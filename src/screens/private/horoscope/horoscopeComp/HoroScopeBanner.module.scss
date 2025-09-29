@@ -1,0 +1,77 @@
+.zodiacHeader {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 20px;
+  background: #f9f9f9;
+  gap: 20px;
+}
+
+.zodiacLeft {
+  flex: 1;
+  min-width: 300px;
+}
+
+.zodiacCls {
+  text-align: center;
+}
+
+.zodiacMain {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+}
+
+.zodiacRight {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex: 2;
+  justify-content: center;
+}
+
+.zodiacSignIcon {
+  text-align: center;
+  width: 100px;
+}
+
+.astroPrediction img {
+  width: 50px;
+  height: 50px;
+}
+
+.zodiacTextFix {
+  display: block;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.rashisContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+
+  width: 100%;
+}
+
+.card {
+  display: flex; /* Make it a flex container */
+  flex-direction: column; /* Stack content vertically */
+  align-items: center; /* Center horizontally */
+  justify-content: center; /* Center vertically */
+
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 2px;
+}
+
+.card p {
+  font-size: 14px;
+  font-weight: 600;
+}

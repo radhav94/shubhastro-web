@@ -1,0 +1,50 @@
+.inputControl {
+    display: flex;
+    flex-direction: column;
+    // height: 80px;
+    gap: 3px;
+
+    .label {
+        font-size: 12px;
+        font-weight: 400;
+
+        .requiredMark {
+            color: orangered;
+        }
+    }
+
+    .checkboxDiv {
+        display: flex;
+        gap: 3px;
+        align-items: center;
+    }
+
+    .inputField {
+        // height: 30px;
+        // background: #FCFCFC;
+        // border: 0.868px solid #9A9A9A77;
+        // color: #000;
+        // font-weight: 600;
+        // border-radius: 5px;
+        // margin: 2px 0;
+        // box-sizing: border-box;
+        // padding: 0 10px;
+        // font-size: 10px;
+        // font-family: "Poppins";
+        cursor: pointer;
+
+        &::placeholder {
+            color: #797979;
+            font-weight: 400;
+        }
+        
+        &:hover {
+            border-color: #9A9A9Abb;
+        }
+
+        // &:focus {
+        //     border-color: #506DF555;
+        //     outline: 2px solid #506DF555;
+        // }
+    }
+}

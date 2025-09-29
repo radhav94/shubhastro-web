@@ -1,0 +1,50 @@
+.blogCard {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+
+  .mainImage {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .blogTitle {
+    margin: 12px 12px;
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  .blogInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+
+    .authorDate {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .authorIcon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+      }
+
+      p {
+        font-size: 12px;
+        color: #666;
+      }
+    }
+
+    .arrowIcon {
+      font-size: 18px;
+      color: #333;
+    }
+  }
+}

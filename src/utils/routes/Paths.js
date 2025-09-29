@@ -1,0 +1,127 @@
+import {
+  Login,
+  Register,
+  ForgotPassword,
+  OtpVerification,
+  VerifyPassword,
+  Home,
+  Horoscope,
+  Panchang,
+  Kundli,
+  Numerology,
+  Tarot,
+  FreeReadings,
+  AstroLive,
+  Video,
+  Blog,
+  SessionDetails,
+  Shop,
+  Profile,
+  TalkToAstrologer,
+  Payment,
+  Astrologers,
+  Streaming,
+} from "../../screens";
+
+export const PATH = {
+  // DEFAULT: {
+  //     path: "/",
+  //     pageName: "Home",
+  // },
+  publicRoutes: {
+    LOGIN: {
+      path: "/login",
+      element: Login,
+    },
+    REGISTER: {
+      path: "/register",
+      element: Register,
+    },
+    FORGOT_PASSWORD: {
+      path: "/forgot-password",
+      element: ForgotPassword,
+    },
+    OTP_VERIFICATION: {
+      path: "/otp-verification",
+      element: OtpVerification,
+    },
+    VERIFY_PASSWORD: {
+      path: "/verify-password/:id",
+      element: VerifyPassword,
+    },
+  },
+
+  privateRoutes: {
+    HOME: {
+      path: "/",
+      element: Home,
+    },
+
+    PROFILE: {
+      path: "/profile",
+      element: Profile,
+    },
+    TALK_TO_ASTROLOGER: {
+      path: "/talk-to-astrologers",
+      element: TalkToAstrologer,
+    },
+    HOROSCOPE: {
+      path: "/horoscopes",
+      element: Horoscope,
+    },
+    PANCHANG: {
+      path: "/panchang",
+      element: Panchang,
+    },
+    KUNDLI: {
+      path: "/kundli",
+      element: Kundli,
+    },
+    NUMEROLOGY: {
+      path: "/numerology",
+      element: Numerology,
+    },
+    TAROT: {
+      path: "/tarot",
+      element: Tarot,
+    },
+    FREE_READINGS: {
+      path: "/readings",
+      element: FreeReadings,
+    },
+    ASTRO_LIVE: {
+      path: "/astrolive",
+      element: AstroLive,
+    },
+    VIDEO: {
+      path: "/video",
+      element: Video,
+    },
+    BLOG: {
+      path: "/blog",
+      element: Blog,
+    },
+    SESSION_DETAILS: {
+      path: "/session-details",
+      element: SessionDetails,
+    },
+    SHOP: {
+      path: "/shop",
+      element: Shop,
+    },
+
+    RECHARGE: {
+      path: "/callingpack",
+      element: Payment,
+    },
+    ASTROLOGERS: {
+      path: "/astrologer/expert/:name",
+      element: Astrologers,
+    },
+    STREAMING: {
+      path: "/astrolive/streaming",
+      element: Streaming,
+      header: false,
+    },
+  },
+};

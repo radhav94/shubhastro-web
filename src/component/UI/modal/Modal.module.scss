@@ -1,0 +1,51 @@
+.mainContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 90vh; // Take 90% of viewport height
+  max-height: 90vh;
+  background-color: rgba(0, 0, 0, 0.01);
+  backdrop-filter: blur(1px);
+  z-index: 9999;
+  overflow: hidden;
+  font-family: "Poppins", sans-serif;
+
+  .modalDiv {
+    min-width: 320px;
+    height: fit-content;
+    background-color: #fff;
+    border-radius: 28px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: solid 4px #e9eaf9;
+    animation: modaldivAnimation 0.5s;
+
+    .modalHeader {
+      border-bottom: solid 1px #f2f2f2;
+      p {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0;
+        padding: 15px;
+      }
+    }
+
+    .modalBody {
+      margin: 15px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+  }
+}
+
+@keyframes modaldivAnimation {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

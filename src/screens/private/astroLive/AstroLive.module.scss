@@ -1,0 +1,37 @@
+.cardsContainer {
+  display: grid;
+  gap: 16px;
+  margin: 12px 0;
+
+  /* Large screens → grid with 4 columns */
+  grid-template-columns: repeat(4, 1fr);
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr); /* 3 cards */
+  }
+
+  @media (max-width: 992px) {
+    grid-template-columns: repeat(2, 1fr); /* 2 cards */
+  }
+
+  @media (max-width: 768px) {
+    display: flex; /* Switch to horizontal scroll */
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 8px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
+
+.cardWrapper {
+  width: 100%;
+
+  @media (max-width: 768px) {
+    flex: 0 0 80%; /* Adjust card width in scroll view */
+  }
+}

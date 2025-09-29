@@ -1,0 +1,139 @@
+.root {
+  flex: 1;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+}
+
+.headerTitle {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  margin: 0;
+  font-size: 24px;
+
+  @media (max-width: 768px) {
+    font-size: 20px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 18px;
+  }
+}
+
+.cardsContainer {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  flex-wrap: nowrap;
+  flex: 1;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.cardWrapper {
+  flex: 1;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-size: cover;
+  background-position: center;
+  border-radius: 12px;
+  padding: 12px;
+  min-width: 220px;
+  position: relative;
+  color: #fff;
+
+  .watchNowWrapper {
+    margin-top: 12px;
+    padding: 6px 8px;
+    text-align: center;
+    background-color: #e52e2e;
+    border-radius: 4px;
+    line-height: 1.5;
+    font-weight: bold;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    svg {
+      margin-left: 8px;
+    }
+  }
+
+  .statusDot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 16px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #fff;
+    min-width: 32px;
+  }
+
+  .live {
+    background-color: #8bc34a;
+  }
+
+  .offline {
+    background-color: #ffd700;
+  }
+
+  .busy {
+    background-color: #ff4500;
+  }
+
+  .topSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .avatarWrapper {
+      display: flex;
+      justify-content: center;
+
+      .avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+    }
+
+    .infoHeader {
+      display: flex;
+
+      align-items: center;
+    }
+
+    .info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+  }
+}

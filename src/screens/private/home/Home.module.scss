@@ -1,0 +1,96 @@
+.heroSection {
+  position: relative;
+  overflow: hidden;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1rem;
+  }
+
+  .heroWrapper {
+    position: relative;
+    background-color: var(--secondary); 
+    border-radius: 2rem; 
+    overflow: hidden;
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1); 
+
+    .backgroundImage {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+
+      .gradientOverlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.4) 0%,
+          rgba(0, 0, 0, 0.6) 100%
+        ); // example gradient
+      }
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      padding: 4rem 2rem;
+
+      max-width: 50rem;
+
+      h1 {
+        font-size: 2.25rem; // text-4xl
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+
+        @media (min-width: 768px) {
+          font-size: 3.75rem; // md:text-6xl
+        }
+
+        .highlight {
+          display: inline-block;
+          background: linear-gradient(
+            90deg,
+            #f97316,
+            #facc15,
+            #10b981
+          ); // example gradient
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: float 3s ease-in-out infinite;
+        }
+      }
+
+      p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.125rem; // text-lg
+        max-width: 32rem;
+      }
+    }
+
+    .decorativePattern {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50%;
+      height: 100%;
+      opacity: 0.3;
+      background-image: url('/path/to/pattern.svg'); // replace with your pattern
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+  }
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}

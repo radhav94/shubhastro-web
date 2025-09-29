@@ -1,0 +1,47 @@
+.inputControl {
+  display: flex;
+  flex-direction: column;
+  //   height: 80px;
+  padding-top: 12px;
+
+  gap: 3px;
+
+  .label {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    color: #797979;
+
+    .requiredMark {
+      color: orangered;
+    }
+  }
+
+  .inputField {
+    height: 44px;
+    background: #fcfcfc;
+    border: 0.868px solid #9a9a9a77;
+    color: #000;
+    font-weight: 500;
+    border-radius: 8px;
+    margin: 0px 0;
+    box-sizing: border-box;
+    padding: 0 10px;
+    font-size: 16px;
+    font-family: "Poppins";
+
+    &::placeholder {
+      color: #797979;
+      font-weight: 400;
+    }
+
+    &:hover {
+      border-color: #9a9a9abb;
+    }
+
+    &:focus {
+      border-color: #ffcb03;
+      outline: 2px solid #ffcb03;
+    }
+  }
+}

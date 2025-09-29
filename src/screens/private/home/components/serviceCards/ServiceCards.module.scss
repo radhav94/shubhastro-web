@@ -1,0 +1,70 @@
+.cardsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  padding: 1rem 0;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 1rem 0;
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.card {
+  cursor: pointer;
+  border-radius: 1rem;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.cardContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem;
+
+  @media (max-width: 640px) {
+    padding: 0.75rem;   // smaller padding on mobile
+    gap: 0.5rem;        // tighter gap
+  }
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+
+  @media (max-width: 640px) {
+    width: 18px;
+    height: 18px; 
+  }
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 600;
+
+  @media (max-width: 640px) {
+    font-size: 0.875rem; 
+  }
+}
+
+.arrow {
+  font-size: 1.25rem;
+
+  @media (max-width: 640px) {
+    font-size: 1rem; // smaller arrow on mobile
+  }
+}
+
