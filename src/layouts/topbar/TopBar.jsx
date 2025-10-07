@@ -7,7 +7,7 @@ import { MdGTranslate } from "react-icons/md";
 import { FiMenu } from "react-icons/fi";
 import styles from "./TopBar.module.scss";
 
-import SideBar from "../sidebar/SIdeBar";
+import SideBar from "../sidebar/SideBar";
 import { useIsMobile } from "../../utils/hooks/useIsMobile";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../utils/routes/Paths";

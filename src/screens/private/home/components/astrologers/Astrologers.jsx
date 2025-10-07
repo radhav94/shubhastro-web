@@ -236,7 +236,10 @@ const Astrologers = ({ onChat }) => {
 
       <div className={styles.cardsContainer}>
         {astrologersData.map((astrologer) => (
-          <div key={astrologer.id} className={styles.cardWrapper}>
+          <div
+            key={astrologer.AstrologerLoginId}
+            className={styles.cardWrapper}
+          >
             <AstrologerCard
               data={astrologer}
               onChat={() => onChat(astrologer)}

@@ -5,11 +5,10 @@ import { Outlet, useMatches } from "react-router-dom";
 import Divider from "../component/Divider";
 
 import { useIsMobile } from "../utils/hooks/useIsMobile";
-import SideBar from "./sidebar/SIdeBar";
+
 import Navbar from "./Navbar";
 import Breadcrumb from "../component/BreadCrumb";
 import Footer from "./Footer";
-import Modal from "../component/UI/modal/Modal";
 
 const HomeLayout = () => {
   const isMobile = useIsMobile();
