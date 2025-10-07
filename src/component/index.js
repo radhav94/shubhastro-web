@@ -15,6 +15,7 @@ export { default as BlogCard } from "../component/UI/cards/BlogCard";
 export { default as ImageTextCard } from "../component/UI/cards/ImageTextCard";
 export { default as WorkInProgressCard } from "../component/UI/cards/WorkInProgressCard";
 export { default as LiveAstroCard } from "../component/UI/cards/LiveAstroCard";
+export { default as ContentCard } from "../component/UI/cards/ContentCard";
 
 //formic control
 export { default as Checkbox } from "../component/formikcontrols/checkbox/Checkbox";

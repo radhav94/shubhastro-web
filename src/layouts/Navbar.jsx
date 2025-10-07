@@ -11,6 +11,12 @@ const Navbar = () => {
     { title: "Consult Now", path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path },
     { title: "Horoscope", path: PATH.privateRoutes.HOROSCOPE.path },
     {
+      title: "Yogi Live",
+      path: PATH.privateRoutes.ASTRO_LIVE.path,
+      tag: "Watch",
+      tagType: "watch",
+    },
+    {
       title: "Year 2025",
       children: [
         { title: "2025 Overview", path: PATH.privateRoutes.PROFILE.path }, // fallback
@@ -23,12 +29,7 @@ const Navbar = () => {
     { title: "Numerology", path: PATH.privateRoutes.NUMEROLOGY.path },
     { title: "Tarot", path: PATH.privateRoutes.TAROT.path },
     { title: "Free Readings", path: PATH.privateRoutes.FREE_READINGS.path },
-    {
-      title: "Yogi Live",
-      path: PATH.privateRoutes.ASTRO_LIVE.path,
-      tag: "Watch",
-      tagType: "watch",
-    },
+
     { title: "Video", path: PATH.privateRoutes.VIDEO.path },
     { title: "Blog", path: PATH.privateRoutes.BLOG.path },
     { title: "Session Booking", path: PATH.privateRoutes.SESSION_DETAILS.path },

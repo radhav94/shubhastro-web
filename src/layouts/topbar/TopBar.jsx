@@ -66,7 +66,7 @@ const TopBar = () => {
             onClick={() => navigate("/counsaltant")}
           />
 
-          <PrimaryButton title="Sign In" />
+          <PrimaryButton title="Sign In" onClick={() => navigate("/login")} />
         </div>
       </div>
 

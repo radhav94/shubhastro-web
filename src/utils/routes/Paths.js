@@ -21,6 +21,7 @@ import {
   Payment,
   Astrologers,
   Streaming,
+  DetailHoroscope,
 } from "../../screens";
 
 export const PATH = {
@@ -68,6 +69,10 @@ export const PATH = {
     HOROSCOPE: {
       path: "/horoscopes",
       element: Horoscope,
+    },
+    HOROSCOPEDETAILS: {
+      path: "/horoscopes/daily/:name-free-horoscope",
+      element: DetailHoroscope,
     },
     PANCHANG: {
       path: "/panchang",

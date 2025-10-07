@@ -4,10 +4,11 @@
   width: 100%;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
+  height: 100%;
 
   .mainImage {
     width: 100%;
-    height: auto;
+    // height: ;
     object-fit: cover;
     display: block;
     border-radius: 8px 8px 0 0;
@@ -17,6 +18,7 @@
     margin: 12px 12px;
     font-weight: bold;
     font-size: 16px;
+    flex-grow: 1;
   }
 
   .blogInfo {
@@ -24,6 +26,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 8px;
+    margin-top: auto;
 
     .authorDate {
       display: flex;

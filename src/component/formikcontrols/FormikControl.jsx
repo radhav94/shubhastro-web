@@ -7,6 +7,8 @@ const FormikControl = (props) => {
   switch (control) {
     case "input":
       return <Input {...rest} />;
+    // case "password":
+    //   return <Password {...rest} />;
 
     default:
       return null;

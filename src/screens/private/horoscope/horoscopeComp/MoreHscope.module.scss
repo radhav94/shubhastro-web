@@ -1,0 +1,107 @@
+@use "../../../../App.module.scss" as var;
+
+.interest_flex {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 20px;
+  padding: 12px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.interest_flex_box {
+  flex: 0 0 auto;
+  min-width: 200px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border-radius: 8px;
+  padding: 8px;
+
+  cursor: pointer;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.interest_cls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.interest_img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 4px;
+}
+
+.horoscopeBox {
+  width: 100%;
+  margin: 8px 0;
+}
+
+.horoSingList {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  gap: 16px;
+  width: 100%;
+}
+
+.horoItem {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background-color: var.$white;
+  padding: 12px 8px;
+  border-radius: 8px;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: inherit;
+    flex: 1;
+  }
+}
+
+.homeLinkCls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.homeLinkCls img {
+  height: 28px;
+  width: auto;
+}
+
+.clearfix {
+  clear: both;
+}
+
+@media (max-width: 768px) {
+  .interest_flex {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+}

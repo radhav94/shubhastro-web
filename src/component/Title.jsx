@@ -22,7 +22,7 @@ const Title = ({
   const headerTitleStyle = {
     flex: "1 1 auto",
     whiteSpace: "nowrap",
-    margin: 0,
+    margin: "4px 0px",
     fontSize: "24px",
   };
 

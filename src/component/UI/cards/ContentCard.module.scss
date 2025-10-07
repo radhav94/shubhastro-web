@@ -1,0 +1,49 @@
+.card {
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  margin: 12px 0px;
+}
+
+.header {
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.date {
+  font-size: 14px;
+  color: #777;
+}
+.zodiacFlex {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin: 12px;
+  background: #fff;
+  border-radius: 12px;
+}
+
+.zodiacFlexBox {
+  flex: 1;
+  padding: 8px;
+  border: 8px;
+}
+
+.billTable {
+  width: 100%;
+  border-collapse: collapse;
+
+  td {
+    padding: 8px;
+    border-bottom: 1px dotted #ddd;
+    font-size: 14px;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}

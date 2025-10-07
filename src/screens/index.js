@@ -1,5 +1,4 @@
 // screens
-import Streaming from "./private/astroLive/streaming/Streaming";
 
 export { default as Login } from "../screens/public/Login";
 export { default as Register } from "../screens/public/Register";
@@ -13,6 +12,8 @@ export { default as Home } from "../screens/private/home/Home";
 export { default as TalkToAstrologer } from "../screens/private/talkToAstrologer/TalkToAstrologer";
 export { default as Profile } from "../screens/private/profile/Profile";
 export { default as Horoscope } from "../screens/private/horoscope/Horoscope";
+export { default as DetailHoroscope } from "../screens/private/horoscope/detailHoroscope/DetailHoroscope";
+
 export { default as Panchang } from "../screens/private/panchang/Panchang";
 export { default as Kundli } from "../screens/private/kundli/Kundali";
 export { default as Numerology } from "../screens/private/numerology/Numerology";
@@ -28,3 +29,5 @@ export { default as Astrologers } from "../screens/private/astrologers/Astrologe
 export { default as Streaming } from "../screens/private/astroLive/streaming/Streaming";
 
 // components/index.js
+
+// layout
