@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import HoroScopeBanner from "../horoscopeComp/horoScopeBanner";
+import HoroScopeBanner from "../horoscopeComp/HoroScopeBanner";
 import { useLocation, useNavigate } from "react-router-dom";
 import Astrologers from "../../home/components/astrologers/Astrologers";
 import Blogs from "../../home/components/blogs/Blogs";

@@ -1,11 +1,10 @@
 import React from "react";
 
-import HoroScopeBanner from "./horoscopeComp/horoScopeBanner";
+import HoroScopeBanner from "./horoscopeComp/HoroScopeBanner";
 import MoreHscope from "./horoscopeComp/MoreHscope";
 import { ContentCard } from "../../../component";
 import { appColors } from "../../../utils/theme";
 import Astrologers from "../home/components/astrologers/Astrologers";
-import Blog from "../blog/Blog";
 import Blogs from "../home/components/blogs/Blogs";
 import { useNavigate } from "react-router-dom";
 import { useHoroscope } from "./useHoroscope";
