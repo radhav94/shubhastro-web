@@ -4,7 +4,8 @@ import styles from "./Date.module.scss";
 import ErrorText from "../../ErrorText";
 
 const Date = (props) => {
-  const { label, name, icon, placeholder, isRequired, type, ...rest } = props;
+  const { label, name, icon, placeholder, isRequired, type, maxDate, ...rest } =
+    props;
 
   return (
     <div className={styles.inputControl}>
@@ -20,6 +21,8 @@ const Date = (props) => {
               {...rest}
               id={name}
               type={"date"}
+              min="1950-01-01"
+              max={maxDate || undefined}
               className={styles.inputField}
               placeholder={placeholder}
               onKeyDown={(e) => {

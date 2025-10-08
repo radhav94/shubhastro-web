@@ -1,5 +1,6 @@
 import React, { memo } from "react";
 import Input from "./input/Input";
+import Date from "./date/Date";
 
 const FormikControl = (props) => {
   const { control, ...rest } = props;
@@ -9,6 +10,9 @@ const FormikControl = (props) => {
       return <Input {...rest} />;
     // case "password":
     //   return <Password {...rest} />;
+
+    case "date":
+      return <Date {...rest} />;
 
     default:
       return null;

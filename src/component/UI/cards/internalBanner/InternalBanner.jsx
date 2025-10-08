@@ -42,7 +42,7 @@ const InternalBanner = ({ onCardClick, data }) => {
                 key={id}
                 className={styles.card}
                 style={{
-                  backgroundColor: isActive ? appColors.tri : appColors.sec,
+                  backgroundColor: isActive ? appColors.pri : appColors.sec,
                 }}
                 onClick={() => onCardClick?.(card)}
               >

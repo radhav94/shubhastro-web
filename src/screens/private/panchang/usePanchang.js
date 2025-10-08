@@ -17,6 +17,7 @@ export const usePanchang = () => {
         img: "https://images.astroyogi.com/strapicmsprod/assets/Today_s_Panchang_6a39293e2a.svg",
         link: "",
         description: "",
+        isSelected: true,
       },
       {
         id: 2,

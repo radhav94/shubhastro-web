@@ -1,47 +1,47 @@
 .inputControl {
-    display: flex;
-    flex-direction: column;
-    height: 80px;
-    gap: 3px;
+  display: flex;
+  flex-direction: column;
 
-    .label {
-        font-size: 12px;
-        font-weight: 400;
+  padding-top: 12px;
 
-        .requiredMark {
-            color: orangered;
-        }
+  gap: 3px;
+
+  .label {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    color: #797979;
+
+    .requiredMark {
+      color: orangered;
+    }
+  }
+
+  .inputField {
+    height: 44px;
+    background: #fcfcfc;
+    border: 0.868px solid #9a9a9a77;
+    color: #000;
+    font-weight: 500;
+    border-radius: 8px;
+    margin: 0px 0;
+    box-sizing: border-box;
+    padding: 0 10px;
+    font-size: 16px;
+    font-family: "Poppins";
+
+    &::placeholder {
+      color: #797979;
+      font-weight: 400;
     }
 
-    .inputField {
-        height: 30px;
-        background: #FCFCFC;
-        border: 0.868px solid #9A9A9A77;
-        color: #000;
-        font-weight: 600;
-        border-radius: 5px;
-        margin: 2px 0;
-        box-sizing: border-box;
-        padding: 0 10px;
-        font-size: 10px;
-        font-family: "Poppins";
-
-        &::-webkit-calendar-picker-indicator {
-            cursor: pointer;
-        }
-
-        &::placeholder {
-            color: #797979;
-            font-weight: 400;
-        }
-        
-        &:hover {
-            border-color: #9A9A9Abb;
-        }
-
-        &:focus {
-            border-color: #506DF555;
-            outline: 2px solid #506DF555;
-        }
+    &:hover {
+      border-color: #9a9a9abb;
     }
+
+    &:focus {
+      border-color: #ffcb03;
+      outline: 2px solid #ffcb03;
+    }
+  }
 }

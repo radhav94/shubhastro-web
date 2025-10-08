@@ -1,5 +1,5 @@
 export const combineClasses = (...classes) => {
-  return classes.join(" ");
+  return classes.filter(Boolean).join(" ");
 };
 
 export const requiredMessage = (name = "This field") => {

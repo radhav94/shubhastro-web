@@ -1,15 +1,33 @@
 import React from "react";
 import styles from "./PanchangInputCard.module.scss";
+import FormikControl from "../../../formikcontrols/FormikControl";
+import { Form, Formik } from "formik";
+import * as Yup from "yup";
+import { requiredMessage } from "../../../../utils/utlis";
+
+import PrimaryButton from "../../../PrimaryButton";
+import PrimaryText from "../../../PrimaryText";
 
 const PanchangInputCard = ({
   imageSrc,
   title,
-  dob,
-  setDob,
-  location,
-  setLocation,
+
   onSubmit,
 }) => {
+  const initialValues = {
+    dateOfBirth: "",
+    location: "",
+  };
+
+  const validationSchema = Yup.object({
+    dateOfBirth: Yup.string().required(requiredMessage("Date of Birth")),
+    location: Yup.string().required(requiredMessage("Location")),
+  });
+
+  const handleSubmit = (values) => {
+    if (onSubmit) onSubmit(values);
+  };
+
   return (
     <div className={styles.panchangWidget}>
       <div className={styles.leftSide}>
@@ -17,33 +35,51 @@ const PanchangInputCard = ({
       </div>
 
       <div className={styles.rightSide}>
-        {title && <h3 className={styles.title}>{title}</h3>}
+        {title && (
+          <PrimaryText isExtraBold size_20>
+            {title}
+          </PrimaryText>
+        )}
 
-        <div className={styles.inputsContainer}>
-          <div className={styles.inputBox}>
-            <label className={styles.label}>Date of Birth</label>
-            <input
-              type="date"
-              value={dob}
-              onChange={(e) => setDob(e.target.value)}
-              max="2035-12-31"
-            />
-          </div>
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {(formik) => (
+            <div className={styles.mainDiv}>
+              <Form className={styles.form}>
+                <div className={styles.inputBox}>
+                  <FormikControl
+                    name="dateOfBirth"
+                    control="date"
+                    type="date"
+                    label="Date of Birth"
+                    placeholder="Enter Date of Birth"
+                    isRequired={true}
+                    formik={formik}
+                    maxDate={new Date().toISOString().split("T")[0]}
+                  />
+                  <FormikControl
+                    name="location"
+                    control="input"
+                    label="Location"
+                    placeholder="Enter Location"
+                    isRequired={true}
+                    formik={formik}
+                  />
+                </div>
 
-          <div className={styles.inputBox}>
-            <label className={styles.label}>Location</label>
-            <input
-              type="text"
-              placeholder="Place of Birth"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <button className={styles.submitButton} onClick={onSubmit}>
-          Submit
-        </button>
+                <PrimaryButton
+                  width={"80%"}
+                  title="Submit"
+                  buttonStyles={{ marginTop: "12px" }}
+                  onClick={formik.handleSubmit}
+                />
+              </Form>
+            </div>
+          )}
+        </Formik>
       </div>
     </div>
   );

@@ -25,7 +25,7 @@ export const useTodayPanchang = () => {
         img: "https://images.astroyogi.com/strapicmsprod/assets/Today_s_Panchang_6a39293e2a.svg",
         link: PATH.privateRoutes.PANCHANG_TODAY.path,
         description: "",
-        isSelected: false,
+        isSelected: true,
       },
       {
         id: 3,
@@ -110,11 +110,51 @@ export const useTodayPanchang = () => {
     ],
   };
 
+  const zodiacDetails = [
+    {
+      id: 1,
+      label: "Location & Date",
+      value: "Ujjain, Wednesday, 08 October 2025",
+    },
+    { id: 2, label: "Tithi", value: "Krishna Dwitiya" },
+    { id: 3, label: "Nakshatra", value: "Ashwini" },
+    { id: 4, label: "Karana", value: "Gara" },
+    { id: 5, label: "Paksha", value: "Krishna-Paksha" },
+    { id: 6, label: "Yoga", value: "Harshan till 01:32:11 AM" },
+    { id: 7, label: "Day", value: "Wednesday" },
+
+    // Sun & Moon Calculations
+    { id: 8, label: "Sun Rise - Sun Set", value: "06:12:48 AM - 05:56:28 PM" },
+    {
+      id: 9,
+      label: "Moon Rise - Moon Set",
+      value: "06:39:41 PM - 07:15:02 AM",
+    },
+    { id: 10, label: "Ritu", value: "Sharad" },
+    { id: 11, label: "Moon Sign", value: "Aries" },
+
+    // Hindu Month & Year
+    { id: 12, label: "Shaka Samvat", value: "1947" },
+    { id: 13, label: "Vikram Samvat", value: "2082" },
+    { id: 14, label: "Month Amanta", value: "Ashwin" },
+    { id: 15, label: "Month Purnimanta", value: "Kartika" },
+
+    // Inauspicious Timings
+    { id: 16, label: "Rahu Kaal", value: "12:04:37 PM to 01:32:35 PM" },
+    { id: 17, label: "Yamaganda", value: "07:40:45 AM to 09:08:43 AM" },
+    { id: 18, label: "Gulika Kaal", value: "10:36:40 AM to 12:04:38 PM" },
+
+    // Auspicious Timings
+    { id: 19, label: "Abhijit", value: "11:41:00 AM to 12:27:00 PM" },
+  ];
+
   const onCardClick = (data) => {
     if (data.link) {
       navigate(data.link);
     }
   };
 
-  return [data, onCardClick];
+  const onSubmit = () => {};
+
+  return [data, onCardClick, onSubmit, zodiacDetails];
 };

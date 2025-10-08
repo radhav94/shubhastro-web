@@ -4,7 +4,7 @@
   flex-direction: column;
   gap: 12px;
   padding: 20px;
-  // margin: 12px 0px;
+  margin: 12px 0px;
 }
 
 .header {
@@ -48,4 +48,8 @@
 
 .value {
   color: #555;
+}
+
+.description {
+  white-space: pre-line;
 }
