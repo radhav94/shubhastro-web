@@ -8,12 +8,7 @@ import { requiredMessage } from "../../../../utils/utlis";
 import PrimaryButton from "../../../PrimaryButton";
 import PrimaryText from "../../../PrimaryText";
 
-const PanchangInputCard = ({
-  imageSrc,
-  title,
-
-  onSubmit,
-}) => {
+const PanchangInputCard = ({ imageSrc, title, onSubmit }) => {
   const initialValues = {
     dateOfBirth: "",
     location: "",
