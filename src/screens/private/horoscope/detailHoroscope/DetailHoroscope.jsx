@@ -159,14 +159,11 @@ const DetailHoroscope = () => {
     });
   };
   const zodiacData = [
-    [
-      { label: "Positivity", value: "78%" },
-      { label: "Lucky Number", value: "7" },
-    ],
-    [
-      { label: "Mood of the Day", value: "Optimistic" },
-      { label: "Lucky Color", value: "Green" },
-    ],
+    { label: "Positivity", value: "78%" },
+    { label: "Lucky Number", value: "7" },
+
+    { label: "Mood of the Day", value: "Optimistic" },
+    { label: "Lucky Color", value: "Green" },
   ];
   return (
     <div>

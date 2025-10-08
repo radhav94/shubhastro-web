@@ -4,7 +4,7 @@
   flex-direction: column;
   gap: 12px;
   padding: 20px;
-  margin: 12px 0px;
+  // margin: 12px 0px;
 }
 
 .header {
@@ -20,30 +20,32 @@
 }
 .zodiacFlex {
   display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin: 12px;
-  background: #fff;
+  flex-direction: column;
+  gap: 12px;
+  background-color: #fff;
+  padding: 12px;
   border-radius: 12px;
 }
 
-.zodiacFlexBox {
-  flex: 1;
-  padding: 8px;
-  border: 8px;
+.zodiacRow {
+  display: flex;
+  gap: 20px;
 }
 
-.billTable {
-  width: 100%;
-  border-collapse: collapse;
+.zodiacItem {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  justify-content: space-between;
+  border-bottom: #555 dotted;
+  padding: 6px;
+}
 
-  td {
-    padding: 8px;
-    border-bottom: 1px dotted #ddd;
-    font-size: 14px;
-  }
+.label {
+  font-weight: bold;
+  font-size: 14px;
+}
 
-  tr:last-child td {
-    border-bottom: none;
-  }
+.value {
+  color: #555;
 }

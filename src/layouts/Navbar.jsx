@@ -16,15 +16,16 @@ const Navbar = () => {
       tag: "Watch",
       tagType: "watch",
     },
-    {
-      title: "Year 2025",
-      children: [
-        { title: "2025 Overview", path: PATH.privateRoutes.PROFILE.path }, // fallback
-        { title: "Love Horoscope", path: PATH.privateRoutes.PROFILE.path }, // fallback
-        { title: "Career Horoscope", path: PATH.privateRoutes.PROFILE.path }, // fallback
-      ],
-    },
     { title: "Panchang", path: PATH.privateRoutes.PANCHANG.path },
+    // {
+    //   title: "Year 2025",
+    //   children: [
+    //     { title: "2025 Overview", path: PATH.privateRoutes.PROFILE.path },
+    //     { title: "Love Horoscope", path: PATH.privateRoutes.PROFILE.path },
+    //     { title: "Career Horoscope", path: PATH.privateRoutes.PROFILE.path },
+    //   ],
+    // },
+
     { title: "Kundli", path: PATH.privateRoutes.KUNDLI.path },
     { title: "Numerology", path: PATH.privateRoutes.NUMEROLOGY.path },
     { title: "Tarot", path: PATH.privateRoutes.TAROT.path },

@@ -11,6 +11,7 @@ export { default as Toast } from "../component/toast";
 
 //cards
 export { default as AstrologerCard } from "../component/UI/cards/AstrologersCard";
+export { default as PanchangInputCard } from "../component/UI/cards/panchangInput/PanchangInputCard";
 export { default as BlogCard } from "../component/UI/cards/BlogCard";
 export { default as ImageTextCard } from "../component/UI/cards/ImageTextCard";
 export { default as WorkInProgressCard } from "../component/UI/cards/WorkInProgressCard";

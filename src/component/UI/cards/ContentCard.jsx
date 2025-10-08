@@ -38,29 +38,41 @@ const ContentCard = ({
       </div>
 
       <PrimaryText size_14>{description}</PrimaryText>
-      {isDailyHoroscope && (
-        <>
-          <div className={styles.zodiacFlex}>
-            {zodiacData.map((group, index) => (
-              <div key={index} className={styles.zodiacFlexBox}>
-                <table className={styles.billTable}>
-                  <tbody>
-                    {group.map((item, idx) => (
-                      <tr key={idx}>
-                        <td>{item.label}</td>
-                        <td>{item.value}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ))}
-          </div>
-          <PrimaryText isExtraBold size_20>
-            Remedy
-          </PrimaryText>
-          <PrimaryText>Meditate for clarity</PrimaryText>
-        </>
+      {isDailyHoroscope && zodiacData && (
+        <div className={styles.zodiacFlex}>
+          {zodiacData.map((item, index) => {
+            // Only start a new row every 2 items
+            if (index % 2 === 0) {
+              const first = item;
+              const second = zodiacData[index + 1];
+
+              return (
+                <div key={index} className={styles.zodiacRow}>
+                  <div className={styles.zodiacItem}>
+                    <PrimaryText className={styles.label}>
+                      {first.label}
+                    </PrimaryText>
+                    <PrimaryText className={styles.value}>
+                      {first.value}
+                    </PrimaryText>
+                  </div>
+
+                  {second && (
+                    <div className={styles.zodiacItem}>
+                      <PrimaryText className={styles.label}>
+                        {second.label}
+                      </PrimaryText>
+                      <PrimaryText className={styles.value}>
+                        {second.value}
+                      </PrimaryText>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            return null; // skip odd indexes
+          })}
+        </div>
       )}
     </div>
   );

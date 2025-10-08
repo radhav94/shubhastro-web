@@ -15,6 +15,10 @@ export { default as Horoscope } from "../screens/private/horoscope/Horoscope";
 export { default as DetailHoroscope } from "../screens/private/horoscope/detailHoroscope/DetailHoroscope";
 
 export { default as Panchang } from "../screens/private/panchang/Panchang";
+export { default as TodayPanchang } from "../screens/private/panchang/todayPanchang/TodayPanchang";
+export { default as Vaar } from "../screens/private/panchang/vaar/Vaar";
+export { default as Tithi } from "../screens/private/panchang/tithi/Tithi";
+
 export { default as Kundli } from "../screens/private/kundli/Kundali";
 export { default as Numerology } from "../screens/private/numerology/Numerology";
 export { default as Tarot } from "../screens/private/tarot/Tarot";

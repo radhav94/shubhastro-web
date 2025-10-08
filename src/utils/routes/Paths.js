@@ -22,6 +22,9 @@ import {
   Astrologers,
   Streaming,
   DetailHoroscope,
+  TodayPanchang,
+  Vaar,
+  Tithi,
 } from "../../screens";
 
 export const PATH = {
@@ -74,10 +77,25 @@ export const PATH = {
       path: "/horoscopes/daily/:name-free-horoscope",
       element: DetailHoroscope,
     },
+
+    //panchang
     PANCHANG: {
       path: "/panchang",
       element: Panchang,
     },
+    PANCHANG_TODAY: {
+      path: "/panchang/today-panchang",
+      element: TodayPanchang,
+    },
+    PANCHANG_VAAR: {
+      path: "/panchang/vaar",
+      element: Vaar,
+    },
+    PANCHANG_TITHI: {
+      path: "/panchang/tithi",
+      element: Tithi,
+    },
+
     KUNDLI: {
       path: "/kundli",
       element: Kundli,

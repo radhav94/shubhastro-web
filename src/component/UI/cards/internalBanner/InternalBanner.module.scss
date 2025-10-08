@@ -1,0 +1,103 @@
+@use "../../../../App.module.scss" as var;
+
+.bannerContainer {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 20px;
+  background: #f9f9f9;
+  gap: 20px;
+  background-color: var.$sec-color;
+  border-radius: 8px;
+  margin: 8px 0px;
+}
+.bannerDescription {
+  max-height: 120px;
+  overflow-y: auto;
+  padding-right: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #333;
+}
+
+.bannerDescription::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bannerDescription::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.bannerLeft {
+  flex: 1;
+  min-width: 300px;
+}
+
+.imageWrapper {
+  text-align: center;
+}
+
+.mainImage {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+}
+
+.bannerRight {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex: 2;
+  justify-content: center;
+}
+
+.cardIcon {
+  text-align: center;
+  width: 100px;
+}
+
+.cardDescription img {
+  width: 50px;
+  height: 50px;
+}
+
+.cardTextFix {
+  display: block;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.cardsContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 16px;
+  width: 100%;
+  background-color: var.$white;
+  border-radius: 8px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var.$light-pri;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 4px 6px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 2px;
+}
