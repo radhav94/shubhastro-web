@@ -43,8 +43,7 @@ import Vastu from "../assets/images/vastu.png";
 import Blog1 from "../assets/images/blog1.png";
 import Progress from "../assets/images/progress.png";
 import Profile from "../assets/images/sanket_profile.jpeg";
-
-import AstroLiveBg from "../assets/images/AstroLiveBg.png";
+import AstroLiveBg from "../assets/images/astroLiveBg.png";
 export const AppImages = {
   Hero,
   Astro1,
