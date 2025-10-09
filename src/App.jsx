@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import classes from "./App.module.scss";
 
 import { PATH } from "./utils/routes/Paths";

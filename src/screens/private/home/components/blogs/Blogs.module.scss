@@ -1,10 +1,28 @@
+.blogsSection {
+  padding: 20px 0;
+}
+
 .blogsContainer {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  align-items: stretch;
+  // --- Mobile First: 1 Column ---
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: stretch; // Ensures all cards in a row have the same height
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+  // --- Tablet: 2 Columns ---
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
   }
+
+  // --- Desktop: 3 Columns ---
+  @media (min-width: 992px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.blogLink {
+  text-decoration: none;
+  color: inherit;
+  display: block; // Ensures the link takes up the full grid area
+  height: 100%;
 }

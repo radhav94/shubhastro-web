@@ -21,7 +21,13 @@ export { default as Tithi } from "../screens/private/panchang/tithi/Tithi";
 
 export { default as Kundli } from "../screens/private/kundli/Kundali";
 export { default as Numerology } from "../screens/private/numerology/Numerology";
+
 export { default as Tarot } from "../screens/private/tarot/Tarot";
+export { default as OneCardTarot } from "../screens/private/tarot/oneCardTarot/OneCardTarot";
+export { default as ThreeCardTarot } from "./private/tarot/threeCardTarot/ThreeCardTarot";
+export { default as WellNessTarot } from "../screens/private/tarot/wellNessTarot/WellNessTarot";
+export { default as TarotResult } from "../screens/private/tarot/resultTarot/ResultTarot";
+
 export { default as FreeReadings } from "../screens/private/readings/Readings";
 export { default as AstroLive } from "../screens/private/astroLive/AstroLive";
 export { default as Video } from "../screens/private/video/Video";

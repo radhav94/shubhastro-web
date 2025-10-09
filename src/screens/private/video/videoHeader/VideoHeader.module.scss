@@ -1,0 +1,166 @@
+@use "sass:color";
+
+// --- (Styles from previous response remain the same until .mainVideoCard) ---
+
+.videoContainer {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  padding: 20px;
+  background-color: #f0f2f5;
+  max-width: 1200px;
+  margin: auto;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.leftContainer {
+  text-decoration: none;
+  color: inherit;
+}
+
+.mainVideoCard {
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+// --- UPDATED to handle both thumbnail and video player ---
+.thumbnailWrapper,
+.videoPlayer {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; // 16:9 Aspect Ratio
+  background-color: #000; // Black background while player loads
+}
+
+.mainThumbnail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+// --- NEW style for the iframe ---
+.videoPlayer iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.playIconOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 68px;
+  height: 48px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  pointer-events: none;
+
+  .thumbnailWrapper:hover & {
+    background-color: #cc0000;
+  }
+}
+
+// --- (The rest of the styles from the previous response are unchanged) ---
+.mainVideoContent {
+  padding: 16px;
+}
+.mainTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  line-height: 1.2;
+}
+.channelInfo {
+  display: flex;
+  align-items: center;
+}
+.channelImage {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+.channelDetails {
+  display: flex;
+  flex-direction: column;
+}
+.channelName {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.metaInfo {
+  font-size: 0.85rem;
+  color: #65676b;
+}
+.rightContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+.subsidiaryLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+.subsidiaryVideoItem {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+  &:hover {
+    background-color: color.adjust(#f0f2f5, $lightness: -3%);
+  }
+}
+.subsidiaryThumbnail {
+  width: 160px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.subsidiaryContent {
+  display: flex;
+  flex-direction: column;
+}
+.subsidiaryTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0 0 8px 0;
+  display: -webkit-box;
+
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.subsidiaryChannelInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #65676b;
+}
+.subsidiaryChannelImage {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}

@@ -1,8 +1,13 @@
 import React from "react";
 import Styles from "./Blogs.module.scss";
 import { BlogCard, Title } from "../../../../../component";
+import { useNavigate } from "react-router-dom";
+import { PATH } from "../../../../../utils/routes/Paths";
 
-const Blogs = () => {
+const Blogs = ({ titleShow = true }) => {
+  const navigate = useNavigate();
+
+  // No changes needed to the data structure
   const blogData = [
     {
       id: 1,
@@ -40,13 +45,26 @@ const Blogs = () => {
         "https://images.astroyogi.com/strapicmsprod/assets/team_astroyogi_658d579d2f.webp",
     },
   ];
+
   return (
-    <div>
-      <Title title="Blogs" showButton showDivider />
+    <div className={Styles.blogsSection}>
+      {titleShow && (
+        <Title
+          title="Latest from Our Blog"
+          showButton
+          showDivider
+          buttonTitle="View All"
+          onButtonClick={() => navigate("/blog")}
+        />
+      )}
 
       <div className={Styles.blogsContainer}>
         {blogData.map((blog) => (
-          <a key={blog.id} href={blog.link} className={Styles.blogLink}>
+          <a
+            key={blog.id}
+            href={PATH.privateRoutes.BLOG.path}
+            className={Styles.blogLink}
+          >
             <BlogCard
               image={blog.image}
               title={blog.title}

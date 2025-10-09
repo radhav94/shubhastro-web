@@ -1,8 +1,15 @@
 import React from "react";
-import { WorkInProgressCard } from "../../../component";
+import styles from "./Blog.module.scss";
+import BlogHeader from "./blogHeader/BlogHeader";
+import Blogs from "../home/components/blogs/Blogs";
 
 const Blog = () => {
-  return <WorkInProgressCard />;
+  return (
+    <>
+      <BlogHeader />
+      <Blogs titleShow={false} />
+    </>
+  );
 };
 
 export default Blog;

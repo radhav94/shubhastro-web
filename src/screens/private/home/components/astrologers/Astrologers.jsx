@@ -5,6 +5,7 @@ import {
   Divider,
   PrimaryButton,
   PrimaryText,
+  Title,
 } from "../../../../../component";
 import { AppImages } from "../../../../../utils/appImages";
 
@@ -223,16 +224,16 @@ const astrologersData = [
   },
 ];
 
-const Astrologers = ({ onChat }) => {
+const Astrologers = ({ onChat, onClickView }) => {
   return (
     <div className={styles.astrologersWrapper}>
-      <div className={styles.header}>
-        <PrimaryText isBold size_24 className={styles.headerTitle}>
-          Top Online Astrologers
-        </PrimaryText>
-        <Divider responsive />
-        <PrimaryButton width={"100px"} title="View" />
-      </div>
+      <Title
+        title="Top Online Astrologers"
+        showDivider
+        showButton
+        buttonTitle="View"
+        onButtonClick={onClickView}
+      />
 
       <div className={styles.cardsContainer}>
         {astrologersData.map((astrologer) => (

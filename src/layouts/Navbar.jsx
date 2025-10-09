@@ -27,12 +27,13 @@ const Navbar = () => {
     // },
 
     { title: "Kundli", path: PATH.privateRoutes.KUNDLI.path },
-    { title: "Numerology", path: PATH.privateRoutes.NUMEROLOGY.path },
+    // { title: "Numerology", path: PATH.privateRoutes.NUMEROLOGY.path },
     { title: "Tarot", path: PATH.privateRoutes.TAROT.path },
-    { title: "Free Readings", path: PATH.privateRoutes.FREE_READINGS.path },
+    { title: "Blog", path: PATH.privateRoutes.BLOG.path },
+    // { title: "Free Readings", path: PATH.privateRoutes.FREE_READINGS.path },
 
     { title: "Video", path: PATH.privateRoutes.VIDEO.path },
-    { title: "Blog", path: PATH.privateRoutes.BLOG.path },
+
     { title: "Session Booking", path: PATH.privateRoutes.SESSION_DETAILS.path },
     {
       title: "Yogii Mall",

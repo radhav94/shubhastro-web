@@ -25,6 +25,10 @@ import {
   TodayPanchang,
   Vaar,
   Tithi,
+  OneCardTarot,
+  ThreeCardTarot,
+  WellNessTarot,
+  TarotResult,
 } from "../../screens";
 
 export const PATH = {
@@ -104,10 +108,28 @@ export const PATH = {
       path: "/numerology",
       element: Numerology,
     },
+    // tarot
     TAROT: {
       path: "/tarot",
       element: Tarot,
     },
+    TAROT_ONE_CARD: {
+      path: "/tarot/one-card-reading",
+      element: OneCardTarot,
+    },
+    TAROT_THREE_CARD: {
+      path: "/tarot/three-card-reading",
+      element: ThreeCardTarot,
+    },
+    TAROT_WELLNESS: {
+      path: "/tarot/wellness-tarot",
+      element: WellNessTarot,
+    },
+    TAROT_RESULT: {
+      path: "/tarot/result",
+      element: TarotResult,
+    },
+
     FREE_READINGS: {
       path: "/readings",
       element: FreeReadings,

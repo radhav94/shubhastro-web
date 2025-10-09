@@ -7,11 +7,12 @@ const PrimaryText = ({
   color,
   isWhite,
   isDanger,
-  isLight,
+  // All fontWeight props
   isRegular,
   isSemiBold,
   isBold,
   isExtraBold,
+  // All size props
   size_10,
   size_12,
   size_14,
@@ -20,18 +21,26 @@ const PrimaryText = ({
   size_20,
   size_24,
   size_28,
+  // All padding props
   paddingTop,
   paddingBottom,
   paddingLeft,
   paddingRight,
+  // All alignment props
   isCenter,
   isRight,
   onClick,
   as = "p",
-  lines, // NEW: number of lines before truncating
+  lines,
+  dangerouslySetInnerHTML,
   ...rest
 }) => {
-  const textAlign = isCenter ? "center" : isRight ? "right" : "left";
+  // Logic combines props for full compatibility
+  const textAlign = isCenter
+    ? "center"
+    : isRight
+    ? "right"
+    : style.textAlign || "left";
 
   const textColor = color
     ? color
@@ -49,7 +58,7 @@ const PrimaryText = ({
     ? "700"
     : isExtraBold
     ? "800"
-    : "400";
+    : "400"; // Default to regular
 
   const fontSize = size_10
     ? "10px"
@@ -67,31 +76,47 @@ const PrimaryText = ({
     ? "24px"
     : size_28
     ? "28px"
-    : "16px";
+    : "16px"; // Default to 16px
 
   const Component = as;
 
-  return (
+  // Combine all styles
+  const finalStyle = {
+    color: textColor,
+    fontWeight,
+    fontSize,
+    textAlign,
+    paddingTop,
+    paddingBottom,
+    paddingLeft,
+    paddingRight,
+    margin: 0,
+    ...style, // Allow style prop to override anything
+  };
+
+  if (lines) {
+    Object.assign(finalStyle, {
+      display: "-webkit-box",
+      WebkitLineClamp: lines,
+      WebkitBoxOrient: "vertical",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+    });
+  }
+
+  return dangerouslySetInnerHTML ? (
     <Component
       onClick={onClick}
       className={className}
-      style={{
-        color: textColor,
-        fontWeight,
-        fontSize,
-        textAlign,
-        paddingTop,
-        paddingBottom,
-        paddingLeft,
-        paddingRight,
-        margin: 0,
-        display: lines ? "-webkit-box" : "block", // multi-line clamp
-        WebkitLineClamp: lines || "none",
-        WebkitBoxOrient: lines ? "vertical" : "unset",
-        overflow: lines ? "hidden" : "visible",
-        textOverflow: lines ? "ellipsis" : "unset",
-        ...style,
-      }}
+      style={finalStyle}
+      dangerouslySetInnerHTML={dangerouslySetInnerHTML}
+      {...rest}
+    />
+  ) : (
+    <Component
+      onClick={onClick}
+      className={className}
+      style={finalStyle}
       {...rest}
     >
       {children}

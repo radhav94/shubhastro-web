@@ -1,54 +1,30 @@
 import React from "react";
-import PrimaryText from "./PrimaryText";
+import styles from "./Title.module.scss"; // Using SCSS module for styling
 import Divider from "./Divider";
 import PrimaryButton from "./PrimaryButton";
 
 const Title = ({
-  title = "",
+  title = "Section Title",
   showDivider = false,
   showButton = false,
-  buttonTitle = "View",
-  buttonWidth = "100px",
+  buttonTitle = "View All",
+  onButtonClick = () => {}, // Added an onClick handler for the button
 }) => {
-  const headerStyle = {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: "12px",
-    flexWrap: "nowrap",
-    marginVertical: "12px",
-  };
-
-  const headerTitleStyle = {
-    flex: "1 1 auto",
-    whiteSpace: "nowrap",
-    margin: "4px 0px",
-    fontSize: "24px",
-  };
-
-  const smallScreen = window.innerWidth <= 768;
-  const extraSmallScreen = window.innerWidth <= 480;
-
-  if (smallScreen) {
-    headerStyle.flexDirection = "column";
-    headerStyle.alignItems = "flex-start";
-    headerStyle.gap = "8px";
-    headerStyle.marginBottom = "12px";
-    headerTitleStyle.fontSize = "20px";
-  }
-
-  if (extraSmallScreen) {
-    headerTitleStyle.fontSize = "18px";
-  }
-
   return (
-    <div style={headerStyle}>
-      <PrimaryText isBold style={headerTitleStyle}>
-        {title}
-      </PrimaryText>
+    <div className={styles.titleContainer}>
+      <div className={styles.titleWrapper}>
+        {/* Use a semantic heading tag for better SEO and accessibility */}
+        <h2 className={styles.titleText}>{title}</h2>
 
-      {showDivider && <Divider responsive />}
-      {showButton && <PrimaryButton width={buttonWidth} title={buttonTitle} />}
+        {/* The divider is now part of the title wrapper for better layout control */}
+        {showDivider && <Divider responsive />}
+      </div>
+
+      {showButton && (
+        <div className={styles.buttonWrapper}>
+          <PrimaryButton title={buttonTitle} onClick={onButtonClick} />
+        </div>
+      )}
     </div>
   );
 };

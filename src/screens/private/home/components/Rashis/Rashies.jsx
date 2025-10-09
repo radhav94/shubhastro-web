@@ -19,14 +19,14 @@ const rashisData = [
   { id: 12, name: "Pisces", image: appSvgs.Pisces },
 ];
 
-const Rashis = () => {
+const Rashis = ({ onClick }) => {
   return (
     <div>
       <Title title="Today's Astrologers Prediction" />
 
       <div className={styles.rashisContainer}>
         {rashisData.map((rashi) => (
-          <div key={rashi.id} className={styles.card}>
+          <div key={rashi.id} className={styles.card} onClick={onClick}>
             <img src={rashi.image} alt={rashi.name} className={styles.image} />
             <p className={styles.name}>{rashi.name}</p>
           </div>

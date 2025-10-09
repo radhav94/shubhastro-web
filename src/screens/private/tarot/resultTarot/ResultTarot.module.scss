@@ -1,0 +1,123 @@
+@use "sass:color"; // Import the modern color module
+
+// --- Theme Variables ---
+$color-bg: #f4f2f8;
+$color-card-bg: #ffffff;
+$color-text-dark: #2c2c2c;
+$color-text-light: #6a6a6a;
+$color-primary: #6a49f2; // A modern purple
+$font-serif: "Playfair Display", serif;
+$font-sans: "Poppins", sans-serif;
+
+.resultContainer {
+  font-family: $font-sans;
+  background-color: $color-bg;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tarotCard {
+  display: flex;
+  background: $color-card-bg;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+
+  width: 100%;
+  overflow: hidden;
+
+  // Responsive layout for smaller screens
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+.tarotLeft {
+  flex: 0 0 35%; // Takes up 35% of the width
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  // --- FIXED ---
+  background-color: color.adjust($color-bg, $lightness: 2%);
+
+  @media (max-width: 768px) {
+    padding: 30px;
+  }
+}
+
+.cardImage {
+  max-width: 100%;
+  width: 250px; // Fixed width for a consistent look
+  height: auto;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.tarotRight {
+  flex: 1; // Takes up the remaining space
+  padding: 40px;
+
+  h1 {
+    font-family: $font-serif;
+    font-size: 2.5rem;
+    color: $color-text-dark;
+    margin: 0 0 10px 0;
+  }
+
+  h2 {
+    font-family: $font-serif;
+    font-size: 1.5rem;
+    color: $color-text-dark;
+    margin: 0 0 20px 0;
+    font-weight: 600;
+  }
+
+  .cardPosition {
+    display: block;
+    font-size: 1rem;
+    color: $color-text-light;
+    font-family: $font-sans;
+    font-weight: 400;
+    margin-top: 5px;
+  }
+
+  p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: $color-text-light;
+    margin-bottom: 30px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 30px;
+    h1 {
+      font-size: 2rem;
+    }
+    h2 {
+      font-size: 1.3rem;
+    }
+  }
+}
+
+.actionButton {
+  background-color: $color-primary;
+  color: #fff;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-family: $font-sans;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba($color-primary, 0.2);
+
+  &:hover {
+    // --- FIXED ---
+    background-color: color.adjust($color-primary, $lightness: -5%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba($color-primary, 0.3);
+  }
+}

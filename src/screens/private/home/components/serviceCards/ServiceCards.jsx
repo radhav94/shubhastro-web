@@ -8,20 +8,36 @@ import { AppIcons } from "../../../../../utils/appImages";
 import { PATH } from "../../../../../utils/routes/Paths";
 import { useNavigate } from "react-router-dom";
 
-const services = [
-  { id: 1, title: "Chat", icon: AppIcons.Chat },
-  { id: 2, title: "Call", icon: AppIcons.Call },
-  { id: 3, title: "Horoscope", icon: AppIcons.Astrology },
-  { id: 4, title: "Kundali", icon: AppIcons.Kundali },
-];
-
 const ServiceCards = () => {
+  const services = [
+    {
+      id: 1,
+      title: "Chat",
+      icon: AppIcons.Chat,
+      path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path,
+    },
+    {
+      id: 2,
+      title: "Call",
+      icon: AppIcons.Call,
+      path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path,
+    },
+    {
+      id: 3,
+      title: "Horoscope",
+      icon: AppIcons.Astrology,
+      path: PATH.privateRoutes.HOROSCOPE.path,
+    },
+    {
+      id: 4,
+      title: "Kundali",
+      icon: AppIcons.Kundali,
+      path: PATH.privateRoutes.KUNDLI.path,
+    },
+  ];
   const navigate = useNavigate();
   return (
-    <div
-      className={styles.cardsGrid}
-      onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
-    >
+    <div className={styles.cardsGrid}>
       {services.map((service) => (
         <motion.div
           key={service.id}
@@ -29,7 +45,10 @@ const ServiceCards = () => {
           transition={{ type: "spring", stiffness: 300 }}
           className={styles.card}
         >
-          <div className={styles.cardContent}>
+          <div
+            className={styles.cardContent}
+            onClick={() => navigate(service.path)}
+          >
             <div
               style={{
                 flexDirection: "row",

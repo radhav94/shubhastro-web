@@ -9,7 +9,7 @@ import { GetString } from "../../../utils/helper/string.utils";
 
 const AstrologerCard = ({ data, onFollow, onChat }) => {
   return (
-    <div className={styles.card}>
+    <div className={styles.card} onClick={onChat}>
       <div className={styles.topSection}>
         <div className={styles.avatarWrapper}>
           <img
@@ -104,7 +104,6 @@ const AstrologerCard = ({ data, onFollow, onChat }) => {
             fontSize={12}
             buttonStyles={{ padding: "4px 6px" }}
             title="Chat"
-            onClick={onChat}
           />
           <PrimaryButton
             bgColor={appColors.white}

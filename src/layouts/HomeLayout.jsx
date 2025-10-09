@@ -9,6 +9,7 @@ import { useIsMobile } from "../utils/hooks/useIsMobile";
 import Navbar from "./Navbar";
 import Breadcrumb from "../component/BreadCrumb";
 import Footer from "./Footer";
+import ScrollToTop from "../component/functions/ScrollToTop";
 
 const HomeLayout = () => {
   const isMobile = useIsMobile();
@@ -23,6 +24,7 @@ const HomeLayout = () => {
 
   return (
     <div className={styles.layout}>
+      <ScrollToTop />
       <div className={styles.contentWrapper}>
         {showHeader && (
           <>

@@ -22,15 +22,21 @@ const Home = () => {
   const onWatchNow = () => {
     navigate(PATH.privateRoutes.ASTRO_LIVE.path);
   };
+  const onClickView = () => {
+    navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path);
+  };
+  const onClick = () => {
+    navigate(PATH.privateRoutes.HOROSCOPE.path);
+  };
   return (
-    <div style={{ flex: 1 }}>
+    <div className={styles.homeContainer}>
       <HeroSection />
       <ServiceCards />
-      <Astrologers onChat={onChat} />
-      <LiveShows onWatchNow={onWatchNow} />
-      <Rashis />
-      <Services />
+      <Astrologers onChat={onChat} onClickView={onClickView} />
+      <LiveShows onWatchNow={onWatchNow} onClickView={onClickView} />
+      <Rashis onClick={onClick} />
       <Blogs />
+      {/* <Services /> */}
     </div>
   );
 };

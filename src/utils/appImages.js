@@ -1,6 +1,6 @@
 //appicons
 
-import Logo from "../assets/icons/logo.jpg";
+import Logo from "../assets/icons/logo.png";
 import Call from "../assets/icons/phone.png";
 import Chat from "../assets/icons/chat.png";
 import Astrology from "../assets/icons/astrology.png";

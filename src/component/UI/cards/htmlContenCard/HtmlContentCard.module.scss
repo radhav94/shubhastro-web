@@ -1,0 +1,96 @@
+@use "sass:color";
+
+// --- Theme Variables ---
+$color-primary: #ffcb03;
+$color-app-bg: #f5f5f5;
+$color-white: #ffffff;
+$color-black: #1a1a1a;
+$color-grey-dark: #555555;
+$font-primary: "Poppins", sans-serif;
+$shadow-4: 0px 4px 6px rgba(0, 0, 0, 0.1);
+$color-link: #007bff;
+$color-link-hover: color.scale($color-link, $lightness: -10%);
+$color-link-visited: color.scale($color-link, $lightness: -20%);
+
+.contentCard {
+  padding: 30px;
+  border-radius: 16px;
+
+  margin: 20px auto;
+  font-family: $font-primary;
+
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
+}
+
+.heading {
+  margin-bottom: 16px !important;
+  margin-top: 32px !important;
+  line-height: 1.4;
+
+  &:first-child {
+    margin-top: 0 !important;
+  }
+}
+
+.paragraph {
+  color: $color-grey-dark;
+  line-height: 1.8;
+  margin-bottom: 1.2em !important;
+
+  // Styling for links within paragraphs
+  a {
+    color: $color-link;
+    text-decoration: none;
+    font-weight: 500;
+    pointer-events: none;
+    cursor: default;
+    &:hover {
+      color: $color-link-hover;
+      text-decoration: underline;
+    }
+    &:visited {
+      color: $color-link-visited;
+    }
+  }
+}
+
+.list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 20px;
+  margin-bottom: 20px;
+
+  li {
+    padding-left: 28px;
+    position: relative;
+    margin-bottom: 16px;
+    color: $color-grey-dark;
+    line-height: 1.8;
+
+    // Custom bullet point style
+    &::before {
+      content: "✔";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: $color-primary;
+      font-weight: 900;
+      font-size: 18px;
+    }
+  }
+  a {
+    color: $color-link;
+    text-decoration: none;
+    pointer-events: none;
+    cursor: default;
+    &:hover {
+      color: $color-link-hover;
+      text-decoration: underline;
+    }
+    &:visited {
+      color: $color-link-visited;
+    }
+  }
+}

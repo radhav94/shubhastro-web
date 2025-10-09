@@ -1,8 +1,13 @@
 import React from "react";
 import { WorkInProgressCard } from "../../../component";
+import VideoHeader from "./videoHeader/VideoHeader";
 
 const Video = () => {
-  return <WorkInProgressCard />;
+  return (
+    <>
+      <VideoHeader />
+    </>
+  );
 };
 
 export default Video;

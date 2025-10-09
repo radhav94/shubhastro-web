@@ -1,39 +1,147 @@
+@use "sass:color"; // 👈 Add this line at the top
+
+// --- Design System Variables (ensure these are consistent with your Footer) ---
+$color-dark-blue: #0f0c29;
+$color-gold: #f9d423;
+$color-light-text: #e0e0e0;
+$color-grey-text: #a0a0b0;
+$font-primary: "Poppins", sans-serif;
+
+// --- Main TopBar Styling ---
 .topBar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  height: 70px;
+  background: "transparent";
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  display: flex;
+  align-items: center;
+}
+
+.container {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 0 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
 
-  .menuIcon {
-    display: none;
-    font-size: 28px;
-    cursor: pointer;
+// --- Left & Right Sections ---
+.leftSection,
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 
-    @media (max-width: 768px) {
-      display: block;
+// --- Logo & Menu Icon ---
+.logoContainer {
+  cursor: pointer;
+  img {
+    height: 45px; // Adjusted for a sleeker look
+    width: auto;
+    transition: transform 0.3s ease;
+    &:hover {
+      transform: scale(1.05);
     }
-  }
-
-  .logoContainer {
-    background-color: #fff;
-    padding: 4px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-
-    img {
-      height: 52px;
-      width: 52px;
-      border-radius: 8px;
-    }
-  }
-
-  .rightSection {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-
-   
   }
 }
 
+.menuIcon {
+  font-size: 26px;
+  color: $color-light-text;
+  cursor: pointer;
+  display: none; // Hidden by default
+}
+
+// --- Right Section Buttons ---
+// Base button reset
+%button-reset {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-family: $font-primary;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.walletButton {
+  @extend %button-reset;
+  background-color: #a0a0b0;
+
+  color: $color-light-text;
+  padding: 8px 16px;
+  border-radius: 50px;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 500;
+
+  svg {
+    font-size: 20px;
+  }
+}
+
+.iconButton {
+  @extend %button-reset;
+  height: 40px;
+  width: 40px;
+  color: $color-grey-text;
+  font-size: 24px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: $color-light-text;
+  }
+}
+
+.ctaButton {
+  @extend %button-reset;
+  background-color: $color-gold;
+  color: $color-dark-blue;
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+
+  &:hover {
+    // 👇 This line is now fixed
+    background-color: color.adjust($color-gold, $lightness: 5%);
+    transform: translateY(-2px);
+  }
+}
+
+// --- Responsive Breakpoints (Mobile First) ---
+
+// By default, hide elements not needed on mobile
+.hideOnMobile {
+  display: none;
+}
+
+@media screen and (min-width: 768px) {
+  // Show hidden elements on tablet and up
+  .hideOnMobile {
+    display: inline-flex;
+  }
+
+  // Hide the hamburger menu on tablet and up
+  .menuIcon {
+    display: none;
+  }
+
+  .leftSection,
+  .rightSection {
+    gap: 24px; // Increase gap on larger screens
+  }
+}

@@ -1,0 +1,253 @@
+@use "sass:color"; // For using modern Sass color functions
+
+// --- Theme Variables ---
+$color-primary: #ffcb03;
+$color-secondary-bg: #fbf1dd;
+$color-tertiary: #bb1160; // Added for hover/error states
+$color-app-bg: #f5f5f5;
+$color-white: #ffffff;
+$color-black: #1a1a1a;
+$color-grey-light: #e0e0e0;
+$color-grey-medium: #999999;
+$color-grey-dark: #555555;
+$font-primary: "Poppins", sans-serif;
+$shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08); // Softened the shadow slightly
+
+// --- Animated Header Section ---
+.headerSection {
+  padding: 40px 20px;
+  text-align: center;
+  background: linear-gradient(
+    135deg,
+    $color-secondary-bg,
+    lighten($color-primary, 30%)
+  );
+  margin-bottom: 20px;
+
+  h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: $color-black;
+    margin: 0 0 12px 0;
+  }
+
+  p {
+    font-size: 16px;
+    color: $color-grey-dark;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+}
+
+// --- Main Page Layout ---
+.kundliPageContainer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  padding: 0 20px 20px 20px;
+  font-family: $font-primary;
+  background-color: $color-app-bg;
+}
+
+@media (min-width: 992px) {
+  .kundliPageContainer {
+    grid-template-columns: 1.2fr 1fr;
+  }
+}
+
+.formContainer,
+.savedKundliContainer {
+  background: $color-white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: $shadow-4;
+  border: 1px solid $color-grey-light;
+  color: $color-black;
+}
+
+.sectionTitle {
+  color: $color-black;
+  font-size: 24px;
+  margin: 0 0 24px 0;
+  text-align: center;
+  font-weight: 700;
+}
+
+// --- Form Styling ---
+.kundliForm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.formSectionHeader {
+  font-size: 18px;
+  color: $color-black;
+  margin: 10px 0 -5px 0;
+  border-bottom: 1px solid $color-grey-light;
+  padding-bottom: 8px;
+  font-weight: 600;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: $color-grey-dark;
+    // Add a red asterisk for required fields for better UX
+    &[for]:after {
+      content: " *";
+      color: $color-tertiary;
+    }
+  }
+
+  input,
+  select {
+    background-color: $color-white;
+    border: 1px solid $color-grey-light;
+    color: $color-black;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 15px;
+    font-family: $font-primary;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    -webkit-appearance: none; // Remove default appearance for custom arrow
+    appearance: none;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.2);
+    }
+  }
+
+  // Custom dropdown arrow for a consistent look
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23999999' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px; // Make space for the arrow
+  }
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+}
+
+.ctaButton {
+  background-color: $color-primary;
+  color: $color-black;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+
+  &:hover {
+    // Corrected the deprecated lighten() function
+    background-color: color.adjust($color-primary, $lightness: -5%);
+    transform: translateY(-2px);
+  }
+}
+
+// --- Saved Kundli List ---
+.savedKundliContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.searchBox {
+  position: relative;
+  margin-bottom: 20px;
+  // Styles for the input are inherited from .formGroup
+}
+
+.kundliList {
+  flex-grow: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-right: 10px;
+}
+
+.kundliItem {
+  cursor: pointer;
+  border: 2px solid $color-grey-light;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  border-radius: 12px;
+
+  &:hover {
+    border-color: rgba($color-primary, 0.5);
+    box-shadow: 0 2px 8px rgba($color-primary, 0.2);
+    transform: translateY(-2px);
+  }
+
+  &.active {
+    border-color: $color-primary;
+    box-shadow: 0 4px 12px rgba($color-primary, 0.3);
+  }
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: $color-secondary-bg;
+  border: 2px solid $color-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 600;
+  color: $color-black;
+  flex-shrink: 0;
+}
+
+.kundliDetails {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.kundliName {
+  font-size: 16px;
+  font-weight: 600;
+  color: $color-black;
+}
+
+.kundliDob,
+.kundliPob {
+  font-size: 13px;
+  color: $color-grey-dark;
+  line-height: 1.5;
+}
+
+.deleteButton {
+  background: none;
+  border: none;
+  color: $color-grey-medium;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: color 0.3s ease, background-color 0.3s ease;
+
+  &:hover {
+    color: $color-tertiary;
+    background-color: rgba($color-tertiary, 0.1);
+  }
+}

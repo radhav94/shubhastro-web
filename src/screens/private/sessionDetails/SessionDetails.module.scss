@@ -1,0 +1,96 @@
+@use "sass:color";
+
+// --- Theme Variables ---
+$color-bg: #f8f9fa; // Light background for the card
+$color-text-primary: #343a40;
+$color-text-secondary: #6c757d;
+$color-star: #a892ee;
+$font-serif: "Cormorant Garamond", serif;
+$font-sans: "Lato", sans-serif;
+
+// --- Keyframe for the pulsing animation ---
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(0.95);
+    opacity: 0.6;
+    box-shadow: 0 0 10px rgba($color-star, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+    box-shadow: 0 0 25px rgba($color-star, 0.7);
+  }
+}
+
+// --- Main Container ---
+.noDataContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+  background-color: $color-bg;
+  border-radius: 12px;
+  min-height: 400px;
+}
+
+.animationWrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin-bottom: 30px;
+}
+
+.star {
+  position: absolute;
+  background-color: $color-star;
+  border-radius: 50%;
+  animation: pulse 2.5s infinite ease-in-out;
+}
+
+// Individual star properties
+.star1 {
+  width: 25px;
+  height: 25px;
+  top: 10%;
+  left: 20%;
+  animation-delay: 0s;
+}
+.star2 {
+  width: 15px;
+  height: 15px;
+  top: 30%;
+  right: 15%;
+  animation-delay: 0.5s;
+}
+.star3 {
+  width: 20px;
+  height: 20px;
+  bottom: 25%;
+  left: 30%;
+  animation-delay: 1s;
+}
+.star4 {
+  width: 10px;
+  height: 10px;
+  bottom: 10%;
+  right: 35%;
+  animation-delay: 1.5s;
+}
+
+.title {
+  font-family: $font-serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin: 0 0 10px 0;
+}
+
+.message {
+  font-family: $font-sans;
+  font-size: 1rem;
+  color: $color-text-secondary;
+  max-width: 300px;
+}

@@ -1,80 +1,91 @@
-@use "../../../../App.module.scss" as var;
+/* Assuming theme variables are globally available via sass-loader */
+/*
+  $color-primary: #ffcb03;
+  $color-secondary-bg: #fbf1dd;
+  ...
+*/
 
 .bannerContainer {
   display: flex;
-  flex-wrap: wrap;
-  padding: 20px;
-  background: #f9f9f9;
-  gap: 20px;
-  background-color: var.$sec-color;
-  border-radius: 8px;
-  margin: 8px 0px;
-}
-.bannerDescription {
-  max-height: 120px;
-  overflow-y: auto;
-  padding-right: 8px;
-  font-size: 14px;
-  line-height: 1.4;
-  color: #333;
+  gap: 30px;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  margin: 16px 0;
+
+  // Responsive stacking for mobile
+  @media (max-width: 992px) {
+    flex-direction: column;
+    padding: 16px;
+    gap: 24px;
+  }
 }
 
-.bannerDescription::-webkit-scrollbar {
-  width: 6px;
-}
-
-.bannerDescription::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-}
-
+// --- LEFT SECTION ---
 .bannerLeft {
   flex: 1;
-  min-width: 300px;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
 }
 
 .imageWrapper {
-  text-align: center;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .mainImage {
   width: 100%;
-  max-width: 400px;
-  border-radius: 8px;
-}
-
-.bannerRight {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  flex: 2;
-  justify-content: center;
-}
-
-.cardIcon {
-  text-align: center;
-  width: 100px;
-}
-
-.cardDescription img {
-  width: 50px;
-  height: 50px;
-}
-
-.cardTextFix {
   display: block;
-  font-weight: bold;
-  margin-top: 5px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
 }
 
-.cardsContainer {
+.bannerTitle {
+  margin-top: 20px !important;
+  margin-bottom: 12px !important;
+}
+
+.bannerDescription {
+  max-height: 150px; // Increased height
+  overflow-y: auto;
+  padding-right: 10px;
+  color: #555555;
+  line-height: 1.7;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+  }
+}
+
+// --- RIGHT SECTION ---
+.bannerRight {
+  flex: 2;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  padding: 16px;
-  width: 100%;
-  background-color: var.$white;
-  border-radius: 8px;
+  // --- Responsive Grid Columns ---
+  grid-template-columns: repeat(2, 1fr); // Mobile default
+  gap: 16px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr); // Tablet
+  }
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(4, 1fr); // Desktop
+  }
 }
 
 .card {
@@ -82,22 +93,36 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var.$light-pri;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 4px 6px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: #f9f9f9;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  padding: 12px;
+  text-align: center;
   cursor: pointer;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease,
+    background-color 0.3s ease;
+
+  &:hover {
+    background-color: #fbf1dd; // $color-secondary-bg
+  }
 }
 
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.cardImage {
+  width: 70px;
+  height: 70px;
+  margin-bottom: 8px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 }
 
-.card img {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  margin-bottom: 2px;
+// --- Active Card State ---
+.card.active {
+  background-color: #fbf1dd; // $color-secondary-bg
+  border-color: #ffcb03; // $color-primary
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(#ffcb03, 0.3);
 }

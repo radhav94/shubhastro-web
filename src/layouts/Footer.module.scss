@@ -1,106 +1,219 @@
+// --- Design System Variables ---
+$color-dark-blue: #0f0c29;
+$color-deep-purple: #302b63;
+$color-night-sky: #24243e;
+$color-gold: #f9d423;
+$color-light-text: #e0e0e0;
+$color-grey-text: #a0a0b0;
+$font-primary: "Poppins", sans-serif;
+
+// --- Mixins for Reusability ---
+@mixin flex-center($direction: row) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: $direction;
+}
+
+// --- Main Footer Styling ---
 .footer {
-  background: #111;
-  // color: #fff;
-  font-size: 14px;
-
+  background: linear-gradient(
+    to right,
+    $color-dark-blue,
+    $color-deep-purple,
+    $color-dark-blue
+  );
+  color: $color-light-text;
+  font-family: $font-primary;
+  padding: 20px 0;
+  padding-bottom: 20px;
   width: 100%;
-  padding: 0;
+  position: relative;
+  font-size: 14px;
+}
 
-  a {
-    color: #bbb;
-    text-decoration: none;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
 
-    &:hover {
-      color: #fff;
-    }
+.footer_main {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 30px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.footer_column {
+  h3.column_title {
+    color: $color-gold;
+    font-size: 18px;
+    margin-bottom: 15px;
+    font-weight: 600;
   }
-}
-
-.pwa_footer {
-  display: none;
-
-  @media screen and (max-width: 768px) {
-    display: flex;
-    justify-content: space-around;
-    background: #222;
-    padding: 0px 10px;
-  }
-}
-
-.pwa_footer_icon {
-  display: flex;
-  gap: 20px;
-
-  li {
-    list-style: none;
-    text-align: center;
-  }
-}
-
-.sticky_footer_css img {
-  width: 30px;
-  height: 30px;
-}
-
-.new_mobile {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: red;
-  color: #fff;
-  font-size: 10px;
-  padding: 2px 4px;
-  border-radius: 4px;
-}
-
-.footer_container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-
-.footer_box {
-  flex: 1;
-  min-width: 200px;
-  margin: 10px 0;
 
   ul {
     list-style: none;
     padding: 0;
-
+    margin: 0;
     li {
-      margin: 5px 0;
+      margin-bottom: 10px;
+      a {
+        color: $color-grey-text;
+        text-decoration: none;
+        transition: color 0.3s ease, padding-left 0.3s ease;
+        &:hover {
+          color: $color-gold;
+          padding-left: 5px;
+        }
+      }
     }
   }
 }
 
-.footer_normal {
-  font-weight: bold;
-  margin-bottom: 10px;
+.footer_logo {
+  width: 120px;
+  margin-bottom: 15px;
 }
 
-.footer_logo img {
-  width: 150px;
+.footer_tagline,
+.footer_column p {
+  color: $color-grey-text;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.support_link {
+  color: $color-light-text;
+  text-decoration: none;
+  &:hover {
+    color: $color-gold;
+  }
 }
 
+.social_icons {
+  display: flex;
+  gap: 15px;
+  a {
+    color: $color-grey-text;
+    font-size: 22px;
+    transition: color 0.3s ease, transform 0.3s ease;
+    &:hover {
+      color: $color-gold;
+      transform: translateY(-3px);
+    }
+  }
+}
+
+// --- Footer Bottom Bar ---
 .footer_bottom {
-  border-top: 1px solid #444;
-  margin-top: 20px;
-  padding-top: 10px;
+  border-top: 1px solid rgba($color-night-sky, 0.5);
+  padding-top: 20px;
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  font-size: 13px;
+  color: $color-grey-text;
 
   ul {
     display: flex;
-    gap: 15px;
+    gap: 25px;
     list-style: none;
+    padding: 0;
+    margin: 0;
+    a {
+      color: $color-grey-text;
+      text-decoration: none;
+      &:hover {
+        color: $color-gold;
+      }
+    }
   }
 }
-.footer_container,
-.footer_bottom {
-  @media screen and (max-width: 768px) {
-    display: none; // hide desktop footer on mobile if needed
+
+// --- Sticky PWA/Mobile Footer ---
+.pwa_footer {
+  display: none; // Hidden on desktop
+}
+
+// --- Responsive Breakpoints ---
+
+@media screen and (max-width: 768px) {
+  .footer {
+    padding: 30px 0 80px 0; // Adjust padding for mobile
+  }
+  .footer_main {
+    text-align: center;
+    gap: 40px;
+  }
+
+  .social_icons {
+    justify-content: center;
+  }
+
+  .footer_bottom {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  // Mobile Sticky Navigation becomes visible
+  .pwa_footer {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba($color-dark-blue, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    border-top: 1px solid rgba($color-gold, 0.2);
+
+    nav ul {
+      display: flex;
+      justify-content: space-around;
+      list-style: none;
+      margin: 0;
+      padding: 8px 0;
+    }
+
+    a {
+      @include flex-center(column);
+      color: $color-grey-text;
+      text-decoration: none;
+      font-size: 11px;
+      padding: 5px;
+      transition: color 0.3s ease;
+
+      &.active {
+        color: $color-gold;
+      }
+
+      &:hover {
+        color: $color-light-text;
+      }
+    }
+  }
+
+  .nav_icon {
+    font-size: 22px;
+    margin-bottom: 2px;
+    position: relative;
+  }
+
+  .new_badge {
+    position: absolute;
+    top: -4px;
+    right: -10px;
+    background: #e74c3c;
+    color: white;
+    font-size: 9px;
+    font-weight: bold;
+    padding: 1px 4px;
+    border-radius: 5px;
   }
 }
