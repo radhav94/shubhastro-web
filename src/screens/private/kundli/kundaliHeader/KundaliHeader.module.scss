@@ -20,7 +20,7 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08); // Softened the shadow slightly
   background: linear-gradient(
     135deg,
     $color-secondary-bg,
-    lighten($color-primary, 30%)
+    color.adjust($color-primary, $lightness: 30%)
   );
   margin-bottom: 20px;
 

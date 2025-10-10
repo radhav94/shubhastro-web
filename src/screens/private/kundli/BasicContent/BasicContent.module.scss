@@ -1,4 +1,4 @@
-// src/components/tabs/BasicContent.module.scss
+@use "sass:color"; // Import the modern color module
 
 // --- Theme Variables ---
 $color-primary: #ffcb03;
@@ -69,11 +69,13 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
     transition: background-color 0.2s ease;
 
     &:nth-child(even) {
-      background-color: lighten($color-app-bg, 1%);
+      // --- FIXED ---
+      background-color: color.adjust($color-app-bg, $lightness: 1%);
     }
 
     &:hover {
-      background-color: lighten($color-primary, 25%);
+      // --- FIXED ---
+      background-color: color.adjust($color-primary, $lightness: 25%);
     }
   }
 
