@@ -1,7 +1,6 @@
-import React from "react";
+import Divider from "../Divider";
+import PrimaryButton from "../PrimaryButton";
 import styles from "./Title.module.scss";
-import Divider from "./Divider";
-import PrimaryButton from "./PrimaryButton";
 
 const Title = ({
   title = "Section Title",

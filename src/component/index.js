@@ -1,4 +1,4 @@
-export { default as Title } from "../component/Title";
+export { default as Title } from "../component/UI/Title";
 
 export { default as Breadcrumb } from "../component/BreadCrumb";
 export { default as Divider } from "../component/Divider";
