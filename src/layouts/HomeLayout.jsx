@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import styles from "./HomeLayout.module.scss";
 import TopBar from "./topbar/TopBar";
 import { Outlet, useMatches } from "react-router-dom";
@@ -10,6 +10,7 @@ import Navbar from "./Navbar";
 import Breadcrumb from "../component/BreadCrumb";
 import Footer from "./Footer";
 import ScrollToTop from "../component/functions/ScrollToTop";
+import CircleSpinner from "../component/UI/CircleSpinner";
 
 const HomeLayout = () => {
   const isMobile = useIsMobile();
@@ -40,10 +41,11 @@ const HomeLayout = () => {
             </div>
           </>
         )}
-
-        <div className={styles.outletDiv}>
-          <Outlet />
-        </div>
+        <Suspense fallback={<CircleSpinner />}>
+          <div className={styles.outletDiv}>
+            <Outlet />
+          </div>
+        </Suspense>
       </div>
       {showHeader && (
         <div className={styles.footerWrapper}>

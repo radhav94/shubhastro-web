@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import styles from "./KundaliHeader.module.scss";
-import { IoSearchOutline, IoTrashOutline } from "react-icons/io5";
+import { IoTrashOutline } from "react-icons/io5";
 import { motion } from "framer-motion";
+import LocationSearch from "../../../../utils/location/locationSearch"; // Adjust this import path as needed
 
-// --- Helper data for dropdowns (no changes here) ---
+// --- Helper data for dropdowns ---
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const months = [
   "Jan",
@@ -24,7 +25,7 @@ const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
 const hours = Array.from({ length: 24 }, (_, i) => i);
 const minutes = Array.from({ length: 60 }, (_, i) => i);
 
-// Sample Data
+// --- Sample Data ---
 const savedKundliData = [
   {
     id: 1,
@@ -33,6 +34,8 @@ const savedKundliData = [
     dob: "16 Aug, 1997",
     tob: "02:00 AM",
     pob: "Mumbai, Maharashtra, India",
+    latitude: 19.076,
+    longitude: 72.8777,
   },
   {
     id: 2,
@@ -41,6 +44,8 @@ const savedKundliData = [
     dob: "16 Jun, 1999",
     tob: "06:15 AM",
     pob: "Mumbai, Maharashtra, India",
+    latitude: 19.076,
+    longitude: 72.8777,
   },
   {
     id: 3,
@@ -49,6 +54,8 @@ const savedKundliData = [
     dob: "31 Oct, 1999",
     tob: "06:00 AM",
     pob: "Kolhapur, Maharashtra, India",
+    latitude: 16.705,
+    longitude: 74.2433,
   },
   {
     id: 4,
@@ -57,6 +64,8 @@ const savedKundliData = [
     dob: "22 May, 2001",
     tob: "08:30 PM",
     pob: "Pune, Maharashtra, India",
+    latitude: 18.5204,
+    longitude: 73.8567,
   },
   {
     id: 5,
@@ -65,10 +74,12 @@ const savedKundliData = [
     dob: "10 Jan, 1995",
     tob: "12:45 PM",
     pob: "Nagpur, Maharashtra, India",
+    latitude: 21.1458,
+    longitude: 79.0882,
   },
 ];
 
-// Animation variants for the header
+// --- Animation Variants ---
 const headerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -76,7 +87,6 @@ const headerVariants = {
     transition: { staggerChildren: 0.2, delayChildren: 0.1 },
   },
 };
-
 const itemVariants = {
   hidden: { y: 20, opacity: 0 },
   visible: { y: 0, opacity: 1, transition: { duration: 0.5 } },
@@ -93,6 +103,8 @@ const KundaliHeader = ({ onGenerateClick }) => {
     minute: "0",
     second: "0",
     birthPlace: "",
+    latitude: null,
+    longitude: null,
   });
   const [selectedKundliId, setSelectedKundliId] = useState(null);
 
@@ -101,38 +113,45 @@ const KundaliHeader = ({ onGenerateClick }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handlePlaceSelect = (place) => {
+    setFormData((prev) => ({
+      ...prev,
+      birthPlace: place.address,
+      latitude: place.lat,
+      longitude: place.lng,
+    }));
+  };
+
   const handleSelectKundli = (kundli) => {
     setSelectedKundliId(kundli.id);
-
-    // --- LOGIC TO POPULATE FORM ---
     const [day, monthStr, year] = kundli.dob.replace(",", "").split(" ");
     const [time, period] = kundli.tob.split(" ");
     let [hour, minute] = time.split(":").map(Number);
 
-    // Convert 12-hour to 24-hour format
-    if (period === "PM" && hour !== 12) {
-      hour += 12;
-    }
-    if (period === "AM" && hour === 12) {
-      hour = 0;
-    }
+    if (period === "PM" && hour !== 12) hour += 12;
+    if (period === "AM" && hour === 12) hour = 0;
 
     setFormData({
       name: kundli.name,
       gender: kundli.gender === "M" ? "Male" : "Female",
-      day: day,
+      day,
       month: monthStr,
-      year: year,
+      year,
       hour: hour.toString(),
       minute: minute.toString(),
-      second: "0", // Assuming seconds are not in the saved data
+      second: "0",
       birthPlace: kundli.pob,
+      latitude: kundli.latitude,
+      longitude: kundli.longitude,
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onGenerateClick(e);
+    console.log("Generating Horoscope with data:", formData);
+    if (onGenerateClick) {
+      onGenerateClick(formData);
+    }
   };
 
   return (
@@ -146,8 +165,7 @@ const KundaliHeader = ({ onGenerateClick }) => {
         <motion.h1 variants={itemVariants}>Free Kundli Online</motion.h1>
         <motion.p variants={itemVariants}>
           A Kundli, or birth chart, is an astrological map of your life's
-          journey. It uses your birth date, time, and place to reveal insights
-          into your past, present, and future.
+          journey.
         </motion.p>
       </motion.div>
 
@@ -155,6 +173,7 @@ const KundaliHeader = ({ onGenerateClick }) => {
         <div className={styles.formContainer}>
           <h2 className={styles.sectionTitle}>Create New Kundli</h2>
           <form onSubmit={handleSubmit} className={styles.kundliForm}>
+            {/* --- Name and Gender --- */}
             <div className={styles.formGroup}>
               <label htmlFor="name">Name</label>
               <input
@@ -180,16 +199,16 @@ const KundaliHeader = ({ onGenerateClick }) => {
                 <option>Female</option>
               </select>
             </div>
-            <h3 className={styles.formSectionHeader}>Birth Details</h3>
+
+            {/* --- Date of Birth --- */}
+            <h3 className={styles.formSectionHeader}>Date of Birth</h3>
             <div className={styles.gridContainer}>
               <div className={styles.formGroup}>
-                <label htmlFor="day">Day</label>
+                <label>Day</label>
                 <select
-                  id="day"
                   name="day"
                   value={formData.day}
                   onChange={handleInputChange}
-                  required
                 >
                   {days.map((d) => (
                     <option key={d}>{d}</option>
@@ -197,13 +216,11 @@ const KundaliHeader = ({ onGenerateClick }) => {
                 </select>
               </div>
               <div className={styles.formGroup}>
-                <label htmlFor="month">Month</label>
+                <label>Month</label>
                 <select
-                  id="month"
                   name="month"
                   value={formData.month}
                   onChange={handleInputChange}
-                  required
                 >
                   {months.map((m) => (
                     <option key={m}>{m}</option>
@@ -211,27 +228,28 @@ const KundaliHeader = ({ onGenerateClick }) => {
                 </select>
               </div>
               <div className={styles.formGroup}>
-                <label htmlFor="year">Year</label>
+                <label>Year</label>
                 <select
-                  id="year"
                   name="year"
                   value={formData.year}
                   onChange={handleInputChange}
-                  required
                 >
                   {years.map((y) => (
                     <option key={y}>{y}</option>
                   ))}
                 </select>
               </div>
+            </div>
+
+            {/* --- Time of Birth --- */}
+            <h3 className={styles.formSectionHeader}>Time of Birth</h3>
+            <div className={styles.gridContainer}>
               <div className={styles.formGroup}>
-                <label htmlFor="hour">Hour</label>
+                <label>Hour</label>
                 <select
-                  id="hour"
                   name="hour"
                   value={formData.hour}
                   onChange={handleInputChange}
-                  required
                 >
                   {hours.map((h) => (
                     <option key={h}>{h}</option>
@@ -239,13 +257,11 @@ const KundaliHeader = ({ onGenerateClick }) => {
                 </select>
               </div>
               <div className={styles.formGroup}>
-                <label htmlFor="minute">Minute</label>
+                <label>Minute</label>
                 <select
-                  id="minute"
                   name="minute"
                   value={formData.minute}
                   onChange={handleInputChange}
-                  required
                 >
                   {minutes.map((m) => (
                     <option key={m}>{m}</option>
@@ -253,9 +269,8 @@ const KundaliHeader = ({ onGenerateClick }) => {
                 </select>
               </div>
               <div className={styles.formGroup}>
-                <label htmlFor="second">Second</label>
+                <label>Second</label>
                 <select
-                  id="second"
                   name="second"
                   value={formData.second}
                   onChange={handleInputChange}
@@ -266,16 +281,18 @@ const KundaliHeader = ({ onGenerateClick }) => {
                 </select>
               </div>
             </div>
+
+            {/* --- Birth Place --- */}
             <div className={styles.formGroup}>
               <label htmlFor="birthPlace">Birth Place</label>
-              <input
-                type="text"
-                id="birthPlace"
-                name="birthPlace"
+              <LocationSearch
                 value={formData.birthPlace}
-                onChange={handleInputChange}
-                placeholder="E.g., Mumbai, Maharashtra"
-                required
+                onChange={(e) =>
+                  handleInputChange({
+                    target: { name: "birthPlace", value: e.target.value },
+                  })
+                }
+                onPlaceSelect={handlePlaceSelect}
               />
             </div>
             <button type="submit" className={styles.ctaButton}>
@@ -286,7 +303,6 @@ const KundaliHeader = ({ onGenerateClick }) => {
 
         <div className={styles.savedKundliContainer}>
           <h2 className={styles.sectionTitle}>Saved Kundli</h2>
-
           <div className={styles.kundliList}>
             {savedKundliData.map((kundli) => (
               <div

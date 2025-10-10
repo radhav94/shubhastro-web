@@ -11,6 +11,7 @@ import Services from "./components/serivces/Services";
 import Blogs from "./components/blogs/Blogs";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../utils/routes/Paths";
+import { PrimaryButton } from "../../../component";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ const Home = () => {
   const onClick = () => {
     navigate(PATH.privateRoutes.HOROSCOPE.path);
   };
+
   return (
     <div className={styles.homeContainer}>
       <HeroSection />

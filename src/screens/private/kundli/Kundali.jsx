@@ -4,13 +4,18 @@ import BasicContent from "./BasicContent/BasicContent";
 import KundaliContent from "./kundaliContent/KundaliContent";
 import HtmlContentCard from "../../../component/UI/cards/htmlContenCard/HtmlContentCard";
 import { useState } from "react";
+import * as KundaliSrvices from "../../../services/appServices/kundaliServices";
+import CircleSpinner from "../../../component/UI/CircleSpinner";
+import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 
 const Kundali = () => {
   const [dataIsFilled, setDataIsFilled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [basicData, setBasicData] = useState([]);
   const tabsData = [
     {
       label: "Basic",
-      content: <BasicContent />,
+      content: <BasicContent basicData={basicData} />,
     },
     {
       label: "Kundli",
@@ -91,14 +96,68 @@ const Kundali = () => {
         "Astrology doesn’t control you, it guides you. Your free kundli shows your strengths and challenges, but your actions matter most. Use this knowledge to live a better, more meaningful life.",
     },
   ];
+  const monthMap = {
+    Jan: 1,
+    January: 1,
+    Feb: 2,
+    February: 2,
+    Mar: 3,
+    March: 3,
+    Apr: 4,
+    April: 4,
+    May: 5,
+    Jun: 6,
+    June: 6,
+    Jul: 7,
+    July: 7,
+    Aug: 8,
+    August: 8,
+    Sep: 9,
+    September: 9,
+    Oct: 10,
+    October: 10,
+    Nov: 11,
+    November: 11,
+    Dec: 12,
+    December: 12,
+  };
 
-  const onGenerateClick = () => {
-    setDataIsFilled(true);
+  const onGenerateClick = async (e) => {
+    try {
+      setIsLoading(true);
+
+      const data = {
+        day: Number(e.day),
+        month: monthMap[e.month] || 1,
+        year: Number(e.year),
+        hour: Number(e.hour),
+        min: Number(e.minute),
+        lat: Number(e.latitude),
+        lon: Number(e.longitude),
+        tzone: 5.5,
+      };
+
+      const res = await KundaliSrvices.getKundliData(data);
+
+      setBasicData({
+        birthDetails: res?.birthDetails || null,
+        birthPanchang: res?.birthPanchang || null,
+        astroDetails: res?.astroDetails || null,
+      });
+      setDataIsFilled(true);
+    } catch (error) {
+      setDataIsFilled(false);
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <>
       <KundaliHeader onGenerateClick={onGenerateClick} />
+      <PrimaryLoader isLoading={isLoading} />
+
       {dataIsFilled ? (
         <PrimaryTabs tabs={tabsData} />
       ) : (

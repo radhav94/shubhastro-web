@@ -1,0 +1,76 @@
+// --- Animations ---
+
+// Fade-in animation for the entire loader
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+// --- Main Styles ---
+
+.loaderWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  // Apply the fade-in animation
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+// The fullscreen overlay with the modern blur effect
+.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+
+  // Modern blur effect with a fallback
+  background-color: rgba(255, 255, 255, 0.5); // Fallback for older browsers
+  @supports (backdrop-filter: blur(5px)) {
+    background-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(5px);
+  }
+}
+
+// The new container for the spinner and message
+.loaderBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+// The GIF spinner element
+.spinnerGif {
+  width: 100px; // Slightly smaller for a cleaner look
+  height: 100px;
+}
+
+// The loading message text with the pulse animation
+.message {
+  font-size: 1rem;
+  font-weight: 500; // Medium weight is often cleaner than bold
+  color: #555;
+  animation: pulse 1.5s ease-in-out infinite;
+}
