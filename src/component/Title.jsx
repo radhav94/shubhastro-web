@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./Title.module.scss"; // Using SCSS module for styling
+import styles from "./Title.module.scss";
 import Divider from "./Divider";
 import PrimaryButton from "./PrimaryButton";
 
