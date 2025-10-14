@@ -1,0 +1,203 @@
+@use "sass:color";
+
+// Define brand colors
+$brand-orange: #ff9800;
+$text-dark: #212121;
+$text-light: #616161;
+$border-color: #e0e0e0;
+$disabled-bg: #e0e0e0;
+$disabled-text: #9e9e9e;
+
+.loginSection {
+  margin: 40px auto;
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 24vw;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: $text-dark;
+  text-align: center;
+  margin: 0;
+}
+
+.subtitle {
+  display: block;
+  font-size: 14px;
+  font-weight: 400;
+  color: $text-light;
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+.phoneContainer {
+  font-weight: 600;
+  color: $text-dark;
+  font-size: 16px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 0 0 8px;
+  line-height: 1;
+  img {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.otpSection {
+  width: 100%;
+  margin-top: 24px;
+}
+
+// Styles for react-otp-input
+.otpInputContainer {
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 8px;
+}
+
+.otpInput {
+  width: 45px !important;
+  height: 50px;
+  font-size: 20px;
+  text-align: center;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  font-weight: 500;
+  caret-color: $brand-orange;
+  transition: all 0.2s ease;
+
+  &:focus {
+    border-color: $brand-orange;
+    outline: none;
+    box-shadow: 0 0 0 3px color.scale($brand-orange, $alpha: -80%);
+  }
+}
+
+.resendOptions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.resendButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $text-light;
+  padding: 0;
+
+  img {
+    width: 20px;
+  }
+}
+
+.verifyButton {
+  width: 100%;
+  padding: 14px;
+  margin-top: 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background-color: $brand-orange;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &.disabled {
+    background-color: $disabled-bg;
+    color: $disabled-text;
+    cursor: not-allowed;
+  }
+}
+
+.byProceeding,
+.whatsapp {
+  margin-top: 24px;
+  width: 100%;
+}
+
+.byProceeding {
+  font-size: 12px;
+  color: $text-light;
+  text-align: center;
+  a {
+    color: $brand-orange;
+    text-decoration: none;
+    font-weight: 500;
+  }
+}
+
+// Custom Checkbox Styles
+.checkBoxLabel {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: $text-dark;
+  cursor: pointer;
+  position: relative;
+  padding-left: 28px;
+  input {
+    position: absolute;
+    opacity: 0;
+  }
+}
+
+.checkmark {
+  position: absolute;
+  top: 1px;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  &:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+  }
+}
+
+.checkBoxLabel input:checked ~ .checkmark {
+  background-color: $brand-orange;
+  border-color: $brand-orange;
+}
+
+.checkBoxLabel input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.whatsappIcon {
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
+}

@@ -1,53 +1,211 @@
-.mainDiv {
-  // border-radius: 20px;
-  // border: 1px solid #DCDCDC;
-  // background: #FFF;
-  // box-shadow: 0px 4px 16px 0px rgba(0, 0, 0, 0.25);
-  padding: 0 15px;
-  text-align: left;
+.loginSection {
+  margin: 40px auto;
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   min-width: 24vw;
-  width: max-content;
-  max-height: 70vh;
-  overflow-y: auto;
-
-  .heading {
-    color: #000;
-    font-size: 16px;
-    font-weight: 600;
-    margin: 0;
-  }
-
-  .subHeading {
-    color: #858585;
-    font-size: 13px;
-    font-weight: 400;
-    margin: 0;
-  }
-
-  .form {
-    padding-top: 20px;
-
-    .button {
-      font-size: 11px !important;
-      font-weight: 600;
-      font-family: "Poppins";
-      width: 100%;
-      height: 32px;
-      border-radius: 5px;
-      background: linear-gradient(273deg, #506df5 0%, #8550f5 100%);
-      // margin-bottom: 10px;
-    }
-
-    .bottomText {
-      text-align: center;
-      font-size: 11px;
-      font-weight: 400;
-    }
-  }
 }
 
-@media screen and (max-width: 500px) {
-  .mainDiv {
-    width: 60vw !important;
-  }
+/* Main title and subtitle */
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #212121;
+  text-align: center;
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  display: block;
+  font-size: 14px;
+  font-weight: 400;
+  color: #616161;
+  margin-top: 8px;
+}
+
+/* Mobile number section */
+.mobileNumber {
+  width: 100%;
+  margin-top: 24px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #424242;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.label span {
+  color: #f44336; /* Red asterisk */
+  margin-left: 2px;
+}
+
+/* Container for the split mobile input */
+.mobileInputContainer {
+  display: flex;
+  width: 100%;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.mobileInputContainer:focus-within {
+  border-color: #ff9800; /* Orange color on focus */
+}
+
+.countryCodeInput {
+  border-right: 1px solid #e0e0e0;
+}
+
+.countryCode,
+.phoneInput input {
+  border: none;
+  outline: none;
+  padding: 12px;
+  font-size: 16px;
+  background-color: transparent;
+}
+
+.countryCode {
+  width: 50px;
+  text-align: center;
+  color: #212121;
+}
+
+.phoneInput {
+  flex-grow: 1;
+}
+
+.phoneInput input {
+  width: 100%;
+}
+
+/* Send OTP button */
+.sendOtpButton {
+  width: 100%;
+  padding: 14px;
+  margin-top: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #ff9800; /* Astroyogi Orange */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sendOtpButton:hover {
+  background-color: #f57c00;
+}
+
+.sendOtpDisable {
+  background-color: #e0e0e0;
+  color: #9e9e9e;
+  cursor: not-allowed;
+}
+
+/* Secondary "Email" button */
+.emailAccount {
+  background: none;
+  border: none;
+  color: #ff9800;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 24px;
+}
+
+/* T&C and Privacy Policy text */
+.byProceeding {
+  font-size: 12px;
+  color: #757575;
+  margin-top: 16px;
+  text-align: center;
+}
+
+.byProceeding a {
+  color: #ff9800;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* WhatsApp checkbox section */
+.whatsapp {
+  margin-top: 24px;
+  width: 100%;
+}
+
+.checkBoxLabel {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #424242;
+  cursor: pointer;
+  position: relative;
+  padding-left: 28px; /* Space for the custom checkbox */
+}
+
+/* Hide default checkbox */
+.checkBoxLabel input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+  position: absolute;
+  top: 1px;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.checkBoxLabel:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+.checkBoxLabel input:checked ~ .checkmark {
+  background-color: #ff9800;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.checkBoxLabel input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.checkBoxLabel .checkmark:after {
+  left: 7px;
+  top: 3px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+
+.whatsappIcon {
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
 }

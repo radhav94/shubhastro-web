@@ -2,22 +2,49 @@ import axios from "axios";
 
 const publicRequest = axios.create({
   baseURL: import.meta.env.VITE_APP_API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-export const get = (endPoint) => {
-  return publicRequest.get(endPoint);
+export const get = async (endPoint, config = {}) => {
+  return apiHandler(() => publicRequest.get(endPoint, config));
 };
 
-export const post = (endPoint, data) => {
-  return publicRequest.post(endPoint, data);
+export const post = async (endPoint, data, config = {}) => {
+  return apiHandler(() => publicRequest.post(endPoint, data, config));
 };
 
-export const put = (endPoint, id, data) => {
-  return publicRequest.put(`${endPoint}/${id}`, data);
+export const put = async (endPoint, id, data, config = {}) => {
+  return apiHandler(() => publicRequest.put(`${endPoint}/${id}`, data, config));
 };
 
-export const deleteRequest = (endPoint, id) => {
-  return publicRequest.delete(`${endPoint}/${id}`);
+export const deleteRequest = async (endPoint, id, config = {}) => {
+  return apiHandler(() => publicRequest.delete(`${endPoint}/${id}`, config));
+};
+
+const apiHandler = async (apiCall) => {
+  try {
+    const response = await apiCall();
+    return {
+      status: true,
+      statusCode: response.status,
+      data: response.data,
+      message: response.data?.message || "Success!",
+    };
+  } catch (error) {
+    const statusCode = error.response?.status || 500;
+    const message =
+      error.response?.data?.message ||
+      error.message ||
+      "An unexpected error occurred. Please try again.";
+    return {
+      status: false,
+      statusCode,
+      data: null,
+      message,
+    };
+  }
 };
 
 export default publicRequest;

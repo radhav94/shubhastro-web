@@ -1,84 +1,135 @@
-import React from "react";
-import LoginLayout from "../../layouts/loginlayout/LoginLayout";
-import { Form, Formik } from "formik";
-import * as Yup from "yup";
-import { combineClasses, requiredMessage } from "../../utils/utlis";
-import { emailRegex } from "../../utils/regex";
-import styles from "./Login.module.scss";
-import FormikControl from "../../component/formikcontrols/FormikControl";
-import { PrimaryButton } from "../../component";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LoginLayout from "../../layouts/loginlayout/LoginLayout";
+import { PrimaryText, Toast } from "../../component";
+import styles from "./Login.module.scss";
 import { PATH } from "../../utils/routes/Paths";
+import * as AuthServices from "../../services/appServices/authService";
 
 const Login = () => {
   const navigate = useNavigate();
 
-  const initialValues = {
-    email: "",
-    password: "",
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [whatsappOptIn, setWhatsappOptIn] = useState(true);
+
+  const isMobileNumberValid = mobileNumber.length == 10;
+
+  // In your React component file
+
+  const handleSendOtp = async (event) => {
+    event.preventDefault();
+    if (!isMobileNumberValid) {
+      return;
+    }
+
+    const payload = {
+      mobile: 8530880988,
+    };
+
+    try {
+      const response = await AuthServices.loginWithPhone(payload);
+      if (response.status) {
+        navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
+          state: { phoneNumber: mobileNumber },
+        });
+      } else {
+        Toast.error("Error", response.message);
+      }
+    } catch (error) {
+      Toast.error("An unexpected error occurred in handleSendOtp", error);
+      navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
+        state: { phoneNumber: mobileNumber },
+      });
+    }
   };
 
-  const validationSchema = Yup.object({
-    email: Yup.string()
-      .required(requiredMessage("Email ID"))
-      .matches(emailRegex, "Invalid email format!"),
-    password: Yup.string().required(requiredMessage("Password")),
-  });
-
-  const handleSubmit = () => {};
   return (
-    <>
-      {/* <SelectRoleModal {...modalProps} /> */}
-      <LoginLayout>
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-        >
-          {(formik) => {
-            return (
-              <div className={styles.mainDiv}>
-                <p className={styles.heading}>Welcome back,</p>
-                <p className={styles.subHeading}>Let's sign in your account</p>
-                <Form className={styles.form} autoComplete="off">
-                  <FormikControl
-                    name="email"
-                    control="input"
-                    label="Email ID"
-                    placeholder="Enter Email ID"
-                    isRequired={true}
-                    formik={formik}
-                  />
-                  <FormikControl
-                    name="password"
-                    control="input"
-                    type="password"
-                    label="Password"
-                    placeholder="Enter Password"
-                    isRequired={true}
-                  />
+    <LoginLayout>
+      <div className={styles.loginSection}>
+        <h1 className={styles.title}>
+          Welcome to Shubh Talk
+          <span className={styles.subtitle}>
+            Enter your mobile number to Login/Signup
+          </span>
+        </h1>
 
-                  <PrimaryButton
-                    title="Login"
-                    buttonStyles={{ marginTop: "12px" }}
-                    onClick={() => navigate(PATH.privateRoutes.HOME.path)}
-                  />
+        <div className={styles.mobileNumber}>
+          <PrimaryText className={styles.label}>
+            Mobile number<span>*</span>
+          </PrimaryText>
 
-                  <p
-                    className={combineClasses(styles.bottomText, "link-text")}
-                    onClick={() =>
-                      navigate(PATH.publicRoutes.FORGOT_PASSWORD.path)
-                    }
-                  >
-                    Forgot Password?
-                  </p>
-                </Form>
+          <form onSubmit={handleSendOtp}>
+            <div className={styles.mobileInputContainer}>
+              <div className={styles.countryCodeInput}>
+                <input
+                  type="text"
+                  value="+91"
+                  readOnly
+                  className={styles.countryCode}
+                />
               </div>
-            );
-          }}
-        </Formik>
-      </LoginLayout>
-    </>
+
+              <div className={styles.phoneInput}>
+                <input
+                  type="tel"
+                  id="phone"
+                  value={mobileNumber}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "");
+                    if (value.length <= 10) {
+                      setMobileNumber(value);
+                    }
+                  }}
+                  inputMode="numeric"
+                  required
+                  placeholder="Mobile number"
+                  pattern="[0-9]*"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className={`${styles.sendOtpButton} ${
+                !isMobileNumberValid ? styles.sendOtpDisable : ""
+              }`}
+              disabled={!isMobileNumberValid}
+            >
+              Send OTP
+            </button>
+          </form>
+        </div>
+
+        <div>
+          <button type="button" className={styles.emailAccount}>
+            Have an email account?
+          </button>
+        </div>
+
+        <div className={styles.byProceeding}>
+          By proceeding, you agree to our{" "}
+          <a href="/termandcondition.aspx">T&C</a> &{" "}
+          <a href="/policy.aspx">Privacy Policy</a>
+        </div>
+
+        <div className={styles.whatsapp}>
+          <label className={styles.checkBoxLabel}>
+            <input
+              type="checkbox"
+              checked={whatsappOptIn}
+              onChange={() => setWhatsappOptIn(!whatsappOptIn)}
+            />
+            <span className={styles.checkmark}></span>
+            Get updates on WhatsApp
+            <img
+              src="https://images.astroyogi.com/astroyogi/common/whats-app-Icon.svg"
+              alt="Whatsapp"
+              className={styles.whatsappIcon}
+            />
+          </label>
+        </div>
+      </div>
+    </LoginLayout>
   );
 };
 
