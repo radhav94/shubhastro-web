@@ -49,7 +49,9 @@ const responseErrorHandler = (error) => {
         );
         break;
       case 404:
-        // Toast.error(data.message || data?.error || message || "Item doesn't exist")
+        Toast.error(
+          data.message || data?.error || message || "Item doesn't exist"
+        );
         break;
       case 405:
         Toast.error(

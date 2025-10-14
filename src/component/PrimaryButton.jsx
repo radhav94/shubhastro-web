@@ -76,7 +76,7 @@ const PrimaryButton = ({
 
           {title && (
             <PrimaryText
-              isBold
+              isSemiBold
               color={textColor}
               style={{ lineHeight: "1.2em", fontSize }}
             >
