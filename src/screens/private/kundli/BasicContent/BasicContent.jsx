@@ -1,6 +1,8 @@
 // src/components/tabs/BasicContent.jsx
 import React from "react";
 import styles from "./BasicContent.module.scss";
+import { PrimaryText } from "../../../../component";
+import { appColors } from "../../../../utils/theme";
 
 const DetailCard = ({ title, data }) => (
   <div className={styles.detailCard}>
@@ -24,20 +26,31 @@ const DetailCard = ({ title, data }) => (
   </div>
 );
 
-const BasicContent = ({ basicData }) => {
+const BasicContent = ({ basicData, userData }) => {
   const { birthDetails, birthPanchang, astroDetails } = basicData || {};
-  console.log(basicData);
 
   return (
-    <div className={styles.gridContainer}>
-      <div className={styles.basicCard}>
-        <DetailCard title="Basic Details" data={birthDetails} />
+    <div>
+      <div className=" flex mb-4 ">
+        <PrimaryText isSemiBold size_20 color={appColors.tri}>
+          {userData?.name}
+        </PrimaryText>
+        <div className=" mr-2 ml-2" />
+        <PrimaryText isSemiBold size_20 color={appColors.tri}>
+          ({userData?.day} - {userData?.month} - {userData?.year})
+        </PrimaryText>
       </div>
-      <div className={styles.panchangCard}>
-        <DetailCard title="Panchang Details" data={birthPanchang} />
-      </div>
-      <div className={styles.avakhadaCard}>
-        <DetailCard title="Avakhada Details" data={astroDetails} />
+
+      <div className={styles.gridContainer}>
+        <div className={styles.basicCard}>
+          <DetailCard title="Basic Details" data={birthDetails} />
+        </div>
+        <div className={styles.panchangCard}>
+          <DetailCard title="Panchang Details" data={birthPanchang} />
+        </div>
+        <div className={styles.avakhadaCard}>
+          <DetailCard title="Avakhada Details" data={astroDetails} />
+        </div>
       </div>
     </div>
   );

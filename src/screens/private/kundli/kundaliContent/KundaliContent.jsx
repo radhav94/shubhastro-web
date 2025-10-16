@@ -1,195 +1,9 @@
-// src/components/KundaliContent.jsx
 import React from "react";
 import { motion } from "framer-motion";
 import styles from "./KundaliContent.module.scss";
+import { PrimaryText } from "../../../../component";
+import { appColors } from "../../../../utils/theme";
 
-const kundliData = {
-  basic: {
-    basicDetails: {
-      Name: "User",
-      Date: "16/08/1997",
-      Time: "02:00 AM",
-      Place: "Mumbai, Maharashtra, India",
-      Latitude: "18.97",
-      Longitude: "72.83",
-      Timezone: "GMT +5.5",
-      Sunrise: "6:20:1",
-      Sunset: "19:5:37",
-      Ayanamsha: "23.82383",
-    },
-    panchangDetails: {
-      Tithi: "Shukla Dwadashi",
-      Karan: "Baalav",
-      Yog: "Preeti",
-      Nakshatra: "Purva Ashadha",
-    },
-    avakhadaDetails: {
-      Varna: "Kshattriya",
-      Vashya: "Chatushpada",
-      Yoni: "Vaanar",
-      Gan: "Manav",
-      Nadi: "Madhya",
-      Sign: "Sagittarius",
-      "Sign Lord": "Jupiter",
-      "Nakshatra-Charan": "Purva Ashadha",
-      Tatva: "Fire",
-      "Name alphabet": "Faa",
-      Paya: "Copper",
-    },
-  },
-  kundli: {
-    planets: {
-      headers: [
-        "Planet",
-        "Sign",
-        "Sign Lord",
-        "Nakshatra",
-        "Naksh Lord",
-        "Degree",
-        "Retro(R)",
-        "Combust",
-        "Avastha",
-        "House",
-        "Status",
-      ],
-      rows: [
-        [
-          "Ascendant",
-          "Taurus",
-          "Venus",
-          "Mrigashirsha",
-          "Mars",
-          "29<sup>&deg;</sup>51&prime;44&Prime;",
-          "Direct",
-          "No",
-          "--",
-          "1",
-          "--",
-        ],
-        [
-          "Sun",
-          "Cancer",
-          "Moon",
-          "Ashlesha",
-          "Mercury",
-          "29<sup>&deg;</sup>12&prime;33&Prime;",
-          "Direct",
-          "No",
-          "Bala",
-          "3",
-          "Friendly",
-        ],
-        [
-          "Moon",
-          "Sagittarius",
-          "Jupiter",
-          "Purva Ashadha",
-          "Venus",
-          "23<sup>&deg;</sup>8&prime;19&Prime;",
-          "Direct",
-          "No",
-          "Vriddha",
-          "8",
-          "Friendly",
-        ],
-        [
-          "Mercury",
-          "Leo",
-          "Sun",
-          "Purva Phalguni",
-          "Venus",
-          "22<sup>&deg;</sup>14&prime;0&Prime;",
-          "Direct",
-          "No",
-          "Vriddha",
-          "4",
-          "Friendly",
-        ],
-        [
-          "Venus",
-          "Virgo",
-          "Mercury",
-          "Uttara Phalguni",
-          "Sun",
-          "4<sup>&deg;</sup>5&prime;41&Prime;",
-          "Direct",
-          "No",
-          "Mrita",
-          "5",
-          "Friendly",
-        ],
-        [
-          "Mars",
-          "Libra",
-          "Venus",
-          "Swati",
-          "Rahu",
-          "7<sup>&deg;</sup>5&prime;41&Prime;",
-          "Direct",
-          "No",
-          "Kumara",
-          "6",
-          "Friendly",
-        ],
-        [
-          "Jupiter",
-          "Capricorn",
-          "Saturn",
-          "Shravana",
-          "Moon",
-          "22<sup>&deg;</sup>21&prime;36&Prime;",
-          "Retro",
-          "No",
-          "Kumara",
-          "9",
-          "Debilitated",
-        ],
-        [
-          "Saturn",
-          "Pisces",
-          "Jupiter",
-          "Revati",
-          "Mercury",
-          "26<sup>&deg;</sup>21&prime;55&Prime;",
-          "Retro",
-          "No",
-          "Bala",
-          "11",
-          "--",
-        ],
-        [
-          "Rahu",
-          "Leo",
-          "Sun",
-          "Uttara Phalguni",
-          "Sun",
-          "27<sup>&deg;</sup>13&prime;7&Prime;",
-          "Retro",
-          "No",
-          "Mrita",
-          "4",
-          "--",
-        ],
-        [
-          "Ketu",
-          "Aquarius",
-          "Saturn",
-          "Purva Bhadrapada",
-          "Jupiter",
-          "27<sup>&deg;</sup>13&prime;7&Prime;",
-          "Retro",
-          "No",
-          "Mrita",
-          "10",
-          "--",
-        ],
-      ],
-    },
-  },
-  // Add other data sections (KP, Ashtakvarga, etc.) here
-};
-
-// Animation variants for sections
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -199,92 +13,118 @@ const sectionVariants = {
   },
 };
 
-// Reusable card for key-value data
-const DetailCard = ({ title, details }) => (
-  <motion.div
-    className={styles.contentCard}
-    variants={sectionVariants}
-    initial="hidden"
-    whileInView="visible"
-    viewport={{ once: true, amount: 0.3 }}
-  >
-    <h3 className={styles.cardTitle}>{title}</h3>
-    <table className={styles.detailsTable}>
-      <tbody>
-        {Object.entries(details).map(([key, value]) => (
-          <tr key={key}>
-            <td>{key}</td>
-            <td>{value}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </motion.div>
-);
+const PlanetaryDetailsTable = ({ data }) => {
+  const headers = [
+    "Planet",
+    "Sign",
+    "Sign Lord",
+    "Nakshatra",
+    "Naksh Lord",
+    "Degree",
+    "Retro(R)",
+    "Combust",
+    "Avastha",
+    "House",
+  ];
 
-// Reusable component for the large planets table
-const PlanetsTable = ({ title, data }) => (
-  <motion.div
-    className={styles.contentCard}
-    variants={sectionVariants}
-    initial="hidden"
-    whileInView="visible"
-    viewport={{ once: true, amount: 0.2 }}
-  >
-    <h3 className={styles.cardTitle}>{title}</h3>
-    <div className={styles.tableContainer}>
-      <table className={`${styles.detailsTable} ${styles.planetsTable}`}>
-        <thead>
-          <tr>
-            {data.headers.map((header) => (
-              <th key={header}>{header}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.rows.map((row, index) => (
-            <tr key={index}>
-              {row.map((cell, cellIndex) => (
-                <td
-                  key={cellIndex}
-                  dangerouslySetInnerHTML={{ __html: cell }}
-                />
+  return (
+    <motion.div
+      className={styles.contentCard}
+      variants={sectionVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+    >
+      <h3 className={styles.cardTitle}>Planetary Positions</h3>
+      <div className={styles.tableContainer}>
+        <table className={`${styles.detailsTable} ${styles.planetsTable}`}>
+          <thead>
+            <tr>
+              {headers.map((header) => (
+                <th key={header}>{header}</th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </motion.div>
-);
-
-const KundaliContent = () => {
-  return (
-    <div className={styles.mainContainer}>
-      <div className={styles.grid}>
-        <motion.div
-          className={styles.contentCard}
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <h3 className={styles.cardTitle}>Lagna / Ascendant Chart</h3>
-          <div className={styles.chartPlaceholder}></div>
-        </motion.div>
-        <motion.div
-          className={styles.contentCard}
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <h3 className={styles.cardTitle}>Navamsa Chart</h3>
-          <div className={styles.chartPlaceholder}></div>
-        </motion.div>
+          </thead>
+          <tbody>
+            {data.map((planet) => (
+              <tr key={planet.id}>
+                <td>{planet.name}</td>
+                <td>{planet.sign}</td>
+                <td>{planet.signLord}</td>
+                <td>{planet.nakshatra}</td>
+                <td>{planet.nakshatraLord}</td>
+                <td>{planet.normDegree.toFixed(2)}</td>
+                <td>{planet.isRetro === "true" ? "R" : "--"}</td>
+                <td>{planet.is_planet_set ? "C" : "--"}</td>
+                <td>{planet.planet_awastha}</td>
+                <td>{planet.house}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+    </motion.div>
+  );
+};
 
-      <PlanetsTable title="Planets" data={kundliData.kundli.planets} />
+const KundaliContent = ({ userData, data }) => {
+  const planets = data.planetData.filter((p) => p.name !== "Ascendant");
+  const svgBirthUrl = `data:image/svg+xml;base64,${btoa(
+    '<?xml version="1.0" encoding="utf-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg xmlns:xlink="http://www.w3.org/1999/xlink" width="424.8pt" height="423.838125pt" viewBox="0 0 424.8 423.838125" xmlns="http://www.w3.org/2000/svg" version="1.1"> <metadata>  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">   <cc:Work>    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>    <dc:date>2025-10-15T16:42:31.700522</dc:date>    <dc:format>image/svg+xml</dc:format>    <dc:creator>     <cc:Agent>      <dc:title>Matplotlib v3.10.6, https://matplotlib.org/</dc:title>     </cc:Agent>    </dc:creator>   </cc:Work>  </rdf:RDF> </metadata> <defs>  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style> </defs> <g id="figure_1">  <g id="patch_1">   <path d="M 0 423.838125 L 424.8 423.838125 L 424.8 0 L 0 0 z" style="fill: #ffffff"/>  </g>  <g id="axes_1">   <g id="line2d_1">    <path d="M 25.854545 398.714489 L 398.945455 398.714489 L 398.945455 40.241761 L 25.854545 40.241761 L 25.854545 398.714489 " clip-path="url(#p9846a40665)" style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"/>   </g>   <g id="line2d_2">    <path d="M 25.854545 398.714489 L 398.945455 40.241761 " clip-path="url(#p9846a40665)" style="fill: none; stroke: #000000; stroke-linecap: square"/>   </g>   <g id="line2d_3">    <path d="M 25.854545 40.241761 L 398.945455 398.714489 " clip-path="url(#p9846a40665)" style="fill: none; stroke: #000000; stroke-linecap: square"/>   </g>   <g id="line2d_4">    <path d="M 212.4 40.241761 L 398.945455 219.478125 L 212.4 398.714489 L 25.854545 219.478125 L 212.4 40.241761 " clip-path="url(#p9846a40665)" style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"/>   </g>   <g id="text_1">    <!-- 26 -->    <g transform="translate(299.410696 85.741926) scale(0.09 -0.09)">     <defs>      <path id="DejaVuSans-Bold-32" d="M 1844 884 L 3897 884 L 3897 0 L 506 0 L 506 884 L 2209 2388 Q 2438 2594 2547 2791 Q 2656 2988 2656 3200 Q 2656 3528 2436 3728 Q 2216 3928 1850 3928 Q 1569 3928 1234 3808 Q 900 3688 519 3450 L 519 4475 Q 925 4609 1322 4679 Q 1719 4750 2100 4750 Q 2938 4750 3402 4381 Q 3866 4013 3866 3353 Q 3866 2972 3669 2642 Q 3472 2313 2841 1759 L 1844 884 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-Bold-36" d="M 2316 2303 Q 2000 2303 1842 2098 Q 1684 1894 1684 1484 Q 1684 1075 1842 870 Q 2000 666 2316 666 Q 2634 666 2792 870 Q 2950 1075 2950 1484 Q 2950 1894 2792 2098 Q 2634 2303 2316 2303 zM 3803 4544 L 3803 3681 Q 3506 3822 3243 3889 Q 2981 3956 2731 3956 Q 2194 3956 1894 3657 Q 1594 3359 1544 2772 Q 1750 2925 1990 3001 Q 2231 3078 2516 3078 Q 3231 3078 3670 2659 Q 4109 2241 4109 1563 Q 4109 813 3618 361 Q 3128 -91 2303 -91 Q 1394 -91 895 523 Q 397 1138 397 2266 Q 397 3422 980 4083 Q 1563 4744 2578 4744 Q 2900 4744 3203 4694 Q 3506 4644 3803 4544 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-Bold-32"/>     <use xlink:href="#DejaVuSans-Bold-36" transform="translate(69.580078 0)"/>    </g>   </g>   <g id="text_2">    <!-- Taurus -->    <g style="fill: #0000ff" transform="translate(292.640227 103.389625) scale(0.08 -0.08)">     <defs>      <path id="DejaVuSans-54" d="M -19 4666 L 3928 4666 L 3928 4134 L 2272 4134 L 2272 0 L 1638 0 L 1638 4134 L -19 4134 L -19 4666 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-61" d="M 2194 1759 Q 1497 1759 1228 1600 Q 959 1441 959 1056 Q 959 750 1161 570 Q 1363 391 1709 391 Q 2188 391 2477 730 Q 2766 1069 2766 1631 L 2766 1759 L 2194 1759 zM 3341 1997 L 3341 0 L 2766 0 L 2766 531 Q 2569 213 2275 61 Q 1981 -91 1556 -91 Q 1019 -91 701 211 Q 384 513 384 1019 Q 384 1609 779 1909 Q 1175 2209 1959 2209 L 2766 2209 L 2766 2266 Q 2766 2663 2505 2880 Q 2244 3097 1772 3097 Q 1472 3097 1187 3025 Q 903 2953 641 2809 L 641 3341 Q 956 3463 1253 3523 Q 1550 3584 1831 3584 Q 2591 3584 2966 3190 Q 3341 2797 3341 1997 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-75" d="M 544 1381 L 544 3500 L 1119 3500 L 1119 1403 Q 1119 906 1312 657 Q 1506 409 1894 409 Q 2359 409 2629 706 Q 2900 1003 2900 1516 L 2900 3500 L 3475 3500 L 3475 0 L 2900 0 L 2900 538 Q 2691 219 2414 64 Q 2138 -91 1772 -91 Q 1169 -91 856 284 Q 544 659 544 1381 zM 1991 3584 L 1991 3584 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-72" d="M 2631 2963 Q 2534 3019 2420 3045 Q 2306 3072 2169 3072 Q 1681 3072 1420 2755 Q 1159 2438 1159 1844 L 1159 0 L 581 0 L 581 3500 L 1159 3500 L 1159 2956 Q 1341 3275 1631 3429 Q 1922 3584 2338 3584 Q 2397 3584 2469 3576 Q 2541 3569 2628 3553 L 2631 2963 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-73" d="M 2834 3397 L 2834 2853 Q 2591 2978 2328 3040 Q 2066 3103 1784 3103 Q 1356 3103 1142 2972 Q 928 2841 928 2578 Q 928 2378 1081 2264 Q 1234 2150 1697 2047 L 1894 2003 Q 2506 1872 2764 1633 Q 3022 1394 3022 966 Q 3022 478 2636 193 Q 2250 -91 1575 -91 Q 1294 -91 989 -36 Q 684 19 347 128 L 347 722 Q 666 556 975 473 Q 1284 391 1588 391 Q 1994 391 2212 530 Q 2431 669 2431 922 Q 2431 1156 2273 1281 Q 2116 1406 1581 1522 L 1381 1569 Q 847 1681 609 1914 Q 372 2147 372 2553 Q 372 3047 722 3315 Q 1072 3584 1716 3584 Q 2034 3584 2315 3537 Q 2597 3491 2834 3397 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-54"/>     <use xlink:href="#DejaVuSans-61" transform="translate(44.583984 0)"/>     <use xlink:href="#DejaVuSans-75" transform="translate(105.863281 0)"/>     <use xlink:href="#DejaVuSans-72" transform="translate(169.242188 0)"/>     <use xlink:href="#DejaVuSans-75" transform="translate(210.355469 0)"/>     <use xlink:href="#DejaVuSans-73" transform="translate(273.734375 0)"/>    </g>   </g>   <g id="text_3">    <!-- 24 -->    <g transform="translate(206.137969 157.436472) scale(0.09 -0.09)">     <defs>      <path id="DejaVuSans-Bold-34" d="M 2356 3675 L 1038 1722 L 2356 1722 L 2356 3675 zM 2156 4666 L 3494 4666 L 3494 1722 L 4159 1722 L 4159 850 L 3494 850 L 3494 0 L 2356 0 L 2356 850 L 288 850 L 288 1881 L 2156 4666 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-Bold-32"/>     <use xlink:href="#DejaVuSans-Bold-34" transform="translate(69.580078 0)"/>    </g>   </g>   <g id="text_4">    <!-- Gemini -->    <g style="fill: #0000ff" transform="translate(198.185625 175.08417) scale(0.08 -0.08)">     <defs>      <path id="DejaVuSans-47" d="M 3809 666 L 3809 1919 L 2778 1919 L 2778 2438 L 4434 2438 L 4434 434 Q 4069 175 3628 42 Q 3188 -91 2688 -91 Q 1594 -91 976 548 Q 359 1188 359 2328 Q 359 3472 976 4111 Q 1594 4750 2688 4750 Q 3144 4750 3555 4637 Q 3966 4525 4313 4306 L 4313 3634 Q 3963 3931 3569 4081 Q 3175 4231 2741 4231 Q 1884 4231 1454 3753 Q 1025 3275 1025 2328 Q 1025 1384 1454 906 Q 1884 428 2741 428 Q 3075 428 3337 486 Q 3600 544 3809 666 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-65" d="M 3597 1894 L 3597 1613 L 953 1613 Q 991 1019 1311 708 Q 1631 397 2203 397 Q 2534 397 2845 478 Q 3156 559 3463 722 L 3463 178 Q 3153 47 2828 -22 Q 2503 -91 2169 -91 Q 1331 -91 842 396 Q 353 884 353 1716 Q 353 2575 817 3079 Q 1281 3584 2069 3584 Q 2775 3584 3186 3129 Q 3597 2675 3597 1894 zM 3022 2063 Q 3016 2534 2758 2815 Q 2500 3097 2075 3097 Q 1594 3097 1305 2825 Q 1016 2553 972 2059 L 3022 2063 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-6d" d="M 3328 2828 Q 3544 3216 3844 3400 Q 4144 3584 4550 3584 Q 5097 3584 5394 3201 Q 5691 2819 5691 2113 L 5691 0 L 5113 0 L 5113 2094 Q 5113 2597 4934 2840 Q 4756 3084 4391 3084 Q 3944 3084 3684 2787 Q 3425 2491 3425 1978 L 3425 0 L 2847 0 L 2847 2094 Q 2847 2600 2669 2842 Q 2491 3084 2119 3084 Q 1678 3084 1418 2786 Q 1159 2488 1159 1978 L 1159 0 L 581 0 L 581 3500 L 1159 3500 L 1159 2956 Q 1356 3278 1631 3431 Q 1906 3584 2284 3584 Q 2666 3584 2933 3390 Q 3200 3197 3328 2828 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-69" d="M 603 3500 L 1178 3500 L 1178 0 L 603 0 L 603 3500 zM 603 4863 L 1178 4863 L 1178 4134 L 603 4134 L 603 4863 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-6e" d="M 3513 2113 L 3513 0 L 2938 0 L 2938 2094 Q 2938 2591 2744 2837 Q 2550 3084 2163 3084 Q 1697 3084 1428 2787 Q 1159 2491 1159 1978 L 1159 0 L 581 0 L 581 3500 L 1159 3500 L 1159 2956 Q 1366 3272 1645 3428 Q 1925 3584 2291 3584 Q 2894 3584 3203 3211 Q 3513 2838 3513 2113 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-47"/>     <use xlink:href="#DejaVuSans-65" transform="translate(77.490234 0)"/>     <use xlink:href="#DejaVuSans-6d" transform="translate(139.013672 0)"/>     <use xlink:href="#DejaVuSans-69" transform="translate(236.425781 0)"/>     <use xlink:href="#DejaVuSans-6e" transform="translate(264.208984 0)"/>     <use xlink:href="#DejaVuSans-69" transform="translate(327.587891 0)"/>    </g>   </g>   <g id="text_5">    <!-- 23 -->    <g transform="translate(112.865241 85.741926) scale(0.09 -0.09)">     <defs>      <path id="DejaVuSans-Bold-33" d="M 2981 2516 Q 3453 2394 3698 2092 Q 3944 1791 3944 1325 Q 3944 631 3412 270 Q 2881 -91 1863 -91 Q 1503 -91 1142 -33 Q 781 25 428 141 L 428 1069 Q 766 900 1098 814 Q 1431 728 1753 728 Q 2231 728 2486 893 Q 2741 1059 2741 1369 Q 2741 1688 2480 1852 Q 2219 2016 1709 2016 L 1228 2016 L 1228 2791 L 1734 2791 Q 2188 2791 2409 2933 Q 2631 3075 2631 3366 Q 2631 3634 2415 3781 Q 2200 3928 1806 3928 Q 1516 3928 1219 3862 Q 922 3797 628 3669 L 628 4550 Q 984 4650 1334 4700 Q 1684 4750 2022 4750 Q 2931 4750 3382 4451 Q 3834 4153 3834 3553 Q 3834 3144 3618 2883 Q 3403 2622 2981 2516 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-Bold-32"/>     <use xlink:href="#DejaVuSans-Bold-33" transform="translate(69.580078 0)"/>    </g>   </g>   <g id="text_6">    <!-- Cancer -->    <g style="fill: #0000ff" transform="translate(105.042898 103.389625) scale(0.08 -0.08)">     <defs>      <path id="DejaVuSans-43" d="M 4122 4306 L 4122 3641 Q 3803 3938 3442 4084 Q 3081 4231 2675 4231 Q 1875 4231 1450 3742 Q 1025 3253 1025 2328 Q 1025 1406 1450 917 Q 1875 428 2675 428 Q 3081 428 3442 575 Q 3803 722 4122 1019 L 4122 359 Q 3791 134 3420 21 Q 3050 -91 2638 -91 Q 1578 -91 968 557 Q 359 1206 359 2328 Q 359 3453 968 4101 Q 1578 4750 2638 4750 Q 3056 4750 3426 4639 Q 3797 4528 4122 4306 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-63" d="M 3122 3366 L 3122 2828 Q 2878 2963 2633 3030 Q 2388 3097 2138 3097 Q 1578 3097 1268 2742 Q 959 2388 959 1747 Q 959 1106 1268 751 Q 1578 397 2138 397 Q 2388 397 2633 464 Q 2878 531 3122 666 L 3122 134 Q 2881 22 2623 -34 Q 2366 -91 2075 -91 Q 1284 -91 818 406 Q 353 903 353 1747 Q 353 2603 823 3093 Q 1294 3584 2113 3584 Q 2378 3584 2631 3529 Q 2884 3475 3122 3366 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-43"/>     <use xlink:href="#DejaVuSans-61" transform="translate(69.824219 0)"/>     <use xlink:href="#DejaVuSans-6e" transform="translate(131.103516 0)"/>     <use xlink:href="#DejaVuSans-63" transform="translate(194.482422 0)"/>     <use xlink:href="#DejaVuSans-65" transform="translate(249.462891 0)"/>     <use xlink:href="#DejaVuSans-72" transform="translate(310.986328 0)"/>    </g>   </g>   <g id="text_7">    <!-- 33 -->    <g transform="translate(56.901605 132.343381) scale(0.09 -0.09)">     <use xlink:href="#DejaVuSans-Bold-33"/>     <use xlink:href="#DejaVuSans-Bold-33" transform="translate(69.580078 0)"/>    </g>   </g>   <g id="text_8">    <!-- Leo -->    <g style="fill: #0000ff" transform="translate(56.096136 149.99108) scale(0.08 -0.08)">     <defs>      <path id="DejaVuSans-4c" d="M 628 4666 L 1259 4666 L 1259 531 L 3531 531 L 3531 0 L 628 0 L 628 4666 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-6f" d="M 1959 3097 Q 1497 3097 1228 2736 Q 959 2375 959 1747 Q 959 1119 1226 758 Q 1494 397 1959 397 Q 2419 397 2687 759 Q 2956 1122 2956 1747 Q 2956 2369 2687 2733 Q 2419 3097 1959 3097 zM 1959 3584 Q 2709 3584 3137 3096 Q 3566 2609 3566 1747 Q 3566 888 3137 398 Q 2709 -91 1959 -91 Q 1206 -91 779 398 Q 353 888 353 1747 Q 353 2609 779 3096 Q 1206 3584 1959 3584 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-4c"/>     <use xlink:href="#DejaVuSans-65" transform="translate(53.962891 0)"/>     <use xlink:href="#DejaVuSans-6f" transform="translate(115.486328 0)"/>    </g>   </g>   <g id="text_9">    <!-- 27 -->    <g transform="translate(112.865241 221.961563) scale(0.09 -0.09)">     <defs>      <path id="DejaVuSans-Bold-37" d="M 428 4666 L 3944 4666 L 3944 3988 L 2125 0 L 953 0 L 2675 3781 L 428 3781 L 428 4666 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-Bold-32"/>     <use xlink:href="#DejaVuSans-Bold-37" transform="translate(69.580078 0)"/>    </g>   </g>   <g id="text_10">    <!-- Virgo -->    <g style="fill: #0000ff" transform="translate(108.808523 239.609261) scale(0.08 -0.08)">     <defs>      <path id="DejaVuSans-56" d="M 1831 0 L 50 4666 L 709 4666 L 2188 738 L 3669 4666 L 4325 4666 L 2547 0 L 1831 0 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-67" d="M 2906 1791 Q 2906 2416 2648 2759 Q 2391 3103 1925 3103 Q 1463 3103 1205 2759 Q 947 2416 947 1791 Q 947 1169 1205 825 Q 1463 481 1925 481 Q 2391 481 2648 825 Q 2906 1169 2906 1791 zM 3481 434 Q 3481 -459 3084 -895 Q 2688 -1331 1869 -1331 Q 1566 -1331 1297 -1286 Q 1028 -1241 775 -1147 L 775 -588 Q 1028 -725 1275 -790 Q 1522 -856 1778 -856 Q 2344 -856 2625 -561 Q 2906 -266 2906 331 L 2906 616 Q 2728 306 2450 153 Q 2172 0 1784 0 Q 1141 0 747 490 Q 353 981 353 1791 Q 353 2603 747 3093 Q 1141 3584 1784 3584 Q 2172 3584 2450 3431 Q 2728 3278 2906 2969 L 2906 3500 L 3481 3500 L 3481 434 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-56"/>     <use xlink:href="#DejaVuSans-69" transform="translate(66.158203 0)"/>     <use xlink:href="#DejaVuSans-72" transform="translate(93.941406 0)"/>     <use xlink:href="#DejaVuSans-67" transform="translate(133.304688 0)"/>     <use xlink:href="#DejaVuSans-6f" transform="translate(196.78125 0)"/>    </g>   </g>   <g id="text_11">    <!-- 24 -->    <g transform="translate(56.901605 318.749199) scale(0.09 -0.09)">     <use xlink:href="#DejaVuSans-Bold-32"/>     <use xlink:href="#DejaVuSans-Bold-34" transform="translate(69.580078 0)"/>    </g>   </g>   <g id="text_12">    <!-- Libra -->    <g style="fill: #0000ff" transform="translate(53.188636 336.396898) scale(0.08 -0.08)">     <defs>      <path id="DejaVuSans-62" d="M 3116 1747 Q 3116 2381 2855 2742 Q 2594 3103 2138 3103 Q 1681 3103 1420 2742 Q 1159 2381 1159 1747 Q 1159 1113 1420 752 Q 1681 391 2138 391 Q 2594 391 2855 752 Q 3116 1113 3116 1747 zM 1159 2969 Q 1341 3281 1617 3432 Q 1894 3584 2278 3584 Q 2916 3584 3314 3078 Q 3713 2572 3713 1747 Q 3713 922 3314 415 Q 2916 -91 2278 -91 Q 1894 -91 1617 61 Q 1341 213 1159 525 L 1159 0 L 581 0 L 581 4863 L 1159 4863 L 1159 2969 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-4c"/>     <use xlink:href="#DejaVuSans-69" transform="translate(55.712891 0)"/>     <use xlink:href="#DejaVuSans-62" transform="translate(83.496094 0)"/>     <use xlink:href="#DejaVuSans-72" transform="translate(146.972656 0)"/>     <use xlink:href="#DejaVuSans-61" transform="translate(188.085938 0)"/>    </g>   </g>   <g id="text_13">    <!-- 34 -->    <g transform="translate(112.865241 368.935381) scale(0.09 -0.09)">     <use xlink:href="#DejaVuSans-Bold-33"/>     <use xlink:href="#DejaVuSans-Bold-34" transform="translate(69.580078 0)"/>    </g>   </g>   <g id="text_14">    <!-- Scorpio -->    <g style="fill: #0000ff" transform="translate(104.198523 386.58308) scale(0.08 -0.08)">     <defs>      <path id="DejaVuSans-53" d="M 3425 4513 L 3425 3897 Q 3066 4069 2747 4153 Q 2428 4238 2131 4238 Q 1616 4238 1336 4038 Q 1056 3838 1056 3469 Q 1056 3159 1242 3001 Q 1428 2844 1947 2747 L 2328 2669 Q 3034 2534 3370 2195 Q 3706 1856 3706 1288 Q 3706 609 3251 259 Q 2797 -91 1919 -91 Q 1588 -91 1214 -16 Q 841 59 441 206 L 441 856 Q 825 641 1194 531 Q 1563 422 1919 422 Q 2459 422 2753 634 Q 3047 847 3047 1241 Q 3047 1584 2836 1778 Q 2625 1972 2144 2069 L 1759 2144 Q 1053 2284 737 2584 Q 422 2884 422 3419 Q 422 4038 858 4394 Q 1294 4750 2059 4750 Q 2388 4750 2728 4690 Q 3069 4631 3425 4513 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-70" d="M 1159 525 L 1159 -1331 L 581 -1331 L 581 3500 L 1159 3500 L 1159 2969 Q 1341 3281 1617 3432 Q 1894 3584 2278 3584 Q 2916 3584 3314 3078 Q 3713 2572 3713 1747 Q 3713 922 3314 415 Q 2916 -91 2278 -91 Q 1894 -91 1617 61 Q 1341 213 1159 525 zM 3116 1747 Q 3116 2381 2855 2742 Q 2594 3103 2138 3103 Q 1681 3103 1420 2742 Q 1159 2381 1159 1747 Q 1159 1113 1420 752 Q 1681 391 2138 391 Q 2594 391 2855 752 Q 3116 1113 3116 1747 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-53"/>     <use xlink:href="#DejaVuSans-63" transform="translate(63.476562 0)"/>     <use xlink:href="#DejaVuSans-6f" transform="translate(118.457031 0)"/>     <use xlink:href="#DejaVuSans-72" transform="translate(179.638672 0)"/>     <use xlink:href="#DejaVuSans-70" transform="translate(220.751953 0)"/>     <use xlink:href="#DejaVuSans-69" transform="translate(284.228516 0)"/>     <use xlink:href="#DejaVuSans-6f" transform="translate(312.011719 0)"/>    </g>   </g>   <g id="text_15">    <!-- 24 -->    <g transform="translate(206.137969 282.901926) scale(0.09 -0.09)">     <use xlink:href="#DejaVuSans-Bold-32"/>     <use xlink:href="#DejaVuSans-Bold-34" transform="translate(69.580078 0)"/>    </g>   </g>   <g id="text_16">    <!-- Sagittarius -->    <g style="fill: #0000ff" transform="translate(190.796875 300.549625) scale(0.08 -0.08)">     <defs>      <path id="DejaVuSans-74" d="M 1172 4494 L 1172 3500 L 2356 3500 L 2356 3053 L 1172 3053 L 1172 1153 Q 1172 725 1289 603 Q 1406 481 1766 481 L 2356 481 L 2356 0 L 1766 0 Q 1100 0 847 248 Q 594 497 594 1153 L 594 3053 L 172 3053 L 172 3500 L 594 3500 L 594 4494 L 1172 4494 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-53"/>     <use xlink:href="#DejaVuSans-61" transform="translate(63.476562 0)"/>     <use xlink:href="#DejaVuSans-67" transform="translate(124.755859 0)"/>     <use xlink:href="#DejaVuSans-69" transform="translate(188.232422 0)"/>     <use xlink:href="#DejaVuSans-74" transform="translate(216.015625 0)"/>     <use xlink:href="#DejaVuSans-74" transform="translate(255.224609 0)"/>     <use xlink:href="#DejaVuSans-61" transform="translate(294.433594 0)"/>     <use xlink:href="#DejaVuSans-72" transform="translate(355.712891 0)"/>     <use xlink:href="#DejaVuSans-69" transform="translate(396.826172 0)"/>     <use xlink:href="#DejaVuSans-75" transform="translate(424.609375 0)"/>     <use xlink:href="#DejaVuSans-73" transform="translate(487.988281 0)"/>    </g>   </g>   <g id="text_17">    <!-- 25 -->    <g transform="translate(299.410696 368.935381) scale(0.09 -0.09)">     <defs>      <path id="DejaVuSans-Bold-35" d="M 678 4666 L 3669 4666 L 3669 3781 L 1638 3781 L 1638 3059 Q 1775 3097 1914 3117 Q 2053 3138 2203 3138 Q 3056 3138 3531 2711 Q 4006 2284 4006 1522 Q 4006 766 3489 337 Q 2972 -91 2053 -91 Q 1656 -91 1267 -14 Q 878 63 494 219 L 494 1166 Q 875 947 1217 837 Q 1559 728 1863 728 Q 2300 728 2551 942 Q 2803 1156 2803 1522 Q 2803 1891 2551 2103 Q 2300 2316 1863 2316 Q 1603 2316 1309 2248 Q 1016 2181 678 2041 L 678 4666 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-Bold-32"/>     <use xlink:href="#DejaVuSans-Bold-35" transform="translate(69.580078 0)"/>    </g>   </g>   <g id="text_18">    <!-- Capricorn -->    <g style="fill: #0000ff" transform="translate(286.377102 386.58308) scale(0.08 -0.08)">     <use xlink:href="#DejaVuSans-43"/>     <use xlink:href="#DejaVuSans-61" transform="translate(69.824219 0)"/>     <use xlink:href="#DejaVuSans-70" transform="translate(131.103516 0)"/>     <use xlink:href="#DejaVuSans-72" transform="translate(194.580078 0)"/>     <use xlink:href="#DejaVuSans-69" transform="translate(235.693359 0)"/>     <use xlink:href="#DejaVuSans-63" transform="translate(263.476562 0)"/>     <use xlink:href="#DejaVuSans-6f" transform="translate(318.457031 0)"/>     <use xlink:href="#DejaVuSans-72" transform="translate(379.638672 0)"/>     <use xlink:href="#DejaVuSans-6e" transform="translate(419.001953 0)"/>    </g>   </g>   <g id="text_19">    <!-- 31 -->    <g transform="translate(355.374332 318.749199) scale(0.09 -0.09)">     <defs>      <path id="DejaVuSans-Bold-31" d="M 750 831 L 1813 831 L 1813 3847 L 722 3622 L 722 4441 L 1806 4666 L 2950 4666 L 2950 831 L 4013 831 L 4013 0 L 750 0 L 750 831 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-Bold-33"/>     <use xlink:href="#DejaVuSans-Bold-31" transform="translate(69.580078 0)"/>    </g>   </g>   <g id="text_20">    <!-- Aquarius -->    <g style="fill: #0000ff" transform="translate(344.070114 336.396898) scale(0.08 -0.08)">     <defs>      <path id="DejaVuSans-41" d="M 2188 4044 L 1331 1722 L 3047 1722 L 2188 4044 zM 1831 4666 L 2547 4666 L 4325 0 L 3669 0 L 3244 1197 L 1141 1197 L 716 0 L 50 0 L 1831 4666 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-71" d="M 947 1747 Q 947 1113 1208 752 Q 1469 391 1925 391 Q 2381 391 2643 752 Q 2906 1113 2906 1747 Q 2906 2381 2643 2742 Q 2381 3103 1925 3103 Q 1469 3103 1208 2742 Q 947 2381 947 1747 zM 2906 525 Q 2725 213 2448 61 Q 2172 -91 1784 -91 Q 1150 -91 751 415 Q 353 922 353 1747 Q 353 2572 751 3078 Q 1150 3584 1784 3584 Q 2172 3584 2448 3432 Q 2725 3281 2906 2969 L 2906 3500 L 3481 3500 L 3481 -1331 L 2906 -1331 L 2906 525 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-41"/>     <use xlink:href="#DejaVuSans-71" transform="translate(66.658203 0)"/>     <use xlink:href="#DejaVuSans-75" transform="translate(130.134766 0)"/>     <use xlink:href="#DejaVuSans-61" transform="translate(193.513672 0)"/>     <use xlink:href="#DejaVuSans-72" transform="translate(254.792969 0)"/>     <use xlink:href="#DejaVuSans-69" transform="translate(295.90625 0)"/>     <use xlink:href="#DejaVuSans-75" transform="translate(323.689453 0)"/>     <use xlink:href="#DejaVuSans-73" transform="translate(387.068359 0)"/>    </g>   </g>   <g id="text_21">    <!-- 30 -->    <g transform="translate(299.410696 221.961563) scale(0.09 -0.09)">     <defs>      <path id="DejaVuSans-Bold-30" d="M 2944 2338 Q 2944 3213 2780 3570 Q 2616 3928 2228 3928 Q 1841 3928 1675 3570 Q 1509 3213 1509 2338 Q 1509 1453 1675 1090 Q 1841 728 2228 728 Q 2613 728 2778 1090 Q 2944 1453 2944 2338 zM 4147 2328 Q 4147 1169 3647 539 Q 3147 -91 2228 -91 Q 1306 -91 806 539 Q 306 1169 306 2328 Q 306 3491 806 4120 Q 1306 4750 2228 4750 Q 3147 4750 3647 4120 Q 4147 3491 4147 2328 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-Bold-33"/>     <use xlink:href="#DejaVuSans-Bold-30" transform="translate(69.580078 0)"/>    </g>   </g>   <g id="text_22">    <!-- Pisces -->    <g style="fill: #0000ff" transform="translate(293.411477 239.609261) scale(0.08 -0.08)">     <defs>      <path id="DejaVuSans-50" d="M 1259 4147 L 1259 2394 L 2053 2394 Q 2494 2394 2734 2622 Q 2975 2850 2975 3272 Q 2975 3691 2734 3919 Q 2494 4147 2053 4147 L 1259 4147 zM 628 4666 L 2053 4666 Q 2838 4666 3239 4311 Q 3641 3956 3641 3272 Q 3641 2581 3239 2228 Q 2838 1875 2053 1875 L 1259 1875 L 1259 0 L 628 0 L 628 4666 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-50"/>     <use xlink:href="#DejaVuSans-69" transform="translate(58.052734 0)"/>     <use xlink:href="#DejaVuSans-73" transform="translate(85.835938 0)"/>     <use xlink:href="#DejaVuSans-63" transform="translate(137.935547 0)"/>     <use xlink:href="#DejaVuSans-65" transform="translate(192.916016 0)"/>     <use xlink:href="#DejaVuSans-73" transform="translate(254.439453 0)"/>    </g>   </g>   <g id="text_23">    <!-- 36 -->    <g transform="translate(355.374332 132.343381) scale(0.09 -0.09)">     <use xlink:href="#DejaVuSans-Bold-33"/>     <use xlink:href="#DejaVuSans-Bold-36" transform="translate(69.580078 0)"/>    </g>   </g>   <g id="text_24">    <!-- Aries -->    <g style="fill: #0000ff" transform="translate(351.599489 149.99108) scale(0.08 -0.08)">     <use xlink:href="#DejaVuSans-41"/>     <use xlink:href="#DejaVuSans-72" transform="translate(68.408203 0)"/>     <use xlink:href="#DejaVuSans-69" transform="translate(109.521484 0)"/>     <use xlink:href="#DejaVuSans-65" transform="translate(137.304688 0)"/>     <use xlink:href="#DejaVuSans-73" transform="translate(198.828125 0)"/>    </g>   </g>   <g id="text_25">    <!-- Astakvarg Sarva Kundali -->    <g transform="translate(139.214062 16.318125) scale(0.12 -0.12)">     <defs>      <path id="DejaVuSans-6b" d="M 581 4863 L 1159 4863 L 1159 1991 L 2875 3500 L 3609 3500 L 1753 1863 L 3688 0 L 2938 0 L 1159 1709 L 1159 0 L 581 0 L 581 4863 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-76" d="M 191 3500 L 800 3500 L 1894 563 L 2988 3500 L 3597 3500 L 2284 0 L 1503 0 L 191 3500 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-20" transform="scale(0.015625)"/>      <path id="DejaVuSans-4b" d="M 628 4666 L 1259 4666 L 1259 2694 L 3353 4666 L 4166 4666 L 1850 2491 L 4331 0 L 3500 0 L 1259 2247 L 1259 0 L 628 0 L 628 4666 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-64" d="M 2906 2969 L 2906 4863 L 3481 4863 L 3481 0 L 2906 0 L 2906 525 Q 2725 213 2448 61 Q 2172 -91 1784 -91 Q 1150 -91 751 415 Q 353 922 353 1747 Q 353 2572 751 3078 Q 1150 3584 1784 3584 Q 2172 3584 2448 3432 Q 2725 3281 2906 2969 zM 947 1747 Q 947 1113 1208 752 Q 1469 391 1925 391 Q 2381 391 2643 752 Q 2906 1113 2906 1747 Q 2906 2381 2643 2742 Q 2381 3103 1925 3103 Q 1469 3103 1208 2742 Q 947 2381 947 1747 z" transform="scale(0.015625)"/>      <path id="DejaVuSans-6c" d="M 603 4863 L 1178 4863 L 1178 0 L 603 0 L 603 4863 z" transform="scale(0.015625)"/>     </defs>     <use xlink:href="#DejaVuSans-41"/>     <use xlink:href="#DejaVuSans-73" transform="translate(68.408203 0)"/>     <use xlink:href="#DejaVuSans-74" transform="translate(120.507812 0)"/>     <use xlink:href="#DejaVuSans-61" transform="translate(159.716797 0)"/>     <use xlink:href="#DejaVuSans-6b" transform="translate(220.996094 0)"/>     <use xlink:href="#DejaVuSans-76" transform="translate(278.90625 0)"/>     <use xlink:href="#DejaVuSans-61" transform="translate(338.085938 0)"/>     <use xlink:href="#DejaVuSans-72" transform="translate(399.365234 0)"/>     <use xlink:href="#DejaVuSans-67" transform="translate(438.728516 0)"/>     <use xlink:href="#DejaVuSans-20" transform="translate(502.205078 0)"/>     <use xlink:href="#DejaVuSans-53" transform="translate(533.992188 0)"/>     <use xlink:href="#DejaVuSans-61" transform="translate(597.46875 0)"/>     <use xlink:href="#DejaVuSans-72" transform="translate(658.748047 0)"/>     <use xlink:href="#DejaVuSans-76" transform="translate(699.861328 0)"/>     <use xlink:href="#DejaVuSans-61" transform="translate(759.041016 0)"/>     <use xlink:href="#DejaVuSans-20" transform="translate(820.320312 0)"/>     <use xlink:href="#DejaVuSans-4b" transform="translate(852.107422 0)"/>     <use xlink:href="#DejaVuSans-75" transform="translate(912.683594 0)"/>     <use xlink:href="#DejaVuSans-6e" transform="translate(976.0625 0)"/>     <use xlink:href="#DejaVuSans-64" transform="translate(1039.441406 0)"/>     <use xlink:href="#DejaVuSans-61" transform="translate(1102.917969 0)"/>     <use xlink:href="#DejaVuSans-6c" transform="translate(1164.197266 0)"/>     <use xlink:href="#DejaVuSans-69" transform="translate(1191.980469 0)"/>    </g>   </g>  </g> </g> <defs>  <clipPath id="p9846a40665">   <rect x="7.2" y="22.318125" width="410.4" height="394.32"/>  </clipPath> </defs></svg>'
+  )}`;
+  const svgNavamsaUrl = `data:image/svg+xml;base64,${btoa(
+    data.navamasaChart.svg
+  )}`;
+
+  return (
+    <div>
+      <div className="flex mb-4">
+        <PrimaryText isSemiBold size_20 color={appColors.tri}>
+          {userData?.name}
+        </PrimaryText>
+        <div className="mr-2 ml-2" />
+        <PrimaryText isSemiBold size_20 color={appColors.tri}>
+          ({userData?.day} - {userData?.month} - {userData?.year})
+        </PrimaryText>
+      </div>
+      <div className={styles.mainContainer}>
+        <div className={styles.grid}>
+          <motion.div
+            className={styles.contentCard}
+            variants={sectionVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+          >
+            <h3 className={styles.cardTitle}>Lagna / Ascendant Chart</h3>
+            <div className={styles.chartPlaceholder}>
+              {data.birthChart ? (
+                <img src={svgBirthUrl} alt="Astrological Chart" />
+              ) : (
+                <p>Chart is loading...</p>
+              )}
+            </div>
+          </motion.div>
+          <motion.div
+            className={styles.contentCard}
+            variants={sectionVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+          >
+            <h3 className={styles.cardTitle}>Navamsa</h3>
+            <div className={styles.chartPlaceholder}>
+              {data.navamasaChart ? (
+                <img src={svgNavamsaUrl} alt="Astrological Chart" />
+              ) : (
+                <p>Chart is loading...</p>
+              )}
+            </div>
+          </motion.div>
+        </div>
+
+        <PlanetaryDetailsTable data={planets} />
+      </div>
     </div>
   );
 };

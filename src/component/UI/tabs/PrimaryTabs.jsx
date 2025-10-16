@@ -31,7 +31,6 @@ const PrimaryTabs = ({ tabs = [] }) => {
               />
             )}
 
-            {/* Using your PrimaryText component for the label */}
             <span className={styles.labelText}>
               <PrimaryText
                 isSemiBold
