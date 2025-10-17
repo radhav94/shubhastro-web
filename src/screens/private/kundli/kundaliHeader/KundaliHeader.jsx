@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import styles from "./KundaliHeader.module.scss";
 import { IoTrashOutline } from "react-icons/io5";
 import { motion } from "framer-motion";
-import LocationSearch from "../../../../utils/location/locationSearch"; // Adjust this import path as needed
+import LocationSearch from "../../../../utils/location/locationSearch";
+import { PrimaryText } from "../../../../component";
 
-// --- Helper data for dropdowns ---
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const months = [
   "Jan",
@@ -79,7 +79,6 @@ const savedKundliData = [
   },
 ];
 
-// --- Animation Variants ---
 const headerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -107,6 +106,7 @@ const KundaliHeader = ({ onGenerateClick }) => {
     longitude: null,
   });
   const [selectedKundliId, setSelectedKundliId] = useState(null);
+  const [savedKundlis, setSavedKundlis] = useState(savedKundliData);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -152,6 +152,19 @@ const KundaliHeader = ({ onGenerateClick }) => {
     if (onGenerateClick) {
       onGenerateClick(formData);
     }
+  };
+
+  const onDelete = (id) => {
+    setSavedKundlis((prevKundlis) =>
+      prevKundlis.filter((kundli) => kundli.id !== id)
+    );
+
+    if (selectedKundliId === id) {
+      setFormData(initialFormData);
+      setSelectedKundliId(null);
+    }
+
+    console.log("Deleted Kundli with ID:", id);
   };
 
   return (
@@ -303,34 +316,40 @@ const KundaliHeader = ({ onGenerateClick }) => {
 
         <div className={styles.savedKundliContainer}>
           <h2 className={styles.sectionTitle}>Saved Kundli</h2>
-          <div className={styles.kundliList}>
-            {savedKundliData.map((kundli) => (
-              <div
-                key={kundli.id}
-                className={`${styles.kundliItem} ${
-                  selectedKundliId === kundli.id ? styles.active : ""
-                }`}
-                onClick={() => handleSelectKundli(kundli)}
-              >
-                <div className={styles.avatar}>{kundli.name.charAt(0)}</div>
-                <div className={styles.kundliDetails}>
-                  <span className={styles.kundliName}>
-                    {kundli.name}, {kundli.gender}
-                  </span>
-                  <span className={styles.kundliDob}>
-                    {kundli.dob} &nbsp; {kundli.tob}
-                  </span>
-                  <span className={styles.kundliPob}>{kundli.pob}</span>
-                </div>
-                <button
-                  className={styles.deleteButton}
-                  onClick={(e) => e.stopPropagation()}
+          {savedKundlis.length > 0 ? (
+            <div className={styles.kundliList}>
+              {savedKundlis.map((kundli) => (
+                <div
+                  key={kundli.id}
+                  className={`${styles.kundliItem} ${
+                    selectedKundliId === kundli.id ? styles.active : ""
+                  }`}
                 >
-                  <IoTrashOutline />
-                </button>
-              </div>
-            ))}
-          </div>
+                  <div className={styles.avatar}>{kundli.name.charAt(0)}</div>
+                  <div
+                    className={styles.kundliDetails}
+                    onClick={() => handleSelectKundli(kundli)}
+                  >
+                    <span className={styles.kundliName}>
+                      {kundli.name}, {kundli.gender}
+                    </span>
+                    <span className={styles.kundliDob}>
+                      {kundli.dob} &nbsp; {kundli.tob}
+                    </span>
+                    <span className={styles.kundliPob}>{kundli.pob}</span>
+                  </div>
+                  <button
+                    className={styles.deleteButton}
+                    onClick={() => onDelete(kundli.id)}
+                  >
+                    <IoTrashOutline />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <PrimaryText isCenter> No Data Found...</PrimaryText>
+          )}
         </div>
       </div>
     </>
