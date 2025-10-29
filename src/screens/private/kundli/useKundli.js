@@ -106,6 +106,7 @@ export const useKundli = () => {
   const [basicData, setBasicData] = useState([]);
   const [userData, setUserData] = useState("");
   const [planetData, setPlanetData] = useState([]);
+  const [kpDetails, setKpDetails] = useState([]);
 
   const onGenerateClick = async (e) => {
     try {
@@ -123,6 +124,7 @@ export const useKundli = () => {
       };
 
       const res = await KundaliSrvices.getKundliData(data);
+      console.log(res,"ressssssss")
 
       setBasicData({
         birthDetails: res?.birthDetails || null,
@@ -134,7 +136,11 @@ export const useKundli = () => {
         planetData: res.planetDetails || [],
         birthChart: res.birth_chart || "",
         navamasaChart: res.navamsa_chart || "",
+        chalitChart:res.chalit_chart || ""
       });
+      setKpDetails({
+        rulingPlanets:res.ruling_planets||null
+      })
       setUserData(e);
       setDataIsFilled(true);
     } catch (error) {
@@ -157,5 +163,6 @@ export const useKundli = () => {
     onGenerateClick,
     userData,
     planetData,
+    kpDetails
   ];
 };

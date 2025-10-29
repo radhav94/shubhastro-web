@@ -8,6 +8,8 @@ export const getKundliData = async (values) => {
     planetDetails,
     birth_chart,
     navamsa_chart,
+    chalit_chart,
+    ruling_planets
   ] = await Promise.all([
     callAstrologyAPI("birth_details", values),
     callAstrologyAPI("basic_panchang", values),
@@ -15,6 +17,8 @@ export const getKundliData = async (values) => {
     callAstrologyAPI("planets", values),
     callAstrologyAPI("horo_chart_image/:D1", values),
     callAstrologyAPI("horo_chart_image/:D9", values),
+    callAstrologyAPI("horo_chart_image/:chalit", values),
+    callAstrologyAPI("kp_planets", values),
   ]);
 
   return {
@@ -24,5 +28,7 @@ export const getKundliData = async (values) => {
     planetDetails,
     birth_chart,
     navamsa_chart,
+    chalit_chart,
+    ruling_planets
   };
 };
