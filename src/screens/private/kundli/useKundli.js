@@ -111,6 +111,7 @@ export const useKundli = () => {
   const [charts, setCharts] = useState([]);
   const [ashtakvarga, setAshtakvarga] = useState(null);
   const [dasha, setDasha] = useState(null);
+  const [report, setReport] = useState(null);
 
   const onGenerateClick = async (e) => {
     try {
@@ -139,6 +140,7 @@ export const useKundli = () => {
 
       const res = await KundaliSrvices.getKundliData(data);
       const ashtakvargaResponse = await getAstakVargaData(ashtakVargaData)
+      const freeReportResponse = await KundaliSrvices.getData(data)
       setAshtakvarga(ashtakvargaResponse);
 
       setBasicData({
@@ -158,6 +160,19 @@ export const useKundli = () => {
       })
       setDasha({
         yogini:res.yogini|| null
+      })
+      setReport({
+        general:{
+          planatery:{
+            sun:freeReportResponse.sun,
+            moon:freeReportResponse.moon,
+            mars:freeReportResponse.mars,
+            mercury:freeReportResponse.mercury,
+            jupiter:freeReportResponse.jupiter,
+            saturn:freeReportResponse.saturn,
+            venus:freeReportResponse.venus,
+          }
+        }
       })
       setCharts({
         chalitChart:res.chalit_chart || "",
@@ -205,6 +220,7 @@ export const useKundli = () => {
     kpDetails,
     charts,
     ashtakvarga,
-    dasha
+    dasha,
+    report
   ];
 };

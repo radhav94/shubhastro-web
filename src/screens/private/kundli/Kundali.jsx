@@ -33,6 +33,7 @@ const Kundali = () => {
     charts,
     ashtakvarga,
     dasha,
+    report
   ] = useKundli();
 
   const tabsData = [
@@ -46,7 +47,7 @@ const Kundali = () => {
     },
     {
       label: "KP",
-      // content: <KpContent userData={userData} data={kpDetails} />,
+      content: <KpContent userData={userData} data={kpDetails} />,
     },
     {
       label: "Ashtakvarga",
@@ -62,7 +63,7 @@ const Kundali = () => {
     },
     {
       label: "Free Report",
-      // content: <FreeReport userData={userData} data={planetData} />,
+      content: <FreeReport userData={userData} data={report} />,
     },
   ];
 

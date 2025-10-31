@@ -1,7 +1,6 @@
 import Table from "../../../../component/UI/table/kundli/dasha/table";
 
 const Yogini = ({data}) =>{
-    console.log(data?.yogini)
     return(
         <div className="w-full mr-4 rounded-sm">
             <div className="" >

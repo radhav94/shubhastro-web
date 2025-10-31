@@ -85,3 +85,33 @@ export const getKundliData = async (values) => {
     shashtiamsaChart,
   };
 };
+
+export const getData = async (values) => {
+  const [
+    sun,
+    moon,
+    mars,
+    mercury,
+    jupiter,
+    saturn,
+    venus
+
+  ] = await Promise.all([
+    callAstrologyAPI("general_house_report/sun", values),
+    callAstrologyAPI("general_house_report/moon", values),
+    callAstrologyAPI("general_house_report/mars", values),
+    callAstrologyAPI("general_house_report/mercury", values),
+    callAstrologyAPI("general_house_report/jupiter", values),
+    callAstrologyAPI("general_house_report/saturn", values),
+    callAstrologyAPI("general_house_report/venus", values),
+  ]);
+  return {
+   sun,
+    moon,
+    mars,
+    mercury,
+    jupiter,
+    saturn,
+    venus
+  };
+};

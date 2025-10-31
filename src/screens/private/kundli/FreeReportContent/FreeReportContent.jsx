@@ -11,15 +11,15 @@ import Kalsarpa from "./dosha/kalsarpa/Kalsarpa";
 import Saresati from "./dosha/saresati/Saresati";
 
 
-const FreeReport = () => {
+const FreeReport = ({data}) => {
   const tabs = [
     {
       label: "General",
       value: "general",
       children: [
-        { label: "General", value: "generalInfo", component: General},
-        { label: "Planetary", value: "planetary", component: Planetary },
-        { label: "Vimshottari Dasha", value: "vimshottari", component: Vimshottari },
+        { label: "General", value: "generalInfo", component: () => <General data={data.general} /> },
+        { label: "Planetary", value: "planetary", component: ()=><Planetary data={data.general.planatery} />  },
+        { label: "Vimshottari Dasha", value: "vimshottari", component:()=><Vimshottari/>  },
         { label: "Yoga", value: "yoga", component: Yoga },
       ],
     },
@@ -27,17 +27,17 @@ const FreeReport = () => {
       label: "Remedies",
       value: "remedies",
       children: [
-        { label: "Rudraksha", value: "rudraksha", component: Rudraksha },
-        { label: "Gemstones", value: "gemstones", component:Gemstones },
+        { label: "Rudraksha", value: "rudraksha", component: () => <Rudraksha/> },
+        { label: "Gemstones", value: "gemstones", component:() => <Gemstones/>  },
       ],
     },
     {
       label: "Dosha",
       value: "dosha",
       children: [
-        { label: "Manglik", value: "manglik", component: () => Manglik },
-        { label: "Kalsarpa", value: "kalsarpa", component: () => Kalsarpa },
-        { label: "Sadesati", value: "sadesati", component: () => Saresati },
+        { label: "Manglik", value: "manglik", component: () => <Manglik/> },
+        { label: "Kalsarpa", value: "kalsarpa", component: () => <Kalsarpa/> },
+        { label: "Sadesati", value: "sadesati", component: () => <Saresati/> },
       ],
     },
   ];

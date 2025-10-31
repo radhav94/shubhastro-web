@@ -1,0 +1,50 @@
+@use "sass:color";
+
+$color-primary: #ffcb03;
+$color-bg: #fafafa;
+$color-white: #ffffff;
+$color-border: #e0e0e0;
+$color-text: #1a1a1a;
+$color-muted: #555;
+$shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+$font-primary: "Poppins", sans-serif;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background-color: $color-bg;
+  font-family: $font-primary;
+}
+
+.card {
+  background-color: $color-white;
+  border: 1px solid $color-border;
+  border-radius: 12px;
+  box-shadow: $shadow;
+  padding: 20px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+
+  span {
+    color: $color-text;
+    font-weight: 700;
+  }
+}
+
+.report {
+  font-size: 15px;
+  color: $color-muted;
+  line-height: 1.6;
+}
