@@ -1,4 +1,4 @@
-import Table from "../../../../component/UI/table/kundli/dasha/table";
+import Table from "../../../../component/UI/table/kundli/dasha/Table";
 
 const Yogini = ({data}) =>{
     return(
