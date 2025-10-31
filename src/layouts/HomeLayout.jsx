@@ -17,7 +17,7 @@ const HomeLayout = () => {
 
   const matches = useMatches();
 
-  // Find the deepest match with handle.header defined
+  // Find the deepest match with handle.header defined in it
   const currentRoute = matches
     .reverse()
     .find((match) => match.handle && match.handle.header !== undefined);
