@@ -12,10 +12,10 @@ import SwitchTabs from "../../../../component/UI/tabs/switchtabs/SwitchTabs";
 
 const KundaliContent = ({ userData, data }) => {
 
-  const tabs = [
-    { label: "North Indian", value: "north", component: () => <NorthIndian data={data} /> },
-    { label: "South Indian", value: "south", component: () => <SouthIndian data={data} /> },
-  ];
+  // const tabs = [
+  //   { label: "North Indian", value: "north", component: () => <NorthIndian data={data} /> },
+  //   { label: "South Indian", value: "south", component: () => <SouthIndian data={data} /> },
+  // ];
 
   return (
     <div>
@@ -30,7 +30,9 @@ const KundaliContent = ({ userData, data }) => {
         </PrimaryText>
       </div>
       <div className={styles.mainContainer}>
-      <SwitchTabs tabs={tabs} defaultTab="north" />
+      {/* <SwitchTabs tabs={tabs} defaultTab="north" /> */}
+      <NorthIndian data={data} />
+
     </div>
     </div>
   );

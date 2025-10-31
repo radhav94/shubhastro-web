@@ -29,7 +29,10 @@ const Kundali = () => {
     onGenerateClick,
     userData,
     planetData,
-    kpDetails
+    kpDetails,
+    charts,
+    ashtakvarga,
+    dasha,
   ] = useKundli();
 
   const tabsData = [
@@ -43,23 +46,23 @@ const Kundali = () => {
     },
     {
       label: "KP",
-      content: <KpContent userData={userData} data={kpDetails} />,
+      // content: <KpContent userData={userData} data={kpDetails} />,
     },
     {
       label: "Ashtakvarga",
-      content: <AshtakvargaContent userData={userData} data={planetData} />,
+      content: <AshtakvargaContent userData={userData} data={ashtakvarga} />,
     },
     {
       label: "Charts",
-      content: <ChartsContent userData={userData} data={planetData} />,
+      content: <ChartsContent userData={userData} data={charts} />,
     },
     {
       label: "Dasha",
-      content: <DashaContent userData={userData} data={planetData} />,
+      content: <DashaContent userData={userData} data={dasha} />,
     },
     {
       label: "Free Report",
-      content: <FreeReport userData={userData} data={planetData} />,
+      // content: <FreeReport userData={userData} data={planetData} />,
     },
   ];
 

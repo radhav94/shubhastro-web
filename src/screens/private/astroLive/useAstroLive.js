@@ -7,7 +7,6 @@ export const useAstrLive = () => {
   const navigate = useNavigate();
 
   const onWatchNow = (data) => {
-    console.log(data);
     navigate(PATH.privateRoutes.STREAMING.path, { state: { data } });
   };
 

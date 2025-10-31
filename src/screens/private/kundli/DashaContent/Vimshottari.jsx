@@ -1,5 +1,5 @@
 import styles from "./DashaContent.module.scss";
-const Vimshottari = ({ }) => {
+const Vimshottari = () => {
     return (
         <div>
             <h2 >Understanding your dasha</h2>

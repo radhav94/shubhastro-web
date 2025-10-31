@@ -59,12 +59,10 @@ const Register = () => {
     }
 
     setError("");
-    console.log("Registration Data Submitted:", formData);
     alert(`Welcome, ${formData.name}! Your account has been created.`);
   };
 
   const onSaveDetails = () => {
-    console.log("asdkhjf");
     navigate(PATH.privateRoutes.HOME.path, { replace: true });
   };
 

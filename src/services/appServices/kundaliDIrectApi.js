@@ -28,3 +28,4 @@ export const callAstrologyAPI = async (endpoint, data, language = "en") => {
     return null;
   }
 };
+

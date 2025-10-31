@@ -148,7 +148,6 @@ const KundaliHeader = ({ onGenerateClick }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Generating Horoscope with data:", formData);
     if (onGenerateClick) {
       onGenerateClick(formData);
     }
@@ -164,7 +163,6 @@ const KundaliHeader = ({ onGenerateClick }) => {
       setSelectedKundliId(null);
     }
 
-    console.log("Deleted Kundli with ID:", id);
   };
 
   return (

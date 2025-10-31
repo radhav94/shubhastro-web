@@ -47,7 +47,6 @@ const OtpVerification = () => {
 
   const handleResend = () => {
     if (isTimerActive) return;
-    console.log("Resending OTP...");
     setIsTimerActive(true);
     setCounter(5);
   };

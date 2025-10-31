@@ -17,7 +17,7 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
 .grid {
   display: grid;
   grid-template-columns: 1fr; // Mobile-first: single column
-  gap: 24px;
+  gap: 35%;
   margin-bottom: 24px;
 
   @media (min-width: 768px) {
@@ -33,20 +33,21 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .contentCard {
-  background-color: $color-white;
-  border-radius: 16px;
-  padding: 24px;
-  border: 1px solid $color-grey-light;
-  box-shadow: $shadow-4;
+  // background-color: $color-white;
+  // border-radius: 16px;
+  // padding: 24px;
+  // border: 1px solid $color-grey-light;
+  // box-shadow: $shadow-4;
 }
 
 .cardTitle {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   color: $color-black;
-  margin: 0 0 16px 0;
-  border-bottom: 1px solid $color-grey-light;
-  padding-bottom: 12px;
+  text-align: start;
+  // margin: 0 0 16px 0;
+  // border-bottom: 1px solid $color-grey-light;
+  padding-bottom: 7px;
 }
 
 .detailsTable {

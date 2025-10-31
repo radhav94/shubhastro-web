@@ -12,7 +12,8 @@ const ChartsContent = ({ data }) => {
 
   return (
     <div className={styles.mainContainer}>
-      <SwitchTabs tabs={tabs} defaultTab="north" />
+      {/* <SwitchTabs tabs={tabs} defaultTab="north" /> */}
+      <NorthIndian data={data} />
     </div>
   );
 };

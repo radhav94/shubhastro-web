@@ -1,5 +1,6 @@
 import { useState } from "react";
 import * as KundaliSrvices from "../../../services/appServices/kundaliServices";
+import { getAstakVargaData } from "../../../services/appServices/AshtakVargaServices";
 
 const kundliInfoData = [
   {
@@ -107,6 +108,9 @@ export const useKundli = () => {
   const [userData, setUserData] = useState("");
   const [planetData, setPlanetData] = useState([]);
   const [kpDetails, setKpDetails] = useState([]);
+  const [charts, setCharts] = useState([]);
+  const [ashtakvarga, setAshtakvarga] = useState(null);
+  const [dasha, setDasha] = useState(null);
 
   const onGenerateClick = async (e) => {
     try {
@@ -122,9 +126,20 @@ export const useKundli = () => {
         lon: Number(e.longitude),
         tzone: 5.5,
       };
+      const ashtakVargaData = {
+        birth_day: Number(e.day),
+        birth_month: monthMap[e.month] || 1,
+        birth_year: Number(e.year),
+        birth_hour: Number(e.hour),
+        birth_min: Number(e.minute),
+        latitude: Number(e.latitude),
+        longitude: Number(e.longitude),
+        time_zone: "Asia/Kolkata",
+      };
 
       const res = await KundaliSrvices.getKundliData(data);
-      console.log(res,"ressssssss")
+      const ashtakvargaResponse = await getAstakVargaData(ashtakVargaData)
+      setAshtakvarga(ashtakvargaResponse);
 
       setBasicData({
         birthDetails: res?.birthDetails || null,
@@ -136,10 +151,34 @@ export const useKundli = () => {
         planetData: res.planetDetails || [],
         birthChart: res.birth_chart || "",
         navamasaChart: res.navamsa_chart || "",
-        chalitChart:res.chalit_chart || ""
       });
       setKpDetails({
-        rulingPlanets:res.ruling_planets||null
+        rulingPlanets:res.ruling_planets||null,
+        chalitChart:res.chalit_chart || ""
+      })
+      setDasha({
+        yogini:res.yogini|| null
+      })
+      setCharts({
+        chalitChart:res.chalit_chart || "",
+        sunChart:res.sunChart || "",
+        moonChart:res.moonChart || "",
+        birthChart:res.birth_chart || "",
+        horaChart:res.horaChart || "",
+        drekkanaChart:res.drekkanaChart || "",
+        chaturthamsaChart:res.chaturthamsaChart || "",
+        saptamsaChart:res.saptamsaChart || "",
+        navamsaChart:res.navamsa_chart || "",
+        dasamsaChart:res.dasamsaChart || "",
+        dwadasamsaChart:res.dwadasamsaChart || "",
+        shodasamsaChart:res.shodasamsaChart || "",
+        vimsamsaChart:res.vimsamsaChart || "",
+        chaturvisamsaChart:res.chaturvisamsaChart || "",
+        saptavisamsaChart:res.saptavisamsaChart || "",
+        trimsamsaChart:res.trimsamsaChart || "",
+        khavedamsaChart:res.khavedamsaChart || "",
+        akshavedamsaChart:res.akshavedamsaChart || "",
+        shashtiamsaChart:res.shashtiamsaChart || "",
       })
       setUserData(e);
       setDataIsFilled(true);
@@ -163,6 +202,9 @@ export const useKundli = () => {
     onGenerateClick,
     userData,
     planetData,
-    kpDetails
+    kpDetails,
+    charts,
+    ashtakvarga,
+    dasha
   ];
 };
