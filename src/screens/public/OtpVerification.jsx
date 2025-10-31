@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { PrimaryText, Toast } from "../../component";
 import { appColors } from "../../utils/theme";
 import { PATH } from "../../utils/routes/Paths";
+import * as AuthServices from "../../services/appServices/authService";
 
 const OtpVerification = () => {
   const navigate = useNavigate();
@@ -19,11 +20,26 @@ const OtpVerification = () => {
 
   const isOtpComplete = otp.length === 6;
 
-  const handleVerifyOtp = (event) => {
+  const handleVerifyOtp = async(event) => {
     event.preventDefault();
-    if (!isOtpComplete) return;
-    Toast.success("Otp Verfies successfully");
-    navigate(PATH.publicRoutes.REGISTER.path, { replace: true });
+    const payload = {
+      phoneNumber:phoneNumber,
+      type:"CUSTOMER",
+      otp:parseInt(otp)
+    }
+    try {
+      const response = await AuthServices.verifyOtp(payload);
+      if(response?.data?.statusCode===200){
+        Toast.success("Otp Verifies successfully");
+        navigate(PATH.publicRoutes.REGISTER.path, { replace: true });
+        localStorage.setItem("isLoggedIn", JSON.stringify(true));
+      }else{
+        Toast.error("Error", response.message);
+      }
+      
+    } catch (error) {
+      Toast.error("An unexpected error occurred in handleSendOtp", error);
+    }
   };
 
   const handleEditNumber = () => {
@@ -54,7 +70,7 @@ const OtpVerification = () => {
     <LoginLayout>
       <div className={styles.loginSection}>
         <h1 className={styles.title}>
-          Welcome to Astroyogi
+          Welcome to ShubhTalk
           <span className={styles.subtitle}>
             You will receive the OTP via SMS on
             <div className={styles.phoneContainer}>

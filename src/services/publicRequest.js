@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const publicRequest = axios.create({
-  baseURL: import.meta.env.VITE_APP_API_BASE_URL,
+  baseURL:'https://njsapi-shubhtalk.epicon.in/api',
   headers: {
     "Content-Type": "application/json",
   },

@@ -20,6 +20,7 @@ const TopBar = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
+  const isLoggedIn = JSON.parse(localStorage.getItem("isLoggedIn"));
 
   useEffect(() => {
     const storedWallet = JSON.parse(localStorage.getItem("wallet")) || {
@@ -66,12 +67,12 @@ const TopBar = () => {
             </button>
 
             {/* Sign In CTA Button */}
-            <button
+            {!isLoggedIn && <button
               className={`${styles.ctaButton} ${styles.hideOnMobile}`}
               onClick={() => navigate("/login")}
             >
               Sign In
-            </button>
+            </button>}
           </div>
         </div>
       </header>

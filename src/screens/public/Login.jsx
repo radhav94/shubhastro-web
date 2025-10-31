@@ -23,15 +23,19 @@ const Login = () => {
     }
 
     const payload = {
-      mobile: 8530880988,
-    };
+    phoneNumber: mobileNumber,
+    type: "CUSTOMER"
+    // "type": "ASTROLOGER"
+    // "otp": 8593
+}
 
     try {
       const response = await AuthServices.loginWithPhone(payload);
       if (response.status) {
         navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
-          state: { phoneNumber: mobileNumber },
-        });
+          state: { phoneNumber: mobileNumber},
+        }
+      );
       } else {
         Toast.error("Error", response.message);
       }

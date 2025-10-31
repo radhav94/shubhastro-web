@@ -63,7 +63,7 @@ const Register = () => {
   };
 
   const onSaveDetails = () => {
-    navigate(PATH.privateRoutes.HOME.path, { replace: true });
+    navigate(PATH.privateRoutes.HOME.path, { replace: true});
   };
 
   return (
