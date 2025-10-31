@@ -69,7 +69,7 @@ const TopBar = () => {
             {/* Sign In CTA Button */}
             {!isLoggedIn && <button
               className={`${styles.ctaButton} ${styles.hideOnMobile}`}
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/login") }
             >
               Sign In
             </button>}
