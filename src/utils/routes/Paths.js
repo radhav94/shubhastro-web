@@ -81,7 +81,7 @@ export const PATH = {
         element: Daily,
 
       },
-      DAILY_DETAIL: {  // Add this new route
+      DAILY_DETAIL: { 
         path: '/horoscopes/daily-horoscope/:sign',
         element: SignScreen,
       },
