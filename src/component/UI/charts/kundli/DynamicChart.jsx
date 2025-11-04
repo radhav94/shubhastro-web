@@ -13,7 +13,7 @@ const sectionVariants = {
 const DynamicChart = ({ title, src, alt="Astrological Chart" }) => {
     return (
     <div>
-    <motion.div
+    {src && <motion.div
         className={styles.contentCard}
         variants={sectionVariants}
         initial="hidden"
@@ -22,13 +22,11 @@ const DynamicChart = ({ title, src, alt="Astrological Chart" }) => {
     >
         {title && <h3 className={styles.cardTitle}>{title}</h3>}
         <div className={styles.chartPlaceholder}>
-            {src ? (
+            {src && (
                 <img src={src} alt={alt} />
-            ) : (
-                <p>Chart is loading...</p>
             )}
         </div>
-    </motion.div>
+    </motion.div>}
     </div>
 
 )}

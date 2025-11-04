@@ -1,0 +1,34 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;          // needed for the pseudo‐elements
+  text-align: center;
+  
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: var(--line‑height, 1px);
+    background-color: var(--line‑color, #ccc);
+    // make sure they stay vertically aligned with the image:
+    align-self: center;
+  }
+
+  // &::before {
+  //   margin-right: 12px;        // space between left line and image
+  // }
+
+  // &::after {
+  //   margin-left: 12px;         // space between image and right line
+  // }
+}
+
+.image {
+  width: 60px;                // make width = height if you want perfect circle
+  height: 60px;
+  border-radius: 50%;         // circle shape
+  border: 1px solid gray;     // gray border
+  object-fit: cover;
+  display: block;
+}

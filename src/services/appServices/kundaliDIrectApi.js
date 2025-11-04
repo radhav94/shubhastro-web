@@ -24,7 +24,7 @@ export const callAstrologyAPI = async (endpoint, data, language = "en") => {
 
     return response.data;
   } catch (error) {
-    Toast.error("Error ", error.toString());
+    // Toast.error("Error ", error.toString());
     return null;
   }
 };

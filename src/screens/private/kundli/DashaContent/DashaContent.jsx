@@ -12,7 +12,8 @@ const DashaContent = ({ data }) => {
 
   return (
     <div className={styles.mainContainer}>
-      <SwitchTabs tabs={tabs} defaultTab="vimshottari" />
+      {/* <SwitchTabs tabs={tabs} defaultTab="vimshottari" /> */}
+      <div>No Data found</div>
     </div>
   );
 };

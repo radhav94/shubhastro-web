@@ -21,6 +21,7 @@ const PrimaryText = ({
   size_20,
   size_24,
   size_28,
+  size_32,
   // All padding props
   paddingTop,
   paddingBottom,
@@ -76,6 +77,8 @@ const PrimaryText = ({
     ? "24px"
     : size_28
     ? "28px"
+    : size_32
+    ? "32px"
     : "16px"; // Default to 16px
 
   const Component = as;

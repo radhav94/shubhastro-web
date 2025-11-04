@@ -42,7 +42,7 @@ const Login = () => {
     } catch (error) {
       Toast.error("An unexpected error occurred in handleSendOtp", error);
       navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
-        state: { phoneNumber: mobileNumber },
+        state: { phoneNumber: mobileNumber, resendOtp: handleSendOtp },
       });
     }
   };
@@ -104,19 +104,19 @@ const Login = () => {
           </form>
         </div>
 
-        <div>
+        {/* <div>
           <button type="button" className={styles.emailAccount}>
             Have an email account?
           </button>
-        </div>
+        </div> */}
 
         <div className={styles.byProceeding}>
           By proceeding, you agree to our{" "}
-          <a href="/termandcondition.aspx">T&C</a> &{" "}
-          <a href="/policy.aspx">Privacy Policy</a>
+          <a>T&C</a> &{" "}
+          <a>Privacy Policy</a>
         </div>
 
-        <div className={styles.whatsapp}>
+        {/* <div className={styles.whatsapp}>
           <label className={styles.checkBoxLabel}>
             <input
               type="checkbox"
@@ -131,7 +131,7 @@ const Login = () => {
               className={styles.whatsappIcon}
             />
           </label>
-        </div>
+        </div> */}
       </div>
     </LoginLayout>
   );

@@ -11,6 +11,27 @@ import PublicRoute from "./utils/routes/PublicRoute";
 import PrivateRoute from "./utils/routes/PrivateRoute";
 
 function App() {
+  // Helper function to flatten nested routes
+  const flattenRoutes = (routes) => {
+    const flattened = [];
+    
+    Object.values(routes).forEach((route) => {
+      // If route has path and element, it's a valid route
+      if (route.path && route.element) {
+        flattened.push(route);
+      }
+      
+      // Check for nested routes (like HOROSCOPE.DAILY, HOROSCOPE.MONTHLY)
+      Object.values(route).forEach((nestedRoute) => {
+        if (nestedRoute && typeof nestedRoute === 'object' && nestedRoute.path && nestedRoute.element) {
+          flattened.push(nestedRoute);
+        }
+      });
+    });
+    
+    return flattened;
+  };
+
   const roleWiseRouting = createBrowserRouter([
     //public routes
     ...Object.values(PATH.publicRoutes).map((route) => ({
@@ -23,7 +44,7 @@ function App() {
       path: "/",
       element: <PrivateRoute component={HomeLayout} />,
       children: [
-        ...Object.values(PATH.privateRoutes).map((child) => ({
+        ...flattenRoutes(PATH.privateRoutes).map((child) => ({
           path: child.path,
           element: <child.element />,
           handle: { header: child.header ?? true },

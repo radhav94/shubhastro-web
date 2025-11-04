@@ -16,29 +16,28 @@ const sectionVariants = {
 };
 
 const planetaryHeaders = [
-    { label: "Planet", key: "name" },
-    { label: "Sign", key: "sign" },
-    { label: "Sign Lord", key: "signLord" },
-    { label: "Nakshatra", key: "nakshatra" },
-    { label: "Naksh Lord", key: "nakshatraLord" },
-    {
-      label: "Degree",
-      key: "normDegree",
-      render: (row) => row.normDegree?.toFixed?.(2) || "--",
-    },
-    {
-      label: "Retro(R)",
-      key: "isRetro",
-      render: (row) => (row.isRetro === "true" ? "R" : "--"),
-    },
-    {
-      label: "Combust",
-      key: "is_planet_set",
-      render: (row) => (row.is_planet_set ? "C" : "--"),
-    },
-    { label: "Avastha", key: "planet_awastha" },
-    { label: "House", key: "house" },
-  ];
+  { label: "Planet", key: "name" },
+  { label: "Sign", key: "sign" },
+  { label: "Sign Lord", key: "signLord" },
+  { label: "Nakshatra", key: "nakshatra" },
+  { label: "Naksh Lord", key: "nakshatraLord" },
+  {
+    label: "Degree",
+    key: "normDegree",
+    render: (row) => row.normDegree?.toFixed?.(2) || "--",
+  },
+  {
+    label: "Retro(R)",
+    key: "isRetro",
+  },
+  {
+    label: "Combust",
+    key: "is_planet_set",
+    render: (row) => (row.is_planet_set ? "Yes" : "No"),
+  },
+  { label: "Avastha", key: "planet_awastha" },
+  { label: "House", key: "house" },
+];
 
 
 const NorthIndian = ({ data }) => {

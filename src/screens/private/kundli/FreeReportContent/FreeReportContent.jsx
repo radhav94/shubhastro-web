@@ -42,7 +42,13 @@ const FreeReport = ({data}) => {
     },
   ];
 
-  return <NestedTabs tabs={tabs} />;
+  return (
+    <div>
+
+    {/* <NestedTabs tabs={tabs} /> */}
+    <div>No Data found</div>
+    </div>
+  )
 };
 
 export default FreeReport

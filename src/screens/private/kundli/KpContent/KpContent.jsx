@@ -40,8 +40,8 @@ const cuspHeaders = [
 
 const KpContent = ({ data }) => {
   const kpPlanets = data?.rulingPlanets;
-  const svgChalitUrl = data?.chalitChart?.svg
-    ? `data:image/svg+xml;base64,${btoa(data?.chalitChart?.svg || "")}`
+  const svgChalitUrl = data?.chalitChart
+    ? `data:image/svg+xml;base64,${btoa(data?.chalitChart || "")}`
     : null;
 
   return (
@@ -51,59 +51,24 @@ const KpContent = ({ data }) => {
         <DynamicChart title="Chalit Chart" src={svgChalitUrl} />
 
         {/* Right: Ruling Table */}
-        {kpPlanets?.length > 0 ? (
+        {kpPlanets?.length > 0 && (
           <DynamicTable
             title="Ruling Table"
             headers={rulingHeaders}
             data={kpPlanets.length > 5 ? kpPlanets.slice(0, 5) : kpPlanets}
           />
-        ) : (
-          <motion.div
-            className={styles.contentCard}
-            variants={sectionVariants}
-            initial="hidden"
-            whileInView="visible"
-            style={{
-              height: "auto",
-              minHeight: "100px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop:'30px'
-            }}
-          >
-            <p>No ruling planet data available.</p>
-          </motion.div>
-        )}
+        ) }
       </div>
 
       {/* Planetary Table */}
-      {kpPlanets?.length > 0 ? (
+      {kpPlanets?.length > 0 && (
         <DynamicTable title="Planets" headers={planetaryHeaders} data={kpPlanets} />
-      ) : (
-        <motion.div
-          className={styles.contentCard}
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-        >
-          <p>No planetary data available.</p>
-        </motion.div>
-      )}
+      ) }
 
       {/* Cusp Table */}
-      {kpPlanets?.length > 0 ? (
+      {kpPlanets?.length > 0 && (
         <DynamicTable title="Cusps" headers={cuspHeaders} data={kpPlanets} />
-      ) : (
-        <motion.div
-          className={styles.contentCard}
-          variants={sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-        >
-          <p>No Cusp data available.</p>
-        </motion.div>
-      )}
+      ) }
     </div>
   );
 };

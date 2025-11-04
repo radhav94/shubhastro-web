@@ -7,7 +7,7 @@ const NorthIndian = ({ data }) => {
 }
 
 // Usage
-const svgChalitUrl = getSvgUrl(data?.chalitChart?.svg);
+const svgChalitUrl = getSvgUrl(data?.chalitChart);
 const svgSunUrl = getSvgUrl(data?.sunChart?.svg);
 const svgMoonUrl = getSvgUrl(data?.moonChart?.svg);
 const svgBirthUrl = getSvgUrl(data?.birthChart?.svg);

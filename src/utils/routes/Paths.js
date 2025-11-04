@@ -29,6 +29,8 @@ import {
   ThreeCardTarot,
   WellNessTarot,
   TarotResult,
+  Daily,
+  SignScreen
 } from "../../screens";
 
 export const PATH = {
@@ -74,8 +76,19 @@ export const PATH = {
       element: TalkToAstrologer,
     },
     HOROSCOPE: {
-      path: "/horoscopes",
-      element: Horoscope,
+      DAILY: {
+        path: '/horoscopes/daily-horoscope',
+        element: Daily,
+
+      },
+      DAILY_DETAIL: {  // Add this new route
+        path: '/horoscopes/daily-horoscope/:sign',
+        element: SignScreen,
+      },
+      MONTHLY: {
+        path: '/horoscopes/monthly-horoscope',
+        // element:
+      },
     },
     HOROSCOPEDETAILS: {
       path: "/horoscopes/daily/:name-free-horoscope",

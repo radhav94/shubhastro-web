@@ -31,7 +31,8 @@ const OtpVerification = () => {
       const response = await AuthServices.verifyOtp(payload);
       if(response?.data?.statusCode===200){
         Toast.success("Otp Verifies successfully");
-        navigate(PATH.publicRoutes.REGISTER.path, { replace: true });
+        // navigate(PATH.publicRoutes.REGISTER.path, { replace: true });
+        navigate(PATH.privateRoutes.HOME.path, { replace: true });
         localStorage.setItem("isLoggedIn", JSON.stringify(true));
       }else{
         Toast.error("Error", response.message);
@@ -96,7 +97,7 @@ const OtpVerification = () => {
               renderInput={(props) => <input {...props} />}
             />
 
-            <div className={styles.resendOptions}>
+            {/* <div className={styles.resendOptions}>
               <button type="button" className={styles.resendButton}>
                 <img
                   src="https://images.astroyogi.com/astroyogi/otp/call.svg"
@@ -111,7 +112,7 @@ const OtpVerification = () => {
                 />
                 RESEND VIA WHATSAPP
               </button>
-            </div>
+            </div> */}
 
             <button
               type="submit"
@@ -124,7 +125,7 @@ const OtpVerification = () => {
             </button>
           </form>
         </div>
-        <div className="mt-1 w-full">
+        {/* <div className="mt-1 w-full">
           {!isTimerActive ? (
             <PrimaryText color={appColors.btn} isRight onClick={handleResend}>
               Resend OTP{" "}
@@ -132,7 +133,7 @@ const OtpVerification = () => {
           ) : (
             <PrimaryText>Resend OTP in {counter}s</PrimaryText>
           )}
-        </div>
+        </div> */}
 
         <div className={styles.byProceeding}>
           By proceeding, you agree to our{" "}
@@ -140,7 +141,7 @@ const OtpVerification = () => {
           <a href="/policy.aspx">Privacy Policy</a>
         </div>
 
-        <div className={styles.whatsapp}>
+        {/* <div className={styles.whatsapp}>
           <label className={styles.checkBoxLabel}>
             <input
               type="checkbox"
@@ -155,7 +156,7 @@ const OtpVerification = () => {
               className={styles.whatsappIcon}
             />
           </label>
-        </div>
+        </div> */}
       </div>
     </LoginLayout>
   );

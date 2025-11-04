@@ -11,7 +11,7 @@ import Lang from "../assets/icons/lang.png";
 import Star from "../assets/icons/star.png";
 import Message from "../assets/icons/message.png";
 import Phone from "../assets/icons/phone.png";
-import Leo from "../assets/icons/leo.png";
+import leo from "../assets/icons/leo.png";
 
 export const AppIcons = {
   Logo,
@@ -26,7 +26,7 @@ export const AppIcons = {
   Message,
   Call,
   Phone,
-  Leo,
+  leo,
 };
 
 //appImages
@@ -66,7 +66,7 @@ import Aries from "../assets/svg/aries.svg";
 import Taurus from "../assets/svg/taurus.svg";
 import Gemini from "../assets/svg/gemini.svg";
 import Cancer from "../assets/svg/cancer.svg";
-import Leos from "../assets/svg/leo.svg";
+import Leo from "../assets/svg/leo.svg";
 import Virgo from "../assets/svg/virgo.svg";
 import Libra from "../assets/svg/libra.svg";
 import Scorpio from "../assets/svg/scorpio.svg";
@@ -80,7 +80,7 @@ export const appSvgs = {
   Taurus,
   Gemini,
   Cancer,
-  Leos,
+  Leo,
   Virgo,
   Libra,
   Scorpio,

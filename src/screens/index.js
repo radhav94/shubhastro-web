@@ -13,6 +13,9 @@ export { default as TalkToAstrologer } from "../screens/private/talkToAstrologer
 export { default as Profile } from "../screens/private/profile/Profile";
 export { default as Horoscope } from "../screens/private/horoscope/Horoscope";
 export { default as DetailHoroscope } from "../screens/private/horoscope/detailHoroscope/DetailHoroscope";
+export {default as Daily} from "../screens/private/horoscope/dailyHoroscope/Daily"
+export {default as SignScreen} from "../screens/private/horoscope/SignScreen"
+
 
 export { default as Panchang } from "../screens/private/panchang/Panchang";
 export { default as TodayPanchang } from "../screens/private/panchang/todayPanchang/TodayPanchang";
