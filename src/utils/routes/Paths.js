@@ -30,7 +30,10 @@ import {
   WellNessTarot,
   TarotResult,
   Daily,
-  SignScreen
+  SignScreen,
+  Monthly,
+  Yesterday,
+  Tomorrow
 } from "../../screens";
 
 export const PATH = {
@@ -76,18 +79,32 @@ export const PATH = {
       element: TalkToAstrologer,
     },
     HOROSCOPE: {
+      path: "/horoscopes",
+      element: Horoscope,
       DAILY: {
         path: '/horoscopes/daily-horoscope',
-        element: Daily,
+        element: SignScreen,
 
       },
       DAILY_DETAIL: { 
         path: '/horoscopes/daily-horoscope/:sign',
-        element: SignScreen,
+        element: Daily,
       },
       MONTHLY: {
         path: '/horoscopes/monthly-horoscope',
-        // element:
+        element: SignScreen
+      },
+      MONTHLY_DETAIL: { 
+        path: '/horoscopes/monthly-horoscope/:sign',
+        element:Monthly ,
+      },
+      YESTERDAY: {
+        path: '/horoscopes/yesterday-horoscope/:sign',
+        element: Yesterday
+      },
+      TOMORROW: {
+        path: '/horoscopes/tomorrow-horoscope/:sign',
+        element: Tomorrow
       },
     },
     HOROSCOPEDETAILS: {

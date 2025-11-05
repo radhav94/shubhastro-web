@@ -26,7 +26,7 @@ const ServiceCards = () => {
       id: 3,
       title: "Horoscope",
       icon: AppIcons.Astrology,
-      path: PATH.privateRoutes.HOROSCOPE.path,
+      path: PATH.privateRoutes.HOROSCOPE.DAILY.path,
     },
     {
       id: 4,

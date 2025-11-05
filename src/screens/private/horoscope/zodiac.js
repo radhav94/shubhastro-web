@@ -147,7 +147,7 @@ export const zodiac = () => {
         img: Pisces,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/pisces-free-horoscope.aspx",
-        description:
+        overview:
           "As a water sign ruled by Neptune, Pisces flows with intuitive wisdom and boundless compassion. Your dreamy nature and psychic sensitivity allow you to navigate life's currents with remarkable emotional intelligence and creative vision.",
       },
     ],

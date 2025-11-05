@@ -1,3 +1,4 @@
+
 // Daily.module.scss
 .dailyContainer {
   max-width: 1200px;
@@ -23,3 +24,18 @@
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+.sidebar{
+  display: flex;
+  flex-direction: row;
+}
+
+.leftContainer{
+  min-width: 250px;
+  padding: 10px;
+  align-content: start;
+  background-color: lightgray;
+  border-radius: 10px;
+  margin-right: 15px;
+}
+

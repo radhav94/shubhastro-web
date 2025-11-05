@@ -1,35 +1,76 @@
-import { PrimaryText } from "../../../../component";
-import DividerWithImage from "../../../../component/UI/DividerWithImage";
-import { appColors } from "../../../../utils/theme";
-import ShubhTalkLogo from "../../../../assets/icons/logo.png";
-import Card from "../../../../component/UI/cards/cardwithimage/Card";
-import { zodiac } from "../zodiac";
+import { useLocation, useParams } from "react-router-dom";
 import styles from "./Daily.module.scss";
-import { Link } from "react-router-dom";
+import { PrimaryText } from "../../../../component";
+import { appColors } from "../../../../utils/theme";
 
+import { appSvgs } from "../../../../utils/appImages";
+import DividerWithImage from "../../../../component/UI/DividerWithImage";
+import { useFetchDailyQuery } from "../../../../redux/api/horoscope/zodiacApi";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import SideBar from "../../../../layouts/sidebar/SideBar";
+import Sidebar from "../sidebar/Sidebar";
 
 const Daily = () => {
-    const [description, horoDisc, onChat, onClickSign, data] = zodiac();
-    
-    return (
-        <div className={styles.dailyContainer}>
-            <PrimaryText isCenter isBold size_32>
-                Daily Horoscope
-            </PrimaryText>
-            <PrimaryText isCenter isSemiBold size_18 color={appColors.greyDark}>
-                Check your Horoscope Today
-            </PrimaryText>
-            <DividerWithImage imageSrc={ShubhTalkLogo} />
-            
-           <div className={styles.cardsContainer} > {data.signs.map((zod) => {
-                return (
-                  <Link to={`/horoscopes/daily-horoscope/${zod.name.toLowerCase()}`} >  
-                <Card key={zod.id} data={zod} scope="Daily" /> 
-                </Link>
-            ) // Add return here
-            })}</div>
-        </div>
-    )
-}
+  const { sign } = useParams();
 
+  const payload = { timezone: 5.5 };
+
+  const { data, isLoading, error, isSuccess, refetch } = useFetchDailyQuery(
+    { sign, payload },
+    { enabled: !!sign }
+  );
+
+  return (
+    <div className={styles.dailyContainer}>
+      <PrimaryLoader isLoading={isLoading} />
+      {data && (
+        <div>
+          <PrimaryText isCenter isBold size_32>
+            {sign.charAt(0).toUpperCase() + sign.slice(1)} Daily Horoscope
+          </PrimaryText>
+          <PrimaryText isCenter isSemiBold size_18 color={appColors.greyDark}>
+            {new Date().toString().slice(3, 15)}
+          </PrimaryText>
+          <DividerWithImage
+            imageSrc={appSvgs[sign.charAt(0).toUpperCase() + sign.slice(1)]}
+          />
+        </div>
+      )}
+      <div className={styles.sidebar}>
+        <Sidebar />
+        <div>
+          <PrimaryText isSemiBold size_20>
+            {sign.charAt(0).toUpperCase() + sign.slice(1)} Daily Horoscope
+          </PrimaryText>
+          <PrimaryText
+            paddingBottom="20px"
+            isItalic
+            isSemiBold
+            size_16
+            color={appColors.greyDark}
+          >
+            {new Date().toString().slice(3, 15)}
+          </PrimaryText>
+          {isSuccess &&
+            Object.entries(data.prediction).map(([key, value]) => (
+              <div key={key}>
+                <PrimaryText paddingBottom="5px" isSemiBold size_20>
+                  {key.replace(/_/g, " ")}
+                </PrimaryText>
+                <PrimaryText
+                  paddingBottom="15px"
+                  size_16
+                  color={appColors.greyDark}
+                >
+                  {value}
+                </PrimaryText>
+              </div>
+            ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 export default Daily;

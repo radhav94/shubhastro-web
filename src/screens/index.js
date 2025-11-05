@@ -13,8 +13,11 @@ export { default as TalkToAstrologer } from "../screens/private/talkToAstrologer
 export { default as Profile } from "../screens/private/profile/Profile";
 export { default as Horoscope } from "../screens/private/horoscope/Horoscope";
 export { default as DetailHoroscope } from "../screens/private/horoscope/detailHoroscope/DetailHoroscope";
-export {default as Daily} from "../screens/private/horoscope/dailyHoroscope/Daily"
-export {default as SignScreen} from "../screens/private/horoscope/SignScreen"
+export {default as SignScreen} from "./private/horoscope/SignScreen"
+export {default as Monthly} from "./private/horoscope/monthlyhoroscope/Monthly"
+export {default as Yesterday} from "../screens/private/horoscope/yesterdayhoroscope/Yesterday"
+export {default as Tomorrow} from "../screens/private/horoscope/tomorrowhoroscope/Tomorrow"
+export {default as Daily} from "./private/horoscope/dailyHoroscope/Daily"
 
 
 export { default as Panchang } from "../screens/private/panchang/Panchang";

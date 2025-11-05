@@ -1,23 +1,46 @@
-import { useParams } from "react-router-dom"
-import styles from './SignScreen.module.scss'
-import { PrimaryText } from "../../../component"
-import { appColors } from "../../../utils/theme";
-
-import {appSvgs} from '../../../utils/appImages'
+import { PrimaryText } from "../../../component";
 import DividerWithImage from "../../../component/UI/DividerWithImage";
+import { appColors } from "../../../utils/theme";
+import ShubhTalkLogo from "../../../assets/icons/logo.png";
+import Card from "../../../component/UI/cards/cardwithimage/Card";
+import { zodiac } from "./zodiac";
+import styles from "./SignScreen.module.scss";
+import { Link, useLocation } from "react-router-dom";
 
-const SignScreen = ()=>{
-    const {sign} = useParams()
-    return (
-        <div className={styles.dailyContainer}>
-            <PrimaryText isCenter isBold size_32>
-                {sign.charAt(0).toUpperCase()+sign.slice(1)} Daily Horoscope
-            </PrimaryText>
-            <PrimaryText isCenter isSemiBold size_18 color={appColors.greyDark}>
-                {new Date().toString().slice(3,15)}
-            </PrimaryText>
-            <DividerWithImage imageSrc={appSvgs[sign.charAt(0).toUpperCase()+sign.slice(1)]} />
-        </div>
-    )
-}
-export default SignScreen
+const SignScreen = () => {
+  const [description, horoDisc, onChat, onClickSign, data] = zodiac();
+  const { pathname } = useLocation();
+  let horoscopeType = pathname.split("/")[2].split("-")[0];
+  horoscopeType =
+    horoscopeType.charAt(0).toUpperCase() + horoscopeType.slice(1);
+
+  return (
+    <div className={styles.dailyContainer}>
+      <PrimaryText isCenter isBold size_32>
+        {horoscopeType} Horoscope
+      </PrimaryText>
+      <PrimaryText isCenter isSemiBold size_18 color={appColors.greyDark}>
+        Check your Horoscope Today
+      </PrimaryText>
+      <DividerWithImage imageSrc={ShubhTalkLogo} />
+
+      <div className={styles.cardsContainer}>
+        {" "}
+        {data.signs.map((zod) => {
+          return (
+            <Link
+              key={zod.id}
+              to={`/horoscopes/${
+                pathname.split("/")[2]
+              }/${zod.name.toLowerCase()}`}
+            >
+              <Card data={zod} scope={horoscopeType} />
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+export default SignScreen;

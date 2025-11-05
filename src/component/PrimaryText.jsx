@@ -12,6 +12,7 @@ const PrimaryText = ({
   isSemiBold,
   isBold,
   isExtraBold,
+  isItalic,
   // All size props
   size_10,
   size_12,
@@ -27,6 +28,10 @@ const PrimaryText = ({
   paddingBottom,
   paddingLeft,
   paddingRight,
+  marginTop,
+  marginBottom,
+  marginLeft,
+  marginRight,
   // All alignment props
   isCenter,
   isRight,
@@ -42,6 +47,8 @@ const PrimaryText = ({
     : isRight
     ? "right"
     : style.textAlign || "left";
+
+  const fontStyle = isItalic ? "italic" : style.fontStyle || "normal";
 
   const textColor = color
     ? color
@@ -89,10 +96,15 @@ const PrimaryText = ({
     fontWeight,
     fontSize,
     textAlign,
+    fontStyle,
     paddingTop,
     paddingBottom,
     paddingLeft,
     paddingRight,
+    marginTop,
+    marginBottom,
+    marginLeft,
+    marginRight,
     margin: 0,
     ...style, // Allow style prop to override anything
   };

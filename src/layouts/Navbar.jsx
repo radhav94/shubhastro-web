@@ -9,13 +9,20 @@ const Navbar = () => {
   const MENU_LIST = [
     { title: "Home", path: PATH.privateRoutes.HOME.path },
     { title: "Consult Now", path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path },
-    { title: "Horoscope", 
+    {
+      title: "Horoscope",
       // path: PATH.privateRoutes.HOROSCOPE.path,
       children: [
-        { title: "Daily Horoscope", path: PATH.privateRoutes.HOROSCOPE.DAILY.path },
-        { title: "Monthly Horoscope", path: PATH.privateRoutes.HOROSCOPE.MONTHLY.path },
+        {
+          title: "Daily Horoscope",
+          path: PATH.privateRoutes.HOROSCOPE.DAILY.path,
+        },
+        {
+          title: "Monthly Horoscope",
+          path: PATH.privateRoutes.HOROSCOPE.MONTHLY.path,
+        },
       ],
-     },
+    },
     {
       title: "Yogi Live",
       path: PATH.privateRoutes.ASTRO_LIVE.path,

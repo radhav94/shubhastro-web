@@ -1,0 +1,72 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  padding: 0 5px;
+  background-color: #eee;
+  margin-right: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.leftContainer {
+  width: 100%;
+  min-width: 250px;
+//   background-color: #f4f4f4;
+  padding: 20px;
+//   border-radius: 10px;
+//   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.leftContainer label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.leftContainer select {
+  width: 100%;
+  padding: 8px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: white;
+}
+
+.leftContainer select:focus {
+  outline: none;
+  border-color: #007BFF;
+}
+
+.dropdownContainer {
+  margin-bottom: 15px;
+}
+
+h2 {
+  margin-bottom: 10px;
+}
+
+
+h2 {
+  font-size: 18px;
+}
+
+.horoscopes {
+    text-align: start;
+    margin: 20px 0;
+}
+
+.horoscopes li {
+    padding: 10px 0;
+    color: #555;
+    font-size: 17px;
+}
+.horoscopes li:hover {
+    color: #000;
+    cursor: pointer;
+    transition: all 0.4s ease-in-out;
+}
+
+.horoscopes .active{
+  color:#000000;
+  font-weight: bolder;
+}

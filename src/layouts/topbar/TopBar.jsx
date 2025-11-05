@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./TopBar.module.scss";
 
 // Assuming your logo path is correct
@@ -14,6 +14,7 @@ import { PATH } from "../../utils/routes/Paths";
 import { IoHomeOutline, IoWalletOutline } from "react-icons/io5";
 import { MdGTranslate } from "react-icons/md";
 import { FiMenu } from "react-icons/fi";
+import { PrimaryText } from "../../component";
 
 const TopBar = () => {
   const isMobile = useIsMobile();
@@ -21,10 +22,10 @@ const TopBar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
   const isLoggedIn = JSON.parse(localStorage.getItem("isLoggedIn"));
-  const handleLogout =()=>{
-    navigate("/")
+  const handleLogout = () => {
+    navigate("/");
     localStorage.setItem("isLoggedIn", JSON.stringify(false));
-  }
+  };
 
   useEffect(() => {
     const storedWallet = JSON.parse(localStorage.getItem("wallet")) || {
@@ -46,44 +47,51 @@ const TopBar = () => {
             )}
             <div className={styles.logoContainer} onClick={() => navigate("/")}>
               <img src={AppIcons.Logo} alt="Shubh Talk Logo" />
+              <PrimaryText marginLeft="5px" isBold size_28>
+                Shubhtalk
+              </PrimaryText>
             </div>
           </div>
 
           <div className={styles.rightSection}>
             {/* Wallet Button */}
-            <button
+            {/* <button
               className={`${styles.walletButton} ${styles.hideOnMobile}`}
               onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
             >
               <IoWalletOutline />
               <span>₹{walletBalance.toFixed(2)}</span>
-            </button>
+            </button> */}
 
             {/* Language & Notifications Icon Buttons */}
-            <button
+            {/* <button
               className={`${styles.iconButton} ${styles.hideOnMobile}`}
               aria-label="Translate"
             >
               <MdGTranslate />
-            </button>
+            </button> */}
             <button className={styles.iconButton} aria-label="Notifications">
-              <IoHomeOutline />
+              <Link to="/">
+                <IoHomeOutline />
+              </Link>
             </button>
 
             {/* Sign In CTA Button */}
-            {!isLoggedIn ? <button
-              className={`${styles.ctaButton} ${styles.hideOnMobile}`}
-              onClick={() => navigate("/login") }
-            >
-              Log In
-            </button>:
-            <button
-              className={`${styles.ctaButton} ${styles.hideOnMobile}`}
-              onClick={ handleLogout }
-            >
-              Log out
-            </button>
-            }
+            {!isLoggedIn ? (
+              <button
+                className={`${styles.ctaButton} ${styles.hideOnMobile}`}
+                onClick={() => navigate("/login")}
+              >
+                Log In
+              </button>
+            ) : (
+              <button
+                className={`${styles.ctaButton} ${styles.hideOnMobile}`}
+                onClick={handleLogout}
+              >
+                Log out
+              </button>
+            )}
           </div>
         </div>
       </header>

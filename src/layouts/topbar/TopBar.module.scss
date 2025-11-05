@@ -42,15 +42,20 @@ $font-primary: "Poppins", sans-serif;
 
 // --- Logo & Menu Icon ---
 .logoContainer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
   cursor: pointer;
   img {
     height: 45px; // Adjusted for a sleeker look
     width: auto;
+    border-radius: 22.5px;
     transition: transform 0.3s ease;
-    &:hover {
-      transform: scale(1.05);
-    }
+    // &:hover {
+    //   transform: scale(1.05);
+    // }
   }
+  
 }
 
 .menuIcon {
