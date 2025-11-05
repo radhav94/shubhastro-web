@@ -54,7 +54,7 @@ const TopBar = () => {
           </div>
 
           <div className={styles.rightSection}>
-            {/* Wallet Button */}
+            {/* Wallet Button  */}
             {/* <button
               className={`${styles.walletButton} ${styles.hideOnMobile}`}
               onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
@@ -63,7 +63,7 @@ const TopBar = () => {
               <span>₹{walletBalance.toFixed(2)}</span>
             </button> */}
 
-            {/* Language & Notifications Icon Buttons */}
+            {/* Language & Notifications Buttons */}
             {/* <button
               className={`${styles.iconButton} ${styles.hideOnMobile}`}
               aria-label="Translate"
