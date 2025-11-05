@@ -105,7 +105,6 @@ const PrimaryText = ({
     marginBottom,
     marginLeft,
     marginRight,
-    margin: 0,
     ...style, // Allow style prop to override anything
   };
 

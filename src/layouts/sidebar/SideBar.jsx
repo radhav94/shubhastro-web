@@ -47,8 +47,8 @@ const SideBar = ({ onClose, isOpen }) => {
         <div className={styles.sidebarContent}>
           <ul>
             {menuItems.map((item, idx) => (
-              <div>
-                <li key={idx}>
+              <div key={idx}>
+                <li>
                   <PrimaryText
                     size_14
                     onClick={() => item.children && toggleSubMenu(idx)}

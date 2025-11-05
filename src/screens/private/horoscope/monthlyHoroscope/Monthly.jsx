@@ -51,17 +51,14 @@ const Monthly = () => {
             {new Date().toString().slice(3, 15)}
           </PrimaryText>
           {isSuccess &&
-            Object.entries(data.prediction).map(([key, value]) => (
-              <div key={key}>
-                <PrimaryText paddingBottom="5px" isSemiBold size_20>
-                  {key.replace(/_/g, " ")}
-                </PrimaryText>
+            data.prediction.map((data, index) => (
+              <div key={index}>
                 <PrimaryText
                   paddingBottom="15px"
                   size_16
                   color={appColors.greyDark}
                 >
-                  {value}
+                  {data}
                 </PrimaryText>
               </div>
             ))}
