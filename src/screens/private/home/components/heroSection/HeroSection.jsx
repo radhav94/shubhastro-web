@@ -23,14 +23,14 @@ const HeroSection = () => {
               <span className={styles.highlight}>Navratri</span>
             </h1>
 
-            <PrimaryButton
+            {/* <PrimaryButton
               size="lg"
               className={styles.primaryButton}
               title="First Chat Free"
               onClick={() =>
                 navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)
               }
-            />
+            /> */}
             <p>
               Connect with expert astrologers and find the guidance you need
               during this auspicious time.

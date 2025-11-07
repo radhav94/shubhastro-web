@@ -34,9 +34,9 @@ const Home = () => {
     <div className={styles.homeContainer}>
       <HeroSection />
       <ServiceCards />
-      <Astrologers onChat={onChat} onClickView={onClickView} />
-      <LiveShows onWatchNow={onWatchNow} onClickView={onClickView} />
-      <Rashis onClick={onClick} />
+      {/* <Astrologers onChat={onChat} onClickView={onClickView} /> */}
+      {/* <LiveShows onWatchNow={onWatchNow} onClickView={onClickView} /> */}
+      {/* <Rashis onClick={onClick} /> */}
       <Blogs />
       {/* <Services /> */}
     </div>

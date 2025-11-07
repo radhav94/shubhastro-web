@@ -56,8 +56,12 @@ const Daily = () => {
           {isSuccess &&
             Object.entries(data.prediction).map(([key, value]) => (
               <div key={key}>
-                <PrimaryText paddingBottom="5px" isSemiBold size_20>
-                  {key.replace(/_/g, " ")}
+                <PrimaryText paddingBottom="5px" size_20>
+                  {key
+                    .replace(/_/g, " ")
+                    .split(" ")
+                    .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
+                    .join(" ")}
                 </PrimaryText>
                 <PrimaryText
                   paddingBottom="15px"

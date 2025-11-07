@@ -15,7 +15,6 @@ import { IoMdCall } from "react-icons/io";
 import { IoChatbubble } from "react-icons/io5";
 import FreeReport from "./FreeReportContent/FreeReportContent";
 
-
 const Kundali = () => {
   const [
     dataIsFilled,
@@ -33,7 +32,7 @@ const Kundali = () => {
     charts,
     ashtakvarga,
     dasha,
-    report
+    report,
   ] = useKundli();
 
   const tabsData = [
@@ -77,7 +76,7 @@ const Kundali = () => {
       ) : (
         <HtmlContentCard sections={kundliInfoData} />
       )}
-      <div className="bg-[#ffcb03] m-6 h-48 rounded-md" >
+      {/* <div className="bg-[#ffcb03] m-6 h-48 rounded-md" >
         <div>
           <p className="text-center text-2xl py-4 px-52  text-gray-500" >Connect with an Astrologer on Call or Chat for more personalised detailed predictions.</p>
           <div className="flex justify-center" >
@@ -91,7 +90,7 @@ const Kundali = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </>
   );
 };

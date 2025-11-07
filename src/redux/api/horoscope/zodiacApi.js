@@ -2,36 +2,34 @@ import { horoscopeApi } from "../baseApi/horoscopeBaseApi";
 
 export const zodiacApi = horoscopeApi.injectEndpoints({
   endpoints: (builder) => ({
-
     fetchDaily: builder.query({
-      query: ({ sign,payload}) => ({
+      query: ({ sign, payload }) => ({
         url: `sun_sign_prediction/daily/${sign}`,
         method: "POST",
-        body:payload
+        body: payload,
       }),
     }),
     fetchPrevios: builder.query({
-      query: ({ sign,payload}) => ({
+      query: ({ sign, payload }) => ({
         url: `sun_sign_prediction/daily/previous/${sign}`,
         method: "POST",
-        body:payload
+        body: payload,
       }),
     }),
     fetchNext: builder.query({
-      query: ({ sign,payload}) => ({
+      query: ({ sign, payload }) => ({
         url: `sun_sign_prediction/daily/next/${sign}`,
         method: "POST",
-        body:payload
+        body: payload,
       }),
     }),
     fetchMonth: builder.query({
-      query: ({ sign,payload}) => ({
+      query: ({ sign, payload }) => ({
         url: `horoscope_prediction/monthly/${sign}`,
         method: "POST",
-        body:payload
+        body: payload,
       }),
     }),
-
   }),
 });
 
@@ -39,5 +37,5 @@ export const {
   useFetchDailyQuery,
   useFetchPreviosQuery,
   useFetchNextQuery,
-  useFetchMonthQuery
+  useFetchMonthQuery,
 } = zodiacApi;

@@ -1,80 +1,138 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./PanchangInputCard.module.scss";
-import FormikControl from "../../../formikcontrols/FormikControl";
-import { Form, Formik } from "formik";
-import * as Yup from "yup";
-import { requiredMessage } from "../../../../utils/utlis";
 
 import PrimaryButton from "../../../PrimaryButton";
 import PrimaryText from "../../../PrimaryText";
+import LocationSearch from "../../../../utils/location/locationSearch";
+import ErrorText from "../../../ErrorText";
+import { color } from "framer-motion";
+import { appColors } from "../../../../utils/theme";
 
-const PanchangInputCard = ({ imageSrc, title, onSubmit }) => {
-  const initialValues = {
+const PanchangInputCard = ({ imageSrc, title }) => {
+  const [formData, setFormData] = useState({
     dateOfBirth: "",
     location: "",
-  };
-
-  const validationSchema = Yup.object({
-    dateOfBirth: Yup.string().required(requiredMessage("Date of Birth")),
-    location: Yup.string().required(requiredMessage("Location")),
+    latitude: "",
+    longitude: "",
+  });
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long", // Thursday
+    year: "numeric", // 2025
+    month: "long", // November
+    day: "numeric", // 13
   });
 
-  const handleSubmit = (values) => {
-    if (onSubmit) onSubmit(values);
+  const [errors, setErrors] = useState({});
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePlaceSelect = (place) => {
+    setFormData((prev) => ({
+      ...prev,
+      location: place.address,
+      latitude: place.lat,
+      longitude: place.lng,
+    }));
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.dateOfBirth)
+      newErrors.dateOfBirth = "Date of Birth is required!";
+    if (!formData.location) newErrors.location = "Location is required!";
+    return newErrors;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
+    setFormData({
+      dateOfBirth: "",
+      location: "",
+      latitude: "",
+      longitude: "",
+    });
   };
 
   return (
     <div className={styles.panchangWidget}>
-      <div className={styles.leftSide}>
-        <img src={imageSrc} alt="Panchang Widget" />
-      </div>
+      {imageSrc && (
+        <div className={styles.leftSide}>
+          <img src={imageSrc} alt="Panchang Widget" />
+        </div>
+      )}
 
       <div className={styles.rightSide}>
         {title && (
-          <PrimaryText isExtraBold size_20>
+          <PrimaryText isCenter isExtraBold size_32>
             {title}
           </PrimaryText>
         )}
+        <PrimaryText isCenter size_24 color={appColors.greyDark}>
+          {today} Panchang For Mumbai, India
+        </PrimaryText>
 
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-        >
-          {(formik) => (
-            <div className={styles.mainDiv}>
-              <Form className={styles.form}>
-                <div className={styles.inputBox}>
-                  <FormikControl
-                    name="dateOfBirth"
-                    control="date"
-                    type="date"
-                    label="Date of Birth"
-                    placeholder="Enter Date of Birth"
-                    isRequired={true}
-                    formik={formik}
-                    maxDate={new Date().toISOString().split("T")[0]}
-                  />
-                  <FormikControl
-                    name="location"
-                    control="input"
-                    label="Location"
-                    placeholder="Enter Location"
-                    isRequired={true}
-                    formik={formik}
-                  />
-                </div>
-
-                <PrimaryButton
-                  width={"80%"}
-                  title="Submit"
-                  buttonStyles={{ marginTop: "12px" }}
-                  onClick={formik.handleSubmit}
-                />
-              </Form>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <div className={styles.inputBox}>
+            {/* Date of Birth */}
+            <div className={styles.inputControl}>
+              <label htmlFor="dateOfBirth" className={styles.label}>
+                Date of Birth <span className={styles.requiredMark}>*</span>
+              </label>
+              <input
+                id="dateOfBirth"
+                name="dateOfBirth"
+                type="date"
+                className={styles.inputField}
+                placeholder="Enter Date of Birth"
+                value={formData.dateOfBirth}
+                onChange={handleInputChange}
+                onClick={(e) => {
+                  // ✅ Manually show date picker
+                  if (e.target.showPicker) {
+                    e.target.showPicker();
+                  }
+                }}
+                max={new Date().toISOString().split("T")[0]}
+              />
+              {errors.dateOfBirth && (
+                <ErrorText>{errors.dateOfBirth}</ErrorText>
+              )}
             </div>
-          )}
-        </Formik>
+
+            {/*  Location (custom search) */}
+            <div className={styles.inputControl}>
+              <label htmlFor="location" className={styles.label}>
+                Location <span className={styles.requiredMark}>*</span>
+              </label>
+              <LocationSearch
+                value={formData.location}
+                onChange={(e) =>
+                  handleInputChange({
+                    target: { name: "location", value: e.target.value },
+                  })
+                }
+                onPlaceSelect={handlePlaceSelect}
+              />
+              {errors.location && <ErrorText>{errors.location}</ErrorText>}
+            </div>
+          </div>
+
+          <PrimaryButton
+            width={"74%"}
+            title="Submit"
+            buttonStyles={{ marginTop: "12px" }}
+            type="submit"
+          />
+        </form>
       </div>
     </div>
   );

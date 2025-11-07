@@ -1,9 +1,9 @@
 .panchangWidget {
   display: flex;
   gap: 16px;
+  padding: 0 15px;
   background: #fff;
   border-radius: 8px;
-  // padding: 16px;
 }
 
 .leftSide {
@@ -14,7 +14,6 @@
 
   img {
     max-width: 100%;
-
     border-radius: 8px;
   }
 }
@@ -27,31 +26,57 @@
   padding: 20px;
 }
 
-.inputsContainer {
-  display: flex;
-
-  gap: 12px;
-}
-
 .inputBox {
   display: flex;
-  gap: 12px;
+  gap: 30px;
   width: 100%;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 16px;
+  }
 }
 
-.inputBox > * {
+.inputControl {
+  display: flex;
+  flex-direction: column;
   flex: 1;
 }
 
 .label {
   font-size: 14px;
-  margin-bottom: 4px;
-  text-align: start;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.input {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  height: 44px;
-  background: #007bff;
+.requiredMark {
+  color: #e63946;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.inputField {
+  border: 1px solid rgb(224, 224, 224);
+  border-radius: 6px;
+  height: 50px;
+  padding: 10px 12px;
+  color: gray;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+
+  // &:focus {
+  //   border-color: #fcb900;
+  //   box-shadow: 0 0 0 2px rgba(252, 185, 0, 0.2);
+  // }
+}
+
+.errorText {
+  color: #e63946;
+  font-size: 13px;
+  margin-top: 4px;
 }

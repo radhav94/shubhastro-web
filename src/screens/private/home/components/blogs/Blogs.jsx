@@ -1,7 +1,7 @@
 import React from "react";
 import Styles from "./Blogs.module.scss";
 import { BlogCard, Title } from "../../../../../component";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { PATH } from "../../../../../utils/routes/Paths";
 
 const Blogs = ({ titleShow = true }) => {
@@ -60,9 +60,9 @@ const Blogs = ({ titleShow = true }) => {
 
       <div className={Styles.blogsContainer}>
         {blogData.map((blog) => (
-          <a
+          <Link
             key={blog.id}
-            href={PATH.privateRoutes.BLOG.path}
+            to={PATH.privateRoutes.BLOG.path}
             className={Styles.blogLink}
           >
             <BlogCard
@@ -72,7 +72,7 @@ const Blogs = ({ titleShow = true }) => {
               date={blog.date}
               authorIcon={blog.authorIcon}
             />
-          </a>
+          </Link>
         ))}
       </div>
     </div>

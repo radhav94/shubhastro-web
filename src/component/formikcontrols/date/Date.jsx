@@ -25,6 +25,12 @@ const Date = (props) => {
               max={maxDate || undefined}
               className={styles.inputField}
               placeholder={placeholder}
+              onClick={(e) => {
+                // Manually show date picker
+                if (e.target.showPicker) {
+                  e.target.showPicker();
+                }
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   form.handleSubmit();
