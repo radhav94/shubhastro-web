@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTodayPanchang } from "./useTodayPanchang";
 import InternalBanner from "../../../../component/UI/cards/internalBanner/InternalBanner";
 import styles from "./TodayPanchang.module.scss";
@@ -13,12 +13,24 @@ import { HiOutlineSwitchHorizontal } from "react-icons/hi";
 import { FaRegMoon } from "react-icons/fa6";
 import { PanchangInputCard } from "../../../../component";
 import PanchangCards from "../../../../component/UI/cards/PanchangCards";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 const TodayPanchang = () => {
   const [data, onCardClick, onSubmit, zodiacDetails, onChat] =
     useTodayPanchang();
 
-  const payload = {
+  // const payload = {
+  //   day: 6,
+  //   month: 1,
+  //   year: 2000,
+  //   hour: 7,
+  //   min: 45,
+  //   lat: 19.132,
+  //   lon: 72.342,
+  //   tzone: 5.5,
+  // };
+
+  const [payload, setPayload] = useState({
     day: 6,
     month: 1,
     year: 2000,
@@ -27,14 +39,13 @@ const TodayPanchang = () => {
     lat: 19.132,
     lon: 72.342,
     tzone: 5.5,
-  };
+  });
 
   const {
     data: panchangData,
     isLoading,
     error,
     isSuccess,
-    refetch,
   } = useFetchAdvancePanchangQuery({ payload });
 
   const todayData = [
@@ -62,6 +73,7 @@ const TodayPanchang = () => {
     { key: "Moon Sign", value: panchangData?.moon_sign, icon: <GrSign /> },
     { key: "Ayana", value: panchangData?.ayana, icon: <GiStonePath /> },
   ];
+
   const monthData = [
     {
       key: "Hindu month",
@@ -80,6 +92,7 @@ const TodayPanchang = () => {
       icon: <FaRegMoon />,
     },
   ];
+
   const muhratData = {
     abhijit: {
       title: "Abhijit Muhurat",
@@ -107,6 +120,7 @@ const TodayPanchang = () => {
       value: panchangData?.tithi?.details?.special,
     },
   ];
+
   const nakshatraData = [
     {
       key: "Name",
@@ -125,6 +139,7 @@ const TodayPanchang = () => {
       value: panchangData?.nakshatra?.details?.special,
     },
   ];
+
   const yogData = [
     {
       key: "Name",
@@ -155,13 +170,33 @@ const TodayPanchang = () => {
     },
   ];
 
-  return (
-    <div className={styles.mainContainer}>
-      {/* <InternalBanner data={data} onCardClick={onCardClick} /> */}
-      <PanchangInputCard title={"Today Panchang"} />
+  const onTap = (data) => {
+    const date = new Date(data?.dateOfBirth);
 
-      <div>
-        {/* <ContentCard
+    const payload = {
+      day: parseInt(date.getUTCDate()) || 12,
+      month: parseInt(date.getUTCMonth()) + 1 || 1,
+      year: parseInt(date.getUTCFullYear()) || 1999,
+      hour: parseInt(date.getUTCHours()) || 1,
+      min: parseInt(date.getUTCMinutes()) || 6,
+      lat: parseInt(data?.latitude) || 19.132,
+      lon: parseInt(data?.longitude) || 72.342,
+      tzone: 5.5,
+    };
+
+    setPayload(payload);
+  };
+
+  return (
+    <>
+      <PrimaryLoader isLoading={isLoading} />
+      {isSuccess && (
+        <div className={styles.mainContainer}>
+          {/* <InternalBanner data={data} onCardClick={onCardClick} /> */}
+          <PanchangInputCard onTap={onTap} title={"Today Panchang"} />
+
+          <div>
+            {/* <ContentCard
         title="Ujjain, Wednesday, 08 October 2025"
         zodiacData={zodiacDetails}
         isDailyHoroscope
@@ -169,42 +204,44 @@ const TodayPanchang = () => {
         showDate
         singleRow
       /> */}
-        {/* <ContentCard
+            {/* <ContentCard
         title="How is Panchang Today Calculated?"
         bgColor="transparent"
         description={`In Hindu culture, it is believed that starting a new task at the most productive time will result in positive outcomes. As a result, it is necessary to check for the appropriate time, which includes Nakshatras in favorable states, planetary movements in beneficial forms, etc.\n\nToday Panchangam is an amalgam of all the factors that Astroyogi took into consideration when creating it.\n\nToday's Panchang is a compilation of in-depth analyses of times and dates for a given day or a future day organized in a tabular format. The Nakshatras, or lunar mansions, provide astronomical data that supports the auspiciousness of these dates in addition to their astrological aspects.\n\nThe calculations are entirely based on the movements of planets and stars at a certain degree of measurement. The method of calculation involves determining the Moon's location within a specific Nakshatra of an individual's birth chart.\n\n*Note: It's important to know that Panchang Muhurats might differ between two locations at the same time. For instance, despite having the same time and date chosen, Panchang Delhi and Panchang Mumbai may not be the same on a given day or year. There might be variations in Panchang at the same time, even within Indian states and cities or any location.`}
       /> */}
-        {/* <ContentCard
+            {/* <ContentCard
         title="What Is The Need To Find A Good Time Today?"
         bgColor="transparent"
         description={`The Panchang, a comprehensive Hindu calendar, guides astrologers in predicting planetary events and determining favorable and unfavorable times for significant life activities.\n\nThe daily Panchang can offer good timings today to carry out important rituals and events. Whether it's religious rituals, weddings, festivals, educational pursuits, travel plans, or investments, the Panchang is an essential tool for planning these crucial moments with precision. This is why you should turn to Astroyogi's daily Panchang to find a good time today.\n\nIn a way, today Panchang offers today's good time so that you can plan your day as efficiently as possible.\n\nRemember that the Panchang doesn't help you change the cosmic forces for your benefit but tells you when you can plan your propitious, new, or meaningful tasks.`}
       /> */}
-        {/* <ContentCard
+            {/* <ContentCard
         title="Why Should You Check Out the Auspicious Time Today?"
         bgColor="transparent"
         description={`In Hindu culture, it is believed that starting a new task at the most productive time will result in positive outcomes. As a result, it is necessary to check for the appropriate time, which includes Nakshatras in favorable states, planetary movements in beneficial forms, etc.\n\nToday Panchangam is an amalgam of all the factors that Astroyogi took into consideration when creating it.\n\nToday's Panchang is a compilation of in-depth analyses of times and dates for a given day or a future day organized in a tabular format. The Nakshatras, or lunar mansions, provide astronomical data that supports the auspiciousness of these dates in addition to their astrological aspects.\n\nThe calculations are entirely based on the movements of planets and stars at a certain degree of measurement. The method of calculation involves determining the Moon's location within a specific Nakshatra of an individual's birth chart.\n\n*Note: It's important to know that Panchang Muhurats might differ between two locations at the same time. For instance, despite having the same time and date chosen, Panchang Delhi and Panchang Mumbai may not be the same on a given day or year. There might be variations in Panchang at the same time, even within Indian states and cities or any location.`}
       /> */}
-        {/* <ContentCard
+            {/* <ContentCard
         title="How is Panchang Today Calculated?"
         bgColor="transparent"
         description={`Is today's auspicious day in the Hindu calendar? Yes! The daily Panchang can be vital in helping you choose the right time, i.e., Shubh Muhurat or an auspicious time for performing rituals and conducting important work. People and expert astrologers rely on daily Panchang to determine auspicious timings for a myriad of religious and social events.\n\nWhether you are looking to conduct a Naamkaran ceremony (ceremony for giving an appropriate name to your baby), perform a Griha Pravesh ceremony before moving into a new house or wedding nuptials, the daily Panchang can come up with an auspicious time today.\n\nThis is not limited to religious rituals like Pujas and Vrats (fasts) or spiritual events only; the daily Panchang can also offer you good timings today or the best timing for any day to purchase a car, begin a new job, or launch your business.\n\nFollowing the auspicious timing as per the celestial alignment can help bring success and growth in all your endeavors. Maintaining Shubh Muhurats can significantly impact your daily life.\n\nHowever, have you ever wondered what makes a particular time or Muhurat auspicious?\n\nWell, it's the complicated balance of multiple astrological factors. The Lunar day (Tithi), Nakshatra (constellation), the day of the week (Vara), Yoga (Luni-Solar day), Karana (half of a Lunar day), and the planetary periods (Dasha) are all vital for identifying the perfect timing for any event. For example, the Tithi can assist you in planning your spiritual events, as every Lunar day has its own energies. Moreover, the occasion or task is also considered, as the auspicious timing for a wedding will not be suitable for making an important business decision.\n\nWhether it's a mundane everyday task or a noteworthy event, today's good times and bad times should be taken into consideration to enhance the success rate and positive impact of that event.`}
       /> */}
-        {/* <Astrologers onChat={onChat} /> */}
-        {/* <Blogs /> */}
-      </div>
-      <div>
-        <PanchangCards data={monthData} muhratData={muhratData} />
-        <PanchangCards title="Sun and Moon Calculations" data={todayData} />
-        <PanchangCards
-          title="Nakshatra"
-          data={nakshatraData}
-          summary={panchangData?.nakshatra?.details?.summary}
-        />
-        <PanchangCards title="Tithi" data={tithiData} />
-        <PanchangCards title="Yog" data={yogData} />
-        <PanchangCards title="Karan" data={karanData} />
-      </div>
-    </div>
+            {/* <Astrologers onChat={onChat} /> */}
+            {/* <Blogs /> */}
+          </div>
+          <div>
+            <PanchangCards data={monthData} muhratData={muhratData} />
+            <PanchangCards title="Sun and Moon Calculations" data={todayData} />
+            <PanchangCards
+              title="Nakshatra"
+              data={nakshatraData}
+              summary={panchangData?.nakshatra?.details?.summary}
+            />
+            <PanchangCards title="Tithi" data={tithiData} />
+            <PanchangCards title="Yog" data={yogData} />
+            <PanchangCards title="Karan" data={karanData} />
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -8,7 +8,7 @@ import ErrorText from "../../../ErrorText";
 import { color } from "framer-motion";
 import { appColors } from "../../../../utils/theme";
 
-const PanchangInputCard = ({ imageSrc, title }) => {
+const PanchangInputCard = ({ imageSrc, title, onTap }) => {
   const [formData, setFormData] = useState({
     dateOfBirth: "",
     location: "",
@@ -42,7 +42,7 @@ const PanchangInputCard = ({ imageSrc, title }) => {
     const newErrors = {};
     if (!formData.dateOfBirth)
       newErrors.dateOfBirth = "Date of Birth is required!";
-    if (!formData.location) newErrors.location = "Location is required!";
+    // if (!formData.location) newErrors.location = "Location is required!";
     return newErrors;
   };
 
@@ -54,12 +54,13 @@ const PanchangInputCard = ({ imageSrc, title }) => {
       return;
     }
     setErrors({});
-    setFormData({
-      dateOfBirth: "",
-      location: "",
-      latitude: "",
-      longitude: "",
-    });
+    onTap(formData);
+    // setFormData({
+    //   dateOfBirth: "",
+    //   location: "",
+    //   latitude: "",
+    //   longitude: "",
+    // });
   };
 
   return (
@@ -101,7 +102,7 @@ const PanchangInputCard = ({ imageSrc, title }) => {
                     e.target.showPicker();
                   }
                 }}
-                max={new Date().toISOString().split("T")[0]}
+                // max={new Date().toISOString().split("T")[0]}
               />
               {errors.dateOfBirth && (
                 <ErrorText>{errors.dateOfBirth}</ErrorText>
