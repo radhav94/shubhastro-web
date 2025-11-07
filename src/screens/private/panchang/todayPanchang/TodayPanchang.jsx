@@ -12,7 +12,7 @@ import { MdCalendarMonth } from "react-icons/md";
 import { HiOutlineSwitchHorizontal } from "react-icons/hi";
 import { FaRegMoon } from "react-icons/fa6";
 import { PanchangInputCard } from "../../../../component";
-import PanchangCard from "../../../../component/UI/cards/panchangCard";
+import PanchangCards from "../../../../component/UI/cards/PanchangCards";
 
 const TodayPanchang = () => {
   const [data, onCardClick, onSubmit, zodiacDetails, onChat] =
@@ -193,16 +193,16 @@ const TodayPanchang = () => {
         {/* <Blogs /> */}
       </div>
       <div>
-        <PanchangCard data={monthData} muhratData={muhratData} />
-        <PanchangCard title="Sun and Moon Calculations" data={todayData} />
-        <PanchangCard
+        <PanchangCards data={monthData} muhratData={muhratData} />
+        <PanchangCards title="Sun and Moon Calculations" data={todayData} />
+        <PanchangCards
           title="Nakshatra"
           data={nakshatraData}
           summary={panchangData?.nakshatra?.details?.summary}
         />
-        <PanchangCard title="Tithi" data={tithiData} />
-        <PanchangCard title="Yog" data={yogData} />
-        <PanchangCard title="Karan" data={karanData} />
+        <PanchangCards title="Tithi" data={tithiData} />
+        <PanchangCards title="Yog" data={yogData} />
+        <PanchangCards title="Karan" data={karanData} />
       </div>
     </div>
   );

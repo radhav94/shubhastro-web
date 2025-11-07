@@ -6,7 +6,7 @@ import styles from "./PanchangCard.module.scss";
  * @param {string} title - Optional title for the card
  * @param {Array|Object} data - Data can be an array of { key, value, icon } or an object { key: value }
  */
-const PanchangCard = ({ title, data, muhratData, summary }) => {
+const PanchangCards = ({ title, data, muhratData, summary }) => {
   if (!data || Object.keys(data).length === 0) return null;
 
   // Support both object and array formats
@@ -60,4 +60,4 @@ const PanchangCard = ({ title, data, muhratData, summary }) => {
   );
 };
 
-export default PanchangCard;
+export default PanchangCards;
