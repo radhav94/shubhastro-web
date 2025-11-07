@@ -1,17 +1,8 @@
 import React from "react";
 import { useTodayPanchang } from "./useTodayPanchang";
 import InternalBanner from "../../../../component/UI/cards/internalBanner/InternalBanner";
-import {
-  ContentCard,
-  PanchangInputCard,
-  PrimaryText,
-} from "../../../../component";
 import styles from "./TodayPanchang.module.scss";
-import { appColors } from "../../../../utils/theme";
-import Astrologers from "../../home/components/astrologers/Astrologers";
-import Blogs from "../../home/components/blogs/Blogs";
 import { useFetchAdvancePanchangQuery } from "../../../../redux/api/panchang/panchangApi";
-import PanchangCard from "../../../../component/UI/cards/panchangCard";
 import { FaSun, FaMoon } from "react-icons/fa";
 import { TbSunset2 } from "react-icons/tb";
 import { GrSign } from "react-icons/gr";
@@ -20,6 +11,8 @@ import { GiMoonBats, GiStonePath } from "react-icons/gi";
 import { MdCalendarMonth } from "react-icons/md";
 import { HiOutlineSwitchHorizontal } from "react-icons/hi";
 import { FaRegMoon } from "react-icons/fa6";
+import { PanchangInputCard } from "../../../../component";
+import PanchangCard from "../../../../component/UI/cards/panchangCard";
 
 const TodayPanchang = () => {
   const [data, onCardClick, onSubmit, zodiacDetails, onChat] =
@@ -89,7 +82,7 @@ const TodayPanchang = () => {
   ];
   const muhratData = {
     abhijit: {
-      title: "Abhijit Muhurta",
+      title: "Abhijit Muhurat",
       end: panchangData?.abhijit_muhurta?.end,
       start: panchangData?.abhijit_muhurta?.start,
     },
