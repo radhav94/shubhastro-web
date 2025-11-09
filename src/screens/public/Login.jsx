@@ -23,24 +23,23 @@ const Login = () => {
     }
 
     const payload = {
-    phoneNumber: mobileNumber,
-    type: "CUSTOMER"
-    // "type": "ASTROLOGER"
-    // "otp": 8593
-}
+      phoneNumber: mobileNumber,
+      type: "CUSTOMER",
+      // "type": "ASTROLOGER"
+      // "otp": 8593
+    };
 
     try {
       const response = await AuthServices.loginWithPhone(payload);
       if (response.status) {
         navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
-          state: { phoneNumber: mobileNumber},
-        }
-      );
+          state: { phoneNumber: mobileNumber },
+        });
       } else {
         Toast.error("Error", response.message);
       }
     } catch (error) {
-      Toast.error("An unexpected error occurred in handleSendOtp", error);
+      Toast.error(response.message, error);
       navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
         state: { phoneNumber: mobileNumber, resendOtp: handleSendOtp },
       });
@@ -111,9 +110,7 @@ const Login = () => {
         </div> */}
 
         <div className={styles.byProceeding}>
-          By proceeding, you agree to our{" "}
-          <a>T&C</a> &{" "}
-          <a>Privacy Policy</a>
+          By proceeding, you agree to our <a>T&C</a> & <a>Privacy Policy</a>
         </div>
 
         {/* <div className={styles.whatsapp}>

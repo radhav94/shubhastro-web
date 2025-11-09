@@ -77,7 +77,7 @@ const TopBar = () => {
             </button>
 
             {/* Sign In CTA Button */}
-            {/* {!isLoggedIn ? (
+            {!isLoggedIn ? (
               <button
                 className={`${styles.ctaButton} ${styles.hideOnMobile}`}
                 onClick={() => navigate("/login")}
@@ -91,7 +91,7 @@ const TopBar = () => {
               >
                 Log out
               </button>
-            )} */}
+            )}
           </div>
         </div>
       </header>
