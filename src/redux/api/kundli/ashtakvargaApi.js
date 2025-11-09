@@ -2,18 +2,14 @@ import { pythonApi } from "../baseApi/pythonApi";
 
 export const ashtakvargaApi = pythonApi.injectEndpoints({
   endpoints: (builder) => ({
-
-    getAshtakvargaChart: builder.mutation({
-      query: ({ data }) => ({
-        url: 'create-astakvarg-kundali-custom',
+    fetchAshtakvargaChart: builder.query({
+      query: ({ payload }) => ({
+        url: "create-astakvarg-kundali-custom",
         method: "POST",
-        body: data,
+        body: payload,
       }),
     }),
-
   }),
 });
 
-export const {
-    useGetAshtakvargaChartMutation
-} = ashtakvargaApi;
+export const { useFetchAshtakvargaChartQuery } = ashtakvargaApi;

@@ -2,71 +2,70 @@ import { baseApi } from "../baseApi/baseApi";
 
 export const kundliApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    
-    getBirthDetails: builder.mutation({
-      query: (data) => ({
+    fetchBirthDetails: builder.query({
+      query: ({ payload }) => ({
         url: "birth_details",
         method: "POST",
-        body: data,
+        body: payload,
       }),
     }),
 
-    getBasicPanchang: builder.mutation({
-      query: (data) => ({
+    getBasicPanchang: builder.query({
+      query: ({ payload }) => ({
         url: "basic_panchang",
         method: "POST",
-        body: data,
+        body: payload,
       }),
     }),
 
-    getAstroDetails: builder.mutation({
-      query: (data) => ({
+    getAstroDetails: builder.query({
+      query: ({ payload }) => ({
         url: "astro_details",
         method: "POST",
-        body: data,
+        body: payload,
       }),
     }),
 
-     getPlanets: builder.mutation({
-      query: (data) => ({
+    getPlanets: builder.query({
+      query: ({ payload }) => ({
         url: "planets",
         method: "POST",
-        body: data,
+        body: payload,
       }),
     }),
-  
-    getKpDetails: builder.mutation({
-      query: (data) => ({
+
+    getKpDetails: builder.query({
+      query: ({ payload }) => ({
         url: "kp_planets",
         method: "POST",
-        body: data,
+        body: payload,
       }),
     }),
 
-    getChart: builder.mutation({
-      query: ({ chartType, data }) => ({
+    getChart: builder.query({
+      query: ({ chartType, payload }) => ({
         url: `horo_chart_image/${chartType}`,
         method: "POST",
-        body: data,
+        body: payload,
       }),
     }),
 
-    getYoginiDasha: builder.mutation({
-      query: ({ data }) => ({
-        url: 'current_yogini_dasha',
+    getYoginiDasha: builder.query({
+      query: ({ payload }) => ({
+        url: "current_yogini_dasha",
         method: "POST",
-        body: data,
+        body: payload,
       }),
     }),
   }),
 });
 
 export const {
-  useGetBirthDetailsMutation,
-  useGetBasicPanchangMutation,
-  useGetAstroDetailsMutation,
-  useGetPlanetsMutation,
-  useGetKpDetailsMutation,
-  useGetChartMutation,
-  useGetYoginiDashaMutation
+  useFetchBirthDetailsQuery,
+  useGetBasicPanchangQuery,
+  useGetAstroDetailsQuery,
+  useGetPlanetsQuery,
+  useGetKpDetailsQuery,
+  useGetChartQuery,
+  useGetYoginiDashaQuery,
 } = kundliApi;
