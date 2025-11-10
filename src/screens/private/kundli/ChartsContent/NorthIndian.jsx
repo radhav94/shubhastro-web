@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import DynamicChart from "../../../../component/UI/charts/kundli/DynamicChart";
 import styles from "./ChartsContent.module.scss";
 import { useGetChartQuery } from "../../../../redux/api/kundli/kundliApi";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 const NorthIndian = () => {
   const payload = useSelector((state) => state?.form?.kundliPayload);
 
@@ -34,6 +35,7 @@ const NorthIndian = () => {
   function getSvgUrl(svgString) {
     return svgString ? `data:image/svg+xml;base64,${btoa(svgString)}` : null;
   }
+  const loading = charts?.some((chart) => chart?.isLoading);
 
   // Usage
   const svgChalitUrl = getSvgUrl(charts[0]?.data);
@@ -58,6 +60,7 @@ const NorthIndian = () => {
 
   return (
     <div>
+      <PrimaryLoader isLoading={loading} />
       <div className={styles.mainContainer}>
         <div className={styles.grid}>
           <DynamicChart title="Chalit" src={svgChalitUrl} />

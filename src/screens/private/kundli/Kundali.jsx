@@ -91,8 +91,8 @@ const Kundali = () => {
       content: <DashaContent />,
     },
     {
-      label: "Free Report",
-      // content: <FreeReport userData={userData} data={report} />,
+      label: "Dosh",
+      content: <FreeReport />,
     },
   ];
 

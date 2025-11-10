@@ -1,7 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
 import styles from "./KundaliContent.module.scss";
-import { PrimaryText } from "../../../../component";
 import { appColors } from "../../../../utils/theme";
 import DynamicTable from "../../../../component/UI/table/kundli/DynamicTable";
 import DynamicChart from "../../../../component/UI/charts/kundli/DynamicChart";
@@ -11,6 +10,7 @@ import {
 } from "../../../../redux/api/kundli/kundliApi";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useSelector } from "react-redux";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -64,26 +64,31 @@ const NorthIndian = () => {
     ? `data:image/svg+xml;base64,${btoa(charts[1]?.data?.svg || "")}`
     : null;
 
+  const loading = isLoading || charts?.some((chart) => chart?.isLoading);
+
   return (
     <div>
-      <div className={styles.mainContainer}>
-        <div className={styles.grid}>
-          {/* Lagna / Ascendant Chart */}
-          <DynamicChart title="Lagna / Ascendant Chart" src={svgBirthUrl} />
+      <PrimaryLoader isLoading={loading} />
+      {isSuccess && charts[0]?.isSuccess && charts[1]?.isSuccess && (
+        <div className={styles.mainContainer}>
+          <div className={styles.grid}>
+            {/* Lagna / Ascendant Chart */}
+            <DynamicChart title="Lagna / Ascendant Chart" src={svgBirthUrl} />
 
-          {/* Navamsa Chart */}
-          <DynamicChart title="Navamsa" src={svgNavamsaUrl} />
+            {/* Navamsa Chart */}
+            <DynamicChart title="Navamsa" src={svgNavamsaUrl} />
+          </div>
+
+          {/* Planetary Table */}
+          {planets?.length > 0 && (
+            <DynamicTable
+              title="Planets"
+              headers={planetaryHeaders}
+              data={planets}
+            />
+          )}
         </div>
-
-        {/* Planetary Table */}
-        {planets?.length > 0 && (
-          <DynamicTable
-            title="Planets"
-            headers={planetaryHeaders}
-            data={planets}
-          />
-        )}
-      </div>
+      )}
     </div>
   );
 };

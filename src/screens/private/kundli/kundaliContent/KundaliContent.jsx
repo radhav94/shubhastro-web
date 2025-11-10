@@ -20,16 +20,18 @@ const KundaliContent = () => {
 
   return (
     <div>
-      <div className="flex mb-4">
-        <PrimaryText isSemiBold size_20 color={appColors.tri}>
-          {userDetails?.name || "--"}
-        </PrimaryText>
-        <div className="mr-2 ml-2" />
-        <PrimaryText isSemiBold size_20 color={appColors.tri}>
-          ({userDetails?.day || "--"} - {userDetails?.month || "--"} -{" "}
-          {userDetails?.year || "--"})
-        </PrimaryText>
-      </div>
+      {userDetails && (
+        <div className="flex mb-4">
+          <PrimaryText isSemiBold size_20 color={appColors.tri}>
+            {userDetails?.name || "--"}
+          </PrimaryText>
+          <div className="mr-2 ml-2" />
+          <PrimaryText isSemiBold size_20 color={appColors.tri}>
+            ({userDetails?.day || "--"} - {userDetails?.month || "--"} -{" "}
+            {userDetails?.year || "--"})
+          </PrimaryText>
+        </div>
+      )}
       <div className={styles.mainContainer}>
         {/* <SwitchTabs tabs={tabs} defaultTab="north" /> */}
         <NorthIndian />

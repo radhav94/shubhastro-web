@@ -9,6 +9,7 @@ import {
   useGetKpDetailsQuery,
 } from "../../../../redux/api/kundli/kundliApi";
 import { skipToken } from "@reduxjs/toolkit/query";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -90,11 +91,12 @@ const cuspHeaders = [
 
 const KpContent = () => {
   const payload = useSelector((state) => state?.form?.kundliPayload);
-  const {
-    data: kpPlanets,
-    isSuccess,
-    isLoading,
-  } = useGetKpDetailsQuery(payload ? { payload } : skipToken);
+  let kpPlanets;
+  // const {
+  //   data: kpPlanets,
+  //   isSuccess,
+  //   isLoading,
+  // } = useGetKpDetailsQuery(payload ? { payload } : skipToken);
   const { data: chalitChart, isLoading: chalitLoading } = useGetChartQuery(
     payload ? { chartType: "chalit", payload } : skipToken
   );
@@ -104,6 +106,7 @@ const KpContent = () => {
 
   return (
     <div className={styles.mainContainer}>
+      <PrimaryLoader isLoading={chalitLoading} />
       <div className={styles.grid}>
         {/* Left: Chalit Chart */}
         <DynamicChart title="Chalit Chart" src={svgChalitUrl} />
