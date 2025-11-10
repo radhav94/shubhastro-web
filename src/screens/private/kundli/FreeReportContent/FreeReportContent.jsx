@@ -1,7 +1,7 @@
 import SwitchTabs from "../../../../component/UI/tabs/switchtabs/SwitchTabs";
 import KaalSarp from "./kaalsarp/KaalSarp";
 import Mangal from "./mangal/Mangal";
-import Manglik from "./Manglik/Manglik";
+import Manglik from "./manglik/Manglik";
 import Pitra from "./pitra/Pitra";
 
 const FreeReport = ({ data }) => {
