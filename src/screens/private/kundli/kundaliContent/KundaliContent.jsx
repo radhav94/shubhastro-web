@@ -6,11 +6,12 @@ import { appColors } from "../../../../utils/theme";
 import NorthIndian from "./NorthIndian";
 import SouthIndian from "./SouthIndian";
 import SwitchTabs from "../../../../component/UI/tabs/switchtabs/SwitchTabs";
+import { useSelector } from "react-redux";
+import { useGetPlanetsQuery } from "../../../../redux/api/kundli/kundliApi";
+import { skipToken } from "@reduxjs/toolkit/query";
 
-
-
-
-const KundaliContent = ({ userData, data }) => {
+const KundaliContent = () => {
+  const userDetails = useSelector((state) => state?.form?.userDetails);
 
   // const tabs = [
   //   { label: "North Indian", value: "north", component: () => <NorthIndian data={data} /> },
@@ -21,19 +22,18 @@ const KundaliContent = ({ userData, data }) => {
     <div>
       <div className="flex mb-4">
         <PrimaryText isSemiBold size_20 color={appColors.tri}>
-          {userData?.name || "--"}
+          {userDetails?.name || "--"}
         </PrimaryText>
         <div className="mr-2 ml-2" />
         <PrimaryText isSemiBold size_20 color={appColors.tri}>
-          ({userData?.day || "--"} - {userData?.month || "--"} -{" "}
-          {userData?.year || "--"})
+          ({userDetails?.day || "--"} - {userDetails?.month || "--"} -{" "}
+          {userDetails?.year || "--"})
         </PrimaryText>
       </div>
       <div className={styles.mainContainer}>
-      {/* <SwitchTabs tabs={tabs} defaultTab="north" /> */}
-      <NorthIndian data={data} />
-
-    </div>
+        {/* <SwitchTabs tabs={tabs} defaultTab="north" /> */}
+        <NorthIndian />
+      </div>
     </div>
   );
 };

@@ -5,6 +5,12 @@ import { PrimaryText } from "../../../../component";
 import { appColors } from "../../../../utils/theme";
 import DynamicTable from "../../../../component/UI/table/kundli/DynamicTable";
 import DynamicChart from "../../../../component/UI/charts/kundli/DynamicChart";
+import {
+  useGetChartQuery,
+  useGetPlanetsQuery,
+} from "../../../../redux/api/kundli/kundliApi";
+import { skipToken } from "@reduxjs/toolkit/query";
+import { useSelector } from "react-redux";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -39,40 +45,43 @@ const planetaryHeaders = [
   { label: "House", key: "house" },
 ];
 
+const NorthIndian = () => {
+  const payload = useSelector((state) => state?.form?.kundliPayload);
+  const { data, isSuccess, isLoading } = useGetPlanetsQuery(
+    payload ? { payload } : skipToken
+  );
+  const planets = data?.filter((p) => p?.name !== "Ascendant");
 
-const NorthIndian = ({ data }) => {
-  const planets = data?.planetData?.filter((p) => p?.name !== "Ascendant");
-  const svgBirthUrl = data?.birthChart?.svg
-    ? `data:image/svg+xml;base64,${btoa(data?.birthChart?.svg || "")}`
+  const chartTypes = ["D1", "D9"];
+  const charts = chartTypes.map((type) =>
+    useGetChartQuery(payload ? { chartType: type, payload } : skipToken)
+  );
+
+  const svgBirthUrl = charts[0]?.data?.svg
+    ? `data:image/svg+xml;base64,${btoa(charts[0]?.data?.svg || "")}`
     : null;
-  const svgNavamsaUrl = data?.navamasaChart?.svg
-    ? `data:image/svg+xml;base64,${btoa(data?.navamasaChart?.svg || "")}`
+  const svgNavamsaUrl = charts[1]?.data?.svg
+    ? `data:image/svg+xml;base64,${btoa(charts[1]?.data?.svg || "")}`
     : null;
 
   return (
     <div>
-
-        <div className={styles.mainContainer}>
+      <div className={styles.mainContainer}>
         <div className={styles.grid}>
           {/* Lagna / Ascendant Chart */}
-          <DynamicChart title="Lagna / Ascendant Chart" src={svgBirthUrl}  />
+          <DynamicChart title="Lagna / Ascendant Chart" src={svgBirthUrl} />
 
           {/* Navamsa Chart */}
-          <DynamicChart title="Navamsa" src={svgNavamsaUrl}/>
+          <DynamicChart title="Navamsa" src={svgNavamsaUrl} />
         </div>
 
         {/* Planetary Table */}
-        {planets?.length > 0 ? (
-          <DynamicTable title="Planets" headers={planetaryHeaders} data={planets} />
-        ) : (
-          <motion.div
-            className={styles.contentCard}
-            variants={sectionVariants}
-            initial="hidden"
-            whileInView="visible"
-          >
-            <p>No planetary data available.</p>
-          </motion.div>
+        {planets?.length > 0 && (
+          <DynamicTable
+            title="Planets"
+            headers={planetaryHeaders}
+            data={planets}
+          />
         )}
       </div>
     </div>

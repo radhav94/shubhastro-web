@@ -4,6 +4,8 @@ import { IoTrashOutline } from "react-icons/io5";
 import { motion } from "framer-motion";
 import LocationSearch from "../../../../utils/location/locationSearch";
 import { PrimaryText } from "../../../../component";
+import { useDispatch } from "react-redux";
+import { setForm } from "../../../../redux/kundliform/formSlice";
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const months = [
@@ -91,7 +93,8 @@ const itemVariants = {
   visible: { y: 0, opacity: 1, transition: { duration: 0.5 } },
 };
 
-const KundaliHeader = ({ onGenerateClick }) => {
+const KundaliHeader = () => {
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     name: "",
     gender: "Male",
@@ -148,9 +151,11 @@ const KundaliHeader = ({ onGenerateClick }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (onGenerateClick) {
-      onGenerateClick(formData);
-    }
+
+    // if (onGenerateClick) {
+    //   onGenerateClick(formData);
+    // }
+    dispatch(setForm(formData));
   };
 
   const onDelete = (id) => {
@@ -162,7 +167,6 @@ const KundaliHeader = ({ onGenerateClick }) => {
       setFormData(initialFormData);
       setSelectedKundliId(null);
     }
-
   };
 
   return (

@@ -75,6 +75,7 @@ const kundliInfoData = [
       "Astrology doesn’t control you, it guides you. Your free kundli shows your strengths and challenges, but your actions matter most. Use this knowledge to live a better, more meaningful life.",
   },
 ];
+
 const monthMap = {
   Jan: 1,
   January: 1,
@@ -139,8 +140,8 @@ export const useKundli = () => {
       };
 
       const res = await KundaliSrvices.getKundliData(data);
-      const ashtakvargaResponse = await getAstakVargaData(ashtakVargaData)
-      const freeReportResponse = await KundaliSrvices.getData(data)
+      const ashtakvargaResponse = await getAstakVargaData(ashtakVargaData);
+      const freeReportResponse = await KundaliSrvices.getData(data);
       setAshtakvarga(ashtakvargaResponse);
 
       setBasicData({
@@ -155,46 +156,46 @@ export const useKundli = () => {
         navamasaChart: res.navamsa_chart || "",
       });
       setKpDetails({
-        rulingPlanets:res.ruling_planets||null,
-        chalitChart:res.chalit_chart || ""
-      })
+        rulingPlanets: res.ruling_planets || null,
+        chalitChart: res.chalit_chart || "",
+      });
       setDasha({
-        yogini:res.yogini|| null
-      })
+        yogini: res.yogini || null,
+      });
       setReport({
-        general:{
-          planatery:{
-            sun:freeReportResponse.sun,
-            moon:freeReportResponse.moon,
-            mars:freeReportResponse.mars,
-            mercury:freeReportResponse.mercury,
-            jupiter:freeReportResponse.jupiter,
-            saturn:freeReportResponse.saturn,
-            venus:freeReportResponse.venus,
-          }
-        }
-      })
+        general: {
+          planatery: {
+            sun: freeReportResponse.sun,
+            moon: freeReportResponse.moon,
+            mars: freeReportResponse.mars,
+            mercury: freeReportResponse.mercury,
+            jupiter: freeReportResponse.jupiter,
+            saturn: freeReportResponse.saturn,
+            venus: freeReportResponse.venus,
+          },
+        },
+      });
       setCharts({
-        chalitChart:res.chalit_chart || "",
-        sunChart:res.sunChart || "",
-        moonChart:res.moonChart || "",
-        birthChart:res.birth_chart || "",
-        horaChart:res.horaChart || "",
-        drekkanaChart:res.drekkanaChart || "",
-        chaturthamsaChart:res.chaturthamsaChart || "",
-        saptamsaChart:res.saptamsaChart || "",
-        navamsaChart:res.navamsa_chart || "",
-        dasamsaChart:res.dasamsaChart || "",
-        dwadasamsaChart:res.dwadasamsaChart || "",
-        shodasamsaChart:res.shodasamsaChart || "",
-        vimsamsaChart:res.vimsamsaChart || "",
-        chaturvisamsaChart:res.chaturvisamsaChart || "",
-        saptavisamsaChart:res.saptavisamsaChart || "",
-        trimsamsaChart:res.trimsamsaChart || "",
-        khavedamsaChart:res.khavedamsaChart || "",
-        akshavedamsaChart:res.akshavedamsaChart || "",
-        shashtiamsaChart:res.shashtiamsaChart || "",
-      })
+        chalitChart: res.chalit_chart || "",
+        sunChart: res.sunChart || "",
+        moonChart: res.moonChart || "",
+        birthChart: res.birth_chart || "",
+        horaChart: res.horaChart || "",
+        drekkanaChart: res.drekkanaChart || "",
+        chaturthamsaChart: res.chaturthamsaChart || "",
+        saptamsaChart: res.saptamsaChart || "",
+        navamsaChart: res.navamsa_chart || "",
+        dasamsaChart: res.dasamsaChart || "",
+        dwadasamsaChart: res.dwadasamsaChart || "",
+        shodasamsaChart: res.shodasamsaChart || "",
+        vimsamsaChart: res.vimsamsaChart || "",
+        chaturvisamsaChart: res.chaturvisamsaChart || "",
+        saptavisamsaChart: res.saptavisamsaChart || "",
+        trimsamsaChart: res.trimsamsaChart || "",
+        khavedamsaChart: res.khavedamsaChart || "",
+        akshavedamsaChart: res.akshavedamsaChart || "",
+        shashtiamsaChart: res.shashtiamsaChart || "",
+      });
       setUserData(e);
       setDataIsFilled(true);
     } catch (error) {
@@ -221,6 +222,6 @@ export const useKundli = () => {
     charts,
     ashtakvarga,
     dasha,
-    report
+    report,
   ];
 };

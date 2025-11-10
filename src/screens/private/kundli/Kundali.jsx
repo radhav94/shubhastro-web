@@ -14,6 +14,13 @@ import DashaContent from "./DashaContent/DashaContent";
 import { IoMdCall } from "react-icons/io";
 import { IoChatbubble } from "react-icons/io5";
 import FreeReport from "./FreeReportContent/FreeReportContent";
+import {
+  useFetchBirthDetailsQuery,
+  useGetAstroDetailsQuery,
+  useGetBasicPanchangQuery,
+} from "../../../redux/api/kundli/kundliApi";
+import { useSelector } from "react-redux";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 const Kundali = () => {
   const [
@@ -35,62 +42,72 @@ const Kundali = () => {
     report,
   ] = useKundli();
 
+  const payload = useSelector((state) => state?.form?.kundliPayload);
+  const {
+    data: birthDetails,
+    isSuccess: isBirth,
+    isLoading: birthLoading,
+  } = useFetchBirthDetailsQuery(payload ? { payload } : skipToken);
+  const {
+    data: birthPanchang,
+    isSuccess: isPanchang,
+    isLoading: panchangLoading,
+  } = useGetBasicPanchangQuery(payload ? { payload } : skipToken);
+  const {
+    data: astroDetails,
+    isSuccess: isAstro,
+    isLoading: astroLoading,
+  } = useGetAstroDetailsQuery(payload ? { payload } : skipToken);
+
   const tabsData = [
     {
       label: "Basic",
-      content: <BasicContent basicData={basicData} userData={userData} />,
+      content: (
+        <BasicContent
+          birthDetails={birthDetails}
+          birthPanchang={birthPanchang}
+          astroDetails={astroDetails}
+        />
+      ),
     },
     {
       label: "Kundli",
-      content: <KundaliContent userData={userData} data={planetData} />,
+      content: <KundaliContent />,
     },
     {
       label: "KP",
-      content: <KpContent userData={userData} data={kpDetails} />,
+      content: <KpContent />,
     },
     {
       label: "Ashtakvarga",
-      content: <AshtakvargaContent userData={userData} data={ashtakvarga} />,
+      content: <AshtakvargaContent />,
     },
     {
       label: "Charts",
-      content: <ChartsContent userData={userData} data={charts} />,
+      content: <ChartsContent />,
     },
     {
       label: "Dasha",
-      content: <DashaContent userData={userData} data={dasha} />,
+      content: <DashaContent />,
     },
     {
       label: "Free Report",
-      content: <FreeReport userData={userData} data={report} />,
+      // content: <FreeReport userData={userData} data={report} />,
     },
   ];
 
   return (
     <>
-      <KundaliHeader onGenerateClick={onGenerateClick} />
-      <PrimaryLoader isLoading={isLoading} />
+      <KundaliHeader />
+      <PrimaryLoader
+        isLoading={birthLoading || panchangLoading || astroLoading}
+      />
 
-      {dataIsFilled ? (
+      {isBirth || isPanchang || isAstro ? (
         <PrimaryTabs tabs={tabsData} />
       ) : (
         <HtmlContentCard sections={kundliInfoData} />
       )}
-      {/* <div className="bg-[#ffcb03] m-6 h-48 rounded-md" >
-        <div>
-          <p className="text-center text-2xl py-4 px-52  text-gray-500" >Connect with an Astrologer on Call or Chat for more personalised detailed predictions.</p>
-          <div className="flex justify-center" >
-            <div className="flex items-center justify-center rounded-full m-3 my-1 bg-white p-5 hover:text-white hover:bg-gray-700 transition-all duration-300" >
-              <IoMdCall size={26} color="#ffcb03" />
-              <button className="mx-1">Talk to Astrologer</button>
-            </div>
-            <div className="flex items-center justify-center rounded-full m-3 my-1 bg-white p-5 hover:text-white hover:bg-gray-700 transition-all duration-300" >
-              <IoChatbubble size={26} color="#ffcb03" />
-              <button className="mx-1">Chat to Astrologer</button>
-            </div>
-          </div>
-        </div>
-      </div> */}
     </>
   );
 };
