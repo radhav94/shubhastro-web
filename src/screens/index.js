@@ -13,12 +13,11 @@ export { default as TalkToAstrologer } from "./private/talkToAstrologer/TalkToAs
 export { default as Profile } from "./private/profile/Profile";
 export { default as Horoscope } from "./private/horoscope/Horoscope";
 export { default as DetailHoroscope } from "./private/horoscope/detailHoroscope/DetailHoroscope";
-export {default as SignScreen} from "./private/horoscope/SignScreen"
-export {default as Monthly} from "./private/horoscope/monthlyHoroscope/Monthly"
-export {default as Yesterday} from "./private/horoscope/yesterdayhoroscope/Yesterday"
-export {default as Tomorrow} from "./private/horoscope/tomorrowhoroscope/Tomorrow"
-export {default as Daily} from "./private/horoscope/dailyHoroscope/Daily"
-
+export { default as SignScreen } from "./private/horoscope/SignScreen";
+export { default as Monthly } from "./private/horoscope/monthlyHoroscope/Monthly";
+export { default as Yesterday } from "./private/horoscope/yesterdayhoroscope/Yesterday";
+export { default as Tomorrow } from "./private/horoscope/tomorrowhoroscope/Tomorrow";
+export { default as Daily } from "./private/horoscope/dailyHoroscope/Daily";
 
 export { default as Panchang } from "./private/panchang/Panchang";
 export { default as TodayPanchang } from "./private/panchang/todayPanchang/TodayPanchang";
@@ -27,6 +26,12 @@ export { default as Tithi } from "./private/panchang/tithi/Tithi";
 
 export { default as Kundli } from "./private/kundli/Kundali";
 export { default as Numerology } from "./private/numerology/Numerology";
+
+export { default as MatchMaking } from "./private/matchmaking/MatchMaking";
+
+export { default as Sadesati } from "./private/sadesati/Sadesati";
+
+export { default as MatchDetails } from "./private/matchmaking/details/MatchDetails";
 
 export { default as Tarot } from "./private/tarot/Tarot";
 export { default as OneCardTarot } from "./private/tarot/oneCardTarot/OneCardTarot";

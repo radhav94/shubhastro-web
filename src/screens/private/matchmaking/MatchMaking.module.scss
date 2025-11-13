@@ -1,0 +1,134 @@
+.dailyContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 10px;
+}
+
+/* ---------- SWITCH TABS ---------- */
+.switchTabs {
+  display: flex;
+  justify-content: center;
+  background: #fff;
+  border-radius: 30px;
+  border: 1px solid grey;
+  overflow: hidden;
+  width: 50%;
+  margin: 15px auto;
+  cursor: pointer;
+
+  span {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    font-weight: 500;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    border-radius: 30px;
+
+    // &:hover {
+    //   background: #fff6c5;
+    // }
+  }
+}
+
+.activeTab {
+  background: #f9d423;
+  color: #000;
+  font-weight: 600;
+}
+
+/* ---------- FORM AREA ---------- */
+.formArea {
+  display: flex;
+  flex-direction: column;
+  // align-items: center;
+  width: 50%;
+  margin: 0 auto;
+  background-color: white;
+  padding: 1rem 5rem;
+  border-radius: 20px;
+  box-shadow: 0px 4px 16px 0px rgba(0, 0, 0, 0.25);
+  
+}
+
+/* ---------- FORM CONTAINER ---------- */
+.kundliFormContainer {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 550px;
+  box-shadow: 0px 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- FORM TITLE ---------- */
+.formTitle {
+  text-align: center;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+/* ---------- FIELDS ---------- */
+.formFields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  text-align: start;
+
+  label {
+    font-weight: 500;
+    color: #444;
+    margin-bottom: 6px;
+  }
+
+  input {
+    padding: 10px 14px;
+    border: 1px solid #cfcfcf;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+
+    &:focus {
+      border-color: #f9d423;
+      box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.25);
+      outline: none;
+    }
+  }
+
+  .error {
+    color: #d9534f;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+}
+
+/* ---------- SUBMIT BUTTON ---------- */
+.generateBtn,
+.submitBtn {
+  margin-top: 20px;
+  background: #f9d423;
+  color: #000;
+  font-weight: 600;
+  font-size: 16px;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background 0.25s ease-in-out;
+
+  // &:hover {
+  //   background: #e3bf41;
+  // }
+}
+
+/* ---------- ERROR INPUT STYLE ---------- */
+.inputError {
+  border: 1px solid #d9534f !important;
+  box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.15);
+}

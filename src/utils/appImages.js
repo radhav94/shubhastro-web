@@ -45,6 +45,7 @@ import Progress from "../assets/images/progress.png";
 import Profile from "../assets/images/sanket_profile.jpeg";
 import AstroLiveBg from "../assets/images/astroLiveBg.png";
 import Dosh from "../assets/images/dosh.png";
+import Ring from "../assets/images/ring.png";
 export const AppImages = {
   Hero,
   Astro1,
@@ -60,6 +61,7 @@ export const AppImages = {
   AstroLiveBg,
   Profile,
   Dosh,
+  Ring,
 };
 
 //svgs

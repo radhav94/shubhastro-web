@@ -33,7 +33,10 @@ import {
   SignScreen,
   Monthly,
   Yesterday,
-  Tomorrow
+  Tomorrow,
+  MatchMaking,
+  Sadesati,
+  MatchDetails,
 } from "../../screens";
 
 export const PATH = {
@@ -82,29 +85,28 @@ export const PATH = {
       path: "/horoscopes",
       element: Horoscope,
       DAILY: {
-        path: '/horoscopes/daily-horoscope',
+        path: "/horoscopes/daily-horoscope",
         element: SignScreen,
-
       },
-      DAILY_DETAIL: { 
-        path: '/horoscopes/daily-horoscope/:sign',
+      DAILY_DETAIL: {
+        path: "/horoscopes/daily-horoscope/:sign",
         element: Daily,
       },
       MONTHLY: {
-        path: '/horoscopes/monthly-horoscope',
-        element: SignScreen
+        path: "/horoscopes/monthly-horoscope",
+        element: SignScreen,
       },
-      MONTHLY_DETAIL: { 
-        path: '/horoscopes/monthly-horoscope/:sign',
-        element:Monthly ,
+      MONTHLY_DETAIL: {
+        path: "/horoscopes/monthly-horoscope/:sign",
+        element: Monthly,
       },
       YESTERDAY: {
-        path: '/horoscopes/yesterday-horoscope/:sign',
-        element: Yesterday
+        path: "/horoscopes/yesterday-horoscope/:sign",
+        element: Yesterday,
       },
       TOMORROW: {
-        path: '/horoscopes/tomorrow-horoscope/:sign',
-        element: Tomorrow
+        path: "/horoscopes/tomorrow-horoscope/:sign",
+        element: Tomorrow,
       },
     },
     HOROSCOPEDETAILS: {
@@ -129,10 +131,22 @@ export const PATH = {
       path: "/panchang/tithi",
       element: Tithi,
     },
+    MATCHMAKING: {
+      path: "/matchmaking",
+      element: MatchMaking,
+    },
+    MATCHMAKING_DETAILS: {
+      path: "/matchmaking/match-making-details",
+      element: MatchDetails,
+    },
 
     KUNDLI: {
       path: "/kundli",
       element: Kundli,
+    },
+    SADESATI: {
+      path: "/sadesati",
+      element: Sadesati,
     },
     NUMEROLOGY: {
       path: "/numerology",

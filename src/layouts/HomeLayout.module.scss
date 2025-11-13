@@ -5,7 +5,10 @@ $mobile-screen-width: 500px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #fff;
+  background: white;
+  // background: linear-gradient(to bottom,#b49f4b 30%, #ffffff 60%, #fff7cc 10%, );
+  // background: linear-gradient(to bottom, #606385 10%, white 80%);
+  
 
   justify-content: flex-start;
 
@@ -13,6 +16,7 @@ $mobile-screen-width: 500px;
     max-width: 1300px;
     width: 100%;
     margin: 0 auto;
+    // align-content: center;
     padding: 0 12px;
     display: flex;
     flex-direction: column;

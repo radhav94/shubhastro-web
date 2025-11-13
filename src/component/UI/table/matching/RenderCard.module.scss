@@ -1,0 +1,73 @@
+/* ----- Card Styling ----- */
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 520px;
+  overflow: hidden;
+  transition: 0.3s ease;
+
+  // &:hover {
+  //   transform: translateY(-3px);
+  // }
+
+  .header {
+    background: #f4d24b;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .headerLeft {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .icon {
+        font-size: 18px;
+        color: #000;
+      }
+
+      .title {
+        font-weight: 600;
+        color: #000;
+      }
+
+      .tag {
+        background: #333;
+        color: #fff;
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid #eee;
+      font-size: 16px;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .label {
+        // font-weight: 600;
+        color: #333;
+      }
+
+      .value {
+        color: #444;
+      }
+    }
+  }
+}

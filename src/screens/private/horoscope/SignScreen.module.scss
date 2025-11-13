@@ -2,7 +2,7 @@
 .dailyContainer {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  // padding: 20px;
 }
 
 .cardsContainer {
@@ -19,7 +19,7 @@
   }
   
   // Large desktop (optional): 3 cards
-  @media (min-width: 1400px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  // @media (min-width: 1400px) {
+  //   grid-template-columns: repeat(3, 1fr);
+  // }
 }
