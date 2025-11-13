@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginLayout from "../../layouts/loginlayout/LoginLayout";
 import { PrimaryText, Toast } from "../../component";
@@ -8,25 +8,26 @@ import * as AuthServices from "../../services/appServices/authService";
 
 const Login = () => {
   const navigate = useNavigate();
-
   const [mobileNumber, setMobileNumber] = useState("");
   const [whatsappOptIn, setWhatsappOptIn] = useState(true);
 
-  const isMobileNumberValid = mobileNumber.length == 10;
+  const isMobileNumberValid = mobileNumber.length === 10;
 
-  // In your React component file
+  // ✅ Check if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token"); // or sessionStorage
+    if (token) {
+      navigate(PATH.privateRoutes.HOME.path, { replace: true });
+    }
+  }, [navigate]);
 
   const handleSendOtp = async (event) => {
     event.preventDefault();
-    if (!isMobileNumberValid) {
-      return;
-    }
+    if (!isMobileNumberValid) return;
 
     const payload = {
       phoneNumber: mobileNumber,
       type: "CUSTOMER",
-      // "type": "ASTROLOGER"
-      // "otp": 8593
     };
 
     try {
@@ -34,14 +35,16 @@ const Login = () => {
       if (response.status) {
         navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
           state: { phoneNumber: mobileNumber },
+          replace: true, // ✅ Replace history to prevent back navigation
         });
       } else {
         Toast.error("Error", response.message);
       }
     } catch (error) {
-      Toast.error(response.message, error);
+      Toast.error("Error", error?.message || "Something went wrong");
       navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
         state: { phoneNumber: mobileNumber, resendOtp: handleSendOtp },
+        replace: true,
       });
     }
   };
@@ -79,9 +82,7 @@ const Login = () => {
                   value={mobileNumber}
                   onChange={(e) => {
                     const value = e.target.value.replace(/\D/g, "");
-                    if (value.length <= 10) {
-                      setMobileNumber(value);
-                    }
+                    if (value.length <= 10) setMobileNumber(value);
                   }}
                   inputMode="numeric"
                   required
@@ -103,32 +104,9 @@ const Login = () => {
           </form>
         </div>
 
-        {/* <div>
-          <button type="button" className={styles.emailAccount}>
-            Have an email account?
-          </button>
-        </div> */}
-
         <div className={styles.byProceeding}>
           By proceeding, you agree to our <a>T&C</a> & <a>Privacy Policy</a>
         </div>
-
-        {/* <div className={styles.whatsapp}>
-          <label className={styles.checkBoxLabel}>
-            <input
-              type="checkbox"
-              checked={whatsappOptIn}
-              onChange={() => setWhatsappOptIn(!whatsappOptIn)}
-            />
-            <span className={styles.checkmark}></span>
-            Get updates on WhatsApp
-            <img
-              src="https://images.astroyogi.com/astroyogi/common/whats-app-Icon.svg"
-              alt="Whatsapp"
-              className={styles.whatsappIcon}
-            />
-          </label>
-        </div> */}
       </div>
     </LoginLayout>
   );

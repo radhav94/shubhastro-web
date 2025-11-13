@@ -19,10 +19,13 @@ import { PrimaryText } from "../../component";
 const TopBar = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+    const [scrolled, setScrolled] = useState(false);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
   const isLoggedIn = JSON.parse(localStorage.getItem("isLoggedIn"));
   const handleLogout = () => {
+    localStorage.removeItem("verifyOtpToken");
     navigate("/");
     localStorage.setItem("isLoggedIn", JSON.stringify(false));
   };
@@ -34,9 +37,23 @@ const TopBar = () => {
     setWalletBalance(Number(storedWallet.amount));
   }, []);
 
+    useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 40) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+
   return (
     <>
-      <header className={styles.topBar}>
+      <header  className={`${styles.topBar} ${scrolled ? styles.scrolled : ""}`}>
         <div className={styles.container}>
           <div className={styles.leftSection}>
             {isMobile && (

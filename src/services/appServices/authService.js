@@ -7,3 +7,12 @@ export const loginWithPhone = async (data) => {
 export const verifyOtp = async (data) => {
   return await publicRequest.post("/verifyOtp", data);
 };
+
+
+export const registerUser = async (data, token) => {
+  return await publicRequest.post("/registerUser", data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

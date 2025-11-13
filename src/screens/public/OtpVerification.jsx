@@ -13,33 +13,57 @@ const OtpVerification = () => {
   const location = useLocation();
   const { phoneNumber } = location.state || {};
   const [otp, setOtp] = useState("");
-  const [whatsappOptIn, setWhatsappOptIn] = useState(true);
   const [counter, setCounter] = useState(5);
 
   const [isTimerActive, setIsTimerActive] = useState(false);
 
   const isOtpComplete = otp.length === 6;
 
-  const handleVerifyOtp = async(event) => {
+
+
+
+
+
+  const handleVerifyOtp = async (event) => {
     event.preventDefault();
+
     const payload = {
-      phoneNumber:phoneNumber,
-      type:"CUSTOMER",
-      otp:parseInt(otp)
-    }
+      phoneNumber,
+      type: "CUSTOMER",
+      otp: parseInt(otp, 10),
+    };
+
     try {
       const response = await AuthServices.verifyOtp(payload);
-      if(response?.data?.statusCode===200){
-        Toast.success("Otp Verifies successfully");
-        // navigate(PATH.publicRoutes.REGISTER.path, { replace: true });
-        navigate(PATH.privateRoutes.HOME.path, { replace: true });
-        localStorage.setItem("isLoggedIn", JSON.stringify(true));
-      }else{
-        Toast.error("Error", response.message);
-      }
-      
+
+     if (response?.data?.statusCode === 200) {
+      const { isRegister, accessToken } = response?.data?.data || {};
+
+  // ✅ Save the OTP token here
+  if (accessToken) {
+    localStorage.setItem("verifyOtpToken", accessToken);
+  }
+
+  Toast.success("OTP verified successfully");
+  localStorage.setItem("isLoggedIn", JSON.stringify(true));
+
+  // if (isRegister === "false") {
+  //   navigate(PATH.publicRoutes.REGISTER.path, {
+  //     replace: true,
+  //     state: { from: location },
+  //   });
+  // } else {
+  //   navigate(PATH.privateRoutes.HOME.path, { replace: true });
+  // }
+  navigate(PATH.publicRoutes.REGISTER.path, {
+      replace: true,
+      state: { from: location },
+    });
+}
+
+
     } catch (error) {
-      Toast.error("An unexpected error occurred in handleSendOtp", error);
+      Toast.error(error?.response?.data?.message);
     }
   };
 
@@ -116,9 +140,8 @@ const OtpVerification = () => {
 
             <button
               type="submit"
-              className={`${styles.verifyButton} ${
-                !isOtpComplete ? styles.disabled : ""
-              }`}
+              className={`${styles.verifyButton} ${!isOtpComplete ? styles.disabled : ""
+                }`}
               disabled={!isOtpComplete}
             >
               Verify OTP

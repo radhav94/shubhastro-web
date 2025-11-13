@@ -48,10 +48,27 @@ $mobile-screen-width: 500px;
     overflow-y: auto;
   }
 
-  .outletDiv {
-    width: 100%;
-    padding: 10px 0;
-  }
+ .outletDiv {
+  width: 100%;
+  padding: 10px 0;
+}
+
+
+.fixedTopBar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 2000;
+
+  background: #ffffff;            // 👈 FIX
+  border-bottom: 1px solid #eee;  // 👈 Optional but looks premium
+}
+
+
+.topGap {
+  height: 125px; // same as TopBar height
+}
+
   .footerWrapper {
     width: 100%;
     max-width: 100vw;

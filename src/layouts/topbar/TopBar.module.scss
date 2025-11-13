@@ -9,18 +9,14 @@ $font-primary: "Poppins", sans-serif;
 
 // --- Main TopBar Styling ---
 .topBar {
-  position: sticky;
+  position: relative; // fixed positioning will be handled by parent
   top: 0;
-  width: 100%;
+  background: #fff;
   z-index: 1000;
-  // height: 70px;
-  background: "transparent";
-  // backdrop-filter: blur(12px);
-  // -webkit-backdrop-filter: blur(12px);
-
-  display: flex;
-  align-items: center;
 }
+
+
+
 
 .container {
   display: flex;
@@ -46,6 +42,8 @@ $font-primary: "Poppins", sans-serif;
   justify-content: space-around;
   align-items: center;
   cursor: pointer;
+  padding-top: 10px;   // 👈 THIS IS THE FIX (moves logo + text slightly down)
+
   img {
     height: 45px; // Adjusted for a sleeker look
     width: auto;
