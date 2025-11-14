@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../utils/routes/Paths";
 
 export const useTalkToAstrologer = () => {
-  const naviagte = useNavigate();
+  const navigate = useNavigate();
   const [openModal, setOpenModal] = useState({
     details: false,
     recharge: false,
@@ -667,21 +667,33 @@ export const useTalkToAstrologer = () => {
     }
   };
 
+  const onProfile = (data) => {
+    const storedWallet = JSON.parse(localStorage.getItem("wallet"));
+    // if (storedWallet != null) {
+    navigate(`/talk-to-astrologers/expert/${data.FirstName}`, {
+      state: { data: data },
+    });
+    return;
+    // }
+    // setOpenModal((prev) => ({ ...prev, details: true }));
+  };
   const onChat = (data) => {
     const storedWallet = JSON.parse(localStorage.getItem("wallet"));
     if (storedWallet != null) {
-      naviagte(`/astrologer/expert/${data.FirstName}`, {
+      // setOpenModal((prev) => ({ ...prev, details: true }));
+      navigate(`/talk-to-astrologers/chat/${data.AstrologerLoginId}`, {
         state: { data: data },
       });
+      // navigate(`/astrologer/chat/${data.AstrologerLoginId}`, {
+      //   state: { data: data },});
       return;
     }
-
     setOpenModal((prev) => ({ ...prev, details: true }));
   };
 
   const onRechargeNow = () => {
     setOpenModal((prev) => ({ ...prev, recharge: false }));
-    naviagte(PATH.privateRoutes.RECHARGE.path);
+    navigate(PATH.privateRoutes.RECHARGE.path);
   };
 
   return [
@@ -690,6 +702,7 @@ export const useTalkToAstrologer = () => {
     openModal,
     setOpenModal,
     onChat,
+    onProfile,
     handleSubmit,
     onRechargeNow,
   ];

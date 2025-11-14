@@ -16,10 +16,20 @@ import { PrimaryButton } from "../../../component";
 const Home = () => {
   const navigate = useNavigate();
   const onChat = (data) => {
-    navigate(`/astrologer/expert/${data.FirstName}`, {
+    navigate(`/talk-to-astrologers/chat/${data.AstrologerLoginId}`, {
       state: { data: data },
     });
   };
+  const onProfile = (data) => {
+    navigate(`/talk-to-astrologers/expert/${data.FirstName}`, {
+      state: { data: data },
+    });
+  };
+  // const onChat = (data) => {
+  //   navigate(`/astrologer/chat/${data.AstrologerLoginId}`, {
+  //     state: { data: data },
+  //   });
+  // };
   const onWatchNow = () => {
     navigate(PATH.privateRoutes.ASTRO_LIVE.path);
   };
@@ -34,7 +44,11 @@ const Home = () => {
     <div className={styles.homeContainer}>
       <HeroSection />
       <ServiceCards />
-      {/* <Astrologers onChat={onChat} onClickView={onClickView} /> */}
+      <Astrologers
+        onChat={onChat}
+        onClickView={onClickView}
+        onProfile={onProfile}
+      />
       {/* <LiveShows onWatchNow={onWatchNow} onClickView={onClickView} /> */}
       {/* <Rashis onClick={onClick} /> */}
       <Blogs />

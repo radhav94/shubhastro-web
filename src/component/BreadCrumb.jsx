@@ -3,7 +3,9 @@ import { Link, useLocation } from "react-router-dom";
 
 const Breadcrumb = () => {
   const location = useLocation();
-  const pathnames = location.pathname.split("/").filter((x) => x);
+  const pathnames = location.pathname
+    .split("/")
+    .filter((x) => x.replace(/\d+/g, "")); // Remove numeric segments
   if (pathnames.length === 0) return null;
 
   return (

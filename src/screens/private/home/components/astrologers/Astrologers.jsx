@@ -224,7 +224,7 @@ const astrologersData = [
   },
 ];
 
-const Astrologers = ({ onChat, onClickView }) => {
+const Astrologers = ({ onChat, onClickView, onProfile }) => {
   return (
     <div className={styles.astrologersWrapper}>
       <Title
@@ -244,6 +244,7 @@ const Astrologers = ({ onChat, onClickView }) => {
             <AstrologerCard
               data={astrologer}
               onChat={() => onChat(astrologer)}
+              onProfile={() => onProfile(astrologer)}
             />
           </div>
         ))}

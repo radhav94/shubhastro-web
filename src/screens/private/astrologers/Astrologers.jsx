@@ -11,7 +11,7 @@ const Astrologers = () => {
   const location = useLocation();
   const data = location.state?.data;
 
-  const phoneCharge = data.IsOfferApplied
+  const phoneCharge = data?.IsOfferApplied
     ? data.PhoneCharge.Value - data.OfferPhoneCharge.Value
     : data.PhoneCharge.Value;
 

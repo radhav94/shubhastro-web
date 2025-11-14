@@ -15,6 +15,7 @@ const TalkToAstrologer = () => {
     openModal,
     setOpenModal,
     onChat,
+    onProfile,
     handleSubmit,
     onRechargeNow,
   ] = useTalkToAstrologer();
@@ -43,6 +44,7 @@ const TalkToAstrologer = () => {
               data={e}
               onFollow={() => onFollow(e.AstrologerLoginId)}
               onChat={() => onChat(e)}
+              onProfile={() => onProfile(e)}
             />
           </div>
         ))}

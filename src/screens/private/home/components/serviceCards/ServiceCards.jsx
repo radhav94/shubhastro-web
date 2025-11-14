@@ -10,12 +10,12 @@ import { useNavigate } from "react-router-dom";
 
 const ServiceCards = () => {
   const services = [
-    // {
-    //   id: 1,
-    //   title: "Chat",
-    //   icon: AppIcons.Chat,
-    //   path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path,
-    // },
+    {
+      id: 1,
+      title: "Chat",
+      icon: AppIcons.Chat,
+      path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path,
+    },
     // {
     //   id: 2,
     //   title: "Call",

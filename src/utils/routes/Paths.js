@@ -37,6 +37,7 @@ import {
   MatchMaking,
   Sadesati,
   MatchDetails,
+  ChatWindow,
 } from "../../screens";
 
 export const PATH = {
@@ -204,8 +205,12 @@ export const PATH = {
       element: Payment,
     },
     ASTROLOGERS: {
-      path: "/astrologer/expert/:name",
+      path: "/talk-to-astrologers/expert/:name",
       element: Astrologers,
+    },
+    CHAT_WITH_ASTROLOGER: {
+      path: "/talk-to-astrologers/chat/:id",
+      element: ChatWindow,
     },
     STREAMING: {
       path: "/astrolive/streaming",

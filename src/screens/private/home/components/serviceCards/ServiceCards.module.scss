@@ -5,12 +5,12 @@
   padding: 1rem 0;
 
   @media (min-width: 640px) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     padding: 1rem 0;
   }
 
   @media (min-width: 1024px) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
