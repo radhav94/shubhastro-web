@@ -1,13 +1,22 @@
 import React from "react";
 import styles from "./LoginLayout.module.scss";
 
-const LoginLayout = ({ children }) => {
+const LoginLayout = ({ children, register }) => {
   return (
     <div className={styles.mainContainer}>
-      <span className={styles.wrapTriangle}>
-        {/* <span className={styles.triangle}></span> */}
-      </span>
-      <span className={styles.childrenContainer}>{children}</span>
+      <div className={styles.leftImage}></div>
+
+      <div className={styles.rightContent}>
+        <span className={styles.wrapTriangle}></span>
+
+        <div
+          className={`${styles.childrenContainer} ${
+            register ? styles.registerWide : ""
+          }`}
+        >
+          {children}
+        </div>
+      </div>
     </div>
   );
 };

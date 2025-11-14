@@ -47,18 +47,18 @@ const OtpVerification = () => {
   Toast.success("OTP verified successfully");
   localStorage.setItem("isLoggedIn", JSON.stringify(true));
 
-  // if (isRegister === "false") {
-  //   navigate(PATH.publicRoutes.REGISTER.path, {
-  //     replace: true,
-  //     state: { from: location },
-  //   });
-  // } else {
-  //   navigate(PATH.privateRoutes.HOME.path, { replace: true });
-  // }
-  navigate(PATH.publicRoutes.REGISTER.path, {
+  if (isRegister === "false") {
+    navigate(PATH.publicRoutes.REGISTER.path, {
       replace: true,
       state: { from: location },
     });
+  } else {
+    navigate(PATH.privateRoutes.HOME.path, { replace: true });
+  }
+  // navigate(PATH.publicRoutes.REGISTER.path, {
+  //     replace: true,
+  //     state: { from: location },
+  //   });
 }
 
 

@@ -1,11 +1,26 @@
 import axios from "axios";
 
 const publicRequest = axios.create({
-  baseURL: "https://njsapi-shubhtalk.epicon.in/api/users/",
+  baseURL: "https://njsapi-shubhtalk.epicon.in/api/",
   headers: {
     "Content-Type": "application/json",
+    
   },
 });
+
+publicRequest.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("verifyOtpToken");
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 
 export const get = async (endPoint, config = {}) => {
   return apiHandler(() => publicRequest.get(endPoint, config));

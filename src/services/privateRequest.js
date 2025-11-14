@@ -5,8 +5,25 @@ import { getToken } from "../utils/utlis";
 let unAuthorizedCount = 0;
 
 const privateRequest = axios.create({
-  baseURL: "akdsjfsldf",
+  baseURL: "https://njsapi-shubhtalk.epicon.in/api/",
+  headers: {
+    "Content-Type": "application/json",
+    
+  },
 });
+
+privateRequest.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("verifyOtpToken");
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 const requestHandler = (request) => {
   const token = getToken() || "";
