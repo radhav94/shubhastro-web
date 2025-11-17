@@ -6,12 +6,13 @@ const auth = {
   //   token: userToken,
   device: "web",
 };
-export const socket = io(SOCKET_URL, {
-  //   auth: { token },
-  reconnection: true,
-  reconnectionAttempts: 10,
-  reconnectionDelay: 2000,
-  timeout: 20000,
-  transports: ["websocket"],
-  //   autoConnect: false, // don’t connect immediately
-});
+export const socket = io();
+// SOCKET_URL, {
+// //   auth: { token },
+// reconnection: true,
+// reconnectionAttempts: 10,
+// reconnectionDelay: 2000,
+// timeout: 20000,
+// transports: ["websocket"],
+//   autoConnect: false, // don’t connect immediately
+// }

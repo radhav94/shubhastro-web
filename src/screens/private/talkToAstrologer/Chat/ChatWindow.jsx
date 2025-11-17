@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { socket } from "../../../../socket/socket";
+// import { socket } from "../../../../socket/socket";
 import { AppImages } from "../../../../utils/appImages";
 import { useLocation } from "react-router-dom";
 import styles from "./ChatWindow.module.scss";
@@ -19,13 +19,13 @@ const ChatWindow = () => {
     // });
 
     return () => {
-      socket.off("chat message");
-      socket.disconnect();
+      //   socket.off("chat message");
+      //   socket.disconnect();
     };
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleSendMessage = (e) => {
@@ -42,7 +42,7 @@ const ChatWindow = () => {
       isOwn: true,
     };
 
-    socket.emit("chat message", msgData);
+    // socket.emit("chat message", msgData);
     setMessages((prev) => [...prev, msgData]);
     setMessage("");
   };

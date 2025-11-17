@@ -1,19 +1,38 @@
-.dailyContainer {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px 10px;
+.mainContainer {
+  display: grid;
+  gap: 30px;
+  align-items: stretch;
+
+  /* Mobile first (stacked) */
+  grid-template-columns: 1fr;
+
+  @media (min-width: 992px) {
+    grid-template-columns: 1.3fr 1fr;
+  }
+
+  @media (min-width: 1400px) {
+    grid-template-columns: 1.3fr 1fr;
+  }
 }
 
+.dailyContainer {
+  width: 100%;
+  padding: 0 20px;
+}
+.tabContainer {
+  margin: 26px;
+  width: 50%;
+}
 /* ---------- SWITCH TABS ---------- */
 .switchTabs {
   display: flex;
-  justify-content: center;
+  justify-content: start;
   background: #fff;
   border-radius: 30px;
   border: 1px solid grey;
   overflow: hidden;
-  width: 50%;
-  margin: 15px auto;
+  width: 100%;
+  // margin: 20px;
   cursor: pointer;
 
   span {
@@ -38,16 +57,12 @@
 
 /* ---------- FORM AREA ---------- */
 .formArea {
-  display: flex;
-  flex-direction: column;
-  // align-items: center;
-  width: 50%;
+  width: 100%;
   margin: 0 auto;
   background-color: white;
-  padding: 1rem 5rem;
+  padding: 1rem 2rem;
   border-radius: 20px;
-  box-shadow: 0px 4px 16px 0px rgba(0, 0, 0, 0.25);
-  
+  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.25);
 }
 
 /* ---------- FORM CONTAINER ---------- */
@@ -58,6 +73,10 @@
   width: 100%;
   max-width: 550px;
   box-shadow: 0px 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.savedKundliContainer {
+  padding: 0 20px;
 }
 
 /* ---------- FORM TITLE ---------- */
@@ -131,4 +150,24 @@
 .inputError {
   border: 1px solid #d9534f !important;
   box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.15);
+}
+
+.kundliListContainer {
+  width: 100%;
+  // margin: 0 auto;
+  background-color: white;
+  padding: 1rem 2rem;
+  border-radius: 20px;
+  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+input[type="date"]::before {
+  content: attr(placeholder) !important;
+  color: #aaa; /* Adjust color as needed */
+  margin-right: 0.5em; /* Adjust spacing */
+}
+
+input[type="date"]:focus::before,
+input[type="date"]:valid::before {
+  content: ""; /* Hide the pseudo-element when focused or a valid date is selected */
 }

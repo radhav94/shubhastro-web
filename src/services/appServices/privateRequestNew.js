@@ -1,5 +1,3 @@
-
-
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // import { getToken } from "../utils/utlis";
 import { Toast } from "../../component";
@@ -58,7 +56,7 @@ export const privateRequestNew = createApi({
       baseUrl: "https://njsapi-shubhtalk.epicon.in/api/",
       prepareHeaders: (headers) => {
         const token = localStorage.getItem("verifyOtpToken");
-        console.log("tokeennnnnn",token)
+        // console.log("tokeennnnnn", token);
 
         headers.set("Content-Type", "application/json");
 
@@ -78,9 +76,7 @@ export const privateRequestNew = createApi({
 
     return result;
   },
-    tagTypes: ["Kundlis"],   // ⭐ Required
-
+  tagTypes: ["Kundlis"], // ⭐ Required
 
   endpoints: () => ({}), // EMPTY — endpoints later inject honge
 });
- 

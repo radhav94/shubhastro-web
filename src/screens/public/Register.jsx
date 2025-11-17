@@ -10,8 +10,18 @@ import LocationSearch from "../../utils/location/locationSearch";
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const months = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 88 }, (_, i) => currentYear - 13 - i);
@@ -52,9 +62,6 @@ const Register = () => {
     return index !== -1 ? index + 1 : "";
   };
 
-
-
-
   const handlePlaceSelect = (place) => {
     setFormData((prev) => ({
       ...prev,
@@ -65,100 +72,106 @@ const Register = () => {
   };
 
   const handleRegister = async (e) => {
-  e.preventDefault();
-
-  try {
-    setError("");
-    setLoading(true);
-
-    const {
-      firstName, lastName, email, password, confirmPassword,
-      gender, day, month, year, address, latitude, longitude, birthPlace
-    } = formData;
-
-    // Required Field Validation
-    if (!firstName || !lastName || !gender || !day || !month || !year) {
-      setError("Please fill in all required fields.");
-      setLoading(false);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      setLoading(false);
-      return;
-    }
-
-    const dateOfBirth = `${year}-${getMonthNumber(month)
-      .toString()
-      .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-
-    const phoneNumber = location?.state?.from?.state?.phoneNumber || "";
-
-    const payload = {
-      phoneNumber,
-      firstName,
-      lastName,
-      password,
-      place: birthPlace || "",
-      email,
-      languagePreferences: ["English", "Hindi"],
-      dateOfBirth,
-      address,
-      lat: latitude?.toString() || "",
-      lon: longitude?.toString() || "",
-      role: "CUSTOMER",
-    };
-
-    let response;
+    e.preventDefault();
 
     try {
-      response = await registerUser(payload);
-    } catch (apiErr) {
-      // API Crashed => Handle here, do NOT break page
+      setError("");
+      setLoading(true);
+
+      const {
+        firstName,
+        lastName,
+        email,
+        password,
+        confirmPassword,
+        gender,
+        day,
+        month,
+        year,
+        address,
+        latitude,
+        longitude,
+        birthPlace,
+      } = formData;
+
+      // Required Field Validation
+      if (!firstName || !lastName || !gender || !day || !month || !year) {
+        setError("Please fill in all required fields.");
+        setLoading(false);
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setError("Passwords do not match.");
+        setLoading(false);
+        return;
+      }
+
+      const dateOfBirth = `${year}-${getMonthNumber(month)
+        .toString()
+        .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+
+      const phoneNumber = location?.state?.from?.state?.phoneNumber || "";
+
+      const payload = {
+        phoneNumber,
+        firstName,
+        lastName,
+        password,
+        place: birthPlace || "",
+        email,
+        languagePreferences: ["English", "Hindi"],
+        dateOfBirth,
+        address,
+        lat: latitude?.toString() || "",
+        lon: longitude?.toString() || "",
+        role: "CUSTOMER",
+      };
+
+      let response;
+
+      try {
+        response = await registerUser(payload);
+      } catch (apiErr) {
+        // API Crashed => Handle here, do NOT break page
+        setToast({
+          show: true,
+          type: "error",
+          message: apiErr?.response?.data?.message || "Something went wrong!",
+        });
+        setLoading(false);
+        return;
+      }
+
+      if (response?.data?.statusCode === 201) {
+        setToast({
+          show: true,
+          type: "success",
+          message: "Registration successful!",
+        });
+
+        setTimeout(() => {
+          navigate(PATH.privateRoutes.HOME.path, { replace: true });
+        }, 1000);
+      } else {
+        setToast({
+          show: true,
+          type: "error",
+          message: response?.data?.message || "Something went wrong!",
+        });
+      }
+    } catch (err) {
+      // Last layer protection
+      console.error("Unexpected error:", err);
       setToast({
         show: true,
         type: "error",
-        message: apiErr?.response?.data?.message || "Something went wrong!",
+        message: "Unexpected error occurred.",
       });
+    } finally {
       setLoading(false);
-      return;
     }
-
-    if (response?.data?.statusCode === 201) {
-      setToast({
-        show: true,
-        type: "success",
-        message: "Registration successful!",
-      });
-
-      setTimeout(() => {
-        navigate(PATH.privateRoutes.HOME.path, { replace: true });
-      }, 1000);
-    } else {
-      setToast({
-        show: true,
-        type: "error",
-        message: response?.data?.message || "Something went wrong!",
-      });
-    }
-
-  } catch (err) {
-    // Last layer protection
-    console.error("Unexpected error:", err);
-    setToast({
-      show: true,
-      type: "error",
-      message: "Unexpected error occurred.",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-console.log(LocationSearch);
-
+  };
 
   return (
     <LoginLayout register={true}>
@@ -170,7 +183,6 @@ console.log(LocationSearch);
         </PrimaryText>
 
         <form onSubmit={handleRegister} className={styles.form}>
-
           {/* First + Last Name */}
           <div className={styles.row}>
             <div className={styles.formGroup}>
@@ -182,7 +194,6 @@ console.log(LocationSearch);
                 required
               />
             </div>
-
 
             <div className={styles.formGroup}>
               <label className={styles.required}>Last Name</label>
@@ -242,7 +253,9 @@ console.log(LocationSearch);
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.required} htmlFor="birthPlace">Birth Place</label>
+            <label className={styles.required} htmlFor="birthPlace">
+              Birth Place
+            </label>
             <LocationSearch
               value={formData.birthPlace}
               onChange={(e) =>
@@ -270,32 +283,49 @@ console.log(LocationSearch);
             </select>
           </div>
 
-
           <h3 className={styles.sectionHeader}>Date of Birth</h3>
 
           {/* DOB Grid */}
           <div className={styles.grid}>
             <div className={styles.formGroup}>
               <label>Day</label>
-              <select name="day" value={formData.day} onChange={handleInputChange}>
+              <select
+                name="day"
+                value={formData.day}
+                onChange={handleInputChange}
+              >
                 <option>Day</option>
-                {days.map((d) => <option key={d}>{d}</option>)}
+                {days.map((d) => (
+                  <option key={d}>{d}</option>
+                ))}
               </select>
             </div>
 
             <div className={styles.formGroup}>
               <label>Month</label>
-              <select name="month" value={formData.month} onChange={handleInputChange}>
+              <select
+                name="month"
+                value={formData.month}
+                onChange={handleInputChange}
+              >
                 <option>Month</option>
-                {months.map((m) => <option key={m}>{m}</option>)}
+                {months.map((m) => (
+                  <option key={m}>{m}</option>
+                ))}
               </select>
             </div>
 
             <div className={styles.formGroup}>
               <label>Year</label>
-              <select name="year" value={formData.year} onChange={handleInputChange}>
+              <select
+                name="year"
+                value={formData.year}
+                onChange={handleInputChange}
+              >
                 <option>Year</option>
-                {years.map((y) => <option key={y}>{y}</option>)}
+                {years.map((y) => (
+                  <option key={y}>{y}</option>
+                ))}
               </select>
             </div>
           </div>
