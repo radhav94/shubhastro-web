@@ -1,58 +1,64 @@
 import React from "react";
-
 import styles from "./Home.module.scss";
 import HeroSection from "./components/heroSection/HeroSection";
 import ServiceCards from "./components/serviceCards/ServiceCards";
 import Astrologers from "./components/astrologers/Astrologers";
-import LiveShows from "./components/liveShows/LiveShows";
-
-import Rashis from "./components/Rashis/Rashies";
-import Services from "./components/serivces/Services";
 import Blogs from "./components/blogs/Blogs";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../utils/routes/Paths";
-import { PrimaryButton } from "../../../component";
+import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices";  // ⭐ API IMPORT
 
 const Home = () => {
   const navigate = useNavigate();
+
+  // ⭐ CALL API
+  const { data, isLoading, isError } = useGetHomeDetailsQuery();
+
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Something went wrong</div>;
+
+  // ⭐ Ab yaha data use kar sakte ho
+  console.log("HOMEDATA", data?.data?.list);
+
   const onChat = (data) => {
     navigate(`/talk-to-astrologers/chat/${data.AstrologerLoginId}`, {
       state: { data: data },
     });
   };
+
   const onProfile = (data) => {
     navigate(`/talk-to-astrologers/expert/${data.FirstName}`, {
       state: { data: data },
     });
   };
-  // const onChat = (data) => {
-  //   navigate(`/astrologer/chat/${data.AstrologerLoginId}`, {
-  //     state: { data: data },
-  //   });
-  // };
+
   const onWatchNow = () => {
     navigate(PATH.privateRoutes.ASTRO_LIVE.path);
   };
+
   const onClickView = () => {
     navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path);
   };
+
   const onClick = () => {
     navigate(PATH.privateRoutes.HOROSCOPE.path);
   };
 
   return (
     <div className={styles.homeContainer}>
-      <HeroSection />
-      <ServiceCards />
+      <HeroSection  data={data?.data?.list}/>
+
+      {/* Example: Sending API data to components */}
+      <ServiceCards data={data?.data?.list} />
+
       <Astrologers
+        astrologers={data?.data?.list}
         onChat={onChat}
         onClickView={onClickView}
         onProfile={onProfile}
       />
-      {/* <LiveShows onWatchNow={onWatchNow} onClickView={onClickView} /> */}
-      {/* <Rashis onClick={onClick} /> */}
-      <Blogs />
-      {/* <Services /> */}
+
+      <Blogs data={data?.data?.list} />
     </div>
   );
 };

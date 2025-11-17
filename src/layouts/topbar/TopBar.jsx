@@ -26,7 +26,7 @@ const TopBar = () => {
   const isLoggedIn = JSON.parse(localStorage.getItem("isLoggedIn"));
   const handleLogout = () => {
     localStorage.removeItem("verifyOtpToken");
-    navigate("/");
+    navigate("/", { state: { from: location.pathname } })
     localStorage.setItem("isLoggedIn", JSON.stringify(false));
   };
 
@@ -88,9 +88,9 @@ const TopBar = () => {
               <MdGTranslate />
             </button> */}
             <button className={styles.iconButton} aria-label="Notifications">
-              <Link to="/">
+              {/* <Link to="/">
                 <IoHomeOutline />
-              </Link>
+              </Link> */}
             </button>
 
             {/* Sign In CTA Button */}

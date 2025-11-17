@@ -29,8 +29,6 @@ const years = Array.from({ length: 88 }, (_, i) => currentYear - 13 - i);
 const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const placeRef = useRef(null);
-
   const [formData, setFormData] = useState({
     firstName: "",
     address: "",
@@ -173,6 +171,9 @@ const Register = () => {
     }
   };
 
+
+
+
   return (
     <LoginLayout register={true}>
       <div className={styles.container}>
@@ -184,7 +185,7 @@ const Register = () => {
 
         <form onSubmit={handleRegister} className={styles.form}>
           {/* First + Last Name */}
-          <div className={styles.row}>
+          {/* <div className={styles.row}> */}
             <div className={styles.formGroup}>
               <label className={styles.required}>First Name</label>
               <input
@@ -204,8 +205,8 @@ const Register = () => {
                 required
               />
             </div>
-          </div>
-          <div className={styles.formGroup}>
+          {/* </div> */}
+          {/* <div className={styles.formGroup}>
             <label className={styles.required}>Address</label>
             <input
               name="address"
@@ -215,7 +216,6 @@ const Register = () => {
             />
           </div>
 
-          {/* Email */}
           <div className={styles.formGroup}>
             <label className={styles.required}>Email</label>
             <input
@@ -227,7 +227,6 @@ const Register = () => {
             />
           </div>
 
-          {/* Password + Confirm */}
           <div className={styles.row}>
             <div className={styles.formGroup}>
               <label className={styles.required}>Password</label>
@@ -250,12 +249,40 @@ const Register = () => {
                 required
               />
             </div>
+          </div> */}
+
+          <h3 className={styles.sectionHeader}>Date of Birth</h3>
+
+          {/* DOB Grid */}
+          <div className={styles.grid}>
+            <div className={styles.formGroup}>
+              <label className={styles.required}>Day</label>
+              <select name="day" value={formData.day} onChange={handleInputChange}>
+                <option value="">Select Day</option>
+                {days.map((d) => <option key={d}>{d}</option>)}
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.required}>Month</label>
+              <select name="month" value={formData.month} onChange={handleInputChange}>
+                <option value="">Select Month</option>
+                {months.map((m) => <option key={m}>{m}</option>)}
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.required}>Year</label>
+              <select name="year" value={formData.year} onChange={handleInputChange}>
+                <option value="">Select Year</option>
+
+                {years.map((y) => <option key={y}>{y}</option>)}
+              </select>
+            </div>
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.required} htmlFor="birthPlace">
-              Birth Place
-            </label>
+            <label htmlFor="birthPlace">Birth Place</label>
             <LocationSearch
               value={formData.birthPlace}
               onChange={(e) =>
@@ -283,52 +310,8 @@ const Register = () => {
             </select>
           </div>
 
-          <h3 className={styles.sectionHeader}>Date of Birth</h3>
 
-          {/* DOB Grid */}
-          <div className={styles.grid}>
-            <div className={styles.formGroup}>
-              <label>Day</label>
-              <select
-                name="day"
-                value={formData.day}
-                onChange={handleInputChange}
-              >
-                <option>Day</option>
-                {days.map((d) => (
-                  <option key={d}>{d}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Month</label>
-              <select
-                name="month"
-                value={formData.month}
-                onChange={handleInputChange}
-              >
-                <option>Month</option>
-                {months.map((m) => (
-                  <option key={m}>{m}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Year</label>
-              <select
-                name="year"
-                value={formData.year}
-                onChange={handleInputChange}
-              >
-                <option>Year</option>
-                {years.map((y) => (
-                  <option key={y}>{y}</option>
-                ))}
-              </select>
-            </div>
-          </div>
+          
 
           {error && <p className={styles.error}>{error}</p>}
 

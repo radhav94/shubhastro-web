@@ -3,7 +3,7 @@ import styles from "./KundaliHeader.module.scss";
 import { IoTrashOutline } from "react-icons/io5";
 import { motion } from "framer-motion";
 import LocationSearch from "../../../../utils/location/locationSearch";
-import { PrimaryText } from "../../../../component";
+import { PrimaryText, Toast } from "../../../../component";
 import { useDispatch } from "react-redux";
 import { setForm } from "../../../../redux/kundliform/formSlice";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +15,7 @@ import {
 
 // Constants
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
-const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
 const hours = Array.from({ length: 24 }, (_, i) => i);
@@ -39,13 +39,13 @@ const monthMap = {
 
 const initialFormData = {
   name: "",
-  gender: "Male",
-  day: "1",
-  month: "Jan",
-  year: currentYear.toString(),
-  hour: "0",
-  minute: "0",
-  second: "0",
+  gender: "",
+  day: "",
+  month: "",
+  year: "",
+  hour: "",
+  minute: "",
+  second: "",
   birthPlace: "",
   latitude: null,
   longitude: null,
@@ -54,26 +54,26 @@ const initialFormData = {
 // Animations
 const headerVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.2, delayChildren: 0.1 }},
+  visible: { opacity: 1, transition: { staggerChildren: 0.2, delayChildren: 0.1 } },
 };
 const itemVariants = {
   hidden: { y: 20, opacity: 0 },
-  visible: { y: 0, opacity: 1, transition: { duration: 0.5 }},
+  visible: { y: 0, opacity: 1, transition: { duration: 0.5 } },
 };
 
 const KundaliHeader = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-    const token = localStorage.getItem("verifyOtpToken");
+  const token = localStorage.getItem("verifyOtpToken");
 
   const [formData, setFormData] = useState(initialFormData);
   const [selectedKundliId, setSelectedKundliId] = useState(null);
 
   // API Hooks
- const { data, isLoading } = useGetAllKundlisQuery(undefined, {
+  const { data, isLoading } = useGetAllKundlisQuery(undefined, {
     skip: !token,
-  });  
+  });
   const [createKundli] = useCreateKundliMutation();
   const [deleteKundli] = useDeleteKundliMutation();
 
@@ -98,12 +98,27 @@ const KundaliHeader = () => {
   // Select Saved Kundli
   const handleSelectKundli = (kundli) => {
     setSelectedKundliId(kundli._id);
+    console.log("kundli",kundli)
 
-    setFormData({
+    // setFormData({
+    //   name: kundli.name,
+    //   gender: kundli.gender === "M" ? "Male" : "Female",
+    //   day: kundli.day.toString(),
+    //   month: kundli.month,
+    //   year: kundli.year.toString(),
+    //   hour: kundli.hour.toString(),
+    //   minute: kundli.min.toString(),
+    //   second: "0",
+    //   birthPlace: kundli.place,
+    //   latitude: kundli.lat,
+    //   longitude: kundli.lon,
+    // });
+
+    dispatch(setForm({
       name: kundli.name,
       gender: kundli.gender === "M" ? "Male" : "Female",
       day: kundli.day.toString(),
-      month: kundli.month,
+      month: kundli.month.toString(),
       year: kundli.year.toString(),
       hour: kundli.hour.toString(),
       minute: kundli.min.toString(),
@@ -111,13 +126,18 @@ const KundaliHeader = () => {
       birthPlace: kundli.place,
       latitude: kundli.lat,
       longitude: kundli.lon,
-    });
+    }));
+
   };
 
   // Submit Form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.birthPlace) {
+      Toast.error("Please select your birth place");
+      return;
+    }
     const payload = {
       name: formData.name,
       gender: formData.gender.toLowerCase(),
@@ -140,7 +160,6 @@ const KundaliHeader = () => {
       console.log(err);
     }
 
-    dispatch(setForm(formData));
   };
 
   // Delete Kundli
@@ -158,7 +177,7 @@ const KundaliHeader = () => {
   };
 
 
- return (
+  return (
     <>
       {/* Header */}
       <motion.div
@@ -174,16 +193,16 @@ const KundaliHeader = () => {
       </motion.div>
 
       <div className={styles.kundliPageContainer}>
-        
+
         {/* FORM SECTION */}
         <div className={styles.formContainer}>
           <h2 className={styles.sectionTitle}>Create New Kundli</h2>
 
           <form onSubmit={handleSubmit} className={styles.kundliForm}>
-            
+
             {/* Name */}
             <div className={styles.formGroup}>
-              <label>Name</label>
+              <label className={styles.required}>Name</label>
               <input
                 name="name"
                 value={formData.name}
@@ -194,58 +213,96 @@ const KundaliHeader = () => {
 
             {/* Gender */}
             <div className={styles.formGroup}>
-              <label>Gender</label>
-              <select name="gender" value={formData.gender} onChange={handleInputChange}>
-                <option>Male</option>
-                <option>Female</option>
+              <label className={styles.required}>Gender</label>
+
+              <select
+                name="gender"
+                value={formData.gender}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select your gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
               </select>
             </div>
+
 
             {/* Date of Birth */}
             <h3 className={styles.formSectionHeader}>Date of Birth</h3>
             <div className={styles.gridContainer}>
               <div className={styles.formGroup}>
-                <label>Day</label>
-                <select name="day" value={formData.day} onChange={handleInputChange}>
-                  {days.map((d) => <option key={d}>{d}</option>)}
+                <label className={styles.required}>Day</label>
+                <select
+                  name="day"
+                  value={formData.day}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select Day</option>
+                  {days.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
                 </select>
               </div>
 
               <div className={styles.formGroup}>
-                <label>Month</label>
-                <select name="month" value={formData.month} onChange={handleInputChange}>
-                  {months.map((m) => <option key={m}>{m}</option>)}
+                <label className={styles.required}>Month</label>
+                <select
+                  name="month"
+                  value={formData.month}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select Month</option>
+                  {months.map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
                 </select>
               </div>
 
               <div className={styles.formGroup}>
-                <label>Year</label>
-                <select name="year" value={formData.year} onChange={handleInputChange}>
-                  {years.map((y) => <option key={y}>{y}</option>)}
+                <label className={styles.required}>Year</label>
+                <select
+                  name="year"
+                  value={formData.year}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select Year</option>
+                  {years.map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
                 </select>
               </div>
             </div>
+
 
             {/* Time of Birth */}
             <h3 className={styles.formSectionHeader}>Time of Birth</h3>
             <div className={styles.gridContainer}>
               <div className={styles.formGroup}>
-                <label>Hour</label>
-                <select name="hour" value={formData.hour} onChange={handleInputChange}>
+                <label className={styles.required}>Hour</label>
+                <select name="hour" value={formData.hour} onChange={handleInputChange} required>
+                  <option value="">Select Hour</option>
                   {hours.map((h) => <option key={h}>{h}</option>)}
                 </select>
               </div>
 
               <div className={styles.formGroup}>
-                <label>Minute</label>
-                <select name="minute" value={formData.minute} onChange={handleInputChange}>
+                <label className={styles.required}>Minute</label>
+                <select name="minute" value={formData.minute} onChange={handleInputChange} required>
+                  <option value="">Select Minute</option>
                   {minutes.map((m) => <option key={m}>{m}</option>)}
                 </select>
               </div>
 
               <div className={styles.formGroup}>
-                <label>Second</label>
-                <select name="second" value={formData.second} onChange={handleInputChange}>
+                <label className={styles.required}>Second</label>
+
+                <select name="second" value={formData.second} onChange={handleInputChange} required>
+                  <option value="">Select Second</option>
+
                   {minutes.map((s) => <option key={s}>{s}</option>)}
                 </select>
               </div>
@@ -253,7 +310,7 @@ const KundaliHeader = () => {
 
             {/* Birth Place */}
             <div className={styles.formGroup}>
-              <label>Birth Place</label>
+              <label className={styles.required}>Birth Place</label>
               <LocationSearch
                 value={formData.birthPlace}
                 onChange={(e) =>
@@ -263,9 +320,22 @@ const KundaliHeader = () => {
               />
             </div>
 
-            <button type="submit" className={styles.ctaButton}>
-              Generate Horoscope
-            </button>
+            {token ? (
+              <button type="submit" className={styles.ctaButton}>
+                Generate Horoscope
+              </button>
+            ) : (
+              <div className={styles.loginPrompt}>
+                <p>Please login to continue</p>
+                <button
+                  className={styles.loginButton}
+                  onClick={() => navigate("/login", { state: { from: location.pathname } })}
+                >
+                  Login
+                </button>
+              </div>
+            )}
+
           </form>
         </div>
 
@@ -279,7 +349,7 @@ const KundaliHeader = () => {
               <PrimaryText isCenter>You are not logged in.</PrimaryText>
               <button
                 className={styles.loginButton}
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/login", { state: { from: location.pathname } })}
               >
                 Login
               </button>
@@ -291,9 +361,8 @@ const KundaliHeader = () => {
               {savedKundlis.map((kundli) => (
                 <div
                   key={kundli._id}
-                  className={`${styles.kundliItem} ${
-                    selectedKundliId === kundli._id ? styles.active : ""
-                  }`}
+                  className={`${styles.kundliItem} ${selectedKundliId === kundli._id ? styles.active : ""
+                    }`}
                 >
                   <div className={styles.avatar}>{kundli.name.charAt(0)}</div>
 

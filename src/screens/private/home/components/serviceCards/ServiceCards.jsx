@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import styles from "./ServiceCards.module.scss";
 
@@ -8,34 +8,55 @@ import { AppIcons } from "../../../../../utils/appImages";
 import { PATH } from "../../../../../utils/routes/Paths";
 import { useNavigate } from "react-router-dom";
 
-const ServiceCards = () => {
-  const services = [
-    {
-      id: 1,
-      title: "Chat",
-      icon: AppIcons.Chat,
-      path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path,
-    },
-    // {
-    //   id: 2,
-    //   title: "Call",
-    //   icon: AppIcons.Call,
-    //   path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path,
-    // },
-    {
-      id: 3,
-      title: "Horoscope",
-      icon: AppIcons.Astrology,
-      path: PATH.privateRoutes.HOROSCOPE.DAILY.path,
-    },
-    {
-      id: 4,
-      title: "Kundali",
-      icon: AppIcons.Kundali,
-      path: PATH.privateRoutes.KUNDLI.path,
-    },
-  ];
+const ServiceCards = ({ data }) => {
+
+  const sections = data;
+
+  // 🟦 Find banner section
+  const bannerSection = sections?.find(
+    (item) => item.display_type === "complementary-services"
+  );
+
+  // 🟩 Banner content (title, desc, icon)
+  const services = bannerSection?.content;
+
+  // const services = [
+  //   {
+  //     id: 1,
+  //     title: "Chat",
+  //     icon: AppIcons.Chat,
+  //     path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path,
+  //   },
+  //   // {
+  //   //   id: 2,
+  //   //   title: "Call",
+  //   //   icon: AppIcons.Call,
+  //   //   path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path,
+  //   // },
+  //   {
+  //     id: 3,
+  //     title: "Horoscope",
+  //     icon: AppIcons.Astrology,
+  // path: PATH.privateRoutes.HOROSCOPE.DAILY.path,
+  //   },
+  //   {
+  //     id: 4,
+  //     title: "Kundali",
+  //     icon: AppIcons.Kundali,
+  //     path: PATH.privateRoutes.KUNDLI.path,
+  //   },
+  // ];
   const navigate = useNavigate();
+
+   const scrollLeft = () => {
+    scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
+  };
+
+  const scrollRight = () => {
+    scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
+  };
+    const scrollRef = useRef(null);
+  
   return (
     <div className={styles.cardsGrid}>
       {services.map((service) => (
@@ -47,8 +68,20 @@ const ServiceCards = () => {
         >
           <div
             className={styles.cardContent}
-            onClick={() => navigate(service.path)}
+            onClick={() => {
+              if (service.slug === "free-kundli") {
+                navigate(`/kundli/${service.slug}`);
+              } 
+              else if (service.slug==="kundli-matching")
+              {
+                navigate(`/matchmaking`);
+              }
+              else {
+                navigate(`/horoscopes/${service.slug}`);
+              }
+            }}
           >
+
             <div
               style={{
                 flexDirection: "row",
@@ -59,7 +92,7 @@ const ServiceCards = () => {
               }}
             >
               <img
-                src={service.icon}
+                src={AppIcons.Chat} /// need to change this in future with the image icon from backend
                 alt={service.title}
                 className={styles.icon}
               />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; 
 import LoginLayout from "../../layouts/loginlayout/LoginLayout";
 import { PrimaryText, Toast } from "../../component";
 import styles from "./Login.module.scss";
@@ -8,18 +8,24 @@ import * as AuthServices from "../../services/appServices/authService";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation(); 
+
+  // ✅ If user came from another page, return to that
+  const redirectPath =
+    location.state?.from || PATH.privateRoutes.HOME.path;
+
   const [mobileNumber, setMobileNumber] = useState("");
   const [whatsappOptIn, setWhatsappOptIn] = useState(true);
 
   const isMobileNumberValid = mobileNumber.length === 10;
 
-  // ✅ Check if already logged in
+  // ✅ Already logged in? Send user back to where they came from (NOT home always)
   useEffect(() => {
-    const token = localStorage.getItem("token"); // or sessionStorage
+    const token = localStorage.getItem("verifyOtpToken");
     if (token) {
-      navigate(PATH.privateRoutes.HOME.path, { replace: true });
+      navigate(redirectPath, { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, redirectPath]);
 
   const handleSendOtp = async (event) => {
     event.preventDefault();
@@ -32,18 +38,28 @@ const Login = () => {
 
     try {
       const response = await AuthServices.loginWithPhone(payload);
+
       if (response.status) {
         navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
-          state: { phoneNumber: mobileNumber },
-          replace: true, // ✅ Replace history to prevent back navigation
+          state: { 
+            phoneNumber: mobileNumber, 
+            from: redirectPath 
+          },
+          replace: true,
         });
       } else {
         Toast.error("Error", response.message);
       }
+
     } catch (error) {
       Toast.error("Error", error?.message || "Something went wrong");
+
       navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
-        state: { phoneNumber: mobileNumber, resendOtp: handleSendOtp },
+        state: { 
+          phoneNumber: mobileNumber, 
+          resendOtp: handleSendOtp,
+          from: redirectPath 
+        },
         replace: true,
       });
     }

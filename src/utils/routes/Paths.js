@@ -86,11 +86,11 @@ export const PATH = {
       path: "/horoscopes",
       element: Horoscope,
       DAILY: {
-        path: "/horoscopes/daily-horoscope",
+        path: "/horoscopes/:slug",
         element: SignScreen,
       },
       DAILY_DETAIL: {
-        path: "/horoscopes/daily-horoscope/:sign",
+        path: "/horoscopes/:slug/:sign",
         element: Daily,
       },
       MONTHLY: {
@@ -142,7 +142,7 @@ export const PATH = {
     },
 
     KUNDLI: {
-      path: "/kundli",
+      path: "/kundli/:slug",
       element: Kundli,
     },
     SADESATI: {

@@ -6,17 +6,18 @@ $color-text-secondary: #6c757d;
 $color-border: #e9ecef;
 $font-primary: "Poppins", sans-serif;
 
-.blogContainer {
-  font-family: $font-primary;
+.blogsContainer {
   display: grid;
-  grid-template-columns: 1fr; // Mobile-first: single column
-  gap: 30px;
-  padding: 20px;
-  background-color: $color-background;
+  grid-template-columns: repeat(2, 1fr); // always 2 columns
+  gap: 24px;
+  align-items: stretch;
 
-  // --- Desktop Layout ---
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   @media (min-width: 992px) {
-    grid-template-columns: 2fr 1fr; // Two columns on larger screens
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 

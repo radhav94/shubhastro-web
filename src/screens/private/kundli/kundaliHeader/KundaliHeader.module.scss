@@ -12,6 +12,11 @@ $color-black: #1a1a1a;
 $color-grey-light: #e0e0e0;
 $color-grey-medium: #999999;
 $color-grey-dark: #555555;
+$color-dark-blue: #0f0c29;
+$color-gold: #f9d423;
+$color-light-text: #e0e0e0;
+$color-grey-text: #a0a0b0;
+$font-primary: "Poppins", sans-serif;
 
 $font-primary: "Poppins", sans-serif;
 $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
@@ -99,6 +104,12 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   @media (max-width: 600px) {
     font-size: 20px;
   }
+}
+
+.required::after {
+  content: " *";
+  color: red;
+  font-weight: bold;
 }
 
 // --------------------------------------
@@ -269,18 +280,18 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .loginButton {
-  padding: 10px 20px;
-  margin-top: 10px;
-  background: #ff8a00;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+  background-color: $color-gold;
+  color: $color-dark-blue;
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-size: 15px;
   font-weight: 600;
-  transition: 0.2s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 
   &:hover {
-    background: #ff7700;
+    // 👇 This line is now fixed
+    background-color: color.adjust($color-gold, $lightness: 5%);
+    transform: translateY(-2px);
   }
 }
 
