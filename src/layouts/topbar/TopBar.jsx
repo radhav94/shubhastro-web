@@ -19,15 +19,16 @@ import { PrimaryText } from "../../component";
 const TopBar = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-    const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
-  const isLoggedIn = JSON.parse(localStorage.getItem("isLoggedIn"));
+  // const isLoggedIn = JSON.parse(localStorage.getItem("isLoggedIn"));
+  const token = localStorage.getItem("verifyOtpToken");
   const handleLogout = () => {
     localStorage.removeItem("verifyOtpToken");
-    navigate("/", { state: { from: location.pathname } })
-    localStorage.setItem("isLoggedIn", JSON.stringify(false));
+    navigate("/");
+    // localStorage.setItem("isLoggedIn", JSON.stringify(false));
   };
 
   useEffect(() => {
@@ -37,7 +38,7 @@ const TopBar = () => {
     setWalletBalance(Number(storedWallet.amount));
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 40) {
         setScrolled(true);
@@ -50,10 +51,9 @@ const TopBar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-
   return (
     <>
-      <header  className={`${styles.topBar} ${scrolled ? styles.scrolled : ""}`}>
+      <header className={`${styles.topBar} ${scrolled ? styles.scrolled : ""}`}>
         <div className={styles.container}>
           <div className={styles.leftSection}>
             {isMobile && (
@@ -94,7 +94,7 @@ const TopBar = () => {
             </button>
 
             {/* Sign In CTA Button */}
-            {!isLoggedIn ? (
+            {!token ? (
               <button
                 className={`${styles.ctaButton} ${styles.hideOnMobile}`}
                 onClick={() => navigate("/login")}

@@ -6,7 +6,7 @@ import Astrologers from "./components/astrologers/Astrologers";
 import Blogs from "./components/blogs/Blogs";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../utils/routes/Paths";
-import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices";  // ⭐ API IMPORT
+import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices"; // ⭐ API IMPORT
 
 const Home = () => {
   const navigate = useNavigate();
@@ -17,19 +17,17 @@ const Home = () => {
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>Something went wrong</div>;
 
-
   const onChat = (data) => {
-    navigate(`/talk-to-astrologers/chat/${data.AstrologerLoginId}`, {
+    navigate(`/talk-to-astrologers/chat/${data._id}`, {
       state: { data: data },
     });
   };
 
   const onProfile = (data) => {
-    navigate(`/talk-to-astrologers/expert/${data.FirstName}`, {
-      state: { data: data },
-    });
+    // navigate(`/talk-to-astrologers/expert/${data.FirstName}`, {
+    //   state: { data: data },
+    // });
   };
-
   const onWatchNow = () => {
     navigate(PATH.privateRoutes.ASTRO_LIVE.path);
   };
@@ -44,7 +42,7 @@ const Home = () => {
 
   return (
     <div className={styles.homeContainer}>
-      <HeroSection  data={data?.data?.list}/>
+      <HeroSection data={data?.data?.list} />
 
       {/* Example: Sending API data to components */}
       <ServiceCards data={data?.data?.list} />

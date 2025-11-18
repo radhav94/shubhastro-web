@@ -6,7 +6,8 @@ import styles from "./ChatWindow.module.scss";
 
 const ChatWindow = () => {
   const location = useLocation();
-  const { FirstName, LastName, ProfileImage } = location?.state?.data || {};
+  const { firstName, lastName, imageUrl, isAccountActive } =
+    location?.state?.data || {};
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const messagesEndRef = useRef(null);
@@ -53,14 +54,24 @@ const ChatWindow = () => {
       <div className={styles.header}>
         <div className={styles.avatarWrapper}>
           <img
-            src={`https://images.astroyogi.com/english/astrologer/profileimage/${ProfileImage}`}
-            alt={FirstName}
+            // src={`https://images.astroyogi.com/english/astrologer/profileimage/${data?.imageUrl}`}
+            src={imageUrl}
+            alt={firstName}
             className={styles.avatar}
+          />
+          <span
+            className={`${styles.statusDot} ${
+              isAccountActive === true
+                ? styles.online
+                : data.status === false
+                ? styles.offline
+                : styles.busy
+            }`}
           />
         </div>
         <div className={styles.headerInfo}>
           <h4>
-            {FirstName} {LastName}
+            {firstName} {lastName}
           </h4>
           {/* <p>Chat has ended.</p> */}
         </div>

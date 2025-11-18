@@ -74,7 +74,6 @@ const MatchMaking = () => {
   });
 
   const handleSelectKundli = (kundli) => {
-    console.log("Selected Kundli:", kundli);
     setSelectedKundliId(kundli._id);
 
     const personKey =
@@ -122,12 +121,6 @@ const MatchMaking = () => {
     }));
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const [year, month, day] = dateString.split("-");
-    return `${day}/${month}/${year}`;
-  };
-
   // --- Validation logic for one person ---
   const validatePerson = (data) => {
     const newErrors = {};
@@ -141,7 +134,11 @@ const MatchMaking = () => {
   };
 
   // --- On Generate Horoscope click ---
-  const handleGenerate = () => {
+  const handleGenerate = (e) => {
+    e.preventDefault();
+    if (!token) {
+      navigate("/login", { state: { from: location.pathname } });
+    }
     const boyErrors = validatePerson(formData.boyData);
     const girlErrors = validatePerson(formData.girlData);
 
@@ -184,8 +181,6 @@ const MatchMaking = () => {
       lon: Number(formData.girlData.place.lng),
       tzone: 5.5,
     };
-    console.log(boyPayload, "boyPayload");
-    console.log(girlPayload, "girlPayload");
     createKundli(boyPayload);
     createKundli(girlPayload);
     navigate(PATH.privateRoutes.MATCHMAKING_DETAILS.path, { state: formData });
@@ -291,15 +286,15 @@ const MatchMaking = () => {
       </div>
       <div className={styles.mainContainer}>
         <div className={styles.dailyContainer}>
-          <div className={styles.formArea}>
+          <form className={styles.formArea} onSubmit={handleGenerate}>
             {isBoy
               ? renderForm("boyData", "Boy's Detail")
               : renderForm("girlData", "Girl's Detail")}
 
-            <button className={styles.generateBtn} onClick={handleGenerate}>
+            <button className={styles.generateBtn} type="submit">
               Generate Horoscope
             </button>
-          </div>
+          </form>
         </div>
         <div className={` ${styles.kundliListContainer} p-4 xs:mt[0] `}>
           <SavedKundliList

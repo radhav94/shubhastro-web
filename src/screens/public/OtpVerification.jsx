@@ -38,15 +38,14 @@ const OtpVerification = () => {
       if (response?.data?.statusCode === 200) {
         const { isRegister, accessToken } = response?.data?.data || {};
 
+        // ✅ Save the OTP token here
         if (accessToken) {
           localStorage.setItem("verifyOtpToken", accessToken);
         }
 
         Toast.success("OTP verified successfully");
-        localStorage.setItem("isLoggedIn", "true");
+        // localStorage.setItem("isLoggedIn", JSON.stringify(true));
 
-
-        // ⬇️ NEW USER → GO TO REGISTER
         if (isRegister === "false") {
           navigate(PATH.publicRoutes.REGISTER.path, {
             replace: true,
@@ -115,8 +114,9 @@ const OtpVerification = () => {
 
             <button
               type="submit"
-              className={`${styles.verifyButton} ${!isOtpComplete ? styles.disabled : ""
-                }`}
+              className={`${styles.verifyButton} ${
+                !isOtpComplete ? styles.disabled : ""
+              }`}
               disabled={!isOtpComplete}
             >
               Verify OTP

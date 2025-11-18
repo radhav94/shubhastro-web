@@ -7,21 +7,22 @@ import Divider from "../../Divider";
 import { MdOutlineCurrencyRupee } from "react-icons/md";
 import { GetString } from "../../../utils/helper/string.utils";
 
-const AstrologerCard = ({ data, onFollow, onChat, onProfile }) => {
+const AstrologerCard = ({ data, onFollow, onChat, onProfile, image = "" }) => {
   return (
     <div className={styles.card}>
       <div className={styles.topSection} onClick={onProfile}>
         <div className={styles.avatarWrapper}>
           <img
-            src={`https://images.astroyogi.com/english/astrologer/profileimage/${data.ProfileImage}`}
-            alt={data.name}
+            src={data.imageUrl}
+            // src={image}
+            alt={data?.firstName}
             className={styles.avatar}
           />
           <span
             className={`${styles.statusDot} ${
-              data.status === "online"
+              data.isAccountActive === true
                 ? styles.online
-                : data.status === "offline"
+                : data.status === false
                 ? styles.offline
                 : styles.busy
             }`}
@@ -31,29 +32,31 @@ const AstrologerCard = ({ data, onFollow, onChat, onProfile }) => {
         <div className={styles.info}>
           <div className={styles.infoHeader}>
             <PrimaryText size_14 isExtraBold color={appColors.tri}>
-              {data.FirstName} {data.LastName}
+              {data?.firstName} {data?.lastName}
             </PrimaryText>
-            <PrimaryButton
+            {/* <PrimaryButton
               onClick={onFollow}
               borderColor={!data.NotifyMe ? appColors.pri : appColors.tri}
               fontSize={12}
               transparent
               buttonStyles={{ padding: "4px 12px" }}
               title={!data.NotifyMe ? "Follow" : "UnFollow"}
-            />
+            /> */}
           </div>
 
-          <div className={styles.row}>
-            <img src={AppIcons.Lang} alt="lang" className={styles.img} />
-            <PrimaryText size_12 isSemiBold color={appColors.greyMedium}>
-              {data.LanguageDltd}
-            </PrimaryText>
-          </div>
+          {data?.languagePreference?.length > 0 && (
+            <div className={styles.row}>
+              <img src={AppIcons.Lang} alt="lang" className={styles.img} />
+              <PrimaryText size_12 isSemiBold color={appColors.greyMedium}>
+                {data?.languagePreference?.join(",")}
+              </PrimaryText>
+            </div>
+          )}
 
           <div className={styles.row}>
             <img src={AppIcons.Education} alt="lang" className={styles.img} />
             <PrimaryText size_12 isBold color={appColors.greyMedium}>
-              {data.ExperienceYear} Years
+              {data.experience} Years
             </PrimaryText>
           </div>
 
@@ -61,11 +64,13 @@ const AstrologerCard = ({ data, onFollow, onChat, onProfile }) => {
             <div className={styles.row} style={{ margin: "0px" }}>
               <img src={AppIcons.Trophy} alt="lang" className={styles.img} />
               <PrimaryText size_12 color={appColors.greyMedium}>
-                {GetString(data.AstroCategoryNameDltd, 20)}
+                {data?.specialties?.length > 0
+                  ? GetString(data?.specialties?.join(), 20)
+                  : data.role}
               </PrimaryText>
             </div>
 
-            <div className={styles.rowCard}>
+            {/* <div className={styles.rowCard}>
               <img
                 src={AppIcons.Star}
                 alt="lang"
@@ -74,7 +79,7 @@ const AstrologerCard = ({ data, onFollow, onChat, onProfile }) => {
               />
               <PrimaryText size_12>{data.AverageRating}</PrimaryText>
               <PrimaryText size_12> | {data.RatingCount}</PrimaryText>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -82,7 +87,7 @@ const AstrologerCard = ({ data, onFollow, onChat, onProfile }) => {
       <Divider responsive margin="0px" />
 
       <div className={styles.bottomRow}>
-        <div className={styles.priceRow}>
+        {/* <div className={styles.priceRow}>
           <MdOutlineCurrencyRupee color={appColors.black} size={12} />
           <PrimaryText className=" pr-1" size_12>
             {data?.PhoneCharge?.Value}/Min
@@ -95,24 +100,24 @@ const AstrologerCard = ({ data, onFollow, onChat, onProfile }) => {
           >
             {data?.OfferChatCharge?.Value} off
           </PrimaryText>
-        </div>
+        </div> */}
 
         <div className={styles.buttonsRow}>
-          <PrimaryButton
+          {/* <PrimaryButton
             bgColor={appColors.white}
             imgSrc={AppIcons.Message}
             fontSize={12}
             buttonStyles={{ padding: "4px 6px" }}
             title="Chat"
             onClick={onChat}
-          />
-          <PrimaryButton
+          /> */}
+          {/* <PrimaryButton
             bgColor={appColors.white}
             imgSrc={AppIcons.Call}
             fontSize={12}
             buttonStyles={{ padding: "4px 6px" }}
             title="Call"
-          />
+          /> */}
         </div>
       </div>
     </div>
