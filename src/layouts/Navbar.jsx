@@ -15,7 +15,7 @@ const Navbar = () => {
       children: [
         {
           title: "Daily Horoscope",
-          path: PATH.privateRoutes.HOROSCOPE.DAILY.path,
+          path: "/horoscopes/daily-horoscope",
         },
         {
           title: "Monthly Horoscope",

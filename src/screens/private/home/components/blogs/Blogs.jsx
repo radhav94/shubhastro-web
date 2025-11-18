@@ -8,63 +8,17 @@ const Blogs = ({ titleShow = true, data }) => {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
 
+  const astroImages = [
+  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/19191028/Leo-Daily-Horoscope-Today.jpg", // astrology chart
+  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/20121804/Copy-of-Blog-Banner-for-Website-Content-1280-x-853-px-10-768x512.jpg", // zodiac wheel
+  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/18190254/Copy-of-Blog-Banner-for-Website-Content-1280-x-853-px-3-768x512.jpg", // planets galaxy
+  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/16143512/Blog-Banner-for-Website-Content-1280-x-853-px-9-768x512.jpg", // constellation
+];
+
 
   const title = data?.find((slug) => slug.display_type === "blog");
 
   const blogData = title?.content;
-  console.log("blogData",blogData);
-  // No changes needed to the data structure
-//   const blogData = [
-//     {
-//       id: 1,
-//       image:
-//         "https://images.astroyogi.com/strapicmsprod/strapicmsprod/assets/mercury_transit_in_scorpio_1200x600_7c3eca0ed3.webp",
-//       link: "/blog/planet-mercury-transit-in-scorpio.aspx",
-//       title:
-//         "Mercury in Scorpio Transit October 2025: Secrets, Strategy & Surprises Revealed",
-//       author: "Astro Roli",
-//       date: "Mon, Oct 06, 2025",
-//       authorIcon:
-//         "https://images.astroyogi.com/strapicmsprod/assets/astro_roli_16354096429_71f8cd7731.jpg",
-//     },
-//     {
-//       id: 2,
-//       image:
-//         "https://images.astroyogi.com/strapicmsprod/strapicmsprod/assets/weekly_horoscope_06_12_oct_2025_1200x600_ca19608cf4.webp",
-//       link: "/blog/october-06-october-12-horoscope.aspx",
-//       title:
-//         "Your Weekly Horoscope 6–12 October 2025: Insights & Tips for Every Zodiac Sign",
-//       author: "Team Astroyogi",
-//       date: "Mon, Oct 06, 2025",
-//       authorIcon:
-//         "https://images.astroyogi.com/strapicmsprod/assets/team_astroyogi_658d579d2f.webp",
-//     },
-//     {
-//       id: 3,
-//       image:
-//         "https://images.astroyogi.com/strapicmsprod/strapicmsprod/assets/108_names_of_ganesha_1200x600_c16713e629.webp",
-//       link: "/blog/108-names-of-lord-ganesha.aspx",
-//       title: "108 Names of Lord Ganesha and Their Meanings",
-//       author: "Team Astroyogi",
-//       date: "Fri, Oct 03, 2025",
-//       authorIcon:
-//         "https://images.astroyogi.com/strapicmsprod/assets/team_astroyogi_658d579d2f.webp",
-//     },
-//     {
-//   id: 4,
-//   image:
-//     "https://images.astroyogi.com/strapicmsprod/strapicmsprod/assets/lord_shiva_names_1200x600_c9a2dd3f12.webp",
-//   link: "/blog/108-names-of-lord-shiva.aspx",
-//   title: "108 Names of Lord Shiva and Their Powerful Meanings",
-//   author: "Astro Team",
-//   date: "Mon, Nov 10, 2025",
-//   authorIcon:
-//     "https://images.astroyogi.com/strapicmsprod/assets/astro_team_45dd67bb21.webp",
-// }
-
-   
-   
-//   ];
 
   const scrollLeft = () => {
     scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
@@ -99,14 +53,15 @@ const Blogs = ({ titleShow = true, data }) => {
         ref={scrollRef}
       >
 
-        {blogData?.map((blog) => (
+        {blogData?.map((blog,index) => (
           <Link
-            key={blog.id}
-            to={PATH.privateRoutes.BLOG.path}
+            key={blog._id}
+            to={PATH.privateRoutes.SINGLEBLOG.path.replace(":slug", blog.blogId)}
+
             className={Styles.blogLink}
           >
             <BlogCard
-              image={blog.image}
+              image={astroImages[index % astroImages.length]}
               title={blog.title}
               author={blog.author}
               date={blog.publishDate}

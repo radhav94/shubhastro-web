@@ -1,0 +1,36 @@
+.paginationWrapper {
+  margin-top: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  button {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    transition: 0.2s;
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &:hover:not(:disabled) {
+      background: #f2f2f2;
+    }
+  }
+}
+
+.pages {
+  display: flex;
+  gap: 8px;
+
+  .active {
+    background: #f4b545;
+    color: white;
+    border-color: #f4b545;
+  }
+}

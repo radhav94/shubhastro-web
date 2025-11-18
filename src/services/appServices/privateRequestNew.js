@@ -56,7 +56,6 @@ export const privateRequestNew = createApi({
       baseUrl: "https://njsapi-shubhtalk.epicon.in/api/",
       prepareHeaders: (headers) => {
         const token = localStorage.getItem("verifyOtpToken");
-        // console.log("tokeennnnnn", token);
 
         headers.set("Content-Type", "application/json");
 

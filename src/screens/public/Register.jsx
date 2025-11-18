@@ -79,16 +79,16 @@ const Register = () => {
       const {
         firstName,
         lastName,
-        email,
+        // email,
         password,
         confirmPassword,
         gender,
         day,
         month,
         year,
-        address,
-        latitude,
-        longitude,
+        // address,
+        // latitude,
+        // longitude,
         birthPlace,
       } = formData;
 
@@ -110,19 +110,18 @@ const Register = () => {
         .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
 
       const phoneNumber = location?.state?.from?.state?.phoneNumber || "";
-
       const payload = {
         phoneNumber,
         firstName,
         lastName,
         password,
         place: birthPlace || "",
-        email,
+        // email,
         languagePreferences: ["English", "Hindi"],
         dateOfBirth,
-        address,
-        lat: latitude?.toString() || "",
-        lon: longitude?.toString() || "",
+        // address,
+        // lat: latitude?.toString() || "",
+        // lon: longitude?.toString() || "",
         role: "CUSTOMER",
       };
 
@@ -148,9 +147,7 @@ const Register = () => {
           message: "Registration successful!",
         });
 
-        setTimeout(() => {
           navigate(PATH.privateRoutes.HOME.path, { replace: true });
-        }, 1000);
       } else {
         setToast({
           show: true,
@@ -227,7 +224,9 @@ const Register = () => {
             />
           </div>
 
-          <div className={styles.row}>
+         */}
+
+           <div className={styles.row}>
             <div className={styles.formGroup}>
               <label className={styles.required}>Password</label>
               <input
@@ -249,7 +248,7 @@ const Register = () => {
                 required
               />
             </div>
-          </div> */}
+          </div>
 
           <h3 className={styles.sectionHeader}>Date of Birth</h3>
 

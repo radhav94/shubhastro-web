@@ -45,11 +45,12 @@ const OtpVerification = () => {
         Toast.success("OTP verified successfully");
         localStorage.setItem("isLoggedIn", "true");
 
+
         // ⬇️ NEW USER → GO TO REGISTER
         if (isRegister === "false") {
           navigate(PATH.publicRoutes.REGISTER.path, {
             replace: true,
-            state: { from: redirectPath },
+            state: { from: location },
           });
         } else {
           // ⬇️ EXISTING USER → BACK TO SAME PAGE
@@ -114,9 +115,8 @@ const OtpVerification = () => {
 
             <button
               type="submit"
-              className={`${styles.verifyButton} ${
-                !isOtpComplete ? styles.disabled : ""
-              }`}
+              className={`${styles.verifyButton} ${!isOtpComplete ? styles.disabled : ""
+                }`}
               disabled={!isOtpComplete}
             >
               Verify OTP

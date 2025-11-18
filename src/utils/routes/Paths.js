@@ -39,6 +39,7 @@ import {
   MatchDetails,
   ChatWindow,
 } from "../../screens";
+import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
 
 export const PATH = {
   // DEFAULT: {
@@ -190,6 +191,10 @@ export const PATH = {
     BLOG: {
       path: "/blog",
       element: Blog,
+    },
+    SINGLEBLOG: {
+      path: "/blog/:slug",
+      element: SingleBlogDetails,
     },
     SESSION_DETAILS: {
       path: "/session-details",

@@ -27,6 +27,13 @@ $font-primary: "Poppins", sans-serif;
   color: inherit;
 }
 
+.blogLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+}
+
 .mainBlogCard {
   background: $color-card;
   border-radius: 16px;

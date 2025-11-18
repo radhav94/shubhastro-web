@@ -11,14 +11,12 @@ import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServic
 const Home = () => {
   const navigate = useNavigate();
 
-  // ⭐ CALL API
+  // CALL API
   const { data, isLoading, isError } = useGetHomeDetailsQuery();
 
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>Something went wrong</div>;
 
-  // ⭐ Ab yaha data use kar sakte ho
-  console.log("HOMEDATA", data?.data?.list);
 
   const onChat = (data) => {
     navigate(`/talk-to-astrologers/chat/${data.AstrologerLoginId}`, {

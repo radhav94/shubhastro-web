@@ -98,7 +98,6 @@ const KundaliHeader = () => {
   // Select Saved Kundli
   const handleSelectKundli = (kundli) => {
     setSelectedKundliId(kundli._id);
-    console.log("kundli",kundli)
 
     // setFormData({
     //   name: kundli.name,

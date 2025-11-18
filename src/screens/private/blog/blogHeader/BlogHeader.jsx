@@ -1,85 +1,58 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./BlogHeader.module.scss";
 import { BlogCard } from "../../../../component";
-// import { subsidiaryBlogsData } from "./data";
 import { useGetBlogQuery } from "../../../../services/appServices/blogService";
+import { Link } from "react-router-dom";
+import { PATH } from "../../../../utils/routes/Paths";
+import { blogResponse } from "./data";  // <-- updated
+import Pagination from "../../../../component/pagination/Pagination";
 
 
-// const subsidiaryBlogsData = [
-//   {
-//     id: 2,
-//     bannerUrl:
-//       "https://images.astroyogi.com/strapicmsprod/strapicmsprod/assets/karwa_chauth_wishes_and_quotes_h_1200x600_909c434d6d.webp",
-//     authorImgUrl:
-//       "https://images.astroyogi.com/strapicmsprod/assets/team_astroyogi_658d579d2f.webp",
-//     authorName: "Team Astroyogi",
-//     date: "Tue, Oct 07, 2025",
-//     title: "Karwa Chauth Wishes and Quotes to Celebrate Love",
-//     link: "/blog/karwa-chauth-wishes-and-quotes.aspx",
-//   },
-//   {
-//     id: 3,
-//     bannerUrl:
-//       "https://images.astroyogi.com/strapicmsprod/strapicmsprod/assets/karwa_chauth_gift_for_wife_1200x600_49f34385c6.webp",
-//     authorImgUrl:
-//       "https://images.astroyogi.com/strapicmsprod/assets/team_astroyogi_658d579d2f.webp",
-//     authorName: "Team Astroyogi",
-//     date: "Tue, Oct 07, 2025",
-//     title: "Karwa Chauth Gift for Wife: According to Zodiac Signs",
-//     link: "/blog/karwa-chauth-gift-for-wife.aspx",
-//   },
-//   {
-//     id: 4,
-//     bannerUrl:
-//       "https://images.astroyogi.com/strapicmsprod/strapicmsprod/assets/weekly_horoscope_06_12_oct_2025_1200x600_ca19608cf4.webp",
-//     authorImgUrl:
-//       "https://images.astroyogi.com/strapicmsprod/assets/team_astroyogi_658d579d2f.webp",
-//     authorName: "Team Astroyogi",
-//     date: "Mon, Oct 06, 2025",
-//     title:
-//       "Your Weekly Horoscope 6–12 October 2025: Insights & Tips for Every Zodiac Sign",
-//     link: "/blog/october-06-october-12-horoscope.aspx",
-//   },
-//   {
-//     id: 5,
-//     bannerUrl:
-//       "https://images.astroyogi.com/strapicmsprod/strapicmsprod/assets/mercury_transit_in_scorpio_1200x600_7c3eca0ed3.webp",
-//     authorImgUrl:
-//       "https://images.astroyogi.com/strapicmsprod/assets/astro_roli_16354096429_71f8cd7731.jpg",
-//     authorName: "Astro Roli",
-//     date: "Mon, Oct 06, 2025",
-//     title:
-//       "Mercury in Scorpio Transit October 2025: Secrets, Strategy & Surprises Revealed",
-//     link: "/blog/planet-mercury-transit-in-scorpio.aspx",
-//   },
-// ];
-
- 
-
-
-
+// AstroTalk style astrology images
+const astroImages = [
+  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/19191028/Leo-Daily-Horoscope-Today.jpg", // astrology chart
+  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/20121804/Copy-of-Blog-Banner-for-Website-Content-1280-x-853-px-10-768x512.jpg", // zodiac wheel
+  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/18190254/Copy-of-Blog-Banner-for-Website-Content-1280-x-853-px-3-768x512.jpg", // planets galaxy
+  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/16143512/Blog-Banner-for-Website-Content-1280-x-853-px-9-768x512.jpg", // constellation
+];
 
 const BlogHeader = () => {
-   const { data, isLoading, isError } = useGetBlogQuery();
-  const subsidiaryBlogsData = data?.data || [];
+  const [page, setPage] = useState(1);
+
+  const { data, isLoading } = useGetBlogQuery({ page, limit: 10 });
+
+  if (isLoading) return <p>Loading...</p>;
+
+  const blogs = data?.data || [];
+
+  const pagination = data?.pagination;
+
+
   return (
-    <div className={styles.blogsContainer}>
-   
-
-     
-
-         {subsidiaryBlogsData?.map((blog) => (
-
-         <BlogCard
-              image={"https://images.astroyogi.com/strapicmsprod/strapicmsprod/assets/mercury_transit_in_scorpio_1200x600_7c3eca0ed3.webp"}
+    <>
+      <div className={styles.blogsContainer}>
+        {blogs?.map((blog, index) => (
+          <Link
+            key={blog._id}
+            to={PATH.privateRoutes.SINGLEBLOG.path.replace(":slug", blog._id)}
+            className={styles.blogLink}
+          >
+            <BlogCard
+              image={astroImages[index % astroImages.length]}
               title={blog.title}
-              author={blog.author}
               date={blog.publishDate}
-              authorIcon={blog.authorIcon}
             />
-             ))}
-    </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Pagination UI */}
+      {pagination && (
+        <Pagination pagination={pagination} onPageChange={setPage} />
+      )}
+    </>
   );
 };
 
 export default BlogHeader;
+

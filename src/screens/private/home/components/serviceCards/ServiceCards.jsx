@@ -20,32 +20,7 @@ const ServiceCards = ({ data }) => {
   // 🟩 Banner content (title, desc, icon)
   const services = bannerSection?.content;
 
-  // const services = [
-  //   {
-  //     id: 1,
-  //     title: "Chat",
-  //     icon: AppIcons.Chat,
-  //     path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path,
-  //   },
-  //   // {
-  //   //   id: 2,
-  //   //   title: "Call",
-  //   //   icon: AppIcons.Call,
-  //   //   path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path,
-  //   // },
-  //   {
-  //     id: 3,
-  //     title: "Horoscope",
-  //     icon: AppIcons.Astrology,
-  // path: PATH.privateRoutes.HOROSCOPE.DAILY.path,
-  //   },
-  //   {
-  //     id: 4,
-  //     title: "Kundali",
-  //     icon: AppIcons.Kundali,
-  //     path: PATH.privateRoutes.KUNDLI.path,
-  //   },
-  // ];
+  
   const navigate = useNavigate();
 
    const scrollLeft = () => {
@@ -61,7 +36,7 @@ const ServiceCards = ({ data }) => {
     <div className={styles.cardsGrid}>
       {services.map((service) => (
         <motion.div
-          key={service.id}
+          key={service._id}
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 300 }}
           className={styles.card}
