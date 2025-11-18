@@ -175,7 +175,8 @@ const KundaliHeader = () => {
     } catch (err) {
       console.log(err);
     }
-    dispatch(setForm(formData));
+     dispatch(setForm(formData));
+
   };
 
   // Delete Kundli

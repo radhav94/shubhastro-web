@@ -94,6 +94,10 @@ const Kundali = () => {
       label: "Dosh",
       content: <FreeReport />,
     },
+     {
+      label: "Free Report",
+      content: <FreeReport />,
+    },
   ];
 
   return (
