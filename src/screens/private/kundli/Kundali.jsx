@@ -21,6 +21,7 @@ import {
 } from "../../../redux/api/kundli/kundliApi";
 import { useSelector } from "react-redux";
 import { skipToken } from "@reduxjs/toolkit/query";
+import Report from "./FreeKundli/Report";
 
 const Kundali = () => {
   const [
@@ -90,13 +91,9 @@ const Kundali = () => {
       label: "Dasha",
       content: <DashaContent />,
     },
-    {
-      label: "Dosh",
-      content: <FreeReport />,
-    },
      {
       label: "Free Report",
-      content: <FreeReport />,
+      content: <Report />,
     },
   ];
 

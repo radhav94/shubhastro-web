@@ -1,3 +1,11 @@
+// --- Global Fixes (Important) ---
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; // Prevents right side white gap
+}
+
 // --- Design System Variables ---
 $color-dark-blue: #0f0c29;
 $color-deep-purple: #302b63;
@@ -58,12 +66,15 @@ $font-primary: "Poppins", sans-serif;
     list-style: none;
     padding: 0;
     margin: 0;
+
     li {
       margin-bottom: 10px;
+
       a {
         color: $color-grey-text;
         text-decoration: none;
         transition: color 0.3s ease, padding-left 0.3s ease;
+
         &:hover {
           color: $color-gold;
           padding-left: 5px;
@@ -101,9 +112,11 @@ $font-primary: "Poppins", sans-serif;
   line-height: 1.6;
   margin-bottom: 20px;
 }
+
 .support_link {
   color: $color-light-text;
   text-decoration: none;
+
   &:hover {
     color: $color-gold;
   }
@@ -112,10 +125,12 @@ $font-primary: "Poppins", sans-serif;
 .social_icons {
   display: flex;
   gap: 15px;
+
   a {
     color: $color-grey-text;
     font-size: 22px;
     transition: color 0.3s ease, transform 0.3s ease;
+
     &:hover {
       color: $color-gold;
       transform: translateY(-3px);
@@ -141,9 +156,11 @@ $font-primary: "Poppins", sans-serif;
     list-style: none;
     padding: 0;
     margin: 0;
+
     a {
       color: $color-grey-text;
       text-decoration: none;
+
       &:hover {
         color: $color-gold;
       }
@@ -151,17 +168,20 @@ $font-primary: "Poppins", sans-serif;
   }
 }
 
-// --- Sticky PWA/Mobile Footer ---
+// --- Sticky PWA / Mobile Footer ---
 .pwa_footer {
   display: none; // Hidden on desktop
 }
 
 // --- Responsive Breakpoints ---
-
 @media screen and (max-width: 768px) {
   .footer {
-    padding: 30px 0 80px 0; // Adjust padding for mobile
+    padding: 30px 0;
+
+    // Fix bottom white-space by adding dynamic padding
+    padding-bottom: calc(100px + env(safe-area-inset-bottom));
   }
+
   .footer_main {
     text-align: center;
     gap: 40px;
@@ -182,7 +202,8 @@ $font-primary: "Poppins", sans-serif;
     position: fixed;
     bottom: 0;
     left: 0;
-    width: 100%;
+    right: 0;   // Prevent right white space
+    width: 100vw; // Prevent 1–2px overflow scroll
     background: rgba($color-dark-blue, 0.85);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -196,6 +217,7 @@ $font-primary: "Poppins", sans-serif;
       list-style: none;
       margin: 0;
       padding: 8px 0;
+      padding-bottom: env(safe-area-inset-bottom); // Fix iPhone bottom gap
     }
 
     a {

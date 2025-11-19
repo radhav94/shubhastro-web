@@ -1,0 +1,174 @@
+.card {
+  background: linear-gradient(180deg, #ffffff 0%, #fafafe 100%);
+  border: 1px solid #eae8ff;
+  border-radius: 18px;
+  padding: 26px;
+  margin-bottom: 24px;
+  box-shadow: 0px 8px 24px rgba(90, 80, 180, 0.08);
+  transition: all 0.28s ease;
+  backdrop-filter: blur(6px);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0px 12px 32px rgba(90, 80, 180, 0.14);
+    border-color: #d5d0ff;
+  }
+}
+
+/* Header */
+.cardHeader {
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(160, 150, 240, 0.15);
+}
+
+.cardTitle {
+  color: #1f1f1f;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  font-size: 22px;
+}
+
+/* Section */
+.section {
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px dashed rgba(150, 140, 240, 0.16);
+
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+}
+
+.sectionTitle {
+  color: #6d35ff;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.sectionContent {
+  color: #3c3c3c;
+  line-height: 1.7;
+  font-size: 15px;
+  background: #f8f7ff;
+  border-left: 4px solid #6d35ff;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #ebe9ff;
+}
+
+/* Tags */
+.tagContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.tag {
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.22s ease;
+}
+
+.tagPositive {
+  background: linear-gradient(135deg, #ecfdf1, #e7fced);
+  color: #2e7d32;
+  border: 1px solid #d5f0d8;
+
+  &:hover {
+    background: #2e7d32;
+    color: #ffffff;
+    box-shadow: 0px 4px 12px rgba(46, 125, 50, 0.25);
+  }
+}
+
+.tagNegative {
+  background: linear-gradient(135deg, #fff1f1, #ffeaea);
+  color: #c62828;
+  border: 1px solid #f4c7c7;
+
+  &:hover {
+    background: #c62828;
+    color: #ffffff;
+    box-shadow: 0px 4px 12px rgba(198, 40, 40, 0.25);
+  }
+}
+
+/* ----------------------- */
+/* ⭐ RESPONSIVENESS BELOW */
+/* ----------------------- */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .card {
+    padding: 22px;
+  }
+  .cardTitle {
+    font-size: 20px;
+  }
+  .sectionContent {
+    font-size: 14px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .card {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .cardTitle {
+    font-size: 18px;
+  }
+
+  .section {
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+  }
+
+  .sectionContent {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .tag {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .card {
+    padding: 16px;
+  }
+
+  .cardTitle {
+    font-size: 17px;
+    letter-spacing: 0.2px;
+  }
+
+  .sectionContent {
+    font-size: 13px;
+    padding: 9px 10px;
+  }
+
+  .tagContainer {
+    gap: 6px;
+  }
+
+  .tag {
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 16px;
+  }
+}

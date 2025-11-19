@@ -41,9 +41,8 @@ const NestedTabs = ({ tabs = [] }) => {
         {tabs.map((tab) => (
           <button
             key={tab.value}
-            className={`${styles.outerButton} ${
-              outerActive === tab.value ? styles.activeOuter : ""
-            }`}
+            className={`${styles.outerButton} ${outerActive === tab.value ? styles.activeOuter : ""
+              }`}
             onClick={() => handleOuterSelect(tab.value)}
           >
             {tab.label}
@@ -57,9 +56,8 @@ const NestedTabs = ({ tabs = [] }) => {
           {innerTabs.map((inner) => (
             <button
               key={inner.value}
-              className={`${styles.innerButton} ${
-                innerActive === inner.value ? styles.activeInner : ""
-              }`}
+              className={`${styles.innerButton} ${innerActive === inner.value ? styles.activeInner : ""
+                }`}
               onClick={() => handleInnerSelect(inner.value)}
             >
               {inner.label}
@@ -69,13 +67,24 @@ const NestedTabs = ({ tabs = [] }) => {
       )}
 
       {/* CONTENT AREA */}
+      {/* CONTENT AREA */}
       <div className={styles.innerTabContent}>
-        {activeInnerTab?.component ? (
+        {/* CASE 1: Has children → Render inner component */}
+        {innerTabs.length > 0 && activeInnerTab?.component && (
           <activeInnerTab.component />
-        ) : (
+        )}
+
+        {/* CASE 2: No children but parent has component → Render parent component */}
+        {innerTabs.length === 0 && outerTab?.component && (
+          <outerTab.component />
+        )}
+
+        {/* CASE 3: Nothing to show */}
+        {innerTabs.length === 0 && !outerTab?.component && (
           <p>No content available</p>
         )}
       </div>
+
     </div>
   );
 };

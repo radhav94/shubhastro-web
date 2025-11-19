@@ -134,7 +134,7 @@ const KundaliHeader = () => {
         name: kundli.name,
         gender: kundli.gender === "M" ? "Male" : "Female",
         day: kundli.day.toString(),
-        month: kundli.month.toString(),
+        month: months[kundli.month - 1],   // FIXED HERE
         year: kundli.year.toString(),
         hour: kundli.hour.toString(),
         minute: kundli.min.toString(),

@@ -1,0 +1,65 @@
+.wrapper {
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #4a2c2a;
+  border-left: 5px solid #d47b00;
+  padding-left: 10px;
+  margin-bottom: 20px;
+}
+
+.section {
+  margin-bottom: 18px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.label {
+  width: 180px;
+  font-weight: 600;
+  color: #333;
+}
+
+.value {
+  flex: 1;
+  color: #555;
+  line-height: 1.6;
+}
+
+.valueBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badgeRed {
+  background: #ffe5e5;
+  color: #d9534f;
+  padding: 5px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  border: 1px solid #ffcdcd;
+}
+
+.badgeGreen {
+  background: #e7ffe7;
+  color: #2e8b57;
+  padding: 5px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  border: 1px solid #c8f5c8;
+}
+
+.botResponse {
+  padding: 12px;
+  background: #f7f2e7;
+  border-left: 4px solid #e0a04b;
+  border-radius: 8px;
+  color: #6b4f2c;
+  line-height: 1.5;
+}

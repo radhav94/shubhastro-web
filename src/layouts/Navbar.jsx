@@ -48,7 +48,7 @@ const Navbar = () => {
     //   ],
     // },
 
-    { title: "Kundli", path: PATH.privateRoutes.KUNDLI.path },
+    { title: "Kundli", path: "kundli/free-kundli" },
     { title: "Sadesati", path: PATH.privateRoutes.SADESATI.path },
     { title: "Match Making", path: PATH.privateRoutes.MATCHMAKING.path },
     // { title: "Numerology", path: PATH.privateRoutes.NUMEROLOGY.path },
