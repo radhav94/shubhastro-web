@@ -61,7 +61,7 @@ const OtpVerification = () => {
     }
   };
 
-  const handleEditNumber = () => navigate(-1);
+  const handleEditNumber = () => navigate("/login");
 
   // Timer logic
   useEffect(() => {
