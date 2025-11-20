@@ -1,34 +1,26 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./TopBar.module.scss";
 
 // Assuming your logo path is correct
-import { AppIcons, AppImages } from "../../utils/appImages";
+import { AppIcons } from "../../utils/appImages";
+import SideBar from "../sidebar/SideBar";
 
 // Components and Hooks
-import SideBar from "../sidebar/SideBar";
-import { useIsMobile } from "../../utils/hooks/useIsMobile";
-import { PATH } from "../../utils/routes/Paths";
 
 // Icons
-import { IoHomeOutline, IoWalletOutline } from "react-icons/io5";
-import { MdGTranslate } from "react-icons/md";
 import { FiMenu } from "react-icons/fi";
 import { PrimaryText } from "../../component";
 
 const TopBar = () => {
-  const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const [scrolled, setScrolled] = useState(false);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
-  // const isLoggedIn = JSON.parse(localStorage.getItem("isLoggedIn"));
   const token = localStorage.getItem("verifyOtpToken");
   const handleLogout = () => {
     localStorage.removeItem("verifyOtpToken");
     navigate("/");
-    // localStorage.setItem("isLoggedIn", JSON.stringify(false));
   };
 
   useEffect(() => {
@@ -38,30 +30,15 @@ const TopBar = () => {
     setWalletBalance(Number(storedWallet.amount));
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 40) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
     <>
-      <header className={`${styles.topBar} ${scrolled ? styles.scrolled : ""}`}>
+      {/* SIDEBAR */}
+      <SideBar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <header className={`${styles.topBar}`}>
         <div className={styles.container}>
           <div className={styles.leftSection}>
-            {isMobile && (
-              <FiMenu
-                className={styles.menuIcon}
-                onClick={() => setSidebarOpen(true)}
-              />
-            )}
+            {/* HAMBURGER MENU → opens sidebar */}
+
             <div className={styles.logoContainer} onClick={() => navigate("/")}>
               <img src={AppIcons.Logo} alt="Shubh Talk Logo" />
               <PrimaryText marginLeft="5px" isBold size_28>
@@ -87,10 +64,12 @@ const TopBar = () => {
             >
               <MdGTranslate />
             </button> */}
-            <button className={styles.iconButton} aria-label="Notifications">
-              {/* <Link to="/">
-                <IoHomeOutline />
-              </Link> */}
+            <button
+              className={styles.menuIcon}
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Hamburger Menu"
+            >
+              <FiMenu />
             </button>
 
             {/* Sign In CTA Button */}
@@ -112,11 +91,6 @@ const TopBar = () => {
           </div>
         </div>
       </header>
-
-      {/* Sidebar for mobile */}
-      {isMobile && (
-        <SideBar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      )}
     </>
   );
 };

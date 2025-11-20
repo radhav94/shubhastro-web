@@ -13,10 +13,10 @@ $font-primary: "Poppins", sans-serif;
   top: 0;
   background: #fff;
   z-index: 1000;
+  @media screen and (max-width: 772px) {
+    padding: 6px 0;
+  }
 }
-
-
-
 
 .container {
   display: flex;
@@ -42,7 +42,7 @@ $font-primary: "Poppins", sans-serif;
   justify-content: space-around;
   align-items: center;
   cursor: pointer;
-  padding-top: 10px;   // 👈 THIS IS THE FIX (moves logo + text slightly down)
+  padding-top: 10px; // 👈 THIS IS THE FIX (moves logo + text slightly down)
 
   img {
     height: 45px; // Adjusted for a sleeker look
@@ -57,9 +57,9 @@ $font-primary: "Poppins", sans-serif;
 
 .menuIcon {
   font-size: 26px;
-  color: $color-light-text;
+  // color: $color-light-text;
   cursor: pointer;
-  display: none; // Hidden by default
+  display: block; // Hidden by default
 }
 
 // --- Right Section Buttons ---

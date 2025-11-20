@@ -8,7 +8,6 @@ $mobile-screen-width: 500px;
   background: white;
   // background: linear-gradient(to bottom,#b49f4b 30%, #ffffff 60%, #fff7cc 10%, );
   // background: linear-gradient(to bottom, #606385 10%, white 80%);
-  
 
   justify-content: flex-start;
 
@@ -29,7 +28,6 @@ $mobile-screen-width: 500px;
   //   z-index: 1000;
   //   background-color: #f7f8fc;
   // }
-  
 
   .topBarContainer {
     width: 100%;
@@ -48,26 +46,31 @@ $mobile-screen-width: 500px;
     overflow-y: auto;
   }
 
- .outletDiv {
-  width: 100%;
-  padding: 10px 0;
-}
+  .outletDiv {
+    width: 100%;
+    padding: 10px 0;
+  }
 
+  .fixedTopBar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 2000;
 
-.fixedTopBar {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 2000;
+    background: #ffffff; //  FIX
+    border-bottom: 1px solid #eee; //  Optional but looks premium
+  }
 
-  background: #ffffff;            // 👈 FIX
-  border-bottom: 1px solid #eee;  // 👈 Optional but looks premium
-}
+  .topGap {
+    height: 125px; // same as TopBar height
+    @media screen and (max-width: 772px) {
+      height: 80px;
+    }
 
-
-.topGap {
-  height: 125px; // same as TopBar height
-}
+    .contentWrapper {
+      padding: 0 16px;
+    }
+  }
 
   .footerWrapper {
     width: 100%;

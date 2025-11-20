@@ -1,6 +1,5 @@
 import { useSelector } from "react-redux";
 import { AppImages } from "../../../utils/appImages";
-import { skipToken } from "@reduxjs/toolkit/query";
 import { useGetSadesatiQuery } from "../../../redux/api/kundli/dashaApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 const Sadesati = () => {
@@ -20,7 +19,6 @@ const Sadesati = () => {
     tz: formData?.tzone || 5.5,
     lang: "en",
   };
-  // : skipToken;
 
   const { data, isLoading } = useGetSadesatiQuery(queryArgs);
   const sadesati = data?.response;

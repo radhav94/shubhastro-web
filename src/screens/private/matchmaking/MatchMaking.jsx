@@ -10,6 +10,25 @@ import {
   useDeleteKundliMutation,
   useGetAllKundlisQuery,
 } from "../../../services/appServices/kundliServicesNew";
+import PrimaryLoader from "../../../component/UI/PrimaryLoader";
+
+const isDuplicateKundli = (payload, list) => {
+  return list.some(
+    (k) =>
+      k.name === payload.name &&
+      k.gender === payload.gender &&
+      k.day === payload.day &&
+      k.month === payload.month &&
+      k.year === payload.year &&
+      Number(k.hour) === Number(payload.hour) &&
+      Number(k.min) === Number(payload.min) &&
+      Number(k.second) === Number(payload.second) &&
+      Number(k.lat) === Number(payload.lat) &&
+      Number(k.lon) === Number(payload.lon) &&
+      k.place === payload.place &&
+      Number(k.tzone) === Number(payload.tzone)
+  );
+};
 
 const MatchMaking = () => {
   const navigate = useNavigate();
@@ -22,21 +41,6 @@ const MatchMaking = () => {
   });
   const [createKundli] = useCreateKundliMutation();
   const [deleteKundli] = useDeleteKundliMutation();
-
-  const monthMap = {
-    Jan: 1,
-    Feb: 2,
-    Mar: 3,
-    Apr: 4,
-    May: 5,
-    Jun: 6,
-    Jul: 7,
-    Aug: 8,
-    Sep: 9,
-    Oct: 10,
-    Nov: 11,
-    Dec: 12,
-  };
 
   const onDelete = async (id) => {
     try {
@@ -181,8 +185,13 @@ const MatchMaking = () => {
       lon: Number(formData.girlData.place.lng),
       tzone: 5.5,
     };
-    createKundli(boyPayload);
-    createKundli(girlPayload);
+    if (!isDuplicateKundli(boyPayload, savedKundlis)) {
+      createKundli(boyPayload);
+    }
+    if (!isDuplicateKundli(girlPayload, savedKundlis)) {
+      createKundli(girlPayload);
+    }
+    // createKundli(girlPayload);
     navigate(PATH.privateRoutes.MATCHMAKING_DETAILS.path, { state: formData });
   };
 
@@ -265,6 +274,7 @@ const MatchMaking = () => {
 
   return (
     <div>
+      <PrimaryLoader isLoading={isLoading} />
       <div className={styles.tabContainer}>
         <PrimaryText marginBottom="1rem" isCenter size_18>
           Enter Your Partner's Detail

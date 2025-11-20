@@ -38,7 +38,7 @@ const OtpVerification = () => {
       if (response?.data?.statusCode === 200) {
         const { isRegister, accessToken } = response?.data?.data || {};
 
-        // ✅ Save the OTP token here
+        // Save the OTP token here
         if (accessToken) {
           localStorage.setItem("verifyOtpToken", accessToken);
         }

@@ -1,77 +1,82 @@
 import React, { useState } from "react";
 import styles from "./SideBar.module.scss";
-import PrimaryText from "../../component/PrimaryText";
-import Divider from "../../component/Divider";
-import { appShadow } from "../../utils/theme";
-import PrimaryButton from "../../component/PrimaryButton";
-import { IoClose } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
+import { FiX, FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { MENU_LIST } from "../../utils/menulist";
 
-const SideBar = ({ onClose, isOpen }) => {
-  const menuItems = [
-    { title: "Home" },
-    { title: "Consult Now" },
-    { title: "Horoscope" },
-    {
-      title: "Year 2025",
-      children: ["2025 Overview", "Love Horoscope", "Career Horoscope"],
-    },
-    { title: "Panchang" },
-    { title: "Kundli" },
-    { title: "Numerology" },
-    { title: "Tarot" },
-    { title: "Free Readings" },
-    { title: "Yogi Live", tag: "Watch", tagType: "watch" },
-    { title: "Video" },
-    { title: "Blog" },
-    { title: "Session Booking" },
-    { title: "Yogii Mall", tag: "New", tagType: "new" },
-  ];
+const SideBar = ({ open, onClose }) => {
+  const navigate = useNavigate();
+  const [openIndex, setOpenIndex] = useState(null); // for accordion
 
-  const [openMenus, setOpenMenus] = useState({});
+  const handleClick = (path) => {
+    navigate(path);
+    onClose();
+  };
 
-  const toggleSubMenu = (index) => {
-    setOpenMenus((prev) => ({ ...prev, [index]: !prev[index] }));
+  const toggleDropdown = (index) => {
+    setOpenIndex(openIndex === index ? null : index);
   };
 
   return (
-    <div className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}>
-      <div>
-        <div style={{ boxShadow: appShadow[4] }} className={styles.header}>
-          <PrimaryText size_14>Shubh Talk</PrimaryText>
-          <PrimaryButton
-            transparent
-            IconComponent={IoClose}
-            onClick={onClose}
-          />
-        </div>
-        <div className={styles.sidebarContent}>
-          <ul>
-            {menuItems.map((item, idx) => (
-              <div key={idx}>
-                <li>
-                  <PrimaryText
-                    size_14
-                    onClick={() => item.children && toggleSubMenu(idx)}
-                    style={{ cursor: item.children ? "pointer" : "default" }}
-                  >
-                    {item.title} {item.children && <span>&#9662;</span>}
-                  </PrimaryText>
+    <>
+      <div
+        className={`${styles.overlay} ${open ? styles.show : ""}`}
+        onClick={onClose}
+      ></div>
 
-                  {item.children && openMenus[idx] && (
-                    <ul className={styles.subMenu}>
-                      {item.children.map((sub, subIdx) => (
-                        <li key={subIdx}>{sub}</li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-                <Divider responsive={true} />
-              </div>
-            ))}
-          </ul>
+      <div className={`${styles.sidebar} ${open ? styles.open : ""}`}>
+        <div className={styles.header}>
+          <FiX className={styles.closeIcon} onClick={onClose} />
+          <span className={styles.title}>Menu</span>
         </div>
+
+        <ul className={styles.menuList}>
+          {MENU_LIST.map((item, i) => (
+            <li key={i} className={styles.menuItem}>
+              {!item.children ? (
+                <span
+                  className={styles.menuLink}
+                  onClick={() => handleClick(item.path)}
+                >
+                  {item.title}
+                </span>
+              ) : (
+                <>
+                  <div
+                    className={styles.parentRow}
+                    onClick={() => toggleDropdown(i)}
+                  >
+                    <span>{item.title}</span>
+                    {openIndex === i ? (
+                      <FiChevronUp className={styles.chevron} />
+                    ) : (
+                      <FiChevronDown className={styles.chevron} />
+                    )}
+                  </div>
+
+                  {/* Accordion Submenu */}
+                  <ul
+                    className={`${styles.submenu} ${
+                      openIndex === i ? styles.submenuOpen : ""
+                    }`}
+                  >
+                    {item.children.map((child, idx) => (
+                      <li
+                        key={idx}
+                        className={styles.submenuItem}
+                        onClick={() => handleClick(child.path)}
+                      >
+                        {child.title}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
       </div>
-    </div>
+    </>
   );
 };
 

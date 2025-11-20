@@ -7,6 +7,7 @@ import Blogs from "./components/blogs/Blogs";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../utils/routes/Paths";
 import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices"; // ⭐ API IMPORT
+import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -14,8 +15,7 @@ const Home = () => {
   // CALL API
   const { data, isLoading, isError } = useGetHomeDetailsQuery();
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Something went wrong</div>;
+  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
 
   const onChat = (data) => {
     navigate(`/talk-to-astrologers/chat/${data._id}`, {

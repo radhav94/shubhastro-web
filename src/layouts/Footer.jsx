@@ -12,6 +12,9 @@ import {
   IoLogoInstagram,
   IoLogoTwitter,
 } from "react-icons/io5";
+import { TbLogout } from "react-icons/tb";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 // Data for links - easy to manage and update
 const quickLinks = [
@@ -30,21 +33,47 @@ const usefulLinks = [
   { href: "/faqs", text: "FAQs" },
 ];
 
-const mobileNavLinks = [
-  { href: "/", icon: <IoHomeOutline />, text: "Home", active: true }, // Example 'active' state
-  { href: "/talk-to-astrologers", icon: <IoCallOutline />, text: "Talk" },
-  { href: "/shop", icon: <IoStorefrontOutline />, text: "Mall", new: true },
-  { href: "/astrologer-live", icon: <IoPlayCircleOutline />, text: "Live" },
-  {
-    href: "/registration/login.aspx",
-    icon: <IoPersonCircleOutline />,
-    text: "Sign In",
-  },
-];
-
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
+  const navigate = useNavigate();
+  const location = useLocation();
 
+  const currentYear = new Date().getFullYear();
+  const [token, setToken] = useState(localStorage.getItem("verifyOtpToken"));
+
+  // When user logs out:
+  const handleLogout = () => {
+    localStorage.removeItem("verifyOtpToken");
+    setToken(null); // 🔥 Trigger React re-render
+    navigate("/");
+  };
+
+  const mobileNavLinks = [
+    { href: "/", icon: <IoHomeOutline />, text: "Home", active: true }, // Example 'active' state
+    { href: "/talk-to-astrologers", icon: <IoCallOutline />, text: "Talk" },
+    { href: "/shop", icon: <IoStorefrontOutline />, text: "Mall", new: true },
+    { href: "/astrologer-live", icon: <IoPlayCircleOutline />, text: "Live" },
+    token
+      ? {
+          href: "#",
+          icon: <TbLogout />,
+          text: "Logout",
+          onClick: handleLogout,
+        }
+      : {
+          href: "/login",
+          icon: <IoPersonCircleOutline />,
+          text: "Login",
+        },
+  ];
+
+  useEffect(() => {
+    const checkToken = () => {
+      setToken(localStorage.getItem("verifyOtpToken"));
+    };
+
+    window.addEventListener("storage", checkToken);
+    return () => window.removeEventListener("storage", checkToken);
+  }, []);
   return (
     <footer className={styles.footer}>
       <div className={styles.container}>
@@ -145,16 +174,27 @@ const Footer = () => {
           <ul>
             {mobileNavLinks.map((link) => (
               <li key={link.text}>
-                <a
-                  href={link.href}
-                  className={link.active ? styles.active : ""}
-                >
-                  <div className={styles.nav_icon}>
-                    {link.icon}
-                    {link.new && <span className={styles.new_badge}>New</span>}
+                {link.onClick ? (
+                  <div className={styles.logout} onClick={link.onClick}>
+                    <div className={styles.nav_icon}>{link.icon}</div>
+                    <span className={styles.nav_text}>{link.text}</span>
                   </div>
-                  <span className={styles.nav_text}>{link.text}</span>
-                </a>
+                ) : (
+                  <Link
+                    to={link.href}
+                    className={
+                      location.pathname === link.href ? styles.active : ""
+                    }
+                  >
+                    <div className={styles.nav_icon}>
+                      {link.icon}
+                      {link.new && (
+                        <span className={styles.new_badge}>New</span>
+                      )}
+                    </div>
+                    <span className={styles.nav_text}>{link.text}</span>
+                  </Link>
+                )}
               </li>
             ))}
           </ul>

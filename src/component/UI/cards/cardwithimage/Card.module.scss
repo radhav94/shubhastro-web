@@ -2,9 +2,9 @@
   background: #fff;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease, transform 0.3s ease;
-  
+
   // Flex layout: image on left, content on right
   display: flex;
   flex-direction: row;
@@ -14,7 +14,7 @@
   cursor: pointer;
 
   &:hover {
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   }
 
   .imageWrapper {
@@ -58,6 +58,7 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
+      text-align: start;
     }
   }
 }

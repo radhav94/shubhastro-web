@@ -1,127 +1,141 @@
+/* ============================= */
+/*   SIDEBAR CONTAINER           */
+/* ============================= */
 .sidebar {
   position: fixed;
   top: 0;
-  left: 0;
-  height: 100%;
-  width: 250px;
-  background-color: #fff;
-  z-index: 999;
-  transform: translateX(-100%);
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  right: -260px;
+  width: 260px;
+  height: 100vh;
+  background: #fff;
+  z-index: 9999;
+  // padding: 20px;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+  transition: left 0.3s ease;
 
-  &.open {
-    transform: translateX(0);
-  }
-  .header{
-    display: flex;          
-  align-items: center;    
-  justify-content: space-between; 
-  padding: 12px;
-
-  border-radius: 0 0 8px 8px;
-    
-  }
-
-  .sidebarContent {
-    padding: 12px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-
-    h5 {
-      margin-bottom: 24px;
-      font-weight: 600;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      flex-grow: 1;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: #ddd transparent;
-
-      &::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      &::-webkit-scrollbar-thumb {
-        background-color: #ddd;
-        border-radius: 4px;
-      }
-
-      &::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      li {
-        margin-bottom: 12px;
-        transition: background-color 0.3s ease;
-        cursor: pointer;
-
-        &:hover {
-          background-color: #f5f5f5;
-        }
-
-        .primaryText {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 8px 0;
-          
-          span {
-            transition: transform 0.3s ease;
-            transform: rotate(0deg);
-          }
-        }
-      }
-    }
+  @media (min-width: 772px) {
+    display: none;
   }
 }
 
-.subMenu {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease-in-out;
-  padding-left: 20px;
-  list-style: none;
-  background-color: #f9f9f9;
-  border-left: 2px solid #ccc;
-  border-radius: 4px;
-
-  li {
-    padding: 8px 0;
-    cursor: pointer;
-    &:hover {
-      color: #007bff;
-    }
-  }
+.open {
+  right: 0;
 }
 
-// State for open menu
-li.open > .primaryText span {
-  transform: rotate(180deg);
-}
-
-li.open > .subMenu {
-  max-height: 500px; /* A large enough value to accommodate all sub-items */
-}
-
+/* Overlay */
 .overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 998;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
   opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
+  visibility: hidden;
+  transition: 0.3s;
+  z-index: 9998;
 
-  &.open {
-    opacity: 1;
-    pointer-events: auto;
+  @media (min-width: 772px) {
+    display: none;
   }
+}
+
+.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ============================= */
+/*     HEADER                    */
+/* ============================= */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.6rem;
+}
+
+.closeIcon {
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* ============================= */
+/*     MENU LIST                 */
+/* ============================= */
+.menuList {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+  text-align: left;
+}
+
+/* 
+=================================
+ UNIFORM ROW STYLE (THE IMPORTANT PART)
+=================================
+*/
+.menuItem {
+  border-bottom: 1px solid #eee;
+  padding: 14px 0; /* only vertical padding here */
+  cursor: pointer;
+  &:hover {
+    background-color: rgb(255, 203, 3);
+  }
+}
+
+.menuText {
+  font-size: 16px;
+  padding-left: 12px; /* ONLY left padding */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menuItem:hover .menuText {
+  background: #fff59b;
+}
+
+/* ============================= */
+/*     SUBMENU ACCORDION         */
+/* ============================= */
+.submenu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+  // padding-left: 20px;
+  background: #fff;
+}
+
+.submenuOpen {
+  max-height: 300px;
+}
+.menuItem div {
+  display: flex;
+  justify-content: space-between;
+}
+.menuItem span {
+  padding: 0 5px;
+}
+
+.submenuItem {
+  padding: 12px;
+  font-size: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.submenuItem:hover {
+  background: #fff59b;
+}
+
+/* Chevron */
+.chevron {
+  margin-right: 12px;
+  font-size: 16px;
+  opacity: 0.7;
 }

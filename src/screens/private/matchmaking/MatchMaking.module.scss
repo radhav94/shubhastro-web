@@ -22,6 +22,10 @@
 .tabContainer {
   margin: 26px;
   width: 50%;
+  @media (max-width: 992px) {
+    width: 95%;
+    margin: 20px auto;
+  }
 }
 /* ---------- SWITCH TABS ---------- */
 .switchTabs {

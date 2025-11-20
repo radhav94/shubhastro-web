@@ -1,5 +1,5 @@
 .blogsSection {
-  padding: 20px 0;
+  padding: 20px;
   position: relative;
 }
 
@@ -21,8 +21,8 @@
 
 /* OVERRIDE GRID COMPLETELY WHEN SCROLL MODE */
 .scrollMode {
-  display: flex !important;          // override grid
-  grid-template-columns: none !important; 
+  display: flex !important; // override grid
+  grid-template-columns: none !important;
   overflow-x: auto !important;
   gap: 20px;
   scroll-behavior: smooth;

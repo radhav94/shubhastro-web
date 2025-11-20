@@ -97,7 +97,7 @@ const PanchangInputCard = ({ imageSrc, title, onTap }) => {
                 value={formData.dateOfBirth}
                 onChange={handleInputChange}
                 onClick={(e) => {
-                  // ✅ Manually show date picker
+                  // Manually show date picker
                   if (e.target.showPicker) {
                     e.target.showPicker();
                   }

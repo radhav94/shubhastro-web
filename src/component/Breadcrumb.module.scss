@@ -1,0 +1,11 @@
+.breadCrumb {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+
+  @media screen and (max-width: 772px) {
+    display: none;
+  }
+}

@@ -226,19 +226,9 @@ const astrologersData = [
   },
 ];
 
-const astroImages = [
-  `https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg`,
-  `https://images.astroyogi.com/english/astrologer/profileimage/tarot-dharra-7690941669104289.jpg`,
-  `https://images.astroyogi.com/english/astrologer/profileimage/tarot-satvika-7405159392822997.jpg`,
-  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/19191028/Leo-Daily-Horoscope-Today.jpg", // astrology chart
-  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/20121804/Copy-of-Blog-Banner-for-Website-Content-1280-x-853-px-10-768x512.jpg", // zodiac wheel
-  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/18190254/Copy-of-Blog-Banner-for-Website-Content-1280-x-853-px-3-768x512.jpg", // planets galaxy
-  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/16143512/Blog-Banner-for-Website-Content-1280-x-853-px-9-768x512.jpg", // constellation
-];
-
 const Astrologers = ({ onChat, onClickView, onProfile }) => {
   const page = 1;
-  const limit = 6;
+  const limit = 3;
 
   const { data } = useGetAstrologersQuery({ page, limit });
   return (
@@ -252,10 +242,9 @@ const Astrologers = ({ onChat, onClickView, onProfile }) => {
       />
 
       <div className={styles.cardsContainer}>
-        {data?.data?.slice(0, 3).map((astrologer, index) => (
+        {data?.data?.map((astrologer) => (
           <div key={astrologer._id} className={styles.cardWrapper}>
             <AstrologerCard
-              image={astroImages[index % astroImages.length]}
               data={astrologer}
               onChat={() => onChat(astrologer)}
               onProfile={() => onProfile(astrologer)}

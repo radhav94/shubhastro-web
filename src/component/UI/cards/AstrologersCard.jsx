@@ -7,14 +7,13 @@ import Divider from "../../Divider";
 import { MdOutlineCurrencyRupee } from "react-icons/md";
 import { GetString } from "../../../utils/helper/string.utils";
 
-const AstrologerCard = ({ data, onFollow, onChat, onProfile, image = "" }) => {
+const AstrologerCard = ({ data, onFollow, onChat, onProfile }) => {
   return (
     <div className={styles.card}>
       <div className={styles.topSection} onClick={onProfile}>
         <div className={styles.avatarWrapper}>
           <img
             src={data.imageUrl}
-            // src={image}
             alt={data?.firstName}
             className={styles.avatar}
           />
@@ -103,14 +102,14 @@ const AstrologerCard = ({ data, onFollow, onChat, onProfile, image = "" }) => {
         </div> */}
 
         <div className={styles.buttonsRow}>
-          {/* <PrimaryButton
+          <PrimaryButton
             bgColor={appColors.white}
             imgSrc={AppIcons.Message}
             fontSize={12}
             buttonStyles={{ padding: "4px 6px" }}
             title="Chat"
             onClick={onChat}
-          /> */}
+          />
           {/* <PrimaryButton
             bgColor={appColors.white}
             imgSrc={AppIcons.Call}

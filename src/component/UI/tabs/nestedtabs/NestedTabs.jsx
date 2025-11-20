@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./NestedTabs.module.scss";
 
 /**
- * ✅ Simplified Nested Tabs
+ * Simplified Nested Tabs
  * - Always shows the first tab when mounted or when parent re-renders
  * - Supports different styles for outer and inner tabs
  */

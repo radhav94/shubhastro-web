@@ -9,7 +9,6 @@ import { useFetchDailyQuery } from "../../../../redux/api/horoscope/zodiacApi";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
-import SideBar from "../../../../layouts/sidebar/SideBar";
 import Sidebar from "../sidebar/Sidebar";
 
 const Daily = () => {
