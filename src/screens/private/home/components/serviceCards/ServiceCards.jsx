@@ -45,7 +45,7 @@ const ServiceCards = ({ data }) => {
             className={styles.cardContent}
             onClick={() => {
               if (service.slug === "free-kundli") {
-                navigate(`/kundli/${service.slug}`);
+                navigate(PATH.privateRoutes.KUNDLI.path);
               } 
               else if (service.slug==="kundli-matching")
               {

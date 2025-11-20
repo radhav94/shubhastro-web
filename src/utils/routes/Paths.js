@@ -143,7 +143,7 @@ export const PATH = {
     },
 
     KUNDLI: {
-      path: "/kundli/:slug",
+      path: "/kundli",
       element: Kundli,
     },
     SADESATI: {
