@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styles from "./SideBar.module.scss";
 import { useNavigate } from "react-router-dom";
 import { FiX, FiChevronDown, FiChevronUp } from "react-icons/fi";
-import { MENU_LIST } from "../../utils/menulist";
+import { MENU_LIST } from "../../utils/menuList";
 
 const SideBar = ({ open, onClose }) => {
   const navigate = useNavigate();
