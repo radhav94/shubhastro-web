@@ -9,18 +9,21 @@ const Planetary = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
 
   const queryArgs = formData
-    ? {
-        dob: `${formData.day}/${formData.month}/${formData.year}`,
-        tob: `${String(formData.hour).padStart(2, "0")}:${String(
-          formData.min
-        ).padStart(2, "0")}`,
-        lat: formData.lat,
-        lon: formData.lon,
-        tz: formData.tzone,
-        planet: "Sun",
-        lang: "en",
-      }
-    : skipToken;
+  ? {
+      dob: `${String(formData.day).padStart(2, "0")}/${String(
+        formData.month
+      ).padStart(2, "0")}/${formData.year}`,
+      tob: `${String(formData.hour).padStart(2, "0")}:${String(
+        formData.min
+      ).padStart(2, "0")}`,
+      lat: formData.lat,
+      lon: formData.lon,
+      tz: formData.tzone,
+      planet: "Sun",
+      lang: "en",
+    }
+  : skipToken;
+
 
   const { data, isLoading } = useGetPlanetReportQuery(queryArgs);
   const planetaryData = data?.response || [];

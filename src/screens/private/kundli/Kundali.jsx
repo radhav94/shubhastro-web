@@ -3,7 +3,7 @@ import PrimaryTabs from "../../../component/UI/tabs/PrimaryTabs";
 import BasicContent from "./BasicContent/BasicContent";
 import KundaliContent from "./kundaliContent/KundaliContent";
 import HtmlContentCard from "../../../component/UI/cards/htmlContenCard/HtmlContentCard";
-import { useState } from "react";
+import { useRef, useEffect } from "react";
 
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { useKundli } from "./useKundli";
@@ -24,6 +24,8 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import Report from "./FreeKundli/Report";
 
 const Kundali = () => {
+  const contentRef = useRef(null);
+
   const [
     dataIsFilled,
     setDataIsFilled,
@@ -49,6 +51,7 @@ const Kundali = () => {
     isSuccess: isBirth,
     isLoading: birthLoading,
   } = useFetchBirthDetailsQuery(payload ? { payload } : skipToken);
+
   const {
     data: birthPanchang,
     isSuccess: isPanchang,
@@ -91,24 +94,36 @@ const Kundali = () => {
       label: "Dasha",
       content: <DashaContent />,
     },
-     {
+    {
       label: "Free Report",
       content: <Report />,
     },
   ];
 
+  useEffect(() => {
+    if (isBirth || isPanchang || isAstro) {
+      contentRef.current?.scrollIntoView({
+        behavior: "smooth",
+      });
+    }
+  }, [isBirth, isPanchang, isAstro]);
+
   return (
     <>
       <KundaliHeader />
+
       <PrimaryLoader
         isLoading={birthLoading || panchangLoading || astroLoading}
       />
+
+      <div ref={contentRef}>
 
       {isBirth || isPanchang || isAstro ? (
         <PrimaryTabs tabs={tabsData} />
       ) : (
         <HtmlContentCard sections={kundliInfoData} />
       )}
+      </div>
     </>
   );
 };

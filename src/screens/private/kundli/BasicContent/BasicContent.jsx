@@ -123,7 +123,8 @@ const BasicContent = (props) => {
     <div>
       <div className=" flex mb-4 ">
         <PrimaryText isSemiBold size_20 color={appColors.tri}>
-          {userDetails?.name}
+          {userDetails?.name?.charAt(0).toUpperCase() +
+            userDetails?.name?.slice(1)}
         </PrimaryText>
         <div className=" mr-2 ml-2" />
         <PrimaryText isSemiBold size_20 color={appColors.tri}>

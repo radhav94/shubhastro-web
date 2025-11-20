@@ -134,7 +134,7 @@ const KundaliHeader = () => {
         name: kundli.name,
         gender: kundli.gender === "M" ? "Male" : "Female",
         day: kundli.day.toString(),
-        month: months[kundli.month - 1],   // FIXED HERE
+        month: months[kundli.month - 1], // FIXED HERE
         year: kundli.year.toString(),
         hour: kundli.hour.toString(),
         minute: kundli.min.toString(),
@@ -144,6 +144,12 @@ const KundaliHeader = () => {
         longitude: kundli.lon,
       })
     );
+    setTimeout(() => {
+      document.getElementById("kundli-tabs")?.scrollIntoView({
+        behavior: "smooth",
+        // block: "start",
+      });
+    }, 300);
   };
 
   // Submit Form
@@ -175,8 +181,7 @@ const KundaliHeader = () => {
     } catch (err) {
       console.log(err);
     }
-     dispatch(setForm(formData));
-
+    dispatch(setForm(formData));
   };
 
   // Delete Kundli
