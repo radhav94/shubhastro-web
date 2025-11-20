@@ -1,61 +1,124 @@
 .card {
-  background: #fff;
-  padding: 16px 20px;
-  border-radius: 6px;
-  max-width: 100%;
-  margin: 1rem auto;
+  background: #ffffff;
+  padding: 22px 24px;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  margin: 1.6rem auto;
+  max-width: 95%;
+  transition: 0.3s ease;
+  border: 1px solid #f5f5f5;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.12);
+  }
 }
 
 .title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
-  margin-bottom: 12px;
   color: #222;
-  text-align: left;
-  padding: 0 1.6rem;
+  margin-bottom: 18px;
+  border-left: 4px solid #ff6b35;
+  padding-left: 12px;
 }
 
 .content {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem 1rem;
-  padding-left: 1.6rem;
+  gap: 22px 40px;
 
-  @media (max-width: 600px) {
+  @media (max-width: 750px) {
     grid-template-columns: 1fr;
-    gap: 20px;
   }
 }
 
 .item {
-  display: grid;
-  grid-template-columns: 180px auto; /* consistent width for (icon+key) column */
-  align-items: start;
-  column-gap: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.key {
+.left {
   display: flex;
   align-items: center;
-  font-weight: 600;
-  color: black; /* deep red */
-  text-align: start;
-  gap: 0.6rem;
-  min-width: 0; /* allows flex to shrink properly */
+  gap: 12px;
 }
 
 .icon {
-  // flex-shrink: 0;
-  // display: flex;
-  // align-items: center;
-  // justify-content: center;
-  // font-size: 1.1rem;
-  // color: black;
-  // width: 20px; /* fix icon space width for perfect vertical alignment */
+  font-size: 1.3rem;
+  color: #ff6723;
+  background: #fff1e7;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.key {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
 }
 
 .value {
-  color: orangered;
-  text-align: start;
-  word-break: break-word;
+  font-size: 15px;
+  font-weight: 700;
+  color: #e14a28;
+  text-align: right;
+}
+
+.summary {
+  margin-top: 14px;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+  background: #fafafa;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+/* ───────────── MUHURAT BOXES ───────────── */
+
+.muhuratWrapper {
+  display: flex;
+  gap: 16px;
+  width: 95%;
+  margin: 18px auto;
+  justify-content: space-between;
+
+  @media (max-width: 750px) {
+    flex-direction: column;
+  }
+}
+
+.muhuratBox {
+  flex: 1;
+  background: #fff;
+  padding: 14px 18px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.07);
+  border-left: 6px solid;
+  transition: 0.3s ease;
+
+  h4 {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  span {
+    display: block;
+    margin-top: 4px;
+    font-weight: 600;
+    color: #d13a1b;
+  }
+}
+
+.abhijit {
+  border-left-color: #ff7b7b;
+  background: #ffeaea;
+}
+
+.rahukaal {
+  border-left-color: #7affb8;
+  background: #eafff4;
 }

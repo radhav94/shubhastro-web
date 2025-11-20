@@ -128,9 +128,13 @@ const PanchangInputCard = ({ imageSrc, title, onTap }) => {
           </div>
 
           <PrimaryButton
-            width={"74%"}
+            width={"100%"}
             title="Submit"
-            buttonStyles={{ marginTop: "12px" }}
+            buttonStyles={{
+              marginTop: "16px",
+              paddingTop: "12px",
+              paddingBottom: "12px",
+            }}
             type="submit"
           />
         </form>

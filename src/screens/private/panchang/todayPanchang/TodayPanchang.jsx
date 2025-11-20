@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTodayPanchang } from "./useTodayPanchang";
-import InternalBanner from "../../../../component/UI/cards/internalBanner/InternalBanner";
 import styles from "./TodayPanchang.module.scss";
 import { useFetchAdvancePanchangQuery } from "../../../../redux/api/panchang/panchangApi";
 import { FaSun, FaMoon } from "react-icons/fa";
@@ -18,17 +17,6 @@ import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 const TodayPanchang = () => {
   const [data, onCardClick, onSubmit, zodiacDetails, onChat] =
     useTodayPanchang();
-
-  // const payload = {
-  //   day: 6,
-  //   month: 1,
-  //   year: 2000,
-  //   hour: 7,
-  //   min: 45,
-  //   lat: 19.132,
-  //   lon: 72.342,
-  //   tzone: 5.5,
-  // };
 
   const [payload, setPayload] = useState({
     day: 6,

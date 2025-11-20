@@ -1,7 +1,8 @@
 import { useSelector } from "react-redux";
-import { AppImages } from "../../../utils/appImages";
 import { useGetSadesatiQuery } from "../../../redux/api/kundli/dashaApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
+import styles from "./Sadesati.module.scss";
+
 const Sadesati = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
 
@@ -22,32 +23,40 @@ const Sadesati = () => {
 
   const { data, isLoading } = useGetSadesatiQuery(queryArgs);
   const sadesati = data?.response;
+
   return (
     <>
       <PrimaryLoader isLoading={isLoading} />
-      <div className="text-start">
-        <div className="bg-slate-50 rounded-lg shadow-black/30 shadow-lg my-5 p-3 text-start">
-          <p className="text-xl font-bold">Current Period</p>
-          <div className="text-red-600 my-2 px-2 rounded-lg  ">
-            <p>{sadesati?.bot_response}</p>
-            <p className="text-gray-600">As on {sadesati?.date_considered}</p>
+
+      <div className={styles.wrapper}>
+        {/* Current Period */}
+        <div className={styles.card}>
+          <p className={styles.heading}>Current Period</p>
+          <div className={styles.periodBox}>
+            <p className={styles.periodText}>{sadesati?.bot_response}</p>
+            <p className={styles.date}>As on {sadesati?.date_considered}</p>
           </div>
         </div>
-        <div>
-          {sadesati?.remedies?.length > 0 && (
-            <div className="bg-slate-50 rounded-lg shadow-black/30 shadow-lg my-5 p-3 text-start">
-              <h1 className="text-xl font-bold">Recommended Remedies</h1>
+
+        {/* Remedies */}
+        {sadesati?.remedies?.length > 0 && (
+          <div className={styles.card}>
+            <p className={styles.heading}>Recommended Remedies</p>
+
+            <div className={styles.remediesWrapper}>
               {sadesati?.remedies?.map((item, i) => (
-                <div key={i} className="bg-yellow-200 my-2 p-2 rounded-lg  ">
+                <div key={i} className={styles.remedyItem}>
                   <p>{item}</p>
                 </div>
               ))}
             </div>
-          )}
-        </div>
-        <div className="bg-slate-50 rounded-lg shadow-black/30 shadow-lg my-5 p-3 text-start">
-          <p className="text-xl font-bold">What is Sade Sati</p>
-          <div className="bg-yellow-200 my-2 p-2 rounded-lg  ">
+          </div>
+        )}
+
+        {/* Description */}
+        <div className={styles.card}>
+          <p className={styles.heading}>What is Sade Sati</p>
+          <div className={styles.descriptionBox}>
             <p>{sadesati?.description}</p>
           </div>
         </div>
