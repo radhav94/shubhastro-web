@@ -3,7 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   userDetails: null,   // full form data for display
   kundliPayload: null, // transformed data for API calls
-  pythonApiPayload:null // transformed python api data for API calls
+  pythonApiPayload:null ,// transformed python api data for API calls
+  numerologyPayload: null
 };
 
 const monthMap = {
@@ -53,6 +54,15 @@ const formSlice = createSlice({
         time_zone: "Asia/Kolkata",
       };
     },
+    setNumerologyPayload: (state, action) => {
+      const { name, date } = action.payload;
+
+      state.numerologyPayload = {
+        name,           // string
+        date,           // "DD/MM/YYYY"
+        lang: "en",
+      };
+    },
 
     clearForm: (state) => {
       state.userDetails = null;
@@ -62,5 +72,5 @@ const formSlice = createSlice({
   },
 });
 
-export const { setForm, clearForm } = formSlice.actions;
+export const { setForm, setNumerologyPayload, clearForm } = formSlice.actions;
 export default formSlice.reducer;

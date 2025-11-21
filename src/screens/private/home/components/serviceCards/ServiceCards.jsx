@@ -9,7 +9,6 @@ import { PATH } from "../../../../../utils/routes/Paths";
 import { useNavigate } from "react-router-dom";
 
 const ServiceCards = ({ data }) => {
-
   const sections = data;
 
   // 🟦 Find banner section
@@ -19,22 +18,33 @@ const ServiceCards = ({ data }) => {
 
   // 🟩 Banner content (title, desc, icon)
   const services = bannerSection?.content;
+  const numerology = { _id: 4, title: "Numerology", slug: "numerology" };
+  const tarot = { _id: 4, title: "Tarot", slug: "tarot" };
 
-  
+  const newServices = [...services, numerology,tarot];
+
   const navigate = useNavigate();
 
-   const scrollLeft = () => {
+  const scrollLeft = () => {
     scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
   };
 
   const scrollRight = () => {
     scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
   };
-    const scrollRef = useRef(null);
-  
+  const scrollRef = useRef(null);
+
+  const slugRoutes = {
+    "free-kundli": PATH.privateRoutes.KUNDLI.path,
+    "kundli-matching": "/matchmaking",
+    "numerology":PATH.privateRoutes.NUMEROLOGY.path,
+    "tarot":PATH.privateRoutes.TAROT.path
+  };
+
+
   return (
     <div className={styles.cardsGrid}>
-      {services.map((service) => (
+      {newServices.map((service) => (
         <motion.div
           key={service._id}
           whileHover={{ scale: 1.05 }}
@@ -44,19 +54,11 @@ const ServiceCards = ({ data }) => {
           <div
             className={styles.cardContent}
             onClick={() => {
-              if (service.slug === "free-kundli") {
-                navigate(PATH.privateRoutes.KUNDLI.path);
-              } 
-              else if (service.slug==="kundli-matching")
-              {
-                navigate(`/matchmaking`);
-              }
-              else {
-                navigate(`/horoscopes/${service.slug}`);
-              }
+              const path =
+                slugRoutes[service.slug] || `/horoscopes/${service.slug}`;
+              navigate(path);
             }}
           >
-
             <div
               style={{
                 flexDirection: "row",

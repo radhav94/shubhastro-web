@@ -40,6 +40,8 @@ import {
   ChatWindow,
 } from "../../screens";
 import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
+import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
+import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
 
 export const PATH = {
   // DEFAULT: {
@@ -146,6 +148,7 @@ export const PATH = {
       path: "/kundli",
       element: Kundli,
     },
+
     SADESATI: {
       path: "/sadesati",
       element: Sadesati,
@@ -154,6 +157,15 @@ export const PATH = {
       path: "/numerology",
       element: Numerology,
     },
+    LIFE_PATH: {
+      path: "/numerology/life-path",
+      element: LifePathForm, 
+    },
+     LIFE_PATH_DETAIL: {
+      path: "/numerology/life-path/life-path-details",
+      element: LifePathDetails, 
+    },
+
     // tarot
     TAROT: {
       path: "/tarot",
