@@ -1,5 +1,62 @@
-import styles from "./Astrologers.module.scss";
+// import styles from "./Astrologers.module.scss";
+// import { useNavigate } from "react-router-dom";
+// import {
+//   AstrologerCard,
+//   Divider,
+//   PrimaryButton,
+//   PrimaryText,
+//   Title,
+// } from "../../../../../component";
+// import { AppImages } from "../../../../../utils/appImages";
+// import { useGetAstrologersQuery } from "../../../../../redux/api/astrologer/astrologerApi";
+// import { useState } from "react";
 
+
+
+// const Astrologers = ({ onChat, onClickView, onProfile }) => {
+//     const navigate = useNavigate();  
+
+//   const page = 1;
+//   const limit = 3;
+
+//   const { data } = useGetAstrologersQuery({ page, limit });
+//   return (
+//     <div className={styles.astrologersWrapper}>
+//       <Title
+//         title="Top Online Astrologers"
+//         showDivider
+//         showButton
+//         buttonTitle="View"
+//         onButtonClick={onClickView}
+//       />
+
+//       <div className={styles.cardsContainer}>
+//         {data?.data?.map((astrologer) => (
+//           <div key={astrologer._id} className={styles.cardWrapper}>
+//             <AstrologerCard
+//               data={astrologer}
+//                onChat={() =>
+//                 navigate(`/talk-to-astrologers/chat/${astrologer._id}`, {
+//                   state: { user: astrologer, role: "USER" },
+//                 })
+//               }
+//               onProfile={() => onProfile(astrologer)}
+//             />
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Astrologers;
+
+
+
+// Astrologers.jsx
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import styles from "./Astrologers.module.scss";
 import {
   AstrologerCard,
   Divider,
@@ -9,228 +66,29 @@ import {
 } from "../../../../../component";
 import { AppImages } from "../../../../../utils/appImages";
 import { useGetAstrologersQuery } from "../../../../../redux/api/astrologer/astrologerApi";
-import { useState } from "react";
-
-const astrologersData = [
-  {
-    AstrologerLoginId: 49671,
-    FirstName: "Tarot",
-    LastName: "Satvika",
-    ExperienceYear: 4,
-    ExperienceMonth: 0,
-    ProfileImage: "tarot-satvika-7405159392822997.jpg",
-    AstrologerType: null,
-    Slug: "satvika",
-    AstroCategoryNameDltd:
-      "Tarot Reading, Reiki Healing, Yoga & Meditation, Pranic Healing, Meditation & Mindfulness, Fortune Telling, Love & Marriage Spell, Chakra Healing, Oracle Card Reading",
-    PhoneCharge: {
-      Value: 31.0,
-      Currency: "INR",
-      CurrencySign: "₹",
-      ValueStr: "₹ 31.00",
-      CommissionPercentage: 0.0,
-    },
-    ChatCharge: {
-      Value: 31.0,
-      Currency: "INR",
-      CurrencySign: "₹",
-      ValueStr: "₹ 31.00",
-      CommissionPercentage: 0.0,
-    },
-    Currency: "INR",
-    IsLiveCall: true,
-    IsLiveChat: true,
-    CityName: "New Delhi",
-    LanguageDltd: "English, Hindi, Punjabi",
-    IsOfferApplied: true,
-    PhoneChargeDiscountPercentage: 12.0,
-    OfferPhoneCharge: {
-      Value: 12.0,
-      Currency: "INR",
-      CurrencySign: "₹",
-      ValueStr: "₹ 12.00",
-      CommissionPercentage: 0.0,
-    },
-    OfferChatCharge: {
-      Value: 12.0,
-      Currency: "INR",
-      CurrencySign: "₹",
-      ValueStr: "₹ 12.00",
-      CommissionPercentage: 0.0,
-    },
-    OfferName: "FlatDeal&12",
-    OfferFirstName: "FlatDeal",
-    OfferLastName: "12",
-    TileImage: "Campaign.png",
-    AverageRating: 4.96,
-    AstrologerAverageRating: {
-      ValueDecimal: 4.96,
-      ValueInt: 5,
-      ValueStr: "4.96",
-    },
-    RatingCount: 3134,
-    PhoneStatus: "Join Queue",
-    ChatStatus: "Join Queue",
-    IsAllowedQueue: true,
-    IsAllowedChatQueue: true,
-    IsHandleNriUser: false,
-    IsPaidUser: false,
-    IsExclusive: false,
-    IsProvideFreeConsultation: false,
-    NotifyMe: false,
-    IsEveryTime: null,
-    ResumeText: null,
-    RowNum: 1,
-    TotalRows: 1136,
-  },
-
-  {
-    AstrologerLoginId: 48613,
-    FirstName: "Tarot",
-    LastName: "Dharra",
-    ExperienceYear: 4,
-    ExperienceMonth: 6,
-    ProfileImage: "tarot-dharra-7690941669104289.jpg",
-    AstrologerType: null,
-    Slug: "dharra",
-    AstroCategoryNameDltd: "Tarot Reading",
-    PhoneCharge: {
-      Value: 30.0,
-      Currency: "INR",
-      CurrencySign: "₹",
-      ValueStr: "₹ 30.00",
-      CommissionPercentage: 0.0,
-    },
-    ChatCharge: {
-      Value: 30.0,
-      Currency: "INR",
-      CurrencySign: "₹",
-      ValueStr: "₹ 30.00",
-      CommissionPercentage: 0.0,
-    },
-    Currency: "INR",
-    IsLiveCall: true,
-    IsLiveChat: true,
-    CityName: "Indore",
-    LanguageDltd: "English, Hindi",
-    IsOfferApplied: true,
-    PhoneChargeDiscountPercentage: 12.0,
-    OfferPhoneCharge: {
-      Value: 12.0,
-      Currency: "INR",
-      CurrencySign: "₹",
-      ValueStr: "₹ 12.00",
-      CommissionPercentage: 0.0,
-    },
-    OfferChatCharge: {
-      Value: 12.0,
-      Currency: "INR",
-      CurrencySign: "₹",
-      ValueStr: "₹ 12.00",
-      CommissionPercentage: 0.0,
-    },
-    OfferName: "FlatDeal&12",
-    OfferFirstName: "FlatDeal",
-    OfferLastName: "12",
-    TileImage: "Campaign.png",
-    AverageRating: 4.88,
-    AstrologerAverageRating: {
-      ValueDecimal: 4.88,
-      ValueInt: 5,
-      ValueStr: "4.88",
-    },
-    RatingCount: 412,
-    PhoneStatus: "Online",
-    ChatStatus: "Online",
-    IsAllowedQueue: true,
-    IsAllowedChatQueue: true,
-    IsHandleNriUser: true,
-    IsPaidUser: false,
-    IsExclusive: false,
-    IsProvideFreeConsultation: false,
-    NotifyMe: false,
-    IsEveryTime: null,
-    ResumeText: null,
-    RowNum: 3,
-    TotalRows: 1136,
-  },
-  {
-    AstrologerLoginId: 62458,
-    FirstName: "Astro",
-    LastName: "Manpreet",
-    ExperienceYear: 6,
-    ExperienceMonth: 0,
-    ProfileImage: "astro-manpreet-7707605892123109.jpg",
-    AstrologerType: null,
-    Slug: "manpreet-a",
-    AstroCategoryNameDltd: "Vedic Astrology, Western astrology",
-    PhoneCharge: {
-      Value: 30.0,
-      Currency: "INR",
-      CurrencySign: "₹",
-      ValueStr: "₹ 30.00",
-      CommissionPercentage: 0.0,
-    },
-    ChatCharge: {
-      Value: 30.0,
-      Currency: "INR",
-      CurrencySign: "₹",
-      ValueStr: "₹ 30.00",
-      CommissionPercentage: 0.0,
-    },
-    Currency: "INR",
-    IsLiveCall: true,
-    IsLiveChat: true,
-    CityName: "Jaunpur",
-    LanguageDltd: "English, Hindi",
-    IsOfferApplied: true,
-    PhoneChargeDiscountPercentage: 12.0,
-    OfferPhoneCharge: {
-      Value: 12.0,
-      Currency: "INR",
-      CurrencySign: "₹",
-      ValueStr: "₹ 12.00",
-      CommissionPercentage: 0.0,
-    },
-    OfferChatCharge: {
-      Value: 12.0,
-      Currency: "INR",
-      CurrencySign: "₹",
-      ValueStr: "₹ 12.00",
-      CommissionPercentage: 0.0,
-    },
-    OfferName: "Flat Deal&12",
-    OfferFirstName: "Flat Deal",
-    OfferLastName: "12",
-    TileImage: "Campaign.png",
-    AverageRating: 4.87,
-    AstrologerAverageRating: {
-      ValueDecimal: 4.87,
-      ValueInt: 5,
-      ValueStr: "4.87",
-    },
-    RatingCount: 356,
-    PhoneStatus: "Online",
-    ChatStatus: "Online",
-    IsAllowedQueue: true,
-    IsAllowedChatQueue: true,
-    IsHandleNriUser: false,
-    IsPaidUser: false,
-    IsExclusive: false,
-    IsProvideFreeConsultation: false,
-    NotifyMe: false,
-    IsEveryTime: null,
-    ResumeText: null,
-    RowNum: 4,
-    TotalRows: 1136,
-  },
-];
+import AstrologerCallUI from "./AstrologerCallUI";
+// import AstrologerCallUI from "../AstrologerCallUI/AstrologerCallUI"; // NEW
 
 const Astrologers = ({ onChat, onClickView, onProfile }) => {
+  const navigate = useNavigate();
+
   const page = 1;
   const limit = 3;
 
   const { data } = useGetAstrologersQuery({ page, limit });
+
+  const [activeCaller, setActiveCaller] = useState(null); // selected astrologer for call
+
+  const handleStartCall = (astrologer) => {
+    // Agar route based call chahiye toh yahan navigate bhi kar sakta hai
+    // navigate(`/talk-to-astrologers/call/${astrologer._id}`, { state: { user: astrologer } });
+    setActiveCaller(astrologer);
+  };
+
+  const handleEndCall = () => {
+    setActiveCaller(null);
+  };
+
   return (
     <div className={styles.astrologersWrapper}>
       <Title
@@ -246,14 +104,32 @@ const Astrologers = ({ onChat, onClickView, onProfile }) => {
           <div key={astrologer._id} className={styles.cardWrapper}>
             <AstrologerCard
               data={astrologer}
-              onChat={() => onChat(astrologer)}
+              onChat={() =>
+                navigate(`/talk-to-astrologers/chat/${astrologer._id}`, {
+                  state: { user: astrologer, role: "USER" },
+                })
+              }
               onProfile={() => onProfile(astrologer)}
+              onAudioCall={() => handleStartCall(astrologer)} // NEW
             />
           </div>
         ))}
       </div>
+
+      {activeCaller && (
+        <AstrologerCallUI
+          astrologer={activeCaller}
+          onEndCall={handleEndCall}
+        />
+      )}
     </div>
   );
 };
 
 export default Astrologers;
+
+
+
+
+
+

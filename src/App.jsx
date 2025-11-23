@@ -9,6 +9,8 @@ import {
 } from "react-router-dom";
 import PublicRoute from "./utils/routes/PublicRoute";
 import PrivateRoute from "./utils/routes/PrivateRoute";
+import SocketConnector from "./SocketConnector";   // ⭐ STEP 1 — ADD THIS
+
 
 function App() {
   // Helper function to flatten nested routes
@@ -81,6 +83,7 @@ const flattenRoutes = (routes) => {
 
   return (
     <div className={classes.app}>
+      <SocketConnector />
       <RouterProvider router={roleWiseRouting} />
     </div>
   );

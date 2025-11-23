@@ -1,0 +1,32 @@
+.listWrapper {
+  padding: 20px;
+}
+
+.chatItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+  background: #fff;
+  border-radius: 12px;
+  transition: .2s;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+
+  &:hover {
+    background: #fff7e0;
+    transform: translateY(-2px);
+  }
+}
+
+.avatar {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.info {
+  flex: 1;
+}

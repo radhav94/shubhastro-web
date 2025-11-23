@@ -209,3 +209,26 @@
   height: 20px;
   margin-left: 8px;
 }
+
+.roleTabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.roleTab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+  background: #fafafa;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.roleTab.active {
+  background: #ffbf00;
+  color: #000;
+  border-color: #ffbf00;
+}

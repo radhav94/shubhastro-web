@@ -19,9 +19,9 @@ const ServiceCards = ({ data }) => {
   // 🟩 Banner content (title, desc, icon)
   const services = bannerSection?.content;
   const numerology = { _id: 4, title: "Numerology", slug: "numerology" };
-  const tarot = { _id: 4, title: "Tarot", slug: "tarot" };
+  // const tarot = { _id: 4, title: "Tarot", slug: "tarot" };
 
-  const newServices = [...services, numerology,tarot];
+  const newServices = [...services, numerology];
 
   const navigate = useNavigate();
 
@@ -38,7 +38,7 @@ const ServiceCards = ({ data }) => {
     "free-kundli": PATH.privateRoutes.KUNDLI.path,
     "kundli-matching": "/matchmaking",
     "numerology":PATH.privateRoutes.NUMEROLOGY.path,
-    "tarot":PATH.privateRoutes.TAROT.path
+    // "tarot":PATH.privateRoutes.TAROT.path
   };
 
 

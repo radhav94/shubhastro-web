@@ -37,7 +37,7 @@ const NumerologyWeb = () => {
       </section>
 
       {/* FEATURE CARDS */}
-      <section className={styles.features}>
+      {/* <section className={styles.features}>
         <div
           className={styles.card}
           onClick={() => navigate(PATH.privateRoutes.LIFE_PATH.path)}
@@ -53,7 +53,7 @@ const NumerologyWeb = () => {
         </div>
 
         <div className={styles.card}
-        onClick={()=>navigate(PATH.privateRoutes.LIFE_PATH.path)}
+        // onClick={()=>navigate(PATH.privateRoutes.LIFE_PATH.path)}
         style={{cursor:"pointer"}}>
           <div className={styles.cardIcon}>✨</div>
           <PrimaryText size_20 isSemiBold>
@@ -75,7 +75,23 @@ const NumerologyWeb = () => {
             See what influence today’s numbers have on your journey.
           </PrimaryText>
         </div>
-      </section>
+      </section> */}
+
+      <section className={styles.features}>
+  <div
+    className={styles.premiumCard}
+    onClick={() => navigate(PATH.privateRoutes.LIFE_PATH.path)}
+  >
+    <div className={styles.cardIcon}>🔮</div>
+    <PrimaryText size_20 isSemiBold>
+      Life Path Insights
+    </PrimaryText>
+    <PrimaryText size_14 color="#6b6357">
+      Discover your purpose, strengths, and spiritual alignment.
+    </PrimaryText>
+  </div>
+</section>
+
 
       {/* DEEP INSIGHT SECTION */}
       <section className={styles.deepSection}>

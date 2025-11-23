@@ -37,9 +37,11 @@ import {
   MatchMaking,
   Sadesati,
   MatchDetails,
-  ChatWindow,
 } from "../../screens";
 import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
+import AstrologersDashboard from "../../screens/private/home/components/astrologers/AstrologersDashboard";
+import ChatList from "../../screens/private/home/components/astrologers/atrologerchat/ChatList";
+import ChatWindow from "../../screens/private/home/components/astrologers/atrologerchat/ChatWindow";
 import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
 import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
 
@@ -75,6 +77,19 @@ export const PATH = {
     HOME: {
       path: "/",
       element: Home,
+    },
+    ASTROLOGER_DASHBOARD: {
+      path: "/astrologer-dashboard",
+      element: AstrologersDashboard,
+    },
+
+     ASTROLOGER_CHAT_USER_LIST: {
+      path: "/astrologer-dashboard/astrologer-chat-user-list",
+      element: ChatList,
+    },
+    ASTROLOGER_CHAT_WINDOW : {
+      path:"/astrologer-dashboard/astrologer-chat-user-list/:chatId",
+      element:ChatWindow
     },
 
     PROFILE: {

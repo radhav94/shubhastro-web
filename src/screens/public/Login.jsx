@@ -14,11 +14,11 @@ const Login = () => {
   const redirectPath = location.state?.from || PATH.privateRoutes.HOME.path;
 
   const [mobileNumber, setMobileNumber] = useState("");
-  const [whatsappOptIn, setWhatsappOptIn] = useState(true);
+  const [selectedRole, setSelectedRole] = useState("USER"); // USER / ASTROLOGER
 
   const isMobileNumberValid = mobileNumber.length === 10;
 
-  // Already logged in? Send user back to where they came from (NOT home always)
+  // Already logged in? Send user back to where they came from
   useEffect(() => {
     const token = localStorage.getItem("verifyOtpToken");
     if (token) {
@@ -26,42 +26,47 @@ const Login = () => {
     }
   }, [navigate, redirectPath]);
 
-  const handleSendOtp = async (event) => {
-    event.preventDefault();
-    if (!isMobileNumberValid) return;
+ const handleSendOtp = async (event) => {
+  event.preventDefault();
+  if (!isMobileNumberValid) return;
 
-    const payload = {
-      phoneNumber: mobileNumber,
-      type: "CUSTOMER",
-    };
+  const type = selectedRole === "USER" ? "CUSTOMER" : "ASTROLOGER";
 
-    try {
-      const response = await AuthServices.loginWithPhone(payload);
+  const payload = {
+    phoneNumber: mobileNumber,
+    type: type,
+  };
 
-      if (response.status) {
-        navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
-          state: {
-            phoneNumber: mobileNumber,
-            from: redirectPath,
-          },
-          replace: true,
-        });
-      } else {
-        Toast.error("Error", response.message);
-      }
-    } catch (error) {
-      Toast.error("Error", error?.message || "Something went wrong");
+  try {
+    const response = await AuthServices.loginWithPhone(payload);
 
+    if (response.status) {
       navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
         state: {
           phoneNumber: mobileNumber,
-          resendOtp: handleSendOtp,
+          type,   // 👈 PASSING TYPE TO OTP PAGE
           from: redirectPath,
         },
         replace: true,
       });
+    } else {
+      Toast.error("Error", response.message);
     }
-  };
+  } catch (error) {
+    Toast.error("Error", error?.message || "Something went wrong");
+
+    navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
+      state: {
+        phoneNumber: mobileNumber,
+        type,    // 👈 PASSING TYPE TO OTP PAGE
+        resendOtp: handleSendOtp,
+        from: redirectPath,
+      },
+      replace: true,
+    });
+  }
+};
+
 
   return (
     <LoginLayout>
@@ -72,6 +77,27 @@ const Login = () => {
             Enter your mobile number to Login/Signup
           </span>
         </h1>
+
+        {/* ----------- ROLE TABS ------------- */}
+        <div className={styles.roleTabs}>
+          <button
+            className={`${styles.roleTab} ${
+              selectedRole === "USER" ? styles.active : ""
+            }`}
+            onClick={() => setSelectedRole("USER")}
+          >
+            User
+          </button>
+
+          <button
+            className={`${styles.roleTab} ${
+              selectedRole === "ASTROLOGER" ? styles.active : ""
+            }`}
+            onClick={() => setSelectedRole("ASTROLOGER")}
+          >
+            Astrologer
+          </button>
+        </div>
 
         <div className={styles.mobileNumber}>
           <PrimaryText className={styles.label}>

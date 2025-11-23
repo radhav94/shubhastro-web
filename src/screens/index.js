@@ -11,7 +11,7 @@ export { default as VerifyPassword } from "./public/VerifyPassword";
 export { default as Home } from "./private/home/Home";
 
 export { default as TalkToAstrologer } from "./private/talkToAstrologer/TalkToAstrologer";
-export { default as ChatWindow } from "./private/talkToAstrologer/Chat/ChatWindow";
+export { default as ChatWindow } from "./private/talkToAstrologer/Chat/ChatWindowold";
 
 export { default as Profile } from "./private/profile/Profile";
 export { default as Horoscope } from "./private/horoscope/Horoscope";
@@ -49,7 +49,7 @@ export { default as Blog } from "./private/blog/Blog";
 export { default as SessionDetails } from "./private/sessionDetails/SessionDetails";
 export { default as Shop } from "./private/shop/Shop";
 export { default as Payment } from "./private/payment/Payment";
-export { default as Astrologers } from "./private/astrologers/Astrologers";
+export { default as Astrologers } from "./private/astrologersold/Astrologers";
 export { default as Streaming } from "./private/astroLive/streaming/Streaming";
 
 // components/index.js

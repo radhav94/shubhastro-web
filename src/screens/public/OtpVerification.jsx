@@ -10,9 +10,9 @@ import * as AuthServices from "../../services/appServices/authService";
 const OtpVerification = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
+console.log("tyeppeeee",location);
   // ⬇️ extract passed data
-  const { phoneNumber, from } = location.state || {};
+  const { phoneNumber, from ,type} = location.state || {};
 
   // redirect back to the page user came from
   const redirectPath = from || PATH.privateRoutes.HOME.path;
@@ -23,43 +23,53 @@ const OtpVerification = () => {
 
   const isOtpComplete = otp.length === 6;
 
-  const handleVerifyOtp = async (event) => {
-    event.preventDefault();
+const handleVerifyOtp = async (event) => {
+  event.preventDefault();
 
-    const payload = {
-      phoneNumber,
-      type: "CUSTOMER",
-      otp: parseInt(otp, 10),
-    };
-
-    try {
-      const response = await AuthServices.verifyOtp(payload);
-
-      if (response?.data?.statusCode === 200) {
-        const { isRegister, accessToken } = response?.data?.data || {};
-
-        // Save the OTP token here
-        if (accessToken) {
-          localStorage.setItem("verifyOtpToken", accessToken);
-        }
-
-        Toast.success("OTP verified successfully");
-        // localStorage.setItem("isLoggedIn", JSON.stringify(true));
-
-        if (isRegister === "false") {
-          navigate(PATH.publicRoutes.REGISTER.path, {
-            replace: true,
-            state: { from: location },
-          });
-        } else {
-          // ⬇️ EXISTING USER → BACK TO SAME PAGE
-          navigate(redirectPath, { replace: true });
-        }
-      }
-    } catch (error) {
-      Toast.error(error?.response?.data?.message || "OTP verification failed");
-    }
+  const payload = {
+    phoneNumber,
+    type, // incoming type from login page (CUSTOMER or ASTROLOGER)
+    otp: parseInt(otp, 10),
   };
+
+  try {
+    const response = await AuthServices.verifyOtp(payload);
+
+    if (response?.data?.statusCode === 200) {
+      const { isRegister, accessToken } = response?.data?.data || {};
+
+      // store token
+      if (accessToken) {
+        localStorage.setItem("verifyOtpToken", accessToken);
+      }
+
+      Toast.success("OTP verified successfully");
+
+      // Convert string/boolean backend flag safely
+      const isNewUser = String(isRegister) === "false";
+
+      // ⭐ ASTROLOGER FLOW — ALWAYS go to dashboard
+      if (type === "ASTROLOGER") {
+        navigate(PATH.privateRoutes.ASTROLOGER_DASHBOARD.path, { replace: true });
+        return;
+      }
+
+      // ⭐ CUSTOMER FLOW — check register status
+      if (isNewUser) {
+        navigate(PATH.publicRoutes.REGISTER.path, {
+          replace: true,
+          state: { from: location },
+        });
+      } else {
+        navigate(redirectPath, { replace: true });
+      }
+    }
+  } catch (error) {
+    Toast.error(error?.response?.data?.message || "OTP verification failed");
+  }
+};
+
+
 
   const handleEditNumber = () => navigate("/login");
 
