@@ -8,14 +8,13 @@ import {
   useRemoteUsers,
 } from "agora-rtc-react";
 import { useAgoraToken } from "../../agora/useAgoraToken";
-// import { useAgoraToken } from "../../agora/useAgoraToken";
+import styles from "./VoiceCall.module.scss";
 
-const VoiceCall = ({ channelName, uid, userType }) => {
+const VoiceCall = ({ channelName, uid, userType = "user", callerName = "Astrologer" }) => {
   const [callActive, setCallActive] = useState(false);
   const [agoraData, setAgoraData] = useState({});
   const { getToken, loading } = useAgoraToken();
 
-  // Agora hooks
   const isJoined = useJoin(
     {
       appid: agoraData.appId,
@@ -32,10 +31,6 @@ const VoiceCall = ({ channelName, uid, userType }) => {
 
   const startCall = async () => {
     const data = await getToken({ channelName, uid });
-
-      console.log("AGORA DATA:", data);
-
-
     if (!data) return alert("Token fetch failed!");
 
     setAgoraData(data);
@@ -43,34 +38,65 @@ const VoiceCall = ({ channelName, uid, userType }) => {
   };
 
   const endCall = () => {
-    window.location.reload();  
+    window.location.reload();
   };
 
   return (
-    <div style={{ padding: 20, border: "1px solid #ddd" }}>
-      <h3>{userType === "astrologer" ? "Astrologer Call" : "User Call"}</h3>
+    <div className={styles.container}>
+      <div className={styles.card}>
+        {/* Header */}
+        <div className={styles.header}>
+          <h2>
+            {userType === "astrologer" ? "Astrologer Voice Call" : "User Voice Call"}
+          </h2>
+          <span className={styles.channelBadge}>Channel: {channelName}</span>
+        </div>
 
-      {!callActive && (
-        <button onClick={startCall} disabled={loading}>
-          {loading ? "Getting Token..." : "Join Call"}
-        </button>
-      )}
+        {/* Avatar */}
+        <div className={styles.avatarWrapper}>
+          <div className={styles.avatarPulse}></div>
+          <div className={styles.avatar}></div>
+        </div>
 
-      {callActive && (
-        <>
-          <p>Status: {isJoined ? "Connected" : "Connecting..."}</p>
+        <h3 className={styles.callerName}>{callerName}</h3>
+        <p className={styles.status}>
+          {callActive ? (isJoined ? "Connected" : "Connecting...") : "Ready to start call"}
+        </p>
 
-          <button onClick={endCall}>End Call</button>
+        {/* Buttons */}
+        <div className={styles.actions}>
+          {!callActive ? (
+            <button
+              className={styles.joinBtn}
+              onClick={startCall}
+              disabled={loading}
+            >
+              {loading ? "Getting Token..." : "Join Call"}
+            </button>
+          ) : (
+            <button className={styles.endBtn} onClick={endCall}>
+              End Call
+            </button>
+          )}
+        </div>
 
-          <h4>Local User</h4>
-          {localMicrophoneTrack && <LocalUser audioTrack={localMicrophoneTrack} />}
+        {/* In-call section */}
+        {callActive && (
+          <div className={styles.callBody}>
+            <h4>Local User</h4>
+            {localMicrophoneTrack && <LocalUser audioTrack={localMicrophoneTrack} />}
 
-          <h4>Remote Users</h4>
-          {remoteUsers.map((user) => (
-            <RemoteUser key={user.uid} user={user} />
-          ))}
-        </>
-      )}
+            <h4>Remote Users</h4>
+            {remoteUsers.length === 0 && <p>No remote users yet...</p>}
+            {remoteUsers.map((u) => (
+              <div key={u.uid} className={styles.remoteUserBox}>
+                <span>User {u.uid}</span>
+                <RemoteUser user={u} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

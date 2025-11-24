@@ -6,55 +6,58 @@ import Astrologers from "./components/astrologers/Astrologers";
 import Blogs from "./components/blogs/Blogs";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../utils/routes/Paths";
-import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices"; // ⭐ API IMPORT
+import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 
 const Home = () => {
   const navigate = useNavigate();
 
-  // CALL API
-  const { data, isLoading, isError } = useGetHomeDetailsQuery();
+  const { data, isLoading } = useGetHomeDetailsQuery();
 
   if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
 
-  const onChat = (data) => {
-    navigate(`/talk-to-astrologers/chat/${data._id}`, {
-      state: { data: data },
+  const homeList = data?.data?.list;
+
+  const onChat = (item) => {
+    navigate(`/talk-to-astrologers/chat/${item._id}`, {
+      state: { data: item },
     });
   };
 
-  const onProfile = (data) => {
-    // navigate(`/talk-to-astrologers/expert/${data.FirstName}`, {
-    //   state: { data: data },
-    // });
-  };
-  const onWatchNow = () => {
-    navigate(PATH.privateRoutes.ASTRO_LIVE.path);
-  };
+  const onProfile = (item) => {};
 
   const onClickView = () => {
     navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path);
   };
 
-  const onClick = () => {
-    navigate(PATH.privateRoutes.HOROSCOPE.path);
-  };
-
   return (
-    <div className={styles.homeContainer}>
-      <HeroSection data={data?.data?.list} />
+    <div className={styles.homePage}>
+      <div className={styles.gradientBg} />
 
-      {/* Example: Sending API data to components */}
-      <ServiceCards data={data?.data?.list} />
+      <div className={styles.homeContainer}>
+        <section className={styles.sectionFull}>
+          <HeroSection data={homeList} />
+        </section>
 
-      <Astrologers
-        astrologers={data?.data?.list}
-        onChat={onChat}
-        onClickView={onClickView}
-        onProfile={onProfile}
-      />
+        <section className={styles.section}>
+          <ServiceCards data={homeList} />
+        </section>
 
-      <Blogs data={data?.data?.list} />
+        <section className={styles.sectionStack}>
+          <div className={styles.sectionBlock}>
+            <Astrologers
+              astrologers={homeList}
+              onChat={onChat}
+              onClickView={onClickView}
+              onProfile={onProfile}
+            />
+          </div>
+
+          <div className={styles.sectionBlock}>
+            <Blogs data={homeList} />
+          </div>
+        </section>
+      </div>
     </div>
   );
 };

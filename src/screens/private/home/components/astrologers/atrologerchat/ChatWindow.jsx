@@ -1,94 +1,108 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styles from "./ChatWindow.module.scss";
 import { IoArrowBack, IoSend } from "react-icons/io5";
 import PrimaryText from "../../../../../../component/PrimaryText";
 import { useLocation, useNavigate } from "react-router-dom";
-import useChat from "../useChat";
+import useChat from "../useChatWindow";
 
 const ChatWindow = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  console.log("stateeeee",state);
+  console.log("📦 Incoming state:", state);
 
-  const user = state?.user;  // ⭐ Now user will ALWAYS come
-  if (!user) return <div>User not found</div>;
+  // ⭐ Required data passed from navigate()
+  const { userId, astrologerId, roomId, fullName } = state;
 
-  const astrologerId = "692012fe836eaeb7310db199";
-  const userId = user._id;
-
-  const { messages, sendMessage, fetchRoom, appendLocalMessage } = useChat({
-    astrologerId,
+  // ⭐ Initialize chat logic
+  const { messages, sendMessage, astroReply, appendLocalMessage } = useChat({
     userId,
+    astrologerId,
+    roomId,
   });
 
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    fetchRoom();
-  }, []);
-
-  useEffect(() => {
-    appendLocalMessage({
-      sender: "astro",
-      text: `Hello ${user.firstName} ${user.lastName}, how may I help you today? 😊`,
-    });
-  }, []);
-
   const handleSend = () => {
     if (!message.trim()) return;
-    sendMessage(message);
-    appendLocalMessage({ sender: "user", text: message });
+
+    // USER → sends msg
+    if (userId && astrologerId) {
+      sendMessage(message);
+      appendLocalMessage({ sender: "user", text: message });
+    }
+    // ASTRO → replies
+    else {
+      astroReply(message);
+      appendLocalMessage({ sender: "astro", text: message });
+    }
+
     setMessage("");
   };
 
   return (
     <div className={styles.chatWindow}>
-      
       {/* HEADER */}
       <div className={styles.header}>
         <IoArrowBack className={styles.backIcon} onClick={() => navigate(-1)} />
 
         <img
-          src={user.image || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+          src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
           className={styles.headerAvatar}
           alt="User"
         />
 
         <div>
           <PrimaryText size_16 isSemiBold>
-            {user.firstName} {user.lastName}
+            {fullName || "Chat User"}
           </PrimaryText>
-          <PrimaryText size_12 color="#7ed891">Online</PrimaryText>
+          <PrimaryText size_12 color="#7ed891">
+            Online
+          </PrimaryText>
         </div>
       </div>
 
       {/* MESSAGES */}
-      <div className={styles.messages}>
-        {messages.map((msg, index) => (
+      {/* <div className={styles.messages}>
+        {messages.map((msg, i) => (
           <div
-            key={index}
+            key={i}
             className={`${styles.msgBubble} ${
               msg.sender === "astro" ? styles.astroMsg : styles.userMsg
             }`}
           >
             <PrimaryText
-              color={msg.sender === "astro" ? "#2d2d2d" : "#fff"}
               size_14
+              color={msg.sender === "astro" ? "#222" : "#fff"}
             >
               {msg.text}
             </PrimaryText>
           </div>
         ))}
+      </div> */}
+      <div className={styles.messages}>
+        {messages.map((msg, i) => (
+          <div
+            key={i}
+            className={`${styles.msgBubble} ${
+              msg.isSender ? styles.userMsg : styles.astroMsg
+            }`}
+          >
+            <PrimaryText size_14 color={msg.isSender ? "#fff" : "#222"}>
+              {msg.text}
+            </PrimaryText>
+
+            <span className={styles.msgTime}>{msg.time}</span>
+          </div>
+        ))}
       </div>
 
-      {/* INPUT */}
+      {/* INPUT BOX */}
       <div className={styles.inputBox}>
         <input
-          type="text"
-          placeholder="Write your message..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          placeholder="Write your message..."
         />
 
         <button onClick={handleSend}>

@@ -1,141 +1,163 @@
 @use "../../../../../App.module.scss" as *;
+
+/* ============================================
+   PREMIUM ASTRO HERO SECTION
+   ============================================ */
+
+$primary-gradient: linear-gradient(135deg, #ffbb00, #ff9100, #ff4500);
+$hero-bg-main: linear-gradient(135deg, #1c0f4a, #120a36, #0a0723);
+$glass-bg: rgba(255, 255, 255, 0.08);
+
 .heroSection {
+  background: $hero-bg-main;
+  padding: 4rem 1rem;
   position: relative;
-  overflow: hidden;
 
-  .container {
-    // max-width: 1200px;
-    margin: 0 auto;
-    padding: 8px;
-    align-items: flex-start;
-    justify-content: flex-start;
-
-    text-align: left;
+  @media (min-width: 768px) {
+    padding: 6rem 2rem;
   }
 
-  .primaryButton {
-    font-size: 1.125rem;
-    padding: 1rem 2rem;
-    border-radius: 1rem;
-    cursor: pointer;
-    display: inline-flex;
+  .container {
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+    position: relative;
+  }
 
-    color: #fff;
-    background: linear-gradient(90deg, #ffcb03, #fcd34d);
-    box-shadow: 0 0 10px rgba(255, 203, 3, 0.7);
-    transition: transform 0.2s ease-in-out;
-    animation: glow 2s ease-in-out infinite alternate;
-    border: none;
+  /* Floating Orbs (premium effect) */
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    animation: float 6s ease-in-out infinite alternate;
+  }
 
-    &:hover {
-      transform: scale(1.05); // hover scale
-    }
+  &::before {
+    top: -40px;
+    left: -40px;
+    background: #f59e0b;
+  }
+
+  &::after {
+    bottom: -40px;
+    right: -40px;
+    background: #6366f1;
   }
 
   .heroWrapper {
-    position: relative;
-    background-color: var(--secondary);
+    background: $glass-bg;
+    backdrop-filter: blur(12px);
     border-radius: 2rem;
     overflow: hidden;
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+
+    @media (min-width: 900px) {
+      flex-direction: row;
+      align-items: center;
+    }
 
     .backgroundImage {
-      position: absolute;
-      inset: 0;
+      flex: 1;
+      min-height: 350px;
+      max-height: 500px;
+
       background-size: cover;
       background-position: center;
+
+      position: relative;
 
       .gradientOverlay {
         position: absolute;
         inset: 0;
         background: linear-gradient(
           180deg,
-          rgba(0, 0, 0, 0.4) 0%,
-          rgba(0, 0, 0, 0.6) 100%
-        ); // example gradient
+          rgba(0, 0, 0, 0.35),
+          rgba(0, 0, 0, 0.7)
+        );
       }
     }
 
     .content {
-      position: relative;
+      flex: 1;
+      padding: 3rem 2rem;
       z-index: 10;
-      padding: 4rem 2rem;
 
-      max-width: 50rem;
+      @media (min-width: 900px) {
+        padding: 4rem 3rem;
+      }
 
       h1 {
-        font-size: 2.25rem; // text-4xl
+        font-size: 2.2rem;
         font-weight: 700;
         color: #fff;
         margin-bottom: 1.5rem;
-        line-height: 1.2;
 
         @media (min-width: 768px) {
-          font-size: 3.75rem; // md:text-6xl
+          font-size: 3.5rem;
         }
 
         .highlight {
-          display: inline-block;
-          background: linear-gradient(
-            90deg,
-            #f97316,
-            $pri,
-            #10b981
-          ); // example gradient
+          background: linear-gradient(90deg, #ff8c00, #ffbb00, #ffdd55);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
+          font-weight: 800;
           animation: float 3s ease-in-out infinite;
         }
       }
 
       p {
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 1.125rem; // text-lg
+        color: #e6e6e6;
+        font-size: 1.1rem;
         max-width: 32rem;
+        margin-top: 1.2rem;
+        line-height: 1.7;
       }
     }
+  }
 
-    .decorativePattern {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 50%;
-      height: 100%;
-      opacity: 0.3;
-      background-image: url("/path/to/pattern.svg"); // replace with your pattern
-      background-repeat: no-repeat;
-      background-size: cover;
+  /* Premium Button */
+  .primaryButton {
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 1rem 2.2rem;
+    border-radius: 1rem;
+    cursor: pointer;
+    display: inline-flex;
+    border: none;
+    margin-top: 1.5rem;
+
+    color: #000;
+    background: linear-gradient(135deg, #ffd54f, #ffb300);
+    box-shadow: 0 0 15px rgba(255, 223, 70, 0.7);
+
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+      transform: scale(1.05) translateY(-3px);
+      box-shadow: 0 0 25px rgba(255, 223, 70, 1);
     }
   }
 }
 
-/* Floating animation */
+/* -------------------------------------------
+   Animations
+--------------------------------------------*/
+
 @keyframes float {
   0%,
   100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-8px);
-  }
-}
-
-@keyframes glow {
-  0% {
-    box-shadow: 0 0 5px rgba(255, 203, 3, 0.5);
-  }
-  100% {
-    box-shadow: 0 0 20px rgba(255, 203, 3, 1);
-  }
-}
-
-/* Floating text animation */
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
+    transform: translateY(-12px);
   }
 }

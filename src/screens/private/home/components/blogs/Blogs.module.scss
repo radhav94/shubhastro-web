@@ -1,66 +1,125 @@
 .blogsSection {
   padding: 20px;
   position: relative;
+
+  @media (min-width: 1400px) {
+    padding: 40px 20px;
+  }
 }
 
-/* DEFAULT: GRID VIEW (when items <= 3) */
+/* -----------------------
+    DEFAULT GRID VIEW
+-------------------------*/
 .blogsContainer {
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
   align-items: stretch;
+  transition: all 0.3s ease;
 
-  @media (min-width: 768px) {
+  @media (min-width: 600px) {
     grid-template-columns: repeat(2, 1fr);
   }
 
   @media (min-width: 992px) {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  @media (min-width: 1400px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
-/* OVERRIDE GRID COMPLETELY WHEN SCROLL MODE */
+/* -----------------------
+      SCROLL MODE
+-------------------------*/
 .scrollMode {
-  display: flex !important; // override grid
-  grid-template-columns: none !important;
+  display: flex !important;
+  flex-wrap: nowrap;
   overflow-x: auto !important;
   gap: 20px;
+  padding-bottom: 12px;
   scroll-behavior: smooth;
-  padding-bottom: 10px;
-  white-space: nowrap;
+
+  & > * {
+    flex: 0 0 auto; 
+    width: 240px;
+
+    @media (min-width: 600px) {
+      width: 280px;
+    }
+
+    @media (min-width: 992px) {
+      width: 300px;
+    }
+
+    @media (min-width: 1400px) {
+      width: 320px;
+    }
+  }
 
   &::-webkit-scrollbar {
     display: none;
   }
 }
 
+/* -----------------------
+       BLOG LINK
+-------------------------*/
 .blogLink {
   text-decoration: none;
   color: inherit;
   display: block;
   height: 100%;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
 }
 
-/* Arrows */
+/* -----------------------
+        ARROWS
+-------------------------*/
 .leftArrow,
 .rightArrow {
   position: absolute;
-  top: 45%;
+  top: 50%;
   transform: translateY(-50%);
-  // background: #ffffff;
   border: none;
-  font-size: 22px;
-  padding: 8px 12px;
+  font-size: 20px;
+  padding: 10px 12px;
   cursor: pointer;
   border-radius: 50%;
-  // box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
   z-index: 10;
+  transition: all 0.2s ease;
+  display: none; // hidden for mobile
+
+  &:hover {
+    background: #f3f3f3;
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  @media (min-width: 768px) {
+    display: block;
+  }
 }
 
 .leftArrow {
-  left: -14px;
+  left: -10px;
+
+  @media (min-width: 1200px) {
+    left: -15px;
+  }
 }
 
 .rightArrow {
-  right: -14px;
+  right: -10px;
+
+  @media (min-width: 1200px) {
+    right: -15px;
+  }
 }

@@ -1,46 +1,37 @@
 import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import styles from "./ServiceCards.module.scss";
-
 import { IoArrowForwardOutline } from "react-icons/io5";
 import { PrimaryText } from "../../../../../component";
-import { AppIcons } from "../../../../../utils/appImages";
-import { PATH } from "../../../../../utils/routes/Paths";
 import { useNavigate } from "react-router-dom";
+import { PATH } from "../../../../../utils/routes/Paths";
+
+const iconMap = {
+  "free-kundli": "https://cdn-icons-png.flaticon.com/512/4715/4715312.png",
+  "kundli-matching": "https://cdn-icons-png.flaticon.com/512/4715/4715295.png", 
+  numerology: "https://cdn-icons-png.flaticon.com/512/4715/4715295.png",
+};
+
 
 const ServiceCards = ({ data }) => {
   const sections = data;
 
-  // 🟦 Find banner section
   const bannerSection = sections?.find(
     (item) => item.display_type === "complementary-services"
   );
 
-  // 🟩 Banner content (title, desc, icon)
-  const services = bannerSection?.content;
-  const numerology = { _id: 4, title: "Numerology", slug: "numerology" };
-  // const tarot = { _id: 4, title: "Tarot", slug: "tarot" };
+  const services = bannerSection?.content || [];
 
+  const numerology = { _id: 4, title: "Numerology", slug: "numerology" };
   const newServices = [...services, numerology];
 
   const navigate = useNavigate();
 
-  const scrollLeft = () => {
-    scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
-  };
-
-  const scrollRight = () => {
-    scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
-  };
-  const scrollRef = useRef(null);
-
   const slugRoutes = {
     "free-kundli": PATH.privateRoutes.KUNDLI.path,
     "kundli-matching": "/matchmaking",
-    "numerology":PATH.privateRoutes.NUMEROLOGY.path,
-    // "tarot":PATH.privateRoutes.TAROT.path
+    numerology: PATH.privateRoutes.NUMEROLOGY.path,
   };
-
 
   return (
     <div className={styles.cardsGrid}>
@@ -48,7 +39,7 @@ const ServiceCards = ({ data }) => {
         <motion.div
           key={service._id}
           whileHover={{ scale: 1.05 }}
-          transition={{ type: "spring", stiffness: 300 }}
+          transition={{ type: "spring", stiffness: 200 }}
           className={styles.card}
         >
           <div
@@ -59,27 +50,13 @@ const ServiceCards = ({ data }) => {
               navigate(path);
             }}
           >
-            <div
-              style={{
-                flexDirection: "row",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "4px",
-              }}
-            >
-              <img
-                src={AppIcons.Chat} /// need to change this in future with the image icon from backend
-                alt={service.title}
-                className={styles.icon}
-              />
+            <img
+              src={iconMap[service.slug] || iconMap["numerology"]}
+              alt={service.title}
+              className={styles.icon}
+            />
 
-              <PrimaryText className={styles.title}>
-                {service.title}
-              </PrimaryText>
-            </div>
-
-            <IoArrowForwardOutline />
+            <PrimaryText className={styles.title}>{service.title}</PrimaryText>
           </div>
         </motion.div>
       ))}

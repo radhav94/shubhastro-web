@@ -107,9 +107,15 @@ const AstrologersDashboard = () => {
 
         <div
           className={styles.tabItem}
-          onClick={() => navigate(PATH.privateRoutes.ASTROLOGER_CHAT_USER_LIST.path)}  // ⭐ DIRECT NAVIGATION
+          onClick={() => navigate(PATH.privateRoutes.ASTROLOGER_CHAT_USER_LIST.path)} 
         >
           Chat
+        </div>
+         <div
+          className={styles.tabItem}
+          onClick={() => navigate(PATH.privateRoutes.ASTROLOGER_CALL_WINDOW.path)}  
+        >
+          Call
         </div>
 
       </div>

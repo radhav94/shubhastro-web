@@ -6,15 +6,11 @@ import styles from "./HeroSection.module.scss";
 const HeroSection = ({ data }) => {
   const navigate = useNavigate();
 
-  const sections = data;
+  const banner = data?.find((item) => item.display_type === "banner")
+    ?.content?.[0];
 
-  // 🟦 Find banner section
-  const bannerSection = sections?.find(
-    (item) => item.display_type === "banner"
-  );
-
-  // 🟩 Banner content (title, desc, icon)
-  const banner = bannerSection?.content?.[0];
+  const title = banner?.title || "";
+  const parts = title.split("Navratri");
 
   return (
     <section className={styles.heroSection}>
@@ -22,16 +18,14 @@ const HeroSection = ({ data }) => {
         <div className={styles.heroWrapper}>
           <div
             className={styles.backgroundImage}
-            style={{
-              backgroundImage: `url(${banner?.icon})`,
-            }}
+            style={{ backgroundImage: `url(${banner?.icon})` }}
           >
             <div className={styles.gradientOverlay}></div>
           </div>
 
           <div className={styles.content}>
             <h1>
-              {banner?.title?.split("Navratri")[0]}
+              {parts[0]}
               <span className={styles.highlight}>Navratri</span>
             </h1>
 

@@ -28,10 +28,22 @@ class CallSocketService {
   /*                 EMIT EVENTS (SEND TO SERVER)           */
   /* ------------------------------------------------------ */
 
+  // startCall(payload) {
+  //   this.socket.emit("call_start", payload);
+  //   this.socket.on('incoming_call', payload);
+  //   console.log("payloadddd",payload)
+  // }
+
   startCall(payload) {
-    console.log("📤 start_call →", payload);
-    this.socket.emit("call_start", payload);
-  }
+  this.socket.emit("call_start", payload);
+
+  this.socket.on("incoming_call", (data) => {
+    console.log("📥 incoming_call →", data);
+  });
+
+  console.log("📤 start_call sent:", payload);
+}
+
 
   receiveCall(payload) {
     console.log("📤 call_received →", payload);

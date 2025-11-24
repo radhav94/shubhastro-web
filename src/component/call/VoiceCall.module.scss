@@ -1,0 +1,140 @@
+.container {
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+  border: 1px solid #eee;
+  text-align: center;
+}
+
+.header h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1b1b1b;
+}
+
+.channelBadge {
+  font-size: 12px;
+  background: #f3e9ff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: inline-block;
+  color: #7a3fe0;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+/* Avatar Section */
+.avatarWrapper {
+  margin-top: 25px;
+  position: relative;
+  width: 110px;
+  height: 110px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.avatarPulse {
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: rgba(125, 60, 255, 0.2);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+.avatar {
+  width: 110px;
+  height: 110px;
+  background: linear-gradient(135deg, #7d3cff, #935cff);
+  border-radius: 50%;
+  z-index: 3;
+  position: relative;
+  box-shadow: 0 8px 20px rgba(125, 60, 255, 0.35);
+}
+
+/* Caller Name + Status */
+.callerName {
+  margin-top: 10px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.status {
+  margin-top: 5px;
+  color: #777;
+  font-size: 14px;
+}
+
+/* Buttons */
+.actions {
+  margin-top: 25px;
+  display: flex;
+  justify-content: center;
+}
+
+.joinBtn {
+  background: #28c76f;
+  padding: 12px 25px;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.joinBtn:hover {
+  background: #20b262;
+}
+
+.endBtn {
+  background: #ff4b4b;
+  padding: 12px 25px;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.endBtn:hover {
+  background: #e53f3f;
+}
+
+/* Call UI */
+.callBody {
+  margin-top: 30px;
+  text-align: left;
+}
+
+.remoteUserBox {
+  background: #f7f7f7;
+  padding: 12px 15px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+}

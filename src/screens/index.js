@@ -11,7 +11,6 @@ export { default as VerifyPassword } from "./public/VerifyPassword";
 export { default as Home } from "./private/home/Home";
 
 export { default as TalkToAstrologer } from "./private/talkToAstrologer/TalkToAstrologer";
-export { default as ChatWindow } from "./private/talkToAstrologer/Chat/ChatWindowold";
 
 export { default as Profile } from "./private/profile/Profile";
 export { default as Horoscope } from "./private/horoscope/Horoscope";

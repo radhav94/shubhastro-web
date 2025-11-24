@@ -39,6 +39,7 @@ import {
   MatchDetails,
 } from "../../screens";
 import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
+import AstrologerIncomingCall from "../../screens/private/home/components/astrologers/AstrologerIncomingCall";
 import AstrologersDashboard from "../../screens/private/home/components/astrologers/AstrologersDashboard";
 import ChatList from "../../screens/private/home/components/astrologers/atrologerchat/ChatList";
 import ChatWindow from "../../screens/private/home/components/astrologers/atrologerchat/ChatWindow";
@@ -90,6 +91,10 @@ export const PATH = {
     ASTROLOGER_CHAT_WINDOW : {
       path:"/astrologer-dashboard/astrologer-chat-user-list/:chatId",
       element:ChatWindow
+    },
+    ASTROLOGER_CALL_WINDOW:{
+        path: "/astrologer-dashboard/astrololger-call",
+        element:AstrologerIncomingCall
     },
 
     PROFILE: {

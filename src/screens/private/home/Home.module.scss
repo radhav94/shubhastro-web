@@ -1,5 +1,117 @@
+/* ============================================
+   PREMIUM HOME PAGE WRAPPER
+   ============================================ */
+
+.homePage {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+background: linear-gradient(140deg, #fff7df, #ffd98c, #ffb347);
+}
+
+/* Soft radial glows on background */
+.gradientBg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.6;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+  }
+
+  &::before {
+    width: 260px;
+    height: 260px;
+    top: -60px;
+    left: -40px;
+    background: rgba(255, 214, 126, 0.8);
+  }
+
+  &::after {
+    width: 320px;
+    height: 320px;
+    bottom: -80px;
+    right: -40px;
+    background: rgba(255, 241, 194, 0.8);
+  }
+}
+
+/* Main content container */
 .homeContainer {
-  flex: 1;
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
   display: flex;
   flex-direction: column;
+  gap: 2.5rem;
+
+  @media (min-width: 1024px) {
+    padding: 2.5rem 1rem 4rem;
+    gap: 3.5rem;
+  }
+}
+
+/* Hero gets full-width feel, no extra card bg */
+.sectionFull {
+  border-radius: 2rem;
+  overflow: hidden;
+}
+
+/* Generic section wrapper (for services etc.) */
+.section {
+  padding: 1.5rem 1.25rem;
+  border-radius: 1.75rem;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(8px);
+
+  @media (min-width: 1024px) {
+    padding: 2rem 1.75rem;
+  }
+}
+
+/* Split layout: astrologers (left) + blogs (right) */
+/* ===========================
+   STACKED ASTRO SECTIONS
+=========================== */
+
+.sectionStack {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sectionBlock {
+  border-radius: 1.75rem;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.10);
+  padding: 1.7rem 1.5rem;
+  backdrop-filter: blur(8px);
+
+  @media (min-width: 1024px) {
+    padding: 2.2rem 2rem;
+  }
+}
+
+
+/* Extra small devices tuning */
+@media (max-width: 480px) {
+  .homeContainer {
+    padding: 1.25rem 0.75rem 2.5rem;
+    gap: 2rem;
+  }
+
+  .section,
+  .leftColumn,
+  .rightColumn {
+    padding: 1.25rem 1rem;
+    border-radius: 1.25rem;
+  }
 }

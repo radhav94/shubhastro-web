@@ -5,8 +5,11 @@
   margin: 0;
   padding: 0;
   font-family: "Poppins";
-  
+  background: transparent !important;
+  width: 100%;
+  min-height: 100vh;
 }
+
 
 $black: #000000;
 $white: #ffffff;

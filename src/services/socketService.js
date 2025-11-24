@@ -2,50 +2,55 @@ import { io } from "socket.io-client";
 
 class SocketService {
   socket = null;
-  isConnected = false;
 
   connect({ onConnected, onDisconnected, onError }) {
-    this.socket = io("https://njsapi-shubhtalk.epicon.in/", {
+    this.socket = io("http://192.168.12.114:3000", {
       transports: ["websocket"],
       autoConnect: true,
+      reconnection: true,
     });
 
     this.socket.on("connect", () => {
-      this.isConnected = true;
-      console.log("🔌 SOCKET CONNECTED:", this.socket.id);
-      onConnected?.(this.socket.id);
+      console.log("🔌 SOCKET CONNECTED", this.socket.id);
+      onConnected?.();
     });
 
     this.socket.on("disconnect", () => {
-      this.isConnected = false;
+      console.log("❌ SOCKET DISCONNECTED");
       onDisconnected?.();
     });
 
     this.socket.on("connect_error", onError);
-    this.socket.on("error", onError);
   }
 
   joinRoom({ roomId, userId, astrologerId }) {
-    const payload = { roomId, userId, astrologerId };
-    console.log("🚪 JOIN ROOM →", payload);
-    this.socket.emit("joinRoom", payload);
+    console.log("🚪 JOIN ROOM →", { roomId, userId, astrologerId });
+    this.socket.emit("joinRoom", { roomId, userId, astrologerId });
   }
 
-  sendMessage({ message, roomId, userId, astrologerId }) {
-    const payload = { message, roomId, userId, astrologerId };
-    console.log("📤 MESSAGE SENT:", payload);
-    this.socket.emit("send_message", payload);
+  sendMessage({ roomId, userId, astrologerId, message }) {
+    this.socket.emit("send_message", {
+      message,
+      roomId,
+      userId,
+      astrologerId,
+    });
+  }
+
+  astrologerReplied({ roomId, userId, astrologerId, message }) {
+    this.socket.emit("astrologer_replied", {
+      message,
+      roomId,
+      userId,
+      astrologerId,
+    });
   }
 
   listenMessages(callback) {
     this.socket.on("receiveMessage", (data) => {
-      console.log("📩 NEW MESSAGE:", data);
+      console.log("📩 RECEIVED:", data);
       callback?.(data);
     });
-  }
-
-  disconnect() {
-    if (this.socket) this.socket.disconnect();
   }
 }
 

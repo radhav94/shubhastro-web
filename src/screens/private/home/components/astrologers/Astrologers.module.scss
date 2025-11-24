@@ -1,204 +1,199 @@
+/* ==========================================================
+   PREMIUM LIGHT ASTROLOGER SECTION (AstroTalk + Apple Style)
+=========================================================== */
+
 .astrologersWrapper {
-  padding: 20px;
+  padding: 32px 20px;
+  background: #faf7ff; // soft purple-white tone
 }
 
-.header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: nowrap;
-  margin-bottom: 20px;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-}
-
+/* HEADER */
 .headerTitle {
-  flex: 1 1 auto;
-  white-space: nowrap;
-  margin: 0;
-  font-size: 24px;
+  font-size: 26px;
+  font-weight: 700;
+  color: #2f2a43;
+}
+
+/* CARD GRID */
+.cardsContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin-top: 20px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
   @media (max-width: 768px) {
-    font-size: 20px;
+    display: flex;
+    overflow-x: auto;
+    gap: 18px;
+    padding-bottom: 12px;
+    scroll-snap-type: x mandatory;
   }
-
-  @media (max-width: 480px) {
-    font-size: 18px;
-  }
-}
-.cardsContainer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  justify-content: space-between;
 }
 
 .cardWrapper {
-  flex: 0 0 calc(33.333% - 10.66px);
-  min-width: 200px;
+  scroll-snap-align: start;
+  flex: 0 0 80%;
+  min-width: 270px;
 }
 
-@media (max-width: 1024px) {
-  .cardWrapper {
-    flex: 0 0 calc(50% - 8px);
-  }
-}
-@media (max-width: 768px) {
-  .cardsContainer {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 8px;
-  }
-
-  .cardWrapper {
-    flex: 0 0 80%;
-    min-width: 250px;
-  }
-}
-
+/* MAIN CARD */
 .card {
-  background: #fff;
-  padding: 8px;
-  border-radius: 12px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f2eaff;
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  min-width: 300px;
-  flex: 1;
-
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: floatFadeIn 0.9s ease;
 
   &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    border-color: #ffdca6;
   }
 }
 
+/* TOP SECTION */
 .topSection {
   display: flex;
+  gap: 12px;
   align-items: center;
-  gap: 8px;
 }
 
 .avatarWrapper {
   position: relative;
-  display: inline-block;
 
   .avatar {
-    width: 60px;
-    height: 60px;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 3px solid #fff;
+    object-fit: cover;
+    box-shadow: 0 4px 16px rgba(255, 186, 75, 0.3);
   }
 
   .statusDot {
     position: absolute;
-    top: 2px;
+    bottom: 2px;
     right: 2px;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     border: 2px solid #fff;
   }
 
   .online {
-    background-color: #8bc34a;
+    background-color: #22c55e;
   }
-
   .offline {
-    background-color: #ffd700;
+    background-color: #facc15;
   }
-
   .busy {
-    background-color: #ff4500;
+    background-color: #ef4444;
   }
 }
 
+/* INFO */
 .info {
-  flex: 1;
   display: flex;
   flex-direction: column;
-}
-
-.infoHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.row {
-  display: flex;
-  flex-direction: row;
   gap: 4px;
-  margin: 4px 0;
+  color: #3b3554;
 }
+
+.name {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.skills {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* RATING + EXPERIENCE ROW */
 
 .rowCard {
-  display: flex;
-  flex-direction: row;
-  padding: 2px 8px;
-  border: 1px solid #e0e0e0;
+  background: #fff9ee;
+  border: 1px solid #ffe9c2;
+  padding: 6px 10px;
   border-radius: 8px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.9rem;
 
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  img {
+    width: 14px;
+    height: 14px;
   }
 }
 
-.starCard {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.img {
-  height: 12px;
-  width: 12px;
-}
-
+/* BOTTOM ACTIONS */
 .bottomRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
 }
 
 .priceRow {
-  display: flex;
-  align-items: center;
-  gap: 2px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #e68a00;
 }
 
+/* ACTION BUTTON ROW */
 .buttonsRow {
   display: flex;
-  align-items: center;
-  gap: 4px;
+  gap: 8px;
+
+  button {
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+
+    &.chat {
+      background: #fff1d6;
+      color: #9b6600;
+
+      &:hover {
+        background: #ffe7bd;
+      }
+    }
+
+    &.call {
+      background: #e4d9ff;
+      color: #5e3ccf;
+
+      &:hover {
+        background: #d8c9ff;
+      }
+    }
+  }
 }
 
+/* ENTRY ANIMATION */
 @keyframes floatFadeIn {
   0% {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(18px);
   }
-  50% {
-    transform: translateY(-4px);
+  60% {
+    transform: translateY(-6px);
   }
   100% {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.card {
-  animation: floatFadeIn 0.8s ease forwards;
 }

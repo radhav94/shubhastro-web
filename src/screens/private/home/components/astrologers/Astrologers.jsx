@@ -90,39 +90,37 @@ const Astrologers = ({ onChat, onClickView, onProfile }) => {
   };
 
   return (
-    <div className={styles.astrologersWrapper}>
-      <Title
-        title="Top Online Astrologers"
-        showDivider
-        showButton
-        buttonTitle="View"
-        onButtonClick={onClickView}
-      />
+   <div className={styles.astrologersWrapper}>
+  <Title
+    title="Top Online Astrologers"
+    showDivider
+    showButton
+    buttonTitle="View All"
+    onButtonClick={onClickView}
+  />
 
-      <div className={styles.cardsContainer}>
-        {data?.data?.map((astrologer) => (
-          <div key={astrologer._id} className={styles.cardWrapper}>
-            <AstrologerCard
-              data={astrologer}
-              onChat={() =>
-                navigate(`/talk-to-astrologers/chat/${astrologer._id}`, {
-                  state: { user: astrologer, role: "USER" },
-                })
-              }
-              onProfile={() => onProfile(astrologer)}
-              onAudioCall={() => handleStartCall(astrologer)} // NEW
-            />
-          </div>
-        ))}
-      </div>
-
-      {activeCaller && (
-        <AstrologerCallUI
-          astrologer={activeCaller}
-          onEndCall={handleEndCall}
+  <div className={styles.cardsContainer}>
+    {data?.data?.map((astrologer) => (
+      <div key={astrologer._id} className={styles.cardWrapper}>
+        <AstrologerCard
+          data={astrologer}
+          onChat={() =>
+            navigate(`/talk-to-astrologers/chat/${astrologer._id}`, {
+              state: { user: astrologer, role: "USER" },
+            })
+          }
+          onProfile={() => onProfile(astrologer)}
+          onAudioCall={() => handleStartCall(astrologer)}
         />
-      )}
-    </div>
+      </div>
+    ))}
+  </div>
+
+  {activeCaller && (
+    <AstrologerCallUI astrologer={activeCaller} onEndCall={handleEndCall} />
+  )}
+</div>
+
   );
 };
 

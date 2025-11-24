@@ -36,7 +36,16 @@ const handleVerifyOtp = async (event) => {
     const response = await AuthServices.verifyOtp(payload);
 
     if (response?.data?.statusCode === 200) {
-      const { isRegister, accessToken } = response?.data?.data || {};
+      const { isRegister, accessToken,_id,astrologer_id} = response?.data?.data || {};
+
+      // localStorage.setItem("astrologerId",_id);
+    if (type === "CUSTOMER") {
+  localStorage.setItem("userId", _id);   // ⭐ Logged in user
+}
+if (type === "ASTROLOGER") {
+  localStorage.setItem("loggedAstroId", _id);  // ⭐ Logged in astrologer
+}
+
 
       // store token
       if (accessToken) {

@@ -11,121 +11,118 @@ import { useNavigate } from "react-router-dom";
 import { useTalkToAstrologer } from "./useTalkToAstrologer";
 import { useGetAstrologersQuery } from "../../../redux/api/astrologer/astrologerApi";
 import FilterChips from "../../../component/UI/chips/astrologer/FilterChips";
-import AstrologerCallUI from "../home/components/astrologers/AstrologerCallUI";
 import VoiceCall from "../../../component/call/VoiceCall";
 import callServices from "../../../services/callServices";
+import axios from "axios";
 
-  const allAstrologers = [
-    {
-      "_id": "692012fe836eaeb7310db199",
-      "firstName": "Astrologer",
-      "lastName": "Sanket",
-      "dateOfBirth": "1990-09-10",
-      "phoneNumber": "7977620389",
-      "otp": 554330,
-      "otpExpireAt": "2025-11-21T10:29:16.515Z",
-      "isVerified": true,
-      "role": "ASTROLOGER",
-      "isAccountActive": true,
-      "languagePreference": ["Hindi", "Marathi", "English"],
-      "specialities": [
-        "Vedic Astrology",
-        "Kundli Matching",
-        "Numerology",
-        "Tarot Reading",
-      ],
-      "astrologer_id": "725bd6d4-aec8-4862-a3a3-916bb0e61dd8",
-      "availability": [
-        {
-          "day": "Monday",
-          "slots": [
-            {"start": "09:00 AM", "end": "12:00 PM"},
-            {"start": "02:00 PM", "end": "05:00 PM"},
-          ],
-        },
-        {
-          "day": "Friday",
-          "slots": [
-            {"start": "10:00 AM", "end": "01:00 PM"},
-            {"start": "03:00 PM", "end": "06:00 PM"},
-          ],
-        },
-      ],
-      "createdAt": "2025-11-20T13:12:12.744Z",
-      "updatedAt": "2025-11-21T10:24:16.544Z",
-      "__v": 0,
-      "email": "sanketPatil@gmail.com",
-      "gender": "male",
-
-      "description":
-          "Sanket Patil is an experienced astrologer specializing in Vedic Astrology, Kundli Matching, and Numerology. He helps clients with personalized horoscope readings and predictions. He also provides Tarot reading sessions for life guidance.",
-      "price": {
-        "unit": "minute",
-        "currency": "INR",
-        "amount": "150",
-        "service": {
-          "free": false,
-          "call": true,
-          "videoCall": true,
-          "chat": false,
-        },
+const allAstrologers = [
+  {
+    _id: "692012fe836eaeb7310db199",
+    firstName: "Astrologer",
+    lastName: "Sanket",
+    dateOfBirth: "1990-09-10",
+    phoneNumber: "7977620389",
+    otp: 554330,
+    otpExpireAt: "2025-11-21T10:29:16.515Z",
+    isVerified: true,
+    role: "ASTROLOGER",
+    isAccountActive: true,
+    languagePreference: ["Hindi", "Marathi", "English"],
+    specialities: [
+      "Vedic Astrology",
+      "Kundli Matching",
+      "Numerology",
+      "Tarot Reading",
+    ],
+    astrologer_id: "725bd6d4-aec8-4862-a3a3-916bb0e61dd8",
+    availability: [
+      {
+        day: "Monday",
+        slots: [
+          { start: "09:00 AM", end: "12:00 PM" },
+          { start: "02:00 PM", end: "05:00 PM" },
+        ],
       },
-      "imageUrl":
-          "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
-      "rating": 4.8,
-      "wallet": 3000,
-      "is_AI": false,
-    },
-    {
-      "_id": "691b0e142f7a64f0520e5feb",
-      "firstName": "Astrologer",
-      "lastName": "Shivam",
-      "dateOfBirth": "1985-05-12",
-      "time": "10:30 AM",
-      "place": "Jaipur, India",
-      "phoneNumber": "9561759639",
-
-      "email": "rahul.sharma@example.com",
-      "gender": "Male",
-      "otp": 123456,
-      "otpExpireAt": "2025-11-21T07:05:25.565Z",
-      "isVerified": true,
-      "role": "ASTROLOGER",
-      "isAccountActive": true,
-      "experience": 12,
-      "languagePreference": ["Hindi", "English"],
-      "specialities": ["Vedic Astrology", "Palm Reading", "Numerology"],
-      "description":
-          "Experienced astrologer with expertise in Vedic astrology and palmistry.",
-      "price": {
-        "unit": "minute",
-        "currency": "INR",
-        "amount": "25",
-        "service": {"call": true, "videoCall": false, "chat": true},
+      {
+        day: "Friday",
+        slots: [
+          { start: "10:00 AM", end: "01:00 PM" },
+          { start: "03:00 PM", end: "06:00 PM" },
+        ],
       },
-      "imageUrl":
-          "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/16143512/Blog-Banner-for-Website-Content-1280-x-853-px-9-768x512.jpg",
-      "availability": [
-        {
-          "day": "Monday",
-          "slots": [
-            {"start": "09:00", "end": "12:00"},
-            {"start": "15:00", "end": "18:00"},
-          ],
-        },
-        {
-          "day": "Wednesday",
-          "slots": [
-            {"start": "10:00", "end": "14:00"},
-          ],
-        },
-      ],
-      "rating": {"average": 4.7, "reviewCount": 230},
-      "wallet": 1500,
-      "is_AI": false,
-    },
-  ]
+    ],
+    createdAt: "2025-11-20T13:12:12.744Z",
+    updatedAt: "2025-11-21T10:24:16.544Z",
+    __v: 0,
+    email: "sanketPatil@gmail.com",
+    gender: "male",
 
+    description:
+      "Sanket Patil is an experienced astrologer specializing in Vedic Astrology, Kundli Matching, and Numerology. He helps clients with personalized horoscope readings and predictions. He also provides Tarot reading sessions for life guidance.",
+    price: {
+      unit: "minute",
+      currency: "INR",
+      amount: "150",
+      service: {
+        free: false,
+        call: true,
+        videoCall: true,
+        chat: false,
+      },
+    },
+    imageUrl:
+      "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
+    rating: 4.8,
+    wallet: 3000,
+    is_AI: false,
+  },
+  {
+    _id: "691b0e142f7a64f0520e5feb",
+    firstName: "Astrologer",
+    lastName: "Shivam",
+    dateOfBirth: "1985-05-12",
+    time: "10:30 AM",
+    place: "Jaipur, India",
+    phoneNumber: "9561759639",
+
+    email: "rahul.sharma@example.com",
+    gender: "Male",
+    otp: 123456,
+    otpExpireAt: "2025-11-21T07:05:25.565Z",
+    isVerified: true,
+    role: "ASTROLOGER",
+    isAccountActive: true,
+    experience: 12,
+    languagePreference: ["Hindi", "English"],
+    specialities: ["Vedic Astrology", "Palm Reading", "Numerology"],
+    description:
+      "Experienced astrologer with expertise in Vedic astrology and palmistry.",
+    price: {
+      unit: "minute",
+      currency: "INR",
+      amount: "25",
+      service: { call: true, videoCall: false, chat: true },
+    },
+    imageUrl:
+      "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/16143512/Blog-Banner-for-Website-Content-1280-x-853-px-9-768x512.jpg",
+    availability: [
+      {
+        day: "Monday",
+        slots: [
+          { start: "09:00", end: "12:00" },
+          { start: "15:00", end: "18:00" },
+        ],
+      },
+      {
+        day: "Wednesday",
+        slots: [{ start: "10:00", end: "14:00" }],
+      },
+    ],
+    rating: { average: 4.7, reviewCount: 230 },
+    wallet: 1500,
+    is_AI: false,
+  },
+];
 
 const TalkToAstrologer = () => {
   const navigate = useNavigate();
@@ -142,28 +139,54 @@ const TalkToAstrologer = () => {
 
   const [activeCaller, setActiveCaller] = useState(null); // PREMIUM CALL UI
 
-  
-
   const handleStartCall = (astro) => {
-  const channel = "order_" + Date.now();
+    const channel = "order_" + Date.now();
 
-  // 1. socket.io event to tell backend: user started call
-  callServices.startCall({
-    fromUserId: "USER_1001", // <-- USER ID (localStorage se le lena)
-    toAstrologerId: astro._id,
-    channelName: channel,
-  });
+    // 1. socket.io event to tell backend: user started call
+    callServices.startCall({
+      userId: "USER_1001", // <-- USER ID (localStorage se le lena)
+      astrologerId: astro._id,
+      channelName: channel,
+      roomId: "6922f545aef79e5bfb1aad3e",
+      startTime: Date.now(),
+    });
 
-  // 2. show UI: waiting for astrologer to accept
-  setActiveCaller({
-    ...astro,
-    channelName: channel,
-  });
-};
+    // 2. show UI: waiting for astrologer to accept
+    setActiveCaller({
+      ...astro,
+      channelName: channel,
+    });
+  };
 
   const handleEndCall = () => {
     setActiveCaller(null);
   };
+
+const handleChat = async (e) => {
+  const userIdLocal = localStorage.getItem("userId");
+
+  localStorage.setItem("selectedAstroId", e._id);
+
+  const res = await axios.post(
+    "http://192.168.12.114:3000/api/chat/room/create",
+    {
+      userId: userIdLocal,        // ⭐ Correct key
+      astrologerId: e._id         // ⭐ Correct key
+    }
+  );
+
+  const roomId = res.data?.data;
+
+  navigate(`/talk-to-astrologers/chat/${e._id}`, {
+    state: {
+      userId: userIdLocal,
+      astrologerId: e._id,
+      fullName: e.firstName,
+      roomId
+    },
+  });
+};
+
 
   const astroImages = [
     `https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg`,
@@ -187,7 +210,6 @@ const TalkToAstrologer = () => {
 
   // const data = astrodata?.data || [];
 
-
   // const [allAstrologers, setAllAstrologers] = useState([]);
 
   // useEffect(() => {
@@ -209,6 +231,8 @@ const TalkToAstrologer = () => {
   //   window.addEventListener("scroll", handleScroll);
   //   return () => window.removeEventListener("scroll", handleScroll);
   // }, [isFetching]);
+
+
 
   return (
     <div>
@@ -235,13 +259,20 @@ const TalkToAstrologer = () => {
               data={e}
               image={astroImages[index % astroImages.length]}
               onFollow={() => onFollow(e._id)}
-              onChat={() =>
-                navigate(`/talk-to-astrologers/chat/${e._id}`, {
-                  state: { user: e, role: "USER" },
-                })
+              // onChat={() =>
+              //   navigate(`/talk-to-astrologers/chat/${e._id}`, {
+              //     state: { user: e, role: "USER" },
+              //   })
+              // }
+
+              onChat={() => {
+                // ⭐ User ne jisko select kiya hai uska ID store karo
+                handleChat(e)
+                
               }
+            }
               onProfile={() => onProfile(e)}
-              onAudioCall={() => handleStartCall(e)}  // ⭐ ADD THIS
+              onAudioCall={() => handleStartCall(e)}
             />
           </div>
         ))}
@@ -252,11 +283,7 @@ const TalkToAstrologer = () => {
         //   astrologer={activeCaller}
         //   onEndCall={handleEndCall}
         // />
-          <VoiceCall
-      channelName="order_555"
-      uid={1001}
-      userType="user"
-    />
+        <VoiceCall channelName="order_555" uid={1001} userType="user" />
       )}
 
       <DetailsModal
