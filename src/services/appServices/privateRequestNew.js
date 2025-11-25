@@ -13,16 +13,35 @@ const handleApiError = (error) => {
 
   switch (status) {
     case 401:
-      if (!unAuthorizedCount) {
-        unAuthorizedCount++;
-        localStorage.removeItem("token");
-        localStorage.removeItem("verifyOtpToken");
-        Toast.error("Session expired, please login again!");
-        setTimeout(() => {
-          unAuthorizedCount = 0;
-          window.location.href = "/";
-        }, 300);
-      }
+  if (!unAuthorizedCount) {
+    unAuthorizedCount++;
+
+    const role = localStorage.getItem("shubhtalk_role");
+
+    // 🔹 Clear tokens correctly based on role
+    if (role === "ASTROLOGER") {
+      localStorage.removeItem("shubhtalk_astro_token");
+      localStorage.removeItem("shubhtalk_astro_id");
+    }
+
+    if (role === "CUSTOMER") {
+      localStorage.removeItem("shubhtalk_customer_token");
+      localStorage.removeItem("shubhtalk_customer_id");
+      localStorage.removeItem("shubhtalk_customer_wallet");
+    }
+
+    // 🔹 Clear role (very important)
+    localStorage.removeItem("shubhtalk_role");
+
+    Toast.error("Session expired, please login again!");
+
+    setTimeout(() => {
+      unAuthorizedCount = 0;
+      window.location.href = "/login"; // redirect to common login
+    }, 300);
+  }
+  break;
+
       break;
     case 400:
       Toast.error(message || "Invalid Value / Bad Request");

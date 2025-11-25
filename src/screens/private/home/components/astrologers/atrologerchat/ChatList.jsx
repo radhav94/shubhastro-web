@@ -11,7 +11,7 @@ import PrimaryLoader from "../../../../../../component/UI/PrimaryLoader";
 
 const ChatList = () => {
   const navigate = useNavigate();
-  const astroIdLocal = localStorage.getItem("loggedAstroId");
+  const astroIdLocal = localStorage.getItem("shubhtalk_astro_id");
 
   const { data, isLoading, isError } = useGetChatMessagesQuery({
     astrologerId: astroIdLocal,

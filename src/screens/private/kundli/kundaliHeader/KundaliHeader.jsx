@@ -82,7 +82,13 @@ const KundaliHeader = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("verifyOtpToken");
+  // const token = localStorage.getItem("verifyOtpToken");
+  const role = localStorage.getItem("shubhtalk_role");
+const token =
+  role === "ASTROLOGER"
+    ? localStorage.getItem("shubhtalk_astro_token")
+    : localStorage.getItem("shubhtalk_customer_token");
+
 
   const [formData, setFormData] = useState(initialFormData);
   const [selectedKundliId, setSelectedKundliId] = useState(null);

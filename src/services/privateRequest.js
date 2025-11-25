@@ -14,7 +14,13 @@ const privateRequest = axios.create({
 
 privateRequest.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("verifyOtpToken");
+    // const token = localStorage.getItem("verifyOtpToken");
+    const role = localStorage.getItem("shubhtalk_role");
+const token =
+  role === "ASTROLOGER"
+    ? localStorage.getItem("shubhtalk_astro_token")
+    : localStorage.getItem("shubhtalk_customer_token");
+
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

@@ -17,13 +17,37 @@ const TopBar = () => {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
-  const token = localStorage.getItem("verifyOtpToken");
+  // const token = localStorage.getItem("verifyOtpToken");
+  // const handleLogout = () => {
+  //   localStorage.removeItem("verifyOtpToken");
+  //   navigate("/");
+  // };
+
+  const role = localStorage.getItem("shubhtalk_role");
+const token =
+  role === "ASTROLOGER"
+    ? localStorage.getItem("shubhtalk_astro_token")
+    : localStorage.getItem("shubhtalk_customer_token");
+
+
   const handleLogout = () => {
-    // localStorage.removeItem("verifyOtpToken");
-    // localStorage.removeItem("loggedAstroId");
-    localStorage.clear();
-    navigate("/");
-  };
+  const role = localStorage.getItem("shubhtalk_role");
+
+  if (role === "ASTROLOGER") {
+    localStorage.removeItem("shubhtalk_astro_token");
+    localStorage.removeItem("shubhtalk_astro_id");
+  }
+
+  if (role === "CUSTOMER") {
+    localStorage.removeItem("shubhtalk_customer_token");
+    localStorage.removeItem("shubhtalk_customer_id");
+    localStorage.removeItem("shubhtalk_customer_wallet");
+  }
+
+  localStorage.removeItem("shubhtalk_role");
+
+  navigate("/");
+};
 
   useEffect(() => {
     const storedWallet = JSON.parse(localStorage.getItem("wallet")) || {

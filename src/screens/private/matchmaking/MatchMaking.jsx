@@ -32,7 +32,12 @@ const isDuplicateKundli = (payload, list) => {
 
 const MatchMaking = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("verifyOtpToken");
+  const role = localStorage.getItem("shubhtalk_role");
+const token =
+  role === "ASTROLOGER"
+    ? localStorage.getItem("shubhtalk_astro_token")
+    : localStorage.getItem("shubhtalk_customer_token");
+
   const [isBoy, setIsBoy] = useState(true);
   const [selectedKundliId, setSelectedKundliId] = useState(null);
 

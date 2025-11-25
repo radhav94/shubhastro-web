@@ -203,7 +203,7 @@ const TalkToAstrologer = () => {
   //   setActiveCaller(null);
   // };
 
-  const userIdLocal = localStorage.getItem("userId");
+  const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
   const openKundliPopup = (astro) => {
     setSelectedAstrologer(astro);

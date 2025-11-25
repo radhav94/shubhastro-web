@@ -20,7 +20,13 @@ const Login = () => {
 
   // Already logged in? Send user back to where they came from
   useEffect(() => {
-    const token = localStorage.getItem("verifyOtpToken");
+    // const token = localStorage.getItem("verifyOtpToken");
+    const role = localStorage.getItem("shubhtalk_role");
+const token =
+  role === "ASTROLOGER"
+    ? localStorage.getItem("shubhtalk_astro_token")
+    : localStorage.getItem("shubhtalk_customer_token");
+
     if (token) {
       navigate(redirectPath, { replace: true });
     }

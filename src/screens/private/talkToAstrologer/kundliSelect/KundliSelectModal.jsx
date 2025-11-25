@@ -61,7 +61,13 @@ const initialForm = {
 };
 
 const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
-  const token = localStorage.getItem("verifyOtpToken");
+  // const token = localStorage.getItem("verifyOtpToken");
+  const role = localStorage.getItem("shubhtalk_role");
+const token =
+  role === "ASTROLOGER"
+    ? localStorage.getItem("shubhtalk_astro_token")
+    : localStorage.getItem("shubhtalk_customer_token");
+
 
   const { data, isLoading, refetch } = useGetAllKundlisQuery(undefined, {
     skip: !token || !isOpen,

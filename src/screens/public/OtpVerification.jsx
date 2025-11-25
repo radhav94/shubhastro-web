@@ -22,47 +22,115 @@ const OtpVerification = () => {
 
   const isOtpComplete = otp.length === 6;
 
+// const handleVerifyOtp = async (event) => {
+//   event.preventDefault();
+
+//   const payload = {
+//     phoneNumber,
+//     type,
+//     otp: parseInt(otp, 10),
+//   };
+
+//   try {
+//     const response = await AuthServices.verifyOtp(payload);
+
+//     if (response?.data?.statusCode === 200) {
+//       const { isRegister, accessToken,_id,astrologer_id} = response?.data?.data || {};
+
+//       // localStorage.setItem("astrologerId",_id);
+//     if (type === "CUSTOMER") {
+//   localStorage.setItem("userId", _id);   // ⭐ Logged in user
+// }
+// if (type === "ASTROLOGER") {
+//   localStorage.setItem("loggedAstroId", _id);  // ⭐ Logged in astrologer
+// }
+
+
+//       // store token
+//       if (accessToken) {
+//         localStorage.setItem("verifyOtpToken", accessToken);
+//       }
+
+//       Toast.success("OTP verified successfully");
+
+//       // Convert string/boolean backend flag safely
+//       const isNewUser = String(isRegister) === "false";
+
+//       // ⭐ ASTROLOGER FLOW — ALWAYS go to dashboard
+//       if (type === "ASTROLOGER") {
+//         navigate(PATH.privateRoutes.ASTROLOGER_DASHBOARD.path, { replace: true });
+//         return;
+//       }
+
+//       // ⭐ CUSTOMER FLOW — check register status
+//       if (isNewUser) {
+//         navigate(PATH.publicRoutes.REGISTER.path, {
+//           replace: true,
+//           state: { from: location },
+//         });
+//       } else {
+//         navigate(redirectPath, { replace: true });
+//       }
+//     }
+//   } catch (error) {
+//     Toast.error(error?.response?.data?.message || "OTP verification failed");
+//   }
+// };
+
+
+
 const handleVerifyOtp = async (event) => {
   event.preventDefault();
 
   const payload = {
     phoneNumber,
-    type, // incoming type from login page (CUSTOMER or ASTROLOGER)
-    otp: parseInt(otp, 10),
+    type, // "CUSTOMER" or "ASTROLOGER"
+    otp: Number(otp),
   };
 
   try {
     const response = await AuthServices.verifyOtp(payload);
 
     if (response?.data?.statusCode === 200) {
-      const { isRegister, accessToken,_id,astrologer_id} = response?.data?.data || {};
+      const { isRegister, accessToken, _id } = response?.data?.data || {};
 
-      // localStorage.setItem("astrologerId",_id);
-    if (type === "CUSTOMER") {
-  localStorage.setItem("userId", _id);   // ⭐ Logged in user
-}
-if (type === "ASTROLOGER") {
-  localStorage.setItem("loggedAstroId", _id);  // ⭐ Logged in astrologer
-}
+      // Clear everything first to avoid conflict
+      // localStorage.removeItem("shubhtalk_role");
+      // localStorage.removeItem("shubhtalk_customer_id");
+      // localStorage.removeItem("shubhtalk_customer_token");
+      // localStorage.removeItem("shubhtalk_astro_id");
+      // localStorage.removeItem("shubhtalk_astro_token");
 
+      // -----------------------------
+      // ⭐ STORE LOGIN BASED ON ROLE
+      // -----------------------------
+      if (type === "CUSTOMER") {
+        localStorage.setItem("shubhtalk_role", "CUSTOMER");
+        localStorage.setItem("shubhtalk_customer_id", _id);
+        localStorage.setItem("shubhtalk_customer_token", accessToken);
+      }
 
-      // store token
-      if (accessToken) {
-        localStorage.setItem("verifyOtpToken", accessToken);
+      if (type === "ASTROLOGER") {
+        localStorage.setItem("shubhtalk_role", "ASTROLOGER");
+        localStorage.setItem("shubhtalk_astro_id", _id);
+        localStorage.setItem("shubhtalk_astro_token", accessToken);
       }
 
       Toast.success("OTP verified successfully");
 
-      // Convert string/boolean backend flag safely
-      const isNewUser = String(isRegister) === "false";
+      // -----------------------------
+      // ⭐ REDIRECTION BASED ON ROLE
+      // -----------------------------
 
-      // ⭐ ASTROLOGER FLOW — ALWAYS go to dashboard
+      // ASTRO ALWAYS GOES TO ASTRO DASHBOARD
       if (type === "ASTROLOGER") {
         navigate(PATH.privateRoutes.ASTROLOGER_DASHBOARD.path, { replace: true });
         return;
       }
 
-      // ⭐ CUSTOMER FLOW — check register status
+      // CUSTOMER → IF NEW, REGISTER
+      const isNewUser = String(isRegister) === "false";
+
       if (isNewUser) {
         navigate(PATH.publicRoutes.REGISTER.path, {
           replace: true,
