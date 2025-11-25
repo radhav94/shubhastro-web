@@ -79,3 +79,36 @@ export const privateRequestNew = createApi({
 
   endpoints: () => ({}), // EMPTY — endpoints later inject honge
 });
+
+
+export const localReuqqestApi = createApi({
+  reducerPath: "localReuqqestApi",
+
+  baseQuery: async (args, api, extraOptions) => {
+    const rawBaseQuery = fetchBaseQuery({
+      baseUrl: "http://192.168.12.114:3000/",
+      prepareHeaders: (headers) => {
+        const token = localStorage.getItem("verifyOtpToken");
+
+        headers.set("Content-Type", "application/json");
+
+        if (token) {
+          headers.set("Authorization", `Bearer ${token}`);
+        }
+
+        return headers;
+      },
+    });
+
+    const result = await rawBaseQuery(args, api, extraOptions);
+
+    if (result.error) {
+      handleApiError(result.error);
+    }
+
+    return result;
+  },
+  tagTypes: ["Kundlis"], // ⭐ Required
+
+  endpoints: () => ({}), // EMPTY — endpoints later inject honge
+});

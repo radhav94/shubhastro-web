@@ -12,6 +12,7 @@ import {
   useCreateKundliMutation,
   useDeleteKundliMutation,
 } from "../../../../services/appServices/kundliServicesNew";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 // Constants
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -405,7 +406,7 @@ const KundaliHeader = () => {
               </button>
             </div>
           ) : isLoading ? (
-            <PrimaryText isCenter>Loading...</PrimaryText>
+            <PrimaryLoader/>
           ) : savedKundlis.length > 0 ? (
             <div className={styles.kundliList}>
               {savedKundlis.map((kundli) => (

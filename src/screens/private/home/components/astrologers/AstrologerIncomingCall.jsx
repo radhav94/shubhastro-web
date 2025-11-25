@@ -5,9 +5,8 @@ import callServices from "../../../../../services/callServices";
 import VoiceCall from "../../../../../component/call/VoiceCall";
 
 const AstrologerIncomingCall = () => {
-  const astrologerId=localStorage.getItem("astrologerId")
+  const astrologerId=localStorage.getItem("loggedAstroId")
 
-  console.log("astrologerId",astrologerId);
   const [incomingData, setIncomingData] = useState(null);
   const [callAccepted, setCallAccepted] = useState(false);
 
@@ -52,19 +51,16 @@ const AstrologerIncomingCall = () => {
   };
 
   // ⭐ If call is accepted → show Agora call UI
-  if (callAccepted && incomingData) {
-    return (
-      <VoiceCall
-        channelName={incomingData.channelName}
-        uid={9999}
-        userType="astrologer"
-      />
-    );
-  }
+  // if (callAccepted && incomingData) {
+  //   return (
+  //     <VoiceCall
+  //     />
+  //   );
+  // }
 
   return (
     <div className={styles.wrapper}>
-      {incomingData ? (
+      {/* {incomingData ? (
         <div className={styles.card}>
           <h2>📞 Incoming Call</h2>
 
@@ -85,7 +81,9 @@ const AstrologerIncomingCall = () => {
         </div>
       ) : (
         <h3>No active calls…</h3>
-      )}
+      )} */}
+      {/* <VoiceCall
+      /> */}
     </div>
   );
 };

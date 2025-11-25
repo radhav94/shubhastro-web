@@ -19,7 +19,7 @@ const Home = () => {
   const homeList = data?.data?.list;
 
   const onChat = (item) => {
-    navigate(`/talk-to-astrologers/chat/${item._id}`, {
+    navigate(`/talk-to-astrologers/${item._id}`, {
       state: { data: item },
     });
   };

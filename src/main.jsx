@@ -39,7 +39,7 @@ import { AgoraProvider } from "./agora/agoraClient";  // <-- IMPORTANT
 
 createRoot(document.getElementById("root")).render(
   // <StrictMode>
-  <AgoraProvider>
+  // <AgoraProvider>
     <Provider store={store}>
       <Toaster
         position="top-right"
@@ -54,6 +54,6 @@ createRoot(document.getElementById("root")).render(
 
       <App />
     </Provider>
-  </AgoraProvider>
+  // </AgoraProvider>
   // </StrictMode>
 );

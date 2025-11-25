@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./ChatWindow.module.scss";
 import { IoArrowBack, IoSend } from "react-icons/io5";
 import PrimaryText from "../../../../../../component/PrimaryText";
@@ -9,33 +9,34 @@ const ChatWindow = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  console.log("📦 Incoming state:", state);
+  const { userId, astrologerId, roomId, fullName, isUserSide, kundliId } = state;
 
-  // ⭐ Required data passed from navigate()
-  const { userId, astrologerId, roomId, fullName } = state;
-
-  // ⭐ Initialize chat logic
-  const { messages, sendMessage, astroReply, appendLocalMessage } = useChat({
+  const {
+    messages,
+    error,
+    isTyping,
+    sendMessage,
+    astroReply,
+    sendTyping,
+  } = useChat({
     userId,
     astrologerId,
     roomId,
+    isUserSide,
+    kundliId,
   });
 
   const [message, setMessage] = useState("");
+  const [localMsgs, setLocalMsgs] = useState([]);
+
+  useEffect(() => {
+    setLocalMsgs(messages);
+  }, [messages]);
 
   const handleSend = () => {
     if (!message.trim()) return;
 
-    // USER → sends msg
-    if (userId && astrologerId) {
-      sendMessage(message);
-      appendLocalMessage({ sender: "user", text: message });
-    }
-    // ASTRO → replies
-    else {
-      astroReply(message);
-      appendLocalMessage({ sender: "astro", text: message });
-    }
+    isUserSide ? sendMessage(message) : astroReply(message);
 
     setMessage("");
   };
@@ -45,50 +46,36 @@ const ChatWindow = () => {
       {/* HEADER */}
       <div className={styles.header}>
         <IoArrowBack className={styles.backIcon} onClick={() => navigate(-1)} />
-
         <img
           src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
           className={styles.headerAvatar}
           alt="User"
         />
-
         <div>
           <PrimaryText size_16 isSemiBold>
             {fullName || "Chat User"}
           </PrimaryText>
+
+          {/* Online + Typing */}
           <PrimaryText size_12 color="#7ed891">
-            Online
+            {isTyping ? "Typing..." : "Online"}
           </PrimaryText>
         </div>
       </div>
 
-      {/* MESSAGES */}
-      {/* <div className={styles.messages}>
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`${styles.msgBubble} ${
-              msg.sender === "astro" ? styles.astroMsg : styles.userMsg
-            }`}
-          >
-            <PrimaryText
-              size_14
-              color={msg.sender === "astro" ? "#222" : "#fff"}
-            >
-              {msg.text}
-            </PrimaryText>
-          </div>
-        ))}
-      </div> */}
+      {/* ERROR BOX */}
+      {error && <div className={styles.errorBox}>⚠️ {error}</div>}
+
+      {/* MESSAGE LIST */}
       <div className={styles.messages}>
-        {messages.map((msg, i) => (
+        {localMsgs.map((msg, i) => (
           <div
             key={i}
             className={`${styles.msgBubble} ${
-              msg.isSender ? styles.userMsg : styles.astroMsg
+              msg.isSender ? styles.senderBubble : styles.receiverBubble
             }`}
           >
-            <PrimaryText size_14 color={msg.isSender ? "#fff" : "#222"}>
+            <PrimaryText size={14} color={msg.isSender ? "#fff" : "#222"}>
               {msg.text}
             </PrimaryText>
 
@@ -97,14 +84,16 @@ const ChatWindow = () => {
         ))}
       </div>
 
-      {/* INPUT BOX */}
+      {/* INPUT */}
       <div className={styles.inputBox}>
         <input
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            sendTyping();
+          }}
           placeholder="Write your message..."
         />
-
         <button onClick={handleSend}>
           <IoSend size={22} color="#fff" />
         </button>

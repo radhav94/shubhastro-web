@@ -246,7 +246,7 @@ export const PATH = {
       element: Astrologers,
     },
     CHAT_WITH_ASTROLOGER: {
-      path: "/talk-to-astrologers/chat/:id",
+      path: "/talk-to-astrologers/:id",
       element: ChatWindow,
     },
     STREAMING: {

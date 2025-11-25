@@ -1,0 +1,213 @@
+@use "sass:color";
+
+// 🎨 Variables
+$overlay-bg: rgba(0, 0, 0, 0.55);
+$modal-bg: #ffffff;
+$accent: #ffcc66;
+$text-dark: #222;
+$text-light: #777;
+$border: #e5e5e5;
+
+// 🎯 Overlay
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: $overlay-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+
+// 📦 Modal Box
+.modalBox {
+  width: 92%;
+  max-width: 480px;
+  background: $modal-bg;
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  animation: popup 0.25s ease-out;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+
+  .closeBtn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    svg {
+      color: $text-dark;
+    }
+  }
+
+  h2 {
+    text-align: center;
+    margin: 0 0 16px;
+    font-size: 20px;
+    font-weight: 700;
+    color: $text-dark;
+  }
+}
+
+// 🟦 Tabs
+.tabs {
+  display: flex;
+  margin-bottom: 16px;
+  border-bottom: 1px solid $border;
+
+  button {
+    flex: 1;
+    padding: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $text-light;
+    border-bottom: 3px solid transparent;
+    transition: 0.2s;
+
+    &:hover {
+      color: $text-dark;
+    }
+  }
+
+  .activeTab {
+    color: $text-dark !important;
+    border-bottom: 3px solid $accent !important;
+  }
+}
+
+// 📘 SAVED KUNDLI LIST
+.kundliList {
+  max-height: 330px;
+  overflow-y: auto;
+  padding-right: 4px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+  }
+
+  .kundliItem {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: #fafafa;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s ease;
+
+    &:hover {
+      background: #f0f0f0;
+      transform: translateY(-2px);
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      background: $accent;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 700;
+      font-size: 18px;
+      color: $text-dark;
+    }
+
+    .name {
+      font-weight: 600;
+      color: $text-dark;
+    }
+
+    .dob {
+      font-size: 14px;
+      color: $text-light;
+    }
+
+    .place {
+      font-size: 13px;
+      color: color.adjust($text-light, $lightness: 10%);
+    }
+  }
+}
+
+// 🟦 CREATE FORM
+.createForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 10px;
+
+  input,
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid $border;
+    font-size: 15px;
+    outline: none;
+
+    &:focus {
+      border-color: $accent;
+      box-shadow: 0 0 0 2px rgba(255, 204, 102, 0.3);
+    }
+  }
+
+  .row {
+    display: flex;
+    gap: 10px;
+
+    select {
+      flex: 1;
+    }
+  }
+
+  .submitBtn {
+    width: 100%;
+    padding: 12px;
+    background: $accent;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #222;
+    cursor: pointer;
+    transition: 0.2s;
+
+    &:hover {
+      background: color.scale($accent, $lightness: -10%);
+      transform: translateY(-2px);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+}
+.locationWrapper {
+  position: relative;
+  z-index: 5000;  // higher than modal
+}
+
+
+// 🎬 Popup Animation
+@keyframes popup {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

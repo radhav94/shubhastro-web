@@ -19,7 +19,9 @@ const TopBar = () => {
   const [walletBalance, setWalletBalance] = useState(0);
   const token = localStorage.getItem("verifyOtpToken");
   const handleLogout = () => {
-    localStorage.removeItem("verifyOtpToken");
+    // localStorage.removeItem("verifyOtpToken");
+    // localStorage.removeItem("loggedAstroId");
+    localStorage.clear();
     navigate("/");
   };
 

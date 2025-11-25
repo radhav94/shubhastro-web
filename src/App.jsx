@@ -10,6 +10,7 @@ import {
 import PublicRoute from "./utils/routes/PublicRoute";
 import PrivateRoute from "./utils/routes/PrivateRoute";
 import SocketConnector from "./SocketConnector";   // ⭐ STEP 1 — ADD THIS
+import { useEffect } from "react";
 
 
 function App() {
@@ -81,9 +82,21 @@ const flattenRoutes = (routes) => {
     },
   ]);
 
+  useEffect(() => {
+  const style = document.createElement("style");
+  style.innerHTML = `
+    .pac-container {
+      z-index: 999999 !important;
+      position: absolute !important;
+    }
+  `;
+  document.head.appendChild(style);
+}, []);
+
+
   return (
     <div className={classes.app}>
-      <SocketConnector />
+      {/* <SocketConnector /> */}
       <RouterProvider router={roleWiseRouting} />
     </div>
   );

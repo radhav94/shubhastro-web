@@ -14,114 +14,126 @@ import FilterChips from "../../../component/UI/chips/astrologer/FilterChips";
 import VoiceCall from "../../../component/call/VoiceCall";
 import callServices from "../../../services/callServices";
 import axios from "axios";
+import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
+import KundliSelectModal from "./kundliSelect/KundliSelectModal";
 
-const allAstrologers = [
-  {
-    _id: "692012fe836eaeb7310db199",
-    firstName: "Astrologer",
-    lastName: "Sanket",
-    dateOfBirth: "1990-09-10",
-    phoneNumber: "7977620389",
-    otp: 554330,
-    otpExpireAt: "2025-11-21T10:29:16.515Z",
-    isVerified: true,
-    role: "ASTROLOGER",
-    isAccountActive: true,
-    languagePreference: ["Hindi", "Marathi", "English"],
-    specialities: [
-      "Vedic Astrology",
-      "Kundli Matching",
-      "Numerology",
-      "Tarot Reading",
-    ],
-    astrologer_id: "725bd6d4-aec8-4862-a3a3-916bb0e61dd8",
-    availability: [
-      {
-        day: "Monday",
-        slots: [
-          { start: "09:00 AM", end: "12:00 PM" },
-          { start: "02:00 PM", end: "05:00 PM" },
-        ],
-      },
-      {
-        day: "Friday",
-        slots: [
-          { start: "10:00 AM", end: "01:00 PM" },
-          { start: "03:00 PM", end: "06:00 PM" },
-        ],
-      },
-    ],
-    createdAt: "2025-11-20T13:12:12.744Z",
-    updatedAt: "2025-11-21T10:24:16.544Z",
-    __v: 0,
-    email: "sanketPatil@gmail.com",
-    gender: "male",
+// const allAstrologers = [
+//   {
+//     _id: "692012fe836eaeb7310db199",
+//     firstName: "Astrologer",
+//     lastName: "Sanket",
+//     dateOfBirth: "1990-09-10",
+//     phoneNumber: "7977620389",
+//     otp: 554330,
+//     otpExpireAt: "2025-11-21T10:29:16.515Z",
+//     isVerified: true,
+//     role: "ASTROLOGER",
+//     isAccountActive: true,
+//     languagePreference: ["Hindi", "Marathi", "English"],
+//     specialities: [
+//       "Vedic Astrology",
+//       "Kundli Matching",
+//       "Numerology",
+//       "Tarot Reading",
+//     ],
+//     astrologer_id: "725bd6d4-aec8-4862-a3a3-916bb0e61dd8",
+//     availability: [
+//       {
+//         day: "Monday",
+//         slots: [
+//           { start: "09:00 AM", end: "12:00 PM" },
+//           { start: "02:00 PM", end: "05:00 PM" },
+//         ],
+//       },
+//       {
+//         day: "Friday",
+//         slots: [
+//           { start: "10:00 AM", end: "01:00 PM" },
+//           { start: "03:00 PM", end: "06:00 PM" },
+//         ],
+//       },
+//     ],
+//     createdAt: "2025-11-20T13:12:12.744Z",
+//     updatedAt: "2025-11-21T10:24:16.544Z",
+//     __v: 0,
+//     email: "sanketPatil@gmail.com",
+//     gender: "male",
 
-    description:
-      "Sanket Patil is an experienced astrologer specializing in Vedic Astrology, Kundli Matching, and Numerology. He helps clients with personalized horoscope readings and predictions. He also provides Tarot reading sessions for life guidance.",
-    price: {
-      unit: "minute",
-      currency: "INR",
-      amount: "150",
-      service: {
-        free: false,
-        call: true,
-        videoCall: true,
-        chat: false,
-      },
-    },
-    imageUrl:
-      "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
-    rating: 4.8,
-    wallet: 3000,
-    is_AI: false,
-  },
-  {
-    _id: "691b0e142f7a64f0520e5feb",
-    firstName: "Astrologer",
-    lastName: "Shivam",
-    dateOfBirth: "1985-05-12",
-    time: "10:30 AM",
-    place: "Jaipur, India",
-    phoneNumber: "9561759639",
+//     description:
+//       "Sanket Patil is an experienced astrologer specializing in Vedic Astrology, Kundli Matching, and Numerology. He helps clients with personalized horoscope readings and predictions. He also provides Tarot reading sessions for life guidance.",
+//     price: {
+//       unit: "minute",
+//       currency: "INR",
+//       amount: "150",
+//       service: {
+//         free: false,
+//         call: true,
+//         videoCall: true,
+//         chat: false,
+//       },
+//     },
+//     imageUrl:
+//       "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
+//     rating: 4.8,
+//     wallet: 3000,
+//     is_AI: false,
+//   },
+//   {
+//     _id: "691b0e142f7a64f0520e5feb",
+//     firstName: "Astrologer",
+//     lastName: "Shivam",
+//     dateOfBirth: "1985-05-12",
+//     time: "10:30 AM",
+//     place: "Jaipur, India",
+//     phoneNumber: "9561759639",
 
-    email: "rahul.sharma@example.com",
-    gender: "Male",
-    otp: 123456,
-    otpExpireAt: "2025-11-21T07:05:25.565Z",
-    isVerified: true,
-    role: "ASTROLOGER",
-    isAccountActive: true,
-    experience: 12,
-    languagePreference: ["Hindi", "English"],
-    specialities: ["Vedic Astrology", "Palm Reading", "Numerology"],
-    description:
-      "Experienced astrologer with expertise in Vedic astrology and palmistry.",
-    price: {
-      unit: "minute",
-      currency: "INR",
-      amount: "25",
-      service: { call: true, videoCall: false, chat: true },
-    },
-    imageUrl:
-      "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/16143512/Blog-Banner-for-Website-Content-1280-x-853-px-9-768x512.jpg",
-    availability: [
-      {
-        day: "Monday",
-        slots: [
-          { start: "09:00", end: "12:00" },
-          { start: "15:00", end: "18:00" },
-        ],
-      },
-      {
-        day: "Wednesday",
-        slots: [{ start: "10:00", end: "14:00" }],
-      },
-    ],
-    rating: { average: 4.7, reviewCount: 230 },
-    wallet: 1500,
-    is_AI: false,
-  },
+//     email: "rahul.sharma@example.com",
+//     gender: "Male",
+//     otp: 123456,
+//     otpExpireAt: "2025-11-21T07:05:25.565Z",
+//     isVerified: true,
+//     role: "ASTROLOGER",
+//     isAccountActive: true,
+//     experience: 12,
+//     languagePreference: ["Hindi", "English"],
+//     specialities: ["Vedic Astrology", "Palm Reading", "Numerology"],
+//     description:
+//       "Experienced astrologer with expertise in Vedic astrology and palmistry.",
+//     price: {
+//       unit: "minute",
+//       currency: "INR",
+//       amount: "25",
+//       service: { call: true, videoCall: false, chat: true },
+//     },
+//     imageUrl:
+//       "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/16143512/Blog-Banner-for-Website-Content-1280-x-853-px-9-768x512.jpg",
+//     availability: [
+//       {
+//         day: "Monday",
+//         slots: [
+//           { start: "09:00", end: "12:00" },
+//           { start: "15:00", end: "18:00" },
+//         ],
+//       },
+//       {
+//         day: "Wednesday",
+//         slots: [{ start: "10:00", end: "14:00" }],
+//       },
+//     ],
+//     rating: { average: 4.7, reviewCount: 230 },
+//     wallet: 1500,
+//     is_AI: false,
+//   },
+// ];
+
+const astroImages = [
+  `https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg`,
+  `https://images.astroyogi.com/english/astrologer/profileimage/tarot-dharra-7690941669104289.jpg`,
+  `https://images.astroyogi.com/english/astrologer/profileimage/tarot-satvika-7405159392822997.jpg`,
+  "https://images.astroyogi.com/english/astrologer/profileimage/tarot-shubh-16511220682.jpg",
+  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/20121804/Copy-of-Blog-Banner-for-Website-Content-1280-x-853-px-10-768x512.jpg",
+  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/18190254/Copy-of-Blog-Banner-for-Website-Content-1280-x-853-px-3-768x512.jpg",
+  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/16143512/Blog-Banner-for-Website-Content-1280-x-853-px-9-768x512.jpg",
 ];
 
 const TalkToAstrologer = () => {
@@ -137,102 +149,92 @@ const TalkToAstrologer = () => {
     onRechargeNow,
   ] = useTalkToAstrologer();
 
-  const [activeCaller, setActiveCaller] = useState(null); // PREMIUM CALL UI
-
-  const handleStartCall = (astro) => {
-    const channel = "order_" + Date.now();
-
-    // 1. socket.io event to tell backend: user started call
-    callServices.startCall({
-      userId: "USER_1001", // <-- USER ID (localStorage se le lena)
-      astrologerId: astro._id,
-      channelName: channel,
-      roomId: "6922f545aef79e5bfb1aad3e",
-      startTime: Date.now(),
-    });
-
-    // 2. show UI: waiting for astrologer to accept
-    setActiveCaller({
-      ...astro,
-      channelName: channel,
-    });
-  };
-
-  const handleEndCall = () => {
-    setActiveCaller(null);
-  };
-
-const handleChat = async (e) => {
-  const userIdLocal = localStorage.getItem("userId");
-
-  localStorage.setItem("selectedAstroId", e._id);
-
-  const res = await axios.post(
-    "http://192.168.12.114:3000/api/chat/room/create",
-    {
-      userId: userIdLocal,        // ⭐ Correct key
-      astrologerId: e._id         // ⭐ Correct key
-    }
-  );
-
-  const roomId = res.data?.data;
-
-  navigate(`/talk-to-astrologers/chat/${e._id}`, {
-    state: {
-      userId: userIdLocal,
-      astrologerId: e._id,
-      fullName: e.firstName,
-      roomId
-    },
-  });
-};
-
-
-  const astroImages = [
-    `https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg`,
-    `https://images.astroyogi.com/english/astrologer/profileimage/tarot-dharra-7690941669104289.jpg`,
-    `https://images.astroyogi.com/english/astrologer/profileimage/tarot-satvika-7405159392822997.jpg`,
-    "https://images.astroyogi.com/english/astrologer/profileimage/tarot-shubh-16511220682.jpg",
-    "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/20121804/Copy-of-Blog-Banner-for-Website-Content-1280-x-853-px-10-768x512.jpg",
-    "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/18190254/Copy-of-Blog-Banner-for-Website-Content-1280-x-853-px-3-768x512.jpg",
-    "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/16143512/Blog-Banner-for-Website-Content-1280-x-853-px-9-768x512.jpg",
-  ];
+  const [activeCaller, setActiveCaller] = useState(null);
+  const [kundliModalOpen, setKundliModalOpen] = useState(false);
+  const [selectedAstrologer, setSelectedAstrologer] = useState(null);
 
   const [page, setPage] = useState(1);
   const [specialty, setSpecialty] = useState("");
   const limit = 6;
 
-  // const { data: astrodata, isFetching } = useGetAstrologersQuery({
-  //   page,
-  //   limit,
-  //   specialties: specialty,
-  // });
+  const [createChatRoom] = useCreateChatRoomMutation();
 
-  // const data = astrodata?.data || [];
+  const { data: astrodata, isFetching } = useGetAstrologersQuery({
+    page,
+    limit,
+    specialties: specialty,
+  });
 
-  // const [allAstrologers, setAllAstrologers] = useState([]);
+  const data = astrodata?.data || [];
 
-  // useEffect(() => {
-  //   if (data) {
-  //     setAllAstrologers((prev) => [...prev, ...data]);
-  //   }
-  // }, [data]);
+  const [allAstrologers, setAllAstrologers] = useState([]);
 
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     const isBottom =
-  //       window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
+  useEffect(() => {
+    if (data) {
+      setAllAstrologers((prev) => [...prev, ...data]);
+    }
+  }, [data]);
 
-  //     if (isBottom && !isFetching) {
-  //       setPage((prev) => prev + 1);
-  //     }
-  //   };
+  useEffect(() => {
+    const handleScroll = () => {
+      const isBottom =
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
 
-  //   window.addEventListener("scroll", handleScroll);
-  //   return () => window.removeEventListener("scroll", handleScroll);
-  // }, [isFetching]);
+      if (isBottom && !isFetching) {
+        setPage((prev) => prev + 1);
+      }
+    };
 
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isFetching]);
 
+  //  const handleStartCall = (astro) => {
+  //   const channel = "order_" + Date.now();
+
+  //   // 2. show UI: waiting for astrologer to accept
+  //   setActiveCaller({
+  //     ...astro,
+  //     channelName: channel,
+  //   });
+  // };
+
+  // const handleEndCall = () => {
+  //   setActiveCaller(null);
+  // };
+
+  const userIdLocal = localStorage.getItem("userId");
+
+  const openKundliPopup = (astro) => {
+    setSelectedAstrologer(astro);
+    setKundliModalOpen(true);
+  };
+
+  const handleChatAfterKundliSelect = async (kundli) => {
+    setKundliModalOpen(false);
+
+    const astro = selectedAstrologer;
+    localStorage.setItem("selectedAstroId", astro._id);
+
+    // Create chat room
+    const res = await createChatRoom({
+      userId: userIdLocal,
+      astrologerId: astro._id,
+    });
+
+    const roomId = res?.data?.data;
+
+    navigate(`/talk-to-astrologers/${astro._id}`, {
+      state: {
+        userId: userIdLocal,
+        astrologerId: astro._id,
+        fullName: astro.firstName,
+        roomId,
+        isUserSide: true,
+        kundliId:kundli._id
+      },
+    });
+  };
 
   return (
     <div>
@@ -259,32 +261,13 @@ const handleChat = async (e) => {
               data={e}
               image={astroImages[index % astroImages.length]}
               onFollow={() => onFollow(e._id)}
-              // onChat={() =>
-              //   navigate(`/talk-to-astrologers/chat/${e._id}`, {
-              //     state: { user: e, role: "USER" },
-              //   })
-              // }
-
-              onChat={() => {
-                // ⭐ User ne jisko select kiya hai uska ID store karo
-                handleChat(e)
-                
-              }
-            }
+              onChat={() => openKundliPopup(e)}
               onProfile={() => onProfile(e)}
-              onAudioCall={() => handleStartCall(e)}
+              // onAudioCall={() => handleStartCall(e)}
             />
           </div>
         ))}
       </div>
-
-      {activeCaller && (
-        // <AstrologerCallUI
-        //   astrologer={activeCaller}
-        //   onEndCall={handleEndCall}
-        // />
-        <VoiceCall channelName="order_555" uid={1001} userType="user" />
-      )}
 
       <DetailsModal
         onClose={() => setOpenModal((prev) => ({ ...prev, details: false }))}
@@ -296,6 +279,11 @@ const handleChat = async (e) => {
         onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
         isOpen={openModal.recharge}
         handleSubmit={onRechargeNow}
+      />
+      <KundliSelectModal
+        isOpen={kundliModalOpen}
+        onClose={() => setKundliModalOpen(false)}
+        onSelect={(kundli) => handleChatAfterKundliSelect(kundli)}
       />
     </div>
   );

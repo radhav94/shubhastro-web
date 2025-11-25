@@ -21,6 +21,19 @@ export const blogApi = privateRequestNew.injectEndpoints({
       providesTags: ["Blogs"],
     }),
 
+    createChatRoom: builder.mutation({
+  query: ({ userId, astrologerId }) => ({
+    url: "chat/room/create",
+    method: "POST",
+    body: {
+      userId,
+      astrologerId,
+    },
+  }),
+  invalidatesTags: ["ChatRoom"],
+}),
+
+
   }),
 });
 

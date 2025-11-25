@@ -104,13 +104,13 @@ const Astrologers = ({ onChat, onClickView, onProfile }) => {
       <div key={astrologer._id} className={styles.cardWrapper}>
         <AstrologerCard
           data={astrologer}
-          onChat={() =>
-            navigate(`/talk-to-astrologers/chat/${astrologer._id}`, {
-              state: { user: astrologer, role: "USER" },
-            })
-          }
-          onProfile={() => onProfile(astrologer)}
-          onAudioCall={() => handleStartCall(astrologer)}
+          // onChat={() =>
+          //   navigate(`/talk-to-astrologers/${astrologer._id}`, {
+          //     state: { user: astrologer, role: "USER" },
+          //   })
+          // }
+          // onProfile={() => onProfile(astrologer)}
+          // onAudioCall={() => handleStartCall(astrologer)}
         />
       </div>
     ))}

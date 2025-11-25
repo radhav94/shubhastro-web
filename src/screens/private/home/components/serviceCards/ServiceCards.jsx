@@ -5,11 +5,13 @@ import { IoArrowForwardOutline } from "react-icons/io5";
 import { PrimaryText } from "../../../../../component";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../../../utils/routes/Paths";
-
+import kunadliIcon from "../../../../../assets/icons/kundali.png"
+import astrologyIcon from "../../../../../assets/icons/astrology.png"
+import starIcon from "../../../../../assets/icons/star.png"
 const iconMap = {
-  "free-kundli": "https://cdn-icons-png.flaticon.com/512/4715/4715312.png",
-  "kundli-matching": "https://cdn-icons-png.flaticon.com/512/4715/4715295.png", 
-  numerology: "https://cdn-icons-png.flaticon.com/512/4715/4715295.png",
+  "free-kundli": kunadliIcon,
+  "kundli-matching": astrologyIcon, 
+  numerology: starIcon,
 };
 
 

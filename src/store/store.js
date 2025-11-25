@@ -5,7 +5,7 @@ import { baseApi } from "../redux/api/baseApi/baseApi";
 import { pythonApi } from "../redux/api/baseApi/pythonApi";
 import { horoscopeApi } from "../redux/api/baseApi/horoscopeBaseApi";
 import { vedicApi } from "../redux/api/baseApi/vedicApi";
-import { privateRequestNew } from "../services/appServices/privateRequestNew";
+import { localReuqqestApi, privateRequestNew } from "../services/appServices/privateRequestNew";
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +13,7 @@ export const store = configureStore({
     form: formReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   [privateRequestNew.reducerPath]:privateRequestNew.reducer,
+  [localReuqqestApi.reducerPath]:localReuqqestApi.reducer,
     [pythonApi.reducerPath]: pythonApi.reducer,
     [horoscopeApi.reducerPath]: horoscopeApi.reducer,
     [vedicApi.reducerPath]: vedicApi.reducer,
@@ -24,6 +25,7 @@ export const store = configureStore({
       // Include all middlewares here
       .concat(baseApi.middleware)
       .concat(privateRequestNew.middleware)
+      .concat(localReuqqestApi.middleware)
       .concat(pythonApi.middleware)
       .concat(horoscopeApi.middleware)
       .concat(vedicApi.middleware),

@@ -70,6 +70,40 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
+.senderBubble {
+  align-self: flex-end !important;   // ⭐ ALWAYS RIGHT
+  background: #ffb300;               // Yellow bubble like WhatsApp
+  color: white;
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 16px;
+}
+
+.receiverBubble {
+  align-self: flex-start;
+  background: #e6e6e6; // gray
+  color: #222;
+   border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 16px;
+}
+
+.errorBox {
+  background: #ff4d4d;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 10px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.typingText {
+  color: #7ed891;
+  font-size: 13px;
+  padding-left: 12px;
+}
+
+
 
 
 /* INPUT BOX */

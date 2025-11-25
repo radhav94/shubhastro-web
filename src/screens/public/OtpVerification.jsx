@@ -10,7 +10,6 @@ import * as AuthServices from "../../services/appServices/authService";
 const OtpVerification = () => {
   const navigate = useNavigate();
   const location = useLocation();
-console.log("tyeppeeee",location);
   // ⬇️ extract passed data
   const { phoneNumber, from ,type} = location.state || {};
 

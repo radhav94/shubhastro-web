@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
 import socketService from "../../../../../services/socketService";
 
-export default function useChat({ astrologerId, roomId, userId }) {
+export default function useChat({
+  userId,
+  astrologerId,
+  roomId,
+  isUserSide,
+  kundliId,
+}) {
   const [messages, setMessages] = useState([]);
+  const [error, setError] = useState(null);
+  const [isTyping, setIsTyping] = useState(false);
 
-  // 🕒 Helper → Format time like “10:21 PM”
-  const formatTime = () => {
-    return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
+  const formatTime = () =>
+    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-  // Append any message into local UI
   const addMessage = (msg) => {
     setMessages((prev) => [...prev, msg]);
   };
@@ -17,61 +22,88 @@ export default function useChat({ astrologerId, roomId, userId }) {
   useEffect(() => {
     socketService.connect({
       onConnected: () => {
-        console.log("🔥 Connected!");
         socketService.joinRoom({ roomId, userId, astrologerId });
-      }
+      },
+      onError: (errMsg) => setError(errMsg),
     });
 
-    // LISTEN FOR MESSAGES
-    socketService.listenMessages((data) => {
-      const isUserSender = data.sender === userId;
+    socketService.listenEvents({
+      onMessage: (data) => {
+        const isSenderUser = data.sender === userId;
 
-      addMessage({
-        text: data.message,
-        sender: isUserSender ? "user" : "astro",
-        isSender: isUserSender,
-        time: formatTime(),
-      });
+        addMessage({
+          text: data.message,
+          sender: isSenderUser ? "user" : "astro",
+          isSender: isSenderUser === isUserSide,
+          time: formatTime(),
+        });
+      },
+
+      onTyping: (data) => {
+        if (data.sender !== userId) {
+          setIsTyping(true);
+          setTimeout(() => setIsTyping(false), 1200);
+        }
+      },
     });
   }, [roomId]);
 
-  // USER sends message
+  // USER SEND
   const sendMessage = (text) => {
-    socketService.sendMessage({
+    const res = socketService.sendMessage({
       message: text,
       roomId,
       userId,
       astrologerId,
+      kundliId,
     });
+
+    if (res?.error) {
+      setError(res.error);
+      return;
+    }
 
     addMessage({
       text,
       sender: "user",
-      isSender: true,
+      isSender: isUserSide,
       time: formatTime(),
     });
   };
 
-  // ASTRO replies
+  // ASTRO SEND
   const astroReply = (text) => {
-    socketService.astrologerReplied({
+    const res = socketService.astrologerReplied({
       message: text,
       roomId,
       userId,
       astrologerId,
     });
 
+    if (res?.error) {
+      setError(res.error);
+      return;
+    }
+
     addMessage({
       text,
       sender: "astro",
-      isSender: true,
+      isSender: !isUserSide,
       time: formatTime(),
     });
   };
 
+  // ⭐ typing emit
+  const sendTyping = () => {
+    socketService.sendTyping({ roomId, sender: userId });
+  };
+
   return {
     messages,
+    error,
+    isTyping,
     sendMessage,
     astroReply,
+    sendTyping,
   };
 }

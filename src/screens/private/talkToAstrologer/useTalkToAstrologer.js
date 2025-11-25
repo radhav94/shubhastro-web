@@ -697,7 +697,7 @@ export const useTalkToAstrologer = () => {
     const storedWallet = JSON.parse(localStorage.getItem("wallet"));
     if (storedWallet != null) {
       // setOpenModal((prev) => ({ ...prev, details: true }));
-      navigate(`/talk-to-astrologers/chat/${data._id}`, {
+      navigate(`/talk-to-astrologers/${data._id}`, {
         state: { data: data },
       });
       // navigate(`/astrologer/chat/${data.AstrologerLoginId}`, {
