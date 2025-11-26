@@ -1,13 +1,11 @@
-import { localReuqqestApi } from "../../services/appServices/privateRequestNew";
+import { privateRequestNew } from "../../services/appServices/privateRequestNew";
 // import { vedicApi } from "../baseApi/vedicApi";
 
-export const chatApi = localReuqqestApi.injectEndpoints({
+export const chatApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
-
-
-      createChatRoom: builder.mutation({
+    createChatRoom: builder.mutation({
       query: ({ userId, astrologerId }) => ({
-        url: "api/chat/room/create",
+        url: "chat/room/create",
         method: "POST",
         body: {
           userId,
@@ -18,11 +16,18 @@ export const chatApi = localReuqqestApi.injectEndpoints({
 
     getChatMessages: builder.query({
       query: ({ astrologerId }) => ({
-        url: "api/chat/messages",
+        url: "chat/messages",
         params: { astrologerId },
+      }),
+    }),
+
+    getChatHistory: builder.query({
+      query: ({ roomId }) => ({
+        url: "chat/messages",
+        params: { roomId },
       }),
     }),
   }),
 });
 
-export const { useGetChatMessagesQuery,useCreateChatRoomMutation } = chatApi;
+export const { useGetChatMessagesQuery, useCreateChatRoomMutation ,useGetChatHistoryQuery} = chatApi;

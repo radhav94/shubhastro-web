@@ -13,36 +13,35 @@ const handleApiError = (error) => {
 
   switch (status) {
     case 401:
-  if (!unAuthorizedCount) {
-    unAuthorizedCount++;
+      if (!unAuthorizedCount) {
+        unAuthorizedCount++;
 
-    const role = localStorage.getItem("shubhtalk_role");
+        const role = localStorage.getItem("shubhtalk_role");
 
-    // 🔹 Clear tokens correctly based on role
-    if (role === "ASTROLOGER") {
-      localStorage.removeItem("shubhtalk_astro_token");
-      localStorage.removeItem("shubhtalk_astro_id");
-    }
+        // 🔹 Clear tokens correctly based on role
+        if (role === "ASTROLOGER") {
+          localStorage.removeItem("shubhtalk_astro_token");
+          localStorage.removeItem("shubhtalk_astro_id");
+        }
 
-    if (role === "CUSTOMER") {
-      localStorage.removeItem("shubhtalk_customer_token");
-      localStorage.removeItem("shubhtalk_customer_id");
-      localStorage.removeItem("shubhtalk_customer_wallet");
-    }
+        if (role === "CUSTOMER") {
+          localStorage.removeItem("shubhtalk_customer_token");
+          localStorage.removeItem("shubhtalk_customer_id");
+          localStorage.removeItem("shubhtalk_customer_wallet");
+        }
 
-    // 🔹 Clear role (very important)
-    localStorage.removeItem("shubhtalk_role");
+        // 🔹 Clear role (very important)
+        localStorage.removeItem("shubhtalk_role");
 
-    Toast.error("Session expired, please login again!");
+        Toast.error("Session expired, please login again!");
 
-    setTimeout(() => {
-      unAuthorizedCount = 0;
-      window.location.href = "/login"; // redirect to common login
-    }, 300);
-  }
-  break;
-
+        // setTimeout(() => {
+        //   unAuthorizedCount = 0;
+        //   window.location.href = "/login"; // redirect to common login
+        // }, 300);
+      }
       break;
+
     case 400:
       Toast.error(message || "Invalid Value / Bad Request");
       break;
@@ -74,7 +73,11 @@ export const privateRequestNew = createApi({
     const rawBaseQuery = fetchBaseQuery({
       baseUrl: "https://njsapi-shubhtalk.epicon.in/api/",
       prepareHeaders: (headers) => {
-        const token = localStorage.getItem("verifyOtpToken");
+        const role = localStorage.getItem("shubhtalk_role");
+        const token =
+          role === "ASTROLOGER"
+            ? localStorage.getItem("shubhtalk_astro_token")
+            : localStorage.getItem("shubhtalk_customer_token");
 
         headers.set("Content-Type", "application/json");
 
@@ -99,15 +102,18 @@ export const privateRequestNew = createApi({
   endpoints: () => ({}), // EMPTY — endpoints later inject honge
 });
 
-
 export const localReuqqestApi = createApi({
   reducerPath: "localReuqqestApi",
 
   baseQuery: async (args, api, extraOptions) => {
     const rawBaseQuery = fetchBaseQuery({
-      baseUrl: "http://192.168.12.114:3000/",
+      baseUrl: "https://njsapi-shubhtalk.epicon.in/api/",
       prepareHeaders: (headers) => {
-        const token = localStorage.getItem("verifyOtpToken");
+        const role = localStorage.getItem("shubhtalk_role");
+        const token =
+          role === "ASTROLOGER"
+            ? localStorage.getItem("shubhtalk_astro_token")
+            : localStorage.getItem("shubhtalk_customer_token");
 
         headers.set("Content-Type", "application/json");
 

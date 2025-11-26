@@ -5,7 +5,7 @@ class SocketService {
   socket = null;
 
   connect({ onConnected, onDisconnected, onError }) {
-    this.socket = io("http://192.168.12.114:3000", {
+    this.socket = io("https://njsapi-shubhtalk.epicon.in/", {
       transports: ["websocket"],
       autoConnect: true,
       reconnection: true,
@@ -42,6 +42,7 @@ class SocketService {
   }
 
   joinRoom({ roomId, userId, astrologerId }) {
+    console.log("JoIN ROOM",roomId, userId, astrologerId )
     this.socket.emit(
       "joinRoom",
       { roomId, userId, astrologerId },
@@ -57,6 +58,7 @@ class SocketService {
 
   // USER SEND
   sendMessage({ roomId, userId, astrologerId, message, kundliId }) {
+    console.log("Send Message",roomId, userId, astrologerId, message, kundliId);
     try {
       if (!this.socket?.connected)
         throw new Error("Socket not connected, try again.");
@@ -78,6 +80,8 @@ class SocketService {
 
   // ASTRO SEND
   astrologerReplied({ roomId, userId, astrologerId, message }) {
+    console.log("Send Message astro",roomId, userId, astrologerId, message);
+
     try {
       if (!this.socket?.connected)
         throw new Error("Socket not connected, try again.");

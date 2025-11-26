@@ -13,6 +13,7 @@ import SocketConnector from "./SocketConnector";   // ⭐ STEP 1 — ADD THIS
 import { useEffect } from "react";
 
 
+
 function App() {
   // Helper function to flatten nested routes
 const flattenRoutes = (routes) => {

@@ -43,9 +43,7 @@ const token =
     localStorage.removeItem("shubhtalk_customer_id");
     localStorage.removeItem("shubhtalk_customer_wallet");
   }
-
   localStorage.removeItem("shubhtalk_role");
-
   navigate("/");
 };
 
