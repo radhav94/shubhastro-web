@@ -1,133 +1,87 @@
-// import styles from "./Astrologers.module.scss";
-// import { useNavigate } from "react-router-dom";
-// import {
-//   AstrologerCard,
-//   Divider,
-//   PrimaryButton,
-//   PrimaryText,
-//   Title,
-// } from "../../../../../component";
-// import { AppImages } from "../../../../../utils/appImages";
-// import { useGetAstrologersQuery } from "../../../../../redux/api/astrologer/astrologerApi";
-// import { useState } from "react";
-
-
-
-// const Astrologers = ({ onChat, onClickView, onProfile }) => {
-//     const navigate = useNavigate();  
-
-//   const page = 1;
-//   const limit = 3;
-
-//   const { data } = useGetAstrologersQuery({ page, limit });
-//   return (
-//     <div className={styles.astrologersWrapper}>
-//       <Title
-//         title="Top Online Astrologers"
-//         showDivider
-//         showButton
-//         buttonTitle="View"
-//         onButtonClick={onClickView}
-//       />
-
-//       <div className={styles.cardsContainer}>
-//         {data?.data?.map((astrologer) => (
-//           <div key={astrologer._id} className={styles.cardWrapper}>
-//             <AstrologerCard
-//               data={astrologer}
-//                onChat={() =>
-//                 navigate(`/talk-to-astrologers/chat/${astrologer._id}`, {
-//                   state: { user: astrologer, role: "USER" },
-//                 })
-//               }
-//               onProfile={() => onProfile(astrologer)}
-//             />
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Astrologers;
-
-
-
 // Astrologers.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Astrologers.module.scss";
-import {
-  AstrologerCard,
-  Divider,
-  PrimaryButton,
-  PrimaryText,
-  Title,
-} from "../../../../../component";
-import { AppImages } from "../../../../../utils/appImages";
+import { AstrologerCard, Title } from "../../../../../component";
+import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
+import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSelectModal";
 import { useGetAstrologersQuery } from "../../../../../redux/api/astrologer/astrologerApi";
-import AstrologerCallUI from "./AstrologerCallUI";
-// import AstrologerCallUI from "../AstrologerCallUI/AstrologerCallUI"; // NEW
 
-const Astrologers = ({ onChat, onClickView, onProfile }) => {
+const Astrologers = ({ onClickView, onProfile }) => {
   const navigate = useNavigate();
 
   const page = 1;
   const limit = 3;
-
   const { data } = useGetAstrologersQuery({ page, limit });
 
-  const [activeCaller, setActiveCaller] = useState(null); // selected astrologer for call
+  const [kundliModalOpen, setKundliModalOpen] = useState(false);
+  const [selectedAstro, setSelectedAstro] = useState(null);
 
-  const handleStartCall = (astrologer) => {
-    // Agar route based call chahiye toh yahan navigate bhi kar sakta hai
-    // navigate(`/talk-to-astrologers/call/${astrologer._id}`, { state: { user: astrologer } });
-    setActiveCaller(astrologer);
+  const [createChatRoom] = useCreateChatRoomMutation();
+  const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+
+  // Step 1: On Chat => open Kundli Modal
+  const openKundliPopup = (astro) => {
+    setSelectedAstro(astro);
+    setKundliModalOpen(true);
   };
 
-  const handleEndCall = () => {
-    setActiveCaller(null);
+  // Step 2: After selecting Kundli => Create Chat Room
+  const handleChatAfterKundliSelect = async (kundli) => {
+    setKundliModalOpen(false);
+
+    const astro = selectedAstro;
+    localStorage.setItem("selectedAstroId", astro._id);
+
+    const res = await createChatRoom({
+      userId: userIdLocal,
+      astrologerId: astro._id,
+    });
+
+    const roomId = res?.data?.data;
+
+    navigate(`/talk-to-astrologers/${astro._id}`, {
+      state: {
+        userId: userIdLocal,
+        astrologerId: astro._id,
+        fullName: astro.firstName,
+        roomId,
+        kundliId: kundli._id,
+        isUserSide: true,
+      },
+    });
   };
 
   return (
-   <div className={styles.astrologersWrapper}>
-  <Title
-    title="Top Online Astrologers"
-    showDivider
-    showButton
-    buttonTitle="View All"
-    onButtonClick={onClickView}
-  />
+    <div className={styles.astrologersWrapper}>
+      <Title
+        title="Top Online Astrologers"
+        showDivider
+        showButton
+        buttonTitle="View All"
+        onButtonClick={onClickView}
+      />
 
-  <div className={styles.cardsContainer}>
-    {data?.data?.map((astrologer) => (
-      <div key={astrologer._id} className={styles.cardWrapper}>
-        <AstrologerCard
-          data={astrologer}
-          // onChat={() =>
-          //   navigate(`/talk-to-astrologers/${astrologer._id}`, {
-          //     state: { user: astrologer, role: "USER" },
-          //   })
-          // }
-          // onProfile={() => onProfile(astrologer)}
-          // onAudioCall={() => handleStartCall(astrologer)}
-        />
+      <div className={styles.cardsContainer}>
+        {data?.data?.map((astrologer) => (
+          <div key={astrologer._id} className={styles.cardWrapper}>
+            <AstrologerCard
+              data={astrologer}
+              onChat={() => openKundliPopup(astrologer)}
+              onProfile={() => onProfile(astrologer)}
+            />
+          </div>
+        ))}
       </div>
-    ))}
-  </div>
 
-  {activeCaller && (
-    <AstrologerCallUI astrologer={activeCaller} onEndCall={handleEndCall} />
-  )}
-</div>
-
+      {/* Kundli Select Modal */}
+      <KundliSelectModal
+        isOpen={kundliModalOpen}
+        onClose={() => setKundliModalOpen(false)}
+        onSelect={(kundli) => handleChatAfterKundliSelect(kundli)}
+      />
+    </div>
   );
 };
 
 export default Astrologers;
-
-
-
-
-
-

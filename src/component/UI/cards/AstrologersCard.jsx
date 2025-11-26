@@ -9,6 +9,8 @@ import { GetString } from "../../../utils/helper/string.utils";
 
 // AstrologerCard.jsx
 const AstrologerCard = ({ data, onFollow, onChat, onProfile, onAudioCall }) => {
+
+
   return (
     <div className={styles.card}>
       <div className={styles.topSection} onClick={onProfile}>
