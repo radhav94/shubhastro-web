@@ -1,3 +1,5 @@
+import VideoCalling from "../../component/call/VideoCall";
+import AgoraVoiceCalling from "../../component/call/VoiceCall";
 import {
   Login,
   Register,
@@ -39,7 +41,7 @@ import {
   MatchDetails,
 } from "../../screens";
 import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
-import AstrologerIncomingCall from "../../screens/private/home/components/astrologers/AstrologerIncomingCall";
+// import AstrologerIncomingCall from "../../screens/private/home/components/astrologers/AstrologerIncomingCall";
 import AstrologersDashboard from "../../screens/private/home/components/astrologers/AstrologersDashboard";
 import ChatList from "../../screens/private/home/components/astrologers/atrologerchat/ChatList";
 import ChatWindow from "../../screens/private/home/components/astrologers/atrologerchat/ChatWindow";
@@ -93,10 +95,10 @@ export const PATH = {
       path: "/astrologer-dashboard/astrologer-chat-user-list/:chatId",
       element: ChatWindow,
     },
-    ASTROLOGER_CALL_WINDOW: {
-      path: "/astrologer-dashboard/astrololger-call",
-      element: AstrologerIncomingCall,
-    },
+    // ASTROLOGER_CALL_WINDOW:{
+    //     path: "/astrologer-dashboard/astrololger-call",
+    //     element:AstrologerIncomingCall
+    // },
 
     PROFILE: {
       path: "/profile",
@@ -253,6 +255,16 @@ export const PATH = {
     CHAT_WITH_ASTROLOGER: {
       path: "/talk-to-astrologers/:id",
       element: ChatWindow,
+    },
+
+    VIDEO_CALL: {
+      path: "/video-call",
+      element: VideoCalling,
+    },
+
+    VOICE_CALL: {
+      path: "/talk-to-astrologers/voice-call",
+      element: AgoraVoiceCalling,
     },
     STREAMING: {
       path: "/astrolive/streaming",

@@ -15,6 +15,7 @@ import FilterChips from "../../../component/UI/chips/astrologer/FilterChips";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import KundliSelectModal from "./kundliSelect/KundliSelectModal";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
+import { PATH } from "../../../utils/routes/Paths";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -33,7 +34,7 @@ const TalkToAstrologer = () => {
     onFollow,
     openModal,
     setOpenModal,
-    onChat, // if you don't use it, you can remove from the hook return
+    onChat,
     onProfile,
     handleSubmit,
     onRechargeNow,
@@ -50,6 +51,7 @@ const TalkToAstrologer = () => {
   const limit = 6;
 
   const [createChatRoom] = useCreateChatRoomMutation();
+  const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
   const { data: astrodata, isFetching } = useGetAstrologersQuery({
     page,
@@ -59,29 +61,22 @@ const TalkToAstrologer = () => {
 
   const data = astrodata?.data || [];
 
-  // Merge paginated astrologers into a single list
+  // Merge paginated astrologers
   useEffect(() => {
     if (!data) return;
 
-    // If we get less than limit, assume no more pages
-    if (data.length < limit) {
-      setHasMore(false);
-    } else {
-      setHasMore(true);
-    }
+    setHasMore(data.length >= limit);
 
-    // If page is 1, we should replace the list (e.g., after filter change)
     if (page === 1) {
       setAllAstrologers(data);
     } else if (data.length > 0) {
-      // Avoid simple duplication: merge by _id
       setAllAstrologers((prev) => {
         const existingIds = new Set(prev.map((item) => item._id));
         const newOnes = data.filter((item) => !existingIds.has(item._id));
         return [...prev, ...newOnes];
       });
     }
-  }, [data, page, limit]);
+  }, [data, page]); // ⬅ FIXED (limit removed)
 
   // Infinite scroll
   useEffect(() => {
@@ -99,8 +94,6 @@ const TalkToAstrologer = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isFetching, hasMore]);
 
-  const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
-
   const openKundliPopup = (astro) => {
     setSelectedAstrologer(astro);
     setKundliModalOpen(true);
@@ -109,21 +102,9 @@ const TalkToAstrologer = () => {
   const handleChatAfterKundliSelect = async (kundli) => {
     setKundliModalOpen(false);
 
-    if (!kundli || !kundli._id) {
-      Toast.error("Kundli not selected properly");
-      return;
-    }
-
-    if (!selectedAstrologer || !selectedAstrologer._id) {
-      Toast.error("Astrologer not selected");
-      return;
-    }
-
-    if (!userIdLocal) {
-      Toast.error("User ID not found in localStorage");
-      // Optionally redirect to login / show error
-      return;
-    }
+    if (!kundli?._id) return Toast.error("Kundli not selected properly");
+    if (!selectedAstrologer?._id) return Toast.error("Astrologer not selected");
+    if (!userIdLocal) return Toast.error("User ID Missing");
 
     const astro = selectedAstrologer;
     localStorage.setItem("selectedAstroId", astro._id);
@@ -135,11 +116,7 @@ const TalkToAstrologer = () => {
       });
 
       const roomId = res?.data?.data;
-
-      if (!roomId) {
-        Toast.error("Room ID not found in createChatRoom response");
-        return;
-      }
+      if (!roomId) return Toast.error("Room ID missing");
 
       navigate(`/talk-to-astrologers/${astro._id}`, {
         state: {
@@ -152,7 +129,46 @@ const TalkToAstrologer = () => {
         },
       });
     } catch (error) {
-      console.error("Error creating chat room:", error);
+      console.error(error);
+    }
+  };
+
+  // ⬇ FIXED: astro param added
+  const handleAudioCall = async (astro) => {
+    if (!astro) return;
+    try {
+      const res = await createChatRoom({
+        userId: userIdLocal,
+        astrologerId: astro._id,
+      });
+
+      const roomId = res?.data?.data;
+      if (!roomId) return Toast.error("Room ID missing");
+
+      navigate(PATH.privateRoutes.VOICE_CALL.path, {
+        state: { userId: userIdLocal, astrologerId: astro._id, roomId },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleVideoCall = async (astro) => {
+    if (!astro) return;
+    try {
+      const res = await createChatRoom({
+        userId: userIdLocal,
+        astrologerId: astro._id,
+      });
+
+      const roomId = res?.data?.data;
+      if (!roomId) return Toast.error("Room ID missing");
+
+      navigate(PATH.privateRoutes.VIDEO_CALL.path, {
+        state: { userId: userIdLocal, astrologerId: astro._id, roomId },
+      });
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -163,7 +179,6 @@ const TalkToAstrologer = () => {
       </PrimaryText>
 
       <div className="pt-4" />
-
       <Title title="Trial Offer ( 3 left )" showDivider />
 
       <FilterChips
@@ -176,7 +191,7 @@ const TalkToAstrologer = () => {
       />
 
       <div className={styles.cardsContainer}>
-        {allAstrologers?.map((astro, index) => (
+        {allAstrologers.map((astro, index) => (
           <div key={astro._id} className={styles.cardWrapper}>
             <AstrologerCard
               data={astro}
@@ -184,15 +199,15 @@ const TalkToAstrologer = () => {
               onFollow={() => onFollow(astro._id)}
               onChat={() => openKundliPopup(astro)}
               onProfile={() => onProfile(astro)}
-              // onAudioCall={() => handleStartCall(astro)}
+              onAudioCall={() => handleAudioCall(astro)}
+              onVideoCall={() => handleVideoCall(astro)}
             />
           </div>
         ))}
 
         {isFetching && (
           <div className={styles.loaderWrapper}>
-            {/* <PrimaryText>Loading more astrologers...</PrimaryText> */}
-            <PrimaryLoader/>
+            <PrimaryLoader />
           </div>
         )}
 

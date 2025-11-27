@@ -8,7 +8,7 @@ import { MdOutlineCurrencyRupee } from "react-icons/md";
 import { GetString } from "../../../utils/helper/string.utils";
 
 // AstrologerCard.jsx
-const AstrologerCard = ({ data, onFollow, onChat, onProfile, onAudioCall }) => {
+const AstrologerCard = ({ data, onFollow, onChat, onProfile, onAudioCall,onVideoCall }) => {
 
 
   return (
@@ -79,14 +79,22 @@ const AstrologerCard = ({ data, onFollow, onChat, onProfile, onAudioCall }) => {
             title="Chat"
             onClick={onChat}
           />
-          <PrimaryButton
+          {/* <PrimaryButton
+            bgColor={appColors.white}
+            imgSrc={AppIcons.Call}
+            fontSize={12}
+            buttonStyles={{ padding: "4px 6px" }}
+            title="Video Call"
+            onClick={onAudioCall}
+          /> */}
+           {/* <PrimaryButton
             bgColor={appColors.white}
             imgSrc={AppIcons.Call}
             fontSize={12}
             buttonStyles={{ padding: "4px 6px" }}
             title="Audio Call"
-            onClick={onAudioCall}
-          />
+            onClick={onVideoCall}
+          /> */}
         </div>
       </div>
     </div>

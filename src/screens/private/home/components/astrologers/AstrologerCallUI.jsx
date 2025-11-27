@@ -61,7 +61,7 @@ const AstrologerCallUI = ({ astrologer, onEndCall }) => {
       <div className={styles.callCard}>
         <div className={styles.header}>
           <PrimaryText size_12 color={appColors.greyLight}>
-            Audio Callsss
+            Audio Call
           </PrimaryText>
           <div className={styles.statusBadge}>
             <span className={styles.pulseDot} />

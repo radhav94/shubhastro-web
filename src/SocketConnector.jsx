@@ -1,7 +1,7 @@
 // src/SocketConnector.jsx
 import { useEffect } from "react";
 import socketService from "./services/socketService";
-import callServices from "./services/callServices";
+// import callServices from "./services/callServices";
 
 
 export default function SocketConnector() {
@@ -14,11 +14,11 @@ export default function SocketConnector() {
     });
 
     // CALL SOCKET
-    callServices.connect({
-      onConnected: () => console.log("CALL SOCKET CONNECTED"),
-      onDisconnected: () => console.log("CALL SOCKET DISCONNECTED"),
-      onError: (err) => console.log("CALL SOCKET ERROR", err),
-    });
+    // callServices.connect({
+    //   onConnected: () => console.log("CALL SOCKET CONNECTED"),
+    //   onDisconnected: () => console.log("CALL SOCKET DISCONNECTED"),
+    //   onError: (err) => console.log("CALL SOCKET ERROR", err),
+    // });
   }, []);
 
   return null;

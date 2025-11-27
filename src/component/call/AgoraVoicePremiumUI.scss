@@ -1,0 +1,314 @@
+// AgoraVoiceCalling.scss
+
+.call-page {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #f2ebe5 0%, #d4b59e 50%, #8d6a53 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ffffff;
+}
+
+.call-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.35),
+    rgba(0, 0, 0, 0.7)
+  );
+  pointer-events: none;
+}
+
+.call-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+background: rgba(255, 250, 245, 0.75);
+  border-radius: 28px;
+  padding: 24px 20px 28px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+backdrop-filter: blur(30px);
+border: 1px solid rgba(120, 90, 60, 0.15);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header */
+
+.call-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.call-header-label {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.call-header-channel {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Main section */
+
+.call-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.avatar {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 8px;
+}
+
+.avatar-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 999px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(37, 211, 102, 0.9),
+    rgba(37, 211, 102, 0.2),
+    rgba(255, 255, 255, 0.4),
+    rgba(37, 211, 102, 0.9)
+  );
+  opacity: 0.9;
+  filter: blur(1px);
+}
+
+.avatar-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 20%, #2ecc71, #054c44);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.7),
+    0 0 0 2px rgba(255, 255, 255, 0.06);
+}
+
+.avatar-icon {
+  font-size: 42px;
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.call-info {
+  text-align: center;
+}
+
+.call-name {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.call-status {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.call-timer {
+  margin-top: 6px;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.remote-info {
+  margin-top: 4px;
+}
+
+.remote-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Connect form (when not connected) */
+
+.connect-form {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 18px;
+  background: radial-gradient(
+      circle at top left,
+      rgba(37, 211, 102, 0.06),
+      transparent
+    ),
+    rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.field-input {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.45);
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #ffffff;
+  outline: none;
+  transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.field-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.field-input:focus {
+  border-color: rgba(37, 211, 102, 0.9);
+  box-shadow: 0 0 0 1px rgba(37, 211, 102, 0.4);
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.connect-btn {
+  margin-top: 4px;
+  border-radius: 999px;
+  border: none;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #1bd741, #10a63a);
+  color: #02220f;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(0, 0, 0, 0.3);
+  transition: transform 0.12s ease, box-shadow 0.12s ease,
+    filter 0.12s ease, background 0.12s ease;
+}
+
+.connect-btn:hover:not(:disabled) {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+.connect-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(0, 0, 0, 0.4);
+}
+
+.connect-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-icon-left {
+  font-size: 18px;
+}
+
+/* Controls */
+
+.controls {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.control-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.7);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease,
+    background 0.12s ease;
+}
+
+.control-btn--primary {
+  background: radial-gradient(circle at 30% 20%, #2ecc71, #0b5f4b);
+}
+
+.control-btn--secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.control-btn--danger {
+  background: linear-gradient(135deg, #f44336, #b71c1c);
+}
+
+.control-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.control-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* Responsive tweaks */
+
+@media (max-width: 480px) {
+  .call-card {
+    padding: 20px 16px 24px;
+    border-radius: 22px;
+  }
+
+  .avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .controls {
+    gap: 16px;
+  }
+
+  .control-btn {
+    width: 52px;
+    height: 52px;
+    font-size: 22px;
+  }
+}

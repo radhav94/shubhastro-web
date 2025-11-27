@@ -1,0 +1,92 @@
+.wrapper {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.remoteVideoWrapper {
+  width: 100%;
+  height: 100%;
+  video {
+    object-fit: cover;
+  }
+}
+
+.remoteVideo {
+  width: 100%;
+  height: 100%;
+}
+
+.waitingText {
+  color: #fff;
+  font-size: 22px;
+  opacity: 0.8;
+  text-align: center;
+  margin-top: 20%;
+}
+
+.localVideoWrapper {
+  position: absolute;
+  bottom: 120px;
+  right: 20px;
+  width: 180px;
+  height: 250px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.6);
+
+  video {
+    object-fit: cover;
+  }
+}
+
+.controls {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+}
+
+.btn {
+  width: 60px;
+  height: 60px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  color: #fff;
+  transition: 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.1);
+    background: rgba(255,255,255,0.3);
+  }
+}
+
+.off {
+  background: rgba(255,0,0,0.6);
+}
+
+.btnEnd {
+  width: 70px;
+  height: 70px;
+  background: #e63946;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 26px;
+  font-weight: bold;
+  transition: 0.2s;
+
+  &:hover {
+    transform: scale(1.15);
+    background: #ff1e35;
+  }
+}
