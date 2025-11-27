@@ -22,4 +22,19 @@ export const MENU_LIST = [
   { title: "Kundli", path: "/kundli" },
   { title: "Sadesati", path: "/sadesati" },
   { title: "Match Making", path: "/matchmaking" },
+  { title: "Numerology", path: "/numerology" },
+  {
+    title: "Tarot",
+    path: "/tarot",
+    children: [
+      {
+        title: "Shuffle Tarot",
+        path: "/tarot",
+      },
+      {
+        title: "Yes/No Tarot",
+        path: "/tarot/yes-no-tarot",
+      },
+    ],
+  },
 ];
