@@ -141,7 +141,7 @@ const MatchDetails = () => {
       </div>
       <KundliSummary score={matchingDetails?.score} total={36} />
 
-      <div className="w-[88.5%] mt-7">
+      <div className={styles.tableWrapper}>
         <DynamicTable
           title="Ashtakoot Compatibility"
           headers={headers}

@@ -19,7 +19,7 @@ export const MENU_LIST = [
       },
     ],
   },
-  { title: "Kundli", path: "/kundli/:slug" },
+  { title: "Kundli", path: "/kundli" },
   { title: "Sadesati", path: "/sadesati" },
   { title: "Match Making", path: "/matchmaking" },
 ];

@@ -12,6 +12,7 @@ import Star from "../assets/icons/star.png";
 import Message from "../assets/icons/message.png";
 import Phone from "../assets/icons/phone.png";
 import leo from "../assets/icons/leo.png";
+import Tarot from "../assets/icons/tarot.png";
 
 export const AppIcons = {
   Logo,
@@ -27,6 +28,7 @@ export const AppIcons = {
   Call,
   Phone,
   leo,
+  Tarot,
 };
 
 //appImages
@@ -47,6 +49,7 @@ import AstroLiveBg from "../assets/images/astroLiveBg.png";
 import Dosh from "../assets/images/dosh.png";
 import Ring from "../assets/images/ring.png";
 import ChatBg from "../assets/images/Chat.png";
+import tarotCard from "../assets/images/tarotCard.png";
 export const AppImages = {
   Hero,
   Astro1,
@@ -64,6 +67,7 @@ export const AppImages = {
   Dosh,
   Ring,
   ChatBg,
+  tarotCard,
 };
 
 //svgs

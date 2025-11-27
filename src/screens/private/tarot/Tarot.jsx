@@ -4,7 +4,6 @@ import HtmlContentCard from "../../../component/UI/cards/htmlContenCard/HtmlCont
 import { useGetTarotShuffleDataQuery } from "../../../redux/api/tarot/tarotApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import TarotCardDisplay from "./TarotCardDisplay";
-// import { useGetTarotShuffleDataQuery } from "../../../redux/api/tarot/tarotApi";
 
 const Tarot = () => {
   const { data, isLoading } = useGetTarotShuffleDataQuery({
@@ -12,16 +11,14 @@ const Tarot = () => {
     lang: "en",
   });
 
-  if (isLoading) return(<PrimaryLoader/>);
+  if (isLoading) return <PrimaryLoader />;
 
   // API mappings
   const tarotReadingData = data?.response || [];
-  console.log("tarotReadingData",JSON.stringify(tarotReadingData));
-
 
   return (
     <>
-     <TarotCardDisplay data={tarotReadingData}/>
+      <TarotCardDisplay data={tarotReadingData} />
     </>
   );
 };

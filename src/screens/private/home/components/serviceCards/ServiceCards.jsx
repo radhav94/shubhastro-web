@@ -5,15 +5,13 @@ import { IoArrowForwardOutline } from "react-icons/io5";
 import { PrimaryText } from "../../../../../component";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../../../utils/routes/Paths";
-import kunadliIcon from "../../../../../assets/icons/kundali.png"
-import astrologyIcon from "../../../../../assets/icons/astrology.png"
-import starIcon from "../../../../../assets/icons/star.png"
+import { AppIcons } from "../../../../../utils/appImages";
 const iconMap = {
-  "free-kundli": kunadliIcon,
-  "kundli-matching": astrologyIcon, 
-  numerology: starIcon,
+  "free-kundli": AppIcons.Kundali,
+  "kundli-matching": AppIcons.Astrology,
+  numerology: AppIcons.Star,
+  tarot: AppIcons.Tarot,
 };
-
 
 const ServiceCards = ({ data }) => {
   const sections = data;
@@ -25,7 +23,8 @@ const ServiceCards = ({ data }) => {
   const services = bannerSection?.content || [];
 
   const numerology = { _id: 4, title: "Numerology", slug: "numerology" };
-  const newServices = [...services, numerology];
+  const tarot = { _id: 5, title: "Tarot", slug: "tarot" };
+  const newServices = [...services, numerology, tarot];
 
   const navigate = useNavigate();
 
@@ -33,6 +32,7 @@ const ServiceCards = ({ data }) => {
     "free-kundli": PATH.privateRoutes.KUNDLI.path,
     "kundli-matching": "/matchmaking",
     numerology: PATH.privateRoutes.NUMEROLOGY.path,
+    tarot: PATH.privateRoutes.TAROT.path,
   };
 
   return (

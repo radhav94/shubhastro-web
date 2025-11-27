@@ -45,6 +45,7 @@ import ChatList from "../../screens/private/home/components/astrologers/atrologe
 import ChatWindow from "../../screens/private/home/components/astrologers/atrologerchat/ChatWindow";
 import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
 import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
+import TarotCards from "../../screens/private/tarot/card/TarotCard";
 
 export const PATH = {
   // DEFAULT: {
@@ -84,17 +85,17 @@ export const PATH = {
       element: AstrologersDashboard,
     },
 
-     ASTROLOGER_CHAT_USER_LIST: {
+    ASTROLOGER_CHAT_USER_LIST: {
       path: "/astrologer-dashboard/astrologer-chat-user-list",
       element: ChatList,
     },
-    ASTROLOGER_CHAT_WINDOW : {
-      path:"/astrologer-dashboard/astrologer-chat-user-list/:chatId",
-      element:ChatWindow
+    ASTROLOGER_CHAT_WINDOW: {
+      path: "/astrologer-dashboard/astrologer-chat-user-list/:chatId",
+      element: ChatWindow,
     },
-    ASTROLOGER_CALL_WINDOW:{
-        path: "/astrologer-dashboard/astrololger-call",
-        element:AstrologerIncomingCall
+    ASTROLOGER_CALL_WINDOW: {
+      path: "/astrologer-dashboard/astrololger-call",
+      element: AstrologerIncomingCall,
     },
 
     PROFILE: {
@@ -179,17 +180,21 @@ export const PATH = {
     },
     LIFE_PATH: {
       path: "/numerology/life-path",
-      element: LifePathForm, 
+      element: LifePathForm,
     },
-     LIFE_PATH_DETAIL: {
+    LIFE_PATH_DETAIL: {
       path: "/numerology/life-path/life-path-details",
-      element: LifePathDetails, 
+      element: LifePathDetails,
     },
 
     // tarot
     TAROT: {
       path: "/tarot",
       element: Tarot,
+    },
+    YES_NO_TAROT: {
+      path: "tarot/yes-no-tarot",
+      element: TarotCards,
     },
     TAROT_ONE_CARD: {
       path: "/tarot/one-card-reading",

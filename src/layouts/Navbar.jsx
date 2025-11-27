@@ -11,19 +11,52 @@ const Navbar = () => {
       title: "Horoscope",
       children: [
         { title: "Daily Horoscope", path: "/horoscopes/daily-horoscope" },
-        { title: "Monthly Horoscope", path: PATH.privateRoutes.HOROSCOPE.MONTHLY.path },
+        {
+          title: "Monthly Horoscope",
+          path: PATH.privateRoutes.HOROSCOPE.MONTHLY.path,
+        },
       ],
     },
     {
       title: "Panchang",
       path: PATH.privateRoutes.PANCHANG.path,
       children: [
-        { title: "Today's Panchang", path: PATH.privateRoutes.PANCHANG_TODAY.path },
+        {
+          title: "Today's Panchang",
+          path: PATH.privateRoutes.PANCHANG_TODAY.path,
+        },
       ],
     },
     { title: "Kundli", path: PATH.privateRoutes.KUNDLI.path },
     { title: "Sadesati", path: PATH.privateRoutes.SADESATI.path },
     { title: "Match Making", path: PATH.privateRoutes.MATCHMAKING.path },
+    // { title: "Numerology", path: PATH.privateRoutes.NUMEROLOGY.path },
+    {
+      title: "Tarot",
+      path: PATH.privateRoutes.TAROT.path,
+      children: [
+        {
+          title: "Shuffle Tarot",
+          path: PATH.privateRoutes.TAROT.path,
+        },
+        {
+          title: "Yes/No Tarot",
+          path: PATH.privateRoutes.YES_NO_TAROT.path,
+        },
+      ],
+    },
+    // { title: "Blog", path: PATH.privateRoutes.BLOG.path },
+    // { title: "Free Readings", path: PATH.privateRoutes.FREE_READINGS.path },
+
+    // { title: "Video", path: PATH.privateRoutes.VIDEO.path },
+
+    // { title: "Session Booking", path: PATH.privateRoutes.SESSION_DETAILS.path },
+    // {
+    //   title: "Yogii Mall",
+    //   path: PATH.privateRoutes.SHOP.path,
+    //   tag: "New",
+    //   tagType: "new",
+    // },
   ];
 
   return (

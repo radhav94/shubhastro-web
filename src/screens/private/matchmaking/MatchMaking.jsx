@@ -47,16 +47,12 @@ const token =
   const [createKundli] = useCreateKundliMutation();
   const [deleteKundli] = useDeleteKundliMutation();
 
-  const onDelete = async (id) => {
-    try {
-      await deleteKundli(id).unwrap();
+  const onDelete = (id) => {
+    deleteKundli(id);
 
-      if (selectedKundliId === id) {
-        setFormData(initialFormData);
-        setSelectedKundliId(null);
-      }
-    } catch (err) {
-      console.log("Delete failed", err);
+    if (selectedKundliId === id) {
+      setFormData(initialFormData);
+      setSelectedKundliId(null);
     }
   };
 
@@ -320,7 +316,9 @@ const token =
             selectedKundliId={selectedKundliId}
             onSelect={handleSelectKundli}
             onDelete={onDelete}
-            onLoginNavigate={() => navigate("/login")}
+            onLoginNavigate={() =>
+              navigate("/login", { state: { from: location.pathname } })
+            }
           />
         </div>
       </div>

@@ -23,44 +23,63 @@ const Sadesati = () => {
 
   const { data, isLoading } = useGetSadesatiQuery(queryArgs);
   const sadesati = data?.response;
+  const token = localStorage.getItem("verifyOtpToken");
 
   return (
     <>
-      <PrimaryLoader isLoading={isLoading} />
+      {token ? (
+        <>
+          <PrimaryLoader isLoading={isLoading} />
+          <div className={styles.wrapper}>
+            {/* Current Period */}
+            <div className={styles.card}>
+              <p className={styles.heading}>Current Period</p>
+              <div className={styles.periodBox}>
+                <p className={styles.periodText}>{sadesati?.bot_response}</p>
+                <p className={styles.date}>As on {sadesati?.date_considered}</p>
+              </div>
+            </div>
 
-      <div className={styles.wrapper}>
-        {/* Current Period */}
-        <div className={styles.card}>
-          <p className={styles.heading}>Current Period</p>
-          <div className={styles.periodBox}>
-            <p className={styles.periodText}>{sadesati?.bot_response}</p>
-            <p className={styles.date}>As on {sadesati?.date_considered}</p>
-          </div>
-        </div>
+            {/* Remedies */}
+            {sadesati?.remedies?.length > 0 && (
+              <div className={styles.card}>
+                <p className={styles.heading}>Recommended Remedies</p>
 
-        {/* Remedies */}
-        {sadesati?.remedies?.length > 0 && (
-          <div className={styles.card}>
-            <p className={styles.heading}>Recommended Remedies</p>
-
-            <div className={styles.remediesWrapper}>
-              {sadesati?.remedies?.map((item, i) => (
-                <div key={i} className={styles.remedyItem}>
-                  <p>{item}</p>
+                <div className={styles.remediesWrapper}>
+                  {sadesati?.remedies?.map((item, i) => (
+                    <div key={i} className={styles.remedyItem}>
+                      <p>{item}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            )}
+
+            {/* Description */}
+            <div className={styles.card}>
+              <p className={styles.heading}>What is Sade Sati</p>
+              <div className={styles.descriptionBox}>
+                <p>{sadesati?.description}</p>
+              </div>
             </div>
           </div>
-        )}
+        </>
+      ) : (
+        <div className={styles.loginCard}>
+          <p className={styles.loginText}>
+            Please login to view your Sadesati details.
+          </p>
 
-        {/* Description */}
-        <div className={styles.card}>
-          <p className={styles.heading}>What is Sade Sati</p>
-          <div className={styles.descriptionBox}>
-            <p>{sadesati?.description}</p>
-          </div>
+          <button
+            className={styles.loginButton}
+            onClick={() =>
+              navigate("/login", { state: { from: location.pathname } })
+            }
+          >
+            Login
+          </button>
         </div>
-      </div>
+      )}
     </>
   );
 };

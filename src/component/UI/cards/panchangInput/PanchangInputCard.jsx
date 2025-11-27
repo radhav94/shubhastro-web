@@ -55,13 +55,14 @@ const PanchangInputCard = ({ imageSrc, title, onTap }) => {
     }
     setErrors({});
     onTap(formData);
-    // setFormData({
-    //   dateOfBirth: "",
-    //   location: "",
-    //   latitude: "",
-    //   longitude: "",
-    // });
   };
+
+  const Userdob = new Date(formData?.dateOfBirth).toLocaleDateString("en-US", {
+    weekday: "long", // Thursday
+    year: "numeric", // 2025
+    month: "long", // November
+    day: "numeric", // 13
+  });
 
   return (
     <div className={styles.panchangWidget}>
@@ -78,7 +79,8 @@ const PanchangInputCard = ({ imageSrc, title, onTap }) => {
           </PrimaryText>
         )}
         <PrimaryText isCenter size_24 color={appColors.greyDark}>
-          {today} Panchang For Mumbai, India
+          {formData?.location || "Mumbai, India"},&nbsp;
+          {formData.dateOfBirth ? Userdob : today}{" "}
         </PrimaryText>
 
         <form className={styles.form} onSubmit={handleSubmit}>

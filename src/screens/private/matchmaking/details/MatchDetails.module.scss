@@ -2,35 +2,43 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 30px 20px;
-  background: #fff;
-  // min-height: 100vh;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 1rem;
+  padding: 0 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  margin: auto;
 }
+
+/* ---------------- Names Row ---------------- */
 
 .namesRow {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 25px;
+  gap: 18px;
+  margin: 5px 0 0;
 
   .nameBtn {
-    background: #fff7b0;
-    border: 1px solid #f4d24b;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-weight: 600;
-    color: #000;
-    font-size: 14px;
+    background: #ffef9d;
+    border: 1px solid #e9ce55;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    transition: 0.2s ease-in-out;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
   }
 
   .iconImage {
-    width: 70px;
-    height: auto;
+    width: 65px;
   }
 }
+
+/* ---------------- Cards Row (Basic Details) ---------------- */
 
 .cardsRow {
   display: flex;
@@ -38,10 +46,12 @@
   align-items: flex-start;
   gap: 40px;
   width: 100%;
-  // max-width: 1100px;
-  margin-bottom: 1.5rem;
+  margin: 20px 0;
 
-  /* On smaller screens: stack cards vertically */
+  @media (max-width: 1024px) {
+    gap: 20px;
+  }
+
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 20px;
@@ -49,15 +59,33 @@
   }
 }
 
+/* ---------------- Guna Summary Response ---------------- */
+
 .response {
-  background: #fff7b0;
-  border: 1px solid #f4d24b;
-  padding: 8px 16px;
-  border-radius: 6px;
+  background: #ffef9d;
+  border: 1px solid #e9ce55;
+  padding: 12px 20px;
+  border-radius: 10px;
   font-weight: 600;
   color: #000;
-  font-size: 14px;
-  width: 88.8%;
-  margin-top: 1rem;
+  font-size: 15px;
+  width: 100%;
+  margin-top: 1.4rem;
   text-align: start;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+/* ---------------- Table Wrapper ---------------- */
+
+.tableWrapper {
+  width: 100%;
+  margin-top: 1rem;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 }

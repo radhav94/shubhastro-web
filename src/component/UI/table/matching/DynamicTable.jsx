@@ -7,7 +7,7 @@ const DynamicTable = ({ title, headers, data }) => {
     .map((key) => data[key]);
 
   return (
-    <div className="w-full  mx-auto mt-6 border rounded-2xl shadow-md overflow-hidden">
+    <div className="w-full  mx-auto mt-6 border rounded-2xl shadow-md overflow-auto">
       {title && (
         <h2 className="text-xl font-semibold text-start  p-3 ">{title}</h2>
       )}
