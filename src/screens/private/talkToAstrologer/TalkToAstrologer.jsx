@@ -62,37 +62,60 @@ const TalkToAstrologer = () => {
   const data = astrodata?.data || [];
 
   // Merge paginated astrologers
-  useEffect(() => {
-    if (!data) return;
+// RESET when screen mounts
+useEffect(() => {
+  window.scrollTo(0, 0);
+  setPage(1);
+  setAllAstrologers([]);
+  setHasMore(true);
+}, []);
 
-    setHasMore(data.length >= limit);
+// MERGE API DATA
+useEffect(() => {
+  if (!data) return;
 
-    if (page === 1) {
-      setAllAstrologers(data);
-    } else if (data.length > 0) {
-      setAllAstrologers((prev) => {
-        const existingIds = new Set(prev.map((item) => item._id));
-        const newOnes = data.filter((item) => !existingIds.has(item._id));
-        return [...prev, ...newOnes];
-      });
+  // If same data count as current list → stop update → stop loop
+  if (page === 1) {
+    if (allAstrologers.length === data.length) return;
+    setAllAstrologers(data);
+  } else {
+    setAllAstrologers(prev => {
+      const existingIds = new Set(prev.map(i => i._id));
+      const newOnes = data.filter(i => !existingIds.has(i._id));
+      if (newOnes.length === 0) return prev; // ⛔ Prevent useless state update
+      return [...prev, ...newOnes];
+    });
+  }
+
+  setHasMore(data.length >= limit);
+}, [data, page]); // 👈 MUST add page here!!
+
+
+// INFINITE SCROLL (with throttle)
+useEffect(() => {
+  let isThrottled = false;
+
+  const handleScroll = () => {
+    if (isThrottled) return;
+
+    const scrollPosition =
+      window.innerHeight + window.scrollY >=
+      document.documentElement.scrollHeight - 200;
+
+    if (scrollPosition && !isFetching && hasMore) {
+      isThrottled = true;
+      setPage((prev) => prev + 1);
+
+      setTimeout(() => {
+        isThrottled = false;
+      }, 800); // delay to avoid loop
     }
-  }, [data, page]); // ⬅ FIXED (limit removed)
+  };
 
-  // Infinite scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition =
-        window.innerHeight + window.scrollY >=
-        document.documentElement.scrollHeight - 200;
+  window.addEventListener("scroll", handleScroll);
+  return () => window.removeEventListener("scroll", handleScroll);
+}, [isFetching, hasMore]);
 
-      if (scrollPosition && !isFetching && hasMore) {
-        setPage((prev) => prev + 1);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isFetching, hasMore]);
 
   const openKundliPopup = (astro) => {
     setSelectedAstrologer(astro);
@@ -134,24 +157,36 @@ const TalkToAstrologer = () => {
   };
 
   // ⬇ FIXED: astro param added
-  const handleAudioCall = async (astro) => {
-    if (!astro) return;
-    try {
-      const res = await createChatRoom({
-        userId: userIdLocal,
-        astrologerId: astro._id,
-      });
+  // const handleAudioCall = async (astro) => {
+  //   if (!astro) return;
+  //   try {
+  //     const res = await createChatRoom({
+  //       userId: userIdLocal,
+  //       astrologerId: astro._id,
+  //     });
 
-      const roomId = res?.data?.data;
-      if (!roomId) return Toast.error("Room ID missing");
+  //     const roomId = res?.data?.data;
+  //     if (!roomId) return Toast.error("Room ID missing");
 
-      navigate(PATH.privateRoutes.VOICE_CALL.path, {
-        state: { userId: userIdLocal, astrologerId: astro._id, roomId },
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  //     navigate(PATH.privateRoutes.VOICE_CALL.path, {
+  //       state: { userId: userIdLocal, astrologerId: astro._id, roomId,isUserSide:true },
+  //     });
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
+
+  const handleAudioCall = (astro) => {
+  navigate(PATH.privateRoutes.VOICE_CALL.path, {
+    state: {
+      userId: userIdLocal,
+      astrologerId: astro._id,
+      isUserSide: true,
+      // roomId: null // temporary
+    },
+  });
+};
+
 
   const handleVideoCall = async (astro) => {
     if (!astro) return;
