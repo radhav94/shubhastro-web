@@ -29,14 +29,14 @@ const HeroSection = ({ data }) => {
               <span className={styles.highlight}>Navratri</span>
             </h1>
 
-            <PrimaryButton
+            {/* <PrimaryButton
               size="lg"
               className={styles.primaryButton}
               title="First Chat Free"
               onClick={() =>
                 navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)
               }
-            />
+            /> */}
 
             <p>{banner?.description}</p>
           </div>
