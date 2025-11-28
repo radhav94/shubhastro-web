@@ -6,6 +6,7 @@ import { AstrologerCard, Title } from "../../../../../component";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
 import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSelectModal";
 import { useGetAstrologersQuery } from "../../../../../redux/api/astrologer/astrologerApi";
+import { getToken } from "../../../../../utils/token";
 
 const Astrologers = ({ onClickView, onProfile }) => {
   const navigate = useNavigate();
@@ -20,10 +21,16 @@ const Astrologers = ({ onClickView, onProfile }) => {
   const [createChatRoom] = useCreateChatRoomMutation();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
+  const token = getToken();
+
   // Step 1: On Chat => open Kundli Modal
   const openKundliPopup = (astro) => {
     setSelectedAstro(astro);
-    setKundliModalOpen(true);
+    if (token) {
+      setKundliModalOpen(true);
+    } else {
+      navigate("/login");
+    }
   };
 
   // Step 2: After selecting Kundli => Create Chat Room

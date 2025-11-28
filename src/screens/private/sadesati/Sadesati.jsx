@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import { useGetSadesatiQuery } from "../../../redux/api/kundli/dashaApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import styles from "./Sadesati.module.scss";
+import { getToken } from "../../../utils/token";
 
 const Sadesati = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
@@ -23,7 +24,7 @@ const Sadesati = () => {
 
   const { data, isLoading } = useGetSadesatiQuery(queryArgs);
   const sadesati = data?.response;
-  const token = localStorage.getItem("verifyOtpToken");
+  const token = getToken();
 
   return (
     <>
