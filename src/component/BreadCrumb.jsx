@@ -5,7 +5,9 @@ import styles from "./Breadcrumb.module.scss";
 const Breadcrumb = () => {
   const location = useLocation();
 
-  const isAstroDashboard = location.pathname.startsWith("/astrologer-dashboard");
+  const isAstroDashboard = location.pathname.startsWith(
+    "/astrologer-dashboard"
+  );
 
   const pathnames = location.pathname
     .split("/")
@@ -43,6 +45,5 @@ const Breadcrumb = () => {
     </div>
   );
 };
-
 
 export default Breadcrumb;

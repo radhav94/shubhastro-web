@@ -12,22 +12,13 @@ $mobile-screen-width: 500px;
   justify-content: flex-start;
 
   .contentWrapper {
-    max-width: 1300px;
     width: 100%;
-    margin: 0 auto;
-    // align-content: center;
-    padding: 0 12px;
+    align-content: center;
+    align-items: center;
     display: flex;
     flex-direction: column;
     flex: 1;
   }
-
-  // .topContent {
-  //   position: sticky;
-  //   top: 0;
-  //   z-index: 1000;
-  //   background-color: #f7f8fc;
-  // }
 
   .topBarContainer {
     width: 100%;
@@ -48,7 +39,6 @@ $mobile-screen-width: 500px;
 
   .outletDiv {
     width: 100%;
-    padding: 10px 0;
   }
 
   .fixedTopBar {
@@ -62,13 +52,9 @@ $mobile-screen-width: 500px;
   }
 
   .topGap {
-    height: 125px; // same as TopBar height
+    height: 105px; // same as TopBar height
     @media screen and (max-width: 772px) {
-      height: 80px;
-    }
-
-    .contentWrapper {
-      padding: 0 16px;
+      height: 68px;
     }
   }
 
@@ -84,10 +70,6 @@ $mobile-screen-width: 500px;
 }
 
 @media screen and (max-width: $mobile-screen-width) {
-  .contentWrapper {
-    padding: 0 16px;
-  }
-
   .topBarContainer {
     padding: 8px 16px;
   }
