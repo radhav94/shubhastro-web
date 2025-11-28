@@ -48,6 +48,8 @@ import ChatWindow from "../../screens/private/home/components/astrologers/atrolo
 import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
 import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
 import TarotCards from "../../screens/private/tarot/card/TarotCard";
+import DailyTarot from "../../screens/private/tarot/dailyTarot/DailyTarot";
+import YesNoTarot from "../../screens/private/tarot/yesNoTarot/YesNoTarot";
 
 export const PATH = {
   // DEFAULT: {
@@ -196,7 +198,11 @@ export const PATH = {
     },
     YES_NO_TAROT: {
       path: "tarot/yes-no-tarot",
-      element: TarotCards,
+      element: YesNoTarot,
+    },
+    DAILY_TAROT: {
+      path: "tarot/daily-tarot",
+      element: DailyTarot,
     },
     TAROT_ONE_CARD: {
       path: "/tarot/one-card-reading",

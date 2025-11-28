@@ -7,7 +7,7 @@ import TarotCardDisplay from "./TarotCardDisplay";
 
 const Tarot = () => {
   const { data, isLoading } = useGetTarotShuffleDataQuery({
-    shuffle_type: "major", // change if dynamic
+    shuffle_type: "both", // change if dynamic
     lang: "en",
   });
 
@@ -15,6 +15,7 @@ const Tarot = () => {
 
   // API mappings
   const tarotReadingData = data?.response || [];
+  console.log("Tarot Reading Data:", data);
 
   return (
     <>

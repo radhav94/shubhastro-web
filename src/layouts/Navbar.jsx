@@ -43,6 +43,10 @@ const Navbar = () => {
           title: "Yes/No Tarot",
           path: PATH.privateRoutes.YES_NO_TAROT.path,
         },
+        {
+          title: "Daily Tarot",
+          path: PATH.privateRoutes.DAILY_TAROT.path,
+        },
       ],
     },
     // { title: "Blog", path: PATH.privateRoutes.BLOG.path },

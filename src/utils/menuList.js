@@ -35,6 +35,10 @@ export const MENU_LIST = [
         title: "Yes/No Tarot",
         path: "/tarot/yes-no-tarot",
       },
+      {
+        title: "Daily Tarot",
+        path: "/tarot/daily-tarot",
+      },
     ],
   },
 ];

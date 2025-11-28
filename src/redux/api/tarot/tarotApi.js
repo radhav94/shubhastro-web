@@ -12,7 +12,18 @@ export const tarotApi = vedicApi.injectEndpoints({
         },
       }),
     }),
+    getTarotDailyData: builder.query({
+      query: ({ card_name, lang = "en" }) => ({
+        url: "tarot/daily",
+        params: {
+          api_key: VEDIC_API_KEY,
+          card_name,
+          lang,
+        },
+      }),
+    }),
   }),
 });
 
-export const { useGetTarotShuffleDataQuery} = tarotApi;
+export const { useGetTarotShuffleDataQuery, useGetTarotDailyDataQuery } =
+  tarotApi;

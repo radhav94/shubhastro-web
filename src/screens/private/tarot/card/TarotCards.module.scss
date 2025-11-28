@@ -2,7 +2,7 @@
   position: relative;
   width: fit-content;
   // margin: 0 auto;
-  padding: 40px;
+  padding: 20px 40px;
   display: flex;
   justify-content: center;
   align-self: self-start;
@@ -47,7 +47,7 @@
 /* Selected card highlight */
 .active {
   // z-index: 1000 !important;
-  transform: scale(1.18) translateY(-20px) !important;
+  transform: scale(1.08) translateY(-10px) !important;
   border: 3px solid #ffd24a;
   box-shadow: 0 10px 20px rgba(255, 200, 0, 0.4);
   // margin-inline: 1rem;
@@ -111,7 +111,7 @@
   background: #ffffff; /*  white background */
   padding: 20px;
   border-radius: 12px;
-  margin-inline: 6rem;
+  // margin-inline: 6rem;
 
   display: flex;
   gap: 20px;
