@@ -30,7 +30,6 @@ const Navbar = () => {
     { title: "Kundli", path: PATH.privateRoutes.KUNDLI.path },
     { title: "Sadesati", path: PATH.privateRoutes.SADESATI.path },
     { title: "Match Making", path: PATH.privateRoutes.MATCHMAKING.path },
-    // { title: "Numerology", path: PATH.privateRoutes.NUMEROLOGY.path },
     {
       title: "Tarot",
       path: PATH.privateRoutes.TAROT.path,
@@ -45,18 +44,6 @@ const Navbar = () => {
         },
       ],
     },
-    // { title: "Blog", path: PATH.privateRoutes.BLOG.path },
-    // { title: "Free Readings", path: PATH.privateRoutes.FREE_READINGS.path },
-
-    // { title: "Video", path: PATH.privateRoutes.VIDEO.path },
-
-    // { title: "Session Booking", path: PATH.privateRoutes.SESSION_DETAILS.path },
-    // {
-    //   title: "Yogii Mall",
-    //   path: PATH.privateRoutes.SHOP.path,
-    //   tag: "New",
-    //   tagType: "new",
-    // },
   ];
 
   return (
@@ -86,9 +73,11 @@ const NavbarItem = ({ title, path, children }) => {
       }`}
       onClick={!children ? () => navigate(path) : undefined}
     >
-      <PrimaryText size_14>
-        {title} {children && <span className={styles.arrow}></span>}
-      </PrimaryText>
+      {/* FIXED ALIGNMENT WRAPPER */}
+      <div className={styles.navItemLabel}>
+        <PrimaryText size_14>{title}</PrimaryText>
+        {children && <span className={styles.arrow}></span>}
+      </div>
 
       {children && (
         <div className={styles.dropdownWrapper}>

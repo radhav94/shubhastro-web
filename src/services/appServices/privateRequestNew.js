@@ -33,12 +33,12 @@ const handleApiError = (error) => {
         // 🔹 Clear role (very important)
         localStorage.removeItem("shubhtalk_role");
 
-        Toast.error("Session expired, please login again!");
+        Toast.error(message);
 
-        // setTimeout(() => {
-        //   unAuthorizedCount = 0;
-        //   window.location.href = "/login"; // redirect to common login
-        // }, 300);
+        setTimeout(() => {
+          unAuthorizedCount = 0;
+          window.location.href = "/login"; 
+        }, 300);
       }
       break;
 
@@ -46,6 +46,9 @@ const handleApiError = (error) => {
       Toast.error(message || "Invalid Value / Bad Request");
       break;
     case 403:
+      Toast.error(message || "Access Denied / Forbidden");
+      break;
+      case 401:
       Toast.error(message || "Access Denied / Forbidden");
       break;
     case 404:

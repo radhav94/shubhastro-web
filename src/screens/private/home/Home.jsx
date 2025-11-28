@@ -8,6 +8,9 @@ import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../utils/routes/Paths";
 import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
+import Footer from "../../../layouts/Footer";
+import WhyAstro from "./components/whyastro/WhyAstro";
+import TotalCount from "./components/totalcount/TotalCount";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -43,6 +46,10 @@ const Home = () => {
           <ServiceCards data={homeList} />
         </section>
 
+          <section className={styles.section}>
+          <TotalCount data={homeList} />
+        </section>
+
         <section className={styles.sectionStack}>
           <div className={styles.sectionBlock}>
             <Astrologers
@@ -56,6 +63,11 @@ const Home = () => {
           <div className={styles.sectionBlock}>
             <Blogs data={homeList} />
           </div>
+
+            <div>
+            <WhyAstro />
+          </div>
+      
         </section>
       </div>
     </div>
