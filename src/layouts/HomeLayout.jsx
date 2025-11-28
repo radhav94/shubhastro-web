@@ -23,45 +23,41 @@ const HomeLayout = () => {
     .find((match) => match.handle && match.handle.header !== undefined);
   const showHeader = currentRoute ? currentRoute.handle.header : true;
 
- return (
-  <div className={styles.layout}>
-    <ScrollToTop />
+  return (
+    <div className={styles.layout}>
+      <ScrollToTop />
 
-    {/* FIXED TOPBAR */}
-    <div className={styles.fixedTopBar}>
-      <TopBar />
-       <Navbar />
+      {/* FIXED TOPBAR */}
+      <div className={styles.fixedTopBar}>
+        <TopBar />
+        <Navbar />
+      </div>
 
-    </div>
+      {/* Scrollable Content */}
+      <div className={styles.contentWrapper}>
+        {/* Push content down so it doesn't hide behind TopBar */}
+        <div className={styles.topGap}></div>
 
-    {/* Scrollable Content */}
-    <div className={styles.contentWrapper}>
+        {showHeader && (
+          <>
+            <Breadcrumb />
+          </>
+        )}
 
-      {/* Push content down so it doesn't hide behind TopBar */}
-      <div className={styles.topGap}></div>
+        <Suspense fallback={<CircleSpinner />}>
+          <div className={styles.outletDiv}>
+            <Outlet />
+          </div>
+        </Suspense>
+      </div>
 
       {showHeader && (
-        <>
-          <Divider />
-          <Breadcrumb />
-        </>
-      )}
-
-      <Suspense fallback={<CircleSpinner />}>
-        <div className={styles.outletDiv}>
-          <Outlet />
+        <div className={styles.footerWrapper}>
+          <Footer />
         </div>
-      </Suspense>
+      )}
     </div>
-
-    {showHeader && (
-      <div className={styles.footerWrapper}>
-        <Footer />
-      </div>
-    )}
-  </div>
-);
-
+  );
 };
 
 export default HomeLayout;
