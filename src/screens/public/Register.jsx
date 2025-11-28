@@ -80,8 +80,8 @@ const Register = () => {
         firstName,
         lastName,
         // email,
-        password,
-        confirmPassword,
+        // password,
+        // confirmPassword,
         gender,
         day,
         month,
@@ -99,11 +99,11 @@ const Register = () => {
         return;
       }
 
-      if (password !== confirmPassword) {
-        setError("Passwords do not match.");
-        setLoading(false);
-        return;
-      }
+      // if (password !== confirmPassword) {
+      //   setError("Passwords do not match.");
+      //   setLoading(false);
+      //   return;
+      // }
 
       const dateOfBirth = `${year}-${getMonthNumber(month)
         .toString()
@@ -114,7 +114,7 @@ const Register = () => {
         phoneNumber,
         firstName,
         lastName,
-        password,
+        // password,
         place: birthPlace || "",
         // email,
         languagePreferences: ["English", "Hindi"],
@@ -226,7 +226,7 @@ const Register = () => {
 
          */}
 
-           <div className={styles.row}>
+           {/* <div className={styles.row}>
             <div className={styles.formGroup}>
               <label className={styles.required}>Password</label>
               <input
@@ -248,7 +248,7 @@ const Register = () => {
                 required
               />
             </div>
-          </div>
+          </div> */}
 
           <h3 className={styles.sectionHeader}>Date of Birth</h3>
 
