@@ -42,6 +42,11 @@ const Home = () => {
           <HeroSection data={homeList} />
         </section>
 
+         <section className={styles.section}>
+          <ServiceCards data={homeList} />
+        </section>
+        
+
         <section className={styles.sectionStack}>
           <div className={styles.sectionBlock}>
             <TotalCount data={homeList} />
