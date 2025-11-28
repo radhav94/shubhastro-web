@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState ,useRef} from "react";
 import {
   AstrologerCard,
   DetailsModal,
@@ -82,7 +82,7 @@ useEffect(() => {
     setAllAstrologers(prev => {
       const existingIds = new Set(prev.map(i => i._id));
       const newOnes = data.filter(i => !existingIds.has(i._id));
-      if (newOnes.length === 0) return prev; // ⛔ Prevent useless state update
+      if (newOnes.length === 0) return prev; 
       return [...prev, ...newOnes];
     });
   }
@@ -91,30 +91,50 @@ useEffect(() => {
 }, [data, page]); // 👈 MUST add page here!!
 
 
-// INFINITE SCROLL (with throttle)
+const isThrottledRef = useRef(false);
+const hasMoreRef = useRef(hasMore);
+const isFetchingRef = useRef(isFetching);
+
+// Keep refs updated
 useEffect(() => {
-  let isThrottled = false;
+  hasMoreRef.current = hasMore;
+  isFetchingRef.current = isFetching;
+}, [hasMore, isFetching]);
 
+// Auto-load if no scrollbar exists (important!)
+useEffect(() => {
+  if (
+    document.documentElement.scrollHeight <= window.innerHeight &&
+    hasMoreRef.current &&
+    !isFetchingRef.current
+  ) {
+    setPage((prev) => prev + 1);
+  }
+}, [allAstrologers]);
+
+// Stable scroll listener
+useEffect(() => {
   const handleScroll = () => {
-    if (isThrottled) return;
+    if (isThrottledRef.current) return;
 
-    const scrollPosition =
+    const bottom =
       window.innerHeight + window.scrollY >=
       document.documentElement.scrollHeight - 200;
 
-    if (scrollPosition && !isFetching && hasMore) {
-      isThrottled = true;
+    if (bottom && !isFetchingRef.current && hasMoreRef.current) {
+      isThrottledRef.current = true;
       setPage((prev) => prev + 1);
 
       setTimeout(() => {
-        isThrottled = false;
-      }, 800); // delay to avoid loop
+        isThrottledRef.current = false;
+      }, 600);
     }
   };
 
   window.addEventListener("scroll", handleScroll);
   return () => window.removeEventListener("scroll", handleScroll);
-}, [isFetching, hasMore]);
+}, []);
+
 
 
   const openKundliPopup = (astro) => {

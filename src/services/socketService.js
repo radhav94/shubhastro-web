@@ -9,8 +9,8 @@ class SocketService {
       transports: ["websocket"],
       autoConnect: true,
       reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 2000,
+      // reconnectionAttempts: 5,
+      // reconnectionDelay: 2000,
     });
 
     this.socket.on("connect", () => {

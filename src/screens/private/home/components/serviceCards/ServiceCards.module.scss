@@ -63,10 +63,47 @@ $hover-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
 
 .title {
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 800; // or 900 for extra bold
   color: $text-primary;
 
   @media (max-width: 640px) {
     font-size: 1rem;
+    font-weight: 800; // ensure consistent weight on mobile too
   }
 }
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center entire section */
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.sectionTitle {
+  font-size: 100px;
+  font-weight: 800;
+  text-align: center;
+  background: linear-gradient(90deg, #7b3ff3, #ff7b4f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 20px;
+}
+
+
+
+.description {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: darken($text-primary, 15%);
+  opacity: 0.75;
+  line-height: 1.3;
+  text-align: center;
+  margin-top: -0.6rem;
+
+  @media (max-width: 640px) {
+    font-size: 0.8rem;
+  }
+}
+

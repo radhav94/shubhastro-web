@@ -1,0 +1,59 @@
+.whyAstroSection {
+  width: 100%;
+  padding: 80px 20px;
+  background: radial-gradient(
+      circle at top left,
+      #ffdf8c33,
+      transparent 40%
+    ),
+    #1a1a1a;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  max-width: 950px;
+  text-align: center;
+}
+
+.title {
+  font-size: 42px;
+  font-weight: 800;
+  color: #ffc94a;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+
+.subTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 25px;
+}
+
+.description {
+  font-size: 18px;
+  line-height: 1.7rem;
+  font-weight: 400;
+  margin: 12px 0;
+  color: #e6e6e6;
+
+  strong {
+    color: #ffc94a;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 30px;
+  }
+  .subTitle {
+    font-size: 20px;
+  }
+  .description {
+    font-size: 16px;
+  }
+}
