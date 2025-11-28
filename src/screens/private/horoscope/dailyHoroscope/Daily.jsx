@@ -11,6 +11,22 @@ import axios from "axios";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import Sidebar from "../sidebar/Sidebar";
 
+// Zodiac Sign Date Ranges
+const zodiacDateRanges = {
+  aries: "March 21 - April 19",
+  taurus: "April 20 - May 20",
+  gemini: "May 21 - June 20",
+  cancer: "June 21 - July 22",
+  leo: "July 23 - August 22",
+  virgo: "August 23 - September 22",
+  libra: "September 23 - October 22",
+  scorpio: "October 23 - November 21",
+  sagittarius: "November 22 - December 21",
+  capricorn: "December 22 - January 19",
+  aquarius: "January 20 - February 18",
+  pisces: "February 19 - March 20",
+};
+
 const Daily = () => {
   const { sign } = useParams();
 
@@ -20,6 +36,8 @@ const Daily = () => {
     { sign, payload },
     { enabled: !!sign }
   );
+
+  const dateRange = zodiacDateRanges[sign.toLowerCase()] || "Unknown Sign";
 
   return (
     <div className={styles.dailyContainer}>
@@ -50,7 +68,7 @@ const Daily = () => {
             size_16
             color={appColors.greyDark}
           >
-            {new Date().toString().slice(3, 15)}
+            {dateRange}
           </PrimaryText>
           {isSuccess &&
             Object.entries(data.prediction).map(([key, value]) => (
