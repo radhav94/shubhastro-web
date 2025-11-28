@@ -183,7 +183,7 @@ const token =
     };
 
     try {
-      await createKundli(payload).unwrap();
+      if(token) await createKundli(payload).unwrap();
       setFormData(initialFormData);
     } catch (err) {
       console.log(err);
@@ -374,7 +374,11 @@ const token =
               />
             </div>
 
-            {token ? (
+            <button type="submit" className={styles.ctaButton}>
+                Generate Horoscope
+              </button>
+
+            {/* {token ? (
               <button type="submit" className={styles.ctaButton}>
                 Generate Horoscope
               </button>
@@ -390,7 +394,7 @@ const token =
                   Login
                 </button>
               </div>
-            )}
+            )} */}
           </form>
         </div>
 
