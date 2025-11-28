@@ -17,8 +17,8 @@ const OtpVerification = () => {
   const redirectPath = from || PATH.privateRoutes.HOME.path;
 
   const [otp, setOtp] = useState("");
-  const [counter, setCounter] = useState(5);
-  const [isTimerActive, setIsTimerActive] = useState(false);
+  const [counter, setCounter] = useState(120);
+  const [isTimerActive, setIsTimerActive] = useState(true);
 
   const isOtpComplete = otp.length === 6;
 
@@ -162,10 +162,24 @@ const handleVerifyOtp = async (event) => {
     return () => clearTimeout(timer);
   }, [counter, isTimerActive]);
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (isTimerActive) return;
+
+  try {
+    const payload = {
+      phoneNumber,
+      type,
+    };
+
+    await AuthServices.loginWithPhone(payload);
+
+    Toast.success("OTP resent successfully");
+
     setIsTimerActive(true);
-    setCounter(5);
+    setCounter(120);
+  } catch (error) {
+    Toast.error(error?.response?.data?.message || "Failed to resend OTP");
+  }
   };
 
   return (
@@ -208,6 +222,22 @@ const handleVerifyOtp = async (event) => {
               Verify OTP
             </button>
           </form>
+            <div className={styles.resendOptions}>
+              <button
+                type="button"
+                className={styles.resendButton}
+                onClick={handleResend}
+                disabled={isTimerActive}
+              >
+                {isTimerActive ? (
+                  <>
+                    Resend OTP in <strong>{counter}s</strong>
+                  </>
+                ) : (
+                  "Resend OTP"
+                )}
+              </button>
+          </div>
         </div>
 
         <div className={styles.byProceeding}>
