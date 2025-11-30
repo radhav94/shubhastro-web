@@ -44,7 +44,7 @@ import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog"
 // import AstrologerIncomingCall from "../../screens/private/home/components/astrologers/AstrologerIncomingCall";
 import AstrologersDashboard from "../../screens/private/home/components/astrologers/AstrologersDashboard";
 import ChatList from "../../screens/private/home/components/astrologers/atrologerchat/ChatList";
-import ChatWindow from "../../screens/private/home/components/astrologers/atrologerchat/ChatWindow";
+import ChatWindow from "../../screens/private/home/components/chats/ChatWindow";
 import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
 import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
 import TarotCards from "../../screens/private/tarot/card/TarotCard";
@@ -269,7 +269,7 @@ export const PATH = {
     },
 
     VOICE_CALL: {
-      path: "/talk-to-astrologers/voice-call",
+      path: "/talk-to-astrologers/voice-call/:roomId",
       element: AgoraVoiceCalling,
     },
     STREAMING: {

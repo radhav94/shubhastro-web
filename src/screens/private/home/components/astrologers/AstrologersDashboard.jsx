@@ -1,13 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./AstrologersDashboard.module.scss";
 import PrimaryText from "../../../../../component/PrimaryText";
 import { useNavigate } from "react-router-dom";
 import ChatList from "./atrologerchat/ChatList";
 import { PATH } from "../../../../../utils/routes/Paths";
+import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
 const AstrologersDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
+
+  // 🚀 Call states
+  const [incomingCall, setIncomingCall] = useState(false);
+  const [callerSocketId, setCallerSocketId] = useState(null);
+  const [roomId, setRoomId] = useState(null);
+
+
+  // 🔥 Listen for incoming call
+ useEffect(() => {
+  console.log("helllooooo user test me")
+  voiceSocket.on("incoming-call",({ roomId, from }) => {
+    console.log("IncomingcallfromuserId", roomId);
+    setIncomingCall(true);
+    setRoomId(roomId);
+    setCallerSocketId(from);  // ⭐ Now contains userId
+  });
+
+  return () => voiceSocket.off("incoming-call");
+}, []);
+
+  // ✔ Accept call => signal + go to Call Screen
+  const handleAccept = () => {
+    console.log("roomIdkjwdbfwjhdfbhejdf",roomId)
+    voiceSocket.emit("accept-call", { roomId, to: callerSocketId });
+    navigate(`/talk-to-astrologers/voice-call/${roomId}`);
+  };
 
   const DashboardTab = (
     <div className={styles.content}>
@@ -17,47 +44,60 @@ const AstrologersDashboard = () => {
           <PrimaryText size_14 color="#777">
             Today's Earnings
           </PrimaryText>
-          <PrimaryText size_28 isBold>
-            ₹2,450
-          </PrimaryText>
+          <PrimaryText size_28 isBold>₹2,450</PrimaryText>
         </div>
-
         <div className={styles.card}>
           <PrimaryText size_14 color="#777">
             This Week
           </PrimaryText>
-          <PrimaryText size_28 isBold>
-            ₹12,780
-          </PrimaryText>
+          <PrimaryText size_28 isBold>₹12,780</PrimaryText>
         </div>
-
         <div className={styles.card}>
           <PrimaryText size_14 color="#777">
             Total Calls Today
           </PrimaryText>
-          <PrimaryText size_28 isBold>
-            18
-          </PrimaryText>
+          <PrimaryText size_28 isBold>18</PrimaryText>
         </div>
-
         <div className={styles.card}>
           <PrimaryText size_14 color="#777">
             Rating
           </PrimaryText>
-          <PrimaryText size_28 isBold>
-            4.9 ⭐
-          </PrimaryText>
+          <PrimaryText size_28 isBold>4.9 ⭐</PrimaryText>
         </div>
       </div>
 
-      {/* Panels */}
+      {/* 📞 Incoming Popup */}
+      {incomingCall && (
+        <div className={styles.incomingCallPopup}>
+          <PrimaryText size_18 isSemiBold>📞 Incoming Call…</PrimaryText>
+          <div className={styles.btnRow}>
+            <button
+              className={styles.acceptBtn}
+              onClick={handleAccept}
+            >
+              Accept
+            </button>
+            <button
+              className={styles.rejectBtn}
+              onClick={() => setIncomingCall(false)}
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Right panels */}
       <div className={styles.panels}>
         <div className={styles.panel}>
           <PrimaryText size_18 isSemiBold>
             Profile Completion
           </PrimaryText>
           <div className={styles.progressBar}>
-            <div className={styles.progress} style={{ width: "85%" }}></div>
+            <div
+              className={styles.progress}
+              style={{ width: "85%" }}
+            ></div>
           </div>
           <PrimaryText size_14 color="#666">
             Your astrologer profile is 85% complete.
@@ -136,37 +176,6 @@ const AstrologersDashboard = () => {
           }
         >
           Chat
-        </div>
-        <div
-          className={styles.tabItem}
-          onClick={() =>
-            navigate(PATH.privateRoutes.VIDEO_CALL.path, {
-              state: {
-                astrologerId: localStorage.getItem("shubhtalk_astro_id"),
-                userId: null, // will be selected later after chat selection
-                roomId: null,
-                isUserSide: false,
-              },
-            })
-          }
-        >
-          Video Call
-        </div>
-
-        <div
-          className={styles.tabItem}
-          onClick={() =>
-            navigate(PATH.privateRoutes.VOICE_CALL.path, {
-              state: {
-                astrologerId: localStorage.getItem("shubhtalk_astro_id"),
-                userId: null, // will be selected later after chat selection
-                roomId: null,
-                isUserSide: false,
-              },
-            })
-          }
-        >
-          Voice Call
         </div>
       </div>
 

@@ -28,6 +28,22 @@
   gap: 10px;
 }
 
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.callIcon,
+.videoIcon {
+  font-size: 22px;
+  cursor: pointer;
+  color: #fff; // change as needed
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
 .backIcon {
   font-size: 22px;
   cursor: pointer;

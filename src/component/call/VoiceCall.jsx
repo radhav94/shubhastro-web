@@ -1,260 +1,86 @@
-// AgoraVoiceCalling.jsx
-import React, { useState, useEffect } from "react";
-import AgoraRTC, {
-  AgoraRTCProvider,
+import {
   LocalUser,
   RemoteUser,
-  useIsConnected,
   useJoin,
   useLocalMicrophoneTrack,
   usePublish,
-  useRemoteUsers,
+  useRemoteUsers
 } from "agora-rtc-react";
-import { useLocation } from "react-router-dom";
-import {
-  IoMic,
-  IoMicOff,
-  IoCall,
-  IoCallOutline,
-  IoPerson,
-} from "react-icons/io5";
-import "./AgoraVoicePremiumUI.scss";
-import useVoiceCall from "./useVoiceCall";
-
-// import useVoiceCall from "../../hooks/useVoiceCall"; // 👈 path adjust karna
+import AgoraRTC, { AgoraRTCProvider } from "agora-rtc-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const AgoraVoiceCalling = () => {
   const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 
   return (
     <AgoraRTCProvider client={client}>
-      <WhatsAppStyleCall />
+      <CallUI />
     </AgoraRTCProvider>
   );
 };
 
-const WhatsAppStyleCall = () => {
+const CallUI = () => {
+  const navigate = useNavigate();
+  
+  const APP_ID = "908a7debb18d43ed8d74bed54c5e6b29";
+  const CHANNEL = "newtestshubtalk";
+  const TOKEN =
+    "007eJxTYBjxPks/OedYOHopxUWCzg007eJxTYNAvPqnisFT43Q/ZlI3KwU0mVmJhOm92ueddUn2xZ+Vhpg0KDJYGFonmKalJSYYWKSbGqSkWKeYmSakppibJpqlmSUaWpzh0MhsCGRmi3v9nYmSAQBCfnyEvtbwktbikOKM0qSQxJ5uBAQCQyyQgWkFYYrEm7xwFy0Gz4czpNaHSlbFhsDRgmAR4Kk0zNTYzSTJLMk8zSDM3SUzI1NVgzMU40NzZKMU8yMTI6WLRmZGSiaGBgYEAmR5KSmlKYkpOYk5iZGJpkGNgAABS7Bho=";
+  const UID = Math.floor(Math.random() * 100000);
+
   const [micOn, setMicOn] = useState(true);
-  const [seconds, setSeconds] = useState(0);
-
-  const { state } = useLocation();
-  const { userId, astrologerId, roomId, isUserSide } = state || {};
-
-  // Agora essentials
-  const [appId] = useState("5630460abdc141e3b2f8d9597752bd7d");
-
-  // 🔔 Call signaling & token/channel from socket
-  const {
-    isCalling,
-    callStatus,
-    token,
-    channelName,
-    startCall,
-    acceptCall,
-    rejectCall,
-    endCall,
-  } = useVoiceCall({ userId, astrologerId, roomId, isUserSide });
-
-  const isConnected = useIsConnected();
   const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
   const remoteUsers = useRemoteUsers();
 
-  // Agora join — only when we have channel + token and isCalling true
-  const shouldJoin = isCalling && !!channelName && !!token;
-
+  // ⭐ Direct Join
   useJoin(
     {
-      appid: appId,
-      channel: channelName || "",
-      token: token || null,
+      appid: APP_ID,
+      channel: CHANNEL,
+      token: TOKEN,
+      uid: UID,
     },
-    shouldJoin
+    true
   );
 
-  usePublish([localMicrophoneTrack]);
+  // ⭐ Publish mic track
+  usePublish(
+    localMicrophoneTrack
+      ? [localMicrophoneTrack]
+      : []
+  );
 
-  // Call timer
-  useEffect(() => {
-    let intervalId;
-
-    if (isConnected && isCalling) {
-      intervalId = window.setInterval(() => {
-        setSeconds((s) => s + 1);
-      }, 1000);
-    } else {
-      setSeconds(0);
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isConnected, isCalling]);
-
-  const formatTime = (sec) => {
-    const m = Math.floor(sec / 60)
-      .toString()
-      .padStart(2, "0");
-    const s = (sec % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
+  const endCall = () => {
+    navigate(-1);
   };
-
-  const handleEndCall = () => {
-    endCall();
-  };
-
-  const callStatusText = (() => {
-    if (!isCalling && callStatus === "idle") return "Ready to start call";
-    if (callStatus === "calling") return "Calling… Waiting for astrologer";
-    if (callStatus === "ringing") return "Incoming call…";
-    if (callStatus === "onCall") return "On call";
-    if (callStatus === "busy") return "Astrologer is busy";
-    if (callStatus === "rejected") return "Call rejected";
-    if (callStatus === "ended") return "Call ended";
-    return callStatus;
-  })();
 
   return (
-    <div className="call-page">
-      <div className="call-overlay" />
+    <div style={{ padding: 30, textAlign: "center" }}>
+      <h2>Voice Call Static Mode</h2>
+      <h4>Channel: {CHANNEL}</h4>
 
-      <div className="call-card">
-        {/* Header */}
-        <div className="call-header">
-          <span className="call-header-label">Voice Call</span>
-          <span className="call-header-channel">
-            {channelName || "Channel"}
-          </span>
-        </div>
+      {/* Remote audio users */}
+      {remoteUsers.map(user => (
+        <RemoteUser key={user.uid} user={user} playAudio={true} />
+      ))}
 
-        {/* Avatar & status */}
-        <div className="call-main">
-          <div className="avatar">
-            <div className="avatar-ring" />
-            <div className="avatar-inner">
-              <IoPerson className="avatar-icon" />
-            </div>
-          </div>
+      <div style={{ marginTop: 20 }}>
+        <button onClick={() => setMicOn(m => !m)}>
+          {micOn ? "Mute Mic" : "Unmute Mic"}
+        </button>
 
-          <div className="call-info">
-            <div className="call-name">SubhTalk User</div>
-            <div className="call-status">{callStatusText}</div>
-
-            {isConnected && isCalling && (
-              <div className="call-timer">{formatTime(seconds)}</div>
-            )}
-          </div>
-
-          {isConnected && (
-            <div className="remote-info">
-              {remoteUsers.length === 0 ? (
-                <span className="remote-text">
-                  Waiting for other person…
-                </span>
-              ) : (
-                remoteUsers.map((user) => (
-                  <span key={user.uid} className="remote-text">
-                    In Call with: <strong>{user.uid}</strong>
-                  </span>
-                ))
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* When NOT connected to Agora yet */}
-        {!isConnected && (
-          <div className="connect-form">
-            {isUserSide ? (
-              <button
-                className="connect-btn"
-                disabled={!appId}
-                onClick={startCall}
-              >
-                <IoCallOutline className="btn-icon-left" />
-                Start Voice Call
-              </button>
-            ) : (
-              <>
-                {callStatus === "ringing" ? (
-                  <div className="incoming-actions">
-                    <button
-                      className="connect-btn"
-                      onClick={acceptCall}
-                    >
-                      Accept
-                    </button>
-                    <button
-                      className="connect-btn danger"
-                      onClick={rejectCall}
-                    >
-                      Reject
-                    </button>
-                  </div>
-                ) : (
-                  <span className="waiting-text">
-                    Waiting for incoming call…
-                  </span>
-                )}
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Controls */}
-        {isConnected && isCalling && (
-          <div className="controls">
-            {/* Mic toggle */}
-            <button
-              className={`control-btn ${
-                micOn ? "control-btn--primary" : "control-btn--danger"
-              }`}
-              onClick={() => setMicOn((m) => !m)}
-            >
-              {micOn ? <IoMic /> : <IoMicOff />}
-            </button>
-
-            <button className="control-btn control-btn--secondary" disabled>
-              <IoCall />
-            </button>
-
-            {/* End call */}
-            <button
-              className="control-btn control-btn--danger"
-              onClick={handleEndCall}
-            >
-              <IoCallOffIcon />
-            </button>
-          </div>
-        )}
-
-        {/* Agora audio handling (hidden UI) */}
-        <div style={{ display: "none" }}>
-          <LocalUser
-            audioTrack={localMicrophoneTrack}
-            micOn={micOn}
-            playAudio={false}
-          >
-            <span>You</span>
-          </LocalUser>
-
-          {remoteUsers.map((user) => (
-            <RemoteUser key={user.uid} user={user} playAudio={true}>
-              <span>{user.uid}</span>
-            </RemoteUser>
-          ))}
-        </div>
+        <button
+          onClick={endCall}
+          style={{ marginLeft: 10, color: "red" }}
+        >
+          End Call
+        </button>
       </div>
+
+      <LocalUser audioTrack={localMicrophoneTrack} playAudio={false} />
     </div>
   );
 };
-
-// Small helper so we don't import another icon lib for Call Off
-const IoCallOffIcon = () => (
-  <span style={{ display: "inline-flex", transform: "rotate(135deg)" }}>
-    <IoCall />
-  </span>
-);
 
 export default AgoraVoiceCalling;
