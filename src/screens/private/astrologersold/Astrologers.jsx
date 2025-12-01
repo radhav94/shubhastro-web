@@ -15,29 +15,29 @@ const Astrologers = () => {
     ? data.PhoneCharge.Value - data.OfferPhoneCharge.Value
     : data.PhoneCharge.Value;
 
-  return (
-    <div className={styles.container}>
-      <div className={styles.left}>
-        <ProfileCard data={data} />
-        <GiftCard />
-        <AboutCard />
-      </div>
-      <div className={styles.right}>
-        <PriceCard
-          phoneChargeStr={phoneCharge}
-          price={data.Price}
-          oldPrice={data.OldPrice}
-          deal={data.Deal}
-          data={data}
-        />
-        <RatingsCard
-          rating={data.AverageRating}
-          ratingCount={data.RatingCount}
-        />
-        <BadgesCard />
-      </div>
-    </div>
-  );
+  // return (
+  //   <div className={styles.container}>
+  //     <div className={styles.left}>
+  //       <ProfileCard data={data} />
+  //       <GiftCard />
+  //       <AboutCard />
+  //     </div>
+  //     <div className={styles.right}>
+  //       <PriceCard
+  //         phoneChargeStr={phoneCharge}
+  //         price={data.Price}
+  //         oldPrice={data.OldPrice}
+  //         deal={data.Deal}
+  //         data={data}
+  //       />
+  //       <RatingsCard
+  //         rating={data.AverageRating}
+  //         ratingCount={data.RatingCount}
+  //       />
+  //       <BadgesCard />
+  //     </div>
+  //   </div>
+  // );
 };
 
 /* ProfileCard */

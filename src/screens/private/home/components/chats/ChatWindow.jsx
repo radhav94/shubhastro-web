@@ -8,10 +8,16 @@ import {
   IoEllipsisVertical,
   IoAttach,
 } from "react-icons/io5";
-import PrimaryText from "../../../../../../component/PrimaryText";
 import { useLocation, useNavigate } from "react-router-dom";
-import useChat from "../useChatWindow";
-import { useGetChatHistoryQuery } from "../../../../../../redux/api/chatApi";
+import { PrimaryText } from "../../../../../component";
+import useChat from "./useChatWindow";
+import { useGetChatHistoryQuery } from "../../../../../redux/api/chatApi";
+// import { Socket } from "socket.io-client";
+
+import { voiceSocket } from "../../../../../services/voiceSocketServices";
+
+
+
 
 const ChatWindow = () => {
   const navigate = useNavigate();
@@ -57,34 +63,43 @@ const ChatWindow = () => {
     return [...formattedHistory, ...formattedSocket];
   }, [messageOff, messages, isUserSide]);
 
-  // COMBINE DB HISTORY + SOCKET LIVE MESSAGES
-  // useEffect(() => {
-  //   if (!messageOff) return;
 
-  //   // Correct sender logic depending on isUserSide
-  //   const formattedHistory = messageOff.map((item) => ({
-  //     text: item.message || item.response,
+   const handleCallClick = () => {
+    console.log("hello")
+    // socket.emit("call_start", { astrologerId: astrologerId });
+    voiceSocket.emit("create-call-room", {
+    userId,
+    astrologerId,
+  });
+  };
 
-  //     // FIXED SENDER LOGIC
-  //     isSender: isUserSide
-  //       ? item.senderType === "user"             // user side → user right
-  //       : item.senderType === "astrologer",      // astro side → astro right
+useEffect(() => {
+  if (!isUserSide) return;
 
-  //     time: new Date(item.createdAt).toLocaleTimeString([], {
-  //       hour: "2-digit",
-  //       minute: "2-digit",
-  //     }),
-  //   }));
+  voiceSocket.on("return-call-room", ({ roomId }) => {
+    console.log("roomiD",roomId)
+    voiceSocket.emit("notify-incoming-call", {
+      roomId,
+      to: astrologerId,
+      from: userId   // ⭐ Add this line
+    });
+  });
 
-  //   const formattedSocket = messages.map((msg) => ({
-  //     text: msg.text,
-  //     isSender: msg.isSender,
-  //     time: msg.time,
-  //   }));
+  voiceSocket.on("call-accepted", ({ roomId }) => {
+navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
+  state: {
+    roomId,
+    callerName: fullName, // 🌟 astrologer ka naam user chat me hota hai
+    isUserSide: true
+  }
+});
+  });
 
-  //   // Merge both
-  //   setFinalMsgs([...formattedHistory, ...formattedSocket]);
-  // }, [messageOff, messages]);
+  return () => {
+    voiceSocket.off("return-call-room");
+    voiceSocket.off("call-accepted");
+  };
+}, [isUserSide]);
 
   // SEND
   const handleSend = () => {
@@ -96,30 +111,37 @@ const ChatWindow = () => {
   return (
     <div className={styles.chatWindow}>
       {/* HEADER */}
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <IoArrowBack
-            className={styles.backIcon}
-            onClick={() => navigate(-1)}
-          />
+     <div className={styles.header}>
+  <div className={styles.headerLeft}>
+    <IoArrowBack
+      className={styles.backIcon}
+      onClick={() => navigate(-1)}
+    />
 
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-            className={styles.headerAvatar}
-            alt="User"
-          />
+    <img
+      src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+      className={styles.headerAvatar}
+      alt="User"
+    />
 
-          <div className={styles.userInfo}>
-            <PrimaryText size_16 isSemiBold>
-              {fullName || "Chat User"}
-            </PrimaryText>
+    <div className={styles.userInfo}>
+      <PrimaryText size_16 isSemiBold>
+        {fullName || "Chat User"}
+      </PrimaryText>
 
-            <span className={styles.statusText}>
-              {isTyping ? "Typing..." : "Online"}
-            </span>
-          </div>
-        </div>
-      </div>
+      <span className={styles.statusText}>
+        {isTyping ? "Typing..." : "Online"}
+      </span>
+    </div>
+  </div>
+
+  {/* Right Side Icons */}
+  <div className={styles.headerRight}>
+    <IoCallOutline className={styles.callIcon} onClick={handleCallClick}/>
+    <IoVideocamOutline className={styles.videoIcon} />
+  </div>
+</div>
+
 
       {/* ERROR */}
       {error && <div className={styles.errorBox}>⚠️ {error}</div>}
