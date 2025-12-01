@@ -1,26 +1,42 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styles from "./ProductDetail.module.scss";
 import { getToken } from "../../../../utils/token";
 
 const ProductDetail = () => {
   const navigate = useNavigate();
-  const { state: product } = useLocation();
-  const { slug } = useParams(); // or however you store it
+  const { slug } = useParams();
+  const location = useLocation();
+
+  let product = location.state;
+
+  // Restore product if returning from login
+  if (!product) {
+    const saved = localStorage.getItem("pendingProductDetail");
+    if (saved) product = JSON.parse(saved);
+  }
 
   if (!product) return <div>No product found</div>;
+
+  // Clear saved product once loaded
+  // useEffect(() => {
+  //   localStorage.removeItem("pendingProductDetail");
+  // }, []);
+
   const handleBookNow = () => {
     const token = getToken();
-    const productSlug = product?.slug;
+    const productSlug = product.slug;
 
     if (!token) {
-      // Redirect to login, but remember the current page
+      // Save product so we can restore after login
+      localStorage.setItem("pendingProductDetail", JSON.stringify(product));
+
       return navigate("/login", { state: { from: location.pathname } });
     }
 
-    // If logged in → go to consultant page
+    // Logged in → go to consultant page
     navigate(`/shop/${slug}/${productSlug}/consultant?uID=${token}`, {
-      state: { product: product },
+      state: { product },
     });
   };
 

@@ -35,7 +35,7 @@ const ConsultantList = () => {
     });
 
     setHasMore(data.length === limit);
-  }, [data, page]); // ✅ FIXED
+  }, [data, page]); // FIXED
 
   const loaderRef = useRef(null);
 

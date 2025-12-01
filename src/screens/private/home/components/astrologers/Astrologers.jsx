@@ -38,11 +38,16 @@ const Astrologers = ({ onClickView, onProfile }) => {
   // Step 1: On Chat => open Kundli Modal
   const openKundliPopup = (astro) => {
     setSelectedAstro(astro);
-    if (token && storedWallet?.amount >= 135) {
+    // if (token && storedWallet?.amount >= 135) {
+    //   setKundliModalOpen(true);
+    // }
+    if (token) {
       setKundliModalOpen(true);
-    } else if (token) {
-      setOpenModal((prev) => ({ ...prev, recharge: true }));
-    } else {
+    }
+    // else if (token) {
+    //   setOpenModal((prev) => ({ ...prev, recharge: true }));
+    // }
+    else {
       navigate("/login", { state: { from: location.pathname } });
     }
   };
