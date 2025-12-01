@@ -86,7 +86,13 @@ useEffect(() => {
   });
 
   voiceSocket.on("call-accepted", ({ roomId }) => {
-    navigate(`/talk-to-astrologers/voice-call/${roomId}`);
+navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
+  state: {
+    roomId,
+    callerName: fullName, // 🌟 astrologer ka naam user chat me hota hai
+    isUserSide: true
+  }
+});
   });
 
   return () => {

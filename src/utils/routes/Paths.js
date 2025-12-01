@@ -272,6 +272,11 @@ export const PATH = {
       path: "/talk-to-astrologers/voice-call/:roomId",
       element: AgoraVoiceCalling,
     },
+
+     ASTRO_VOICE_CALL: {
+      path: "/astrologer-dashboard/voice-call/:roomId",
+      element: AgoraVoiceCalling,
+    },
     STREAMING: {
       path: "/astrolive/streaming",
       element: Streaming,

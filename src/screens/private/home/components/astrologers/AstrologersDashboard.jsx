@@ -18,7 +18,6 @@ const AstrologersDashboard = () => {
 
   // 🔥 Listen for incoming call
  useEffect(() => {
-  console.log("helllooooo user test me")
   voiceSocket.on("incoming-call",({ roomId, from }) => {
     console.log("IncomingcallfromuserId", roomId);
     setIncomingCall(true);
@@ -33,7 +32,14 @@ const AstrologersDashboard = () => {
   const handleAccept = () => {
     console.log("roomIdkjwdbfwjhdfbhejdf",roomId)
     voiceSocket.emit("accept-call", { roomId, to: callerSocketId });
-    navigate(`/talk-to-astrologers/voice-call/${roomId}`);
+   navigate(`/astrologer-dashboard/voice-call/${roomId}`, {
+  state: {
+    roomId,
+    callerName: callerSocketId || "User", 
+    isUserSide: false
+  }
+});
+
   };
 
   const DashboardTab = (
@@ -67,7 +73,7 @@ const AstrologersDashboard = () => {
       </div>
 
       {/* 📞 Incoming Popup */}
-      {incomingCall && (
+      {/* {incomingCall && (
         <div className={styles.incomingCallPopup}>
           <PrimaryText size_18 isSemiBold>📞 Incoming Call…</PrimaryText>
           <div className={styles.btnRow}>
@@ -85,7 +91,26 @@ const AstrologersDashboard = () => {
             </button>
           </div>
         </div>
-      )}
+      )} */}
+
+      {/* 📞 Incoming Call Modal */}
+{incomingCall && (
+  <div className={styles.modalOverlay}>
+    <div className={styles.modalContainer}>
+      <PrimaryText size_18 isSemiBold>📞 Incoming Call…</PrimaryText>
+
+      <div className={styles.modalButtons}>
+        <button className={styles.acceptBtn} onClick={handleAccept}>
+          Accept
+        </button>
+        <button className={styles.rejectBtn} onClick={() => setIncomingCall(false)}>
+          Reject
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* Right panels */}
       <div className={styles.panels}>
