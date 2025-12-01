@@ -13,60 +13,133 @@ import { FiMenu } from "react-icons/fi";
 import { PrimaryText } from "../../component";
 import { IoWalletOutline } from "react-icons/io5";
 
-const MENU_LIST = [
-  { title: "Home", path: PATH.privateRoutes.HOME.path },
-  {
-    title: "Panchang",
-    path: PATH.privateRoutes.PANCHANG.path,
-    children: [
-      {
-        title: "Today's Panchang",
-        path: PATH.privateRoutes.PANCHANG_TODAY.path,
-      },
-    ],
-  },
-  { title: "Kundli", path: PATH.privateRoutes.KUNDLI.path },
-  { title: "Sadesati", path: PATH.privateRoutes.SADESATI.path },
-  { title: "Match Making", path: PATH.privateRoutes.MATCHMAKING.path },
-  {
-    title: "Horoscope",
-    children: [
-      { title: "Daily Horoscope", path: "/horoscopes/daily-horoscope" },
-      {
-        title: "Monthly Horoscope",
-        path: PATH.privateRoutes.HOROSCOPE.MONTHLY.path,
-      },
-    ],
-  },
-  {
-    title: "Tarot",
-    path: PATH.privateRoutes.TAROT.path,
-    children: [
-      {
-        title: "Shuffle Tarot",
-        path: PATH.privateRoutes.TAROT.path,
-      },
-      {
-        title: "Yes/No Tarot",
-        path: PATH.privateRoutes.YES_NO_TAROT.path,
-      },
-      {
-        title: "Daily Tarot",
-        path: PATH.privateRoutes.DAILY_TAROT.path,
-      },
-    ],
-  },
-  // {
-  //   title: "Eng",
-  //   path: PATH.privateRoutes.TAROT.path,
-  //   children: [
-  //     {
-  //       title: "हिंदी",
-  //       path: PATH.privateRoutes.TAROT.path,
-  //     },
-  //   ],
-  // },
-];
+  const  BOTTOM_MENU = [
+    {
+      title: "Best Astrologers",
+      children: [
+        { title: "Vedic Astrologers", path: "/astro/vedic" },
+        { title: "Tarot Experts", path: "/astro/tarot" },
+      ],
+    },
+    { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
+    { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
+    { title: "Astromall", path: "/mall" },
+    { title: "Astrotalk Store", path: "/store" },
+    {
+      title: "Blogs",
+      path : "/blog",
+    },
+  ];
+
+
+const TopBar = () => {
+  const navigate = useNavigate();
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [currentLang, setCurrentLang] = useState(localStorage.getItem("selectedLanguage") || "en");
+
+  // const token = localStorage.getItem("verifyOtpToken");
+  // const handleLogout = () => {
+  //   localStorage.removeItem("verifyOtpToken");
+  //   navigate("/");
+  // };
+
+  const role = localStorage.getItem("shubhtalk_role");
+const token =
+  role === "ASTROLOGER"
+    ? localStorage.getItem("shubhtalk_astro_token")
+    : localStorage.getItem("shubhtalk_customer_token");
+
+
+  const handleLogout = () => {
+  const role = localStorage.getItem("shubhtalk_role");
+
+  if (role === "ASTROLOGER") {
+    localStorage.removeItem("shubhtalk_astro_token");
+    localStorage.removeItem("shubhtalk_astro_id");
+  }
+
+  if (role === "CUSTOMER") {
+    localStorage.removeItem("shubhtalk_customer_token");
+    localStorage.removeItem("shubhtalk_customer_id");
+    localStorage.removeItem("shubhtalk_customer_wallet");
+  }
+  localStorage.removeItem("shubhtalk_role");
+  navigate("/");
+};
+
+  function handleLanguageChange(lang) {
+    const select = document.querySelector(".goog-te-combo");
+
+    if (select) {
+      select.value = lang;
+      select.dispatchEvent(new Event("change"));
+      setCurrentLang(lang);   // UPDATE UI LANGUAGE
+      localStorage.setItem("selectedLanguage", lang);
+    } else {
+      console.error("Google Translate dropdown not found");
+    }
+  }
+
+    const  MENU_LIST = [
+    { title: "Home", path: PATH.privateRoutes.HOME.path },
+    {
+      title: "Panchang",
+      path: PATH.privateRoutes.PANCHANG.path,
+      children: [
+        {
+          title: "Today's Panchang",
+          path: PATH.privateRoutes.PANCHANG_TODAY.path,
+        },
+      ],
+    },
+    { title: "Kundli", path: PATH.privateRoutes.KUNDLI.path },
+    { title: "Sadesati", path: PATH.privateRoutes.SADESATI.path },
+    { title: "Match Making", path: PATH.privateRoutes.MATCHMAKING.path },
+    {
+      title: "Horoscope",
+      children: [
+        { title: "Daily Horoscope", path: "/horoscopes/daily-horoscope" },
+        {
+          title: "Monthly Horoscope",
+          path: PATH.privateRoutes.HOROSCOPE.MONTHLY.path,
+        },
+      ],
+    },
+    {
+      title: "Tarot",
+      path: PATH.privateRoutes.TAROT.path,
+      children: [
+        {
+          title: "Shuffle Tarot",
+          path: PATH.privateRoutes.TAROT.path,
+        },
+        {
+          title: "Yes/No Tarot",
+          path: PATH.privateRoutes.YES_NO_TAROT.path,
+        },
+        {
+          title: "Daily Tarot",
+          path: PATH.privateRoutes.DAILY_TAROT.path,
+        },
+      ],
+    },
+    {
+      title:  <span className="notranslate">{currentLang === "en" ? "Eng" : "हिंदी"}</span>,
+      children: [
+        currentLang === "en"
+          ? {
+              title: "हिंदी",
+              onClick: () => handleLanguageChange("hi")
+            }
+          : {
+              title: "English",
+              onClick: () => handleLanguageChange("en")
+            }
+      ]
+    }
+  ];
 
 const BOTTOM_MENU = [
   {
@@ -86,34 +159,6 @@ const BOTTOM_MENU = [
   },
 ];
 
-const TopBar = () => {
-  const navigate = useNavigate();
-
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [walletBalance, setWalletBalance] = useState(0);
-
-  const role = localStorage.getItem("shubhtalk_role");
-  const token =
-    role === "ASTROLOGER"
-      ? localStorage.getItem("shubhtalk_astro_token")
-      : localStorage.getItem("shubhtalk_customer_token");
-
-  const handleLogout = () => {
-    const role = localStorage.getItem("shubhtalk_role");
-
-    if (role === "ASTROLOGER") {
-      localStorage.removeItem("shubhtalk_astro_token");
-      localStorage.removeItem("shubhtalk_astro_id");
-    }
-
-    if (role === "CUSTOMER") {
-      localStorage.removeItem("shubhtalk_customer_token");
-      localStorage.removeItem("shubhtalk_customer_id");
-      localStorage.removeItem("shubhtalk_customer_wallet");
-    }
-    localStorage.removeItem("shubhtalk_role");
-    navigate("/");
-  };
 
   useEffect(() => {
     const updateWalletFromStorage = () => {
@@ -135,11 +180,25 @@ const TopBar = () => {
         updateWalletFromStorage();
       }
     };
+    //Translate if hindi lang is selected
+    const savedLang = localStorage.getItem("selectedLanguage");
+
+    if (!savedLang || savedLang === "en") return; 
+
+    const interval = setInterval(() => {
+      const select = document.querySelector(".goog-te-combo");
+      if (select) {
+        select.value = savedLang;
+        select.dispatchEvent(new Event("change"));
+        clearInterval(interval);
+      }
+    }, 500);
 
     window.addEventListener("wallet-updated", handleWalletUpdated);
 
     return () => {
       window.removeEventListener("wallet-updated", handleWalletUpdated);
+      clearInterval(interval);
     };
   }, []); // 🔹 IMPORTANT: empty dependency array
 
@@ -255,7 +314,8 @@ const NavbarItem = ({ title, path, children }) => {
         <div className={styles.dropdownWrapper}>
           <ul className={styles.dropdownMenu}>
             {children.map((child, idx) => (
-              <li key={idx} onClick={() => navigate(child.path)}>
+              <li key={idx} onClick={() => child?.onClick ? child?.onClick() : navigate(child.path)}>
+              
                 {child.title}
               </li>
             ))}
