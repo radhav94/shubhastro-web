@@ -8,15 +8,24 @@ import { useGetNumerologyReportQuery } from "../../../../redux/api/numerology/nu
 import LifePathSingleDetails from "./LifePathSingleDetails";
 
 const LifePathDetails = () => {
-  const formData = useSelector((state) => state.form.numerologyPayload);
+const storedPayload = localStorage.getItem("numerologyPayload");
+const formData = useSelector((state) => state.form.numerologyPayload)
+  || (storedPayload && JSON.parse(storedPayload));
 
-  const queryArgs = formData
-    ? {
-        name: formData.name,
-        date: formData.date,
-        lang: "en",
-      }
-    : skipToken;
+React.useEffect(() => {
+  if (formData) {
+    localStorage.setItem("numerologyPayload", JSON.stringify(formData));
+  }
+}, [formData]);
+
+const queryArgs = formData
+  ? {
+      name: formData.name,
+      date: formData.date,
+      lang: "en",
+    }
+  : skipToken;
+
 
   const { data, isLoading } = useGetNumerologyReportQuery(queryArgs);
 

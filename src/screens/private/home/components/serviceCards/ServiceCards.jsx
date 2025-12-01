@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import styles from "./ServiceCards.module.scss";
 import { IoArrowForwardOutline } from "react-icons/io5";
-import { PrimaryText } from "../../../../../component";
+import { PrimaryText, Title } from "../../../../../component";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../../../utils/routes/Paths";
 import { AppIcons } from "../../../../../utils/appImages";
@@ -41,9 +41,11 @@ const ServiceCards = ({ data }) => {
   return (
     <div className={styles.container}>
       {/* New Title Added */}
-      <PrimaryText className={styles.sectionTitle}>
-        Complementary Astrologer Services
-      </PrimaryText>
+      <Title
+                title="Complementary Astrologer Services"
+                showDivider
+              
+              />
 
       <div className={styles.cardsGrid}>
         {newServices.map((service) => (
