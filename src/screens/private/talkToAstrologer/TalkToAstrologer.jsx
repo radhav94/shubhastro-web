@@ -17,6 +17,7 @@ import KundliSelectModal from "./kundliSelect/KundliSelectModal";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { PATH } from "../../../utils/routes/Paths";
 import { getToken } from "../../../utils/token";
+import { voiceSocket } from "../../../services/voiceSocketServices";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -43,6 +44,8 @@ const TalkToAstrologer = () => {
 
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
+    const [activeCallAstro, setActiveCallAstro] = useState(null);
+
 
   const [page, setPage] = useState(1);
   const [specialty, setSpecialty] = useState("");
@@ -207,16 +210,79 @@ const TalkToAstrologer = () => {
   //   }
   // };
 
-  const handleAudioCall = (astro) => {
-    navigate(PATH.privateRoutes.VOICE_CALL.path, {
-      state: {
-        userId: userIdLocal,
-        astrologerId: astro._id,
-        isUserSide: true,
-        // roomId: null // temporary
-      },
+  // const handleAudioCall = (astro) => {
+  //   navigate(PATH.privateRoutes.VOICE_CALL.path, {
+  //     state: {
+  //       userId: userIdLocal,
+  //       astrologerId: astro._id,
+  //       isUserSide: true,
+  //       // roomId: null // temporary
+  //     },
+  //   });
+  // };
+//   const handleAudioCall = (astro) => {
+//   navigate(PATH.privateRoutes.VOICE_CALL.path, {
+//     state: {
+//       userId: userIdLocal,
+//       astrologerId: astro._id,
+//       isUserSide: true,
+//       // roomId: null // temporary
+//     },
+//   });
+// };
+
+
+const handleAudioCall = (astro) => {
+    if (!astro) return;
+    if (!userIdLocal) return Toast.error("User ID Missing");
+
+    setActiveCallAstro(astro);
+
+    // 1️⃣ ask backend to create call room
+    voiceSocket.emit("create_call_room", {
+      userId: userIdLocal,
+      astrologerId: astro._id,
     });
   };
+
+  // 2️⃣ listen to room creation + call accepted
+  useEffect(() => {
+    if (!userIdLocal) return;
+
+    const handleReturnCallRoom = ({ roomId }) => {
+      // 3️⃣ notify astrologer about incoming call
+      voiceSocket.emit("notify_incoming_call", {
+        roomId,
+         to: activeCallAstro._id, // astrologerId
+        from: userIdLocal,  
+      });
+    };
+
+    const handleCallAccepted = ({ roomId }) => {
+      if (!roomId) return;
+
+      const callerName = activeCallAstro?.firstName || "Astrologer";
+
+      // 4️⃣ navigate to voice call screen
+      navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
+        state: {
+          roomId,
+          callerName, // astrologer name shown in call UI
+          userId: userIdLocal,
+          astrologerId: activeCallAstro?._id,
+          isUserSide: true,
+        },
+      });
+    };
+
+    voiceSocket.on("return_call_room", handleReturnCallRoom);
+    voiceSocket.on("call_accepted", handleCallAccepted);
+
+    return () => {
+      voiceSocket.off("return_call_room", handleReturnCallRoom);
+      voiceSocket.off("call_accepted", handleCallAccepted);
+    };
+  }, [userIdLocal, activeCallAstro, navigate]);
 
   const handleVideoCall = async (astro) => {
     if (!astro) return;

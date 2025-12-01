@@ -18,20 +18,20 @@ const AstrologersDashboard = () => {
 
   // 🔥 Listen for incoming call
  useEffect(() => {
-  voiceSocket.on("incoming-call",({ roomId, from }) => {
+  voiceSocket.on("incoming_call",({ roomId, from }) => {
     console.log("IncomingcallfromuserId", roomId);
     setIncomingCall(true);
     setRoomId(roomId);
     setCallerSocketId(from);  // ⭐ Now contains userId
   });
 
-  return () => voiceSocket.off("incoming-call");
+  return () => voiceSocket.off("incoming_call");
 }, []);
 
   // ✔ Accept call => signal + go to Call Screen
   const handleAccept = () => {
     console.log("roomIdkjwdbfwjhdfbhejdf",roomId)
-    voiceSocket.emit("accept-call", { roomId, to: callerSocketId });
+    voiceSocket.emit("accept_call", { roomId, to: callerSocketId });
    navigate(`/astrologer-dashboard/voice-call/${roomId}`, {
   state: {
     roomId,

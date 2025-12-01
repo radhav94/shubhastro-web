@@ -1,5 +1,6 @@
 // Astrologers.jsx
 import { useCallback, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Astrologers.module.scss";
 import {
@@ -12,6 +13,7 @@ import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSele
 import { useGetAstrologersQuery } from "../../../../../redux/api/astrologer/astrologerApi";
 import { getToken } from "../../../../../utils/token";
 import { PATH } from "../../../../../utils/routes/Paths";
+import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
 const Astrologers = ({ onClickView, onProfile }) => {
   const navigate = useNavigate();
@@ -34,6 +36,9 @@ const Astrologers = ({ onClickView, onProfile }) => {
   const storedWallet = JSON.parse(localStorage.getItem("wallet")) || {
     amount: 0,
   };
+
+  // ⭐ track which astrologer user is calling
+  const [activeCallAstro, setActiveCallAstro] = useState(null);
 
   // Step 1: On Chat => open Kundli Modal
   const openKundliPopup = (astro) => {
@@ -82,6 +87,66 @@ const Astrologers = ({ onClickView, onProfile }) => {
     setOpenModal((prev) => ({ ...prev, recharge: false }));
     navigate(PATH.privateRoutes.RECHARGE.path);
   }, [navigate]);
+  // ⭐ AUDIO CALL – same pattern as TalkToAstrologer / ChatWindow
+  const handleAudioCall = (astro) => {
+    if (!astro) return;
+
+    if (!token) {
+      // if not logged in, same behavior as chat
+      return navigate("/login");
+    }
+
+    if (!userIdLocal) return; // optionally show toast
+
+    setActiveCallAstro(astro);
+
+    // 1️⃣ ask backend to create a call room
+    voiceSocket.emit("create_call_room", {
+      userId: userIdLocal,
+      astrologerId: astro._id,
+    });
+  };
+
+  // 2️⃣ listen for room + call accepted
+  useEffect(() => {
+  if (!userIdLocal) return;
+
+  const handleReturnCallRoom = ({ roomId }) => {
+    if (!roomId || !activeCallAstro?._id) return;
+
+    // Notify astrologer of incoming call
+    voiceSocket.emit("notify_incoming_call", {
+      roomId,
+      to: activeCallAstro._id, // astrologerId from state
+      from: userIdLocal,       // userId known from storage
+    });
+  };
+
+  const handleCallAccepted = ({ roomId }) => {
+    if (!roomId) return;
+
+    const callerName = activeCallAstro?.firstName || "Astrologer";
+
+    navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
+      state: {
+        roomId,
+        callerName,
+        userId: userIdLocal,
+        astrologerId: activeCallAstro?._id,
+        isUserSide: true,
+      },
+    });
+  };
+
+  voiceSocket.on("return_call_room", handleReturnCallRoom);
+  voiceSocket.on("call_accepted", handleCallAccepted);
+
+  return () => {
+    voiceSocket.off("return_call_room", handleReturnCallRoom);
+    voiceSocket.off("call_accepted", handleCallAccepted);
+  };
+}, [userIdLocal, activeCallAstro, navigate]);
+
 
   return (
     <div className={styles.astrologersWrapper}>
@@ -100,6 +165,7 @@ const Astrologers = ({ onClickView, onProfile }) => {
               data={astrologer}
               onChat={() => openKundliPopup(astrologer)}
               onProfile={() => onProfile(astrologer)}
+              onAudioCall={() => handleAudioCall(astrologer)} // ⭐ updated
             />
           </div>
         ))}
