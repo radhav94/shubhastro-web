@@ -52,7 +52,7 @@ $mobile-screen-width: 500px;
   }
 
   .topGap {
-    height: 105px; // same as TopBar height
+    height: 95px; // same as TopBar height
     @media screen and (max-width: 772px) {
       height: 68px;
     }
