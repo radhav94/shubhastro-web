@@ -6,7 +6,6 @@ import Divider from "../component/Divider";
 
 import { useIsMobile } from "../utils/hooks/useIsMobile";
 
-import Navbar from "./Navbar";
 import Breadcrumb from "../component/BreadCrumb";
 import Footer from "./Footer";
 import ScrollToTop from "../component/functions/ScrollToTop";
@@ -30,7 +29,6 @@ const HomeLayout = () => {
       {/* FIXED TOPBAR */}
       <div className={styles.fixedTopBar}>
         <TopBar />
-        <Navbar />
       </div>
 
       {/* Scrollable Content */}

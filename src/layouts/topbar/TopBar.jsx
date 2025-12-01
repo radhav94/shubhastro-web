@@ -1,16 +1,91 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./TopBar.module.scss";
 
 // Assuming your logo path is correct
 import { AppIcons } from "../../utils/appImages";
 import SideBar from "../sidebar/SideBar";
+import { PATH } from "../../utils/routes/Paths";
 
 // Components and Hooks
 
 // Icons
 import { FiMenu } from "react-icons/fi";
 import { PrimaryText } from "../../component";
+
+  const  MENU_LIST = [
+    { title: "Home", path: PATH.privateRoutes.HOME.path },
+    {
+      title: "Panchang",
+      path: PATH.privateRoutes.PANCHANG.path,
+      children: [
+        {
+          title: "Today's Panchang",
+          path: PATH.privateRoutes.PANCHANG_TODAY.path,
+        },
+      ],
+    },
+    { title: "Kundli", path: PATH.privateRoutes.KUNDLI.path },
+    { title: "Sadesati", path: PATH.privateRoutes.SADESATI.path },
+    { title: "Match Making", path: PATH.privateRoutes.MATCHMAKING.path },
+    {
+      title: "Horoscope",
+      children: [
+        { title: "Daily Horoscope", path: "/horoscopes/daily-horoscope" },
+        {
+          title: "Monthly Horoscope",
+          path: PATH.privateRoutes.HOROSCOPE.MONTHLY.path,
+        },
+      ],
+    },
+    {
+      title: "Tarot",
+      path: PATH.privateRoutes.TAROT.path,
+      children: [
+        {
+          title: "Shuffle Tarot",
+          path: PATH.privateRoutes.TAROT.path,
+        },
+        {
+          title: "Yes/No Tarot",
+          path: PATH.privateRoutes.YES_NO_TAROT.path,
+        },
+        {
+          title: "Daily Tarot",
+          path: PATH.privateRoutes.DAILY_TAROT.path,
+        },
+      ],
+    },
+    // {
+    //   title: "Eng",
+    //   path: PATH.privateRoutes.TAROT.path,
+    //   children: [
+    //     {
+    //       title: "हिंदी",
+    //       path: PATH.privateRoutes.TAROT.path,
+    //     },
+    //   ],
+    // },
+  ];
+
+  const  BOTTOM_MENU = [
+    {
+      title: "Best Astrologers",
+      children: [
+        { title: "Vedic Astrologers", path: "/astro/vedic" },
+        { title: "Tarot Experts", path: "/astro/tarot" },
+      ],
+    },
+    { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
+    { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
+    { title: "Astromall", path: "/mall" },
+    { title: "Astrotalk Store", path: "/store" },
+    {
+      title: "Blogs",
+      path : "/blog",
+    },
+  ];
+
 
 const TopBar = () => {
   const navigate = useNavigate();
@@ -96,22 +171,46 @@ const token =
               <FiMenu />
             </button>
 
-            {/* Sign In CTA Button */}
-            {!token ? (
-              <button
-                className={`${styles.ctaButton} ${styles.hideOnMobile}`}
-                onClick={() => navigate("/login")}
-              >
-                Log In
-              </button>
-            ) : (
-              <button
-                className={`${styles.ctaButton} ${styles.hideOnMobile}`}
-                onClick={handleLogout}
-              >
-                Log out
-              </button>
-            )}
+            <header className={styles.navbar}>
+              <nav className={styles.navbarMenu}>
+                <div style={{display: "flex", flexDirection : "row"}} >
+
+                <ul>
+                  {MENU_LIST.map((item, index) => (
+                    <NavbarItem key={index} {...item} />
+                  ))}
+                  
+                  <li>
+
+                {/* Sign In CTA Button */}
+                {!token ? (
+                  <button
+                  className={`${styles.ctaButton} ${styles.hideOnMobile}`}
+                  onClick={() => navigate("/login")}
+                  >
+                    LogIn
+                  </button>
+                ) : (
+                  <button
+                    className={`${styles.ctaButton} ${styles.hideOnMobile}`}
+                    onClick={handleLogout}
+                    >
+                    Log out
+                  </button>
+                )}
+                </li>
+                </ul>
+                  </div>
+                  <div style={{display: "flex", flexDirection : "row"}} >
+
+                <ul>
+                  {BOTTOM_MENU.map((item, index) => (
+                    <NavbarItem key={index} {...item} />
+                  ))}
+                </ul>
+                  </div>
+              </nav>
+            </header>
           </div>
         </div>
       </header>
@@ -120,3 +219,36 @@ const token =
 };
 
 export default TopBar;
+
+const NavbarItem = ({ title, path, children }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isActive = path && location.pathname === path;
+
+  return (
+    <li
+      className={`${children ? styles.dropdown : ""} ${
+        isActive ? styles.active : ""
+      }`}
+      onClick={!children ? () => navigate(path) : undefined}
+    >
+      {/* FIXED ALIGNMENT WRAPPER */}
+      <div className={styles.navItemLabel}>
+        <PrimaryText size_14>{title}</PrimaryText>
+        {children && <span className={styles.arrow}></span>}
+      </div>
+
+      {children && (
+        <div className={styles.dropdownWrapper}>
+          <ul className={styles.dropdownMenu}>
+            {children.map((child, idx) => (
+              <li key={idx} onClick={() => navigate(child.path)}>
+                {child.title}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </li>
+  );
+};
