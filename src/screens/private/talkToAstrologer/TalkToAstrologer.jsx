@@ -1,4 +1,4 @@
-import { useEffect, useState ,useRef} from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   AstrologerCard,
   DetailsModal,
@@ -16,6 +16,7 @@ import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import KundliSelectModal from "./kundliSelect/KundliSelectModal";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { PATH } from "../../../utils/routes/Paths";
+import { getToken } from "../../../utils/token";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -60,86 +61,93 @@ const TalkToAstrologer = () => {
   });
 
   const data = astrodata?.data || [];
-
-  // Merge paginated astrologers
-// RESET when screen mounts
-useEffect(() => {
-  window.scrollTo(0, 0);
-  setPage(1);
-  setAllAstrologers([]);
-  setHasMore(true);
-}, []);
-
-// MERGE API DATA
-useEffect(() => {
-  if (!data) return;
-
-  // If same data count as current list → stop update → stop loop
-  if (page === 1) {
-    if (allAstrologers.length === data.length) return;
-    setAllAstrologers(data);
-  } else {
-    setAllAstrologers(prev => {
-      const existingIds = new Set(prev.map(i => i._id));
-      const newOnes = data.filter(i => !existingIds.has(i._id));
-      if (newOnes.length === 0) return prev; 
-      return [...prev, ...newOnes];
-    });
-  }
-
-  setHasMore(data.length >= limit);
-}, [data, page]); // 👈 MUST add page here!!
-
-
-const isThrottledRef = useRef(false);
-const hasMoreRef = useRef(hasMore);
-const isFetchingRef = useRef(isFetching);
-
-// Keep refs updated
-useEffect(() => {
-  hasMoreRef.current = hasMore;
-  isFetchingRef.current = isFetching;
-}, [hasMore, isFetching]);
-
-// Auto-load if no scrollbar exists (important!)
-useEffect(() => {
-  if (
-    document.documentElement.scrollHeight <= window.innerHeight &&
-    hasMoreRef.current &&
-    !isFetchingRef.current
-  ) {
-    setPage((prev) => prev + 1);
-  }
-}, [allAstrologers]);
-
-// Stable scroll listener
-useEffect(() => {
-  const handleScroll = () => {
-    if (isThrottledRef.current) return;
-
-    const bottom =
-      window.innerHeight + window.scrollY >=
-      document.documentElement.scrollHeight - 200;
-
-    if (bottom && !isFetchingRef.current && hasMoreRef.current) {
-      isThrottledRef.current = true;
-      setPage((prev) => prev + 1);
-
-      setTimeout(() => {
-        isThrottledRef.current = false;
-      }, 600);
-    }
+  const token = getToken();
+  const storedWallet = JSON.parse(localStorage.getItem("wallet")) || {
+    amount: 0,
   };
 
-  window.addEventListener("scroll", handleScroll);
-  return () => window.removeEventListener("scroll", handleScroll);
-}, []);
+  // Merge paginated astrologers
+  // RESET when screen mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    setPage(1);
+    setAllAstrologers([]);
+    setHasMore(true);
+  }, []);
 
+  // MERGE API DATA
+  useEffect(() => {
+    if (!data) return;
 
+    // If same data count as current list → stop update → stop loop
+    if (page === 1) {
+      if (allAstrologers.length === data.length) return;
+      setAllAstrologers(data);
+    } else {
+      setAllAstrologers((prev) => {
+        const existingIds = new Set(prev.map((i) => i._id));
+        const newOnes = data.filter((i) => !existingIds.has(i._id));
+        if (newOnes.length === 0) return prev;
+        return [...prev, ...newOnes];
+      });
+    }
+
+    setHasMore(data.length >= limit);
+  }, [data, page]); // 👈 MUST add page here!!
+
+  const isThrottledRef = useRef(false);
+  const hasMoreRef = useRef(hasMore);
+  const isFetchingRef = useRef(isFetching);
+
+  // Keep refs updated
+  useEffect(() => {
+    hasMoreRef.current = hasMore;
+    isFetchingRef.current = isFetching;
+  }, [hasMore, isFetching]);
+
+  // Auto-load if no scrollbar exists (important!)
+  useEffect(() => {
+    if (
+      document.documentElement.scrollHeight <= window.innerHeight &&
+      hasMoreRef.current &&
+      !isFetchingRef.current
+    ) {
+      setPage((prev) => prev + 1);
+    }
+  }, [allAstrologers]);
+
+  // Stable scroll listener
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isThrottledRef.current) return;
+
+      const bottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 200;
+
+      if (bottom && !isFetchingRef.current && hasMoreRef.current) {
+        isThrottledRef.current = true;
+        setPage((prev) => prev + 1);
+
+        setTimeout(() => {
+          isThrottledRef.current = false;
+        }, 600);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const openKundliPopup = (astro) => {
     setSelectedAstrologer(astro);
-    setKundliModalOpen(true);
+    if (token && storedWallet?.amount >= 135) {
+      setKundliModalOpen(true);
+    } else if (token) {
+      setOpenModal((prev) => ({ ...prev, recharge: true }));
+    } else {
+      navigate("/login", { state: { from: location.pathname } });
+    }
   };
 
   const handleChatAfterKundliSelect = async (kundli) => {
@@ -197,16 +205,15 @@ useEffect(() => {
   // };
 
   const handleAudioCall = (astro) => {
-  navigate(PATH.privateRoutes.VOICE_CALL.path, {
-    state: {
-      userId: userIdLocal,
-      astrologerId: astro._id,
-      isUserSide: true,
-      // roomId: null // temporary
-    },
-  });
-};
-
+    navigate(PATH.privateRoutes.VOICE_CALL.path, {
+      state: {
+        userId: userIdLocal,
+        astrologerId: astro._id,
+        isUserSide: true,
+        // roomId: null // temporary
+      },
+    });
+  };
 
   const handleVideoCall = async (astro) => {
     if (!astro) return;
@@ -228,7 +235,7 @@ useEffect(() => {
   };
 
   return (
-    <div>
+    <div className={styles.mainContainer}>
       <PrimaryText size_24 isExtraBold>
         Talk To Best Astrologers Online
       </PrimaryText>
@@ -283,6 +290,7 @@ useEffect(() => {
         onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
         isOpen={openModal.recharge}
         handleSubmit={onRechargeNow}
+        astrologer={selectedAstrologer}
       />
 
       <KundliSelectModal

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./Payment.module.scss";
 import { Toast } from "../../../component";
+import { Link } from "react-router-dom";
 
 // Reusable Recharge Pack Component
 const RechargePack = ({ amount, extra, active, onSelect }) => (
@@ -89,32 +90,37 @@ const Payment = () => {
             </span>
           </div>
 
-          <div className={styles.rechargeHeader}>Recharge Wallet</div>
+          <div className={styles.rechargeHeader}>Add Money to Wallet</div>
 
           <div className={styles.rechargeFlex}>
             {rechargePacks.map((pack, index) => (
-              <RechargePack
+              <Link
+                to="/callingpack/payment"
+                state={{ amount: pack.amount, extra: pack.extra }}
                 key={index}
-                {...pack}
-                active={pack.amount === selectedPack.amount}
-                onSelect={setSelectedPack}
-              />
+              >
+                <RechargePack
+                  {...pack}
+                  active={pack.amount === selectedPack.amount}
+                  onSelect={setSelectedPack}
+                />
+              </Link>
             ))}
           </div>
 
-          <div className={styles.requiredBalance}>
+          {/* <div className={styles.requiredBalance}>
             <img
               src="https://images.astroyogi.com/astroyogi2017/e-pass/exclamation_mark_blue.png"
               alt="Required Balance"
               className={styles.requiredBalanceImg}
             />
             Minimum 5 mins balance required to consult
-          </div>
+          </div> */}
         </div>
       </div>
 
       {/* Right side */}
-      <div className={styles.rightSide}>
+      {/* <div className={styles.rightSide}>
         <div className={styles.rechargeRightPack}>
           <div className={styles.cashbackAmount}>
             <div className={styles.cashbackHeader}>
@@ -187,7 +193,7 @@ const Payment = () => {
             <span>Total Amount</span>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

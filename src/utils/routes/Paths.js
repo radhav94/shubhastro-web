@@ -47,6 +47,11 @@ import ChatList from "../../screens/private/home/components/astrologers/atrologe
 import ChatWindow from "../../screens/private/home/components/chats/ChatWindow";
 import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
 import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
+import FinalPay from "../../screens/private/payment/FinalPay";
+import ConsultantList from "../../screens/private/shop/consultant/ConsultantList";
+import PaymentScreen from "../../screens/private/shop/consultant/PaymentScreen";
+import ProductDetail from "../../screens/private/shop/detail/ProductDetail";
+import ProductList from "../../screens/private/shop/product/ProductList";
 import TarotCards from "../../screens/private/tarot/card/TarotCard";
 import DailyTarot from "../../screens/private/tarot/dailyTarot/DailyTarot";
 import YesNoTarot from "../../screens/private/tarot/yesNoTarot/YesNoTarot";
@@ -249,10 +254,30 @@ export const PATH = {
       path: "/shop",
       element: Shop,
     },
+    PRODUCT_LIST: {
+      path: "/shop/:slug",
+      element: ProductList,
+    },
+    PRODUCT_DETAIL: {
+      path: "/shop/:slug/:productSlug",
+      element: ProductDetail,
+    },
+    CONSULTANT_LIST: {
+      path: "/shop/:slug/:productSlug/consultant",
+      element: ConsultantList,
+    },
+    CONSULTANT_PAYMENT: {
+      path: "/consultant/payment",
+      element: PaymentScreen,
+    },
 
     RECHARGE: {
       path: "/callingpack",
       element: Payment,
+    },
+    FinalPay: {
+      path: "/callingpack/payment",
+      element: FinalPay,
     },
     ASTROLOGERS: {
       path: "/talk-to-astrologers/expert/:name",

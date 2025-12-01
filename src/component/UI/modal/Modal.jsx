@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import styles from "./Modal.module.scss";
 import { combineClasses } from "../../../utils/utlis";
 import { useEffect } from "react";
@@ -25,7 +26,7 @@ const Modal = ({
 
   if (!modalOpen) return null;
 
-  return (
+  return createPortal(
     <div
       className={styles.mainContainer}
       onMouseDown={(e) => {
@@ -46,6 +47,7 @@ const Modal = ({
             <p>{heading}</p>
           </div>
         )}
+
         <div
           className={combineClasses(
             styles.modalBody,
@@ -55,7 +57,8 @@ const Modal = ({
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body // ← THIS IS THE FIX
   );
 };
 

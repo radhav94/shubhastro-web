@@ -1,8 +1,8 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import styles from "./KundliSelectModal.module.scss";
 import { IoClose } from "react-icons/io5";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
-// import LocationSearch from "../../../../utils/location/locationSearch";
 
 import {
   useGetAllKundlisQuery,
@@ -10,7 +10,6 @@ import {
 } from "../../../../services/appServices/kundliServicesNew";
 import LocationSearch from "../../../../utils/location/locationSearch";
 
-// CONSTANTS
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const months = [
   "Jan",
@@ -61,20 +60,18 @@ const initialForm = {
 };
 
 const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
-  // const token = localStorage.getItem("verifyOtpToken");
   const role = localStorage.getItem("shubhtalk_role");
-const token =
-  role === "ASTROLOGER"
-    ? localStorage.getItem("shubhtalk_astro_token")
-    : localStorage.getItem("shubhtalk_customer_token");
 
+  const token =
+    role === "ASTROLOGER"
+      ? localStorage.getItem("shubhtalk_astro_token")
+      : localStorage.getItem("shubhtalk_customer_token");
 
-  const { data, isLoading, refetch } = useGetAllKundlisQuery(undefined, {
+  const { data, isLoading } = useGetAllKundlisQuery(undefined, {
     skip: !token || !isOpen,
   });
 
   const [createKundli] = useCreateKundliMutation();
-
   const kundlis = data?.data || [];
 
   const [activeTab, setActiveTab] = useState("saved");
@@ -83,63 +80,13 @@ const token =
 
   if (!isOpen) return null;
 
-  // Handle input fields
-  const handleInput = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  // Auto-fill Place, Lat, Lon
-  const handlePlaceSelect = (place) => {
-    setForm({
-      ...form,
-      place: place.address,
-      lat: place.lat,
-      lon: place.lng,
-    });
-  };
-
-  // CREATE KUNDLI INSIDE POPUP
-  const handleCreateKundli = async (e) => {
-    e.preventDefault();
-    setCreating(true);
-
-    try {
-      const payload = {
-        name: form.name,
-        gender: form.gender.toLowerCase(),
-        day: Number(form.day),
-        month: monthMap[form.month],
-        year: Number(form.year),
-        hour: Number(form.hour),
-        min: Number(form.minute),
-        second: Number(form.second),
-        place: form.place,
-        lat: Number(form.lat),
-        lon: Number(form.lon),
-        tzone: 5.5,
-      };
-
-      const res = await createKundli(payload).unwrap();
-
-      // RETURN NEW KUNDLI BACK TO PARENT
-      onSelect(res.data);
-
-      setForm(initialForm);
-    } catch (err) {
-      console.log("Create failed", err);
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  return (
+  return createPortal(
     <div className={styles.modalOverlay}>
       <div className={styles.modalBox}>
         <button className={styles.closeBtn} onClick={onClose}>
           <IoClose size={22} />
         </button>
 
-        {/* Tabs */}
         <div className={styles.tabs}>
           <button
             className={activeTab === "saved" ? styles.activeTab : ""}
@@ -191,19 +138,50 @@ const token =
 
         {/* CREATE KUNDLI */}
         {activeTab === "create" && (
-          <form className={styles.createForm} onSubmit={handleCreateKundli}>
+          <form
+            className={styles.createForm}
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setCreating(true);
+
+              try {
+                const payload = {
+                  name: form.name,
+                  gender: form.gender.toLowerCase(),
+                  day: Number(form.day),
+                  month: monthMap[form.month],
+                  year: Number(form.year),
+                  hour: Number(form.hour),
+                  min: Number(form.minute),
+                  second: Number(form.second),
+                  place: form.place,
+                  lat: Number(form.lat),
+                  lon: Number(form.lon),
+                  tzone: 5.5,
+                };
+
+                const res = await createKundli(payload).unwrap();
+                onSelect(res.data);
+                setForm(initialForm);
+              } catch (err) {
+                console.log("Create failed", err);
+              } finally {
+                setCreating(false);
+              }
+            }}
+          >
             <input
               placeholder="Name"
               name="name"
               value={form.name}
-              onChange={handleInput}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
             />
 
             <select
               name="gender"
               value={form.gender}
-              onChange={handleInput}
+              onChange={(e) => setForm({ ...form, gender: e.target.value })}
               required
             >
               <option value="">Gender</option>
@@ -211,12 +189,11 @@ const token =
               <option value="Female">Female</option>
             </select>
 
-            {/* DOB */}
             <div className={styles.row}>
               <select
                 name="day"
                 value={form.day}
-                onChange={handleInput}
+                onChange={(e) => setForm({ ...form, day: e.target.value })}
                 required
               >
                 <option value="">Day</option>
@@ -228,7 +205,7 @@ const token =
               <select
                 name="month"
                 value={form.month}
-                onChange={handleInput}
+                onChange={(e) => setForm({ ...form, month: e.target.value })}
                 required
               >
                 <option value="">Month</option>
@@ -240,7 +217,7 @@ const token =
               <select
                 name="year"
                 value={form.year}
-                onChange={handleInput}
+                onChange={(e) => setForm({ ...form, year: e.target.value })}
                 required
               >
                 <option value="">Year</option>
@@ -255,7 +232,7 @@ const token =
               <select
                 name="hour"
                 value={form.hour}
-                onChange={handleInput}
+                onChange={(e) => setForm({ ...form, hour: e.target.value })}
                 required
               >
                 <option value="">Hour</option>
@@ -267,7 +244,7 @@ const token =
               <select
                 name="minute"
                 value={form.minute}
-                onChange={handleInput}
+                onChange={(e) => setForm({ ...form, minute: e.target.value })}
                 required
               >
                 <option value="">Minute</option>
@@ -279,7 +256,7 @@ const token =
               <select
                 name="second"
                 value={form.second}
-                onChange={handleInput}
+                onChange={(e) => setForm({ ...form, second: e.target.value })}
                 required
               >
                 <option value="">Second</option>
@@ -289,23 +266,29 @@ const token =
               </select>
             </div>
 
-            {/* Location Search */}
             <div className={styles.locationWrapper}>
               <LocationSearch
                 value={form.place}
                 onChange={(e) => setForm({ ...form, place: e.target.value })}
-                onPlaceSelect={handlePlaceSelect}
+                onPlaceSelect={(place) =>
+                  setForm({
+                    ...form,
+                    place: place.address,
+                    lat: place.lat,
+                    lon: place.lng,
+                  })
+                }
               />
             </div>
 
-            {/* Submit */}
             <button className={styles.submitBtn} disabled={creating}>
               {creating ? "Creating..." : "Create Kundli"}
             </button>
           </form>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

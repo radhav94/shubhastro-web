@@ -1,12 +1,17 @@
 // Astrologers.jsx
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Astrologers.module.scss";
-import { AstrologerCard, Title } from "../../../../../component";
+import {
+  AstrologerCard,
+  RechargeAlertModel,
+  Title,
+} from "../../../../../component";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
 import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSelectModal";
 import { useGetAstrologersQuery } from "../../../../../redux/api/astrologer/astrologerApi";
 import { getToken } from "../../../../../utils/token";
+import { PATH } from "../../../../../utils/routes/Paths";
 
 const Astrologers = ({ onClickView, onProfile }) => {
   const navigate = useNavigate();
@@ -16,20 +21,29 @@ const Astrologers = ({ onClickView, onProfile }) => {
   const { data } = useGetAstrologersQuery({ page, limit });
 
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
+  const [openModal, setOpenModal] = useState({
+    recharge: false,
+  });
+
   const [selectedAstro, setSelectedAstro] = useState(null);
 
   const [createChatRoom] = useCreateChatRoomMutation();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
   const token = getToken();
+  const storedWallet = JSON.parse(localStorage.getItem("wallet")) || {
+    amount: 0,
+  };
 
   // Step 1: On Chat => open Kundli Modal
   const openKundliPopup = (astro) => {
     setSelectedAstro(astro);
-    if (token) {
+    if (token && storedWallet?.amount >= 135) {
       setKundliModalOpen(true);
+    } else if (token) {
+      setOpenModal((prev) => ({ ...prev, recharge: true }));
     } else {
-      navigate("/login");
+      navigate("/login", { state: { from: location.pathname } });
     }
   };
 
@@ -59,6 +73,11 @@ const Astrologers = ({ onClickView, onProfile }) => {
     });
   };
 
+  const onRechargeNow = useCallback(() => {
+    setOpenModal((prev) => ({ ...prev, recharge: false }));
+    navigate(PATH.privateRoutes.RECHARGE.path);
+  }, [navigate]);
+
   return (
     <div className={styles.astrologersWrapper}>
       <Title
@@ -86,6 +105,12 @@ const Astrologers = ({ onClickView, onProfile }) => {
         isOpen={kundliModalOpen}
         onClose={() => setKundliModalOpen(false)}
         onSelect={(kundli) => handleChatAfterKundliSelect(kundli)}
+      />
+      <RechargeAlertModel
+        onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
+        isOpen={openModal.recharge}
+        handleSubmit={onRechargeNow}
+        astrologer={selectedAstro}
       />
     </div>
   );

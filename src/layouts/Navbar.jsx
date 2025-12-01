@@ -48,6 +48,7 @@ const Navbar = () => {
         },
       ],
     },
+    { title: "Shop", path: PATH.privateRoutes.SHOP.path },
   ];
 
   return (

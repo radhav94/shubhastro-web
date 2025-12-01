@@ -6,128 +6,142 @@ import styles from "./TopBar.module.scss";
 import { AppIcons } from "../../utils/appImages";
 import SideBar from "../sidebar/SideBar";
 import { PATH } from "../../utils/routes/Paths";
-
 // Components and Hooks
 
 // Icons
 import { FiMenu } from "react-icons/fi";
 import { PrimaryText } from "../../component";
+import { IoWalletOutline } from "react-icons/io5";
 
-  const  MENU_LIST = [
-    { title: "Home", path: PATH.privateRoutes.HOME.path },
-    {
-      title: "Panchang",
-      path: PATH.privateRoutes.PANCHANG.path,
-      children: [
-        {
-          title: "Today's Panchang",
-          path: PATH.privateRoutes.PANCHANG_TODAY.path,
-        },
-      ],
-    },
-    { title: "Kundli", path: PATH.privateRoutes.KUNDLI.path },
-    { title: "Sadesati", path: PATH.privateRoutes.SADESATI.path },
-    { title: "Match Making", path: PATH.privateRoutes.MATCHMAKING.path },
-    {
-      title: "Horoscope",
-      children: [
-        { title: "Daily Horoscope", path: "/horoscopes/daily-horoscope" },
-        {
-          title: "Monthly Horoscope",
-          path: PATH.privateRoutes.HOROSCOPE.MONTHLY.path,
-        },
-      ],
-    },
-    {
-      title: "Tarot",
-      path: PATH.privateRoutes.TAROT.path,
-      children: [
-        {
-          title: "Shuffle Tarot",
-          path: PATH.privateRoutes.TAROT.path,
-        },
-        {
-          title: "Yes/No Tarot",
-          path: PATH.privateRoutes.YES_NO_TAROT.path,
-        },
-        {
-          title: "Daily Tarot",
-          path: PATH.privateRoutes.DAILY_TAROT.path,
-        },
-      ],
-    },
-    // {
-    //   title: "Eng",
-    //   path: PATH.privateRoutes.TAROT.path,
-    //   children: [
-    //     {
-    //       title: "हिंदी",
-    //       path: PATH.privateRoutes.TAROT.path,
-    //     },
-    //   ],
-    // },
-  ];
+const MENU_LIST = [
+  { title: "Home", path: PATH.privateRoutes.HOME.path },
+  {
+    title: "Panchang",
+    path: PATH.privateRoutes.PANCHANG.path,
+    children: [
+      {
+        title: "Today's Panchang",
+        path: PATH.privateRoutes.PANCHANG_TODAY.path,
+      },
+    ],
+  },
+  { title: "Kundli", path: PATH.privateRoutes.KUNDLI.path },
+  { title: "Sadesati", path: PATH.privateRoutes.SADESATI.path },
+  { title: "Match Making", path: PATH.privateRoutes.MATCHMAKING.path },
+  {
+    title: "Horoscope",
+    children: [
+      { title: "Daily Horoscope", path: "/horoscopes/daily-horoscope" },
+      {
+        title: "Monthly Horoscope",
+        path: PATH.privateRoutes.HOROSCOPE.MONTHLY.path,
+      },
+    ],
+  },
+  {
+    title: "Tarot",
+    path: PATH.privateRoutes.TAROT.path,
+    children: [
+      {
+        title: "Shuffle Tarot",
+        path: PATH.privateRoutes.TAROT.path,
+      },
+      {
+        title: "Yes/No Tarot",
+        path: PATH.privateRoutes.YES_NO_TAROT.path,
+      },
+      {
+        title: "Daily Tarot",
+        path: PATH.privateRoutes.DAILY_TAROT.path,
+      },
+    ],
+  },
+  // {
+  //   title: "Eng",
+  //   path: PATH.privateRoutes.TAROT.path,
+  //   children: [
+  //     {
+  //       title: "हिंदी",
+  //       path: PATH.privateRoutes.TAROT.path,
+  //     },
+  //   ],
+  // },
+];
 
-  const  BOTTOM_MENU = [
-    {
-      title: "Best Astrologers",
-      children: [
-        { title: "Vedic Astrologers", path: "/astro/vedic" },
-        { title: "Tarot Experts", path: "/astro/tarot" },
-      ],
-    },
-    { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
-    { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
-    { title: "Astromall", path: "/mall" },
-    { title: "Astrotalk Store", path: "/store" },
-    {
-      title: "Blogs",
-      path : "/blog",
-    },
-  ];
-
+const BOTTOM_MENU = [
+  {
+    title: "Best Astrologers",
+    children: [
+      { title: "Vedic Astrologers", path: "/astro/vedic" },
+      { title: "Tarot Experts", path: "/astro/tarot" },
+    ],
+  },
+  { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
+  { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
+  { title: "Astromall", path: "/shop" },
+  // { title: "Shubhtalk Store", path: "/store" },
+  {
+    title: "Blogs",
+    path: "/blog",
+  },
+];
 
 const TopBar = () => {
   const navigate = useNavigate();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
-  // const token = localStorage.getItem("verifyOtpToken");
-  // const handleLogout = () => {
-  //   localStorage.removeItem("verifyOtpToken");
-  //   navigate("/");
-  // };
 
   const role = localStorage.getItem("shubhtalk_role");
-const token =
-  role === "ASTROLOGER"
-    ? localStorage.getItem("shubhtalk_astro_token")
-    : localStorage.getItem("shubhtalk_customer_token");
-
+  const token =
+    role === "ASTROLOGER"
+      ? localStorage.getItem("shubhtalk_astro_token")
+      : localStorage.getItem("shubhtalk_customer_token");
 
   const handleLogout = () => {
-  const role = localStorage.getItem("shubhtalk_role");
+    const role = localStorage.getItem("shubhtalk_role");
 
-  if (role === "ASTROLOGER") {
-    localStorage.removeItem("shubhtalk_astro_token");
-    localStorage.removeItem("shubhtalk_astro_id");
-  }
+    if (role === "ASTROLOGER") {
+      localStorage.removeItem("shubhtalk_astro_token");
+      localStorage.removeItem("shubhtalk_astro_id");
+    }
 
-  if (role === "CUSTOMER") {
-    localStorage.removeItem("shubhtalk_customer_token");
-    localStorage.removeItem("shubhtalk_customer_id");
-    localStorage.removeItem("shubhtalk_customer_wallet");
-  }
-  localStorage.removeItem("shubhtalk_role");
-  navigate("/");
-};
+    if (role === "CUSTOMER") {
+      localStorage.removeItem("shubhtalk_customer_token");
+      localStorage.removeItem("shubhtalk_customer_id");
+      localStorage.removeItem("shubhtalk_customer_wallet");
+    }
+    localStorage.removeItem("shubhtalk_role");
+    navigate("/");
+  };
 
   useEffect(() => {
-    const storedWallet = JSON.parse(localStorage.getItem("wallet")) || {
-      amount: 0,
+    const updateWalletFromStorage = () => {
+      const storedWallet = JSON.parse(localStorage.getItem("wallet")) || {
+        amount: 0,
+      };
+      setWalletBalance(Number(storedWallet.amount));
     };
-    setWalletBalance(Number(storedWallet.amount));
-  }, []);
+
+    // run once on mount
+    updateWalletFromStorage();
+
+    // listen for custom wallet updates
+    const handleWalletUpdated = (event) => {
+      // you can either use event.detail.amount or read from localStorage again
+      if (event?.detail?.amount != null) {
+        setWalletBalance(Number(event.detail.amount));
+      } else {
+        updateWalletFromStorage();
+      }
+    };
+
+    window.addEventListener("wallet-updated", handleWalletUpdated);
+
+    return () => {
+      window.removeEventListener("wallet-updated", handleWalletUpdated);
+    };
+  }, []); // 🔹 IMPORTANT: empty dependency array
 
   return (
     <>
@@ -148,13 +162,15 @@ const token =
 
           <div className={styles.rightSection}>
             {/* Wallet Button  */}
-            {/* <button
-              className={`${styles.walletButton} ${styles.hideOnMobile}`}
-              onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
-            >
-              <IoWalletOutline />
-              <span>₹{walletBalance.toFixed(2)}</span>
-            </button> */}
+            {/* {token && (
+              <button
+                className={`${styles.walletButton} ${styles.hideOnMobile}`}
+                onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
+              >
+                <IoWalletOutline />
+                <span>₹{walletBalance.toFixed(2)}</span>
+              </button>
+            )} */}
 
             {/* Language & Notifications Buttons */}
             {/* <button
@@ -173,42 +189,39 @@ const token =
 
             <header className={styles.navbar}>
               <nav className={styles.navbarMenu}>
-                <div style={{display: "flex", flexDirection : "row"}} >
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <ul>
+                    {MENU_LIST.map((item, index) => (
+                      <NavbarItem key={index} {...item} />
+                    ))}
 
-                <ul>
-                  {MENU_LIST.map((item, index) => (
-                    <NavbarItem key={index} {...item} />
-                  ))}
-                  
-                  <li>
-
-                {/* Sign In CTA Button */}
-                {!token ? (
-                  <button
-                  className={`${styles.ctaButton} ${styles.hideOnMobile}`}
-                  onClick={() => navigate("/login")}
-                  >
-                    LogIn
-                  </button>
-                ) : (
-                  <button
-                    className={`${styles.ctaButton} ${styles.hideOnMobile}`}
-                    onClick={handleLogout}
-                    >
-                    Log out
-                  </button>
-                )}
-                </li>
-                </ul>
-                  </div>
-                  <div style={{display: "flex", flexDirection : "row"}} >
-
-                <ul>
-                  {BOTTOM_MENU.map((item, index) => (
-                    <NavbarItem key={index} {...item} />
-                  ))}
-                </ul>
-                  </div>
+                    <li>
+                      {/* Sign In CTA Button */}
+                      {!token ? (
+                        <button
+                          className={`${styles.ctaButton} ${styles.hideOnMobile}`}
+                          onClick={() => navigate("/login")}
+                        >
+                          LogIn
+                        </button>
+                      ) : (
+                        <button
+                          className={`${styles.ctaButton} ${styles.hideOnMobile}`}
+                          onClick={handleLogout}
+                        >
+                          Log out
+                        </button>
+                      )}
+                    </li>
+                  </ul>
+                </div>
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <ul>
+                    {BOTTOM_MENU.map((item, index) => (
+                      <NavbarItem key={index} {...item} />
+                    ))}
+                  </ul>
+                </div>
               </nav>
             </header>
           </div>
