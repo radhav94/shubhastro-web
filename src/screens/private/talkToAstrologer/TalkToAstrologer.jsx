@@ -49,7 +49,7 @@ const TalkToAstrologer = () => {
   const [allAstrologers, setAllAstrologers] = useState([]);
   const [hasMore, setHasMore] = useState(true);
 
-  const limit = 6;
+  const limit = 9;
 
   const [createChatRoom] = useCreateChatRoomMutation();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
@@ -95,9 +95,9 @@ const TalkToAstrologer = () => {
     setHasMore(data.length >= limit);
   }, [data, page]); // 👈 MUST add page here!!
 
-  const isThrottledRef = useRef(false);
   const hasMoreRef = useRef(hasMore);
   const isFetchingRef = useRef(isFetching);
+  const loadMoreRef = useRef(null);
 
   // Keep refs updated
   useEffect(() => {
@@ -116,28 +116,26 @@ const TalkToAstrologer = () => {
     }
   }, [allAstrologers]);
 
-  // Stable scroll listener
   useEffect(() => {
-    const handleScroll = () => {
-      if (isThrottledRef.current) return;
+    if (isFetching || !hasMore) return;
 
-      const bottom =
-        window.innerHeight + window.scrollY >=
-        document.documentElement.scrollHeight - 200;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 1 }
+    );
 
-      if (bottom && !isFetchingRef.current && hasMoreRef.current) {
-        isThrottledRef.current = true;
-        setPage((prev) => prev + 1);
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
 
-        setTimeout(() => {
-          isThrottledRef.current = false;
-        }, 600);
-      }
+    return () => {
+      if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
     };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+}, [isFetching, hasMore]);
 
   const openKundliPopup = (astro) => {
     setSelectedAstrologer(astro);
@@ -283,6 +281,10 @@ const TalkToAstrologer = () => {
             <PrimaryText>No astrologers found.</PrimaryText>
           </div>
         )}
+      </div>
+
+      <div ref={loadMoreRef} className={styles.loaderWrapper}>
+        {isFetching && <PrimaryLoader />}
       </div>
 
       <DetailsModal

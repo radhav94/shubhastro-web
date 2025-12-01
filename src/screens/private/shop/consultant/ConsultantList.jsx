@@ -9,7 +9,7 @@ const ConsultantList = () => {
   const [allAstrologers, setAllAstrologers] = useState([]);
   const [hasMore, setHasMore] = useState(true);
 
-  const limit = 6;
+  const limit = 9;
 
   const { data: astroRes, isFetching } = useGetAstrologersQuery({
     page,
