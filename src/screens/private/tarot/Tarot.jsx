@@ -15,7 +15,6 @@ const Tarot = () => {
 
   // API mappings
   const tarotReadingData = data?.response || [];
-  console.log("Tarot Reading Data:", data);
 
   return (
     <>

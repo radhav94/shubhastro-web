@@ -6,7 +6,12 @@ import { IoMdClose } from "react-icons/io";
 
 import { getWidth } from "../../../../utils/theme";
 
-const RechargeAlertModel = ({ isOpen, onClose, handleSubmit }) => {
+const RechargeAlertModel = ({
+  isOpen,
+  onClose,
+  handleSubmit,
+  astrologer = "Astrologer",
+}) => {
   const modalWidth = `${getWidth() * 0.44}px`;
 
   return (
@@ -19,18 +24,17 @@ const RechargeAlertModel = ({ isOpen, onClose, handleSubmit }) => {
             className="cursor-pointer"
           />
         </div>
-        <div className="  ">
-          <PrimaryText isExtraBold size_20 isCenter>
+        <div className="flex flex-col items-center justify-center">
+          {/* <PrimaryText isExtraBold size_20 isCenter>
             Insufficient wallet balance
-          </PrimaryText>
+          </PrimaryText> */}
           <PrimaryText isCenter className=" pt-4">
-            Your wallet balance is ₹ 0.00 and required amount to consult with
-            <br />
-            Tarot Amrita is ₹ 25.00. Please recharge your wallet to consult.
+            Minimum balance of 5 minutes (₹ 135) is required to start chat with
+            {` ${astrologer?.firstName}`}.
           </PrimaryText>
           <PrimaryButton
+            className=" mt-2"
             title="Reacharge NOW!"
-            className=" mt-4"
             onClick={handleSubmit}
           />
         </div>

@@ -2,6 +2,9 @@
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
+  // margin: 20px 5rem;
+  justify-content: center;
+  align-items: center;
 
   .leftSide {
     flex: 1 1 300px;
@@ -12,6 +15,7 @@
     .walletBalance {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 10px;
       font-weight: 600;
 
@@ -34,14 +38,18 @@
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
+      justify-content: center;
+      align-items: center;
 
       .rechargeAmountWrapper {
+        width: 200px;
         .rechargeAmount {
-          background-color: #f0f0f0;
-          padding: 10px 15px;
+          // background-color: #f0f0f0;
+          padding: 20px 30px;
           border-radius: 6px;
           font-weight: 600;
           cursor: pointer;
+          box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
 
           &:hover {
             background-color: #e6f7ff;

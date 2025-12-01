@@ -1,0 +1,33 @@
+.mainContainer {
+  margin: 0 1rem;
+}
+.cardsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  margin: 2rem;
+}
+
+.cardWrapper {
+  flex: 0 0 calc(33.333% - 10.66px);
+  min-width: 200px;
+}
+
+@media (max-width: 1024px) {
+  .cardWrapper {
+    flex: 0 0 calc(50% - 8px);
+  }
+}
+@media (max-width: 768px) {
+  .cardsContainer {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .cardWrapper {
+    flex: 0 0 80%;
+    min-width: 250px;
+  }
+}
