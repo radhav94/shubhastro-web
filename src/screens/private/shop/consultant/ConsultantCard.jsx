@@ -62,7 +62,7 @@ const ConsultantCard = ({ data }) => {
           </div>
         </div>
         <button className={styles.select} onClick={handleSelect}>
-          Select
+          select
         </button>
       </div>
 

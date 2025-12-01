@@ -25,10 +25,20 @@ const ProductList = () => {
           >
             <img src={product.defaultImage} alt={product.name} />
 
+            {/* AstroTalk-style BOOK button */}
+            <button
+              className={styles.bookBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/shop/${slug}/${product.slug}`, { state: product });
+              }}
+            >
+              Book
+            </button>
+
             <div className={styles.content}>
               <h3>{product.name}</h3>
               <p>Starting from ₹ {product.minConsultantPrice}</p>
-              {/* <button className={styles.bookBtn}>View Details</button> */}
             </div>
           </div>
         ))}
