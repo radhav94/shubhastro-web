@@ -1,6 +1,5 @@
 // Astrologers.jsx
-import { useCallback, useState } from "react";
-import { useState, useEffect } from "react";
+import { useCallback, useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Astrologers.module.scss";
 import {
