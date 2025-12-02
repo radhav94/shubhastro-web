@@ -12,8 +12,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { PrimaryText } from "../../../../../component";
 import useChat from "./useChatWindow";
 import { useGetChatHistoryQuery } from "../../../../../redux/api/chatApi";
-// import { Socket } from "socket.io-client";
-
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
 
@@ -65,9 +63,8 @@ const ChatWindow = () => {
 
 
    const handleCallClick = () => {
-    console.log("hello")
     // socket.emit("call_start", { astrologerId: astrologerId });
-    voiceSocket.emit("create-call-room", {
+    voiceSocket.emit("create_call_room", {
     userId,
     astrologerId,
   });
@@ -76,16 +73,16 @@ const ChatWindow = () => {
 useEffect(() => {
   if (!isUserSide) return;
 
-  voiceSocket.on("return-call-room", ({ roomId }) => {
+  voiceSocket.on("return_call_room", ({ roomId }) => {
     console.log("roomiD",roomId)
-    voiceSocket.emit("notify-incoming-call", {
+    voiceSocket.emit("notify_incoming_call", {
       roomId,
       to: astrologerId,
       from: userId   // ⭐ Add this line
     });
   });
 
-  voiceSocket.on("call-accepted", ({ roomId }) => {
+  voiceSocket.on("call_accepted", ({ roomId }) => {
 navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
   state: {
     roomId,
@@ -96,10 +93,45 @@ navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
   });
 
   return () => {
-    voiceSocket.off("return-call-room");
-    voiceSocket.off("call-accepted");
+    voiceSocket.off("return_call_room");
+    voiceSocket.off("call_accepted");
   };
 }, [isUserSide]);
+
+
+
+
+const handleVideoCall = () => {
+  voiceSocket.emit("create-video-call-room", {
+    userId,
+    astrologerId
+  });
+};
+
+
+// Listen for room create
+useEffect(() => {
+  const handleRoomReturn = ({ channelName }) => {
+    console.log("Room Created:", channelName);
+
+    // 👉 wait for astrologer to accept
+    voiceSocket.on("video-call-accepted", ({ channelName }) => {
+      console.log("Astrologer Accepted Call!");
+      
+      navigate(`/talk-to-astrologers/video-call/${channelName}`, {
+        state: { channelName, isUserSide: true }
+      });
+    });
+  };
+
+  voiceSocket.on("return-video-call-room", handleRoomReturn);
+
+  return () => {
+    voiceSocket.off("return-video-call-room", handleRoomReturn);
+    voiceSocket.off("video-call-accepted");
+  };
+}, [navigate]);
+
 
   // SEND
   const handleSend = () => {
@@ -138,7 +170,10 @@ navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
   {/* Right Side Icons */}
   <div className={styles.headerRight}>
     <IoCallOutline className={styles.callIcon} onClick={handleCallClick}/>
-    <IoVideocamOutline className={styles.videoIcon} />
+    <IoVideocamOutline
+            className={styles.videoIcon}
+            onClick={handleVideoCall}
+          />
   </div>
 </div>
 

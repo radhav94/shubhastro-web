@@ -110,7 +110,7 @@ export const localReuqqestApi = createApi({
 
   baseQuery: async (args, api, extraOptions) => {
     const rawBaseQuery = fetchBaseQuery({
-      baseUrl: "https://njsapi-shubhtalk.epicon.in/api/",
+      baseUrl: "http://192.168.12.114:3000/",
       prepareHeaders: (headers) => {
         const role = localStorage.getItem("shubhtalk_role");
         const token =
