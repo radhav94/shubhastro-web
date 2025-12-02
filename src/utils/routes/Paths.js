@@ -289,7 +289,12 @@ export const PATH = {
     },
 
     VIDEO_CALL: {
-      path: "/video-call",
+      path: "/talk-to-astrologers/video-call/:channelName",
+      element: VideoCalling,
+    },
+
+     ASTRO_VIDEO_CALL: {
+      path: "/astrologer-dashboard/video-call/:channelName",
       element: VideoCalling,
     },
 

@@ -1,10 +1,10 @@
-import { localReuqqestApi } from "../../../services/appServices/privateRequestNew";
+import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 
-export const agoraToken = localReuqqestApi.injectEndpoints({
+export const agoraToken = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
     getAgoraToken: builder.query({
       query: ({ channelName }) => ({
-        url: "api/callSessions/agoraToken",
+        url: "callSessions/agoraToken",
         params: {
           channelName,
           // entityId,

@@ -63,7 +63,6 @@ const ChatWindow = () => {
 
 
    const handleCallClick = () => {
-    console.log("hello")
     // socket.emit("call_start", { astrologerId: astrologerId });
     voiceSocket.emit("create_call_room", {
     userId,
@@ -98,6 +97,41 @@ navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
     voiceSocket.off("call_accepted");
   };
 }, [isUserSide]);
+
+
+
+
+const handleVideoCall = () => {
+  voiceSocket.emit("create-video-call-room", {
+    userId,
+    astrologerId
+  });
+};
+
+
+// Listen for room create
+useEffect(() => {
+  const handleRoomReturn = ({ channelName }) => {
+    console.log("Room Created:", channelName);
+
+    // 👉 wait for astrologer to accept
+    voiceSocket.on("video-call-accepted", ({ channelName }) => {
+      console.log("Astrologer Accepted Call!");
+      
+      navigate(`/talk-to-astrologers/video-call/${channelName}`, {
+        state: { channelName, isUserSide: true }
+      });
+    });
+  };
+
+  voiceSocket.on("return-video-call-room", handleRoomReturn);
+
+  return () => {
+    voiceSocket.off("return-video-call-room", handleRoomReturn);
+    voiceSocket.off("video-call-accepted");
+  };
+}, [navigate]);
+
 
   // SEND
   const handleSend = () => {
@@ -136,7 +170,10 @@ navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
   {/* Right Side Icons */}
   <div className={styles.headerRight}>
     <IoCallOutline className={styles.callIcon} onClick={handleCallClick}/>
-    <IoVideocamOutline className={styles.videoIcon} />
+    <IoVideocamOutline
+            className={styles.videoIcon}
+            onClick={handleVideoCall}
+          />
   </div>
 </div>
 

@@ -10,10 +10,20 @@ const AstrologersDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
 
+  const astroIdLocal = localStorage.getItem("shubhtalk_astro_id");
+
+
   // 🚀 Call states
   const [incomingCall, setIncomingCall] = useState(false);
   const [callerSocketId, setCallerSocketId] = useState(null);
   const [roomId, setRoomId] = useState(null);
+   const [incomingVideoCall, setIncomingVideoCall] = useState(false);
+const [videoChannelName, setVideoChannelName] = useState(null);
+  const [callerUserId, setCallerUserId] = useState(null);
+
+
+
+
 
 
   // 🔥 Listen for incoming call
@@ -40,6 +50,89 @@ const AstrologersDashboard = () => {
   }
 });
 
+  };
+
+
+
+
+
+
+// useEffect(() => {
+//   const handleIncomingVideo = ({ channelName,userId, astrologerId  }) => {
+//     console.log("Incoming Call:", userId);
+//     setIncomingVideoCall(true);
+//     setVideoChannelName(channelName);
+//   };
+
+// //   const handleIncomingVideo = ({ channelName, userId, astrologerId }) => {
+// //   console.log("Incoming Call:", userId);
+
+// //   voiceSocket.emit("join-room", {
+// //     userId,
+// //     astrologerId: Number(astroIdLocal),
+// //   });
+
+// //   setIncomingVideoCall(true);
+// //   setVideoChannelName(channelName);
+// //   setCallerSocketId(userId); // 👈 REQUIRED!
+// // };
+
+
+//   voiceSocket.on("incoming-video-call", handleIncomingVideo);
+
+//   return () => {
+//     voiceSocket.off("incoming-video-call", handleIncomingVideo);
+//   };
+// }, []);
+
+useEffect(() => {
+  const handleIncoming = ({ channelName, userId }) => {
+    console.log("📹 Incoming Call from:", userId);
+    setCallerUserId(userId);
+    setVideoChannelName(channelName);
+    setIncomingVideoCall(true);
+  };
+
+  voiceSocket.on("incoming-video-call", handleIncoming);
+
+  return () => voiceSocket.off("incoming-video-call", handleIncoming);
+}, []);
+
+  
+  /** ⭐ Accept Video Call */
+const handleVideoAccept = () => {
+  voiceSocket.emit("accept-video-call", {
+    channelName: videoChannelName,
+    userId: callerUserId,
+    astrologerId: Number(astroIdLocal)
+  });
+
+  setIncomingVideoCall(false);
+
+  navigate(`/astrologer-dashboard/video-call/${videoChannelName}`, {
+    state: { channelName: videoChannelName, isUserSide: false }
+  });
+};
+
+
+  // const handleVideoAccept = () => {
+  //   console.log("Accepted Call:", videoChannelName);
+
+  //   voiceSocket.emit("accept-video-call", {
+  //     channelName: videoChannelName,
+  //     userId: callerUserId,
+  //     astrologerId: astroIdLocal,
+  //   });
+
+  //   setIncomingVideoCall(false);
+  //   navigate(`/astrologer-dashboard/video-call/${videoChannelName}`, {
+  //     state: { channelName: videoChannelName, isUserSide: false },
+  //   });
+  // };
+
+  /** ❌ Reject video call popup */
+  const handleVideoReject = () => {
+    setIncomingVideoCall(false);
   };
 
   const DashboardTab = (
@@ -110,6 +203,23 @@ const AstrologersDashboard = () => {
     </div>
   </div>
 )}
+
+{incomingVideoCall && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContainer}>
+            <PrimaryText size_18 isSemiBold>📹 Incoming Video Call</PrimaryText>
+
+            <div className={styles.modalButtons}>
+              <button className={styles.acceptBtn} onClick={handleVideoAccept}>
+                Accept
+              </button>
+              <button className={styles.rejectBtn} onClick={handleVideoReject}>
+                Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
 
       {/* Right panels */}
