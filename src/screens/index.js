@@ -54,3 +54,12 @@ export { default as Streaming } from "./private/astroLive/streaming/Streaming";
 // components/index.js
 
 // layout
+
+
+//Footer
+export { default as  About} from "./public/static-pages/About";
+export { default as  Disclaimer} from "./public/static-pages/Disclaimer";
+export { default as  PricingPolicy} from "./public/static-pages/PricingPolicy";
+export { default as  PrivacyPolicy} from "./public/static-pages/PrivacyPolicy";
+export { default as  RefundPolicy} from "./public/static-pages/RefundPolicy";
+export { default as  TermsConditions} from "./public/static-pages/TermsConditions";
