@@ -39,6 +39,12 @@ import {
   MatchMaking,
   Sadesati,
   MatchDetails,
+  About,
+  Disclaimer,
+  PricingPolicy,
+  PrivacyPolicy,
+  RefundPolicy,
+  TermsConditions
 } from "../../screens";
 import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
 // import AstrologerIncomingCall from "../../screens/private/home/components/astrologers/AstrologerIncomingCall";
@@ -311,6 +317,37 @@ export const PATH = {
       path: "/astrolive/streaming",
       element: Streaming,
       header: false,
+      footer: false,
+    },
+    ABOUT: {
+      path: "/aboutus",
+      element: About,
+      header: false
+    },
+    DISCLAIMER: {
+      path: "/disclaimer",
+      element: Disclaimer,
+      header: false
+    },
+    PRICING_POLICY: {
+      path: "/pricing-policy",
+      element: PricingPolicy,
+      header: false
+    },
+    PRIVACY_POLICY: {
+      path: "/privacy-policy",
+      element: PrivacyPolicy,
+      header: false
+    },
+    REFUND_POLICY: {
+      path: "/refund-and-cancellation-policy",
+      element: RefundPolicy,
+      header: false
+    },
+    TERMSCONDITIONS: {
+      path: "/terms-conditions",
+      element: TermsConditions,
+      header: false
     },
   },
 };

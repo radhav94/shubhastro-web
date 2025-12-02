@@ -26,12 +26,14 @@ const quickLinks = [
 ];
 
 const usefulLinks = [
-  { href: "/aboutus.aspx", text: "About Us" },
-  { href: "/contact-us", text: "Contact Us" },
-  { href: "/career.aspx", text: "Careers" },
-  { href: "/refund-policy", text: "Refund Policy" },
-  { href: "/faqs", text: "FAQs" },
+  { href: "/aboutus", text: "About Us" },
+  { href: "/refund-and-cancellation-policy", text: "Refund & Cancellation Policy" },
+  { href: "/terms-conditions", text: "Terms & Conditions" },
+  { href: "/privacy-policy", text: "Privacy Policy" },
+  { href: "/disclaimer", text: "Disclaimer" },
+  { href: "/pricing-policy", text: "Pricing Policy" },
 ];
+
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -165,7 +167,7 @@ const Footer = () => {
             <ul>
               {usefulLinks.map((link) => (
                 <li key={link.href}>
-                  <a href={link.href}>{link.text}</a>
+                  <Link to={link.href}>{link.text}</Link>
                 </li>
               ))}
             </ul>
@@ -192,10 +194,10 @@ const Footer = () => {
           <p>© 2001-{currentYear} Shubh Talk Pvt. Ltd. All rights reserved</p>
           <ul>
             <li>
-              <a href="/policy.aspx">Privacy Policy</a>
+              <Link to="/policy">Privacy Policy</Link>
             </li>
             <li>
-              <a href="/termandcondition.aspx">T&C</a>
+              <Link to="/termandcondition">T&C</Link>
             </li>
           </ul>
         </div>

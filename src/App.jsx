@@ -65,7 +65,7 @@ const flattenRoutes = (routes) => {
         ...flattenRoutes(PATH.privateRoutes).map((child) => ({
           path: child.path,
           element: <child.element />,
-          handle: { header: child.header ?? true },
+          handle: { header: child.header ?? true, footer: child.footer ?? true },
         })),
         {
           path: "/",

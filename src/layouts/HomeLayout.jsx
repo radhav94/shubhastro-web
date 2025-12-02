@@ -21,6 +21,7 @@ const HomeLayout = () => {
     .reverse()
     .find((match) => match.handle && match.handle.header !== undefined);
   const showHeader = currentRoute ? currentRoute.handle.header : true;
+  const showFooter = currentRoute ? currentRoute.handle.footer : true;
 
   return (
     <div className={styles.layout}>
@@ -49,7 +50,7 @@ const HomeLayout = () => {
         </Suspense>
       </div>
 
-      {showHeader && (
+      {showFooter && (
         <div className={styles.footerWrapper}>
           <Footer />
         </div>
