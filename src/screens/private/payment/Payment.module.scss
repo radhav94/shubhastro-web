@@ -7,10 +7,13 @@
   align-items: center;
 
   .leftSide {
-    flex: 1 1 300px;
+    // flex: 1 1 300px;
     background-color: #fff;
     border-radius: 8px;
     padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     .walletBalance {
       display: flex;
@@ -78,134 +81,6 @@
       img {
         width: 20px;
         height: 20px;
-      }
-    }
-  }
-
-  .rightSide {
-    flex: 1 1 300px;
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 20px;
-
-    .cashbackAmount {
-      background-color: #f6ffed;
-      border: 1px solid #b7eb8f;
-      border-radius: 6px;
-      padding: 10px;
-      margin-bottom: 15px;
-
-      .cashbackHeader {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-
-        button {
-          border: none;
-          background: none;
-          cursor: pointer;
-        }
-
-        span {
-          color: #52c41a;
-          font-size: 12px;
-        }
-      }
-
-      .offerApplied {
-        margin-top: 5px;
-        color: #1890ff;
-        font-size: 14px;
-      }
-    }
-
-    .redeemSection {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background-color: #fffbe6;
-      border: 1px solid #ffe58f;
-      border-radius: 6px;
-      padding: 10px;
-      margin-bottom: 15px;
-      cursor: pointer;
-
-      .redeemIcon {
-        width: 20px;
-        height: 20px;
-      }
-
-      .redeemArrow {
-        width: 16px;
-        height: 16px;
-      }
-    }
-
-    .billSummary {
-      .billTable {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 10px;
-
-        th,
-        td {
-          text-align: left;
-          padding: 8px 5px;
-          font-size: 14px;
-          border-bottom: 1px solid #f0f0f0;
-        }
-
-        th {
-          font-weight: 700;
-        }
-
-        .greenSpan {
-          color: #52c41a;
-          font-weight: 600;
-        }
-      }
-
-      .toPay {
-        th,
-        td {
-          font-size: 16px;
-        }
-      }
-    }
-
-    .offerPoints {
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .proceedPay {
-      margin-top: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      .proceedPayButton {
-        background-color: #1890ff;
-        color: #fff;
-        border: none;
-        padding: 10px 15px;
-        border-radius: 6px;
-        cursor: pointer;
-
-        &:hover {
-          background-color: #40a9ff;
-        }
-      }
-
-      strong {
-        font-size: 16px;
-      }
-
-      span {
-        font-size: 14px;
-        color: #595959;
       }
     }
   }

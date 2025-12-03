@@ -41,4 +41,18 @@ export const MENU_LIST = [
       },
     ],
   },
+  {
+    title: "Best Astrologers",
+    children: [
+      { title: "Vedic Astrologers", path: "/astro/vedic" },
+      { title: "Tarot Experts", path: "/astro/tarot" },
+    ],
+  },
+  { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
+  { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
+  { title: "Astromall", path: "/shop" },
+  { title: "Live", path: "/livestream" },
+  // { title: "Shubhtalk Store", path: "/store" },
+  { title: "Blogs", path: "/blog" },
+  { title: "Recharge", path: "/callingpack" },
 ];

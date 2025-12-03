@@ -4,13 +4,17 @@ import styles from "./FinalPay.module.scss";
 import { Toast } from "../../../component";
 import { FaCcMastercard } from "react-icons/fa";
 import { LuBadgeIndianRupee } from "react-icons/lu";
+import { useGetPlanByIdQuery } from "../../../redux/api/plansApi/plansApi";
 
 const FinalPay = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const amount = location.state?.amount || 0;
-  const extra = location.state?.extra || 0;
+  const planId = location.state?.planId;
+  const { data } = useGetPlanByIdQuery(planId);
+
+  const amount = data?.data?.actualPrice || 0;
+  const extra = data?.data?.discountedPrice || 0;
 
   const gst = +(amount * 0.18).toFixed(2);
   const totalAmount = +(amount + gst).toFixed(2);
@@ -25,7 +29,7 @@ const FinalPay = () => {
   }, []);
 
   const handlePayment = (method) => {
-    const newBalance = walletBalance + amount;
+    const newBalance = walletBalance + amount + extra;
 
     localStorage.setItem("wallet", JSON.stringify({ amount: newBalance }));
     setWalletBalance(newBalance);
@@ -67,7 +71,7 @@ const FinalPay = () => {
       </div>
 
       <div className={styles.cashbackBox}>
-        ₹ {extra} cashback will be added soon
+        ₹ {extra} in wallet after recharge
       </div>
 
       <p className={styles.chooseText}>Choose Payment Method</p>
