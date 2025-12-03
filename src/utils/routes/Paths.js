@@ -44,7 +44,9 @@ import {
   PricingPolicy,
   PrivacyPolicy,
   RefundPolicy,
-  TermsConditions
+  TermsConditions,
+  Notification,
+  WalletTranscations
 } from "../../screens";
 import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
 // import AstrologerIncomingCall from "../../screens/private/home/components/astrologers/AstrologerIncomingCall";
@@ -349,5 +351,15 @@ export const PATH = {
       element: TermsConditions,
       header: false
     },
+
+    // Header
+    NOTIFICATION: {
+      path: "/notification",
+      element: Notification,
+    },
+    WalletTranscations: {
+      path: "/wallet-transactions",
+      element: WalletTranscations,
+    }
   },
 };

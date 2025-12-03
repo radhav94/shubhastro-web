@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { PrimaryText, Toast } from "../../component";
 import { PATH } from "../../utils/routes/Paths";
 import * as AuthServices from "../../services/appServices/authService";
+import { saveUserToStorage } from "../../utils/authStorage";
 
 const OtpVerification = () => {
   const navigate = useNavigate();
@@ -92,7 +93,11 @@ const handleVerifyOtp = async (event) => {
     const response = await AuthServices.verifyOtp(payload);
 
     if (response?.data?.statusCode === 200) {
-      const { isRegister, accessToken, _id } = response?.data?.data || {};
+      const userData = response?.data?.data || {};
+      const { isRegister, accessToken, _id } = userData;
+
+      // SAVE ONLY NECESSARY DATA
+      saveUserToStorage(userData);
 
       // Clear everything first to avoid conflict
       // localStorage.removeItem("shubhtalk_role");
