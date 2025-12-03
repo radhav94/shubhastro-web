@@ -14,62 +14,38 @@ import { PrimaryText } from "../../component";
 import { IoWalletOutline } from "react-icons/io5";
 import { getUserFromStorage } from "../../utils/authStorage";
 
-  const  BOTTOM_MENU = [
-    {
-      title: "Best Astrologers",
-      children: [
-        { title: "Vedic Astrologers", path: "/astro/vedic" },
-        { title: "Tarot Experts", path: "/astro/tarot" },
-      ],
-    },
-    { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
-    { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
-    { title: "Astromall", path: "/mall" },
-    { title: "Astrotalk Store", path: "/store" },
-    {
-      title: "Blogs",
-      path : "/blog",
-    },
-  ];
-
-
 const TopBar = () => {
   const navigate = useNavigate();
   const user = getUserFromStorage();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
-  const [currentLang, setCurrentLang] = useState(localStorage.getItem("selectedLanguage") || "en");
-
-  // const token = localStorage.getItem("verifyOtpToken");
-  // const handleLogout = () => {
-  //   localStorage.removeItem("verifyOtpToken");
-  //   navigate("/");
-  // };
+  const [currentLang, setCurrentLang] = useState(
+    localStorage.getItem("selectedLanguage") || "en"
+  );
 
   const role = localStorage.getItem("shubhtalk_role");
-const token =
-  role === "ASTROLOGER"
-    ? localStorage.getItem("shubhtalk_astro_token")
-    : localStorage.getItem("shubhtalk_customer_token");
-
+  const token =
+    role === "ASTROLOGER"
+      ? localStorage.getItem("shubhtalk_astro_token")
+      : localStorage.getItem("shubhtalk_customer_token");
 
   const handleLogout = () => {
-  const role = localStorage.getItem("shubhtalk_role");
+    const role = localStorage.getItem("shubhtalk_role");
 
-  if (role === "ASTROLOGER") {
-    localStorage.removeItem("shubhtalk_astro_token");
-    localStorage.removeItem("shubhtalk_astro_id");
-  }
+    if (role === "ASTROLOGER") {
+      localStorage.removeItem("shubhtalk_astro_token");
+      localStorage.removeItem("shubhtalk_astro_id");
+    }
 
-  if (role === "CUSTOMER") {
-    localStorage.removeItem("shubhtalk_customer_token");
-    localStorage.removeItem("shubhtalk_customer_id");
-    localStorage.removeItem("shubhtalk_customer_wallet");
-  }
-  localStorage.removeItem("shubhtalk_role");
-  navigate("/");
-};
+    if (role === "CUSTOMER") {
+      localStorage.removeItem("shubhtalk_customer_token");
+      localStorage.removeItem("shubhtalk_customer_id");
+      localStorage.removeItem("shubhtalk_customer_wallet");
+    }
+    localStorage.removeItem("shubhtalk_role");
+    navigate("/");
+  };
 
   function handleLanguageChange(lang) {
     const select = document.querySelector(".goog-te-combo");
@@ -77,14 +53,14 @@ const token =
     if (select) {
       select.value = lang;
       select.dispatchEvent(new Event("change"));
-      setCurrentLang(lang);   // UPDATE UI LANGUAGE
+      setCurrentLang(lang); // UPDATE UI LANGUAGE
       localStorage.setItem("selectedLanguage", lang);
     } else {
       console.error("Google Translate dropdown not found");
     }
   }
 
-    const  MENU_LIST = [
+  const MENU_LIST = [
     { title: "Home", path: PATH.privateRoutes.HOME.path },
     {
       title: "Panchang",
@@ -128,95 +104,104 @@ const token =
       ],
     },
     {
-      title:  <span className="notranslate">{currentLang === "en" ? "Eng" : "हिंदी"}</span>,
+      title: (
+        <span className="notranslate">
+          {currentLang === "en" ? "Eng" : "हिंदी"}
+        </span>
+      ),
       children: [
         currentLang === "en"
           ? {
               title: "हिंदी",
-              onClick: () => handleLanguageChange("hi")
+              onClick: () => handleLanguageChange("hi"),
             }
           : {
               title: "English",
-              onClick: () => handleLanguageChange("en")
-            }
-      ]
+              onClick: () => handleLanguageChange("en"),
+            },
+      ],
     },
     {
-      title:    token ? (<div className={styles.avatarCircle}>
-        <img
-          src={"https://cdn-icons-png.flaticon.com/512/149/149071.png"}
-          alt="user"
-          className={styles.avatar}
-        />
-      </div>) : (
+      title: token ? (
+        <div className={styles.avatarCircle}>
+          <img
+            src={"https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+            alt="user"
+            className={styles.avatar}
+          />
+        </div>
+      ) : (
         <button
-            className={`${styles.ctaButton} ${styles.hideOnMobile}`}
-            onClick={() => navigate("/login")}
-          >
-            LogIn
-          </button>
+          className={`${styles.ctaButton} ${styles.hideOnMobile}`}
+          onClick={() => navigate("/login")}
+        >
+          LogIn
+        </button>
       ),
       children: token && [
         {
-          title: <div className={styles.userInfo}>
-                    <div className={styles.userAvatar}>
-                      <img
-                        src={"https://cdn-icons-png.flaticon.com/512/149/149071.png"}
-                        alt="user"
-                        className={styles.avatar}
-                      />
-                    </div>
-                    <div className={styles.userDetails}>
-                      <PrimaryText size_14 isBold isCenter >{user?.firstName}</PrimaryText>
-                      <PrimaryText size_12 isBold color="#466590" isCenter={true}>{user?.phoneNumber}</PrimaryText>
-                    </div>
-                  </div>,
-          path: "/profile"
+          title: (
+            <div className={styles.userInfo}>
+              <div className={styles.userAvatar}>
+                <img
+                  src={"https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+                  alt="user"
+                  className={styles.avatar}
+                />
+              </div>
+              <div className={styles.userDetails}>
+                <PrimaryText size_14 isBold isCenter>
+                  {user?.firstName}
+                </PrimaryText>
+                <PrimaryText size_12 isBold color="#466590" isCenter={true}>
+                  {user?.phoneNumber}
+                </PrimaryText>
+              </div>
+            </div>
+          ),
+          path: "/profile",
         },
-        
+
         {
           title: "Notification",
-          path : "/notification"
+          path: "/notification",
         },
         {
           title: "Wallet Transactions",
-          path : "/wallet-transactions"
+          path: "/wallet-transactions",
         },
         {
           title: "Order History",
-          path: "/order-history"
+          path: "/order-history",
         },
-        
+
         {
           title: "Logout",
-          onClick: handleLogout
+          onClick: handleLogout,
         },
         {
           title: "Logout From Other Devices",
-          onClick: handleLogout
-        }
-      ]
-    }
+          onClick: handleLogout,
+        },
+      ],
+    },
   ];
 
-const BOTTOM_MENU = [
-  {
-    title: "Best Astrologers",
-    children: [
-      { title: "Vedic Astrologers", path: "/astro/vedic" },
-      { title: "Tarot Experts", path: "/astro/tarot" },
-    ],
-  },
-  { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
-  { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
-  { title: "Astromall", path: "/shop" },
-  // { title: "Shubhtalk Store", path: "/store" },
-  {
-    title: "Blogs",
-    path: "/blog",
-  },
-];
-
+  const BOTTOM_MENU = [
+    {
+      title: "Best Astrologers",
+      children: [
+        { title: "Vedic Astrologers", path: "/astro/vedic" },
+        { title: "Tarot Experts", path: "/astro/tarot" },
+      ],
+    },
+    { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
+    { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
+    { title: "Astromall", path: "/shop" },
+    // { title: "Shubhtalk Store", path: "/store" },
+    { title: "Blogs", path: "/blog" },
+    { title: "Recharge", path: "/callingpack" },
+  ];
 
   useEffect(() => {
     const updateWalletFromStorage = () => {
@@ -241,7 +226,7 @@ const BOTTOM_MENU = [
     //Translate if hindi lang is selected
     const savedLang = localStorage.getItem("selectedLanguage");
 
-    if (!savedLang || savedLang === "en") return; 
+    if (!savedLang || savedLang === "en") return;
 
     const interval = setInterval(() => {
       const select = document.querySelector(".goog-te-combo");
@@ -258,7 +243,7 @@ const BOTTOM_MENU = [
       window.removeEventListener("wallet-updated", handleWalletUpdated);
       clearInterval(interval);
     };
-  }, []); // 🔹 IMPORTANT: empty dependency array
+  }, []); //  IMPORTANT: empty dependency array
 
   return (
     <>
@@ -311,7 +296,6 @@ const BOTTOM_MENU = [
                     {MENU_LIST.map((item, index) => (
                       <NavbarItem key={index} {...item} />
                     ))}
-
                   </ul>
                 </div>
                 <div style={{ display: "flex", flexDirection: "row" }}>
@@ -354,8 +338,12 @@ const NavbarItem = ({ title, path, children }) => {
         <div className={styles.dropdownWrapper}>
           <ul className={styles.dropdownMenu}>
             {children.map((child, idx) => (
-              <li key={idx} onClick={() => child?.onClick ? child?.onClick() : navigate(child.path)}>
-              
+              <li
+                key={idx}
+                onClick={() =>
+                  child?.onClick ? child?.onClick() : navigate(child.path)
+                }
+              >
                 {child.title}
               </li>
             ))}
