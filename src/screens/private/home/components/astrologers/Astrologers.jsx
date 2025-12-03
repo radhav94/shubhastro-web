@@ -1,9 +1,10 @@
 // Astrologers.jsx
-import { useCallback, useState,useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Astrologers.module.scss";
 import {
   AstrologerCard,
+  PrimaryText,
   RechargeAlertModel,
   Title,
 } from "../../../../../component";
@@ -27,6 +28,7 @@ const Astrologers = ({ onClickView, onProfile }) => {
   });
 
   const [selectedAstro, setSelectedAstro] = useState(null);
+  const [waitingPopup, setWaitingPopup] = useState(false); // ⭐ waiting state added
 
   const [createChatRoom] = useCreateChatRoomMutation();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
@@ -86,66 +88,58 @@ const Astrologers = ({ onClickView, onProfile }) => {
     setOpenModal((prev) => ({ ...prev, recharge: false }));
     navigate(PATH.privateRoutes.RECHARGE.path);
   }, [navigate]);
+
   // ⭐ AUDIO CALL – same pattern as TalkToAstrologer / ChatWindow
   const handleAudioCall = (astro) => {
     if (!astro) return;
-
-    if (!token) {
-      // if not logged in, same behavior as chat
-      return navigate("/login");
-    }
-
-    if (!userIdLocal) return; // optionally show toast
+    if (!token) return navigate("/login");
+    if (!userIdLocal) return;
 
     setActiveCallAstro(astro);
+    setWaitingPopup(true); // ⭐ Show popup
 
-    // 1️⃣ ask backend to create a call room
     voiceSocket.emit("create_call_room", {
       userId: userIdLocal,
       astrologerId: astro._id,
     });
   };
 
-  // 2️⃣ listen for room + call accepted
   useEffect(() => {
-  if (!userIdLocal) return;
+    if (!userIdLocal) return;
 
-  const handleReturnCallRoom = ({ roomId }) => {
-    if (!roomId || !activeCallAstro?._id) return;
+    const handleReturnCallRoom = ({ roomId }) => {
+      if (!roomId || !activeCallAstro?._id) return;
 
-    // Notify astrologer of incoming call
-    voiceSocket.emit("notify_incoming_call", {
-      roomId,
-      to: activeCallAstro._id, // astrologerId from state
-      from: userIdLocal,       // userId known from storage
-    });
-  };
-
-  const handleCallAccepted = ({ roomId }) => {
-    if (!roomId) return;
-
-    const callerName = activeCallAstro?.firstName || "Astrologer";
-
-    navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
-      state: {
+      voiceSocket.emit("notify_incoming_call", {
         roomId,
-        callerName,
-        userId: userIdLocal,
-        astrologerId: activeCallAstro?._id,
-        isUserSide: true,
-      },
-    });
-  };
+        to: activeCallAstro._id,
+        from: userIdLocal,
+      });
+    };
 
-  voiceSocket.on("return_call_room", handleReturnCallRoom);
-  voiceSocket.on("call_accepted", handleCallAccepted);
+    const handleCallAccepted = ({ roomId }) => {
+      setWaitingPopup(false); // ⭐ Hide popup
+      const callerName = activeCallAstro?.firstName || "Astrologer";
 
-  return () => {
-    voiceSocket.off("return_call_room", handleReturnCallRoom);
-    voiceSocket.off("call_accepted", handleCallAccepted);
-  };
-}, [userIdLocal, activeCallAstro, navigate]);
+      navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
+        state: {
+          roomId,
+          callerName,
+          userId: userIdLocal,
+          astrologerId: activeCallAstro?._id,
+          isUserSide: true,
+        },
+      });
+    };
 
+    voiceSocket.on("return_call_room", handleReturnCallRoom);
+    voiceSocket.on("call_accepted", handleCallAccepted);
+
+    return () => {
+      voiceSocket.off("return_call_room", handleReturnCallRoom);
+      voiceSocket.off("call_accepted", handleCallAccepted);
+    };
+  }, [activeCallAstro]);
 
   return (
     <div className={styles.astrologersWrapper}>
@@ -156,6 +150,33 @@ const Astrologers = ({ onClickView, onProfile }) => {
         buttonTitle="View All"
         onButtonClick={onClickView}
       />
+
+      {waitingPopup && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContainer}>
+            <PrimaryText size_18 isSemiBold>
+              🔔 Calling Astrologer…
+            </PrimaryText>
+            <PrimaryText size_14 color="#777">
+              Please wait while astrologer accepts the call
+            </PrimaryText>
+
+            <div className={styles.modalButtons}>
+              <button
+                className={styles.rejectBtn}
+                onClick={() => {
+                  setWaitingPopup(false);
+                  voiceSocket.emit("cancel_call", {
+                    astrologerId: activeCallAstro?._id,
+                  });
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className={styles.cardsContainer}>
         {data?.data?.map((astrologer) => (

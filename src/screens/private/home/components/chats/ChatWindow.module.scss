@@ -293,6 +293,106 @@
   filter: brightness(1.05);
 }
 
+/* Common Modal Overlay */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Modal Card */
+.modalContainer {
+  width: 320px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 25px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transform: scale(0.9);
+  animation: popUp 0.25s ease-in-out forwards;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Buttons layout */
+.modalButtons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* Accept Button */
+.acceptBtn {
+  padding: 10px 18px;
+  background: #3AB54A;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s ease-in-out;
+
+  &:hover {
+    background: #2f983c;
+  }
+}
+
+/* Reject or Cancel Button */
+.rejectBtn {
+  padding: 10px 18px;
+  background: #D93636;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s ease-in-out;
+
+  &:hover {
+    background: #b32c2c;
+  }
+}
+
+/* Status message styling */
+.waitingText {
+  font-size: 15px;
+  color: #444;
+  margin-top: -5px;
+}
+
+/* Animation */
+@keyframes popUp {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+
 /* Simple mobile tweak */
 
 @media (max-width: 600px) {

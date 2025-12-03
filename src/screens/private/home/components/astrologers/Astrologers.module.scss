@@ -143,6 +143,50 @@
   align-items: center;
 }
 
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(2px);
+}
+
+.modalContainer {
+  background: #fff;
+  padding: 22px;
+  width: 330px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0px 12px 30px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+
+.rejectBtn {
+  background: #d93b3b;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
 .priceRow {
   font-size: 1.1rem;
   font-weight: 700;

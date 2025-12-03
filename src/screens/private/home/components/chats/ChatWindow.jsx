@@ -5,7 +5,6 @@ import {
   IoSend,
   IoCallOutline,
   IoVideocamOutline,
-  IoEllipsisVertical,
   IoAttach,
 } from "react-icons/io5";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -14,15 +13,11 @@ import useChat from "./useChatWindow";
 import { useGetChatHistoryQuery } from "../../../../../redux/api/chatApi";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
-
-
-
 const ChatWindow = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
+  const { userId, astrologerId, roomId, fullName, isUserSide, kundliId } = state;
 
-  const { userId, astrologerId, roomId, fullName, isUserSide, kundliId } =
-    state;
   const { messages, error, isTyping, sendMessage, astroReply, sendTyping } =
     useChat({
       userId,
@@ -33,14 +28,12 @@ const ChatWindow = () => {
     });
 
   const [message, setMessage] = useState("");
+  const [waitingPopup, setWaitingPopup] = useState(false);
 
-  console.log("istypeinnnggg", isTyping);
-  const { data, isLoading } = useGetChatHistoryQuery({ roomId });
+  const { data } = useGetChatHistoryQuery({ roomId });
   const messageOff = data?.data?.[0]?.chatHistory || [];
 
   const finalMsgs = useMemo(() => {
-    if (!messageOff) return [];
-
     const formattedHistory = messageOff.map((item) => ({
       text: item.message || item.response,
       isSender: isUserSide
@@ -61,79 +54,70 @@ const ChatWindow = () => {
     return [...formattedHistory, ...formattedSocket];
   }, [messageOff, messages, isUserSide]);
 
+  const handleCallClick = () => {
+    setWaitingPopup(true); // 👈 Show popup immediately
 
-   const handleCallClick = () => {
-    // socket.emit("call_start", { astrologerId: astrologerId });
     voiceSocket.emit("create_call_room", {
-    userId,
-    astrologerId,
-  });
-  };
-
-useEffect(() => {
-  if (!isUserSide) return;
-
-  voiceSocket.on("return_call_room", ({ roomId }) => {
-    console.log("roomiD",roomId)
-    voiceSocket.emit("notify_incoming_call", {
-      roomId,
-      to: astrologerId,
-      from: userId   // ⭐ Add this line
+      userId,
+      astrologerId,
     });
-  });
-
-  voiceSocket.on("call_accepted", ({ roomId }) => {
-navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
-  state: {
-    roomId,
-    callerName: fullName, // 🌟 astrologer ka naam user chat me hota hai
-    isUserSide: true
-  }
-});
-  });
-
-  return () => {
-    voiceSocket.off("return_call_room");
-    voiceSocket.off("call_accepted");
   };
-}, [isUserSide]);
 
+  useEffect(() => {
+    if (!isUserSide) return;
 
-
-
-const handleVideoCall = () => {
-  voiceSocket.emit("create-video-call-room", {
-    userId,
-    astrologerId
-  });
-};
-
-
-// Listen for room create
-useEffect(() => {
-  const handleRoomReturn = ({ channelName }) => {
-    console.log("Room Created:", channelName);
-
-    // 👉 wait for astrologer to accept
-    voiceSocket.on("video-call-accepted", ({ channelName }) => {
-      console.log("Astrologer Accepted Call!");
-      
-      navigate(`/talk-to-astrologers/video-call/${channelName}`, {
-        state: { channelName, isUserSide: true }
+    const handleReturnRoom = ({ roomId }) => {
+      voiceSocket.emit("notify_incoming_call", {
+        roomId,
+        to: astrologerId,
+        from: userId,
       });
+    };
+
+    const handleCallAccepted = ({ roomId }) => {
+      setWaitingPopup(false); // Hide popup
+      navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
+        state: {
+          roomId,
+          callerName: fullName,
+          isUserSide: true,
+        },
+      });
+    };
+
+    voiceSocket.on("return_call_room", handleReturnRoom);
+    voiceSocket.on("call_accepted", handleCallAccepted);
+
+    return () => {
+      voiceSocket.off("return_call_room", handleReturnRoom);
+      voiceSocket.off("call_accepted", handleCallAccepted);
+    };
+  }, [userId, astrologerId, fullName, navigate, isUserSide]);
+
+  const handleVideoCall = () => {
+    voiceSocket.emit("create-video-call-room", {
+      userId,
+      astrologerId,
     });
   };
 
-  voiceSocket.on("return-video-call-room", handleRoomReturn);
+  useEffect(() => {
+    const handleRoomReturn = ({ channelName }) => {
+      voiceSocket.on("video-call-accepted", () => {
+        navigate(`/talk-to-astrologers/video-call/${channelName}`, {
+          state: { channelName, isUserSide: true },
+        });
+      });
+    };
 
-  return () => {
-    voiceSocket.off("return-video-call-room", handleRoomReturn);
-    voiceSocket.off("video-call-accepted");
-  };
-}, [navigate]);
+    voiceSocket.on("return-video-call-room", handleRoomReturn);
 
+    return () => {
+      voiceSocket.off("return-video-call-room", handleRoomReturn);
+      voiceSocket.off("video-call-accepted");
+    };
+  }, [navigate]);
 
-  // SEND
   const handleSend = () => {
     if (!message.trim()) return;
     isUserSide ? sendMessage(message) : astroReply(message);
@@ -142,46 +126,39 @@ useEffect(() => {
 
   return (
     <div className={styles.chatWindow}>
-      {/* HEADER */}
-     <div className={styles.header}>
-  <div className={styles.headerLeft}>
-    <IoArrowBack
-      className={styles.backIcon}
-      onClick={() => navigate(-1)}
-    />
+      {/* Header */}
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <IoArrowBack className={styles.backIcon} onClick={() => navigate(-1)} />
 
-    <img
-      src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-      className={styles.headerAvatar}
-      alt="User"
-    />
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+            className={styles.headerAvatar}
+            alt="User"
+          />
 
-    <div className={styles.userInfo}>
-      <PrimaryText size_16 isSemiBold>
-        {fullName || "Chat User"}
-      </PrimaryText>
+          <div className={styles.userInfo}>
+            <PrimaryText size_16 isSemiBold>
+              {fullName || "Chat User"}
+            </PrimaryText>
+            <span className={styles.statusText}>
+              {isTyping ? "Typing..." : "Online"}
+            </span>
+          </div>
+        </div>
 
-      <span className={styles.statusText}>
-        {isTyping ? "Typing..." : "Online"}
-      </span>
-    </div>
-  </div>
-
-  {/* Right Side Icons */}
-  <div className={styles.headerRight}>
-    <IoCallOutline className={styles.callIcon} onClick={handleCallClick}/>
-    <IoVideocamOutline
+        <div className={styles.headerRight}>
+          <IoCallOutline className={styles.callIcon} onClick={handleCallClick} />
+          <IoVideocamOutline
             className={styles.videoIcon}
             onClick={handleVideoCall}
           />
-  </div>
-</div>
+        </div>
+      </div>
 
-
-      {/* ERROR */}
       {error && <div className={styles.errorBox}>⚠️ {error}</div>}
 
-      {/* MESSAGE LIST */}
+      {/* Messages */}
       <div className={styles.messages}>
         {finalMsgs.map((msg, i) => (
           <div
@@ -194,41 +171,52 @@ useEffect(() => {
               <PrimaryText
                 size={14}
                 color={msg.isSender ? "#fff" : "#111"}
-                className={styles.messageText}
               >
                 {msg.text}
               </PrimaryText>
-
-              {/* read-status style like Instagram: Sent / Delivered / Seen */}
-              {msg.isSender && msg.status && (
-                <span className={styles.msgStatus}>
-                  {msg.status === "seen"
-                    ? "Seen"
-                    : msg.status === "delivered"
-                    ? "Delivered"
-                    : "Sent"}
-                </span>
-              )}
             </div>
 
-            {/* time — right side inside bubble */}
             <span className={styles.msgTime}>{msg.time}</span>
           </div>
         ))}
 
-        {/* Typing indicator bubble */}
         {isTyping && (
           <div className={`${styles.msgBubble} ${styles.receiverBubble}`}>
             <div className={styles.typingIndicator}>
-              <span className={styles.typingDot}></span>
-              <span className={styles.typingDot}></span>
-              <span className={styles.typingDot}></span>
+              <span></span><span></span><span></span>
             </div>
           </div>
         )}
       </div>
 
-      {/* INPUT */}
+      {/* Waiting Popup — OUTSIDE messages */}
+      {waitingPopup && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContainer}>
+            <PrimaryText size_18 isSemiBold>
+              ⏳ Waiting for astrologer to accept your call…
+            </PrimaryText>
+
+            <PrimaryText size_14 color="#777">
+              Please stay on this screen
+            </PrimaryText>
+
+            <div className={styles.modalButtons}>
+              <button
+                className={styles.rejectBtn}
+                onClick={() => {
+                  setWaitingPopup(false);
+                  voiceSocket.emit("cancel_call", { astrologerId });
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Input */}
       <div className={styles.inputBox}>
         <button className={styles.attachButton}>
           <IoAttach size={20} />
@@ -242,7 +230,7 @@ useEffect(() => {
             sendTyping();
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
+            if (e.key === "Enter") {
               e.preventDefault();
               handleSend();
             }
