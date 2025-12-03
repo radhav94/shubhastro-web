@@ -215,6 +215,11 @@ $font-primary: "Poppins", sans-serif;
   content: none;
 } 
 
+.navbarMenu li:nth-child(9) {
+  text-align: left;
+
+} 
+
 .active {
   font-weight: 700;
   color: #d48806;
@@ -312,4 +317,75 @@ $font-primary: "Poppins", sans-serif;
 .new {
   background: #f1c40f;
   color: #000;
+}
+
+// --- Avatar Dropdown Styles ---
+.avatarContainer {
+  position: relative;
+  cursor: pointer;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: #666;
+  border: 2px solid #e0e0e0;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: $color-gold;
+    transform: scale(1.05);
+  }
+}
+
+.userInfo {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  // background: linear-gradient(135deg, #f9f9f9 0%, #f0f0f0 100%);
+  border-bottom: 2px solid #eaeaea;
+}
+
+.userAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  color: $color-gold;
+  margin-right: 12px;
+  border: 2px solid #eaeaea;
+}
+
+.userDetails {
+  flex: 1;
+  
+  h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  p {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: #666;
+  }
+}
+
+.divider {
+  height: 1px;
+  background: #eaeaea;
+  margin: 8px 0;
 }

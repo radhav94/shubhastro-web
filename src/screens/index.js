@@ -51,6 +51,10 @@ export { default as Payment } from "./private/payment/Payment";
 export { default as Astrologers } from "./private/astrologersold/Astrologers";
 export { default as Streaming } from "./private/astroLive/streaming/Streaming";
 
+// Header
+export { default as Notification } from "./private/notification/Notification";
+export { default as WalletTranscations } from "./private/wallet/WalletTranscations";
+
 // components/index.js
 
 // layout

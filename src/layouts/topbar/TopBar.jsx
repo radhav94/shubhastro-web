@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import styles from "./TopBar.module.scss";
 
 // Assuming your logo path is correct
-import { AppIcons } from "../../utils/appImages";
+import { AppIcons, appSvgs } from "../../utils/appImages";
 import SideBar from "../sidebar/SideBar";
 import { PATH } from "../../utils/routes/Paths";
 // Components and Hooks
@@ -12,6 +12,7 @@ import { PATH } from "../../utils/routes/Paths";
 import { FiMenu } from "react-icons/fi";
 import { PrimaryText } from "../../component";
 import { IoWalletOutline } from "react-icons/io5";
+import { getUserFromStorage } from "../../utils/authStorage";
 
   const  BOTTOM_MENU = [
     {
@@ -34,6 +35,7 @@ import { IoWalletOutline } from "react-icons/io5";
 
 const TopBar = () => {
   const navigate = useNavigate();
+  const user = getUserFromStorage();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
@@ -137,6 +139,62 @@ const token =
               title: "English",
               onClick: () => handleLanguageChange("en")
             }
+      ]
+    },
+    {
+      title:    token ? (<div className={styles.avatarCircle}>
+        <img
+          src={"https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+          alt="user"
+          className={styles.avatar}
+        />
+      </div>) : (
+        <button
+            className={`${styles.ctaButton} ${styles.hideOnMobile}`}
+            onClick={() => navigate("/login")}
+          >
+            LogIn
+          </button>
+      ),
+      children: token && [
+        {
+          title: <div className={styles.userInfo}>
+                    <div className={styles.userAvatar}>
+                      <img
+                        src={"https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+                        alt="user"
+                        className={styles.avatar}
+                      />
+                    </div>
+                    <div className={styles.userDetails}>
+                      <PrimaryText size_14 isBold isCenter >{user?.firstName}</PrimaryText>
+                      <PrimaryText size_12 isBold color="#466590" isCenter={true}>{user?.phoneNumber}</PrimaryText>
+                    </div>
+                  </div>,
+          path: "/profile"
+        },
+        
+        {
+          title: "Notification",
+          path : "/notification"
+        },
+        {
+          title: "Wallet Transactions",
+          path : "/wallet-transactions"
+        },
+        {
+          title: "Order History",
+          path: "/order-history"
+        },
+        
+        {
+          title: "Logout",
+          onClick: handleLogout
+        },
+        {
+          title: "Logout From Other Devices",
+          onClick: handleLogout
+        }
       ]
     }
   ];
@@ -254,24 +312,6 @@ const BOTTOM_MENU = [
                       <NavbarItem key={index} {...item} />
                     ))}
 
-                    <li>
-                      {/* Sign In CTA Button */}
-                      {!token ? (
-                        <button
-                          className={`${styles.ctaButton} ${styles.hideOnMobile}`}
-                          onClick={() => navigate("/login")}
-                        >
-                          LogIn
-                        </button>
-                      ) : (
-                        <button
-                          className={`${styles.ctaButton} ${styles.hideOnMobile}`}
-                          onClick={handleLogout}
-                        >
-                          Log out
-                        </button>
-                      )}
-                    </li>
                   </ul>
                 </div>
                 <div style={{ display: "flex", flexDirection: "row" }}>
