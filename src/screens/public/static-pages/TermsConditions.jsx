@@ -8,7 +8,7 @@ const TermsConditions = ({isRefundPolicy = false}) => {
     <h1 className={styles.title} >TERMS AND CONDITIONS OF USAGE</h1>
     <Divider/>
     {isRefundPolicy ? 
-    <p className={styles.paragraph}>These terms and conditions of Use (hereinafter referred as "Terms of Usage") describe and govern the User's use of the content and services offered by Shubhtalk Services Private Limited through www.shubhtalk.com (hereinafter referred as "We" "Shubhtalk" "us" "our" "shubhtalk application" "Website").</p> 
+    <p className={styles.paragraph}>These terms and conditions of Use (hereinafter referred as "Terms of Usage") describe and govern the User's use of the content and services offered by Shubhtalk Services Private Limited (Formerly Codeyeti Software Solutions Pvt. Ltd.) through www.shubhtalk.com (hereinafter referred as "We" "Shubhtalk" "us" "our" "shubhtalk application" "Website").</p> 
     : (
       <>
       <p className={styles.paragraph}>This website is owned and operated Shubhtalk Services Private Limited ("us" "We", "the Company" or "Shubhtalk" which also includes its affiliates) (<a href="mailto:contact@shubhtalk.com" className={styles.link}>contact@shubhtalk.com</a>). The Platform may be provided or be accessible via multiple websites or applications whether owned and/or operated by us or by third parties, including, without limitation, the website<a href="dev-shubhtalk.epicon.in" className={styles.link}><strong>&nbsp;<u>dev-shubhtalk.epicon.in</u></strong></a>&nbsp;and its related apps.</p>
