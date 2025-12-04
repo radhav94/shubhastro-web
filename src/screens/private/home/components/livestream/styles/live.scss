@@ -1,8 +1,67 @@
 .live-container {
   width: 100vw;
   height: 100vh;
-  background: #000;
+  position: relative;
+  overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
+
+  /* Premium luxury gradient background */
+  background:
+    radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.22), transparent 55%),
+    radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.18), transparent 60%),
+    radial-gradient(circle at 50% 100%, rgba(255, 107, 107, 0.15), transparent 60%),
+    #000; /* fallback */
 }
+
+
+
+
+
+/* Cosmic glow behind card */
+.live-bg-blur {
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.45), transparent 55%),
+    radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.35), transparent 60%),
+    radial-gradient(circle at 50% 100%, rgba(255, 107, 107, 0.25), transparent 60%);
+  filter: blur(60px);
+  opacity: 0.9;
+  animation: bgDrift 16s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+@keyframes bgDrift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1.1);
+  }
+  100% {
+    transform: translate3d(-30px, 20px, 0) scale(1.25);
+  }
+}
+
+.live-container > *:not(.live-bg-blur) {
+  position: relative;
+  z-index: 2;
+}
+
+
+/* 📱 Mobile: Remove background + padding push */
+@media (max-width: 768px) {
+  :root {
+    --header-height: 0px; /* No header on mobile live */
+  }
+
+  .live-container {
+    height: 100vh !important;
+    margin-top: 0 !important;
+    background: #000 !important;
+  }
+
+  .live-bg-blur {
+    display: none !important;
+  }
+}
+

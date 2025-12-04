@@ -114,12 +114,16 @@ export const PATH = {
 
     ASTRO_LIVE_STREAMING :{
       path: "/astrologer-dashboard/live-streaming",
-      element: InteractiveLiveStreaming
+      element: InteractiveLiveStreaming,
+      header: false,
+      footer: false,  
     },
 
     AUDIENCE_LIVE_STREAMING :{
       path: "/audience-live-streaming",
-      element: InteractiveLiveStreaming
+      element: InteractiveLiveStreaming,
+      header: false,
+      footer: false,  
     },
     
 
