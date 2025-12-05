@@ -53,6 +53,7 @@ import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog"
 import AstrologersDashboard from "../../screens/private/home/components/astrologers/AstrologersDashboard";
 import ChatList from "../../screens/private/home/components/astrologers/atrologerchat/ChatList";
 import ChatWindow from "../../screens/private/home/components/chats/ChatWindow";
+import InteractiveLiveStreaming from "../../screens/private/home/components/livestream/InteractiveLiveStreaming";
 import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
 import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
 import FinalPay from "../../screens/private/payment/FinalPay";
@@ -110,10 +111,21 @@ export const PATH = {
       path: "/astrologer-dashboard/astrologer-chat-user-list/:chatId",
       element: ChatWindow,
     },
-    // ASTROLOGER_CALL_WINDOW:{
-    //     path: "/astrologer-dashboard/astrololger-call",
-    //     element:AstrologerIncomingCall
-    // },
+
+    ASTRO_LIVE_STREAMING :{
+      path: "/astrologer-dashboard/live-streaming",
+      element: InteractiveLiveStreaming,
+      header: false,
+      footer: false,  
+    },
+
+    AUDIENCE_LIVE_STREAMING :{
+      path: "/audience-live-streaming",
+      element: InteractiveLiveStreaming,
+      header: false,
+      footer: false,  
+    },
+    
 
     PROFILE: {
       path: "/profile",
