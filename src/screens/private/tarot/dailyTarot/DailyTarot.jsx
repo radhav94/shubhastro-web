@@ -1,106 +1,27 @@
-import React, { useEffect, useRef, useState } from "react";
-import TarotCard from "../card/TarotCard";
-import { useGetTarotDailyDataQuery } from "../../../../redux/api/tarot/tarotApi";
-import styles from "./DailyTarot.module.scss";
-
-export const dailyTarotCardMap = [
-  "the_fool",
-  "the_magician",
-  "the_high_priestess",
-  "the_empress",
-  "the_emperor",
-  "the_hierophant",
-  "the_lovers",
-  "the_chariot",
-  "strength",
-  "the_hermit",
-  "wheel_of_fortune",
-  "justice",
-  "the_hanged_man",
-  "death",
-  "temperance",
-  "the_devil",
-  "the_tower",
-  "the_star",
-  "the_moon",
-  "the_sun",
-  "judgement",
-  "the_world",
-];
+import React from 'react'
+import { useGetTarotDailyDataQuery } from '../../../../redux/api/tarot/tarotApi'
+import CommonTarot from '../commonTarot/CommonTarot'
+import { tarotMeta } from '../../../../utils/constanats/tarotMeta'
+import DailyTarotResult from './DailyTarotResult'
 
 const DailyTarot = () => {
-  const [selectedCard, setSelectedCard] = useState(null);
-  const resultRef = useRef(null);
-
-  const cardName =
-    selectedCard !== null ? dailyTarotCardMap[selectedCard] : null;
-
-  const { data, isLoading } = useGetTarotDailyDataQuery(
-    { card_name: cardName, lang: "en" },
-    { skip: !cardName }
-  );
-
-  const response = data?.response;
-  useEffect(() => {
-    if (response && resultRef.current) {
-      setTimeout(() => {
-        resultRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 200);
-    }
-  }, [response]);
-
   return (
-    <div className={styles.dailyWrapper}>
-      <TarotCard
-        title="Daily Tarot Reading"
-        cardsCount={11}
-        onSelect={(index) => setSelectedCard(index)}
-      />
+    <CommonTarot
+      title={tarotMeta.DAILY_TAROT.title}
+      subTitle={tarotMeta.DAILY_TAROT.subtitle}
+      shuffleType="major"
+      apiHook={useGetTarotDailyDataQuery}
+      ResultComponent={DailyTarotResult}
+      buildParams={({ selected, revealed, lang }) => {
+        if (!selected || !revealed) return null;
 
-      {/* RESULT BOX */}
-      {response && (
-        <div ref={resultRef} className={styles.resultContainer}>
-          {/* LEFT: CARD WITH TITLE */}
-          <div className={styles.leftCard}>
-            <h3 className={styles.cardName}>{response.name}</h3>
-            <img
-              src={response.card_image.classic}
-              alt={response.name}
-              className={styles.cardImg}
-            />
-          </div>
+        return {
+          card_name: selected?.id,
+          lang,
+        };
+      }}
+    />
+  )
+}
 
-          {/* RIGHT: DAILY MEANINGS */}
-          <div className={styles.rightContent}>
-            <h2 className={styles.readingHeader}>Your Daily Tarot Insight</h2>
-
-            <div className={styles.section}>
-              <h3>💪 Health</h3>
-              <p>{response.health}</p>
-            </div>
-
-            <div className={styles.section}>
-              <h3>❤️ Relationship</h3>
-              <p>{response.relationship}</p>
-            </div>
-
-            <div className={styles.section}>
-              <h3>💼 Career</h3>
-              <p>{response.career}</p>
-            </div>
-
-            <div className={styles.section}>
-              <h3>💰 Finance</h3>
-              <p>{response.finance}</p>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default DailyTarot;
+export default DailyTarot

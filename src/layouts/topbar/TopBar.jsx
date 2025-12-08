@@ -81,18 +81,54 @@ const TopBar = () => {
       title: "Tarot",
       path: PATH.privateRoutes.TAROT.path,
       children: [
-        {
-          title: "Shuffle Tarot",
-          path: PATH.privateRoutes.TAROT.path,
-        },
+        // {
+        //   title: "Shuffle Tarot",
+        //   path: PATH.privateRoutes.TAROT.path,
+        // },
         {
           title: "Yes/No Tarot",
           path: PATH.privateRoutes.YES_NO_TAROT.path,
         },
         {
-          title: "Daily Tarot",
+          title: "Career Select",
+          path: PATH.privateRoutes.CAREER_SELECT_TAROT.path,
+        },
+        {
+          title: "Love Triangle",
+          path: PATH.privateRoutes.LOVE_TRIANGLE_TAROT.path,
+        },
+        {
+          title: "Daily",
           path: PATH.privateRoutes.DAILY_TAROT.path,
         },
+        {
+          title: "In Depth Love",
+          path: PATH.privateRoutes.IN_DEPTH_TAROT.path,
+        },
+        {
+          title: "Erotic Love",
+          path: PATH.privateRoutes.EROTIC_LOVE_TAROT.path,
+        },
+        {
+          title: "Made For Each Other",
+          path: PATH.privateRoutes.MADE_FOR_EACH_OTHER_TAROT.path,
+        },
+        {
+          title: "Flirt Reading",
+          path: PATH.privateRoutes.FLIRT_TAROT.path,
+        },
+        {
+          title: "Romantic Breakup",
+          path: PATH.privateRoutes.ROMANTIC_BREAKUP_TAROT.path,
+        },
+        {
+          title: "Business Breakup",
+          path: PATH.privateRoutes.BUISNESS_BREAKUP_TAROT.path,
+        },
+        // {
+        //   title: "Fortune Cookie",
+        //   path: PATH.privateRoutes.DAILY_TAROT.path,
+        // },
       ],
     },
     {
@@ -194,7 +230,7 @@ const TopBar = () => {
     // { title: "Shubhtalk Store", path: "/store" },
     { title: "Blogs", path: "/blog" },
     { title: "Recharge", path: "/callingpack" },
-  ];
+  ]
 
   useEffect(() => {
     const updateWalletFromStorage = () => {
