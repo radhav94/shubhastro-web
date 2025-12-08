@@ -34,13 +34,13 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  
+
   &:hover {
     background-color: $color-primary;
     color: $color-black;
     font-weight: bold;
   }
-  
+
   &.active {
     background-color: $color-primary;
     border-color: $color-primary;
@@ -55,26 +55,28 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   gap: 24px;
   margin-bottom: 24px;
 
-// --- Responsive Design ---
-@media (max-width: 768px) {
-  .toggleButton {
-    padding: 8px 18px;
-    font-size: 14px;
+  // --- Responsive Design ---
+  @media (max-width: 768px) {
+    .toggleButton {
+      padding: 8px 18px;
+      font-size: 14px;
+    }
+    .buttonGroup {
+      gap: 12px;
+    }
   }
-  .buttonGroup {
-    gap: 12px;
+
+  @media (max-width: 480px) {
+    .toggleButton {
+      width: 100%;
+      max-width: 200px;
+      text-align: center;
+    }
   }
-}
 
-@media (max-width: 480px) {
-  .toggleButton {
-    width: 100%;
-    max-width: 200px;
-    text-align: center;
+  @media (min-width: 500px) {
+    grid-template-columns: 1fr 1fr;
   }
-}
-
-
   @media (min-width: 768px) {
     grid-template-columns: 1fr 1fr 1fr;
   }

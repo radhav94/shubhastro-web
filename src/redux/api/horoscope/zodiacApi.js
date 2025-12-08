@@ -1,14 +1,46 @@
-import { horoscopeApi } from "../baseApi/horoscopeBaseApi";
+import { VEDIC_API_KEY, vedicApi } from "../baseApi/vedicApi";
 
-export const zodiacApi = horoscopeApi.injectEndpoints({
+export const zodiacApi = vedicApi.injectEndpoints({
   endpoints: (builder) => ({
     fetchDaily: builder.query({
-      query: ({ sign, payload }) => ({
-        url: `sun_sign_prediction/daily/${sign}`,
-        method: "POST",
-        body: payload,
+      query: (zodiac) => ({
+        url: "western/daily-horoscope",
+        params: {
+          zodiac,
+          api_key: VEDIC_API_KEY,
+          date: new Date().toLocaleDateString("en-GB"),
+          // date: "06/12/2025",
+          split: true,
+          type: "big",
+          lang: "en",
+        },
       }),
     }),
+    fetchWeekly: builder.query({
+      query: (zodiac) => ({
+        url: "western/weekly-horoscope",
+        params: {
+          zodiac,
+          week: "thisweek",
+          api_key: VEDIC_API_KEY,
+          split: true,
+          type: "big",
+          lang: "en",
+        },
+      }),
+    }),
+    fetchYearly: builder.query({
+      query: (zodiac) => ({
+        url: "western/yearly-horoscope",
+        params: {
+          zodiac,
+          api_key: VEDIC_API_KEY,
+          year: new Date().getFullYear(),
+          lang: "en",
+        },
+      }),
+    }),
+
     fetchPrevios: builder.query({
       query: ({ sign, payload }) => ({
         url: `sun_sign_prediction/daily/previous/${sign}`,
@@ -38,4 +70,6 @@ export const {
   useFetchPreviosQuery,
   useFetchNextQuery,
   useFetchMonthQuery,
+  useFetchWeeklyQuery,
+  useFetchYearlyQuery,
 } = zodiacApi;

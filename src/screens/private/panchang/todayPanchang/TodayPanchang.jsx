@@ -1,23 +1,32 @@
 import { useState } from "react";
-import { useTodayPanchang } from "./useTodayPanchang";
 import styles from "./TodayPanchang.module.scss";
 import { useFetchAdvancePanchangQuery } from "../../../../redux/api/panchang/panchangApi";
-import { FaSun, FaMoon } from "react-icons/fa";
-import { TbSunset2 } from "react-icons/tb";
-import { GrSign } from "react-icons/gr";
-import { CiCloudOn } from "react-icons/ci";
-import { GiMoonBats, GiStonePath } from "react-icons/gi";
-import { MdCalendarMonth } from "react-icons/md";
-import { HiOutlineSwitchHorizontal } from "react-icons/hi";
-import { FaRegMoon } from "react-icons/fa6";
+
 import { PanchangInputCard } from "../../../../component";
 import PanchangCards from "../../../../component/UI/cards/PanchangCards";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
-const TodayPanchang = () => {
-  const [data, onCardClick, onSubmit, zodiacDetails, onChat] =
-    useTodayPanchang();
+// Icons
+import { BsCalendar2Week } from "react-icons/bs";
+import { TbSunrise, TbSunset2 } from "react-icons/tb";
+import {
+  FaMoon,
+  FaSun,
+  FaStar,
+  FaRegMoon,
+  FaCloudSun,
+  FaGlobeAsia,
+  FaClock,
+  FaDirections,
+  FaCloud,
+} from "react-icons/fa";
+import { GiMoonBats, GiStonePath } from "react-icons/gi";
+import { RiMoonFoggyFill, RiMoonFoggyLine } from "react-icons/ri";
+import { CiCloudOn } from "react-icons/ci";
+import { GoNumber } from "react-icons/go";
+import { WiMoonFull } from "react-icons/wi";
 
+const TodayPanchang = () => {
   const [payload, setPayload] = useState({
     day: 6,
     month: 1,
@@ -29,171 +38,341 @@ const TodayPanchang = () => {
     tzone: 5.5,
   });
 
-  const {
-    data: panchangData,
-    isLoading,
-    error,
-    isSuccess,
-  } = useFetchAdvancePanchangQuery({ payload });
+  const { data, isLoading, isSuccess } = useFetchAdvancePanchangQuery(payload);
+  const panchangData = data?.response;
 
+  // -------------------- TODAY HIGHLIGHTS --------------------
   const todayData = [
+    { key: "Day", value: panchangData?.day?.name, icon: <BsCalendar2Week /> },
+
     {
-      key: "Sun Rise",
-      value: panchangData?.sunrise,
-      icon: <FaSun />,
+      key: "Sunrise",
+      value: panchangData?.advanced_details?.sun_rise,
+      icon: <TbSunrise />,
     },
     {
-      key: "Moon Rise",
-      value: panchangData?.moonrise,
+      key: "Sunset",
+      value: panchangData?.advanced_details?.sun_set,
+      icon: <TbSunset2 />,
+    },
+
+    {
+      key: "Moonrise",
+      value: panchangData?.advanced_details?.moon_rise,
       icon: <FaMoon />,
     },
     {
-      key: "Sun Set",
-      value: panchangData?.sunset,
-      icon: <TbSunset2 size={20} />,
-    },
-    {
-      key: "Moon Set",
-      value: panchangData?.moonset,
-      icon: <GiMoonBats size={26} />,
+      key: "Moonset",
+      value: panchangData?.advanced_details?.moon_set,
+      icon: <GiMoonBats />,
     },
 
-    { key: "Moon Sign", value: panchangData?.moon_sign, icon: <GrSign /> },
-    { key: "Ayana", value: panchangData?.ayana, icon: <GiStonePath /> },
-  ];
+    {
+      key: "Next Full Moon",
+      value: panchangData?.advanced_details?.next_full_moon,
+      icon: <WiMoonFull />,
+    },
+    {
+      key: "Next New Moon",
+      value: panchangData?.advanced_details?.next_new_moon,
+      icon: <FaMoon />,
+    },
 
-  const monthData = [
     {
-      key: "Hindu month",
-      value: panchangData?.hindu_maah?.purnimanta,
-      icon: <MdCalendarMonth />,
+      key: "Rasi (Moon Sign)",
+      value: panchangData?.rasi?.name,
+      icon: <GiStonePath />,
+    },
+
+    // Sun Position
+    {
+      key: "Sun Zodiac",
+      value: panchangData?.sun_position?.zodiac,
+      icon: <FaSun />,
     },
     {
-      key: "Direction",
-      value: panchangData?.disha_shool,
-      icon: <HiOutlineSwitchHorizontal />,
+      key: "Sun Nakshatra",
+      value: panchangData?.sun_position?.nakshatra,
+      icon: <FaStar />,
     },
-    { key: "Ritu", value: panchangData?.ritu, icon: <CiCloudOn /> },
     {
-      key: "Tithi",
-      value: panchangData?.tithi?.details?.tithi_name,
+      key: "Sun Rasi No.",
+      value: panchangData?.sun_position?.rasi_no,
+      icon: <FaStar />,
+    },
+    {
+      key: "Sun Nakshatra No.",
+      value: panchangData?.sun_position?.nakshatra_no,
+      icon: <FaStar />,
+    },
+    {
+      key: "Sun Degree at Rise",
+      value: panchangData?.sun_position?.sun_degree_at_rise,
+      icon: <FaSun />,
+    },
+
+    // Moon Position
+    {
+      key: "Moon Degree",
+      value: panchangData?.moon_position?.moon_degree,
+      icon: <GiMoonBats />,
+    },
+
+    {
+      key: "Ayanamsa",
+      value: `${panchangData?.ayanamsa?.name}`,
+      icon: <GiStonePath />,
+    },
+    {
+      key: "Ayanamsa Number",
+      value: panchangData?.ayanamsa?.number,
+      icon: <GoNumber />,
+    },
+
+    {
+      key: "Paksha",
+      value: panchangData?.advanced_details?.masa?.paksha,
       icon: <FaRegMoon />,
     },
+    {
+      key: "Ritu",
+      value: panchangData?.advanced_details?.masa?.ritu,
+      icon: <CiCloudOn />,
+    },
+    {
+      key: "Tamil Ritu",
+      value: panchangData?.advanced_details?.masa?.ritu_tamil,
+      icon: <FaCloud />,
+    },
+
+    {
+      key: "Moon Yogini Nivas",
+      value: panchangData?.advanced_details?.moon_yogini_nivas,
+      icon: <RiMoonFoggyFill />,
+    },
+    {
+      key: "Ahargana",
+      value: panchangData?.advanced_details?.ahargana,
+      icon: <FaGlobeAsia />,
+    },
+
+    {
+      key: "Vaara",
+      value: panchangData?.advanced_details?.vaara,
+      icon: <FaGlobeAsia />,
+    },
+    {
+      key: "Disha Shool",
+      value: panchangData?.advanced_details?.disha_shool,
+      icon: <FaDirections />,
+    },
+
+    { key: "Date", value: panchangData?.date, icon: <FaClock /> },
   ];
 
-  const muhratData = {
+  // -------------------- MASA DETAILS --------------------
+  const masa = panchangData?.advanced_details?.masa;
+
+  const masaData = [
+    { key: "Amanta Name", value: masa?.amanta_name },
+    { key: "Amanta Number", value: masa?.amanta_number },
+    { key: "Amanta Date", value: masa?.amanta_date },
+    { key: "Alternate Amanta Name", value: masa?.alternate_amanta_name },
+    { key: "Amanta Start", value: masa?.amanta_start },
+    { key: "Amanta End", value: masa?.amanta_end },
+
+    { key: "Purnimanta Name", value: masa?.purnimanta_name },
+    { key: "Purnimanta Number", value: masa?.purnimanta_number },
+    { key: "Purnimanta Date", value: masa?.purnimanta_date },
+    {
+      key: "Alternate Purnimanta Name",
+      value: masa?.alternate_purnimanta_name,
+    },
+    { key: "Purnimanta Start", value: masa?.purnimanta_start },
+    { key: "Purnimanta End", value: masa?.purnimanta_end },
+
+    { key: "Adhik Maas", value: masa?.adhik_maasa ? "Yes" : "No" },
+    { key: "Ayana", value: masa?.ayana },
+    { key: "Real Ayana", value: masa?.real_ayana },
+
+    { key: "Tamil Month", value: masa?.tamil_month },
+    { key: "Tamil Month Number", value: masa?.tamil_month_num },
+    { key: "Tamil Day", value: masa?.tamil_day },
+
+    { key: "Moon Phase", value: masa?.moon_phase },
+  ];
+
+  // -------------------- YEAR DETAILS --------------------
+  const years = panchangData?.advanced_details?.years;
+
+  const yearData = [
+    { key: "Kali Year", value: years?.kali },
+    { key: "Kali Samvat Number", value: years?.kali_samvaat_number },
+    { key: "Kali Samvat Name", value: years?.kali_samvaat_name },
+
+    { key: "Saka Year", value: years?.saka },
+    { key: "Saka Samvat Number", value: years?.saka_samvaat_number },
+    { key: "Saka Samvat Name", value: years?.saka_samvaat_name },
+
+    { key: "Vikram Samvat", value: years?.vikram_samvaat },
+    { key: "Vikram Samvat Number", value: years?.vikram_samvaat_number },
+    { key: "Vikram Samvat Name", value: years?.vikram_samvaat_name },
+  ];
+
+  // -------------------- TITHI DETAILS --------------------
+  const tithi = panchangData?.tithi;
+
+  const tithiData = [
+    { key: "Name", value: tithi?.name },
+    { key: "Number", value: tithi?.number },
+    { key: "Type", value: tithi?.type },
+    { key: "Deity", value: tithi?.diety },
+    { key: "Meaning", value: tithi?.meaning },
+    { key: "Special", value: tithi?.special },
+
+    { key: "Start", value: tithi?.start },
+    { key: "End", value: tithi?.end },
+
+    { key: "Next Tithi", value: tithi?.next_tithi },
+  ];
+
+  // -------------------- NAKSHATRA DETAILS --------------------
+  const nakshatra = panchangData?.nakshatra;
+
+  const nakshatraData = [
+    { key: "Name", value: nakshatra?.name },
+    { key: "Number", value: nakshatra?.number },
+    { key: "Pada", value: nakshatra?.pada },
+    { key: "Lord", value: nakshatra?.lord },
+    { key: "Deity", value: nakshatra?.diety },
+
+    { key: "Meaning", value: nakshatra?.meaning },
+    { key: "Special", value: nakshatra?.special },
+    { key: "Summary", value: nakshatra?.summary },
+
+    {
+      key: "Auspicious Direction",
+      value: nakshatra?.auspicious_disha?.join(", "),
+    },
+
+    { key: "Start", value: nakshatra?.start },
+    { key: "End", value: nakshatra?.end },
+
+    { key: "Next Nakshatra", value: nakshatra?.next_nakshatra },
+  ];
+
+  // -------------------- KARANA DETAILS --------------------
+  const karana = panchangData?.karana;
+
+  const karanData = [
+    { key: "Name", value: karana?.name },
+    { key: "Number", value: karana?.number },
+
+    { key: "Type", value: karana?.type },
+    { key: "Lord", value: karana?.lord },
+    { key: "Deity", value: karana?.diety },
+
+    { key: "Special", value: karana?.special },
+
+    { key: "Start", value: karana?.start },
+    { key: "End", value: karana?.end },
+
+    { key: "Next Karana", value: karana?.next_karana },
+  ];
+
+  // -------------------- YOGA DETAILS --------------------
+  const yoga = panchangData?.yoga;
+
+  const yogData = [
+    { key: "Name", value: yoga?.name },
+    { key: "Number", value: yoga?.number },
+
+    { key: "Meaning", value: yoga?.meaning },
+    { key: "Special", value: yoga?.special },
+
+    { key: "Start", value: yoga?.start },
+    { key: "End", value: yoga?.end },
+
+    { key: "Next Yoga", value: yoga?.next_yoga },
+  ];
+
+  // -------------------- MUHURAT DETAILS --------------------
+  const muhuratData = {
     abhijit: {
       title: "Abhijit Muhurat",
-      end: panchangData?.abhijit_muhurta?.end,
-      start: panchangData?.abhijit_muhurta?.start,
+      start: panchangData?.advanced_details?.abhijit_muhurta?.start,
+      end: panchangData?.advanced_details?.abhijit_muhurta?.end,
     },
     rahukaal: {
       title: "Rahu Kaal",
-      end: panchangData?.rahukaal?.end,
-      start: panchangData?.rahukaal?.start,
+      start: panchangData?.rahukaal.split("to")[0],
+      end: panchangData?.rahukaal.split("to")[1],
+    },
+    gulika: {
+      title: "Gulika Kaal",
+      start: panchangData?.gulika.split("to")[0],
+      end: panchangData?.gulika.split("to")[1],
+    },
+    yamakanta: {
+      title: "Yamakanta Kaal",
+      start: panchangData?.yamakanta.split("to")[0],
+      end: panchangData?.yamakanta.split("to")[1],
     },
   };
 
-  const tithiData = [
-    {
-      key: "Name",
-      value: panchangData?.tithi?.details?.tithi_name,
-    },
-    {
-      key: "Deity",
-      value: panchangData?.tithi?.details?.deity,
-    },
-    {
-      key: "Special",
-      value: panchangData?.tithi?.details?.special,
-    },
+  // -------------------------
+  //  AYANAMSA & RASI SECTION
+  // -------------------------
+  const ayanamsaData = [
+    { key: "Ayanamsa Name", value: panchangData?.ayanamsa?.name },
+    { key: "Ayanamsa Number", value: panchangData?.ayanamsa?.number },
+    { key: "Rasi (Moon Sign)", value: panchangData?.rasi?.name },
   ];
 
-  const nakshatraData = [
-    {
-      key: "Name",
-      value: panchangData?.nakshatra?.details?.nak_name,
-    },
-    {
-      key: "Ruler",
-      value: panchangData?.nakshatra?.details?.ruler,
-    },
-    {
-      key: "Deity",
-      value: panchangData?.nakshatra?.details?.deity,
-    },
-    {
-      key: "Special",
-      value: panchangData?.nakshatra?.details?.special,
-    },
-  ];
-
-  const yogData = [
-    {
-      key: "Name",
-      value: panchangData?.yog?.details?.yog_name,
-    },
-    {
-      key: "Special",
-      value: panchangData?.yog?.details?.special,
-    },
-  ];
-
-  const karanData = [
-    {
-      key: "Name",
-      value: panchangData?.karan?.details?.karan_name,
-    },
-    {
-      key: "Ruler",
-      value: panchangData?.karan?.details?.ruler,
-    },
-    {
-      key: "Deity",
-      value: panchangData?.karan?.details?.deity,
-    },
-    {
-      key: "Special",
-      value: panchangData?.karan?.details?.special?.slice(0, 33),
-    },
-  ];
-
-  const onTap = (data) => {
-    const date = new Date(data?.dateOfBirth);
-
-    const payload = {
-      day: parseInt(date.getUTCDate()) || 12,
-      month: parseInt(date.getUTCMonth()) + 1 || 1,
-      year: parseInt(date.getUTCFullYear()) || 1999,
-      hour: parseInt(date.getUTCHours()) || 1,
-      min: parseInt(date.getUTCMinutes()) || 6,
-      lat: parseInt(data?.latitude) || 19.132,
-      lon: parseInt(data?.longitude) || 72.342,
+  // -------------------------
+  //  INPUT HANDLER
+  // -------------------------
+  const onTap = (details) => {
+    const date = new Date(details?.dateOfBirth);
+    setPayload({
+      day: date.getUTCDate(),
+      month: date.getUTCMonth() + 1,
+      year: date.getUTCFullYear(),
+      hour: 11,
+      min: 12,
+      lat: Number(details.latitude),
+      lon: Number(details.longitude),
       tzone: 5.5,
-    };
-
-    setPayload(payload);
+    });
   };
 
   return (
     <>
       <PrimaryLoader isLoading={isLoading} />
+
       {isSuccess && (
         <div className={styles.mainContainer}>
-          {/* <InternalBanner data={data} onCardClick={onCardClick} /> */}
-          <PanchangInputCard onTap={onTap} title={"Today's Panchang"} />
-          <div>
-            <PanchangCards data={monthData} muhratData={muhratData} />
-            <PanchangCards title="Sun and Moon Calculations" data={todayData} />
-            <PanchangCards
-              title="Nakshatra"
-              data={nakshatraData}
-              summary={panchangData?.nakshatra?.details?.summary}
-            />
-            <PanchangCards title="Tithi" data={tithiData} />
-            <PanchangCards title="Yog" data={yogData} />
-            <PanchangCards title="Karan" data={karanData} />
-          </div>
+          <PanchangInputCard onTap={onTap} title="Panchang" />
+
+          <PanchangCards data={todayData} />
+          <PanchangCards data={ayanamsaData} title="Ayanamsa & Rasi" />
+          <PanchangCards data={masaData} title="Masa (Hindu Month Details)" />
+          <PanchangCards data={yearData} title="Samvat Years" />
+
+          <PanchangCards title="Important Muhurats" muhratData={muhuratData} />
+
+          <PanchangCards
+            title="Tithi"
+            data={tithiData}
+            summary={panchangData?.tithi?.special}
+          />
+          <PanchangCards
+            title="Nakshatra"
+            data={nakshatraData}
+            summary={panchangData?.nakshatra?.summary}
+          />
+          <PanchangCards title="Yoga" data={yogData} />
+          <PanchangCards title="Karana" data={karanData} />
         </div>
       )}
     </>

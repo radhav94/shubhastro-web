@@ -46,7 +46,7 @@ import {
   RefundPolicy,
   TermsConditions,
   Notification,
-  WalletTranscations
+  WalletTranscations,
 } from "../../screens";
 import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
 // import AstrologerIncomingCall from "../../screens/private/home/components/astrologers/AstrologerIncomingCall";
@@ -54,6 +54,8 @@ import AstrologersDashboard from "../../screens/private/home/components/astrolog
 import ChatList from "../../screens/private/home/components/astrologers/atrologerchat/ChatList";
 import ChatWindow from "../../screens/private/home/components/chats/ChatWindow";
 import InteractiveLiveStreaming from "../../screens/private/home/components/livestream/InteractiveLiveStreaming";
+import Weekly from "../../screens/private/horoscope/weeklyHoroscope/Weekly";
+import Yearly from "../../screens/private/horoscope/yearlyHoroscope/Yearly";
 import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
 import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
 import FinalPay from "../../screens/private/payment/FinalPay";
@@ -112,20 +114,19 @@ export const PATH = {
       element: ChatWindow,
     },
 
-    ASTRO_LIVE_STREAMING :{
+    ASTRO_LIVE_STREAMING: {
       path: "/astrologer-dashboard/live-streaming",
       element: InteractiveLiveStreaming,
       header: false,
-      footer: false,  
+      footer: false,
     },
 
-    AUDIENCE_LIVE_STREAMING :{
+    AUDIENCE_LIVE_STREAMING: {
       path: "/audience-live-streaming",
       element: InteractiveLiveStreaming,
       header: false,
-      footer: false,  
+      footer: false,
     },
-    
 
     PROFILE: {
       path: "/profile",
@@ -143,8 +144,16 @@ export const PATH = {
         element: SignScreen,
       },
       DAILY_DETAIL: {
-        path: "/horoscopes/:slug/:sign",
+        path: "/horoscopes/daily-horoscope/:sign",
         element: Daily,
+      },
+      WEEKLY_DETAIL: {
+        path: "/horoscopes/weekly-horoscope/:sign",
+        element: Weekly,
+      },
+      YEARLY_DETAIL: {
+        path: "/horoscopes/yearly-horoscope/:sign",
+        element: Yearly,
       },
       MONTHLY: {
         path: "/horoscopes/monthly-horoscope",
@@ -171,7 +180,7 @@ export const PATH = {
     //panchang
     PANCHANG: {
       path: "/panchang",
-      element: Panchang,
+      element: TodayPanchang,
     },
     PANCHANG_TODAY: {
       path: "/panchang/today-panchang",
@@ -313,7 +322,7 @@ export const PATH = {
       element: VideoCalling,
     },
 
-     ASTRO_VIDEO_CALL: {
+    ASTRO_VIDEO_CALL: {
       path: "/astrologer-dashboard/video-call/:channelName",
       element: VideoCalling,
     },
@@ -323,7 +332,7 @@ export const PATH = {
       element: AgoraVoiceCalling,
     },
 
-     ASTRO_VOICE_CALL: {
+    ASTRO_VOICE_CALL: {
       path: "/astrologer-dashboard/voice-call/:roomId",
       element: AgoraVoiceCalling,
     },
@@ -336,32 +345,32 @@ export const PATH = {
     ABOUT: {
       path: "/aboutus",
       element: About,
-      header: false
+      header: false,
     },
     DISCLAIMER: {
       path: "/disclaimer",
       element: Disclaimer,
-      header: false
+      header: false,
     },
     PRICING_POLICY: {
       path: "/pricing-policy",
       element: PricingPolicy,
-      header: false
+      header: false,
     },
     PRIVACY_POLICY: {
       path: "/privacy-policy",
       element: PrivacyPolicy,
-      header: false
+      header: false,
     },
     REFUND_POLICY: {
       path: "/refund-and-cancellation-policy",
       element: RefundPolicy,
-      header: false
+      header: false,
     },
     TERMSCONDITIONS: {
       path: "/terms-conditions",
       element: TermsConditions,
-      header: false
+      header: false,
     },
 
     // Header
@@ -372,6 +381,6 @@ export const PATH = {
     WalletTranscations: {
       path: "/wallet-transactions",
       element: WalletTranscations,
-    }
+    },
   },
 };

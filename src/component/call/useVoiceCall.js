@@ -8,7 +8,6 @@
 //   isUserSide,
 // }) {
 
-//   console.log("testingggggg",userId,astrologerId,roomId);
 //   const [isCalling, setIsCalling] = useState(false);
 //   const [remoteJoined, setRemoteJoined] = useState(false);
 //   const [callStatus, setCallStatus] = useState("idle"); // idle | calling | ringing | onCall | ended | busy | rejected
@@ -60,7 +59,6 @@
 
 //     return () => voiceSocketServices.removeListeners();
 //   }, [roomId, userId, astrologerId]);
-
 
 //   /******************
 //    * ACTIONS USERS CAN DO

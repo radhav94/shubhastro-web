@@ -67,25 +67,25 @@ const Sidebar = () => {
                 Daily Horoscope
               </li>
             </Link>
-            <Link to={`/horoscopes/monthly-horoscope/${paramSign}`}>
+            <Link to={`/horoscopes/weekly-horoscope/${paramSign}`}>
               <li
                 className={`${
-                  horoscopeType.includes("monthly") ? styles.active : ""
+                  horoscopeType.includes("weekly") ? styles.active : ""
                 }`}
               >
-                Monthly Horoscope
+                Weekly Horoscope
               </li>
             </Link>
-            <Link to={`/horoscopes/yesterday-horoscope/${paramSign}`}>
+            <Link to={`/horoscopes/yearly-horoscope/${paramSign}`}>
               <li
                 className={`${
-                  horoscopeType.includes("yesterday") ? styles.active : ""
+                  horoscopeType.includes("yearly") ? styles.active : ""
                 }`}
               >
-                Yesterday’s Horoscope
+                Yearly Horoscope
               </li>
             </Link>
-            <Link to={`/horoscopes/tomorrow-horoscope/${paramSign}`}>
+            {/* <Link to={`/horoscopes/tomorrow-horoscope/${paramSign}`}>
               <li
                 className={`${
                   horoscopeType.includes("tomorrow") ? styles.active : ""
@@ -93,9 +93,7 @@ const Sidebar = () => {
               >
                 Tomorrow's Horoscope
               </li>
-            </Link>
-            {/* <li>Weekly Horoscope</li>
-            <li>Annual Horoscope</li> */}
+            </Link> */}
           </ul>
         </div>
       </div>

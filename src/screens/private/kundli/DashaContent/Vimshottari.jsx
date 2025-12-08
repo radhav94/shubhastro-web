@@ -27,7 +27,7 @@ const Vimshottari = () => {
       {data?.response?.dashas?.map((dasha, i) => (
         <div key={i} className="border-gray-300 border rounded-md p-5 my-2">
           <div className="flex justify-between font-bold mb-2">
-            <h2>{dasha.dasha}</h2>
+            <h2>{dasha.dasha} Mahadasha</h2>
             <p className="text-gray-600 text-sm ">
               ({dasha.dasha_start_year} - {dasha.dasha_end_year})
             </p>
@@ -37,6 +37,13 @@ const Vimshottari = () => {
               Prediction
             </span>
             {dasha.prediction}
+          </p>
+          <br />
+          <p className="text-left text-gray-600">
+            <span className="text-red-500 text-lg mr-5 font-bold ">
+              Planet in Zodiac
+            </span>
+            {dasha.planet_in_zodiac}
           </p>
         </div>
       ))}

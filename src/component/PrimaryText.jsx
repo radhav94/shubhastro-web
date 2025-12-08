@@ -36,7 +36,7 @@ const PrimaryText = ({
   isCenter,
   isRight,
   onClick,
-  as = "p",
+  as = "div",
   lines,
   dangerouslySetInnerHTML,
   ...rest

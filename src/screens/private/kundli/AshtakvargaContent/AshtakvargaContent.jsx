@@ -4,6 +4,8 @@ import DynamicChart from "../../../../component/UI/charts/kundli/DynamicChart";
 import { useSelector } from "react-redux";
 import { useFetchAshtakvargaChartQuery } from "../../../../redux/api/kundli/ashtakvargaApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import { useGetAshtakvargaChartQuery } from "../../../../redux/api/kundli/kundliApi";
+import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -17,30 +19,61 @@ const sectionVariants = {
 const AshtakvargaContent = () => {
   // const { Jupiter, Mars, Mercury, Moon, Sarva, Saturn, Sun, Venus } = data?.data
 
-  const payload = useSelector((state) => state?.form?.pythonApiPayload);
+  const payload = useSelector((state) => state?.form?.kundliPayload);
+  const params = payload ? buildVedicParam(payload) : null;
 
-  const { data, isSuccess, isLoading } = useFetchAshtakvargaChartQuery(
-    payload ? { payload } : skipToken
+  // const { data, isSuccess, isLoading } = useFetchAshtakvargaChartQuery(
+  //   payload ? { payload } : skipToken
+  // );
+  const dSun = useGetAshtakvargaChartQuery(
+    params ? { chartType: "Sun", params } : skipToken
+  );
+  const moon = useGetAshtakvargaChartQuery(
+    params ? { chartType: "Moon", params } : skipToken
+  );
+  const mars = useGetAshtakvargaChartQuery(
+    params ? { chartType: "Mars", params } : skipToken
+  );
+  const mercury = useGetAshtakvargaChartQuery(
+    params ? { chartType: "Mercury", params } : skipToken
+  );
+  const venus = useGetAshtakvargaChartQuery(
+    params ? { chartType: "Venus", params } : skipToken
+  );
+  const jupiter = useGetAshtakvargaChartQuery(
+    params ? { chartType: "Jupiter", params } : skipToken
+  );
+  const saturn = useGetAshtakvargaChartQuery(
+    params ? { chartType: "Saturn", params } : skipToken
   );
 
-  function getSvgUrl(svgString) {
-    return svgString ? `data:image/svg+xml;base64,${btoa(svgString)}` : null;
-  }
+  const svgUrl = (raw) =>
+    raw ? `data:image/svg+xml;utf8,${encodeURIComponent(raw)}` : null;
+
+  const charts = [
+    { title: "Sun", src: svgUrl(dSun.data) },
+    { title: "Moon", src: svgUrl(moon.data) },
+    { title: "Mars", src: svgUrl(mars.data) },
+    { title: "Mercury", src: svgUrl(mercury.data) },
+    { title: "Venus", src: svgUrl(venus.data) },
+    { title: "Jupiter", src: svgUrl(jupiter.data) },
+    { title: "Saturn", src: svgUrl(saturn.data) },
+  ];
 
   // Usage
-  const JupiterUrl = getSvgUrl(data?.data?.Jupiter);
-  const MarsUrl = getSvgUrl(data?.data?.Mars);
-  const MercuryUrl = getSvgUrl(data?.data?.Mercury);
-  const MoonUrl = getSvgUrl(data?.data?.Moon);
-  const sarvaUrl = getSvgUrl(data?.data?.Sarva);
-  const saturnUrl = getSvgUrl(data?.data?.Saturn);
-  const sunUrl = getSvgUrl(data?.data?.Sun);
-  const venusUrl = getSvgUrl(data?.data?.Venus);
+  // const JupiterUrl = getSvgUrl(data?.data?.Jupiter);
+  // const MarsUrl = getSvgUrl(data?.data?.Mars);
+  // const MercuryUrl = getSvgUrl(data?.data?.Mercury);
+  // const MoonUrl = getSvgUrl(data?.data?.Moon);
+  // const sarvaUrl = getSvgUrl(data?.data?.Sarva);
+  // const saturnUrl = getSvgUrl(data?.data?.Saturn);
+  const sunUrl = svgUrl(dSun.data);
+  // const venusUrl = getSvgUrl(data?.data?.Venus);
 
   return (
     <>
-      <PrimaryLoader isLoading={isLoading} />
-      {isSuccess && (
+      {/* <PrimaryLoader isLoading={isLoading} /> */}
+      {true && (
         <div className={styles.mainContainer}>
           <div className={styles.textContainer}>
             <h1 className={styles.cardTitle}>Ashtakvarga Chart</h1>
@@ -55,14 +88,16 @@ const AshtakvargaContent = () => {
             </p>
           </div>
           <div className={styles.grid}>
-            <DynamicChart title="Sav" src={sarvaUrl} alt="Sarva" />
-            <DynamicChart title="Jupiter" src={JupiterUrl} alt="Jupiter" />
-            <DynamicChart title="Mars" src={MarsUrl} alt="Mars" />
-            <DynamicChart title="Mercury" src={MercuryUrl} alt="Mercury" />
-            <DynamicChart title="Moon" src={MoonUrl} alt="Moon" />
-            <DynamicChart title="Saturn" src={saturnUrl} alt="Saturn" />
-            <DynamicChart title="Sun" src={sunUrl} alt="Sun" />
-            <DynamicChart title="Venus" src={venusUrl} alt="Venus" />
+            {charts.map(
+              (chart, index) =>
+                chart.src && (
+                  <DynamicChart
+                    key={index}
+                    title={chart.title}
+                    src={chart.src}
+                  />
+                )
+            )}
           </div>
         </div>
       )}

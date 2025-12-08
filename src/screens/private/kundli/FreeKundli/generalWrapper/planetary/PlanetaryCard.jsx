@@ -6,7 +6,9 @@ const PlanetaryCard = ({ planet }) => {
   if (!planet) {
     return (
       <div className={styles.card}>
-        <PrimaryText size_16 color="#555">No data available</PrimaryText>
+        <PrimaryText size_16 color="#555">
+          No data available
+        </PrimaryText>
       </div>
     );
   }
@@ -16,14 +18,22 @@ const PlanetaryCard = ({ planet }) => {
 
   return (
     <div className={styles.card}>
-
       {/* Title */}
       <div className={styles.cardHeader}>
         <PrimaryText isBold size_20 className={styles.cardTitle}>
-          {safe(planet.planet_considered)} • Consideration
+          {safe(planet.planet_considered)} Consideration
         </PrimaryText>
       </div>
 
+      {/* Planet Definition */}
+      <div className={styles.section}>
+        <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
+          Definition
+        </PrimaryText>
+        <PrimaryText size_16 color="#555" className={styles.sectionContent}>
+          {safe(planet.planet_definitions)}
+        </PrimaryText>
+      </div>
       {/* Affliction */}
       <div className={styles.section}>
         <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
@@ -74,13 +84,22 @@ const PlanetaryCard = ({ planet }) => {
         </PrimaryText>
       </div>
 
-      {/* Qualities */}
+      {/* Long Qualities */}
       <div className={styles.section}>
         <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
-          Qualities
+          Long Qualities
         </PrimaryText>
         <PrimaryText size_16 color="#555" className={styles.sectionContent}>
           {safe(planet.qualities_long)}
+        </PrimaryText>
+      </div>
+      {/*Short  Qualities */}
+      <div className={styles.section}>
+        <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
+          short Qualities
+        </PrimaryText>
+        <PrimaryText size_16 color="#555" className={styles.sectionContent}>
+          {safe(planet.qualities_short)}
         </PrimaryText>
       </div>
 
@@ -142,7 +161,6 @@ const PlanetaryCard = ({ planet }) => {
           ))}
         </div>
       </div>
-
     </div>
   );
 };

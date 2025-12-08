@@ -1,39 +1,37 @@
-.card {
-  background: #ffffff;
-  padding: 22px 24px;
-  border-radius: 14px;
+.cardContainer {
+  background: #fff;
+  padding: 25px;
+  border-radius: 18px;
+  margin: 15px 0;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-  margin: 1.6rem auto;
-  max-width: 95%;
-  transition: 0.3s ease;
-  border: 1px solid #f5f5f5;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.12);
-  }
 }
 
 .title {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
-  color: #222;
+  text-align: start;
   margin-bottom: 18px;
-  border-left: 4px solid #ff6b35;
-  padding-left: 12px;
 }
 
-.content {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 22px 40px;
+.summary {
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 12px;
+  line-height: 1.5;
+  text-align: left;
+}
 
-  @media (max-width: 750px) {
+.gridBox {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 3rem;
+
+  @media (max-width: 600px) {
     grid-template-columns: 1fr;
   }
 }
 
-.item {
+.row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -42,83 +40,76 @@
 .left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .icon {
-  font-size: 1.3rem;
-  color: #ff6723;
-  background: #fff1e7;
-  padding: 6px;
-  border-radius: 8px;
+  font-size: 18px;
+  color: #ff6f3d;
 }
 
-.key {
+.label {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
   color: #333;
 }
 
 .value {
   font-size: 15px;
-  font-weight: 700;
-  color: #e14a28;
+  font-weight: 600;
+  color: #e64a19;
   text-align: right;
 }
 
-.summary {
-  margin-top: 14px;
-  font-size: 14px;
-  color: #555;
-  line-height: 1.5;
-  background: #fafafa;
-  padding: 10px;
-  border-radius: 8px;
-}
-
-/* ───────────── MUHURAT BOXES ───────────── */
-
-.muhuratWrapper {
-  display: flex;
-  gap: 16px;
-  width: 95%;
-  margin: 18px auto;
-  justify-content: space-between;
-
-  @media (max-width: 750px) {
-    flex-direction: column;
-  }
+.muhuratContainer {
+  margin-top: 18px;
+  text-align: start;
 }
 
 .muhuratBox {
-  flex: 1;
-  background: #fff;
-  padding: 14px 18px;
+  background: #fff5f0;
+  padding: 12px 16px;
   border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.07);
-  border-left: 6px solid;
-  transition: 0.3s ease;
+  margin-bottom: 10px;
+  text-align: start;
+}
 
-  h4 {
-    font-size: 18px;
-    font-weight: 700;
-  }
+.muhuratBox h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.row {
+  display: grid;
+  grid-template-columns: 40% 1fr;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
 
-  span {
-    display: block;
-    margin-top: 4px;
-    font-weight: 600;
-    color: #d13a1b;
+  @media (max-width: 600px) {
+    grid-template-columns: 70% 1fr;
   }
 }
 
-.abhijit {
-  border-left-color: #ff7b7b;
-  background: #ffeaea;
+.left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
-.rahukaal {
-  border-left-color: #7affb8;
-  background: #eafff4;
+.label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+.value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #e64a19;
+  text-align: left;
+  line-height: 1.4;
+  word-break: break-word;
 }
