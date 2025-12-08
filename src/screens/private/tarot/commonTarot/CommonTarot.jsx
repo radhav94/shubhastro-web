@@ -13,6 +13,7 @@ const CommonTarot = ({
 }) => {
   const [selected, setSelected] = useState(null);
   const [revealed, setRevealed] = useState(false);
+  const [shuffleKey, setShuffleKey] = useState(0);
   const resultRef = useRef(null);
 
   // dynamically prepare params
@@ -43,6 +44,8 @@ const CommonTarot = ({
   const handleReset = () => {
     setSelected(null);
     setRevealed(false);
+    // increases key → tarot cards reshuffle
+    setShuffleKey((prev) => prev + 1);
   };
 
   return (
@@ -52,6 +55,7 @@ const CommonTarot = ({
         subtitle={subTitle}
         onSelect={handleCardSelect}
         shuffleType={shuffleType}
+        shuffleKey={shuffleKey}
       />
 
       {/* Reveal Button */}

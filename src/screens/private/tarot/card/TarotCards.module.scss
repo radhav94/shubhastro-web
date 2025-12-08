@@ -310,3 +310,35 @@
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
   }
 }
+
+.card {
+  position: absolute;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.multiActive {
+  transform: translateY(-25px);   // 👈 Lifts card upward
+  // z-index: 10;                     // bring above others
+  filter: drop-shadow(0px 6px 8px rgba(0, 0, 0, 0.3));
+}
+
+.pickBadge {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  background: #ffcc00;
+  color: #000;
+  font-size: 12px;
+  font-weight: 600;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  z-index: 5;
+}
