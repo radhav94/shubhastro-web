@@ -93,21 +93,17 @@ const BasicContent = (props) => {
   const basic = {
     title: "Basic Details",
     data: {
-      Name: capitalizeWords(userDetails.name) || "--",
-      Date: formatDate(
-        userDetails.day,
-        monthMap[userDetails.month],
-        userDetails.year
-      ),
-      Time: formatTime(userDetails.hour, userDetails.minute),
+      Name: userDetails.name || "--",
+      Date: formatDate(birthDetails.day, birthDetails.month, birthDetails.year),
+      Time: formatTime(birthDetails.hour, birthDetails.minute),
       Place: userDetails.birthPlace || "--",
-      Latitude: userDetails.latitude ?? "--",
-      Longitude: userDetails.longitude ?? "--",
-      Timezone: userDetails.timezone ? `GMT +${birthDetails.timezone}` : "5.5",
+      Latitude: birthDetails.latitude ?? "--",
+      Longitude: birthDetails.longitude ?? "--",
+      Timezone: birthDetails.timezone ? `GMT +${birthDetails.timezone}` : "--",
       Sunrise: birthDetails.sunrise || "--",
       Sunset: birthDetails.sunset || "--",
-      Ayanamsha: astroDetails.ayanamsa
-        ? astroDetails.ayanamsa.toFixed(5)
+      Ayanamsha: birthDetails.ayanamsha
+        ? birthDetails.ayanamsha.toFixed(5)
         : "--",
     },
   };
