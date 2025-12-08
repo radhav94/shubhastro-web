@@ -15,6 +15,7 @@ const MultiPickTarot = ({
 }) => {
   const [selectedCards, setSelectedCards] = useState([]);
   const [revealed, setRevealed] = useState(false);
+  const [shuffleKey, setShuffleKey] = useState(0);
   const resultRef = useRef(null);
 
   const handleCardSelect = (card) => {
@@ -35,6 +36,8 @@ const MultiPickTarot = ({
   const handleReset = () => {
     setSelectedCards([]);
     setRevealed(false);
+    // increases key → tarot cards reshuffle
+    setShuffleKey((prev) => prev + 1);
   };
 
   const handleReveal = () => {
@@ -69,6 +72,10 @@ const MultiPickTarot = ({
         cardsCount={cardsCount}
         shuffleType={shuffleType}
         onSelect={handleCardSelect}
+        multiPick={true}
+        shuffleKey={shuffleKey}
+        maxSelectableCards={maxSelectableCards}
+        selectedCardsCount={selectedCards.length}
       />
 
       {selectedCards.length > 0 && !revealed && (
