@@ -11,8 +11,6 @@ import { useLocation,useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import AgoraRTC, { AgoraRTCProvider } from "agora-rtc-react";
 import { IoMic, IoMicOff, IoCall } from "react-icons/io5";
-import {useGetAgoraTokenQuery} from "../../redux/api/agoratokenApi/agoraTokenApi"
-
 import styles from "./VoiceCall.module.scss";
 
 export const AgoraVoiceCalling = () => {
@@ -32,29 +30,18 @@ const CallingUI = ({ client }) => {
   const remoteUsers = useRemoteUsers();
   const location = useLocation();
   const navigate = useNavigate();
-
-
-  // const {roomId,callerName}=state
   
   const callerName = location.state?.callerName || "Unknown";
   const roomID = location.state?.roomId || "123456";
   const agoraToken=location?.state?.agoraToken  || "";
 
-  
-//   const { data, isLoading, error } = useGetAgoraTokenQuery({
-//   channelName:roomID,
-//   // entityId:callerName,
-// });
-
-// const tokendData=data?.data;
-// console.log("tokenData",tokendData);
 
   const appId = "5630460abdc141e3b2f8d9597752bd7d";
   const channel = roomID;
   const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
 
 useJoin(
-  agoraToken && calling && !isLoading && !error
+  agoraToken && calling
     ? { appid: appId, channel, token: agoraToken }
     : undefined,
   calling
@@ -104,6 +91,8 @@ useJoin(
     client.off("user-left", handleRemoteLeave);
   };
 }, [client, localMicrophoneTrack, navigate]);
+
+
 
   const formatTime = (sec) => {
     const m = String(Math.floor(sec / 60)).padStart(2, "0");

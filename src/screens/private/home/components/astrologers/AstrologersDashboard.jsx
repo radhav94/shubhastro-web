@@ -11,41 +11,29 @@ const AstrologersDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
 
   const astroIdLocal = localStorage.getItem("shubhtalk_astro_id");
-
-  // 🚀 Call states
   const [incomingCall, setIncomingCall] = useState(false);
-  const [callerSocketId, setCallerSocketId] = useState(null);
   const [roomId, setRoomId] = useState(null);
   const [incomingVideoCall, setIncomingVideoCall] = useState(false);
   const [videoChannelName, setVideoChannelName] = useState(null);
   const [callerUserId, setCallerUserId] = useState(null);
-
-  // 🔥 Listen for incoming call
-  // useEffect(() => {
-  //   voiceSocket.on("incoming_call", (data) => {
-
-  //     console.log("data---->>>",data)
-  //     console.log("IncomingcallfromuserId", roomId);
-  //     setIncomingCall(true);
-  //     setRoomId(roomId);
-  //     setCallerSocketId(from); // ⭐ Now contains userId
-  //   });
-
-  //   return () => voiceSocket.off("incoming_call");
-  // }, []);
-
+  const [token,setToken]=useState("");
 
   useEffect(() => {
   if (!voiceSocket.connected) {
+    voiceSocket.io.opts.query = {
+      astrologerId: astroIdLocal,
+      role: "ASTROLOGER",
+    };
+
     voiceSocket.connect();
   }
 
-  const handleIncomingVoiceCall = ({ roomId, appId, token, userId }) => {
-    console.log("Incoming call", roomId, appId, token, userId);
-
+  const handleIncomingVoiceCall = ({ roomId,  agoraToken,callerId }) => {
+    console.log("Incoming call", roomId,  agoraToken, callerId);
     setRoomId(roomId);
-    setCallerUserId(userId);
+    setCallerUserId(callerId);
     setIncomingCall(true);
+    setToken(agoraToken);
   };
 
   voiceSocket.on("incoming_call", handleIncomingVoiceCall);
@@ -55,17 +43,21 @@ const AstrologersDashboard = () => {
   };
 }, []);
 
-
-  // ✔ Accept call => signal + go to Call Screen
+  
   const handleAccept = () => {
-    voiceSocket.emit("accept_call", { roomId, to: callerSocketId });
+    voiceSocket.emit("accept_call", { roomId, token,channelName:roomId,astrologerId: astroIdLocal});
     navigate(`/astrologer-dashboard/voice-call/${roomId}`, {
       state: {
-        roomId,
-        callerName: callerSocketId || "User",
-        isUserSide: false,
+          roomId,
+          agoraToken:token,
+          callerName: callerUserId,
+          isUserSide: false,
       },
     });
+  };
+
+  const handleReject = () => {
+    voiceSocket.emit("reject_call", {roomId});
   };
 
   useEffect(() => {
@@ -153,7 +145,7 @@ const AstrologersDashboard = () => {
               </button>
               <button
                 className={styles.rejectBtn}
-                onClick={() => setIncomingCall(false)}
+                onClick={handleReject}
               >
                 Reject
               </button>

@@ -55,62 +55,64 @@ const ChatWindow = () => {
     return [...formattedHistory, ...formattedSocket];
   }, [messageOff, messages, isUserSide]);
 
-  const handleCallClick = () => {
-    setWaitingPopup(true);
+  // const handleCallClick = () => {
+  //   // setWaitingPopup(true);
 
+  //   if (!voiceSocket.connected) {
+  //     voiceSocket.connect();
+  //   }
+
+  //   voiceSocket.on("connect", () => {
+  //     voiceSocket.emit("create_call_room", {
+  //       userId,
+  //       astrologerId,
+  //     });
+
+  //     console.log("create_call_room emitted!");
+  //   });
+
+  //   voiceSocket.on("connect_error", (err) => {
+  //     console.log("❌ Socket connection error:", err);
+  //   });
+  // };
+
+  const handleCallClick = () => {
     if (!voiceSocket.connected) {
+      voiceSocket.io.opts.query = {
+        userId,
+        astrologerId,
+        role: "CUSTOMER",
+      };
+
       voiceSocket.connect();
     }
 
-    voiceSocket.once("connect", () => {
-      voiceSocket.emit("create_call_room", {
-        userId,
-        astrologerId,
-      });
-
-      console.log("create_call_room emitted!");
-    });
-
-    voiceSocket.once("connect_error", (err) => {
-      console.log("❌ Socket connection error:", err);
+    voiceSocket.emit("create_call_room", {
+      userId,
+      astrologerId,
     });
   };
 
   useEffect(() => {
     if (!isUserSide) return;
 
-    const handleReturnRoom = ({roomId,agoraToken}) => {
-      console.log("Room Created----->>>>", data);
-       setWaitingPopup(false);
+    const handleReturnRoom = (data) => {
+      setWaitingPopup(true); // Show "Waiting for astrologer..."
+    };
 
+    const handleCallAccepted = ({ roomId, appId, token }) => {
+      console.log("📲 Call Accepted:", roomId, appId, token);
 
-       navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
+      navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
         state: {
           roomId,
-          appId,
-          agoraToken,
+          agoraToken: token,
           callerName: fullName,
           isUserSide: true,
         },
       });
 
-      // Show waiting popup
-      // setWaitingPopup(true);
-    };
-
-    const handleCallAccepted = ({ roomId, appId, agoraToken }) => {
-      console.log("📲 Call Accepted:", roomId, appId, agoraToken);
-
-
-      // navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
-      //   state: {
-      //     roomId,
-      //     appId,
-      //     agoraToken,
-      //     callerName: fullName,
-      //     isUserSide: true,
-      //   },
-      // });
+      setWaitingPopup(false);
     };
 
     voiceSocket.on("return_call_room", handleReturnRoom);
