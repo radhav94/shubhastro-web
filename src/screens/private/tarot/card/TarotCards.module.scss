@@ -183,3 +183,130 @@
     text-align: center;
   }
 }
+
+
+/* Selected Card Indicator */
+.selectionIndicator {
+  margin: 20px 0;
+  padding: 12px 25px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Reveal Section */
+.revealSection {
+  margin: 30px auto;
+  padding: 30px 25px;
+  max-width: 500px;
+  background: #fff;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.5s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.selectedCardInfo {
+  margin-bottom: 25px;
+  
+  .selectedMessage {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .instruction {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Button Styles */
+.revealButton {
+  padding: 14px 35px;
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 180px;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.resetButton {
+  padding: 14px 25px;
+  font-size: 14px;
+  font-weight: 500;
+  background: transparent;
+  border: 2px solid #ddd;
+  color: #666;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px;
+  
+  &:hover {
+    border-color: #764ba2;
+    color: #764ba2;
+    background: rgba(118, 75, 162, 0.05);
+  }
+}
+
+/* Result Buttons */
+.resultButtons {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  text-align: center;
+}
+
+.newReadingButton {
+  padding: 12px 30px;
+  font-size: 14px;
+  font-weight: 500;
+  background: transparent;
+  border: 2px solid #667eea;
+  color: #667eea;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+}

@@ -61,8 +61,16 @@ import ConsultantList from "../../screens/private/shop/consultant/ConsultantList
 import PaymentScreen from "../../screens/private/shop/consultant/PaymentScreen";
 import ProductDetail from "../../screens/private/shop/detail/ProductDetail";
 import ProductList from "../../screens/private/shop/product/ProductList";
+import BuisnessBreakupTarot from "../../screens/private/tarot/buisnessBreakupTarot/BuisnessBreakupTarot";
 import TarotCards from "../../screens/private/tarot/card/TarotCard";
+import CareerSelectTarot from "../../screens/private/tarot/careerSelectTarot/CareerSelectTarot";
 import DailyTarot from "../../screens/private/tarot/dailyTarot/DailyTarot";
+import EroticLove from "../../screens/private/tarot/eroticLove/EroticLove";
+import FlirtTarot from "../../screens/private/tarot/flirtTarot/FlirtTarot";
+import InDepthLove from "../../screens/private/tarot/inDepthLove/InDepthLove";
+import LoveTriangleTarot from "../../screens/private/tarot/loveTriangleTarot/LoveTriangleTarot";
+import MadeForEachOther from "../../screens/private/tarot/madeForEachOther/MadeForEachOther";
+import RomanticBreakUpTarot from "../../screens/private/tarot/romanticBreakupTarot/RomanticBreakUpTarot";
 import YesNoTarot from "../../screens/private/tarot/yesNoTarot/YesNoTarot";
 
 export const PATH = {
@@ -228,6 +236,38 @@ export const PATH = {
     DAILY_TAROT: {
       path: "tarot/daily-tarot",
       element: DailyTarot,
+    },
+    CAREER_SELECT_TAROT: {
+      path: "tarot/career-select",
+      element: CareerSelectTarot,
+    },
+    FLIRT_TAROT: {
+      path: "tarot/flirt",
+      element: FlirtTarot,
+    },
+    EROTIC_LOVE_TAROT: {
+      path: "tarot/erotic-love",
+      element: EroticLove,
+    },
+    MADE_FOR_EACH_OTHER_TAROT: {
+      path: "tarot/made-for-each-other",
+      element: MadeForEachOther,
+    },
+    IN_DEPTH_TAROT: {
+      path: "tarot/in-depth-love",
+      element: InDepthLove,
+    },
+    LOVE_TRIANGLE_TAROT: {
+      path: "tarot/love-triangle",
+      element: LoveTriangleTarot,
+    },
+    ROMANTIC_BREAKUP_TAROT: {
+      path: "tarot/romantic-breakup",
+      element: RomanticBreakUpTarot,
+    },
+    BUISNESS_BREAKUP_TAROT: {
+      path: "tarot/buisness-breakup",
+      element: BuisnessBreakupTarot,
     },
     TAROT_ONE_CARD: {
       path: "/tarot/one-card-reading",

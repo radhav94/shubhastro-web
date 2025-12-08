@@ -11,27 +11,26 @@ const defaultCard = {
   isUpright: true,
 };
 
-const ResultTarot = ({ card = defaultCard, userName = "Demo" }) => {
+const ResultTarot = ({ card = defaultCard, userName = "", onReset }) => {
   return (
     <div className={styles.resultContainer}>
       <div className={styles.tarotCard}>
         <div className={styles.tarotLeft}>
-          <img src={card.image} alt={card.name} className={styles.cardImage} />
+          <img src={card?.card_image?.classic} alt={card.name} className={styles.cardImage} />
         </div>
         <div className={styles.tarotRight}>
-          <h1>Hi {userName}</h1>
+          {userName && <h1>Hi {userName}</h1>}
           <h2>
             {card.name}
-            <span className={styles.cardPosition}>
+            {card.isUpright && <span className={styles.cardPosition}>
               The card is {card.isUpright ? "upright" : "reversed"}
-            </span>
+            </span>}
           </h2>
           <p>{card.meaning}</p>
-          <a href="/tarot/one-card-reading">
-            <button type="button" className={styles.actionButton}>
+          <p>{card.description}</p>
+            <button type="button" className={styles.actionButton} onClick={onReset} >
               Ask another question
             </button>
-          </a>
         </div>
       </div>
     </div>

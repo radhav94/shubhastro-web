@@ -2,15 +2,23 @@ import React, { useState } from "react";
 import styles from "./TarotCards.module.scss";
 import { AppImages } from "../../../../utils/appImages";
 import { PrimaryText } from "../../../../component";
+import { useGetTarotShuffleDataQuery } from "../../../../redux/api/tarot/tarotApi";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
-const TarotCard = ({ title, cardsCount = 11, onSelect }) => {
+const TarotCard = ({ title, subtitle="", onSelect, shuffleType = "both" }) => {
   const [selectedIndex, setSelectedIndex] = useState(null);
 
-  const cards = Array.from({ length: cardsCount }, (_, i) => i);
+  const { data, isLoading } = useGetTarotShuffleDataQuery({
+    shuffle_type: shuffleType,
+    lang: "en",
+  });
 
-  const handleSelect = (index) => {
+  if (isLoading) return <PrimaryLoader />;
+
+  const handleSelect = (index, cardData) => {
+    
     setSelectedIndex(index);
-    if (onSelect) onSelect(index);
+    if (onSelect) onSelect(cardData || null);
   };
 
   return (
@@ -18,22 +26,31 @@ const TarotCard = ({ title, cardsCount = 11, onSelect }) => {
       <PrimaryText isBold isCenter size_28>
         {title}
       </PrimaryText>
+      {subtitle && <p className={styles.description}>{subtitle}</p>}
+
 
       <div className={styles.wrapper}>
         <div className={styles.fanWrapper}>
-          {cards.map((cardIndex, i) => (
+          {data?.response?.map((card, i) => (
             <div
               key={i}
               className={`${styles.card} ${
-                selectedIndex === cardIndex ? styles.active : ""
+                selectedIndex === i ? styles.active : ""
               }`}
               style={{ left: `${i * 34}px` }}
-              onClick={() => handleSelect(cardIndex)}
+              onClick={() => handleSelect(i, card)}
             >
               <img src={AppImages.tarotCard} alt="tarot" />
             </div>
           ))}
         </div>
+        
+        {/* Selected Card Indicator */}
+        {selectedIndex !== null && (
+          <div className={styles.selectionIndicator}>
+            <p>Card selected! Ready to reveal your reading.</p>
+          </div>
+        )}
       </div>
     </>
   );
