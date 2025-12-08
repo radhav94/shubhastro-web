@@ -38,22 +38,24 @@ const CallingUI = ({ client }) => {
   
   const callerName = location.state?.callerName || "Unknown";
   const roomID = location.state?.roomId || "123456";
+  const agoraToken=location?.state?.agoraToken  || "";
 
-  const { data, isLoading, error } = useGetAgoraTokenQuery({
-  channelName:roomID,
-  // entityId:callerName,
-});
+  
+//   const { data, isLoading, error } = useGetAgoraTokenQuery({
+//   channelName:roomID,
+//   // entityId:callerName,
+// });
 
-const tokendData=data?.data;
-console.log("tokenData",tokendData);
+// const tokendData=data?.data;
+// console.log("tokenData",tokendData);
 
   const appId = "5630460abdc141e3b2f8d9597752bd7d";
   const channel = roomID;
   const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
 
 useJoin(
-  tokendData && calling && !isLoading && !error
-    ? { appid: appId, channel, token: tokendData }
+  agoraToken && calling && !isLoading && !error
+    ? { appid: appId, channel, token: agoraToken }
     : undefined,
   calling
 );

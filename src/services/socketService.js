@@ -42,7 +42,6 @@ class SocketService {
   }
 
   joinRoom({ roomId, userId, astrologerId }) {
-    console.log("JoIN ROOM",roomId, userId, astrologerId )
     this.socket.emit(
       "joinRoom",
       { roomId, userId, astrologerId },
@@ -58,7 +57,6 @@ class SocketService {
 
   // USER SEND
   sendMessage({ roomId, userId, astrologerId, message, kundliId }) {
-    console.log("Send Message",roomId, userId, astrologerId, message, kundliId);
     try {
       if (!this.socket?.connected)
         throw new Error("Socket not connected, try again.");
@@ -80,8 +78,6 @@ class SocketService {
 
   // ASTRO SEND
   astrologerReplied({ roomId, userId, astrologerId, message }) {
-    console.log("Send Message astro",roomId, userId, astrologerId, message);
-
     try {
       if (!this.socket?.connected)
         throw new Error("Socket not connected, try again.");

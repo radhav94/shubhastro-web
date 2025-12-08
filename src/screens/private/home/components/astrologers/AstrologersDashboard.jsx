@@ -21,20 +21,43 @@ const AstrologersDashboard = () => {
   const [callerUserId, setCallerUserId] = useState(null);
 
   // 🔥 Listen for incoming call
-  useEffect(() => {
-    voiceSocket.on("incoming_call", ({ roomId, from }) => {
-      console.log("IncomingcallfromuserId", roomId);
-      setIncomingCall(true);
-      setRoomId(roomId);
-      setCallerSocketId(from); // ⭐ Now contains userId
-    });
+  // useEffect(() => {
+  //   voiceSocket.on("incoming_call", (data) => {
 
-    return () => voiceSocket.off("incoming_call");
-  }, []);
+  //     console.log("data---->>>",data)
+  //     console.log("IncomingcallfromuserId", roomId);
+  //     setIncomingCall(true);
+  //     setRoomId(roomId);
+  //     setCallerSocketId(from); // ⭐ Now contains userId
+  //   });
+
+  //   return () => voiceSocket.off("incoming_call");
+  // }, []);
+
+
+  useEffect(() => {
+  if (!voiceSocket.connected) {
+    voiceSocket.connect();
+  }
+
+  const handleIncomingVoiceCall = ({ roomId, appId, token, userId }) => {
+    console.log("Incoming call", roomId, appId, token, userId);
+
+    setRoomId(roomId);
+    setCallerUserId(userId);
+    setIncomingCall(true);
+  };
+
+  voiceSocket.on("incoming_call", handleIncomingVoiceCall);
+
+  return () => {
+    voiceSocket.off("incoming_call", handleIncomingVoiceCall);
+  };
+}, []);
+
 
   // ✔ Accept call => signal + go to Call Screen
   const handleAccept = () => {
-    console.log("roomIdkjwdbfwjhdfbhejdf", roomId);
     voiceSocket.emit("accept_call", { roomId, to: callerSocketId });
     navigate(`/astrologer-dashboard/voice-call/${roomId}`, {
       state: {

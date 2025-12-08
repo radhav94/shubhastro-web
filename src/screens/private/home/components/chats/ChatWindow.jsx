@@ -16,7 +16,8 @@ import { voiceSocket } from "../../../../../services/voiceSocketServices";
 const ChatWindow = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { userId, astrologerId, roomId, fullName, isUserSide, kundliId } = state;
+  const { userId, astrologerId, roomId, fullName, isUserSide, kundliId } =
+    state;
 
   const { messages, error, isTyping, sendMessage, astroReply, sendTyping } =
     useChat({
@@ -55,34 +56,61 @@ const ChatWindow = () => {
   }, [messageOff, messages, isUserSide]);
 
   const handleCallClick = () => {
-    setWaitingPopup(true); // 👈 Show popup immediately
+    setWaitingPopup(true);
 
-    voiceSocket.emit("create_call_room", {
-      userId,
-      astrologerId,
+    if (!voiceSocket.connected) {
+      voiceSocket.connect();
+    }
+
+    voiceSocket.once("connect", () => {
+      voiceSocket.emit("create_call_room", {
+        userId,
+        astrologerId,
+      });
+
+      console.log("create_call_room emitted!");
+    });
+
+    voiceSocket.once("connect_error", (err) => {
+      console.log("❌ Socket connection error:", err);
     });
   };
 
   useEffect(() => {
     if (!isUserSide) return;
 
-    const handleReturnRoom = ({ roomId }) => {
-      voiceSocket.emit("notify_incoming_call", {
-        roomId,
-        to: astrologerId,
-        from: userId,
-      });
-    };
+    const handleReturnRoom = ({roomId,agoraToken}) => {
+      console.log("Room Created----->>>>", data);
+       setWaitingPopup(false);
 
-    const handleCallAccepted = ({ roomId }) => {
-      setWaitingPopup(false); // Hide popup
-      navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
+
+       navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
         state: {
           roomId,
+          appId,
+          agoraToken,
           callerName: fullName,
           isUserSide: true,
         },
       });
+
+      // Show waiting popup
+      // setWaitingPopup(true);
+    };
+
+    const handleCallAccepted = ({ roomId, appId, agoraToken }) => {
+      console.log("📲 Call Accepted:", roomId, appId, agoraToken);
+
+
+      // navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
+      //   state: {
+      //     roomId,
+      //     appId,
+      //     agoraToken,
+      //     callerName: fullName,
+      //     isUserSide: true,
+      //   },
+      // });
     };
 
     voiceSocket.on("return_call_room", handleReturnRoom);
@@ -129,7 +157,10 @@ const ChatWindow = () => {
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <IoArrowBack className={styles.backIcon} onClick={() => navigate(-1)} />
+          <IoArrowBack
+            className={styles.backIcon}
+            onClick={() => navigate(-1)}
+          />
 
           <img
             src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
@@ -148,7 +179,10 @@ const ChatWindow = () => {
         </div>
 
         <div className={styles.headerRight}>
-          <IoCallOutline className={styles.callIcon} onClick={handleCallClick} />
+          <IoCallOutline
+            className={styles.callIcon}
+            onClick={handleCallClick}
+          />
           <IoVideocamOutline
             className={styles.videoIcon}
             onClick={handleVideoCall}
@@ -168,10 +202,7 @@ const ChatWindow = () => {
             }`}
           >
             <div className={styles.bubbleContent}>
-              <PrimaryText
-                size={14}
-                color={msg.isSender ? "#fff" : "#111"}
-              >
+              <PrimaryText size={14} color={msg.isSender ? "#fff" : "#111"}>
                 {msg.text}
               </PrimaryText>
             </div>
@@ -183,7 +214,9 @@ const ChatWindow = () => {
         {isTyping && (
           <div className={`${styles.msgBubble} ${styles.receiverBubble}`}>
             <div className={styles.typingIndicator}>
-              <span></span><span></span><span></span>
+              <span></span>
+              <span></span>
+              <span></span>
             </div>
           </div>
         )}
