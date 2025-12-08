@@ -5,19 +5,14 @@ export const MENU_LIST = [
     title: "Horoscope",
     children: [
       { title: "Daily Horoscope", path: "/horoscopes/daily-horoscope" },
-      { title: "Monthly Horoscope", path: "/horoscopes/monthly-horoscope" },
+      { title: "Monthly Horoscope", path: "/horoscopes/weekly-horoscope" },
+      { title: "Monthly Horoscope", path: "/horoscopes/yearly-horoscope" },
     ],
   },
 
   {
     title: "Panchang",
     path: "/panchang",
-    children: [
-      {
-        title: "Today's Panchang",
-        path: "/panchang/today-panchang",
-      },
-    ],
   },
   { title: "Kundli", path: "/kundli" },
   { title: "Sadesati", path: "/sadesati" },

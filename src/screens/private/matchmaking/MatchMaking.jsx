@@ -15,28 +15,26 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 const isDuplicateKundli = (payload, list) => {
   return list.some(
     (k) =>
-      k.name === payload.name &&
-      k.gender === payload.gender &&
-      k.day === payload.day &&
-      k.month === payload.month &&
-      k.year === payload.year &&
+      k.name.trim().toLowerCase() === payload.name.trim().toLowerCase() &&
+      k.gender.toLowerCase() === payload.gender.toLowerCase() &&
+      Number(k.day) === Number(payload.day) &&
+      Number(k.month) === Number(payload.month) &&
+      Number(k.year) === Number(payload.year) &&
       Number(k.hour) === Number(payload.hour) &&
       Number(k.min) === Number(payload.min) &&
-      Number(k.second) === Number(payload.second) &&
       Number(k.lat) === Number(payload.lat) &&
       Number(k.lon) === Number(payload.lon) &&
-      k.place === payload.place &&
-      Number(k.tzone) === Number(payload.tzone)
+      k.place.trim().toLowerCase() === payload.place.trim().toLowerCase()
   );
 };
 
 const MatchMaking = () => {
   const navigate = useNavigate();
   const role = localStorage.getItem("shubhtalk_role");
-const token =
-  role === "ASTROLOGER"
-    ? localStorage.getItem("shubhtalk_astro_token")
-    : localStorage.getItem("shubhtalk_customer_token");
+  const token =
+    role === "ASTROLOGER"
+      ? localStorage.getItem("shubhtalk_astro_token")
+      : localStorage.getItem("shubhtalk_customer_token");
 
   const [isBoy, setIsBoy] = useState(true);
   const [selectedKundliId, setSelectedKundliId] = useState(null);
@@ -47,6 +45,8 @@ const token =
   const [createKundli] = useCreateKundliMutation();
   const [deleteKundli] = useDeleteKundliMutation();
 
+  const savedKundlis = data?.data || [];
+
   const onDelete = (id) => {
     deleteKundli(id);
 
@@ -55,8 +55,6 @@ const token =
       setSelectedKundliId(null);
     }
   };
-
-  const savedKundlis = data?.data || [];
 
   const [formData, setFormData] = useState({
     boyData: {
@@ -92,12 +90,15 @@ const token =
         name: kundli.name,
         dob: formatDateInput(kundli.year, kundli.month, kundli.day),
         tob: formatTimeInput(kundli.hour, kundli.min),
-        place: { address: kundli.place, lat: kundli.lat, lng: kundli.lon },
+        place: {
+          address: kundli.place,
+          lat: kundli.lat,
+          lng: kundli.lon,
+        },
       },
     }));
   };
 
-  // --- Update single field for specific person ---
   const handleChange = (person, field, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -107,15 +108,9 @@ const token =
 
   const pad = (num) => String(num).padStart(2, "0");
 
-  const formatDateInput = (y, m, d) => {
-    return `${y}-${pad(m)}-${pad(d)}`;
-  };
+  const formatDateInput = (y, m, d) => `${y}-${pad(m)}-${pad(d)}`;
+  const formatTimeInput = (h, min) => `${pad(h)}:${pad(min)}`;
 
-  const formatTimeInput = (h, min) => {
-    return `${pad(h)}:${pad(min)}`;
-  };
-
-  // --- Handle place select (Boy/Girl) ---
   const handlePlaceSelect = (person, loc) => {
     setFormData((prev) => ({
       ...prev,
@@ -126,7 +121,6 @@ const token =
     }));
   };
 
-  // --- Validation logic for one person ---
   const validatePerson = (data) => {
     const newErrors = {};
     if (!data.name.trim()) newErrors.name = "Name is required";
@@ -138,18 +132,19 @@ const token =
     return newErrors;
   };
 
-  // --- On Generate Horoscope click ---
   const handleGenerate = (e) => {
     e.preventDefault();
+
     if (!token) {
       navigate("/login", { state: { from: location.pathname } });
+      return;
     }
+
     const boyErrors = validatePerson(formData.boyData);
     const girlErrors = validatePerson(formData.girlData);
 
     setErrors({ boyData: boyErrors, girlData: girlErrors });
 
-    // If any errors exist
     if (Object.keys(boyErrors).length > 0) {
       setIsBoy(true);
       return;
@@ -158,6 +153,7 @@ const token =
       setIsBoy(false);
       return;
     }
+
     const boyPayload = {
       name: formData.boyData.name,
       gender: "Male",
@@ -167,11 +163,12 @@ const token =
       hour: Number(formData.boyData.tob.split(":")[0]),
       min: Number(formData.boyData.tob.split(":")[1]),
       second: 0,
-      place: formData.boyData.place.address,
+      place: formData.boyData.place.address.trim(),
       lat: Number(formData.boyData.place.lat),
       lon: Number(formData.boyData.place.lng),
       tzone: 5.5,
     };
+
     const girlPayload = {
       name: formData.girlData.name,
       gender: "Female",
@@ -181,22 +178,38 @@ const token =
       hour: Number(formData.girlData.tob.split(":")[0]),
       min: Number(formData.girlData.tob.split(":")[1]),
       second: 0,
-      place: formData.girlData.place.address,
+      place: formData.girlData.place.address.trim(),
       lat: Number(formData.girlData.place.lat),
       lon: Number(formData.girlData.place.lng),
       tzone: 5.5,
     };
-    if (!isDuplicateKundli(boyPayload, savedKundlis)) {
-      createKundli(boyPayload);
+
+    // -----------------------------------------------------
+    // 🔥 FIXED: DO NOT CREATE KUNDLI IF USER SELECTED ONE
+    // -----------------------------------------------------
+    const selected = savedKundlis.find((k) => k._id === selectedKundliId);
+
+    if (selected) {
+      if (selected.gender.toLowerCase() === "male") {
+        if (!isDuplicateKundli(boyPayload, savedKundlis)) {
+          createKundli(boyPayload);
+        }
+      }
+      if (selected.gender.toLowerCase() === "female") {
+        if (!isDuplicateKundli(girlPayload, savedKundlis)) {
+          createKundli(girlPayload);
+        }
+      }
+    } else {
+      if (!isDuplicateKundli(boyPayload, savedKundlis))
+        createKundli(boyPayload);
+      if (!isDuplicateKundli(girlPayload, savedKundlis))
+        createKundli(girlPayload);
     }
-    if (!isDuplicateKundli(girlPayload, savedKundlis)) {
-      createKundli(girlPayload);
-    }
-    // createKundli(girlPayload);
+
     navigate(PATH.privateRoutes.MATCHMAKING_DETAILS.path, { state: formData });
   };
 
-  // --- Render individual form ---
   const renderForm = (personKey, title) => {
     const data = formData[personKey];
     const err = errors[personKey];
@@ -276,10 +289,12 @@ const token =
   return (
     <div>
       <PrimaryLoader isLoading={isLoading} />
+
       <div className={styles.tabContainer}>
         <PrimaryText marginBottom="1rem" isCenter size_18>
           Enter Your Partner's Detail
         </PrimaryText>
+
         <div className={styles.switchTabs}>
           <span
             onClick={() => setIsBoy(true)}
@@ -287,6 +302,7 @@ const token =
           >
             Boy's Detail
           </span>
+
           <span
             onClick={() => setIsBoy(false)}
             className={!isBoy ? styles.activeTab : ""}
@@ -295,6 +311,7 @@ const token =
           </span>
         </div>
       </div>
+
       <div className={styles.mainContainer}>
         <div className={styles.dailyContainer}>
           <form className={styles.formArea} onSubmit={handleGenerate}>
@@ -307,7 +324,8 @@ const token =
             </button>
           </form>
         </div>
-        <div className={` ${styles.kundliListContainer} p-4 xs:mt[0] `}>
+
+        <div className={`${styles.kundliListContainer} p-4 xs:mt[0]`}>
           <SavedKundliList
             title="Saved Matches"
             token={token}

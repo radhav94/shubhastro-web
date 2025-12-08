@@ -1,4 +1,5 @@
 import { baseApi } from "../baseApi/baseApi";
+import { VEDIC_API_KEY, vedicApi } from "../baseApi/vedicApi";
 
 export const kundliApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -17,55 +18,118 @@ export const kundliApi = baseApi.injectEndpoints({
         body: payload,
       }),
     }),
+  }),
+});
 
+export const kundliVedicApi = vedicApi.injectEndpoints({
+  endpoints: (builder) => ({
     getAstroDetails: builder.query({
-      query: ({ payload }) => ({
-        url: "astro_details",
-        method: "POST",
-        body: payload,
-      }),
-    }),
-
-    getPlanets: builder.query({
-      query: ({ payload }) => ({
-        url: "planets",
-        method: "POST",
-        body: payload,
-      }),
-    }),
-
-    getKpDetails: builder.query({
-      query: ({ payload }) => ({
-        url: "kp_planets",
-        method: "POST",
-        body: payload,
+      query: (params) => ({
+        url: "extended-horoscope/extended-kundli-details",
+        params: {
+          api_key: VEDIC_API_KEY,
+          dob: params.dob,
+          tob: params.tob,
+          lat: params.lat,
+          lon: params.lon,
+          tz: params.tz || 5.5,
+          lang: "en",
+        },
       }),
     }),
 
     getChart: builder.query({
-      query: ({ chartType, payload }) => ({
-        url: `horo_chart_image/${chartType}`,
-        method: "POST",
-        body: payload,
+      query: ({ chartType, params }) => ({
+        url: "horoscope/chart-image",
+        method: "GET",
+        params: {
+          api_key: VEDIC_API_KEY,
+          dob: params.dob,
+          tob: params.tob,
+          tz: params.tz || 5.5,
+          div: chartType,
+          style: params.style || "north",
+          lang: "en",
+          stroke: 2,
+          lat: params.lat,
+          lon: params.lon,
+          color: "%23ff850b3d",
+          font_size: 15,
+          font_style: "Nunito",
+          colorful_planets: true,
+          format: "svg", //  IMPORTANT (use svg not base64)
+          transit_date: "22/01/2022",
+          size: 300,
+          show_degree: true,
+        },
+        responseHandler: "text", //  THIS FIXES PARSING ERROR
+      }),
+
+      transformResponse: (responseText) => responseText, //  return raw SVG
+    }),
+    getAshtakvargaChart: builder.query({
+      query: ({ chartType, params }) => ({
+        url: "horoscope/ashtakvarga-chart-image",
+        method: "GET",
+        params: {
+          api_key: VEDIC_API_KEY,
+          dob: params.dob,
+          tob: params.tob,
+          lat: params.lat,
+          lon: params.lon,
+          tz: params.tz || 5.5,
+          style: params.style || "north",
+          color: "%23ff850b3d",
+          planet: chartType,
+          size: 300,
+          font_size: 15,
+          lang: "en",
+          format: "svg", //  IMPORTANT (use svg not base64)
+        },
+        responseHandler: "text", //  THIS FIXES PARSING ERROR
+      }),
+
+      transformResponse: (responseText) => responseText, //  return raw SVG
+    }),
+
+    getPlanets: builder.query({
+      query: (params) => ({
+        url: "horoscope/planet-details",
+        params: {
+          api_key: VEDIC_API_KEY,
+          dob: params.dob,
+          tob: params.tob,
+          lat: params.lat,
+          lon: params.lon,
+          tz: params.tz || 5.5,
+          lang: "en",
+        },
       }),
     }),
 
-    getYoginiDasha: builder.query({
-      query: ({ payload }) => ({
-        url: "current_yogini_dasha",
-        method: "POST",
-        body: payload,
+    getKpDetails: builder.query({
+      query: (params) => ({
+        url: "extended-horoscope/kp-planets",
+        params: {
+          api_key: VEDIC_API_KEY,
+          dob: params.dob,
+          tob: params.tob,
+          lat: params.lat,
+          lon: params.lon,
+          tz: params.tz || 5.5,
+          lang: "en",
+        },
       }),
     }),
   }),
 });
 
+export const { useFetchBirthDetailsQuery, useGetBasicPanchangQuery } =
+  kundliApi;
 export const {
-  useFetchBirthDetailsQuery,
-  useGetBasicPanchangQuery,
   useGetAstroDetailsQuery,
+  useGetChartQuery,
+  useGetAshtakvargaChartQuery,
   useGetPlanetsQuery,
   useGetKpDetailsQuery,
-  useGetChartQuery,
-  useGetYoginiDashaQuery,
-} = kundliApi;
+} = kundliVedicApi;

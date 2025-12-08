@@ -3,121 +3,145 @@ import DynamicChart from "../../../../component/UI/charts/kundli/DynamicChart";
 import styles from "./ChartsContent.module.scss";
 import { useGetChartQuery } from "../../../../redux/api/kundli/kundliApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import { skipToken } from "@reduxjs/toolkit/query";
+import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
+
 const NorthIndian = () => {
   const payload = useSelector((state) => state?.form?.kundliPayload);
+  const params = payload ? buildVedicParam(payload) : null;
 
-  const chartTypes = [
-    "chalit",
-    "SUN",
-    "MOON",
-    "D1",
-    "D2",
-    "D3",
-    "D4",
-    "D5",
-    "D7",
-    "D9",
-    "D10",
-    "D12",
-    "D16",
-    "D20",
-    "D24",
-    "D27",
-    "D30",
-    "D40",
-    "D45",
-    "D60",
-  ];
-  const charts = chartTypes.map((type) =>
-    useGetChartQuery(payload ? { chartType: type, payload } : skipToken)
+  /** ↓↓↓ CALL EACH CHART INDIVIDUALLY (NO LOOP) ↓↓↓ */
+
+  const dChalit = useGetChartQuery(
+    params ? { chartType: "chalit", params } : skipToken
+  );
+  const dSun = useGetChartQuery(
+    params ? { chartType: "sun", params } : skipToken
+  );
+  const dMoon = useGetChartQuery(
+    params ? { chartType: "moon", params } : skipToken
+  );
+  const transit = useGetChartQuery(
+    params ? { chartType: "transit", params } : skipToken
+  );
+  const d1 = useGetChartQuery(params ? { chartType: "D1", params } : skipToken);
+  const d2 = useGetChartQuery(params ? { chartType: "D2", params } : skipToken);
+  const d3 = useGetChartQuery(params ? { chartType: "D3", params } : skipToken);
+  const d3s = useGetChartQuery(
+    params ? { chartType: "D3-s", params } : skipToken
+  );
+  const d4 = useGetChartQuery(params ? { chartType: "D4", params } : skipToken);
+  const d5 = useGetChartQuery(params ? { chartType: "D5", params } : skipToken);
+  const d7 = useGetChartQuery(params ? { chartType: "D7", params } : skipToken);
+  const d9 = useGetChartQuery(params ? { chartType: "D9", params } : skipToken);
+  const d10 = useGetChartQuery(
+    params ? { chartType: "D10", params } : skipToken
+  );
+  const d10r = useGetChartQuery(
+    params ? { chartType: "D10-R", params } : skipToken
+  );
+  const d12 = useGetChartQuery(
+    params ? { chartType: "D12", params } : skipToken
+  );
+  const d16 = useGetChartQuery(
+    params ? { chartType: "D16", params } : skipToken
+  );
+  const d20 = useGetChartQuery(
+    params ? { chartType: "D20", params } : skipToken
+  );
+  const d24 = useGetChartQuery(
+    params ? { chartType: "D24", params } : skipToken
+  );
+  const d24r = useGetChartQuery(
+    params ? { chartType: "D24-R", params } : skipToken
+  );
+  const d27 = useGetChartQuery(
+    params ? { chartType: "D27", params } : skipToken
+  );
+  const d30 = useGetChartQuery(
+    params ? { chartType: "D30", params } : skipToken
+  );
+  const d40 = useGetChartQuery(
+    params ? { chartType: "D40", params } : skipToken
+  );
+  const d45 = useGetChartQuery(
+    params ? { chartType: "D45", params } : skipToken
+  );
+  const d60 = useGetChartQuery(
+    params ? { chartType: "D60", params } : skipToken
   );
 
-  function getSvgUrl(svgString) {
-    return svgString ? `data:image/svg+xml;base64,${btoa(svgString)}` : null;
-  }
-  const loading = charts?.some((chart) => chart?.isLoading);
+  /** ↓↓↓ Build safe SVG URLs ↓↓↓ */
 
-  // Usage
-  const svgChalitUrl = getSvgUrl(charts[0]?.data);
-  const svgSunUrl = getSvgUrl(charts[1]?.data?.svg);
-  const svgMoonUrl = getSvgUrl(charts[2]?.data?.svg);
-  const svgBirthUrl = getSvgUrl(charts[3]?.data?.svg);
-  const svgHoraUrl = getSvgUrl(charts[4]?.data?.svg);
-  const svgDrekkanaUrl = getSvgUrl(charts[5]?.data?.svg);
-  const svgChaturthamsaChartaUrl = getSvgUrl(charts[6]?.data?.svg);
-  const svgSaptamsaChartUrl = getSvgUrl(charts[7]?.data?.svg);
-  const svgNavamsaUrl = getSvgUrl(charts[8]?.data?.svg);
-  const svgDasamsaUrl = getSvgUrl(charts[9]?.data?.svg);
-  const svgDwadasamsaUrl = getSvgUrl(charts[10]?.data?.svg);
-  const svgShodasamsaUrl = getSvgUrl(charts[11]?.data?.svg);
-  const svgVimsamsaUrl = getSvgUrl(charts[12]?.data?.svg);
-  const svgChaturvisamsaUrl = getSvgUrl(charts[13]?.data?.svg);
-  const svgSaptavisamsaUrl = getSvgUrl(charts[14]?.data?.svg);
-  const svgTrimsamsaUrl = getSvgUrl(charts[15]?.data?.svg);
-  const svgKhavedamsaUrl = getSvgUrl(charts[16]?.data?.svg);
-  const svgAkshavedamsaaUrl = getSvgUrl(charts[17]?.data?.svg);
-  const svgShashtiamsaaUrl = getSvgUrl(charts[18]?.data?.svg);
+  const svgUrl = (raw) =>
+    raw ? `data:image/svg+xml;utf8,${encodeURIComponent(raw)}` : null;
+
+  const charts = [
+    { title: "Chalit", src: svgUrl(dChalit.data) },
+    { title: "Sun Chart", src: svgUrl(dSun.data) },
+    { title: "Moon Chart", src: svgUrl(dMoon.data) },
+    { title: "Transit Chart", src: svgUrl(transit.data) },
+    { title: "Lagna / Ascendant / Basic Birth Chart", src: svgUrl(d1.data) },
+    { title: "Hora (Wealth / Income Chart)", src: svgUrl(d2.data) },
+    { title: "Drekkana (Relationship with siblings)", src: svgUrl(d3.data) },
+    { title: "Special Drekkana (Secret enemies)", src: svgUrl(d3s.data) },
+    { title: "Chaturthamsa (Assets)", src: svgUrl(d4.data) },
+    { title: "Panchamsa (Power)", src: svgUrl(d5.data) },
+    { title: "Saptamsa (Progeny)", src: svgUrl(d7.data) },
+    { title: "Navamsa (Prospects of marriage)", src: svgUrl(d9.data) },
+    { title: "Dasamsa (Profession)", src: svgUrl(d10.data) },
+    { title: "Dasamsa (Retro Version)", src: svgUrl(d10r.data) },
+    { title: "Dwadasamsa (Ancestors)", src: svgUrl(d12.data) },
+    { title: "Shodasamsa (Travel)", src: svgUrl(d16.data) },
+    { title: "Vimsamsa (Spiritual progress)", src: svgUrl(d20.data) },
+    { title: "Chaturvimsamsa (Intellectual)", src: svgUrl(d24.data) },
+    { title: "Chaturvimsamsa (Alternative D24)", src: svgUrl(d24r.data) },
+    { title: "Saptavimsamsa (Strength)", src: svgUrl(d27.data) },
+    { title: "Trimsamsa (Misfortunes)", src: svgUrl(d30.data) },
+    { title: "Khavedamsa (Auspicious time)", src: svgUrl(d40.data) },
+    { title: "Akshavedamsa (General issues)", src: svgUrl(d45.data) },
+    { title: "Shastiamsa (Summary of charts)", src: svgUrl(d60.data) },
+  ];
+
+  const loading = charts.some((c, i) => {
+    const chart = [
+      dChalit,
+      dSun,
+      dMoon,
+      d1,
+      d2,
+      d3,
+      d4,
+      d5,
+      d7,
+      d9,
+      d10,
+      d12,
+      d16,
+      d20,
+      d24,
+      d27,
+      d30,
+      d40,
+      d45,
+      d60,
+    ][i];
+    return chart?.isLoading;
+  });
 
   return (
     <div>
       <PrimaryLoader isLoading={loading} />
+
       <div className={styles.mainContainer}>
         <div className={styles.grid}>
-          <DynamicChart title="Chalit" src={svgChalitUrl} />
-          <DynamicChart title="Sun" src={svgSunUrl} />
-          <DynamicChart title="Moon" src={svgMoonUrl} />
-          <DynamicChart
-            title="Lagna / Ascendant / Basic Birth Chart"
-            src={svgBirthUrl}
-          />
-          <DynamicChart title="Hora (Wealth / Income Chart)" src={svgHoraUrl} />
-          <DynamicChart
-            title="Drekkana (Relationship with siblings)"
-            src={svgDrekkanaUrl}
-          />
-          <DynamicChart
-            title="Chaturthamsa (Assets)"
-            src={svgChaturthamsaChartaUrl}
-          />
-          <DynamicChart title="Saptamsa (Progeny)" src={svgSaptamsaChartUrl} />
-          <DynamicChart title="Dasamsa (Profession)" src={svgNavamsaUrl} />
-          <DynamicChart
-            title="Navamsa (Prospects of marriage)"
-            src={svgDasamsaUrl}
-          />
-          <DynamicChart
-            title="Dwadasamsa (Native parents / Ancestors)"
-            src={svgDwadasamsaUrl}
-          />
-          <DynamicChart title="Shodasamsa (Travel)" src={svgShodasamsaUrl} />
-          <DynamicChart
-            title="Vimsamsa (Spiritual progress)"
-            src={svgVimsamsaUrl}
-          />
-          <DynamicChart
-            title="Chaturvimsamsa (Intellectual)"
-            src={svgChaturvisamsaUrl}
-          />
-          <DynamicChart
-            title="Saptavimsamsa (Strength / Protection)"
-            src={svgSaptavisamsaUrl}
-          />
-          <DynamicChart title="Trimsamsa (Misfortunes)" src={svgTrimsamsaUrl} />
-          <DynamicChart
-            title="Khavedamsa (Auspicious time)"
-            src={svgKhavedamsaUrl}
-          />
-          <DynamicChart
-            title="Akshavedamsa (General issues)"
-            src={svgAkshavedamsaaUrl}
-          />
-          <DynamicChart
-            title="Shastiamsa (Summary of charts)"
-            src={svgShashtiamsaaUrl}
-          />
+          {charts.map(
+            (chart, index) =>
+              chart.src && (
+                <DynamicChart key={index} title={chart.title} src={chart.src} />
+              )
+          )}
         </div>
-
-        {/* Planetary Table */}
       </div>
     </div>
   );

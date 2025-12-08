@@ -22,6 +22,7 @@ import {
 import { useSelector } from "react-redux";
 import { skipToken } from "@reduxjs/toolkit/query";
 import Report from "./FreeKundli/Report";
+import { buildVedicParam } from "../../../utils/VedicParams.js/vedicParams";
 
 const Kundali = () => {
   const contentRef = useRef(null);
@@ -46,6 +47,7 @@ const Kundali = () => {
   ] = useKundli();
 
   const payload = useSelector((state) => state?.form?.kundliPayload);
+  const params = buildVedicParam(payload);
   const {
     data: birthDetails,
     isSuccess: isBirth,
@@ -58,10 +60,11 @@ const Kundali = () => {
     isLoading: panchangLoading,
   } = useGetBasicPanchangQuery(payload ? { payload } : skipToken);
   const {
-    data: astroDetails,
+    data,
     isSuccess: isAstro,
     isLoading: astroLoading,
-  } = useGetAstroDetailsQuery(payload ? { payload } : skipToken);
+  } = useGetAstroDetailsQuery(params ? params : skipToken);
+  const astroDetails = data?.response;
 
   const tabsData = [
     {
@@ -117,12 +120,11 @@ const Kundali = () => {
       />
 
       <div ref={contentRef}>
-
-      {isBirth || isPanchang || isAstro ? (
-        <PrimaryTabs tabs={tabsData} />
-      ) : (
-        <HtmlContentCard sections={kundliInfoData} />
-      )}
+        {isBirth || isPanchang || isAstro ? (
+          <PrimaryTabs tabs={tabsData} />
+        ) : (
+          <HtmlContentCard sections={kundliInfoData} />
+        )}
       </div>
     </>
   );

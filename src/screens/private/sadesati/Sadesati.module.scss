@@ -3,77 +3,111 @@
   padding: 1rem;
 }
 
-.card {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 20px 22px;
-  margin: 1.5rem 0;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f4f4f4;
-  transition: 0.25s ease-in-out;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
-  }
+/* STATUS CARD */
+.statusCard {
+  background: linear-gradient(135deg, #fff3e0, #ffe5d1);
+  padding: 22px 24px;
+  border-radius: 16px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 18px rgba(255, 147, 74, 0.25);
 }
 
-.heading {
+.statusIcon {
+  font-size: 40px;
+  color: #ff6b35;
+  margin-bottom: 10px;
+}
+
+.statusTitle {
   font-size: 22px;
   font-weight: 700;
   color: #222;
-  margin-bottom: 14px;
-  border-left: 4px solid #ff6b35;
-  padding-left: 10px;
 }
 
-.periodBox {
-  background: #fff7f7;
-  border-radius: 10px;
-  padding: 14px 16px;
-}
-
-.periodText {
-  color: #d63939;
+.statusMessage {
   font-size: 16px;
+  color: #c23616;
+  margin-top: 6px;
   font-weight: 600;
 }
 
-.date {
-  color: #676767;
-  margin-top: 4px;
-}
-
-.remediesWrapper {
+.dateText {
   margin-top: 10px;
+  font-size: 14px;
+  color: #555;
 }
 
-.remedyItem {
-  background: #fff8c9;
-  padding: 12px 14px;
-  border-radius: 10px;
-  margin: 10px 0;
-  font-size: 15px;
-  border-left: 6px solid #ffe27a;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+/* CARD */
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 22px;
+  margin: 1.4rem 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
 
-  p {
-    color: #333;
-    font-weight: 500;
+.headingBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.headingIcon {
+  font-size: 22px;
+  color: #ff6b35;
+}
+
+.heading {
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+}
+
+/* REMEDIES GRID */
+.remediesGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+
+  @media (min-width: 600px) {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
-.descriptionBox {
-  background: #fff8c9;
-  padding: 14px 16px;
-  border-radius: 10px;
-  border-left: 6px solid #ffe27a;
-  font-size: 15px;
-  line-height: 1.6;
+.remedyItem {
+  padding: 12px 14px;
+  background: #fff8e6;
+  border-radius: 12px;
+  border-left: 6px solid #ffcf6b;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  text-align: start;
+  box-shadow: 0 2px 8px rgba(255, 155, 74, 0.15);
+
+  p {
+    color: #333;
+    font-size: 15px;
+    line-height: 1.4;
+  }
 }
 
-/* ---------- LOGIN MESSAGE CARD ---------- */
+.remedyIcon {
+  font-size: 20px;
+  color: #ff9a3d;
+}
 
+/* DESCRIPTION */
+.description {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.7;
+  text-align: left;
+}
+
+/* LOGIN CARD */
 .loginCard {
   background: #ffffff;
   padding: 26px 22px;
@@ -81,7 +115,6 @@
   text-align: center;
   margin-top: 30px;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f4f4f4;
 }
 
 .loginText {
@@ -100,15 +133,10 @@
   border: none;
   cursor: pointer;
   color: #000;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: 0.2s ease;
 
   &:hover {
-    background-color: rgb(249.6769911504, 216.8517699115, 59.8230088496);
     transform: translateY(-2px);
-  }
-
-  &:active {
-    transform: scale(0.97);
+    background: #f7c813;
   }
 }

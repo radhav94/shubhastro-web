@@ -1,7 +1,7 @@
 // Daily.module.scss
 .dailyContainer {
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 0 auto 1rem;
   // padding: 20px;
 }
 
@@ -27,6 +27,7 @@
   justify-content: center;
   @media (max-width: 772px) {
     flex-direction: column;
+    margin: 0.5rem 2rem;
   }
 }
 

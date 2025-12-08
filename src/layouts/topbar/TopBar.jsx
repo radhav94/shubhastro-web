@@ -65,12 +65,6 @@ const TopBar = () => {
     {
       title: "Panchang",
       path: PATH.privateRoutes.PANCHANG.path,
-      children: [
-        {
-          title: "Today's Panchang",
-          path: PATH.privateRoutes.PANCHANG_TODAY.path,
-        },
-      ],
     },
     { title: "Kundli", path: PATH.privateRoutes.KUNDLI.path },
     { title: "Sadesati", path: PATH.privateRoutes.SADESATI.path },
@@ -79,10 +73,8 @@ const TopBar = () => {
       title: "Horoscope",
       children: [
         { title: "Daily Horoscope", path: "/horoscopes/daily-horoscope" },
-        {
-          title: "Monthly Horoscope",
-          path: PATH.privateRoutes.HOROSCOPE.MONTHLY.path,
-        },
+        { title: "Weekly Horoscope", path: "/horoscopes/weekly-horoscope" },
+        { title: "Yearly Horoscope", path: "/horoscopes/yearly-horoscope" },
       ],
     },
     {
