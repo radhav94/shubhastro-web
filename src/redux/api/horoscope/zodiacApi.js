@@ -1,4 +1,4 @@
-import { VEDIC_API_KEY, vedicApi } from "../baseApi/vedicApi";
+import { vedicApi } from "../baseApi/vedicApi";
 
 export const zodiacApi = vedicApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -7,7 +7,6 @@ export const zodiacApi = vedicApi.injectEndpoints({
         url: "western/daily-horoscope",
         params: {
           zodiac,
-          api_key: VEDIC_API_KEY,
           date: new Date().toLocaleDateString("en-GB"),
           // date: "06/12/2025",
           split: true,
@@ -22,7 +21,6 @@ export const zodiacApi = vedicApi.injectEndpoints({
         params: {
           zodiac,
           week: "thisweek",
-          api_key: VEDIC_API_KEY,
           split: true,
           type: "big",
           lang: "en",
@@ -34,7 +32,6 @@ export const zodiacApi = vedicApi.injectEndpoints({
         url: "western/yearly-horoscope",
         params: {
           zodiac,
-          api_key: VEDIC_API_KEY,
           year: new Date().getFullYear(),
           lang: "en",
         },

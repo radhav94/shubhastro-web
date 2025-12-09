@@ -8,7 +8,7 @@ export const VEDIC_API_KEY = "e19fcd25-34b1-52eb-9c7b-4270f71cbd87";
 export const vedicApi = createApi({
   reducerPath: "vedicApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://api.vedicastroapi.com/v3-json/",
+    baseUrl: "https://njsapi-shubhtalk.epicon.in/api/astro/v3-json/",
   }),
   endpoints: () => ({}),
 });
