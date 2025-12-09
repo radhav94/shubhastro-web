@@ -77,6 +77,7 @@ const TopBar = () => {
         { title: "Yearly Horoscope", path: "/horoscopes/yearly-horoscope" },
       ],
     },
+    { title: "Compatibility", path: PATH.privateRoutes.COMPATIBILITY.path },
     {
       title: "Tarot",
       path: PATH.privateRoutes.TAROT.path,

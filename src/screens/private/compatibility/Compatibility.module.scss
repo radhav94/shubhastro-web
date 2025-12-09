@@ -1,0 +1,290 @@
+.wrapper {
+  width: 100%;
+  padding: 0 20px 20px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  color: #333;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 18px;
+  text-align: center;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.introBox {
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  line-height: 1.6;
+
+  p {
+    margin-bottom: 12px;
+    font-size: 14px;
+    text-align: left;
+  }
+}
+
+.bannerBox {
+  background: url("/path/banner-bg.png") center/cover no-repeat;
+  background: #fffdf0;
+  padding: 25px 15px;
+  border-radius: 16px;
+  text-align: center;
+  margin-bottom: 28px;
+  border: 2px solid #ffe680;
+
+  .bannerContent {
+    h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+  }
+
+  button {
+    display: block;
+    width: 85%;
+    margin: 10px auto;
+    padding: 12px;
+    border: none;
+    font-size: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .callBtn {
+    background: #ffd33f;
+  }
+
+  .chatBtn {
+    background: #ffd33f;
+  }
+}
+
+.chooseTitle {
+  margin-top: 10px;
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.signGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.signCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  padding: 15px;
+  border-radius: 14px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
+  }
+
+  .imageWrapper {
+    flex-shrink: 0; // Prevent image from shrinking
+    width: 120px;
+    height: 120px;
+    overflow: hidden;
+    border-radius: 50%; // Makes it circular like in the image
+
+    .image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  h4 {
+    font-size: 16px;
+    margin-bottom: 3px;
+  }
+
+  p {
+    font-size: 13px;
+    color: #777;
+  }
+}
+
+.resultBox {
+  background: #fff;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  margin-top: 25px;
+}
+
+.progressWrapper {
+  width: 100%;
+  height: 14px;
+  background: #eee;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 15px 0;
+  border: 1px solid lightgrey;
+}
+
+.progress {
+  height: 100%;
+  background: #ffc107;
+  transition: width 0.5s ease;
+}
+
+.percentText {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.description {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Selected sign title */
+.selectedName {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* Center circular icon like screenshot */
+.selectedIconWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.selectedIcon {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: contain;
+  background: #fffde8;
+  border: 2px solid #ffdf3a; /* Yellow border */
+  padding: 8px;
+}
+/* Description text */
+.selectedDescription {
+  max-width: 850px;
+  margin: 0 auto 28px auto;
+  text-align: center;
+  color: #444;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Section title */
+.sectionTitle {
+  margin-top: 25px;
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+}
+
+
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+/* Left text section */
+.leftContent {
+  width: 70%;
+}
+
+/* Right form box */
+.rightSidebar {
+  width: 30%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Form styling like screenshot */
+.formBox {
+  // background: #fffdf0;
+  padding: 25px;
+  width: 100%;
+  border-radius: 16px;
+  // border: 2px solid #ffe680;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.formTitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.formSubtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.selectGroup {
+  text-align: left;
+  margin-bottom: 18px;
+
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    background: #fff;
+  }
+}
+
+.submitBtn {
+  background: #ffd33f;
+  padding: 12px;
+  width: 100%;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+
+  &:hover {
+    background: #ffce2f;
+  }
+}
