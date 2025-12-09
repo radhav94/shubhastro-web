@@ -14,22 +14,18 @@ class SocketService {
     });
 
     this.socket.on("connect", () => {
-      console.log("🔌 SOCKET CONNECTED:", this.socket.id);
       onConnected?.();
     });
 
     this.socket.on("disconnect", (reason) => {
-      console.log("❌ SOCKET DISCONNECTED:", reason);
       onDisconnected?.(reason);
     });
 
     this.socket.on("connect_error", (err) => {
-      console.error("🚨 CONNECTION ERROR:", err.message);
       onError?.("Unable to connect to server");
     });
 
     this.socket.on("error", (err) => {
-      console.error("⚠️ SOCKET ERROR:", err);
       onError?.(err.message || "Unknown error occurred");
     });
   }
@@ -37,7 +33,6 @@ class SocketService {
   disconnect() {
     if (this.socket) {
       this.socket.disconnect();
-      console.log("🔌 SOCKET FORCE DISCONNECTED");
     }
   }
 

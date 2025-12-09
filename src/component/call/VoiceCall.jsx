@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import AgoraRTC, { AgoraRTCProvider } from "agora-rtc-react";
 import { IoMic, IoMicOff, IoCall } from "react-icons/io5";
 import styles from "./VoiceCall.module.scss";
+import { voiceSocket } from "../../services/voiceSocketServices";
 
 export const AgoraVoiceCalling = () => {
   const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
@@ -34,6 +35,9 @@ const CallingUI = ({ client }) => {
   const callerName = location.state?.callerName || "Unknown";
   const roomID = location.state?.roomId || "123456";
   const agoraToken=location?.state?.agoraToken  || "";
+  const isUserSide = location.state?.isUserSide;
+
+  console.log("agoratoken------>>>>>>",roomID)
 
 
   const appId = "5630460abdc141e3b2f8d9597752bd7d";
@@ -41,9 +45,11 @@ const CallingUI = ({ client }) => {
   const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
 
 useJoin(
-  agoraToken && calling
-    ? { appid: appId, channel, token: agoraToken }
-    : undefined,
+  {
+    appid: appId,
+    channel,
+    token: agoraToken || null,
+  },
   calling
 );
   usePublish(localMicrophoneTrack ? [localMicrophoneTrack] : []);
@@ -67,6 +73,14 @@ useJoin(
     }
     return () => interval && clearInterval(interval);
   }, [callState]);
+
+  useEffect(() => {
+  return () => {
+    console.log("🧹 Cleaning up socket listeners on Call Screen unmount...");
+    voiceSocket.removeAllListeners();
+  };
+}, []);
+
 
   useEffect(() => {
   const handleRemoteLeave = () => {
@@ -104,18 +118,29 @@ useJoin(
     setCalling(true);
     setCallState("connecting");
   };
+const endCall = () => {
+  const endedBy = isUserSide ? "CUSTOMER" : "ASTROLOGER";
 
- const endCall = () => {
+  voiceSocket.emit("call_end", { roomId: roomID, endedBy });
+
+  // ALWAYS DISCONNECT
+  if (voiceSocket.connected) {
+    voiceSocket.disconnect(); 
+  }
+
   if (localMicrophoneTrack) {
     localMicrophoneTrack.stop();
     localMicrophoneTrack.close();
   }
 
   client.leave().then(() => {
-    console.log("Call Ended Locally");
+    console.log("Call End:", endedBy);
     navigate(-1);
   });
 };
+
+
+
 
 
   return (

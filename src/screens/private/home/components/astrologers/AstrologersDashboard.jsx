@@ -29,7 +29,7 @@ const AstrologersDashboard = () => {
   }
 
   const handleIncomingVoiceCall = ({ roomId,  agoraToken,callerId }) => {
-    console.log("Incoming call", roomId,  agoraToken, callerId);
+    console.log("Incoming call",roomId);
     setRoomId(roomId);
     setCallerUserId(callerId);
     setIncomingCall(true);
@@ -46,6 +46,8 @@ const AstrologersDashboard = () => {
   
   const handleAccept = () => {
     voiceSocket.emit("accept_call", { roomId, token,channelName:roomId,astrologerId: astroIdLocal});
+
+    console.log("accept call",roomId)
     navigate(`/astrologer-dashboard/voice-call/${roomId}`, {
       state: {
           roomId,
@@ -58,6 +60,8 @@ const AstrologersDashboard = () => {
 
   const handleReject = () => {
     voiceSocket.emit("reject_call", {roomId});
+    setIncomingCall(false);
+
   };
 
   useEffect(() => {
