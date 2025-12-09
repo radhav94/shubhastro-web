@@ -49,6 +49,9 @@ import {
   WalletTranscations,
 } from "../../screens";
 import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
+import CompatibilityLanding from "../../screens/private/compatibility/CompatibilityLanding";
+import CompatibilityResult from "../../screens/private/compatibility/CompatibilityResult";
+import SelectPartner from "../../screens/private/compatibility/SelectPartner";
 // import AstrologerIncomingCall from "../../screens/private/home/components/astrologers/AstrologerIncomingCall";
 import AstrologersDashboard from "../../screens/private/home/components/astrologers/AstrologersDashboard";
 import ChatList from "../../screens/private/home/components/astrologers/atrologerchat/ChatList";
@@ -231,6 +234,19 @@ export const PATH = {
     LIFE_PATH_DETAIL: {
       path: "/numerology/life-path/life-path-details",
       element: LifePathDetails,
+    },
+    //Compatibility
+    COMPATIBILITY: {
+      path: "/compatibility",
+      element: CompatibilityLanding,
+    },
+    COMPATIBILITY_SelectPartner: {
+      path: "/compatibility/select/:p1",
+      element: SelectPartner,
+    },
+    COMPATIBILITY_RESULT: {
+      path: "/compatibility/result/:p1/:p2",
+      element: CompatibilityResult,
     },
 
     // tarot
