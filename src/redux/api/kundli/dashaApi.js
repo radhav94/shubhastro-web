@@ -1,4 +1,4 @@
-import { VEDIC_API_KEY, vedicApi } from "../baseApi/vedicApi";
+import { vedicApi } from "../baseApi/vedicApi";
 
 const formatDate = (dateString) => {
   if (!dateString) return "";
@@ -12,7 +12,6 @@ export const dashaApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "dashas/maha-dasha-predictions",
         params: {
-          api_key: VEDIC_API_KEY,
           dob,
           tob,
           lat,
@@ -26,7 +25,6 @@ export const dashaApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "dosha/manglik-dosh",
         params: {
-          api_key: VEDIC_API_KEY,
           dob,
           tob,
           lat,
@@ -40,7 +38,6 @@ export const dashaApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "dosha/kaalsarp-dosh",
         params: {
-          api_key: VEDIC_API_KEY,
           dob,
           tob,
           lat,
@@ -54,7 +51,6 @@ export const dashaApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "dosha/mangal-dosh",
         params: {
-          api_key: VEDIC_API_KEY,
           dob,
           tob,
           lat,
@@ -68,7 +64,6 @@ export const dashaApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "dosha/pitra-dosh",
         params: {
-          api_key: VEDIC_API_KEY,
           dob,
           tob,
           lat,
@@ -82,7 +77,6 @@ export const dashaApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "extended-horoscope/current-sade-sati",
         params: {
-          api_key: VEDIC_API_KEY,
           dob,
           tob,
           lat,
@@ -96,7 +90,6 @@ export const dashaApi = vedicApi.injectEndpoints({
       query: ({ formData }) => ({
         url: "matching/ashtakoot",
         params: {
-          api_key: VEDIC_API_KEY,
           boy_dob: formatDate(formData.boyData.dob), // DD/MM/YYYY
           boy_tob: formData.boyData.tob, // HH:MM
           boy_lat: formData.boyData.place.lat,

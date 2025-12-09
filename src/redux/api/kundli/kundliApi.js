@@ -1,5 +1,5 @@
 import { baseApi } from "../baseApi/baseApi";
-import { VEDIC_API_KEY, vedicApi } from "../baseApi/vedicApi";
+import { vedicApi } from "../baseApi/vedicApi";
 
 export const kundliApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -27,7 +27,6 @@ export const kundliVedicApi = vedicApi.injectEndpoints({
       query: (params) => ({
         url: "extended-horoscope/extended-kundli-details",
         params: {
-          api_key: VEDIC_API_KEY,
           dob: params.dob,
           tob: params.tob,
           lat: params.lat,
@@ -43,7 +42,6 @@ export const kundliVedicApi = vedicApi.injectEndpoints({
         url: "horoscope/chart-image",
         method: "GET",
         params: {
-          api_key: VEDIC_API_KEY,
           dob: params.dob,
           tob: params.tob,
           tz: params.tz || 5.5,
@@ -72,7 +70,6 @@ export const kundliVedicApi = vedicApi.injectEndpoints({
         url: "horoscope/ashtakvarga-chart-image",
         method: "GET",
         params: {
-          api_key: VEDIC_API_KEY,
           dob: params.dob,
           tob: params.tob,
           lat: params.lat,
@@ -96,7 +93,6 @@ export const kundliVedicApi = vedicApi.injectEndpoints({
       query: (params) => ({
         url: "horoscope/planet-details",
         params: {
-          api_key: VEDIC_API_KEY,
           dob: params.dob,
           tob: params.tob,
           lat: params.lat,
@@ -111,7 +107,6 @@ export const kundliVedicApi = vedicApi.injectEndpoints({
       query: (params) => ({
         url: "extended-horoscope/kp-planets",
         params: {
-          api_key: VEDIC_API_KEY,
           dob: params.dob,
           tob: params.tob,
           lat: params.lat,

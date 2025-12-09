@@ -1,4 +1,4 @@
-import { vedicApi, VEDIC_API_KEY } from "../baseApi/vedicApi";
+import { vedicApi } from "../baseApi/vedicApi";
 
 const formatDate = (dateString) => {
   if (!dateString) return "";
@@ -12,7 +12,6 @@ export const panchangApi = vedicApi.injectEndpoints({
       query: (formData) => ({
         url: "panchang/panchang",
         params: {
-          api_key: VEDIC_API_KEY,
           date: `${formData.day}/${formData.month}/${formData.year}`, // DD/MM/YYYY
           time: `${formData.hour}:${formData.min}`, // HH:MM
           lat: formData.lat,

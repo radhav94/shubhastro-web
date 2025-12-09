@@ -1,4 +1,3 @@
-import { VEDIC_API_KEY } from "../../redux/api/baseApi/vedicApi";
 
 export const convertToMatchPayload = (boy, girl) => {
   const formatDate = (dob) => {
@@ -7,7 +6,6 @@ export const convertToMatchPayload = (boy, girl) => {
   };
 
   return {
-    api_key: VEDIC_API_KEY,
     boy_dob: formatDate(boy.dob),
     boy_tob: boy.tob,
     boy_tz: 5.5,

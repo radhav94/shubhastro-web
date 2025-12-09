@@ -1,4 +1,4 @@
-import { VEDIC_API_KEY, vedicApi } from "../baseApi/vedicApi";
+import { vedicApi } from "../baseApi/vedicApi";
 
 export const tarotApi = vedicApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -6,7 +6,6 @@ export const tarotApi = vedicApi.injectEndpoints({
       query: ({ shuffle_type, lang = "en" }) => ({
         url: "tarot/shuffle",
         params: {
-          api_key: VEDIC_API_KEY,
           shuffle_type,
           lang,
         },
@@ -15,8 +14,7 @@ export const tarotApi = vedicApi.injectEndpoints({
     getTarotDailyData: builder.query({
       query: ({ card_name, lang = "en" }) => ({
         url: "tarot/daily",
-        params: {
-          api_key: VEDIC_API_KEY,
+        params: { 
           card_name,
           lang,
         },
@@ -26,7 +24,6 @@ export const tarotApi = vedicApi.injectEndpoints({
       query: ({ card_name, direction, lang = "en" }) => ({
         url: "tarot/yes-no",
         params: {
-          api_key: VEDIC_API_KEY,
           card_name,
           direction,
           lang,
@@ -37,7 +34,7 @@ export const tarotApi = vedicApi.injectEndpoints({
       query: ({ card_name, direction, lang = "en" }) => ({
         url: "tarot/career-select",
         params: {
-          api_key: VEDIC_API_KEY,
+          
           card_name,
           direction,
           lang,
@@ -48,7 +45,7 @@ export const tarotApi = vedicApi.injectEndpoints({
       query: ({ card_name, lang = "en" }) => ({
         url: "tarot/flirt-reading",
         params: {
-          api_key: VEDIC_API_KEY,
+          
           card_name,
           lang,
         },
@@ -58,7 +55,7 @@ export const tarotApi = vedicApi.injectEndpoints({
       query: ({ card_name, lang = "en" }) => ({
         url: "tarot/erotic-love",
         params: {
-          api_key: VEDIC_API_KEY,
+          
           card_name,
           lang,
         },
@@ -68,7 +65,7 @@ export const tarotApi = vedicApi.injectEndpoints({
       query: ({ card_name, lang = "en" }) => ({
         url: "tarot/made-for-each-other-or-not",
         params: {
-          api_key: VEDIC_API_KEY,
+          
           card_name,
           lang,
         },
@@ -78,7 +75,7 @@ export const tarotApi = vedicApi.injectEndpoints({
       query: ({ card_name, lang = "en" }) => ({
         url: "tarot/in-depth-love",
         params: {
-          api_key: VEDIC_API_KEY,
+          
           card_name,
           lang,
         },
@@ -88,7 +85,7 @@ export const tarotApi = vedicApi.injectEndpoints({
       query: ({ card_self, card_lover1, card_lover2, lang = "en" }) => ({
         url: "tarot/love-triangle",
         params: {
-          api_key: VEDIC_API_KEY,
+          
           card_self,
           card_lover1,
           card_lover2,
@@ -100,7 +97,7 @@ export const tarotApi = vedicApi.injectEndpoints({
       query: ({ card_cause, card_advise, lang = "en" }) => ({
         url: "tarot/romantic-breakup",
         params: {
-          api_key: VEDIC_API_KEY,
+          
           card_cause,
           card_advise,
           lang,
@@ -111,7 +108,7 @@ export const tarotApi = vedicApi.injectEndpoints({
       query: ({ card_cause, card_advise, lang = "en" }) => ({
         url: "tarot/business-breakup",
         params: {
-          api_key: VEDIC_API_KEY,
+          
           card_cause,
           card_advise,
           lang,
