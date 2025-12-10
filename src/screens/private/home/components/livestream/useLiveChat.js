@@ -4,15 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import AgoraRTM from "agora-rtm-sdk";
 
 const APP_ID = "b7bd8229702e4ec3b0938ea15f23a39c";
-const CHANNEL_NAME = "testnew";
+const CHANNEL_NAME = "testnewchannellive";
 
 /**
  * NOTE:
  * Replace these with the tokens FROM AGORA CONSOLE
  * based on the exact UID format below
  */
-const HOST_RTM_TOKEN = "006b7bd8229702e4ec3b0938ea15f23a39cIACicAU2Uv51r7pgDKCI8gma/TrYxWYEfC8e/VwM40Oj6SisZ78AAAAAEAAn4FweVewxaQEA6ANV7DFp";
-const AUDIENCE_RTM_TOKEN = "006b7bd8229702e4ec3b0938ea15f23a39cIAD35Z3CCMg4t/ZFr8UFfUskKfy6UGZQgbONWXiM+/0q3PMYoaIAAAAAEAAn4Fwelu0xaQEA6AOW7TFp";
+const HOST_RTM_TOKEN = "006b7bd8229702e4ec3b0938ea15f23a39cIABjuXZUD3AWTqdx9UwEdVX9qvVE1WjUZUb9SbY5TzmMYpO2XjoAAAAAEADItRogY4k6aQEA6ANjiTpp";
+const AUDIENCE_RTM_TOKEN = "006b7bd8229702e4ec3b0938ea15f23a39cIABysGXiQuZ73Y5OgXl4/rqXbluuFoZF6KfC6Ew27aIQWQLXAzAAAAAAEADItRogL4k6aQEA6AMviTpp";
 
 export const useLiveChat = (ROLE) => {
   const rtmClientRef = useRef(null);
@@ -25,7 +25,7 @@ export const useLiveChat = (ROLE) => {
    * Generate UID based on role
    * AND must match the UID used when generating the token in Agora Console
    */
-  const rtmUid = ROLE === "host" ? "host-123" : "aud-123";
+  const rtmUid = ROLE === "host" ? "host-234" : "test-123";
 
   // Select correct token for login
   const selectedRTMToken =
