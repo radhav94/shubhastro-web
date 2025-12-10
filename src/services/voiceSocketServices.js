@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-export const voiceSocket = io("http://192.168.12.90:3000", {
+export const voiceSocket = io("https://njsapi-shubhtalk.epicon.in/", {
   transports: ["websocket"],
   autoConnect: false,
 });
