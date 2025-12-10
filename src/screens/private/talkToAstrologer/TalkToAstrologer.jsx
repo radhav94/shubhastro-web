@@ -46,7 +46,10 @@ const TalkToAstrologer = () => {
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
   const [activeCallAstro, setActiveCallAstro] = useState(null);
   const [waitingPopup, setWaitingPopup] = useState(false); // ⭐ Added popup state
+  const [callType, setCallType] = useState(null); // audio | video
 
+  // ✅ Ref for current calling astrologer (no re-render)
+  const activeCallAstroRef = useRef(null);
 
   const [page, setPage] = useState(1);
   const [specialty, setSpecialty] = useState("");
@@ -70,8 +73,6 @@ const TalkToAstrologer = () => {
     amount: 0,
   };
 
-  // Merge paginated astrologers
-  // RESET when screen mounts
   useEffect(() => {
     window.scrollTo(0, 0);
     setPage(1);
@@ -145,8 +146,7 @@ const TalkToAstrologer = () => {
     setSelectedAstrologer(astro);
     if (token) {
       setKundliModalOpen(true);
-    }
-    else {
+    } else {
       navigate("/login", { state: { from: location.pathname } });
     }
   };
@@ -185,74 +185,106 @@ const TalkToAstrologer = () => {
     }
   };
 
- const handleAudioCall = (astro) => {
+  /* ------------------- SOCKET CALL FLOW (ADDED ONLY) ------------------- */
+
+  const connectSocket = () => {
+    if (voiceSocket.connected) voiceSocket.disconnect();
+    voiceSocket.io.opts.query = { userId: userIdLocal, role: "CUSTOMER" };
+    voiceSocket.connect();
+  };
+
+  const handleAudioCall = (astro) => {
     if (!astro) return Toast.error("Astrologer missing");
     if (!userIdLocal) return Toast.error("User ID missing");
 
+    activeCallAstroRef.current = astro; // ✅ store in ref
     setActiveCallAstro(astro);
-    setWaitingPopup(true); // ⭐ Popup show here
+    setCallType("audio");
+    setWaitingPopup(true);
 
+    connectSocket();
     voiceSocket.emit("create_call_room", {
       userId: userIdLocal,
       astrologerId: astro._id,
+      type: "audio",
     });
   };
 
-  // 2️⃣ listen to room creation + call accepted
+  const handleVideoCall = (astro) => {
+    if (!astro) return Toast.error("Astrologer missing");
+    if (!userIdLocal) return Toast.error("User ID missing");
+
+    activeCallAstroRef.current = astro; // ✅ store in ref
+    setActiveCallAstro(astro);
+    setCallType("video");
+    setWaitingPopup(true);
+
+    connectSocket();
+    voiceSocket.emit("create_call_room", {
+      userId: userIdLocal,
+      astrologerId: astro._id,
+      type: "video",
+    });
+  };
+
   useEffect(() => {
     if (!userIdLocal) return;
 
-    const handleReturnRoom = ({ roomId }) => {
-      voiceSocket.emit("notify_incoming_call", {
-        roomId,
-        to: activeCallAstro._id,
-        from: userIdLocal,
-      });
+    const handleReturnRoom = () => {
+      setWaitingPopup(true);
     };
 
-    const handleCallAccepted = ({ roomId }) => {
-      setWaitingPopup(false); // ⭐ Hide popup on accept
-      const callerName = activeCallAstro?.firstName || "Astrologer";
+    const handleCallAccepted = ({ roomId, token, type }) => {
+      setWaitingPopup(false);
 
-      navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
+      const route =
+        type === "video"
+          ? `/talk-to-astrologers/video-call/${roomId}`
+          : `/talk-to-astrologers/voice-call/${roomId}`;
+
+      navigate(route, {
         state: {
           roomId,
-          callerName,
-          userId: userIdLocal,
-          astrologerId: activeCallAstro?._id,
+          agoraToken: token,
+          callerName: activeCallAstroRef.current?.firstName,
           isUserSide: true,
         },
       });
     };
 
+    const handleCallRejected = (data) => {
+      Toast.error(data?.sessionData?.sessionEndReason || "Call rejected");
+      setWaitingPopup(false);
+      voiceSocket.disconnect();
+    };
+
+    const handleSocketError = (err) => {
+      Toast.error(err?.message || "Connection error");
+      setWaitingPopup(false);
+      voiceSocket.disconnect();
+    };
+
+    const handleCallEnded = () => {
+      setWaitingPopup(false);
+      voiceSocket.disconnect();
+    };
+
     voiceSocket.on("return_call_room", handleReturnRoom);
     voiceSocket.on("call_accepted", handleCallAccepted);
+    voiceSocket.on("call_rejected", handleCallRejected);
+    voiceSocket.on("error", handleSocketError);
+    voiceSocket.on("call_ended", handleCallEnded);
 
     return () => {
       voiceSocket.off("return_call_room", handleReturnRoom);
       voiceSocket.off("call_accepted", handleCallAccepted);
+      voiceSocket.off("call_rejected", handleCallRejected);
+      voiceSocket.off("error", handleSocketError);
+      voiceSocket.off("call_ended", handleCallEnded);
     };
-  }, [activeCallAstro]);
+  }, [userIdLocal, navigate]);
 
-
-  const handleVideoCall = async (astro) => {
-    if (!astro) return;
-    try {
-      const res = await createChatRoom({
-        userId: userIdLocal,
-        astrologerId: astro._id,
-      });
-
-      const roomId = res?.data?.data;
-      if (!roomId) return Toast.error("Room ID missing");
-
-      navigate(PATH.privateRoutes.VIDEO_CALL.path, {
-        state: { userId: userIdLocal, astrologerId: astro._id, roomId },
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  /* ------------------------------------------------------------------- */
 
   return (
     <div className={styles.mainContainer}>
@@ -260,7 +292,7 @@ const TalkToAstrologer = () => {
         Talk To Best Astrologers Online
       </PrimaryText>
 
-       {waitingPopup && (
+      {waitingPopup && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContainer}>
             <PrimaryText size_18 isSemiBold>

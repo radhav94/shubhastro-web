@@ -7,13 +7,12 @@ import {
   usePublish,
   useRemoteUsers,
 } from "agora-rtc-react";
-import { useLocation,useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import AgoraRTC, { AgoraRTCProvider } from "agora-rtc-react";
 import { IoMic, IoMicOff, IoCall } from "react-icons/io5";
-import {useGetAgoraTokenQuery} from "../../redux/api/agoratokenApi/agoraTokenApi"
-
 import styles from "./VoiceCall.module.scss";
+import { voiceSocket } from "../../services/voiceSocketServices";
 
 export const AgoraVoiceCalling = () => {
   const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
@@ -25,7 +24,8 @@ export const AgoraVoiceCalling = () => {
 };
 
 const CallingUI = ({ client }) => {
-  const [calling, setCalling] = useState(false);
+  // ✅ AUTO START CALL
+  const [calling, setCalling] = useState(true);
   const [micOn, setMic] = useState(true);
 
   const isConnected = useIsConnected();
@@ -33,35 +33,32 @@ const CallingUI = ({ client }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-
-  // const {roomId,callerName}=state
-  
   const callerName = location.state?.callerName || "Unknown";
   const roomID = location.state?.roomId || "123456";
-
-  const { data, isLoading, error } = useGetAgoraTokenQuery({
-  channelName:roomID,
-  // entityId:callerName,
-});
-
-const tokendData=data?.data;
-console.log("tokenData",tokendData);
+  const agoraToken = location?.state?.agoraToken || "";
+  const isUserSide = location.state?.isUserSide;
 
   const appId = "5630460abdc141e3b2f8d9597752bd7d";
   const channel = roomID;
+
   const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
 
-useJoin(
-  tokendData && calling && !isLoading && !error
-    ? { appid: appId, channel, token: tokendData }
-    : undefined,
-  calling
-);
+  // ✅ JOIN AUTOMATICALLY
+  useJoin(
+    {
+      appid: appId,
+      channel,
+      token: agoraToken || null,
+    },
+    calling
+  );
+
   usePublish(localMicrophoneTrack ? [localMicrophoneTrack] : []);
 
-  const [callState, setCallState] = useState("idle");
+  const [callState, setCallState] = useState("connecting");
   const [timer, setTimer] = useState(0);
 
+  // ✅ CALL STATE HANDLING
   useEffect(() => {
     if (calling && isConnected) {
       if (remoteUsers.length > 0) setCallState("connected");
@@ -69,6 +66,7 @@ useJoin(
     }
   }, [calling, isConnected, remoteUsers.length]);
 
+  // ✅ TIMER
   useEffect(() => {
     let interval = null;
     if (callState === "connected") {
@@ -79,29 +77,36 @@ useJoin(
     return () => interval && clearInterval(interval);
   }, [callState]);
 
+  // ✅ CLEAN SOCKET LISTENERS
   useEffect(() => {
-  const handleRemoteLeave = () => {
-    console.log("🚨 Remote user has left the call!");
+    return () => {
+      console.log("🧹 Cleaning up socket listeners on Call Screen unmount...");
+      voiceSocket.removeAllListeners();
+    };
+  }, []);
 
-    // Stop and release local track
-    if (localMicrophoneTrack) {
-      localMicrophoneTrack.stop();
-      localMicrophoneTrack.close();
-    }
+  // ✅ REMOTE USER LEAVE HANDLER
+  useEffect(() => {
+    const handleRemoteLeave = () => {
+      console.log("🚨 Remote user has left the call!");
 
-    // Leave Agora channel
-    client.leave().then(() => {
-      console.log("👋 Left the Agora room");
-      navigate(-1); // redirect
-    });
-  };
+      if (localMicrophoneTrack) {
+        localMicrophoneTrack.stop();
+        localMicrophoneTrack.close();
+      }
 
-  client.on("user-left", handleRemoteLeave);
+      client.leave().then(() => {
+        console.log("👋 Left the Agora room");
+        navigate(-1);
+      });
+    };
 
-  return () => {
-    client.off("user-left", handleRemoteLeave);
-  };
-}, [client, localMicrophoneTrack, navigate]);
+    client.on("user-left", handleRemoteLeave);
+
+    return () => {
+      client.off("user-left", handleRemoteLeave);
+    };
+  }, [client, localMicrophoneTrack, navigate]);
 
   const formatTime = (sec) => {
     const m = String(Math.floor(sec / 60)).padStart(2, "0");
@@ -109,80 +114,67 @@ useJoin(
     return `${m}:${s}`;
   };
 
-  const startCall = () => {
-    setCalling(true);
-    setCallState("connecting");
+  // ✅ END CALL (UNCHANGED)
+  const endCall = () => {
+    const endedBy = isUserSide ? "CUSTOMER" : "ASTROLOGER";
+
+    voiceSocket.emit("call_end", { roomId: roomID, endedBy });
+
+    if (voiceSocket.connected) {
+      voiceSocket.disconnect();
+    }
+
+    if (localMicrophoneTrack) {
+      localMicrophoneTrack.stop();
+      localMicrophoneTrack.close();
+    }
+
+    client.leave().then(() => {
+      console.log("Call End:", endedBy);
+      navigate(-1);
+    });
   };
-
- const endCall = () => {
-  if (localMicrophoneTrack) {
-    localMicrophoneTrack.stop();
-    localMicrophoneTrack.close();
-  }
-
-  client.leave().then(() => {
-    console.log("Call Ended Locally");
-    navigate(-1);
-  });
-};
-
 
   return (
     <div className={styles.callScreen}>
-      {!calling ? (
-        <div className={styles.startContainer}>
-          <img
-            className={styles.avatar}
-            src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-            alt="Astrologer"
-          />
+      <div className={styles.callingContainer}>
+        <img
+          className={styles.avatar}
+          src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+          alt="Astrologer"
+        />
 
-          <h2 className={styles.name}>{callerName}</h2>
+        <h2 className={styles.name}>{callerName}</h2>
 
-          <p className={styles.status}>Tap to start voice call</p>
+        <p className={styles.status}>
+          {callState === "connecting" && "Connecting…"}
+          {callState === "waiting" && `Waiting for ${callerName} to join…`}
+          {callState === "connected" && `Connected • ${formatTime(timer)}`}
+        </p>
 
-          <button className={styles.callBtn} onClick={startCall}>
+        {/* Remote Audio */}
+        {remoteUsers.map((user) => (
+          <RemoteUser key={user.uid} user={user} playAudio={true} />
+        ))}
+
+        <div className={styles.controls}>
+          <button
+            className={`${styles.controlBtn} ${styles.micBtn}`}
+            onClick={() => setMic((m) => !m)}
+          >
+            {micOn ? <IoMic size={28} /> : <IoMicOff size={28} />}
+          </button>
+
+          <button
+            className={`${styles.controlBtn} ${styles.endCallBtn}`}
+            onClick={endCall}
+          >
             <IoCall size={32} />
           </button>
         </div>
-      ) : (
-        <div className={styles.callingContainer}>
-          <img
-            className={styles.avatar}
-            src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-            alt="Astrologer"
-          />
-
-          <h2 className={styles.name}>{callerName}</h2>
-
-          <p className={styles.status}>
-            {callState === "connecting" && "Connecting…"}
-            {callState === "waiting" && `Waiting for ${callerName} to join…`}
-            {callState === "connected" && `Connected • ${formatTime(timer)}`}
-          </p>
-
-          {/* Render remote audio */}
-          {remoteUsers.map((user) => (
-            <RemoteUser key={user.uid} user={user} playAudio={true} />
-          ))}
-
-          <div className={styles.controls}>
-            <button
-              className={`${styles.controlBtn} ${styles.micBtn}`}
-              onClick={() => setMic((m) => !m)}
-            >
-              {micOn ? <IoMic size={28} /> : <IoMicOff size={28} />}
-            </button>
-
-            <button className={`${styles.controlBtn} ${styles.endCallBtn}`} onClick={endCall}>
-              <IoCall size={32} />
-            </button>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };
 
 export default AgoraVoiceCalling;
-

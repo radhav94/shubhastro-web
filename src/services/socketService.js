@@ -14,22 +14,18 @@ class SocketService {
     });
 
     this.socket.on("connect", () => {
-      console.log("🔌 SOCKET CONNECTED:", this.socket.id);
       onConnected?.();
     });
 
     this.socket.on("disconnect", (reason) => {
-      console.log("❌ SOCKET DISCONNECTED:", reason);
       onDisconnected?.(reason);
     });
 
     this.socket.on("connect_error", (err) => {
-      console.error("🚨 CONNECTION ERROR:", err.message);
       onError?.("Unable to connect to server");
     });
 
     this.socket.on("error", (err) => {
-      console.error("⚠️ SOCKET ERROR:", err);
       onError?.(err.message || "Unknown error occurred");
     });
   }
@@ -37,12 +33,10 @@ class SocketService {
   disconnect() {
     if (this.socket) {
       this.socket.disconnect();
-      console.log("🔌 SOCKET FORCE DISCONNECTED");
     }
   }
 
   joinRoom({ roomId, userId, astrologerId }) {
-    console.log("JoIN ROOM",roomId, userId, astrologerId )
     this.socket.emit(
       "joinRoom",
       { roomId, userId, astrologerId },
@@ -58,7 +52,6 @@ class SocketService {
 
   // USER SEND
   sendMessage({ roomId, userId, astrologerId, message, kundliId }) {
-    console.log("Send Message",roomId, userId, astrologerId, message, kundliId);
     try {
       if (!this.socket?.connected)
         throw new Error("Socket not connected, try again.");
@@ -80,8 +73,6 @@ class SocketService {
 
   // ASTRO SEND
   astrologerReplied({ roomId, userId, astrologerId, message }) {
-    console.log("Send Message astro",roomId, userId, astrologerId, message);
-
     try {
       if (!this.socket?.connected)
         throw new Error("Socket not connected, try again.");

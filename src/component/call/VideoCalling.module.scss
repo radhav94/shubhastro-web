@@ -1,66 +1,92 @@
-.videoWrapper {
-  width: 100vw;
+.videoContainer {
+  width: 100%;
   height: 100vh;
-  background: #000;
-  position: relative;
+  background: #0a0d2d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.joinContainer {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 12px;
+  width: 320px;
+  background: #1a1e3d;
+  padding: 22px;
+  border-radius: 12px;
 }
 
-.topBar {
+.videoWrapper {
+  position: relative;
+  width: 85%;
+  height: 85%;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.remoteVideoArea {
   width: 100%;
-  padding: 12px;
-  text-align: center;
-  background: rgba(0,0,0,0.4);
+  height: 100%;
+  background: #000;
 }
 
-.callerName {
-  color: #fff;
-  font-size: 16px;
+/* 🔥 IMPORTANT: prevent video blocking clicks */
+.remoteVideoArea video {
+  pointer-events: none;
 }
 
-.remoteVideo {
-  flex: 1;
+.remoteUserVideo {
+  width: 100%;
+  height: 100%;
 }
 
-.localVideo {
-  width: 150px;
-  height: 200px;
+.localVideoPreview {
   position: absolute;
-  bottom: 90px;
-  right: 15px;
+  bottom: 100px;
+  right: 20px;
+  width: 200px;
+  height: 130px;
   border-radius: 10px;
   overflow: hidden;
-  background: #111;
+  border: 2px solid #00aaff;
+  z-index: 5;
 }
 
 .controls {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
   display: flex;
   gap: 18px;
   justify-content: center;
-  align-items: center;
-  padding: 16px;
+  z-index: 10; /* ✅ KEY FIX */
 }
 
 .controlBtn {
-  width: 55px;
-  height: 55px;
-  border-radius: 50%;
-  background: #222;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  color: #fff;
+  background: #1a1d40;
   border: none;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 50px;
   cursor: pointer;
-}
-
-.off {
-  background: #555 !important;
+  font-size: 13px;
 }
 
 .endBtn {
-  background: #e53935 !important;
+  background: #ff3d5a;
+  border: none;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+.waitingText {
+  color: white;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }

@@ -1,102 +1,158 @@
 // import {
 //   LocalUser,
 //   RemoteUser,
-//   useIsConnected,
 //   useJoin,
 //   useLocalMicrophoneTrack,
 //   useLocalCameraTrack,
 //   usePublish,
 //   useRemoteUsers,
+//   useRTCClient,
 // } from "agora-rtc-react";
-// import { useState, useMemo, useEffect } from "react";
 // import AgoraRTC, { AgoraRTCProvider } from "agora-rtc-react";
+// import { useState, useEffect } from "react";
 // import styles from "./VideoCalling.module.scss";
+// import { useLocation,useNavigate } from "react-router-dom";
 
-// const VideoCalling = () => {
-//   const client = useMemo(
-//     () => AgoraRTC.createClient({ mode: "rtc", codec: "vp8" }),
-//     []
+
+
+// export const VideoCalling = () => {
+//   const client = useRTCClient(
+//     AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
 //   );
 
 //   return (
 //     <AgoraRTCProvider client={client}>
-//       <CallUI />
+//       <Basics />
 //     </AgoraRTCProvider>
 //   );
 // };
 
-// const CallUI = () => {
-//   const [calling, setCalling] = useState(true);
-//   const isConnected = useIsConnected();
+// const Basics = ({ client }) => {
+//   const [calling, setCalling] = useState(false);
 //   const [micOn, setMic] = useState(true);
 //   const [cameraOn, setCamera] = useState(true);
-
-//   const appId = "908a7debb18d43ed8d74bed54c5e6b29";
-//   const channel = "subhtalknew"; // For now static
-//   const token = "007eJxTYJD4Y5EQ4+DU1sVx4eRMNa6Dnz93HPLdnWt/+f8x6VmW37wUGCwNLBLNU1KTkgwtUkyMU1MsUsxNklJTTE2STVPNkowsr21Vy2wIZGR499yClZEBAkF8bobi0qSMksSc7LzUcgYGAKx7JJU=";
-//   const uid = Math.floor(Math.random() * 100000);
-
 //   const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
 //   const { localCameraTrack } = useLocalCameraTrack(cameraOn);
+//   const location = useLocation();
+//    const callerName = location.state?.callerName || "Unknown";
+//   const roomID = location.state?.roomId || "123456";
+//   const agoraToken=location?.state?.agoraToken  || "";
+
+//   console.log("agoratoken",agoraToken)
+//   const isUserSide = location.state?.isUserSide;
+
+
+
+//   const appId = "5630460abdc141e3b2f8d9597752bd7d";
+
+//   const { isConnected } = useJoin(
+//     { appid: appId, channel: roomID, token: agoraToken || null },
+//     calling
+//   );
+
 //   const remoteUsers = useRemoteUsers();
 
-//   useJoin({ appid: appId, channel: channel, token, uid }, calling);
-//   usePublish([localMicrophoneTrack, localCameraTrack]);
+//   // 🔥 Sync track enabled state with button toggles
+//   useEffect(() => {
+//     if (localMicrophoneTrack) {
+//       localMicrophoneTrack.setEnabled(micOn);
+//     }
+//     if (localCameraTrack) {
+//       localCameraTrack.setEnabled(cameraOn);
+//     }
+//   }, [micOn, cameraOn, localMicrophoneTrack, localCameraTrack]);
+
+//   // 🔥 Republish only enabled tracks
+//   usePublish([
+//     ...(localMicrophoneTrack && micOn ? [localMicrophoneTrack] : []),
+//     ...(localCameraTrack && cameraOn ? [localCameraTrack] : []),
+//   ]);
 
 //   return (
-//     <div className={styles.wrapper}>
-//       {isConnected && (
-//         <>
-//           <div className={styles.remoteVideoWrapper}>
+//     <div className={styles.videoContainer}>
+//       {!isConnected ? (
+//         <div className={styles.joinContainer}>
+//           {/* <input
+//             placeholder="App ID"
+//             value={appId}
+//             onChange={(e) => setAppId(e.target.value)}
+//           />
+//           <input
+//             placeholder="Channel"
+//             value={channel}
+//             onChange={(e) => setChannel(e.target.value)}
+//           />
+//           <input
+//             placeholder="Token (optional)"
+//             value={token || ""}
+//             onChange={(e) => setToken(e.target.value)}
+//           /> */}
+//           <button
+//             className={styles.joinBtn}
+//             disabled={!appId || !roomID}
+//             onClick={() => setCalling(true)}
+//           >
+//             Join Call
+//           </button>
+//         </div>
+//       ) : (
+//         <div className={styles.videoWrapper}>
+//           {/* Remote Video */}
+//           <div className={styles.remoteVideoArea}>
 //             {remoteUsers.length > 0 ? (
 //               remoteUsers.map((user) => (
 //                 <RemoteUser
 //                   key={user.uid}
 //                   user={user}
-//                   playVideo
-//                   playAudio
-//                   className={styles.remoteVideo}
+//                   playAudio={true}
+//                   playVideo={true}
+//                   className={styles.remoteUserVideo}
 //                 />
 //               ))
 //             ) : (
-//               <div className={styles.waitingText}>Waiting for remote user...</div>
+//               <div className={styles.waitingText}>Waiting for remote user…</div>
 //             )}
 //           </div>
 
-//           <div className={styles.localVideoWrapper}>
-//             <LocalUser
-//               audioTrack={localMicrophoneTrack}
-//               videoTrack={localCameraTrack}
-//               micOn={micOn}
-//               cameraOn={cameraOn}
-//               playVideo
-//               className={styles.localVideo}
-//             />
-//           </div>
+//           {/* Local Preview */}
+//           {cameraOn && (
+//             <div className={styles.localVideoPreview}>
+//               <LocalUser
+//                 audioTrack={localMicrophoneTrack}
+//                 videoTrack={localCameraTrack}
+//                 micOn={micOn}
+//                 cameraOn={cameraOn}
+//                 playAudio={false}
+//                 playVideo={true}
+//                 className={styles.localUserVideo}
+//               />
+//             </div>
+//           )}
 
+//           {/* Controls */}
 //           <div className={styles.controls}>
 //             <button
-//               className={`${styles.btn} ${!micOn ? styles.off : ""}`}
+//               className={styles.controlBtn}
 //               onClick={() => setMic((prev) => !prev)}
 //             >
-//               🎤
+//               {micOn ? "Mute Mic" : "Unmute Mic"}
 //             </button>
 
 //             <button
-//               className={`${styles.btn} ${!cameraOn ? styles.off : ""}`}
+//               className={styles.controlBtn}
 //               onClick={() => setCamera((prev) => !prev)}
 //             >
-//               📷
+//               {cameraOn ? "Stop Camera" : "Start Camera"}
 //             </button>
 
 //             <button
-//               className={styles.btnEnd}
+//               className={styles.endBtn}
 //               onClick={() => setCalling(false)}
 //             >
-//               🔴
+//               End
 //             </button>
 //           </div>
-//         </>
+//         </div>
 //       )}
 //     </div>
 //   );
@@ -106,132 +162,178 @@
 
 
 
-import React, { useEffect, useRef, useState } from "react";
-import AgoraRTC from "agora-rtc-sdk-ng";
-import { useLocation, useNavigate } from "react-router-dom";
-import { IoMicOffOutline, IoMicOutline, IoVideocamOffOutline, IoVideocamOutline, IoCall } from "react-icons/io5";
+
+import {
+  LocalUser,
+  RemoteUser,
+  useJoin,
+  useLocalMicrophoneTrack,
+  useLocalCameraTrack,
+  usePublish,
+  useRemoteUsers,
+  useRTCClient,
+} from "agora-rtc-react";
+import AgoraRTC, { AgoraRTCProvider } from "agora-rtc-react";
+import { useState, useEffect } from "react";
 import styles from "./VideoCalling.module.scss";
+import { useLocation, useNavigate } from "react-router-dom";
+import { voiceSocket } from "../../services/voiceSocketServices";
+// import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
-const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+export const VideoCalling = () => {
+  const client = useRTCClient(
+    AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
+  );
 
-const VideoCall = () => {
+  return (
+    <AgoraRTCProvider client={client}>
+      <Basics client={client} />
+    </AgoraRTCProvider>
+  );
+};
+
+const Basics = ({ client }) => {
+  // ✅ auto join
+  const [calling, setCalling] = useState(true);
+  const [micOn, setMic] = useState(true);
+  const [cameraOn, setCamera] = useState(true);
+
+  const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
+  const { localCameraTrack } = useLocalCameraTrack(cameraOn);
+
+  const location = useLocation();
   const navigate = useNavigate();
-  const { state } = useLocation();
 
-  const { channelName, token, uid, userId, astrologerId, isUserSide, callerName } = state;
+  const roomID = location.state?.roomId || "123456";
+  const agoraToken = location.state?.agoraToken || "";
+  const isUserSide = location.state?.isUserSide;
 
-  const localRef = useRef(null);
-  const remoteRef = useRef(null);
+  const appId = "5630460abdc141e3b2f8d9597752bd7d";
 
-  const [localTracks, setLocalTracks] = useState(null);
-  const [micEnabled, setMicEnabled] = useState(true);
-  const [camEnabled, setCamEnabled] = useState(true);
+  const { isConnected } = useJoin(
+    { appid: appId, channel: roomID, token: agoraToken || null },
+    calling
+  );
 
-  /** 🚀 Join video call */
+  const remoteUsers = useRemoteUsers();
+
+  // ✅ mic / camera sync
   useEffect(() => {
-    const joinVideoCall = async () => {
-      try {
-        await client.join(
-          "b7bd8229702e4ec3b0938ea15f23a39c",
-          "testing",
-          "007eJxTYDhg+3WajmmeaqPx+nObrn/awxWskXY8a4bjIpM2XY7epTsUGJLMk1IsjIwszQ2MUk1Sk42TDCyNLVITDU3TjIwTjS2TF3zUzWwIZGTYnfSUiZEBAkF8doaS1OKSzLx0BgYAsqUhKw==",
-          uid
-        );
-
-        const tracks = await AgoraRTC.createMicrophoneAndCameraTracks();
-        setLocalTracks(tracks);
-
-        tracks[1].play(localRef.current);
-        await client.publish(tracks);
-        console.log("Call Joined:", channelName);
-      } catch (err) {
-        console.error("Agora Join Error:", err);
-      }
-    };
-
-    joinVideoCall();
-
-    /** Remote user published */
-    client.on("user-published", async (user, mediaType) => {
-      await client.subscribe(user, mediaType);
-      if (mediaType === "video") {
-        user.videoTrack.play(remoteRef.current);
-      }
-      if (mediaType === "audio") {
-        user.audioTrack.play();
-      }
-    });
-
-    return () => {
-      client.off("user-published");
-    };
-  }, [channelName, token, uid]);
-
-  /** 🔇 Toggle Mic */
-  const toggleMic = async () => {
-    if (!localTracks) return;
-    const newState = !micEnabled;
-    await localTracks[0].setEnabled(newState);
-    setMicEnabled(newState);
-  };
-
-  /** 🎥 Toggle Camera */
-  const toggleCam = async () => {
-    if (!localTracks) return;
-    const newState = !camEnabled;
-    await localTracks[1].setEnabled(newState);
-    setCamEnabled(newState);
-  };
-
-  /** 📞 End Call */
-  const handleEndCall = async () => {
-    if (localTracks) {
-      localTracks[0].close();
-      localTracks[1].close();
+    if (localMicrophoneTrack) {
+      localMicrophoneTrack.setEnabled(micOn);
     }
+    if (localCameraTrack) {
+      localCameraTrack.setEnabled(cameraOn);
+    }
+  }, [micOn, cameraOn, localMicrophoneTrack, localCameraTrack]);
 
-    await client.leave();
+  // ✅ publish only enabled tracks
+  usePublish([
+    ...(localMicrophoneTrack && micOn ? [localMicrophoneTrack] : []),
+    ...(localCameraTrack && cameraOn ? [localCameraTrack] : []),
+  ]);
 
-    navigate(-1); // return to chat or previous screen
+  // ✅ END CALL
+  const endCall = async () => {
+    try {
+      voiceSocket.emit("call_end", {
+        roomId: roomID,
+        endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
+      });
+
+      if (localMicrophoneTrack) {
+        localMicrophoneTrack.stop();
+        localMicrophoneTrack.close();
+      }
+
+      if (localCameraTrack) {
+        localCameraTrack.stop();
+        localCameraTrack.close();
+      }
+
+      await client.leave();
+      voiceSocket.disconnect();
+
+      setCalling(false);
+      navigate(-1);
+    } catch (err) {
+      console.error("End call error:", err);
+    }
   };
 
   return (
-    <div className={styles.videoWrapper}>
-      <div className={styles.topBar}>
-        <span className={styles.callerName}>
-          {callerName || "Video Call"}
-        </span>
-      </div>
+    <div className={styles.videoContainer}>
+      {!isConnected ? (
+        <div className={styles.joinContainer}>
+          <div className={styles.waitingText}>
+            Connecting to video call…
+          </div>
+        </div>
+      ) : (
+        <div className={styles.videoWrapper}>
+          {/* Remote */}
+          <div className={styles.remoteVideoArea}>
+            {remoteUsers.length > 0 ? (
+              remoteUsers.map((user) => (
+                <RemoteUser
+                  key={user.uid}
+                  user={user}
+                  playAudio
+                  playVideo
+                  className={styles.remoteUserVideo}
+                />
+              ))
+            ) : (
+              <div className={styles.waitingText}>
+                Waiting for remote user…
+              </div>
+            )}
+          </div>
 
-      {/* REMOTE VIEW */}
-      <div className={styles.remoteVideo} ref={remoteRef}></div>
+          {/* Local */}
+          {cameraOn && (
+            <div className={styles.localVideoPreview}>
+              <LocalUser
+                audioTrack={localMicrophoneTrack}
+                videoTrack={localCameraTrack}
+                micOn={micOn}
+                cameraOn={cameraOn}
+                playAudio={false}
+                playVideo
+                className={styles.localUserVideo}
+              />
+            </div>
+          )}
 
-      {/* LOCAL VIEW SMALL PREVIEW */}
-      <div className={styles.localVideo} ref={localRef}></div>
+          {/* Controls */}
+          <div className={styles.controls}>
+            <button
+              className={styles.controlBtn}
+              onClick={() => setMic((p) => !p)}
+            >
+              {micOn ? "Mute Mic" : "Unmute Mic"}
+            </button>
 
-      {/* CONTROLS */}
-      <div className={styles.controls}>
-        <button
-          className={`${styles.controlBtn} ${micEnabled ? "" : styles.off}`}
-          onClick={toggleMic}
-        >
-          {micEnabled ? <IoMicOutline /> : <IoMicOffOutline />}
-        </button>
+            <button
+              className={styles.controlBtn}
+              onClick={() => setCamera((p) => !p)}
+            >
+              {cameraOn ? "Stop Camera" : "Start Camera"}
+            </button>
 
-        <button
-          className={`${styles.controlBtn} ${camEnabled ? "" : styles.off}`}
-          onClick={toggleCam}
-        >
-          {camEnabled ? <IoVideocamOutline /> : <IoVideocamOffOutline />}
-        </button>
-
-        <button className={`${styles.controlBtn} ${styles.endBtn}`} onClick={handleEndCall}>
-          <IoCall />
-        </button>
-      </div>
+            <button className={styles.endBtn} onClick={endCall}>
+              End
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default VideoCall;
+export default VideoCalling;
+
+
+
+
 
