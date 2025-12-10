@@ -87,14 +87,14 @@ const AstrologerCard = ({ data, onFollow, onChat, onProfile, onAudioCall,onVideo
             title="Voice Call"
             onClick={onAudioCall}
           />
-           {/* <PrimaryButton
+           <PrimaryButton
             bgColor={appColors.white}
             imgSrc={AppIcons.Call}
             fontSize={12}
             buttonStyles={{ padding: "4px 6px" }}
-            title="Audio Call"
+            title="Video Call"
             onClick={onVideoCall}
-          /> */}
+          />
         </div>
       </div>
     </div>
