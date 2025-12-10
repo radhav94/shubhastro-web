@@ -16,85 +16,107 @@ const AstrologersDashboard = () => {
   const [incomingVideoCall, setIncomingVideoCall] = useState(false);
   const [videoChannelName, setVideoChannelName] = useState(null);
   const [callerUserId, setCallerUserId] = useState(null);
-  const [token,setToken]=useState("");
+  const [token, setToken] = useState("");
 
   useEffect(() => {
-  if (!voiceSocket.connected) {
-    voiceSocket.io.opts.query = {
-      astrologerId: astroIdLocal,
-      role: "ASTROLOGER",
+    if (!voiceSocket.connected) {
+      voiceSocket.io.opts.query = {
+        astrologerId: astroIdLocal,
+        role: "ASTROLOGER",
+      };
+
+      voiceSocket.connect();
+    }
+
+    const handleIncomingVoiceCall = (data) => {
+      const { roomId, agoraToken, callerId } = data || {};
+      console.log("Incoming call", roomId, data);
+      setRoomId(roomId);
+      setCallerUserId(callerId);
+      setToken(agoraToken);
+      setVideoChannelName(roomId);
+
+      // If backend sends a type (e.g. "audio" / "video"), use it.
+      // Otherwise default to audio popup.
+      if (data?.type === "video") {
+        setIncomingVideoCall(true);
+        setIncomingCall(false);
+      } else {
+        setIncomingCall(true);  
+        setIncomingVideoCall(false);
+      }
     };
 
-    voiceSocket.connect();
-  }
+    voiceSocket.on("incoming_call", handleIncomingVoiceCall);
 
-  const handleIncomingVoiceCall = ({ roomId,  agoraToken,callerId }) => {
-    console.log("Incoming call",roomId);
-    setRoomId(roomId);
-    setCallerUserId(callerId);
-    setIncomingCall(true);
-    setToken(agoraToken);
-  };
+    return () => {
+      voiceSocket.off("incoming_call", handleIncomingVoiceCall);
+    };
+  }, []);
 
-  voiceSocket.on("incoming_call", handleIncomingVoiceCall);
-
-  return () => {
-    voiceSocket.off("incoming_call", handleIncomingVoiceCall);
-  };
-}, []);
-
-  
   const handleAccept = () => {
-    voiceSocket.emit("accept_call", { roomId, token,channelName:roomId,astrologerId: astroIdLocal});
+    if (!roomId) return;
 
-    console.log("accept call",roomId)
+    voiceSocket.emit("accept_call", {
+      roomId,
+      token,
+      channelName: roomId,
+      astrologerId: astroIdLocal,
+    });
+
+    console.log("accept call", roomId);
+    setIncomingCall(false);
+    setIncomingVideoCall(false);
+
     navigate(`/astrologer-dashboard/voice-call/${roomId}`, {
       state: {
-          roomId,
-          agoraToken:token,
-          callerName: callerUserId,
-          isUserSide: false,
+        roomId,
+        agoraToken: token,
+        callerName: callerUserId,
+        isUserSide: false,
       },
     });
   };
 
   const handleReject = () => {
-    voiceSocket.emit("reject_call", {roomId});
-    setIncomingCall(false);
+    if (!roomId) return;
 
+    voiceSocket.emit("reject_call", { roomId });
+    setIncomingCall(false);
+    setIncomingVideoCall(false);
   };
 
-  useEffect(() => {
-    const handleIncoming = ({ channelName, userId }) => {
-      console.log("📹 Incoming Call from:", userId);
-      setCallerUserId(userId);
-      setVideoChannelName(channelName);
-      setIncomingVideoCall(true);
-    };
-
-    voiceSocket.on("incoming-video-call", handleIncoming);
-
-    return () => voiceSocket.off("incoming-video-call", handleIncoming);
-  }, []);
-
-  /** ⭐ Accept Video Call */
   const handleVideoAccept = () => {
-    voiceSocket.emit("accept-video-call", {
-      channelName: videoChannelName,
-      userId: callerUserId,
-      astrologerId: Number(astroIdLocal),
+    if (!roomId) return;
+
+    voiceSocket.emit("accept_call", {
+      roomId,
+      token,
+      channelName: roomId,
+      astrologerId: astroIdLocal,
     });
 
+    console.log("accept video call", roomId);
+    setIncomingCall(false);
     setIncomingVideoCall(false);
 
-    navigate(`/astrologer-dashboard/video-call/${videoChannelName}`, {
-      state: { channelName: videoChannelName, isUserSide: false },
+    navigate(`/astrologer-dashboard/video-call/${roomId}`, {
+      state: {
+        roomId,
+        agoraToken: token,
+        callerName: callerUserId,
+        isUserSide: false,
+      },
     });
   };
 
   /** ❌ Reject video call popup */
   const handleVideoReject = () => {
+    if (!roomId) return;
+
+    voiceSocket.emit("reject_call", { roomId });
     setIncomingVideoCall(false);
+    setIncomingCall(false);
   };
 
   const DashboardTab = (
@@ -147,10 +169,7 @@ const AstrologersDashboard = () => {
               <button className={styles.acceptBtn} onClick={handleAccept}>
                 Accept
               </button>
-              <button
-                className={styles.rejectBtn}
-                onClick={handleReject}
-              >
+              <button className={styles.rejectBtn} onClick={handleReject}>
                 Reject
               </button>
             </div>
@@ -267,9 +286,7 @@ const AstrologersDashboard = () => {
 
         <div
           className={styles.tabItem}
-          onClick={() =>
-            navigate('/astrologer-dashboard/live-streaming')
-          }
+          onClick={() => navigate("/astrologer-dashboard/live-streaming")}
         >
           Live Stream
         </div>

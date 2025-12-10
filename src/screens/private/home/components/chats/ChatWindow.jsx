@@ -55,120 +55,88 @@ const ChatWindow = () => {
     return [...formattedHistory, ...formattedSocket];
   }, [messageOff, messages, isUserSide]);
 
-
-
-  // const handleCallClick = () => {
-  //   if (!voiceSocket.connected) {
-  //     voiceSocket.io.opts.query = {
-  //       userId,
-  //       astrologerId,
-  //       role: "CUSTOMER",
-  //     };
-
-  //     voiceSocket.connect();
-  //   }
-
-  //   voiceSocket.emit("create_call_room", {
-  //     userId,
-  //     astrologerId,
-  //   });
-  // };
+  // Common socket connect function for both calls
+  const commonSocketConnect = () => {
+    if (voiceSocket.connected) voiceSocket.disconnect();
+    voiceSocket.io.opts.query = { userId, astrologerId, role: "CUSTOMER" };
+    voiceSocket.connect();
+  };
 
   const handleCallClick = () => {
-  if (voiceSocket.connected) voiceSocket.disconnect();
-
-  voiceSocket.io.opts.query = { userId, astrologerId, role: "CUSTOMER" };
-  voiceSocket.connect();
-
-  voiceSocket.emit("create_call_room", { userId, astrologerId });
-};
-
-
- 
-useEffect(() => {
-  if (!isUserSide) return;
-
-  const handleReturnRoom = (data) => {
-    console.log("rommid111111",data);
-
-    setWaitingPopup(true);
-  };
-
-  const handleCallAccepted = ({ roomId,token }) => {
-
-    console.log("rommid22222",roomId);
-    navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
-      state: {
-        roomId,
-        agoraToken: token,
-        callerName: fullName,
-        isUserSide: true,
-      },
-    });
-
-    setWaitingPopup(false);
-  };
-
-  const handleCallRejected = (data) => {
-    console.log("test the reject")
-    Toast.error(data?.sessionData?.sessionEndReason)
-    setWaitingPopup(false); 
-    voiceSocket.disconnect();
-  };
-
-  const handleSocketError = (err) => {
-    Toast.error(err?.message)
-
-    setWaitingPopup(false);
-  };
-
-  const handleCallEnded = (err) => {
-    console.log("disconnect");
-    voiceSocket.disconnect();
-
-  };
-
-  voiceSocket.on("return_call_room", handleReturnRoom);
-  voiceSocket.on("call_accepted", handleCallAccepted);
-  voiceSocket.on("call_rejected", handleCallRejected);
-  voiceSocket.on("error", handleSocketError);
-  voiceSocket.on("call_ended", handleCallEnded);
-
-  return () => {
-    voiceSocket.off("return_call_room", handleReturnRoom);
-    voiceSocket.off("call_accepted", handleCallAccepted);
-    voiceSocket.off("call_rejected", handleCallRejected);
-    voiceSocket.off("error", handleSocketError);
-  voiceSocket.off("call_ended", handleCallEnded);
-
-  };
-}, [userId, astrologerId, fullName, navigate, isUserSide]);
-
-
-  
-  const handleVideoCall = () => {
-    voiceSocket.emit("create-video-call-room", {
+    commonSocketConnect();
+    voiceSocket.emit("create_call_room", {
       userId,
       astrologerId,
+      type: "audio",
     });
   };
 
+  const handleVideoCall = () => {
+    commonSocketConnect();
+    voiceSocket.emit("create_call_room", {
+      userId,
+      astrologerId,
+      type: "video",
+    });
+  };
+
+  // Single socket listener for both audio + video
   useEffect(() => {
-    const handleRoomReturn = ({ channelName }) => {
-      voiceSocket.on("video-call-accepted", () => {
-        navigate(`/talk-to-astrologers/video-call/${channelName}`, {
-          state: { channelName, isUserSide: true },
-        });
-      });
+    if (!isUserSide) return;
+
+    const handleReturnRoom = () => {
+      setWaitingPopup(true);
     };
 
-    voiceSocket.on("return-video-call-room", handleRoomReturn);
+    const handleCallAccepted = ({ roomId, token, type }) => {
+      const route =
+        type === "video"
+          ? `/talk-to-astrologers/video-call/${roomId}`
+          : `/talk-to-astrologers/voice-call/${roomId}`;
+
+      navigate(route, {
+        state: {
+          roomId,
+          agoraToken: token,
+          callerName: fullName,
+          isUserSide: true,
+          callType: type,
+        },
+      });
+
+      setWaitingPopup(false);
+    };
+
+    const handleCallRejected = (data) => {
+      Toast.error(data?.sessionData?.sessionEndReason || "Call Rejected!");
+      setWaitingPopup(false);
+      voiceSocket.disconnect();
+    };
+
+    const handleSocketError = (err) => {
+      Toast.error(err?.message || "Connection Error!");
+      setWaitingPopup(false);
+    };
+
+    const handleCallEnded = () => {
+      voiceSocket.disconnect();
+      setWaitingPopup(false);
+    };
+
+    voiceSocket.on("return_call_room", handleReturnRoom);
+    voiceSocket.on("call_accepted", handleCallAccepted);
+    voiceSocket.on("call_rejected", handleCallRejected);
+    voiceSocket.on("error", handleSocketError);
+    voiceSocket.on("call_ended", handleCallEnded);
 
     return () => {
-      voiceSocket.off("return-video-call-room", handleRoomReturn);
-      voiceSocket.off("video-call-accepted");
+      voiceSocket.off("return_call_room", handleReturnRoom);
+      voiceSocket.off("call_accepted", handleCallAccepted);
+      voiceSocket.off("call_rejected", handleCallRejected);
+      voiceSocket.off("error", handleSocketError);
+      voiceSocket.off("call_ended", handleCallEnded);
     };
-  }, [navigate]);
+  }, [userId, astrologerId, fullName, navigate, isUserSide]);
 
   const handleSend = () => {
     if (!message.trim()) return;
@@ -246,7 +214,7 @@ useEffect(() => {
         )}
       </div>
 
-      {/* Waiting Popup — OUTSIDE messages */}
+      {/* Waiting Popup */}
       {waitingPopup && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContainer}>
