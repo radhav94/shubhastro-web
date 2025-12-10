@@ -55,6 +55,7 @@ const TalkToAstrologer = () => {
   const [specialty, setSpecialty] = useState("");
   const [allAstrologers, setAllAstrologers] = useState([]);
   const [hasMore, setHasMore] = useState(true);
+  const [callRoomId,setCallRoomId]=useState(null)
 
   const limit = 9;
 
@@ -230,7 +231,8 @@ const TalkToAstrologer = () => {
   useEffect(() => {
     if (!userIdLocal) return;
 
-    const handleReturnRoom = () => {
+    const handleReturnRoom = ({roomId}) => {
+      setCallRoomId(roomId);
       setWaitingPopup(true);
     };
 
@@ -306,10 +308,11 @@ const TalkToAstrologer = () => {
               <button
                 className={styles.rejectBtn}
                 onClick={() => {
-                  setWaitingPopup(false);
                   voiceSocket.emit("cancel_call", {
-                    astrologerId: activeCallAstro?._id,
+                    roomId: callRoomId,
                   });
+                  setWaitingPopup(false);
+                  setCallRoomId(null); // ✅ REQUIRED
                 }}
               >
                 Cancel

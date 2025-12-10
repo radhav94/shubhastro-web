@@ -35,22 +35,33 @@ const AstrologersDashboard = () => {
       setCallerUserId(callerId);
       setToken(agoraToken);
       setVideoChannelName(roomId);
-
-      // If backend sends a type (e.g. "audio" / "video"), use it.
-      // Otherwise default to audio popup.
       if (data?.type === "video") {
         setIncomingVideoCall(true);
         setIncomingCall(false);
       } else {
-        setIncomingCall(true);  
+        setIncomingCall(true);
         setIncomingVideoCall(false);
       }
     };
 
+  const handleCanceledCall = (data) => {
+  console.log("Call canceled by user", data);
+
+  setIncomingCall(false);
+  setIncomingVideoCall(false);
+
+  // ✅ reset call state
+  setRoomId(null);
+  setCallerUserId(null);
+  setToken("");
+};
+
     voiceSocket.on("incoming_call", handleIncomingVoiceCall);
+    voiceSocket.on("call_canceled", handleCanceledCall);
 
     return () => {
       voiceSocket.off("incoming_call", handleIncomingVoiceCall);
+      voiceSocket.off("call_canceled", handleCanceledCall);
     };
   }, []);
 
@@ -95,8 +106,6 @@ const AstrologersDashboard = () => {
       channelName: roomId,
       astrologerId: astroIdLocal,
     });
-
-    console.log("accept video call", roomId);
     setIncomingCall(false);
     setIncomingVideoCall(false);
 

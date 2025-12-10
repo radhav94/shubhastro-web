@@ -29,6 +29,8 @@ const ChatWindow = () => {
     });
 
   const [message, setMessage] = useState("");
+  const [callRoomId, setCallRoomId] = useState(null);
+
   const [waitingPopup, setWaitingPopup] = useState(false);
 
   const { data } = useGetChatHistoryQuery({ roomId });
@@ -84,7 +86,8 @@ const ChatWindow = () => {
   useEffect(() => {
     if (!isUserSide) return;
 
-    const handleReturnRoom = () => {
+    const handleReturnRoom = ({ roomId }) => {
+      setCallRoomId(roomId);
       setWaitingPopup(true);
     };
 
@@ -143,6 +146,16 @@ const ChatWindow = () => {
     isUserSide ? sendMessage(message) : astroReply(message);
     setMessage("");
   };
+
+  const handleCancelCall = () => {
+  if (!callRoomId) return;
+
+  voiceSocket.emit("cancel_call", { roomId: callRoomId });
+
+  setWaitingPopup(false);
+  setCallRoomId(null); // ✅ REQUIRED
+};
+
 
   return (
     <div className={styles.chatWindow}>
@@ -229,10 +242,8 @@ const ChatWindow = () => {
             <div className={styles.modalButtons}>
               <button
                 className={styles.rejectBtn}
-                onClick={() => {
-                  setWaitingPopup(false);
-                  voiceSocket.emit("cancel_call", { astrologerId });
-                }}
+                disabled={!callRoomId}
+                onClick={handleCancelCall}
               >
                 Cancel
               </button>
