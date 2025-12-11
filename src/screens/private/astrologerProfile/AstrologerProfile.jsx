@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "./AstrologerProfile.module.scss";
-import { FaCheckCircle } from "react-icons/fa";
+import { FaCheckCircle, FaVideo } from "react-icons/fa";
 import { FaPhoneAlt } from "react-icons/fa";
 import { FaComments } from "react-icons/fa";
 import GiftSection from "./GiftSection";
@@ -98,9 +98,9 @@ const AstrologerProfile = () => {
 
           <p>{data?.specialities?.map((s) => s).join(", ") || ""}</p>
           <p className={styles.light}>
-            Languages: {data?.languagePreference?.map((l) => l).join(",")}
+            Languages: {data?.languagePreference?.map((l) => l).join(", ")}
           </p>
-          <p className={styles.light}>Exp: {data?.experience} Years </p>
+          <p className={styles.light}>Exp : {data?.experience} Years </p>
 
           <h3 className={styles.price}>₹ {data?.price?.amount}/min</h3>
 
@@ -115,6 +115,9 @@ const AstrologerProfile = () => {
             </button>
             <button className={styles.callBtn} onClick={handleTalk}>
               <FaPhoneAlt /> Start Call
+            </button>
+            <button className={styles.videoCallBtn} onClick={handleTalk}>
+              <FaVideo /> Start Video
             </button>
           </div>
         </div>
