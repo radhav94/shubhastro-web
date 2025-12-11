@@ -44,17 +44,17 @@ const AstrologersDashboard = () => {
       }
     };
 
-  const handleCanceledCall = (data) => {
-  console.log("Call canceled by user", data);
+    const handleCanceledCall = (data) => {
+      console.log("Call canceled by user", data);
 
-  setIncomingCall(false);
-  setIncomingVideoCall(false);
+      setIncomingCall(false);
+      setIncomingVideoCall(false);
 
-  // ✅ reset call state
-  setRoomId(null);
-  setCallerUserId(null);
-  setToken("");
-};
+      // ✅ reset call state
+      setRoomId(null);
+      setCallerUserId(null);
+      setToken("");
+    };
 
     voiceSocket.on("incoming_call", handleIncomingVoiceCall);
     voiceSocket.on("call_canceled", handleCanceledCall);

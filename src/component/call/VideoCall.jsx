@@ -1,168 +1,3 @@
-// import {
-//   LocalUser,
-//   RemoteUser,
-//   useJoin,
-//   useLocalMicrophoneTrack,
-//   useLocalCameraTrack,
-//   usePublish,
-//   useRemoteUsers,
-//   useRTCClient,
-// } from "agora-rtc-react";
-// import AgoraRTC, { AgoraRTCProvider } from "agora-rtc-react";
-// import { useState, useEffect } from "react";
-// import styles from "./VideoCalling.module.scss";
-// import { useLocation,useNavigate } from "react-router-dom";
-
-
-
-// export const VideoCalling = () => {
-//   const client = useRTCClient(
-//     AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
-//   );
-
-//   return (
-//     <AgoraRTCProvider client={client}>
-//       <Basics />
-//     </AgoraRTCProvider>
-//   );
-// };
-
-// const Basics = ({ client }) => {
-//   const [calling, setCalling] = useState(false);
-//   const [micOn, setMic] = useState(true);
-//   const [cameraOn, setCamera] = useState(true);
-//   const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
-//   const { localCameraTrack } = useLocalCameraTrack(cameraOn);
-//   const location = useLocation();
-//    const callerName = location.state?.callerName || "Unknown";
-//   const roomID = location.state?.roomId || "123456";
-//   const agoraToken=location?.state?.agoraToken  || "";
-
-//   console.log("agoratoken",agoraToken)
-//   const isUserSide = location.state?.isUserSide;
-
-
-
-//   const appId = "5630460abdc141e3b2f8d9597752bd7d";
-
-//   const { isConnected } = useJoin(
-//     { appid: appId, channel: roomID, token: agoraToken || null },
-//     calling
-//   );
-
-//   const remoteUsers = useRemoteUsers();
-
-//   // 🔥 Sync track enabled state with button toggles
-//   useEffect(() => {
-//     if (localMicrophoneTrack) {
-//       localMicrophoneTrack.setEnabled(micOn);
-//     }
-//     if (localCameraTrack) {
-//       localCameraTrack.setEnabled(cameraOn);
-//     }
-//   }, [micOn, cameraOn, localMicrophoneTrack, localCameraTrack]);
-
-//   // 🔥 Republish only enabled tracks
-//   usePublish([
-//     ...(localMicrophoneTrack && micOn ? [localMicrophoneTrack] : []),
-//     ...(localCameraTrack && cameraOn ? [localCameraTrack] : []),
-//   ]);
-
-//   return (
-//     <div className={styles.videoContainer}>
-//       {!isConnected ? (
-//         <div className={styles.joinContainer}>
-//           {/* <input
-//             placeholder="App ID"
-//             value={appId}
-//             onChange={(e) => setAppId(e.target.value)}
-//           />
-//           <input
-//             placeholder="Channel"
-//             value={channel}
-//             onChange={(e) => setChannel(e.target.value)}
-//           />
-//           <input
-//             placeholder="Token (optional)"
-//             value={token || ""}
-//             onChange={(e) => setToken(e.target.value)}
-//           /> */}
-//           <button
-//             className={styles.joinBtn}
-//             disabled={!appId || !roomID}
-//             onClick={() => setCalling(true)}
-//           >
-//             Join Call
-//           </button>
-//         </div>
-//       ) : (
-//         <div className={styles.videoWrapper}>
-//           {/* Remote Video */}
-//           <div className={styles.remoteVideoArea}>
-//             {remoteUsers.length > 0 ? (
-//               remoteUsers.map((user) => (
-//                 <RemoteUser
-//                   key={user.uid}
-//                   user={user}
-//                   playAudio={true}
-//                   playVideo={true}
-//                   className={styles.remoteUserVideo}
-//                 />
-//               ))
-//             ) : (
-//               <div className={styles.waitingText}>Waiting for remote user…</div>
-//             )}
-//           </div>
-
-//           {/* Local Preview */}
-//           {cameraOn && (
-//             <div className={styles.localVideoPreview}>
-//               <LocalUser
-//                 audioTrack={localMicrophoneTrack}
-//                 videoTrack={localCameraTrack}
-//                 micOn={micOn}
-//                 cameraOn={cameraOn}
-//                 playAudio={false}
-//                 playVideo={true}
-//                 className={styles.localUserVideo}
-//               />
-//             </div>
-//           )}
-
-//           {/* Controls */}
-//           <div className={styles.controls}>
-//             <button
-//               className={styles.controlBtn}
-//               onClick={() => setMic((prev) => !prev)}
-//             >
-//               {micOn ? "Mute Mic" : "Unmute Mic"}
-//             </button>
-
-//             <button
-//               className={styles.controlBtn}
-//               onClick={() => setCamera((prev) => !prev)}
-//             >
-//               {cameraOn ? "Stop Camera" : "Start Camera"}
-//             </button>
-
-//             <button
-//               className={styles.endBtn}
-//               onClick={() => setCalling(false)}
-//             >
-//               End
-//             </button>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default VideoCalling;
-
-
-
-
 import {
   LocalUser,
   RemoteUser,
@@ -260,6 +95,32 @@ const Basics = ({ client }) => {
       console.error("End call error:", err);
     }
   };
+
+
+  // 🔥 Listen for remote end-call event
+useEffect(() => {
+  const handleRemoteLeave = () => {
+    console.log("🚨 Remote video user left!");
+
+    localMicrophoneTrack?.stop();
+    localMicrophoneTrack?.close();
+
+    localCameraTrack?.stop();
+    localCameraTrack?.close();
+
+    client.leave().then(() => {
+      navigate(-1);
+    });
+  };
+
+  client.on("user-left", handleRemoteLeave);
+
+  return () => {
+    client.off("user-left", handleRemoteLeave);
+  };
+}, [client, localMicrophoneTrack, localCameraTrack, navigate]);
+
+
 
   return (
     <div className={styles.videoContainer}>
