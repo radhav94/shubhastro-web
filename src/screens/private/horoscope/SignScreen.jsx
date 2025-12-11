@@ -13,14 +13,36 @@ const SignScreen = () => {
   let horoscopeType = pathname.split("/")[2].split("-")[0];
   horoscopeType =
     horoscopeType.charAt(0).toUpperCase() + horoscopeType.slice(1);
+  console.log(horoscopeType, "horoscopeType");
+  let subTitleStr;
+  switch (horoscopeType) {
+    case "Todays":
+      subTitleStr = "Check your Today's Horoscope";
+      break;
+    case "Daily":
+      subTitleStr = "Check your horoscope today";
+      break;
+    case "Weekly":
+      subTitleStr = "Sunday - Saturday";
+      break;
+    case "Yearly":
+      subTitleStr = new Date().getFullYear();
+      break;
+  }
 
   return (
     <div className={styles.dailyContainer}>
       <PrimaryText isCenter isBold size_32>
         {horoscopeType} Horoscope
       </PrimaryText>
-      <PrimaryText isCenter isSemiBold size_18 color={appColors.greyDark}>
-        Check your Horoscope Today
+      <PrimaryText
+        marginBottom="6px"
+        isCenter
+        isSemiBold
+        size_20
+        color={appColors.greyDark}
+      >
+        {subTitleStr}
       </PrimaryText>
       <DividerWithImage imageSrc={ShubhTalkLogo} />
 

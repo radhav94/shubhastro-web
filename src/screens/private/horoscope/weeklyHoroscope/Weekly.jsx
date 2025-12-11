@@ -30,8 +30,14 @@ const Weekly = () => {
             {sign.charAt(0).toUpperCase() + sign.slice(1)} Weekly Horoscope
           </PrimaryText>
 
-          <PrimaryText isCenter isSemiBold size_18 color={appColors.greyDark}>
-            {formatted}
+          <PrimaryText
+            marginBottom="6px"
+            isCenter
+            isSemiBold
+            size_20
+            color={appColors.greyDark}
+          >
+            Sunday - Saturday
           </PrimaryText>
 
           <DividerWithImage

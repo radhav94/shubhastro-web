@@ -39,8 +39,14 @@ const Yearly = () => {
             {toTitle(sign)} Yearly Horoscope
           </PrimaryText>
 
-          <PrimaryText isCenter isSemiBold size_18 color={appColors.greyDark}>
-            {formatted}
+          <PrimaryText
+            marginBottom="6px"
+            isCenter
+            isSemiBold
+            size_20
+            color={appColors.greyDark}
+          >
+            {new Date().getFullYear()}
           </PrimaryText>
 
           <DividerWithImage imageSrc={appSvgs[toTitle(sign)]} />
