@@ -2,13 +2,12 @@
 
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-// Keep API key configurable (env recommended later)
-export const VEDIC_API_KEY = "e19fcd25-34b1-52eb-9c7b-4270f71cbd87";
+const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 export const vedicApi = createApi({
   reducerPath: "vedicApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://njsapi-shubhtalk.epicon.in/api/astro/v3-json/",
+    baseUrl: `${BASE_URL}/api/astro/v3-json/`,
   }),
   endpoints: () => ({}),
 });

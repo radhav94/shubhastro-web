@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 
-const BACKEND = "https://njsapi-shubhtalk.epicon.in/"; // change to production URL
+const BACKEND = import.meta.env.VITE_APP_API_BASE_URL; // change to production URL
 
 export const useAgoraToken = () => {
   const [loading, setLoading] = useState(false);
