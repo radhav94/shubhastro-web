@@ -18,8 +18,16 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         };
       },
     }),
+
+    // GET ASTROLOGER BY ID
+    getAstrologerById: builder.query({
+      query: ({id}) => ({
+        url: `astrologers/astrologer?astrologerId=${id}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
 // HOOKS
-export const { useGetAstrologersQuery } = astrologerApi;
+export const { useGetAstrologersQuery, useGetAstrologerByIdQuery } = astrologerApi;

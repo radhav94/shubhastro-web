@@ -67,3 +67,6 @@ export { default as  PricingPolicy} from "./public/static-pages/PricingPolicy";
 export { default as  PrivacyPolicy} from "./public/static-pages/PrivacyPolicy";
 export { default as  RefundPolicy} from "./public/static-pages/RefundPolicy";
 export { default as  TermsConditions} from "./public/static-pages/TermsConditions";
+
+//Astrologer
+export { default as AstrologerProfile} from "./private/astrologerProfile/AstrologerProfile"

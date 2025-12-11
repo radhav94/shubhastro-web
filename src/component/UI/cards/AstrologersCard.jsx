@@ -6,6 +6,7 @@ import { AppIcons, AppImages } from "../../../utils/appImages";
 import Divider from "../../Divider";
 import { MdOutlineCurrencyRupee } from "react-icons/md";
 import { GetString } from "../../../utils/helper/string.utils";
+import { Link } from "react-router-dom";
 
 // AstrologerCard.jsx
 const AstrologerCard = ({ data, onFollow, onChat, onProfile, onAudioCall,onVideoCall }) => {
@@ -32,10 +33,12 @@ const AstrologerCard = ({ data, onFollow, onChat, onProfile, onAudioCall,onVideo
         </div>
 
         <div className={styles.info}>
-          <div className={styles.infoHeader}>
+          <div className={styles.infoHeader} >
+            <Link to={`/astrologer/${data?._id}`} >
             <PrimaryText size_14 isExtraBold color={appColors.tri}>
               {data?.firstName} {data?.lastName}
             </PrimaryText>
+            </Link>
           </div>
 
           {data?.languagePreference?.length > 0 && (
