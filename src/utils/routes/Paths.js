@@ -47,6 +47,7 @@ import {
   TermsConditions,
   Notification,
   WalletTranscations,
+  AstrologerProfile
 } from "../../screens";
 import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
 import CompatibilityLanding from "../../screens/private/compatibility/CompatibilityLanding";
@@ -371,6 +372,11 @@ export const PATH = {
     CHAT_WITH_ASTROLOGER: {
       path: "/talk-to-astrologers/:id",
       element: ChatWindow,
+    },
+    PROFILE_ASTROLOGER: {
+      path: "/astrologer/:id",
+      element: AstrologerProfile,
+      header: false
     },
 
     VIDEO_CALL: {
