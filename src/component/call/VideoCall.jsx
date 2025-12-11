@@ -69,32 +69,6 @@ const Basics = ({ client }) => {
   ]);
 
   // ✅ END CALL
-  const endCall = async () => {
-    try {
-      voiceSocket.emit("call_end", {
-        roomId: roomID,
-        endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
-      });
-
-      if (localMicrophoneTrack) {
-        localMicrophoneTrack.stop();
-        localMicrophoneTrack.close();
-      }
-
-      if (localCameraTrack) {
-        localCameraTrack.stop();
-        localCameraTrack.close();
-      }
-
-      await client.leave();
-      voiceSocket.disconnect();
-
-      setCalling(false);
-      navigate(-1);
-    } catch (err) {
-      console.error("End call error:", err);
-    }
-  };
 
 
   // 🔥 Listen for remote end-call event
@@ -119,6 +93,35 @@ useEffect(() => {
     client.off("user-left", handleRemoteLeave);
   };
 }, [client, localMicrophoneTrack, localCameraTrack, navigate]);
+
+
+const endCall = async () => {
+  try {
+    const endedBy = isUserSide ? "CUSTOMER" : "ASTROLOGER";
+
+    // Notify backend first
+    voiceSocket.emit("call_end", { roomId: roomID, endedBy });
+
+    // Stop tracks
+    localMicrophoneTrack?.stop();
+    localMicrophoneTrack?.close();
+    localCameraTrack?.stop();
+    localCameraTrack?.close();
+
+    // Leave Agora FIRST
+    await client.leave();
+
+    // Delay socket disconnect so backend can broadcast call_ended
+    setTimeout(() => {
+      if (voiceSocket.connected) voiceSocket.disconnect();
+    }, 500);
+
+    navigate(-1);
+  } catch (err) {
+    console.error("Astrologer end call error:", err);
+  }
+};
+
 
 
 
