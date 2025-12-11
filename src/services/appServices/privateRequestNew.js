@@ -4,6 +4,7 @@ import { Toast } from "../../component";
 import { getToken } from "../../utils/utlis";
 
 let unAuthorizedCount = 0;
+const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 // ERROR HANDLER
 const handleApiError = (error) => {
@@ -74,7 +75,7 @@ export const privateRequestNew = createApi({
 
   baseQuery: async (args, api, extraOptions) => {
     const rawBaseQuery = fetchBaseQuery({
-      baseUrl: "https://njsapi-shubhtalk.epicon.in/api/",
+      baseUrl: `${BASE_URL}/api/`,
       prepareHeaders: (headers) => {
         const role = localStorage.getItem("shubhtalk_role");
         const token =

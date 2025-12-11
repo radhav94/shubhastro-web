@@ -1,11 +1,12 @@
 // socketService.js
 import { io } from "socket.io-client";
 
+const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
 class SocketService {
   socket = null;
 
   connect({ onConnected, onDisconnected, onError }) {
-    this.socket = io("https://njsapi-shubhtalk.epicon.in/", {
+    this.socket = io(BASE_URL, {
       transports: ["websocket"],
       autoConnect: true,
       reconnection: true,
