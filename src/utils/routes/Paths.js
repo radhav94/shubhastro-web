@@ -183,6 +183,10 @@ export const PATH = {
         path: "/horoscopes/tomorrow-horoscope/:sign",
         element: Tomorrow,
       },
+      TODAY: {
+        path: "/horoscopes/todays-horoscope/:sign",
+        element: Daily,
+      },
     },
     HOROSCOPEDETAILS: {
       path: "/horoscopes/daily/:name-free-horoscope",

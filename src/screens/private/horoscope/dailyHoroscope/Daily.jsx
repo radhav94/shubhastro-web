@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import styles from "./Daily.module.scss";
 import { PrimaryText } from "../../../../component";
 import { appColors } from "../../../../utils/theme";
@@ -7,10 +7,16 @@ import DividerWithImage from "../../../../component/UI/DividerWithImage";
 import { useFetchDailyQuery } from "../../../../redux/api/horoscope/zodiacApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import Sidebar from "../sidebar/Sidebar";
-import { signToNumber, Today, zodiacDateRanges } from "../utils";
+import { signToNumber, zodiacDateRanges } from "../utils";
+import { formatted } from "../../../../utils/dateFormat/date";
 
 const Daily = () => {
   const { sign } = useParams();
+  const { pathname } = useLocation();
+  let horoscopeType = pathname.split("/")[2].split("-")[0];
+  horoscopeType =
+    horoscopeType.charAt(0).toUpperCase() + horoscopeType.slice(1);
+  console.log(useLocation(), "useLocation");
   const signNumber = signToNumber[sign.toLowerCase()];
 
   const { data, isLoading, isSuccess } = useFetchDailyQuery(signNumber);
@@ -26,11 +32,12 @@ const Daily = () => {
       {data && (
         <div>
           <PrimaryText isCenter isBold size_32>
-            {sign.charAt(0).toUpperCase() + sign.slice(1)} Daily Horoscope
+            {sign.charAt(0).toUpperCase() + sign.slice(1)} {horoscopeType}{" "}
+            Horoscope
           </PrimaryText>
 
           <PrimaryText isCenter isSemiBold size_18 color={appColors.greyDark}>
-            {Today}
+            {formatted}
           </PrimaryText>
 
           <DividerWithImage

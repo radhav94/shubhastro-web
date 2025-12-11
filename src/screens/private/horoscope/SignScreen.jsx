@@ -8,7 +8,7 @@ import styles from "./SignScreen.module.scss";
 import { Link, useLocation } from "react-router-dom";
 
 const SignScreen = () => {
-  const [description, horoDisc, onChat, onClickSign, data] = zodiac();
+  const [data] = zodiac();
   const { pathname } = useLocation();
   let horoscopeType = pathname.split("/")[2].split("-")[0];
   horoscopeType =

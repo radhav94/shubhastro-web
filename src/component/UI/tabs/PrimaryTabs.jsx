@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "./PrimaryTabs.module.scss";
 import PrimaryText from "../../PrimaryText";
+import ConnectCard from "../cards/connectCard/ConnectCard";
+import ServiceCards from "../../../screens/private/home/components/serviceCards/ServiceCards";
+import ZodiacCarousel from "../../../screens/private/horoscope/zodiacCarousel/ZodiacCarousel";
 
 const PrimaryTabs = ({ tabs = [] }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(
@@ -56,7 +59,12 @@ const PrimaryTabs = ({ tabs = [] }) => {
             {tabs[activeTabIndex].content}
           </motion.div>
         </AnimatePresence>
+        <div className="mt-4">
+          <ConnectCard />
+          <ServiceCards />
+        </div>
       </main>
+      <ZodiacCarousel />
     </div>
   );
 };

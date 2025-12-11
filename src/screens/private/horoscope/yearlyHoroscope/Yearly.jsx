@@ -7,7 +7,8 @@ import DividerWithImage from "../../../../component/UI/DividerWithImage";
 import { useFetchYearlyQuery } from "../../../../redux/api/horoscope/zodiacApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import Sidebar from "../sidebar/Sidebar";
-import { signToNumber, Today, zodiacDateRanges } from "../utils";
+import { signToNumber, zodiacDateRanges } from "../utils";
+import { formatted } from "../../../../utils/dateFormat/date";
 
 const Yearly = () => {
   const { sign } = useParams();
@@ -39,7 +40,7 @@ const Yearly = () => {
           </PrimaryText>
 
           <PrimaryText isCenter isSemiBold size_18 color={appColors.greyDark}>
-            {Today}
+            {formatted}
           </PrimaryText>
 
           <DividerWithImage imageSrc={appSvgs[toTitle(sign)]} />

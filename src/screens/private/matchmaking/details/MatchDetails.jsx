@@ -8,6 +8,9 @@ import { AppImages } from "../../../../utils/appImages";
 import KundliSummary from "../../../../component/UI/circular/KundliSummary";
 import DynamicTable from "../../../../component/UI/table/matching/DynamicTable";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
+import ServiceCards from "../../home/components/serviceCards/ServiceCards";
+import ZodiacCarousel from "../../horoscope/zodiacCarousel/ZodiacCarousel";
 
 const MatchDetails = () => {
   const location = useLocation();
@@ -113,46 +116,51 @@ const MatchDetails = () => {
   ];
 
   return (
-    <div className={styles.matchContainer}>
-      <PrimaryText size_32 isCenter>
-        Kundli Matching Report
-      </PrimaryText>
-      {/* Names Section */}
-      <div className={styles.namesRow}>
-        <p className={styles.nameBtn}>{boyData?.name}</p>
-        <img
-          src={AppImages.Ring}
-          alt="rings-heart"
-          className={styles.iconImage}
-        />
-        <p className={styles.nameBtn}>{girlData?.name}</p>
-      </div>
+    <>
+      <div className={styles.matchContainer}>
+        <PrimaryText size_32 isCenter>
+          Kundli Matching Report
+        </PrimaryText>
+        {/* Names Section */}
+        <div className={styles.namesRow}>
+          <p className={styles.nameBtn}>{boyData?.name}</p>
+          <img
+            src={AppImages.Ring}
+            alt="rings-heart"
+            className={styles.iconImage}
+          />
+          <p className={styles.nameBtn}>{girlData?.name}</p>
+        </div>
 
-      {/* Cards */}
-      <div className={styles.cardsRow}>
-        {RenderCard(<FaMale />, "Basic Details", "Male", "#1E90FF", boyCard)}
-        {RenderCard(
-          <FaFemale />,
-          "Basic Details",
-          "Female",
-          "#E91E63",
-          girlCard
-        )}
-      </div>
-      <KundliSummary score={matchingDetails?.score} total={36} />
+        {/* Cards */}
+        <div className={styles.cardsRow}>
+          {RenderCard(<FaMale />, "Basic Details", "Male", "#1E90FF", boyCard)}
+          {RenderCard(
+            <FaFemale />,
+            "Basic Details",
+            "Female",
+            "#E91E63",
+            girlCard
+          )}
+        </div>
+        <KundliSummary score={matchingDetails?.score} total={36} />
 
-      <div className={styles.tableWrapper}>
-        <DynamicTable
-          title="Ashtakoot Compatibility"
-          headers={headers}
-          data={response}
-        />
-      </div>
-      <p className={styles.response}>{matchingDetails?.bot_response}</p>
+        <div className={styles.tableWrapper}>
+          <DynamicTable
+            title="Ashtakoot Compatibility"
+            headers={headers}
+            data={response}
+          />
+        </div>
+        <p className={styles.response}>{matchingDetails?.bot_response}</p>
+        <ConnectCard />
+        <ServiceCards />
 
-      {/* API loading or output (optional future addition) */}
+        {/* API loading or output (optional future addition) */}
+      </div>
+      <ZodiacCarousel />
       <PrimaryLoader isLoading={isLoading} />
-    </div>
+    </>
   );
 };
 

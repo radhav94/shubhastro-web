@@ -72,9 +72,10 @@ const TopBar = () => {
     {
       title: "Horoscope",
       children: [
+        { title: "Today's Horoscope", path: "/horoscopes/todays-horoscope" },
         { title: "Daily Horoscope", path: "/horoscopes/daily-horoscope" },
-        { title: "Weekly Horoscope", path: "/horoscopes/weekly-horoscope" },
         { title: "Yearly Horoscope", path: "/horoscopes/yearly-horoscope" },
+        { title: "Weekly Horoscope", path: "/horoscopes/weekly-horoscope" },
       ],
     },
     { title: "Compatibility", path: PATH.privateRoutes.COMPATIBILITY.path },
@@ -231,7 +232,7 @@ const TopBar = () => {
     // { title: "Shubhtalk Store", path: "/store" },
     { title: "Blogs", path: "/blog" },
     { title: "Recharge", path: "/callingpack" },
-  ]
+  ];
 
   useEffect(() => {
     const updateWalletFromStorage = () => {

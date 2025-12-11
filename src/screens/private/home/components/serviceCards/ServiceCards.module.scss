@@ -1,40 +1,82 @@
-/* ==========================================================
-   PREMIUM LIGHT SERVICE CARDS (Soft Pastel Theme)
-=========================================================== */
+.wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-$light-bg: #ffffff;
-$light-border: #f1f1f1;
-$text-primary: #3b3b3b;
-$gold-accent: #ffb300;
-$shadow-soft: 0 6px 20px rgba(0, 0, 0, 0.08);
-$hover-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+.carouselWrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
 
-.cardsGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-  padding: 1rem 0;
+.arrowBtn {
+  background: #fff;
+  border: 1px solid #ddd;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: 0.2s ease;
 
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+  &:hover {
+    background: #f6f6f6;
+  }
+
+  &.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+/* ----------- FIXED 3 CARDS (NO CUTTING) ----------- */
+.horizontalScroll {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  margin: 10px;
+
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
 .card {
-  cursor: pointer;
-  background: $light-bg;
+  flex: 0 0 calc((100% - 36px) / 3); /* Perfect 3 cards, no cut */
+  scroll-snap-align: start;
+  background: #fff;
   border-radius: 1.2rem;
   padding: 2rem 1.5rem;
-  border: 1px solid $light-border;
-  box-shadow: $shadow-soft;
+  border: 1px solid #f1f1f1;
+  cursor: pointer;
   transition: 0.3s ease;
   text-align: center;
 
   &:hover {
     transform: translateY(-6px);
-    box-shadow: $hover-shadow;
-    border-color: #ffe29a;
+    // box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* Responsive: 2 cards on tablets */
+@media (max-width: 768px) {
+  .card {
+    flex: 0 0 calc((100% - 15px) / 2);
+  }
+}
+
+/* Responsive: 1 card on small screens */
+@media (max-width: 480px) {
+  .card {
+    flex: 0 0 90%;
   }
 }
 
@@ -48,62 +90,19 @@ $hover-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
 .icon {
   width: 64px;
   height: 64px;
-  border-radius: 1rem;
-  padding: 10px;
-  background: linear-gradient(135deg, #fff7df, #ffe8b8);
-  border: 1px solid #ffe6a2;
-  box-shadow: 0 3px 10px rgba(255, 193, 70, 0.25);
-  object-fit: contain;
-
-  @media (max-width: 640px) {
-    width: 52px;
-    height: 52px;
-  }
+  background: #fff7df;
+  border-radius: 50%;
+  padding: 12px;
 }
 
 .title {
   font-size: 1.1rem;
-  font-weight: 800; // or 900 for extra bold
-  color: $text-primary;
-
-  @media (max-width: 640px) {
-    font-size: 1rem;
-    font-weight: 800; // ensure consistent weight on mobile too
-  }
-}
-
-.container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Center entire section */
-  gap: 25px;
-  margin-top: 20px;
-}
-
-.sectionTitle {
-  font-size: 100px;
   font-weight: 800;
-  text-align: center;
-  background: linear-gradient(90deg, #7b3ff3, #ff7b4f);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 20px;
 }
-
-
 
 .description {
   font-size: 0.85rem;
-  font-weight: 500;
-  color: darken($text-primary, 15%);
   opacity: 0.75;
   line-height: 1.3;
-  text-align: center;
-  margin-top: -0.6rem;
-
-  @media (max-width: 640px) {
-    font-size: 0.8rem;
-  }
+  color: #6e6e6e;
 }
-

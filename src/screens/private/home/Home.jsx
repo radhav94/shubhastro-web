@@ -42,10 +42,9 @@ const Home = () => {
           <HeroSection data={homeList} />
         </section>
 
-         <section className={styles.section}>
-          <ServiceCards data={homeList} />
+        <section className={styles.section}>
+          <ServiceCards />
         </section>
-        
 
         <section className={styles.sectionStack}>
           <div className={styles.sectionBlock}>
@@ -58,9 +57,9 @@ const Home = () => {
             />
           </div>
 
-          <div className={styles.sectionBlock}>
-            <Blogs data={homeList} />
-          </div>
+          {/* <div className={styles.sectionBlock}> */}
+          <Blogs data={homeList} />
+          {/* </div> */}
 
           <div>
             <WhyAstro />
