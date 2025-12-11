@@ -13,7 +13,7 @@ const GiftSection = ({astrologerId }) => {
   const [selected, setSelected] = useState(null);
   const [disableSend, setDisableSend] = useState(false);
   const gifts = data?.data || [];
-  const walletBalance = 154;
+  const walletBalance = JSON.parse(localStorage.getItem("wallet"))?.amount || 0;
 
   const handleSend = async() => {
     if (!selected || !astrologerId) return;

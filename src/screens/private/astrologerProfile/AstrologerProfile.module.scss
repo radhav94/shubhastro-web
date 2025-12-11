@@ -62,33 +62,41 @@
 }
 
 .actionRow {
-  margin-top: 15px;
+  margin-top: 20px;
   display: flex;
-  gap: 20px;
+  gap: 18px;
 }
 
+/* Common style for all three buttons */
 .chatBtn,
-.callBtn {
-  padding: 14px 26px;     /* Bigger height + width */
-  border: none;
-  cursor: pointer;
-  border-radius: 10px;    /* Slightly bigger radius */
+.callBtn,
+.videoCallBtn {
+  padding: 14px 34px;
+  border-radius: 50px;            /* Rounded Pill Shape */
+  background: #ffffff;            /* White Background */
+  border: 1.5px solid #0ba360;    /* Green Border */
+  color: #0ba360;                 /* Green Text */
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 17px;        /* Bigger text */
-  font-weight: 500;       /* Slightly bolder */
+  gap: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: 0.2s ease-in-out;
 }
 
-
-.chatBtn {
-  background: #00a884;
-  color: white;
+.chatBtn svg,
+.callBtn svg,
+.videoCallBtn svg {
+  color: #0ba360;                 /* Icon Color */
+  font-size: 18px;
 }
 
-.callBtn {
-  background: #0088ff;
-  color: white;
+.chatBtn:hover,
+.callBtn:hover,
+.videoCallBtn:hover {
+  background: #e6f7ef;            /* Light green tint */
+  border-color: #0a9457;
 }
 
 /* Gallery */
