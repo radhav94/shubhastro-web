@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import TransactionsTable from './TransactionsTable'
 import { useGetTransactionsQuery } from '../../../services/appServices/transactionService';
 import { Link } from 'react-router-dom';
+import { useWalletBalance } from './useWalletBalance';
+import { FaSync } from 'react-icons/fa';
 
 const PAYMENT = "payment";
 const WALLET = "wallet";
@@ -10,6 +12,7 @@ const WalletTranscations = () => {
   const [transactionData, setTransactionData] = useState([]);
   
   const {data, isFetching} = useGetTransactionsQuery()
+    const {balance, refreshWallet, isFetching: isFetchingWallet} = useWalletBalance();
   
   useEffect(() => {
       if(activeTab === PAYMENT) {
@@ -42,7 +45,17 @@ const WalletTranscations = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="text-green-600 font-medium">Available balance: <span className="font-bold">₹ 159</span></div>
+          <div className="text-green-600 font-medium">Available balance: <span className="font-bold">₹ {balance}</span></div>
+            {/* Refresh Button */}
+            <button
+              onClick={refreshWallet}
+              className="flex items-center justify-center p-2 rounded-full hover:text-blue-400 transition-all duration-200 transform hover:scale-110"
+            >
+              <FaSync
+                className={`w-5 h-5 ${isFetchingWallet ? 'animate-spin' : ''}`} 
+              />
+            </button>
+
           <Link to="/callingpack"><button className="border border-green-500 text-green-600 px-3 py-1 rounded-md hover:bg-green-500 hover:text-white transition-colors duration-300">Recharge</button></Link>
           <button className="ml-4 border border-red-300 text-red-600 px-3 py-1 rounded-md hover:bg-red-600 hover:text-white transition-all duration-300">Delete All</button>
         </div>

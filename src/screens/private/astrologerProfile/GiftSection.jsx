@@ -5,6 +5,7 @@ import ganpati from "./ganpati.png";
 import { useGetAllGiftsQuery, useSendGiftMutation } from "../../../redux/api/gift/giftApi";
 import { useNavigate } from "react-router-dom";
 import toast from "../../../component/toast";
+import { useWalletBalance } from "../wallet/useWalletBalance";
 
 const GiftSection = ({astrologerId }) => {
   const { data, isLoading } = useGetAllGiftsQuery();
@@ -13,7 +14,7 @@ const GiftSection = ({astrologerId }) => {
   const [selected, setSelected] = useState(null);
   const [disableSend, setDisableSend] = useState(false);
   const gifts = data?.data || [];
-  const walletBalance = JSON.parse(localStorage.getItem("wallet"))?.amount || 0;
+  const {balance, refreshWallet} = useWalletBalance();
 
   const handleSend = async() => {
     if (!selected || !astrologerId) return;
@@ -21,6 +22,7 @@ const GiftSection = ({astrologerId }) => {
     try {
       await sendGift({giftId: selected?.ID, astrologerId}).unwrap();
       setSelected(null);
+      refreshWallet();
       toast.success("Gift sent successfully")
     } catch (error) {
       console.error("Error sending gift:", error);
@@ -30,7 +32,7 @@ const GiftSection = ({astrologerId }) => {
   const handleRecharge = () => navigate("/callingpack");
 
   useEffect(() => {
-    if (selected && selected?.price > walletBalance) {
+    if (selected && selected?.price > balance) {
       setDisableSend(true);
     } else setDisableSend(false);
   }, [selected]);
@@ -44,7 +46,7 @@ const GiftSection = ({astrologerId }) => {
           <IoGiftOutline size={18} />
           <h3>Send Gift to Harjeet</h3>
         </div>
-        <div className={styles.priceTag}> ₹ {walletBalance}</div>
+        <div className={styles.priceTag}> ₹ {balance}</div>
       </div>
 
       <div className={styles.giftGrid}>

@@ -21,8 +21,7 @@ export default function TransactionsTable({ data = [] }) {
       <div className="text-center py-12 bg-white rounded shadow-sm">
         <div className="text-xl text-gray-400 mb-2">No sufficient data available!</div>
         <div className="text-gray-500 text-sm">
-          <div className="mt-4 border-t pt-4">Available balance: 0</div>
-          <div className="mt-2">Recharge</div>
+          
         </div>
       </div>
     );

@@ -18,6 +18,7 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { PATH } from "../../../utils/routes/Paths";
 import { getToken } from "../../../utils/token";
 import { voiceSocket } from "../../../services/voiceSocketServices";
+import { useWalletBalance } from "../wallet/useWalletBalance";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -70,9 +71,7 @@ const TalkToAstrologer = () => {
 
   const data = astrodata?.data || [];
   const token = getToken();
-  const storedWallet = JSON.parse(localStorage.getItem("wallet")) || {
-    amount: 0,
-  };
+  const {balance} = useWalletBalance()
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -195,8 +194,19 @@ const TalkToAstrologer = () => {
   };
 
   const handleAudioCall = (astro) => {
+    if(!token) {
+      navigate("/login", { state: { from: location.pathname } })
+      return;
+    }
     if (!astro) return Toast.error("Astrologer missing");
     if (!userIdLocal) return Toast.error("User ID missing");
+
+    //Check if user has sufficient balance
+    if(balance < (astro?.price?.amount || 0)) {
+      setSelectedAstrologer(astro);
+      setOpenModal((prev) => ({ ...prev, recharge: true }))
+      return;
+    }
 
     activeCallAstroRef.current = astro; // ✅ store in ref
     setActiveCallAstro(astro);
@@ -212,8 +222,19 @@ const TalkToAstrologer = () => {
   };
 
   const handleVideoCall = (astro) => {
+    if(!token) { 
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    };
     if (!astro) return Toast.error("Astrologer missing");
     if (!userIdLocal) return Toast.error("User ID missing");
+
+    //Check if user has sufficient balance
+    if(balance < (astro?.price?.amount || 0)) {
+      setSelectedAstrologer(astro);
+      setOpenModal((prev) => ({ ...prev, recharge: true }))
+      return;
+    }
 
     activeCallAstroRef.current = astro; // ✅ store in ref
     setActiveCallAstro(astro);
@@ -372,18 +393,48 @@ const TalkToAstrologer = () => {
         handleSubmit={handleSubmit}
       />
 
-      <RechargeAlertModel
+      {/* <RechargeAlertModel
         onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
         isOpen={openModal.recharge}
         handleSubmit={onRechargeNow}
         astrologer={selectedAstrologer}
-      />
+      /> */}
 
       <KundliSelectModal
         isOpen={kundliModalOpen}
         onClose={() => setKundliModalOpen(false)}
         onSelect={handleChatAfterKundliSelect}
       />
+
+      {openModal.recharge && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContainer}>
+            <PrimaryText isCenter className=" pt-4">
+              Minimum balance of 5 minutes (₹{" "}
+              {(selectedAstrologer?.price?.amount || 1) * 5}) is required to
+              start chat with
+              {` ${selectedAstrologer?.firstName || "Astrologer"}`}.
+            </PrimaryText>
+
+            <div className={styles.modalButtons}>
+              <button
+                className={styles.rejectBtn}
+                onClick={() =>
+                  setOpenModal((prev) => ({ ...prev, recharge: false }))
+                }
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.acceptBtn}
+                onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
+              >
+                Recharge
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
