@@ -12,6 +12,8 @@ import { PrimaryText, Toast } from "../../../../../component";
 import useChat from "./useChatWindow";
 import { useGetChatHistoryQuery } from "../../../../../redux/api/chatApi";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
+import InactivityModal from "../../../../../component/UI/modal/inActivity/InactivityModal";
+import { useInactivityTimer } from "../../../../../utils/hooks/useInactivityTimer";
 
 const ChatWindow = () => {
   const navigate = useNavigate();
@@ -32,6 +34,28 @@ const ChatWindow = () => {
   const [callRoomId, setCallRoomId] = useState(null);
 
   const [waitingPopup, setWaitingPopup] = useState(false);
+
+  const [showInactivityModal, setShowInactivityModal] = useState(false);
+  const { isInactive, resetTimer } = useInactivityTimer(
+    3000,
+    showInactivityModal
+  );
+
+  useEffect(() => {
+    if (isInactive) {
+      setShowInactivityModal(true); // Show modal
+    }
+  }, [isInactive]);
+
+  const handleDisconnect = () => {
+    setShowInactivityModal(false);
+    navigate(-1); // go back
+  };
+
+  const handleContinue = () => {
+    setShowInactivityModal(false);
+    resetTimer();
+  };
 
   const { data } = useGetChatHistoryQuery({ roomId });
   const messageOff = data?.data?.[0]?.chatHistory || [];
@@ -148,14 +172,13 @@ const ChatWindow = () => {
   };
 
   const handleCancelCall = () => {
-  if (!callRoomId) return;
+    if (!callRoomId) return;
 
-  voiceSocket.emit("cancel_call", { roomId: callRoomId });
+    voiceSocket.emit("cancel_call", { roomId: callRoomId });
 
-  setWaitingPopup(false);
-  setCallRoomId(null); // ✅ REQUIRED
-};
-
+    setWaitingPopup(false);
+    setCallRoomId(null); // ✅ REQUIRED
+  };
 
   return (
     <div className={styles.chatWindow}>
@@ -278,6 +301,11 @@ const ChatWindow = () => {
           <IoSend size={20} />
         </button>
       </div>
+      <InactivityModal
+        isOpen={isInactive}
+        onDisconnect={handleDisconnect}
+        onContinue={handleContinue}
+      />
     </div>
   );
 };

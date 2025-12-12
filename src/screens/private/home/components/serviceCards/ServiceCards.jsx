@@ -19,6 +19,8 @@ const iconMap = {
 const ServiceCards = () => {
   // ⛔ HOOK MUST RUN ALWAYS (Fixes your error)
   const { data, isLoading } = useGetHomeDetailsQuery();
+  const [disableLeft, setDisableLeft] = useState(true);
+  const [disableRight, setDisableRight] = useState(false);
 
   const scrollRef = useRef(null);
   const navigate = useNavigate();
@@ -38,6 +40,10 @@ const ServiceCards = () => {
   const updateButtons = () => {
     const container = scrollRef.current;
     if (!container) return;
+    setDisableLeft(container.scrollLeft <= 5);
+    setDisableRight(
+      container.scrollLeft + container.offsetWidth >= container.scrollWidth - 5
+    );
   };
 
   useEffect(() => {
@@ -72,7 +78,8 @@ const ServiceCards = () => {
 
       <div className={styles.carouselWrapper}>
         <button
-          className={styles.arrowBtn}
+          className={`${styles.arrowBtn} ${disableLeft ? styles.disabled : ""}`}
+          disabled={disableLeft}
           onClick={() => scrollByOneCard("left")}
         >
           <IoArrowBackOutline size={22} />
@@ -110,7 +117,10 @@ const ServiceCards = () => {
         </div>
 
         <button
-          className={styles.arrowBtn}
+          className={`${styles.arrowBtn} ${
+            disableRight ? styles.disabled : ""
+          }`}
+          disabled={disableRight}
           onClick={() => scrollByOneCard("right")}
         >
           <IoArrowForwardOutline size={22} />

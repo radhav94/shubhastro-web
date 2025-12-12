@@ -28,7 +28,7 @@ const Astrologers = ({ onClickView, onProfile }) => {
   });
 
   const [selectedAstro, setSelectedAstro] = useState(null);
-  const [waitingPopup, setWaitingPopup] = useState(false); // ⭐ waiting state added
+  const [waitingPopup, setWaitingPopup] = useState(false); //  waiting state added
 
   const [createChatRoom] = useCreateChatRoomMutation();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
@@ -38,7 +38,7 @@ const Astrologers = ({ onClickView, onProfile }) => {
     amount: 0,
   };
 
-  // ⭐ track which astrologer user is calling
+  //  track which astrologer user is calling
   const [activeCallAstro, setActiveCallAstro] = useState(null);
 
   // Step 1: On Chat => open Kundli Modal
@@ -89,14 +89,14 @@ const Astrologers = ({ onClickView, onProfile }) => {
     navigate(PATH.privateRoutes.RECHARGE.path);
   }, [navigate]);
 
-  // ⭐ AUDIO CALL – same pattern as TalkToAstrologer / ChatWindow
+  //  AUDIO CALL – same pattern as TalkToAstrologer / ChatWindow
   const handleAudioCall = (astro) => {
     if (!astro) return;
     if (!token) return navigate("/login");
     if (!userIdLocal) return;
 
     setActiveCallAstro(astro);
-    setWaitingPopup(true); // ⭐ Show popup
+    setWaitingPopup(true); //  Show popup
 
     voiceSocket.emit("create_call_room", {
       userId: userIdLocal,
@@ -118,7 +118,7 @@ const Astrologers = ({ onClickView, onProfile }) => {
     };
 
     const handleCallAccepted = ({ roomId }) => {
-      setWaitingPopup(false); // ⭐ Hide popup
+      setWaitingPopup(false); //  Hide popup
       const callerName = activeCallAstro?.firstName || "Astrologer";
 
       navigate(`/talk-to-astrologers/voice-call/${roomId}`, {
@@ -185,7 +185,7 @@ const Astrologers = ({ onClickView, onProfile }) => {
               data={astrologer}
               onChat={() => openKundliPopup(astrologer)}
               onProfile={() => onProfile(astrologer)}
-              onAudioCall={() => handleAudioCall(astrologer)} // ⭐ updated
+              onAudioCall={() => handleAudioCall(astrologer)} //  updated
             />
           </div>
         ))}

@@ -93,7 +93,7 @@ export default function useChat({
     });
   };
 
-  // ⭐ typing emit
+  //  typing emit
   const sendTyping = () => {
     socketService.sendTyping({ roomId, sender: userId });
   };
