@@ -7,8 +7,10 @@ import { getToken } from "../../../utils/token";
 import { FaClock, FaMoon, FaUserClock, FaBookReader } from "react-icons/fa";
 import { GiStonePath, GiMeditation } from "react-icons/gi";
 import { MdOutlineTipsAndUpdates } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 const Sadesati = () => {
+  const navigate = useNavigate();
   const formData = useSelector((state) => state?.form?.kundliPayload);
 
   const queryArgs = {

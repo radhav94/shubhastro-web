@@ -85,15 +85,15 @@ const Sidebar = () => {
                 Yearly Horoscope
               </li>
             </Link>
-            {/* <Link to={`/horoscopes/tomorrow-horoscope/${paramSign}`}>
+            <Link to={`/horoscopes/todays-horoscope/${paramSign}`}>
               <li
                 className={`${
-                  horoscopeType.includes("tomorrow") ? styles.active : ""
+                  horoscopeType.includes("todays") ? styles.active : ""
                 }`}
               >
-                Tomorrow's Horoscope
+                Today's Horoscope
               </li>
-            </Link> */}
+            </Link>
           </ul>
         </div>
       </div>

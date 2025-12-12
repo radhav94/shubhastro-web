@@ -7,7 +7,8 @@ import DividerWithImage from "../../../../component/UI/DividerWithImage";
 import { useFetchWeeklyQuery } from "../../../../redux/api/horoscope/zodiacApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import Sidebar from "../sidebar/Sidebar";
-import { signToNumber, Today, zodiacDateRanges } from "../utils";
+import { signToNumber, zodiacDateRanges } from "../utils";
+import { formatted } from "../../../../utils/dateFormat/date";
 
 const Weekly = () => {
   const { sign } = useParams();
@@ -29,8 +30,14 @@ const Weekly = () => {
             {sign.charAt(0).toUpperCase() + sign.slice(1)} Weekly Horoscope
           </PrimaryText>
 
-          <PrimaryText isCenter isSemiBold size_18 color={appColors.greyDark}>
-            {Today}
+          <PrimaryText
+            marginBottom="6px"
+            isCenter
+            isSemiBold
+            size_20
+            color={appColors.greyDark}
+          >
+            Sunday - Saturday
           </PrimaryText>
 
           <DividerWithImage

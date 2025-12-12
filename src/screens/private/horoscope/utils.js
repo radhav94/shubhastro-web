@@ -29,5 +29,3 @@ export const signToNumber = {
   aquarius: 11,
   pisces: 12,
 };
-
-export const Today = new Date().toLocaleDateString("en-GB"); // DD/MM/YYYY

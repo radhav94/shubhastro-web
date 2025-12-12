@@ -26,13 +26,13 @@ export const zodiac = () => {
       "https://images.astroyogi.com/strapicmsprod/assets/horoscopes_e87a82bf53.webp",
     header: "Horoscope",
     description:
-      "Get free horoscope predictions for all zodiac signs. Explore horoscope dates, check your daily horoscope, and discover what your zodiac sign means. Uncover your destiny today!",
+      "Get free horoscope predictions for all zodiac signs. Explore horoscope ranges, check your daily horoscope, and discover what your zodiac sign means. Uncover your destiny today!",
 
     signs: [
       {
         id: 1,
         name: "Aries",
-        date: "21/3-19/4",
+        range: "MAR 21 - APR 19",
         img: Aries,
         bannerImg:
           "https://images.astroyogi.com/strapicmsprod/assets/Traits_ee14f625a9.webp",
@@ -43,7 +43,7 @@ export const zodiac = () => {
       {
         id: 2,
         name: "Taurus",
-        date: "20/4-20/5",
+        range: "Apr 20 - May 20",
         img: Taurus,
         bannerImg:
           "https://images.astroyogi.com/strapicmsprod/assets/Seasons_b0619d2142.webp",
@@ -54,7 +54,7 @@ export const zodiac = () => {
       {
         id: 3,
         name: "Gemini",
-        date: "21/5-20/6",
+        range: "May 21 - Jun 20",
         img: Gemini,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/gemini-free-horoscope.aspx",
@@ -64,7 +64,7 @@ export const zodiac = () => {
       {
         id: 4,
         name: "Cancer",
-        date: "21/6-22/7",
+        range: "Jun 21 - Jul 22",
         img: Cancer,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/cancer-free-horoscope.aspx",
@@ -74,7 +74,7 @@ export const zodiac = () => {
       {
         id: 5,
         name: "Leo",
-        date: "23/7-22/8",
+        range: "Jul 23 - Aug 22",
         img: Leo,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/leo-free-horoscope.aspx",
@@ -84,7 +84,7 @@ export const zodiac = () => {
       {
         id: 6,
         name: "Virgo",
-        date: "23/8-22/9",
+        range: "Aug 23 - Sep 22",
         img: Virgo,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/virgo-free-horoscope.aspx",
@@ -94,7 +94,7 @@ export const zodiac = () => {
       {
         id: 7,
         name: "Libra",
-        date: "23/9-22/10",
+        range: "Sep 23 - Oct 22",
         img: Libra,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/libra-free-horoscope.aspx",
@@ -104,7 +104,7 @@ export const zodiac = () => {
       {
         id: 8,
         name: "Scorpio",
-        date: "23/10-21/11",
+        range: "Oct 23 - Nov 21",
         img: Scorpio,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/scorpio-free-horoscope.aspx",
@@ -114,7 +114,7 @@ export const zodiac = () => {
       {
         id: 9,
         name: "Sagittarius",
-        date: "22/11-21/12",
+        range: "Nov 22 - Dec 21",
         img: Sagittarius,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/sagittarius-free-horoscope.aspx",
@@ -124,7 +124,7 @@ export const zodiac = () => {
       {
         id: 10,
         name: "Capricorn",
-        date: "22/12-19/1",
+        range: "Dec 22 - Jan 19",
         img: Capricorn,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/capricorn-free-horoscope.aspx",
@@ -134,7 +134,7 @@ export const zodiac = () => {
       {
         id: 11,
         name: "Aquarius",
-        date: "20/1-18/2",
+        range: "Jan 20 - Feb 18",
         img: Aquarius,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/aquarius-free-horoscope.aspx",
@@ -144,7 +144,7 @@ export const zodiac = () => {
       {
         id: 12,
         name: "Pisces",
-        date: "19/2-20/3",
+        range: "Feb 19 - Mar 20",
         img: Pisces,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/pisces-free-horoscope.aspx",
@@ -170,5 +170,5 @@ export const zodiac = () => {
     });
   };
 
-  return [description, horoDisc, onChat, onClickSign, data];
+  return [data];
 };

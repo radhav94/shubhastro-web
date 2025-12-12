@@ -1,0 +1,52 @@
+.connectCard {
+  background: #f4dd2c; // yellow background (adjust if needed)
+  padding: 30px 20px;
+  border-radius: 8px;
+  text-align: center;
+  width: 100%;
+
+  .title {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    @media (max-width: 500px) {
+      flex-direction: column;
+    }
+  }
+
+  .btn {
+    background: #fff;
+    border: none;
+    outline: none;
+    padding: 16px 45px;
+    border-radius: 50px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #333;
+    font-weight: 500;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.15);
+    transition: 0.2s ease-in-out;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      transition: 0.2s ease-in-out all;
+    }
+
+    .icon {
+      font-size: 20px;
+      color: #e0c200; // yellow-ish icon color like screenshot
+    }
+  }
+}

@@ -1,0 +1,85 @@
+.mainCon {
+  background: #fff9c9;
+  padding-top: 10px;
+}
+.carouselWrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 20px 0;
+  // light yellow background like screenshot
+}
+
+.arrowBtn {
+  background: #fff;
+  border: 1px solid #ddd;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+
+  &.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.list {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 28px;
+  padding: 10px 0;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.card {
+  flex: 0 0 calc((100% - 100px) / 4); // exactly 4 cards visible
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.imgCircle {
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto 10px auto;
+  background: #ffeb3b;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+  &:hover {
+    box-shadow: 0 0 12px rgba(0, 0, 120, 0.6);
+    transition: 0.2s ease-in-out all;
+  }
+}
+
+.name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.range {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #555;
+}
