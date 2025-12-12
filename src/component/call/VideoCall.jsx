@@ -74,7 +74,7 @@ const Basics = ({ client }) => {
   // 🔥 Listen for remote end-call event
 useEffect(() => {
   const handleRemoteLeave = () => {
-    console.log("🚨 Remote video user left!");
+    console.log("Remote video user left!");
 
     localMicrophoneTrack?.stop();
     localMicrophoneTrack?.close();
@@ -94,6 +94,59 @@ useEffect(() => {
   };
 }, [client, localMicrophoneTrack, localCameraTrack, navigate]);
 
+// 🔥 Handle backend death or forced disconnect
+// useEffect(() => {
+//   const forceEndCall = () => {
+//     console.warn("⚠ Backend died or force-disconnect. Ending call…");
+
+//     // Stop remote tracks
+//     client.remoteUsers.forEach((u) => {
+//       u.videoTrack?.stop();
+//       u.audioTrack?.stop();
+//     });
+
+//     // Stop my local tracks
+//     localMicrophoneTrack?.stop();
+//     localMicrophoneTrack?.close();
+//     localCameraTrack?.stop();
+//     localCameraTrack?.close();
+
+//     // Leave Agora safely
+//     client.leave().finally(() => {
+//       navigate(-1);
+//     });
+//   };
+
+//   // Normal backend-triggered end
+//   const handleBackendEnded = () => {
+//     console.log("📩 call_ended from backend");
+//     forceEndCall();
+//   };
+
+//   // Backend crash / socket dead
+//   const handleDisconnect = () => {
+//     console.log("❌ Socket disconnected: backend might be down");
+//     forceEndCall();
+//   };
+
+//   const handleConnectError = (err) => {
+//     console.log("⚠ Socket connection error", err);
+//     forceEndCall();
+//   };
+
+//   voiceSocket.on("call_ended", handleBackendEnded);
+//   voiceSocket.on("disconnect", handleDisconnect);
+//   voiceSocket.on("connect_error", handleConnectError);
+//   voiceSocket.on("reconnect_failed", forceEndCall);
+
+//   return () => {
+//     voiceSocket.off("call_ended", handleBackendEnded);
+//     voiceSocket.off("disconnect", handleDisconnect);
+//     voiceSocket.off("connect_error", handleConnectError);
+//     voiceSocket.off("reconnect_failed", forceEndCall);
+//   };
+// }, [client, localMicrophoneTrack, localCameraTrack, navigate]);
+
 
 const endCall = async () => {
   try {
@@ -112,9 +165,9 @@ const endCall = async () => {
     await client.leave();
 
     // Delay socket disconnect so backend can broadcast call_ended
-    setTimeout(() => {
-      if (voiceSocket.connected) voiceSocket.disconnect();
-    }, 500);
+    // setTimeout(() => {
+    //   if (voiceSocket.connected) voiceSocket.disconnect();
+    // }, 500);
 
     navigate(-1);
   } catch (err) {

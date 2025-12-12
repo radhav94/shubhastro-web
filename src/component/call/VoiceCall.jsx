@@ -108,6 +108,33 @@ const CallingUI = ({ client }) => {
     };
   }, [client, localMicrophoneTrack, navigate]);
 
+
+  useEffect(() => {
+  const handleBackendCallEnded = () => {
+    console.log("📩 Received call_ended from backend");
+
+    if (localMicrophoneTrack) {
+      localMicrophoneTrack.stop();
+      localMicrophoneTrack.close();
+    }
+
+    client.leave().then(() => {
+      console.log("👋 Left Agora due to backend call_ended");
+      navigate(-1); // Auto close call screen
+    });
+
+    if (voiceSocket.connected) {
+      voiceSocket.disconnect();
+    }
+  };
+
+  voiceSocket.on("call_ended", handleBackendCallEnded);
+
+  return () => {
+    voiceSocket.off("call_ended", handleBackendCallEnded);
+  };
+}, [client, localMicrophoneTrack, navigate]);
+
   const formatTime = (sec) => {
     const m = String(Math.floor(sec / 60)).padStart(2, "0");
     const s = String(sec % 60).padStart(2, "0");
