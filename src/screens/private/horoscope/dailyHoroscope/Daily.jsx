@@ -36,7 +36,13 @@ const Daily = () => {
             Horoscope
           </PrimaryText>
 
-          <PrimaryText isCenter isSemiBold size_18 color={appColors.greyDark}>
+          <PrimaryText
+            isCenter
+            isSemiBold
+            size_20
+            marginBottom="6px"
+            color={appColors.greyDark}
+          >
             {formatted}
           </PrimaryText>
 

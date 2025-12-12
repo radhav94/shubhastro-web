@@ -1,14 +1,13 @@
 import React, { useRef, useState, useEffect } from "react";
 import styles from "./ZodiacCarousel.module.scss";
 import { IoArrowBackOutline, IoArrowForwardOutline } from "react-icons/io5";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { zodiac } from "../zodiac";
 import { PrimaryText } from "../../../../component";
 
 const ZodiacCarousel = () => {
   const [data] = zodiac();
   const scrollRef = useRef(null);
-  const { pathname } = useLocation();
   const signs = data.signs;
 
   const [disableLeft, setDisableLeft] = useState(true);
@@ -59,16 +58,12 @@ const ZodiacCarousel = () => {
         <div className={styles.list} ref={scrollRef}>
           {signs.map((sign) => (
             <div key={sign.id} className={styles.card}>
-              <div
+              <Link
                 to={`/horoscopes/todays-horoscope/${sign.name.toLowerCase()}`}
                 className={styles.imgCircle}
               >
-                <Link
-                  to={`/horoscopes/todays-horoscope/${sign.name.toLowerCase()}`}
-                >
-                  <img src={sign.img} alt={sign.name} />
-                </Link>
-              </div>
+                <img src={sign.img} alt={sign.name} />
+              </Link>
               <h3 className={styles.name}>{sign.name.toUpperCase()}</h3>
               <p className={styles.range}>{sign.range.toUpperCase()}</p>
             </div>
