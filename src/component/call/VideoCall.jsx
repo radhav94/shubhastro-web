@@ -28,9 +28,7 @@ export const VideoCalling = ({ callData }) => {
 };
 
 const Basics = ({ client, callData }) => {
-
-  console.log("callData-----",callData)
-  const { setActiveCall } = useCall();
+  const { activeCall,setActiveCall } = useCall();
 
   // ⭐ callData comes from global context
   const { roomId, agoraToken, isUserSide, callerName, callType } = callData;
@@ -227,16 +225,19 @@ const Basics = ({ client, callData }) => {
                   onClick={() => {
                     setIsMinimized(true);
 
-                    navigate(`/talk-to-astrologers/${callData.astrologerId}`, {
-                      state: {
-                        userId: callData.userId,
-                        astrologerId: callData.astrologerId,
-                        fullName: callData.callerName,
-                        roomId: callData.roomId,
-                        kundliId: callData.kundliId,
-                        isUserSide: true,
-                      },
-                    });
+                    navigate(
+                      `/talk-to-astrologers/${activeCall.astrologerId}`,
+                      {
+                        state: {
+                          roomId: activeCall.chatRoomId, // 👈 SAME CHAT
+                          userId: activeCall.userId,
+                          astrologerId: activeCall.astrologerId,
+                          kundliId: activeCall.kundliId,
+                          fullName: activeCall.callerName,
+                          isUserSide: true,
+                        },
+                      }
+                    );
                   }}
                 >
                   💬

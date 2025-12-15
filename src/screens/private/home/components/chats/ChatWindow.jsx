@@ -129,13 +129,26 @@ const ChatWindow = () => {
     const handleCallAccepted = ({ roomId, token, type }) => {
   
   // ⭐ NO NORMALIZATION — type same as backend
+  // setActiveCall({
+  //   roomId,
+  //   agoraToken: token,
+  //   callerName: fullName,
+  //   isUserSide: true,
+  //   callType: type,   // ⭐ stays "audio" or "video"
+  // });
+
   setActiveCall({
-    roomId,
-    agoraToken: token,
-    callerName: fullName,
-    isUserSide: true,
-    callType: type,   // ⭐ stays "audio" or "video"
-  });
+  roomId,                 // call room (Agora)
+  chatRoomId: state.roomId, // chat room
+  agoraToken: token,
+  callerName: fullName,
+  isUserSide: true,
+  callType: type,
+  userId,
+  astrologerId,
+  kundliId,
+});
+
 
   setWaitingPopup(false);
 };
