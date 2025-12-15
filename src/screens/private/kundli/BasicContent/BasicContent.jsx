@@ -90,38 +90,52 @@ const BasicContent = (props) => {
     December: 12,
   };
 
-  const basic = {
-    title: "Basic Details",
-    data: {
-      Name: userDetails.name || "--",
-      Date: formatDate(birthDetails.day, birthDetails.month, birthDetails.year),
-      Time: formatTime(birthDetails.hour, birthDetails.minute),
-      Place: userDetails.birthPlace || "--",
-      Latitude: birthDetails.latitude ?? "--",
-      Longitude: birthDetails.longitude ?? "--",
-      Timezone: birthDetails.timezone ? `GMT +${birthDetails.timezone}` : "--",
-      Sunrise: birthDetails.sunrise || "--",
-      Sunset: birthDetails.sunset || "--",
-      Ayanamsha: birthDetails.ayanamsha
-        ? birthDetails.ayanamsha.toFixed(5)
-        : "--",
-    },
-  };
+const basic = {
+  title: "Basic Details",
+  data: {
+    Name: userDetails?.name || "--",
 
-  const panchangTable = {
-    title: "Panchang Details",
-    data: {
-      Day: birthPanchang.day,
-      Tithi: birthPanchang.tithi,
-      Yog: birthPanchang.yog,
-      Nakshatra: birthPanchang.nakshatra,
-      Karan: birthPanchang.karan,
-      Sunrise: birthPanchang.sunrise,
-      Sunset: birthPanchang.sunset,
-      "Vedic Sunrise": birthPanchang.vedic_sunrise,
-      "Vedic Sunset": birthPanchang.vedic_sunrise,
-    },
-  };
+    Date: birthDetails?.birth_dasa_time || "--",
+    Time: birthDetails?.current_dasa_time?.trim() || "--",
+
+    Place: userDetails?.birthPlace || "--",
+
+    Rasi: birthDetails?.rasi || "--",
+    Nakshatra: birthDetails?.nakshatra || "--",
+    "Nakshatra Pada": birthDetails?.nakshatra_pada ?? "--",
+
+    "Day of Birth": birthDetails?.panchang?.day_of_birth || "--",
+    "Day Lord": birthDetails?.panchang?.day_lord || "--",
+    "Hora Lord": birthDetails?.panchang?.hora_lord || "--",
+
+    Sunrise: birthDetails?.panchang?.sunrise_at_birth || "--",
+    Sunset: birthDetails?.panchang?.sunset_at_birth || "--",
+
+    Tithi: birthDetails?.panchang?.tithi || "--",
+    Yoga: birthDetails?.panchang?.yoga || "--",
+    Karana: birthDetails?.panchang?.karana || "--",
+
+    Ayanamsha: birthDetails?.panchang?.ayanamsa
+      ? birthDetails.panchang.ayanamsa.toFixed(5)
+      : "--",
+    "Ayanamsha Type": birthDetails?.panchang?.ayanamsa_name || "--",
+  },
+};
+
+const panchangTable = {
+  title: "Panchang Details",
+  data: {
+    Day: birthPanchang.day_of_birth,
+    Tithi: birthPanchang.tithi,
+    Yoga: birthPanchang.yoga,
+    Karana: birthPanchang.karana,
+    "Day Lord": birthPanchang.day_lord,
+    "Hora Lord": birthPanchang.hora_lord,
+    Sunrise: birthPanchang.sunrise_at_birth,
+    Sunset: birthPanchang.sunset_at_birth,
+    Ayanamsa: birthPanchang.ayanamsa_name,
+  },
+};
 
   const astros = {
     title: "Avakhada Details",
