@@ -137,3 +137,92 @@
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+.premiumMini {
+  position: fixed;
+  width: 260px;
+  padding: 14px;
+  background: rgba(30, 0, 60, 0.65);
+  backdrop-filter: blur(14px);
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.55);
+  z-index: 100000;
+  user-select: none;
+}
+
+/* Drag handle */
+.dragHandle {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 10px;
+  cursor: grab;
+}
+
+.dragDot {
+  width: 6px;
+  height: 6px;
+  background: rgba(255,255,255,0.45);
+  border-radius: 50%;
+}
+
+/* Info */
+.miniInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.miniInfo img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.6);
+}
+
+.miniName {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.miniStatus {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+/* Controls */
+.miniControls {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+
+.miniBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.miniBtn:hover {
+  transform: scale(1.08);
+  background: rgba(255,255,255,0.25);
+}
+
+.miniBtn.muted {
+  background: rgba(255,60,60,0.7);
+}
+
+.miniBtn.end {
+  background: #ff1744;
+  box-shadow: 0 4px 12px rgba(255,23,68,0.45);
+}
+

@@ -13,6 +13,9 @@ import { useState, useEffect } from "react";
 import styles from "./VideoCalling.module.scss";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
+import { useNavigate } from "react-router-dom";
+import { PATH } from "../../utils/routes/Paths";
+
 // import { useCall } from "../../context/CallContext";
 
 export const VideoCalling = ({ callData }) => {
@@ -28,7 +31,8 @@ export const VideoCalling = ({ callData }) => {
 };
 
 const Basics = ({ client, callData }) => {
-  const { activeCall,setActiveCall } = useCall();
+  const { activeCall, setActiveCall } = useCall();
+  const navigate = useNavigate();
 
   // ⭐ callData comes from global context
   const { roomId, agoraToken, isUserSide, callerName, callType } = callData;
@@ -37,6 +41,10 @@ const Basics = ({ client, callData }) => {
   const [calling, setCalling] = useState(true);
   const [micOn, setMic] = useState(true);
   const [cameraOn, setCamera] = useState(true);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [hasJoinedOnce, setHasJoinedOnce] = useState(false);
+
+  const [position, setPosition] = useState({ x: 20, y: 20 });
 
   const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
   const { localCameraTrack } = useLocalCameraTrack(cameraOn);
@@ -80,6 +88,53 @@ const Basics = ({ client, callData }) => {
     return () => client.off("user-left", handleRemoteLeave);
   }, [client, localMicrophoneTrack, localCameraTrack]);
 
+  useEffect(() => {
+    if (isConnected) {
+      setHasJoinedOnce(true);
+    }
+  }, [isConnected]);
+
+  useEffect(() => {
+  const handleSocketDisconnect = () => {
+    if (!roomId) return;
+
+    const endedBy = isUserSide ? "CUSTOMER" : "ASTROLOGER";
+
+    voiceSocket.emit("call_end", {
+      roomId,
+      endedBy,
+    });
+
+    setActiveCall(null);
+  };
+
+  voiceSocket.on("disconnect", handleSocketDisconnect);
+
+  return () => {
+    voiceSocket.off("disconnect", handleSocketDisconnect);
+  };
+}, [roomId, isUserSide]);
+useEffect(() => {
+  const handleCallEnded = () => {
+    localMicrophoneTrack?.stop();
+    localMicrophoneTrack?.close();
+    localCameraTrack?.stop();
+    localCameraTrack?.close();
+
+    client.leave().finally(() => {
+      setActiveCall(null);
+    });
+  };
+
+  voiceSocket.on("call_ended", handleCallEnded);
+
+  return () => {
+    voiceSocket.off("call_ended", handleCallEnded);
+  };
+}, []);
+
+
+
   // End call manually
   const endCall = async () => {
     try {
@@ -99,10 +154,6 @@ const Basics = ({ client, callData }) => {
       console.error("Error ending call:", err);
     }
   };
-
-  // =============== MINI WINDOW LOGIC ==================
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [position, setPosition] = useState({ x: 20, y: 20 });
 
   let dragOffset = { x: 0, y: 0 };
 
@@ -127,35 +178,62 @@ const Basics = ({ client, callData }) => {
     document.removeEventListener("mouseup", stopDrag);
   };
 
-  // ======================= UI ==============================
-
   return (
     <>
-      {/* ▼ MINI WINDOW ▼ */}
       {isMinimized && (
         <div
           className={styles.floatingMini}
           style={{ top: position.y, left: position.x }}
           onMouseDown={startDrag}
         >
+          {/* Header */}
           <div className={styles.miniHeader}>
-            <span>{callerName || "Video Call"}</span>
-            <button onClick={() => setIsMinimized(false)}>🔼</button>
+            <span className={styles.miniTitle}>
+              {callerName || "Video Call"}
+            </span>
+
+            <button
+              className={styles.expandBtn}
+              onClick={() => setIsMinimized(false)}
+            >
+              ⤢
+            </button>
           </div>
 
+          {/* Video */}
           <div className={styles.miniVideo}>
             {remoteUsers.length > 0 ? (
               <RemoteUser user={remoteUsers[0]} playVideo playAudio />
             ) : (
-              <div style={{ color: "#fff", padding: 10, fontSize: 12 }}>
-                Waiting…
-              </div>
+              <div className={styles.miniWaiting}>Connecting…</div>
             )}
           </div>
 
-          <button className={styles.miniEnd} onClick={endCall}>
-            End Call
-          </button>
+          {/* Controls */}
+          <div className={styles.miniControls}>
+            <button
+              className={`${styles.iconBtn} ${!micOn ? styles.activeRed : ""}`}
+              onClick={() => setMic((p) => !p)}
+            >
+              {micOn ? "🎙️" : "🔇"}
+            </button>
+
+            <button
+              className={`${styles.iconBtn} ${
+                !cameraOn ? styles.activeRed : ""
+              }`}
+              onClick={() => setCamera((p) => !p)}
+            >
+              {cameraOn ? "📷" : "🚫"}
+            </button>
+
+            <button
+              className={`${styles.iconBtn} ${styles.endBtnMini}`}
+              onClick={endCall}
+            >
+              📞
+            </button>
+          </div>
         </div>
       )}
 
@@ -169,7 +247,7 @@ const Basics = ({ client, callData }) => {
             Minimize
           </button>
 
-          {!isConnected ? (
+          {!hasJoinedOnce ? (
             <div className={styles.joinContainer}>
               <div className={styles.waitingText}>
                 Connecting to video call…
@@ -197,6 +275,7 @@ const Basics = ({ client, callData }) => {
               {cameraOn && (
                 <div className={styles.localVideoPreview}>
                   <LocalUser
+                    key={isMinimized ? "mini" : "full"} // ⭐ IMPORTANT
                     audioTrack={localMicrophoneTrack}
                     videoTrack={localCameraTrack}
                     micOn={micOn}
@@ -209,11 +288,11 @@ const Basics = ({ client, callData }) => {
 
               <div className={styles.controls}>
                 <button onClick={() => setMic((p) => !p)}>
-                  {micOn ? "Mute Mic" : "Unmute Mic"}
+                  {micOn ? "🎙️" : "🔇"}
                 </button>
 
                 <button onClick={() => setCamera((p) => !p)}>
-                  {cameraOn ? "Stop Camera" : "Start Camera"}
+                  {cameraOn ? "📷" : "🚫"}
                 </button>
 
                 <button className={styles.endBtn} onClick={endCall}>
@@ -223,21 +302,28 @@ const Basics = ({ client, callData }) => {
                 <button
                   className={styles.chatBtn}
                   onClick={() => {
-                    setIsMinimized(true);
+                    if (isUserSide) {
+                      setIsMinimized(true);
 
-                    navigate(
-                      `/talk-to-astrologers/${activeCall.astrologerId}`,
-                      {
-                        state: {
-                          roomId: activeCall.chatRoomId, // 👈 SAME CHAT
-                          userId: activeCall.userId,
-                          astrologerId: activeCall.astrologerId,
-                          kundliId: activeCall.kundliId,
-                          fullName: activeCall.callerName,
-                          isUserSide: true,
-                        },
-                      }
-                    );
+                      navigate(
+                        `/talk-to-astrologers/${activeCall.astrologerId}`,
+                        {
+                          state: {
+                            roomId: activeCall.chatRoomId, // SAME CHAT
+                            userId: activeCall.userId,
+                            astrologerId: activeCall.astrologerId,
+                            kundliId: activeCall.kundliId,
+                            fullName: activeCall.callerName,
+                            isUserSide: true,
+                          },
+                        }
+                      );
+                    } else {
+                      setIsMinimized(true);
+                      navigate(
+                        PATH.privateRoutes.ASTROLOGER_CHAT_USER_LIST.path
+                      );
+                    }
                   }}
                 >
                   💬

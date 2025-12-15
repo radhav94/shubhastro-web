@@ -100,54 +100,122 @@
 /*            GOOGLE MEET MINI FLOATING WINDOW CSS               */
 /* ============================================================= */
 
+/* ================= PREMIUM FLOATING MINI CALL ================= */
+
 .floatingMini {
   position: fixed;
-  width: 220px;
-  height: 150px;
-  background: #000;
-  border-radius: 12px;
+  width: 240px;
+  height: 165px;
+  background: rgba(10, 12, 30, 0.75);
+  backdrop-filter: blur(14px);
+  border-radius: 16px;
   overflow: hidden;
   z-index: 999999;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
   cursor: grab;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
+.floatingMini:hover {
+  transform: scale(1.02);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.8);
+}
+
+/* Header */
 .miniHeader {
-  height: 28px;
-  background: rgba(255, 255, 255, 0.12);
-  color: white;
-  padding: 4px 8px;
+  height: 32px;
+  padding: 0 10px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0.04)
+  );
+  color: white;
   font-size: 12px;
 }
 
-.miniVideo {
-  width: 100%;
-  height: calc(100% - 58px);
-  background: #111;
+.miniTitle {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.miniEnd {
-  width: 100%;
-  background: #ff3d5a;
+.expandBtn {
+  background: none;
   border: none;
   color: white;
-  padding: 6px;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
+}
+
+/* Video */
+.miniVideo {
+  width: 100%;
+  height: calc(100% - 72px);
+  background: #000;
+}
+
+.miniWaiting {
+  color: #ccc;
+  font-size: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+/* Controls */
+.miniControls {
+  height: 40px;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.iconBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.iconBtn:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: scale(1.1);
+}
+
+.activeRed {
+  background: rgba(255, 70, 70, 0.85);
+}
+
+.endBtnMini {
+  background: #ff3d5a;
 }
 
 .minimizeBtn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  padding: 9px 14px;
-  background: #1a1d40;
-  color: white;
-  border: none;
+  position: fixed;   /* ⭐ screen ke corner pe chipak jaayega */
+  top: 12px;
+  right: 12px;
+
+  z-index: 999999;
+
+  padding: 6px 10px;
   border-radius: 6px;
+  border: none;
   cursor: pointer;
-  z-index: 10000;
+
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 12px;
 }
+

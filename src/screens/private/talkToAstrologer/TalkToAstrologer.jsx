@@ -54,6 +54,8 @@ const TalkToAstrologer = () => {
 
   // ✅ Ref for current calling astrologer (no re-render)
   const activeCallAstroRef = useRef(null);
+    const kundliRef = useRef(null);          // selected kundliId
+
 
   const [page, setPage] = useState(1);
   const [specialty, setSpecialty] = useState("");
@@ -263,19 +265,49 @@ const TalkToAstrologer = () => {
     };
 
     /* CALL ACCEPTED → NO NAVIGATION ANYMORE */
-    const handleCallAccepted = ({ roomId, token, type }) => {
+    // const handleCallAccepted = ({ roomId, token, type }) => {
+    //   setWaitingPopup(false);
+
+    //   setActiveCall({
+    //     roomId,
+    //     agoraToken: token,
+    //     callerName: activeCallAstroRef.current?.firstName,
+    //     isUserSide: true,
+    //     callType: type, 
+    //   });
+
+    // };
+
+
+    const handleCallAccepted = async ({ roomId, token, type }) => {
       setWaitingPopup(false);
 
-      setActiveCall({
-        roomId,
-        agoraToken: token,
-        callerName: activeCallAstroRef.current?.firstName,
-        isUserSide: true,
-        callType: type, // ⭐ “audio” or “video”
-      });
+      const astro = activeCallAstroRef.current;
+      const kundliId = kundliRef.current;
 
-      // ❌ No navigate now
-      // navigate(...)
+      try {
+        const res = await createChatRoom({
+          userId: userIdLocal,
+          astrologerId: astro._id,
+        });
+
+        const chatRoomId = res?.data?.data;
+        if (!chatRoomId) throw new Error();
+
+        setActiveCall({
+          roomId,
+          chatRoomId,
+          agoraToken: token,
+          callerName: astro.firstName,
+          isUserSide: true,
+          callType: type,
+          userId: userIdLocal,
+          astrologerId: astro._id,
+          kundliId,
+        });
+      } catch {
+        Toast.error("Failed to start chat");
+      }
     };
 
     /* REJECTED */

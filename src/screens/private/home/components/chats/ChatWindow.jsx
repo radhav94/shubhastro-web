@@ -105,8 +105,8 @@ const ChatWindow = () => {
 
   const handleVideoCall = () => {
     if (activeCall) {
-          return Toast.error("You are already on a call");
-        }
+      return Toast.error("You are already on a call");
+    }
     commonSocketConnect();
     voiceSocket.emit("create_call_room", {
       userId,
@@ -124,35 +124,21 @@ const ChatWindow = () => {
       setWaitingPopup(true);
     };
 
-  
-
     const handleCallAccepted = ({ roomId, token, type }) => {
-  
-  // ⭐ NO NORMALIZATION — type same as backend
-  // setActiveCall({
-  //   roomId,
-  //   agoraToken: token,
-  //   callerName: fullName,
-  //   isUserSide: true,
-  //   callType: type,   // ⭐ stays "audio" or "video"
-  // });
+      setActiveCall({
+        roomId, // call room (Agora)
+        chatRoomId: state.roomId, // chat room
+        agoraToken: token,
+        callerName: fullName,
+        isUserSide: true,
+        callType: type,
+        userId,
+        astrologerId,
+        kundliId,
+      });
 
-  setActiveCall({
-  roomId,                 // call room (Agora)
-  chatRoomId: state.roomId, // chat room
-  agoraToken: token,
-  callerName: fullName,
-  isUserSide: true,
-  callType: type,
-  userId,
-  astrologerId,
-  kundliId,
-});
-
-
-  setWaitingPopup(false);
-};
-
+      setWaitingPopup(false);
+    };
 
     const handleCallRejected = (data) => {
       Toast.error(data?.sessionData?.sessionEndReason || "Call Rejected!");

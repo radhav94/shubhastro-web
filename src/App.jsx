@@ -10,15 +10,9 @@ import {
 import PublicRoute from "./utils/routes/PublicRoute";
 import PrivateRoute from "./utils/routes/PrivateRoute";
 import { useEffect } from "react";
-import VideoCallContainer from "./component/call/VideoCallContainer";
 import { CallProvider } from "./context/CallContext";
 
-// ⭐ ADD THESE TWO IMPORTS
-// import { CallProvider } from "./context/CallContext";
-// import VideoCallContainer from "./components/VideoCallContainer"; 
-
 function App() {
-  // Helper function to flatten nested routes
   const flattenRoutes = (routes) => {
     const flattened = [];
 
@@ -51,13 +45,11 @@ function App() {
   };
 
   const roleWiseRouting = createBrowserRouter([
-    // Public routes
     ...Object.values(PATH.publicRoutes).map((route) => ({
       path: route.path,
       element: <PublicRoute component={route.element} />,
     })),
 
-    // Private routes
     {
       path: "/",
       element: <PrivateRoute component={HomeLayout} />,
@@ -67,22 +59,12 @@ function App() {
           element: <child.element />,
           handle: { header: child.header ?? true, footer: child.footer ?? true },
         })),
-        {
-          path: "/",
-          element: <Navigate to={PATH.privateRoutes.HOME.path} />,
-        },
-        {
-          path: "*",
-          element: <Navigate to={PATH.privateRoutes.HOME.path} />,
-        },
+        { path: "/", element: <Navigate to={PATH.privateRoutes.HOME.path} /> },
+        { path: "*", element: <Navigate to={PATH.privateRoutes.HOME.path} /> },
       ],
     },
 
-    // fallback
-    {
-      path: "*",
-      element: <Navigate to="/" />,
-    },
+    { path: "*", element: <Navigate to="/" /> },
   ]);
 
   useEffect(() => {
@@ -97,14 +79,9 @@ function App() {
   }, []);
 
   return (
-    // ⭐ WRAP EVERYTHING INSIDE CallProvider
     <CallProvider>
       <div className={classes.app}>
         <RouterProvider router={roleWiseRouting} />
-
-        {/* ⭐ VERY IMPORTANT: GLOBAL CALL WINDOW */}
-        {/* <VideoCallContainer /> */}
-        <VideoCallContainer/>
       </div>
     </CallProvider>
   );
