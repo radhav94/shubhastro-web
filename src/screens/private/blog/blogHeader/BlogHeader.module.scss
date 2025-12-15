@@ -22,19 +22,47 @@ $font-primary: "Poppins", sans-serif;
 -----------------------------------------*/
 .blogsContainer {
   display: grid;
-  grid-template-columns: 1fr; // mobile default
-  gap: 24px;
+  grid-template-columns: 1fr; // Single column on mobile
+  gap: 20px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 10px 0;
 
+  // Small tablets and landscape phones
+  @media (min-width: 576px) {
+    grid-template-columns: repeat(2, 1fr); // 2 columns
+    gap: 20px;
+  }
+
+  // Tablets
   @media (min-width: 768px) {
-    grid-template-columns: 1fr; // still single column but wider spacing
+    grid-template-columns: repeat(2, 1fr); // 2 columns
+    gap: 24px;
   }
 
+  // Large tablets / small desktops
   @media (min-width: 992px) {
-    grid-template-columns: 1.5fr 1fr; // main blog bigger than right column
+    grid-template-columns: repeat(3, 1fr); // 3 columns
+    gap: 28px;
   }
 
+  // Desktops
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr); // 3 columns
+    gap: 30px;
+  }
+
+  // Large desktops
   @media (min-width: 1400px) {
-    grid-template-columns: 2fr 1fr; // premium layout
+    grid-template-columns: repeat(4, 1fr); // 4 columns
+    gap: 32px;
+    max-width: 1600px;
+  }
+
+  // Extra large screens
+  @media (min-width: 1600px) {
+    grid-template-columns: repeat(4, 1fr); // 4 columns
+    gap: 36px;
   }
 }
 
