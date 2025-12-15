@@ -14,9 +14,12 @@ import { useGetChatHistoryQuery } from "../../../../../redux/api/chatApi";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import InactivityModal from "../../../../../component/UI/modal/inActivity/InactivityModal";
 import { useInactivityTimer } from "../../../../../utils/hooks/useInactivityTimer";
+import { useCall } from "../../../../../context/CallContext";
 
 const ChatWindow = () => {
   const navigate = useNavigate();
+  const { activeCall, setActiveCall } = useCall();
+
   const { state } = useLocation();
   const { userId, astrologerId, roomId, fullName, isUserSide, kundliId } =
     state;
@@ -89,6 +92,9 @@ const ChatWindow = () => {
   };
 
   const handleCallClick = () => {
+    if (activeCall) {
+      return Toast.error("You are already on a call");
+    }
     commonSocketConnect();
     voiceSocket.emit("create_call_room", {
       userId,
@@ -98,6 +104,9 @@ const ChatWindow = () => {
   };
 
   const handleVideoCall = () => {
+    if (activeCall) {
+          return Toast.error("You are already on a call");
+        }
     commonSocketConnect();
     voiceSocket.emit("create_call_room", {
       userId,
@@ -115,24 +124,22 @@ const ChatWindow = () => {
       setWaitingPopup(true);
     };
 
+  
+
     const handleCallAccepted = ({ roomId, token, type }) => {
-      const route =
-        type === "video"
-          ? `/talk-to-astrologers/video-call/${roomId}`
-          : `/talk-to-astrologers/voice-call/${roomId}`;
+  
+  // ⭐ NO NORMALIZATION — type same as backend
+  setActiveCall({
+    roomId,
+    agoraToken: token,
+    callerName: fullName,
+    isUserSide: true,
+    callType: type,   // ⭐ stays "audio" or "video"
+  });
 
-      navigate(route, {
-        state: {
-          roomId,
-          agoraToken: token,
-          callerName: fullName,
-          isUserSide: true,
-          callType: type,
-        },
-      });
+  setWaitingPopup(false);
+};
 
-      setWaitingPopup(false);
-    };
 
     const handleCallRejected = (data) => {
       Toast.error(data?.sessionData?.sessionEndReason || "Call Rejected!");

@@ -19,6 +19,7 @@ import { PATH } from "../../../utils/routes/Paths";
 import { getToken } from "../../../utils/token";
 import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useWalletBalance } from "../wallet/useWalletBalance";
+import { useCall } from "../../../context/CallContext";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -49,6 +50,8 @@ const TalkToAstrologer = () => {
   const [waitingPopup, setWaitingPopup] = useState(false); // ⭐ Added popup state
   const [callType, setCallType] = useState(null); // audio | video
 
+  const { activeCall, setActiveCall } = useCall();
+
   // ✅ Ref for current calling astrologer (no re-render)
   const activeCallAstroRef = useRef(null);
 
@@ -56,7 +59,7 @@ const TalkToAstrologer = () => {
   const [specialty, setSpecialty] = useState("");
   const [allAstrologers, setAllAstrologers] = useState([]);
   const [hasMore, setHasMore] = useState(true);
-  const [callRoomId,setCallRoomId]=useState(null)
+  const [callRoomId, setCallRoomId] = useState(null);
 
   const limit = 9;
 
@@ -189,109 +192,113 @@ const TalkToAstrologer = () => {
 
   const connectSocket = () => {
     if (voiceSocket.connected) voiceSocket.disconnect();
-    voiceSocket.io.opts.query = { userId: userIdLocal, role: "CUSTOMER" };
+
+    voiceSocket.io.opts.query = {
+      userId: userIdLocal,
+      role: "CUSTOMER",
+    };
+
     voiceSocket.connect();
   };
 
-  const handleAudioCall = (astro) => {
-    if(!token) {
-      navigate("/login", { state: { from: location.pathname } })
-      return;
-    }
-    if (!astro) return Toast.error("Astrologer missing");
-    if (!userIdLocal) return Toast.error("User ID missing");
 
-    //Check if user has sufficient balance
-    if(balance < (astro?.price?.amount || 0)) {
-      setSelectedAstrologer(astro);
-      setOpenModal((prev) => ({ ...prev, recharge: true }))
-      return;
-    }
+  const initiateCall = (astro, type) => {
+  // 🔐 Auth check
+  if (!token) {
+    navigate("/login", { state: { from: location.pathname } });
+    return;
+  }
 
-    activeCallAstroRef.current = astro; // ✅ store in ref
-    setActiveCallAstro(astro);
-    setCallType("audio");
-    setWaitingPopup(true);
+  // ❌ Validations
+  if (!astro) return Toast.error("Astrologer missing");
+  if (!userIdLocal) return Toast.error("User ID missing");
 
-    connectSocket();
-    voiceSocket.emit("create_call_room", {
-      userId: userIdLocal,
-      astrologerId: astro._id,
-      type: "audio",
-    });
-  };
+  // 💰 Balance check
+  const price = astro?.price?.amount || 0;
+  if (balance < price) {
+    setSelectedAstrologer(astro);
+    setOpenModal((prev) => ({ ...prev, recharge: true }));
+    return;
+  }
+
+  // 📞 Already on call
+  if (activeCall) {
+    return Toast.error("You are already on a call");
+  }
+
+  // ✅ Store active call info
+  activeCallAstroRef.current = astro;
+  setActiveCallAstro(astro);
+  setCallType(type);
+  setWaitingPopup(true);
+
+  // 🔌 Ensure socket connection
+  connectSocket();
+
+  // 🚀 Create call room
+  voiceSocket.emit("create_call_room", {
+    userId: userIdLocal,
+    astrologerId: astro._id,
+    type, // "audio" | "video"
+  });
+};
+
+
+ const handleAudioCall = (astro) => {
+  initiateCall(astro, "audio");
+};
 
   const handleVideoCall = (astro) => {
-    if(!token) { 
-      navigate("/login", { state: { from: location.pathname } });
-      return;
-    };
-    if (!astro) return Toast.error("Astrologer missing");
-    if (!userIdLocal) return Toast.error("User ID missing");
+  initiateCall(astro, "video");
+};
 
-    //Check if user has sufficient balance
-    if(balance < (astro?.price?.amount || 0)) {
-      setSelectedAstrologer(astro);
-      setOpenModal((prev) => ({ ...prev, recharge: true }))
-      return;
-    }
-
-    activeCallAstroRef.current = astro; // ✅ store in ref
-    setActiveCallAstro(astro);
-    setCallType("video");
-    setWaitingPopup(true);
-
-    connectSocket();
-    voiceSocket.emit("create_call_room", {
-      userId: userIdLocal,
-      astrologerId: astro._id,
-      type: "video",
-    });
-  };
 
   useEffect(() => {
     if (!userIdLocal) return;
 
-    const handleReturnRoom = ({roomId}) => {
+    /* Room ready event */
+    const handleReturnRoom = ({ roomId }) => {
       setCallRoomId(roomId);
       setWaitingPopup(true);
     };
 
+    /* CALL ACCEPTED → NO NAVIGATION ANYMORE */
     const handleCallAccepted = ({ roomId, token, type }) => {
       setWaitingPopup(false);
 
-      const route =
-        type === "video"
-          ? `/talk-to-astrologers/video-call/${roomId}`
-          : `/talk-to-astrologers/voice-call/${roomId}`;
-
-      navigate(route, {
-        state: {
-          roomId,
-          agoraToken: token,
-          callerName: activeCallAstroRef.current?.firstName,
-          isUserSide: true,
-        },
+      setActiveCall({
+        roomId,
+        agoraToken: token,
+        callerName: activeCallAstroRef.current?.firstName,
+        isUserSide: true,
+        callType: type, // ⭐ “audio” or “video”
       });
+
+      // ❌ No navigate now
+      // navigate(...)
     };
 
+    /* REJECTED */
     const handleCallRejected = (data) => {
       Toast.error(data?.sessionData?.sessionEndReason || "Call rejected");
       setWaitingPopup(false);
       voiceSocket.disconnect();
     };
 
+    /* ERROR */
     const handleSocketError = (err) => {
       Toast.error(err?.message || "Connection error");
       setWaitingPopup(false);
       voiceSocket.disconnect();
     };
 
+    /* CALL ENDED */
     const handleCallEnded = () => {
       setWaitingPopup(false);
       voiceSocket.disconnect();
     };
 
+    // Attach events
     voiceSocket.on("return_call_room", handleReturnRoom);
     voiceSocket.on("call_accepted", handleCallAccepted);
     voiceSocket.on("call_rejected", handleCallRejected);
@@ -305,7 +312,7 @@ const TalkToAstrologer = () => {
       voiceSocket.off("error", handleSocketError);
       voiceSocket.off("call_ended", handleCallEnded);
     };
-  }, [userIdLocal, navigate]);
+  }, [userIdLocal]);
 
   /* ------------------------------------------------------------------- */
 
