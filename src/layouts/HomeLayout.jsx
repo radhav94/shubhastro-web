@@ -10,16 +10,16 @@ import Breadcrumb from "../component/BreadCrumb";
 import Footer from "./Footer";
 import ScrollToTop from "../component/functions/ScrollToTop";
 import CircleSpinner from "../component/UI/CircleSpinner";
+import VideoCallContainer from "../component/call/VideoCallContainer";
 
 const HomeLayout = () => {
   const isMobile = useIsMobile();
-
   const matches = useMatches();
 
-  // Find the deepest match with handle.header defined in it
   const currentRoute = matches
     .reverse()
     .find((match) => match.handle && match.handle.header !== undefined);
+
   const showHeader = currentRoute ? currentRoute.handle.header : true;
   const showFooter = currentRoute ? currentRoute.handle.footer : true;
 
@@ -34,14 +34,9 @@ const HomeLayout = () => {
 
       {/* Scrollable Content */}
       <div className={styles.contentWrapper}>
-        {/* Push content down so it doesn't hide behind TopBar */}
         <div className={styles.topGap}></div>
 
-        {showHeader && (
-          <>
-            <Breadcrumb />
-          </>
-        )}
+        {showHeader && <Breadcrumb />}
 
         <Suspense fallback={<CircleSpinner />}>
           <div className={styles.outletDiv}>
@@ -55,8 +50,12 @@ const HomeLayout = () => {
           <Footer />
         </div>
       )}
+
+      {/* ✅ FLOATING CALL UI (IMPORTANT LINE) */}
+      <VideoCallContainer />
     </div>
   );
 };
+
 
 export default HomeLayout;

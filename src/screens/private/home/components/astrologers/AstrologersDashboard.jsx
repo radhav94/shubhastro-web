@@ -5,8 +5,11 @@ import { useNavigate } from "react-router-dom";
 import ChatList from "./atrologerchat/ChatList";
 import { PATH } from "../../../../../utils/routes/Paths";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
+import { useCall } from "../../../../../context/CallContext";
 
 const AstrologersDashboard = () => {
+    const { setActiveCall } = useCall();
+
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
 
@@ -65,29 +68,31 @@ const AstrologersDashboard = () => {
     };
   }, []);
 
+
+
   const handleAccept = () => {
-    if (!roomId) return;
+  if (!roomId) return;
 
-    voiceSocket.emit("accept_call", {
-      roomId,
-      token,
-      channelName: roomId,
-      astrologerId: astroIdLocal,
-    });
+  voiceSocket.emit("accept_call", {
+    roomId,
+    token,
+    channelName: roomId,
+    astrologerId: astroIdLocal,
+  });
 
-    console.log("accept call", roomId);
-    setIncomingCall(false);
-    setIncomingVideoCall(false);
+  setIncomingCall(false);
+  setIncomingVideoCall(false);
 
-    navigate(`/astrologer-dashboard/voice-call/${roomId}`, {
-      state: {
-        roomId,
-        agoraToken: token,
-        callerName: callerUserId,
-        isUserSide: false,
-      },
-    });
-  };
+  setActiveCall({
+    roomId,
+    agoraToken: token,
+    callerName: callerUserId,
+    isUserSide: false,
+    callType: "audio",
+  });
+};
+
+  
 
   const handleReject = () => {
     if (!roomId) return;
@@ -97,27 +102,49 @@ const AstrologersDashboard = () => {
     setIncomingVideoCall(false);
   };
 
+  // const handleVideoAccept = () => {
+  //   if (!roomId) return;
+
+  //   voiceSocket.emit("accept_call", {
+  //     roomId,
+  //     token,
+  //     channelName: roomId,
+  //     astrologerId: astroIdLocal,
+  //   });
+  //   setIncomingCall(false);
+  //   setIncomingVideoCall(false);
+
+  //   navigate(`/astrologer-dashboard/video-call/${roomId}`, {
+  //     state: {
+  //       roomId,
+  //       agoraToken: token,
+  //       callerName: callerUserId,
+  //       isUserSide: false,
+  //     },
+  //   });
+  // };
+
   const handleVideoAccept = () => {
-    if (!roomId) return;
+  if (!roomId) return;
 
-    voiceSocket.emit("accept_call", {
-      roomId,
-      token,
-      channelName: roomId,
-      astrologerId: astroIdLocal,
-    });
-    setIncomingCall(false);
-    setIncomingVideoCall(false);
+  voiceSocket.emit("accept_call", {
+    roomId,
+    token,
+    channelName: roomId,
+    astrologerId: astroIdLocal,
+  });
 
-    navigate(`/astrologer-dashboard/video-call/${roomId}`, {
-      state: {
-        roomId,
-        agoraToken: token,
-        callerName: callerUserId,
-        isUserSide: false,
-      },
-    });
-  };
+  setIncomingCall(false);
+  setIncomingVideoCall(false);
+
+  setActiveCall({
+    roomId,
+    agoraToken: token,
+    callerName: callerUserId,
+    isUserSide: false,
+    callType: "video",
+  });
+};
 
   /** ❌ Reject video call popup */
   const handleVideoReject = () => {

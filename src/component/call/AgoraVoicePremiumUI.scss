@@ -312,3 +312,53 @@ border: 1px solid rgba(120, 90, 60, 0.15);
     font-size: 22px;
   }
 }
+
+.floatingMini {
+  position: fixed;
+  width: 180px;
+  height: 120px;
+  background: rgba(0,0,0,0.75);
+  border-radius: 12px;
+  z-index: 999999;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: grab;
+}
+
+.miniHeader {
+  display: flex;
+  justify-content: space-between;
+  color: #fff;
+  font-size: 12px;
+}
+
+.miniBody {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.miniEndBtn {
+  background: red;
+  color: #fff;
+  border: none;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.minimizeBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  background: rgba(0,0,0,0.4);
+  color: white;
+  border: none;
+}
+

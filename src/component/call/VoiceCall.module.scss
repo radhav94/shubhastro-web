@@ -1,43 +1,63 @@
-.callScreen {
+/* ⭐ FULL SCREEN WRAPPER (IMPORTANT FIX) */
+.fullscreenWrapper {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
   height: 100vh;
+  overflow: hidden; /* no scroll */
   background: linear-gradient(135deg, #0e002e, #220044, #40006a);
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #fff;
-  padding: 20px;
-  overflow: hidden;
+  z-index: 99999;
 }
 
-.startContainer,
+/* Voice Call UI */
 .callingContainer {
   text-align: center;
   animation: fadeIn 0.6s ease-in-out;
 }
 
+/* Minimize Button ALWAYS on top */
+.minimizeBtn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  z-index: 100000; /* always on top */
+}
+
+/* Avatar image */
 .avatar {
   width: 120px;
   height: 120px;
   border-radius: 50%;
   border: 4px solid #fff;
-  padding: 4px;
   margin-bottom: 12px;
-  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.25));
 }
 
+/* User Name */
 .name {
   font-size: 24px;
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-top: 12px;
 }
 
+/* Status text */
 .status {
   font-size: 16px;
+  margin-top: 4px;
   opacity: 0.85;
-  margin-bottom: 25px;
   animation: pulseText 2s infinite;
 }
 
+/* Controls area */
 .controls {
   display: flex;
   justify-content: center;
@@ -45,85 +65,164 @@
   margin-top: 45px;
 }
 
+/* Call buttons */
 .controlBtn {
   width: 62px;
   height: 62px;
+  background: rgba(255,255,255,0.2);
   border-radius: 50%;
   border: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 22px;
-  cursor: pointer;
-  transition: all 0.25s ease-in-out;
-  backdrop-filter: blur(8px);
-  background: rgba(255, 255, 255, 0.1);
-
-  &:active {
-    transform: scale(0.85);
-  }
-}
-
-.micBtn {
   color: #fff;
-  border: 2px solid #6ce2ff;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
 .endCallBtn {
   background: #ff1744;
+  box-shadow: 0 3px 10px rgba(255,0,0,0.3);
+}
+
+/* ⭐ MINI WINDOW */
+.floatingMini {
+  position: fixed;
+  width: 180px;
+  height: 140px;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(20,0,40,0.85);
+  border-radius: 14px;
+  padding: 10px;
   color: #fff;
-  box-shadow: 0 4px 12px rgba(255, 23, 68, 0.4);
+  z-index: 100010; /* above everything */
 
-  &:hover {
-    background: #d50032;
-  }
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.45);
+  backdrop-filter: blur(8px);
 }
 
-.callBtn {
-  width: 75px;
-  height: 75px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #2cce63, #05b246);
-  border: none;
-  box-shadow: 0 5px 20px rgba(22, 187, 90, 0.5);
-  cursor: pointer;
+.miniHeader {
   display: flex;
-  justify-content: center;
-  align-items: center;
-
-  transition: all 0.25s ease-in-out;
-
-  &:active {
-    transform: scale(0.9);
-  }
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 6px;
 }
 
-/* Glow Animation */
+.miniBody {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.miniEndBtn {
+  margin-top: 6px;
+  width: 100%;
+  padding: 6px;
+  background: #ff1744;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+}
+
+
+/* Pulse Animation */
 @keyframes pulseText {
-  0%, 100% { opacity: 0.7; }
+  0%,100% { opacity: 0.7; }
   50% { opacity: 1; }
 }
 
+/* Fade-in Animation */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0px);
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Modern Floating Effects */
-.callingContainer::after {
-  content: "";
+.premiumMini {
   position: fixed;
-  bottom: -40px;
-  right: -40px;
-  width: 180px;
-  height: 180px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 50%;
-  filter: blur(45px);
+  width: 260px;
+  padding: 14px;
+  background: rgba(30, 0, 60, 0.65);
+  backdrop-filter: blur(14px);
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.55);
+  z-index: 100000;
+  user-select: none;
 }
+
+/* Drag handle */
+.dragHandle {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 10px;
+  cursor: grab;
+}
+
+.dragDot {
+  width: 6px;
+  height: 6px;
+  background: rgba(255,255,255,0.45);
+  border-radius: 50%;
+}
+
+/* Info */
+.miniInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.miniInfo img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.6);
+}
+
+.miniName {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.miniStatus {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+/* Controls */
+.miniControls {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+
+.miniBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.miniBtn:hover {
+  transform: scale(1.08);
+  background: rgba(255,255,255,0.25);
+}
+
+.miniBtn.muted {
+  background: rgba(255,60,60,0.7);
+}
+
+.miniBtn.end {
+  background: #ff1744;
+  box-shadow: 0 4px 12px rgba(255,23,68,0.45);
+}
+

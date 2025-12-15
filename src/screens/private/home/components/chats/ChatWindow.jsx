@@ -14,9 +14,12 @@ import { useGetChatHistoryQuery } from "../../../../../redux/api/chatApi";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import InactivityModal from "../../../../../component/UI/modal/inActivity/InactivityModal";
 import { useInactivityTimer } from "../../../../../utils/hooks/useInactivityTimer";
+import { useCall } from "../../../../../context/CallContext";
 
 const ChatWindow = () => {
   const navigate = useNavigate();
+  const { activeCall, setActiveCall } = useCall();
+
   const { state } = useLocation();
   const { userId, astrologerId, roomId, fullName, isUserSide, kundliId } =
     state;
@@ -89,6 +92,9 @@ const ChatWindow = () => {
   };
 
   const handleCallClick = () => {
+    if (activeCall) {
+      return Toast.error("You are already on a call");
+    }
     commonSocketConnect();
     voiceSocket.emit("create_call_room", {
       userId,
@@ -98,6 +104,9 @@ const ChatWindow = () => {
   };
 
   const handleVideoCall = () => {
+    if (activeCall) {
+      return Toast.error("You are already on a call");
+    }
     commonSocketConnect();
     voiceSocket.emit("create_call_room", {
       userId,
@@ -116,19 +125,16 @@ const ChatWindow = () => {
     };
 
     const handleCallAccepted = ({ roomId, token, type }) => {
-      const route =
-        type === "video"
-          ? `/talk-to-astrologers/video-call/${roomId}`
-          : `/talk-to-astrologers/voice-call/${roomId}`;
-
-      navigate(route, {
-        state: {
-          roomId,
-          agoraToken: token,
-          callerName: fullName,
-          isUserSide: true,
-          callType: type,
-        },
+      setActiveCall({
+        roomId, // call room (Agora)
+        chatRoomId: state.roomId, // chat room
+        agoraToken: token,
+        callerName: fullName,
+        isUserSide: true,
+        callType: type,
+        userId,
+        astrologerId,
+        kundliId,
       });
 
       setWaitingPopup(false);

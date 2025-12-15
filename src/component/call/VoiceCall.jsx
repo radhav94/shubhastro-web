@@ -1,206 +1,290 @@
 import {
-  LocalUser,
   RemoteUser,
   useIsConnected,
   useJoin,
   useLocalMicrophoneTrack,
   usePublish,
   useRemoteUsers,
+  useRTCClient,
 } from "agora-rtc-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import AgoraRTC, { AgoraRTCProvider } from "agora-rtc-react";
 import { IoMic, IoMicOff, IoCall } from "react-icons/io5";
 import styles from "./VoiceCall.module.scss";
 import { voiceSocket } from "../../services/voiceSocketServices";
+import { useCall } from "../../context/CallContext";
+import { PATH } from "../../utils/routes/Paths";
 
-export const AgoraVoiceCalling = () => {
-  const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+export const AgoraVoiceCalling = ({ callData }) => {
+  const client = useRTCClient(
+    AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
+  );
+
   return (
     <AgoraRTCProvider client={client}>
-      <CallingUI client={client} />
+      <CallingUI client={client} callData={callData} />
     </AgoraRTCProvider>
   );
 };
 
-const CallingUI = ({ client }) => {
-  // ✅ AUTO START CALL
-  const [calling, setCalling] = useState(true);
+const CallingUI = ({ client, callData }) => {
+  const { activeCall, setActiveCall } = useCall();
+  const navigate = useNavigate();
+
+  const { roomId, callerName, agoraToken, isUserSide } = callData;
+
+  const [calling] = useState(true);
   const [micOn, setMic] = useState(true);
 
   const isConnected = useIsConnected();
   const remoteUsers = useRemoteUsers();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const callerName = location.state?.callerName || "Unknown";
-  const roomID = location.state?.roomId || "123456";
-  const agoraToken = location?.state?.agoraToken || "";
-  const isUserSide = location.state?.isUserSide;
 
   const appId = "5630460abdc141e3b2f8d9597752bd7d";
-  const channel = roomID;
 
   const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
 
-  // ✅ JOIN AUTOMATICALLY
+  // JOIN CALL
   useJoin(
     {
       appid: appId,
-      channel,
-      token: agoraToken || null,
+      channel: roomId,
+      token: agoraToken,
     },
     calling
   );
 
   usePublish(localMicrophoneTrack ? [localMicrophoneTrack] : []);
 
+  // CALL STATUS
   const [callState, setCallState] = useState("connecting");
   const [timer, setTimer] = useState(0);
 
-  // ✅ CALL STATE HANDLING
   useEffect(() => {
-    if (calling && isConnected) {
-      if (remoteUsers.length > 0) setCallState("connected");
-      else setCallState("waiting");
-    }
-  }, [calling, isConnected, remoteUsers.length]);
+    if (!isConnected) return;
 
-  // ✅ TIMER
+    if (remoteUsers.length > 0) setCallState("connected");
+    else setCallState("waiting");
+  }, [isConnected, remoteUsers.length]);
+
   useEffect(() => {
-    let interval = null;
+    let interval;
     if (callState === "connected") {
       interval = setInterval(() => setTimer((t) => t + 1), 1000);
     } else {
       setTimer(0);
     }
-    return () => interval && clearInterval(interval);
+
+    return () => clearInterval(interval);
   }, [callState]);
 
-  // ✅ CLEAN SOCKET LISTENERS
-  useEffect(() => {
-    return () => {
-      console.log("🧹 Cleaning up socket listeners on Call Screen unmount...");
-      voiceSocket.removeAllListeners();
-    };
-  }, []);
-
-  // ✅ REMOTE USER LEAVE HANDLER
+  // REMOTE USER LEFT
   useEffect(() => {
     const handleRemoteLeave = () => {
-      console.log("🚨 Remote user has left the call!");
+      localMicrophoneTrack?.stop();
+      localMicrophoneTrack?.close();
 
-      if (localMicrophoneTrack) {
-        localMicrophoneTrack.stop();
-        localMicrophoneTrack.close();
-      }
-
-      client.leave().then(() => {
-        console.log("👋 Left the Agora room");
-        navigate(-1);
-      });
+      client.leave().then(() => setActiveCall(null));
     };
 
     client.on("user-left", handleRemoteLeave);
+    return () => client.off("user-left", handleRemoteLeave);
+  }, [client, localMicrophoneTrack]);
 
-    return () => {
-      client.off("user-left", handleRemoteLeave);
-    };
-  }, [client, localMicrophoneTrack, navigate]);
-
-
+  // BACKEND CALL ENDED
   useEffect(() => {
-  const handleBackendCallEnded = () => {
-    console.log("📩 Received call_ended from backend");
+    const handleBackendCallEnded = () => {
+      localMicrophoneTrack?.stop();
+      localMicrophoneTrack?.close();
 
-    if (localMicrophoneTrack) {
-      localMicrophoneTrack.stop();
-      localMicrophoneTrack.close();
-    }
+      client.leave().then(() => setActiveCall(null));
+    };
 
-    client.leave().then(() => {
-      console.log("👋 Left Agora due to backend call_ended");
-      navigate(-1); // Auto close call screen
-    });
+    voiceSocket.on("call_ended", handleBackendCallEnded);
+    return () => voiceSocket.off("call_ended", handleBackendCallEnded);
+  }, []);
 
-    if (voiceSocket.connected) {
-      voiceSocket.disconnect();
-    }
-  };
-
-  voiceSocket.on("call_ended", handleBackendCallEnded);
-
-  return () => {
-    voiceSocket.off("call_ended", handleBackendCallEnded);
-  };
-}, [client, localMicrophoneTrack, navigate]);
-
-  const formatTime = (sec) => {
-    const m = String(Math.floor(sec / 60)).padStart(2, "0");
-    const s = String(sec % 60).padStart(2, "0");
-    return `${m}:${s}`;
-  };
-
-  // ✅ END CALL (UNCHANGED)
+  // END CALL
   const endCall = () => {
     const endedBy = isUserSide ? "CUSTOMER" : "ASTROLOGER";
 
-    voiceSocket.emit("call_end", { roomId: roomID, endedBy });
+    voiceSocket.emit("call_end", { roomId, endedBy });
 
-    if (voiceSocket.connected) {
-      voiceSocket.disconnect();
-    }
-
-    if (localMicrophoneTrack) {
-      localMicrophoneTrack.stop();
-      localMicrophoneTrack.close();
-    }
+    localMicrophoneTrack?.stop();
+    localMicrophoneTrack?.close();
 
     client.leave().then(() => {
-      console.log("Call End:", endedBy);
-      navigate(-1);
+      setActiveCall(null);
     });
   };
 
+  const formatTime = (sec) =>
+    `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(
+      sec % 60
+    ).padStart(2, "0")}`;
+
+  // -----------------------------------------------
+  // ⭐ MINIMIZE FEATURE + DRAGGABLE MINI WINDOW
+  // -----------------------------------------------
+
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [position, setPosition] = useState({ x: 20, y: 20 });
+
+  let dragOffset = { x: 0, y: 0 };
+
+  const startDrag = (e) => {
+    dragOffset = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    };
+    document.addEventListener("mousemove", onDrag);
+    document.addEventListener("mouseup", stopDrag);
+  };
+
+  const onDrag = (e) => {
+    setPosition({
+      x: e.clientX - dragOffset.x,
+      y: e.clientY - dragOffset.y,
+    });
+  };
+
+  const stopDrag = () => {
+    document.removeEventListener("mousemove", onDrag);
+    document.removeEventListener("mouseup", stopDrag);
+  };
+
+  // -----------------------------------------------
+  // ⭐ UI RETURNS
+  // -----------------------------------------------
+
   return (
-    <div className={styles.callScreen}>
-      <div className={styles.callingContainer}>
-        <img
-          className={styles.avatar}
-          src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-          alt="Astrologer"
-        />
+    <>
+      {/* ⭐ MINI FLOATING WINDOW */}
+      {isMinimized && (
+        <div
+          className={styles.premiumMini}
+          style={{ top: position.y, left: position.x }}
+        >
+          {/* DRAG HANDLE */}
+          <div className={styles.dragHandle} onMouseDown={startDrag}>
+            <span className={styles.dragDot} />
+            <span className={styles.dragDot} />
+            <span className={styles.dragDot} />
+          </div>
 
-        <h2 className={styles.name}>{callerName}</h2>
+          {/* USER INFO */}
+          <div className={styles.miniInfo}>
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+              alt="avatar"
+            />
+            <div>
+              <p className={styles.miniName}>{callerName}</p>
+              <span className={styles.miniStatus}>
+                {callState === "connected" ? formatTime(timer) : "Calling..."}
+              </span>
+            </div>
+          </div>
 
-        <p className={styles.status}>
-          {callState === "connecting" && "Connecting…"}
-          {callState === "waiting" && `Waiting for ${callerName} to join…`}
-          {callState === "connected" && `Connected • ${formatTime(timer)}`}
-        </p>
+          {/* CONTROLS */}
+          <div className={styles.miniControls}>
+            <button
+              className={`${styles.miniBtn} ${!micOn ? styles.muted : ""}`}
+              onClick={() => setMic((m) => !m)}
+            >
+              {micOn ? <IoMic /> : <IoMicOff />}
+            </button>
 
-        {/* Remote Audio */}
-        {remoteUsers.map((user) => (
-          <RemoteUser key={user.uid} user={user} playAudio={true} />
-        ))}
+            <button
+              className={`${styles.miniBtn} ${styles.end}`}
+              onClick={endCall}
+            >
+              <IoCall />
+            </button>
 
-        <div className={styles.controls}>
-          <button
-            className={`${styles.controlBtn} ${styles.micBtn}`}
-            onClick={() => setMic((m) => !m)}
-          >
-            {micOn ? <IoMic size={28} /> : <IoMicOff size={28} />}
-          </button>
-
-          <button
-            className={`${styles.controlBtn} ${styles.endCallBtn}`}
-            onClick={endCall}
-          >
-            <IoCall size={32} />
-          </button>
+            <button
+              className={styles.miniBtn}
+              onClick={() => setIsMinimized(false)}
+            >
+              ⬆
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+
+      {/* ⭐ FULL SCREEN CALL UI */}
+      {!isMinimized && (
+        <div className={styles.fullscreenWrapper}>
+          <button
+            className={styles.minimizeBtn}
+            onClick={() => setIsMinimized(true)}
+          >
+            Minimize
+          </button>
+
+          <div className={styles.callingContainer}>
+            <img
+              className={styles.avatar}
+              src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+              alt="User"
+            />
+
+            <h2 className={styles.name}>{callerName}</h2>
+
+            <p className={styles.status}>
+              {callState === "connecting" && "Connecting…"}
+              {callState === "waiting" && `Waiting for ${callerName}…`}
+              {callState === "connected" && `Connected • ${formatTime(timer)}`}
+            </p>
+
+            {remoteUsers.map((user) => (
+              <RemoteUser key={user.uid} user={user} playAudio={true} />
+            ))}
+
+            <div className={styles.controls}>
+              <button
+                className={styles.controlBtn}
+                onClick={() => setMic((m) => !m)}
+              >
+                {micOn ? <IoMic size={28} /> : <IoMicOff size={28} />}
+              </button>
+
+              <button className={styles.endCallBtn} onClick={endCall}>
+                <IoCall size={32} />
+              </button>
+
+              <button
+                className={styles.chatBtn}
+                onClick={() => {
+                  if (isUserSide) {
+                    setIsMinimized(true);
+
+                    navigate(
+                      `/talk-to-astrologers/${activeCall.astrologerId}`,
+                      {
+                        state: {
+                          roomId: activeCall.chatRoomId, // SAME CHAT
+                          userId: activeCall.userId,
+                          astrologerId: activeCall.astrologerId,
+                          kundliId: activeCall.kundliId,
+                          fullName: activeCall.callerName,
+                          isUserSide: true,
+                        },
+                      }
+                    );
+                  } else {
+                      setIsMinimized(true);
+                    navigate(PATH.privateRoutes.ASTROLOGER_CHAT_USER_LIST.path);
+                  }
+                }}
+              >
+                💬
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
