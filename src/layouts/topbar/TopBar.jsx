@@ -209,22 +209,18 @@ const TopBar = () => {
           title: "Logout",
           onClick: handleLogout,
         },
-        {
-          title: "Logout From Other Devices",
-          onClick: handleLogout,
-        },
       ],
     },
   ];
 
   const BOTTOM_MENU = [
-    {
-      title: "Best Astrologers",
-      children: [
-        { title: "Vedic Astrologers", path: "/astro/vedic" },
-        { title: "Tarot Experts", path: "/astro/tarot" },
-      ],
-    },
+    // {
+    //   title: "Best Astrologers",
+    //   children: [
+    //     { title: "Vedic Astrologers", path: "/astro/vedic" },
+    //     { title: "Tarot Experts", path: "/astro/tarot" },
+    //   ],
+    // },
     { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
     { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
     { title: "Join Live", path: "/audience-live-streaming" },
@@ -314,7 +310,7 @@ const TopBar = () => {
             </button> */}
             <button
               className={styles.menuIcon}
-              onClick={() => setSidebarOpen(true)}
+              onClick={() => setSidebarOpen(!sidebarOpen)}
               aria-label="Hamburger Menu"
             >
               <FiMenu />

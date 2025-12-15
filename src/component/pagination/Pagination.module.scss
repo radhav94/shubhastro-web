@@ -34,3 +34,42 @@
     border-color: #f4b545;
   }
 }
+/* -------------------------
+   Mobile Pagination
+--------------------------*/
+@media (max-width: 576px) {
+  .paginationWrapper {
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px;
+    margin-top: 20px;
+  }
+
+  /* Prev / Next buttons */
+  .paginationWrapper > button {
+    flex: 1 1 45%;
+    padding: 10px 0;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+
+  .pages {
+    width: 100%;
+    justify-content: center;
+    gap: 6px;
+    order: 3;
+  }
+
+  .pages button {
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+    font-size: 12px;
+    border-radius: 50%;
+  }
+
+  .dots {
+    font-size: 12px;
+    padding: 0 4px;
+  }
+}

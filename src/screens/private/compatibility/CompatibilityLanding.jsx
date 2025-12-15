@@ -13,18 +13,6 @@ const CompatibilityLanding = () => {
 
       <DividerWithImage imageSrc={ShubhTalkLogo} />
 
-      {/* <section className={styles.introBox}>
-        <p>
-            You don't always get along like a blaze on flames. Sometimes the spark feels missing,
-          sometimes it feels magical. Astrology helps you understand the underlying cosmic
-          connection between two people.
-        </p>
-        <p>
-          Do you believe your heart might have jumped a beat when you met someone? Let the stars
-          guide you toward understanding whether this bond is meant to grow or fade.
-        </p>
-      </section> */}
-
       <div className={styles.introBox}><p>You don't always get along like a blaze on flames with people, but when you're with that "special person," you feel happy and in control of the situation. We encounter numerous people throughout life. One person would be your life partner out of all those who may be terrific friends or mentors for you. You must make the appropriate choice for that person. They must make you feel at home, never depressed or too uncared for.</p>
         <p>Do you believe your heart might have jumped a beat if you had met that particular someone? If so, find out what your Sun sign conspires to have you do by checking your zodiac sign love compatibility.</p></div>
         

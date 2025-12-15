@@ -90,3 +90,51 @@ $color-text-secondary: #6c757d;
   color: $color-text-secondary;
   transition: transform 0.3s ease;
 }
+@media (max-width: 576px) {
+  .blogCard {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px;
+    gap: 12px;
+    border-radius: 14px;
+  }
+
+  .imageContainer {
+    width: 88px;
+    height: 88px;
+    aspect-ratio: auto;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  .mainImage {
+    border-radius: 12px;
+  }
+
+  .contentContainer {
+    padding: 0;
+    flex-grow: 1;
+    justify-content: center;
+  }
+
+  .blogTitle {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 6px;
+
+    -webkit-line-clamp: 2;
+  }
+
+  .blogInfo {
+    margin-top: 4px;
+  }
+
+  .authorText {
+    font-size: 11px;
+  }
+
+  .arrowIcon {
+    font-size: 18px;
+  }
+}
