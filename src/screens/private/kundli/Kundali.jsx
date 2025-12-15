@@ -18,6 +18,7 @@ import {
   useFetchBirthDetailsQuery,
   useGetAstroDetailsQuery,
   useGetBasicPanchangQuery,
+  useGetPlanetsQuery,
 } from "../../../redux/api/kundli/kundliApi";
 import { useSelector } from "react-redux";
 import { skipToken } from "@reduxjs/toolkit/query";
@@ -48,17 +49,23 @@ const Kundali = () => {
 
   const payload = useSelector((state) => state?.form?.kundliPayload);
   const params = buildVedicParam(payload);
-  const {
-    data: birthDetails,
-    isSuccess: isBirth,
-    isLoading: birthLoading,
-  } = useFetchBirthDetailsQuery(payload ? { payload } : skipToken);
+  // const {
+  //   data: birthDetails,
+  //   isSuccess: isBirth,
+  //   isLoading: birthLoading,
+  // } = useFetchBirthDetailsQuery(payload ? { payload } : skipToken);
 
-  const {
-    data: birthPanchang,
-    isSuccess: isPanchang,
-    isLoading: panchangLoading,
-  } = useGetBasicPanchangQuery(payload ? { payload } : skipToken);
+  // const {
+  //   data: birthPanchang,
+  //   isSuccess: isPanchang,
+  //   isLoading: panchangLoading,
+  // } = useGetBasicPanchangQuery(payload ? { payload } : skipToken);  
+    /** 🌟 Load Planet Data */
+    const {
+      data:fullData,
+      isLoading: planetLoading,
+      isSuccess: planetSuccess,
+    } = useGetPlanetsQuery(params ? params : skipToken);
   const {
     data,
     isSuccess: isAstro,
@@ -71,8 +78,8 @@ const Kundali = () => {
       label: "Basic",
       content: (
         <BasicContent
-          birthDetails={birthDetails}
-          birthPanchang={birthPanchang}
+          birthDetails={fullData?.response}
+          birthPanchang={fullData?.response?.panchang}
           astroDetails={astroDetails}
         />
       ),
@@ -104,23 +111,23 @@ const Kundali = () => {
   ];
 
   useEffect(() => {
-    if (isBirth || isPanchang || isAstro) {
+    if (planetLoading || isAstro) {
       contentRef.current?.scrollIntoView({
         behavior: "smooth",
       });
     }
-  }, [isBirth, isPanchang, isAstro]);
+  }, [ planetLoading, isAstro]);
 
   return (
     <>
       <KundaliHeader />
 
       <PrimaryLoader
-        isLoading={birthLoading || panchangLoading || astroLoading}
+        isLoading={planetLoading || astroLoading}
       />
 
       <div ref={contentRef}>
-        {isBirth || isPanchang || isAstro ? (
+        {planetLoading || isAstro ? (
           <PrimaryTabs tabs={tabsData} />
         ) : (
           <HtmlContentCard sections={kundliInfoData} />
