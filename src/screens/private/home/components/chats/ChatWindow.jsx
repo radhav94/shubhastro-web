@@ -37,7 +37,7 @@ const ChatWindow = () => {
 
   const [showInactivityModal, setShowInactivityModal] = useState(false);
   const { isInactive, resetTimer } = useInactivityTimer(
-    3000,
+    120000,
     showInactivityModal
   );
 
