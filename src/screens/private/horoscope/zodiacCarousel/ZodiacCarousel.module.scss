@@ -1,6 +1,6 @@
 .mainCon {
   background: #fff9c9;
-  padding-top: 10px;
+  padding-top: 1rem;
 }
 .carouselWrapper {
   width: 100%;
@@ -42,7 +42,7 @@
 }
 
 .card {
-  flex: 0 0 calc((100% - 100px) / 4); // exactly 4 cards visible
+  flex: 0 0 calc((100% - 110px) / 4); // exactly 4 cards visible
   text-align: center;
   text-decoration: none;
   color: inherit;

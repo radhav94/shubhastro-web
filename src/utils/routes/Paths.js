@@ -47,7 +47,7 @@ import {
   TermsConditions,
   Notification,
   WalletTranscations,
-  AstrologerProfile
+  AstrologerProfile,
 } from "../../screens";
 import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
 import CompatibilityLanding from "../../screens/private/compatibility/CompatibilityLanding";
@@ -380,7 +380,7 @@ export const PATH = {
     PROFILE_ASTROLOGER: {
       path: "/astrologer/:id",
       element: AstrologerProfile,
-      header: false
+      header: false,
     },
 
     VIDEO_CALL: {
