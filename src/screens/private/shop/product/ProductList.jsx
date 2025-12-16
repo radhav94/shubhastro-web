@@ -14,7 +14,7 @@ const ProductList = () => {
   const shouldFetchEPooja = slug === "online-puja";
 
   const { data: epoojaData, isLoading } = useGetAllEPoojaQuery(
-    shouldFetchEPooja ? undefined : skipToken
+    shouldFetchEPooja ? { page: 1, limit: 34 } : skipToken
   );
 
   /**  Use RTK data OR fallback to categoryProducts */
@@ -33,13 +33,13 @@ const ProductList = () => {
             key={product._id || product.id}
             className={styles.card}
             onClick={() =>
-              navigate(`/shop/${slug}/${product.slug || product._id}`, {
+              navigate(`/shop/${slug}/${product.slug || product.ID}`, {
                 state: product,
               })
             }
           >
             <img
-              src={product.defaultImage || product.imgUrl}
+              src={product.defaultImage || product.image}
               alt={product.title || product.name}
             />
 
@@ -60,9 +60,16 @@ const ProductList = () => {
               <h3>{product.title || product.name}</h3>
 
               {/* Online puja price key = "price", normal category price key = minConsultantPrice */}
+              {
+                <p className={styles.place}>
+                  {product.district}, {product.state}
+                </p>
+              }
               <p>
-                Starting from ₹{" "}
-                {product.price || product.minConsultantPrice || "--"}
+                Description
+                {product.price || product.description.length > 20
+                  ? product.description.slice(0, 22) + "..."
+                  : product.description || "--"}
               </p>
             </div>
           </div>

@@ -38,7 +38,7 @@ const handleApiError = (error) => {
 
         setTimeout(() => {
           unAuthorizedCount = 0;
-          window.location.href = "/login"; 
+          window.location.href = "/login";
         }, 300);
       }
       break;
@@ -49,7 +49,7 @@ const handleApiError = (error) => {
     case 403:
       Toast.error(message || "Access Denied / Forbidden");
       break;
-      case 401:
+    case 401:
       Toast.error(message || "Access Denied / Forbidden");
       break;
     case 404:
@@ -101,7 +101,7 @@ export const privateRequestNew = createApi({
 
     return result;
   },
-  tagTypes: ["Kundlis"], // ⭐ Required
+  tagTypes: ["Kundlis"], //  Required
 
   endpoints: () => ({}), // EMPTY — endpoints later inject honge
 });
