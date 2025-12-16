@@ -6,6 +6,7 @@ import { useFetchAshtakvargaChartQuery } from "../../../../redux/api/kundli/asht
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { useGetAshtakvargaChartQuery } from "../../../../redux/api/kundli/kundliApi";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
+import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -48,7 +49,7 @@ const AshtakvargaContent = () => {
   );
 
   const svgUrl = (raw) =>
-    raw ? `data:image/svg+xml;utf8,${encodeURIComponent(raw)}` : null;
+    sanitizeSvg(raw) || null;
 
   const charts = [
     { title: "Sun", src: svgUrl(dSun.data) },

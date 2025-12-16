@@ -12,6 +12,7 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
 
 .mainContainer {
   font-family: $font-primary;
+  overflow: auto;
 }
 
 .grid {
@@ -24,7 +25,10 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   @media (min-width: 500px) {
     grid-template-columns: 1fr 1fr;
   }
-  @media (min-width: 968px) {
+  @media (min-width: 1024px) {
+    grid-template-columns:  1fr 1fr;
+  }
+  @media (min-width: 1440px) {
     grid-template-columns: 1fr 1fr 1fr;
   }
 }

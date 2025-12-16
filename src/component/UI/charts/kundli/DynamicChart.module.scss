@@ -5,74 +5,123 @@ $font-primary: "Poppins", sans-serif;
 // --- Container for All Charts ---
 .mainContainer {
   display: flex;
-  justify-content: space-between; //Equal space on left, between, and right
+  justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
   background-color: $color-app-bg;
-  padding: 0;
+  padding: 20px;
   margin: 0 auto;
   font-family: $font-primary;
   width: 100%;
   box-sizing: border-box;
+  gap: 20px; // Added consistent gap between cards
 }
 
 // --- Individual Chart Card ---
 .contentCard {
-  flex: 0 1 42%; //Slightly smaller width to balance spacing
-  max-width: 420px;
+  flex: 0 1 calc(50% - 10px); // Better flex calculation for desktop
+  // max-width: 420px;
   display: flex;
   flex-direction: column;
-  // align-items: center;
   background: none;
   border: none;
   box-shadow: none;
   padding: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 // --- Title ---
 .cardTitle {
-  font-size: 16px;
+  font-size: clamp(14px, 2.5vw, 16px); // Responsive font size
   font-weight: 700;
   color: $color-black;
-  margin-bottom: 8px;
-  text-align: start;
+  margin-bottom: 12px;
+  text-align: center;
+  line-height: 1.3;
 }
 
 // --- Chart Area ---
 .chartPlaceholder {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  border-radius: 8px;
+  border-radius: 12px;
   width: 100%;
-  min-height: 260px;
+  min-height: clamp(220px, 35vw, 280px); // Responsive height
+  padding: 20px;
+  background-color: #fff;
+  // box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  // border: 1px solid #e5e5e5;
 
   img {
     width: 100%;
     height: auto;
+    max-height: 100%;
     object-fit: contain;
     background-color: #fcf8e3;
+    border-radius: 8px;
   }
 
   p {
     color: #666;
     font-style: italic;
-    font-size: 14px;
+    font-size: clamp(12px, 2vw, 14px);
+    margin: 0;
+    text-align: center;
+    padding: 20px;
   }
 }
 
-// --- Responsive Layout ---
+// --- Tablet Styles ---
+@media (max-width: 1024px) {
+  .mainContainer {
+    padding: 16px;
+    gap: 16px;
+  }
+  
+  .contentCard {
+    flex: 0 1 48%;
+    max-width: 380px;
+  }
+}
+
+// --- Mobile Styles ---
 @media (max-width: 768px) {
   .mainContainer {
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 16px;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 16px;
+    gap: 24px;
   }
 
   .contentCard {
-    flex: 1 1 100%;
-    max-width: 100%;
+    flex: none;
+    max-width: none;
+    width: 100%;
+  }
+
+  .cardTitle {
+    margin-bottom: 16px;
+  }
+
+  .chartPlaceholder {
+    min-height: 240px;
+    padding: 24px;
+  }
+}
+
+// --- Small Mobile Styles ---
+@media (max-width: 480px) {
+  .mainContainer {
+    padding: 12px;
+    gap: 20px;
+  }
+
+  .chartPlaceholder {
+    min-height: 200px;
+    padding: 16px;
   }
 }
