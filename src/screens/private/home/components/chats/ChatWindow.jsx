@@ -147,6 +147,7 @@ const ChatWindow = () => {
     };
 
     const handleSocketError = (err) => {
+      console.log("hellllooooooooo",err);
       Toast.error(err?.message || "Connection Error!");
       setWaitingPopup(false);
     };

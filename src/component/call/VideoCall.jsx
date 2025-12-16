@@ -8,8 +8,17 @@ import {
   useRemoteUsers,
   useRTCClient,
 } from "agora-rtc-react";
+import {
+  IoMic,
+  IoMicOff,
+  IoVideocam,
+  IoVideocamOff,
+  IoArrowBack,
+  IoChatbubbleEllipses,
+} from "react-icons/io5";
+
 import AgoraRTC, { AgoraRTCProvider } from "agora-rtc-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "./VideoCalling.module.scss";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
@@ -34,11 +43,8 @@ const Basics = ({ client, callData }) => {
   const { activeCall, setActiveCall } = useCall();
   const navigate = useNavigate();
 
-  // ⭐ callData comes from global context
-  const { roomId, agoraToken, isUserSide, callerName, callType } = callData;
+  const { roomId, agoraToken, isUserSide, callerName } = callData;
 
-  // States
-  const [calling, setCalling] = useState(true);
   const [micOn, setMic] = useState(true);
   const [cameraOn, setCamera] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -46,24 +52,46 @@ const Basics = ({ client, callData }) => {
 
   const [position, setPosition] = useState({ x: 20, y: 20 });
 
+  const cleanupDoneRef = useRef(false);
+
   const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
   const { localCameraTrack } = useLocalCameraTrack(cameraOn);
-
   const appId = "5630460abdc141e3b2f8d9597752bd7d";
 
   // Join channel
   const { isConnected } = useJoin(
     { appid: appId, channel: roomId, token: agoraToken },
-    calling
+    true
   );
 
   const remoteUsers = useRemoteUsers();
 
+  const cleanupCall = async () => {
+    if (cleanupDoneRef.current) return;
+    cleanupDoneRef.current = true;
+
+    try {
+      localMicrophoneTrack?.stop();
+      localMicrophoneTrack?.close();
+
+      localCameraTrack?.stop();
+      localCameraTrack?.close();
+
+      if (client.connectionState !== "DISCONNECTED") {
+        await client.leave();
+      }
+    } catch (e) {
+      console.warn("Cleanup safe error:", e);
+    } finally {
+      setActiveCall(null);
+    }
+  };
+
   // Sync mic/camera
   useEffect(() => {
-    if (localMicrophoneTrack) localMicrophoneTrack.setEnabled(micOn);
-    if (localCameraTrack) localCameraTrack.setEnabled(cameraOn);
-  }, [micOn, cameraOn, localMicrophoneTrack, localCameraTrack]);
+    localMicrophoneTrack?.setEnabled(micOn);
+    localCameraTrack?.setEnabled(cameraOn);
+  }, [micOn, cameraOn]);
 
   // Publish tracks
   usePublish([
@@ -73,31 +101,38 @@ const Basics = ({ client, callData }) => {
 
   // Remote user left → end call
   useEffect(() => {
-    const handleRemoteLeave = () => {
-      localMicrophoneTrack?.stop();
-      localMicrophoneTrack?.close();
-      localCameraTrack?.stop();
-      localCameraTrack?.close();
-
-      client.leave().then(() => {
-        setActiveCall(null); // remove UI globally
-      });
-    };
-
-    client.on("user-left", handleRemoteLeave);
-    return () => client.off("user-left", handleRemoteLeave);
-  }, [client, localMicrophoneTrack, localCameraTrack]);
-
-  useEffect(() => {
-    if (isConnected) {
-      setHasJoinedOnce(true);
-    }
+    if (isConnected) setHasJoinedOnce(true);
   }, [isConnected]);
 
   useEffect(() => {
-  const handleSocketDisconnect = () => {
-    if (!roomId) return;
+    const onCallEnded = async () => {
+      await cleanupCall();
+    };
 
+    const onSocketDisconnect = async () => {
+      await cleanupCall();
+    };
+
+    voiceSocket.on("call_ended", onCallEnded);
+    voiceSocket.on("disconnect", onSocketDisconnect);
+
+    return () => {
+      voiceSocket.off("call_ended", onCallEnded);
+      voiceSocket.off("disconnect", onSocketDisconnect);
+    };
+  }, []);
+
+  useEffect(() => {
+    const onRemoteLeave = async () => {
+      await cleanupCall();
+    };
+
+    client.on("user-left", onRemoteLeave);
+    return () => client.off("user-left", onRemoteLeave);
+  }, []);
+
+  // End call manually
+  const endCall = async () => {
     const endedBy = isUserSide ? "CUSTOMER" : "ASTROLOGER";
 
     voiceSocket.emit("call_end", {
@@ -105,77 +140,49 @@ const Basics = ({ client, callData }) => {
       endedBy,
     });
 
-    setActiveCall(null);
+    await cleanupCall();
   };
 
-  voiceSocket.on("disconnect", handleSocketDisconnect);
-
-  return () => {
-    voiceSocket.off("disconnect", handleSocketDisconnect);
-  };
-}, [roomId, isUserSide]);
-useEffect(() => {
-  const handleCallEnded = () => {
-    localMicrophoneTrack?.stop();
-    localMicrophoneTrack?.close();
-    localCameraTrack?.stop();
-    localCameraTrack?.close();
-
-    client.leave().finally(() => {
-      setActiveCall(null);
-    });
-  };
-
-  voiceSocket.on("call_ended", handleCallEnded);
-
-  return () => {
-    voiceSocket.off("call_ended", handleCallEnded);
-  };
-}, []);
+    const dragOffset = useRef({ x: 0, y: 0 });
 
 
-
-  // End call manually
-  const endCall = async () => {
-    try {
-      const endedBy = isUserSide ? "CUSTOMER" : "ASTROLOGER";
-
-      voiceSocket.emit("call_end", { roomId, endedBy });
-
-      localMicrophoneTrack?.stop();
-      localMicrophoneTrack?.close();
-      localCameraTrack?.stop();
-      localCameraTrack?.close();
-
-      await client.leave();
-
-      setActiveCall(null); // global cleanup
-    } catch (err) {
-      console.error("Error ending call:", err);
-    }
-  };
-
-  let dragOffset = { x: 0, y: 0 };
 
   const startDrag = (e) => {
-    dragOffset = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
+    e.preventDefault(); // ⭐ REQUIRED FOR MOBILE
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    dragOffset.current = {
+      x: clientX - position.x,
+      y: clientY - position.y,
     };
+
     document.addEventListener("mousemove", onDrag);
     document.addEventListener("mouseup", stopDrag);
+
+    document.addEventListener("touchmove", onDrag, { passive: false });
+    document.addEventListener("touchend", stopDrag);
   };
 
   const onDrag = (e) => {
+    e.preventDefault(); // ⭐ mobile scroll stop
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
     setPosition({
-      x: e.clientX - dragOffset.x,
-      y: e.clientY - dragOffset.y,
+      x: clientX - dragOffset.current.x,
+      y: clientY - dragOffset.current.y,
     });
   };
 
   const stopDrag = () => {
     document.removeEventListener("mousemove", onDrag);
     document.removeEventListener("mouseup", stopDrag);
+
+    document.removeEventListener("touchmove", onDrag);
+    document.removeEventListener("touchend", stopDrag);
   };
 
   return (
@@ -185,6 +192,8 @@ useEffect(() => {
           className={styles.floatingMini}
           style={{ top: position.y, left: position.x }}
           onMouseDown={startDrag}
+          onTouchStart={startDrag}
+
         >
           {/* Header */}
           <div className={styles.miniHeader}>
@@ -243,8 +252,9 @@ useEffect(() => {
           <button
             className={styles.minimizeBtn}
             onClick={() => setIsMinimized(true)}
+            aria-label="Minimize"
           >
-            Minimize
+            <IoArrowBack size={20} />
           </button>
 
           {!hasJoinedOnce ? (
@@ -287,12 +297,22 @@ useEffect(() => {
               )}
 
               <div className={styles.controls}>
-                <button onClick={() => setMic((p) => !p)}>
-                  {micOn ? "🎙️" : "🔇"}
+                <button
+                  onClick={() => setMic((p) => !p)}
+                  className={styles.controlBtn}
+                >
+                  {micOn ? <IoMic size={20} /> : <IoMicOff size={20} />}
                 </button>
 
-                <button onClick={() => setCamera((p) => !p)}>
-                  {cameraOn ? "📷" : "🚫"}
+                <button
+                  onClick={() => setCamera((p) => !p)}
+                  className={styles.controlBtn}
+                >
+                  {cameraOn ? (
+                    <IoVideocam size={20} />
+                  ) : (
+                    <IoVideocamOff size={20} />
+                  )}
                 </button>
 
                 <button className={styles.endBtn} onClick={endCall}>
@@ -325,8 +345,9 @@ useEffect(() => {
                       );
                     }
                   }}
+                  aria-label="Open Chat"
                 >
-                  💬
+                  <IoChatbubbleEllipses size={20} />
                 </button>
               </div>
             </div>
