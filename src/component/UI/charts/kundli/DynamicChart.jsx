@@ -23,10 +23,13 @@ const DynamicChart = ({ title, src }) => {
     >
       {title && <h3 className={styles.cardTitle}>{title}</h3>}
 
-      <div
-        className={styles.chartPlaceholder}
-        dangerouslySetInnerHTML={{ __html: src }}
-      />
+      <div className={styles.chartPlaceholder}>
+        <img 
+          src={src} 
+          alt={title || "Chart"}
+          className={styles.chartImage}
+        />
+      </div>
     </motion.div>
   );
 };
