@@ -1,34 +1,101 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { SHOP_PRODUCTS } from "../data/productData";
 import styles from "./ProductList.module.scss";
 import { useGetAllEPoojaQuery } from "../../../../redux/api/astromall/epooja/epoojaApi";
 import { skipToken } from "@reduxjs/toolkit/query";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 const ProductList = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
 
-  /**  Only call RTK query when slug === "online-puja" */
   const shouldFetchEPooja = slug === "online-puja";
 
-  const { data: epoojaData, isLoading } = useGetAllEPoojaQuery(
-    shouldFetchEPooja ? { page: 1, limit: 34 } : skipToken
-  );
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
-  /**  Use RTK data OR fallback to categoryProducts */
+  const {
+    data: epoojaData,
+    isLoading,
+    isFetching,
+  } = useGetAllEPoojaQuery(shouldFetchEPooja ? { page, limit } : skipToken);
+
   const categoryProducts = SHOP_PRODUCTS[slug] || [];
-  const finalProducts = shouldFetchEPooja
-    ? epoojaData?.data || []
-    : categoryProducts;
+
+  const [products, setProducts] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+
+  const loadMoreRef = useRef(null);
+  const hasMoreRef = useRef(true);
+  const isFetchingRef = useRef(false);
+
+  const apiProducts = epoojaData?.data || [];
+  const meta = epoojaData?.meta;
+
+  useEffect(() => {
+    if (!shouldFetchEPooja) {
+      setProducts(categoryProducts);
+      return;
+    }
+
+    if (!apiProducts.length) return;
+
+    if (page === 1) {
+      setProducts(apiProducts);
+    } else {
+      setProducts((prev) => {
+        const ids = new Set(prev.map((p) => p._id));
+        const newItems = apiProducts.filter((p) => !ids.has(p._id));
+        return [...prev, ...newItems];
+      });
+    }
+
+    setHasMore(meta?.hasNextPage === true);
+  }, [apiProducts, page, shouldFetchEPooja]);
+
+  useEffect(() => {
+    hasMoreRef.current = hasMore;
+    isFetchingRef.current = isFetching;
+  }, [hasMore, isFetching]);
+
+  useEffect(() => {
+    if (!shouldFetchEPooja) return;
+
+    if (isFetching || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasMoreRef.current &&
+          !isFetchingRef.current &&
+          page < meta?.totalPages
+        ) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (loadMoreRef.current) {
+        observer.unobserve(loadMoreRef.current);
+      }
+    };
+  }, [page, hasMore, isFetching, shouldFetchEPooja, meta?.totalPages]);
 
   return (
     <div className={styles.wrapper}>
       <h2 className={styles.heading}>{location.state?.name}</h2>
 
       <div className={styles.grid}>
-        {finalProducts.map((product) => (
+        {products.map((product) => (
           <div
             key={product._id || product.id}
             className={styles.card}
@@ -43,7 +110,6 @@ const ProductList = () => {
               alt={product.title || product.name}
             />
 
-            {/* Book Button */}
             <button
               className={styles.bookBtn}
               onClick={(e) => {
@@ -59,15 +125,13 @@ const ProductList = () => {
             <div className={styles.content}>
               <h3>{product.title || product.name}</h3>
 
-              {/* Online puja price key = "price", normal category price key = minConsultantPrice */}
-              {
-                <p className={styles.place}>
-                  {product.district}, {product.state}
-                </p>
-              }
+              <p className={styles.place}>
+                {product.district}, {product.state}
+              </p>
+
               <p>
-                Description
-                {product.price || product.description.length > 20
+                Description{" "}
+                {product.description?.length > 20
                   ? product.description.slice(0, 22) + "..."
                   : product.description || "--"}
               </p>
@@ -75,6 +139,10 @@ const ProductList = () => {
           </div>
         ))}
       </div>
+
+      {shouldFetchEPooja && <div ref={loadMoreRef} style={{ height: 1 }} />}
+
+      <PrimaryLoader isLoading={isLoading} />
     </div>
   );
 };
