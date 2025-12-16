@@ -1,10 +1,13 @@
-/* ⭐ FULL SCREEN WRAPPER (IMPORTANT FIX) */
+/* ================================================= */
+/* ⭐ FULL SCREEN WRAPPER */
+/* ================================================= */
+
 .fullscreenWrapper {
   position: fixed;
   inset: 0;
   width: 100vw;
   height: 100vh;
-  overflow: hidden; /* no scroll */
+  overflow: hidden;
   background: linear-gradient(135deg, #0e002e, #220044, #40006a);
   display: flex;
   justify-content: center;
@@ -12,44 +15,30 @@
   z-index: 99999;
 }
 
-/* Voice Call UI */
+/* ================================================= */
+/* VOICE CALL UI */
+/* ================================================= */
+
 .callingContainer {
   text-align: center;
   animation: fadeIn 0.6s ease-in-out;
 }
 
-/* Minimize Button ALWAYS on top */
-.minimizeBtn {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: none;
-  background: rgba(255,255,255,0.18);
-  color: #fff;
-  font-size: 13px;
-  cursor: pointer;
-  z-index: 100000; /* always on top */
-}
-
-/* Avatar image */
 .avatar {
   width: 120px;
   height: 120px;
   border-radius: 50%;
   border: 4px solid #fff;
-  margin-bottom: 12px;
+  margin: 0 auto 12px;
+  display: block;
 }
 
-/* User Name */
 .name {
   font-size: 24px;
   font-weight: 700;
   margin-top: 12px;
 }
 
-/* Status text */
 .status {
   font-size: 16px;
   margin-top: 4px;
@@ -57,7 +46,10 @@
   animation: pulseText 2s infinite;
 }
 
-/* Controls area */
+/* ================================================= */
+/* CONTROLS */
+/* ================================================= */
+
 .controls {
   display: flex;
   justify-content: center;
@@ -65,7 +57,6 @@
   margin-top: 45px;
 }
 
-/* Call buttons */
 .controlBtn {
   width: 62px;
   height: 62px;
@@ -74,72 +65,63 @@
   border: none;
   color: #fff;
   cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.endCallBtn {
-  background: #ff1744;
-  box-shadow: 0 3px 10px rgba(255,0,0,0.3);
-}
-
-/* ⭐ MINI WINDOW */
-.floatingMini {
-  position: fixed;
-  width: 180px;
-  height: 140px;
-  bottom: 20px;
-  right: 20px;
-  background: rgba(20,0,40,0.85);
-  border-radius: 14px;
-  padding: 10px;
-  color: #fff;
-  z-index: 100010; /* above everything */
-
-  border: 1px solid rgba(255,255,255,0.25);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.45);
-  backdrop-filter: blur(8px);
-}
-
-.miniHeader {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  margin-bottom: 6px;
-}
-
-.miniBody {
-  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: 0.2s ease;
 }
 
-.miniEndBtn {
-  margin-top: 6px;
-  width: 100%;
-  padding: 6px;
-  background: #ff1744;
-  border: none;
-  border-radius: 6px;
+.controlBtn:hover {
+  transform: scale(1.08);
+}
+
+.endBtn {
+  background: #ff3d5a;
   color: #fff;
+  padding: 12px 18px;
+  border-radius: 50px;
+  border: none;
   cursor: pointer;
 }
 
-
-/* Pulse Animation */
-@keyframes pulseText {
-  0%,100% { opacity: 0.7; }
-  50% { opacity: 1; }
+.chatBtn {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
-/* Fade-in Animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ================================================= */
+/* MINIMIZE BUTTON */
+/* ================================================= */
+
+.minimizeBtn {
+  position: fixed;
+  top: 16px;
+  left: 16px;   /* ⭐ LEFT */
+  right: auto;  /* ⭐ IMPORTANT: reset */
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  cursor: pointer;
+  z-index: 100000;
 }
+
+
+/* ================================================= */
+/* ⭐ PREMIUM MINI WINDOW (DRAGGABLE) */
+/* ================================================= */
 
 .premiumMini {
-  position: fixed;
+  position: fixed;              /* ⭐ REQUIRED */
   width: 260px;
   padding: 14px;
   background: rgba(30, 0, 60, 0.65);
@@ -149,9 +131,17 @@
   box-shadow: 0 12px 30px rgba(0,0,0,0.55);
   z-index: 100000;
   user-select: none;
+  touch-action: none;           /* ⭐ MOBILE DRAG FIX */
 }
 
-/* Drag handle */
+.premiumMini:active {
+  cursor: grabbing;
+}
+
+/* ================================================= */
+/* DRAG HANDLE */
+/* ================================================= */
+
 .dragHandle {
   display: flex;
   justify-content: center;
@@ -167,7 +157,10 @@
   border-radius: 50%;
 }
 
-/* Info */
+/* ================================================= */
+/* MINI INFO */
+/* ================================================= */
+
 .miniInfo {
   display: flex;
   align-items: center;
@@ -191,7 +184,10 @@
   opacity: 0.75;
 }
 
-/* Controls */
+/* ================================================= */
+/* MINI CONTROLS */
+/* ================================================= */
+
 .miniControls {
   display: flex;
   justify-content: space-between;
@@ -209,20 +205,83 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
 }
 
 .miniBtn:hover {
   transform: scale(1.08);
-  background: rgba(255,255,255,0.25);
 }
 
 .miniBtn.muted {
   background: rgba(255,60,60,0.7);
 }
 
-.miniBtn.end {
-  background: #ff1744;
-  box-shadow: 0 4px 12px rgba(255,23,68,0.45);
+.expandBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  cursor: pointer;
 }
 
+/* ================================================= */
+/* 📱 MOBILE RESPONSIVE (DRAG STILL WORKS) */
+/* ================================================= */
+
+@media (max-width: 768px) {
+
+  .premiumMini {
+    width: 220px;
+    padding: 12px;
+      touch-action: none;     /* ⭐ REQUIRED */
+
+  }
+
+  .miniInfo {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+  }
+
+  .miniInfo img {
+    width: 48px;
+    height: 48px;
+  }
+
+  .miniControls {
+    margin-top: 12px;
+  }
+
+  .miniBtn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .miniName {
+    font-size: 13px;
+  }
+
+  .miniStatus {
+    font-size: 11px;
+  }
+}
+
+/* ================================================= */
+/* ANIMATIONS */
+/* ================================================= */
+
+@keyframes pulseText {
+  0%,100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -8,9 +8,14 @@ import {
   useRTCClient,
 } from "agora-rtc-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AgoraRTC, { AgoraRTCProvider } from "agora-rtc-react";
-import { IoMic, IoMicOff, IoCall } from "react-icons/io5";
+import {
+  IoMic,
+  IoMicOff,
+  IoArrowBack,
+  IoChatbubbleEllipses,
+} from "react-icons/io5";
 import styles from "./VoiceCall.module.scss";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
@@ -31,11 +36,14 @@ export const AgoraVoiceCalling = ({ callData }) => {
 const CallingUI = ({ client, callData }) => {
   const { activeCall, setActiveCall } = useCall();
   const navigate = useNavigate();
-
   const { roomId, callerName, agoraToken, isUserSide } = callData;
-
-  const [calling] = useState(true);
   const [micOn, setMic] = useState(true);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [callState, setCallState] = useState("connecting");
+  const [timer, setTimer] = useState(0);
+  const [position, setPosition] = useState({ x: 20, y: 20 });
+
+  const cleanupDoneRef = useRef(false);
 
   const isConnected = useIsConnected();
   const remoteUsers = useRemoteUsers();
@@ -44,27 +52,42 @@ const CallingUI = ({ client, callData }) => {
 
   const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
 
-  // JOIN CALL
   useJoin(
     {
       appid: appId,
       channel: roomId,
       token: agoraToken,
     },
-    calling
+    true
   );
 
   usePublish(localMicrophoneTrack ? [localMicrophoneTrack] : []);
 
-  // CALL STATUS
-  const [callState, setCallState] = useState("connecting");
-  const [timer, setTimer] = useState(0);
+  const cleanupCall = async () => {
+    if (cleanupDoneRef.current) return;
+    cleanupDoneRef.current = true;
+
+    try {
+      localMicrophoneTrack?.stop();
+      localMicrophoneTrack?.close();
+
+      if (client.connectionState !== "DISCONNECTED") {
+        await client.leave();
+      }
+    } catch (e) {
+      console.warn("Cleanup safe error:", e);
+    } finally {
+      setActiveCall(null);
+    }
+  };
+
+  useEffect(() => {
+    localMicrophoneTrack?.setEnabled(micOn);
+  }, [micOn]);
 
   useEffect(() => {
     if (!isConnected) return;
-
-    if (remoteUsers.length > 0) setCallState("connected");
-    else setCallState("waiting");
+    setCallState(remoteUsers.length > 0 ? "connected" : "waiting");
   }, [isConnected, remoteUsers.length]);
 
   useEffect(() => {
@@ -74,48 +97,33 @@ const CallingUI = ({ client, callData }) => {
     } else {
       setTimer(0);
     }
-
     return () => clearInterval(interval);
   }, [callState]);
 
-  // REMOTE USER LEFT
   useEffect(() => {
-    const handleRemoteLeave = () => {
-      localMicrophoneTrack?.stop();
-      localMicrophoneTrack?.close();
-
-      client.leave().then(() => setActiveCall(null));
+    const onCallEnded = async () => {
+      await cleanupCall();
     };
 
-    client.on("user-left", handleRemoteLeave);
-    return () => client.off("user-left", handleRemoteLeave);
-  }, [client, localMicrophoneTrack]);
-
-  // BACKEND CALL ENDED
-  useEffect(() => {
-    const handleBackendCallEnded = () => {
-      localMicrophoneTrack?.stop();
-      localMicrophoneTrack?.close();
-
-      client.leave().then(() => setActiveCall(null));
+    const onSocketDisconnect = async () => {
+      await cleanupCall();
     };
 
-    voiceSocket.on("call_ended", handleBackendCallEnded);
-    return () => voiceSocket.off("call_ended", handleBackendCallEnded);
+    voiceSocket.on("call_ended", onCallEnded);
+    voiceSocket.on("disconnect", onSocketDisconnect);
+
+    return () => {
+      voiceSocket.off("call_ended", onCallEnded);
+      voiceSocket.off("disconnect", onSocketDisconnect);
+    };
   }, []);
 
-  // END CALL
-  const endCall = () => {
+  const endCall = async () => {
     const endedBy = isUserSide ? "CUSTOMER" : "ASTROLOGER";
 
     voiceSocket.emit("call_end", { roomId, endedBy });
 
-    localMicrophoneTrack?.stop();
-    localMicrophoneTrack?.close();
-
-    client.leave().then(() => {
-      setActiveCall(null);
-    });
+    await cleanupCall();
   };
 
   const formatTime = (sec) =>
@@ -123,56 +131,61 @@ const CallingUI = ({ client, callData }) => {
       sec % 60
     ).padStart(2, "0")}`;
 
-  // -----------------------------------------------
-  // ⭐ MINIMIZE FEATURE + DRAGGABLE MINI WINDOW
-  // -----------------------------------------------
-
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [position, setPosition] = useState({ x: 20, y: 20 });
-
-  let dragOffset = { x: 0, y: 0 };
+  const dragOffset = useRef({ x: 0, y: 0 });
 
   const startDrag = (e) => {
-    dragOffset = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
+    e.preventDefault(); // ⭐ REQUIRED FOR MOBILE
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    dragOffset.current = {
+      x: clientX - position.x,
+      y: clientY - position.y,
     };
+
     document.addEventListener("mousemove", onDrag);
     document.addEventListener("mouseup", stopDrag);
+
+    document.addEventListener("touchmove", onDrag, { passive: false });
+    document.addEventListener("touchend", stopDrag);
   };
 
   const onDrag = (e) => {
+    e.preventDefault(); // ⭐ mobile scroll stop
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
     setPosition({
-      x: e.clientX - dragOffset.x,
-      y: e.clientY - dragOffset.y,
+      x: clientX - dragOffset.current.x,
+      y: clientY - dragOffset.current.y,
     });
   };
 
   const stopDrag = () => {
     document.removeEventListener("mousemove", onDrag);
     document.removeEventListener("mouseup", stopDrag);
-  };
 
-  // -----------------------------------------------
-  // ⭐ UI RETURNS
-  // -----------------------------------------------
+    document.removeEventListener("touchmove", onDrag);
+    document.removeEventListener("touchend", stopDrag);
+  };
 
   return (
     <>
-      {/* ⭐ MINI FLOATING WINDOW */}
       {isMinimized && (
         <div
           className={styles.premiumMini}
           style={{ top: position.y, left: position.x }}
+          onMouseDown={startDrag}
+          onTouchStart={startDrag}
         >
-          {/* DRAG HANDLE */}
-          <div className={styles.dragHandle} onMouseDown={startDrag}>
+          <div className={styles.dragHandle}>
             <span className={styles.dragDot} />
             <span className={styles.dragDot} />
             <span className={styles.dragDot} />
           </div>
 
-          {/* USER INFO */}
           <div className={styles.miniInfo}>
             <img
               src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
@@ -186,40 +199,37 @@ const CallingUI = ({ client, callData }) => {
             </div>
           </div>
 
-          {/* CONTROLS */}
           <div className={styles.miniControls}>
+           
             <button
-              className={`${styles.miniBtn} ${!micOn ? styles.muted : ""}`}
-              onClick={() => setMic((m) => !m)}
+              onClick={() => setMic((p) => !p)}
+              className={styles.controlBtn}
             >
-              {micOn ? <IoMic /> : <IoMicOff />}
+              {micOn ? <IoMic size={20} /> : <IoMicOff size={20} />}
+            </button>
+
+            <button className={styles.endBtn} onClick={endCall}>
+              End
             </button>
 
             <button
-              className={`${styles.miniBtn} ${styles.end}`}
-              onClick={endCall}
-            >
-              <IoCall />
-            </button>
-
-            <button
-              className={styles.miniBtn}
+              className={styles.expandBtn}
               onClick={() => setIsMinimized(false)}
             >
-              ⬆
+              ⤢
             </button>
           </div>
         </div>
       )}
 
-      {/* ⭐ FULL SCREEN CALL UI */}
       {!isMinimized && (
         <div className={styles.fullscreenWrapper}>
           <button
             className={styles.minimizeBtn}
             onClick={() => setIsMinimized(true)}
+            aria-label="Minimize"
           >
-            Minimize
+            <IoArrowBack size={20} />
           </button>
 
           <div className={styles.callingContainer}>
@@ -249,8 +259,8 @@ const CallingUI = ({ client, callData }) => {
                 {micOn ? <IoMic size={28} /> : <IoMicOff size={28} />}
               </button>
 
-              <button className={styles.endCallBtn} onClick={endCall}>
-                <IoCall size={32} />
+              <button className={styles.endBtn} onClick={endCall}>
+                End
               </button>
 
               <button
@@ -273,12 +283,13 @@ const CallingUI = ({ client, callData }) => {
                       }
                     );
                   } else {
-                      setIsMinimized(true);
+                    setIsMinimized(true);
                     navigate(PATH.privateRoutes.ASTROLOGER_CHAT_USER_LIST.path);
                   }
                 }}
+                aria-label="Open Chat"
               >
-                💬
+                <IoChatbubbleEllipses size={20} />
               </button>
             </div>
           </div>
