@@ -95,8 +95,8 @@ const basic = {
   data: {
     Name: userDetails?.name || "--",
 
-    Date: birthDetails?.birth_dasa_time || "--",
-    Time: birthDetails?.current_dasa_time?.trim() || "--",
+    Date: formatDate(userDetails.day, userDetails.month, userDetails.year) || "--",
+    Time: formatTime(userDetails.hour, userDetails.minute) || "--",
 
     Place: userDetails?.birthPlace || "--",
 
