@@ -20,7 +20,7 @@ $font-primary: "Poppins", sans-serif;
 // --- Individual Chart Card ---
 .contentCard {
   flex: 0 1 calc(50% - 10px); // Better flex calculation for desktop
-  // max-width: 420px;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
   background: none;
@@ -62,6 +62,7 @@ $font-primary: "Poppins", sans-serif;
     object-fit: contain;
     background-color: #fcf8e3;
     border-radius: 8px;
+    display: block;
   }
 
   p {

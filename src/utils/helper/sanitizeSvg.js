@@ -3,7 +3,7 @@ export function sanitizeSvg(raw = "") {
 
   let svg = raw;
 
-  //  Remove wrapping quotes
+  // Remove wrapping quotes
   if (
     (svg.startsWith('"') && svg.endsWith('"')) ||
     (svg.startsWith("'") && svg.endsWith("'"))
@@ -11,29 +11,32 @@ export function sanitizeSvg(raw = "") {
     svg = svg.slice(1, -1);
   }
 
-  //  Fix escaped quotes FIRST (very important)
+  // Fix escaped quotes FIRST (very important)
   svg = svg.replace(/\\+"/g, '"');
 
-  //  Decode HTML entities (&quot;, &lt;, &gt;, &amp;)
+  // Decode HTML entities (&quot;, &lt;, &gt;, &amp;)
   const textarea = document.createElement("textarea");
   textarea.innerHTML = svg;
   svg = textarea.value;
 
-  //  Remove XML / DOCTYPE / comments
+  // Remove XML / DOCTYPE / comments
   svg = svg
     .replace(/<\?xml.*?\?>/gi, "")
     .replace(/<!DOCTYPE.*?>/gi, "")
     .replace(/<!--.*?-->/gs, "");
 
-  //  NOW remove newlines & extra spaces (LAST step)
+  // Remove newlines & extra spaces
   svg = svg
     .replace(/\r?\n|\r/g, "")
     .replace(/\s{2,}/g, " ")
     .trim();
 
-    svg = svg.match(/<svg[\s\S]*<\/svg>/i)?.[0] || "";
+  // Extract SVG element
+  svg = svg.match(/<svg[\s\S]*<\/svg>/i)?.[0] || "";
 
+  if (!svg) return "";
 
-
-  return svg;
+  // Encode the SVG for data URL
+  const encodedSvg = encodeURIComponent(svg);
+  return `data:image/svg+xml;utf8,${encodedSvg}`;
 }
