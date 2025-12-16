@@ -23,6 +23,10 @@
 .right {
   max-width: 600px;
 }
+.title {
+  font-size: 25px;
+  font-weight: 700;
+}
 
 .price {
   font-size: 22px;
@@ -49,4 +53,10 @@
   &:hover {
     background: #e55c00;
   }
+}
+
+.place {
+  line-height: 1.6;
+  color: hsla(0, 1%, 33%, 0.418);
+  margin-bottom: 1rem;
 }

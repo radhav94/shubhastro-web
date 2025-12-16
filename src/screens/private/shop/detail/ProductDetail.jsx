@@ -7,8 +7,9 @@ import { useGetSingleEPoojaQuery } from "../../../../redux/api/astromall/epooja/
 
 const ProductDetail = () => {
   const navigate = useNavigate();
-  const { slug, productSlug } = useParams();
   const location = useLocation();
+  console.log("Location:", location);
+  const { slug, productSlug } = useParams();
 
   let productFromState = location.state;
   if (!productFromState) {
@@ -30,13 +31,14 @@ const ProductDetail = () => {
       return {
         id: p._id,
         name: p.title,
-        image: p.imgUrl,
+        image: p.image,
         price: p.price,
         description: p.description,
         benefit: p.benefit,
         duration: p.duration,
         procedure: p.procedure,
         fullData: p,
+        place: `${p.district}, ${p.state}`,
       };
     }
 
@@ -83,9 +85,12 @@ const ProductDetail = () => {
 
         {/* RIGHT CONTENT */}
         <div className={styles.right}>
-          <h2>{product.name}</h2>
+          <h2 className={styles.title}>{product.name}</h2>
 
-          <p className={styles.price}>Starting from ₹ {product.price}</p>
+          {product?.price && (
+            <p className={styles.price}>Starting from ₹ {product.price}</p>
+          )}
+          {product?.place && <p className={styles.place}>{product.place}</p>}
 
           {/* Description */}
           <div
