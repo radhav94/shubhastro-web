@@ -65,6 +65,7 @@ import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm
 import FinalPay from "../../screens/private/payment/FinalPay";
 import ConsultantList from "../../screens/private/shop/consultant/ConsultantList";
 import PaymentScreen from "../../screens/private/shop/consultant/PaymentScreen";
+import PlayScreen from "../../screens/private/shop/detail/playscreen/PlayScreen";
 import ProductDetail from "../../screens/private/shop/detail/ProductDetail";
 import ProductList from "../../screens/private/shop/product/ProductList";
 import BuisnessBreakupTarot from "../../screens/private/tarot/buisnessBreakupTarot/BuisnessBreakupTarot";
@@ -355,6 +356,10 @@ export const PATH = {
     CONSULTANT_LIST: {
       path: "/shop/:slug/:productSlug/consultant",
       element: ConsultantList,
+    },
+    PLAYSCREEN: {
+      path: "/shop/:slug/:productSlug/play",
+      element: PlayScreen,
     },
     CONSULTANT_PAYMENT: {
       path: "/consultant/payment",

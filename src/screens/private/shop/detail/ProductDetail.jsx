@@ -1,14 +1,14 @@
-import React, { useEffect, useMemo } from "react";
+import React, { use, useEffect, useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styles from "./ProductDetail.module.scss";
 import { getToken } from "../../../../utils/token";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useGetSingleEPoojaQuery } from "../../../../redux/api/astromall/epooja/epoojaApi";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 const ProductDetail = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  console.log("Location:", location);
   const { slug, productSlug } = useParams();
 
   let productFromState = location.state;
@@ -19,7 +19,7 @@ const ProductDetail = () => {
 
   const isPooja = slug === "online-puja";
 
-  const { data: epoojaData } = useGetSingleEPoojaQuery(
+  const { data: epoojaData, isLoading } = useGetSingleEPoojaQuery(
     isPooja ? productSlug : skipToken
   );
 
@@ -39,6 +39,7 @@ const ProductDetail = () => {
         procedure: p.procedure,
         fullData: p,
         place: `${p.district}, ${p.state}`,
+        video: p.video_url,
       };
     }
 
@@ -69,70 +70,76 @@ const ProductDetail = () => {
       );
       return navigate("/login", { state: { from: location.pathname } });
     }
-
-    navigate(`/shop/${slug}/${productSlug}/consultant?uID=${token}`, {
-      state: { product: product.fullData },
-    });
+    if (isPooja) {
+      navigate(`/shop/${slug}/${productSlug}/play?uID=${token}`);
+    } else {
+      navigate(`/shop/${slug}/${productSlug}/consultant?uID=${token}`, {
+        state: { product: product.fullData },
+      });
+    }
   };
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.flex}>
-        {/* LEFT IMAGE */}
-        <div className={styles.left}>
-          <img src={product.image} alt={product.name} />
-        </div>
+    <>
+      <PrimaryLoader isLoading={isLoading} />
+      <div className={styles.wrapper}>
+        <div className={styles.flex}>
+          {/* LEFT IMAGE */}
+          <div className={styles.left}>
+            <img src={product.image} alt={product.name} />
+          </div>
 
-        {/* RIGHT CONTENT */}
-        <div className={styles.right}>
-          <h2 className={styles.title}>{product.name}</h2>
+          {/* RIGHT CONTENT */}
+          <div className={styles.right}>
+            <h2 className={styles.title}>{product.name}</h2>
 
-          {product?.price && (
-            <p className={styles.price}>Starting from ₹ {product.price}</p>
-          )}
-          {product?.place && <p className={styles.place}>{product.place}</p>}
+            {product?.price && (
+              <p className={styles.price}>Starting from ₹ {product.price}</p>
+            )}
+            {product?.place && <p className={styles.place}>{product.place}</p>}
 
-          {/* Description */}
-          <div
-            className={styles.shortDesc}
-            dangerouslySetInnerHTML={{ __html: product.description }}
-          />
+            {/* Description */}
+            <div
+              className={styles.shortDesc}
+              dangerouslySetInnerHTML={{ __html: product.description }}
+            />
 
-          {/* ONLY FOR ONLINE PUJA — show extra sections */}
-          {isPooja && (
-            <div className={styles.extraSections}>
-              {/* Benefit */}
-              {product.benefit && (
-                <div className={styles.shortDesc}>
-                  <h3 className="font-bold text-lg">Benefits</h3>
-                  <p>{product.benefit}</p>
-                </div>
-              )}
+            {/* ONLY FOR ONLINE PUJA — show extra sections */}
+            {isPooja && (
+              <div className={styles.extraSections}>
+                {/* Benefit */}
+                {product.benefit && (
+                  <div className={styles.shortDesc}>
+                    <h3 className="font-bold text-lg">Benefits</h3>
+                    <p>{product.benefit}</p>
+                  </div>
+                )}
 
-              {/* Duration */}
-              {product.duration && (
-                <div className={styles.shortDesc}>
-                  <h3 className="font-bold text-lg">Duration</h3>
-                  <p>{product.duration}</p>
-                </div>
-              )}
+                {/* Duration */}
+                {product.duration && (
+                  <div className={styles.shortDesc}>
+                    <h3 className="font-bold text-lg">Duration</h3>
+                    <p>{product.duration}</p>
+                  </div>
+                )}
 
-              {/* Procedure */}
-              {product.procedure && (
-                <div className={styles.shortDesc}>
-                  <h3 className="font-bold text-lg">Procedure</h3>
-                  <p>{product.procedure}</p>
-                </div>
-              )}
-            </div>
-          )}
+                {/* Procedure */}
+                {product.procedure && (
+                  <div className={styles.shortDesc}>
+                    <h3 className="font-bold text-lg">Procedure</h3>
+                    <p>{product.procedure}</p>
+                  </div>
+                )}
+              </div>
+            )}
 
-          <button className={styles.bookBtn} onClick={handleBookNow}>
-            Book Now
-          </button>
+            <button className={styles.bookBtn} onClick={handleBookNow}>
+              Book Now
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
