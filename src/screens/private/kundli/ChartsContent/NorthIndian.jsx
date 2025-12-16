@@ -5,6 +5,7 @@ import { useGetChartQuery } from "../../../../redux/api/kundli/kundliApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
+import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
 
 const NorthIndian = () => {
   const payload = useSelector((state) => state?.form?.kundliPayload);
@@ -74,7 +75,7 @@ const NorthIndian = () => {
   /** ↓↓↓ Build safe SVG URLs ↓↓↓ */
 
   const svgUrl = (raw) =>
-    raw ? `data:image/svg+xml;utf8,${encodeURIComponent(raw)}` : null;
+    sanitizeSvg(raw) || null;
 
   const charts = [
     { title: "Chalit", src: svgUrl(dChalit.data) },

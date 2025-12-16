@@ -2,7 +2,7 @@ import styles from './DynamicChart.module.scss'
 import { motion } from "framer-motion";
 
 const sectionVariants = {
-  hidden: { opacity: 0.6, y:5  },
+  hidden: { opacity: 0.6, y: 5 },
   visible: {
     opacity: 1,
     y: 0,
@@ -10,25 +10,25 @@ const sectionVariants = {
   },
 };
 
-const DynamicChart = ({ title, src, alt="Astrological Chart" }) => {
-    return (
-    <div>
-    {src && <motion.div
-        className={styles.contentCard}
-        variants={sectionVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.3 }}
+const DynamicChart = ({ title, src }) => {
+  if (!src) return null;
+
+  return (
+    <motion.div
+      className={styles.contentCard}
+      variants={sectionVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
     >
-        {title && <h3 className={styles.cardTitle}>{title}</h3>}
-        <div className={styles.chartPlaceholder}>
-            {src && (
-                <img src={src} alt={alt} />
-            )}
-        </div>
-    </motion.div>}
-    </div>
+      {title && <h3 className={styles.cardTitle}>{title}</h3>}
 
-)}
+      <div
+        className={styles.chartPlaceholder}
+        dangerouslySetInnerHTML={{ __html: src }}
+      />
+    </motion.div>
+  );
+};
 
-export default DynamicChart
+export default DynamicChart;

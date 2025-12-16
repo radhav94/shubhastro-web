@@ -145,3 +145,54 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
     font-size: 14px;
   }
 }
+/* =========================
+   MOBILE TABLE VIEW 
+   ========================= */
+
+@media (max-width: 768px) {
+  .tableContainer {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .detailsTable {
+    min-width: 520px; /* 👈 forces horizontal scroll */
+    font-size: 13px;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: auto;
+    width: 100%;
+  }
+
+  .detailsTable th,
+  .detailsTable td {
+    padding: 8px 10px;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .detailsTable th {
+    font-size: 12px;
+    font-weight: 600;
+    background-color: #f7f7f7;
+  }
+
+  .detailsTable td {
+    font-size: 13px;
+  }
+
+  /* softer grid like screenshot */
+  .detailsTable th,
+  .detailsTable td {
+    border: 1px solid #e6e6e6;
+  }
+
+  .contentCard {
+    padding: 16px;
+  }
+
+  .cardTitle {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+}

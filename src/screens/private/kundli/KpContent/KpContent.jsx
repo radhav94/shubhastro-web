@@ -11,6 +11,7 @@ import {
 import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
+import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -126,9 +127,8 @@ const KpContent = () => {
     ? Object.values(data.response).filter((item) => typeof item === "object")
     : [];
 
-  const svgChalitUrl = chalitChart
-    ? `data:image/svg+xml;utf8,${encodeURIComponent(chalitChart)}`
-    : null;
+  const svgChalitUrl = sanitizeSvg(chalitChart) || null;
+
 
   return (
     <div className={styles.mainContainer}>

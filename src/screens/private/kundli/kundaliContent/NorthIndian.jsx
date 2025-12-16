@@ -12,6 +12,7 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import { useSelector } from "react-redux";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
+import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
 
 export const planetaryHeaders = [
   { label: "Planet", key: "name" },
@@ -100,13 +101,12 @@ const NorthIndian = () => {
 
   const loading = planetLoading || birthLoading || navLoading;
 
-  const svgBirthUrl = birthChart
-    ? `data:image/svg+xml;utf8,${encodeURIComponent(birthChart)}`
-    : null;
+  const svgBirthUrl = birthChart || null;
 
   const svgNavamsaUrl = navamsaChart
     ? `data:image/svg+xml;utf8,${encodeURIComponent(navamsaChart)}`
     : null;
+
 
   return (
     <div>
@@ -116,10 +116,10 @@ const NorthIndian = () => {
         <div className={styles.mainContainer}>
           <div className={styles.grid}>
             {/* D1: Lagna Chart */}
-            <DynamicChart title="Lagna / Ascendant Chart" src={svgBirthUrl} />
+            <DynamicChart title="Lagna / Ascendant Chart" src={sanitizeSvg(svgBirthUrl)} />
 
             {/* D9: Navamsa */}
-            <DynamicChart title="Navamsa Chart" src={svgNavamsaUrl} />
+            <DynamicChart title="Navamsa Chart" src={sanitizeSvg(navamsaChart)} />
           </div>
 
           {/* Planetary Table */}
