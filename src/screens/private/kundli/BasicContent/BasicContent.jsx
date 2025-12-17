@@ -186,7 +186,7 @@ const panchangTable = {
         </PrimaryText>
         <div className=" mr-2 ml-2" />
         <PrimaryText isSemiBold size_20 color={appColors.tri}>
-          ({birthDetails?.day} - {birthDetails?.month} - {birthDetails?.year})
+          ({userDetails?.day} - {userDetails?.month} - {userDetails?.year})
         </PrimaryText>
       </div>
 

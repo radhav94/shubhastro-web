@@ -86,6 +86,19 @@ export const dashaApi = vedicApi.injectEndpoints({
         },
       }),
     }),
+    getSadeSatiTable: builder.query({
+      query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
+        url: "extended-horoscope/sade-sati-table",
+        params: {
+          dob,
+          tob,
+          lat,
+          lon,
+          tz,
+          lang,
+        },
+      }),
+    }),
     getMatchMaking: builder.query({
       query: ({ formData }) => ({
         url: "matching/ashtakoot",
@@ -114,5 +127,6 @@ export const {
   useGetMangalDoshQuery,
   useGetPitraDoshQuery,
   useGetSadesatiQuery,
+  useGetSadeSatiTableQuery,
   useGetMatchMakingQuery,
 } = dashaApi;

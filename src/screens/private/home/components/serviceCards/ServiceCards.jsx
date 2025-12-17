@@ -97,7 +97,7 @@ const ServiceCards = () => {
                 }}
               >
                 <img
-                  src={iconMap[service.slug] || iconMap["numerology"]}
+                  src={service.icon || iconMap["numerology"]}
                   alt={service.title}
                   className={styles.icon}
                 />

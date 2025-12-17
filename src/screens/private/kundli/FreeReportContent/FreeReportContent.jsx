@@ -3,6 +3,7 @@ import KaalSarp from "./kaalsarp/KaalSarp";
 import Mangal from "./mangal/Mangal";
 import Manglik from "./manglik/Manglik";
 import Pitra from "./pitra/Pitra";
+import SadeSati from "./sadesati/SadeSati";
 
 const FreeReport = ({ data }) => {
   const tabs = [
@@ -60,6 +61,11 @@ const FreeReport = ({ data }) => {
       label: "Pitra",
       value: "pitra",
       component: Pitra,
+    },
+    {
+      label: "Sade Sati",
+      value: "Sade Sati",
+      component: SadeSati,
     },
   ];
 
