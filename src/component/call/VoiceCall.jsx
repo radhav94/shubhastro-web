@@ -21,48 +21,19 @@ import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
 import { PATH } from "../../utils/routes/Paths";
 
-// export const AgoraVoiceCalling = ({ callData }) => {
-//   const clientRef = useRef(null);
-
-//   if (!clientRef.current) {
-//     clientRef.current = AgoraRTC.createClient({
-//       mode: "rtc",
-//       codec: "vp8",
-//     });
-//   }
-
-//   return (
-//     <AgoraRTCProvider client={clientRef.current}>
-//       <CallingUI client={clientRef.current} callData={callData} />
-//     </AgoraRTCProvider>
-//   );
-// };
-
-
 export const AgoraVoiceCalling = ({ callData }) => {
-  const [clientKey, setClientKey] = useState(0);
-
-  // 🔥 whenever room changes → force new Agora client
-  useEffect(() => {
-    setClientKey((k) => k + 1);
-  }, [callData.roomId]);
+  const client = useRTCClient(
+    AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
+  );
 
   return (
-    <AgoraRTCProvider
-      key={clientKey}
-      client={AgoraRTC.createClient({
-        mode: "rtc",
-        codec: "vp8",
-      })}
-    >
-      <CallingUI callData={callData} />
+    <AgoraRTCProvider client={client}>
+      <CallingUI client={client} callData={callData} />
     </AgoraRTCProvider>
   );
 };
 
-
-
-const CallingUI = ({  callData }) => {
+const CallingUI = ({ client, callData }) => {
   const { activeCall, setActiveCall } = useCall();
   const navigate = useNavigate();
   const { roomId, callerName, agoraToken, isUserSide } = callData;
@@ -73,8 +44,6 @@ const CallingUI = ({  callData }) => {
   const [position, setPosition] = useState({ x: 20, y: 20 });
 
   const cleanupDoneRef = useRef(false);
-  const client = useRTCClient();
-
 
   const isConnected = useIsConnected();
   const remoteUsers = useRemoteUsers();
@@ -83,80 +52,34 @@ const CallingUI = ({  callData }) => {
 
   const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
 
-useJoin(
-  {
-    appid: appId,
-    channel: roomId,
-    token: agoraToken,
-  },
-  Boolean(roomId && agoraToken)
-);
+  useJoin(
+    {
+      appid: appId,
+      channel: roomId,
+      token: agoraToken,
+    },
+    true
+  );
 
+  usePublish(localMicrophoneTrack ? [localMicrophoneTrack] : []);
 
+  const cleanupCall = async () => {
+    if (cleanupDoneRef.current) return;
+    cleanupDoneRef.current = true;
 
-  useEffect(() => {
-  return () => {
-    (async () => {
-      try {
-        localMicrophoneTrack?.stop();
-        localMicrophoneTrack?.close();
+    try {
+      localMicrophoneTrack?.stop();
+      localMicrophoneTrack?.close();
 
-        if (client && client.connectionState !== "DISCONNECTED") {
-          await client.unpublish();
-          await client.leave();
-        }
-
-        client?.removeAllListeners();
-      } catch (e) {
-        console.warn("Agora unmount cleanup", e);
+      if (client.connectionState !== "DISCONNECTED") {
+        await client.leave();
       }
-    })();
-  };
-}, []);
-
-
- useEffect(() => {
-  if (!isConnected || !localMicrophoneTrack) return;
-
-  client.publish([localMicrophoneTrack]);
-
-  return () => {
-    if (client.connectionState === "CONNECTED") {
-      client.unpublish([localMicrophoneTrack]);
+    } catch (e) {
+      console.warn("Cleanup safe error:", e);
+    } finally {
+      setActiveCall(null);
     }
   };
-}, [isConnected, localMicrophoneTrack]);
-
-
-
-  useEffect(() => {
-  cleanupDoneRef.current = false;
-}, [roomId]);
-
-
-const cleanupCall = async () => {
-  if (cleanupDoneRef.current) return;
-  cleanupDoneRef.current = true;
-
-  try {
-    localMicrophoneTrack?.stop();
-    localMicrophoneTrack?.close();
-
-    if (client?.connectionState !== "DISCONNECTED") {
-      await client.unpublish();
-      await client.leave();
-    }
-
-    client?.removeAllListeners();
-  } catch (e) {
-    console.warn("cleanup error", e);
-  } finally {
-    setActiveCall(null);
-  }
-};
-
-
-
 
   useEffect(() => {
     localMicrophoneTrack?.setEnabled(micOn);
@@ -164,10 +87,8 @@ const cleanupCall = async () => {
 
   useEffect(() => {
     if (!isConnected) return;
-    setCallState(remoteUsers ? "connected" : "waiting");
-
-    console.log("remoteUsers----",remoteUsers);
-  }, [isConnected, remoteUsers.length]);
+    setCallState(remoteUsers? "connected" : "waiting");
+  }, [isConnected, remoteUsers]);
 
   useEffect(() => {
     let interval;
@@ -179,52 +100,23 @@ const cleanupCall = async () => {
     return () => clearInterval(interval);
   }, [callState]);
 
-  // useEffect(() => {
-  //   const onCallEnded = async () => {
-  //     await cleanupCall();
-  //   };
+  useEffect(() => {
+    const onCallEnded = async () => {
+      await cleanupCall();
+    };
 
-  //   const onSocketDisconnect = async () => {
-  //     await cleanupCall();
-  //   };
-
-  //   voiceSocket.on("call_ended", onCallEnded);
-  //   voiceSocket.on("disconnect", onSocketDisconnect);
-
-  //   return () => {
-  //     voiceSocket.off("call_ended", onCallEnded);
-  //     voiceSocket.off("disconnect", onSocketDisconnect);
-  //   };
-  // }, []);
-
-  // ONLY for CUSTOMER
-useEffect(() => {
-  const onCallEnded = async () => {
-    await cleanupCall(); // Agora cleanup only
-  };
-
-  voiceSocket.on("call_ended", onCallEnded);
-
-  // 🔑 IMPORTANT: socket disconnect ONLY for customer
-  if (isUserSide) {
     const onSocketDisconnect = async () => {
       await cleanupCall();
     };
 
+    voiceSocket.on("call_ended", onCallEnded);
     voiceSocket.on("disconnect", onSocketDisconnect);
 
     return () => {
       voiceSocket.off("call_ended", onCallEnded);
       voiceSocket.off("disconnect", onSocketDisconnect);
     };
-  }
-
-  return () => {
-    voiceSocket.off("call_ended", onCallEnded);
-  };
-}, [isUserSide]);
-
-
+  }, []);
 
   const endCall = async () => {
     const endedBy = isUserSide ? "CUSTOMER" : "ASTROLOGER";
