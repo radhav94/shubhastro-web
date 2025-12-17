@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useLayoutEffect } from "react";
 import styles from "./ChatWindow.module.scss";
 import {
   IoArrowBack,
@@ -18,9 +18,9 @@ import { useCall } from "../../../../../context/CallContext";
 import { useRef } from "react";
 
 const ChatWindow = () => {
+  const messagesRef = useRef(null);
   const navigate = useNavigate();
   const { activeCall, setActiveCall } = useCall();
-  const bottomRef = useRef(null);
 
   const { state } = useLocation();
   const { userId, astrologerId, roomId, fullName, isUserSide, kundliId } =
@@ -117,9 +117,13 @@ const ChatWindow = () => {
     });
   };
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [finalMsgs]);
+  useLayoutEffect(() => {
+    const container = messagesRef.current;
+    if (!container) return;
+
+    // ALWAYS keep latest message visible
+    container.scrollTop = container.scrollHeight;
+  }, [finalMsgs.length, isTyping]);
 
   // Single socket listener for both audio + video
   useEffect(() => {
@@ -235,7 +239,7 @@ const ChatWindow = () => {
         {error && <div className={styles.errorBox}>⚠️ {error}</div>}
 
         {/* Messages */}
-        <div className={styles.messages}>
+        <div className={styles.messages} ref={messagesRef}>
           {finalMsgs.map((msg, i) => (
             <div
               key={i}
@@ -320,7 +324,6 @@ const ChatWindow = () => {
           onDisconnect={handleDisconnect}
           onContinue={handleContinue}
         />
-        <div ref={bottomRef} />
       </div>
     </div>
   );

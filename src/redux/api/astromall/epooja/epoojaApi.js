@@ -2,7 +2,7 @@ import { privateRequestNew } from "../../../../services/appServices/privateReque
 
 export const epoojaApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
-    // GET ALL Epooja
+    // GET ALL Darshan
     getAllEPooja: builder.query({
       query: ({ page = 1, limit = 10 }) => {
         const params = new URLSearchParams({
@@ -17,13 +17,38 @@ export const epoojaApi = privateRequestNew.injectEndpoints({
       },
     }),
 
-    // GET Single Epooja
+    // GET Single Darshan
     getSingleEPooja: builder.query({
       query: (ID) => ({
         url: `liveDarshan/${ID}`,
       }),
     }),
+
+    // GET ALL Epooja
+    getAllOldEPooja: builder.query({
+      query: (categoryId = "69328474e62280851507e1ef") => ({
+        url: "ePoojas/all",
+        params: {
+          categoryId,
+        },
+      }),
+    }),
+
+    // GET Single Epooja
+    getSingleOldEPooja: builder.query({
+      query: (poojaId) => ({
+        url: "ePoojas/single",
+        params: {
+          poojaId,
+        },
+      }),
+    }),
   }),
 });
 
-export const { useGetAllEPoojaQuery, useGetSingleEPoojaQuery } = epoojaApi;
+export const {
+  useGetAllEPoojaQuery,
+  useGetSingleEPoojaQuery,
+  useGetAllOldEPoojaQuery,
+  useGetSingleOldEPoojaQuery,
+} = epoojaApi;

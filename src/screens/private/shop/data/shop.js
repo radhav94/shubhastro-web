@@ -1,5 +1,15 @@
 export const SHOP_CATEGORIES = [
   {
+    id: 99,
+    name: "Live Darshan",
+    tag: "Watch Live | Daily Aarti",
+    slug: "live-darshan",
+    image:
+      "https://cdn.pixabay.com/photo/2020/08/02/11/20/chennai-to-tirupati-package-5457397_960_720.jpg",
+    description:
+      "Experience divine connection from anywhere with Live Darshan. Join real-time temple aartis, special poojas, and sacred rituals streamed live to bring peace, positivity, and blessings into your life.",
+  },
+  {
     id: 1,
     name: "VIP E-Pooja",
     tag: "Starts at INR 1100",
@@ -18,6 +28,7 @@ export const SHOP_CATEGORIES = [
       "https://aws.astrotalk.com/images/149fef6f-8254-4ee9-b116-17f6b662149d.jpeg",
     description: "",
   },
+
   {
     id: 17,
     name: "Spell",

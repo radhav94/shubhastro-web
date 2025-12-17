@@ -98,6 +98,7 @@
 
   scroll-behavior: smooth;
   overscroll-behavior: contain;
+  // padding-bottom: calc(var(--chat-input-height) + 8px);
 }
 
 /* ================= MESSAGE BUBBLES ================= */
