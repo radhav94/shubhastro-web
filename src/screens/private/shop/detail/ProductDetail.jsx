@@ -1,9 +1,12 @@
-import React, { use, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styles from "./ProductDetail.module.scss";
 import { getToken } from "../../../../utils/token";
 import { skipToken } from "@reduxjs/toolkit/query";
-import { useGetSingleEPoojaQuery } from "../../../../redux/api/astromall/epooja/epoojaApi";
+import {
+  useGetSingleEPoojaQuery,
+  useGetSingleOldEPoojaQuery,
+} from "../../../../redux/api/astromall/epooja/epoojaApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 const ProductDetail = () => {
@@ -11,21 +14,34 @@ const ProductDetail = () => {
   const location = useLocation();
   const { slug, productSlug } = useParams();
 
+  //Restore state on refresh
   let productFromState = location.state;
   if (!productFromState) {
     const saved = localStorage.getItem("pendingProductDetail");
     if (saved) productFromState = JSON.parse(saved);
   }
 
-  const isPooja = slug === "online-puja";
+  // SLUG TYPES
+  const isLiveDarshan = slug === "live-darshan";
+  const isOnlinePuja = slug === "online-puja";
 
+  // APIs
+
+  //  Live Darshan
   const { data: epoojaData, isLoading } = useGetSingleEPoojaQuery(
-    isPooja ? productSlug : skipToken
+    isLiveDarshan ? productSlug : skipToken
   );
 
-  /** Build unified product object */
+  //  Online Puja
+  const { data: oldEpoojaData } = useGetSingleOldEPoojaQuery(
+    isOnlinePuja ? productSlug : skipToken
+  );
+
+  // BUILD PRODUCT
+
   const product = useMemo(() => {
-    if (isPooja && epoojaData?.data) {
+    //  LIVE DARSHAN (DO NOT TOUCH)
+    if (isLiveDarshan && epoojaData?.data) {
       const p = epoojaData.data;
 
       return {
@@ -37,13 +53,31 @@ const ProductDetail = () => {
         benefit: p.benefit,
         duration: p.duration,
         procedure: p.procedure,
-        fullData: p,
         place: `${p.district}, ${p.state}`,
         video: p.video_url,
+        fullData: p,
       };
     }
 
-    // fallback product (normal AstroMall)
+    //  ONLINE PUJA
+    if (isOnlinePuja && oldEpoojaData?.data) {
+      const p = oldEpoojaData.data;
+
+      return {
+        id: p._id,
+        name: p.title,
+        image:
+          "https://images.unsplash.com/photo-1625072290979-cac544181be8?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        price: p.price,
+        description: p.description,
+        benefit: p.benefit,
+        duration: p.duration,
+        procedure: p.procedure,
+        fullData: p,
+      };
+    }
+
+    //  FALLBACK (OTHER CATEGORIES)
     if (productFromState) {
       return {
         id: productFromState.id,
@@ -56,9 +90,17 @@ const ProductDetail = () => {
     }
 
     return null;
-  }, [isPooja, epoojaData, productFromState]);
+  }, [
+    isLiveDarshan,
+    isOnlinePuja,
+    epoojaData,
+    oldEpoojaData,
+    productFromState,
+  ]);
 
   if (!product) return <div>No product found</div>;
+
+  //BOOK NOW
 
   const handleBookNow = () => {
     const token = getToken();
@@ -70,18 +112,25 @@ const ProductDetail = () => {
       );
       return navigate("/login", { state: { from: location.pathname } });
     }
-    if (isPooja) {
+
+    //  LIVE DARSHAN
+    if (isLiveDarshan) {
       navigate(`/shop/${slug}/${productSlug}/play?uID=${token}`);
-    } else {
-      navigate(`/shop/${slug}/${productSlug}/consultant?uID=${token}`, {
-        state: { product: product.fullData },
-      });
+      return;
     }
+
+    //  ONLINE PUJA + OTHERS
+    navigate(`/shop/${slug}/${productSlug}/consultant?uID=${token}`, {
+      state: { product: product.fullData },
+    });
   };
+
+  /* ---------- UI ---------- */
 
   return (
     <>
       <PrimaryLoader isLoading={isLoading} />
+
       <div className={styles.wrapper}>
         <div className={styles.flex}>
           {/* LEFT IMAGE */}
@@ -96,6 +145,7 @@ const ProductDetail = () => {
             {product?.price && (
               <p className={styles.price}>Starting from ₹ {product.price}</p>
             )}
+
             {product?.place && <p className={styles.place}>{product.place}</p>}
 
             {/* Description */}
@@ -104,29 +154,26 @@ const ProductDetail = () => {
               dangerouslySetInnerHTML={{ __html: product.description }}
             />
 
-            {/* ONLY FOR ONLINE PUJA — show extra sections */}
-            {isPooja && (
+            {/* ONLINE PUJA EXTRA SECTIONS */}
+            {isOnlinePuja && (
               <div className={styles.extraSections}>
-                {/* Benefit */}
                 {product.benefit && (
                   <div className={styles.shortDesc}>
-                    <h3 className="font-bold text-lg">Benefits</h3>
+                    <h3>Benefits</h3>
                     <p>{product.benefit}</p>
                   </div>
                 )}
 
-                {/* Duration */}
                 {product.duration && (
                   <div className={styles.shortDesc}>
-                    <h3 className="font-bold text-lg">Duration</h3>
+                    <h3>Duration</h3>
                     <p>{product.duration}</p>
                   </div>
                 )}
 
-                {/* Procedure */}
                 {product.procedure && (
                   <div className={styles.shortDesc}>
-                    <h3 className="font-bold text-lg">Procedure</h3>
+                    <h3>Procedure</h3>
                     <p>{product.procedure}</p>
                   </div>
                 )}

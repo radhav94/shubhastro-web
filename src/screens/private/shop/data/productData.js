@@ -97,7 +97,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1755088660143,
       latestImage: "",
       shortDescription:
-        "<p>Reduces Saturn&rsquo;s negative effects | bring relief | from struggles, delays, and karmic challenges.</p>",
+        "Reduces Saturn&rsquo;s negative effects | bring relief | from struggles, delays, and karmic challenges.",
       productRank: 1,
       sequence: 2,
       fakeImageIcon:
@@ -136,7 +136,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>🪔 Shani Dev ke prabhav se hone wali relationship problems shanti hoti hai<br />\r\n📉 Delay, struggle aur failures kam hone lagte hain<br />\r\n🛡️ Karmic burden aur dushprabhav se milti hai raksha<br />\r\n🙏 Life mein aata hai balance, pyaar, dhairya aur safalta</p>\r\n\r\n<p>Yeh Pooja, Shani Dosh aur Sade Sati ke asar ko shaant karne ke liye kiya jaane wala vishesh anushthan hai, jisme Shani Dev ka vidhivat poojan kiya jaata hai 🪷</p>\r\n\r\n<p>Yeh pooja karwane se Shani ke dushprabhav kam hote hain, karm sudharta hai aur jeevan mein sukh aur samriddhi aane lagti hai 🌟</p>\r\n\r\n<p>Chahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏</p>",
+        "🪔 Shani Dev ke prabhav se hone wali relationship problems shanti hoti hai<br />\r\n📉 Delay, struggle aur failures kam hone lagte hain<br />\r\n🛡️ Karmic burden aur dushprabhav se milti hai raksha<br />\r\n🙏 Life mein aata hai balance, pyaar, dhairya aur safalta\r\n\r\nYeh Pooja, Shani Dosh aur Sade Sati ke asar ko shaant karne ke liye kiya jaane wala vishesh anushthan hai, jisme Shani Dev ka vidhivat poojan kiya jaata hai 🪷\r\n\r\nYeh pooja karwane se Shani ke dushprabhav kam hote hain, karm sudharta hai aur jeevan mein sukh aur samriddhi aane lagti hai 🌟\r\n\r\nChahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -254,7 +254,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/ca4d9a72-efa1-47b8-8f10-ca013e8bd6df.jpg",
       shortDescription:
-        "<p>🕉️ Har tarah ke grah dosh aur negativity khatam<br />\r\n🔥 Sharirik, mansik aur aarthik peedaon se milti hai mukti<br />\r\n🌊 Life mein aati hai shanti, safalta aur spiritual upliftment<br />\r\n🙏 Bante hain rukhe kaam aur badhta hai sukh-samriddhi</p>\r\n\r\n<p>Yeh Pooja, Bhagwan Shiv ko samarpit ek shaktishaali aur pavitra anushthan hai, jisme Rudra Sukt, Shiv Mantra aur Abhishek ke dwara shuddhi aur kripa prapt ki jaati hai 🔱</p>\r\n\r\n<p>Yeh pooja karwane se jeevan ke sabhi pehluon mein positive changes aate hain &mdash; health, relationships, career aur inner peace mein sudhaar hota hai 🌺</p>\r\n\r\n<p>Chahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏</p>",
+        "🕉️ Har tarah ke grah dosh aur negativity khatam<br />\r\n🔥 Sharirik, mansik aur aarthik peedaon se milti hai mukti<br />\r\n🌊 Life mein aati hai shanti, safalta aur spiritual upliftment<br />\r\n🙏 Bante hain rukhe kaam aur badhta hai sukh-samriddhi\r\n\r\nYeh Pooja, Bhagwan Shiv ko samarpit ek shaktishaali aur pavitra anushthan hai, jisme Rudra Sukt, Shiv Mantra aur Abhishek ke dwara shuddhi aur kripa prapt ki jaati hai 🔱\r\n\r\nYeh pooja karwane se jeevan ke sabhi pehluon mein positive changes aate hain &mdash; health, relationships, career aur inner peace mein sudhaar hota hai 🌺\r\n\r\nChahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏",
       productRank: 1,
       sequence: 1,
       fakeImageIcon:
@@ -270,7 +270,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Powerful Shiva Pooja for peace, protection, and removal of life problems.</p>",
+        "Powerful Shiva Pooja for peace, protection, and removal of life problems.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -386,7 +386,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1753680269925,
       latestImage: null,
       shortDescription:
-        "<p>🌑 Rahu-Ketu problems dur hoti hai<br />\r\n🔮 Badluck, confusion aur delay dur hote hain<br />\r\n🪔 Career, health &amp; relationships mein aata hai stability<br />\r\n🙏 Grah dosh se mukti milti hota hai</p>\r\n\r\n<p>Yeh Pooja, Rahu aur Ketu ke dosh ko shaant karne ke liye kiya jaane wala vishesh anushthan hai, jisme Shiv ji aur Chhaya Grahon ka aavahan kiya jaata hai 🔱</p>\r\n\r\n<p>Yeh pooja karwane se Rahu-Ketu ke dosh se hone wale negative effects door hote hain aur jeevan mein sukh-shanti ka aagman hota hai 🌟</p>\r\n\r\n<p>Chahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏</p>",
+        "🌑 Rahu-Ketu problems dur hoti hai<br />\r\n🔮 Badluck, confusion aur delay dur hote hain<br />\r\n🪔 Career, health &amp; relationships mein aata hai stability<br />\r\n🙏 Grah dosh se mukti milti hota hai\r\n\r\nYeh Pooja, Rahu aur Ketu ke dosh ko shaant karne ke liye kiya jaane wala vishesh anushthan hai, jisme Shiv ji aur Chhaya Grahon ka aavahan kiya jaata hai 🔱\r\n\r\nYeh pooja karwane se Rahu-Ketu ke dosh se hone wale negative effects door hote hain aur jeevan mein sukh-shanti ka aagman hota hai 🌟\r\n\r\nChahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏",
       productRank: 2,
       sequence: 1,
       fakeImageIcon: "",
@@ -423,7 +423,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Pooja to remove <em>Rahu-Ketu dosh</em>, reduce <em>obstacles</em>, and bring <em>mental peace</em> with blessings of <em>Lord Shiva</em>.</p>",
+        "Pooja to remove <em>Rahu-Ketu dosh</em>, reduce <em>obstacles</em>, and bring <em>mental peace</em> with blessings of <em>Lord Shiva</em>.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: "https://www.youtube.com/watch?v=0SBKcItAZAA",
@@ -539,7 +539,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1753680216989,
       latestImage: null,
       shortDescription:
-        "<p>🐍 Kaal Sarp Dosh ke asar se milti hai mukti<br />\r\n🌸 Life mein aati hai shanti aur success<br />\r\n🙏 Negative energy aur dosh khatam hote hain<br />\r\n🕊️ Anxiety aur tension dur hoti hai</p>\r\n\r\n<p>Yeh Pooja, Kaal Sarp Dosh se mukti aur jeevan mein sukh aur samriddhi ke liye kiya jaane wala ek vishesh anushthan hai, jisme Bhagwan Shiva aur Kaal Sarp Devta ka aavahan kiya jaata hai 🪷</p>\r\n\r\n<p>Yeh pooja karwane se aapke jeevan se Kaal Sarp Dosh aur uske bure asar door ho jaate hain aur safalta aur shanti milti hai 💫</p>\r\n\r\n<p>Chahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏</p>",
+        "🐍 Kaal Sarp Dosh ke asar se milti hai mukti<br />\r\n🌸 Life mein aati hai shanti aur success<br />\r\n🙏 Negative energy aur dosh khatam hote hain<br />\r\n🕊️ Anxiety aur tension dur hoti hai\r\n\r\nYeh Pooja, Kaal Sarp Dosh se mukti aur jeevan mein sukh aur samriddhi ke liye kiya jaane wala ek vishesh anushthan hai, jisme Bhagwan Shiva aur Kaal Sarp Devta ka aavahan kiya jaata hai 🪷\r\n\r\nYeh pooja karwane se aapke jeevan se Kaal Sarp Dosh aur uske bure asar door ho jaate hain aur safalta aur shanti milti hai 💫\r\n\r\nChahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏",
       productRank: 2,
       sequence: 1,
       fakeImageIcon: "",
@@ -564,7 +564,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Pooja to reduce Kaal Sarp Dosh and remove life obstacles caused by Rahu-Ketu.</p>",
+        "Pooja to reduce Kaal Sarp Dosh and remove life obstacles caused by Rahu-Ketu.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -680,7 +680,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1753680288881,
       latestImage: null,
       shortDescription:
-        "<p>💍 Shaadi mein aa rahi rukawate door hone lagti hain<br />\r\n🙏 Achhe rishton ke liye raah banne lagti hai<br />\r\n🌸 Grah dosh aur negative energy dur hota hai<br />\r\n🕊️ Man aur parivaar mein aata hai sukh aur shanti</p>\r\n\r\n<p>Yeh Pooja, vivaah mein ho rahi deri ya badhaon ko door karne ke liye kiya jaane wala ek vishesh anushthan hai 🪷</p>\r\n\r\n<p>Yeh pooja karwane se rishton mein samasyaayein kam hoti hain aur vivaah yog banne lagte hain ❤️</p>\r\n\r\n<p>Chahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏</p>",
+        "💍 Shaadi mein aa rahi rukawate door hone lagti hain<br />\r\n🙏 Achhe rishton ke liye raah banne lagti hai<br />\r\n🌸 Grah dosh aur negative energy dur hota hai<br />\r\n🕊️ Man aur parivaar mein aata hai sukh aur shanti\r\n\r\nYeh Pooja, vivaah mein ho rahi deri ya badhaon ko door karne ke liye kiya jaane wala ek vishesh anushthan hai 🪷\r\n\r\nYeh pooja karwane se rishton mein samasyaayein kam hoti hain aur vivaah yog banne lagte hain ❤️\r\n\r\nChahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏",
       productRank: 3,
       sequence: 2,
       fakeImageIcon: null,
@@ -712,7 +712,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Pooja to remove problems in marriage and help you get the right life partner.</p>",
+        "Pooja to remove problems in marriage and help you get the right life partner.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -828,7 +828,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1753680173961,
       latestImage: "",
       shortDescription:
-        "<p>💖 Rishtey mein pyaar aur samajh badhne lagti hai<br />\r\n🌸 Man-mutav aur dooriyan door hoti hain<br />\r\n🙏 Grah dosh aur negative energy khatam hota hai<br />\r\n🕊️ Rishton mein aati hai shanti aur samarpan</p>\r\n\r\n<p>Yeh Pooja, aapke rishton ko strong aur long-lasting banane ke liye kiya jaane wala vishesh anushthan hai 🪷</p>\r\n\r\n<p>Yeh pooja karwane se rishtey mein pyaar aur vishwas badhta hai aur har kathinai door hoti hai ❤️</p>\r\n\r\n<p>Chahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏</p>",
+        "💖 Rishtey mein pyaar aur samajh badhne lagti hai<br />\r\n🌸 Man-mutav aur dooriyan door hoti hain<br />\r\n🙏 Grah dosh aur negative energy khatam hota hai<br />\r\n🕊️ Rishton mein aati hai shanti aur samarpan\r\n\r\nYeh Pooja, aapke rishton ko strong aur long-lasting banane ke liye kiya jaane wala vishesh anushthan hai 🪷\r\n\r\nYeh pooja karwane se rishtey mein pyaar aur vishwas badhta hai aur har kathinai door hoti hai ❤️\r\n\r\nChahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏",
       productRank: 10,
       sequence: 10,
       fakeImageIcon: "",
@@ -860,7 +860,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Strengthen love, remove misunderstandings, and restore peace in your relationship.</p>",
+        "Strengthen love, remove misunderstandings, and restore peace in your relationship.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -976,7 +976,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1746507756339,
       latestImage: "",
       shortDescription:
-        "<p>🔥 Rishtey aur vivah mein badha dur hoti hai<br />\r\n💔 Gusse, clashes aur misunderstanding mein hoti hai kami<br />\r\n🪔 Grah shanti ke saath jeevan mein aata hai sukh aur samriddhi<br />\r\n🙏 Mangal Dev ki kripa se rishton aur career mein milti hai stability</p>\r\n\r\n<p>Yeh Pooja, Mangal Dosh ke dushprabhav ko shaant karne ke liye kiya jaane wala ek vishesh anushthan hai, jisme Mangal Dev ka poojan aur havan kiya jaata hai 🔱</p>\r\n\r\n<p>Yeh pooja karwane se Mangal Dosh ke karan hone wale conflicts, delay in marriage, aur health issues door hote hain, aur jeevan mein sukh-shanti badhti hai 🌟</p>\r\n\r\n<p>Chahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏</p>",
+        "🔥 Rishtey aur vivah mein badha dur hoti hai<br />\r\n💔 Gusse, clashes aur misunderstanding mein hoti hai kami<br />\r\n🪔 Grah shanti ke saath jeevan mein aata hai sukh aur samriddhi<br />\r\n🙏 Mangal Dev ki kripa se rishton aur career mein milti hai stability\r\n\r\nYeh Pooja, Mangal Dosh ke dushprabhav ko shaant karne ke liye kiya jaane wala ek vishesh anushthan hai, jisme Mangal Dev ka poojan aur havan kiya jaata hai 🔱\r\n\r\nYeh pooja karwane se Mangal Dosh ke karan hone wale conflicts, delay in marriage, aur health issues door hote hain, aur jeevan mein sukh-shanti badhti hai 🌟\r\n\r\nChahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -1013,7 +1013,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Pooja to remove Mangal Dosh and solve marriage and relationship problems.</p>",
+        "Pooja to remove Mangal Dosh and solve marriage and relationship problems.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -1129,7 +1129,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1751881085702,
       latestImage: "",
       shortDescription:
-        "<p>🌟 Life ke obstacles aur challenges ko door karta hai<br />\r\n📚 Business &amp; Financial related problem solve hoti hai<br />\r\n🚀 Career aur personal life mein stability aur growth hoti hai<br />\r\n💫 Relationships mein understanding aur pyaar bana rehta hai</p>\r\n\r\n<p>Guru Chandal Dosh Nivaran Pooja un logon ke liye hai jo apne life mein Guru Chandal Dosh ke prabhav se jujh rahe hain. Is pooja se Guru ki blessings milti hain aur dosh ke khatre ko kam kiya jaata hai.</p>\r\n\r\n<p>Yeh pooja aapke jeevan ke har pehlu mein sukh aur safalta laane mein madad karti hai. Is se na sirf career aur business mein sudhar hota hai, balki personal life mein bhi sukh aur shanti milti hai.</p>\r\n\r\n<p>Chahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏</p>",
+        "🌟 Life ke obstacles aur challenges ko door karta hai<br />\r\n📚 Business &amp; Financial related problem solve hoti hai<br />\r\n🚀 Career aur personal life mein stability aur growth hoti hai<br />\r\n💫 Relationships mein understanding aur pyaar bana rehta hai\r\n\r\nGuru Chandal Dosh Nivaran Pooja un logon ke liye hai jo apne life mein Guru Chandal Dosh ke prabhav se jujh rahe hain. Is pooja se Guru ki blessings milti hain aur dosh ke khatre ko kam kiya jaata hai.\r\n\r\nYeh pooja aapke jeevan ke har pehlu mein sukh aur safalta laane mein madad karti hai. Is se na sirf career aur business mein sudhar hota hai, balki personal life mein bhi sukh aur shanti milti hai.\r\n\r\nChahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -1143,7 +1143,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Pooja to reduce negative effects of Guru-Rahu/Ketu and improve clarity, luck, and growth.</p>",
+        "Pooja to reduce negative effects of Guru-Rahu/Ketu and improve clarity, luck, and growth.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -1259,7 +1259,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1746507843342,
       latestImage: null,
       shortDescription:
-        "<p>🌟 Nav grahon ke dushprabhav se hoti hai mukti<br />\r\n⚖️ Life mein aata hai balance, shanti aur sukh<br />\r\n🪔 Career, health, relationship aur finances mein hota hai sudhaar<br />\r\n🔮 Grah dosh aur karmic blocks khatam hota hai</p>\r\n\r\n<p>Yeh Pooja, 9 grahon &mdash; Surya, Chandra, Mangal, Budh, Guru, Shukra, Shani, Rahu aur Ketu &mdash; ke dushprabhav ko shaant karne ke liye kiya jaane wala ek vishesh anushthan hai 🪷</p>\r\n\r\n<p>Yeh pooja karwane se grah dosh kam hote hain, aur jeevan ke har pehlu mein safalta aur positivity ka pravesh hota hai 🌿</p>\r\n\r\n<p>Chahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏</p>",
+        "🌟 Nav grahon ke dushprabhav se hoti hai mukti<br />\r\n⚖️ Life mein aata hai balance, shanti aur sukh<br />\r\n🪔 Career, health, relationship aur finances mein hota hai sudhaar<br />\r\n🔮 Grah dosh aur karmic blocks khatam hota hai\r\n\r\nYeh Pooja, 9 grahon &mdash; Surya, Chandra, Mangal, Budh, Guru, Shukra, Shani, Rahu aur Ketu &mdash; ke dushprabhav ko shaant karne ke liye kiya jaane wala ek vishesh anushthan hai 🪷\r\n\r\nYeh pooja karwane se grah dosh kam hote hain, aur jeevan ke har pehlu mein safalta aur positivity ka pravesh hota hai 🌿\r\n\r\nChahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏",
       productRank: 10,
       sequence: 0,
       fakeImageIcon: null,
@@ -1273,7 +1273,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Pooja to balance all nine planets and remove problems caused by planetary doshas.</p>",
+        "Pooja to balance all nine planets and remove problems caused by planetary doshas.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -1390,7 +1390,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/0572ce13-35cf-4720-84b2-da70b28e0d47.jpg",
       shortDescription:
-        "<p>🌘 Rahu aur Ketu ke Grahan Yog se hone wale dosh ko shant karta hai<br />\r\n💔 Relationship aur health problems mein noticeable sudhaar aata hai<br />\r\n🧿 Misfortune, bad luck aur financial instability kam hoti hai<br />\r\n🌟 Kundli mein sukh-shanti aur balance sthapit hota hai</p>\r\n\r\n<p>Yeh pooja un logon ke liye hai jinki kundli mein Grahan Dosh hai, jiska prabhav unke jeevan ke har pehlu par pad raha hai.</p>\r\n\r\n<p>Chahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏</p>",
+        "🌘 Rahu aur Ketu ke Grahan Yog se hone wale dosh ko shant karta hai<br />\r\n💔 Relationship aur health problems mein noticeable sudhaar aata hai<br />\r\n🧿 Misfortune, bad luck aur financial instability kam hoti hai<br />\r\n🌟 Kundli mein sukh-shanti aur balance sthapit hota hai\r\n\r\nYeh pooja un logon ke liye hai jinki kundli mein Grahan Dosh hai, jiska prabhav unke jeevan ke har pehlu par pad raha hai.\r\n\r\nChahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -1404,7 +1404,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Removes negative effects of Grahan Dosh and brings peace in life.</p>",
+        "Removes negative effects of Grahan Dosh and brings peace in life.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -1520,7 +1520,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1746507884978,
       latestImage: null,
       shortDescription:
-        "<p>🕯️ Pitra Dosh ke karan aane wali problems hoti hain door<br />\r\n🌿 Purvajon ki atma ko milta hai shaanti<br />\r\n📉 Sudden failures aur disputes nahi hote hai&nbsp;<br />\r\n🙏 Life mein aata hai sukh aur vriddhi</p>\r\n\r\n<p>Yeh Pooja, un atmaon ki shanti ke liye ki jaati hai jinke asantusht hone se Pitra Dosh hota hai. Isme Vishnu aur Shiv ji ka poojan karke poorvajon ki kripa prapt ki jaati hai 🕊️</p>\r\n\r\n<p>Yeh pooja karwane se vansh par se dosh kam hota hai, aur parivaar mein sukh, samriddhi aur santulan aata hai 🌼</p>\r\n\r\n<p>Chahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏</p>",
+        "🕯️ Pitra Dosh ke karan aane wali problems hoti hain door<br />\r\n🌿 Purvajon ki atma ko milta hai shaanti<br />\r\n📉 Sudden failures aur disputes nahi hote hai&nbsp;<br />\r\n🙏 Life mein aata hai sukh aur vriddhi\r\n\r\nYeh Pooja, un atmaon ki shanti ke liye ki jaati hai jinke asantusht hone se Pitra Dosh hota hai. Isme Vishnu aur Shiv ji ka poojan karke poorvajon ki kripa prapt ki jaati hai 🕊️\r\n\r\nYeh pooja karwane se vansh par se dosh kam hota hai, aur parivaar mein sukh, samriddhi aur santulan aata hai 🌼\r\n\r\nChahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏",
       productRank: 10,
       sequence: 0,
       fakeImageIcon: null,
@@ -1550,7 +1550,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Removes ancestral dosh and brings peace, prosperity, and family harmony.</p>",
+        "Removes ancestral dosh and brings peace, prosperity, and family harmony.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -1670,7 +1670,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1760422649479,
       latestImage: null,
       shortDescription:
-        "<p>❤️ Attract new love with open hearts<br />\r\n🌟 Confident, charming aur attractive ban jaayein<br />\r\n💖 Emotional barrier ko remove karke pyaar paayein<br />\r\n💑 Zindagi mein saccha pyaar milega</p>\r\n\r\n<p>Attract Your Love Spell ek powerful ritual hai jo aapko pyaar aur emotional connection attract karne mein madad karta hai. Yeh spell special herbs aur focused energy se kiya jaata hai, jisse aapka soulmate ya genuine partner aapki taraf naturally attract hote ho.<br />\r\n<br />\r\n&nbsp;</p>\r\n\r\n<p><strong>Cord Cutting ek spiritual ritual hota hai jo aapko kisi insaan ya purani yaadon se jude negative emotional, mental, ya energetic connection se free karta hai.</strong></p>\r\n\r\n<p>Jab aap kisi toxic relationship, breakup, ya betrayal ke baad move on nahi kar paate, tab yeh ritual bahut helpful hota hai. Iske zariye aapke andar ka gussa, dard ya sadness dheere-dheere release hota hai. Yeh ritual aapko inner peace, focus aur emotional freedom wapas dilane mein madad karta hai, taaki aap apni life mein aage badh sakein bina kisi unwanted energy ke.</p>\r\n\r\n<p>Wherever you are in the world, allow this spell to gently guide love into your life through divine energy and heartfelt intention. 🙏</p>",
+        "❤️ Attract new love with open hearts<br />\r\n🌟 Confident, charming aur attractive ban jaayein<br />\r\n💖 Emotional barrier ko remove karke pyaar paayein<br />\r\n💑 Zindagi mein saccha pyaar milega\r\n\r\nAttract Your Love Spell ek powerful ritual hai jo aapko pyaar aur emotional connection attract karne mein madad karta hai. Yeh spell special herbs aur focused energy se kiya jaata hai, jisse aapka soulmate ya genuine partner aapki taraf naturally attract hote ho.<br />\r\n<br />\r\n&nbsp;\r\n\r\n<strong>Cord Cutting ek spiritual ritual hota hai jo aapko kisi insaan ya purani yaadon se jude negative emotional, mental, ya energetic connection se free karta hai.</strong>\r\n\r\nJab aap kisi toxic relationship, breakup, ya betrayal ke baad move on nahi kar paate, tab yeh ritual bahut helpful hota hai. Iske zariye aapke andar ka gussa, dard ya sadness dheere-dheere release hota hai. Yeh ritual aapko inner peace, focus aur emotional freedom wapas dilane mein madad karta hai, taaki aap apni life mein aage badh sakein bina kisi unwanted energy ke.\r\n\r\nWherever you are in the world, allow this spell to gently guide love into your life through divine energy and heartfelt intention. 🙏",
       productRank: 1,
       sequence: 2,
       fakeImageIcon: null,
@@ -1684,7 +1684,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Manifest True Love | Attract a Soulmate | Radiate Charisma &amp; Romance | Open Your Heart to New Possibilities | Customised Spell by Skilled Spellcasters</p>",
+        "Manifest True Love | Attract a Soulmate | Radiate Charisma &amp; Romance | Open Your Heart to New Possibilities | Customised Spell by Skilled Spellcasters",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -1800,7 +1800,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1760422635137,
       latestImage: null,
       shortDescription:
-        "<p>❤️ Dooriyan aur&nbsp;misunderstandings kam&nbsp;hongi<br />\r\n💖 Love aur emotional connection wapas aayega<br />\r\n💑 Rishtey strong honge aur pyaar badhega</p>\r\n\r\n<p>Love Honey Spell powerful ritual hai jo lost love wapas laane, rishtey improve karne ya naya pyaar attract karne mein help karta hai. Negativity hataakar emotional bond strong banata hai.<br />\r\n&nbsp;</p>\r\n\r\n<p><strong>Cord Cutting ek spiritual ritual hota hai jo aapko kisi insaan ya purani yaadon se jude negative emotional, mental, ya energetic connection se free karta hai.</strong></p>\r\n\r\n<p>Jab aap kisi toxic relationship, breakup, ya betrayal ke baad move on nahi kar paate, tab yeh ritual bahut helpful hota hai. Iske zariye aapke andar ka gussa, dard ya sadness dheere-dheere release hota hai. Yeh ritual aapko inner peace, focus aur emotional freedom wapas dilane mein madad karta hai, taaki aap apni life mein aage badh sakein bina kisi unwanted energy ke.</p>\r\n\r\n<p>No matter where you are in the world, you can have this divine combo performed personally for you by our expert astrologers. 🙏</p>",
+        "❤️ Dooriyan aur&nbsp;misunderstandings kam&nbsp;hongi<br />\r\n💖 Love aur emotional connection wapas aayega<br />\r\n💑 Rishtey strong honge aur pyaar badhega\r\n\r\nLove Honey Spell powerful ritual hai jo lost love wapas laane, rishtey improve karne ya naya pyaar attract karne mein help karta hai. Negativity hataakar emotional bond strong banata hai.<br />\r\n&nbsp;\r\n\r\n<strong>Cord Cutting ek spiritual ritual hota hai jo aapko kisi insaan ya purani yaadon se jude negative emotional, mental, ya energetic connection se free karta hai.</strong>\r\n\r\nJab aap kisi toxic relationship, breakup, ya betrayal ke baad move on nahi kar paate, tab yeh ritual bahut helpful hota hai. Iske zariye aapke andar ka gussa, dard ya sadness dheere-dheere release hota hai. Yeh ritual aapko inner peace, focus aur emotional freedom wapas dilane mein madad karta hai, taaki aap apni life mein aage badh sakein bina kisi unwanted energy ke.\r\n\r\nNo matter where you are in the world, you can have this divine combo performed personally for you by our expert astrologers. 🙏",
       productRank: 1,
       sequence: 1,
       fakeImageIcon: null,
@@ -1814,7 +1814,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Attract Lost Love | Sweeten Relationship Bonds | Resolve Emotional Conflicts | Ignite Romance &amp; Passion | Personalised Love Honey Spell by Expert Spellcasters</p>",
+        "Attract Lost Love | Sweeten Relationship Bonds | Resolve Emotional Conflicts | Ignite Romance &amp; Passion | Personalised Love Honey Spell by Expert Spellcasters",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -1930,7 +1930,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1760422642144,
       latestImage: null,
       shortDescription:
-        "<p><strong>Relationship Healing ek powerful energy-based process hai jo rishton se negativity, misunderstandings aur emotional pain ko door karta hai.</strong></p>\r\n\r\n<p>Yeh healing aapke aur aapke partner, dost ya family ke beech love, trust aur connection ko strong banati hai. Is process se aapke rishte positive energy se bhar jaate hain, jisse relationship zyada peaceful, happy aur loving ban jata hai. Agar aap apne rishton ko heal karna chahte ho, unmein improvement lana chahte ho ya phir harmony wapas lana chahte ho, toh yeh healing perfect hai aapke liye!</p>\r\n\r\n<p>Negativity Removal Spell ek spiritual ritual hai jo buri nazar, negative energy aur blockage ko door karta hai. Yeh spell aapke aura ko cleanse karta hai, mind ko shant karta hai aur positivity attract karta hai. Perfect hai un logon ke liye jo baar-baar problems face kar rahe hain bina wajah.</p>",
+        "<strong>Relationship Healing ek powerful energy-based process hai jo rishton se negativity, misunderstandings aur emotional pain ko door karta hai.</strong>\r\n\r\nYeh healing aapke aur aapke partner, dost ya family ke beech love, trust aur connection ko strong banati hai. Is process se aapke rishte positive energy se bhar jaate hain, jisse relationship zyada peaceful, happy aur loving ban jata hai. Agar aap apne rishton ko heal karna chahte ho, unmein improvement lana chahte ho ya phir harmony wapas lana chahte ho, toh yeh healing perfect hai aapke liye!\r\n\r\nNegativity Removal Spell ek spiritual ritual hai jo buri nazar, negative energy aur blockage ko door karta hai. Yeh spell aapke aura ko cleanse karta hai, mind ko shant karta hai aur positivity attract karta hai. Perfect hai un logon ke liye jo baar-baar problems face kar rahe hain bina wajah.",
       productRank: 2,
       sequence: 1,
       fakeImageIcon: null,
@@ -1944,7 +1944,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Heals Negative Energies In A&nbsp;Relationship &amp; Speeds The Healing Process</p>",
+        "Heals Negative Energies In A&nbsp;Relationship &amp; Speeds The Healing Process",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -2060,7 +2060,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1760422653503,
       latestImage: null,
       shortDescription:
-        "<p>Yeh dono poojaein un logon ke liye hoti hain jinke vivah mein baar-baar rukawat aa rahi hoti hai ya fir Mangal Dosh ki wajah se rishton mein tension, delay ya conflicts ho rahe hote hain.</p>\r\n\r\n<p>Vivah Badha Nivaran Pooja shaadi ke raste mein aane wali negative energies, grah dosh aur nazar dosh ko door karti hai, jabki Mangal Dosh Nivaran Pooja Mangal ke prabhav ko shaant karke relationship mein balance aur positivity laati hai.</p>\r\n\r\n<p>Yeh powerful combo unke liye perfect hai jo shaadi mein sukh, stability aur samriddhi chahte hain.</p>",
+        "Yeh dono poojaein un logon ke liye hoti hain jinke vivah mein baar-baar rukawat aa rahi hoti hai ya fir Mangal Dosh ki wajah se rishton mein tension, delay ya conflicts ho rahe hote hain.\r\n\r\nVivah Badha Nivaran Pooja shaadi ke raste mein aane wali negative energies, grah dosh aur nazar dosh ko door karti hai, jabki Mangal Dosh Nivaran Pooja Mangal ke prabhav ko shaant karke relationship mein balance aur positivity laati hai.\r\n\r\nYeh powerful combo unke liye perfect hai jo shaadi mein sukh, stability aur samriddhi chahte hain.",
       productRank: 2,
       sequence: 2,
       fakeImageIcon: null,
@@ -2074,7 +2074,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Shaadi mein rukawat | Mangal Dosh shanti | Grah dosh removal | Rishton mein harmony | Marriage yog strong | Timely &amp; happy vivah</p>",
+        "Shaadi mein rukawat | Mangal Dosh shanti | Grah dosh removal | Rishton mein harmony | Marriage yog strong | Timely &amp; happy vivah",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -2190,7 +2190,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1760422645605,
       latestImage: null,
       shortDescription:
-        "<p>💖 Rishtey mein pyaar aur samajh badhne lagti hai<br />\r\n🌸 Man-mutav aur dooriyan door hoti hain<br />\r\n🙏 Grah dosh aur negative energy khatam hota hai<br />\r\n🕊️ Rishton mein aati hai shanti aur samarpan</p>\r\n\r\n<p>Yeh Pooja, aapke rishton ko strong aur long-lasting banane ke liye kiya jaane wala vishesh anushthan hai 🪷</p>\r\n\r\n<p>Yeh pooja karwane se rishtey mein pyaar aur vishwas badhta hai aur har kathinai door hoti hai ❤️</p>\r\n\r\n<p>Chahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏</p>",
+        "💖 Rishtey mein pyaar aur samajh badhne lagti hai<br />\r\n🌸 Man-mutav aur dooriyan door hoti hain<br />\r\n🙏 Grah dosh aur negative energy khatam hota hai<br />\r\n🕊️ Rishton mein aati hai shanti aur samarpan\r\n\r\nYeh Pooja, aapke rishton ko strong aur long-lasting banane ke liye kiya jaane wala vishesh anushthan hai 🪷\r\n\r\nYeh pooja karwane se rishtey mein pyaar aur vishwas badhta hai aur har kathinai door hoti hai ❤️\r\n\r\nChahe aap desh mein ho ya videsh mein, yeh pooja aap personally apne naam se hamare anubhavi panditon ke dwara karwa sakte hain 🙏",
       productRank: 3,
       sequence: 1,
       fakeImageIcon: null,
@@ -2204,7 +2204,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Strengthen love, remove misunderstandings, and restore peace in your relationship.</p>",
+        "Strengthen love, remove misunderstandings, and restore peace in your relationship.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -2320,7 +2320,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1760422729449,
       latestImage: null,
       shortDescription:
-        "<p>💖 Attract blessings for love-filled marriage<br />\r\n✨ Pyaar, trust aur commitment strong banao<br />\r\n🌸 Shaadi ke obstacles ko door karo<br />\r\n💑 Spiritual guidance se marriage peaceful banao<br />\r\n<br />\r\nDivine Marriage Blessing Spell ek sacred ritual hai jo aapke rishtey mein divine blessings aur positivity laata hai. Yeh spell love, trust aur commitment ko badhakar shaadi ke raaste ko smooth aur harmonious banata hai.<br />\r\n<br />\r\nYeh personalized ritual humare skilled practitioners dwara aapke naam se perform kiya jaata hai, taaki aapka shaadi ka safar pyaar, shanti aur divine grace se bhara ho. 🙏</p>",
+        "💖 Attract blessings for love-filled marriage<br />\r\n✨ Pyaar, trust aur commitment strong banao<br />\r\n🌸 Shaadi ke obstacles ko door karo<br />\r\n💑 Spiritual guidance se marriage peaceful banao<br />\r\n<br />\r\nDivine Marriage Blessing Spell ek sacred ritual hai jo aapke rishtey mein divine blessings aur positivity laata hai. Yeh spell love, trust aur commitment ko badhakar shaadi ke raaste ko smooth aur harmonious banata hai.<br />\r\n<br />\r\nYeh personalized ritual humare skilled practitioners dwara aapke naam se perform kiya jaata hai, taaki aapka shaadi ka safar pyaar, shanti aur divine grace se bhara ho. 🙏",
       productRank: 10,
       sequence: 8,
       fakeImageIcon: null,
@@ -2334,7 +2334,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Attract Divine Blessings for a Harmonious Marriage | Strengthen Love &amp; Commitment | Remove Obstacles to Marriage | Personalised Blessing Spell by Expert Practitioners</p>",
+        "Attract Divine Blessings for a Harmonious Marriage | Strengthen Love &amp; Commitment | Remove Obstacles to Marriage | Personalised Blessing Spell by Expert Practitioners",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -2450,7 +2450,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1760422701238,
       latestImage: null,
       shortDescription:
-        "<p>🚫 Buri energies aur black magic se bachav<br />\r\n🔥 Aapke aas-paas ek protective layer ban jaati hai<br />\r\n🧘&zwj;♀️ Dar aur tension kam hone lagta hai<br />\r\n<br />\r\nBlack Magic Protection Healing un logon ke liye hai jo negative energy ya nazar se pareshan hain. Yeh ritual aapko spiritual protection deta hai. ⚡<br />\r\n<br />\r\nChahe aap desh mein ho ya videsh mein, yeh healing ritual aapke naam se hamare trained healers dwara personally karwa sakte hai. 🌍🙏</p>",
+        "🚫 Buri energies aur black magic se bachav<br />\r\n🔥 Aapke aas-paas ek protective layer ban jaati hai<br />\r\n🧘&zwj;♀️ Dar aur tension kam hone lagta hai<br />\r\n<br />\r\nBlack Magic Protection Healing un logon ke liye hai jo negative energy ya nazar se pareshan hain. Yeh ritual aapko spiritual protection deta hai. ⚡<br />\r\n<br />\r\nChahe aap desh mein ho ya videsh mein, yeh healing ritual aapke naam se hamare trained healers dwara personally karwa sakte hai. 🌍🙏",
       productRank: 10,
       sequence: 5,
       fakeImageIcon: null,
@@ -2464,7 +2464,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Remove Negative Energies &amp; Evil Eye | Protect Yourself from Harmful Influences | Restore Peace &amp; Harmony in Your Life | Personalised Spell by Expert Practitioners</p>",
+        "Remove Negative Energies &amp; Evil Eye | Protect Yourself from Harmful Influences | Restore Peace &amp; Harmony in Your Life | Personalised Spell by Expert Practitioners",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -2580,7 +2580,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1760422715520,
       latestImage: null,
       shortDescription:
-        "<p>Yeh pooja combo un logon ke liye hai jo apne career mein growth chahte hain ya job change, promotion ya naye job opportunities ke liye struggle kar rahe hain.</p>\r\n\r\n<p><strong>Career Growth Pooja</strong> aapke kaam mein rukawat, jealous logon ki negativity aur self-doubt jaise blockages ko door karti hai, aur career path mein safalta aur clarity laati hai.</p>\r\n\r\n<p><strong>Job Aakarshan Baglamukhi Pooja</strong> Maa Baglamukhi ke divine shakti se aapke favour mein job opportunities, interviewer ka support aur career breakthroughs attract hote hain.</p>\r\n\r\n<p>Yeh dono poojaein milkar aapko job security, growth aur naye career opportunities ke liye spiritually empower karti hain.</p>",
+        "Yeh pooja combo un logon ke liye hai jo apne career mein growth chahte hain ya job change, promotion ya naye job opportunities ke liye struggle kar rahe hain.\r\n\r\n<strong>Career Growth Pooja</strong> aapke kaam mein rukawat, jealous logon ki negativity aur self-doubt jaise blockages ko door karti hai, aur career path mein safalta aur clarity laati hai.\r\n\r\n<strong>Job Aakarshan Baglamukhi Pooja</strong> Maa Baglamukhi ke divine shakti se aapke favour mein job opportunities, interviewer ka support aur career breakthroughs attract hote hain.\r\n\r\nYeh dono poojaein milkar aapko job security, growth aur naye career opportunities ke liye spiritually empower karti hain.",
       productRank: 10,
       sequence: 7,
       fakeImageIcon: null,
@@ -2594,7 +2594,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Career mein safalta | Promotion &amp; job change | Interview mein jeet | Rukawat door | Maa Baglamukhi ki kripa | Job attraction &amp; stability</p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>&nbsp;</p>",
+        "Career mein safalta | Promotion &amp; job change | Interview mein jeet | Rukawat door | Maa Baglamukhi ki kripa | Job attraction &amp; stability\r\n\r\n&nbsp;\r\n\r\n&nbsp;",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -2710,7 +2710,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1760422705535,
       latestImage: null,
       shortDescription:
-        "<p>Yeh pooja combo un logon ke liye hai jo life mein confusion, instability, sudden losses, ya unexplained stress face kar rahe hain.</p>\r\n\r\n<p><strong>Rahu &amp; Ketu Shanti Pooja</strong> in chhaya grahon ke negative prabhav ko shaant karti hai jo illusion, fear, aur unexpected challenges ka kaaran bante hain.</p>\r\n\r\n<p><strong>Navgrah Shanti Pooja</strong> sabhi 9 grahon ko balance karti hai, jisse aapki kundli mein harmony aati hai aur grah doshon ke karan ho rahe problems ka solution milta hai.</p>\r\n\r\n<p>Yeh combo pooja life mein clarity, peace, aur stability laakar safalta ka raasta kholta hai.</p>",
+        "Yeh pooja combo un logon ke liye hai jo life mein confusion, instability, sudden losses, ya unexplained stress face kar rahe hain.\r\n\r\n<strong>Rahu &amp; Ketu Shanti Pooja</strong> in chhaya grahon ke negative prabhav ko shaant karti hai jo illusion, fear, aur unexpected challenges ka kaaran bante hain.\r\n\r\n<strong>Navgrah Shanti Pooja</strong> sabhi 9 grahon ko balance karti hai, jisse aapki kundli mein harmony aati hai aur grah doshon ke karan ho rahe problems ka solution milta hai.\r\n\r\nYeh combo pooja life mein clarity, peace, aur stability laakar safalta ka raasta kholta hai.",
       productRank: 10,
       sequence: 5,
       fakeImageIcon: null,
@@ -2724,7 +2724,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Grah dosh shanti | Mental clarity | Sudden problems ka solution | Life balance | Navgrah ka ashirwad | Peace &amp; progress</p>",
+        "Grah dosh shanti | Mental clarity | Sudden problems ka solution | Life balance | Navgrah ka ashirwad | Peace &amp; progress",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -2840,7 +2840,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1760422720863,
       latestImage: null,
       shortDescription:
-        "<p>💼 Apne sapno ki naukri ko kare manifest<br />\r\n🚀 Interview aur selection ke chances badhayein<br />\r\n🌟 Career goals ke liye focused energy activate ho<br />\r\n✨ Luck aur clarity dono mile ek saath<br />\r\n💼 Jab mehnat ke bawajood tarakki na mile,<br />\r\n💫 Jab aapko lagne lage ki aapka growth kahi ruk gaya hai,<br />\r\n🚀 Aur aap apni potential ko poori tarah jee nahi pa rahe...</p>\r\n\r\n<p>Get Your Dream Job Spell ek powerful energy ritual hai jo aapke career path ko clear karta hai aur perfect job opportunities aapki life mein laata hai. Yeh spell confidence, preparation aur destiny ko align karta hai.&nbsp;Promotion &amp; Growth Healing ki &mdash; ek shaktishaali ritual jo un logon ke liye hai jo apne career, business ya personal development mein agla kadam lena chahte hain. 🌟</p>\r\n\r\n<p>Yeh personalized spell aapke naam se perform kiya jaata hai, taaki aap apne career dreams ko reality mein badal sakein. 🙏</p>",
+        "💼 Apne sapno ki naukri ko kare manifest<br />\r\n🚀 Interview aur selection ke chances badhayein<br />\r\n🌟 Career goals ke liye focused energy activate ho<br />\r\n✨ Luck aur clarity dono mile ek saath<br />\r\n💼 Jab mehnat ke bawajood tarakki na mile,<br />\r\n💫 Jab aapko lagne lage ki aapka growth kahi ruk gaya hai,<br />\r\n🚀 Aur aap apni potential ko poori tarah jee nahi pa rahe...\r\n\r\nGet Your Dream Job Spell ek powerful energy ritual hai jo aapke career path ko clear karta hai aur perfect job opportunities aapki life mein laata hai. Yeh spell confidence, preparation aur destiny ko align karta hai.&nbsp;Promotion &amp; Growth Healing ki &mdash; ek shaktishaali ritual jo un logon ke liye hai jo apne career, business ya personal development mein agla kadam lena chahte hain. 🌟\r\n\r\nYeh personalized spell aapke naam se perform kiya jaata hai, taaki aap apne career dreams ko reality mein badal sakein. 🙏",
       productRank: 10,
       sequence: 7,
       fakeImageIcon: null,
@@ -2973,7 +2973,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/927e3769-f648-48fd-b9ce-c98c3b83e5a8.jpg",
       shortDescription:
-        "<p>❤️ Dooriyan aur&nbsp;misunderstandings kam&nbsp;hongi<br />\r\n💖 Love aur emotional connection wapas aayega<br />\r\n💑 Rishtey strong honge aur pyaar badhega</p>\r\n\r\n<p>Love Honey Spell powerful ritual hai jo lost love wapas laane, rishtey improve karne ya naya pyaar attract karne mein help karta hai. Negativity hataakar emotional bond strong banata hai.</p>\r\n\r\n<p>No matter where you are in the world, you can have this divine love spell performed personally for you by our expert astrologers. 🙏</p>",
+        "❤️ Dooriyan aur&nbsp;misunderstandings kam&nbsp;hongi<br />\r\n💖 Love aur emotional connection wapas aayega<br />\r\n💑 Rishtey strong honge aur pyaar badhega\r\n\r\nLove Honey Spell powerful ritual hai jo lost love wapas laane, rishtey improve karne ya naya pyaar attract karne mein help karta hai. Negativity hataakar emotional bond strong banata hai.\r\n\r\nNo matter where you are in the world, you can have this divine love spell performed personally for you by our expert astrologers. 🙏",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -3005,7 +3005,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Attract Lost Love | Sweeten Relationship Bonds | Resolve Emotional Conflicts | Ignite Romance &amp; Passion | Personalised Love Honey Spell by Expert Spellcasters</p>",
+        "Attract Lost Love | Sweeten Relationship Bonds | Resolve Emotional Conflicts | Ignite Romance &amp; Passion | Personalised Love Honey Spell by Expert Spellcasters",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: "https://www.youtube.com/watch?v=PZ3iY0c8Z10",
@@ -3122,7 +3122,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/ef89b9c9-6b68-4ffb-9791-19009ec3da1c.png",
       shortDescription:
-        "<p>❤️ Attract new love with open hearts<br />\r\n🌟 Confident, charming aur attractive ban jaayein<br />\r\n💖 Emotional barrier ko remove karke pyaar paayein<br />\r\n💑 Zindagi mein saccha pyaar milega</p>\r\n\r\n<p>Attract Your Love Spell ek powerful ritual hai jo aapko pyaar aur emotional connection attract karne mein madad karta hai. Yeh spell special herbs aur focused energy se kiya jaata hai, jisse aapka soulmate ya genuine partner aapki taraf naturally attract hote ho.</p>\r\n\r\n<p>Wherever you are in the world, allow this spell to gently guide love into your life through divine energy and heartfelt intention. 🙏</p>",
+        "❤️ Attract new love with open hearts<br />\r\n🌟 Confident, charming aur attractive ban jaayein<br />\r\n💖 Emotional barrier ko remove karke pyaar paayein<br />\r\n💑 Zindagi mein saccha pyaar milega\r\n\r\nAttract Your Love Spell ek powerful ritual hai jo aapko pyaar aur emotional connection attract karne mein madad karta hai. Yeh spell special herbs aur focused energy se kiya jaata hai, jisse aapka soulmate ya genuine partner aapki taraf naturally attract hote ho.\r\n\r\nWherever you are in the world, allow this spell to gently guide love into your life through divine energy and heartfelt intention. 🙏",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -3136,7 +3136,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Manifest True Love | Attract a Soulmate | Radiate Charisma &amp; Romance | Open Your Heart to New Possibilities | Customised Spell by Skilled Spellcasters</p>",
+        "Manifest True Love | Attract a Soulmate | Radiate Charisma &amp; Romance | Open Your Heart to New Possibilities | Customised Spell by Skilled Spellcasters",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: "https://www.youtube.com/watch?v=yvi3IJwCgG8",
@@ -3253,7 +3253,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/c6e4d1c8-e905-467d-a0f4-8eced6ac9d18.jpg",
       shortDescription:
-        "<p>💼 Success, recognition &amp; growth ke raaste khulenge<br />\r\n✨ Career ki rukawatein door ho jayengi<br />\r\n📈 Job offers, promotions attract ho jaayenge<br />\r\n🌟 Energy align hogi apki success ke saath</p>\r\n\r\n<p>The Career Spell is a powerful ritual that clears blockages, supports your goals, and helps you grow with clarity. Perfect for job stress, stuck growth, or fresh opportunities&mdash;it shifts energy in your favor.</p>\r\n\r\n<p>Yeh spell professionals, entrepreneurs ya job seekers ke liye perfect hai. Yeh personalised ritual aapke career mein clarity, opportunities aur success lata hai. 🌿</p>\r\n\r\n<p>No matter where you are in the world, the spell is performed in your name with full spiritual focus and sincerity by our experienced team. 🙏</p>",
+        "💼 Success, recognition &amp; growth ke raaste khulenge<br />\r\n✨ Career ki rukawatein door ho jayengi<br />\r\n📈 Job offers, promotions attract ho jaayenge<br />\r\n🌟 Energy align hogi apki success ke saath\r\n\r\nThe Career Spell is a powerful ritual that clears blockages, supports your goals, and helps you grow with clarity. Perfect for job stress, stuck growth, or fresh opportunities&mdash;it shifts energy in your favor.\r\n\r\nYeh spell professionals, entrepreneurs ya job seekers ke liye perfect hai. Yeh personalised ritual aapke career mein clarity, opportunities aur success lata hai. 🌿\r\n\r\nNo matter where you are in the world, the spell is performed in your name with full spiritual focus and sincerity by our experienced team. 🙏",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -3283,7 +3283,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Unlock Career Success | Attract New Opportunities | Boost Confidence &amp; Ambition | Remove Professional Blockages | Personalised Career Spell by Expert Spellcasters</p>",
+        "Unlock Career Success | Attract New Opportunities | Boost Confidence &amp; Ambition | Remove Professional Blockages | Personalised Career Spell by Expert Spellcasters",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -3400,7 +3400,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/1ec9e980-b46d-4e94-ada1-fb946d392b37.jpg",
       shortDescription:
-        "<p>🛡️ Protect yourself from negative energies<br />\r\n🌟 Attract blessings of peace and success<br />\r\n💖 Boost emotional and spiritual protection power<br />\r\n🌸 Feel safe with divine positive energy<br />\r\n<br />\r\nProtection &amp; Blessing Spell ek sacred ritual hai jo aapko negativity, bad luck aur spiritual harm se bachata hai. Powerful mantras se yeh aapke around ek protective aura banata hai for peace &amp; prosperity.<br />\r\n<br />\r\nYeh ritual harmful blockages ko door karta hai, aapke ghar aur apno ko protect karta hai, aur aapki life mein balance laata hai.<br />\r\n<br />\r\nPerformed by experienced spellcasters in your name, this personalised spell ensures that you are surrounded by positive energy and divine grace, no matter where you are in the world. 🙏</p>",
+        "🛡️ Protect yourself from negative energies<br />\r\n🌟 Attract blessings of peace and success<br />\r\n💖 Boost emotional and spiritual protection power<br />\r\n🌸 Feel safe with divine positive energy<br />\r\n<br />\r\nProtection &amp; Blessing Spell ek sacred ritual hai jo aapko negativity, bad luck aur spiritual harm se bachata hai. Powerful mantras se yeh aapke around ek protective aura banata hai for peace &amp; prosperity.<br />\r\n<br />\r\nYeh ritual harmful blockages ko door karta hai, aapke ghar aur apno ko protect karta hai, aur aapki life mein balance laata hai.<br />\r\n<br />\r\nPerformed by experienced spellcasters in your name, this personalised spell ensures that you are surrounded by positive energy and divine grace, no matter where you are in the world. 🙏",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -3459,7 +3459,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Shield Against Negativity | Invite Divine Blessings | Strengthen Spiritual Defense | Create a Protective Aura | Personalised Protection &amp; Blessing Spell by Skilled Practitioners</p>\r\n\r\n<p>&nbsp;</p>",
+        "Shield Against Negativity | Invite Divine Blessings | Strengthen Spiritual Defense | Create a Protective Aura | Personalised Protection &amp; Blessing Spell by Skilled Practitioners\r\n\r\n&nbsp;",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -3576,7 +3576,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/caa775df-14a4-4357-8c94-f35a41335974.jpg",
       shortDescription:
-        "<p>💸 Attract wealth, success, financial stability<br />\r\n✨ Rukawat aur karz ko door karein<br />\r\n💰 Unlock new growth and money opportunities<br />\r\n🌟 Energy ko prosperity se align karo<br />\r\n<br />\r\nThe Finance Spell is a powerful ritual designed to help you attract wealth and abundance into your life. Whether you&#39;re seeking financial security, new career opportunities, or relief from debt, this spell works to remove obstacles and align your energy with prosperity.<br />\r\n<br />\r\nSacred herbs, focused intentions, aur purani wealth magic ka istemal karke, yeh spell aapke liye growth, success, aur financial stability ke naye opportunities attract karta hai.<br />\r\n<br />\r\nThis spell will help you create lasting wealth and open the path to financial freedom, no matter where you are in the world. 🙏</p>",
+        "💸 Attract wealth, success, financial stability<br />\r\n✨ Rukawat aur karz ko door karein<br />\r\n💰 Unlock new growth and money opportunities<br />\r\n🌟 Energy ko prosperity se align karo<br />\r\n<br />\r\nThe Finance Spell is a powerful ritual designed to help you attract wealth and abundance into your life. Whether you&#39;re seeking financial security, new career opportunities, or relief from debt, this spell works to remove obstacles and align your energy with prosperity.<br />\r\n<br />\r\nSacred herbs, focused intentions, aur purani wealth magic ka istemal karke, yeh spell aapke liye growth, success, aur financial stability ke naye opportunities attract karta hai.<br />\r\n<br />\r\nThis spell will help you create lasting wealth and open the path to financial freedom, no matter where you are in the world. 🙏",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -3601,7 +3601,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Attract Wealth &amp; Prosperity | Open Doors to Abundance | Clear Money Blockages | Manifest Financial Stability | Personalised Finance Spell by Expert Spellcasters</p>",
+        "Attract Wealth &amp; Prosperity | Open Doors to Abundance | Clear Money Blockages | Manifest Financial Stability | Personalised Finance Spell by Expert Spellcasters",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -3717,7 +3717,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1753959307640,
       latestImage: null,
       shortDescription:
-        "<p>🛡️ Protect you from black magic &amp; dark energies<br />\r\n🌑 Break negative influences and spiritual attacks<br />\r\n✨ Restore inner peace, strength, and protection<br />\r\n<br />\r\nProtection Spell ek strong ritual hai jo dark energy, curses aur buri niyat ke effects ko hataata hai. Sacred symbols aur ancient methods se yeh spell aapke around spiritual protection create karta hai.<br />\r\n<br />\r\nIdeal for those feeling drained, cursed, or blocked. Our experienced spellcasters perform this ritual personally in your name&mdash;no matter where you are in the world&mdash;for lasting protection and peace of mind. 🙏</p>",
+        "🛡️ Protect you from black magic &amp; dark energies<br />\r\n🌑 Break negative influences and spiritual attacks<br />\r\n✨ Restore inner peace, strength, and protection<br />\r\n<br />\r\nProtection Spell ek strong ritual hai jo dark energy, curses aur buri niyat ke effects ko hataata hai. Sacred symbols aur ancient methods se yeh spell aapke around spiritual protection create karta hai.<br />\r\n<br />\r\nIdeal for those feeling drained, cursed, or blocked. Our experienced spellcasters perform this ritual personally in your name&mdash;no matter where you are in the world&mdash;for lasting protection and peace of mind. 🙏",
       productRank: 10,
       sequence: 0,
       fakeImageIcon: null,
@@ -3756,7 +3756,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Shield Yourself from Black Magic &amp; Negative Forces | Protect Against Harmful Spells &amp; Curses | Restore Peace, Strength, &amp; Positive Energy | Personalised Spell by Expert Practitioners</p>",
+        "Shield Yourself from Black Magic &amp; Negative Forces | Protect Against Harmful Spells &amp; Curses | Restore Peace, Strength, &amp; Positive Energy | Personalised Spell by Expert Practitioners",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -3872,7 +3872,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1747548102495,
       latestImage: null,
       shortDescription:
-        "<p>🔒 Rishtey mein loyalty aur trust banaye rakhe<br />\r\n💑 Rishton ko nazar aur negativity se bachaye<br />\r\n🛡️ Arguments aur misunderstandings se protection mile<br />\r\n🌟 Long-lasting bond create kare</p>\r\n\r\n<p>Yeh aapke relationship ko negativity se bachakar strong karta hai. Yeh spell deep trust aur emotional strength laata hai, jisse aapka connection aur bhi gehra ho jata hai.<br />\r\nYeh ritual aapke naam se personally perform kiya jata hai taaki aapka rishta kabhi na toote. ❤️🔐</p>",
+        "🔒 Rishtey mein loyalty aur trust banaye rakhe<br />\r\n💑 Rishton ko nazar aur negativity se bachaye<br />\r\n🛡️ Arguments aur misunderstandings se protection mile<br />\r\n🌟 Long-lasting bond create kare\r\n\r\nYeh aapke relationship ko negativity se bachakar strong karta hai. Yeh spell deep trust aur emotional strength laata hai, jisse aapka connection aur bhi gehra ho jata hai.<br />\r\nYeh ritual aapke naam se personally perform kiya jata hai taaki aapka rishta kabhi na toote. ❤️🔐",
       productRank: 10,
       sequence: 0,
       fakeImageIcon: null,
@@ -3893,7 +3893,7 @@ export const SHOP_PRODUCTS = {
       tagId: null,
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
-      description: "<p>Unbreakable Bond Spell</p>",
+      description: "Unbreakable Bond Spell",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -4013,7 +4013,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/b1d4ec02-f4db-4709-89c8-452fefc3d437.png",
       shortDescription:
-        "<p>Duration: 5 minutes to 30 minutes (depends on the astrologer)</p>",
+        "Duration: 5 minutes to 30 minutes (depends on the astrologer)",
       productRank: 10,
       sequence: 1,
       fakeImageIcon:
@@ -4052,7 +4052,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Did you know that the evil eye is not only a superstitious belief but is supported scientifically via the thoughts of waves?</p>\r\n\r\n<p><strong>How this works?</strong></p>\r\n\r\n<p>How it works is that, when a person directs his or hers negative/evil thought waves onto another person, the victim&rsquo;s forthcoming life events are delayed or denied. These forthcoming can be in the form of misfortune, diseases or serious injuries.&nbsp;Worry not, as there are many&nbsp;remedies followed by cultures around the world to remove this negativity. It is known to many as the&nbsp;&lsquo;&rsquo;buri nazar&rsquo;&rsquo; or the &nbsp;&lsquo;&rsquo;drishti&rsquo;&rsquo;.&nbsp;</p>\r\n\r\n<p>When someone looks at someone else with affection, envy, jealousy, hate, rage, resentment, hatred, sadness, joy and sorrow, the feelings or thoughts that arise in their mind, it had a bad impact on the vibration of your mind and energy. Human beings have an aura all around them, and it is assumed that the aura is a human shield. When an evil eye affects the shield of energy it is called Nazar. An Individual effected by this, goes through a bad phase in life immediately after that. His career, relationship and everything in life tends to decline or doesn&rsquo;t see any progress. Our experts perform a remedy on video call and remove the evil eye effect and the normal life kicks in immediately.</p>\r\n\r\n<p><strong>Who needs Evil Eye?</strong></p>\r\n\r\n<p>Here are the common symptoms of Buri Nazar:&nbsp;</p>\r\n\r\n<ul>\r\n\t<li>Rise in restlessness</li>\r\n\t<li>Sudden sweating and negative thoughts</li>\r\n\t<li>Not having control over speech</li>\r\n\t<li>Blurring of vision</li>\r\n\t<li>Using abusive language</li>\r\n\t<li>Babies crying a lot suddenly</li>\r\n\t<li>Saliva dripping from the mouth</li>\r\n\t<li>Thoughts of committing suicide</li>\r\n\t<li>Fainting, manifestation of negative energy</li>\r\n\t<li>Even thoughts about/of killing someone</li>\r\n</ul>",
+        "Did you know that the evil eye is not only a superstitious belief but is supported scientifically via the thoughts of waves?\r\n\r\n<strong>How this works?</strong>\r\n\r\nHow it works is that, when a person directs his or hers negative/evil thought waves onto another person, the victim&rsquo;s forthcoming life events are delayed or denied. These forthcoming can be in the form of misfortune, diseases or serious injuries.&nbsp;Worry not, as there are many&nbsp;remedies followed by cultures around the world to remove this negativity. It is known to many as the&nbsp;&lsquo;&rsquo;buri nazar&rsquo;&rsquo; or the &nbsp;&lsquo;&rsquo;drishti&rsquo;&rsquo;.&nbsp;\r\n\r\nWhen someone looks at someone else with affection, envy, jealousy, hate, rage, resentment, hatred, sadness, joy and sorrow, the feelings or thoughts that arise in their mind, it had a bad impact on the vibration of your mind and energy. Human beings have an aura all around them, and it is assumed that the aura is a human shield. When an evil eye affects the shield of energy it is called Nazar. An Individual effected by this, goes through a bad phase in life immediately after that. His career, relationship and everything in life tends to decline or doesn&rsquo;t see any progress. Our experts perform a remedy on video call and remove the evil eye effect and the normal life kicks in immediately.\r\n\r\n<strong>Who needs Evil Eye?</strong>\r\n\r\nHere are the common symptoms of Buri Nazar:&nbsp;\r\n\r\n<ul>\r\n\t<li>Rise in restlessness</li>\r\n\t<li>Sudden sweating and negative thoughts</li>\r\n\t<li>Not having control over speech</li>\r\n\t<li>Blurring of vision</li>\r\n\t<li>Using abusive language</li>\r\n\t<li>Babies crying a lot suddenly</li>\r\n\t<li>Saliva dripping from the mouth</li>\r\n\t<li>Thoughts of committing suicide</li>\r\n\t<li>Fainting, manifestation of negative energy</li>\r\n\t<li>Even thoughts about/of killing someone</li>\r\n</ul>",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -4167,7 +4167,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1725274909811,
       latestImage: null,
       shortDescription:
-        "<p>Relieves mallefic effects of evil influences | Positive vibrations</p>",
+        "Relieves mallefic effects of evil influences | Positive vibrations",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -4199,7 +4199,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>The whole concept of &ldquo;evil eye&rdquo; or &ldquo;Nazar Lagna&rdquo; essentially revolves around the human aura.&nbsp;When someone looks at someone else with affection, envy, jealousy, hate, rage, resentment, hatred, sadness, joy, and sorrow, the feelings or thoughts that arise in their mind, it had a bad impact on the vibration of your mind and energy.&nbsp;Worry not, as there are many&nbsp;remedies followed by cultures around the world to remove this negativity. It is known to many as the&nbsp;&lsquo;&rsquo;Buri Nazar&rsquo;&rsquo; or the &nbsp;&lsquo;&rsquo;Drishti&rsquo;&rsquo;.</p>\r\n\r\n<p><strong>Duration: </strong>5 minutes on Video Call</p>\r\n\r\n<p><strong>Who should take Evil Eye on Relationship?</strong></p>\r\n\r\n<ul>\r\n\t<li>If your partner is cheating on you, you being a victim of infidelity.</li>\r\n\t<li>You feel&nbsp;anguish, depression, fury, and humiliation.</li>\r\n\t<li>Lack of intimacy,&nbsp;emotional bonding, and feelings of connectedness.&nbsp;</li>\r\n\t<li>Conflicts leading to&nbsp;serious disagreements and more intensely heated arguments.</li>\r\n\t<li>Physiological&nbsp;dysfunctions are characterized by psychosocial distress.</li>\r\n\t<li>Contributing factors like&nbsp;divorce, physical abuse, and lower marital satisfaction.</li>\r\n</ul>\r\n\r\n<p><strong>What is the procedure of Evil Eye Session?</strong></p>\r\n\r\n<p>Your session would be on a LIVE Video call for around 5 minutes at your preferred timing.&nbsp;Please ensure you have an updated version of your app to initiate a video call.</p>",
+        "The whole concept of &ldquo;evil eye&rdquo; or &ldquo;Nazar Lagna&rdquo; essentially revolves around the human aura.&nbsp;When someone looks at someone else with affection, envy, jealousy, hate, rage, resentment, hatred, sadness, joy, and sorrow, the feelings or thoughts that arise in their mind, it had a bad impact on the vibration of your mind and energy.&nbsp;Worry not, as there are many&nbsp;remedies followed by cultures around the world to remove this negativity. It is known to many as the&nbsp;&lsquo;&rsquo;Buri Nazar&rsquo;&rsquo; or the &nbsp;&lsquo;&rsquo;Drishti&rsquo;&rsquo;.\r\n\r\n<strong>Duration: </strong>5 minutes on Video Call\r\n\r\n<strong>Who should take Evil Eye on Relationship?</strong>\r\n\r\n<ul>\r\n\t<li>If your partner is cheating on you, you being a victim of infidelity.</li>\r\n\t<li>You feel&nbsp;anguish, depression, fury, and humiliation.</li>\r\n\t<li>Lack of intimacy,&nbsp;emotional bonding, and feelings of connectedness.&nbsp;</li>\r\n\t<li>Conflicts leading to&nbsp;serious disagreements and more intensely heated arguments.</li>\r\n\t<li>Physiological&nbsp;dysfunctions are characterized by psychosocial distress.</li>\r\n\t<li>Contributing factors like&nbsp;divorce, physical abuse, and lower marital satisfaction.</li>\r\n</ul>\r\n\r\n<strong>What is the procedure of Evil Eye Session?</strong>\r\n\r\nYour session would be on a LIVE Video call for around 5 minutes at your preferred timing.&nbsp;Please ensure you have an updated version of your app to initiate a video call.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -4315,7 +4315,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1734675285621,
       latestImage: null,
       shortDescription:
-        "<p>Relieves mallefic effects of evil influences | Positive vibrations</p>",
+        "Relieves mallefic effects of evil influences | Positive vibrations",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -4340,7 +4340,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>The whole concept of &ldquo;evil eye&rdquo; or &ldquo;Nazar Lagna&rdquo; essentially revolves around the human aura.&nbsp;When someone looks at someone else with affection, envy, jealousy, hate, rage, resentment, hatred, sadness, joy, and sorrow, the feelings or thoughts that arise in their mind, it had a bad impact on the vibration of your mind and energy.&nbsp;Worry not, as there are many&nbsp;remedies followed by cultures around the world to remove this negativity. It is known to many as the&nbsp;&lsquo;&rsquo;Buri Nazar&rsquo;&rsquo; or the &nbsp;&lsquo;&rsquo;Drishti&rsquo;&rsquo;.</p>\r\n\r\n<p><strong>Duration:&nbsp;</strong>5 minutes on Video Call</p>\r\n\r\n<p><strong>Who should take Evil Eye on Career?</strong></p>\r\n\r\n<ul>\r\n\t<li>Seeking for job or lost job due to pandemic.</li>\r\n\t<li>Work-related stress can cause physical health problems such as heart attacks, hypertension, mental weakness, and insomnia.</li>\r\n\t<li>Communication problems leading to&nbsp;Interpersonal conflict.</li>\r\n\t<li>Bullying</li>\r\n\t<li>Harassment&nbsp;</li>\r\n\t<li>Low motivation and job satisfaction</li>\r\n\t<li>Poor performance and unhealthy experience.</li>\r\n</ul>\r\n\r\n<p><strong>What is the procedure of Evil Eye Session?</strong></p>\r\n\r\n<p>Your session would be on a LIVE Video call for around 5 minutes at your preferred timing.&nbsp;Please ensure you have an updated version of your app to initiate a video call.</p>",
+        "The whole concept of &ldquo;evil eye&rdquo; or &ldquo;Nazar Lagna&rdquo; essentially revolves around the human aura.&nbsp;When someone looks at someone else with affection, envy, jealousy, hate, rage, resentment, hatred, sadness, joy, and sorrow, the feelings or thoughts that arise in their mind, it had a bad impact on the vibration of your mind and energy.&nbsp;Worry not, as there are many&nbsp;remedies followed by cultures around the world to remove this negativity. It is known to many as the&nbsp;&lsquo;&rsquo;Buri Nazar&rsquo;&rsquo; or the &nbsp;&lsquo;&rsquo;Drishti&rsquo;&rsquo;.\r\n\r\n<strong>Duration:&nbsp;</strong>5 minutes on Video Call\r\n\r\n<strong>Who should take Evil Eye on Career?</strong>\r\n\r\n<ul>\r\n\t<li>Seeking for job or lost job due to pandemic.</li>\r\n\t<li>Work-related stress can cause physical health problems such as heart attacks, hypertension, mental weakness, and insomnia.</li>\r\n\t<li>Communication problems leading to&nbsp;Interpersonal conflict.</li>\r\n\t<li>Bullying</li>\r\n\t<li>Harassment&nbsp;</li>\r\n\t<li>Low motivation and job satisfaction</li>\r\n\t<li>Poor performance and unhealthy experience.</li>\r\n</ul>\r\n\r\n<strong>What is the procedure of Evil Eye Session?</strong>\r\n\r\nYour session would be on a LIVE Video call for around 5 minutes at your preferred timing.&nbsp;Please ensure you have an updated version of your app to initiate a video call.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -4455,7 +4455,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1725274978948,
       latestImage: null,
       shortDescription:
-        "<p>Relieves mallefic effects of evil influences | Positive vibrations</p>",
+        "Relieves mallefic effects of evil influences | Positive vibrations",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -4499,7 +4499,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>The whole concept of &ldquo;evil eye&rdquo; or &ldquo;Nazar Lagna&rdquo; essentially revolves around the human aura.&nbsp;When someone looks at someone else with affection, envy, jealousy, hate, rage, resentment, hatred, sadness, joy, and sorrow, the feelings or thoughts that arise in their mind, it had a bad impact on the vibration of your mind and energy.&nbsp;Worry not, as there are many&nbsp;remedies followed by cultures around the world to remove this negativity. It is known to many as the&nbsp;&lsquo;&rsquo;Buri Nazar&rsquo;&rsquo; or the &nbsp;&lsquo;&rsquo;Drishti&rsquo;&rsquo;.</p>\r\n\r\n<p><strong>Duration:&nbsp;</strong>5 minutes on Video Call</p>\r\n\r\n<p><strong>Who should take Evil Eye on Health?</strong></p>\r\n\r\n<ul>\r\n\t<li>Stress-related to&nbsp;smoking or obesity increases the chances of heart disease risk factors.</li>\r\n\t<li>The kids with stressed-out parents had a substantially higher risk of developing diseases.</li>\r\n\t<li>Unhealthy eating and Excessive drinking often cause various ailments.</li>\r\n\t<li>Tension triggers your headache.</li>\r\n\t<li>Chronic depression seemed to accelerate aging about 9 to 17 additional years.</li>\r\n</ul>\r\n\r\n<p><strong>What is the procedure of Evil Eye Session?</strong></p>\r\n\r\n<p>Your session would be on a LIVE Video call for around 5 minutes at your preferred timing.&nbsp;Please ensure you have an updated version of your app to initiate a video call.</p>",
+        "The whole concept of &ldquo;evil eye&rdquo; or &ldquo;Nazar Lagna&rdquo; essentially revolves around the human aura.&nbsp;When someone looks at someone else with affection, envy, jealousy, hate, rage, resentment, hatred, sadness, joy, and sorrow, the feelings or thoughts that arise in their mind, it had a bad impact on the vibration of your mind and energy.&nbsp;Worry not, as there are many&nbsp;remedies followed by cultures around the world to remove this negativity. It is known to many as the&nbsp;&lsquo;&rsquo;Buri Nazar&rsquo;&rsquo; or the &nbsp;&lsquo;&rsquo;Drishti&rsquo;&rsquo;.\r\n\r\n<strong>Duration:&nbsp;</strong>5 minutes on Video Call\r\n\r\n<strong>Who should take Evil Eye on Health?</strong>\r\n\r\n<ul>\r\n\t<li>Stress-related to&nbsp;smoking or obesity increases the chances of heart disease risk factors.</li>\r\n\t<li>The kids with stressed-out parents had a substantially higher risk of developing diseases.</li>\r\n\t<li>Unhealthy eating and Excessive drinking often cause various ailments.</li>\r\n\t<li>Tension triggers your headache.</li>\r\n\t<li>Chronic depression seemed to accelerate aging about 9 to 17 additional years.</li>\r\n</ul>\r\n\r\n<strong>What is the procedure of Evil Eye Session?</strong>\r\n\r\nYour session would be on a LIVE Video call for around 5 minutes at your preferred timing.&nbsp;Please ensure you have an updated version of your app to initiate a video call.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -4615,7 +4615,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1725274885918,
       latestImage: null,
       shortDescription:
-        "<p>Relieves mallefic effects of evil influences | Positive vibrations</p>",
+        "Relieves mallefic effects of evil influences | Positive vibrations",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -4640,7 +4640,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>The whole concept of &ldquo;evil eye&rdquo; or &ldquo;Nazar Lagna&rdquo; essentially revolves around the human aura.&nbsp;When someone looks at someone else with affection, envy, jealousy, hate, rage, resentment, hatred, sadness, joy, and sorrow, the feelings or thoughts that arise in their mind, it had a bad impact on the vibration of your mind and energy.&nbsp;Worry not, as there are many&nbsp;remedies followed by cultures around the world to remove this negativity. It is known to many as the&nbsp;&lsquo;&rsquo;Buri Nazar&rsquo;&rsquo; or the &nbsp;&lsquo;&rsquo;Drishti&rsquo;&rsquo;.</p>\r\n\r\n<p><strong>Duration:&nbsp;</strong>5 minutes on Video Call</p>\r\n\r\n<p><strong>Who should take Evil Eye on Finance?</strong></p>\r\n\r\n<ul>\r\n\t<li>Lack of income or job loss</li>\r\n\t<li>Unexpected expenses exceeds your monthly income</li>\r\n\t<li>Too much debt</li>\r\n\t<li>Need for financial independence</li>\r\n\t<li>Financial Anxiety</li>\r\n\t<li>Don&#39;t have an emergency fund</li>\r\n</ul>\r\n\r\n<p><strong>What is the procedure of Evil Eye Session?</strong></p>\r\n\r\n<p>Your session would be on a LIVE Video call for around 5 minutes at your preferred timing.&nbsp;Please ensure you have an updated version of your app to initiate a video call.</p>",
+        "The whole concept of &ldquo;evil eye&rdquo; or &ldquo;Nazar Lagna&rdquo; essentially revolves around the human aura.&nbsp;When someone looks at someone else with affection, envy, jealousy, hate, rage, resentment, hatred, sadness, joy, and sorrow, the feelings or thoughts that arise in their mind, it had a bad impact on the vibration of your mind and energy.&nbsp;Worry not, as there are many&nbsp;remedies followed by cultures around the world to remove this negativity. It is known to many as the&nbsp;&lsquo;&rsquo;Buri Nazar&rsquo;&rsquo; or the &nbsp;&lsquo;&rsquo;Drishti&rsquo;&rsquo;.\r\n\r\n<strong>Duration:&nbsp;</strong>5 minutes on Video Call\r\n\r\n<strong>Who should take Evil Eye on Finance?</strong>\r\n\r\n<ul>\r\n\t<li>Lack of income or job loss</li>\r\n\t<li>Unexpected expenses exceeds your monthly income</li>\r\n\t<li>Too much debt</li>\r\n\t<li>Need for financial independence</li>\r\n\t<li>Financial Anxiety</li>\r\n\t<li>Don&#39;t have an emergency fund</li>\r\n</ul>\r\n\r\n<strong>What is the procedure of Evil Eye Session?</strong>\r\n\r\nYour session would be on a LIVE Video call for around 5 minutes at your preferred timing.&nbsp;Please ensure you have an updated version of your app to initiate a video call.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -4756,7 +4756,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/7000d578-21e9-40ff-8d7c-2363f26f6ba4.png",
       shortDescription:
-        "<p>Relieves mallefic effects of evil influences | Positive vibrations</p>",
+        "Relieves mallefic effects of evil influences | Positive vibrations",
       productRank: 10,
       sequence: 2,
       fakeImageIcon: "",
@@ -4781,7 +4781,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>The whole concept of &ldquo;evil eye&rdquo; or &ldquo;Nazar Lagna&rdquo; essentially revolves around the human aura.&nbsp;When someone looks at someone else with affection, envy, jealousy, hate, rage, resentment, hatred, sadness, joy, and sorrow, the feelings or thoughts that arise in their mind, it had a bad impact on the vibration of your mind and energy.&nbsp;Worry not, as there are many&nbsp;remedies followed by cultures around the world to remove this negativity. It is known to many as the&nbsp;&lsquo;&rsquo;Buri Nazar&rsquo;&rsquo; or the &nbsp;&lsquo;&rsquo;Drishti&rsquo;&rsquo;.</p>\r\n\r\n<p><strong>Duration:&nbsp;</strong>5 minutes on Video Call for all family members together (4 persons max)</p>\r\n\r\n<p><strong>Common symptoms of Buri Nazar:&nbsp;</strong></p>\r\n\r\n<ul>\r\n\t<li>Rise in restlessness</li>\r\n\t<li>Sudden sweating and negative thoughts</li>\r\n\t<li>Not having control over speech</li>\r\n\t<li>Blurring of vision</li>\r\n\t<li>Using abusive language</li>\r\n\t<li>Babies crying a lot suddenly</li>\r\n\t<li>Saliva dripping from the mouth</li>\r\n\t<li>Thoughts of committing suicide</li>\r\n\t<li>Fainting, manifestation of negative energy</li>\r\n\t<li>Even thoughts about/of killing someone</li>\r\n</ul>\r\n\r\n<p><strong>What is the procedure of Evil Eye Session?</strong></p>\r\n\r\n<p>Once your order is booked, our team will send an automated message and a session will be scheduled at your convenient time and day. Your session would be on a LIVE Video call for around 5 minutes.&nbsp;Please ensure you have an updated version of your app to initiate a video call.</p>",
+        "The whole concept of &ldquo;evil eye&rdquo; or &ldquo;Nazar Lagna&rdquo; essentially revolves around the human aura.&nbsp;When someone looks at someone else with affection, envy, jealousy, hate, rage, resentment, hatred, sadness, joy, and sorrow, the feelings or thoughts that arise in their mind, it had a bad impact on the vibration of your mind and energy.&nbsp;Worry not, as there are many&nbsp;remedies followed by cultures around the world to remove this negativity. It is known to many as the&nbsp;&lsquo;&rsquo;Buri Nazar&rsquo;&rsquo; or the &nbsp;&lsquo;&rsquo;Drishti&rsquo;&rsquo;.\r\n\r\n<strong>Duration:&nbsp;</strong>5 minutes on Video Call for all family members together (4 persons max)\r\n\r\n<strong>Common symptoms of Buri Nazar:&nbsp;</strong>\r\n\r\n<ul>\r\n\t<li>Rise in restlessness</li>\r\n\t<li>Sudden sweating and negative thoughts</li>\r\n\t<li>Not having control over speech</li>\r\n\t<li>Blurring of vision</li>\r\n\t<li>Using abusive language</li>\r\n\t<li>Babies crying a lot suddenly</li>\r\n\t<li>Saliva dripping from the mouth</li>\r\n\t<li>Thoughts of committing suicide</li>\r\n\t<li>Fainting, manifestation of negative energy</li>\r\n\t<li>Even thoughts about/of killing someone</li>\r\n</ul>\r\n\r\n<strong>What is the procedure of Evil Eye Session?</strong>\r\n\r\nOnce your order is booked, our team will send an automated message and a session will be scheduled at your convenient time and day. Your session would be on a LIVE Video call for around 5 minutes.&nbsp;Please ensure you have an updated version of your app to initiate a video call.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -4901,7 +4901,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/12823f12-979c-4a84-858f-6d2808468547.png",
       shortDescription:
-        "<p><strong>Relationship Healing</strong> is a powerful energy-based process that helps remove negativity, misunderstandings, and emotional pain from relationships. It strengthens love, trust, and connection between partners, friends, or family members. This healing fills your bond with positive energy, making relationships more peaceful, happy, and full of love. Perfect for anyone wanting to heal, improve, or bring back harmony in their relationships!</p>",
+        "<strong>Relationship Healing</strong> is a powerful energy-based process that helps remove negativity, misunderstandings, and emotional pain from relationships. It strengthens love, trust, and connection between partners, friends, or family members. This healing fills your bond with positive energy, making relationships more peaceful, happy, and full of love. Perfect for anyone wanting to heal, improve, or bring back harmony in their relationships!",
       productRank: 1,
       sequence: 2,
       fakeImageIcon:
@@ -4930,7 +4930,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Heals Negative Energies In A&nbsp;Relationship &amp; Speeds The Healing Process</p>",
+        "Heals Negative Energies In A&nbsp;Relationship &amp; Speeds The Healing Process",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -5046,7 +5046,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1747977945731,
       latestImage: null,
       shortDescription:
-        "<p>❤️ Dil ki dooriyan kam hone lagti hain<br />\r\n💖 Toota hua emotional connection phir se judta hai<br />\r\n💑 Rishtey mein pyaar, samajhdaari aur apnapan wapas aata hai<br />\r\n<br />\r\nAttract Your Love Healing ek powerful ritual hai jo un logon ke liye bana hai jo apne rishte mein khoya hua pyaar wapas lana chahte hain. 💕<br />\r\n<br />\r\nEmotional blockages, confusion aur past hurt ko hataakar, yeh healing aapke rishte ko naye shuruat dene mein madad karta hai. ✨<br />\r\n<br />\r\nChahe aap desh mein ho ya videsh mein, yeh healing ritual aapke naam se hamare trained healers dwara personally karwa sakte hai. 🌍🙏</p>",
+        "❤️ Dil ki dooriyan kam hone lagti hain<br />\r\n💖 Toota hua emotional connection phir se judta hai<br />\r\n💑 Rishtey mein pyaar, samajhdaari aur apnapan wapas aata hai<br />\r\n<br />\r\nAttract Your Love Healing ek powerful ritual hai jo un logon ke liye bana hai jo apne rishte mein khoya hua pyaar wapas lana chahte hain. 💕<br />\r\n<br />\r\nEmotional blockages, confusion aur past hurt ko hataakar, yeh healing aapke rishte ko naye shuruat dene mein madad karta hai. ✨<br />\r\n<br />\r\nChahe aap desh mein ho ya videsh mein, yeh healing ritual aapke naam se hamare trained healers dwara personally karwa sakte hai. 🌍🙏",
       productRank: 3,
       sequence: 0,
       fakeImageIcon: null,
@@ -5078,7 +5078,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Lost Love Comes Back | Emotional Wound Healing | Love Energy Activation | Relationship Reconnection | Stronger Emotional Bond 💑</p>",
+        "Lost Love Comes Back | Emotional Wound Healing | Love Energy Activation | Relationship Reconnection | Stronger Emotional Bond 💑",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -5193,7 +5193,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1747978026235,
       latestImage: null,
       shortDescription:
-        "<p>🚀 Jab business ki raah mein rukawat kam hone lage,<br />\r\n💼 Naye ideas aur opportunities phir se jagmagane lage,<br />\r\n📈 Aur kaam mein growth, safalta aur nayi ummeedein laut aaye...<br />\r\nTab zarurat hai Business Boom Healing ki &mdash; ek shaktishaali ritual jo un logon ke liye hai jo apne business mein rukawat hataakar tezi se tarakki karna chahte hain. 💼✨<br />\r\n<br />\r\nYeh healing aapke business ke saamne aane wali energy blockages, doubts aur challenges ko door karke, naye growth aur success ke raaste kholti hai. 🌟<br />\r\n<br />\r\n📍 Chahe aap India mein ho ya duniya ke kisi kone mein, yeh healing aapke naam se hamare expert healers dwara personal level par ki jati hai. 🌍🙏</p>",
+        "🚀 Jab business ki raah mein rukawat kam hone lage,<br />\r\n💼 Naye ideas aur opportunities phir se jagmagane lage,<br />\r\n📈 Aur kaam mein growth, safalta aur nayi ummeedein laut aaye...<br />\r\nTab zarurat hai Business Boom Healing ki &mdash; ek shaktishaali ritual jo un logon ke liye hai jo apne business mein rukawat hataakar tezi se tarakki karna chahte hain. 💼✨<br />\r\n<br />\r\nYeh healing aapke business ke saamne aane wali energy blockages, doubts aur challenges ko door karke, naye growth aur success ke raaste kholti hai. 🌟<br />\r\n<br />\r\n📍 Chahe aap India mein ho ya duniya ke kisi kone mein, yeh healing aapke naam se hamare expert healers dwara personal level par ki jati hai. 🌍🙏",
       productRank: 4,
       sequence: 0,
       fakeImageIcon: null,
@@ -5328,7 +5328,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1747977995359,
       latestImage: null,
       shortDescription:
-        "<p>❤️ Shaadi mein pyaar aur samjhauta badhne lagta hai<br />\r\n💖 Rishtey mein shanti aur balance aata hai<br />\r\n💑 Ghar ka mahaul sukoon bhara ho jaata hai<br />\r\n<br />\r\nMarriage Blessing Healing un couples ke liye hai jo apna rishta aur bhi strong banana chahte hain.<br />\r\nYeh ritual rishtey mein naye pyaar aur understanding laata hai. 💕<br />\r\n<br />\r\nChahe aap desh mein ho ya videsh mein, yeh healing ritual aapke naam se hamare trained healers dwara personally karwa sakte hai. 🌍</p>",
+        "❤️ Shaadi mein pyaar aur samjhauta badhne lagta hai<br />\r\n💖 Rishtey mein shanti aur balance aata hai<br />\r\n💑 Ghar ka mahaul sukoon bhara ho jaata hai<br />\r\n<br />\r\nMarriage Blessing Healing un couples ke liye hai jo apna rishta aur bhi strong banana chahte hain.<br />\r\nYeh ritual rishtey mein naye pyaar aur understanding laata hai. 💕<br />\r\n<br />\r\nChahe aap desh mein ho ya videsh mein, yeh healing ritual aapke naam se hamare trained healers dwara personally karwa sakte hai. 🌍",
       productRank: 5,
       sequence: 0,
       fakeImageIcon: null,
@@ -5355,7 +5355,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Strengthen Marital Bond | Divine Couple Protection | Emotional Harmony in Marriage | Long-lasting Love &amp; Loyalty | Blessings for Peaceful Marriage | Remove Tensions &amp; Misunderstandings</p>",
+        "Strengthen Marital Bond | Divine Couple Protection | Emotional Harmony in Marriage | Long-lasting Love &amp; Loyalty | Blessings for Peaceful Marriage | Remove Tensions &amp; Misunderstandings",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -5471,7 +5471,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1747982418348,
       latestImage: null,
       shortDescription:
-        "<p>💸 Jab paisa rukne lage bina wajah,<br />\r\n💭 Paise ko lekar hamesha stress aur uncertainty bani rahe,<br />\r\n🌈 Aur financial life mein clarity, growth aur sukoon ki kami mehsoos ho...<br />\r\n<br />\r\nTab zarurat hai Money Magnet Healing ki &mdash; ek shaktishaali ritual jo un logon ke liye hai jo apne jeevan mein abundance, wealth aur financial stability attract karna chahte hain. 💰✨<br />\r\n<br />\r\nYeh healing aapke subconscious mind se money blocks, fear, self-doubt aur karmic limitations ko hataakar, aapke andar wealth receive karne ki energy activate karti hai. 🌟<br />\r\n<br />\r\n📍 Chahe aap Bharat mein ho ya videsh mein, yeh ritual aapke naam se hamare trained healers dwara personally perform kiya jata hai &mdash; taaki paisa asani se aur lagatar aap tak aaye. 🌍🙏</p>",
+        "💸 Jab paisa rukne lage bina wajah,<br />\r\n💭 Paise ko lekar hamesha stress aur uncertainty bani rahe,<br />\r\n🌈 Aur financial life mein clarity, growth aur sukoon ki kami mehsoos ho...<br />\r\n<br />\r\nTab zarurat hai Money Magnet Healing ki &mdash; ek shaktishaali ritual jo un logon ke liye hai jo apne jeevan mein abundance, wealth aur financial stability attract karna chahte hain. 💰✨<br />\r\n<br />\r\nYeh healing aapke subconscious mind se money blocks, fear, self-doubt aur karmic limitations ko hataakar, aapke andar wealth receive karne ki energy activate karti hai. 🌟<br />\r\n<br />\r\n📍 Chahe aap Bharat mein ho ya videsh mein, yeh ritual aapke naam se hamare trained healers dwara personally perform kiya jata hai &mdash; taaki paisa asani se aur lagatar aap tak aaye. 🌍🙏",
       productRank: 6,
       sequence: 0,
       fakeImageIcon: null,
@@ -5607,7 +5607,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/ef632045-1e8a-47a2-8735-feeb40ec2d2e.png",
       shortDescription:
-        "<p><strong>Angel Healing</strong> (<strong>Seven Chakras Healing</strong>) is a healing that balances and energizes all 7 chakras. It removes emotional blockages, brings inner peace, and helps you feel more focused in life. This healing fills you with positivity, clarity, and spiritual strength, making your mind and soul feel lighter and more aligned. Perfect for emotional healing and a better, peaceful life!</p>",
+        "<strong>Angel Healing</strong> (<strong>Seven Chakras Healing</strong>) is a healing that balances and energizes all 7 chakras. It removes emotional blockages, brings inner peace, and helps you feel more focused in life. This healing fills you with positivity, clarity, and spiritual strength, making your mind and soul feel lighter and more aligned. Perfect for emotional healing and a better, peaceful life!",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -5666,7 +5666,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Energises 7 Chakras Healing Emotionally &amp; Providing A&nbsp;Better Focus In Life</p>",
+        "Energises 7 Chakras Healing Emotionally &amp; Providing A&nbsp;Better Focus In Life",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -5784,7 +5784,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1725102497494,
       latestImage: null,
       shortDescription:
-        "<p>Unlock the secrets of your past life | Utilize your time on a perfect direction | Explore hidden creativity</p>",
+        "Unlock the secrets of your past life | Utilize your time on a perfect direction | Explore hidden creativity",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -5798,7 +5798,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p><strong>Look at your Palm:&nbsp;</strong></p>\r\n\r\n<p>Palmistry is the art of analyzing the physical features of the hands to interpret personality characteristics and predict future happenings. Palm readers observe how the hand&#39;s attributes connect to greater themes.&nbsp;The folds and creases of the palms referred to as&nbsp;<strong>lines</strong>, are indeed used to form narratives and predict future happenings.&nbsp;Every line on your palm represents some part of your life for example- your love life, your career life, and all the future happenings.</p>\r\n\r\n<p><strong>Why Palmistry is necessary for you?</strong></p>\r\n\r\n<ul>\r\n\t<li>It can find out the right direction to proceed in your life.</li>\r\n\t<li>It helps you to land on the right decisions in your life.</li>\r\n\t<li>It will help you to find the perfect job for you.</li>\r\n\t<li>It helps you to understand find out the purpose of your life.</li>\r\n\t<li>You can avoid the unpredictable mishappenings of your life ex-accidents, family issues and love issues.</li>\r\n\t<li>It provides advice for decisions regarding relationship, career, family&nbsp;friends, finances and life choices.</li>\r\n</ul>\r\n\r\n<p><strong>Conclusion:</strong></p>\r\n\r\n<p>Palmistry is so powerful that one can predict life-threatening upcoming situations and can make a move according to that. Palmistry could be your strength if you truly believe in them.&nbsp;Different people have different lines, just like the fingerprints palm lines are unique. Different have different stories, so you need to dwell yourself into the lines if you want to learn palm reading.</p>",
+        "<strong>Look at your Palm:&nbsp;</strong>\r\n\r\nPalmistry is the art of analyzing the physical features of the hands to interpret personality characteristics and predict future happenings. Palm readers observe how the hand&#39;s attributes connect to greater themes.&nbsp;The folds and creases of the palms referred to as&nbsp;<strong>lines</strong>, are indeed used to form narratives and predict future happenings.&nbsp;Every line on your palm represents some part of your life for example- your love life, your career life, and all the future happenings.\r\n\r\n<strong>Why Palmistry is necessary for you?</strong>\r\n\r\n<ul>\r\n\t<li>It can find out the right direction to proceed in your life.</li>\r\n\t<li>It helps you to land on the right decisions in your life.</li>\r\n\t<li>It will help you to find the perfect job for you.</li>\r\n\t<li>It helps you to understand find out the purpose of your life.</li>\r\n\t<li>You can avoid the unpredictable mishappenings of your life ex-accidents, family issues and love issues.</li>\r\n\t<li>It provides advice for decisions regarding relationship, career, family&nbsp;friends, finances and life choices.</li>\r\n</ul>\r\n\r\n<strong>Conclusion:</strong>\r\n\r\nPalmistry is so powerful that one can predict life-threatening upcoming situations and can make a move according to that. Palmistry could be your strength if you truly believe in them.&nbsp;Different people have different lines, just like the fingerprints palm lines are unique. Different have different stories, so you need to dwell yourself into the lines if you want to learn palm reading.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: "https://youtu.be/7kVN2-j_-PE",
@@ -5916,7 +5916,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1749100601903,
       latestImage: "",
       shortDescription:
-        "<p>This healing is done for a person who wants to improve his/her health, emotional well being, lack of prosperity and challenging relationships. Theta Healing is a useful technique that creates a fusion between spirituality and science to identify and further subsequently transform an individual&rsquo;s negative beliefs like poor health, challenging relationships and also lack of prosperity, deeply held blocks back in their mindsets and moreover trauma in their unconscious minds. It can easily resolve the trapped energy below a trauma by replacing one&rsquo;s mindset with positive beliefs and a positive insight towards life.</p>\r\n\r\n<ul>\r\n</ul>",
+        "This healing is done for a person who wants to improve his/her health, emotional well being, lack of prosperity and challenging relationships. Theta Healing is a useful technique that creates a fusion between spirituality and science to identify and further subsequently transform an individual&rsquo;s negative beliefs like poor health, challenging relationships and also lack of prosperity, deeply held blocks back in their mindsets and moreover trauma in their unconscious minds. It can easily resolve the trapped energy below a trauma by replacing one&rsquo;s mindset with positive beliefs and a positive insight towards life.\r\n\r\n<ul>\r\n</ul>",
       productRank: 10,
       sequence: 1,
       fakeImageIcon:
@@ -5977,7 +5977,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Theta Healing (थीटा हीलिंग)<br />\r\n<br />\r\n&nbsp;</p>\r\n\r\n<p><strong>Benefits of Theta Healing:</strong></p>\r\n\r\n<ul>\r\n\t<li>Reveals your creative potential.</li>\r\n\t<li>Puts an end to fears and phobias.</li>\r\n\t<li>Frees you from addictions and habits.</li>\r\n\t<li>Makes your spiritual connection deeper.</li>\r\n\t<li>Aids you in attaining personal freedom.</li>\r\n\t<li>Helps you to be healthier and feel well.</li>\r\n\t<li>Heals physical illnesses.</li>\r\n</ul>",
+        "Theta Healing (थीटा हीलिंग)<br />\r\n<br />\r\n&nbsp;\r\n\r\n<strong>Benefits of Theta Healing:</strong>\r\n\r\n<ul>\r\n\t<li>Reveals your creative potential.</li>\r\n\t<li>Puts an end to fears and phobias.</li>\r\n\t<li>Frees you from addictions and habits.</li>\r\n\t<li>Makes your spiritual connection deeper.</li>\r\n\t<li>Aids you in attaining personal freedom.</li>\r\n\t<li>Helps you to be healthier and feel well.</li>\r\n\t<li>Heals physical illnesses.</li>\r\n</ul>",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -6095,7 +6095,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1753351514408,
       latestImage: null,
       shortDescription:
-        "<p>Brings inner peace |&nbsp;Enhances meditation |&nbsp;Boosts intuition&nbsp;</p>",
+        "Brings inner peace |&nbsp;Enhances meditation |&nbsp;Boosts intuition&nbsp;",
       productRank: 1,
       sequence: 1,
       fakeImageIcon: null,
@@ -6109,7 +6109,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: false,
       description:
-        "<p><!-- x-tinymce/html -->0 Mukhi Rudraksha &ndash; also known as Nirakar Rudraksha &ndash; symbolizes the formless power of Lord Shiva. It helps deepen spiritual connection and brings detachment from material worries. Ideal for those seeking peace, focus, and liberation.</p>",
+        "<!-- x-tinymce/html -->0 Mukhi Rudraksha &ndash; also known as Nirakar Rudraksha &ndash; symbolizes the formless power of Lord Shiva. It helps deepen spiritual connection and brings detachment from material worries. Ideal for those seeking peace, focus, and liberation.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -6225,7 +6225,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1753351767159,
       latestImage: "",
       shortDescription:
-        "<p>Attracts wealth | Fulfills Desires |&nbsp;Energized |&nbsp;Certificate Included |&nbsp;Free Shipping&nbsp;</p>",
+        "Attracts wealth | Fulfills Desires |&nbsp;Energized |&nbsp;Certificate Included |&nbsp;Free Shipping&nbsp;",
       productRank: 2,
       sequence: 2,
       fakeImageIcon:
@@ -6264,7 +6264,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: false,
       description:
-        "<p>By wearing Ek Mukhi Rudraksha, one gets the Shiva element. Ek mukhi Rudraksh is extremely rare and in this Rudraksh resides Sakshat Mahadev. Wearing a Ek Mukhi Rudraksha pendant, attains the essence of Shiva and eliminates all kinds of sins. The natives are very lucky, who wear a Ek Mukhi Rudraksha.This Rudraksha has its own significance. It is considered to be perfect for achieving unbelievable wealth. It bestows honor and fame. By wearing it, the person becomes fearless and courageous, fearless. The product is 100% natural and thus no harm in the quality as well as shape of the Rudraksha will be seen. Being a natural product, the Rudraksha will provide you a peaceful experience.</p>\r\n\r\n<p><strong>Benefits of wearing Ek Mukhi Rudraksha:</strong></p>\r\n\r\n<p>a) With the effect of Ekamukhi Rudraksha, the doshas arising from the sun are eliminated.</p>\r\n\r\n<p>b) Wearing a Ekamukhi Rudraksha provides quick relief from fever, eye diseases, headache,heart disease, indigestion, liver disease or bone related diseases.</p>\r\n\r\n<p>c) If there is any kind of hindrance in the administrative work, then the interruptions will automatically end with the effect of a Ekamukhi Rudraksha pendant.</p>\r\n\r\n<p>d) This Rudraksha relieves mental pain, increases the positive energy in the body.</p>\r\n\r\n<p>e) With the effect of Ekamukhi Rudraksha, a person subdues his senses and moves towards the attainment of Brahman knowledge.</p>\r\n\r\n<p><strong>Return Policy:</strong><br />\r\n10 days Return &amp; Replacement Policy</p>",
+        "By wearing Ek Mukhi Rudraksha, one gets the Shiva element. Ek mukhi Rudraksh is extremely rare and in this Rudraksh resides Sakshat Mahadev. Wearing a Ek Mukhi Rudraksha pendant, attains the essence of Shiva and eliminates all kinds of sins. The natives are very lucky, who wear a Ek Mukhi Rudraksha.This Rudraksha has its own significance. It is considered to be perfect for achieving unbelievable wealth. It bestows honor and fame. By wearing it, the person becomes fearless and courageous, fearless. The product is 100% natural and thus no harm in the quality as well as shape of the Rudraksha will be seen. Being a natural product, the Rudraksha will provide you a peaceful experience.\r\n\r\n<strong>Benefits of wearing Ek Mukhi Rudraksha:</strong>\r\n\r\na) With the effect of Ekamukhi Rudraksha, the doshas arising from the sun are eliminated.\r\n\r\nb) Wearing a Ekamukhi Rudraksha provides quick relief from fever, eye diseases, headache,heart disease, indigestion, liver disease or bone related diseases.\r\n\r\nc) If there is any kind of hindrance in the administrative work, then the interruptions will automatically end with the effect of a Ekamukhi Rudraksha pendant.\r\n\r\nd) This Rudraksha relieves mental pain, increases the positive energy in the body.\r\n\r\ne) With the effect of Ekamukhi Rudraksha, a person subdues his senses and moves towards the attainment of Brahman knowledge.\r\n\r\n<strong>Return Policy:</strong><br />\r\n10 days Return &amp; Replacement Policy",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -6380,7 +6380,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1753443600279,
       latestImage: "",
       shortDescription:
-        "<p>Increase Courage &amp; Confidence&nbsp;|&nbsp;Energized |&nbsp;Certificate Included |&nbsp;Free Shipping&nbsp;</p>",
+        "Increase Courage &amp; Confidence&nbsp;|&nbsp;Energized |&nbsp;Certificate Included |&nbsp;Free Shipping&nbsp;",
       productRank: 3,
       sequence: 3,
       fakeImageIcon:
@@ -6396,7 +6396,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: false,
       description:
-        "<p>In the horoscope, if Mars is not in a good state or there are obstacles in marriage etc., then you should wear Trimukhi Rudraksha. Three Mukhi Rudraksha removes mangalik dosha, besides Mars is also the causative planet of abortion or feticide. If you are struggling with such problems, then you must wear three faced Rudraksha.Three Mukhi Rudraksh is also most special because it is related to Agni Dev and it is said to be the form of Sakshat Agni Dev. This Rudraksha is worn for purity of mind.The product is 100% natural and thus no harm in the quality as well as shape of the Rudraksha will be seen. Being a natural product, the Rudraksha will provide you a peaceful experience.</p>\r\n\r\n<p><strong>Benefits of wearing&nbsp;&nbsp;3 Mukhi Rudraksha:</strong></p>\r\n\r\n<p>a) If you are always ill due to the inauspiciousness of Mars, then you should wear a pendant made of three Mukhi Rudraksh, due to its&nbsp; &nbsp; &nbsp;&nbsp;effects from smallpox, liver disease, hemorrhoids, blood related problems, cholera, menstrual related diseases then&nbsp;will get liberation from&nbsp; &nbsp; &nbsp;these.</p>\r\n\r\n<p>b) After wearing pendants made of three Mukhi Rudraksh, self-strength increases, negative thoughts do not arise in the mind.</p>\r\n\r\n<p>c) Due to the effect of this Rudraksh, you get desired success in the field of education. Competition also gives good success.</p>\r\n\r\n<p>d) Due to the nature of fire, after wearing this Rudraksha, the fire god is pleased and you get his blessings, wealth and opulence are attained.</p>\r\n\r\n<p>e) Business or job progresses very quickly, money starts coming in, poverty is removed.</p>\r\n\r\n<p><strong>Return Policy:</strong><br />\r\n10 days Return &amp; Replacement Policy</p>",
+        "In the horoscope, if Mars is not in a good state or there are obstacles in marriage etc., then you should wear Trimukhi Rudraksha. Three Mukhi Rudraksha removes mangalik dosha, besides Mars is also the causative planet of abortion or feticide. If you are struggling with such problems, then you must wear three faced Rudraksha.Three Mukhi Rudraksh is also most special because it is related to Agni Dev and it is said to be the form of Sakshat Agni Dev. This Rudraksha is worn for purity of mind.The product is 100% natural and thus no harm in the quality as well as shape of the Rudraksha will be seen. Being a natural product, the Rudraksha will provide you a peaceful experience.\r\n\r\n<strong>Benefits of wearing&nbsp;&nbsp;3 Mukhi Rudraksha:</strong>\r\n\r\na) If you are always ill due to the inauspiciousness of Mars, then you should wear a pendant made of three Mukhi Rudraksh, due to its&nbsp; &nbsp; &nbsp;&nbsp;effects from smallpox, liver disease, hemorrhoids, blood related problems, cholera, menstrual related diseases then&nbsp;will get liberation from&nbsp; &nbsp; &nbsp;these.\r\n\r\nb) After wearing pendants made of three Mukhi Rudraksh, self-strength increases, negative thoughts do not arise in the mind.\r\n\r\nc) Due to the effect of this Rudraksh, you get desired success in the field of education. Competition also gives good success.\r\n\r\nd) Due to the nature of fire, after wearing this Rudraksha, the fire god is pleased and you get his blessings, wealth and opulence are attained.\r\n\r\ne) Business or job progresses very quickly, money starts coming in, poverty is removed.\r\n\r\n<strong>Return Policy:</strong><br />\r\n10 days Return &amp; Replacement Policy",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -6512,7 +6512,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1753443465505,
       latestImage: "",
       shortDescription:
-        "<p>Career Advancement | Academic Growth | Energized |&nbsp;Certificate Included | Free Shipping&nbsp;</p>",
+        "Career Advancement | Academic Growth | Energized |&nbsp;Certificate Included | Free Shipping&nbsp;",
       productRank: 4,
       sequence: 4,
       fakeImageIcon:
@@ -6528,7 +6528,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: false,
       description:
-        "<p>Chaturmukhi Rudraksha is nothing less than a boon for students, it is a divine gift for students. You get the benefit of early education as soon as you wear it. This Rudraksha is related to the planet Mercury. Its deity is Brahma Deva, the students develop intelligence and mind while studying it. This Rudraksha is not less than a boon because by its wearing, the guilty of murder are freed from sin and they attain salvation.&nbsp;The product is 100% natural and thus no harm in the quality as well as shape of the Rudraksha will be seen. Being a natural product, the Rudraksha will provide you a peaceful experience.</p>\r\n\r\n<p><strong>Benefits of wearing&nbsp;4 Mukhi Rudraksha:</strong></p>\r\n\r\n<p>a) For those who are troubled by nervous debility, mental illness, fever, asthma, bile and veins related diseases, this Rudraksha is very beneficial for them.</p>\r\n\r\n<p>b) Due to the effect of this Rudraksha, sweetness comes in the speech and there is a sharpness in the face.</p>\r\n\r\n<p>c) Within few days of wearing this Rudraksha, you get rid of physical, mental, worldly sorrows.</p>\r\n\r\n<p>d) If there is any type of obsolescence in the horoscope, then this&nbsp;Rudraksha must be worn. Mercury planet becomes strong due to its effect. &nbsp; &nbsp;The obsolescence arising in life goes away.</p>\r\n\r\n<p>e) To increase concentration, Rudraksha pendant in scientific studies and study of religious texts, it is beneficial.</p>\r\n\r\n<p><strong>Return Policy:</strong><br />\r\n10 days Return &amp; Replacement Policy</p>",
+        "Chaturmukhi Rudraksha is nothing less than a boon for students, it is a divine gift for students. You get the benefit of early education as soon as you wear it. This Rudraksha is related to the planet Mercury. Its deity is Brahma Deva, the students develop intelligence and mind while studying it. This Rudraksha is not less than a boon because by its wearing, the guilty of murder are freed from sin and they attain salvation.&nbsp;The product is 100% natural and thus no harm in the quality as well as shape of the Rudraksha will be seen. Being a natural product, the Rudraksha will provide you a peaceful experience.\r\n\r\n<strong>Benefits of wearing&nbsp;4 Mukhi Rudraksha:</strong>\r\n\r\na) For those who are troubled by nervous debility, mental illness, fever, asthma, bile and veins related diseases, this Rudraksha is very beneficial for them.\r\n\r\nb) Due to the effect of this Rudraksha, sweetness comes in the speech and there is a sharpness in the face.\r\n\r\nc) Within few days of wearing this Rudraksha, you get rid of physical, mental, worldly sorrows.\r\n\r\nd) If there is any type of obsolescence in the horoscope, then this&nbsp;Rudraksha must be worn. Mercury planet becomes strong due to its effect. &nbsp; &nbsp;The obsolescence arising in life goes away.\r\n\r\ne) To increase concentration, Rudraksha pendant in scientific studies and study of religious texts, it is beneficial.\r\n\r\n<strong>Return Policy:</strong><br />\r\n10 days Return &amp; Replacement Policy",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -6644,7 +6644,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1750757867933,
       latestImage: "",
       shortDescription:
-        "<p>Improved Fitness | Promotes Good Health | Energized |&nbsp;Certificate Included |&nbsp;Free Shipping</p>",
+        "Improved Fitness | Promotes Good Health | Energized |&nbsp;Certificate Included |&nbsp;Free Shipping",
       productRank: 5,
       sequence: 5,
       fakeImageIcon:
@@ -6660,7 +6660,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: false,
       description:
-        "<p>Since ancient times, it is believed that Mahadev Shiva has five God forms in Panchmukhi Rudraksha and it is also said that this five God form resides in Panchmukhi Rudraksha. Panchmukhi is established in the world as Rudraksh Pendant Kalagni. This is the only Rudraksha on which Lord Vishnu along with Lord Shiva, Lord Ganesha, Sun God and Mother Bhagwati, the symbol of power, has immense grace.The product is 100% natural and thus no harm in the quality as well as shape of the Rudraksha will be seen. Being a natural product, the Rudraksha will provide you a peaceful experience.</p>\r\n\r\n<p><strong>Benefits of wearing&nbsp;5 Mukhi Rudraksha:</strong></p>\r\n\r\n<p>a) Due to the effect of this Rudraksh, poverty, poverty are ended, money comes in life, happiness comes in life.</p>\r\n\r\n<p>b) Due to the effect of this Rudraksha, there is happiness in married life, sweetness is seen in the relationship between husband and wife.</p>\r\n\r\n<p>c) After wearing Panchmukhi Rudraksha pendant, confidence, morale and reverence for God increases.</p>\r\n\r\n<p>d) Chanting the Mahamrityunjaya Mantra from Panch Mukhi Rudraksha to avoid premature death is a defense.</p>\r\n\r\n<p>e) For the heart patients, it is the Rambana, the person who is troubled by the heart disease must wear the Panchamukhi Rudraksha pendant.</p>\r\n\r\n<ul>\r\n\t<li><strong>Return Policy:</strong><br />\r\n\t10 days Return &amp; Replacement Policy</li>\r\n</ul>",
+        "Since ancient times, it is believed that Mahadev Shiva has five God forms in Panchmukhi Rudraksha and it is also said that this five God form resides in Panchmukhi Rudraksha. Panchmukhi is established in the world as Rudraksh Pendant Kalagni. This is the only Rudraksha on which Lord Vishnu along with Lord Shiva, Lord Ganesha, Sun God and Mother Bhagwati, the symbol of power, has immense grace.The product is 100% natural and thus no harm in the quality as well as shape of the Rudraksha will be seen. Being a natural product, the Rudraksha will provide you a peaceful experience.\r\n\r\n<strong>Benefits of wearing&nbsp;5 Mukhi Rudraksha:</strong>\r\n\r\na) Due to the effect of this Rudraksh, poverty, poverty are ended, money comes in life, happiness comes in life.\r\n\r\nb) Due to the effect of this Rudraksha, there is happiness in married life, sweetness is seen in the relationship between husband and wife.\r\n\r\nc) After wearing Panchmukhi Rudraksha pendant, confidence, morale and reverence for God increases.\r\n\r\nd) Chanting the Mahamrityunjaya Mantra from Panch Mukhi Rudraksha to avoid premature death is a defense.\r\n\r\ne) For the heart patients, it is the Rambana, the person who is troubled by the heart disease must wear the Panchamukhi Rudraksha pendant.\r\n\r\n<ul>\r\n\t<li><strong>Return Policy:</strong><br />\r\n\t10 days Return &amp; Replacement Policy</li>\r\n</ul>",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -6776,7 +6776,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1753352586769,
       latestImage: "",
       shortDescription:
-        "<p>Brings Good Fortune | Increased Wellness | Energized |&nbsp;Certificate Included | Free Shipping</p>",
+        "Brings Good Fortune | Increased Wellness | Energized |&nbsp;Certificate Included | Free Shipping",
       productRank: 6,
       sequence: 6,
       fakeImageIcon:
@@ -6792,7 +6792,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: false,
       description:
-        "<p>Six Mukhi Rudraksha is considered as the form of Kartikeya, son of Lord Shiva. Along with the influence of the planet Venus on this Rudraksha, it is considered a symbol of Rudraksha Vairagya.Wearing six Mukhi Rudraksha pendants gives the grace of Lord Shiva, Lord Kartikeya and Venus together.The product is 100% natural and thus no harm in the quality as well as shape of the Rudraksha will be seen. Being a natural product, the Rudraksha will provide you a peaceful experience.</p>\r\n\r\n<p><strong>Benefits of wearing&nbsp;6 Mukhi Rudraksha:</strong></p>\r\n\r\n<p>&nbsp;</p>\r\n\r\n<p>a) Wearing six face Rudraksha pendants leads to enlightenment and sharpness of intellect. Wealth is obtained.</p>\r\n\r\n<p>b) With the effect of this Rudraksha, we get relief from diseases of the body.&nbsp;</p>\r\n\r\n<p>c) Wearing six Mukhi Rudraksha pendants provides the power to face worldly sorrows and fight them.</p>\r\n\r\n<p>d) According to Mahashiva Purana, this Rudraksha is helpful in providing freedom from the sins of killing Brahma etc.</p>\r\n\r\n<p>e) With the effect of this Rudraksha, you become proficient in the art of eloquence, speech etc. The people become experts in leadership arts.</p>\r\n\r\n<ul>\r\n\t<li><strong>Return Policy:</strong><br />\r\n\t10 days Return &amp; Replacement Policy</li>\r\n</ul>",
+        "Six Mukhi Rudraksha is considered as the form of Kartikeya, son of Lord Shiva. Along with the influence of the planet Venus on this Rudraksha, it is considered a symbol of Rudraksha Vairagya.Wearing six Mukhi Rudraksha pendants gives the grace of Lord Shiva, Lord Kartikeya and Venus together.The product is 100% natural and thus no harm in the quality as well as shape of the Rudraksha will be seen. Being a natural product, the Rudraksha will provide you a peaceful experience.\r\n\r\n<strong>Benefits of wearing&nbsp;6 Mukhi Rudraksha:</strong>\r\n\r\n&nbsp;\r\n\r\na) Wearing six face Rudraksha pendants leads to enlightenment and sharpness of intellect. Wealth is obtained.\r\n\r\nb) With the effect of this Rudraksha, we get relief from diseases of the body.&nbsp;\r\n\r\nc) Wearing six Mukhi Rudraksha pendants provides the power to face worldly sorrows and fight them.\r\n\r\nd) According to Mahashiva Purana, this Rudraksha is helpful in providing freedom from the sins of killing Brahma etc.\r\n\r\ne) With the effect of this Rudraksha, you become proficient in the art of eloquence, speech etc. The people become experts in leadership arts.\r\n\r\n<ul>\r\n\t<li><strong>Return Policy:</strong><br />\r\n\t10 days Return &amp; Replacement Policy</li>\r\n</ul>",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
@@ -6923,7 +6923,7 @@ export const SHOP_PRODUCTS = {
       tagId: null,
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
-      description: "<p>Explore soul&rsquo;s cosmic library!</p>",
+      description: "Explore soul&rsquo;s cosmic library!",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -7041,7 +7041,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/603dc88e-8018-4167-a7c4-b88c47355c67.png",
       shortDescription:
-        "<p>Attract your soulmate and bring true love into your life. This spell helps you find the right partner for you.</p>",
+        "Attract your soulmate and bring true love into your life. This spell helps you find the right partner for you.",
       productRank: 1,
       sequence: 1,
       fakeImageIcon: null,
@@ -7056,7 +7056,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Attract your soulmate and bring true love into your life. This spell helps you find the right partner for you.</p>",
+        "Attract your soulmate and bring true love into your life. This spell helps you find the right partner for you.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -7172,7 +7172,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/48b039c0-dec0-4c72-990f-26e4bf01adb5.png",
       shortDescription:
-        "<p>This spell helps you reconnect with a past relationship by bringing back love and understanding. It opens the path for a fresh start together.</p>",
+        "This spell helps you reconnect with a past relationship by bringing back love and understanding. It opens the path for a fresh start together.",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: null,
@@ -7187,7 +7187,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>This spell helps you reconnect with a past relationship by bringing back love and understanding. It opens the path for a fresh start together.</p>",
+        "This spell helps you reconnect with a past relationship by bringing back love and understanding. It opens the path for a fresh start together.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -7303,7 +7303,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/bcdb3cdd-2588-4f34-8b6c-146f3e432336.png",
       shortDescription:
-        "<p>Rekindle the bond with your partner, bringing closeness and strengthening your relationship.</p>",
+        "Rekindle the bond with your partner, bringing closeness and strengthening your relationship.",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: null,
@@ -7318,7 +7318,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Rekindle the bond with your partner, bringing closeness and strengthening your relationship.</p>",
+        "Rekindle the bond with your partner, bringing closeness and strengthening your relationship.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -7434,7 +7434,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/d5720090-5676-4340-a58d-a4067e08858f.png",
       shortDescription:
-        "<p>&nbsp;</p>\r\n\r\n<p>This spell helps bring back past life memories and enhances your connection with your partner.</p>\r\n\r\n<p>&nbsp;</p>",
+        "&nbsp;\r\n\r\nThis spell helps bring back past life memories and enhances your connection with your partner.\r\n\r\n&nbsp;",
       productRank: 10,
       sequence: 4,
       fakeImageIcon: null,
@@ -7448,7 +7448,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>&nbsp;</p>\r\n\r\n<p>This spell helps bring back past life memories and enhances your connection with your partner.</p>\r\n\r\n<p>&nbsp;</p>",
+        "&nbsp;\r\n\r\nThis spell helps bring back past life memories and enhances your connection with your partner.\r\n\r\n&nbsp;",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -7564,7 +7564,7 @@ export const SHOP_PRODUCTS = {
       latestImage:
         "https://aws.astrotalk.com/images/3cb5c1b6-d4fe-4c33-ab7b-96ed89ec01ee.png",
       shortDescription:
-        "<p>Protects you from negative energy and removes the effects of jealousy or harmful intentions. It restores peace and positive energy around you.</p>",
+        "Protects you from negative energy and removes the effects of jealousy or harmful intentions. It restores peace and positive energy around you.",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: null,
@@ -7579,7 +7579,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Protects you from negative energy and removes the effects of jealousy or harmful intentions. It restores peace and positive energy around you.</p>",
+        "Protects you from negative energy and removes the effects of jealousy or harmful intentions. It restores peace and positive energy around you.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -7696,7 +7696,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1725102562756,
       latestImage:
         "https://aws.astrotalk.com/images/740aef53-643c-41cd-b7e7-6ba72976af12.png",
-      shortDescription: "<p>Average Duration: 35-40 minutes</p>",
+      shortDescription: "Average Duration: 35-40 minutes",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -7718,7 +7718,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Cosmic integration sessions are the sessions which empower your internal energy to get connected with the Cosmos and subconsciously attract whatever you desire in your life. We teach you how to make your internal energy powerful enough to seek from the universe what you deserve and also channel it towards your personal betterment. You will have to get connected over chat or call with our consultant and they will guide you with the help of manifestation and provide you the correct Vedic mantra to enchant when it also they will connect their energy to make it much more powerful. It is advised to complete the cycle of three sessions with the help of an expert and then this can be done alone. Also once you get your desired desert it is expected that you teach this wonderful technique two more people.</p>\r\n\r\n<p>It aim to empower your internal energy to get connected with the Cosmos and subconsciously attract whatever you desire in your life. With the help of cosmic integration, you can attract love and also attract all kinds of richness.&nbsp;During the session, expert astrologers teach you how to make your internal energy powerful enough to seek from the universe what you deserve. Also, it helps to channel it towards your personal betterment. Under the guidance of experts, through cosmic integration, you can learn to feel positive energies around you and attain them for your amelioration.</p>",
+        "Cosmic integration sessions are the sessions which empower your internal energy to get connected with the Cosmos and subconsciously attract whatever you desire in your life. We teach you how to make your internal energy powerful enough to seek from the universe what you deserve and also channel it towards your personal betterment. You will have to get connected over chat or call with our consultant and they will guide you with the help of manifestation and provide you the correct Vedic mantra to enchant when it also they will connect their energy to make it much more powerful. It is advised to complete the cycle of three sessions with the help of an expert and then this can be done alone. Also once you get your desired desert it is expected that you teach this wonderful technique two more people.\r\n\r\nIt aim to empower your internal energy to get connected with the Cosmos and subconsciously attract whatever you desire in your life. With the help of cosmic integration, you can attract love and also attract all kinds of richness.&nbsp;During the session, expert astrologers teach you how to make your internal energy powerful enough to seek from the universe what you deserve. Also, it helps to channel it towards your personal betterment. Under the guidance of experts, through cosmic integration, you can learn to feel positive energies around you and attain them for your amelioration.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -7835,7 +7835,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1725102345525,
       latestImage: "",
       shortDescription:
-        "<p>Please Note: Call/Chat will be done by the astrologer&#39;s end once after you&#39;ll book the product and a single order will stand for a single person&#39;s name correction.</p>",
+        "Please Note: Call/Chat will be done by the astrologer&#39;s end once after you&#39;ll book the product and a single order will stand for a single person&#39;s name correction.",
       productRank: 10,
       sequence: 1,
       fakeImageIcon: "",
@@ -7849,7 +7849,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Your name is a significant part of your identity in the world. Therefore, it is no surprise that your name is linked to your destiny. Everyone wants to be famous. They want everyone to remember them in the world. It is suggested to have a unique name to get fame. If you change in the letters of your name, then you can get attraction and fortune also. You can remove or add some letters in your name. It is believed that repentance of word becomes affirmation or mantra in totality so if you change the name the positive effect or the whole power entirely transform one&rsquo;s fate and luck, so changes in the name come with several pros.</p>",
+        "Your name is a significant part of your identity in the world. Therefore, it is no surprise that your name is linked to your destiny. Everyone wants to be famous. They want everyone to remember them in the world. It is suggested to have a unique name to get fame. If you change in the letters of your name, then you can get attraction and fortune also. You can remove or add some letters in your name. It is believed that repentance of word becomes affirmation or mantra in totality so if you change the name the positive effect or the whole power entirely transform one&rsquo;s fate and luck, so changes in the name come with several pros.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -7965,7 +7965,7 @@ export const SHOP_PRODUCTS = {
       isAddOnsMandatory: false,
       updationTime: 1725273913291,
       latestImage: null,
-      shortDescription: "<p>Consists of 2 sessions: 10 min and 30 mins</p>",
+      shortDescription: "Consists of 2 sessions: 10 min and 30 mins",
       productRank: 10,
       sequence: 1,
       fakeImageIcon:
@@ -7981,7 +7981,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        '<p><strong>What Is It:&nbsp;</strong>Past-life regression therapy is a form of hypnosis and attendant talk therapy that essentially suggests that we carry evidence &mdash; emotional, psychic and occasionally physical &mdash; of our past lives into our current one. (You have to accept the idea of pseudo-reincarnation or past lives, period, to get with it.) By accessing those memories and talking through them, past-life regression can help us confront issues in our current life.</p>\r\n\r\n<p>Personally, I&rsquo;m a bit of a pragmatist: I was intrigued by the premise of past-life regression when I got the cold email about it, but I didn&rsquo;t really put much stock in it. As a fairly confirmed skeptic, I thought it would be interesting to experience something outside of my comfort zone, so I dove in.</p>\r\n\r\n<p>&ldquo;We unconsciously carry forward experiences, attitudes, and relationship dynamics from prior lives into our current lifetime,&rdquo; therapist&nbsp;<a href="https://www.pastlives.org/about-contact" target="_blank">Ann Barham writes on her website</a>. &ldquo;By bringing these memories into conscious awareness, we can release or diffuse the energy and emotional blockages that keep us stuck. Typically, [a past life regression] therapist guides the client through the significant events of the lifetime, through the death experience, and then a &lsquo;life review.&rsquo; This is where the purpose of that lifetime, the lessons learned, and decisions made are examined from a higher, spiritual perspective.&rdquo;</p>\r\n\r\n<p>Barham&rsquo;s new book,&nbsp;<a href="https://www.amazon.com/The-Past-Life-Perspective-Discovering/dp/1501135732/ref=as_li_ss_il?ots=1&amp;ie=UTF8&amp;keywords=past%20lives%20ann%20barham&amp;qid=1459787101&amp;ref_=sr_1_1&amp;sr=8-1&amp;linkCode=li3&amp;tag=paslifthe-20&amp;linkId=add9cd47fcc846f044b9426c21c006f4" target="_blank"><em>The Past Life Perspective</em></a>, explores past-life therapy through a series of case studies culled from her practice.</p>\r\n\r\n<p><strong>Who Tried it:</strong>&nbsp;Alex Heigl, PEOPLE and Entertainment Weekly associate editor</p>\r\n\r\n<p><strong>Level of Difficulty:</strong>&nbsp;I&rsquo;d say anywhere from a 1-5, depending on your experience with guided meditation or hypnosis. My weapons-grade anxiety makes it difficult for me to relax to the point where I believe my subconscious is truly taking over &mdash; your mileage may vary. And while Barham warns that it can be painful to experience things from your past lives &mdash; including, but not limited to, their deaths, for example &mdash; I didn&rsquo;t find it particularly trying.</p>\r\n\r\n<p><strong>About the Process:</strong>&nbsp;Past-life regression is essentially guided hypnosis. You&rsquo;re put into a deeply relaxed but still conscious state and asked questions about what you see or feel; images and sensations that appear are then interpreted into a cohesive vision of a past life. After being guided through this narrative, Barham&rsquo;s session involves using the uncovered narrative to illustrate problems in your own life and how lessons learned from the regression can be applied to them.</p>\r\n\r\n<p>I&rsquo;m still having a hard time figuring out exactly how successful my session with Barham was. After being guided into an extremely relaxed but still conscious state &mdash; as I mentioned earlier, I think it&rsquo;s virtually impossible for me to get my mind to slow down to the point of &ldquo;deep hypnosis&rdquo; &mdash; I was able to envision/uncover/&rdquo;re-live&rdquo; a past life as a Depression-era man living with his family in California. Possibly involved with a WPA job, he was working as part of a road crew and attempting to support a wife and two children. I remain somewhat skeptical of the process &mdash; at times I felt like I was just filling in details because I was being asked to, rather than uncovering something &ldquo;real.&rdquo; But that&rsquo;s a whole other can of worms: Where were these images coming from? If I was consciously constructing a narrative because I felt like I was being asked to do so, what was my guiding process for this? If I was constructing a narrative instead of &ldquo;discovering&rdquo; one, why did I pick the one that I did, one that was relatively mundane, kind of depressing and more or less the complete opposite of my own life experience? And if the details were coming from my subconscious, uh,&nbsp;<em>where and how?</em></p>\r\n\r\n<p>Different unexplainable moments during my regression, numbered in order of most disconcerting to least:</p>\r\n\r\n<p>1. A strange heaviness all down my left side, and only my left side at one point &mdash; phenomenon like these are typically chalked up to injuries sustained by one of your past lives, so maybe my dude had a stroke?</p>\r\n\r\n<p>2. A man with blue eyes. My dad has blue eyes, but it&rsquo;s apparently a recessive trait in my family &mdash; both my sister and I are brown-eyed &mdash; though the image of the man I may or may not have been was clearly blue-eyed, albeit with brown hair.</p>\r\n\r\n<p>3. A recurring image of the northern California coastline, somewhere around Monterey, possibly. Wind-swept, a very literal end-of-the-earth kind of setting.</p>\r\n\r\n<p><strong>The Verdict:&nbsp;</strong>A person I interviewed prior to my session summed things up far better than I could: &ldquo;I don&rsquo;t know or care whether these are actual lifetimes my soul had. That&rsquo;s beside the point.&nbsp;<em>The narratives and issues I saw mirrored to me issues that I was grappling with, and gave me different perspectives on my own ingrained patterns about those issues</em>.&rdquo;</p>\r\n\r\n<p>We can debate the metaphysics of past-life regression until we&rsquo;re all blue in the face, but the point is that it&rsquo;s a form of therapy regardless, albeit a nontraditional one. If you&rsquo;re able to uncover, deal with, and feel better about issues you&rsquo;re facing via past-life regression, then it&rsquo;s a success, and probably a more fun one than your usual therapy session.</p>',
+        '<strong>What Is It:&nbsp;</strong>Past-life regression therapy is a form of hypnosis and attendant talk therapy that essentially suggests that we carry evidence &mdash; emotional, psychic and occasionally physical &mdash; of our past lives into our current one. (You have to accept the idea of pseudo-reincarnation or past lives, period, to get with it.) By accessing those memories and talking through them, past-life regression can help us confront issues in our current life.\r\n\r\nPersonally, I&rsquo;m a bit of a pragmatist: I was intrigued by the premise of past-life regression when I got the cold email about it, but I didn&rsquo;t really put much stock in it. As a fairly confirmed skeptic, I thought it would be interesting to experience something outside of my comfort zone, so I dove in.\r\n\r\n&ldquo;We unconsciously carry forward experiences, attitudes, and relationship dynamics from prior lives into our current lifetime,&rdquo; therapist&nbsp;<a href="https://www.pastlives.org/about-contact" target="_blank">Ann Barham writes on her website</a>. &ldquo;By bringing these memories into conscious awareness, we can release or diffuse the energy and emotional blockages that keep us stuck. Typically, [a past life regression] therapist guides the client through the significant events of the lifetime, through the death experience, and then a &lsquo;life review.&rsquo; This is where the purpose of that lifetime, the lessons learned, and decisions made are examined from a higher, spiritual perspective.&rdquo;\r\n\r\nBarham&rsquo;s new book,&nbsp;<a href="https://www.amazon.com/The-Past-Life-Perspective-Discovering/dp/1501135732/ref=as_li_ss_il?ots=1&amp;ie=UTF8&amp;keywords=past%20lives%20ann%20barham&amp;qid=1459787101&amp;ref_=sr_1_1&amp;sr=8-1&amp;linkCode=li3&amp;tag=paslifthe-20&amp;linkId=add9cd47fcc846f044b9426c21c006f4" target="_blank"><em>The Past Life Perspective</em></a>, explores past-life therapy through a series of case studies culled from her practice.\r\n\r\n<strong>Who Tried it:</strong>&nbsp;Alex Heigl, PEOPLE and Entertainment Weekly associate editor\r\n\r\n<strong>Level of Difficulty:</strong>&nbsp;I&rsquo;d say anywhere from a 1-5, depending on your experience with guided meditation or hypnosis. My weapons-grade anxiety makes it difficult for me to relax to the point where I believe my subconscious is truly taking over &mdash; your mileage may vary. And while Barham warns that it can be painful to experience things from your past lives &mdash; including, but not limited to, their deaths, for example &mdash; I didn&rsquo;t find it particularly trying.\r\n\r\n<strong>About the Process:</strong>&nbsp;Past-life regression is essentially guided hypnosis. You&rsquo;re put into a deeply relaxed but still conscious state and asked questions about what you see or feel; images and sensations that appear are then interpreted into a cohesive vision of a past life. After being guided through this narrative, Barham&rsquo;s session involves using the uncovered narrative to illustrate problems in your own life and how lessons learned from the regression can be applied to them.\r\n\r\nI&rsquo;m still having a hard time figuring out exactly how successful my session with Barham was. After being guided into an extremely relaxed but still conscious state &mdash; as I mentioned earlier, I think it&rsquo;s virtually impossible for me to get my mind to slow down to the point of &ldquo;deep hypnosis&rdquo; &mdash; I was able to envision/uncover/&rdquo;re-live&rdquo; a past life as a Depression-era man living with his family in California. Possibly involved with a WPA job, he was working as part of a road crew and attempting to support a wife and two children. I remain somewhat skeptical of the process &mdash; at times I felt like I was just filling in details because I was being asked to, rather than uncovering something &ldquo;real.&rdquo; But that&rsquo;s a whole other can of worms: Where were these images coming from? If I was consciously constructing a narrative because I felt like I was being asked to do so, what was my guiding process for this? If I was constructing a narrative instead of &ldquo;discovering&rdquo; one, why did I pick the one that I did, one that was relatively mundane, kind of depressing and more or less the complete opposite of my own life experience? And if the details were coming from my subconscious, uh,&nbsp;<em>where and how?</em>\r\n\r\nDifferent unexplainable moments during my regression, numbered in order of most disconcerting to least:\r\n\r\n1. A strange heaviness all down my left side, and only my left side at one point &mdash; phenomenon like these are typically chalked up to injuries sustained by one of your past lives, so maybe my dude had a stroke?\r\n\r\n2. A man with blue eyes. My dad has blue eyes, but it&rsquo;s apparently a recessive trait in my family &mdash; both my sister and I are brown-eyed &mdash; though the image of the man I may or may not have been was clearly blue-eyed, albeit with brown hair.\r\n\r\n3. A recurring image of the northern California coastline, somewhere around Monterey, possibly. Wind-swept, a very literal end-of-the-earth kind of setting.\r\n\r\n<strong>The Verdict:&nbsp;</strong>A person I interviewed prior to my session summed things up far better than I could: &ldquo;I don&rsquo;t know or care whether these are actual lifetimes my soul had. That&rsquo;s beside the point.&nbsp;<em>The narratives and issues I saw mirrored to me issues that I was grappling with, and gave me different perspectives on my own ingrained patterns about those issues</em>.&rdquo;\r\n\r\nWe can debate the metaphysics of past-life regression until we&rsquo;re all blue in the face, but the point is that it&rsquo;s a form of therapy regardless, albeit a nontraditional one. If you&rsquo;re able to uncover, deal with, and feel better about issues you&rsquo;re facing via past-life regression, then it&rsquo;s a success, and probably a more fun one than your usual therapy session.',
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -8097,7 +8097,7 @@ export const SHOP_PRODUCTS = {
       isAddOnsMandatory: false,
       updationTime: 1725273875895,
       latestImage: null,
-      shortDescription: "<p>Call Session With Astrologer</p>",
+      shortDescription: "Call Session With Astrologer",
       productRank: 10,
       sequence: 1,
       fakeImageIcon:
@@ -8121,7 +8121,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p><strong>Description:</strong>&nbsp;Birth Time Rectification is important and sometimes necessary because without a birth time, you cannot accurately calculate a person&rsquo;s birth chart. If a person know approx. time of birth with difference of 2-3 hours, we can rectify the time. But, if a person doesn&rsquo;t know the time, then it is very difficult to get the time of birth out of 24 hours calculations.&nbsp;Majority of you know your birth time as a round off time like 10 am, 12 pm, 4.30pm etc. This may be not exact time as it can be 10.02am, 12.03pm or 4.29 pm.&nbsp;A difference of 2 minutes changes many calculations of your Kundali (D-60 and some Sub-Lord). It is very necessary to understand the importance of Muhrat.&nbsp;That is why, it is very important to do Birth time rectification before doing Vedic Astrology Readings.&nbsp;</p>\r\n\r\n<ol>\r\n\t<li><strong>Methods to Rectify Time:&nbsp;&nbsp;</strong>There are 2 holistic approach of mine to rectify the accurate birth time. Firstly, we make Prashna Kundli ask the universe and god to help us identify the right birth time in Horoscope. Secondly, when we also match the nature, personality, physical characteristics like face hair head etc. to see if the birth time is correct or not.</li>\r\n\t<li><strong>Relation of Astrology and Birth:&nbsp;</strong>Majority of the time, I have experienced changes in birth time. If the time is rectified, we can accurately predict events like Career, Job, Marriage, Relationships in Astrology reading. I have covered topic&rsquo;s like <strong>Career Consultation Astrology</strong>&nbsp;and Choose the correct stream by astrology.</li>\r\n\t<li><strong>Which Time is Consider as the Birth Time :&nbsp;</strong>\r\n\t<p>Also, what time should we consider as birth time ? Is it when the umbilical cord is cut, or when child cries for first time, or when child comes out ? In my opinion, the birth time is when the child comes out. That time should be recorded as time of birth.&nbsp; Hence, it is imperative to do the&nbsp;<em>birth time rectification</em>&nbsp;of each and every chart you see or make any Horoscope in Astrology.</p>\r\n\t&nbsp;</li>\r\n</ol>",
+        "<strong>Description:</strong>&nbsp;Birth Time Rectification is important and sometimes necessary because without a birth time, you cannot accurately calculate a person&rsquo;s birth chart. If a person know approx. time of birth with difference of 2-3 hours, we can rectify the time. But, if a person doesn&rsquo;t know the time, then it is very difficult to get the time of birth out of 24 hours calculations.&nbsp;Majority of you know your birth time as a round off time like 10 am, 12 pm, 4.30pm etc. This may be not exact time as it can be 10.02am, 12.03pm or 4.29 pm.&nbsp;A difference of 2 minutes changes many calculations of your Kundali (D-60 and some Sub-Lord). It is very necessary to understand the importance of Muhrat.&nbsp;That is why, it is very important to do Birth time rectification before doing Vedic Astrology Readings.&nbsp;\r\n\r\n<ol>\r\n\t<li><strong>Methods to Rectify Time:&nbsp;&nbsp;</strong>There are 2 holistic approach of mine to rectify the accurate birth time. Firstly, we make Prashna Kundli ask the universe and god to help us identify the right birth time in Horoscope. Secondly, when we also match the nature, personality, physical characteristics like face hair head etc. to see if the birth time is correct or not.</li>\r\n\t<li><strong>Relation of Astrology and Birth:&nbsp;</strong>Majority of the time, I have experienced changes in birth time. If the time is rectified, we can accurately predict events like Career, Job, Marriage, Relationships in Astrology reading. I have covered topic&rsquo;s like <strong>Career Consultation Astrology</strong>&nbsp;and Choose the correct stream by astrology.</li>\r\n\t<li><strong>Which Time is Consider as the Birth Time :&nbsp;</strong>\r\n\tAlso, what time should we consider as birth time ? Is it when the umbilical cord is cut, or when child cries for first time, or when child comes out ? In my opinion, the birth time is when the child comes out. That time should be recorded as time of birth.&nbsp; Hence, it is imperative to do the&nbsp;<em>birth time rectification</em>&nbsp;of each and every chart you see or make any Horoscope in Astrology.\r\n\t&nbsp;</li>\r\n</ol>",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: null,
       video: null,
@@ -8238,7 +8238,7 @@ export const SHOP_PRODUCTS = {
       updationTime: 1749100352111,
       latestImage: null,
       shortDescription:
-        "<p>Kundali Matching is the process of checking compatibility between two people before marriage using their birth charts. It is done to ensure a happy, stable, and peaceful married life. The matching is based on factors like mental compatibility, health, family life, financial stability, and chances of children. It also helps identify any dosh like Mangal Dosh or Nadi Dosh that may cause problems after marriage.&nbsp;</p>",
+        "Kundali Matching is the process of checking compatibility between two people before marriage using their birth charts. It is done to ensure a happy, stable, and peaceful married life. The matching is based on factors like mental compatibility, health, family life, financial stability, and chances of children. It also helps identify any dosh like Mangal Dosh or Nadi Dosh that may cause problems after marriage.&nbsp;",
       productRank: 10,
       sequence: 12,
       fakeImageIcon: "",
@@ -8270,7 +8270,7 @@ export const SHOP_PRODUCTS = {
       shouldGiveProductUpdate: null,
       isToShowConsultantList: true,
       description:
-        "<p>Check compatibility for a happy and successful married life.</p>",
+        "Check compatibility for a happy and successful married life.",
       epoojaPppPriceOfUserByPcmId: null,
       isCtListHiddenFromUser: false,
       video: null,
