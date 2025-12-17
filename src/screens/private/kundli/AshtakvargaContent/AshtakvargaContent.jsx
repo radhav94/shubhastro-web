@@ -47,6 +47,9 @@ const AshtakvargaContent = () => {
   const saturn = useGetAshtakvargaChartQuery(
     params ? { chartType: "Saturn", params } : skipToken
   );
+  const total = useGetAshtakvargaChartQuery(
+    params ? { chartType: "total", params } : skipToken
+  );
 
   const svgUrl = (raw) =>
     sanitizeSvg(raw) || null;
@@ -59,6 +62,7 @@ const AshtakvargaContent = () => {
     { title: "Venus", src: svgUrl(venus.data) },
     { title: "Jupiter", src: svgUrl(jupiter.data) },
     { title: "Saturn", src: svgUrl(saturn.data) },
+    { title: "Total", src: svgUrl(total.data) },
   ];
 
   // Usage

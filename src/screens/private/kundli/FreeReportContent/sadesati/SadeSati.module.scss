@@ -1,0 +1,142 @@
+.wrapper {
+  width: 100%;
+  padding: 1rem;
+}
+
+/* STATUS CARD */
+.statusCard {
+  background: linear-gradient(135deg, #fff3e0, #ffe5d1);
+  padding: 22px 24px;
+  border-radius: 16px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 18px rgba(255, 147, 74, 0.25);
+}
+
+.statusIcon {
+  font-size: 40px;
+  color: #ff6b35;
+  margin-bottom: 10px;
+}
+
+.statusTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #222;
+}
+
+.statusMessage {
+  font-size: 16px;
+  color: #c23616;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.dateText {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* CARD */
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 22px;
+  margin: 1.4rem 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.headingBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.headingIcon {
+  font-size: 22px;
+  color: #ff6b35;
+}
+
+.heading {
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+}
+
+/* REMEDIES GRID */
+.remediesGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+
+  @media (min-width: 600px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.remedyItem {
+  padding: 12px 14px;
+  background: #fff8e6;
+  border-radius: 12px;
+  border-left: 6px solid #ffcf6b;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  text-align: start;
+  box-shadow: 0 2px 8px rgba(255, 155, 74, 0.15);
+
+  p {
+    color: #333;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+}
+
+.remedyIcon {
+  font-size: 20px;
+  color: #ff9a3d;
+}
+
+/* DESCRIPTION */
+.description {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.7;
+  text-align: left;
+}
+
+/* LOGIN CARD */
+.loginCard {
+  background: #ffffff;
+  padding: 26px 22px;
+  border-radius: 14px;
+  text-align: center;
+  margin-top: 30px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.loginText {
+  font-size: 18px;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 20px;
+}
+
+.loginButton {
+  background: #f9d423;
+  padding: 10px 24px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  transition: 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    background: #f7c813;
+  }
+}

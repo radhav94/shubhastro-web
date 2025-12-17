@@ -22,6 +22,9 @@ const NorthIndian = () => {
   const dMoon = useGetChartQuery(
     params ? { chartType: "moon", params } : skipToken
   );
+  const kpChalit = useGetChartQuery(
+    params ? { chartType: "kp_chalit", params } : skipToken
+  );
   const transit = useGetChartQuery(
     params ? { chartType: "transit", params } : skipToken
   );
@@ -34,6 +37,7 @@ const NorthIndian = () => {
   const d4 = useGetChartQuery(params ? { chartType: "D4", params } : skipToken);
   const d5 = useGetChartQuery(params ? { chartType: "D5", params } : skipToken);
   const d7 = useGetChartQuery(params ? { chartType: "D7", params } : skipToken);
+  const d8 = useGetChartQuery(params ? { chartType: "D8", params } : skipToken);
   const d9 = useGetChartQuery(params ? { chartType: "D9", params } : skipToken);
   const d10 = useGetChartQuery(
     params ? { chartType: "D10", params } : skipToken
@@ -81,6 +85,7 @@ const NorthIndian = () => {
     { title: "Chalit", src: svgUrl(dChalit.data) },
     { title: "Sun Chart", src: svgUrl(dSun.data) },
     { title: "Moon Chart", src: svgUrl(dMoon.data) },
+    { title: "KP Chalit", src: svgUrl(kpChalit.data) },
     { title: "Transit Chart", src: svgUrl(transit.data) },
     { title: "Lagna / Ascendant / Basic Birth Chart", src: svgUrl(d1.data) },
     { title: "Hora (Wealth / Income Chart)", src: svgUrl(d2.data) },
@@ -89,6 +94,7 @@ const NorthIndian = () => {
     { title: "Chaturthamsa (Assets)", src: svgUrl(d4.data) },
     { title: "Panchamsa (Power)", src: svgUrl(d5.data) },
     { title: "Saptamsa (Progeny)", src: svgUrl(d7.data) },
+    { title: "Asthamsa", src: svgUrl(d8.data) },
     { title: "Navamsa (Prospects of marriage)", src: svgUrl(d9.data) },
     { title: "Dasamsa (Profession)", src: svgUrl(d10.data) },
     { title: "Dasamsa (Retro Version)", src: svgUrl(d10r.data) },
@@ -109,12 +115,15 @@ const NorthIndian = () => {
       dChalit,
       dSun,
       dMoon,
+      kpChalit,
+      transit,
       d1,
       d2,
       d3,
       d4,
       d5,
       d7,
+      d8,
       d9,
       d10,
       d12,
