@@ -19,7 +19,7 @@ import { Toast } from "../../../../../component";
 
 const Astrologers = ({ onClickView, onProfile }) => {
   const navigate = useNavigate();
-  const { activeCall, setActiveCall } = useCall(); // ⭐ IMPORTANT
+  const { activeCall, setActiveCall } = useCall(); //  IMPORTANT
 
   const page = 1;
   const limit = 3;
@@ -38,7 +38,7 @@ const Astrologers = ({ onClickView, onProfile }) => {
 
   //  track which astrologer user is calling
   const [activeCallAstro, setActiveCallAstro] = useState(null);
-  // ⭐ keep astro in ref (important)
+  //  keep astro in ref (important)
   const activeCallAstroRef = useRef(null);
 
   // ---------------- CHAT FLOW ----------------
@@ -96,26 +96,24 @@ const Astrologers = ({ onClickView, onProfile }) => {
     });
   };
 
-
   const handleVideoCall = (astro) => {
-  if (activeCall) {
-    return Toast.error("You are already on a call");
-  }
+    if (activeCall) {
+      return Toast.error("You are already on a call");
+    }
 
-  if (!astro) return;
-  if (!token) return navigate("/login");
-  if (!userIdLocal) return;
+    if (!astro) return;
+    if (!token) return navigate("/login");
+    if (!userIdLocal) return;
 
-  activeCallAstroRef.current = astro;
-  setWaitingPopup(true);
+    activeCallAstroRef.current = astro;
+    setWaitingPopup(true);
 
-  voiceSocket.emit("create_call_room", {
-    userId: userIdLocal,
-    astrologerId: astro._id,
-    type: "video",
-  });
-};
-
+    voiceSocket.emit("create_call_room", {
+      userId: userIdLocal,
+      astrologerId: astro._id,
+      type: "video",
+    });
+  };
 
   // ---------------- SOCKET LISTENERS ----------------
 
@@ -133,7 +131,7 @@ const Astrologers = ({ onClickView, onProfile }) => {
       const astro = activeCallAstroRef.current;
       if (!astro) return;
 
-      // ⭐ START CALL GLOBALLY (NO NAVIGATION)
+      //  START CALL GLOBALLY (NO NAVIGATION)
       setActiveCall({
         roomId,
         agoraToken: token,
@@ -215,8 +213,7 @@ const Astrologers = ({ onClickView, onProfile }) => {
               onProfile={() => onProfile(astrologer)}
               onAudioCall={() => handleAudioCall(astrologer)}
               onVideoCall={() => handleVideoCall(astrologer)}
-
-              disabled={!!activeCall} // ⭐ optional UX improvement
+              disabled={!!activeCall} //  optional UX improvement
             />
           </div>
         ))}

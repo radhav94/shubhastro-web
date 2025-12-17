@@ -53,11 +53,11 @@ $mobile-screen-width: 500px;
 
   .topGap {
     height: 95px; // same as TopBar height
-    @media screen and (max-width: 919px) {
-      height: 115px;
-    }
+    // @media screen and (max-width: 919px) {
+    //   height: 115px;
+    // }
     @media screen and (max-width: 772px) {
-      height: 95px;
+      height: 68px;
     }
   }
 

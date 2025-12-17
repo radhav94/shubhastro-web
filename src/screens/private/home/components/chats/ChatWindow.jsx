@@ -15,10 +15,12 @@ import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import InactivityModal from "../../../../../component/UI/modal/inActivity/InactivityModal";
 import { useInactivityTimer } from "../../../../../utils/hooks/useInactivityTimer";
 import { useCall } from "../../../../../context/CallContext";
+import { useRef } from "react";
 
 const ChatWindow = () => {
   const navigate = useNavigate();
   const { activeCall, setActiveCall } = useCall();
+  const bottomRef = useRef(null);
 
   const { state } = useLocation();
   const { userId, astrologerId, roomId, fullName, isUserSide, kundliId } =
@@ -115,6 +117,10 @@ const ChatWindow = () => {
     });
   };
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [finalMsgs]);
+
   // Single socket listener for both audio + video
   useEffect(() => {
     if (!isUserSide) return;
@@ -147,7 +153,7 @@ const ChatWindow = () => {
     };
 
     const handleSocketError = (err) => {
-      console.log("hellllooooooooo",err);
+      console.log("hellllooooooooo", err);
       Toast.error(err?.message || "Connection Error!");
       setWaitingPopup(false);
     };
@@ -188,131 +194,134 @@ const ChatWindow = () => {
   };
 
   return (
-    <div className={styles.chatWindow}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <IoArrowBack
-            className={styles.backIcon}
-            onClick={() => navigate(-1)}
-          />
+    <div className={styles.chatPage}>
+      <div className={styles.chatWindow}>
+        {/* Header */}
+        <div className={styles.header}>
+          <div className={styles.headerLeft}>
+            <IoArrowBack
+              className={styles.backIcon}
+              onClick={() => navigate(-1)}
+            />
 
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-            className={styles.headerAvatar}
-            alt="User"
-          />
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+              className={styles.headerAvatar}
+              alt="User"
+            />
 
-          <div className={styles.userInfo}>
-            <PrimaryText size_16 isSemiBold>
-              {fullName || "Chat User"}
-            </PrimaryText>
-            <span className={styles.statusText}>
-              {isTyping ? "Typing..." : "Online"}
-            </span>
-          </div>
-        </div>
-
-        <div className={styles.headerRight}>
-          <IoCallOutline
-            className={styles.callIcon}
-            onClick={handleCallClick}
-          />
-          <IoVideocamOutline
-            className={styles.videoIcon}
-            onClick={handleVideoCall}
-          />
-        </div>
-      </div>
-
-      {error && <div className={styles.errorBox}>⚠️ {error}</div>}
-
-      {/* Messages */}
-      <div className={styles.messages}>
-        {finalMsgs.map((msg, i) => (
-          <div
-            key={i}
-            className={`${styles.msgBubble} ${
-              msg.isSender ? styles.senderBubble : styles.receiverBubble
-            }`}
-          >
-            <div className={styles.bubbleContent}>
-              <PrimaryText size={14} color={msg.isSender ? "#fff" : "#111"}>
-                {msg.text}
+            <div className={styles.userInfo}>
+              <PrimaryText size_16 isSemiBold>
+                {fullName || "Chat User"}
               </PrimaryText>
+              <span className={styles.statusText}>
+                {isTyping ? "Typing..." : "Online"}
+              </span>
             </div>
-
-            <span className={styles.msgTime}>{msg.time}</span>
           </div>
-        ))}
 
-        {isTyping && (
-          <div className={`${styles.msgBubble} ${styles.receiverBubble}`}>
-            <div className={styles.typingIndicator}>
-              <span></span>
-              <span></span>
-              <span></span>
+          <div className={styles.headerRight}>
+            <IoCallOutline
+              className={styles.callIcon}
+              onClick={handleCallClick}
+            />
+            <IoVideocamOutline
+              className={styles.videoIcon}
+              onClick={handleVideoCall}
+            />
+          </div>
+        </div>
+
+        {error && <div className={styles.errorBox}>⚠️ {error}</div>}
+
+        {/* Messages */}
+        <div className={styles.messages}>
+          {finalMsgs.map((msg, i) => (
+            <div
+              key={i}
+              className={`${styles.msgBubble} ${
+                msg.isSender ? styles.senderBubble : styles.receiverBubble
+              }`}
+            >
+              <div className={styles.bubbleContent}>
+                <PrimaryText size={14} color={msg.isSender ? "#fff" : "#111"}>
+                  {msg.text}
+                </PrimaryText>
+              </div>
+
+              <span className={styles.msgTime}>{msg.time}</span>
+            </div>
+          ))}
+
+          {isTyping && (
+            <div className={`${styles.msgBubble} ${styles.receiverBubble}`}>
+              <div className={styles.typingIndicator}>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Waiting Popup */}
+        {waitingPopup && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modalContainer}>
+              <PrimaryText size_18 isSemiBold>
+                ⏳ Waiting for astrologer to accept your call…
+              </PrimaryText>
+
+              <PrimaryText size_14 color="#777">
+                Please stay on this screen
+              </PrimaryText>
+
+              <div className={styles.modalButtons}>
+                <button
+                  className={styles.rejectBtn}
+                  disabled={!callRoomId}
+                  onClick={handleCancelCall}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         )}
-      </div>
 
-      {/* Waiting Popup */}
-      {waitingPopup && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContainer}>
-            <PrimaryText size_18 isSemiBold>
-              ⏳ Waiting for astrologer to accept your call…
-            </PrimaryText>
+        {/* Input */}
+        <div className={styles.inputBox}>
+          <button className={styles.attachButton}>
+            <IoAttach size={20} />
+          </button>
 
-            <PrimaryText size_14 color="#777">
-              Please stay on this screen
-            </PrimaryText>
+          <input
+            className={styles.inputField}
+            value={message}
+            onChange={(e) => {
+              setMessage(e.target.value);
+              sendTyping();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            placeholder="Write a message..."
+          />
 
-            <div className={styles.modalButtons}>
-              <button
-                className={styles.rejectBtn}
-                disabled={!callRoomId}
-                onClick={handleCancelCall}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
+          <button className={styles.sendButton} onClick={handleSend}>
+            <IoSend size={20} />
+          </button>
         </div>
-      )}
-
-      {/* Input */}
-      <div className={styles.inputBox}>
-        <button className={styles.attachButton}>
-          <IoAttach size={20} />
-        </button>
-
-        <input
-          className={styles.inputField}
-          value={message}
-          onChange={(e) => {
-            setMessage(e.target.value);
-            sendTyping();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-          placeholder="Write a message..."
+        <InactivityModal
+          isOpen={isInactive}
+          onDisconnect={handleDisconnect}
+          onContinue={handleContinue}
         />
-
-        <button className={styles.sendButton} onClick={handleSend}>
-          <IoSend size={20} />
-        </button>
+        <div ref={bottomRef} />
       </div>
-      <InactivityModal
-        isOpen={isInactive}
-        onDisconnect={handleDisconnect}
-        onContinue={handleContinue}
-      />
     </div>
   );
 };
