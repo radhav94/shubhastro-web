@@ -1,17 +1,29 @@
 import React from "react";
 import styles from "./ResultTarot.module.scss";
 
-// A default card object for demonstration purposes
-const defaultCard = {
-  name: "The Wheel",
-  image:
-    "https://images.astroyogi.com/astroyogi2017/english/images/cms/tarot/cards/red/23.jpg",
-  meaning:
-    "Almost every definition of this card indicates abundance, happiness, elevation, or luck; a change that just happens, and brings with it great joy. Encounters leading to friendship or romance are on the horizon; professional assignments come to fruition. But, this card also reminds you that you are the master of your own destiny; that it is up to you to give the wheel that first push that will start events turning to your advantage. Passivity and inertia are banned! Get moving! Romantic times are up ahead for you.",
-  isUpright: true,
-};
+const ResultTarot = ({ card , userName = "", onReset }) => {
 
-const ResultTarot = ({ card = defaultCard, userName = "", onReset }) => {
+if (!card || Object.keys(card).length === 0) {
+  return (
+    <div className={styles.resultContainer}>
+      <div className={styles.noDataWrapper}>
+        <div className={styles.noDataIcon}>🔮</div>
+        <h2 className={styles.noDataTitle}>No Tarot Card Drawn</h2>
+        <p className={styles.noDataText}>
+          The universe is quiet right now. Ask a question to reveal your tarot card.
+        </p>
+        <button
+          type="button"
+          className={styles.actionButton}
+          onClick={onReset}
+        >
+          Ask a Question
+        </button>
+      </div>
+    </div>
+  );
+}
+
   return (
     <div className={styles.resultContainer}>
       <div className={styles.tarotCard}>
