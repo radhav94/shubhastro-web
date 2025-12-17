@@ -9,9 +9,14 @@ import { GetString } from "../../../utils/helper/string.utils";
 import { Link } from "react-router-dom";
 
 // AstrologerCard.jsx
-const AstrologerCard = ({ data, onFollow, onChat, onProfile, onAudioCall,onVideoCall }) => {
-
-
+const AstrologerCard = ({
+  data,
+  onFollow,
+  onChat,
+  onProfile,
+  onAudioCall,
+  onVideoCall,
+}) => {
   return (
     <div className={styles.card}>
       <div className={styles.topSection} onClick={onProfile}>
@@ -33,11 +38,11 @@ const AstrologerCard = ({ data, onFollow, onChat, onProfile, onAudioCall,onVideo
         </div>
 
         <div className={styles.info}>
-          <div className={styles.infoHeader} >
-            <Link to={`/astrologer/${data?._id}`} >
-            <PrimaryText size_14 isExtraBold color={appColors.tri}>
-              {data?.firstName} {data?.lastName}
-            </PrimaryText>
+          <div className={styles.infoHeader}>
+            <Link to={`/astrologer/${data?._id}`}>
+              <PrimaryText size_14 isExtraBold color={appColors.tri}>
+                {data?.firstName} {data?.lastName}
+              </PrimaryText>
             </Link>
           </div>
 
@@ -90,9 +95,9 @@ const AstrologerCard = ({ data, onFollow, onChat, onProfile, onAudioCall,onVideo
             title="Voice Call"
             onClick={onAudioCall}
           />
-           <PrimaryButton
+          <PrimaryButton
             bgColor={appColors.white}
-            imgSrc={AppIcons.Call}
+            imgSrc={AppIcons.Video}
             fontSize={12}
             buttonStyles={{ padding: "4px 6px" }}
             title="Video Call"

@@ -11,7 +11,7 @@ const Breadcrumb = () => {
 
   const pathnames = location.pathname
     .split("/")
-    .filter((x) => x.replace(/\d+/g, ""));
+    .filter((x) => x.replace(/\+/g, ""));
 
   if (pathnames.length === 0) return null;
 

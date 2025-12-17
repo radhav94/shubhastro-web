@@ -381,6 +381,7 @@ export const PATH = {
     CHAT_WITH_ASTROLOGER: {
       path: "/talk-to-astrologers/:id",
       element: ChatWindow,
+      footer: false,
     },
     PROFILE_ASTROLOGER: {
       path: "/astrologer/:id",

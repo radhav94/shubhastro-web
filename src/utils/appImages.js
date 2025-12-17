@@ -17,6 +17,7 @@ import Share from "../assets/icons/share.png";
 import Gmail from "../assets/icons/gmail.png";
 import whatsapp from "../assets/icons/whatsapp.png";
 import CopyLink from "../assets/icons/link.png";
+import Video from "../assets/icons/video.png";
 
 export const AppIcons = {
   Logo,
@@ -36,7 +37,8 @@ export const AppIcons = {
   Share,
   Gmail,
   whatsapp,
-  CopyLink
+  CopyLink,
+  Video,
 };
 
 //appImages
