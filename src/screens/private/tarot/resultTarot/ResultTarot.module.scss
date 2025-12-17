@@ -16,6 +16,7 @@ $font-sans: "Poppins", sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 .tarotCard {
@@ -145,4 +146,33 @@ $font-sans: "Poppins", sans-serif;
 .userTitle {
   text-align: center;
   margin-bottom: 20px;
+}
+
+.noDataWrapper {
+  background: $color-card-bg;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  padding: 60px 40px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.noDataIcon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.noDataTitle {
+  font-family: $font-serif;
+  font-size: 1.8rem;
+  color: $color-text-dark;
+  margin-bottom: 10px;
+}
+
+.noDataText {
+  font-size: 1rem;
+  color: $color-text-light;
+  line-height: 1.6;
+  margin-bottom: 30px;
 }
