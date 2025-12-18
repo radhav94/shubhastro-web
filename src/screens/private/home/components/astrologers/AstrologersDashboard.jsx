@@ -6,9 +6,11 @@ import ChatList from "./atrologerchat/ChatList";
 import { PATH } from "../../../../../utils/routes/Paths";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import { useCall } from "../../../../../context/CallContext";
+import CallHistoryTab from "./CallHistoryTab";
 
 const AstrologersDashboard = () => {
-    const { setActiveCall } = useCall();
+    const { setActiveCall ,waitingList,
+    setWaitingList,} = useCall();
 
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -17,9 +19,10 @@ const AstrologersDashboard = () => {
   const [incomingCall, setIncomingCall] = useState(false);
   const [roomId, setRoomId] = useState(null);
   const [incomingVideoCall, setIncomingVideoCall] = useState(false);
-  const [videoChannelName, setVideoChannelName] = useState(null);
   const [callerUserId, setCallerUserId] = useState(null);
   const [token, setToken] = useState("");
+  // const [waitingList, setWaitingList] = useState([]);
+
 
   useEffect(() => {
     if (!voiceSocket.connected) {
@@ -37,7 +40,6 @@ const AstrologersDashboard = () => {
       setRoomId(roomId);
       setCallerUserId(callerId);
       setToken(agoraToken);
-      setVideoChannelName(roomId);
       if (data?.type === "video") {
         setIncomingVideoCall(true);
         setIncomingCall(false);
@@ -59,12 +61,35 @@ const AstrologersDashboard = () => {
       setToken("");
     };
 
+
+ const handleWaitingList = (data) => {
+  const normalizedList = (data.list || []).map((call) => ({
+    ...call,
+
+    // ✅ Extract correct caller info
+    callerId: call.userId,
+    callerName:
+      call.user?.customer?.name ||
+      call.user?.customer?.fullName ||
+      call.userId,
+
+    agoraToken: call.agoraToken,
+  }));
+
+  setWaitingList(normalizedList);
+};
+
+
+
     voiceSocket.on("incoming_call", handleIncomingVoiceCall);
+    voiceSocket.on("waiting_list",handleWaitingList);
     voiceSocket.on("call_canceled", handleCanceledCall);
 
     return () => {
       voiceSocket.off("incoming_call", handleIncomingVoiceCall);
       voiceSocket.off("call_canceled", handleCanceledCall);
+      voiceSocket.off("waiting_list",handleWaitingList);
+
     };
   }, []);
 
@@ -90,6 +115,9 @@ const AstrologersDashboard = () => {
     isUserSide: false,
     callType: "audio",
   });
+
+  console.log("test the following",token,callerUserId,roomId)
+
 };
 
   
@@ -102,27 +130,6 @@ const AstrologersDashboard = () => {
     setIncomingVideoCall(false);
   };
 
-  // const handleVideoAccept = () => {
-  //   if (!roomId) return;
-
-  //   voiceSocket.emit("accept_call", {
-  //     roomId,
-  //     token,
-  //     channelName: roomId,
-  //     astrologerId: astroIdLocal,
-  //   });
-  //   setIncomingCall(false);
-  //   setIncomingVideoCall(false);
-
-  //   navigate(`/astrologer-dashboard/video-call/${roomId}`, {
-  //     state: {
-  //       roomId,
-  //       agoraToken: token,
-  //       callerName: callerUserId,
-  //       isUserSide: false,
-  //     },
-  //   });
-  // };
 
   const handleVideoAccept = () => {
   if (!roomId) return;
@@ -144,9 +151,9 @@ const AstrologersDashboard = () => {
     isUserSide: false,
     callType: "video",
   });
+
 };
 
-  /** ❌ Reject video call popup */
   const handleVideoReject = () => {
     if (!roomId) return;
 
@@ -269,13 +276,6 @@ const AstrologersDashboard = () => {
     </div>
   );
 
-  const CallHistoryTab = (
-    <div className={styles.placeholder}>
-      <PrimaryText size_20 isSemiBold>
-        Call history will appear here.
-      </PrimaryText>
-    </div>
-  );
 
   return (
     <div className={styles.wrapper}>
@@ -330,7 +330,7 @@ const AstrologersDashboard = () => {
 
       {/* ⭐ CONTENT AREA */}
       {activeTab === "dashboard" && DashboardTab}
-      {activeTab === "history" && CallHistoryTab}
+      {activeTab === "history" && <CallHistoryTab/>}
     </div>
   );
 };
