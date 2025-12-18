@@ -25,21 +25,26 @@ import { useCall } from "../../context/CallContext";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../utils/routes/Paths";
 
-// import { useCall } from "../../context/CallContext";
-
 export const VideoCalling = ({ callData }) => {
-  const client = useRTCClient(
-    AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
-  );
+  const [clientKey, setClientKey] = useState(0);
+
+  // 🔥 FORCE NEW AGORA CLIENT PER ROOM (MAIN FIX)
+  useEffect(() => {
+    setClientKey((k) => k + 1);
+  }, [callData.roomId]);
 
   return (
-    <AgoraRTCProvider client={client}>
-      <Basics client={client} callData={callData} />
+    <AgoraRTCProvider
+      key={clientKey}
+      client={AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })}
+    >
+      <Basics callData={callData} />
     </AgoraRTCProvider>
   );
 };
 
-const Basics = ({ client, callData }) => {
+const Basics = ({ callData }) => {
+  const client = useRTCClient();
   const { activeCall, setActiveCall } = useCall();
   const navigate = useNavigate();
 
@@ -49,23 +54,67 @@ const Basics = ({ client, callData }) => {
   const [cameraOn, setCamera] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
   const [hasJoinedOnce, setHasJoinedOnce] = useState(false);
-
   const [position, setPosition] = useState({ x: 20, y: 20 });
 
   const cleanupDoneRef = useRef(false);
 
   const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
   const { localCameraTrack } = useLocalCameraTrack(cameraOn);
-  const appId = "5630460abdc141e3b2f8d9597752bd7d";
-
-  // Join channel
-  const { isConnected } = useJoin(
-    { appid: appId, channel: roomId, token: agoraToken },
-    true
-  );
-
   const remoteUsers = useRemoteUsers();
 
+  const appId = "5630460abdc141e3b2f8d9597752bd7d";
+
+  /* 🔥 FORCE LEAVE OLD CHANNEL BEFORE JOIN */
+  useEffect(() => {
+    cleanupDoneRef.current = false;
+
+    const safeLeave = async () => {
+      if (client.connectionState === "CONNECTED") {
+        await client.leave();
+      }
+    };
+
+    safeLeave();
+  }, [roomId]);
+
+  /* JOIN CHANNEL */
+  const { isConnected } = useJoin(
+    {
+      appid: appId,
+      channel: roomId,
+      token: agoraToken,
+    },
+    Boolean(roomId && agoraToken)
+  );
+
+  useEffect(() => {
+  if (client.connectionState === "CONNECTED") {
+    setHasJoinedOnce(true);
+  }
+}, [client.connectionState]);
+
+
+  /* TRACK JOIN STATE */
+  useEffect(() => {
+    if (isConnected) setHasJoinedOnce(true);
+  }, [isConnected]);
+
+  /* SINGLE SOURCE OF PUBLISH */
+  usePublish([
+    ...(localMicrophoneTrack ? [localMicrophoneTrack] : []),
+    ...(localCameraTrack ? [localCameraTrack] : []),
+  ]);
+
+  /* SYNC MIC / CAMERA */
+  useEffect(() => {
+    localMicrophoneTrack?.setEnabled(micOn);
+  }, [micOn, localMicrophoneTrack]);
+
+  useEffect(() => {
+    localCameraTrack?.setEnabled(cameraOn);
+  }, [cameraOn, localCameraTrack]);
+
+  /* CLEANUP */
   const cleanupCall = async () => {
     if (cleanupDoneRef.current) return;
     cleanupDoneRef.current = true;
@@ -81,75 +130,46 @@ const Basics = ({ client, callData }) => {
         await client.leave();
       }
     } catch (e) {
-      console.warn("Cleanup safe error:", e);
+      console.warn("Cleanup error:", e);
     } finally {
       setActiveCall(null);
     }
   };
 
-  // Sync mic/camera
+  /* SOCKET EVENTS */
   useEffect(() => {
-    localMicrophoneTrack?.setEnabled(micOn);
-    localCameraTrack?.setEnabled(cameraOn);
-  }, [micOn, cameraOn]);
+    const end = async () => cleanupCall();
 
-  // Publish tracks
-  usePublish([
-    ...(localMicrophoneTrack && micOn ? [localMicrophoneTrack] : []),
-    ...(localCameraTrack && cameraOn ? [localCameraTrack] : []),
-  ]);
-
-  // Remote user left → end call
-  useEffect(() => {
-    if (isConnected) setHasJoinedOnce(true);
-  }, [isConnected]);
-
-  useEffect(() => {
-    const onCallEnded = async () => {
-      await cleanupCall();
-    };
-
-    const onSocketDisconnect = async () => {
-      await cleanupCall();
-    };
-
-    voiceSocket.on("call_ended", onCallEnded);
-    voiceSocket.on("disconnect", onSocketDisconnect);
+    voiceSocket.on("call_ended", end);
+    voiceSocket.on("force_call_end", end);
+    voiceSocket.on("disconnect", end);
 
     return () => {
-      voiceSocket.off("call_ended", onCallEnded);
-      voiceSocket.off("disconnect", onSocketDisconnect);
+      voiceSocket.off("call_ended", end);
+      voiceSocket.off("force_call_end", end);
+      voiceSocket.off("disconnect", end);
     };
   }, []);
 
+  /* REMOTE USER LEFT */
   useEffect(() => {
-    const onRemoteLeave = async () => {
-      await cleanupCall();
-    };
-
+    const onRemoteLeave = async () => cleanupCall();
     client.on("user-left", onRemoteLeave);
     return () => client.off("user-left", onRemoteLeave);
   }, []);
 
-  // End call manually
+  /* END CALL */
   const endCall = async () => {
     const endedBy = isUserSide ? "CUSTOMER" : "ASTROLOGER";
-
-    voiceSocket.emit("call_end", {
-      roomId,
-      endedBy,
-    });
-
+    voiceSocket.emit("call_end", { roomId, endedBy });
     await cleanupCall();
   };
 
-    const dragOffset = useRef({ x: 0, y: 0 });
-
-
+  /* DRAG LOGIC (UNCHANGED) */
+  const dragOffset = useRef({ x: 0, y: 0 });
 
   const startDrag = (e) => {
-    e.preventDefault(); // ⭐ REQUIRED FOR MOBILE
-
+    e.preventDefault();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
@@ -160,14 +180,12 @@ const Basics = ({ client, callData }) => {
 
     document.addEventListener("mousemove", onDrag);
     document.addEventListener("mouseup", stopDrag);
-
     document.addEventListener("touchmove", onDrag, { passive: false });
     document.addEventListener("touchend", stopDrag);
   };
 
   const onDrag = (e) => {
-    e.preventDefault(); // ⭐ mobile scroll stop
-
+    e.preventDefault();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
@@ -180,22 +198,20 @@ const Basics = ({ client, callData }) => {
   const stopDrag = () => {
     document.removeEventListener("mousemove", onDrag);
     document.removeEventListener("mouseup", stopDrag);
-
     document.removeEventListener("touchmove", onDrag);
     document.removeEventListener("touchend", stopDrag);
   };
 
   return (
     <>
+      {/* MINI WINDOW */}
       {isMinimized && (
         <div
           className={styles.floatingMini}
           style={{ top: position.y, left: position.x }}
           onMouseDown={startDrag}
           onTouchStart={startDrag}
-
         >
-          {/* Header */}
           <div className={styles.miniHeader}>
             <span className={styles.miniTitle}>
               {callerName || "Video Call"}
@@ -209,7 +225,6 @@ const Basics = ({ client, callData }) => {
             </button>
           </div>
 
-          {/* Video */}
           <div className={styles.miniVideo}>
             {remoteUsers.length > 0 ? (
               <RemoteUser user={remoteUsers[0]} playVideo playAudio />
@@ -218,7 +233,6 @@ const Basics = ({ client, callData }) => {
             )}
           </div>
 
-          {/* Controls */}
           <div className={styles.miniControls}>
             <button
               className={`${styles.iconBtn} ${!micOn ? styles.activeRed : ""}`}
@@ -246,13 +260,12 @@ const Basics = ({ client, callData }) => {
         </div>
       )}
 
-      {/* ▼ FULL SCREEN WINDOW ▼ */}
+      {/* FULL SCREEN */}
       {!isMinimized && (
         <div className={styles.videoContainer}>
           <button
             className={styles.minimizeBtn}
             onClick={() => setIsMinimized(true)}
-            aria-label="Minimize"
           >
             <IoArrowBack size={20} />
           </button>
@@ -271,8 +284,8 @@ const Basics = ({ client, callData }) => {
                     <RemoteUser
                       key={user.uid}
                       user={user}
-                      playAudio
                       playVideo
+                      playAudio
                     />
                   ))
                 ) : (
@@ -285,12 +298,11 @@ const Basics = ({ client, callData }) => {
               {cameraOn && (
                 <div className={styles.localVideoPreview}>
                   <LocalUser
-                    key={isMinimized ? "mini" : "full"} // ⭐ IMPORTANT
+                    key={roomId} // 🔥 FORCE REMOUNT
                     audioTrack={localMicrophoneTrack}
                     videoTrack={localCameraTrack}
                     micOn={micOn}
                     cameraOn={cameraOn}
-                    playAudio={false}
                     playVideo
                   />
                 </div>
@@ -322,30 +334,25 @@ const Basics = ({ client, callData }) => {
                 <button
                   className={styles.chatBtn}
                   onClick={() => {
-                    if (isUserSide) {
-                      setIsMinimized(true);
-
-                      navigate(
-                        `/talk-to-astrologers/${activeCall.astrologerId}`,
-                        {
-                          state: {
-                            roomId: activeCall.chatRoomId, // SAME CHAT
-                            userId: activeCall.userId,
-                            astrologerId: activeCall.astrologerId,
-                            kundliId: activeCall.kundliId,
-                            fullName: activeCall.callerName,
-                            isUserSide: true,
-                          },
-                        }
-                      );
-                    } else {
-                      setIsMinimized(true);
-                      navigate(
-                        PATH.privateRoutes.ASTROLOGER_CHAT_USER_LIST.path
-                      );
-                    }
+                    setIsMinimized(true);
+                    isUserSide
+                      ? navigate(
+                          `/talk-to-astrologers/${activeCall.astrologerId}`,
+                          {
+                            state: {
+                              roomId: activeCall.chatRoomId,
+                              userId: activeCall.userId,
+                              astrologerId: activeCall.astrologerId,
+                              kundliId: activeCall.kundliId,
+                              fullName: activeCall.callerName,
+                              isUserSide: true,
+                            },
+                          }
+                        )
+                      : navigate(
+                          PATH.privateRoutes.ASTROLOGER_CHAT_USER_LIST.path
+                        );
                   }}
-                  aria-label="Open Chat"
                 >
                   <IoChatbubbleEllipses size={20} />
                 </button>

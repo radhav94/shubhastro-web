@@ -1,26 +1,47 @@
-import React from "react";
+import React,{useEffect} from "react";
 import PrimaryText from "../../../../../component/PrimaryText";
 import styles from "./AstrologersDashboard.module.scss";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import { useCall } from "../../../../../context/CallContext";
+import { Toast } from "../../../../../component";
 
 const CallHistoryTab = () => {
   const {
     waitingList,
     setWaitingList,
     setActiveCall,
+    activeCall
   } = useCall();
 
   const astroIdLocal = localStorage.getItem("shubhtalk_astro_id");
 
-const handleAccept = (call) => {
 
-  console.log("testssss",call);
-  if (!call?.roomId || !call?.agoraToken) {
-    console.warn("Missing call data", call);
-    return;
+  useEffect(() => {
+  if (!voiceSocket.connected) {
+    voiceSocket.io.opts.query = {
+      astrologerId: astroIdLocal,
+      role: "ASTROLOGER",
+    };
+    voiceSocket.connect();
+  }
+}, []);
+
+const handleAccept = async (call) => {
+  if (!call?.roomId || !call?.agoraToken) return;
+
+  if(activeCall)
+  {
+    Toast.error("Please end the previous call first");
+    return
   }
 
+  // 1️⃣ END ANY EXISTING CALL FIRST
+  setActiveCall(null);
+
+  // 🔥 IMPORTANT: allow Agora to cleanup
+  await new Promise((res) => setTimeout(res, 0));
+
+  // 2️⃣ TELL SERVER
   voiceSocket.emit("accept_call", {
     roomId: call.roomId,
     token: call.agoraToken,
@@ -28,29 +49,26 @@ const handleAccept = (call) => {
     astrologerId: astroIdLocal,
   });
 
-  // Remove from waiting list
+  // 3️⃣ REMOVE FROM WAITING LIST
   setWaitingList((prev) =>
     prev.filter((item) => item.roomId !== call.roomId)
   );
 
-  // 🔥 SET ACTIVE CALL WITH CORRECT SHAPE
+  // 🔥 IMPORTANT: delay before mounting Agora again
+  await new Promise((res) => setTimeout(res, 50));
 
-  console.log("ACCEPT FROM WAITING LIST", {
-  roomId: call.roomId,
-  token: call.agoraToken,
-  callerName: call.callerName,
-});
-
- setActiveCall({
-  roomId: call.roomId,
-  agoraToken: call.agoraToken,
-  callerName: call.callerName, // ✅ REAL NAME
-  isUserSide: false,
-  callType: call.callType || "audio",
-});
-
-
+  // 4️⃣ START NEW CALL
+  setActiveCall({
+    roomId: call.roomId,
+    agoraToken: call.agoraToken,
+    callerName: call.callerName,
+    isUserSide: false,
+    callType: call.callType || "audio",
+  });
 };
+
+
+
 
 
   const handleReject = (call) => {
