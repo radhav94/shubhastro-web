@@ -19,7 +19,7 @@ const Pagination = ({ pagination, onPageChange }) => {
     pages.push(1);
 
     // Left dots
-    if (page > 1) {
+    if (page > 3) {
       pages.push("...");
     }
 
