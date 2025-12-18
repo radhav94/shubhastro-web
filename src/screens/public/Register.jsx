@@ -6,7 +6,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { PATH } from "../../utils/routes/Paths";
 import { registerUser } from "../../services/appServices/authService";
 import LocationSearch from "../../utils/location/locationSearch";
-// import LocationSearch from "../../components/locationSearch/LocationSearch";
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const months = [
@@ -47,7 +46,7 @@ const Register = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [toast, setToast] = useState({ show: false, type: "", message: "" });
+  // const [toast, setToast] = useState({ show: false, type: "", message: "" });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -76,34 +75,23 @@ const Register = () => {
       setError("");
       setLoading(true);
 
-      const {
-        firstName,
-        lastName,
-        // email,
-        // password,
-        // confirmPassword,
-        gender,
-        day,
-        month,
-        year,
-        // address,
-        // latitude,
-        // longitude,
-        birthPlace,
-      } = formData;
+      const { firstName, lastName, gender, day, month, year, birthPlace } =
+        formData;
 
       // Required Field Validation
-      if (!firstName || !lastName || !gender || !day || !month || !year) {
+      if (
+        !firstName ||
+        !lastName ||
+        !gender ||
+        !day ||
+        !month ||
+        !year ||
+        !birthPlace
+      ) {
         setError("Please fill in all required fields.");
         setLoading(false);
         return;
       }
-
-      // if (password !== confirmPassword) {
-      //   setError("Passwords do not match.");
-      //   setLoading(false);
-      //   return;
-      // }
 
       const dateOfBirth = `${year}-${getMonthNumber(month)
         .toString()
@@ -114,14 +102,9 @@ const Register = () => {
         phoneNumber,
         firstName,
         lastName,
-        // password,
         place: birthPlace || "",
-        // email,
         languagePreferences: ["English", "Hindi"],
         dateOfBirth,
-        // address,
-        // lat: latitude?.toString() || "",
-        // lon: longitude?.toString() || "",
         role: "CUSTOMER",
       };
 
@@ -130,51 +113,42 @@ const Register = () => {
       try {
         response = await registerUser(payload);
       } catch (apiErr) {
-        // API Crashed => Handle here, do NOT break page
-        setToast({
-          show: true,
-          type: "error",
-          message: apiErr?.response?.data?.message || "Something went wrong!",
-        });
+        console.log("apiErrror", apiErr);
+
+        const backendMessage =
+          apiErr?.response?.data?.message ||
+          apiErr?.response?.data?.error ||
+          "Invalid input";
+
+        setError(backendMessage); // 🔥 EXACT backend message
+        setLoading(false);
+
+        Toast.error(apiErr?.response?.data?.message || "Something went wrong!");
+
         setLoading(false);
         return;
       }
 
       if (response?.data?.statusCode === 201) {
-        setToast({
-          show: true,
-          type: "success",
-          message: "Registration successful!",
-        });
+        Toast.success("Registration successful!");
 
-          navigate(PATH.privateRoutes.HOME.path, { replace: true });
+        navigate(PATH.privateRoutes.HOME.path, { replace: true });
       } else {
-        setToast({
-          show: true,
-          type: "error",
-          message: response?.data?.message || "Something went wrong!",
-        });
+        Toast.error(response?.data?.message || "Something went wrong!");
       }
     } catch (err) {
-      // Last layer protection
-      console.error("Unexpected error:", err);
-      setToast({
-        show: true,
-        type: "error",
-        message: "Unexpected error occurred.",
-      });
+      console.error("Unexpected error:", err)
+
+      Toast.error("Unexpected error occurred.");
     } finally {
       setLoading(false);
     }
   };
 
-
-
-
   return (
     <LoginLayout register={true}>
       <div className={styles.container}>
-        {toast.show && <Toast type={toast.type} message={toast.message} />}
+        {/* {toast.show && <Toast type={toast.type} message={toast.message} />} */}
 
         <PrimaryText paddingBottom={20}>
           Join us to get personalized insights and services.
@@ -183,105 +157,77 @@ const Register = () => {
         <form onSubmit={handleRegister} className={styles.form}>
           {/* First + Last Name */}
           {/* <div className={styles.row}> */}
-            <div className={styles.formGroup}>
-              <label className={styles.required}>First Name</label>
-              <input
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.required}>Last Name</label>
-              <input
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-          {/* </div> */}
-          {/* <div className={styles.formGroup}>
-            <label className={styles.required}>Address</label>
+          <div className={styles.formGroup}>
+            <label className={styles.required}>First Name</label>
             <input
-              name="address"
-              value={formData.address}
+              name="firstName"
+              value={formData.firstName}
               onChange={handleInputChange}
               required
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.required}>Email</label>
+            <label className={styles.required}>Last Name</label>
             <input
-              type="email"
-              name="email"
-              value={formData.email}
+              name="lastName"
+              value={formData.lastName}
               onChange={handleInputChange}
               required
             />
           </div>
-
-         */}
-
-           {/* <div className={styles.row}>
-            <div className={styles.formGroup}>
-              <label className={styles.required}>Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.required}>Confirm Password</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-          </div> */}
-
           <h3 className={styles.sectionHeader}>Date of Birth</h3>
 
           {/* DOB Grid */}
           <div className={styles.grid}>
             <div className={styles.formGroup}>
               <label className={styles.required}>Day</label>
-              <select name="day" value={formData.day} onChange={handleInputChange}>
+              <select
+                name="day"
+                value={formData.day}
+                onChange={handleInputChange}
+              >
                 <option value="">Select Day</option>
-                {days.map((d) => <option key={d}>{d}</option>)}
+                {days.map((d) => (
+                  <option key={d}>{d}</option>
+                ))}
               </select>
             </div>
 
             <div className={styles.formGroup}>
               <label className={styles.required}>Month</label>
-              <select name="month" value={formData.month} onChange={handleInputChange}>
+              <select
+                name="month"
+                value={formData.month}
+                onChange={handleInputChange}
+              >
                 <option value="">Select Month</option>
-                {months.map((m) => <option key={m}>{m}</option>)}
+                {months.map((m) => (
+                  <option key={m}>{m}</option>
+                ))}
               </select>
             </div>
 
             <div className={styles.formGroup}>
               <label className={styles.required}>Year</label>
-              <select name="year" value={formData.year} onChange={handleInputChange}>
+              <select
+                name="year"
+                value={formData.year}
+                onChange={handleInputChange}
+              >
                 <option value="">Select Year</option>
 
-                {years.map((y) => <option key={y}>{y}</option>)}
+                {years.map((y) => (
+                  <option key={y}>{y}</option>
+                ))}
               </select>
             </div>
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="birthPlace">Birth Place</label>
+            <label htmlFor="birthPlace" className={styles.required}>
+              Birth Place
+            </label>
             <LocationSearch
               value={formData.birthPlace}
               onChange={(e) =>
@@ -308,9 +254,6 @@ const Register = () => {
               <option>Other</option>
             </select>
           </div>
-
-
-          
 
           {error && <p className={styles.error}>{error}</p>}
 
