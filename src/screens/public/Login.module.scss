@@ -26,6 +26,23 @@
   margin-top: 8px;
 }
 
+.logoContainer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  cursor: pointer;
+  padding-top: 0px; // 👈 THIS IS THE FIX (moves logo + text slightly down)
+
+  img {
+    height: 45px; // Adjusted for a sleeker look
+    width: auto;
+    border-radius: 22.5px;
+    transition: transform 0.3s ease;
+    // &:hover {
+    //   transform: scale(1.05);
+    // }
+  }
+}
 /* Mobile number section */
 .mobileNumber {
   width: 100%;

@@ -4,6 +4,7 @@ import LoginLayout from "../../layouts/loginlayout/LoginLayout";
 import { PrimaryText, Toast } from "../../component";
 import styles from "./Login.module.scss";
 import { PATH } from "../../utils/routes/Paths";
+import { AppIcons, appSvgs } from "../../utils/appImages";
 import * as AuthServices from "../../services/appServices/authService";
 
 const Login = () => {
@@ -77,6 +78,9 @@ const token =
   return (
     <LoginLayout>
       <div className={styles.loginSection}>
+        <div className={styles.logoContainer} onClick={() => navigate("/")}>
+          <img src={AppIcons.Logo} alt="Shubh Talk Logo" />
+        </div>
         <h1 className={styles.title}>
           Welcome to Shubh Talk
           <span className={styles.subtitle}>
