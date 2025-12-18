@@ -1,12 +1,22 @@
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 const CallContext = createContext();
 
 export const CallProvider = ({ children }) => {
-  const [activeCall, setActiveCall] = useState(null); 
+  const [activeCall, setActiveCall] = useState(null);
+
+  // 🔥 GLOBAL waiting list (persists across navigation)
+  const [waitingList, setWaitingList] = useState([]);
 
   return (
-    <CallContext.Provider value={{ activeCall, setActiveCall }}>
+    <CallContext.Provider
+      value={{
+        activeCall,
+        setActiveCall,
+        waitingList,
+        setWaitingList,
+      }}
+    >
       {children}
     </CallContext.Provider>
   );

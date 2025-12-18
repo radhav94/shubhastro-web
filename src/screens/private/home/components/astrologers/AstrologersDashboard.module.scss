@@ -196,3 +196,49 @@ input:checked + .slider:before {
   border-radius: 8px;
   cursor: pointer;
 }
+
+.callList {
+  list-style: none;
+  padding: 0;
+  margin-top: 12px;
+}
+
+.callItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fff;
+  margin-bottom: 10px;
+}
+
+.callInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.callActions {
+  display: flex;
+  gap: 8px;
+}
+
+.acceptBtn {
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.rejectBtn {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
