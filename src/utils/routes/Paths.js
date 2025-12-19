@@ -37,7 +37,7 @@ import {
   Yesterday,
   Tomorrow,
   MatchMaking,
-  Sadesati,
+  // Sadesati,
   MatchDetails,
   About,
   Disclaimer,
@@ -225,10 +225,10 @@ export const PATH = {
       element: Kundli,
     },
 
-    SADESATI: {
-      path: "/sadesati",
-      element: Sadesati,
-    },
+    // SADESATI: {
+    //   path: "/sadesati",
+    //   element: Sadesati,
+    // },
     NUMEROLOGY: {
       path: "/numerology",
       element: Numerology,
@@ -381,7 +381,6 @@ export const PATH = {
     CHAT_WITH_ASTROLOGER: {
       path: "/talk-to-astrologers/:id",
       element: ChatWindow,
-      footer: false,
     },
     PROFILE_ASTROLOGER: {
       path: "/astrologer/:id",

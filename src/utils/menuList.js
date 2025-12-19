@@ -15,7 +15,7 @@ export const MENU_LIST = [
     path: "/panchang",
   },
   { title: "Kundli", path: "/kundli" },
-  { title: "Sadesati", path: "/sadesati" },
+  // { title: "Sadesati", path: "/sadesati" },
   { title: "Match Making", path: "/matchmaking" },
   { title: "Numerology", path: "/numerology" },
   {

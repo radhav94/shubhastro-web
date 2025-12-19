@@ -67,7 +67,7 @@ const TopBar = () => {
       path: PATH.privateRoutes.PANCHANG.path,
     },
     { title: "Kundli", path: PATH.privateRoutes.KUNDLI.path },
-    { title: "Sadesati", path: PATH.privateRoutes.SADESATI.path },
+    // { title: "Sadesati", path: PATH.privateRoutes.SADESATI.path },
     { title: "Match Making", path: PATH.privateRoutes.MATCHMAKING.path },
     {
       title: "Horoscope",
