@@ -62,6 +62,7 @@ const TalkToAstrologer = () => {
   const [allAstrologers, setAllAstrologers] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [callRoomId, setCallRoomId] = useState(null);
+  const [isFiltered, setIsFiltered] = useState(false);
 
   const limit = 9;
 
@@ -117,6 +118,8 @@ const TalkToAstrologer = () => {
 
   // Auto-load if no scrollbar exists (important!)
   useEffect(() => {
+    if (isFiltered) return;
+
     if (
       document.documentElement.scrollHeight <= window.innerHeight &&
       hasMoreRef.current &&
@@ -124,10 +127,10 @@ const TalkToAstrologer = () => {
     ) {
       setPage((prev) => prev + 1);
     }
-  }, [allAstrologers]);
+  }, [allAstrologers, isFiltered]);
 
   useEffect(() => {
-    if (isFetching || !hasMore) return;
+    if (isFiltered || !hasMore || isFetching) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -138,15 +141,42 @@ const TalkToAstrologer = () => {
       { threshold: 1 }
     );
 
-    if (loadMoreRef.current) {
-      observer.observe(loadMoreRef.current);
-    }
+    if (loadMoreRef.current) observer.observe(loadMoreRef.current);
 
     return () => {
       if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
     };
-  }, [isFetching, hasMore]);
+  }, [isFetching, hasMore, isFiltered]);
 
+  // Filter handlers
+  const resetFilters = () => {
+    setIsFiltered(false);
+    setSpecialty("");
+    setPage(1);
+    setAllAstrologers([]);
+    setHasMore(true);
+  };
+
+  const handleSelect = (category) => {
+    if (!category) {
+      resetFilters();
+    } else {
+      setSpecialty(category);
+      setIsFiltered(true);
+      setPage(1);
+      setAllAstrologers([]);
+      setHasMore(true);
+    }
+  };
+
+  const handleApplyFilters = (payload) => {
+    setIsFiltered(true);
+    setPage(1);
+    setAllAstrologers(payload.result || []);
+    setHasMore(false); // stop infinite scroll
+  };
+
+  // Kundli & Chat handlers
   const openKundliPopup = (astro) => {
     setSelectedAstrologer(astro);
     if (token) {
@@ -385,14 +415,7 @@ const TalkToAstrologer = () => {
       <div className="pt-4" />
       <Title title="Trial Offer ( 3 left )" showDivider />
 
-      <FilterChips
-        onSelect={(filterName) => {
-          setSpecialty(filterName);
-          setPage(1);
-          setAllAstrologers([]);
-          setHasMore(true);
-        }}
-      />
+      <FilterChips onSelect={handleSelect} onApplyFilters={handleApplyFilters} />
 
       <div className={styles.cardsContainer}>
         {allAstrologers.map((astro, index) => (
@@ -417,7 +440,7 @@ const TalkToAstrologer = () => {
 
         {!isFetching && allAstrologers.length === 0 && (
           <div className={styles.emptyState}>
-            <PrimaryText>No astrologers found.</PrimaryText>
+          <PrimaryText>No astrologers found.</PrimaryText>
           </div>
         )}
       </div>
