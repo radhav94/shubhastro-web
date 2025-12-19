@@ -232,9 +232,8 @@ const handleVerifyOtp = async (event) => {
                     return;
                   }
           
-                  // block non-numeric keys
                   if (!/^[0-9]$/.test(e.key)) {
-                    e.preventDefault(); // ⛔ stops focus jump
+                    e.preventDefault();
                   }
                 }}
               />}
