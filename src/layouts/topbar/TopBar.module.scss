@@ -165,7 +165,7 @@ $font-primary: "Poppins", sans-serif;
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   // box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
 
-  @media (max-width: 768px) {
+  @media (max-width: 772px) {
     display: none;
   }
 }
@@ -213,12 +213,11 @@ $font-primary: "Poppins", sans-serif;
 
 .navbarMenu li:nth-child(9)::after {
   content: none;
-} 
+}
 
 .navbarMenu li:nth-child(9) {
   text-align: left;
-
-} 
+}
 
 .active {
   font-weight: 700;
@@ -369,14 +368,14 @@ $font-primary: "Poppins", sans-serif;
 
 .userDetails {
   flex: 1;
-  
+
   h3 {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
     color: #333;
   }
-  
+
   p {
     margin: 4px 0 0 0;
     font-size: 13px;

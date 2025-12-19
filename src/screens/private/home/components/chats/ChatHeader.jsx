@@ -1,10 +1,5 @@
-import React from "react";
 import styles from "./ChatWindow.module.scss";
-import {
-  IoArrowBack,
-  IoCallOutline,
-  IoVideocamOutline,
-} from "react-icons/io5";
+import { IoArrowBack, IoCallOutline, IoVideocamOutline } from "react-icons/io5";
 import { PrimaryText } from "../../../../../component";
 
 const ChatHeader = ({

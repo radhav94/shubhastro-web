@@ -1,10 +1,9 @@
-import React from "react";
 import styles from "./ChatWindow.module.scss";
 import { PrimaryText } from "../../../../../component";
 
-const ChatMessages = ({ messages, isTyping, error }) => {
+const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
   return (
-    <div className={styles.messages}>
+    <div className={styles.messages} ref={messagesRef}>
       {error && <div className={styles.errorBox}>⚠️ {error}</div>}
 
       {messages.map((msg, i) => (
