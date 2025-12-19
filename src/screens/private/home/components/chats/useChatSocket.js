@@ -8,14 +8,13 @@ const useChatSocket = ({
   astrologerId,
   fullName,
   kundliId,
-  roomId: chatRoomId, 
+  roomId: chatRoomId,
   isUserSide,
 }) => {
   const { activeCall, setActiveCall } = useCall();
 
   const [waitingPopup, setWaitingPopup] = useState(false);
   const [callRoomId, setCallRoomId] = useState(null);
-
 
   const connectSocket = () => {
     if (voiceSocket.connected) {
@@ -64,17 +63,16 @@ const useChatSocket = ({
   useEffect(() => {
     if (!isUserSide) return;
 
-    const handleReturnRoom = ({ roomId,status}) => {
-
-        console.log("statussssssss",status);
-      setCallRoomId(roomId); 
+    const handleReturnRoom = ({ roomId, status }) => {
+      console.log("statussssssss", status);
+      setCallRoomId(roomId);
       setWaitingPopup(true);
     };
 
     const handleCallAccepted = ({ roomId, token, type }) => {
       setActiveCall({
-        roomId,           
-        chatRoomId,        
+        roomId,
+        chatRoomId,
         agoraToken: token,
         callerName: fullName,
         isUserSide: true,
@@ -85,13 +83,11 @@ const useChatSocket = ({
       });
 
       setWaitingPopup(false);
-      setCallRoomId(null); 
+      setCallRoomId(null);
     };
 
     const handleCallRejected = (data) => {
-      Toast.error(
-        data?.sessionData?.sessionEndReason || "Call Rejected"
-      );
+      Toast.error(data?.sessionData?.sessionEndReason || "Call Rejected");
       setWaitingPopup(false);
       setCallRoomId(null);
     };

@@ -1,5 +1,4 @@
-/* ================= ROOT HEIGHT CONTROL ================= */
-
+/*  ROOT HEIGHT CONTROL */
 :root {
   --site-header-height: 72px;
   --breadcrumb-height: 56px;
@@ -7,8 +6,7 @@
   --chat-input-height: 64px;
 }
 
-/* ================= PAGE WRAPPER ================= */
-
+/* PAGE WRAPPER */
 .chatPage {
   height: calc(100dvh - (var(--site-header-height) + var(--breadcrumb-height)));
   width: 100%;
@@ -16,8 +14,7 @@
   overflow: hidden;
 }
 
-/* ================= CHAT CONTAINER ================= */
-
+/* CHAT CONTAINER */
 .chatWindow {
   height: 100%;
   display: flex;
@@ -26,8 +23,7 @@
   background: #f5f5f7;
 }
 
-/* ================= HEADER ================= */
-
+/* HEADER */
 .header {
   height: var(--chat-header-height);
   min-height: var(--chat-header-height);
@@ -85,8 +81,7 @@
   color: #2ecc71;
 }
 
-/* ================= MESSAGES ================= */
-
+/* MESSAGES*/
 .messages {
   flex: 1;
   overflow-y: auto;
@@ -101,8 +96,7 @@
   // padding-bottom: calc(var(--chat-input-height) + 8px);
 }
 
-/* ================= MESSAGE BUBBLES ================= */
-
+/* MESSAGE BUBBLES */
 .msgBubble {
   max-width: 75%;
   padding: 8px 10px 4px;
@@ -141,8 +135,7 @@
   align-self: flex-end;
 }
 
-/* ================= TYPING ================= */
-
+/* TYPING */
 .typingIndicator {
   display: flex;
   gap: 4px;
@@ -168,8 +161,7 @@
   }
 }
 
-/* ================= INPUT BAR ================= */
-
+/* INPUT BAR */
 .inputBox {
   height: var(--chat-input-height);
   min-height: var(--chat-input-height);
@@ -219,10 +211,10 @@
   color: #fff;
 }
 
-/* ================= TABLET FIX (YOUR 792px ISSUE) ================= */
-
-@media (max-width: 820px) {
+/* TABLET */
+@media (max-width: 772px) {
   :root {
+    --site-header-height: 68px;
     --breadcrumb-height: 0px;
     --chat-header-height: 57px;
     --chat-input-height: 57px;
@@ -233,8 +225,7 @@
   }
 }
 
-/* ================= MOBILE ================= */
-
+/* MOBILE */
 @media (max-width: 600px) {
   :root {
     --site-header-height: 68px;

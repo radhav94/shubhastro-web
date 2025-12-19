@@ -1,4 +1,3 @@
-import React from "react";
 import styles from "./ChatWindow.module.scss";
 import { IoSend, IoAttach } from "react-icons/io5";
 

@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useState } from "react";
 import styles from "./ChatWindow.module.scss";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Toast } from "../../../../../component";
 import useChat from "./useChatWindow";
 import { useGetChatHistoryQuery } from "../../../../../redux/api/chatApi";
 import { useInactivityTimer } from "../../../../../utils/hooks/useInactivityTimer";
@@ -19,7 +18,8 @@ const ChatWindow = () => {
   const messagesRef = useRef(null);
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { userId, astrologerId, roomId, fullName, isUserSide, kundliId } = state;
+  const { userId, astrologerId, roomId, fullName, isUserSide, kundliId } =
+    state;
 
   const { activeCall } = useCall();
 
@@ -28,19 +28,15 @@ const ChatWindow = () => {
 
   const [message, setMessage] = useState("");
 
-  const {
-    waitingPopup,
-    handleAudioCall,
-    handleVideoCall,
-    handleCancelCall,
-  } = useChatSocket({
-    userId,
-    astrologerId,
-    fullName,
-    kundliId,
-    roomId,
-    isUserSide,
-  });
+  const { waitingPopup, handleAudioCall, handleVideoCall, handleCancelCall } =
+    useChatSocket({
+      userId,
+      astrologerId,
+      fullName,
+      kundliId,
+      roomId,
+      isUserSide,
+    });
 
   const { data } = useGetChatHistoryQuery({ roomId });
   const history = data?.data?.[0]?.chatHistory || [];
@@ -69,38 +65,50 @@ const ChatWindow = () => {
     setMessage("");
   };
 
+  useLayoutEffect(() => {
+    const container = messagesRef.current;
+    if (!container) return;
+
+    // ALWAYS keep latest message visible
+    container.scrollTop = container.scrollHeight;
+  }, [finalMsgs.length, isTyping]);
+
   return (
-    <div className={styles.chatWindow}>
-      <ChatHeader
-        fullName={fullName}
-        isTyping={isTyping}
-        onBack={() => navigate(-1)}
-        onAudioCall={handleAudioCall}
-        onVideoCall={handleVideoCall}
-        disabled={!!activeCall}
-      />
+    <div className={styles.chatPage}>
+      <div className={styles.chatWindow}>
+        <ChatHeader
+          fullName={fullName}
+          isTyping={isTyping}
+          onBack={() => navigate(-1)}
+          onAudioCall={handleAudioCall}
+          onVideoCall={handleVideoCall}
+          disabled={!!activeCall}
+        />
 
-      <ChatMessages messages={finalMsgs} isTyping={isTyping} error={error} />
+        <ChatMessages
+          messages={finalMsgs}
+          isTyping={isTyping}
+          error={error}
+          messagesRef={messagesRef}
+        />
 
-      <ChatInput
-        value={message}
-        onChange={(e) => {
-          setMessage(e.target.value);
-          sendTyping();
-        }}
-        onSend={handleSend}
-      />
+        <ChatInput
+          value={message}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            sendTyping();
+          }}
+          onSend={handleSend}
+        />
 
-      <WaitingPopup
-        open={waitingPopup}
-        onCancel={handleCancelCall}
-      />
+        <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
 
-      <InactivityModal
-        isOpen={isInactive}
-        onDisconnect={handleDisconnect}
-        onContinue={resetTimer}
-      />
+        <InactivityModal
+          isOpen={isInactive}
+          onDisconnect={handleDisconnect}
+          onContinue={resetTimer}
+        />
+      </div>
     </div>
   );
 };
