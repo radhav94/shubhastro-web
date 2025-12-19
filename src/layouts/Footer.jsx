@@ -212,6 +212,12 @@ const Footer = () => {
                 <a
                   href={link.href}
                   className={link.active ? styles.active : ""}
+                  onClick={(e) => {
+                    if (link.onClick) {
+                      e.preventDefault();   // stop page reload
+                      link.onClick();
+                    }
+                  }}
                 >
                   <div className={styles.nav_icon}>
                     {link.icon}
