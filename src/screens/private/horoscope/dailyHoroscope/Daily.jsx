@@ -87,8 +87,8 @@ const Daily = () => {
 
               <PrimaryText size_16 color={appColors.greyDark}>
                 <strong>Lucky Number:</strong>{" "}
-                {data.response.lucky_number.length > 0 &&
-                  data.response.lucky_number.join(", ")}
+                {data?.response?.lucky_number?.length > 0 &&
+                  data?.response?.lucky_number?.join(", ")}
               </PrimaryText>
             </div>
           )}

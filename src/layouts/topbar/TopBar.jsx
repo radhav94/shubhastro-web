@@ -346,7 +346,8 @@ export default TopBar;
 const NavbarItem = ({ title, path, children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isActive = path && location.pathname === path;
+  // const isActive = path && location.pathname === path;
+  const isActive = isMenuActive({ title, path, children }, location.pathname);
 
   return (
     <li
@@ -379,4 +380,24 @@ const NavbarItem = ({ title, path, children }) => {
       )}
     </li>
   );
+};
+
+const isMenuActive = (item, pathname) => {
+  // 1️⃣ If any child is active → parent is active
+  if (item.children) {
+    const childActive = item.children.some(
+      (child) =>
+        child.path &&
+        (pathname === child.path || pathname.startsWith(child.path + "/"))
+    );
+
+    if (childActive) return true;
+  }
+
+  // 2️⃣ Fallback to direct path match
+  if (item.path) {
+    return pathname === item.path || pathname.startsWith(item.path + "/");
+  }
+
+  return false;
 };

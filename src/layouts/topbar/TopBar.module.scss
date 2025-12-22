@@ -50,9 +50,9 @@ $font-primary: "Poppins", sans-serif;
     width: auto;
     border-radius: 22.5px;
     transition: transform 0.3s ease;
-    // &:hover {
-    //   transform: scale(1.05);
-    // }
+    &:hover {
+      transform: scale(1.05);
+    }
   }
 }
 
@@ -120,7 +120,7 @@ $font-primary: "Poppins", sans-serif;
   transition: background-color 0.3s ease, transform 0.2s ease;
 
   &:hover {
-    // 👇 This line is now fixed
+    // This line is now fixed
     background-color: color.adjust($color-gold, $lightness: 5%);
     transform: translateY(-2px);
   }
@@ -225,11 +225,20 @@ $font-primary: "Poppins", sans-serif;
 
 .active {
   font-weight: 700;
-  color: #d48806;
+  // color: #d48806;
+  border-bottom: 2px solid black;
 
   &::after {
-    width: 100%;
+    width: 0%;
   }
+}
+
+.navbarMenu li.active:hover {
+  color: inherit;
+}
+
+.navbarMenu li.active:hover::after {
+  width: 0%;
 }
 
 /* FLEX WRAPPER FOR TEXT + ARROW */
