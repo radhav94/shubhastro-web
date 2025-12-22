@@ -1,10 +1,10 @@
-/*  ROOT HEIGHT CONTROL */
-:root {
-  --site-header-height: 72px;
-  --breadcrumb-height: 56px;
-  --chat-header-height: 64px;
-  --chat-input-height: 64px;
-}
+// /*  ROOT HEIGHT CONTROL */
+// :root {
+//   --site-header-height: 72px;
+//   --breadcrumb-height: 56px;
+//   --chat-header-height: 64px;
+//   --chat-input-height: 64px;
+// }
 
 .overlay {
   position: fixed;
@@ -13,7 +13,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 999;
+  z-index: 99999;
 }
 
 .modal {
