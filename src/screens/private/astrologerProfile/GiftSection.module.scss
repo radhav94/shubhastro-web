@@ -142,3 +142,95 @@
     cursor: not-allowed;
   }
 }
+/* ===============================
+   RESPONSIVE STYLES – GiftSection
+   =============================== */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .giftGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .emoji img {
+    max-width: 70px;
+    max-height: 80px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .giftBox {
+    padding: 16px;
+  }
+
+  .headerRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .priceTag {
+    align-self: flex-end;
+  }
+
+  .giftGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .giftItem {
+    padding: 12px 6px;
+  }
+
+  .emoji img {
+    max-width: 60px;
+    max-height: 70px;
+  }
+
+  .name {
+    font-size: 12px;
+  }
+
+  .amount {
+    font-size: 13px;
+  }
+
+  .buttonRow {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .rechargeBtn,
+  .sendBtn {
+    width: 100%;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .giftGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .emoji img {
+    max-width: 52px;
+    max-height: 60px;
+  }
+
+  .headerRow h3 {
+    font-size: 15px;
+  }
+
+  .priceTag {
+    font-size: 14px;
+  }
+
+  .sendBtn,
+  .rechargeBtn {
+    font-size: 14px;
+    padding: 11px;
+  }
+}
