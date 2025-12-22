@@ -39,3 +39,205 @@
   color: #000;
   box-shadow: 0 0 6px rgba(255, 200, 0, 0.4);
 }
+/* ===========================
+   MODAL OVERLAY
+=========================== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+}
+
+/* ===========================
+   SLIDE-UP CONTAINER
+=========================== */
+.modalSlide {
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  background: #fff;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  animation: slideUp 0.3s ease-out;
+}
+
+/* ===========================
+   HEADER
+=========================== */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  border-bottom: 1px solid #eee;
+}
+
+.modalHeader button {
+  font-size: 18px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* ===========================
+   BODY LAYOUT
+=========================== */
+.modalBody {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ===========================
+   LEFT TABS
+=========================== */
+.leftTabs {
+  width: 35%;
+  background: #f7f7f7;
+  border-right: 1px solid #ddd;
+  overflow-y: auto;
+}
+
+.tab {
+  padding: 14px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s all;
+}
+
+.tab:hover {
+  background: #eaeaea;
+}
+
+.activeTab {
+  background: #fff;
+  color: #2b8c88;
+  font-weight: 600;
+}
+
+/* ===========================
+   RIGHT CONTENT
+=========================== */
+.rightContent {
+  width: 65%;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ===========================
+   Select All / Clear links
+=========================== */
+.topActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2b8c88;
+  cursor: pointer;
+}
+
+/* ===========================
+   OPTIONS
+=========================== */
+.option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.option:hover {
+  background-color: #f0f0f0;
+}
+
+/* Circular checkbox */
+.check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #2b8c88;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: transparent; /* hidden by default */
+}
+
+.checked {
+  background: #2b8c88;
+  color: #fff; /* ✓ visible when checked */
+}
+
+/* ===========================
+   FOOTER
+=========================== */
+.modalFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-top: 1px solid #eee;
+}
+
+.resetBtn {
+  background: none;
+  border: none;
+  color: #2b8c88;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.applyBtn {
+  background: #ffeb3b;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ===========================
+   SLIDE ANIMATION
+=========================== */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* ===========================
+   SCROLLBAR STYLE
+=========================== */
+.rightContent::-webkit-scrollbar,
+.leftTabs::-webkit-scrollbar {
+  width: 6px;
+}
+
+.rightContent::-webkit-scrollbar-thumb,
+.leftTabs::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.listWrapper {
+  overflow-y: auto;
+}
