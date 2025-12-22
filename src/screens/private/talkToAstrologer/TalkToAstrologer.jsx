@@ -20,6 +20,9 @@ import { getToken } from "../../../utils/token";
 import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { useCall } from "../../../context/CallContext";
+import useRecommendTrigger from "../../../utils/hooks/useRecommendTrigger";
+import RecommendCTA from "../../../layouts/recommend/RecommendCTA";
+import RecommendModal from "../../../component/UI/modal/RecommendModal/RecommendModal";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -33,6 +36,9 @@ const astroImages = [
 
 const TalkToAstrologer = () => {
   const navigate = useNavigate();
+  const showCTA = useRecommendTrigger(0.7);
+  const [open, setOpen] = useState(false);
+  const [showRecommend, setShowRecommend] = useState(true);
 
   const [
     onFollow,
@@ -54,8 +60,7 @@ const TalkToAstrologer = () => {
 
   // ✅ Ref for current calling astrologer (no re-render)
   const activeCallAstroRef = useRef(null);
-    const kundliRef = useRef(null);          // selected kundliId
-
+  const kundliRef = useRef(null); // selected kundliId
 
   const [page, setPage] = useState(1);
   const [specialty, setSpecialty] = useState("");
@@ -76,7 +81,7 @@ const TalkToAstrologer = () => {
 
   const data = astrodata?.data || [];
   const token = getToken();
-  const {balance} = useWalletBalance()
+  const { balance } = useWalletBalance();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -203,57 +208,54 @@ const TalkToAstrologer = () => {
     voiceSocket.connect();
   };
 
-
   const initiateCall = (astro, type) => {
-  // 🔐 Auth check
-  if (!token) {
-    navigate("/login", { state: { from: location.pathname } });
-    return;
-  }
+    // 🔐 Auth check
+    if (!token) {
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
 
-  // ❌ Validations
-  if (!astro) return Toast.error("Astrologer missing");
-  if (!userIdLocal) return Toast.error("User ID missing");
+    // ❌ Validations
+    if (!astro) return Toast.error("Astrologer missing");
+    if (!userIdLocal) return Toast.error("User ID missing");
 
-  // 💰 Balance check
-  const price = astro?.price?.amount || 0;
-  if (balance < price) {
-    setSelectedAstrologer(astro);
-    setOpenModal((prev) => ({ ...prev, recharge: true }));
-    return;
-  }
+    // 💰 Balance check
+    const price = astro?.price?.amount || 0;
+    if (balance < price) {
+      setSelectedAstrologer(astro);
+      setOpenModal((prev) => ({ ...prev, recharge: true }));
+      return;
+    }
 
-  // 📞 Already on call
-  if (activeCall) {
-    return Toast.error("You are already on a call");
-  }
+    // 📞 Already on call
+    if (activeCall) {
+      return Toast.error("You are already on a call");
+    }
 
-  // ✅ Store active call info
-  activeCallAstroRef.current = astro;
-  setActiveCallAstro(astro);
-  setCallType(type);
-  setWaitingPopup(true);
+    // ✅ Store active call info
+    activeCallAstroRef.current = astro;
+    setActiveCallAstro(astro);
+    setCallType(type);
+    setWaitingPopup(true);
 
-  // 🔌 Ensure socket connection
-  connectSocket();
+    // 🔌 Ensure socket connection
+    connectSocket();
 
-  // 🚀 Create call room
-  voiceSocket.emit("create_call_room", {
-    userId: userIdLocal,
-    astrologerId: astro._id,
-    type, // "audio" | "video"
-  });
-};
+    // 🚀 Create call room
+    voiceSocket.emit("create_call_room", {
+      userId: userIdLocal,
+      astrologerId: astro._id,
+      type, // "audio" | "video"
+    });
+  };
 
-
- const handleAudioCall = (astro) => {
-  initiateCall(astro, "audio");
-};
+  const handleAudioCall = (astro) => {
+    initiateCall(astro, "audio");
+  };
 
   const handleVideoCall = (astro) => {
-  initiateCall(astro, "video");
-};
-
+    initiateCall(astro, "video");
+  };
 
   useEffect(() => {
     if (!userIdLocal) return;
@@ -273,11 +275,10 @@ const TalkToAstrologer = () => {
     //     agoraToken: token,
     //     callerName: activeCallAstroRef.current?.firstName,
     //     isUserSide: true,
-    //     callType: type, 
+    //     callType: type,
     //   });
 
     // };
-
 
     const handleCallAccepted = async ({ roomId, token, type }) => {
       setWaitingPopup(false);
@@ -345,6 +346,11 @@ const TalkToAstrologer = () => {
       voiceSocket.off("call_ended", handleCallEnded);
     };
   }, [userIdLocal]);
+
+  const handleClick = () => {
+    setOpen(true);
+    setShowRecommend(false);
+  };
 
   /* ------------------------------------------------------------------- */
 
@@ -474,6 +480,20 @@ const TalkToAstrologer = () => {
           </div>
         </div>
       )}
+      {showCTA && showRecommend && (
+        <RecommendCTA
+          mode="chat"
+          onClick={handleClick} // Chat Now
+          onClose={() => setShowRecommend(false)} //  Close
+        />
+      )}
+
+      <RecommendModal
+        open={open}
+        onClose={() => setOpen(false)}
+        mode="chat"
+        data={allAstrologers.slice(0, 8)}
+      />
     </div>
   );
 };

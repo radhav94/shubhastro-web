@@ -43,7 +43,7 @@ $font-primary: "Poppins", sans-serif;
   justify-content: space-around;
   align-items: center;
   cursor: pointer;
-  padding-top: 10px; // 👈 THIS IS THE FIX (moves logo + text slightly down)
+  padding-top: 10px; //
 
   img {
     height: 45px; // Adjusted for a sleeker look
@@ -218,6 +218,10 @@ $font-primary: "Poppins", sans-serif;
 .navbarMenu li:nth-child(9) {
   text-align: left;
 }
+.navbarMenu li:nth-child(9) .dropdownWrapper {
+  // pointer-events: auto;
+  top: 100%;
+}
 
 .active {
   font-weight: 700;
@@ -254,12 +258,12 @@ $font-primary: "Poppins", sans-serif;
 .dropdownWrapper {
   position: absolute;
   top: 120%;
-  left: 0;
+  left: calc(50% - 90px);
   min-width: 180px;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 14px;
   border: 1px solid rgba(0, 0, 0, 0.05);
-  padding: 10px 0;
+  padding: 0 0 10px 0;
   display: block;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
   opacity: 0;
