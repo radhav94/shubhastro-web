@@ -214,7 +214,29 @@ const handleVerifyOtp = async (event) => {
               numInputs={6}
               containerStyle={styles.otpInputContainer}
               inputStyle={styles.otpInput}
-              renderInput={(props) => <input {...props} />}
+              renderInput={(props) => <input 
+                {...props}
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={1}
+                onKeyDown={(e) => {
+                  // allow control keys
+                  if (
+                    e.key === "Backspace" ||
+                    e.key === "Delete" ||
+                    e.key === "ArrowLeft" ||
+                    e.key === "ArrowRight" ||
+                    e.key === "Tab"
+                  ) {
+                    return;
+                  }
+          
+                  if (!/^[0-9]$/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+              />}
             />
 
             <button
