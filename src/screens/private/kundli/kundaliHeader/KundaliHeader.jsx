@@ -343,13 +343,13 @@ const token =
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.required}>Second</label>
+                <label className="">Second</label>
 
                 <select
                   name="second"
                   value={formData.second}
                   onChange={handleInputChange}
-                  required
+                  
                 >
                   <option value="">Select Second</option>
 
