@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import socketService from "../../../../../services/socketService";
 
 export default function useChat({
@@ -11,6 +11,8 @@ export default function useChat({
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
+  const [chatSeconds, setChatSeconds] = useState(0);
+  const chatTimerRef = useRef(null);
 
   const formatTime = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -46,6 +48,14 @@ export default function useChat({
         }
       },
     });
+
+    chatTimerRef.current = setInterval(() => {
+      setChatSeconds((prev) => prev + 1);
+    }, 1000);
+
+    return () => {
+      clearInterval(chatTimerRef.current);
+    };
   }, [roomId]);
 
   // USER SEND
@@ -105,5 +115,6 @@ export default function useChat({
     sendMessage,
     astroReply,
     sendTyping,
+    chatSeconds
   };
 }
