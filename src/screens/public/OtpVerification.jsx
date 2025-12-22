@@ -212,32 +212,53 @@ const handleVerifyOtp = async (event) => {
               value={otp}
               onChange={setOtp}
               numInputs={6}
+              shouldAutoFocus
               containerStyle={styles.otpInputContainer}
               inputStyle={styles.otpInput}
-              renderInput={(props) => <input 
-                {...props}
-                type="tel"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={1}
-                onKeyDown={(e) => {
-                  // allow control keys
-                  if (
-                    e.key === "Backspace" ||
-                    e.key === "Delete" ||
-                    e.key === "ArrowLeft" ||
-                    e.key === "ArrowRight" ||
-                    e.key === "Tab"
-                  ) {
-                    return;
-                  }
-          
-                  if (!/^[0-9]$/.test(e.key)) {
-                    e.preventDefault();
-                  }
-                }}
-              />}
+              renderInput={(props, index) => (
+                <input
+                  {...props}
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={1}
+                  onKeyDown={(e) => {
+                    if (e.key === "Backspace") {
+                      e.preventDefault();
+
+                      const otpArray = otp.split("");
+
+                      if (otpArray[index]) {
+                        // 🔹 current box clear
+                        otpArray[index] = "";
+                        setOtp(otpArray.join(""));
+                      } else if (index > 0) {
+                        // 🔹 move to previous box
+                        otpArray[index - 1] = "";
+                        setOtp(otpArray.join(""));
+
+                        const prevInput = document.querySelectorAll(
+                          `.${styles.otpInput}`
+                        )[index - 1];
+
+                        prevInput?.focus();
+                      }
+                    }
+
+                    // allow only numbers
+                    if (
+                      !/^[0-9]$/.test(e.key) &&
+                      !["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(
+                        e.key
+                      )
+                    ) {
+                      e.preventDefault();
+                    }
+                  }}
+                />
+              )}
             />
+
 
             <button
               type="submit"
