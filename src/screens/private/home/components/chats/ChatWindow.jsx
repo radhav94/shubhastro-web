@@ -27,7 +27,7 @@ const ChatWindow = () => {
 
   const { activeCall } = useCall();
 
-  const { messages, error, isTyping, sendMessage, astroReply, sendTyping } =
+  const { messages, error, isTyping, sendMessage, astroReply, sendTyping, chatSeconds } =
     useChat({ userId, astrologerId, roomId, isUserSide, kundliId });
 
   const [message, setMessage] = useState("");
@@ -100,6 +100,12 @@ const ChatWindow = () => {
     } catch (error) {
       console.error("Failed to submit review", error);
     }
+  }
+  
+  const formatChatTime = (secs) => {
+    const minutes = String(Math.floor(secs / 60)).padStart(2, "0");
+    const seconds = String(secs % 60).padStart(2, "0");
+    return `${minutes}:${seconds}`;
   };
 
   return (
@@ -112,6 +118,7 @@ const ChatWindow = () => {
           onAudioCall={handleAudioCall}
           onVideoCall={handleVideoCall}
           disabled={!!activeCall}
+          chatDuration={formatChatTime(chatSeconds)}
         />
 
         <ChatMessages

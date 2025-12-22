@@ -16,11 +16,12 @@ const AstrologerCard = ({
   onProfile,
   onAudioCall,
   onVideoCall,
+  isLayoutClassic=true
 }) => {
   return (
     <div className={styles.card}>
-      <div className={styles.topSection} onClick={onProfile}>
-        <div className={styles.avatarWrapper}>
+      <div className={!isLayoutClassic? styles.topSection1 : styles.topSection} onClick={onProfile}>
+        <div className={!isLayoutClassic ? styles.avatarWrapper1 : styles.avatarWrapper}>
           <img
             src={data.imageUrl}
             alt={data?.firstName}
@@ -46,7 +47,7 @@ const AstrologerCard = ({
             </Link>
           </div>
 
-          {data?.languagePreference?.length > 0 && (
+          {data?.languagePreference?.length > 0 && isLayoutClassic && (
             <div className={styles.row}>
               <img src={AppIcons.Lang} alt="lang" className={styles.img} />
               <PrimaryText size_12 isSemiBold color={appColors.greyMedium}>
@@ -55,19 +56,19 @@ const AstrologerCard = ({
             </div>
           )}
 
-          <div className={styles.row}>
+          {isLayoutClassic && <div className={styles.row}>
             <img src={AppIcons.Education} alt="lang" className={styles.img} />
             <PrimaryText size_12 isBold color={appColors.greyMedium}>
               {data.experience} Years
             </PrimaryText>
-          </div>
+          </div>}
 
           <div className={styles.starCard}>
             <div className={styles.row} style={{ margin: "0px" }}>
               <img src={AppIcons.Trophy} alt="lang" className={styles.img} />
               <PrimaryText size_12 color={appColors.greyMedium}>
                 {data?.specialties?.length > 0
-                  ? GetString(data?.specialties?.join(), 20)
+                  ? GetString(data?.specialties?.join(", "), 30)
                   : data.role}
               </PrimaryText>
             </div>

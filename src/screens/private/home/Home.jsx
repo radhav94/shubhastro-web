@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./Home.module.scss";
-import HeroSection from "./components/heroSection/HeroSection";
+// import HeroSection from "./components/heroSection/HeroSection";
 import ServiceCards from "./components/serviceCards/ServiceCards";
 import Astrologers from "./components/astrologers/Astrologers";
 import Blogs from "./components/blogs/Blogs";
@@ -11,6 +11,8 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import Footer from "../../../layouts/Footer";
 import WhyAstro from "./components/whyastro/WhyAstro";
 import TotalCount from "./components/totalcount/TotalCount";
+import QuickActionTray from "./components/quickActionTray/QuickActionTray";
+import HeroSection from "./components/heroSection2/HeroSection";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -38,8 +40,19 @@ const Home = () => {
       <div className={styles.gradientBg} />
 
       <div className={styles.homeContainer}>
-        <section className={styles.sectionFull}>
+        {/* <section className={styles.sectionFull}>
           <HeroSection data={homeList} />
+        </section> */}
+        <HeroSection/>
+        <QuickActionTray />
+
+        <section className={styles.section}>
+          <Astrologers
+              astrologers={homeList}
+              onChat={onChat}
+              onClickView={onClickView}
+              onProfile={onProfile}
+            />
         </section>
 
         <section className={styles.section}>
@@ -49,12 +62,6 @@ const Home = () => {
         <section className={styles.sectionStack}>
           <div className={styles.sectionBlock}>
             <TotalCount data={homeList} />
-            <Astrologers
-              astrologers={homeList}
-              onChat={onChat}
-              onClickView={onClickView}
-              onProfile={onProfile}
-            />
           </div>
 
           {/* <div className={styles.sectionBlock}> */}

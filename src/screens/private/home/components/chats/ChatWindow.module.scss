@@ -54,10 +54,20 @@
 }
 
 .callIcon,
-.videoIcon {
+.videoIcon{
   font-size: 22px;
   cursor: pointer;
-  color: #fff;
+  color: #2196f3;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.duration {
+  font-size: 22px;
+  cursor: pointer;
+  color: #000;
 
   &:hover {
     opacity: 0.85;

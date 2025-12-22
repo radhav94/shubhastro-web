@@ -21,7 +21,7 @@ const Astrologers = ({ onClickView, onProfile }) => {
   const navigate = useNavigate();
   const { activeCall, setActiveCall } = useCall(); //  IMPORTANT
 
-  const page = 1;
+  const page = 4;
   const limit = 3;
   const { data } = useGetAstrologersQuery({ page, limit });
 
@@ -214,6 +214,7 @@ const Astrologers = ({ onClickView, onProfile }) => {
               onAudioCall={() => handleAudioCall(astrologer)}
               onVideoCall={() => handleVideoCall(astrologer)}
               disabled={!!activeCall} //  optional UX improvement
+              isLayoutClassic={false}
             />
           </div>
         ))}
