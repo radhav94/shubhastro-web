@@ -1,15 +1,29 @@
-import { useState } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
 import styles from "./FilterChips.module.scss";
+import { useLazyFilterAstrologersQuery } from "../../../../redux/api/astrologer/astrologerApi";
 
 const FilterChips = ({ onSelect, onApplyFilters }) => {
+  const [triggerFilter, { isLoading }] = useLazyFilterAstrologersQuery();
+
   const filterButtons = [
     { name: "All", icon: "📋" },
     { name: "Tarot", icon: "🔮" },
+    { name: "Palmistry", icon: "🔮" },
+    { name: "numerology", icon: "🔢" },
+    { name: "Face Reading", icon: "🔢" },
     { name: "Vedic Astrology", icon: "🧘" },
+    { name: "Love", icon: "🧘" },
+    { name: "Education", icon: "🧘" },
+    { name: "Career", icon: "🧘" },
+    { name: "Marriage", icon: "🧘" },
+    { name: "Health", icon: "🧘" },
+    { name: "Wealth", icon: "🧘" },
+    { name: "Legal", icon: "🧘" },
+    { name: "Finance", icon: "🔮" },
+    { name: "Remedies", icon: "🔮" },
+    { name: "Parents", icon: "🔮" },
     { name: "Palm reader", icon: "✋" },
     { name: "tantra-magic", icon: "✨" },
-    { name: "numerology", icon: "🔢" },
   ];
 
   const skills = [
@@ -20,53 +34,114 @@ const FilterChips = ({ onSelect, onApplyFilters }) => {
     "Numerology",
     "Palmistry",
     "Prashana",
+    "Psychic",
+    "Signature Reading",
+    "Tarot",
+    "Vastu",
+    "Vedic",
   ];
-  const languages = ["Hindi", "English", "Tamil"];
-  const genders = ["Male", "Female"];
-  const sorting = ["Popularity", "Experience", "Price Low to High"];
 
-  const [active, setActive] = useState("All");
+  const genders = ["Male", "Female"];
+  const sorting = ["Sort By Price", "Sort By Rating"];
+
+  const [active, setActive] = useState("All"); // Global active filter/search
   const [searchText, setSearchText] = useState("");
   const [filterModalOpen, setFilterModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("Skill");
 
   const [selectedSkills, setSelectedSkills] = useState([]);
-  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [experties, setEexperties] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
   const [selectedSort, setSelectedSort] = useState("");
 
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // ✅ Modal tab state
+  const [activeModalTab, setActiveModalTab] = useState("Skill");
+
+  // Open modal with default Skill tab
+  const openFilterModal = () => {
+    setFilterModalOpen(true);
+    setActiveModalTab("Skill");
+  };
+
   const handleClick = (item) => {
     setActive(item);
-    onSelect?.(item === "All" ? null : item);
+    setPage(1);
+    setHasMore(true);
+  
+    // 🔹 RESET previous filters
+    setEexperties("");          
+    setSelectedSkills([]);
+    setSelectedGender("");
+    setSelectedSort("");
+  
+    if (item === "All") {
+      // ❌ unset speciality completely
+      onSelect?.(null);
+      return;
+    }
+  
+    // ✅ set new speciality
+    setEexperties(item);
+    applyFilters({
+      pageNo: 1,
+      experties: item,
+      ignoreSearch: true,
+      append: false,
+    });
   };
   
+
+  useEffect(() => {
+    if (active === "All") return;
+
+    const handleScroll = () => {
+      if (loadingMore || isLoading || !hasMore) return;
+
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.documentElement.scrollHeight;
+
+      if (scrollTop + windowHeight >= fullHeight - 200) {
+        applyFilters({ pageNo: page + 1, append: true });
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [active, page, hasMore, loadingMore, isLoading]);
+
   const handleSearchClick = (e) => {
     const value = e.target.value;
     setSearchText(value);
-  
+
     if (value.length > 2) {
       setActive("search");
       clearAll();
       applyFilters({ searchValue: value, category: "search" });
-    }else if (value.length === 0) {
+    } else if (value.length === 0) {
       handleClick("All");
     }
   };
+
   const applyFiltersClick = () => {
     setActive("filter");
+    setPage(1);
+    setHasMore(true);
   
-    // ✅ clear old data immediately
-    onApplyFilters?.({
+    // ❗ do NOT call onApplyFilters here
+    // applyFilters will handle API + append logic
+    applyFilters({
+      ignoreSearch: true,
       category: "filter",
-      result: [],
-      loading: true,
+      pageNo: 1,
+      append: false,
     });
-  
-    applyFilters({ ignoreSearch: true, category: "filter" });
   };
   
-  
-  
+
   const toggleValue = (value, setter, state) => setter(state === value ? "" : value);
 
   const toggleSkill = (skill) => {
@@ -75,82 +150,78 @@ const FilterChips = ({ onSelect, onApplyFilters }) => {
     );
   };
 
-  const selectAll = () => {
-    if (activeTab === "Skill") setSelectedSkills([...skills]);
-  };
+  const selectAll = () => setSelectedSkills([...skills]);
 
   const clearAll = () => {
-    if (activeTab === "Skill") setSelectedSkills([]);
-    if (activeTab === "Language") setSelectedLanguage("");
-    if (activeTab === "Gender") setSelectedGender("");
-    if (activeTab === "Sorting") setSelectedSort("");
-  };
-
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-    clearAll();
+    setSelectedSkills([]);
+    setSelectedGender("");
+    setSelectedSort("");
   };
 
   const applyFilters = async ({
     ignoreSearch = false,
     searchValue,
     category = "filter",
+    experties: expertiesValue,
+    pageNo = 1,
+    append = false,
+    skills, // ✅ accept skills explicitly
   } = {}) => {
-    const finalSearchText =
-      ignoreSearch ? "" : searchValue ?? searchText;
+    const finalSearchText = ignoreSearch ? "" : (searchValue ?? searchText);
+    const finalExperties = expertiesValue ?? experties;
+    const finalSkills = skills ?? selectedSkills; // ✅ ARRAY
   
     try {
-      const response = await axios.get(
-        `https://devapi-shubhtalk.epicon.in/api/astrologers/filterAstrologers?${new URLSearchParams({
-          astroName: finalSearchText,
-          specialities: selectedSkills.join(","),
-          limit: 10,
-          page: 1,
-          Eexperties: "",
-          sorting: !!selectedSort,
-          sortByPrice: selectedSort === "Price Low to High" ? 1 : 0,
-          sortByRating: selectedSort === "Popularity" ? 1 : 0,
-          gender: selectedGender.toLowerCase() || "",
-        })}`,
-        { headers: { Authorization: "Bearer YOUR_TOKEN" } }
-      );
+      setLoadingMore(true);
   
-      // ✅ ALWAYS replace data
+      const response = await triggerFilter({
+        searchText: finalSearchText,
+        selectedSkills: finalSkills, // ✅ ARRAY (RTK will join)
+        experties: finalExperties,
+        selectedSort,
+        selectedGender,
+        page: pageNo,
+        limit: 9,
+      }).unwrap();
+  
       onApplyFilters?.({
         category,
         search: finalSearchText,
-        result: response.data?.data || [],
+        result: response?.data || [],
+        append,
       });
   
+      setPage(pageNo);
+      setHasMore(response?.data?.length >= 9);
       setFilterModalOpen(false);
-    } catch (err) {
-      // ✅ clear old data even on error
-      onApplyFilters?.({
-        category,
-        search: finalSearchText,
-        result: [],
-      });
-      console.error(err);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingMore(false);
     }
   };
   
+
   return (
     <>
       {/* SEARCH + FILTER BUTTONS */}
       <div className={styles.filterWrapper}>
-      <div>
-        <i className="fa fa-search" />
-        <input
-          className={`${styles.chip} ${active === "search" ? styles.activeChip : ""}`}
-          type="text"
-          placeholder="Search Name"
-          value={searchText}
-          onInput={handleSearchClick}
-        />
-      </div>
+        <div>
+          <i className="fa fa-search" />
+          <input
+            className={`${styles.chip} ${active === "search" ? styles.activeChip : ""}`}
+            type="text"
+            placeholder="Search Name"
+            value={searchText}
+            onInput={handleSearchClick}
+          />
+        </div>
 
-
-        <button  key={'filter'}  className={`${styles.chip} ${active === 'filter' ? styles.activeChip : ""}`} onClick={() => setFilterModalOpen(true)}>
+        <button
+          key={"filter"}
+          className={`${styles.chip} ${active === "filter" ? styles.activeChip : ""}`}
+          onClick={openFilterModal}
+        >
           Filter
         </button>
 
@@ -177,25 +248,26 @@ const FilterChips = ({ onSelect, onApplyFilters }) => {
 
             <div className={styles.modalBody}>
               <div className={styles.leftTabs}>
-                {["Skill", "Language", "Gender", "Sorting"].map((tab) => (
+                {["Skill", "Gender", "Sorting"].map((tab) => (
                   <div
                     key={tab}
-                    className={`${styles.tab} ${activeTab === tab ? styles.activeTab : ""}`}
-                    onClick={() => handleTabChange(tab)}
+                    className={`${styles.tab} ${activeModalTab === tab ? styles.activeTab : ""}`}
+                    onClick={() => setActiveModalTab(tab)}
                   >
                     {tab}
                   </div>
                 ))}
               </div>
-             
+
               <div className={styles.rightContent}>
-              {activeTab === "Skill" &&(
-                <div className={styles.topActions}>
-                  <span onClick={selectAll}>Select all</span>
-                  <span onClick={clearAll}>Clear</span>
-                </div>
+                {activeModalTab === "Skill" && (
+                  <div className={styles.topActions}>
+                    <span onClick={selectAll}>Select all</span>
+                    <span onClick={clearAll}>Clear</span>
+                  </div>
                 )}
-                {activeTab === "Skill" &&
+
+                {activeModalTab === "Skill" &&
                   skills.map((skill) => {
                     const isSelected = selectedSkills.includes(skill);
                     return (
@@ -211,24 +283,8 @@ const FilterChips = ({ onSelect, onApplyFilters }) => {
                       </div>
                     );
                   })}
-                {activeTab === "Language" &&
-                  languages.map((lang) => {
-                    const isSelected = selectedLanguage === lang;
-                    return (
-                      <div
-                        key={lang}
-                        className={`${styles.option} ${isSelected ? styles.selectedOption : ""}`}
-                        onClick={() => toggleValue(lang, setSelectedLanguage, selectedLanguage)}
-                      >
-                        <span className={`${styles.check} ${isSelected ? styles.checked : ""}`}>
-                          ✓
-                        </span>
-                        {lang}
-                      </div>
-                    );
-                  })}
 
-                {activeTab === "Gender" &&
+                {activeModalTab === "Gender" &&
                   genders.map((g) => {
                     const isSelected = selectedGender === g;
                     return (
@@ -237,15 +293,13 @@ const FilterChips = ({ onSelect, onApplyFilters }) => {
                         className={`${styles.option} ${isSelected ? styles.selectedOption : ""}`}
                         onClick={() => toggleValue(g, setSelectedGender, selectedGender)}
                       >
-                        <span className={`${styles.check} ${isSelected ? styles.checked : ""}`}>
-                          ✓
-                        </span>
+                        <span className={`${styles.check} ${isSelected ? styles.checked : ""}`}>✓</span>
                         {g}
                       </div>
                     );
                   })}
 
-                {activeTab === "Sorting" &&
+                {activeModalTab === "Sorting" &&
                   sorting.map((s) => {
                     const isSelected = selectedSort === s;
                     return (
@@ -254,9 +308,7 @@ const FilterChips = ({ onSelect, onApplyFilters }) => {
                         className={`${styles.option} ${isSelected ? styles.selectedOption : ""}`}
                         onClick={() => toggleValue(s, setSelectedSort, selectedSort)}
                       >
-                        <span className={`${styles.check} ${isSelected ? styles.checked : ""}`}>
-                          ✓
-                        </span>
+                        <span className={`${styles.check} ${isSelected ? styles.checked : ""}`}>✓</span>
                         {s}
                       </div>
                     );
@@ -269,10 +321,9 @@ const FilterChips = ({ onSelect, onApplyFilters }) => {
                 className={styles.resetBtn}
                 onClick={() => {
                   setSelectedSkills([]);
-                  setSelectedLanguage("");
                   setSelectedGender("");
                   setSelectedSort("");
-                  handleClick('All');
+                  handleClick("All");
                 }}
               >
                 Reset

@@ -169,12 +169,34 @@ const TalkToAstrologer = () => {
     }
   };
 
+  // const handleApplyFilters = (payload) => {
+  //   setIsFiltered(true);
+  //   setPage(1);
+  //   setAllAstrologers(payload.result || []);
+  //   setHasMore(false); // stop infinite scroll
+  // };
+
   const handleApplyFilters = (payload) => {
+    const { result = [], append = false } = payload || {};
+  
     setIsFiltered(true);
-    setPage(1);
-    setAllAstrologers(payload.result || []);
-    setHasMore(false); // stop infinite scroll
+  
+    if (!append) {
+      // 🔹 first page OR new filter → reset list
+      setPage(1);
+      setAllAstrologers(result);
+    } else {
+      // 🔹 scroll load → append only new items
+      setAllAstrologers((prev) => {
+        const existingIds = new Set(prev.map((i) => i._id));
+        const newOnes = result.filter((i) => !existingIds.has(i._id));
+        return [...prev, ...newOnes];
+      });
+    }
+  
+    setHasMore(result.length >= limit);
   };
+  
 
   // Kundli & Chat handlers
   const openKundliPopup = (astro) => {
