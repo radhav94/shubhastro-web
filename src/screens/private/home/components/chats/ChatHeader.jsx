@@ -1,5 +1,5 @@
 import styles from "./ChatWindow.module.scss";
-import { IoArrowBack, IoCallOutline, IoVideocamOutline } from "react-icons/io5";
+import { IoArrowBack, IoCall, IoVideocam } from "react-icons/io5";
 import { PrimaryText } from "../../../../../component";
 
 const ChatHeader = ({
@@ -9,6 +9,7 @@ const ChatHeader = ({
   onAudioCall,
   onVideoCall,
   disabled,
+  chatDuration
 }) => {
   return (
     <div className={styles.header}>
@@ -32,11 +33,12 @@ const ChatHeader = ({
       </div>
 
       <div className={styles.headerRight}>
-        <IoCallOutline
+        <span className={styles.duration}>{chatDuration}</span>
+        <IoCall
           className={styles.callIcon}
           onClick={disabled ? null : onAudioCall}
         />
-        <IoVideocamOutline
+        <IoVideocam
           className={styles.videoIcon}
           onClick={disabled ? null : onVideoCall}
         />
