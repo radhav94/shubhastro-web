@@ -82,3 +82,55 @@
   font-size: 12px;
   margin: 0;
 }
+.titleRow {
+  display: flex;
+  justify-content: space-between; // pushes span to the right
+  align-items: center;            // vertically aligns number with title
+  margin-bottom: 4px;             // optional spacing
+}
+
+.titleRow h3 {
+  margin: 0;                      // remove default h3 margin
+  font-size: 1rem;                // adjust as needed
+}
+
+.titleRow span {
+  font-size: 0.9rem;
+  color: #555;                     // adjust color
+}
+.views {
+  display: flex;
+  align-items: center; // vertically center icon and text
+  gap: 4px; // space between icon and number
+  font-size: 0.875rem;
+  color: #555;
+
+  .eyeIcon {
+    font-size: 1rem; // adjust size of the icon
+  }
+}
+.liveTicker {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background-color: rgba(255, 0, 0, 0.85);
+  color: #fff;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+
+  .liveIcon {
+    color: #fff;
+    font-size: 0.6rem;
+    animation: blink 1s infinite;
+  }
+}
+
+@keyframes blink {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0; }
+}

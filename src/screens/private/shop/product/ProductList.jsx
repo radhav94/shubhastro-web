@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { SHOP_PRODUCTS } from "../data/productData";
 import styles from "./ProductList.module.scss";
+import { FaEye,FaCircle } from "react-icons/fa";
+
 import {
   useGetAllEPoojaQuery,
   useGetAllOldEPoojaQuery,
@@ -136,29 +138,44 @@ const ProductList = () => {
               })
             }
           >
-            <img
-              src={
-                product.defaultImage ||
-                product.image ||
-                "https://images.unsplash.com/photo-1625072290979-cac544181be8?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-              }
-              alt={product.title || product.name}
-            />
+            <div className={styles.imageWrapper}>
+              <img
+                src={
+                  product.defaultImage ||
+                  product.image ||
+                  "https://images.unsplash.com/photo-1625072290979-cac544181be8?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                }
+                alt={product.title || product.name}
+              />
 
-            <button
-              className={styles.bookBtn}
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/shop/${slug}/${product.slug || product._id}`, {
-                  state: product,
-                });
-              }}
-            >
-              Book
-            </button>
+              {/* Live Ticker Badge */}
+              {(slug === "live-darshan")&&(<div className={styles.liveTicker}>
+                <FaCircle className={styles.liveIcon} /> Live
+              </div>)}
+            </div>
+
+            <div className={styles.actions}>
+              <button
+                className={styles.bookBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/shop/${slug}/${product.slug || product._id}`, {
+                    state: product,
+                  });
+                }}
+              >
+                Book
+              </button>
+            </div>
 
             <div className={styles.content}>
-              <h3>{product.title || product.name}</h3>
+              <div className={styles.titleRow}>
+                <h3>{product.title || product.name}</h3>
+                <div className={styles.views}>
+                  <FaEye className={styles.eyeIcon} />
+                  <span>{product.views || 1719}</span>
+                </div>
+              </div>
 
               {product?.district && (
                 <p className={styles.place}>
@@ -175,6 +192,7 @@ const ProductList = () => {
           </div>
         ))}
       </div>
+
 
       {isLiveDarshan && <div ref={loadMoreRef} style={{ height: 1 }} />}
 
