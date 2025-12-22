@@ -24,6 +24,7 @@ const ChatWindow = () => {
   const { state } = useLocation();
   const { userId, astrologerId, roomId, fullName, isUserSide, kundliId } =
     state;
+  console.log("state in chat window:", state);
 
   const { activeCall } = useCall();
 
@@ -63,7 +64,17 @@ const ChatWindow = () => {
   const { isInactive, resetTimer } = useInactivityTimer(120000);
   const handleDisconnect = () => navigate(-1);
 
-  const handleSend = () => {
+  const handleSend = (kundli = null) => {
+    if (kundli) {
+      const baseUrl = window.location.origin;
+
+      const kundliLink = `${baseUrl}/kundli/${kundli._id}`;
+      isUserSide ? sendMessage(kundliLink) : astroReply(kundliLink);
+
+      setMessage("");
+      return;
+    }
+
     if (!message.trim()) return;
     isUserSide ? sendMessage(message) : astroReply(message);
     setMessage("");

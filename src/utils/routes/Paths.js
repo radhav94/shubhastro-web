@@ -149,6 +149,10 @@ export const PATH = {
       path: "/talk-to-astrologers",
       element: TalkToAstrologer,
     },
+    Chat_With_ASTROLOGER: {
+      path: "/chat-with-astrologers",
+      element: TalkToAstrologer,
+    },
     HOROSCOPE: {
       path: "/horoscopes",
       element: Horoscope,
@@ -222,6 +226,10 @@ export const PATH = {
 
     KUNDLI: {
       path: "/kundli",
+      element: Kundli,
+    },
+    KUNDLI_BY_ID: {
+      path: "/kundli/:kundliId",
       element: Kundli,
     },
 

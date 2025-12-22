@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./KundaliHeader.module.scss";
 import { IoTrashOutline } from "react-icons/io5";
 import { motion } from "framer-motion";
@@ -6,13 +6,14 @@ import LocationSearch from "../../../../utils/location/locationSearch";
 import { PrimaryText, Toast } from "../../../../component";
 import { useDispatch } from "react-redux";
 import { setForm } from "../../../../redux/kundliform/formSlice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   useGetAllKundlisQuery,
   useCreateKundliMutation,
   useDeleteKundliMutation,
 } from "../../../../services/appServices/kundliServicesNew";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import { buildKundliPayload } from "./utils";
 
 // Constants
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -34,22 +35,6 @@ const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
 const hours = Array.from({ length: 24 }, (_, i) => i);
 const minutes = Array.from({ length: 60 }, (_, i) => i);
-
-// Month name → number
-const monthMap = {
-  Jan: 1,
-  Feb: 2,
-  Mar: 3,
-  Apr: 4,
-  May: 5,
-  Jun: 6,
-  Jul: 7,
-  Aug: 8,
-  Sep: 9,
-  Oct: 10,
-  Nov: 11,
-  Dec: 12,
-};
 
 const initialFormData = {
   name: "",
@@ -82,13 +67,15 @@ const KundaliHeader = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const { kundliId } = useParams();
+  console.log(kundliId, "kundliIdbyparams");
+
   // const token = localStorage.getItem("verifyOtpToken");
   const role = localStorage.getItem("shubhtalk_role");
-const token =
-  role === "ASTROLOGER"
-    ? localStorage.getItem("shubhtalk_astro_token")
-    : localStorage.getItem("shubhtalk_customer_token");
-
+  const token =
+    role === "ASTROLOGER"
+      ? localStorage.getItem("shubhtalk_astro_token")
+      : localStorage.getItem("shubhtalk_customer_token");
 
   const [formData, setFormData] = useState(initialFormData);
   const [selectedKundliId, setSelectedKundliId] = useState(null);
@@ -101,6 +88,20 @@ const token =
   const [deleteKundli] = useDeleteKundliMutation();
 
   const savedKundlis = data?.data || [];
+
+  useEffect(() => {
+    if (!kundliId || !savedKundlis?.length) return;
+
+    console.log(kundliId, "kundliId");
+
+    const selectedData = savedKundlis.find(
+      (kundli) => String(kundli._id) === String(kundliId)
+    );
+
+    if (selectedData) {
+      handleSelectKundli(selectedData);
+    }
+  }, [kundliId, savedKundlis]);
 
   // Input change
   const handleInputChange = (e) => {
@@ -167,23 +168,10 @@ const token =
       Toast.error("Please select your birth place");
       return;
     }
-    const payload = {
-      name: formData.name,
-      gender: formData.gender.toLowerCase(),
-      day: Number(formData.day),
-      month: monthMap[formData.month],
-      year: Number(formData.year),
-      hour: Number(formData.hour),
-      min: Number(formData.minute),
-      second: Number(formData.second),
-      place: formData.birthPlace,
-      lat: Number(formData.latitude),
-      lon: Number(formData.longitude),
-      tzone: 5.5,
-    };
+    const payload = buildKundliPayload(formData);
 
     try {
-      if(token) await createKundli(payload).unwrap();
+      if (token) await createKundli(payload).unwrap();
       setFormData(initialFormData);
     } catch (err) {
       console.log(err);
@@ -375,8 +363,8 @@ const token =
             </div>
 
             <button type="submit" className={styles.ctaButton}>
-                Generate Horoscope
-              </button>
+              Generate Horoscope
+            </button>
 
             {/* {token ? (
               <button type="submit" className={styles.ctaButton}>
@@ -416,7 +404,7 @@ const token =
               </button>
             </div>
           ) : isLoading ? (
-            <PrimaryLoader/>
+            <PrimaryLoader />
           ) : savedKundlis.length > 0 ? (
             <div className={styles.kundliList}>
               {savedKundlis.map((kundli) => (
