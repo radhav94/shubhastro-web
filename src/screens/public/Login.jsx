@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import LoginLayout from "../../layouts/loginlayout/LoginLayout";
 import { PrimaryText, Toast } from "../../component";
 import styles from "./Login.module.scss";
 import { PATH } from "../../utils/routes/Paths";
 import { AppIcons, appSvgs } from "../../utils/appImages";
 import * as AuthServices from "../../services/appServices/authService";
-
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -155,7 +154,13 @@ const token =
         </div>
 
         <div className={styles.byProceeding}>
-          By proceeding, you agree to our <a>T&C</a> & <a>Privacy Policy</a>
+          By proceeding, you agree to our  
+          <Link to={PATH.privateRoutes.TERMSCONDITIONS.path}>
+            T&C
+          </Link> &{" "}
+          <Link to={PATH.privateRoutes.PRICING_POLICY.path}>
+            Privacy Policy
+          </Link>
         </div>
       </div>
     </LoginLayout>

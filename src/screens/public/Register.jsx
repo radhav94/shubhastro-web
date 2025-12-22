@@ -23,7 +23,7 @@ const months = [
   "December",
 ];
 const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 88 }, (_, i) => currentYear - 13 - i);
+const years = Array.from({ length: 88 }, (_, i) => currentYear - 1 - i);
 
 const Register = () => {
   const navigate = useNavigate();
