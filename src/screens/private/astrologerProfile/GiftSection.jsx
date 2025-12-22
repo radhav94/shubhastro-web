@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "./GiftSection.module.scss";
 import { IoGiftOutline } from "react-icons/io5";
-import ganpati from "./ganpati.png";
 import { useGetAllGiftsQuery, useSendGiftMutation } from "../../../redux/api/gift/giftApi";
 import { useNavigate } from "react-router-dom";
 import toast from "../../../component/toast";
@@ -60,7 +59,7 @@ const GiftSection = ({astrologerId }) => {
           >
             <div className={styles.emoji}>
               {" "}
-              <img src={ganpati} />{" "}
+              <img src={gift?.giftImg} />{" "}
             </div>
             <p className={styles.name}>{gift.giftName}</p>
             <p className={styles.amount}>₹ {gift?.price}</p>
