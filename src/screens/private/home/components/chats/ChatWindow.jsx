@@ -13,6 +13,10 @@ import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 import WaitingPopup from "./WaitingPopup";
 import useChatSocket from "./useChatSocket";
+import Feedback from "./Feedback";
+import { getUserFromStorage } from "../../../../../utils/authStorage";
+import { useAddAstrologerReviewMutation } from "../../../../../redux/api/review/reviewApi";
+import { Toast } from "../../../../../component";
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
@@ -73,6 +77,31 @@ const ChatWindow = () => {
     container.scrollTop = container.scrollHeight;
   }, [finalMsgs.length, isTyping]);
 
+  const user = getUserFromStorage();
+  const [openFeedback, setOpenFeedback] = useState(false);
+  const [addAstrologerReview, { isLoading }] = useAddAstrologerReviewMutation();
+  const handleReviewSubmit = async ({ rating, review, anonymous }) => {
+    try {
+      const res = await addAstrologerReview({
+        astrologerId,
+        rating,
+        review,
+        anonymous,
+      }).unwrap();
+
+      if (res.success) {
+        Toast.success(res.message);
+        handleDisconnect();
+      } else {
+        Toast.error(res.message)
+      }
+
+      setOpenFeedback(false);
+    } catch (error) {
+      console.error("Failed to submit review", error);
+    }
+  };
+
   return (
     <div className={styles.chatPage}>
       <div className={styles.chatWindow}>
@@ -99,6 +128,7 @@ const ChatWindow = () => {
             sendTyping();
           }}
           onSend={handleSend}
+          setOpen={setOpenFeedback}
         />
 
         <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
@@ -107,6 +137,15 @@ const ChatWindow = () => {
           isOpen={isInactive}
           onDisconnect={handleDisconnect}
           onContinue={resetTimer}
+        />
+
+        <Feedback
+          open={openFeedback}
+          onClose={() => setOpenFeedback(false)}
+          handleSubmit={handleReviewSubmit}
+          ratedUserName={fullName}
+          reviewerName={user?.firstName || "User"}
+          loading={isLoading}
         />
       </div>
     </div>
