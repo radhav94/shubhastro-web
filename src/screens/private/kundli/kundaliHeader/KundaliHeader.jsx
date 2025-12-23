@@ -425,7 +425,7 @@ const KundaliHeader = () => {
                     </span>
 
                     <span className={styles.kundliDob}>
-                      {kundli.day} {kundli.month}, {kundli.year} • {kundli.hour}
+                      {kundli.day}-{kundli.month}-{kundli.year} • {kundli.hour}
                       :{kundli.min}
                     </span>
 
