@@ -68,7 +68,6 @@ const KundaliHeader = () => {
   const navigate = useNavigate();
 
   const { kundliId } = useParams();
-  console.log(kundliId, "kundliIdbyparams");
 
   // const token = localStorage.getItem("verifyOtpToken");
   const role = localStorage.getItem("shubhtalk_role");
@@ -91,8 +90,6 @@ const KundaliHeader = () => {
 
   useEffect(() => {
     if (!kundliId || !savedKundlis?.length) return;
-
-    console.log(kundliId, "kundliId");
 
     const selectedData = savedKundlis.find(
       (kundli) => String(kundli._id) === String(kundliId)
@@ -337,7 +334,6 @@ const KundaliHeader = () => {
                   name="second"
                   value={formData.second}
                   onChange={handleInputChange}
-                  
                 >
                   <option value="">Select Second</option>
 

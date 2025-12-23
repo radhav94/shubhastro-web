@@ -16,7 +16,6 @@ const Daily = () => {
   let horoscopeType = pathname.split("/")[2].split("-")[0];
   horoscopeType =
     horoscopeType.charAt(0).toUpperCase() + horoscopeType.slice(1);
-  console.log(useLocation(), "useLocation");
   const signNumber = signToNumber[sign.toLowerCase()];
 
   const { data, isLoading, isSuccess } = useFetchDailyQuery(signNumber);
