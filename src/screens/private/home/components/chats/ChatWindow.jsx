@@ -71,7 +71,7 @@ const ChatWindow = () => {
   const handleDisconnect = () => navigate(-1);
 
   const handleSend = (kundli = null) => {
-    if (kundli) {
+    if (kundli?._id) {
       const baseUrl = window.location.origin;
 
       const kundliLink = `${baseUrl}/kundli/${kundli._id}`;
