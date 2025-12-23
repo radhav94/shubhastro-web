@@ -22,20 +22,22 @@ const AstrologerCard = ({
     <div className={styles.card}>
       <div className={!isLayoutClassic? styles.topSection1 : styles.topSection} onClick={onProfile}>
         <div className={!isLayoutClassic ? styles.avatarWrapper1 : styles.avatarWrapper}>
-          <img
-            src={data.imageUrl}
-            alt={data?.firstName}
-            className={styles.avatar}
-          />
-          <span
-            className={`${styles.statusDot} ${
-              data.isAccountActive === true
-                ? styles.online
-                : data.status === false
-                ? styles.offline
-                : styles.busy
-            }`}
-          />
+          <Link to={`/astrologer/${data?._id}`}>        
+            <img
+              src={data.imageUrl}
+              alt={data?.firstName}
+              className={styles.avatar}
+            />
+            <span
+              className={`${styles.statusDot} ${
+                data.isAccountActive === true
+                  ? styles.online
+                  : data.status === false
+                  ? styles.offline
+                  : styles.busy
+              }`}
+            />
+          </Link>
         </div>
 
         <div className={styles.info}>
