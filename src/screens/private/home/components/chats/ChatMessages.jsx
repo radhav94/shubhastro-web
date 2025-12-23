@@ -17,7 +17,6 @@ const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
             {(() => {
               const urlRegex = /(https?:\/\/[^\s]+)/g;
               const match = msg.text.match(urlRegex);
-              console.log("match in chat messages:", match);
 
               if (match) {
                 return (

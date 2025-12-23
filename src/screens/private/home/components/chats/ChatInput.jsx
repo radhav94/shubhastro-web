@@ -9,10 +9,7 @@ const ChatInput = ({ value, onChange, onSend, setOpen }) => {
   const handleChatAfterKundliSelect = async (kundli) => {
     setKundliModalOpen(false);
     if (!kundli?._id) return Toast.error("Kundli not selected properly");
-    // const astro = selectedAstrologer;
-    // localStorage.setItem("selectedAstroId", astro._id);
     onSend(kundli);
-    console.log("Selected Kundli for chat:", kundli);
   };
 
   return (
