@@ -188,23 +188,30 @@ const MatchMaking = () => {
     // 🔥 FIXED: DO NOT CREATE KUNDLI IF USER SELECTED ONE
     // -----------------------------------------------------
     const selected = savedKundlis.find((k) => k._id === selectedKundliId);
-    if(token){
+
+    if (token) {
+      // 🔹 CASE 1: Selected kundli exists
       if (selected) {
-        if (selected.gender.toLowerCase() === "male") {
+        const selectedGender = selected.gender.toLowerCase();
+        if (selectedGender === "female") {
           if (!isDuplicateKundli(boyPayload, savedKundlis)) {
             createKundli(boyPayload);
           }
         }
-        if (selected.gender.toLowerCase() === "female") {
+        if (selectedGender === "male") {
           if (!isDuplicateKundli(girlPayload, savedKundlis)) {
             createKundli(girlPayload);
           }
         }
-      } else {
-        if (!isDuplicateKundli(boyPayload, savedKundlis))
+      }
+      else {
+        if (!isDuplicateKundli(boyPayload, savedKundlis)) {
           createKundli(boyPayload);
-        if (!isDuplicateKundli(girlPayload, savedKundlis))
+        }
+
+        if (!isDuplicateKundli(girlPayload, savedKundlis)) {
           createKundli(girlPayload);
+        }
       }
     }
 
