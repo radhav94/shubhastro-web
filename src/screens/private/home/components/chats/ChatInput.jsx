@@ -1,7 +1,7 @@
 import styles from "./ChatWindow.module.scss";
 import { IoSend, IoAttach } from "react-icons/io5";
 import { IoMdAdd } from "react-icons/io";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSelectModal";
 
 const ChatInput = ({ value, onChange, onSend, setOpen }) => {
@@ -12,12 +12,41 @@ const ChatInput = ({ value, onChange, onSend, setOpen }) => {
     onSend(kundli);
   };
 
+  const fileInputRef = useRef(null);
+
+  const handleAttachClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e) => {
+    const files = e.target.files;
+    if (!files || !files.length) return;
+
+    console.log("Selected files:", files);
+    // You can now upload / preview / send files
+  };
+
   return (
     <>
       <div className={styles.inputBox}>
-        <button className={styles.attachButton}>
-          <IoAttach size={20} />
-        </button>
+        <>
+          <button
+            type="button"
+            className={styles.attachButton}
+            onClick={handleAttachClick}
+          >
+            <IoAttach size={20} />
+          </button>
+
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
+        </>
+
         <button
           onClick={() => setKundliModalOpen(true)}
           className={styles.kundliButton}
