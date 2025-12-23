@@ -36,9 +36,17 @@ const astroImages = [
 
 const TalkToAstrologer = () => {
   const navigate = useNavigate();
-  const showCTA = useRecommendTrigger(0.7);
-  const [open, setOpen] = useState(false);
+  const [resetTrigger, setResetTrigger] = useState(0);
   const [showRecommend, setShowRecommend] = useState(true);
+
+  const showCTA = useRecommendTrigger(120, resetTrigger);
+  useEffect(() => {
+    if (showCTA) {
+      setShowRecommend(true);
+    }
+  }, [showCTA]);
+
+  const [open, setOpen] = useState(false);
 
   const [
     onFollow,
@@ -183,9 +191,9 @@ const TalkToAstrologer = () => {
 
   const handleApplyFilters = (payload) => {
     const { result = [], append = false } = payload || {};
-  
+
     setIsFiltered(true);
-  
+
     if (!append) {
       // 🔹 first page OR new filter → reset list
       setPage(1);
@@ -198,10 +206,9 @@ const TalkToAstrologer = () => {
         return [...prev, ...newOnes];
       });
     }
-  
+
     setHasMore(result.length >= limit);
   };
-  
 
   // Kundli & Chat handlers
   const openKundliPopup = (astro) => {
@@ -249,21 +256,21 @@ const TalkToAstrologer = () => {
 
   /* ------------------- SOCKET CALL FLOW (ADDED ONLY) ------------------- */
 
-useEffect(() => {
-  if (!userIdLocal) return;
+  useEffect(() => {
+    if (!userIdLocal) return;
 
-  if (!voiceSocket.connected) {
-    voiceSocket.io.opts.query = {
-      userId: userIdLocal,
-      role: "CUSTOMER",
+    if (!voiceSocket.connected) {
+      voiceSocket.io.opts.query = {
+        userId: userIdLocal,
+        role: "CUSTOMER",
+      };
+      voiceSocket.connect();
+    }
+
+    return () => {
+      voiceSocket.off(); // remove listeners only
     };
-    voiceSocket.connect();
-  }
-
-  return () => {
-    voiceSocket.off(); // remove listeners only
-  };
-}, [userIdLocal]);
+  }, [userIdLocal]);
 
   const connectSocket = () => {
     if (voiceSocket.connected) voiceSocket.disconnect();
@@ -276,18 +283,17 @@ useEffect(() => {
     voiceSocket.connect();
   };
 
-const resetCallState = () => {
-  setWaitingPopup(false);
-  setCallRoomId(null);
-  setCallType(null);
-  setActiveCallAstro(null);
+  const resetCallState = () => {
+    setWaitingPopup(false);
+    setCallRoomId(null);
+    setCallType(null);
+    setActiveCallAstro(null);
 
-  activeCallAstroRef.current = null;
-  kundliRef.current = null;
+    activeCallAstroRef.current = null;
+    kundliRef.current = null;
 
-  setActiveCall(null);
-};
-
+    setActiveCall(null);
+  };
 
   const initiateCall = (astro, type) => {
     // 🔐 Auth check
@@ -386,17 +392,17 @@ const resetCallState = () => {
 
     /* ERROR */
     const handleSocketError = (err) => {
-  console.log("SOCKET ERROR:", err);
+      console.log("SOCKET ERROR:", err);
 
-  if (err?.message === "Call has already ended") {
-    // soft reset only
-    resetCallState();
-    return;
-  }
+      if (err?.message === "Call has already ended") {
+        // soft reset only
+        resetCallState();
+        return;
+      }
 
-  Toast.error(err?.message || "Connection error");
-  resetCallState();
-};
+      Toast.error(err?.message || "Connection error");
+      resetCallState();
+    };
 
     /* CALL ENDED */
     const handleCallEnded = () => {
@@ -462,7 +468,10 @@ const resetCallState = () => {
       <div className="pt-4" />
       <Title title="Trial Offer ( 3 left )" showDivider />
 
-      <FilterChips onSelect={handleSelect} onApplyFilters={handleApplyFilters} />
+      <FilterChips
+        onSelect={handleSelect}
+        onApplyFilters={handleApplyFilters}
+      />
 
       <div className={styles.cardsContainer}>
         {allAstrologers.map((astro, index) => (
@@ -487,7 +496,7 @@ const resetCallState = () => {
 
         {!isFetching && allAstrologers.length === 0 && (
           <div className={styles.emptyState}>
-          <PrimaryText>No astrologers found.</PrimaryText>
+            <PrimaryText>No astrologers found.</PrimaryText>
           </div>
         )}
       </div>
@@ -547,17 +556,18 @@ const resetCallState = () => {
       {showCTA && showRecommend && (
         <RecommendCTA
           mode="chat"
-          onClick={handleClick} // Chat Now
-          onClose={() => setShowRecommend(false)} //  Close
+          onClick={() => {
+            setOpen(true);
+            setShowRecommend(false);
+          }}
+          onClose={() => {
+            setShowRecommend(false); // close now
+            setResetTrigger((prev) => prev + 1); // allow next scroll
+          }}
         />
       )}
 
-      <RecommendModal
-        open={open}
-        onClose={() => setOpen(false)}
-        mode="chat"
-        data={allAstrologers.slice(0, 8)}
-      />
+      <RecommendModal open={open} onClose={() => setOpen(false)} mode="chat" />
     </div>
   );
 };

@@ -9,16 +9,16 @@ const Blogs = ({ titleShow = true, data }) => {
   const scrollRef = useRef(null);
 
   const astroImages = [
-  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/19191028/Leo-Daily-Horoscope-Today.jpg", // astrology chart
-  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/20121804/Copy-of-Blog-Banner-for-Website-Content-1280-x-853-px-10-768x512.jpg", // zodiac wheel
-  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/18190254/Copy-of-Blog-Banner-for-Website-Content-1280-x-853-px-3-768x512.jpg", // planets galaxy
-  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/16143512/Blog-Banner-for-Website-Content-1280-x-853-px-9-768x512.jpg", // constellation
-];
-
+    "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/19191028/Leo-Daily-Horoscope-Today.jpg", // astrology chart
+    "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/20121804/Copy-of-Blog-Banner-for-Website-Content-1280-x-853-px-10-768x512.jpg", // zodiac wheel
+    "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/18190254/Copy-of-Blog-Banner-for-Website-Content-1280-x-853-px-3-768x512.jpg", // planets galaxy
+    "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/16143512/Blog-Banner-for-Website-Content-1280-x-853-px-9-768x512.jpg", // constellation
+  ];
 
   const title = data?.find((slug) => slug.display_type === "blog");
 
   const blogData = title?.content;
+  console.log(blogData, "blogData");
 
   const scrollLeft = () => {
     scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
@@ -48,20 +48,22 @@ const Blogs = ({ titleShow = true, data }) => {
       )}
 
       <div
-        className={`${Styles.blogsContainer} ${blogData?.length > 3 ? Styles.scrollMode : ""
-          }`}
+        className={`${Styles.blogsContainer} ${
+          blogData?.length > 3 ? Styles.scrollMode : ""
+        }`}
         ref={scrollRef}
       >
-
-        {blogData?.map((blog,index) => (
+        {blogData?.map((blog, index) => (
           <Link
             key={blog._id}
-            to={PATH.privateRoutes.SINGLEBLOG.path.replace(":slug", blog.blogId)}
-
+            to={PATH.privateRoutes.SINGLEBLOG.path.replace(
+              ":slug",
+              blog.blogId
+            )}
             className={Styles.blogLink}
           >
             <BlogCard
-              image={astroImages[index % astroImages.length]}
+              image={blog?.imageUrl}
               title={blog.title}
               author={blog.author}
               date={blog.publishDate}
