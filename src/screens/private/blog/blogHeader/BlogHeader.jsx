@@ -24,10 +24,11 @@ const BlogHeader = () => {
   if (isLoading) return <p>Loading...</p>;
 
   const blogs = data?.data || [];
-
+    
   const pagination = data?.pagination;
 
-
+  console.log(blogs);
+  
   return (
     <>
       <div className={styles.blogsContainer}>
@@ -38,7 +39,7 @@ const BlogHeader = () => {
             className={styles.blogLink}
           >
             <BlogCard
-              image={astroImages[index % astroImages.length]}
+              image={blog.img}
               title={blog.title}
               date={blog.publishDate}
             />
