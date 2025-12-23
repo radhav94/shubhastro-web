@@ -249,6 +249,22 @@ const TalkToAstrologer = () => {
 
   /* ------------------- SOCKET CALL FLOW (ADDED ONLY) ------------------- */
 
+useEffect(() => {
+  if (!userIdLocal) return;
+
+  if (!voiceSocket.connected) {
+    voiceSocket.io.opts.query = {
+      userId: userIdLocal,
+      role: "CUSTOMER",
+    };
+    voiceSocket.connect();
+  }
+
+  return () => {
+    voiceSocket.off(); // remove listeners only
+  };
+}, [userIdLocal]);
+
   const connectSocket = () => {
     if (voiceSocket.connected) voiceSocket.disconnect();
 
@@ -259,6 +275,19 @@ const TalkToAstrologer = () => {
 
     voiceSocket.connect();
   };
+
+const resetCallState = () => {
+  setWaitingPopup(false);
+  setCallRoomId(null);
+  setCallType(null);
+  setActiveCallAstro(null);
+
+  activeCallAstroRef.current = null;
+  kundliRef.current = null;
+
+  setActiveCall(null);
+};
+
 
   const initiateCall = (astro, type) => {
     // 🔐 Auth check
@@ -291,7 +320,7 @@ const TalkToAstrologer = () => {
     setWaitingPopup(true);
 
     // 🔌 Ensure socket connection
-    connectSocket();
+    // connectSocket();
 
     // 🚀 Create call room
     voiceSocket.emit("create_call_room", {
@@ -317,20 +346,6 @@ const TalkToAstrologer = () => {
       setCallRoomId(roomId);
       setWaitingPopup(true);
     };
-
-    /* CALL ACCEPTED → NO NAVIGATION ANYMORE */
-    // const handleCallAccepted = ({ roomId, token, type }) => {
-    //   setWaitingPopup(false);
-
-    //   setActiveCall({
-    //     roomId,
-    //     agoraToken: token,
-    //     callerName: activeCallAstroRef.current?.firstName,
-    //     isUserSide: true,
-    //     callType: type,
-    //   });
-
-    // };
 
     const handleCallAccepted = async ({ roomId, token, type }) => {
       setWaitingPopup(false);
@@ -366,21 +381,26 @@ const TalkToAstrologer = () => {
     /* REJECTED */
     const handleCallRejected = (data) => {
       Toast.error(data?.sessionData?.sessionEndReason || "Call rejected");
-      setWaitingPopup(false);
-      voiceSocket.disconnect();
+      resetCallState();
     };
 
     /* ERROR */
     const handleSocketError = (err) => {
-      Toast.error(err?.message || "Connection error");
-      setWaitingPopup(false);
-      voiceSocket.disconnect();
-    };
+  console.log("SOCKET ERROR:", err);
+
+  if (err?.message === "Call has already ended") {
+    // soft reset only
+    resetCallState();
+    return;
+  }
+
+  Toast.error(err?.message || "Connection error");
+  resetCallState();
+};
 
     /* CALL ENDED */
     const handleCallEnded = () => {
-      setWaitingPopup(false);
-      voiceSocket.disconnect();
+      resetCallState();
     };
 
     // Attach events
@@ -426,11 +446,10 @@ const TalkToAstrologer = () => {
               <button
                 className={styles.rejectBtn}
                 onClick={() => {
-                  voiceSocket.emit("cancel_call", {
-                    roomId: callRoomId,
-                  });
-                  setWaitingPopup(false);
-                  setCallRoomId(null); // ✅ REQUIRED
+                  if (callRoomId) {
+                    voiceSocket.emit("cancel_call", { roomId: callRoomId });
+                  }
+                  resetCallState();
                 }}
               >
                 Cancel

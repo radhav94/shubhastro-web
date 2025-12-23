@@ -63,9 +63,8 @@ const useChatSocket = ({
   useEffect(() => {
     if (!isUserSide) return;
 
-    const handleReturnRoom = ({ roomId, status }) => {
-      console.log("statussssssss", status);
-      setCallRoomId(roomId);
+    const handleReturnRoom = ({ roomId,status}) => {
+      setCallRoomId(roomId); 
       setWaitingPopup(true);
     };
 

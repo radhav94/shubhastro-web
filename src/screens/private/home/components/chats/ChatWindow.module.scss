@@ -278,3 +278,46 @@
     font-size: 20px;
   }
 }
+
+
+/* ================= WAITING POPUP ================= */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0; /* top:0 right:0 bottom:0 left:0 */
+  background: rgba(0, 0, 0, 0.45);
+
+  display: flex;
+  align-items: center;      /* vertical center */
+  justify-content: center;  /* horizontal center */
+
+  z-index: 9999;
+}
+
+.modalContainer {
+  width: 90%;
+  max-width: 360px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 18px;
+  text-align: center;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.modalButtons {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.rejectBtn {
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: none;
+  background: #ff4d4f;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
