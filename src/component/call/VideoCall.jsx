@@ -43,14 +43,15 @@ const VideoCalling = ({ callData }) => {
   const [callSeconds, setCallSeconds] = useState(0);
   const timerRef = useRef(null);
 
-  /* ================= SAFE VIDEO PLAY ================= */
+  /* ================= LOCAL VIDEO ================= */
   const playLocalVideo = (container) => {
     if (!camTrackRef.current || !container) return;
     camTrackRef.current.stop();
     camTrackRef.current.play(container);
   };
 
-  const playRemoteVideo = (track) => {
+  /* ================= REMOTE VIDEO SAFE PLAY ================= */
+  const safePlayRemoteVideo = (track) => {
     if (!remoteVideoRef.current || !track) return;
 
     remoteVideoRef.current.innerHTML = "";
@@ -59,18 +60,19 @@ const VideoCalling = ({ callData }) => {
     div.style.height = "100%";
     remoteVideoRef.current.appendChild(div);
 
-    track.stop();
-
-    // 🔥 CRITICAL INCognito FIX
     setTimeout(() => {
-      track.play(div);
-    }, 50);
+      try {
+        track.play(div);
+      } catch (e) {
+        console.warn("Retry remote video play");
+        setTimeout(() => track.play(div), 300);
+      }
+    }, 150);
   };
 
-  /* ================= RESUME REMOTE AUDIO (USER ACTION ONLY) ================= */
+  /* ================= RESUME REMOTE AUDIO ================= */
   const resumeRemoteAudio = () => {
     if (!clientRef.current) return;
-
     clientRef.current.remoteUsers.forEach((user) => {
       if (user.audioTrack) {
         user.audioTrack.play();
@@ -97,10 +99,11 @@ const VideoCalling = ({ callData }) => {
         client.on("user-published", async (user, mediaType) => {
           await client.subscribe(user, mediaType);
 
-          // ❌ DO NOT autoplay audio (incognito issue)
-          if (mediaType === "video") {
-            playRemoteVideo(user.videoTrack);
+          if (mediaType === "video" && user.videoTrack) {
+            safePlayRemoteVideo(user.videoTrack);
           }
+
+          // ❌ no audio autoplay (incognito safe)
         });
 
         client.on("user-unpublished", () => {
@@ -144,12 +147,23 @@ const VideoCalling = ({ callData }) => {
 
   useEffect(() => {
     micTrackRef.current?.setEnabled(micOn);
-    resumeRemoteAudio(); // 🔓 unlock audio after interaction
+    resumeRemoteAudio();
   }, [micOn]);
 
   useEffect(() => {
     camTrackRef.current?.setEnabled(cameraOn);
   }, [cameraOn]);
+
+  /* ================= REMOTE VIDEO SAFETY REPLAY ================= */
+  useEffect(() => {
+    if (!joined || !clientRef.current) return;
+
+    clientRef.current.remoteUsers.forEach((user) => {
+      if (user.videoTrack) {
+        safePlayRemoteVideo(user.videoTrack);
+      }
+    });
+  }, [joined]);
 
   /* ================= CLEANUP ================= */
   const cleanup = async () => {
@@ -271,13 +285,19 @@ const VideoCalling = ({ callData }) => {
       {/* MINI VIEW */}
       <div
         className={styles.floatingMini}
-        style={{ top: position.y, left: position.x, display: isMinimized ? "block" : "none" }}
+        style={{
+          top: position.y,
+          left: position.x,
+          display: isMinimized ? "block" : "none",
+        }}
         onMouseDown={startDrag}
         onTouchStart={startDrag}
         onClick={resumeRemoteAudio}
       >
         <div className={styles.miniHeader}>
-          <span>{callerName || "Video Call"} • {formatTime(callSeconds)}</span>
+          <span>
+            {callerName || "Video Call"} • {formatTime(callSeconds)}
+          </span>
           <button onClick={() => setIsMinimized(false)}>⤢</button>
         </div>
 
@@ -288,7 +308,9 @@ const VideoCalling = ({ callData }) => {
         <div className={styles.miniControls}>
           <button onClick={() => setMicOn((p) => !p)}>🎙️</button>
           <button onClick={() => setCameraOn((p) => !p)}>📷</button>
-          <button className={styles.endBtnMini} onClick={safeEndCall}>📞</button>
+          <button className={styles.endBtnMini} onClick={safeEndCall}>
+            📞
+          </button>
         </div>
       </div>
 
@@ -298,7 +320,10 @@ const VideoCalling = ({ callData }) => {
         style={{ visibility: isMinimized ? "hidden" : "visible" }}
         onClick={resumeRemoteAudio}
       >
-        <button className={styles.minimizeBtn} onClick={() => setIsMinimized(true)}>
+        <button
+          className={styles.minimizeBtn}
+          onClick={() => setIsMinimized(true)}
+        >
           <IoArrowBack size={20} />
         </button>
 
@@ -309,29 +334,50 @@ const VideoCalling = ({ callData }) => {
             <div ref={remoteVideoRef} className={styles.remoteVideoArea} />
 
             <div className={styles.localVideoPreview}>
-              <div ref={localVideoFullRef} style={{ width: "100%", height: "100%" }} />
+              <div
+                ref={localVideoFullRef}
+                style={{ width: "100%", height: "100%" }}
+              />
             </div>
 
             <div className={styles.controls}>
               <div className={styles.callInfo}>
                 <span className={styles.callerName}>{callerName}</span>
-                <span className={styles.callTimer}>⏱️ {formatTime(callSeconds)}</span>
+                <span className={styles.callTimer}>
+                  ⏱️ {formatTime(callSeconds)}
+                </span>
               </div>
 
               <div className={styles.controlButtons}>
-                <button className={styles.iconBtn} onClick={() => setMicOn(p => !p)}>
+                <button
+                  className={styles.iconBtn}
+                  onClick={() => setMicOn((p) => !p)}
+                >
                   {micOn ? <IoMic size={22} /> : <IoMicOff size={22} />}
                 </button>
 
-                <button className={styles.iconBtn} onClick={() => setCameraOn(p => !p)}>
-                  {cameraOn ? <IoVideocam size={22} /> : <IoVideocamOff size={22} />}
+                <button
+                  className={styles.iconBtn}
+                  onClick={() => setCameraOn((p) => !p)}
+                >
+                  {cameraOn ? (
+                    <IoVideocam size={22} />
+                  ) : (
+                    <IoVideocamOff size={22} />
+                  )}
                 </button>
 
-                <button className={`${styles.iconBtn} ${styles.endBtn}`} onClick={safeEndCall}>
+                <button
+                  className={`${styles.iconBtn} ${styles.endBtn}`}
+                  onClick={safeEndCall}
+                >
                   End
                 </button>
 
-                <button className={styles.iconBtn} onClick={openChatWithMinimize}>
+                <button
+                  className={styles.iconBtn}
+                  onClick={openChatWithMinimize}
+                >
                   <IoChatbubbleEllipses size={22} />
                 </button>
               </div>
