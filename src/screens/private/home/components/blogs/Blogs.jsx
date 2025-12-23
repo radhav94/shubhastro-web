@@ -18,7 +18,6 @@ const Blogs = ({ titleShow = true, data }) => {
   const title = data?.find((slug) => slug.display_type === "blog");
 
   const blogData = title?.content;
-  console.log(blogData, "blogData");
 
   const scrollLeft = () => {
     scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
