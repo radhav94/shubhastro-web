@@ -135,10 +135,10 @@ const MatchMaking = () => {
   const handleGenerate = (e) => {
     e.preventDefault();
 
-    if (!token) {
-      navigate("/login", { state: { from: location.pathname } });
-      return;
-    }
+    // if (!token) {
+    //   navigate("/login", { state: { from: location.pathname } });
+    //   return;
+    // }
 
     const boyErrors = validatePerson(formData.boyData);
     const girlErrors = validatePerson(formData.girlData);
@@ -188,23 +188,24 @@ const MatchMaking = () => {
     // 🔥 FIXED: DO NOT CREATE KUNDLI IF USER SELECTED ONE
     // -----------------------------------------------------
     const selected = savedKundlis.find((k) => k._id === selectedKundliId);
-
-    if (selected) {
-      if (selected.gender.toLowerCase() === "male") {
-        if (!isDuplicateKundli(boyPayload, savedKundlis)) {
+    if(token){
+      if (selected) {
+        if (selected.gender.toLowerCase() === "male") {
+          if (!isDuplicateKundli(boyPayload, savedKundlis)) {
+            createKundli(boyPayload);
+          }
+        }
+        if (selected.gender.toLowerCase() === "female") {
+          if (!isDuplicateKundli(girlPayload, savedKundlis)) {
+            createKundli(girlPayload);
+          }
+        }
+      } else {
+        if (!isDuplicateKundli(boyPayload, savedKundlis))
           createKundli(boyPayload);
-        }
-      }
-      if (selected.gender.toLowerCase() === "female") {
-        if (!isDuplicateKundli(girlPayload, savedKundlis)) {
+        if (!isDuplicateKundli(girlPayload, savedKundlis))
           createKundli(girlPayload);
-        }
       }
-    } else {
-      if (!isDuplicateKundli(boyPayload, savedKundlis))
-        createKundli(boyPayload);
-      if (!isDuplicateKundli(girlPayload, savedKundlis))
-        createKundli(girlPayload);
     }
 
     navigate(PATH.privateRoutes.MATCHMAKING_DETAILS.path, { state: formData });
