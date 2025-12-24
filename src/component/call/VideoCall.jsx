@@ -71,14 +71,31 @@ const VideoCalling = ({ callData }) => {
   };
 
   /* ================= RESUME REMOTE AUDIO ================= */
-  const resumeRemoteAudio = () => {
-    if (!clientRef.current) return;
-    clientRef.current.remoteUsers.forEach((user) => {
-      if (user.audioTrack) {
-        user.audioTrack.play();
-      }
-    });
-  };
+  // const resumeRemoteAudio = () => {
+  //   if (!clientRef.current) return;
+  //   clientRef.current.remoteUsers.forEach((user) => {
+  //     if (user.audioTrack) {
+  //       user.audioTrack.play();
+  //     }
+  //   });
+  // };
+
+  const resumeRemoteTracks = () => {
+  if (!clientRef.current) return;
+
+  clientRef.current.remoteUsers.forEach((user) => {
+    if (user.audioTrack) {
+      user.audioTrack.play();
+    }
+    if (user.videoTrack && remoteVideoRef.current) {
+      safePlayRemoteVideo(user.videoTrack);
+    }
+  });
+};
+
+const resumeRemoteAudio = resumeRemoteTracks;
+
+
 
   /* ================= START CALL ================= */
   useEffect(() => {
@@ -97,14 +114,18 @@ const VideoCalling = ({ callData }) => {
         clientRef.current = client;
 
         client.on("user-published", async (user, mediaType) => {
-          await client.subscribe(user, mediaType);
+  await client.subscribe(user, mediaType);
 
-          if (mediaType === "video" && user.videoTrack) {
-            safePlayRemoteVideo(user.videoTrack);
-          }
+  if (mediaType === "video" && user.videoTrack) {
+    safePlayRemoteVideo(user.videoTrack);
+  }
 
-          // ❌ no audio autoplay (incognito safe)
-        });
+  if (mediaType === "audio" && user.audioTrack) {
+    // ✅ REQUIRED FOR CROSS DEVICE
+    user.audioTrack.play();
+  }
+});
+
 
         client.on("user-unpublished", () => {
           if (remoteVideoRef.current) {
@@ -318,7 +339,7 @@ const VideoCalling = ({ callData }) => {
       <div
         className={styles.videoContainer}
         style={{ visibility: isMinimized ? "hidden" : "visible" }}
-        onClick={resumeRemoteAudio}
+        onClick={resumeRemoteTracks}
       >
         <button
           className={styles.minimizeBtn}
