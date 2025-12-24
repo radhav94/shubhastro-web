@@ -10,8 +10,8 @@ import {
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import styles from "./VideoCalling.module.scss";
-import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
+import { voiceSocket } from "../../services/voiceSocketServices";
 
 const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 
@@ -63,26 +63,21 @@ const VideoCalling = ({ callData }) => {
     setTimeout(() => {
       try {
         track.play(div);
-      } catch {
+      } catch (e) {
+        console.warn("Retry remote video play");
         setTimeout(() => track.play(div), 300);
       }
     }, 150);
   };
 
-  /* ================= REMOTE AUDIO AUTO PLAY ================= */
-  const playRemoteAudio = (user) => {
-    if (user?.audioTrack) {
-      try {
-        user.audioTrack.play();
-      } catch {
-        setTimeout(() => user.audioTrack?.play(), 300);
-      }
-    }
-  };
-
-  const resumeAllRemoteAudio = () => {
+  /* ================= RESUME REMOTE AUDIO ================= */
+  const resumeRemoteAudio = () => {
     if (!clientRef.current) return;
-    clientRef.current.remoteUsers.forEach((u) => playRemoteAudio(u));
+    clientRef.current.remoteUsers.forEach((user) => {
+      if (user.audioTrack) {
+        user.audioTrack.play();
+      }
+    });
   };
 
   /* ================= START CALL ================= */
@@ -108,41 +103,25 @@ const VideoCalling = ({ callData }) => {
             safePlayRemoteVideo(user.videoTrack);
           }
 
-          if (mediaType === "audio") {
-            playRemoteAudio(user);
-          }
+          // ❌ no audio autoplay (incognito safe)
         });
 
-        client.on("user-unpublished", (user, mediaType) => {
-          if (mediaType === "video" && remoteVideoRef.current) {
+        client.on("user-unpublished", () => {
+          if (remoteVideoRef.current) {
             remoteVideoRef.current.innerHTML = "";
           }
         });
 
+        client.on("user-left", safeEndCall);
+
         await client.join(APP_ID, roomId, agoraToken, null);
 
-        if (cleanupRef.current || endCallRef.current) return;
+        micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack();
+        camTrackRef.current = await AgoraRTC.createCameraVideoTrack();
 
-        micTrackRef.current =
-          await AgoraRTC.createMicrophoneAudioTrack();
-        camTrackRef.current =
-          await AgoraRTC.createCameraVideoTrack();
-
-        if (
-          micTrackRef.current &&
-          camTrackRef.current &&
-          !cleanupRef.current &&
-          !endCallRef.current
-        ) {
-          await client.publish([
-            micTrackRef.current,
-            camTrackRef.current,
-          ]);
-        }
+        await client.publish([micTrackRef.current, camTrackRef.current]);
 
         setJoined(true);
-
-        resumeAllRemoteAudio();
 
         timerRef.current = setInterval(() => {
           setCallSeconds((p) => p + 1);
@@ -168,11 +147,23 @@ const VideoCalling = ({ callData }) => {
 
   useEffect(() => {
     micTrackRef.current?.setEnabled(micOn);
+    resumeRemoteAudio();
   }, [micOn]);
 
   useEffect(() => {
     camTrackRef.current?.setEnabled(cameraOn);
   }, [cameraOn]);
+
+  /* ================= REMOTE VIDEO SAFETY REPLAY ================= */
+  useEffect(() => {
+    if (!joined || !clientRef.current) return;
+
+    clientRef.current.remoteUsers.forEach((user) => {
+      if (user.videoTrack) {
+        safePlayRemoteVideo(user.videoTrack);
+      }
+    });
+  }, [joined]);
 
   /* ================= CLEANUP ================= */
   const cleanup = async () => {
@@ -189,10 +180,13 @@ const VideoCalling = ({ callData }) => {
         await clientRef.current.leave();
         clientRef.current.removeAllListeners();
       }
-    } catch {}
-    finally {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
+    } catch (e) {
+      console.warn(e);
+    } finally {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
 
       micTrackRef.current = null;
       camTrackRef.current = null;
@@ -241,7 +235,6 @@ const VideoCalling = ({ callData }) => {
     const x = e.touches ? e.touches[0].clientX : e.clientX;
     const y = e.touches ? e.touches[0].clientY : e.clientY;
     dragOffset.current = { x: x - position.x, y: y - position.y };
-
     document.addEventListener("mousemove", onDrag);
     document.addEventListener("mouseup", stopDrag);
     document.addEventListener("touchmove", onDrag);
@@ -289,6 +282,7 @@ const VideoCalling = ({ callData }) => {
   /* ================= UI ================= */
   return (
     <>
+      {/* MINI VIEW */}
       <div
         className={styles.floatingMini}
         style={{
@@ -298,7 +292,7 @@ const VideoCalling = ({ callData }) => {
         }}
         onMouseDown={startDrag}
         onTouchStart={startDrag}
-        onClick={resumeAllRemoteAudio}
+        onClick={resumeRemoteAudio}
       >
         <div className={styles.miniHeader}>
           <span>
@@ -320,10 +314,11 @@ const VideoCalling = ({ callData }) => {
         </div>
       </div>
 
+      {/* FULL VIEW */}
       <div
         className={styles.videoContainer}
         style={{ visibility: isMinimized ? "hidden" : "visible" }}
-        onClick={resumeAllRemoteAudio}
+        onClick={resumeRemoteAudio}
       >
         <button
           className={styles.minimizeBtn}
