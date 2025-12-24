@@ -23,6 +23,7 @@ import { useCall } from "../../../context/CallContext";
 import useRecommendTrigger from "../../../utils/hooks/useRecommendTrigger";
 import RecommendCTA from "../../../layouts/recommend/RecommendCTA";
 import RecommendModal from "../../../component/UI/modal/RecommendModal/RecommendModal";
+import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -425,11 +426,6 @@ const TalkToAstrologer = () => {
     };
   }, [userIdLocal]);
 
-  const handleClick = () => {
-    setOpen(true);
-    setShowRecommend(false);
-  };
-
   /* ------------------------------------------------------------------- */
 
   return (
@@ -439,6 +435,7 @@ const TalkToAstrologer = () => {
       </PrimaryText>
 
       {waitingPopup && (
+        // <WaitingModal callRoomId={callRoomId} resetCallState={resetCallState} />
         <div className={styles.modalOverlay}>
           <div className={styles.modalContainer}>
             <PrimaryText size_18 isSemiBold>
@@ -567,7 +564,13 @@ const TalkToAstrologer = () => {
         />
       )}
 
-      <RecommendModal open={open} onClose={() => setOpen(false)} mode="chat" />
+      {open && (
+        <RecommendModal
+          open={open}
+          onClose={() => setOpen(false)}
+          mode="chat"
+        />
+      )}
     </div>
   );
 };

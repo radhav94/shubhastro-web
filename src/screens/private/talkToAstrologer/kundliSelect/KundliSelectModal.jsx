@@ -5,7 +5,6 @@ import { IoClose } from "react-icons/io5";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { padZero } from "../../../../utils/dateFormat/dateTime";
 
-
 import {
   useGetAllKundlisQuery,
   useCreateKundliMutation,
@@ -125,7 +124,8 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                         {k.name} ({k.gender})
                       </p>
                       <p className={styles.dob}>
-                        {padZero(k.day)}-{padZero(k.month)}-{k.year} • {padZero(k.hour)}:{padZero(k.min)}
+                        {padZero(k.day)}-{padZero(k.month)}-{k.year} •{" "}
+                        {padZero(k.hour)}:{padZero(k.min)}
                       </p>
                       <p className={styles.place}>{k.place}</p>
                     </div>
