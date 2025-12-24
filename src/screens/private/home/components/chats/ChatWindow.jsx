@@ -112,11 +112,31 @@ const ChatWindow = () => {
       console.error("Failed to submit review", error);
     }
   }
-  
+
   const formatChatTime = (secs) => {
     const minutes = String(Math.floor(secs / 60)).padStart(2, "0");
     const seconds = String(secs % 60).padStart(2, "0");
     return `${minutes}:${seconds}`;
+  };
+
+  const sendVoiceMessage = (blob = null, duration) => {
+    const formData = new FormData();
+    formData.append("file", blob);
+
+    // const res = await fetch("/api/upload/audio", {
+    //   method: "POST",
+    //   body: formData,
+    // });
+
+    // const { url } = await res.json();
+    const url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+    const jsonString = JSON.stringify({
+      type: "voice",
+      url,
+      duration,
+    });
+    sendMessage(jsonString)
+    setMessage("");
   };
 
   return (
@@ -147,6 +167,7 @@ const ChatWindow = () => {
           }}
           onSend={handleSend}
           setOpen={setOpenFeedback}
+          sendVoiceMessage={sendVoiceMessage}
         />
 
         <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />

@@ -1,10 +1,12 @@
 import styles from "./ChatWindow.module.scss";
-import { IoSend, IoAttach } from "react-icons/io5";
+import { IoSend, IoAttach, IoMic } from "react-icons/io5";
 import { IoMdAdd } from "react-icons/io";
 import { useState } from "react";
 import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSelectModal";
+import { useVoiceRecorder } from "../../../talkToAstrologer/voiceChat/useVoiceRecorder";
+import VoiceRecorderPopup from "../../../talkToAstrologer/voiceChat/VoiceRecorderPopup";
 
-const ChatInput = ({ value, onChange, onSend, setOpen }) => {
+const ChatInput = ({ value, onChange, onSend, setOpen, sendVoiceMessage }) => {
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const handleChatAfterKundliSelect = async (kundli) => {
     setKundliModalOpen(false);
@@ -14,6 +16,23 @@ const ChatInput = ({ value, onChange, onSend, setOpen }) => {
     onSend(kundli);
     console.log("Selected Kundli for chat:", kundli);
   };
+
+  const {
+    recording,
+    seconds,
+    startRecording,
+    stopRecording,
+  } = useVoiceRecorder();
+
+  const handleMicClick = async () => {
+    await startRecording();
+  };
+
+  const handleStopRecording = async () => {
+    const { blob, duration } = await stopRecording();
+    await sendVoiceMessage(blob, duration);
+  };
+
 
   return (
     <>
@@ -39,6 +58,13 @@ const ChatInput = ({ value, onChange, onSend, setOpen }) => {
         <button className={styles.sendButton} onClick={onSend}>
           <IoSend size={20} />
         </button>
+        <button
+          className={styles.voiceChatButton}
+          onClick={handleMicClick}
+        >
+          <IoMic size={20} />
+        </button>
+
         <button className={styles.endChatButton} onClick={() => setOpen(true)}>
           End
         </button>
@@ -48,6 +74,13 @@ const ChatInput = ({ value, onChange, onSend, setOpen }) => {
         onClose={() => setKundliModalOpen(false)}
         onSelect={handleChatAfterKundliSelect}
       />
+
+      {recording && (
+        <VoiceRecorderPopup
+          seconds={seconds}
+          onStop={handleStopRecording}
+        />
+      )}
     </>
   );
 };
