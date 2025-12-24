@@ -35,7 +35,7 @@ export default function TransactionsTable({ data = [] }) {
             <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Description</th>
             <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Invoice</th>
             <th className="px-6 py-3 text-right text-sm font-medium text-gray-600">Transaction Amount</th>
-            <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Datetime</th>
+            <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Date & Time</th>
             <th className="px-6 py-3 text-center text-sm font-medium text-gray-600">Actions</th>
           </tr>
         </thead>
