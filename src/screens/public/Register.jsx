@@ -5,7 +5,7 @@ import { PrimaryButton, PrimaryText, Toast } from "../../component";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PATH } from "../../utils/routes/Paths";
 import { registerUser } from "../../services/appServices/authService";
-import LocationSearch from "../../utils/location/locationSearch";
+import LocationSearch from "../../utils/location/locationSearchVedic";
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const months = [
