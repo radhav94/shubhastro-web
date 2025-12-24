@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./KundaliHeader.module.scss";
 import { IoTrashOutline } from "react-icons/io5";
 import { motion } from "framer-motion";
-import LocationSearch from "../../../../utils/location/locationSearch";
+import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import { PrimaryText, Toast } from "../../../../component";
 import { useDispatch } from "react-redux";
 import { setForm } from "../../../../redux/kundliform/formSlice";

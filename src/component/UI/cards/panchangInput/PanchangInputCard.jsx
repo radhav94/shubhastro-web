@@ -3,7 +3,7 @@ import styles from "./PanchangInputCard.module.scss";
 
 import PrimaryButton from "../../../PrimaryButton";
 import PrimaryText from "../../../PrimaryText";
-import LocationSearch from "../../../../utils/location/locationSearch";
+import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import ErrorText from "../../../ErrorText";
 import { color } from "framer-motion";
 import { appColors } from "../../../../utils/theme";

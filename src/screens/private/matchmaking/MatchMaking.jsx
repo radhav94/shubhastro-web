@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LocationSearch from "../../../utils/location/locationSearch";
+import LocationSearch from "../../../utils/location/locationSearchVedic";
 import styles from "./MatchMaking.module.scss";
 import PrimaryText from "../../../component/PrimaryText";
 import { PATH } from "../../../utils/routes/Paths";
@@ -270,8 +270,8 @@ const MatchMaking = () => {
 
           {/* Birth Place */}
           <div className={styles.formGroup}>
-            <label>Birth Place*</label>
-            <LocationSearch
+          <label>Birth Place*</label>
+          <LocationSearch
               value={data.place.address}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -287,8 +287,8 @@ const MatchMaking = () => {
               }
               onPlaceSelect={(loc) => handlePlaceSelect(personKey, loc)}
             />
-            {err.place && <p className={styles.error}>{err.place}</p>}
-          </div>
+          {err.place && <p className={styles.error}>{err.place}</p>}
+        </div>
         </div>
       </div>
     );

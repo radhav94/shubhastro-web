@@ -10,7 +10,7 @@ import {
   useGetAllKundlisQuery,
   useCreateKundliMutation,
 } from "../../../../services/appServices/kundliServicesNew";
-import LocationSearch from "../../../../utils/location/locationSearch";
+import LocationSearch from "../../../../utils/location/locationSearchVedic";
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const months = [
