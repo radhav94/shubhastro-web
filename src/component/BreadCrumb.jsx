@@ -1,6 +1,8 @@
 import React from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import styles from "./Breadcrumb.module.scss";
+import { useSelector } from "react-redux";
+import { blogApi } from "../services/appServices/blogService";
 
 const Breadcrumb = () => {
   const location = useLocation();
@@ -19,6 +21,14 @@ const Breadcrumb = () => {
   const astrologerName =
     location.state?.fullName ||
     location.state?.astroName;
+
+  const { slug } = useParams();
+
+  const blogData = useSelector((state) =>
+    blogApi.endpoints.getSingleBlog.select(slug)(state)
+  );
+
+  const blogTitle = blogData?.data?.data?.title;
 
   return (
     <div className={styles.breadCrumb}>
@@ -43,6 +53,10 @@ const Breadcrumb = () => {
           astrologerName
         ) {
           label = astrologerName;
+        }
+
+        if (pathnames[index - 1] === "blog" && blogTitle) {
+          label = blogTitle;
         }
 
         return (
