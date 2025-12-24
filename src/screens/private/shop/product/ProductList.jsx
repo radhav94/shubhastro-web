@@ -123,19 +123,21 @@ const ProductList = () => {
               )}
             </div>
 
-            <div className={styles.actions}>
-              <button
-                className={styles.bookBtn}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/shop/${slug}/${getProductRouteId(product)}`, {
-                    state: product,
-                  });
-                }}
-              >
-                Book
-              </button>
-            </div>
+            {!isLiveDarshan && (
+              <div className={styles.actions}>
+                <button
+                  className={styles.bookBtn}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/shop/${slug}/${getProductRouteId(product)}`, {
+                      state: product,
+                    });
+                  }}
+                >
+                  Book
+                </button>
+              </div>
+            )}
 
             <div className={styles.content}>
               <div className={styles.titleRow}>

@@ -127,9 +127,15 @@ const ProductDetail = () => {
                 }}
               />
 
-              <button className={styles.bookBtn} onClick={handleBookNow}>
-                Book Now
-              </button>
+              {isLiveDarshan ? (
+                <button className={styles.bookBtn} onClick={handleBookNow}>
+                  Watch Now
+                </button>
+              ) : (
+                <button className={styles.bookBtn} onClick={handleBookNow}>
+                  Book Now
+                </button>
+              )}
             </div>
           </div>
         </div>
