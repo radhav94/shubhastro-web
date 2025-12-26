@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./KundaliHeader.module.scss";
 import { IoTrashOutline } from "react-icons/io5";
 import { motion } from "framer-motion";
-import LocationSearch from "../../../../utils/location/locationSearch";
+import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import { PrimaryText, Toast } from "../../../../component";
 import { useDispatch } from "react-redux";
 import { setForm } from "../../../../redux/kundliform/formSlice";
@@ -14,6 +14,7 @@ import {
 } from "../../../../services/appServices/kundliServicesNew";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { buildKundliPayload } from "./utils";
+import { padZero } from "../../../../utils/dateFormat/dateTime";
 
 // Constants
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -68,7 +69,6 @@ const KundaliHeader = () => {
   const navigate = useNavigate();
 
   const { kundliId } = useParams();
-  console.log(kundliId, "kundliIdbyparams");
 
   // const token = localStorage.getItem("verifyOtpToken");
   const role = localStorage.getItem("shubhtalk_role");
@@ -91,8 +91,6 @@ const KundaliHeader = () => {
 
   useEffect(() => {
     if (!kundliId || !savedKundlis?.length) return;
-
-    console.log(kundliId, "kundliId");
 
     const selectedData = savedKundlis.find(
       (kundli) => String(kundli._id) === String(kundliId)
@@ -337,7 +335,6 @@ const KundaliHeader = () => {
                   name="second"
                   value={formData.second}
                   onChange={handleInputChange}
-                  
                 >
                   <option value="">Select Second</option>
 
@@ -425,8 +422,8 @@ const KundaliHeader = () => {
                     </span>
 
                     <span className={styles.kundliDob}>
-                      {kundli.day} {kundli.month}, {kundli.year} • {kundli.hour}
-                      :{kundli.min}
+                      {padZero(kundli.day)}-{padZero(kundli.month)}-{kundli.year} • {padZero(kundli.hour)}
+                      :{padZero(kundli.min)}
                     </span>
 
                     <span className={styles.kundliPob}>{kundli.place}</span>

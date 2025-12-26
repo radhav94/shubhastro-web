@@ -24,9 +24,7 @@ const SingleBlogDetails = () => {
 
       {/* Banner Image */}
       <img
-        // src={singleBLogData.img}// commented it will be used for later
-        src={astroImages}
-
+        src={singleBLogData.img}
         alt={singleBLogData.title}
         className={styles.bannerImage}
       />

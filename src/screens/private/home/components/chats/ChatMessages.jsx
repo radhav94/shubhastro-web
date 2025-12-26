@@ -1,6 +1,7 @@
 import styles from "./ChatWindow.module.scss";
 import { PrimaryText } from "../../../../../component";
 import VoiceMessage from "../../../../../screens/private/talkToAstrologer/voiceChat/VoiceMessage";
+import { GrReactjs } from "react-icons/gr";
 
 const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
   return (
@@ -42,14 +43,16 @@ const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
                         fontWeight: 600,
                         color: msg.isSender ? "#111" : "#111",
                         cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
                       }}
                     >
-                      🔗 View Kundli
+                      <GrReactjs />
+                      View Kundli
                     </a>
                   );
                 }
               }
-
               return msg?.text;
             })()}
           </PrimaryText>

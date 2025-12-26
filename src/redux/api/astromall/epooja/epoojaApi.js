@@ -2,6 +2,13 @@ import { privateRequestNew } from "../../../../services/appServices/privateReque
 
 export const epoojaApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
+    // GET ALL Categories
+    getAllCategories: builder.query({
+      query: () => ({
+        url: "categories/all",
+      }),
+    }),
+
     // GET ALL Darshan
     getAllEPooja: builder.query({
       query: ({ page = 1, limit = 10 }) => {
@@ -20,7 +27,10 @@ export const epoojaApi = privateRequestNew.injectEndpoints({
     // GET Single Darshan
     getSingleEPooja: builder.query({
       query: (ID) => ({
-        url: `liveDarshan/${ID}`,
+        url: `liveDarshan/single`,
+        params: {
+          id: ID,
+        },
       }),
     }),
 
@@ -47,6 +57,7 @@ export const epoojaApi = privateRequestNew.injectEndpoints({
 });
 
 export const {
+  useGetAllCategoriesQuery,
   useGetAllEPoojaQuery,
   useGetSingleEPoojaQuery,
   useGetAllOldEPoojaQuery,

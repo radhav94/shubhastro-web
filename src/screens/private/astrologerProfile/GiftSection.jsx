@@ -1,28 +1,34 @@
 import React, { useEffect, useState } from "react";
 import styles from "./GiftSection.module.scss";
 import { IoGiftOutline } from "react-icons/io5";
-import { useGetAllGiftsQuery, useSendGiftMutation } from "../../../redux/api/gift/giftApi";
+import {
+  useGetAllGiftsQuery,
+  useSendGiftMutation,
+} from "../../../redux/api/gift/giftApi";
 import { useNavigate } from "react-router-dom";
 import toast from "../../../component/toast";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 
-const GiftSection = ({astrologerId }) => {
+const GiftSection = ({ astrologer }) => {
   const { data, isLoading } = useGetAllGiftsQuery();
-  const [sendGift, {isLoading: isSending}] = useSendGiftMutation();
+  const [sendGift, { isLoading: isSending }] = useSendGiftMutation();
   const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
   const [disableSend, setDisableSend] = useState(false);
   const gifts = data?.data || [];
-  const {balance, refreshWallet} = useWalletBalance();
+  const { balance, refreshWallet } = useWalletBalance();
 
-  const handleSend = async() => {
-    if (!selected || !astrologerId) return;
+  const handleSend = async () => {
+    if (!selected || !astrologer) return;
 
     try {
-      await sendGift({giftId: selected?.ID, astrologerId}).unwrap();
+      await sendGift({
+        giftId: selected?.ID,
+        astrologerId: astrologer?.ID,
+      }).unwrap();
       setSelected(null);
       refreshWallet();
-      toast.success("Gift sent successfully")
+      toast.success("Gift sent successfully");
     } catch (error) {
       console.error("Error sending gift:", error);
     }
@@ -43,7 +49,9 @@ const GiftSection = ({astrologerId }) => {
       <div className={styles.headerRow}>
         <div className={styles.subHeader}>
           <IoGiftOutline size={18} />
-          <h3>Send Gift to Harjeet</h3>
+          <h3>
+            Send Gift to {astrologer?.firstName + " " + astrologer?.lastName}
+          </h3>
         </div>
         <div className={styles.priceTag}> ₹ {balance}</div>
       </div>
@@ -80,7 +88,9 @@ const GiftSection = ({astrologerId }) => {
           disabled={!selected || disableSend || isSending}
           onClick={handleSend}
         >
-          {isSending ? 'Sending...' : `Send Gift ${selected ? `• ₹${selected?.price}` : ''}`}
+          {isSending
+            ? "Sending..."
+            : `Send Gift ${selected ? `• ₹${selected?.price}` : ""}`}
         </button>
       </div>
     </div>

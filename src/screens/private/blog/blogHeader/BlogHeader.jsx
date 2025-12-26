@@ -4,9 +4,8 @@ import { BlogCard } from "../../../../component";
 import { useGetBlogQuery } from "../../../../services/appServices/blogService";
 import { Link } from "react-router-dom";
 import { PATH } from "../../../../utils/routes/Paths";
-import { blogResponse } from "./data";  // <-- updated
+import { blogResponse } from "./data"; // <-- updated
 import Pagination from "../../../../component/pagination/Pagination";
-
 
 // AstroTalk style astrology images
 const astroImages = [
@@ -27,7 +26,6 @@ const BlogHeader = () => {
 
   const pagination = data?.pagination;
 
-
   return (
     <>
       <div className={styles.blogsContainer}>
@@ -38,7 +36,7 @@ const BlogHeader = () => {
             className={styles.blogLink}
           >
             <BlogCard
-              image={astroImages[index % astroImages.length]}
+              image={blog.img}
               title={blog.title}
               date={blog.publishDate}
             />
@@ -55,4 +53,3 @@ const BlogHeader = () => {
 };
 
 export default BlogHeader;
-

@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { SHOP_PRODUCTS } from "../data/productData";
 import styles from "./ProductList.module.scss";
-import { FaEye,FaCircle } from "react-icons/fa";
+import { FaEye, FaCircle } from "react-icons/fa";
 
 import {
   useGetAllEPoojaQuery,
@@ -10,6 +9,9 @@ import {
 } from "../../../../redux/api/astromall/epooja/epoojaApi";
 import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import { SHOP_PRODUCTS } from "../data/productData";
+
+const LIMIT = 10;
 
 const ProductList = () => {
   const { slug } = useParams();
@@ -17,93 +19,62 @@ const ProductList = () => {
   const location = useLocation();
 
   const isLiveDarshan = slug === "live-darshan";
-  const isOnlinePuja = slug === "online-puja";
 
   const [page, setPage] = useState(1);
-  const limit = 10;
+  const [products, setProducts] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
 
-  // APIs
+  const loadMoreRef = useRef(null);
 
   const {
     data: epoojaData,
     isLoading,
     isFetching,
-  } = useGetAllEPoojaQuery(isLiveDarshan ? { page, limit } : skipToken);
+  } = useGetAllEPoojaQuery(isLiveDarshan ? { page, limit: LIMIT } : skipToken);
 
   const { data: oldEpoojaData } = useGetAllOldEPoojaQuery(
-    isOnlinePuja ? undefined : skipToken
+    !isLiveDarshan ? slug : skipToken
   );
 
-  // STATE
-
-  const [products, setProducts] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
-
-  const loadMoreRef = useRef(null);
-  const hasMoreRef = useRef(true);
-  const isFetchingRef = useRef(false);
-
-  //LIVE DARSHAN (PAGINATED)
-
-  const apiProducts = epoojaData?.data || [];
-  const meta = epoojaData?.meta;
+  useEffect(() => {
+    setPage(1);
+    setProducts([]);
+    setHasMore(true);
+  }, [slug]);
 
   useEffect(() => {
-    if (!isLiveDarshan) return;
+    if (isLiveDarshan) {
+      const list = epoojaData?.data || [];
+      const meta = epoojaData?.meta;
 
-    if (!apiProducts.length) return;
+      if (!list.length) return;
 
-    if (page === 1) {
-      setProducts(apiProducts);
-    } else {
-      setProducts((prev) => {
-        const ids = new Set(prev.map((p) => p._id));
-        const newItems = apiProducts.filter((p) => !ids.has(p._id));
-        return [...prev, ...newItems];
-      });
+      setProducts((prev) =>
+        page === 1
+          ? list
+          : [...prev, ...list.filter((p) => !prev.some((x) => x._id === p._id))]
+      );
+
+      setHasMore(meta?.hasNextPage === true);
+      return;
     }
 
-    setHasMore(meta?.hasNextPage === true);
-  }, [apiProducts, page, isLiveDarshan, meta]);
-
-  // ONLINE PUJA
-
-  useEffect(() => {
-    if (!isOnlinePuja) return;
-
-    const list = oldEpoojaData?.data || [];
-    setProducts(list);
-    setHasMore(false);
-  }, [isOnlinePuja, oldEpoojaData]);
-
-  // OTHER CATEGORIES
-
-  useEffect(() => {
-    if (isLiveDarshan || isOnlinePuja) return;
+    if (oldEpoojaData?.data) {
+      setProducts(oldEpoojaData.data);
+      setHasMore(false);
+      return;
+    }
 
     setProducts(SHOP_PRODUCTS[slug] || []);
     setHasMore(false);
-  }, [slug, isLiveDarshan, isOnlinePuja]);
-
-  // INFINITE SCROLL
+  }, [isLiveDarshan, epoojaData, oldEpoojaData, slug, page]);
 
   useEffect(() => {
-    hasMoreRef.current = hasMore;
-    isFetchingRef.current = isFetching;
-  }, [hasMore, isFetching]);
-
-  useEffect(() => {
-    if (!isLiveDarshan) return;
-    if (isFetching || !hasMore) return;
+    if (!isLiveDarshan || !hasMore || isFetching) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          hasMoreRef.current &&
-          !isFetchingRef.current &&
-          page < meta?.totalPages
-        ) {
+      ([entry]) => {
+        if (entry.isIntersecting) {
           setPage((prev) => prev + 1);
         }
       },
@@ -111,17 +82,14 @@ const ProductList = () => {
     );
 
     if (loadMoreRef.current) observer.observe(loadMoreRef.current);
-
     return () => observer.disconnect();
-  }, [page, hasMore, isFetching, isLiveDarshan, meta?.totalPages]);
+  }, [isLiveDarshan, hasMore, isFetching]);
 
+  // ✅ FIX IS HERE
   const getProductRouteId = (product) => {
-    if (slug === "online-puja") return product._id;
-    if (slug === "live-darshan") return product.ID;
-    return product.slug;
+    if (slug === "live-darshan") return product._id;
+    return product._id;
   };
-
-  /* ---------- UI ---------- */
 
   return (
     <div className={styles.wrapper}>
@@ -143,36 +111,39 @@ const ProductList = () => {
                 src={
                   product.defaultImage ||
                   product.image ||
-                  "https://images.unsplash.com/photo-1625072290979-cac544181be8?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                  "https://images.unsplash.com/photo-1625072290979-cac544181be8"
                 }
                 alt={product.title || product.name}
               />
 
-              {/* Live Ticker Badge */}
-              {(slug === "live-darshan")&&(<div className={styles.liveTicker}>
-                <FaCircle className={styles.liveIcon} /> Live
-              </div>)}
+              {isLiveDarshan && (
+                <div className={styles.liveTicker}>
+                  <FaCircle className={styles.liveIcon} /> Live
+                </div>
+              )}
             </div>
 
-            <div className={styles.actions}>
-              <button
-                className={styles.bookBtn}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/shop/${slug}/${product.slug || product._id}`, {
-                    state: product,
-                  });
-                }}
-              >
-                Book
-              </button>
-            </div>
+            {!isLiveDarshan && (
+              <div className={styles.actions}>
+                <button
+                  className={styles.bookBtn}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/shop/${slug}/${getProductRouteId(product)}`, {
+                      state: product,
+                    });
+                  }}
+                >
+                  Book
+                </button>
+              </div>
+            )}
 
             <div className={styles.content}>
               <div className={styles.titleRow}>
                 <h3>{product.title || product.name}</h3>
                 <div className={styles.views}>
-                  <FaEye className={styles.eyeIcon} />
+                  <FaEye />
                   <span>{product.views || 1719}</span>
                 </div>
               </div>
@@ -184,15 +155,14 @@ const ProductList = () => {
               )}
 
               <p>
-                {product.description?.length > 42
-                  ? product.description.slice(0, 42) + "..."
-                  : product.description || "--"}
+                {product.description
+                  ? product.description.slice(0, 30) + "..."
+                  : "--"}
               </p>
             </div>
           </div>
         ))}
       </div>
-
 
       {isLiveDarshan && <div ref={loadMoreRef} style={{ height: 1 }} />}
 

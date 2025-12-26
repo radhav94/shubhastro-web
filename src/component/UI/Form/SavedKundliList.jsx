@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./SavedKundliList.module.scss";
 import { IoTrashOutline } from "react-icons/io5";
 import PrimaryText from "../../PrimaryText";
-
+import { padZero } from "../../../utils/dateFormat/dateTime";
 const SavedKundliList = ({
   title = "Saved Kundli",
   token,
@@ -47,8 +47,8 @@ const SavedKundliList = ({
                 </span>
 
                 <span className={styles.kundliDob}>
-                  {kundli.day} {kundli.month}, {kundli.year} • {kundli.hour}:
-                  {kundli.min}
+                  {padZero(kundli.day)}-{padZero(kundli.month)}-{kundli.year} • {padZero(kundli.hour)}:
+                  {padZero(kundli.min)}
                 </span>
 
                 <span className={styles.kundliPob}>{kundli.place}</span>
