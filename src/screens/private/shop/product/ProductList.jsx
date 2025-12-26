@@ -88,7 +88,7 @@ const ProductList = () => {
   // ✅ FIX IS HERE
   const getProductRouteId = (product) => {
     if (slug === "live-darshan") return product._id;
-    return product._id;
+    return product?.slug;
   };
 
   return (
