@@ -13,7 +13,7 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         if (specialties) params.append("specialties", specialties);
 
         return {
-          url: `astrologers/filter?${params.toString()}`,
+          url: `astrologers/filterAstrologers?${params.toString()}`,
           method: "GET",
         };
       },
