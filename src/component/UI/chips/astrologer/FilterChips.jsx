@@ -80,7 +80,6 @@ const FilterChips = ({ onSelect, onApplyFilters,isActiveType }) => {
     if (item === "All") {
       // ❌ unset speciality completely
       onSelect?.(null);
-      return;
     }
   
     // ✅ set new speciality
