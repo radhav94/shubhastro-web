@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import styles from "./FilterChips.module.scss";
 import { useLazyFilterAstrologersQuery } from "../../../../redux/api/astrologer/astrologerApi";
 
-const FilterChips = ({ onSelect, onApplyFilters }) => {
+const FilterChips = ({ onSelect, onApplyFilters,isActiveType }) => {
   const [triggerFilter, { isLoading }] = useLazyFilterAstrologersQuery();
 
   const filterButtons = [
@@ -182,6 +182,7 @@ const FilterChips = ({ onSelect, onApplyFilters }) => {
         selectedGender,
         page: pageNo,
         limit: 9,
+        isActiveType
       }).unwrap();
   
       onApplyFilters?.({

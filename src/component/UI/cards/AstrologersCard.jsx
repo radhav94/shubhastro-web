@@ -16,7 +16,8 @@ const AstrologerCard = ({
   onProfile,
   onAudioCall,
   onVideoCall,
-  isLayoutClassic=true
+  isLayoutClassic=true,
+  isActiveType
 }) => {
   return (
     <div className={styles.card}>
@@ -82,30 +83,37 @@ const AstrologerCard = ({
 
       <div className={styles.bottomRow}>
         <div className={styles.buttonsRow}>
-          <PrimaryButton
-            bgColor={appColors.white}
-            imgSrc={AppIcons.Message}
-            fontSize={12}
-            buttonStyles={{ padding: "4px 6px" }}
-            title="Chat"
-            onClick={onChat}
-          />
-          <PrimaryButton
-            bgColor={appColors.white}
-            imgSrc={AppIcons.Call}
-            fontSize={12}
-            buttonStyles={{ padding: "4px 6px" }}
-            title="Voice Call"
-            onClick={onAudioCall}
-          />
-          <PrimaryButton
-            bgColor={appColors.white}
-            imgSrc={AppIcons.Video}
-            fontSize={12}
-            buttonStyles={{ padding: "4px 6px" }}
-            title="Video Call"
-            onClick={onVideoCall}
-          />
+        {isActiveType === "chat" ? (
+            <PrimaryButton
+              bgColor={appColors.white}
+              imgSrc={AppIcons.Message}
+              fontSize={12}
+              buttonStyles={{ padding: "4px 6px" }}
+              title="Chat"
+              onClick={onChat}
+            />
+          ) : (
+            <>
+              <PrimaryButton
+                bgColor={appColors.white}
+                imgSrc={AppIcons.Call}
+                fontSize={12}
+                buttonStyles={{ padding: "4px 6px" }}
+                title="Voice Call"
+                onClick={onAudioCall}
+              />
+
+              <PrimaryButton
+                bgColor={appColors.white}
+                imgSrc={AppIcons.Video}
+                fontSize={12}
+                buttonStyles={{ padding: "4px 6px" }}
+                title="Video Call"
+                onClick={onVideoCall}
+              />
+            </>
+          )}
+
         </div>
       </div>
     </div>
