@@ -17,6 +17,7 @@ import Feedback from "./Feedback";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
 import { useAddAstrologerReviewMutation } from "../../../../../redux/api/review/reviewApi";
 import { Toast } from "../../../../../component";
+import { useGetS3SignedUrlMutation } from "../../../../../redux/api/s3SignedApi"
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
@@ -119,24 +120,47 @@ const ChatWindow = () => {
     return `${minutes}:${seconds}`;
   };
 
-  const sendVoiceMessage = (blob = null, duration) => {
-    const formData = new FormData();
-    formData.append("file", blob);
-
-    // const res = await fetch("/api/upload/audio", {
-    //   method: "POST",
-    //   body: formData,
-    // });
-
-    // const { url } = await res.json();
-    const url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+  const [getS3SignedUrl] = useGetS3SignedUrlMutation();
+  const sendVoiceMessage = async (blob = null, duration) => {
+    // const formData = new FormData();
+    // formData.append("file", blob);
+    const { uploadUrl } = await getS3SignedUrl({
+      fileType: blob.type,
+    }).unwrap();
+    console.log("UploadUrl", uploadUrl);
+    const audioUrl = uploadUrl.split("?")[0];
+    // const uploadUrl = "https://shubhastroassets.s3.ap-south-1.amazonaws.com/uploads/1766572860978-b5df851f-fb81-4d7c-bd6a-99fa834934ab.webm?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6IY35XCAFJDY7WMB%2F20251224%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20251224T104100Z&X-Amz-Expires=60000&X-Amz-Signature=a96d8d051b6253e930b402f1d9a52d0fabf4d0778838f81a1190e8f5d140b435&X-Amz-SignedHeaders=host&x-amz-checksum-crc32=AAAAAA%3D%3D&x-amz-sdk-checksum-algorithm=CRC32&x-id=PutObject";
+    const res = await uploadAudioToS3(uploadUrl, blob);
+    console.log("Result", res);
+    // const url = "https://shubhastroassets.s3.ap-south-1.amazonaws.com/uploads/1766572860978-b5df851f-fb81-4d7c-bd6a-99fa834934ab.webm";
+    // console.log("audioUrl", audioUrl);
+    return;
+    // const url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
     const jsonString = JSON.stringify({
       type: "voice",
-      url,
+      audioUrl,
       duration,
     });
     sendMessage(jsonString)
     setMessage("");
+  };
+
+  const uploadAudioToS3 = async (uploadUrl, blob) => {
+    console.log("type", blob.type)
+    const res = await fetch(uploadUrl, {
+      method: "PUT",
+      body: blob,
+      headers: {
+        "Content-Type": blob.type, // VERY IMPORTANT
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("S3 upload failed");
+    }
+
+    // remove query params → permanent file URL
+    return uploadUrl.split("?")[0];
   };
 
   return (
