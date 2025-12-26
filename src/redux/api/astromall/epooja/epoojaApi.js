@@ -36,20 +36,20 @@ export const epoojaApi = privateRequestNew.injectEndpoints({
 
     // GET ALL Epooja
     getAllOldEPooja: builder.query({
-      query: (categoryId = "69328474e62280851507e1ef") => ({
+      query: (slug) => ({
         url: "ePoojas/all",
         params: {
-          categoryId,
+          slug,
         },
       }),
     }),
 
     // GET Single Epooja
     getSingleOldEPooja: builder.query({
-      query: (poojaId) => ({
+      query: (slug = "spell") => ({
         url: "ePoojas/single",
         params: {
-          poojaId,
+          slug,
         },
       }),
     }),

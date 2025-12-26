@@ -19,7 +19,6 @@ const GiftSection = ({ astrologer }) => {
   const { balance, refreshWallet } = useWalletBalance();
 
   const handleSend = async () => {
-    console.log(selected, astrologer, "selected");
     if (!selected || !astrologer) return;
 
     try {

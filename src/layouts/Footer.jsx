@@ -19,21 +19,22 @@ import { useEffect, useState } from "react";
 // Data for links - easy to manage and update
 const quickLinks = [
   { href: "/talk-to-astrologers", text: "Talk to Astrologer" },
-  { href: "/astrologer/chat", text: "Chat with Astrologer" },
-  { href: "/astrologer/tarot-reader", text: "Tarot Readers" },
-  { href: "/astrologer/vastu", text: "Vastu Experts" },
-  { href: "/astrologer/love", text: "Love Astrologer" },
+  { href: "/chat-with-astrologers", text: "Chat with Astrologer" },
+  { href: "/tarot", text: "Tarot" },
+  { href: "/tarot/love-triangle", text: "Love Traingle" },
 ];
 
 const usefulLinks = [
   { href: "/aboutus", text: "About Us" },
-  { href: "/refund-and-cancellation-policy", text: "Refund & Cancellation Policy" },
+  {
+    href: "/refund-and-cancellation-policy",
+    text: "Refund & Cancellation Policy",
+  },
   { href: "/terms-conditions", text: "Terms & Conditions" },
   { href: "/privacy-policy", text: "Privacy Policy" },
   { href: "/disclaimer", text: "Disclaimer" },
   { href: "/pricing-policy", text: "Pricing Policy" },
 ];
-
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -156,7 +157,7 @@ const Footer = () => {
             <ul>
               {quickLinks.map((link) => (
                 <li key={link.href}>
-                  <a href={link.href}>{link.text}</a>
+                  <Link to={link.href}>{link.text}</Link>
                 </li>
               ))}
             </ul>
@@ -214,7 +215,7 @@ const Footer = () => {
                   className={link.active ? styles.active : ""}
                   onClick={(e) => {
                     if (link.onClick) {
-                      e.preventDefault();   // stop page reload
+                      e.preventDefault(); // stop page reload
                       link.onClick();
                     }
                   }}
@@ -233,6 +234,5 @@ const Footer = () => {
     </footer>
   );
 };
-
 
 export default Footer;

@@ -21,7 +21,6 @@ const TarotCardDisplay = ({ data }) => {
 
   return (
     <div className={styles.container}>
-      
       <h2 className={styles.title}>Now, pick the cards that call to you…</h2>
       <p className={styles.subTitle}>
         Select up to 3 cards • {selectedCards.length}/3 selected
@@ -46,11 +45,11 @@ const TarotCardDisplay = ({ data }) => {
         })}
       </div>
 
-      {selectedCards.length > 0 && (
+      {/* {selectedCards.length > 0 && (
         <button className={styles.revealButton}>
           Reveal Your Reading
         </button>
-      )}
+      )} */}
     </div>
   );
 };

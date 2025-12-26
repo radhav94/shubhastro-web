@@ -142,7 +142,6 @@ const RecommendModal = ({ open, onClose, mode = "chat" }) => {
   };
 
   const handleAudioCall = (astro) => {
-    console.log("calledd");
     initiateCall(astro, "audio");
   };
 
