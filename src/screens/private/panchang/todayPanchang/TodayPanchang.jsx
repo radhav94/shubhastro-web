@@ -27,17 +27,17 @@ import { GoNumber } from "react-icons/go";
 import { WiMoonFull } from "react-icons/wi";
 
 const TodayPanchang = () => {
+  const now = new Date();
   const [payload, setPayload] = useState({
-    day: 6,
-    month: 1,
-    year: 2000,
-    hour: 7,
-    min: 45,
+    day: now.getDate(),
+    month: now.getMonth() + 1,
+    year: now.getFullYear(),
+    hour: now.getHours(),
+    min: now.getMinutes(),
     lat: 19.132,
-    lon: 72.342,
+    lon: 72.342, 
     tzone: 5.5,
   });
-
   const { data, isLoading, isSuccess } = useFetchAdvancePanchangQuery(payload);
   const panchangData = data?.response;
 
