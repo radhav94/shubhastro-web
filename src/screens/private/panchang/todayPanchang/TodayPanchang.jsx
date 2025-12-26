@@ -27,13 +27,14 @@ import { GoNumber } from "react-icons/go";
 import { WiMoonFull } from "react-icons/wi";
 
 const TodayPanchang = () => {
+  const pad = (num) => String(num).padStart(2, "0");
   const now = new Date();
   const [payload, setPayload] = useState({
     day: now.getDate(),
     month: now.getMonth() + 1,
     year: now.getFullYear(),
-    hour: now.getHours(),
-    min: now.getMinutes(),
+    hour: pad(now.getHours()),      // 07 if needed
+    min: pad(now.getMinutes()),  
     lat: 19.132,
     lon: 72.342, 
     tzone: 5.5,
@@ -333,15 +334,17 @@ const TodayPanchang = () => {
   //  INPUT HANDLER
   // -------------------------
   const onTap = (details) => {
-    const date = new Date(details?.dateOfBirth);
+    const now = new Date();
+    const dob = details?.dateOfBirth ? new Date(details.dateOfBirth) : null;
+    const pad = (val) => (val < 10 ? "0" + val : val);
     setPayload({
-      day: date.getUTCDate(),
-      month: date.getUTCMonth() + 1,
-      year: date.getUTCFullYear(),
-      hour: 11,
-      min: 12,
-      lat: Number(details.latitude),
-      lon: Number(details.longitude),
+      day: dob ? dob.getUTCDate() : now.getDate(),
+      month: dob ? dob.getUTCMonth() + 1 : now.getMonth() + 1,
+      year: dob ? dob.getUTCFullYear() : now.getFullYear(),
+      hour: dob ? pad(dob.getHours()) : pad(now.getHours()),
+      min: dob ? pad(dob.getMinutes()-27) : pad(now.getMinutes()),
+      lat: Number(details?.latitude) || 19.132,
+      lon: Number(details?.longitude) || 72.342,
       tzone: 5.5,
     });
   };
