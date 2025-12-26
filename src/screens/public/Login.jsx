@@ -39,7 +39,7 @@ const token =
   const type = selectedRole === "USER" ? "CUSTOMER" : "ASTROLOGER";
 
   const payload = {
-    phoneNumber: '+91'+mobileNumber,
+    phoneNumber: '91'+mobileNumber,
     type: type,
   };
 
@@ -49,7 +49,7 @@ const token =
     if (response.status) {
       navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
         state: {
-          phoneNumber: '+91'+mobileNumber,
+          phoneNumber: '91'+mobileNumber,
           type,   // 👈 PASSING TYPE TO OTP PAGE
           from: redirectPath,
         },
@@ -63,7 +63,7 @@ const token =
 
     navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
       state: {
-        phoneNumber: '+91'+mobileNumber,
+        phoneNumber: '91'+mobileNumber,
         type,    // 👈 PASSING TYPE TO OTP PAGE
         resendOtp: handleSendOtp,
         from: redirectPath,
