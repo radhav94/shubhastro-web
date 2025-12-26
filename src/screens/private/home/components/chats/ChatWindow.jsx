@@ -35,7 +35,6 @@ const ChatWindow = () => {
     sendMessage,
     astroReply,
     sendTyping,
-    chatSeconds,
   } = useChat({ userId, astrologerId, roomId, isUserSide, kundliId });
 
   const [message, setMessage] = useState("");
@@ -120,28 +119,16 @@ const ChatWindow = () => {
     }
   };
 
-  const formatChatTime = (secs) => {
-    const minutes = String(Math.floor(secs / 60)).padStart(2, "0");
-    const seconds = String(secs % 60).padStart(2, "0");
-    return `${minutes}:${seconds}`;
-  };
-
   const [getS3SignedUrl] = useGetS3SignedUrlMutation();
   const sendVoiceMessage = async (blob = null, duration) => {
     // const formData = new FormData();
     // formData.append("file", blob);
-    const { uploadUrl } = await getS3SignedUrl({
+    const signedUrl = await getS3SignedUrl({
       fileType: blob.type,
     }).unwrap();
-    console.log("UploadUrl", uploadUrl);
-    const audioUrl = uploadUrl.split("?")[0];
-    // const uploadUrl = "https://shubhastroassets.s3.ap-south-1.amazonaws.com/uploads/1766572860978-b5df851f-fb81-4d7c-bd6a-99fa834934ab.webm?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA6IY35XCAFJDY7WMB%2F20251224%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20251224T104100Z&X-Amz-Expires=60000&X-Amz-Signature=a96d8d051b6253e930b402f1d9a52d0fabf4d0778838f81a1190e8f5d140b435&X-Amz-SignedHeaders=host&x-amz-checksum-crc32=AAAAAA%3D%3D&x-amz-sdk-checksum-algorithm=CRC32&x-id=PutObject";
+    const audioUrl = signedUrl.key;
+    const uploadUrl = signedUrl.uploadUrl;
     const res = await uploadAudioToS3(uploadUrl, blob);
-    console.log("Result", res);
-    // const url = "https://shubhastroassets.s3.ap-south-1.amazonaws.com/uploads/1766572860978-b5df851f-fb81-4d7c-bd6a-99fa834934ab.webm";
-    // console.log("audioUrl", audioUrl);
-    return;
-    // const url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
     const jsonString = JSON.stringify({
       type: "voice",
       audioUrl,
@@ -152,21 +139,19 @@ const ChatWindow = () => {
   };
 
   const uploadAudioToS3 = async (uploadUrl, blob) => {
-    console.log("type", blob.type)
     const res = await fetch(uploadUrl, {
       method: "PUT",
       body: blob,
       headers: {
-        "Content-Type": blob.type, // VERY IMPORTANT
+        "Content-Type": blob.type,
       },
     });
-
+    console.log("uploadAudioToS3", res);
     if (!res.ok) {
       throw new Error("S3 upload failed");
     }
 
-    // remove query params → permanent file URL
-    return uploadUrl.split("?")[0];
+    return "success";
   };
 
   return (
@@ -179,7 +164,6 @@ const ChatWindow = () => {
           onAudioCall={handleAudioCall}
           onVideoCall={handleVideoCall}
           disabled={!!activeCall}
-          chatDuration={formatChatTime(chatSeconds)}
         />
 
         <ChatMessages
