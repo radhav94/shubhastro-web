@@ -3,7 +3,7 @@ import styles from "./PanchangInputCard.module.scss";
 
 import PrimaryButton from "../../../PrimaryButton";
 import PrimaryText from "../../../PrimaryText";
-import LocationSearch from "../../../../utils/location/locationSearch";
+import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import ErrorText from "../../../ErrorText";
 import { color } from "framer-motion";
 import { appColors } from "../../../../utils/theme";
@@ -12,8 +12,8 @@ const PanchangInputCard = ({ imageSrc, title, onTap }) => {
   const [formData, setFormData] = useState({
     dateOfBirth: "",
     location: "",
-    latitude: "",
-    longitude: "",
+    latitude: "19.132",
+    longitude: "72.342",
   });
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long", // Thursday
@@ -33,15 +33,15 @@ const PanchangInputCard = ({ imageSrc, title, onTap }) => {
     setFormData((prev) => ({
       ...prev,
       location: place.address,
-      latitude: place.lat,
-      longitude: place.lng,
+      latitude: place.lat || 19.132,
+      longitude: place.lng || 72.342,
     }));
   };
 
   const validate = () => {
     const newErrors = {};
     if (!formData.dateOfBirth)
-      newErrors.dateOfBirth = "Date of Birth is required!";
+      newErrors.dateOfBirth = "Date is required!";
     // if (!formData.location) newErrors.location = "Location is required!";
     return newErrors;
   };
@@ -88,14 +88,14 @@ const PanchangInputCard = ({ imageSrc, title, onTap }) => {
             {/* Date of Birth */}
             <div className={styles.inputControl}>
               <label htmlFor="dateOfBirth" className={styles.label}>
-                Date of Birth <span className={styles.requiredMark}>*</span>
+                Date <span className={styles.requiredMark}>*</span>
               </label>
               <input
                 id="dateOfBirth"
                 name="dateOfBirth"
                 type="date"
                 className={styles.inputField}
-                placeholder="Enter Date of Birth"
+                placeholder="Enter the Date"
                 value={formData.dateOfBirth}
                 onChange={handleInputChange}
                 onClick={(e) => {

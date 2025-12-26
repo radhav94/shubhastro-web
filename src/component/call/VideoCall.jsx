@@ -1,13 +1,5 @@
-import {
-  LocalUser,
-  RemoteUser,
-  useJoin,
-  useLocalMicrophoneTrack,
-  useLocalCameraTrack,
-  usePublish,
-  useRemoteUsers,
-  useRTCClient,
-} from "agora-rtc-react";
+import React, { useEffect, useRef, useState } from "react";
+import AgoraRTC from "agora-rtc-sdk-ng";
 import {
   IoMic,
   IoMicOff,
@@ -16,183 +8,264 @@ import {
   IoArrowBack,
   IoChatbubbleEllipses,
 } from "react-icons/io5";
-
-import AgoraRTC, { AgoraRTCProvider } from "agora-rtc-react";
-import { useState, useEffect, useRef } from "react";
-import styles from "./VideoCalling.module.scss";
-import { voiceSocket } from "../../services/voiceSocketServices";
-import { useCall } from "../../context/CallContext";
 import { useNavigate } from "react-router-dom";
-import { PATH } from "../../utils/routes/Paths";
+import styles from "./VideoCalling.module.scss";
+import { useCall } from "../../context/CallContext";
+import { voiceSocket } from "../../services/voiceSocketServices";
 
-export const VideoCalling = ({ callData }) => {
-  const [clientKey, setClientKey] = useState(0);
+const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 
-  // 🔥 FORCE NEW AGORA CLIENT PER ROOM (MAIN FIX)
-  useEffect(() => {
-    setClientKey((k) => k + 1);
-  }, [callData.roomId]);
-
-  return (
-    <AgoraRTCProvider
-      key={clientKey}
-      client={AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })}
-    >
-      <Basics callData={callData} />
-    </AgoraRTCProvider>
-  );
-};
-
-const Basics = ({ callData }) => {
-  const client = useRTCClient();
+const VideoCalling = ({ callData }) => {
   const { activeCall, setActiveCall } = useCall();
   const navigate = useNavigate();
 
+  if (!activeCall || activeCall.callType !== "video") return null;
+
   const { roomId, agoraToken, isUserSide, callerName } = callData;
 
-  const [micOn, setMic] = useState(true);
-  const [cameraOn, setCamera] = useState(true);
+  const clientRef = useRef(null);
+  const micTrackRef = useRef(null);
+  const camTrackRef = useRef(null);
+
+  const localVideoFullRef = useRef(null);
+  const localVideoMiniRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+
+  const cleanupRef = useRef(false);
+  const endCallRef = useRef(false);
+
+  const [joined, setJoined] = useState(false);
+  const [micOn, setMicOn] = useState(true);
+  const [cameraOn, setCameraOn] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [hasJoinedOnce, setHasJoinedOnce] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: 20 });
 
-  const cleanupDoneRef = useRef(false);
+  const [callSeconds, setCallSeconds] = useState(0);
+  const timerRef = useRef(null);
 
-  const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn);
-  const { localCameraTrack } = useLocalCameraTrack(cameraOn);
-  const remoteUsers = useRemoteUsers();
+  /* ================= LOCAL VIDEO ================= */
+  const playLocalVideo = (container) => {
+    if (!camTrackRef.current || !container) return;
+    camTrackRef.current.stop();
+    camTrackRef.current.play(container);
+  };
 
-  const appId = "5630460abdc141e3b2f8d9597752bd7d";
+  /* ================= REMOTE VIDEO SAFE PLAY ================= */
+  const safePlayRemoteVideo = (track) => {
+    if (!remoteVideoRef.current || !track) return;
 
-  /* 🔥 FORCE LEAVE OLD CHANNEL BEFORE JOIN */
+    remoteVideoRef.current.innerHTML = "";
+    const div = document.createElement("div");
+    div.style.width = "100%";
+    div.style.height = "100%";
+    remoteVideoRef.current.appendChild(div);
+
+    setTimeout(() => {
+      try {
+        track.play(div);
+      } catch (e) {
+        console.warn("Retry remote video play");
+        setTimeout(() => track.play(div), 300);
+      }
+    }, 150);
+  };
+
+  /* ================= RESUME REMOTE AUDIO ================= */
+  // const resumeRemoteAudio = () => {
+  //   if (!clientRef.current) return;
+  //   clientRef.current.remoteUsers.forEach((user) => {
+  //     if (user.audioTrack) {
+  //       user.audioTrack.play();
+  //     }
+  //   });
+  // };
+
+  const resumeRemoteTracks = () => {
+  if (!clientRef.current) return;
+
+  clientRef.current.remoteUsers.forEach((user) => {
+    if (user.audioTrack) {
+      user.audioTrack.play();
+    }
+    if (user.videoTrack && remoteVideoRef.current) {
+      safePlayRemoteVideo(user.videoTrack);
+    }
+  });
+};
+
+const resumeRemoteAudio = resumeRemoteTracks;
+
+
+
+  /* ================= START CALL ================= */
   useEffect(() => {
-    cleanupDoneRef.current = false;
+    cleanupRef.current = false;
+    endCallRef.current = false;
 
-    const safeLeave = async () => {
-      if (client.connectionState === "CONNECTED") {
-        await client.leave();
+    const start = async () => {
+      try {
+        if (clientRef.current) {
+          await clientRef.current.leave();
+          clientRef.current.removeAllListeners();
+          clientRef.current = null;
+        }
+
+        const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+        clientRef.current = client;
+
+        client.on("user-published", async (user, mediaType) => {
+  await client.subscribe(user, mediaType);
+
+  if (mediaType === "video" && user.videoTrack) {
+    safePlayRemoteVideo(user.videoTrack);
+  }
+
+  if (mediaType === "audio" && user.audioTrack) {
+    // ✅ REQUIRED FOR CROSS DEVICE
+    user.audioTrack.play();
+  }
+});
+
+
+        client.on("user-unpublished", () => {
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.innerHTML = "";
+          }
+        });
+
+        client.on("user-left", safeEndCall);
+
+        await client.join(APP_ID, roomId, agoraToken, null);
+
+        micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack();
+        camTrackRef.current = await AgoraRTC.createCameraVideoTrack();
+
+        await client.publish([micTrackRef.current, camTrackRef.current]);
+
+        setJoined(true);
+
+        timerRef.current = setInterval(() => {
+          setCallSeconds((p) => p + 1);
+        }, 1000);
+      } catch (err) {
+        console.error("CALL START ERROR", err);
+        safeEndCall();
       }
     };
 
-    safeLeave();
+    start();
+    return () => cleanup();
+    // eslint-disable-next-line
   }, [roomId]);
 
-  /* JOIN CHANNEL */
-  const { isConnected } = useJoin(
-    {
-      appid: appId,
-      channel: roomId,
-      token: agoraToken,
-    },
-    Boolean(roomId && agoraToken)
-  );
+  /* ================= LOCAL VIDEO ================= */
+  useEffect(() => {
+    if (!joined) return;
+    isMinimized
+      ? playLocalVideo(localVideoMiniRef.current)
+      : playLocalVideo(localVideoFullRef.current);
+  }, [joined, isMinimized]);
 
   useEffect(() => {
-  if (client.connectionState === "CONNECTED") {
-    setHasJoinedOnce(true);
-  }
-}, [client.connectionState]);
-
-
-  /* TRACK JOIN STATE */
-  useEffect(() => {
-    if (isConnected) setHasJoinedOnce(true);
-  }, [isConnected]);
-
-  /* SINGLE SOURCE OF PUBLISH */
-  usePublish([
-    ...(localMicrophoneTrack ? [localMicrophoneTrack] : []),
-    ...(localCameraTrack ? [localCameraTrack] : []),
-  ]);
-
-  /* SYNC MIC / CAMERA */
-  useEffect(() => {
-    localMicrophoneTrack?.setEnabled(micOn);
-  }, [micOn, localMicrophoneTrack]);
+    micTrackRef.current?.setEnabled(micOn);
+    resumeRemoteAudio();
+  }, [micOn]);
 
   useEffect(() => {
-    localCameraTrack?.setEnabled(cameraOn);
-  }, [cameraOn, localCameraTrack]);
+    camTrackRef.current?.setEnabled(cameraOn);
+  }, [cameraOn]);
 
-  /* CLEANUP */
-  const cleanupCall = async () => {
-    if (cleanupDoneRef.current) return;
-    cleanupDoneRef.current = true;
+  /* ================= REMOTE VIDEO SAFETY REPLAY ================= */
+  useEffect(() => {
+    if (!joined || !clientRef.current) return;
+
+    clientRef.current.remoteUsers.forEach((user) => {
+      if (user.videoTrack) {
+        safePlayRemoteVideo(user.videoTrack);
+      }
+    });
+  }, [joined]);
+
+  /* ================= CLEANUP ================= */
+  const cleanup = async () => {
+    if (cleanupRef.current) return;
+    cleanupRef.current = true;
 
     try {
-      localMicrophoneTrack?.stop();
-      localMicrophoneTrack?.close();
+      micTrackRef.current?.stop();
+      micTrackRef.current?.close();
+      camTrackRef.current?.stop();
+      camTrackRef.current?.close();
 
-      localCameraTrack?.stop();
-      localCameraTrack?.close();
-
-      if (client.connectionState !== "DISCONNECTED") {
-        await client.leave();
+      if (clientRef.current) {
+        await clientRef.current.leave();
+        clientRef.current.removeAllListeners();
       }
     } catch (e) {
-      console.warn("Cleanup error:", e);
+      console.warn(e);
     } finally {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+
+      micTrackRef.current = null;
+      camTrackRef.current = null;
+      clientRef.current = null;
+
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.innerHTML = "";
+      }
+
+      setJoined(false);
+      setCallSeconds(0);
       setActiveCall(null);
     }
   };
 
-  /* SOCKET EVENTS */
-  useEffect(() => {
-    const end = async () => cleanupCall();
+  /* ================= SAFE END CALL ================= */
+  const safeEndCall = async () => {
+    if (endCallRef.current) return;
+    endCallRef.current = true;
 
-    voiceSocket.on("call_ended", end);
-    voiceSocket.on("force_call_end", end);
-    voiceSocket.on("disconnect", end);
+    voiceSocket.emit("call_end", {
+      roomId,
+      endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
+    });
+
+    await cleanup();
+  };
+
+  /* ================= SOCKET ================= */
+  useEffect(() => {
+    voiceSocket.on("call_ended", safeEndCall);
+    voiceSocket.on("force_call_end", safeEndCall);
+    voiceSocket.on("disconnect", safeEndCall);
 
     return () => {
-      voiceSocket.off("call_ended", end);
-      voiceSocket.off("force_call_end", end);
-      voiceSocket.off("disconnect", end);
+      voiceSocket.off("call_ended", safeEndCall);
+      voiceSocket.off("force_call_end", safeEndCall);
+      voiceSocket.off("disconnect", safeEndCall);
     };
   }, []);
 
-  /* REMOTE USER LEFT */
-  useEffect(() => {
-    const onRemoteLeave = async () => cleanupCall();
-    client.on("user-left", onRemoteLeave);
-    return () => client.off("user-left", onRemoteLeave);
-  }, []);
-
-  /* END CALL */
-  const endCall = async () => {
-    const endedBy = isUserSide ? "CUSTOMER" : "ASTROLOGER";
-    voiceSocket.emit("call_end", { roomId, endedBy });
-    await cleanupCall();
-  };
-
-  /* DRAG LOGIC (UNCHANGED) */
+  /* ================= DRAG ================= */
   const dragOffset = useRef({ x: 0, y: 0 });
 
   const startDrag = (e) => {
-    e.preventDefault();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-    dragOffset.current = {
-      x: clientX - position.x,
-      y: clientY - position.y,
-    };
-
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    dragOffset.current = { x: x - position.x, y: y - position.y };
     document.addEventListener("mousemove", onDrag);
     document.addEventListener("mouseup", stopDrag);
-    document.addEventListener("touchmove", onDrag, { passive: false });
+    document.addEventListener("touchmove", onDrag);
     document.addEventListener("touchend", stopDrag);
   };
 
   const onDrag = (e) => {
-    e.preventDefault();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-    setPosition({
-      x: clientX - dragOffset.current.x,
-      y: clientY - dragOffset.current.y,
-    });
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    setPosition({ x: x - dragOffset.current.x, y: y - dragOffset.current.y });
   };
 
   const stopDrag = () => {
@@ -202,165 +275,137 @@ const Basics = ({ callData }) => {
     document.removeEventListener("touchend", stopDrag);
   };
 
+  /* ================= CHAT ================= */
+  const openChatWithMinimize = () => {
+    setIsMinimized(true);
+    setTimeout(() => {
+      if (isUserSide) {
+        navigate(`/talk-to-astrologers/${activeCall.astrologerId}`, {
+          state: {
+            roomId: activeCall.chatRoomId,
+            userId: activeCall.userId,
+            astrologerId: activeCall.astrologerId,
+            kundliId: activeCall.kundliId,
+            fullName: activeCall.callerName,
+            isUserSide: true,
+          },
+        });
+      }
+    }, 50);
+  };
+
+  const formatTime = (s) =>
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(
+      2,
+      "0"
+    )}`;
+
+  /* ================= UI ================= */
   return (
     <>
-      {/* MINI WINDOW */}
-      {isMinimized && (
-        <div
-          className={styles.floatingMini}
-          style={{ top: position.y, left: position.x }}
-          onMouseDown={startDrag}
-          onTouchStart={startDrag}
-        >
-          <div className={styles.miniHeader}>
-            <span className={styles.miniTitle}>
-              {callerName || "Video Call"}
-            </span>
-
-            <button
-              className={styles.expandBtn}
-              onClick={() => setIsMinimized(false)}
-            >
-              ⤢
-            </button>
-          </div>
-
-          <div className={styles.miniVideo}>
-            {remoteUsers.length > 0 ? (
-              <RemoteUser user={remoteUsers[0]} playVideo playAudio />
-            ) : (
-              <div className={styles.miniWaiting}>Connecting…</div>
-            )}
-          </div>
-
-          <div className={styles.miniControls}>
-            <button
-              className={`${styles.iconBtn} ${!micOn ? styles.activeRed : ""}`}
-              onClick={() => setMic((p) => !p)}
-            >
-              {micOn ? "🎙️" : "🔇"}
-            </button>
-
-            <button
-              className={`${styles.iconBtn} ${
-                !cameraOn ? styles.activeRed : ""
-              }`}
-              onClick={() => setCamera((p) => !p)}
-            >
-              {cameraOn ? "📷" : "🚫"}
-            </button>
-
-            <button
-              className={`${styles.iconBtn} ${styles.endBtnMini}`}
-              onClick={endCall}
-            >
-              📞
-            </button>
-          </div>
+      {/* MINI VIEW */}
+      <div
+        className={styles.floatingMini}
+        style={{
+          top: position.y,
+          left: position.x,
+          display: isMinimized ? "block" : "none",
+        }}
+        onMouseDown={startDrag}
+        onTouchStart={startDrag}
+        onClick={resumeRemoteAudio}
+      >
+        <div className={styles.miniHeader}>
+          <span>
+            {callerName || "Video Call"} • {formatTime(callSeconds)}
+          </span>
+          <button onClick={() => setIsMinimized(false)}>⤢</button>
         </div>
-      )}
 
-      {/* FULL SCREEN */}
-      {!isMinimized && (
-        <div className={styles.videoContainer}>
-          <button
-            className={styles.minimizeBtn}
-            onClick={() => setIsMinimized(true)}
-          >
-            <IoArrowBack size={20} />
+        <div className={styles.miniVideo}>
+          <div ref={localVideoMiniRef} style={{ width: "100%", height: "100%" }} />
+        </div>
+
+        <div className={styles.miniControls}>
+          <button onClick={() => setMicOn((p) => !p)}>🎙️</button>
+          <button onClick={() => setCameraOn((p) => !p)}>📷</button>
+          <button className={styles.endBtnMini} onClick={safeEndCall}>
+            📞
           </button>
+        </div>
+      </div>
 
-          {!hasJoinedOnce ? (
-            <div className={styles.joinContainer}>
-              <div className={styles.waitingText}>
-                Connecting to video call…
-              </div>
+      {/* FULL VIEW */}
+      <div
+        className={styles.videoContainer}
+        style={{ visibility: isMinimized ? "hidden" : "visible" }}
+        onClick={resumeRemoteTracks}
+      >
+        <button
+          className={styles.minimizeBtn}
+          onClick={() => setIsMinimized(true)}
+        >
+          <IoArrowBack size={20} />
+        </button>
+
+        {!joined ? (
+          <div className={styles.waitingText}>Connecting…</div>
+        ) : (
+          <div className={styles.videoWrapper}>
+            <div ref={remoteVideoRef} className={styles.remoteVideoArea} />
+
+            <div className={styles.localVideoPreview}>
+              <div
+                ref={localVideoFullRef}
+                style={{ width: "100%", height: "100%" }}
+              />
             </div>
-          ) : (
-            <div className={styles.videoWrapper}>
-              <div className={styles.remoteVideoArea}>
-                {remoteUsers.length > 0 ? (
-                  remoteUsers.map((user) => (
-                    <RemoteUser
-                      key={user.uid}
-                      user={user}
-                      playVideo
-                      playAudio
-                    />
-                  ))
-                ) : (
-                  <div className={styles.waitingText}>
-                    Waiting for remote user…
-                  </div>
-                )}
+
+            <div className={styles.controls}>
+              <div className={styles.callInfo}>
+                <span className={styles.callerName}>{callerName}</span>
+                <span className={styles.callTimer}>
+                  ⏱️ {formatTime(callSeconds)}
+                </span>
               </div>
 
-              {cameraOn && (
-                <div className={styles.localVideoPreview}>
-                  <LocalUser
-                    key={roomId} // 🔥 FORCE REMOUNT
-                    audioTrack={localMicrophoneTrack}
-                    videoTrack={localCameraTrack}
-                    micOn={micOn}
-                    cameraOn={cameraOn}
-                    playVideo
-                  />
-                </div>
-              )}
-
-              <div className={styles.controls}>
+              <div className={styles.controlButtons}>
                 <button
-                  onClick={() => setMic((p) => !p)}
-                  className={styles.controlBtn}
+                  className={styles.iconBtn}
+                  onClick={() => setMicOn((p) => !p)}
                 >
-                  {micOn ? <IoMic size={20} /> : <IoMicOff size={20} />}
+                  {micOn ? <IoMic size={22} /> : <IoMicOff size={22} />}
                 </button>
 
                 <button
-                  onClick={() => setCamera((p) => !p)}
-                  className={styles.controlBtn}
+                  className={styles.iconBtn}
+                  onClick={() => setCameraOn((p) => !p)}
                 >
                   {cameraOn ? (
-                    <IoVideocam size={20} />
+                    <IoVideocam size={22} />
                   ) : (
-                    <IoVideocamOff size={20} />
+                    <IoVideocamOff size={22} />
                   )}
                 </button>
 
-                <button className={styles.endBtn} onClick={endCall}>
+                <button
+                  className={`${styles.iconBtn} ${styles.endBtn}`}
+                  onClick={safeEndCall}
+                >
                   End
                 </button>
 
                 <button
-                  className={styles.chatBtn}
-                  onClick={() => {
-                    setIsMinimized(true);
-                    isUserSide
-                      ? navigate(
-                          `/talk-to-astrologers/${activeCall.astrologerId}`,
-                          {
-                            state: {
-                              roomId: activeCall.chatRoomId,
-                              userId: activeCall.userId,
-                              astrologerId: activeCall.astrologerId,
-                              kundliId: activeCall.kundliId,
-                              fullName: activeCall.callerName,
-                              isUserSide: true,
-                            },
-                          }
-                        )
-                      : navigate(
-                          PATH.privateRoutes.ASTROLOGER_CHAT_USER_LIST.path
-                        );
-                  }}
+                  className={styles.iconBtn}
+                  onClick={openChatWithMinimize}
                 >
-                  <IoChatbubbleEllipses size={20} />
+                  <IoChatbubbleEllipses size={22} />
                 </button>
               </div>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </>
   );
 };

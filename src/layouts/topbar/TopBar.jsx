@@ -66,7 +66,7 @@ const TopBar = () => {
       title: "Panchang",
       path: PATH.privateRoutes.PANCHANG.path,
     },
-    { title: "Kundli", path: PATH.privateRoutes.KUNDLI.path },
+    { title: "Free Kundli", path: PATH.privateRoutes.KUNDLI.path },
     // { title: "Sadesati", path: PATH.privateRoutes.SADESATI.path },
     { title: "Match Making", path: PATH.privateRoutes.MATCHMAKING.path },
     {
@@ -181,7 +181,8 @@ const TopBar = () => {
               </div>
               <div className={styles.userDetails}>
                 <PrimaryText size_14 isBold isCenter>
-                  {user?.firstName}
+                  {user?.firstName &&
+                    user.firstName[0].toUpperCase() + user.firstName.slice(1)}
                 </PrimaryText>
                 <PrimaryText size_12 isBold color="#466590" isCenter={true}>
                   {user?.phoneNumber}
@@ -221,7 +222,8 @@ const TopBar = () => {
     //     { title: "Tarot Experts", path: "/astro/tarot" },
     //   ],
     // },
-    { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
+    { title: "Numerology", path: "/numerology" },
+    { title: "Chat with Astrologer", path: "/chat-with-astrologers" },
     { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
     { title: "Join Live", path: "/audience-live-streaming" },
     { title: "Astromall", path: "/shop" },

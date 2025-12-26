@@ -27,8 +27,15 @@ const ChatWindow = () => {
 
   const { activeCall } = useCall();
 
-  const { messages, error, isTyping, sendMessage, astroReply, sendTyping, chatSeconds } =
-    useChat({ userId, astrologerId, roomId, isUserSide, kundliId });
+  const {
+    messages,
+    error,
+    isTyping,
+    sendMessage,
+    astroReply,
+    sendTyping,
+    chatSeconds,
+  } = useChat({ userId, astrologerId, roomId, isUserSide, kundliId });
 
   const [message, setMessage] = useState("");
 
@@ -63,7 +70,17 @@ const ChatWindow = () => {
   const { isInactive, resetTimer } = useInactivityTimer(120000);
   const handleDisconnect = () => navigate(-1);
 
-  const handleSend = () => {
+  const handleSend = (kundli = null) => {
+    if (kundli?._id) {
+      const baseUrl = window.location.origin;
+
+      const kundliLink = `${baseUrl}/kundli/${kundli._id}`;
+      isUserSide ? sendMessage(kundliLink) : astroReply(kundliLink);
+
+      setMessage("");
+      return;
+    }
+
     if (!message.trim()) return;
     isUserSide ? sendMessage(message) : astroReply(message);
     setMessage("");
@@ -93,15 +110,15 @@ const ChatWindow = () => {
         Toast.success(res.message);
         handleDisconnect();
       } else {
-        Toast.error(res.message)
+        Toast.error(res.message);
       }
 
       setOpenFeedback(false);
     } catch (error) {
       console.error("Failed to submit review", error);
     }
-  }
-  
+  };
+
   const formatChatTime = (secs) => {
     const minutes = String(Math.floor(secs / 60)).padStart(2, "0");
     const seconds = String(secs % 60).padStart(2, "0");

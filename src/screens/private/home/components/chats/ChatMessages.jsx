@@ -1,5 +1,6 @@
 import styles from "./ChatWindow.module.scss";
 import { PrimaryText } from "../../../../../component";
+import { GrReactjs } from "react-icons/gr";
 
 const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
   return (
@@ -14,8 +15,35 @@ const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
           }`}
         >
           <PrimaryText size={14} color={msg.isSender ? "#fff" : "#111"}>
-            {msg.text}
+            {(() => {
+              const urlRegex = /(https?:\/\/[^\s]+)/g;
+              const match = msg.text.match(urlRegex);
+
+              if (match) {
+                return (
+                  <a
+                    href={match[0]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      textDecoration: "underline",
+                      fontWeight: 600,
+                      color: msg.isSender ? "#111" : "#111",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <GrReactjs />
+                    View Kundli
+                  </a>
+                );
+              }
+
+              return msg.text;
+            })()}
           </PrimaryText>
+
           <span className={styles.msgTime}>{msg.time}</span>
         </div>
       ))}

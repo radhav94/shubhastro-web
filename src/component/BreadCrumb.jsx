@@ -1,9 +1,12 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import styles from "./Breadcrumb.module.scss";
+import { useSelector } from "react-redux";
+import { blogApi } from "../services/appServices/blogService";
 
 const Breadcrumb = () => {
   const location = useLocation();
+  const params = useParams();
 
   const isAstroDashboard = location.pathname.startsWith(
     "/astrologer-dashboard"
@@ -11,13 +14,24 @@ const Breadcrumb = () => {
 
   const pathnames = location.pathname
     .split("/")
-    .filter((x) => x.replace(/\+/g, ""));
+    .filter(Boolean);
 
-  if (pathnames.length === 0) return null;
+  if (!pathnames.length) return null;
+
+  const astrologerName =
+    location.state?.fullName ||
+    location.state?.astroName;
+
+  const { slug } = useParams();
+
+  const blogData = useSelector((state) =>
+    blogApi.endpoints.getSingleBlog.select(slug)(state)
+  );
+
+  const blogTitle = blogData?.data?.data?.title;
 
   return (
     <div className={styles.breadCrumb}>
-      {/* If inside Astrologer Dashboard, start from "Astrologer Dashboard" */}
       {isAstroDashboard ? (
         <Link to="/astrologer-dashboard">Astrologer Dashboard</Link>
       ) : (
@@ -28,16 +42,32 @@ const Breadcrumb = () => {
         const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
         const isLast = index === pathnames.length - 1;
 
-        // Skip the first segment when in astrologer-dashboard (to avoid duplication)
         if (isAstroDashboard && index === 0) return null;
+
+        let label = name.replace(/-/g, " ");
+
+        // 🔥 Replace astrologer ID with name
+        if (
+          pathnames[index - 1] === "talk-to-astrologers" &&
+          name === params.id &&
+          astrologerName
+        ) {
+          label = astrologerName;
+        }
+
+        if (pathnames[index - 1] === "blog" && blogTitle) {
+          label = blogTitle;
+        }
 
         return (
           <span key={routeTo}>
             {" > "}
             {isLast ? (
-              <span className="text-yellow-500">{name.replace(/-/g, " ")}</span>
+              <span className="text-yellow-500 capitalize">{label}</span>
             ) : (
-              <Link to={routeTo}>{name.replace(/-/g, " ")}</Link>
+              <Link to={routeTo} className="capitalize">
+                {label}
+              </Link>
             )}
           </span>
         );

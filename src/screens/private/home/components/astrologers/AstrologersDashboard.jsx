@@ -9,8 +9,7 @@ import { useCall } from "../../../../../context/CallContext";
 import CallHistoryTab from "./CallHistoryTab";
 
 const AstrologersDashboard = () => {
-    const { setActiveCall ,waitingList,
-    setWaitingList,} = useCall();
+  const { setActiveCall, waitingList, setWaitingList } = useCall();
 
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -22,7 +21,6 @@ const AstrologersDashboard = () => {
   const [callerUserId, setCallerUserId] = useState(null);
   const [token, setToken] = useState("");
   // const [waitingList, setWaitingList] = useState([]);
-
 
   useEffect(() => {
     if (!voiceSocket.connected) {
@@ -61,66 +59,55 @@ const AstrologersDashboard = () => {
       setToken("");
     };
 
+    const handleWaitingList = (data) => {
+      const normalizedList = (data.list || []).map((call) => ({
+        ...call,
 
- const handleWaitingList = (data) => {
-  const normalizedList = (data.list || []).map((call) => ({
-    ...call,
+        // ✅ Extract correct caller info
+        callerId: call.userId,
+        callerName:
+          call.user?.customer?.name ||
+          call.user?.customer?.fullName ||
+          call.userId,
 
-    // ✅ Extract correct caller info
-    callerId: call.userId,
-    callerName:
-      call.user?.customer?.name ||
-      call.user?.customer?.fullName ||
-      call.userId,
+        agoraToken: call.agoraToken,
+      }));
 
-    agoraToken: call.agoraToken,
-  }));
-
-  setWaitingList(normalizedList);
-};
-
-
+      setWaitingList(normalizedList);
+    };
 
     voiceSocket.on("incoming_call", handleIncomingVoiceCall);
-    voiceSocket.on("waiting_list",handleWaitingList);
+    voiceSocket.on("waiting_list", handleWaitingList);
     voiceSocket.on("call_canceled", handleCanceledCall);
 
     return () => {
       voiceSocket.off("incoming_call", handleIncomingVoiceCall);
       voiceSocket.off("call_canceled", handleCanceledCall);
-      voiceSocket.off("waiting_list",handleWaitingList);
-
+      voiceSocket.off("waiting_list", handleWaitingList);
     };
   }, []);
 
-
-
   const handleAccept = () => {
-  if (!roomId) return;
+    if (!roomId) return;
 
-  voiceSocket.emit("accept_call", {
-    roomId,
-    token,
-    channelName: roomId,
-    astrologerId: astroIdLocal,
-  });
+    voiceSocket.emit("accept_call", {
+      roomId,
+      token,
+      channelName: roomId,
+      astrologerId: astroIdLocal,
+    });
 
-  setIncomingCall(false);
-  setIncomingVideoCall(false);
+    setIncomingCall(false);
+    setIncomingVideoCall(false);
 
-  setActiveCall({
-    roomId,
-    agoraToken: token,
-    callerName: callerUserId,
-    isUserSide: false,
-    callType: "audio",
-  });
-
-  console.log("test the following",token,callerUserId,roomId)
-
-};
-
-  
+    setActiveCall({
+      roomId,
+      agoraToken: token,
+      callerName: callerUserId,
+      isUserSide: false,
+      callType: "audio",
+    });
+  };
 
   const handleReject = () => {
     if (!roomId) return;
@@ -130,29 +117,27 @@ const AstrologersDashboard = () => {
     setIncomingVideoCall(false);
   };
 
-
   const handleVideoAccept = () => {
-  if (!roomId) return;
+    if (!roomId) return;
 
-  voiceSocket.emit("accept_call", {
-    roomId,
-    token,
-    channelName: roomId,
-    astrologerId: astroIdLocal,
-  });
+    voiceSocket.emit("accept_call", {
+      roomId,
+      token,
+      channelName: roomId,
+      astrologerId: astroIdLocal,
+    });
 
-  setIncomingCall(false);
-  setIncomingVideoCall(false);
+    setIncomingCall(false);
+    setIncomingVideoCall(false);
 
-  setActiveCall({
-    roomId,
-    agoraToken: token,
-    callerName: callerUserId,
-    isUserSide: false,
-    callType: "video",
-  });
-
-};
+    setActiveCall({
+      roomId,
+      agoraToken: token,
+      callerName: callerUserId,
+      isUserSide: false,
+      callType: "video",
+    });
+  };
 
   const handleVideoReject = () => {
     if (!roomId) return;
@@ -276,7 +261,6 @@ const AstrologersDashboard = () => {
     </div>
   );
 
-
   return (
     <div className={styles.wrapper}>
       {/* ONLINE TOGGLE */}
@@ -330,7 +314,7 @@ const AstrologersDashboard = () => {
 
       {/* ⭐ CONTENT AREA */}
       {activeTab === "dashboard" && DashboardTab}
-      {activeTab === "history" && <CallHistoryTab/>}
+      {activeTab === "history" && <CallHistoryTab />}
     </div>
   );
 };

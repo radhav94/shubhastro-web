@@ -1,22 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-const useRecommendTrigger = (threshold = 0.8) => {
+const useRecommendTrigger = (step = 120, resetKey = 0) => {
   const [showCTA, setShowCTA] = useState(false);
+  const nextTriggerPoint = useRef(step);
+
+  // Reset trigger after close
+  useEffect(() => {
+    setShowCTA(false);
+    nextTriggerPoint.current = window.scrollY + step;
+  }, [resetKey, step]);
 
   useEffect(() => {
     const onScroll = () => {
-      const scrolled =
-        window.scrollY / (document.body.scrollHeight - window.innerHeight);
-
-      if (scrolled > threshold) {
+      if (window.scrollY >= nextTriggerPoint.current) {
         setShowCTA(true);
-        window.removeEventListener("scroll", onScroll);
+        // move checkpoint forward
+        nextTriggerPoint.current += step;
       }
     };
 
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [threshold]);
+  }, [step]);
 
   return showCTA;
 };

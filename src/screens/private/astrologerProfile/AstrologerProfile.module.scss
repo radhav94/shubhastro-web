@@ -234,3 +234,216 @@
   color: #ffd500;
   font-size: 32px;
 }
+/* ===============================
+   MOBILE RESPONSIVE (STRUCTURE ONLY)
+   =============================== */
+
+@media (max-width: 768px) {
+  .page {
+    padding: 14px;
+    p {
+      text-align: center;
+    }
+  }
+
+  /* Header card layout */
+  .header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+  }
+
+  .leftBlock {
+    width: 100%;
+  }
+
+  .profileImg {
+    width: 120px;
+    height: 120px;
+  }
+
+  .followBtn {
+    margin-top: 10px;
+    width: 120px;
+  }
+
+  .headerInfo {
+    width: 100%;
+    text-align: center;
+  }
+
+  .nameRow {
+    justify-content: center;
+  }
+
+  .headerInfo h1 {
+    font-size: 22px;
+  }
+
+  .price {
+    margin-top: 8px;
+  }
+
+  /* Stats row */
+  .stats {
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  /* Action buttons like mobile app */
+  .actionRow {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .chatBtn,
+  .callBtn,
+  .videoCallBtn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  /* Gallery becomes horizontal scroll */
+  .gallery {
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 6px;
+  }
+
+  .gallery img {
+    min-width: 220px;
+    height: 160px;
+  }
+
+  /* About */
+  .about {
+    margin-top: 28px;
+  }
+
+  /* Rating & Reviews stack */
+  .ratingAndReview {
+    flex-direction: column;
+  }
+
+  .ratingSection {
+    width: 100%;
+    margin-top: 30px;
+  }
+
+  .reviews {
+    margin-top: 20px;
+    padding: 16px;
+  }
+
+  .reviewCard {
+    padding: 14px;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 480px) {
+  .profileImg {
+    width: 100px;
+    height: 100px;
+  }
+
+  .headerInfo h1 {
+    font-size: 20px;
+  }
+
+  .price {
+    font-size: 14px;
+  }
+
+  .stats {
+    font-size: 13px;
+  }
+
+  .ratingValue h1 {
+    font-size: 36px;
+  }
+}
+
+/* 📌 FULL SCREEN POPUP OVERLAY */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+/* 📌 Popup Card */
+.modalContainer {
+  width: 360px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 22px;
+  text-align: center;
+  box-shadow: 0px 12px 35px rgba(0, 0, 0, 0.25);
+  animation: scaleUp 0.25s ease-out forwards;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 📌 Button Wrapper */
+.modalButtons {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+
+/* ✔ Accept Button Style */
+.acceptBtn {
+  background: #1f9c3a;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  min-width: 110px;
+  transition: 0.2s ease-in-out;
+
+  &:hover {
+    background: #187d2f;
+  }
+}
+
+/* ❌ Cancel / Reject Button Style */
+.rejectBtn {
+  background: #d93b3b;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  min-width: 110px;
+  transition: 0.2s ease-in-out;
+
+  &:hover {
+    background: #b63030;
+  }
+}
+
+/* ✨ Subtle Text */
+.waitingText {
+  font-size: 14px;
+  color: #666;
+}

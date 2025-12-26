@@ -1,0 +1,80 @@
+import { useState, useEffect, useRef } from "react";
+import { useLazyGeoSearchQuery } from "../../redux/api/geoApi";
+import styles from "./locationSearch.module.scss";
+
+const LocationSearch = ({ value, onChange, onPlaceSelect }) => {
+  const [triggerGeoSearch, { data = [], isFetching }] = useLazyGeoSearchQuery();
+  const [open, setOpen] = useState(false);
+  const selectionMade = useRef(false); // Track if a place is selected
+
+  // Only call API when user types in input
+  const handleInputChange = (e) => {
+    const newValue = e.target.value;
+    selectionMade.current = false; // reset selection
+    onChange(e);
+
+    if (newValue && newValue.length >= 2) {
+      triggerGeoSearch(encodeURIComponent(newValue)); // call API
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  };
+
+  const handleSelect = (item) => {
+    try {
+      onPlaceSelect({
+        address: item.full_name,
+        lat: Number(item.coordinates[0]),
+        lng: Number(item.coordinates[1]),
+      });
+      selectionMade.current = true; // prevent further API calls until user types again
+      setOpen(false);
+    } catch (err) {
+      console.error("Error selecting place:", err);
+    }
+  };
+
+  return (
+    <div className={styles.wrapper}>
+      <input
+        type="text"
+        value={value}
+        onChange={handleInputChange} // API triggers only here
+        placeholder="Search for a city..."
+        className={styles.input}
+        autoComplete="off"
+      />
+
+      {open && (
+        <div className={styles.dropdown}>
+          {isFetching && <div className={styles.loading}>Searching…</div>}
+
+          {!isFetching && data.length === 0 && (
+            <div className={styles.noResult}>No results</div>
+          )}
+
+          {!isFetching &&
+            data.map((item, index) => {
+              const displayName =
+                item.full_name && item.country && item.country_name
+                  ? item.full_name.replace(new RegExp(`${item.country}$`), item.country_name)
+                  : item.full_name || "";
+
+              return (
+                <div
+                  key={`${item.full_name || index}-${index}`}
+                  className={styles.item}
+                  onClick={() => handleSelect({ ...item, full_name: displayName })}
+                >
+                  <strong>{displayName}</strong>
+                </div>
+              );
+            })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default LocationSearch;

@@ -59,13 +59,13 @@ const Kundali = () => {
   //   data: birthPanchang,
   //   isSuccess: isPanchang,
   //   isLoading: panchangLoading,
-  // } = useGetBasicPanchangQuery(payload ? { payload } : skipToken);  
-    /** 🌟 Load Planet Data */
-    const {
-      data:fullData,
-      isLoading: planetLoading,
-      isSuccess: planetSuccess,
-    } = useGetPlanetsQuery(params ? params : skipToken);
+  // } = useGetBasicPanchangQuery(payload ? { payload } : skipToken);
+  /** 🌟 Load Planet Data */
+  const {
+    data: fullData,
+    isLoading: planetLoading,
+    isSuccess: planetSuccess,
+  } = useGetPlanetsQuery(params ? params : skipToken);
   const {
     data,
     isSuccess: isAstro,
@@ -116,15 +116,13 @@ const Kundali = () => {
         behavior: "smooth",
       });
     }
-  }, [ planetLoading, isAstro]);
+  }, [planetLoading, isAstro]);
 
   return (
     <>
       <KundaliHeader />
 
-      <PrimaryLoader
-        isLoading={planetLoading || astroLoading}
-      />
+      <PrimaryLoader isLoading={planetLoading || astroLoading} />
 
       <div ref={contentRef}>
         {planetLoading || isAstro ? (

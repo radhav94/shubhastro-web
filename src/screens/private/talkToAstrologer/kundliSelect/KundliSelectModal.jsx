@@ -3,12 +3,13 @@ import { createPortal } from "react-dom";
 import styles from "./KundliSelectModal.module.scss";
 import { IoClose } from "react-icons/io5";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import { padZero } from "../../../../utils/dateFormat/dateTime";
 
 import {
   useGetAllKundlisQuery,
   useCreateKundliMutation,
 } from "../../../../services/appServices/kundliServicesNew";
-import LocationSearch from "../../../../utils/location/locationSearch";
+import LocationSearch from "../../../../utils/location/locationSearchVedic";
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const months = [
@@ -123,7 +124,8 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                         {k.name} ({k.gender})
                       </p>
                       <p className={styles.dob}>
-                        {k.day} {k.month}, {k.year} • {k.hour}:{k.min}
+                        {padZero(k.day)}-{padZero(k.month)}-{k.year} •{" "}
+                        {padZero(k.hour)}:{padZero(k.min)}
                       </p>
                       <p className={styles.place}>{k.place}</p>
                     </div>

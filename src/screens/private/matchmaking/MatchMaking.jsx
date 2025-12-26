@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LocationSearch from "../../../utils/location/locationSearch";
+import LocationSearch from "../../../utils/location/locationSearchVedic";
 import styles from "./MatchMaking.module.scss";
 import PrimaryText from "../../../component/PrimaryText";
 import { PATH } from "../../../utils/routes/Paths";
@@ -135,10 +135,10 @@ const MatchMaking = () => {
   const handleGenerate = (e) => {
     e.preventDefault();
 
-    if (!token) {
-      navigate("/login", { state: { from: location.pathname } });
-      return;
-    }
+    // if (!token) {
+    //   navigate("/login", { state: { from: location.pathname } });
+    //   return;
+    // }
 
     const boyErrors = validatePerson(formData.boyData);
     const girlErrors = validatePerson(formData.girlData);
@@ -189,22 +189,30 @@ const MatchMaking = () => {
     // -----------------------------------------------------
     const selected = savedKundlis.find((k) => k._id === selectedKundliId);
 
-    if (selected) {
-      if (selected.gender.toLowerCase() === "male") {
+    if (token) {
+      // 🔹 CASE 1: Selected kundli exists
+      if (selected) {
+        const selectedGender = selected.gender.toLowerCase();
+        if (selectedGender === "female") {
+          if (!isDuplicateKundli(boyPayload, savedKundlis)) {
+            createKundli(boyPayload);
+          }
+        }
+        if (selectedGender === "male") {
+          if (!isDuplicateKundli(girlPayload, savedKundlis)) {
+            createKundli(girlPayload);
+          }
+        }
+      }
+      else {
         if (!isDuplicateKundli(boyPayload, savedKundlis)) {
           createKundli(boyPayload);
         }
-      }
-      if (selected.gender.toLowerCase() === "female") {
+
         if (!isDuplicateKundli(girlPayload, savedKundlis)) {
           createKundli(girlPayload);
         }
       }
-    } else {
-      if (!isDuplicateKundli(boyPayload, savedKundlis))
-        createKundli(boyPayload);
-      if (!isDuplicateKundli(girlPayload, savedKundlis))
-        createKundli(girlPayload);
     }
 
     navigate(PATH.privateRoutes.MATCHMAKING_DETAILS.path, { state: formData });
@@ -262,8 +270,8 @@ const MatchMaking = () => {
 
           {/* Birth Place */}
           <div className={styles.formGroup}>
-            <label>Birth Place*</label>
-            <LocationSearch
+          <label>Birth Place*</label>
+          <LocationSearch
               value={data.place.address}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -279,8 +287,8 @@ const MatchMaking = () => {
               }
               onPlaceSelect={(loc) => handlePlaceSelect(personKey, loc)}
             />
-            {err.place && <p className={styles.error}>{err.place}</p>}
-          </div>
+          {err.place && <p className={styles.error}>{err.place}</p>}
+        </div>
         </div>
       </div>
     );

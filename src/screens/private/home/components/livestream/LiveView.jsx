@@ -6,11 +6,10 @@ import GiftPopup from "./GiftPopup";
 import CallRequestPopup from "./CallRequestPopup";
 import SharePopup from "./SharePopup";
 import { Toast } from "../../../../../component";
+import { useGetAllGiftsQuery } from "../../../../../redux/api/gift/giftApi";
 
 const LiveView = (props) => {
   const [showGifts, setShowGifts] = useState(false);
-  const [selectedGift, setSelectedGift] = useState(null);
-  const [coins, setCoins] = useState(106);
   const [showCallPopup, setShowCallPopup] = useState(false);
 
   const hostData = {
@@ -19,22 +18,7 @@ const LiveView = (props) => {
     rate: 32,
   };
 
-
-
-  
-
-  const giftList = [
-    { id: 1, name: "Flowers", price: 15, icon: "/gifts/flowers.png" },
-    { id: 2, name: "Pooja Thali", price: 21, icon: "/gifts/pooja.png" },
-    { id: 3, name: "Heart", price: 21, icon: "/gifts/heart.png" },
-    { id: 4, name: "Chocolates", price: 51, icon: "/gifts/choco.png" },
-    { id: 5, name: "Sweets", price: 101, icon: "/gifts/sweets.png" },
-    { id: 6, name: "Magician", price: 101, icon: "/gifts/magic.png" },
-    { id: 7, name: "Shivling", price: 251, icon: "/gifts/shiv.png" },
-    { id: 8, name: "Crown", price: 501, icon: "/gifts/crown.png" },
-    { id: 9, name: "Dakshina", price: 2100, icon: "/gifts/dakshina.png" },
-    { id: 10, name: "Ganesha", price: 5100, icon: "/gifts/ganesha.png" },
-  ];
+  const { data: giftList, isLoading } = useGetAllGiftsQuery();
 
   const {
     ROLE,
@@ -66,6 +50,11 @@ const LiveView = (props) => {
     shareToFacebook,
     shareToPinterest,
   } = useLiveViewLogic(props);
+
+  const handleGiftSent = () => {
+    Toast.success("Gift Sent!");
+    setShowGifts(false);
+  };
 
   return (
     <div className="video-box">
@@ -146,24 +135,16 @@ const LiveView = (props) => {
       <GiftPopup
         show={showGifts}
         onClose={() => setShowGifts(false)}
-        giftList={giftList}
-        coins={coins}
-        selectedGift={selectedGift}
-        setSelectedGift={setSelectedGift}
-        onSend={() => {
-          Toast.success("Gift Sent!");
-          setShowGifts(false);
-        }}
+        giftList={giftList?.data}
       />
-     <SharePopup
-  show={showSharePopup}
-  onClose={() => setShowSharePopup(false)}
-  url={window.location.href}
-  shareToWhatsapp={shareToWhatsapp}
-  shareToGmail={shareToGmail}
-  handleCopyLink={handleCopyLink}
-/>
-
+      <SharePopup
+        show={showSharePopup}
+        onClose={() => setShowSharePopup(false)}
+        url={window.location.href}
+        shareToWhatsapp={shareToWhatsapp}
+        shareToGmail={shareToGmail}
+        handleCopyLink={handleCopyLink}
+      />
 
       <CallRequestPopup
         show={showCallPopup}
@@ -185,9 +166,11 @@ const LiveView = (props) => {
           📞
         </button>
 
-        <button className="icon-btn" onClick={() => setShowGifts(true)}>
-          🎁
-        </button>
+        {!isHost && (
+          <button className="icon-btn" onClick={() => setShowGifts(true)}>
+            🎁
+          </button>
+        )}
 
         {isHost && (
           <button
@@ -198,7 +181,6 @@ const LiveView = (props) => {
           </button>
         )}
       </div>
-
     </div>
   );
 };

@@ -23,6 +23,7 @@ import { useCall } from "../../../context/CallContext";
 import useRecommendTrigger from "../../../utils/hooks/useRecommendTrigger";
 import RecommendCTA from "../../../layouts/recommend/RecommendCTA";
 import RecommendModal from "../../../component/UI/modal/RecommendModal/RecommendModal";
+import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -36,9 +37,17 @@ const astroImages = [
 
 const TalkToAstrologer = () => {
   const navigate = useNavigate();
-  const showCTA = useRecommendTrigger(0.7);
-  const [open, setOpen] = useState(false);
+  const [resetTrigger, setResetTrigger] = useState(0);
   const [showRecommend, setShowRecommend] = useState(true);
+
+  const showCTA = useRecommendTrigger(120, resetTrigger);
+  useEffect(() => {
+    if (showCTA) {
+      setShowRecommend(true);
+    }
+  }, [showCTA]);
+
+  const [open, setOpen] = useState(false);
 
   const [
     onFollow,
@@ -183,9 +192,9 @@ const TalkToAstrologer = () => {
 
   const handleApplyFilters = (payload) => {
     const { result = [], append = false } = payload || {};
-  
+
     setIsFiltered(true);
-  
+
     if (!append) {
       // 🔹 first page OR new filter → reset list
       setPage(1);
@@ -198,10 +207,9 @@ const TalkToAstrologer = () => {
         return [...prev, ...newOnes];
       });
     }
-  
+
     setHasMore(result.length >= limit);
   };
-  
 
   // Kundli & Chat handlers
   const openKundliPopup = (astro) => {
@@ -249,6 +257,22 @@ const TalkToAstrologer = () => {
 
   /* ------------------- SOCKET CALL FLOW (ADDED ONLY) ------------------- */
 
+  useEffect(() => {
+    if (!userIdLocal) return;
+
+    if (!voiceSocket.connected) {
+      voiceSocket.io.opts.query = {
+        userId: userIdLocal,
+        role: "CUSTOMER",
+      };
+      voiceSocket.connect();
+    }
+
+    return () => {
+      voiceSocket.off(); // remove listeners only
+    };
+  }, [userIdLocal]);
+
   const connectSocket = () => {
     if (voiceSocket.connected) voiceSocket.disconnect();
 
@@ -258,6 +282,18 @@ const TalkToAstrologer = () => {
     };
 
     voiceSocket.connect();
+  };
+
+  const resetCallState = () => {
+    setWaitingPopup(false);
+    setCallRoomId(null);
+    setCallType(null);
+    setActiveCallAstro(null);
+
+    activeCallAstroRef.current = null;
+    kundliRef.current = null;
+
+    setActiveCall(null);
   };
 
   const initiateCall = (astro, type) => {
@@ -291,7 +327,7 @@ const TalkToAstrologer = () => {
     setWaitingPopup(true);
 
     // 🔌 Ensure socket connection
-    connectSocket();
+    // connectSocket();
 
     // 🚀 Create call room
     voiceSocket.emit("create_call_room", {
@@ -317,20 +353,6 @@ const TalkToAstrologer = () => {
       setCallRoomId(roomId);
       setWaitingPopup(true);
     };
-
-    /* CALL ACCEPTED → NO NAVIGATION ANYMORE */
-    // const handleCallAccepted = ({ roomId, token, type }) => {
-    //   setWaitingPopup(false);
-
-    //   setActiveCall({
-    //     roomId,
-    //     agoraToken: token,
-    //     callerName: activeCallAstroRef.current?.firstName,
-    //     isUserSide: true,
-    //     callType: type,
-    //   });
-
-    // };
 
     const handleCallAccepted = async ({ roomId, token, type }) => {
       setWaitingPopup(false);
@@ -366,21 +388,26 @@ const TalkToAstrologer = () => {
     /* REJECTED */
     const handleCallRejected = (data) => {
       Toast.error(data?.sessionData?.sessionEndReason || "Call rejected");
-      setWaitingPopup(false);
-      voiceSocket.disconnect();
+      resetCallState();
     };
 
     /* ERROR */
     const handleSocketError = (err) => {
+      console.log("SOCKET ERROR:", err);
+
+      if (err?.message === "Call has already ended") {
+        // soft reset only
+        resetCallState();
+        return;
+      }
+
       Toast.error(err?.message || "Connection error");
-      setWaitingPopup(false);
-      voiceSocket.disconnect();
+      resetCallState();
     };
 
     /* CALL ENDED */
     const handleCallEnded = () => {
-      setWaitingPopup(false);
-      voiceSocket.disconnect();
+      resetCallState();
     };
 
     // Attach events
@@ -399,11 +426,6 @@ const TalkToAstrologer = () => {
     };
   }, [userIdLocal]);
 
-  const handleClick = () => {
-    setOpen(true);
-    setShowRecommend(false);
-  };
-
   /* ------------------------------------------------------------------- */
 
   return (
@@ -413,6 +435,7 @@ const TalkToAstrologer = () => {
       </PrimaryText>
 
       {waitingPopup && (
+        // <WaitingModal callRoomId={callRoomId} resetCallState={resetCallState} />
         <div className={styles.modalOverlay}>
           <div className={styles.modalContainer}>
             <PrimaryText size_18 isSemiBold>
@@ -426,11 +449,10 @@ const TalkToAstrologer = () => {
               <button
                 className={styles.rejectBtn}
                 onClick={() => {
-                  voiceSocket.emit("cancel_call", {
-                    roomId: callRoomId,
-                  });
-                  setWaitingPopup(false);
-                  setCallRoomId(null); // ✅ REQUIRED
+                  if (callRoomId) {
+                    voiceSocket.emit("cancel_call", { roomId: callRoomId });
+                  }
+                  resetCallState();
                 }}
               >
                 Cancel
@@ -443,7 +465,10 @@ const TalkToAstrologer = () => {
       <div className="pt-4" />
       <Title title="Trial Offer ( 3 left )" showDivider />
 
-      <FilterChips onSelect={handleSelect} onApplyFilters={handleApplyFilters} />
+      <FilterChips
+        onSelect={handleSelect}
+        onApplyFilters={handleApplyFilters}
+      />
 
       <div className={styles.cardsContainer}>
         {allAstrologers.map((astro, index) => (
@@ -468,7 +493,7 @@ const TalkToAstrologer = () => {
 
         {!isFetching && allAstrologers.length === 0 && (
           <div className={styles.emptyState}>
-          <PrimaryText>No astrologers found.</PrimaryText>
+            <PrimaryText>No astrologers found.</PrimaryText>
           </div>
         )}
       </div>
@@ -528,17 +553,24 @@ const TalkToAstrologer = () => {
       {showCTA && showRecommend && (
         <RecommendCTA
           mode="chat"
-          onClick={handleClick} // Chat Now
-          onClose={() => setShowRecommend(false)} //  Close
+          onClick={() => {
+            setOpen(true);
+            setShowRecommend(false);
+          }}
+          onClose={() => {
+            setShowRecommend(false); // close now
+            setResetTrigger((prev) => prev + 1); // allow next scroll
+          }}
         />
       )}
 
-      <RecommendModal
-        open={open}
-        onClose={() => setOpen(false)}
-        mode="chat"
-        data={allAstrologers.slice(0, 8)}
-      />
+      {open && (
+        <RecommendModal
+          open={open}
+          onClose={() => setOpen(false)}
+          mode="chat"
+        />
+      )}
     </div>
   );
 };
