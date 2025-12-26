@@ -11,8 +11,8 @@ const CHANNEL_NAME = "testnewchannellive";
  * Replace these with the tokens FROM AGORA CONSOLE
  * based on the exact UID format below
  */
-const HOST_RTM_TOKEN = "0065630460abdc141e3b2f8d9597752bd7dIAByS4w1xoNWxDHpabPe2pBhw0bosUvYWekbQfbV+jnod5O2XjoAAAAAEABJobrSxSxFaQEA6APFLEVp";
-const AUDIENCE_RTM_TOKEN = "0065630460abdc141e3b2f8d9597752bd7dIAACNCWXRqCqi/HK4eYsHrTCWw80RUOxVq17tRyvH06ZkwLXAzAAAAAAEABJobrSryxFaQEA6AOvLEVp";
+const HOST_RTM_TOKEN = "0065630460abdc141e3b2f8d9597752bd7dIADWzrD7oASi2gMLqybOgCjqGZOY7q9WkCai4M1xSw4OUZO2XjoAAAAAEABWKbNQJ3pPaQEA6AMnek9p";
+const AUDIENCE_RTM_TOKEN = "0065630460abdc141e3b2f8d9597752bd7dIAChnA1JbYYqFn8fs85PGwvG6DR/D2nuI2a7rof3YMbJQwLXAzAAAAAAEABWKbNQFnpPaQEA6AMVek9p";
 
 export const useLiveChat = (ROLE) => {
   const rtmClientRef = useRef(null);
