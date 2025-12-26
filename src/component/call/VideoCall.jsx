@@ -10,8 +10,8 @@ import {
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import styles from "./VideoCalling.module.scss";
-import { useCall } from "../../context/CallContext";
 import { voiceSocket } from "../../services/voiceSocketServices";
+import { useCall } from "../../context/CallContext";
 
 const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 
@@ -28,6 +28,8 @@ const VideoCalling = ({ callData }) => {
   const camTrackRef = useRef(null);
 
   const localVideoFullRef = useRef(null);
+  const [isLocalBig, setIsLocalBig] = useState(false);
+
   const localVideoMiniRef = useRef(null);
   const remoteVideoRef = useRef(null);
 
@@ -44,58 +46,84 @@ const VideoCalling = ({ callData }) => {
   const timerRef = useRef(null);
 
   /* ================= LOCAL VIDEO ================= */
-  const playLocalVideo = (container) => {
-    if (!camTrackRef.current || !container) return;
-    camTrackRef.current.stop();
-    camTrackRef.current.play(container);
-  };
+ const playLocalVideo = (container) => {
+  if (!camTrackRef.current || !container) return;
 
-  /* ================= REMOTE VIDEO SAFE PLAY ================= */
-  const safePlayRemoteVideo = (track) => {
-    if (!remoteVideoRef.current || !track) return;
+  try {
+    camTrackRef.current.stop(); // 🔥 IMPORTANT
+  } catch (e) {}
 
-    remoteVideoRef.current.innerHTML = "";
-    const div = document.createElement("div");
-    div.style.width = "100%";
-    div.style.height = "100%";
-    remoteVideoRef.current.appendChild(div);
-
-    setTimeout(() => {
-      try {
-        track.play(div);
-      } catch (e) {
-        console.warn("Retry remote video play");
-        setTimeout(() => track.play(div), 300);
-      }
-    }, 150);
-  };
-
-  /* ================= RESUME REMOTE AUDIO ================= */
-  // const resumeRemoteAudio = () => {
-  //   if (!clientRef.current) return;
-  //   clientRef.current.remoteUsers.forEach((user) => {
-  //     if (user.audioTrack) {
-  //       user.audioTrack.play();
-  //     }
-  //   });
-  // };
-
-  const resumeRemoteTracks = () => {
-  if (!clientRef.current) return;
-
-  clientRef.current.remoteUsers.forEach((user) => {
-    if (user.audioTrack) {
-      user.audioTrack.play();
-    }
-    if (user.videoTrack && remoteVideoRef.current) {
-      safePlayRemoteVideo(user.videoTrack);
-    }
-  });
+  container.innerHTML = "";
+  camTrackRef.current.play(container);
 };
 
-const resumeRemoteAudio = resumeRemoteTracks;
+
+  /* ================= REMOTE VIDEO SAFE PLAY ================= */
+  // const safePlayRemoteVideo = (track) => {
+  //   if (!remoteVideoRef.current || !track) return;
+
+  //   remoteVideoRef.current.innerHTML = "";
+  //   const div = document.createElement("div");
+  //   div.style.width = "100%";
+  //   div.style.height = "100%";
+  //   remoteVideoRef.current.appendChild(div);
+
+  //   setTimeout(() => {
+  //     try {
+  //       track.play(div);
+  //     } catch (e) {
+  //       console.warn("Retry remote video play");
+  //       setTimeout(() => track.play(div), 300);
+  //     }
+  //   }, 150);
+  // };
+
+  const safePlayRemoteVideo = (track) => {
+  if (!track) return;
+
+  const container = isLocalBig
+    ? localVideoFullRef.current
+    : remoteVideoRef.current;
+
+  if (!container) return;
+
+  try {
+    track.stop(); // 🔥 VERY IMPORTANT
+  } catch (e) {}
+
+  container.innerHTML = "";
+
+  const div = document.createElement("div");
+  div.style.width = "100%";
+  div.style.height = "100%";
+  container.appendChild(div);
+
+  setTimeout(() => {
+    try {
+      track.play(div);
+    } catch (err) {
+      console.warn("Remote play retry");
+      setTimeout(() => track.play(div), 300);
+    }
+  }, 100);
+};
 
 
+  /* ================= RESUME REMOTE AUDIO ================= */
+  const resumeRemoteTracks = () => {
+    if (!clientRef.current) return;
+
+    clientRef.current.remoteUsers.forEach((user) => {
+      if (user.audioTrack) {
+        user.audioTrack.play();
+      }
+      if (user.videoTrack && remoteVideoRef.current) {
+        safePlayRemoteVideo(user.videoTrack);
+      }
+    });
+  };
+
+  const resumeRemoteAudio = resumeRemoteTracks;
 
   /* ================= START CALL ================= */
   useEffect(() => {
@@ -114,18 +142,17 @@ const resumeRemoteAudio = resumeRemoteTracks;
         clientRef.current = client;
 
         client.on("user-published", async (user, mediaType) => {
-  await client.subscribe(user, mediaType);
+          await client.subscribe(user, mediaType);
 
-  if (mediaType === "video" && user.videoTrack) {
-    safePlayRemoteVideo(user.videoTrack);
-  }
+          if (mediaType === "video" && user.videoTrack) {
+            safePlayRemoteVideo(user.videoTrack);
+          }
 
-  if (mediaType === "audio" && user.audioTrack) {
-    // ✅ REQUIRED FOR CROSS DEVICE
-    user.audioTrack.play();
-  }
-});
-
+          if (mediaType === "audio" && user.audioTrack) {
+            // ✅ REQUIRED FOR CROSS DEVICE
+            user.audioTrack.play();
+          }
+        });
 
         client.on("user-unpublished", () => {
           if (remoteVideoRef.current) {
@@ -159,12 +186,25 @@ const resumeRemoteAudio = resumeRemoteTracks;
   }, [roomId]);
 
   /* ================= LOCAL VIDEO ================= */
+ 
+
   useEffect(() => {
     if (!joined) return;
-    isMinimized
-      ? playLocalVideo(localVideoMiniRef.current)
-      : playLocalVideo(localVideoFullRef.current);
-  }, [joined, isMinimized]);
+
+    if (isMinimized) {
+      playLocalVideo(localVideoMiniRef.current);
+    } else if (isLocalBig) {
+      playLocalVideo(remoteVideoRef.current); // local goes big
+    } else {
+      playLocalVideo(localVideoFullRef.current); // local stays small
+    }
+  }, [joined, isMinimized, isLocalBig]);
+
+  useEffect(() => {
+  if (!clientRef.current) return;
+  resumeRemoteTracks();
+}, [isLocalBig]);
+
 
   useEffect(() => {
     micTrackRef.current?.setEnabled(micOn);
@@ -299,8 +339,6 @@ const resumeRemoteAudio = resumeRemoteTracks;
       2,
       "0"
     )}`;
-
-  /* ================= UI ================= */
   return (
     <>
       {/* MINI VIEW */}
@@ -323,7 +361,10 @@ const resumeRemoteAudio = resumeRemoteTracks;
         </div>
 
         <div className={styles.miniVideo}>
-          <div ref={localVideoMiniRef} style={{ width: "100%", height: "100%" }} />
+          <div
+            ref={localVideoMiniRef}
+            style={{ width: "100%", height: "100%" }}
+          />
         </div>
 
         <div className={styles.miniControls}>
@@ -354,10 +395,13 @@ const resumeRemoteAudio = resumeRemoteTracks;
           <div className={styles.videoWrapper}>
             <div ref={remoteVideoRef} className={styles.remoteVideoArea} />
 
-            <div className={styles.localVideoPreview}>
+            <div
+              className={styles.localVideoPreview}
+              onClick={() => setIsLocalBig((p) => !p)}
+            >
               <div
                 ref={localVideoFullRef}
-                style={{ width: "100%", height: "100%" }}
+                style={{ width: "100%", height: "100%", cursor: "pointer" }}
               />
             </div>
 
