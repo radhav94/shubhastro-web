@@ -19,12 +19,13 @@ const GiftSection = ({ astrologer }) => {
   const { balance, refreshWallet } = useWalletBalance();
 
   const handleSend = async () => {
+    console.log(selected, astrologer, "selected");
     if (!selected || !astrologer) return;
 
     try {
       await sendGift({
-        giftId: selected?.ID,
-        astrologerId: astrologer?.ID,
+        giftId: selected?._id,
+        astrologerId: astrologer?._id,
       }).unwrap();
       setSelected(null);
       refreshWallet();
