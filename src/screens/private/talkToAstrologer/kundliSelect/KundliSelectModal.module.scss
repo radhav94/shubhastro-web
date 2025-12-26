@@ -16,7 +16,7 @@ $border: #e5e5e5;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 3000;
+  z-index: 9999000;
 }
 
 // 📦 Modal Box
@@ -196,9 +196,8 @@ $border: #e5e5e5;
 }
 .locationWrapper {
   position: relative;
-  z-index: 5000;  // higher than modal
+  z-index: 5000; // higher than modal
 }
-
 
 // 🎬 Popup Animation
 @keyframes popup {

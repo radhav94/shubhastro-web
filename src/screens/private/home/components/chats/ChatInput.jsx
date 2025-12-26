@@ -22,8 +22,7 @@ const ChatInput = ({ value, onChange, onSend, setOpen }) => {
     const files = e.target.files;
     if (!files || !files.length) return;
 
-    console.log("Selected files:", files);
-    // You can now upload / preview / send files
+    // console.log("Selected files:", files);
   };
 
   return (

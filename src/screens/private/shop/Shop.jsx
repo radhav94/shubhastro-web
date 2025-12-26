@@ -25,11 +25,7 @@ const Shop = () => {
             className={styles.card}
             onClick={() => navigate(`/shop/${cat?._id}`, { state: cat })}
           >
-            <img
-              // src={cat.imgUrl}
-              className={styles.image}
-              // alt={cat?.name}
-            />
+            <img src={cat.imgUrl} className={styles.image} alt={cat?.name} />
 
             <div className={styles.content}>
               {cat?.tag && <span className={styles.tag}>{cat?.tag}</span>}
