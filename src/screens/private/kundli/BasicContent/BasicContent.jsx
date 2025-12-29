@@ -6,6 +6,7 @@ import { appColors } from "../../../../utils/theme";
 import { useSelector } from "react-redux";
 import { useFetchBirthDetailsQuery } from "../../../../redux/api/kundli/kundliApi";
 import { capitalizeWords } from "../../../../utils/capitalize";
+import { format12HourTime } from "../../../../utils/dateFormat/dateTime";
 
 const DetailCard = ({ title, data = {} }) => {
   // format labels nicely (camelCase or snake_case → readable text)
@@ -54,27 +55,6 @@ const BasicContent = (props) => {
   const formatDate = (d, m, y) =>
     `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}/${y}`;
 
-  // Helper to format time (12-hour with AM/PM)
-  const formatTime = (hour, minute, meridiem) => {
-    if (hour === undefined || minute === undefined) return "--";
-
-    let h = Number(hour);
-    const m = Number(minute);
-
-    let suffix = meridiem;
-
-    // ✅ If meridiem is NOT provided, derive it from hour
-    if (!suffix) {
-      suffix = h >= 12 ? "PM" : "AM";
-      h = h % 12 || 12;
-    }
-
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(
-      2,
-      "0"
-    )} ${suffix}`;
-  };
-
   const monthMap = {
     Jan: 1,
     January: 1,
@@ -109,7 +89,7 @@ const BasicContent = (props) => {
       Date:
         formatDate(userDetails.day, userDetails.month, userDetails.year) ||
         "--",
-      Time: formatTime(userDetails.hour, userDetails.minute) || "--",
+      Time: format12HourTime(userDetails.hour, userDetails.minute) || "--",
 
       Place: userDetails?.birthPlace || "--",
 

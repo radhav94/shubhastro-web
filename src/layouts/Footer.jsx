@@ -20,7 +20,7 @@ import { useEffect, useState } from "react";
 const quickLinks = [
   { href: "/talk-to-astrologers", text: "Talk to Astrologer" },
   { href: "/chat-with-astrologers", text: "Chat with Astrologer" },
-  { href: "/tarot", text: "Tarot" },
+  { href: "/tarot/yes-no-tarot", text: "Yes/No Tarot" },
   { href: "/tarot/love-triangle", text: "Love Traingle" },
 ];
 
