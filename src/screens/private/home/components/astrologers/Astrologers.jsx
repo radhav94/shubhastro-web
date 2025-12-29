@@ -21,7 +21,7 @@ const Astrologers = ({ onClickView, onProfile }) => {
   const navigate = useNavigate();
   const { activeCall, setActiveCall } = useCall(); //  IMPORTANT
 
-  const page = 4;
+  const page = 1;
   const limit = 3;
   const { data } = useGetAstrologersQuery({ page, limit });
 

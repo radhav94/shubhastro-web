@@ -13,15 +13,24 @@ const monthMap = {
   Dec: 12,
 };
 export const buildKundliPayload = (formData) => {
+  const hour12 = Number(formData.hour);
+  const isPM = formData.meridiem === "PM";
+
+  // ✅ only convert when PM
+  const hour24 = isPM && hour12 < 12 ? hour12 + 12 : hour12;
+
   return {
     name: formData.name,
     gender: formData.gender?.toLowerCase(),
     day: Number(formData.day),
     month: monthMap[formData.month],
     year: Number(formData.year),
-    hour: Number(formData.hour),
+
+    //  FIXED
+    hour: hour24,
     min: Number(formData.minute),
-    second: Number(formData.second),
+
+    second: 0,
     place: formData.birthPlace,
     lat: Number(formData.latitude),
     lon: Number(formData.longitude),
