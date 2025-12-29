@@ -49,7 +49,6 @@ const Kundali = () => {
 
   const payload = useSelector((state) => state?.form?.kundliPayload);
   const params = buildVedicParam(payload);
-  console.log(params, "params");
   // const {
   //   data: birthDetails,
   //   isSuccess: isBirth,
@@ -120,7 +119,7 @@ const Kundali = () => {
   }, [planetLoading, isAstro]);
 
   return (
-    <>
+    <div>
       <KundaliHeader />
 
       <PrimaryLoader isLoading={planetLoading || astroLoading} />
@@ -132,7 +131,7 @@ const Kundali = () => {
           <HtmlContentCard sections={kundliInfoData} />
         )}
       </div>
-    </>
+    </div>
   );
 };
 

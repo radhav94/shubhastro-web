@@ -6,12 +6,16 @@ import IframeModal from "./IframeModal";
 
 const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
   const [iframeSrc, setIframeSrc] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const extractKundliPath = (url) => {
+    setLoading(true);
     try {
       const parsed = new URL(url);
+      setLoading(false);
       return parsed.pathname; // "/kundli/:id"
     } catch {
+      setLoading(false);
       return null;
     }
   };
@@ -67,6 +71,7 @@ const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
         open={!!iframeSrc}
         src={iframeSrc}
         onClose={() => setIframeSrc(null)}
+        loading={loading}
       />
     </>
   );

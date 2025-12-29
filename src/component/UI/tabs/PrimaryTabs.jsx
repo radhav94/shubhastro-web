@@ -5,6 +5,7 @@ import PrimaryText from "../../PrimaryText";
 import ConnectCard from "../cards/connectCard/ConnectCard";
 import ServiceCards from "../../../screens/private/home/components/serviceCards/ServiceCards";
 import ZodiacCarousel from "../../../screens/private/horoscope/zodiacCarousel/ZodiacCarousel";
+import { useParams } from "react-router-dom";
 
 const PrimaryTabs = ({ tabs = [] }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(
@@ -14,6 +15,12 @@ const PrimaryTabs = ({ tabs = [] }) => {
   if (activeTabIndex === -1) {
     return <div>No tabs to display.</div>;
   }
+  const { kundliId } = useParams();
+
+  const activeStyle = {
+    display: "none",
+    background: "black",
+  };
 
   return (
     <div className={styles.tabsContainer}>
@@ -59,12 +66,14 @@ const PrimaryTabs = ({ tabs = [] }) => {
             {tabs[activeTabIndex].content}
           </motion.div>
         </AnimatePresence>
-        <div className="mt-4">
+        <div className="mt-4" style={kundliId ? activeStyle : null}>
           <ConnectCard />
           <ServiceCards />
         </div>
       </main>
-      <ZodiacCarousel />
+      <div style={kundliId ? activeStyle : null}>
+        <ZodiacCarousel />
+      </div>
     </div>
   );
 };

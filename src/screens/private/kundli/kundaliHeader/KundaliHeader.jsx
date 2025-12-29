@@ -195,8 +195,12 @@ const KundaliHeader = () => {
     }
   };
 
+  const activeStyle = {
+    display: "none",
+    background: "black",
+  };
   return (
-    <>
+    <div style={kundliId ? activeStyle : null}>
       {/* Header */}
       <motion.div
         className={styles.headerSection}
@@ -449,7 +453,7 @@ const KundaliHeader = () => {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
