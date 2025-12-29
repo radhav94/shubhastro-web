@@ -49,7 +49,6 @@ const Kundali = () => {
 
   const payload = useSelector((state) => state?.form?.kundliPayload);
   const params = buildVedicParam(payload);
-
   // const {
   //   data: birthDetails,
   //   isSuccess: isBirth,
