@@ -1,25 +1,36 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  userDetails: null,   // full form data for display
+  userDetails: null, // full form data for display
   kundliPayload: null, // transformed data for API calls
-  pythonApiPayload:null ,// transformed python api data for API calls
-  numerologyPayload: null
+  pythonApiPayload: null, // transformed python api data for API calls
+  numerologyPayload: null,
 };
 
 const monthMap = {
-  Jan: 1, January: 1,
-  Feb: 2, February: 2,
-  Mar: 3, March: 3,
-  Apr: 4, April: 4,
+  Jan: 1,
+  January: 1,
+  Feb: 2,
+  February: 2,
+  Mar: 3,
+  March: 3,
+  Apr: 4,
+  April: 4,
   May: 5,
-  Jun: 6, June: 6,
-  Jul: 7, July: 7,
-  Aug: 8, August: 8,
-  Sep: 9, September: 9,
-  Oct: 10, October: 10,
-  Nov: 11, November: 11,
-  Dec: 12, December: 12,
+  Jun: 6,
+  June: 6,
+  Jul: 7,
+  July: 7,
+  Aug: 8,
+  August: 8,
+  Sep: 9,
+  September: 9,
+  Oct: 10,
+  October: 10,
+  Nov: 11,
+  November: 11,
+  Dec: 12,
+  December: 12,
 };
 
 const formSlice = createSlice({
@@ -38,6 +49,7 @@ const formSlice = createSlice({
         year: Number(formData.year),
         hour: Number(formData.hour),
         min: Number(formData.minute),
+        meridiem: formData.meridiem || "AM",
         lat: Number(formData.latitude),
         lon: Number(formData.longitude),
         tzone: 5.5,
@@ -58,8 +70,8 @@ const formSlice = createSlice({
       const { name, date } = action.payload;
 
       state.numerologyPayload = {
-        name,           // string
-        date,           // "DD/MM/YYYY"
+        name, // string
+        date, // "DD/MM/YYYY"
         lang: "en",
       };
     },

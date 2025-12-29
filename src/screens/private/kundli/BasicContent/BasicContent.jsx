@@ -55,15 +55,26 @@ const BasicContent = (props) => {
     `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}/${y}`;
 
   // Helper to format time (12-hour with AM/PM)
-  const formatTime = (hour, minute) => {
+  const formatTime = (hour, minute, meridiem) => {
+    if (hour === undefined || minute === undefined) return "--";
+
     let h = Number(hour);
-    const suffix = h >= 12 ? "PM" : "AM";
-    h = h % 12 || 12;
-    return `${String(h).padStart(2, "0")}:${String(minute).padStart(
+    const m = Number(minute);
+
+    let suffix = meridiem;
+
+    // ✅ If meridiem is NOT provided, derive it from hour
+    if (!suffix) {
+      suffix = h >= 12 ? "PM" : "AM";
+      h = h % 12 || 12;
+    }
+
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(
       2,
       "0"
     )} ${suffix}`;
   };
+
   const monthMap = {
     Jan: 1,
     January: 1,
@@ -90,52 +101,54 @@ const BasicContent = (props) => {
     December: 12,
   };
 
-const basic = {
-  title: "Basic Details",
-  data: {
-    Name: userDetails?.name || "--",
+  const basic = {
+    title: "Basic Details",
+    data: {
+      Name: userDetails?.name || "--",
 
-    Date: formatDate(userDetails.day, userDetails.month, userDetails.year) || "--",
-    Time: formatTime(userDetails.hour, userDetails.minute) || "--",
+      Date:
+        formatDate(userDetails.day, userDetails.month, userDetails.year) ||
+        "--",
+      Time: formatTime(userDetails.hour, userDetails.minute) || "--",
 
-    Place: userDetails?.birthPlace || "--",
+      Place: userDetails?.birthPlace || "--",
 
-    Rasi: birthDetails?.rasi || "--",
-    Nakshatra: birthDetails?.nakshatra || "--",
-    "Nakshatra Pada": birthDetails?.nakshatra_pada ?? "--",
+      Rasi: birthDetails?.rasi || "--",
+      Nakshatra: birthDetails?.nakshatra || "--",
+      "Nakshatra Pada": birthDetails?.nakshatra_pada ?? "--",
 
-    "Day of Birth": birthDetails?.panchang?.day_of_birth || "--",
-    "Day Lord": birthDetails?.panchang?.day_lord || "--",
-    "Hora Lord": birthDetails?.panchang?.hora_lord || "--",
+      "Day of Birth": birthDetails?.panchang?.day_of_birth || "--",
+      "Day Lord": birthDetails?.panchang?.day_lord || "--",
+      "Hora Lord": birthDetails?.panchang?.hora_lord || "--",
 
-    Sunrise: birthDetails?.panchang?.sunrise_at_birth || "--",
-    Sunset: birthDetails?.panchang?.sunset_at_birth || "--",
+      Sunrise: birthDetails?.panchang?.sunrise_at_birth || "--",
+      Sunset: birthDetails?.panchang?.sunset_at_birth || "--",
 
-    Tithi: birthDetails?.panchang?.tithi || "--",
-    Yoga: birthDetails?.panchang?.yoga || "--",
-    Karana: birthDetails?.panchang?.karana || "--",
+      Tithi: birthDetails?.panchang?.tithi || "--",
+      Yoga: birthDetails?.panchang?.yoga || "--",
+      Karana: birthDetails?.panchang?.karana || "--",
 
-    Ayanamsha: birthDetails?.panchang?.ayanamsa
-      ? birthDetails.panchang.ayanamsa.toFixed(5)
-      : "--",
-    "Ayanamsha Type": birthDetails?.panchang?.ayanamsa_name || "--",
-  },
-};
+      Ayanamsha: birthDetails?.panchang?.ayanamsa
+        ? birthDetails.panchang.ayanamsa.toFixed(5)
+        : "--",
+      "Ayanamsha Type": birthDetails?.panchang?.ayanamsa_name || "--",
+    },
+  };
 
-const panchangTable = {
-  title: "Panchang Details",
-  data: {
-    Day: birthPanchang.day_of_birth,
-    Tithi: birthPanchang.tithi,
-    Yoga: birthPanchang.yoga,
-    Karana: birthPanchang.karana,
-    "Day Lord": birthPanchang.day_lord,
-    "Hora Lord": birthPanchang.hora_lord,
-    Sunrise: birthPanchang.sunrise_at_birth,
-    Sunset: birthPanchang.sunset_at_birth,
-    Ayanamsa: birthPanchang.ayanamsa_name,
-  },
-};
+  const panchangTable = {
+    title: "Panchang Details",
+    data: {
+      Day: birthPanchang.day_of_birth,
+      Tithi: birthPanchang.tithi,
+      Yoga: birthPanchang.yoga,
+      Karana: birthPanchang.karana,
+      "Day Lord": birthPanchang.day_lord,
+      "Hora Lord": birthPanchang.hora_lord,
+      Sunrise: birthPanchang.sunrise_at_birth,
+      Sunset: birthPanchang.sunset_at_birth,
+      Ayanamsa: birthPanchang.ayanamsa_name,
+    },
+  };
 
   const astros = {
     title: "Avakhada Details",

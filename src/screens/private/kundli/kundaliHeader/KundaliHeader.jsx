@@ -14,7 +14,10 @@ import {
 } from "../../../../services/appServices/kundliServicesNew";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { buildKundliPayload } from "./utils";
-import { padZero } from "../../../../utils/dateFormat/dateTime";
+import {
+  format12HourTime,
+  padZero,
+} from "../../../../utils/dateFormat/dateTime";
 
 // Constants
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -34,8 +37,9 @@ const months = [
 ];
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
-const hours = Array.from({ length: 24 }, (_, i) => i);
+const hours = Array.from({ length: 12 }, (_, i) => i + 1);
 const minutes = Array.from({ length: 60 }, (_, i) => i);
+const meridiem = ["AM", "PM"];
 
 const initialFormData = {
   name: "",
@@ -45,7 +49,7 @@ const initialFormData = {
   year: "",
   hour: "",
   minute: "",
-  second: "",
+  meridiem: null,
   birthPlace: "",
   latitude: null,
   longitude: null,
@@ -144,7 +148,7 @@ const KundaliHeader = () => {
         year: kundli.year.toString(),
         hour: kundli.hour.toString(),
         minute: kundli.min.toString(),
-        second: "0",
+        meridiem: kundli?.meridiem || null,
         birthPlace: kundli.place,
         latitude: kundli.lat,
         longitude: kundli.lon,
@@ -329,16 +333,17 @@ const KundaliHeader = () => {
               </div>
 
               <div className={styles.formGroup}>
-                <label className="">Second</label>
+                <label className={styles.required}>Meridiem (AM/ PM) </label>
 
                 <select
-                  name="second"
-                  value={formData.second}
+                  name="meridiem"
+                  required
+                  value={formData.meridiem}
                   onChange={handleInputChange}
                 >
-                  <option value="">Select Second</option>
+                  <option value="">Select Meridiem</option>
 
-                  {minutes.map((s) => (
+                  {meridiem.map((s) => (
                     <option key={s}>{s}</option>
                   ))}
                 </select>
@@ -422,8 +427,9 @@ const KundaliHeader = () => {
                     </span>
 
                     <span className={styles.kundliDob}>
-                      {padZero(kundli.day)}-{padZero(kundli.month)}-{kundli.year} • {padZero(kundli.hour)}
-                      :{padZero(kundli.min)}
+                      {padZero(kundli.day)}-{padZero(kundli.month)}-
+                      {kundli.year} •{" "}
+                      {format12HourTime(kundli.hour, kundli.min)}
                     </span>
 
                     <span className={styles.kundliPob}>{kundli.place}</span>
