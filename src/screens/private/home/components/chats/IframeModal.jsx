@@ -1,8 +1,9 @@
 // components/IframeModal.jsx
+import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
 import styles from "./IframeModal.module.scss";
 import { IoClose } from "react-icons/io5";
 
-const IframeModal = ({ open, src, onClose }) => {
+const IframeModal = ({ open, src, onClose, loading }) => {
   if (!open) return null;
 
   return (
@@ -11,7 +12,7 @@ const IframeModal = ({ open, src, onClose }) => {
         <button className={styles.closeBtn} onClick={onClose}>
           <IoClose size={22} />
         </button>
-
+        <PrimaryLoader isLoading={loading} />
         <iframe src={src} title="Kundli" className={styles.iframe} />
       </div>
     </div>
