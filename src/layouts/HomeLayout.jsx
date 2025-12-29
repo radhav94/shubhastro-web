@@ -28,15 +28,15 @@ const HomeLayout = () => {
       <ScrollToTop />
 
       {/* FIXED TOPBAR */}
-      {
+      {showHeader && (
         <div className={styles.fixedTopBar}>
           <TopBar />
         </div>
-      }
+      )}
 
       {/* Scrollable Content */}
       <div className={styles.contentWrapper}>
-        <div className={styles.topGap}></div>
+        <div className={showHeader ? styles.topGap : ""}></div>
 
         {showHeader && <Breadcrumb />}
 
