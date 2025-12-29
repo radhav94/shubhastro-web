@@ -4,11 +4,16 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
     //  GET ALL ASTROLOGERS
     getAstrologers: builder.query({
-      query: ({ page = 1, limit = 6, specialties,isActiveType }) => {
+      query: ({
+        page = 1,
+        limit = 6,
+        specialties,
+        isActiveType = "video,audio",
+      }) => {
         const params = new URLSearchParams({
           page,
           limit,
-          isActiveType
+          isActiveType,
         });
 
         if (specialties) params.append("specialties", specialties);
@@ -38,7 +43,7 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         selectedGender = "",
         page = 1,
         limit = 10,
-        isActiveType
+        isActiveType,
       }) => {
         const params = new URLSearchParams({
           astroName: searchText,
