@@ -230,7 +230,6 @@ const TalkToAstrologer = () => {
 
     const astro = selectedAstrologer;
     localStorage.setItem("selectedAstroId", astro._id);
-    localStorage.setItem("selectedAstrologerId", astro.astrologer_ID);
 
     try {
       const res = await createChatRoom({
@@ -249,6 +248,7 @@ const TalkToAstrologer = () => {
           roomId,
           isUserSide: true,
           kundliId: kundli._id,
+          astroID: astro.astrologer_ID
         },
       });
     } catch (error) {
