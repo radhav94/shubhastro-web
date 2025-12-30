@@ -23,7 +23,7 @@ const ChatWindow = () => {
   const messagesRef = useRef(null);
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { userId, astrologerId, roomId, fullName, isUserSide, kundliId } =
+  const { userId, astrologerId, roomId, fullName, isUserSide, kundliId, astroID } =
     state;
 
   const { activeCall } = useCall();
@@ -100,9 +100,8 @@ const ChatWindow = () => {
   const handleReviewSubmit = async ({ rating, review, anonymous }) => {
     try {
       const isAnonymous = anonymous;
-      const astrologerID = parseInt(localStorage.getItem("selectedAstrologerId"));
       const res = await addAstrologerReview({
-        astrologerID,
+        astrologerID: astroID,
         rating,
         review,
         isAnonymous,
