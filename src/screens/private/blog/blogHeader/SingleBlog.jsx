@@ -2,15 +2,10 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { useGetSingleBlogQuery } from "../../../../services/appServices/blogService";
 import styles from "./SingleBlogDetails.module.scss";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
-
-
-
-
-const astroImages = 
-  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/19191028/Leo-Daily-Horoscope-Today.jpg" // astrology chart
-;
-
+const astroImages =
+  "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/19191028/Leo-Daily-Horoscope-Today.jpg"; // astrology chart
 const SingleBlogDetails = () => {
   const { slug } = useParams();
   const { data, isLoading, isError } = useGetSingleBlogQuery(slug);
@@ -43,4 +38,3 @@ const SingleBlogDetails = () => {
 };
 
 export default SingleBlogDetails;
-

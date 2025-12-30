@@ -17,7 +17,7 @@ const iconMap = {
 };
 
 const ServiceCards = () => {
-  // ⛔ HOOK MUST RUN ALWAYS (Fixes your error)
+  //  HOOK MUST RUN ALWAYS (Fixes your error)
   const { data, isLoading } = useGetHomeDetailsQuery();
   const [disableLeft, setDisableLeft] = useState(true);
   const [disableRight, setDisableRight] = useState(false);
@@ -63,7 +63,7 @@ const ServiceCards = () => {
     setTimeout(updateButtons, 300);
   };
 
-  // ⬇️ Render loader BELOW hooks (correct pattern)
+  //  Render loader BELOW hooks (correct pattern)
   if (isLoading) {
     return (
       <div className={styles.wrapper}>
@@ -71,6 +71,13 @@ const ServiceCards = () => {
       </div>
     );
   }
+  const handleClick = (service) => {
+    if (service.slug === "tarot") {
+      return navigate("/tarot/yes-no-tarot");
+    }
+    const path = slugRoutes[service.slug] || `/horoscopes/${service.slug}`;
+    navigate(path);
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -90,11 +97,7 @@ const ServiceCards = () => {
             <motion.div key={service._id} className={styles.card}>
               <div
                 className={styles.cardContent}
-                onClick={() => {
-                  const path =
-                    slugRoutes[service.slug] || `/horoscopes/${service.slug}`;
-                  navigate(path);
-                }}
+                onClick={() => handleClick(service)}
               >
                 <img
                   src={service.icon || iconMap["numerology"]}
