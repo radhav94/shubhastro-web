@@ -5,6 +5,8 @@ import {
   IoMicOff,
   IoArrowBack,
   IoChatbubbleEllipses,
+  IoVideocam,
+  IoVideocamOff
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import styles from "./VoiceCall.module.scss";
@@ -26,6 +28,7 @@ const AgoraVoiceCalling = ({ callData }) => {
   const clientRef = useRef(null);
   const micTrackRef = useRef(null);
   const cleanupRef = useRef(false);
+  const videoTrackRef = useRef(null);
 
   /* ================= STATE ================= */
   const [micOn, setMicOn] = useState(true);
@@ -56,6 +59,7 @@ const AgoraVoiceCalling = ({ callData }) => {
 
       micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack();
       await client.publish([micTrackRef.current]);
+      videoTrackRef.current = await AgoraRTC.createCameraVideoTrack();
 
       setJoined(true);
       setCallState("connected");
@@ -153,6 +157,39 @@ const AgoraVoiceCalling = ({ callData }) => {
       sec % 60
     ).padStart(2, "0")}`;
 
+  const [isVideo, setIsVideo] = useState(false);
+  const toggleCamera = async () => {
+    const client = clientRef.current;
+
+    if (!client) return;
+
+    // TURN OFF VIDEO
+    if (isVideo) {
+      if (videoTrackRef.current) {
+        await client.unpublish(videoTrackRef.current);
+        videoTrackRef.current.stop();
+        videoTrackRef.current.close();
+        videoTrackRef.current = null;
+      }
+
+      setIsVideo(false);
+      return;
+    }
+
+    // TURN ON VIDEO
+    // videoTrackRef.current = await AgoraRTC.createCameraVideoTrack();
+    await client.publish(videoTrackRef.current);
+
+    // videoTrackRef.current.play("local-video");
+    setIsVideo(true);
+  };
+
+  useEffect(() => {
+    if (isVideo && videoTrackRef.current) {
+      videoTrackRef.current.play("local-video");
+    }
+  }, [isVideo]);
+
   /* ================= UI ================= */
   return (
     <>
@@ -188,6 +225,12 @@ const AgoraVoiceCalling = ({ callData }) => {
       {/* FULL VIEW */}
       {!isMinimized && (
         <div className={styles.fullscreenWrapper}>
+          {isVideo && (
+            <div
+              id="local-video"
+              className="absolute bottom-20 right-4 w-32 h-40 bg-black rounded-lg overflow-hidden"
+            />
+          )}
           <button
             className={styles.minimizeBtn}
             onClick={() => setIsMinimized(true)}
@@ -206,7 +249,9 @@ const AgoraVoiceCalling = ({ callData }) => {
               <button onClick={() => setMicOn((m) => !m)}>
                 {micOn ? <IoMic size={28} /> : <IoMicOff size={28} />}
               </button>
-
+              <button onClick={toggleCamera}>
+                {isVideo ? <IoVideocamOff /> : <IoVideocam />}
+              </button>
               <button className={styles.endBtn} onClick={endCall}>
                 End
               </button>
@@ -216,21 +261,21 @@ const AgoraVoiceCalling = ({ callData }) => {
                   setIsMinimized(true);
                   isUserSide
                     ? navigate(
-                        `/talk-to-astrologers/${activeCall.astrologerId}`,
-                        {
-                          state: {
-                            roomId: activeCall.chatRoomId,
-                            userId: activeCall.userId,
-                            astrologerId: activeCall.astrologerId,
-                            kundliId: activeCall.kundliId,
-                            fullName: activeCall.callerName,
-                            isUserSide: true,
-                          },
-                        }
-                      )
+                      `/talk-to-astrologers/${activeCall.astrologerId}`,
+                      {
+                        state: {
+                          roomId: activeCall.chatRoomId,
+                          userId: activeCall.userId,
+                          astrologerId: activeCall.astrologerId,
+                          kundliId: activeCall.kundliId,
+                          fullName: activeCall.callerName,
+                          isUserSide: true,
+                        },
+                      }
+                    )
                     : navigate(
-                        PATH.privateRoutes.ASTROLOGER_CHAT_USER_LIST.path
-                      );
+                      PATH.privateRoutes.ASTROLOGER_CHAT_USER_LIST.path
+                    );
                 }}
               >
                 <IoChatbubbleEllipses size={20} />
