@@ -1,0 +1,151 @@
+.blogsSection {
+  padding: 20px;
+  position: relative;
+
+  @media (min-width: 1400px) {
+    padding: 40px 20px;
+  }
+}
+
+/* -----------------------
+    DEFAULT GRID VIEW
+-------------------------*/
+.blogsContainer {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+
+  & > * {
+    flex: 0 0 85%;
+    min-width: 85%;
+    scroll-snap-align: start;
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* TABLET */
+  @media (min-width: 600px) {
+    & > * {
+      flex: 0 0 45%;
+      min-width: 45%;
+    }
+  }
+
+  /* DESKTOP → GRID */
+  @media (min-width: 992px) {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    overflow: visible;
+    scroll-snap-type: none;
+
+    & > * {
+      flex: unset;
+      min-width: unset;
+    }
+  }
+
+  @media (min-width: 1400px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* -----------------------
+      SCROLL MODE
+-------------------------*/
+.scrollMode {
+  display: flex !important;
+  flex-wrap: nowrap;
+  overflow-x: auto !important;
+  gap: 20px;
+  padding-bottom: 12px;
+  scroll-behavior: smooth;
+
+  & > * {
+    flex: 0 0 auto; 
+    width: 240px;
+
+    @media (min-width: 600px) {
+      width: 280px;
+    }
+
+    @media (min-width: 992px) {
+      width: 300px;
+    }
+
+    @media (min-width: 1400px) {
+      width: 320px;
+    }
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* -----------------------
+       BLOG LINK
+-------------------------*/
+.blogLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* -----------------------
+        ARROWS
+-------------------------*/
+.leftArrow,
+.rightArrow {
+  position: absolute;
+  top: 50%;
+  min-height: 40px;
+  min-width: 40px;
+  transform: translateY(-50%);
+  border: none;
+  font-size: 20px;
+  // padding: 10px 12px;
+  cursor: pointer;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  transition: all 0.2s ease;
+  display: none; // hidden for mobile
+
+  &:hover {
+    background: #f3f3f3;
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  @media (min-width: 768px) {
+    display: block;
+  }
+}
+
+.leftArrow {
+  left: -10px;
+
+  @media (min-width: 1200px) {
+    left: -15px;
+  }
+}
+
+.rightArrow {
+  right: -10px;
+
+  @media (min-width: 1200px) {
+    right: -15px;
+  }
+}
