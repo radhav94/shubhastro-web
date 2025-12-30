@@ -20,7 +20,7 @@ const BlogHeader = () => {
 
   const { data, isLoading } = useGetBlogQuery({ page, limit: 10 });
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <p style={{ textAlign: "center" }}>Loading...</p>;
 
   const blogs = data?.data || [];
 

@@ -9,8 +9,9 @@ const astroImages =
 const SingleBlogDetails = () => {
   const { slug } = useParams();
   const { data, isLoading, isError } = useGetSingleBlogQuery(slug);
-  const singleBLogData = data?.data;
-  if (!singleBLogData) return <PrimaryLoader isLoading={isLoading} />;
+  const singleBLogData = data?.data
+  if (isLoading) return <p style={{ textAlign: "center" }}>Loading...</p>;
+  if (!singleBLogData) return <p style={{ textAlign: "center" }}>No blog found</p>;
 
   return (
     <div className={styles.singleBlogWrapper}>
