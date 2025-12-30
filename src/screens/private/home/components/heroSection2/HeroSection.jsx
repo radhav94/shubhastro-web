@@ -12,10 +12,7 @@ const HeroSection = () => {
       <div className={styles.heroCard}>
         {/* Left Image */}
         <div className={styles.imageWrapper}>
-          <img
-            src={AppIcons.Logo}
-            alt="Astrologer"
-          />
+          <img src={AppIcons.Logo} alt="Astrologer" />
         </div>
 
         {/* Right Content */}
@@ -29,7 +26,7 @@ const HeroSection = () => {
           <button
             className={styles.cta}
             onClick={() =>
-              navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)
+              navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)
             }
           >
             Chat Now
