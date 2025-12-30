@@ -37,6 +37,8 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [timer, setTimer] = useState(0);
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: 20 });
+  const [isVideo, setIsVideo] = useState(false);
+  const [isRemoteVideo, setIsRemoteVideo] = useState(false);
 
   /* ================= START CALL ================= */
   useEffect(() => {
@@ -51,6 +53,18 @@ const AgoraVoiceCalling = ({ callData }) => {
         if (mediaType === "audio") {
           user.audioTrack?.play();
         }
+
+        if (mediaType === "video") {
+          user.videoTrack?.play("remote-video");
+          setIsRemoteVideo(true);
+        }
+
+      });
+
+      client.on("user-unpublished", async (user, mediaType) => {
+        if (mediaType === "video") {
+          setIsRemoteVideo(false)
+        }
       });
 
       client.on("user-left", endCall);
@@ -59,7 +73,7 @@ const AgoraVoiceCalling = ({ callData }) => {
 
       micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack();
       await client.publish([micTrackRef.current]);
-      videoTrackRef.current = await AgoraRTC.createCameraVideoTrack();
+      // videoTrackRef.current = await AgoraRTC.createCameraVideoTrack();
 
       setJoined(true);
       setCallState("connected");
@@ -93,6 +107,8 @@ const AgoraVoiceCalling = ({ callData }) => {
     try {
       await micTrackRef.current?.stop();
       await micTrackRef.current?.close();
+      await videoTrackRef.current?.stop();
+      await videoTrackRef.current?.close();
       await clientRef.current?.leave();
     } catch (e) {
       console.warn("Voice cleanup error:", e);
@@ -157,7 +173,6 @@ const AgoraVoiceCalling = ({ callData }) => {
       sec % 60
     ).padStart(2, "0")}`;
 
-  const [isVideo, setIsVideo] = useState(false);
   const toggleCamera = async () => {
     const client = clientRef.current;
 
@@ -177,7 +192,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     }
 
     // TURN ON VIDEO
-    // videoTrackRef.current = await AgoraRTC.createCameraVideoTrack();
+    videoTrackRef.current = await AgoraRTC.createCameraVideoTrack();
     await client.publish(videoTrackRef.current);
 
     // videoTrackRef.current.play("local-video");
@@ -225,6 +240,13 @@ const AgoraVoiceCalling = ({ callData }) => {
       {/* FULL VIEW */}
       {!isMinimized && (
         <div className={styles.fullscreenWrapper}>
+          {/* Remote (main screen) */}
+          {isRemoteVideo && (
+            <div
+              id="remote-video"
+              className="w-full h-full bg-black rounded-lg"
+            />
+          )}
           {isVideo && (
             <div
               id="local-video"
