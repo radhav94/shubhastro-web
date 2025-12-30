@@ -106,7 +106,6 @@ const TalkToAstrologer = () => {
     specialties: specialty || "",
     isActiveType: activeType, // now activeType exists
   });
-  console.log(activeType, "activeType");
 
   const data = astrodata?.data || [];
   const token = getToken();
@@ -445,8 +444,6 @@ const TalkToAstrologer = () => {
       voiceSocket.off("call_ended", handleCallEnded);
     };
   }, [userIdLocal]);
-  console.log("data : ", data);
-  console.log("allAstrologers : ", allAstrologers);
   /* ------------------------------------------------------------------- */
 
   return (

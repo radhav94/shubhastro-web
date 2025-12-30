@@ -3,7 +3,7 @@ import styles from "./recommendedCard.module.scss";
 import { AppIcons } from "../../../../utils/appImages";
 import { appColors } from "../../../../utils/theme";
 
-const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall }) => {
+const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall,isActiveType}) => {
   return (
     <>
       <div className={styles.card}>
@@ -12,6 +12,7 @@ const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall }) => {
         <h4>{astro?.firstName}</h4>
 
         <div className={styles.buttonsRow}>
+        {isActiveType === "chat" ? (
           <PrimaryButton
             bgColor={appColors.white}
             imgSrc={AppIcons.Message}
@@ -19,13 +20,14 @@ const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall }) => {
             buttonStyles={{ padding: "2px" }}
             onClick={onChat}
           />
-
+        ) : (
+          <>
           <PrimaryButton
             bgColor={appColors.white}
             imgSrc={AppIcons.Call}
             imgSize={20}
             buttonStyles={{ padding: "2px" }}
-            // onClick={onAudioCall}
+            onClick={onAudioCall}
           />
 
           <PrimaryButton
@@ -33,8 +35,10 @@ const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall }) => {
             imgSrc={AppIcons.Video}
             imgSize={20}
             buttonStyles={{ padding: "2px" }}
-            // onClick={onVideoCall}
+            onClick={onVideoCall}
           />
+          </>
+          )}
         </div>
       </div>
     </>

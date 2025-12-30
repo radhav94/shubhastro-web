@@ -9,7 +9,7 @@ import { useWalletBalance } from "../../../../screens/private/wallet/useWalletBa
 import { getToken } from "../../../../utils/token";
 import { voiceSocket } from "../../../../services/voiceSocketServices";
 import { useCreateChatRoomMutation } from "../../../../redux/api/chatApi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 import WaitingModal from "../waitingModal/WaitingModal";
 import KundliSelectModal from "../../../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
 
@@ -33,7 +33,23 @@ const RecommendModal = ({ open, onClose, mode = "chat" }) => {
   const { balance } = useWalletBalance();
 
   const [createChatRoom] = useCreateChatRoomMutation();
+  const location = useLocation(); // 👈 get current URL
+  const currentPath = location.pathname.split("/").pop(); // last part of URL
 
+  // Detect type based on URL
+  const getTypeFromURL = () => {
+    if (currentPath.includes("chat")) return "chat";
+    if (currentPath.includes("talk")) return "video,audio";
+    return "chat"; // default fallback
+  };
+
+  // 🔥 Set initial activeType from URL
+  const [activeType, setActiveType] = useState(getTypeFromURL());
+
+  // 🔄 Update activeType if URL changes
+  useEffect(() => {
+    setActiveType(getTypeFromURL());
+  }, [location.pathname]);
   // Kundli & Chat handlers
   const openKundliPopup = (astro) => {
     setSelectedAstrologer(astro);
@@ -255,6 +271,7 @@ const RecommendModal = ({ open, onClose, mode = "chat" }) => {
             <div className={styles.grid}>
               {recommendedAstros?.data?.map((astro) => (
                 <RecommendedCard
+                  isActiveType={activeType}
                   key={astro._id}
                   astro={astro}
                   onChat={() => openKundliPopup(astro)}

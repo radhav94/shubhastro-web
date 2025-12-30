@@ -21,7 +21,7 @@ const BlogCard = ({ image, title, author, date, authorIcon }) => {
               />
             )}
             <span className={Styles.authorText}>
-              {author} ・ {date}
+            {author ? `${author} ・ ` : ""}{date}
             </span>
           </div>
           <IoArrowForwardOutline className={Styles.arrowIcon} />
