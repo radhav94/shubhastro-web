@@ -144,7 +144,7 @@ const SideBar = ({ open, onClose }) => {
     { title: "Join Live", path: "/audience-live-streaming" },
     { title: "Astromall", path: "/shop" },
     { title: "Blogs", path: "/blog" },
-    { title: "Recharge", path: "/callingpack" },
+    { title: "Recharge", path: "/recharge" },
   ];
 
   const USER_MENU_ITEMS = token

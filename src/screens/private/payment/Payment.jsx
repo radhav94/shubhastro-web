@@ -54,7 +54,7 @@ const Payment = () => {
         <div className={styles.rechargeFlex}>
           {allPlans?.map((pack) => (
             <Link
-              to="/callingpack/payment"
+              to="/recharge/payment"
               state={{ planId: pack.plan_id }}
               key={pack._id}
               className={styles.linkWrapper}
