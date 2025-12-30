@@ -55,14 +55,16 @@ const AgoraVoiceCalling = ({ callData }) => {
         }
 
         if (mediaType === "video") {
-          user.videoTrack?.play("remote-video");
           setIsRemoteVideo(true);
+          const container = document.getElementById("remote-video");
+          user.videoTrack?.play(container);
         }
 
       });
 
       client.on("user-unpublished", async (user, mediaType) => {
         if (mediaType === "video") {
+          user.videoTrack?.stop();
           setIsRemoteVideo(false)
         }
       });
@@ -211,6 +213,32 @@ const AgoraVoiceCalling = ({ callData }) => {
       {/* MINI VIEW */}
       {isMinimized && (
         <div
+          className={styles.miniCall}
+          style={{ top: position.y, left: position.x }}
+          onMouseDown={startDrag}
+          onTouchStart={startDrag}
+        >
+          <div>
+            <strong>{callerName}</strong>
+            <small>{joined ? formatTime(timer) : "Calling…"}</small>
+          </div>
+
+          <div className={styles.miniActions}>
+            <button onClick={() => setMicOn((m) => !m)}>
+              {micOn ? <IoMic size={26} /> : <IoMicOff size={26} />}
+            </button>
+
+            <button className={styles.endBtn} onClick={endCall}>
+              End
+            </button>
+
+            <button onClick={() => setIsMinimized(false)}>⤢</button>
+          </div>
+        </div>
+      )}
+      {/* Old code */}
+      {/* {isMinimized && (
+        <div
           className={styles.premiumMini}
           style={{ top: position.y, left: position.x }}
           onMouseDown={startDrag}
@@ -235,12 +263,83 @@ const AgoraVoiceCalling = ({ callData }) => {
             <button onClick={() => setIsMinimized(false)}>⤢</button>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* FULL VIEW */}
       {!isMinimized && (
         <div className={styles.fullscreenWrapper}>
-          {/* Remote (main screen) */}
+
+          <div
+            id="remote-video"
+            className={styles.remoteVideo}
+            style={{ display: isRemoteVideo ? "block" : "none" }}
+          />
+
+          {isVideo && (
+            <div id="local-video" className={styles.localVideo} />
+          )}
+          <div className={styles.callHeader}>
+            <button onClick={() => setIsMinimized(true)}>
+              <IoArrowBack size={20} />
+            </button>
+            <span>{callerName}</span>
+          </div>
+          {!isRemoteVideo && (
+            <div className={styles.voiceCenter}>
+              <img
+                className={styles.avatar}
+                src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                alt="avatar"
+              />
+              <h2>{callerName}</h2>
+              <p>{joined ? formatTime(timer) : "Connecting…"}</p>
+            </div>
+          )}
+          <div className={styles.callControls}>
+            <button onClick={() => setMicOn((m) => !m)}>
+              {micOn ? <IoMic /> : <IoMicOff />}
+            </button>
+
+            <button onClick={toggleCamera}>
+              {isVideo ? <IoVideocamOff /> : <IoVideocam />}
+            </button>
+
+            <button className={styles.endBtn} onClick={endCall}>
+              End
+            </button>
+
+            <button
+              onClick={() => {
+                setIsMinimized(true);
+                isUserSide
+                  ? navigate(
+                    `/talk-to-astrologers/${activeCall.astrologerId}`,
+                    {
+                      state: {
+                        roomId: activeCall.chatRoomId,
+                        userId: activeCall.userId,
+                        astrologerId: activeCall.astrologerId,
+                        kundliId: activeCall.kundliId,
+                        fullName: activeCall.callerName,
+                        isUserSide: true,
+                      },
+                    }
+                  )
+                  : navigate(
+                    PATH.privateRoutes.ASTROLOGER_CHAT_USER_LIST.path
+                  );
+              }}
+            >
+              <IoChatbubbleEllipses />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Old Code */}
+      {/* {!isMinimized && (
+        <div className={styles.fullscreenWrapper}>
+          
           {isRemoteVideo && (
             <div
               id="remote-video"
@@ -305,7 +404,7 @@ const AgoraVoiceCalling = ({ callData }) => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 };
