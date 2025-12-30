@@ -1,7 +1,7 @@
 .gift-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.65);
+  background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(4px);
   z-index: 999;
   display: flex;
@@ -53,6 +53,10 @@
   border-radius: 12px;
   transition: 0.2s;
   border: 1px solid transparent;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .gift-item.active {
@@ -96,8 +100,12 @@
 
 /* Slide animation */
 @keyframes slideUp {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 /* ---------------------------- */
@@ -105,7 +113,6 @@
 /* ---------------------------- */
 
 @media (max-width: 450px) {
-  
   .gift-popup {
     max-height: 72vh;
     padding: 12px;
@@ -136,7 +143,6 @@
 
 /* Extra Small Screens */
 @media (max-width: 360px) {
-
   .gift-popup {
     max-height: 75vh;
     padding: 10px;

@@ -8,7 +8,7 @@ import {
   Toast,
 } from "../../../component";
 import styles from "./TalkToAstrologer.module.scss";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTalkToAstrologer } from "./useTalkToAstrologer";
 import { useGetAstrologersQuery } from "../../../redux/api/astrologer/astrologerApi";
 import FilterChips from "../../../component/UI/chips/astrologer/FilterChips";
@@ -82,12 +82,31 @@ const TalkToAstrologer = () => {
 
   const [createChatRoom] = useCreateChatRoomMutation();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+  const location = useLocation(); // 👈 get current URL
+  const currentPath = location.pathname.split("/").pop(); // last part of URL
+
+  // Detect type based on URL
+  const getTypeFromURL = () => {
+    if (currentPath.includes("chat")) return "chat";
+    if (currentPath.includes("talk")) return "video,audio";
+    return "chat"; // default fallback
+  };
+
+  // 🔥 Set initial activeType from URL
+  const [activeType, setActiveType] = useState(getTypeFromURL());
+
+  // 🔄 Update activeType if URL changes
+  useEffect(() => {
+    setActiveType(getTypeFromURL());
+  }, [location.pathname]);
 
   const { data: astrodata, isFetching } = useGetAstrologersQuery({
     page,
     limit,
-    specialties: specialty,
+    specialties: specialty || "",
+    isActiveType: activeType, // now activeType exists
   });
+  console.log(activeType, "activeType");
 
   const data = astrodata?.data || [];
   const token = getToken();
@@ -118,7 +137,7 @@ const TalkToAstrologer = () => {
     }
 
     setHasMore(data.length >= limit);
-  }, [data, page]); // 👈 MUST add page here!!
+  }, [data, page, activeType]); // 👈 MUST add page here!!
 
   const hasMoreRef = useRef(hasMore);
   const isFetchingRef = useRef(isFetching);
@@ -230,6 +249,7 @@ const TalkToAstrologer = () => {
 
     const astro = selectedAstrologer;
     localStorage.setItem("selectedAstroId", astro._id);
+    localStorage.setItem("selectedAstrologerId", astro.astrologer_ID);
 
     try {
       const res = await createChatRoom({
@@ -425,7 +445,8 @@ const TalkToAstrologer = () => {
       voiceSocket.off("call_ended", handleCallEnded);
     };
   }, [userIdLocal]);
-
+  console.log("data : ", data);
+  console.log("allAstrologers : ", allAstrologers);
   /* ------------------------------------------------------------------- */
 
   return (
@@ -467,6 +488,7 @@ const TalkToAstrologer = () => {
 
       <FilterChips
         onSelect={handleSelect}
+        isActiveType={activeType}
         onApplyFilters={handleApplyFilters}
       />
 
@@ -474,6 +496,7 @@ const TalkToAstrologer = () => {
         {allAstrologers.map((astro, index) => (
           <div key={astro._id} className={styles.cardWrapper}>
             <AstrologerCard
+              isActiveType={activeType}
               data={astro}
               image={astroImages[index % astroImages.length]}
               onFollow={() => onFollow(astro._id)}

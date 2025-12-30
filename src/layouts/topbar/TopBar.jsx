@@ -222,13 +222,14 @@ const TopBar = () => {
     //     { title: "Tarot Experts", path: "/astro/tarot" },
     //   ],
     // },
+    { title: "Numerology", path: "/numerology" },
     { title: "Chat with Astrologer", path: "/chat-with-astrologers" },
     { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
     { title: "Join Live", path: "/audience-live-streaming" },
     { title: "Astromall", path: "/shop" },
     // { title: "Shubhtalk Store", path: "/store" },
     { title: "Blogs", path: "/blog" },
-    { title: "Recharge", path: "/callingpack" },
+    { title: "Recharge", path: "/recharge" },
   ];
 
   useEffect(() => {

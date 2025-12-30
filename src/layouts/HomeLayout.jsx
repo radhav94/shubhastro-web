@@ -28,13 +28,15 @@ const HomeLayout = () => {
       <ScrollToTop />
 
       {/* FIXED TOPBAR */}
-      <div className={styles.fixedTopBar}>
-        <TopBar />
-      </div>
+      {showHeader && (
+        <div className={styles.fixedTopBar}>
+          <TopBar />
+        </div>
+      )}
 
       {/* Scrollable Content */}
       <div className={styles.contentWrapper}>
-        <div className={styles.topGap}></div>
+        <div className={showHeader ? styles.topGap : ""}></div>
 
         {showHeader && <Breadcrumb />}
 
@@ -56,6 +58,5 @@ const HomeLayout = () => {
     </div>
   );
 };
-
 
 export default HomeLayout;

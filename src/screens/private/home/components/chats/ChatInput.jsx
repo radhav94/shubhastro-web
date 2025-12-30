@@ -1,6 +1,7 @@
 import styles from "./ChatWindow.module.scss";
 import { IoSend, IoAttach, IoMic } from "react-icons/io5";
 import { IoMdAdd } from "react-icons/io";
+import { GrReactjs } from "react-icons/gr";
 import { useRef, useState } from "react";
 import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSelectModal";
 import { useVoiceRecorder } from "../../../talkToAstrologer/voiceChat/useVoiceRecorder";
@@ -69,7 +70,7 @@ const ChatInput = ({ value, onChange, onSend, setOpen, sendVoiceMessage }) => {
           onClick={() => setKundliModalOpen(true)}
           className={styles.kundliButton}
         >
-          <IoMdAdd size={20} />
+          <GrReactjs size={20} />
         </button>
 
         <input

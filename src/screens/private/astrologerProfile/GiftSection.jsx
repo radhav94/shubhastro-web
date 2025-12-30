@@ -23,8 +23,8 @@ const GiftSection = ({ astrologer }) => {
 
     try {
       await sendGift({
-        giftId: selected?.ID,
-        astrologerId: astrologer?.ID,
+        giftId: selected?._id,
+        astrologerId: astrologer?._id,
       }).unwrap();
       setSelected(null);
       refreshWallet();
@@ -34,7 +34,7 @@ const GiftSection = ({ astrologer }) => {
     }
   };
 
-  const handleRecharge = () => navigate("/callingpack");
+  const handleRecharge = () => navigate("/recharge");
 
   useEffect(() => {
     if (selected && selected?.price > balance) {

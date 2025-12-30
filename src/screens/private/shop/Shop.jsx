@@ -23,7 +23,7 @@ const Shop = () => {
           <div
             key={cat?._id}
             className={styles.card}
-            onClick={() => navigate(`/shop/${cat?._id}`, { state: cat })}
+            onClick={() => navigate(`/shop/${cat?.slug}`, { state: cat })}
           >
             <img src={cat.imgUrl} className={styles.image} alt={cat?.name} />
 

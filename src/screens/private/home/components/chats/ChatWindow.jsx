@@ -99,11 +99,13 @@ const ChatWindow = () => {
   const [addAstrologerReview, { isLoading }] = useAddAstrologerReviewMutation();
   const handleReviewSubmit = async ({ rating, review, anonymous }) => {
     try {
+      const isAnonymous = anonymous;
+      const astrologerID = parseInt(localStorage.getItem("selectedAstrologerId"));
       const res = await addAstrologerReview({
-        astrologerId,
+        astrologerID,
         rating,
         review,
-        anonymous,
+        isAnonymous,
       }).unwrap();
 
       if (res.success) {

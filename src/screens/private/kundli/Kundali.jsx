@@ -119,7 +119,7 @@ const Kundali = () => {
   }, [planetLoading, isAstro]);
 
   return (
-    <>
+    <div>
       <KundaliHeader />
 
       <PrimaryLoader isLoading={planetLoading || astroLoading} />
@@ -131,7 +131,7 @@ const Kundali = () => {
           <HtmlContentCard sections={kundliInfoData} />
         )}
       </div>
-    </>
+    </div>
   );
 };
 

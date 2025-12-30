@@ -231,6 +231,8 @@ export const PATH = {
     KUNDLI_BY_ID: {
       path: "/kundli/:kundliId",
       element: Kundli,
+      header: false,
+      footer: false,
     },
 
     // SADESATI: {
@@ -375,11 +377,11 @@ export const PATH = {
     },
 
     RECHARGE: {
-      path: "/callingpack",
+      path: "/recharge",
       element: Payment,
     },
     FinalPay: {
-      path: "/callingpack/payment",
+      path: "/recharge/payment",
       element: FinalPay,
     },
     ASTROLOGERS: {

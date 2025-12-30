@@ -264,6 +264,26 @@ const AstrologerProfile = () => {
   if (isLoading) return <p>Loading...</p>;
   if (error) return <ErrorText>Something went wrong!</ErrorText>;
 
+  const StarRating = ({ rating, max = 5 }) => {
+    return (
+      <div className={styles.stars}>
+        {[...Array(max)].map((_, i) => {
+          const starIndex = i + 1;
+
+          if (rating >= starIndex) {
+            return <span key={i}>★</span>;          // full
+          }
+
+          if (rating >= starIndex - 0.5) {
+            return <span key={i}>⯪</span>;         // half
+          }
+
+          return <span key={i}>☆</span>;            // empty
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className={styles.page}>
       {/* Header */}
@@ -359,7 +379,7 @@ const AstrologerProfile = () => {
             <div className={styles.ratingSummary}>
               <div className={styles.ratingValue}>
                 <h1>{data.rating} </h1>
-                <p>⭐ ⭐ ⭐ ⭐ ⭐</p>
+                <StarRating rating={data.rating} />
                 {/* <p>{data?.ratingTotal || 5} total</p> */}
               </div>
 

@@ -6,7 +6,7 @@
   position: fixed;
   inset: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh; 
   background: #0a0d2d;
   display: flex;
   align-items: center;
@@ -14,6 +14,7 @@
   z-index: 99999;
   overflow: hidden;
 }
+
 
 .joinContainer {
   display: flex;
@@ -50,29 +51,21 @@
 
 .localVideoPreview {
   position: absolute;
-  right: 20px;
-  bottom: 140px;
-  width: 200px;
-  height: 130px;
+  right: 12px;
+  bottom: calc(120px + var(--safe-bottom));
+  width: 110px;
+  height: 80px;
   border-radius: 10px;
   overflow: hidden;
   border: 2px solid #00aaff;
   z-index: 5;
 }
 
+
 /* ===============================
    🎛 CONTROLS
    =============================== */
 
-.controls {
-  position: absolute;
-  bottom: 80px;
-  width: 100%;
-  display: flex;
-  gap: 18px;
-  justify-content: center;
-  z-index: 10;
-}
 
 .controlBtn {
   background: #1a1d40;
@@ -164,18 +157,16 @@
 
 .minimizeBtn {
   position: fixed;
-  top: 12px;
-  left: 12px;     /* ✅ LEFT for web + mobile */
-  right: auto;
+  top: calc(12px + var(--safe-top));
+  left: 12px;
   z-index: 999999;
   padding: 6px 10px;
   border-radius: 6px;
-  border: none;
-  cursor: pointer;
   background: rgba(0, 0, 0, 0.6);
   color: #fff;
-  font-size: 12px;
+  border: none;
 }
+
 
 /* ===============================
    📱 MOBILE (≤768px)
@@ -200,10 +191,7 @@
     right: 12px;
   }
 
-  .controls {
-    bottom: 96px;
-    gap: 12px;
-  }
+ 
 
   .controlBtn,
   .endBtn {
@@ -234,9 +222,7 @@
     bottom: 180px;
   }
 
-  .controls {
-    bottom: 110px;
-  }
+ 
 
   .floatingMini {
     width: 160px;
@@ -273,13 +259,7 @@
   transform: scale(0.95);
 }
 
-.controls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 20px;
-}
+
 
 /* Call text */
 .callInfo {
@@ -297,8 +277,8 @@
 /* Buttons row */
 .controlButtons {
   display: flex;
-  align-items: center;
   gap: 14px;
+  justify-content: center;
 }
 
 /* Circle icon button */
@@ -338,14 +318,16 @@
 
 
 .controls {
-  position: absolute;
-  bottom: 24px;
+  position: fixed;
+  bottom: calc(16px + var(--safe-bottom));
+  left: 0;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  z-index: 10;
+  z-index: 999999;
+  pointer-events: auto;
 }
 
 /* CALL INFO */
@@ -379,10 +361,6 @@
 }
 
 /* BUTTONS */
-.controlButtons {
-  display: flex;
-  gap: 14px;
-}
 
 .iconBtn {
   width: 44px;
