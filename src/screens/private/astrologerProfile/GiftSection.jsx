@@ -34,7 +34,7 @@ const GiftSection = ({ astrologer }) => {
     }
   };
 
-  const handleRecharge = () => navigate("/callingpack");
+  const handleRecharge = () => navigate("/recharge");
 
   useEffect(() => {
     if (selected && selected?.price > balance) {

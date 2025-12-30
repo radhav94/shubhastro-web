@@ -229,7 +229,7 @@ const TopBar = () => {
     { title: "Astromall", path: "/shop" },
     // { title: "Shubhtalk Store", path: "/store" },
     { title: "Blogs", path: "/blog" },
-    { title: "Recharge", path: "/callingpack" },
+    { title: "Recharge", path: "/recharge" },
   ];
 
   useEffect(() => {
