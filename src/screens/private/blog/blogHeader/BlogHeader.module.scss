@@ -32,24 +32,28 @@ $font-primary: "Poppins", sans-serif;
   @media (min-width: 576px) {
     grid-template-columns: repeat(2, 1fr); // 2 columns
     gap: 20px;
+    padding: 0px 0px 0px 4px;
   }
 
   // Tablets
   @media (min-width: 768px) {
     grid-template-columns: repeat(2, 1fr); // 2 columns
     gap: 24px;
+    padding: 0px 0px 0px 4px;
   }
 
   // Large tablets / small desktops
   @media (min-width: 992px) {
     grid-template-columns: repeat(3, 1fr); // 3 columns
     gap: 28px;
+    padding: 0px 0px 0px 4px;
   }
 
   // Desktops
   @media (min-width: 1200px) {
     grid-template-columns: repeat(3, 1fr); // 3 columns
     gap: 30px;
+    padding: 0px 0px 0px 4px;
   }
 
   // Large desktops
@@ -57,12 +61,14 @@ $font-primary: "Poppins", sans-serif;
     grid-template-columns: repeat(4, 1fr); // 4 columns
     gap: 32px;
     max-width: 1600px;
+    padding: 0px 0px 0px 4px;
   }
 
   // Extra large screens
   @media (min-width: 1600px) {
     grid-template-columns: repeat(4, 1fr); // 4 columns
     gap: 36px;
+    padding: 0px 0px 0px 4px;
   }
 }
 
