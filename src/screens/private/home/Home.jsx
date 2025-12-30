@@ -4,6 +4,7 @@ import styles from "./Home.module.scss";
 import ServiceCards from "./components/serviceCards/ServiceCards";
 import Astrologers from "./components/astrologers/Astrologers";
 import Blogs from "./components/blogs/Blogs";
+import News from "./components/news/news";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../utils/routes/Paths";
 import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices";
@@ -54,7 +55,7 @@ const Home = () => {
               onProfile={onProfile}
             />
         </section>
-
+        <News data={homeList} />
         <section className={styles.section}>
           <ServiceCards />
         </section>
@@ -67,7 +68,6 @@ const Home = () => {
           {/* <div className={styles.sectionBlock}> */}
           <Blogs data={homeList} />
           {/* </div> */}
-
           <div>
             <WhyAstro />
           </div>
