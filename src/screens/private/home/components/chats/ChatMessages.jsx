@@ -19,7 +19,7 @@ const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
               try {
                 const voiceMessage = JSON.parse(msg.text);
                 return (<VoiceMessage
-                  url={voiceMessage.url}
+                  url={voiceMessage.audioUrl}
                   duration={voiceMessage.duration}
                   time={msg.time}
                   isSender={msg.isSender}

@@ -121,14 +121,12 @@ const ChatWindow = () => {
 
   const [getS3SignedUrl] = useGetS3SignedUrlMutation();
   const sendVoiceMessage = async (blob = null, duration) => {
-    // const formData = new FormData();
-    // formData.append("file", blob);
     const signedUrl = await getS3SignedUrl({
       fileType: blob.type,
     }).unwrap();
-    const audioUrl = signedUrl.key;
+    const audioUrl = (signedUrl.uploadUrl).split("?")[0];
     const uploadUrl = signedUrl.uploadUrl;
-    const res = await uploadAudioToS3(uploadUrl, blob);
+    await uploadAudioToS3(uploadUrl, blob);
     const jsonString = JSON.stringify({
       type: "voice",
       audioUrl,
@@ -146,7 +144,7 @@ const ChatWindow = () => {
         "Content-Type": blob.type,
       },
     });
-    console.log("uploadAudioToS3", res);
+    
     if (!res.ok) {
       throw new Error("S3 upload failed");
     }
