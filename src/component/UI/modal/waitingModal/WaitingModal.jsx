@@ -1,3 +1,4 @@
+import { voiceSocket } from "../../../../services/voiceSocketServices";
 import PrimaryText from "../../../PrimaryText";
 import styles from "./WaitingModal.module.scss";
 

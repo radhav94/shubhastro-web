@@ -12,9 +12,11 @@ import { useCreateChatRoomMutation } from "../../../../redux/api/chatApi";
 import { useNavigate,useLocation } from "react-router-dom";
 import WaitingModal from "../waitingModal/WaitingModal";
 import KundliSelectModal from "../../../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
+import PrimaryLoader from "../../PrimaryLoader";
 
 const RecommendModal = ({ open, onClose, mode = "chat" }) => {
-  const { data: recommendedAstros } = useGetRecommendedAstrologersQuery();
+  const { data: recommendedAstros, isLoading } =
+    useGetRecommendedAstrologersQuery();
 
   if (!open) return null;
 
@@ -137,7 +139,7 @@ const RecommendModal = ({ open, onClose, mode = "chat" }) => {
     if (balance < price) {
       setSelectedAstrologer(astro);
       // setOpenModal((prev) => ({ ...prev, recharge: true }));
-      // return;
+      return;
     }
 
     //  Already on call
@@ -258,6 +260,8 @@ const RecommendModal = ({ open, onClose, mode = "chat" }) => {
       />
       <div className={styles.overlay}>
         <div className={styles.modal}>
+          <PrimaryLoader isLoading={isLoading} />
+
           {/* HEADER */}
           <div className={styles.modalHeader}>
             <h3>Recommended Astrologers</h3>
@@ -274,6 +278,7 @@ const RecommendModal = ({ open, onClose, mode = "chat" }) => {
                   isActiveType={activeType}
                   key={astro._id}
                   astro={astro}
+                  mode={mode}
                   onChat={() => openKundliPopup(astro)}
                   // onProfile={() => onProfile(astro)}
                   onAudioCall={() => handleAudioCall(astro)}

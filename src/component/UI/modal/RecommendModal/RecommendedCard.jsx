@@ -3,7 +3,7 @@ import styles from "./recommendedCard.module.scss";
 import { AppIcons } from "../../../../utils/appImages";
 import { appColors } from "../../../../utils/theme";
 
-const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall,isActiveType}) => {
+const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall, mode }) => {
   return (
     <>
       <div className={styles.card}>
@@ -12,32 +12,38 @@ const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall,isActiveType}
         <h4>{astro?.firstName}</h4>
 
         <div className={styles.buttonsRow}>
-        {isActiveType === "chat" ? (
-          <PrimaryButton
-            bgColor={appColors.white}
-            imgSrc={AppIcons.Message}
-            imgSize={20}
-            buttonStyles={{ padding: "2px" }}
-            onClick={onChat}
-          />
-        ) : (
-          <>
-          <PrimaryButton
-            bgColor={appColors.white}
-            imgSrc={AppIcons.Call}
-            imgSize={20}
-            buttonStyles={{ padding: "2px" }}
-            onClick={onAudioCall}
-          />
+          {mode === "chat" ? (
+            <PrimaryButton
+              bgColor={appColors.white}
+              imgSrc={AppIcons.Message}
+              imgSize={20}
+              buttonStyles={{ padding: "2px" }}
+              onClick={onChat}
+            />
+          ) : (
+            <>
+              <PrimaryButton
+                bgColor={appColors.white}
+                imgSrc={AppIcons.Call}
+                imgSize={20}
+                buttonStyles={{ padding: "2px" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAudioCall();
+                }}
+              />
 
-          <PrimaryButton
-            bgColor={appColors.white}
-            imgSrc={AppIcons.Video}
-            imgSize={20}
-            buttonStyles={{ padding: "2px" }}
-            onClick={onVideoCall}
-          />
-          </>
+              <PrimaryButton
+                bgColor={appColors.white}
+                imgSrc={AppIcons.Video}
+                imgSize={20}
+                buttonStyles={{ padding: "2px" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onVideoCall();
+                }}
+              />
+            </>
           )}
         </div>
       </div>
