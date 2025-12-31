@@ -377,11 +377,11 @@ export const PATH = {
     },
 
     RECHARGE: {
-      path: "/callingpack",
+      path: "/recharge",
       element: Payment,
     },
     FinalPay: {
-      path: "/callingpack/payment",
+      path: "/recharge/payment",
       element: FinalPay,
     },
     ASTROLOGERS: {

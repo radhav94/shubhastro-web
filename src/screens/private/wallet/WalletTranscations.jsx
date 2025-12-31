@@ -76,7 +76,7 @@ const WalletTranscations = () => {
             />
           </button>
 
-          <Link to="/callingpack">
+          <Link to="/recharge">
             <button
               className="border border-green-500 text-green-600 text-sm px-3 py-1 rounded-md
               hover:bg-green-500 hover:text-white transition-colors duration-300"

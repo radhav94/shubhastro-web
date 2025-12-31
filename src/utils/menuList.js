@@ -49,5 +49,5 @@ export const MENU_LIST = [
   { title: "Live", path: "/livestream" },
   // { title: "Shubhtalk Store", path: "/store" },
   { title: "Blogs", path: "/blog" },
-  { title: "Recharge", path: "/callingpack" },
+  { title: "Recharge", path: "/recharge" },
 ];

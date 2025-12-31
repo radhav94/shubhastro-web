@@ -3,32 +3,36 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import styles from "./Breadcrumb.module.scss";
 import { useSelector } from "react-redux";
 import { blogApi } from "../services/appServices/blogService";
+import { epoojaApi } from "../redux/api/astromall/epooja/epoojaApi";
 
 const Breadcrumb = () => {
   const location = useLocation();
   const params = useParams();
+  const { slug, productSlug } = params;
 
   const isAstroDashboard = location.pathname.startsWith(
     "/astrologer-dashboard"
   );
 
-  const pathnames = location.pathname
-    .split("/")
-    .filter(Boolean);
-
+  const pathnames = location.pathname.split("/").filter(Boolean);
   if (!pathnames.length) return null;
 
-  const astrologerName =
-    location.state?.fullName ||
-    location.state?.astroName;
+  const astrologerName = location.state?.fullName || location.state?.astroName;
 
-  const { slug } = useParams();
+  /* Blog and Darshan*/
+  const blogSelector = blogApi.endpoints.getSingleBlog.select(slug);
+  const darshanSelector =
+    epoojaApi.endpoints.getSingleEPooja.select(productSlug);
 
-  const blogData = useSelector((state) =>
-    blogApi.endpoints.getSingleBlog.select(slug)(state)
-  );
+  const blogData = useSelector(blogSelector);
+  const darshanData = useSelector(darshanSelector);
 
-  const blogTitle = blogData?.data?.data?.title;
+  const blogTitle = pathnames.includes("blog")
+    ? blogData?.data?.data?.title
+    : null;
+
+  const darshanTitle =
+    slug === "live-darshan" ? darshanData?.data?.data?.title : null;
 
   return (
     <div className={styles.breadCrumb}>
@@ -46,7 +50,7 @@ const Breadcrumb = () => {
 
         let label = name.replace(/-/g, " ");
 
-        // 🔥 Replace astrologer ID with name
+        // Astrologer name
         if (
           pathnames[index - 1] === "talk-to-astrologers" &&
           name === params.id &&
@@ -55,8 +59,18 @@ const Breadcrumb = () => {
           label = astrologerName;
         }
 
+        // Blog title
         if (pathnames[index - 1] === "blog" && blogTitle) {
           label = blogTitle;
+        }
+
+        // Live Darshan title
+        if (
+          pathnames[index - 1] === "live-darshan" &&
+          name === productSlug &&
+          darshanTitle
+        ) {
+          label = darshanTitle;
         }
 
         return (

@@ -1,4 +1,16 @@
 /* element selectors */
+
+:root {
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+
+body {
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -39,15 +39,20 @@ const astroImages = [
 
 const TalkToAstrologer = () => {
   const navigate = useNavigate();
+  const [isRecommendModalOpen, setIsRecommendModalOpen] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showRecommend, setShowRecommend] = useState(true);
+
+  const location = useLocation(); //  get current URL
+  const isChatMode = location.pathname === "/chat-with-astrologers";
+  const currentPath = location.pathname.split("/").pop();
 
   const showCTA = useRecommendTrigger(120, resetTrigger);
   useEffect(() => {
     if (showCTA) {
       setShowRecommend(true);
     }
-  }, [showCTA]);
+  }, [showCTA, isChatMode]);
 
   const [open, setOpen] = useState(false);
 
@@ -86,8 +91,7 @@ const TalkToAstrologer = () => {
 
   const [createChatRoom] = useCreateChatRoomMutation();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
-  const location = useLocation(); // 👈 get current URL
-  const currentPath = location.pathname.split("/").pop(); // last part of URL
+  // last part of URL
 
   // Detect type based on URL
   const getTypeFromURL = () => {
@@ -113,7 +117,6 @@ const TalkToAstrologer = () => {
     specialties: specialty || "",
     isActiveType: activeType, // now activeType exists
   });
-  console.log(activeType, "activeType");
 
   const data = astrodata?.data || [];
   const token = getToken();
@@ -276,7 +279,6 @@ const TalkToAstrologer = () => {
 
     const astro = selectedAstrologer;
     localStorage.setItem("selectedAstroId", astro._id);
-    localStorage.setItem("selectedAstrologerId", astro.astrologer_ID);
 
     try {
       // 🔐 Auth check
@@ -302,7 +304,7 @@ const TalkToAstrologer = () => {
   /* ------------------- SOCKET CALL FLOW (ADDED ONLY) ------------------- */
 
   useEffect(() => {
-    if (!userIdLocal) return;
+    if (!userIdLocal || isRecommendModalOpen) return;
 
     if (!voiceSocket.connected) {
       voiceSocket.io.opts.query = {
@@ -313,9 +315,9 @@ const TalkToAstrologer = () => {
     }
 
     return () => {
-      voiceSocket.off(); // remove listeners only
+      voiceSocket.off();
     };
-  }, [userIdLocal]);
+  }, [userIdLocal, isRecommendModalOpen]);
 
   const connectSocket = () => {
     if (voiceSocket.connected) voiceSocket.disconnect();
@@ -391,7 +393,7 @@ const TalkToAstrologer = () => {
   };
 
   useEffect(() => {
-    if (!userIdLocal) return;
+    if (!userIdLocal || isRecommendModalOpen) return;
 
     /* Room ready event */
     const handleReturnRoom = ({ roomId }) => {
@@ -517,9 +519,9 @@ const TalkToAstrologer = () => {
       voiceSocket.off("error", handleSocketError);
       voiceSocket.off("call_ended", handleCallEnded);
     };
-  }, [userIdLocal]);
-  /* ------------------------------------------------------------------- */
+  }, [userIdLocal, isRecommendModalOpen]);
 
+  //JSX
   return (
     <div className={styles.mainContainer}>
       <PrimaryText size_24 isExtraBold>
@@ -646,9 +648,10 @@ const TalkToAstrologer = () => {
       )}
       {showCTA && showRecommend && (!WaitingList) && (
         <RecommendCTA
-          mode="chat"
+          mode={isChatMode ? "chat" : "call"}
           onClick={() => {
             setOpen(true);
+            setIsRecommendModalOpen(true);
             setShowRecommend(false);
           }}
           onClose={() => {
@@ -661,8 +664,11 @@ const TalkToAstrologer = () => {
       {open && (
         <RecommendModal
           open={open}
-          onClose={() => setOpen(false)}
-          mode="chat"
+          onClose={() => {
+            setOpen(false);
+            setIsRecommendModalOpen(false);
+          }}
+          mode={isChatMode ? "chat" : "call"}
         />
       )}
     </div>

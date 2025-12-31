@@ -23,6 +23,7 @@ import { voiceSocket } from "../../../../../services/voiceSocketServices";
 const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 const MIN_CHAT_SECONDS = 60;
 
+import { useGetS3SignedUrlMutation } from "../../../../../redux/api/s3SignedApi"
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
@@ -132,9 +133,8 @@ const ChatWindow = () => {
   const handleReviewSubmit = async ({ rating, review, anonymous }) => {
     try {
       const isAnonymous = anonymous;
-      const astrologerID = parseInt(localStorage.getItem("selectedAstrologerId"));
       const res = await addAstrologerReview({
-        astrologerID,
+        astrologerID: astroID,
         rating,
         review,
         isAnonymous,
@@ -153,10 +153,37 @@ const ChatWindow = () => {
     }
   };
 
-  const formatChatTime = (secs) => {
-    const minutes = String(Math.floor(secs / 60)).padStart(2, "0");
-    const seconds = String(secs % 60).padStart(2, "0");
-    return `${minutes}:${seconds}`;
+  const [getS3SignedUrl] = useGetS3SignedUrlMutation();
+  const sendVoiceMessage = async (blob = null, duration) => {
+    const signedUrl = await getS3SignedUrl({
+      fileType: blob.type,
+    }).unwrap();
+    const audioUrl = (signedUrl.uploadUrl).split("?")[0];
+    const uploadUrl = signedUrl.uploadUrl;
+    await uploadAudioToS3(uploadUrl, blob);
+    const jsonString = JSON.stringify({
+      type: "voice",
+      audioUrl,
+      duration,
+    });
+    sendMessage(jsonString)
+    setMessage("");
+  };
+
+  const uploadAudioToS3 = async (uploadUrl, blob) => {
+    const res = await fetch(uploadUrl, {
+      method: "PUT",
+      body: blob,
+      headers: {
+        "Content-Type": blob.type,
+      },
+    });
+    
+    if (!res.ok) {
+      throw new Error("S3 upload failed");
+    }
+
+    return "success";
   };
 
   return (
@@ -169,7 +196,6 @@ const ChatWindow = () => {
           onAudioCall={handleAudioCall}
           onVideoCall={handleVideoCall}
           disabled={!!activeCall}
-          chatDuration={formatChatTime(chatSeconds)}
         />
 
         <ChatMessages
@@ -188,6 +214,8 @@ const ChatWindow = () => {
           onSend={handleSend}
           isMessageDisabled={isMessageDisabled}
           onChatEnd={handleChatEnd}
+          setOpen={setOpenFeedback}
+          sendVoiceMessage={sendVoiceMessage}
         />
 
         <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />

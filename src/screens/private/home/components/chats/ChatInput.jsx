@@ -1,13 +1,16 @@
 import styles from "./ChatWindow.module.scss";
-import { IoSend, IoAttach } from "react-icons/io5";
+import { IoSend, IoAttach, IoMic } from "react-icons/io5";
 import { IoMdAdd } from "react-icons/io";
 import { GrReactjs } from "react-icons/gr";
 import { useRef, useState } from "react";
 import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSelectModal";
 import toast from "../../../../../component/toast";
 import { useChat } from "../../../../../context/ChatContext";
+import { useVoiceRecorder } from "../../../talkToAstrologer/voiceChat/useVoiceRecorder";
+import VoiceRecorderPopup from "../../../talkToAstrologer/voiceChat/VoiceRecorderPopup";
 
-const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd }) => {
+const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd, sendVoiceMessage }) => {
+
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const handleChatAfterKundliSelect = async (kundli) => {
     setKundliModalOpen(false);
@@ -34,6 +37,22 @@ const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd
     onChatEnd();
     setActiveChat(null);
   }
+  const {
+    recording,
+    seconds,
+    startRecording,
+    stopRecording,
+  } = useVoiceRecorder();
+
+  const handleMicClick = async () => {
+    await startRecording();
+  };
+
+  const handleStopRecording = async () => {
+    const { blob, duration } = await stopRecording();
+    await sendVoiceMessage(blob, duration);
+  };
+
 
   return (
     <>
@@ -75,6 +94,13 @@ const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd
         <button className={styles.sendButton} onClick={onSend}>
           <IoSend size={20} />
         </button>
+        <button
+          className={styles.voiceChatButton}
+          onClick={handleMicClick}
+        >
+          <IoMic size={20} />
+        </button>
+
         <button className={styles.endChatButton} onClick={handleChatEnd}>
           End
         </button>
@@ -84,6 +110,13 @@ const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd
         onClose={() => setKundliModalOpen(false)}
         onSelect={handleChatAfterKundliSelect}
       />
+
+      {recording && (
+        <VoiceRecorderPopup
+          seconds={seconds}
+          onStop={handleStopRecording}
+        />
+      )}
     </>
   );
 };

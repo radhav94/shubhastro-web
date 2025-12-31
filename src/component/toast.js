@@ -3,6 +3,7 @@ import { toast as rht } from "react-hot-toast";
 const options = {
   duration: 5000,
   position: "top-right",
+    zIndex: 9999999999,
 };
 
 const success = (msg) => {
