@@ -32,7 +32,7 @@ export const zodiac = () => {
       {
         id: 1,
         name: "Aries",
-        range: "MAR 21 - APR 19",
+        range: "Mar 21 - Apr 19",
         img: Aries,
         bannerImg:
           "https://images.astroyogi.com/strapicmsprod/assets/Traits_ee14f625a9.webp",
