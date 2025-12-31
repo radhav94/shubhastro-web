@@ -63,7 +63,7 @@ const AstrologerProfile = () => {
 
       if (!isFollowing) {
         // FOLLOW API CALL
-        await followAstrologer({ astrologerId: data.ID }).unwrap();
+        await followAstrologer({ astrologerId: data._id }).unwrap();
         toast.success(
           `We will notify you when ${
             data?.firstName || ""
@@ -71,7 +71,7 @@ const AstrologerProfile = () => {
         );
       } else {
         // UNFOLLOW API CALL
-        await unfollowAstrologer({ astrologerId: data.ID }).unwrap();
+        await unfollowAstrologer({ astrologerId: data._id }).unwrap();
         toast.success(`You unfollowed ${data?.firstName}`);
       }
 
