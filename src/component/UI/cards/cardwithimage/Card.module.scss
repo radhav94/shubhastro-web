@@ -62,3 +62,26 @@
     }
   }
 }
+.luckyMain{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  & .luckyColor{
+    display: flex;
+    align-items: center; 
+    gap: 6px;
+    font-size: 14px;
+    strong{
+      text-align: center;
+      span{
+        @media (max-width: 1180px) {
+          display: none;
+        }
+      }
+    }
+    @media (max-width: 1180px) {
+      flex-direction: column;
+    }
+  }
+}
