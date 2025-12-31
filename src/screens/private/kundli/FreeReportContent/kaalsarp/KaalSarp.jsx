@@ -66,9 +66,11 @@ const KaalSarp = () => {
             <div className="flex-col mx-2 flex-1 bg-black/10 rounded-md ">
               <p className="font-medium text-gray-400 ">Details</p>
               <p className="text-xl font-medium">
-                {kaalsarp?.bot_response?.length > 50
-                  ? kaalsarp?.bot_response?.length.slice(0, 50) + "..."
-                  : kaalsarp?.bot_response}
+                {kaalsarp?.bot_response
+                  ? kaalsarp.bot_response.length > 50
+                    ? kaalsarp.bot_response.slice(0, 50) + "..."
+                    : kaalsarp.bot_response
+                  : ""}
               </p>
             </div>
           </div>
