@@ -22,9 +22,8 @@ export const chatApi = privateRequestNew.injectEndpoints({
     }),
 
     getChatHistory: builder.query({
-      query: ({ roomId }) => ({
-        url: "chat/messages",
-        params: { roomId },
+      query: ({ userId }) => ({
+        url: `chat/messages/inbox/${userId}`,
       }),
     }),
   }),

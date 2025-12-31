@@ -4,16 +4,21 @@ import { IoMdAdd } from "react-icons/io";
 import { GrReactjs } from "react-icons/gr";
 import { useRef, useState } from "react";
 import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSelectModal";
+import toast from "../../../../../component/toast";
+import { useChat } from "../../../../../context/ChatContext";
 import { useVoiceRecorder } from "../../../talkToAstrologer/voiceChat/useVoiceRecorder";
 import VoiceRecorderPopup from "../../../talkToAstrologer/voiceChat/VoiceRecorderPopup";
 
-const ChatInput = ({ value, onChange, onSend, setOpen, sendVoiceMessage }) => {
+const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd, sendVoiceMessage }) => {
+
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const handleChatAfterKundliSelect = async (kundli) => {
     setKundliModalOpen(false);
-    if (!kundli?._id) return Toast.error("Kundli not selected properly");
+    if (!kundli?._id) return toast.error("Kundli not selected properly");
     onSend(kundli);
   };
+
+  const {setActiveChat} = useChat();
 
   const fileInputRef = useRef(null);
 
@@ -28,6 +33,10 @@ const ChatInput = ({ value, onChange, onSend, setOpen, sendVoiceMessage }) => {
     // console.log("Selected files:", files);
   };
 
+  const handleChatEnd = () => {
+    onChatEnd();
+    setActiveChat(null);
+  }
   const {
     recording,
     seconds,
@@ -77,6 +86,7 @@ const ChatInput = ({ value, onChange, onSend, setOpen, sendVoiceMessage }) => {
           className={styles.inputField}
           value={value}
           onChange={onChange}
+          disabled={isMessageDisabled}
           onKeyDown={(e) => e.key === "Enter" && onSend()}
           placeholder="Write a message..."
         />
@@ -91,7 +101,7 @@ const ChatInput = ({ value, onChange, onSend, setOpen, sendVoiceMessage }) => {
           <IoMic size={20} />
         </button>
 
-        <button className={styles.endChatButton} onClick={() => setOpen(true)}>
+        <button className={styles.endChatButton} onClick={handleChatEnd}>
           End
         </button>
       </div>

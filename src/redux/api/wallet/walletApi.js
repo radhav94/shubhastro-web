@@ -5,8 +5,14 @@ export const walletApi = privateRequestNew.injectEndpoints({
     getWalletBalance: builder.query({
       query: () => "wallets/all"
     }),
+    getBalance: builder.mutation({
+      query: ({ astrologerId, type = "chat" }) => ({
+        url: "wallets/preSessionBalanceCheck",
+        params: { astrologerId, type }, 
+      }),
+    }),
   }),
 });
 
 // HOOKS
-export const { useLazyGetWalletBalanceQuery } = walletApi;
+export const { useLazyGetWalletBalanceQuery, useGetBalanceMutation } = walletApi;

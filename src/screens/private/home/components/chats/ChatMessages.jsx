@@ -30,7 +30,7 @@ const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
             className={`${styles.msgBubble} ${msg.isSender ? styles.senderBubble : styles.receiverBubble
               }`}
           >
-            <PrimaryText size={14}>
+            <PrimaryText size={14} color={"#111"}>
               {(() => {
                 try {
                   const voiceMessage = JSON.parse(msg.text);

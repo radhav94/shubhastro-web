@@ -11,6 +11,7 @@ import Footer from "./Footer";
 import ScrollToTop from "../component/functions/ScrollToTop";
 import CircleSpinner from "../component/UI/CircleSpinner";
 import VideoCallContainer from "../component/call/VideoCallContainer";
+import StickyChatFooter from "../screens/private/home/components/chats/StickyChatFooter";
 
 const HomeLayout = () => {
   const isMobile = useIsMobile();
@@ -55,6 +56,8 @@ const HomeLayout = () => {
 
       {/* ✅ FLOATING CALL UI (IMPORTANT LINE) */}
       <VideoCallContainer />
+
+      <StickyChatFooter/>
     </div>
   );
 };
