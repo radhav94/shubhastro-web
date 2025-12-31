@@ -5,34 +5,40 @@ export const useInactivityTimer = (timeout = 120000, isPaused = false) => {
   const timerRef = useRef(null);
 
   const resetTimer = () => {
-    if (isPaused) return; // STOP resetting when modal is open
+    if (isPaused || isInactive) return;
 
     setIsInactive(false);
-    if (timerRef.current) clearTimeout(timerRef.current);
+    clearTimeout(timerRef.current);
 
     timerRef.current = setTimeout(() => {
       setIsInactive(true);
     }, timeout);
   };
 
-  useEffect(() => {
-    if (!isPaused) resetTimer(); // Restart timer only if not paused
 
-    const events = ["mousemove", "keydown", "click", "touchstart"];
+useEffect(() => {
+  if (isPaused || isInactive) return;
 
-    const handleActivity = () => {
-      if (!isPaused) resetTimer();
-    };
+  resetTimer();
 
-    events.forEach((event) => window.addEventListener(event, handleActivity));
+  const events = ["mousemove", "keydown", "click", "touchstart"];
 
-    return () => {
-      events.forEach((event) =>
-        window.removeEventListener(event, handleActivity)
-      );
-      clearTimeout(timerRef.current);
-    };
-  }, [isPaused]);
+  const handleActivity = () => {
+    resetTimer();
+  };
+
+  events.forEach(event =>
+    window.addEventListener(event, handleActivity)
+  );
+
+  return () => {
+    events.forEach(event =>
+      window.removeEventListener(event, handleActivity)
+    );
+    clearTimeout(timerRef.current);
+  };
+}, [isPaused, isInactive, timeout]);
+
 
   return { isInactive, resetTimer };
 };

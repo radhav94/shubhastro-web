@@ -17,15 +17,22 @@ import Feedback from "./Feedback";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
 import { useAddAstrologerReviewMutation } from "../../../../../redux/api/review/reviewApi";
 import { Toast } from "../../../../../component";
+import dayjs from "dayjs";
+import { voiceSocket } from "../../../../../services/voiceSocketServices";
+
+const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
+const MIN_CHAT_SECONDS = 60;
+
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { userId, astrologerId, roomId, fullName, isUserSide, kundliId } =
-    state;
+  const { userId, astrologerId, roomId, fullName, isUserSide, kundliId, astrologerName, refreshKey } =
+    state || {};
 
   const { activeCall } = useCall();
+  const [openFeedback, setOpenFeedback] = useState(false);
 
   const {
     messages,
@@ -35,7 +42,8 @@ const ChatWindow = () => {
     astroReply,
     sendTyping,
     chatSeconds,
-  } = useChat({ userId, astrologerId, roomId, isUserSide, kundliId });
+    isMessageDisabled,
+  } = useChat({ userId, astrologerId, roomId, isUserSide, kundliId, setOpenFeedback, astrologerName, refreshKey });
 
   const [message, setMessage] = useState("");
 
@@ -49,26 +57,51 @@ const ChatWindow = () => {
       isUserSide,
     });
 
-  const { data } = useGetChatHistoryQuery({ roomId });
-  const history = data?.data?.[0]?.chatHistory || [];
+  const { data } = useGetChatHistoryQuery({ userId : astrologerId }, {refetchOnMountOrArgChange : true});
+  const history = data?.data || [];
 
   const finalMsgs = useMemo(() => {
     const historyMsgs = history.map((item) => ({
-      text: item.message || item.response,
+      text: item.message || "",
       isSender: isUserSide
-        ? item.senderType === "user"
-        : item.senderType === "astrologer",
+        ? item.sender === "user"
+        : item.sender === "astrologer",
       time: new Date(item.createdAt).toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       }),
+      dateTime: item.createdAt,
     }));
 
-    return [...historyMsgs, ...messages];
+
+    const socket = messages.map((msg, idx) => ({
+      id: `socket-${idx}-${msg.time}`,
+      text: msg.text,
+      isSender: msg.sender,
+      time: msg.time,
+      date: msg.date || formatDate(new Date()),
+      dateTime: msg.dateTime || new Date().toISOString(),
+    }));
+
+    return [...historyMsgs, ...socket].sort(
+    (a, b) => new Date(a.dateTime) - new Date(b.dateTime)
+    );
   }, [history, messages, isUserSide]);
 
   const { isInactive, resetTimer } = useInactivityTimer(120000);
-  const handleDisconnect = () => navigate(-1);
+
+  const handleChatEnd = () => {
+    if (chatSeconds < MIN_CHAT_SECONDS) {
+        Toast.error("Chat cannot be ended before 1 minute");
+        return;
+      }
+    voiceSocket.emit("chat:end", {roomId, endedBy : "CUSTOMER"})
+  };
+
+  const handleDisconnect = () => {
+    handleChatEnd();
+    navigate(-1)
+  };
 
   const handleSend = (kundli = null) => {
     if (kundli?._id) {
@@ -95,7 +128,6 @@ const ChatWindow = () => {
   }, [finalMsgs.length, isTyping]);
 
   const user = getUserFromStorage();
-  const [openFeedback, setOpenFeedback] = useState(false);
   const [addAstrologerReview, { isLoading }] = useAddAstrologerReviewMutation();
   const handleReviewSubmit = async ({ rating, review, anonymous }) => {
     try {
@@ -154,7 +186,8 @@ const ChatWindow = () => {
             sendTyping();
           }}
           onSend={handleSend}
-          setOpen={setOpenFeedback}
+          isMessageDisabled={isMessageDisabled}
+          onChatEnd={handleChatEnd}
         />
 
         <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />

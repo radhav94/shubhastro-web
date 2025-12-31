@@ -4,14 +4,18 @@ import { IoMdAdd } from "react-icons/io";
 import { GrReactjs } from "react-icons/gr";
 import { useRef, useState } from "react";
 import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSelectModal";
+import toast from "../../../../../component/toast";
+import { useChat } from "../../../../../context/ChatContext";
 
-const ChatInput = ({ value, onChange, onSend, setOpen }) => {
+const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd }) => {
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const handleChatAfterKundliSelect = async (kundli) => {
     setKundliModalOpen(false);
-    if (!kundli?._id) return Toast.error("Kundli not selected properly");
+    if (!kundli?._id) return toast.error("Kundli not selected properly");
     onSend(kundli);
   };
+
+  const {setActiveChat} = useChat();
 
   const fileInputRef = useRef(null);
 
@@ -25,6 +29,11 @@ const ChatInput = ({ value, onChange, onSend, setOpen }) => {
 
     // console.log("Selected files:", files);
   };
+
+  const handleChatEnd = () => {
+    onChatEnd();
+    setActiveChat(null);
+  }
 
   return (
     <>
@@ -58,6 +67,7 @@ const ChatInput = ({ value, onChange, onSend, setOpen }) => {
           className={styles.inputField}
           value={value}
           onChange={onChange}
+          disabled={isMessageDisabled}
           onKeyDown={(e) => e.key === "Enter" && onSend()}
           placeholder="Write a message..."
         />
@@ -65,7 +75,7 @@ const ChatInput = ({ value, onChange, onSend, setOpen }) => {
         <button className={styles.sendButton} onClick={onSend}>
           <IoSend size={20} />
         </button>
-        <button className={styles.endChatButton} onClick={() => setOpen(true)}>
+        <button className={styles.endChatButton} onClick={handleChatEnd}>
           End
         </button>
       </div>

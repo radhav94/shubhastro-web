@@ -11,6 +11,7 @@ import PublicRoute from "./utils/routes/PublicRoute";
 import PrivateRoute from "./utils/routes/PrivateRoute";
 import { useEffect } from "react";
 import { CallProvider } from "./context/CallContext";
+import { ChatProvider } from "./context/ChatContext";
 
 function App() {
   const flattenRoutes = (routes) => {
@@ -80,9 +81,11 @@ function App() {
 
   return (
     <CallProvider>
+    <ChatProvider>
       <div className={classes.app}>
         <RouterProvider router={roleWiseRouting} />
       </div>
+    </ChatProvider>
     </CallProvider>
   );
 }

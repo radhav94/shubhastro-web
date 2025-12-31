@@ -1,5 +1,8 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import socketService from "../../../../../services/socketService";
+import { voiceSocket } from "../../../../../services/voiceSocketServices";
+import toast from "../../../../../component/toast";
+import {useChat as useChatContext} from "../../../../../context/ChatContext"
 
 export default function useChat({
   userId,
@@ -7,12 +10,15 @@ export default function useChat({
   roomId,
   isUserSide,
   kundliId,
+  setOpenFeedback,
+  astrologerName,
+  refreshKey = 0
 }) {
+  const { startTimer, stopTimer, chatSeconds } = useChatContext();
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
-  const [chatSeconds, setChatSeconds] = useState(0);
-  const chatTimerRef = useRef(null);
+  const [isMessageDisabled, setIsMessageDisabled] = useState(false);
 
   const formatTime = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -24,37 +30,52 @@ export default function useChat({
   useEffect(() => {
     socketService.connect({
       onConnected: () => {
-        socketService.joinRoom({ roomId, userId, astrologerId });
-      },
-      onError: (errMsg) => setError(errMsg),
-    });
-
-    socketService.listenEvents({
-      onMessage: (data) => {
-        const isSenderUser = data.sender === userId;
-
-        addMessage({
-          text: data.message,
-          sender: isSenderUser ? "user" : "astro",
-          isSender: isSenderUser === isUserSide,
-          time: formatTime(),
-        });
-      },
-
-      onTyping: (data) => {
-        if (data.sender !== userId) {
-          setIsTyping(true);
-          setTimeout(() => setIsTyping(false), 1200);
+        startTimer();
+        //Send msg first time only 
+        if(!refreshKey) {
+          sendMessage(`Hi ${astrologerName || ""}`); 
+          const baseUrl = window.location.origin;
+          const kundliLink = `${baseUrl}/kundli/${kundliId}`;
+          sendMessage(kundliLink);
         }
       },
+      onError: (errMsg) => {
+        toast.error(errMsg ||"Something went wrong");
+        setError(errMsg)
+      },
+      onWarn: (msg) => {
+        toast.warning(msg ||"Something went wrong");
+      },
     });
 
-    chatTimerRef.current = setInterval(() => {
-      setChatSeconds((prev) => prev + 1);
-    }, 1000);
+    const handleAddMessage = (data) => {
+      const isSenderUser = data.sender === "user";
+        addMessage({
+          text: data.message,
+          sender: isSenderUser,
+          time: formatTime(),
+          dateTime: data?.dateTime
+        });
+    }
+
+    const handleChatEndedFromServer = () => {
+      setIsMessageDisabled(true);
+      setOpenFeedback(true);
+      stopTimer();
+    };
+
+    const handleWarning = (msg) => {
+      toast.warning(msg.message);
+    }
+
+    voiceSocket.on("message:recieved", handleAddMessage);
+    voiceSocket.on("warning", handleWarning);
+    voiceSocket.on("chat:ended", handleChatEndedFromServer);
 
     return () => {
-      clearInterval(chatTimerRef.current);
+      voiceSocket.off("message:recieved", handleAddMessage);
+      voiceSocket.off("warning", handleWarning);
+      voiceSocket.off("chat:ended", handleChatEndedFromServer);
     };
   }, [roomId]);
 
@@ -72,13 +93,6 @@ export default function useChat({
       setError(res.error);
       return;
     }
-
-    addMessage({
-      text,
-      sender: "user",
-      isSender: isUserSide,
-      time: formatTime(),
-    });
   };
 
   // ASTRO SEND
@@ -115,6 +129,8 @@ export default function useChat({
     sendMessage,
     astroReply,
     sendTyping,
-    chatSeconds
+    chatSeconds,
+    isMessageDisabled,
+    setIsMessageDisabled
   };
 }

@@ -30,7 +30,7 @@ const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
               msg.isSender ? styles.senderBubble : styles.receiverBubble
             }`}
           >
-            <PrimaryText size={14}>
+            <PrimaryText size={14} color={"#111"}>
               {(() => {
                 const urlRegex = /(https?:\/\/[^\s]+)/g;
                 const match = msg.text.match(urlRegex);

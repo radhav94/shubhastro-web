@@ -5,7 +5,7 @@ const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
 class SocketService {
   socket = null;
 
-  connect({ onConnected, onDisconnected, onError }) {
+  connect({ onConnected, onDisconnected, onError, onWarn }) {
     this.socket = io(BASE_URL, {
       transports: ["websocket"],
       autoConnect: true,
@@ -28,6 +28,9 @@ class SocketService {
 
     this.socket.on("error", (err) => {
       onError?.(err.message || "Unknown error occurred");
+    });
+    this.socket.on("warning", (msg) => {
+      onWarn?.(msg.message || "Warning");
     });
   }
 
@@ -57,13 +60,14 @@ class SocketService {
       if (!this.socket?.connected)
         throw new Error("Socket not connected, try again.");
 
-      this.socket.emit("user_sent_message", {
-        sender: userId,
+      this.socket.emit("chat:message", {
+        sender: "user",
         kundliId,
         roomId,
         userId,
         astrologerId,
         message,
+        type: "message"
       });
 
       return { success: true };
@@ -103,17 +107,11 @@ class SocketService {
   listenEvents(callbacks) {
     const { onMessage, onTyping } = callbacks;
 
-    this.socket.on("user_received_message", (data) => {
+    this.socket.on("message:recieved", (data) => {
       onMessage?.({
         sender: data.sender,
         message: data.message || data.response,
-      });
-    });
-
-    this.socket.on("astrologer_received_message", (data) => {
-      onMessage?.({
-        sender: data.sender,
-        message: data.message || data.response,
+        dateTime: data.createdAt || new Date().toISOString(),
       });
     });
 
