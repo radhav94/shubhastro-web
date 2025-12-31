@@ -16,6 +16,21 @@ const Card = ({ data, scope }) => {
           <span>{data?.range}</span>
         </div>
         <p className={styles.description}>{data.overview}</p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <strong>Lucky Color :</strong>
+            <span style={{ color: data?.lucky_color_code }}>{data?.lucky_color}</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <strong>Lucky Number :</strong>
+            <span>
+              {Array.isArray(data?.lucky_number) && data.lucky_number.length > 0
+                ? data.lucky_number.join(", ")
+                : "-"}
+            </span>
+          </div>
+</div>
+
       </div>
     </div>
   );
