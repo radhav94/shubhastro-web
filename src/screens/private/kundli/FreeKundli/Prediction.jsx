@@ -1,24 +1,63 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useGetAi12MonthsPredictionQuery } from "../../../../redux/api/kundli/kundliApi";
 
-const formatLabel = (key) =>
+/* ================= UTIL HELPERS ================= */
+
+const formatLabel = (key = "") =>
   key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
-const formatValue = (value) =>
-  typeof value === "boolean" ? (value ? "Yes" : "No") : value;
+const formatValue = (value) => {
+  if (value === null || value === undefined) return "-";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (typeof value === "object") return JSON.stringify(value);
+  return value;
+};
+
+const renderAnyValue = (value) => {
+  if (value === null || value === undefined) return "-";
+
+  if (Array.isArray(value)) {
+    return (
+      <ul className="list-disc ml-4 space-y-1">
+        {value.map((v, i) => (
+          <li key={i}>{renderAnyValue(v)}</li>
+        ))}
+      </ul>
+    );
+  }
+
+  if (typeof value === "object") {
+    return (
+      <div className="space-y-1">
+        {Object.entries(value).map(([k, v]) => (
+          <p key={k}>
+            <span className="font-medium">{formatLabel(k)}:</span>{" "}
+            {renderAnyValue(v)}
+          </p>
+        ))}
+      </div>
+    );
+  }
+
+  return value;
+};
+
+/* ================= COMPONENT ================= */
 
 const Prediction = ({ params, skipToken }) => {
   const { data, isLoading } =
     useGetAi12MonthsPredictionQuery(params ?? skipToken);
 
-  const predictions = data?.response ?? [];
+  const predictions = Array.isArray(data?.response)
+    ? data.response
+    : [];
+
   const [openIndex, setOpenIndex] = useState(0);
   const [openMeta, setOpenMeta] = useState({});
   const accordionRefs = useRef([]);
   const HEADER_OFFSET = 100;
 
-
-  /* open first by default */
+  /* open first accordion by default */
   useEffect(() => {
     if (predictions.length) setOpenIndex(0);
   }, [predictions.length]);
@@ -26,19 +65,15 @@ const Prediction = ({ params, skipToken }) => {
   /* scroll into view on open */
   useEffect(() => {
     if (accordionRefs.current[openIndex]) {
-      const element = accordionRefs.current[openIndex];
-      const elementTop =
-        element.getBoundingClientRect().top + window.pageYOffset;
+      const el = accordionRefs.current[openIndex];
+      const top =
+        el.getBoundingClientRect().top + window.pageYOffset - HEADER_OFFSET;
 
-      const offsetPosition = elementTop - HEADER_OFFSET;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      });
+      window.scrollTo({ top, behavior: "smooth" });
     }
   }, [openIndex]);
 
+  /* ================= STATES ================= */
 
   if (isLoading) {
     return (
@@ -56,10 +91,12 @@ const Prediction = ({ params, skipToken }) => {
     );
   }
 
+  /* ================= UI ================= */
+
   return (
     <div className="space-y-4 mt-4">
       {predictions.map((item, index) => {
-        const { specifications, predictions: data } = item;
+        const { specifications = {}, predictions: predData = {} } = item;
         const isOpen = openIndex === index;
 
         return (
@@ -74,7 +111,7 @@ const Prediction = ({ params, skipToken }) => {
               className="w-full flex justify-between items-center px-4 py-3 text-left"
             >
               <p className="text-base font-semibold text-gray-800">
-                {specifications?.dasha}
+                {specifications?.dasha || "Prediction"}
               </p>
               <span className="text-sm text-gray-400">
                 {isOpen ? "▲" : "▼"}
@@ -85,7 +122,7 @@ const Prediction = ({ params, skipToken }) => {
               <div className="border-t px-4 py-4 space-y-5">
                 {/* ================= SPECIFICATIONS ================= */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-md border">
-                  {Object.entries(specifications || {}).map(([key, value]) => (
+                  {Object.entries(specifications).map(([key, value]) => (
                     <div key={key}>
                       <p className="text-sm text-gray-500">
                         {formatLabel(key)}
@@ -99,7 +136,7 @@ const Prediction = ({ params, skipToken }) => {
 
                 {/* ================= PREDICTIONS ================= */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {Object.entries(data || {}).map(([key, value]) => {
+                  {Object.entries(predData).map(([key, value]) => {
                     if (!value?.bot_response) return null;
 
                     const metaKey = `${index}-${key}`;
@@ -115,15 +152,17 @@ const Prediction = ({ params, skipToken }) => {
                             {formatLabel(key)}
                           </p>
 
-                          <span
-                            className={`text-xs px-3 py-1 rounded-full capitalize
-                              ${value.outcome === "positive"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-red-100 text-red-700"
+                          {value.outcome && (
+                            <span
+                              className={`text-xs px-3 py-1 rounded-full capitalize ${
+                                value.outcome === "positive"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-red-100 text-red-700"
                               }`}
-                          >
-                            {value.outcome}
-                          </span>
+                            >
+                              {value.outcome}
+                            </span>
+                          )}
                         </div>
 
                         <p className="text-sm text-gray-600 leading-relaxed">
@@ -131,7 +170,7 @@ const Prediction = ({ params, skipToken }) => {
                         </p>
 
                         <p className="mt-2 text-xs text-gray-500">
-                          Probability: {value.probability}
+                          Probability: {formatValue(value.probability)}
                         </p>
 
                         {(value.contributors || value.houseScores) && (
@@ -155,7 +194,7 @@ const Prediction = ({ params, skipToken }) => {
                                 <p className="font-medium text-gray-700 mb-1">
                                   Contributors
                                 </p>
-                                <p>{value.contributors}</p>
+                                {renderAnyValue(value.contributors)}
                               </div>
                             )}
 
@@ -169,11 +208,11 @@ const Prediction = ({ params, skipToken }) => {
                                     ([house, score]) => (
                                       <span
                                         key={house}
-                                        className={`px-3 py-1 rounded-full text-xs
-                                          ${score === "positive"
+                                        className={`px-3 py-1 rounded-full text-xs ${
+                                          score === "positive"
                                             ? "bg-green-100 text-green-700"
                                             : "bg-red-100 text-red-700"
-                                          }`}
+                                        }`}
                                       >
                                         House {house}
                                       </span>
