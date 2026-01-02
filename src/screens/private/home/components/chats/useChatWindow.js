@@ -44,9 +44,11 @@ export default function useChat({
       onError: (errMsg) => {
         toast.error(errMsg ||"Something went wrong");
         setError(errMsg);
+      if(errMsg === 'Chat no longer available'){
         setIsMessageDisabled(true);
         resetTimer();
         setActiveChat(null);
+      }
       },
       onWarn: (msg) => {
         toast.warning(msg ||"Something went wrong");
