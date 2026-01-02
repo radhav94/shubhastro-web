@@ -205,7 +205,7 @@ const ChatWindow = () => {
           messagesRef={messagesRef}
         />
 
-        <ChatInput
+        {!isMessageDisabled && <ChatInput
           value={message}
           onChange={(e) => {
             setMessage(e.target.value);
@@ -216,7 +216,7 @@ const ChatWindow = () => {
           onChatEnd={handleChatEnd}
           setOpen={setOpenFeedback}
           sendVoiceMessage={sendVoiceMessage}
-        />
+        />}
 
         <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
 

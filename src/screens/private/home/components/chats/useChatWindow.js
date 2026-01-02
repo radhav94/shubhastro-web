@@ -14,7 +14,7 @@ export default function useChat({
   astrologerName,
   refreshKey = 0
 }) {
-  const { startTimer, stopTimer, chatSeconds } = useChatContext();
+  const { startTimer, resetTimer, chatSeconds, setActiveChat, activeChat } = useChatContext();
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
@@ -28,6 +28,8 @@ export default function useChat({
   };
 
   useEffect(() => {
+    if(activeChat?.astrologerId !== astrologerId) setIsMessageDisabled(true)
+    if(!roomId || !userId || !astrologerId) return;
     socketService.connect({
       onConnected: () => {
         startTimer();
@@ -41,7 +43,10 @@ export default function useChat({
       },
       onError: (errMsg) => {
         toast.error(errMsg ||"Something went wrong");
-        setError(errMsg)
+        setError(errMsg);
+        setIsMessageDisabled(true);
+        resetTimer();
+        setActiveChat(null);
       },
       onWarn: (msg) => {
         toast.warning(msg ||"Something went wrong");
@@ -61,7 +66,8 @@ export default function useChat({
     const handleChatEndedFromServer = () => {
       setIsMessageDisabled(true);
       setOpenFeedback(true);
-      stopTimer();
+      resetTimer();
+      setActiveChat(null);
     };
 
     const handleWarning = (msg) => {
