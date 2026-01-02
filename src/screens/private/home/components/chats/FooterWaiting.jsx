@@ -4,7 +4,7 @@ import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
 
 export const FooterWaiting = () => {
-  const { waitingList, resetChatFlow, activeChatRoomId, setChatApproval, setWaitingList } = useChat();
+  const { waitingList, resetChatFlow, activeChatRoomId, setChatApproval, setWaitingList, lastRequestedAstro } = useChat();
 
   useEffect(() => {
     const handleAstrologerIncoming = () => {
@@ -17,6 +17,8 @@ export const FooterWaiting = () => {
     }
   }, [])
 
+  const astrologerName = lastRequestedAstro?.firstName
+
   return (
     <>
       <div className="flex items-center gap-3 text-white">
@@ -26,6 +28,11 @@ export const FooterWaiting = () => {
           <p className="text-xs text-zinc-400">
             Approx {waitingList || "2"} mins
           </p>
+          {astrologerName && (
+            <p className="text-xs text-zinc-400">
+              Astrologer: {astrologerName}
+            </p>
+          )}
         </div>
       </div>
 

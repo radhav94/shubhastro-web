@@ -290,6 +290,7 @@ const TalkToAstrologer = () => {
     // ✅ Store active call info
     activeCallAstroRef.current = astro;
     setWaitingPopup(true);
+    kundliRef.current = kundli?._id
 
     // 🚀 Create call room
     voiceSocket.emit("chat:initiate", {
@@ -476,7 +477,8 @@ const TalkToAstrologer = () => {
     };
     /* REJECTED */
     const handleCallRejected = (data) => {
-      Toast.error(data?.sessionData?.sessionEndReason || "Call rejected");
+      const errorMsg = data?.sessionData?.sessionEndReason === "rejected" ? "Astrologer has rejected the chat request" : "Call rejected";
+      Toast.error(errorMsg);
       resetCallState();
       resetChatFlow();
     };

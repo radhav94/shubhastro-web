@@ -9,7 +9,7 @@ class SocketService {
     this.socket = io(BASE_URL, {
       transports: ["websocket"],
       autoConnect: true,
-      reconnection: true,
+      // reconnection: true,
       // reconnectionAttempts: 5,
       // reconnectionDelay: 2000,
     });
