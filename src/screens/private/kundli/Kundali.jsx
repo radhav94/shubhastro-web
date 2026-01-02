@@ -24,6 +24,7 @@ import { useSelector } from "react-redux";
 import { skipToken } from "@reduxjs/toolkit/query";
 import Report from "./FreeKundli/Report";
 import { buildVedicParam } from "../../../utils/VedicParams.js/vedicParams";
+import Prediction from "./FreeKundli/Prediction";
 
 const Kundali = () => {
   const contentRef = useRef(null);
@@ -107,6 +108,10 @@ const Kundali = () => {
     {
       label: "Free Report",
       content: <Report />,
+    },
+    {
+      label: "12 Months Prediction",
+      content: <Prediction params={params} skipToken={skipToken} />,
     },
   ];
 

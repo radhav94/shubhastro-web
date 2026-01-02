@@ -116,6 +116,20 @@ export const kundliVedicApi = vedicApi.injectEndpoints({
         },
       }),
     }),
+
+    getAi12MonthsPrediction: builder.query({
+      query: (params) => ({
+        url: "horoscope/ai-12-month-prediction",
+        params: {
+          dob: params.dob,
+          tob: params.tob,
+          lat: params.lat,
+          lon: params.lon,
+          tz: params.tz || 5.5,
+          lang: "en",
+        },
+      }),
+    }),
   }),
 });
 
@@ -127,4 +141,5 @@ export const {
   useGetAshtakvargaChartQuery,
   useGetPlanetsQuery,
   useGetKpDetailsQuery,
+  useGetAi12MonthsPredictionQuery,
 } = kundliVedicApi;
