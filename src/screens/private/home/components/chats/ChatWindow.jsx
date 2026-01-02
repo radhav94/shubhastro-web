@@ -29,7 +29,7 @@ const ChatWindow = () => {
   const messagesRef = useRef(null);
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { userId, astrologerId, roomId, fullName, isUserSide, kundliId, astrologerName, refreshKey } =
+  const { userId, astrologerId, roomId, fullName, isUserSide, kundliId, astrologerName, refreshKey, astroID } =
     state || {};
 
   const { activeCall } = useCall();
