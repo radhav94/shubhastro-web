@@ -466,7 +466,8 @@ const TalkToAstrologer = () => {
           roomId,
           isUserSide: true,
           kundliId,
-          astrologerName: data?.astrologer?.firstName || ""
+          astrologerName: data?.astrologer?.firstName || "",
+          astroID: data?.astrologer?.astrologer_ID
         },
       });
       } catch {
