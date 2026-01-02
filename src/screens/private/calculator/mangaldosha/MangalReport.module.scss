@@ -1,0 +1,116 @@
+.wrapper {
+  max-width: 1100px;
+  margin: 10px auto 40px;
+  padding: 0 16px;
+}
+
+.header {
+  background: linear-gradient(180deg, #2c3e50, #34495e);
+  color: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.header h2 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.header p {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.statusBadge {
+  margin: 20px auto;
+  padding: 8px 18px;
+  border-radius: 20px;
+  width: fit-content;
+  font-weight: 600;
+}
+
+.manglik {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.nonManglik {
+  background: #e6f7ec;
+  color: #047857;
+}
+
+.botMessage {
+  background: #f9fafb;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section h3 {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: #fff;
+  padding: 16px;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.card span {
+  font-size: 12px;
+  color: #6b7280;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.card strong {
+  font-size: 15px;
+}
+
+.card p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.disclaimer {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.shareBtn {
+  background: #8b5cf6;
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 10px;
+  border: none;
+}
+
+.calculateBtn {
+  background: #8d7b00;
+  color: #fff;
+  padding: 10px 28px;
+  border-radius: 24px;
+  border: none;
+}

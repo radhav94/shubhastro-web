@@ -270,19 +270,23 @@ $font-primary: "Poppins", sans-serif;
 .dropdownWrapper {
   position: absolute;
   top: 120%;
-  left: calc(50% - 90px);
-  min-width: 180px;
+  left: 50%; // 🔥 center anchor
+  transform: translateX(-50%) translateY(10px); // 🔥 true centering
+
+  width: max-content;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 14px;
   border: 1px solid rgba(0, 0, 0, 0.05);
   padding: 0 0 10px 0;
   display: block;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+
   opacity: 0;
-  transform: translateY(10px);
   pointer-events: none;
   transition: all 0.25s ease;
   z-index: 999;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+
   ul {
     gap: 0;
   }
@@ -290,7 +294,7 @@ $font-primary: "Poppins", sans-serif;
 
 .dropdown:hover .dropdownWrapper {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0); //
   pointer-events: auto;
 }
 
