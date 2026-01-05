@@ -1,16 +1,23 @@
 import styles from "./ChatWindow.module.scss";
 import { IoSend, IoAttach, IoMic } from "react-icons/io5";
-import { IoMdAdd } from "react-icons/io";
 import { GrReactjs } from "react-icons/gr";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSelectModal";
 import toast from "../../../../../component/toast";
 import { useChat } from "../../../../../context/ChatContext";
 import { useVoiceRecorder } from "../../../talkToAstrologer/voiceChat/useVoiceRecorder";
 import VoiceRecorderPopup from "../../../talkToAstrologer/voiceChat/VoiceRecorderPopup";
+import { useFileSelector } from "./filePicker/useFileSelector";
 
-const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd, sendVoiceMessage }) => {
-
+const ChatInput = ({
+  value,
+  onChange,
+  onSend,
+  isMessageDisabled = false,
+  onChatEnd,
+  sendVoiceMessage,
+  sendFiles,
+}) => {
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const handleChatAfterKundliSelect = async (kundli) => {
     setKundliModalOpen(false);
@@ -18,27 +25,24 @@ const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd
     onSend(kundli);
   };
 
-  const {setActiveChat} = useChat();
+  const { setActiveChat } = useChat();
 
-  const fileInputRef = useRef(null);
+  const handleAttachClick = async () => {
+    try {
+      const { blob, name, type, size } = await openFileSelector(
+        "image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx"
+      );
 
-  const handleAttachClick = () => {
-    fileInputRef.current?.click();
+      await sendFiles(blob, { name, type, size });
+    } catch (err) {
+      console.log("File selection cancelled");
+    }
   };
 
-  const handleFileChange = (e) => {
-    const files = e.target.files;
-    if (!files || !files.length) return;
+  const { recording, seconds, startRecording, stopRecording } =
+    useVoiceRecorder();
 
-    // console.log("Selected files:", files);
-  };
-
-  const {
-    recording,
-    seconds,
-    startRecording,
-    stopRecording,
-  } = useVoiceRecorder();
+  const { openFileSelector } = useFileSelector();
 
   const handleMicClick = async () => {
     await startRecording();
@@ -48,7 +52,6 @@ const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd
     const { blob, duration } = await stopRecording();
     await sendVoiceMessage(blob, duration);
   };
-
 
   return (
     <>
@@ -63,12 +66,7 @@ const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd
           </button>
 
           {/* Hidden file input */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            style={{ display: "none" }}
-            onChange={handleFileChange}
-          />
+          <input type="file" style={{ display: "none" }} />
         </>
 
         <button
@@ -90,10 +88,7 @@ const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd
         <button className={styles.sendButton} onClick={onSend}>
           <IoSend size={20} />
         </button>
-        <button
-          className={styles.voiceChatButton}
-          onClick={handleMicClick}
-        >
+        <button className={styles.voiceChatButton} onClick={handleMicClick}>
           <IoMic size={20} />
         </button>
 
@@ -108,10 +103,7 @@ const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd
       />
 
       {recording && (
-        <VoiceRecorderPopup
-          seconds={seconds}
-          onStop={handleStopRecording}
-        />
+        <VoiceRecorderPopup seconds={seconds} onStop={handleStopRecording} />
       )}
     </>
   );

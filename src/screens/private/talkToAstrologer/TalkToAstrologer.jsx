@@ -51,10 +51,9 @@ const TalkToAstrologer = () => {
   /* ---------------------- URL BASED LOGIC ---------------------- */
 
   const pathParts = location.pathname.split("/").filter(Boolean);
-  const moduleName = pathParts[0];      // talk-to-astrologers | chat-with-astrologers
-  const secondParam = pathParts[1];     // online | undefined
+  const moduleName = pathParts[0]; // talk-to-astrologers | chat-with-astrologers
+  const secondParam = pathParts[1]; // online | undefined
   const isOnlineFromURL = secondParam === "online";
-  console.log("moduleName : ",moduleName);
   const getActiveConfigFromURL = () => {
     let isActiveOnline = false;
     let isActiveType = null;
@@ -132,11 +131,11 @@ const TalkToAstrologer = () => {
   const getTypeFromURL = () => {
     if (moduleName === "chat-with-astrologers") {
       return "chat";
-      }
+    }
 
-      if (moduleName === "talk-to-astrologers") {
-        return "video,audio";
-      }
+    if (moduleName === "talk-to-astrologers") {
+      return "video,audio";
+    }
   };
 
   // 🔥 Set initial activeType from URL

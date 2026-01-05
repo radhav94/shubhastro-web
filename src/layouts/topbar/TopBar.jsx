@@ -13,7 +13,7 @@ import { FiMenu } from "react-icons/fi";
 import { PrimaryText } from "../../component";
 import { getUserFromStorage } from "../../utils/authStorage";
 import { useDispatch } from "react-redux";
-import { logoutAction } from "../../redux/actions/logoutAction";
+import { clearFormAndCache } from "../../redux/actions/clearFormAndCache";
 
 const TopBar = () => {
   const navigate = useNavigate();
@@ -33,8 +33,7 @@ const TopBar = () => {
       : localStorage.getItem("shubhtalk_customer_token");
 
   const handleLogout = () => {
-    // reset entire redux store
-    dispatch(logoutAction());
+    dispatch(clearFormAndCache());
     const role = localStorage.getItem("shubhtalk_role");
 
     if (role === "ASTROLOGER") {
