@@ -23,14 +23,23 @@ import { voiceSocket } from "../../../../../services/voiceSocketServices";
 const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 const MIN_CHAT_SECONDS = 60;
 
-import { useGetS3SignedUrlMutation } from "../../../../../redux/api/s3SignedApi"
+import { useGetS3SignedUrlMutation } from "../../../../../redux/api/s3SignedApi";
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { userId, astrologerId, roomId, fullName, isUserSide, kundliId, astrologerName, refreshKey } =
-    state || {};
+  const {
+    userId,
+    astrologerId,
+    roomId,
+    fullName,
+    isUserSide,
+    kundliId,
+    astrologerName,
+    refreshKey,
+    astroID,
+  } = state || {};
 
   const { activeCall } = useCall();
   const [openFeedback, setOpenFeedback] = useState(false);
@@ -44,7 +53,17 @@ const ChatWindow = () => {
     sendTyping,
     chatSeconds,
     isMessageDisabled,
-  } = useChat({ userId, astrologerId, roomId, isUserSide, kundliId, setOpenFeedback, astrologerName, refreshKey });
+    remainingTime,
+  } = useChat({
+    userId,
+    astrologerId,
+    roomId,
+    isUserSide,
+    kundliId,
+    setOpenFeedback,
+    astrologerName,
+    refreshKey,
+  });
 
   const [message, setMessage] = useState("");
 
@@ -58,7 +77,10 @@ const ChatWindow = () => {
       isUserSide,
     });
 
-  const { data } = useGetChatHistoryQuery({ userId : astrologerId }, {refetchOnMountOrArgChange : true});
+  const { data } = useGetChatHistoryQuery(
+    { userId: astrologerId },
+    { refetchOnMountOrArgChange: true }
+  );
   const history = data?.data || [];
 
   const finalMsgs = useMemo(() => {
@@ -74,7 +96,6 @@ const ChatWindow = () => {
       dateTime: item.createdAt,
     }));
 
-
     const socket = messages.map((msg, idx) => ({
       id: `socket-${idx}-${msg.time}`,
       text: msg.text,
@@ -85,23 +106,23 @@ const ChatWindow = () => {
     }));
 
     return [...historyMsgs, ...socket].sort(
-    (a, b) => new Date(a.dateTime) - new Date(b.dateTime)
+      (a, b) => new Date(a.dateTime) - new Date(b.dateTime)
     );
   }, [history, messages, isUserSide]);
 
   const { isInactive, resetTimer } = useInactivityTimer(120000);
 
   const handleChatEnd = () => {
-    if (chatSeconds < MIN_CHAT_SECONDS) {
-        Toast.error("Chat cannot be ended before 1 minute");
-        return;
-      }
-    voiceSocket.emit("chat:end", {roomId, endedBy : "CUSTOMER"})
+    if (remainingTime * 60 - chatSeconds < MIN_CHAT_SECONDS) {
+      Toast.error("Chat cannot be ended before 1 minute");
+      return false;
+    }
+    voiceSocket.emit("chat:end", { roomId, endedBy: "CUSTOMER" });
+    return true;
   };
 
   const handleDisconnect = () => {
-    handleChatEnd();
-    navigate(-1)
+    if (handleChatEnd()) navigate(-1);
   };
 
   const handleSend = (kundli = null) => {
@@ -158,19 +179,43 @@ const ChatWindow = () => {
     const signedUrl = await getS3SignedUrl({
       fileType: blob.type,
     }).unwrap();
-    const audioUrl = (signedUrl.uploadUrl).split("?")[0];
+    const audioUrl = signedUrl.uploadUrl.split("?")[0];
     const uploadUrl = signedUrl.uploadUrl;
-    await uploadAudioToS3(uploadUrl, blob);
+    await uploadFileToS3(uploadUrl, blob);
     const jsonString = JSON.stringify({
       type: "voice",
       audioUrl,
       duration,
     });
-    sendMessage(jsonString)
+    sendMessage(jsonString);
     setMessage("");
   };
 
-  const uploadAudioToS3 = async (uploadUrl, blob) => {
+  const sendFiles = async (blob, meta) => {
+    const signedUrl = await getS3SignedUrl({
+      fileType: blob.type,
+    }).unwrap();
+
+    const uploadUrl = signedUrl.uploadUrl;
+    const fileUrl = uploadUrl.split("?")[0];
+
+    await uploadFileToS3(uploadUrl, blob);
+
+    //don't remove this below commented code//
+    // const jsonString = JSON.stringify({
+    //   type: "file",
+    //   fileUrl,
+    //   fileName: meta.name,
+    //   fileType: blob.type,
+    //   fileSize: meta.size,
+    // });
+
+    // sendMessage(jsonString);
+    // setMessage("");
+    console.log("FILE UPLOADED URL:", fileUrl);
+  };
+
+  const uploadFileToS3 = async (uploadUrl, blob) => {
     const res = await fetch(uploadUrl, {
       method: "PUT",
       body: blob,
@@ -178,7 +223,7 @@ const ChatWindow = () => {
         "Content-Type": blob.type,
       },
     });
-    
+
     if (!res.ok) {
       throw new Error("S3 upload failed");
     }
@@ -205,24 +250,28 @@ const ChatWindow = () => {
           messagesRef={messagesRef}
         />
 
-        <ChatInput
-          value={message}
-          onChange={(e) => {
-            setMessage(e.target.value);
-            sendTyping();
-          }}
-          onSend={handleSend}
-          isMessageDisabled={isMessageDisabled}
-          onChatEnd={handleChatEnd}
-          setOpen={setOpenFeedback}
-          sendVoiceMessage={sendVoiceMessage}
-        />
+        {!isMessageDisabled && (
+          <ChatInput
+            value={message}
+            onChange={(e) => {
+              setMessage(e.target.value);
+              sendTyping();
+            }}
+            onSend={handleSend}
+            isMessageDisabled={isMessageDisabled}
+            onChatEnd={handleChatEnd}
+            setOpen={setOpenFeedback}
+            sendVoiceMessage={sendVoiceMessage}
+            sendFiles={sendFiles}
+          />
+        )}
+
         {waitingPopup && (
           <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
         )}
 
         <InactivityModal
-          isOpen={isInactive}
+          isOpen={isInactive && !isMessageDisabled}
           onDisconnect={handleDisconnect}
           onContinue={resetTimer}
         />

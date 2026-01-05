@@ -50,6 +50,24 @@ import {
   AstrologerProfile,
 } from "../../screens";
 import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
+import AtmakarakaCalculator from "../../screens/private/calculator/Atmakaraka/AtmakarakaCalculator";
+import AtmakarakaReport from "../../screens/private/calculator/Atmakaraka/Report";
+import DashaCalc from "../../screens/private/calculator/dasha/DashaCalc";
+import DashaReport from "../../screens/private/calculator/dasha/DashaReport";
+import KaalSarpCalc from "../../screens/private/calculator/kaalsarp/KaalSarpCalc";
+import KaalSarpReport from "../../screens/private/calculator/kaalsarp/KaalSarpReport";
+import MangalDosha from "../../screens/private/calculator/mangaldosha/MangalDosha";
+import MangalReport from "../../screens/private/calculator/mangaldosha/MangalReport";
+import NumerologyCalc from "../../screens/private/calculator/numerology/NumerologyCalc";
+import NumerologyReport from "../../screens/private/calculator/numerology/NumerologyReport";
+import RashiCalc from "../../screens/private/calculator/rashi/RashiCalc";
+import RashiReport from "../../screens/private/calculator/rashi/RashiReport";
+import RisingSign from "../../screens/private/calculator/risingsign/RisingSign";
+import RisingSignReport from "../../screens/private/calculator/risingsign/RisingSignReport";
+import ShaniReport from "../../screens/private/calculator/shanisadesati/ShaniReport";
+import ShaniSadeSati from "../../screens/private/calculator/shanisadesati/ShaniSadeSati";
+import SunSignCalc from "../../screens/private/calculator/sunsign/SunSignCalc";
+import SunSignReport from "../../screens/private/calculator/sunsign/SunSignReport";
 import CompatibilityLanding from "../../screens/private/compatibility/CompatibilityLanding";
 import CompatibilityResult from "../../screens/private/compatibility/CompatibilityResult";
 import SelectPartner from "../../screens/private/compatibility/SelectPartner";
@@ -246,6 +264,78 @@ export const PATH = {
     NUMEROLOGY: {
       path: "/numerology",
       element: Numerology,
+    },
+    ATMAKARAKA_CALC: {
+      path: "/atmakaraka-and-darakaraka-calculator",
+      element: AtmakarakaCalculator,
+    },
+    ATMAKARAKA_REPORT: {
+      path: "/atmakaraka-and-darakaraka-calculator/report",
+      element: AtmakarakaReport,
+    },
+    SUNSIGN_CALC: {
+      path: "/sun-sign-calculator",
+      element: SunSignCalc,
+    },
+    SUNSIGN_REPORT: {
+      path: "/sun-sign-calculator/report",
+      element: SunSignReport,
+    },
+    RISINGSIGN_CALC: {
+      path: "/rising-ascendant-sign-calculator",
+      element: RisingSign,
+    },
+    RISINGSIGN_REPORT: {
+      path: "/rising-ascendant-sign-calculator/report",
+      element: RisingSignReport,
+    },
+    RASHI_CALC: {
+      path: "/rashi-moon-sign-calculator",
+      element: RashiCalc,
+    },
+    RASHI_REPORT: {
+      path: "/rashi-moon-sign-calculator/report",
+      element: RashiReport,
+    },
+    DASHA_CALC: {
+      path: "/dasha-calculator",
+      element: DashaCalc,
+    },
+    DASHA_REPORT: {
+      path: "/dasha-calculator/report",
+      element: DashaReport,
+    },
+    MANGAL_DOSHA_CALC: {
+      path: "/mangal-kuja-dosha-calculator",
+      element: MangalDosha,
+    },
+    MANGAL_DOSHA_REPORT: {
+      path: "/mangal-kuja-dosha-calculator/report",
+      element: MangalReport,
+    },
+    ShaniSadeSati_CALC: {
+      path: "/shani-sade-sati-calculator",
+      element: ShaniSadeSati,
+    },
+    ShaniSadeSati_REPORT: {
+      path: "/shani-sade-sati-calculator/report",
+      element: ShaniReport,
+    },
+    KaalSarp_CALC: {
+      path: "/kaal-sarp-dosh-calculator",
+      element: KaalSarpCalc,
+    },
+    KaalSarp_REPORT: {
+      path: "/kaal-sarp-dosh-calculator/report",
+      element: KaalSarpReport,
+    },
+    NUMEROLOGY_CALC: {
+      path: "/name-numerology-calculator",
+      element: NumerologyCalc,
+    },
+    NUMEROLOGY_REPORT: {
+      path: "/name-numerology-calculator/report",
+      element: NumerologyReport,
     },
     LIFE_PATH: {
       path: "/numerology/life-path",

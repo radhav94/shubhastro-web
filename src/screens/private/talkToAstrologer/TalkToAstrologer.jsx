@@ -51,10 +51,9 @@ const TalkToAstrologer = () => {
   /* ---------------------- URL BASED LOGIC ---------------------- */
 
   const pathParts = location.pathname.split("/").filter(Boolean);
-  const moduleName = pathParts[0];      // talk-to-astrologers | chat-with-astrologers
-  const secondParam = pathParts[1];     // online | undefined
+  const moduleName = pathParts[0]; // talk-to-astrologers | chat-with-astrologers
+  const secondParam = pathParts[1]; // online | undefined
   const isOnlineFromURL = secondParam === "online";
-  console.log("moduleName : ",moduleName);
   const getActiveConfigFromURL = () => {
     let isActiveOnline = false;
     let isActiveType = null;
@@ -108,7 +107,7 @@ const TalkToAstrologer = () => {
   const [callType, setCallType] = useState(null); // audio | video
 
   const { activeCall, setActiveCall } = useCall();
-  const {setActiveChat, setWaitingList, WaitingList, resetChatFlow, setActiveChatRoomId, setLastRequestedAstro } = useChat();
+  const {setActiveChat, setWaitingList, WaitingList, resetChatFlow, setActiveChatRoomId, setLastRequestedAstro, setChatSeconds } = useChat();
 
   // ✅ Ref for current calling astrologer (no re-render)
   const activeCallAstroRef = useRef(null);
@@ -132,11 +131,11 @@ const TalkToAstrologer = () => {
   const getTypeFromURL = () => {
     if (moduleName === "chat-with-astrologers") {
       return "chat";
-      }
+    }
 
-      if (moduleName === "talk-to-astrologers") {
-        return "video,audio";
-      }
+    if (moduleName === "talk-to-astrologers") {
+      return "video,audio";
+    }
   };
 
   // 🔥 Set initial activeType from URL
@@ -290,20 +289,20 @@ const TalkToAstrologer = () => {
     }
   };
 
-   async function handleChatStart (astro){
+  async function handleChatStart(astro) {
     setSelectedAstrologer(astro);
     setLastRequestedAstro(astro);
     //Check if user has minimum required balance
     // 💰 Balance check
-    const result = await getBalance({ astrologerId : astro?._id });
+    const result = await getBalance({ astrologerId: astro?._id });
     if (result.data.data.status === false) {
       setOpenModal((prev) => ({ ...prev, recharge: true }));
       return;
     }
 
     //Check if astro is online
-    if(!astro?.isActive) {
-      Toast.error("Astrologer is not online")
+    if (!astro?.isActive) {
+      Toast.error("Astrologer is not online");
       return;
     }
 
@@ -322,20 +321,21 @@ const TalkToAstrologer = () => {
 
     try {
       // 🔐 Auth check
-    if (!token) {
-      navigate("/login", { state: { from: location.pathname } });
-      return;
-    }
+      if (!token) {
+        navigate("/login", { state: { from: location.pathname } });
+        return;
+      }
 
-    // ✅ Store active call info
-    activeCallAstroRef.current = astro;
-    setWaitingPopup(true);
+      // ✅ Store active call info
+      activeCallAstroRef.current = astro;
+      setWaitingPopup(true);
+      kundliRef.current = kundli?._id;
 
-    // 🚀 Create call room
-    voiceSocket.emit("chat:initiate", {
-      userId: userIdLocal,
-      astrologerId: astro._id,
-    });
+      // 🚀 Create call room
+      voiceSocket.emit("chat:initiate", {
+        userId: userIdLocal,
+        astrologerId: astro._id,
+      });
     } catch (error) {
       console.error(error);
     }
@@ -443,7 +443,7 @@ const TalkToAstrologer = () => {
 
     const handleChatRoom = (data) => {
       setChatRoomId(data?.roomId);
-      setActiveChatRoomId(data?.roomId)
+      setActiveChatRoomId(data?.roomId);
       setWaitingPopup(false);
       setWaitingList(data?.waitingTime || 2);
     };
@@ -479,7 +479,12 @@ const TalkToAstrologer = () => {
       }
     };
 
-    const handleChatAccepted = async ({astrologerId, roomId, userId, ...data}) => {
+    const handleChatAccepted = async ({
+      astrologerId,
+      roomId,
+      userId,
+      ...data
+    }) => {
       setWaitingList(false);
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
@@ -495,8 +500,10 @@ const TalkToAstrologer = () => {
           userId: userIdLocal,
           astrologerId: astrologerId,
           kundliId,
-          astrologerName: data?.astrologer?.firstName || ""
+          astrologerName: data?.astrologer?.firstName || "",
+          remainingTime: data?.remainingTime
         });
+        setChatSeconds(Number(data?.remainingTime)*60);
 
         navigate(`/talk-to-astrologers/${astrologerId}`, {
         state: {
@@ -506,16 +513,22 @@ const TalkToAstrologer = () => {
           roomId,
           isUserSide: true,
           kundliId,
-          astrologerName: data?.astrologer?.firstName || ""
+          astrologerName: data?.astrologer?.firstName || "",
+          astroID: data?.astrologer?.astrologer_ID
         },
       });
-      } catch {
+      } catch(e) {
+        console.log('e', e)
         Toast.error("Failed to start chat");
       }
     };
     /* REJECTED */
     const handleCallRejected = (data) => {
-      Toast.error(data?.sessionData?.sessionEndReason || "Call rejected");
+      const errorMsg =
+        data?.sessionData?.sessionEndReason === "rejected"
+          ? "Astrologer has rejected the chat request"
+          : "Call rejected";
+      Toast.error(errorMsg);
       resetCallState();
       resetChatFlow();
     };
@@ -565,7 +578,8 @@ const TalkToAstrologer = () => {
   return (
     <div className={styles.mainContainer}>
       <PrimaryText size_24 isExtraBold>
-        Talk To Best Astrologers Online
+        {activeType === "chat" ? "Chat With " : "Talk To "}Best Astrologers
+        Online
       </PrimaryText>
 
       {waitingPopup && (
@@ -663,8 +677,8 @@ const TalkToAstrologer = () => {
           <div className={styles.modalContainer}>
             <PrimaryText isCenter className=" pt-4">
               Minimum balance of 5 minutes (₹{" "}
-              {(selectedAstrologer?.price?.chatRate?.amount || 1) * 5}) is required to
-              start chat with
+              {(selectedAstrologer?.price?.chatRate?.amount || 1) * 5}) is
+              required to start chat with
               {` ${selectedAstrologer?.firstName || "Astrologer"}`}.
             </PrimaryText>
 
@@ -687,7 +701,7 @@ const TalkToAstrologer = () => {
           </div>
         </div>
       )}
-      {showCTA && showRecommend && (!WaitingList) && (
+      {showCTA && showRecommend && !WaitingList && (
         <RecommendCTA
           mode={isChatMode ? "chat" : "call"}
           onClick={() => {
@@ -705,6 +719,7 @@ const TalkToAstrologer = () => {
       {open && (
         <RecommendModal
           open={open}
+          setOpen={setOpen}
           onClose={() => {
             setOpen(false);
             setIsRecommendModalOpen(false);

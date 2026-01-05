@@ -80,6 +80,7 @@ const formSlice = createSlice({
       state.userDetails = null;
       state.kundliPayload = null;
       state.pythonApiPayload = null;
+      state.numerologyPayload = null;
     },
   },
 });

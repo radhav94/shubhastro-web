@@ -202,13 +202,13 @@ $font-primary: "Poppins", sans-serif;
     position: fixed;
     bottom: 0;
     left: 0;
-    right: 0;   // Prevent right white space
+    right: 0; // Prevent right white space
     width: 100vw; // Prevent 1–2px overflow scroll
     background: rgba($color-dark-blue, 0.85);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.3);
-    z-index: 1000;
+    z-index: 40;
     border-top: 1px solid rgba($color-gold, 0.2);
 
     nav ul {
