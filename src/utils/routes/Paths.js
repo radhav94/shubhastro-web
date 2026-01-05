@@ -167,6 +167,10 @@ export const PATH = {
       path: "/talk-to-astrologers",
       element: TalkToAstrologer,
     },
+    TALK_TO_ASTROLOGER_ONLINE: {
+      path: "/talk-to-astrologers/online",
+      element: TalkToAstrologer,
+    },
     Chat_With_ASTROLOGER: {
       path: "/chat-with-astrologers",
       element: TalkToAstrologer,
