@@ -15,11 +15,10 @@ const Breadcrumb = () => {
   );
 
   const pathnames = location.pathname.split("/").filter(Boolean);
-  if (!pathnames.length) return null;
 
   const astrologerName = location.state?.fullName || location.state?.astroName;
 
-  /* Blog and Darshan*/
+  /* Blog and Darshan selectors (hooks must ALWAYS run) */
   const blogSelector = blogApi.endpoints.getSingleBlog.select(slug);
   const darshanSelector =
     epoojaApi.endpoints.getSingleEPooja.select(productSlug);
@@ -33,6 +32,9 @@ const Breadcrumb = () => {
 
   const darshanTitle =
     slug === "live-darshan" ? darshanData?.data?.data?.title : null;
+
+  /* Safe early return AFTER hooks */
+  if (!pathnames.length) return null;
 
   return (
     <div className={styles.breadCrumb}>
@@ -50,7 +52,6 @@ const Breadcrumb = () => {
 
         let label = name.replace(/-/g, " ");
 
-        // Astrologer name
         if (
           pathnames[index - 1] === "talk-to-astrologers" &&
           name === params.id &&
@@ -59,12 +60,10 @@ const Breadcrumb = () => {
           label = astrologerName;
         }
 
-        // Blog title
         if (pathnames[index - 1] === "blog" && blogTitle) {
           label = blogTitle;
         }
 
-        // Live Darshan title
         if (
           pathnames[index - 1] === "live-darshan" &&
           name === productSlug &&

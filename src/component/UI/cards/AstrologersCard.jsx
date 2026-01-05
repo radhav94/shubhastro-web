@@ -23,15 +23,15 @@ const AstrologerCard = ({
     <div className={styles.card}>
       <div className={!isLayoutClassic? styles.topSection1 : styles.topSection} onClick={onProfile}>
         <div className={!isLayoutClassic ? styles.avatarWrapper1 : styles.avatarWrapper}>
-          <Link to={`/astrologer/${data?._id}`}>        
+          <Link to={`/astrologer/${data?.astrologerId || data?._id}`}>        
             <img
-              src={data.imageUrl}
+              src={data?.imageUrl || data?.icon}
               alt={data?.firstName}
               className={styles.avatar}
             />
             <span
               className={`${styles.statusDot} ${
-                data.isAccountActive === true
+                data.isActive === true
                   ? styles.online
                   : data.status === false
                   ? styles.offline
@@ -43,7 +43,7 @@ const AstrologerCard = ({
 
         <div className={styles.info}>
           <div className={styles.infoHeader}>
-            <Link to={`/astrologer/${data?._id}`}>
+            <Link to={`/astrologer/${data?.astrologerId || data?._id}`}>
               <PrimaryText size_14 isExtraBold color={appColors.tri}>
                 {data?.firstName} {data?.lastName}
               </PrimaryText>
@@ -70,8 +70,8 @@ const AstrologerCard = ({
             <div className={styles.row} style={{ margin: "0px" }}>
               <img src={AppIcons.Trophy} alt="lang" className={styles.img} />
               <PrimaryText size_12 color={appColors.greyMedium}>
-                {data?.specialties?.length > 0
-                  ? GetString(data?.specialties?.join(", "), 30)
+                {data?.specialities?.length > 0
+                  ? GetString(data?.specialities?.join(", "), 30)
                   : data.role}
               </PrimaryText>
             </div>

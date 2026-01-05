@@ -8,22 +8,35 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         page = 1,
         limit = 6,
         specialties,
-        isActiveType = "video,audio",
+        isActiveType,
+        isActive,
       }) => {
         const params = new URLSearchParams({
           page,
           limit,
-          isActiveType,
         });
-
-        if (specialties) params.append("specialties", specialties);
-
+    
+        // ✅ send only when present
+        if (specialties) {
+          params.append("specialties", specialties);
+        }
+    
+        if (isActiveType) {
+          params.append("isActiveType", isActiveType);
+        }
+    
+        // ✅ send ONLY when true
+        if (isActive === true) {
+          params.append("isActive", "true");
+        }
+    
         return {
           url: `astrologers/filterAstrologers?${params.toString()}`,
           method: "GET",
         };
       },
     }),
+    
 
     //  GET ASTROLOGER BY ID
     getAstrologerById: builder.query({
@@ -44,6 +57,7 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         page = 1,
         limit = 10,
         isActiveType,
+        isActive,
       }) => {
         const params = new URLSearchParams({
           astroName: searchText,
@@ -60,7 +74,9 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         if (Array.isArray(selectedSkills) && selectedSkills.length > 0) {
           params.append("specialities", selectedSkills.join(",")); //  Face Reading,Kp
         }
-
+        if (isActive === true) {
+          params.append("isActive", "true");
+        }
         return {
           url: `astrologers/filterAstrologers?${params.toString()}`,
           method: "GET",
