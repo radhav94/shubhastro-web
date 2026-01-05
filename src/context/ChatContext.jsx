@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import { voiceSocket } from "../services/voiceSocketServices";
 
 const ChatContext = createContext();
 
@@ -14,10 +15,11 @@ export const ChatProvider = ({ children }) => {
   const [chatSeconds, setChatSeconds] = useState(0);
   const timerRef = useRef(null);
 
+  const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
   const startTimer = () => {
     if (timerRef.current) return;
     timerRef.current = setInterval(() => {
-      setChatSeconds((s) => s + 1);
+      setChatSeconds((s) => s - 1);
     }, 1000);
   };
 
@@ -37,6 +39,31 @@ export const ChatProvider = ({ children }) => {
     setMissedApproval(false);
     resetTimer();
   };
+
+useEffect(() => {
+  if (!userIdLocal) return;
+  
+  if (!voiceSocket.connected) {
+    voiceSocket.io.opts.query = {
+      userId: userIdLocal,
+      role: "CUSTOMER",
+    };
+    voiceSocket.connect();
+  }
+  const handleActivity = (data) => {
+    if(data?.remainingTime){
+      resetTimer(); // Reset the timer
+      setChatSeconds(data?.remainingTime); // Use data.remainingTime if provided
+      startTimer(); // Start the timer again
+    }
+  }
+
+  voiceSocket.on("activity", handleActivity)
+  
+  return () => {
+  voiceSocket.off("activity", handleActivity)
+  }
+}, [resetChatFlow, resetTimer, userIdLocal])
 
   return (
     <ChatContext.Provider
@@ -58,6 +85,7 @@ export const ChatProvider = ({ children }) => {
         startTimer,
         stopTimer,
         resetTimer,
+        setChatSeconds
       }}
     >
       {children}

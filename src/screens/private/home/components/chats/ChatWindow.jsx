@@ -44,6 +44,7 @@ const ChatWindow = () => {
     sendTyping,
     chatSeconds,
     isMessageDisabled,
+    remainingTime
   } = useChat({ userId, astrologerId, roomId, isUserSide, kundliId, setOpenFeedback, astrologerName, refreshKey });
 
   const [message, setMessage] = useState("");
@@ -92,15 +93,16 @@ const ChatWindow = () => {
   const { isInactive, resetTimer } = useInactivityTimer(120000);
 
   const handleChatEnd = () => {
-    if (chatSeconds < MIN_CHAT_SECONDS) {
+    if (((remainingTime*60) - chatSeconds) < MIN_CHAT_SECONDS) {
         Toast.error("Chat cannot be ended before 1 minute");
-        return;
+        return false;
       }
     voiceSocket.emit("chat:end", {roomId, endedBy : "CUSTOMER"})
+    return true;
   };
 
   const handleDisconnect = () => {
-    handleChatEnd();
+    if(handleChatEnd())
     navigate(-1)
   };
 
@@ -221,7 +223,7 @@ const ChatWindow = () => {
         <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
 
         <InactivityModal
-          isOpen={isInactive}
+          isOpen={isInactive && !isMessageDisabled}
           onDisconnect={handleDisconnect}
           onContinue={resetTimer}
         />

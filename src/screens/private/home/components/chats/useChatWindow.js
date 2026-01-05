@@ -14,7 +14,7 @@ export default function useChat({
   astrologerName,
   refreshKey = 0
 }) {
-  const { startTimer, resetTimer, chatSeconds, setActiveChat, activeChat } = useChatContext();
+  const { startTimer, stopTimer, chatSeconds, setActiveChat, activeChat } = useChatContext();
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
@@ -32,7 +32,7 @@ export default function useChat({
     if(!roomId || !userId || !astrologerId) return;
     socketService.connect({
       onConnected: () => {
-        startTimer();
+        if(Object.keys(activeChat || {}).length > 0) startTimer(); //Start timer only when there is active chat
         //Send msg first time only 
         if(!refreshKey) {
           sendMessage(`Hi ${astrologerName || ""}`); 
@@ -44,9 +44,9 @@ export default function useChat({
       onError: (errMsg) => {
         toast.error(errMsg ||"Something went wrong");
         setError(errMsg);
-      if(errMsg === 'Chat no longer available'){
+      if(errMsg === 'Chat no longer available' || errMsg === 'Chat has already ended' || errMsg === 'Session not found'){
         setIsMessageDisabled(true);
-        resetTimer();
+        stopTimer();
         setActiveChat(null);
       }
       },
@@ -68,7 +68,7 @@ export default function useChat({
     const handleChatEndedFromServer = () => {
       setIsMessageDisabled(true);
       setOpenFeedback(true);
-      resetTimer();
+      stopTimer();
       setActiveChat(null);
     };
 
@@ -85,7 +85,7 @@ export default function useChat({
       voiceSocket.off("warning", handleWarning);
       voiceSocket.off("chat:ended", handleChatEndedFromServer);
     };
-  }, [roomId]);
+  }, [roomId, activeChat]);
 
   // USER SEND
   const sendMessage = (text) => {
@@ -139,6 +139,7 @@ export default function useChat({
     sendTyping,
     chatSeconds,
     isMessageDisabled,
-    setIsMessageDisabled
+    setIsMessageDisabled,
+    remainingTime : activeChat?.remainingTime || 0
   };
 }

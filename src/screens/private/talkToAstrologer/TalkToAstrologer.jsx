@@ -108,14 +108,7 @@ const TalkToAstrologer = () => {
   const [callType, setCallType] = useState(null); // audio | video
 
   const { activeCall, setActiveCall } = useCall();
-  const {
-    setActiveChat,
-    setWaitingList,
-    WaitingList,
-    resetChatFlow,
-    setActiveChatRoomId,
-    setLastRequestedAstro,
-  } = useChat();
+  const {setActiveChat, setWaitingList, WaitingList, resetChatFlow, setActiveChatRoomId, setLastRequestedAstro, setChatSeconds } = useChat();
 
   // ✅ Ref for current calling astrologer (no re-render)
   const activeCallAstroRef = useRef(null);
@@ -509,21 +502,24 @@ const TalkToAstrologer = () => {
           astrologerId: astrologerId,
           kundliId,
           astrologerName: data?.astrologer?.firstName || "",
+          remainingTime: data?.remainingTime
         });
+        setChatSeconds(Number(data?.remainingTime)*60);
 
         navigate(`/talk-to-astrologers/${astrologerId}`, {
-          state: {
-            userId: userId,
-            astrologerId,
-            fullName: astro.firstName,
-            roomId,
-            isUserSide: true,
-            kundliId,
-            astrologerName: data?.astrologer?.firstName || "",
-            astroID: data?.astrologer?.astrologer_ID,
-          },
-        });
-      } catch {
+        state: {
+          userId: userId,
+          astrologerId,
+          fullName: astro.firstName,
+          roomId,
+          isUserSide: true,
+          kundliId,
+          astrologerName: data?.astrologer?.firstName || "",
+          astroID: data?.astrologer?.astrologer_ID
+        },
+      });
+      } catch(e) {
+        console.log('e', e)
         Toast.error("Failed to start chat");
       }
     };
