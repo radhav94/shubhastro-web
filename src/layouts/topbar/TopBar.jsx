@@ -12,8 +12,8 @@ import { PATH } from "../../utils/routes/Paths";
 import { FiMenu } from "react-icons/fi";
 import { PrimaryText } from "../../component";
 import { getUserFromStorage } from "../../utils/authStorage";
-import { clearForm } from "../../redux/kundliform/formSlice";
 import { useDispatch } from "react-redux";
+import { logoutAction } from "../../redux/actions/logoutAction";
 
 const TopBar = () => {
   const navigate = useNavigate();
@@ -33,7 +33,8 @@ const TopBar = () => {
       : localStorage.getItem("shubhtalk_customer_token");
 
   const handleLogout = () => {
-    dispatch(clearForm());
+    // reset entire redux store
+    dispatch(logoutAction());
     const role = localStorage.getItem("shubhtalk_role");
 
     if (role === "ASTROLOGER") {
