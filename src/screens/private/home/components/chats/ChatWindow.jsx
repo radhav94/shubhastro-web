@@ -266,7 +266,9 @@ const ChatWindow = () => {
           />
         )}
 
-        <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
+        {waitingPopup && (
+          <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
+        )}
 
         <InactivityModal
           isOpen={isInactive && !isMessageDisabled}
