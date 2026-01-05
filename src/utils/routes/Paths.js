@@ -76,6 +76,8 @@ import AstrologersDashboard from "../../screens/private/home/components/astrolog
 import ChatList from "../../screens/private/home/components/astrologers/atrologerchat/ChatList";
 import ChatWindow from "../../screens/private/home/components/chats/ChatWindow";
 import InteractiveLiveStreaming from "../../screens/private/home/components/livestream/InteractiveLiveStreaming";
+import LivePlayerPage from "../../screens/private/home/components/livestream/LivePlayerPage";
+// import LivePlayerPage from "../../screens/private/home/components/livestream/LivePlayerPage";
 import Weekly from "../../screens/private/horoscope/weeklyHoroscope/Weekly";
 import Yearly from "../../screens/private/horoscope/yearlyHoroscope/Yearly";
 import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
@@ -152,12 +154,13 @@ export const PATH = {
       footer: false,
     },
 
-    AUDIENCE_LIVE_STREAMING: {
-      path: "/audience-live-streaming",
-      element: InteractiveLiveStreaming,
-      header: false,
-      footer: false,
-    },
+   AUDIENCE_LIVE_STREAMING: {
+  path: "/live",
+  element: LivePlayerPage,
+  header: false,
+  footer: false,
+},
+
 
     PROFILE: {
       path: "/profile",

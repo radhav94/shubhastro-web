@@ -1,25 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useRef,useEffect } from "react";
 import { LocalUser, RemoteUser } from "agora-rtc-react";
 import "./styles/videoBox.scss";
 import { useLiveViewLogic } from "./useLiveViewLogic";
 import GiftPopup from "./GiftPopup";
 import CallRequestPopup from "./CallRequestPopup";
 import SharePopup from "./SharePopup";
+import { useReelScroll } from "./useReelScroll";
+
+import { useNavigate } from "react-router-dom";
+
 import { Toast } from "../../../../../component";
 import { useGetAllGiftsQuery } from "../../../../../redux/api/gift/giftApi";
+import { useLiveList } from "../../../../../context/LiveListContext";
 
 const LiveView = (props) => {
-  const [showGifts, setShowGifts] = useState(false);
-  const [showCallPopup, setShowCallPopup] = useState(false);
-
-  const hostData = {
-    name: "Anaisha",
-    image: "/host-profile.jpg",
-    rate: 32,
-  };
-
-  const { data: giftList, isLoading } = useGetAllGiftsQuery();
-
   const {
     ROLE,
     isConnected,
@@ -34,7 +28,42 @@ const LiveView = (props) => {
     messages,
     chatInput,
     setChatInput,
+    hostLeft
   } = props;
+
+  const [showGifts, setShowGifts] = useState(false);
+  const [showCallPopup, setShowCallPopup] = useState(false);
+
+  const liveListCtx = useLiveList();
+  const reelRef = useRef(null);
+
+  useReelScroll({
+    enabled: !!liveListCtx && ROLE !== "host",
+    containerRef: reelRef,
+    onNext: liveListCtx?.goNextLive,
+    onPrev: liveListCtx?.goPrevLive,
+  });
+
+  console.log("liveListCtx", JSON.stringify(liveListCtx));
+
+  const hostData = {
+    name: "Anaisha",
+    image: "/host-profile.jpg",
+    rate: 32,
+  };
+
+  const { data: giftList, isLoading } = useGetAllGiftsQuery();
+
+  useEffect(() => {
+  if (!hostLeft || ROLE === "host") return;
+
+  const t = setTimeout(() => {
+    liveListCtx?.goNextLive();
+  }, 2000);
+
+  return () => clearTimeout(t);
+}, [hostLeft, ROLE, liveListCtx]);
+
 
   const isHost = ROLE === "host";
   const viewerCount = (remoteUsers?.length || 0) + 1;
@@ -47,8 +76,6 @@ const LiveView = (props) => {
     handleCopyLink,
     shareToWhatsapp,
     shareToGmail,
-    shareToFacebook,
-    shareToPinterest,
   } = useLiveViewLogic(props);
 
   const handleGiftSent = () => {
@@ -57,7 +84,7 @@ const LiveView = (props) => {
   };
 
   return (
-    <div className="video-box">
+    <div className="video-box" ref={reelRef}>
       {/* TOP BAR */}
       <div className="top-bar">
         <div className="host-info">
@@ -73,12 +100,21 @@ const LiveView = (props) => {
           <div className="viewer-pill">
             <span className="viewer-dot" />
             <span className="viewer-count">{viewerCount} watching</span>
+          Live {liveListCtx.currentIndex + 1} / {liveListCtx.lives.length}
+
           </div>
         </div>
       </div>
 
+      {/* LIVE INDEX INDICATOR */}
+      {!isHost && liveListCtx && (
+        <div className="live-counter">
+        </div>
+      )}
+
       {/* Video */}
       <div className="reel-container">
+        {/* HOST VIDEO */}
         {isHost && isConnected && (
           <LocalUser
             audioTrack={localMicrophoneTrack}
@@ -88,11 +124,25 @@ const LiveView = (props) => {
           />
         )}
 
+        {/* AUDIENCE VIDEO */}
         {!isHost &&
+          remoteUsers.length > 0 &&
           remoteUsers.map((user) => <RemoteUser key={user.uid} user={user} />)}
 
-        {!isHost && remoteUsers.length === 0 && (
-          <div className="waiting-text">Waiting for astrologer…</div>
+        {/* WAITING (never joined yet) */}
+        {!isHost && remoteUsers.length === 0 && !hostLeft && (
+          <div className="waiting-wrapper">
+            <div className="waiting-text">
+              🔮 Waiting for astrologer to go live…
+            </div>
+          </div>
+        )}
+
+        {/* ENDED (this is your screenshot fix) */}
+        {!isHost && hostLeft && (
+          <div className="waiting-wrapper ended">
+            <div className="waiting-text">⛔ Astrologer has ended the live</div>
+          </div>
         )}
       </div>
 
@@ -170,6 +220,18 @@ const LiveView = (props) => {
           <button className="icon-btn" onClick={() => setShowGifts(true)}>
             🎁
           </button>
+        )}
+
+        {!isHost && liveListCtx && (
+          <>
+            <button className="icon-btn" onClick={liveListCtx.goNextLive}>
+              ⬆️
+            </button>
+
+            <button className="icon-btn" onClick={liveListCtx.goPrevLive}>
+              ⬇️
+            </button>
+          </>
         )}
 
         {isHost && (
