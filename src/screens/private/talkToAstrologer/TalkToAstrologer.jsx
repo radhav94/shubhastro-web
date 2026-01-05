@@ -165,7 +165,6 @@ const TalkToAstrologer = () => {
     ...(isActiveOnline === true && { isActive: true }),
   });
 
-  console.log(activeType, "activeType");
   const data = astrodata?.data || [];
   const token = getToken();
   const { balance } = useWalletBalance();
@@ -725,6 +724,7 @@ const TalkToAstrologer = () => {
       {open && (
         <RecommendModal
           open={open}
+          setOpen={setOpen}
           onClose={() => {
             setOpen(false);
             setIsRecommendModalOpen(false);
