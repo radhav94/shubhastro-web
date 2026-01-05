@@ -1,4 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "../redux/auth/authSlice";
+import formReducer from "../redux/kundliform/formSlice";
 import { baseApi } from "../redux/api/baseApi/baseApi";
 import { pythonApi } from "../redux/api/baseApi/pythonApi";
 import { horoscopeApi } from "../redux/api/baseApi/horoscopeBaseApi";
@@ -10,10 +12,20 @@ import {
 } from "../services/appServices/privateRequestNew";
 import { astroTarotApi } from "../redux/api/tarot/astroTarotApi";
 import { calculatorApi } from "../redux/api/baseApi/calculatorApi";
-import { rootReducer } from "../redux/actions/rootReducer";
-
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: {
+    auth: authReducer,
+    form: formReducer,
+    [baseApi.reducerPath]: baseApi.reducer,
+    [privateRequestNew.reducerPath]: privateRequestNew.reducer,
+    [localReuqqestApi.reducerPath]: localReuqqestApi.reducer,
+    [pythonApi.reducerPath]: pythonApi.reducer,
+    [horoscopeApi.reducerPath]: horoscopeApi.reducer,
+    [vedicApi.reducerPath]: vedicApi.reducer,
+    [astroTarotApi.reducerPath]: astroTarotApi.reducer,
+    [geoApi.reducerPath]: geoApi.reducer,
+    [calculatorApi.reducerPath]: calculatorApi.reducer,
+  },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
       .concat(geoApi.middleware)
