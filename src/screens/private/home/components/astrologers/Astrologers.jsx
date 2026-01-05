@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import styles from "./Astrologers.module.scss";
 import {
   AstrologerCard,
-  PrimaryText,
   RechargeAlertModel,
   Title,
+  Toast,
 } from "../../../../../component";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
 import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSelectModal";
@@ -15,9 +15,9 @@ import { getToken } from "../../../../../utils/token";
 import { PATH } from "../../../../../utils/routes/Paths";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import { useCall } from "../../../../../context/CallContext";
-import { Toast } from "../../../../../component";
+import WaitingPopup from "../../components/chats/WaitingPopup";
 
-const Astrologers = ({title,astrologers = [],onClickView,onProfile,}) => {
+const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
   const navigate = useNavigate();
   const { activeCall, setActiveCall } = useCall();
 
@@ -43,6 +43,7 @@ const Astrologers = ({title,astrologers = [],onClickView,onProfile,}) => {
 
   const [selectedAstro, setSelectedAstro] = useState(null);
   const [waitingPopup, setWaitingPopup] = useState(false);
+  const [callRoomId, setCallRoomId] = useState(null);
 
   const [createChatRoom] = useCreateChatRoomMutation();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
@@ -129,6 +130,23 @@ const Astrologers = ({title,astrologers = [],onClickView,onProfile,}) => {
     });
   };
 
+  const cancelCall = () => {
+    const astro = activeCallAstroRef.current;
+
+    setWaitingPopup(false);
+    setCallRoomId(null);
+    activeCallAstroRef.current = null;
+
+    setActiveCall(null);
+
+    if (astro?._id) {
+      voiceSocket.emit("cancel_call", {
+        userId: userIdLocal,
+        astrologerId: astro._id,
+      });
+    }
+  };
+
   // ---------------- SOCKET LISTENERS ----------------
 
   useEffect(() => {
@@ -199,30 +217,10 @@ const Astrologers = ({title,astrologers = [],onClickView,onProfile,}) => {
       />
 
       {waitingPopup && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContainer}>
-            <PrimaryText size_18 isSemiBold>
-              🔔 Calling Astrologer…
-            </PrimaryText>
-
-            <PrimaryText size_14 color="#777">
-              Please wait while astrologer accepts the call
-            </PrimaryText>
-
-            <div className={styles.modalButtons}>
-              <button
-                className={styles.rejectBtn}
-                onClick={() => {
-                  setWaitingPopup(false);
-                  activeCallAstroRef.current = null;
-                  voiceSocket.emit("cancel_call");
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+        <WaitingPopup
+          callRoomId={callRoomId}
+          onCancel={cancelCall}
+        />
       )}
        {astrologers?.length > 3 && (
         <button className={styles.leftArrow} onClick={scrollLeft}>
