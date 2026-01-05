@@ -33,10 +33,6 @@ const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd
     // console.log("Selected files:", files);
   };
 
-  const handleChatEnd = () => {
-    onChatEnd();
-    setActiveChat(null);
-  }
   const {
     recording,
     seconds,
@@ -101,7 +97,7 @@ const ChatInput = ({ value, onChange, onSend, isMessageDisabled=false, onChatEnd
           <IoMic size={20} />
         </button>
 
-        <button className={styles.endChatButton} onClick={handleChatEnd}>
+        <button className={styles.endChatButton} onClick={onChatEnd}>
           End
         </button>
       </div>
