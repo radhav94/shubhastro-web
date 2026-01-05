@@ -17,13 +17,26 @@ import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import { useCall } from "../../../../../context/CallContext";
 import { Toast } from "../../../../../component";
 
-const Astrologers = ({ onClickView, onProfile }) => {
+const Astrologers = ({title,astrologers = [],onClickView,onProfile,}) => {
   const navigate = useNavigate();
-  const { activeCall, setActiveCall } = useCall(); //  IMPORTANT
+  const { activeCall, setActiveCall } = useCall();
 
   const page = 1;
   const limit = 3;
-  const { data } = useGetAstrologersQuery({ page, limit });
+
+  // 🔹 Skip API if astrologers prop already exists
+  const shouldSkipApi = astrologers.length > 0;
+
+  const { data: apiResponse } = useGetAstrologersQuery(
+    { page, limit },
+    { skip: shouldSkipApi }
+  );
+
+  // 🔹 Use prop first, fallback to API
+  const astrologerList =
+    astrologers.length > 0
+      ? astrologers
+      : apiResponse?.data || [];
 
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const [openModal, setOpenModal] = useState({ recharge: false });
@@ -33,6 +46,7 @@ const Astrologers = ({ onClickView, onProfile }) => {
 
   const [createChatRoom] = useCreateChatRoomMutation();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+  const scrollRef = useRef(null);
 
   const token = getToken();
 
@@ -58,7 +72,7 @@ const Astrologers = ({ onClickView, onProfile }) => {
       astrologerId: astro._id,
     });
 
-    const roomId = res?.data?.data;
+    const roomId = astrologers || res?.data?.data;
 
     navigate(`/talk-to-astrologers/${astro._id}`, {
       state: {
@@ -165,12 +179,19 @@ const Astrologers = ({ onClickView, onProfile }) => {
     };
   }, [userIdLocal, setActiveCall]);
 
+  const scrollLeft = () => {
+    scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
+  };
+
+  const scrollRight = () => {
+    scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
+  };
   // ---------------- UI ----------------
 
   return (
     <div className={styles.astrologersWrapper}>
       <Title
-        title="Top Online Astrologers"
+        title={title}
         showDivider
         showButton
         buttonTitle="View All"
@@ -203,9 +224,16 @@ const Astrologers = ({ onClickView, onProfile }) => {
           </div>
         </div>
       )}
-
-      <div className={styles.cardsContainer}>
-        {data?.data?.map((astrologer) => (
+       {astrologers?.length > 3 && (
+        <button className={styles.leftArrow} onClick={scrollLeft}>
+          &lt;
+        </button>
+      )}
+      <div className={`${styles.cardsContainer} ${
+            astrologers?.length > 3 ? styles.scrollMode : ""
+        }`}
+        ref={scrollRef}>
+        {astrologers?.map((astrologer) => (
           <div key={astrologer._id} className={styles.cardWrapper}>
             <AstrologerCard
               data={astrologer}
@@ -219,7 +247,11 @@ const Astrologers = ({ onClickView, onProfile }) => {
           </div>
         ))}
       </div>
-
+      {astrologers?.length > 3 && (
+        <button className={styles.rightArrow} onClick={scrollRight}>
+          &gt;
+        </button>
+      )}
       <KundliSelectModal
         isOpen={kundliModalOpen}
         onClose={() => setKundliModalOpen(false)}

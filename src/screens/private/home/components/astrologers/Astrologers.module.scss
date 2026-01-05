@@ -263,3 +263,82 @@
     padding: 20px 12px;
   }
 }
+/* -----------------------
+        ARROWS
+-------------------------*/
+.leftArrow,
+.rightArrow {
+  position: absolute;
+  top: 50%;
+  min-height: 40px;
+  min-width: 40px;
+  transform: translateY(-50%);
+  border: none;
+  font-size: 20px;
+  // padding: 10px 12px;
+  cursor: pointer;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  transition: all 0.2s ease;
+  display: none; // hidden for mobile
+
+  &:hover {
+    background: #f3f3f3;
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  @media (min-width: 768px) {
+    display: block;
+  }
+}
+
+.leftArrow {
+  left: -10px;
+
+  @media (min-width: 1200px) {
+    left: -15px;
+  }
+}
+
+.rightArrow {
+  right: -10px;
+
+  @media (min-width: 1200px) {
+    right: -15px;
+  }
+}
+
+/* -----------------------
+      SCROLL MODE
+-------------------------*/
+.scrollMode {
+  display: flex !important;
+  flex-wrap: nowrap;
+  overflow-x: auto !important;
+  gap: 20px;
+  padding-bottom: 12px;
+  scroll-behavior: smooth;
+
+  & > * {
+    flex: 0 0 auto; 
+    width: 240px;
+
+    @media (min-width: 600px) {
+      width: 280px;
+    }
+
+    @media (min-width: 992px) {
+      width: 300px;
+    }
+
+    @media (min-width: 1400px) {
+      width: 320px;
+    }
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
