@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styles from "./KundaliHeader.module.scss";
 import { IoTrashOutline } from "react-icons/io5";
 import { motion } from "framer-motion";
@@ -6,7 +6,7 @@ import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import { PrimaryText, Toast } from "../../../../component";
 import { useDispatch } from "react-redux";
 import { setForm } from "../../../../redux/kundliform/formSlice";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   useGetAllKundlisQuery,
   useCreateKundliMutation,
@@ -71,7 +71,7 @@ const itemVariants = {
 const KundaliHeader = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const location = useLocation();
   const { kundliId } = useParams();
 
   // const token = localStorage.getItem("verifyOtpToken");
@@ -81,11 +81,14 @@ const KundaliHeader = () => {
       ? localStorage.getItem("shubhtalk_astro_token")
       : localStorage.getItem("shubhtalk_customer_token");
 
+  const prevTokenRef = useRef(null);
+
+  /* ----------------------------- State ----------------------------- */
   const [formData, setFormData] = useState(initialFormData);
   const [selectedKundliId, setSelectedKundliId] = useState(null);
 
-  // API Hooks
-  const { data, isLoading } = useGetAllKundlisQuery(undefined, {
+  /* ----------------------------- API ----------------------------- */
+  const { data, isLoading, refetch } = useGetAllKundlisQuery(undefined, {
     skip: !token,
   });
   const [createKundli] = useCreateKundliMutation();
@@ -93,28 +96,51 @@ const KundaliHeader = () => {
 
   const savedKundlis = data?.data || [];
 
+  /* --------------------- TOKEN CHANGE ---------------------- */
+  useEffect(() => {
+    const prevToken = prevTokenRef.current;
+
+    if (!prevToken && token) {
+      refetch();
+    }
+
+    if (prevToken && token && prevToken !== token) {
+      setFormData(initialFormData);
+      setSelectedKundliId(null);
+      dispatch(setForm(initialFormData));
+      refetch();
+    }
+
+    if (prevToken && !token) {
+      setFormData(initialFormData);
+      setSelectedKundliId(null);
+      dispatch(setForm(initialFormData));
+    }
+
+    prevTokenRef.current = token;
+  }, [token, refetch, dispatch]);
+
+  /* ----------------- Auto select from URL ----------------- */
   useEffect(() => {
     if (!kundliId || !savedKundlis?.length) return;
 
-    const selectedData = savedKundlis.find(
-      (kundli) => String(kundli._id) === String(kundliId)
+    const selected = savedKundlis.find(
+      (k) => String(k._id) === String(kundliId)
     );
 
-    if (selectedData) {
-      handleSelectKundli(selectedData);
-    }
+    if (selected) handleSelectKundli(selected);
   }, [kundliId, savedKundlis]);
 
   // Input change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((p) => ({ ...p, [name]: value }));
   };
 
   // Place Selection
   const handlePlaceSelect = (place) => {
-    setFormData((prev) => ({
-      ...prev,
+    setFormData((p) => ({
+      ...p,
       birthPlace: place.address,
       latitude: place.lat,
       longitude: place.lng,
@@ -125,40 +151,28 @@ const KundaliHeader = () => {
   const handleSelectKundli = (kundli) => {
     setSelectedKundliId(kundli._id);
 
-    // setFormData({
-    //   name: kundli.name,
-    //   gender: kundli.gender === "M" ? "Male" : "Female",
-    //   day: kundli.day.toString(),
-    //   month: kundli.month,
-    //   year: kundli.year.toString(),
-    //   hour: kundli.hour.toString(),
-    //   minute: kundli.min.toString(),
-    //   second: "0",
-    //   birthPlace: kundli.place,
-    //   latitude: kundli.lat,
-    //   longitude: kundli.lon,
-    // });
+    const gender =
+      kundli.gender === "M" || kundli.gender === "Male" ? "Male" : "Female";
 
-    dispatch(
-      setForm({
-        name: kundli.name,
-        gender: kundli.gender === "M" ? "Male" : "Female",
-        day: kundli.day.toString(),
-        month: months[kundli.month - 1], // FIXED HERE
-        year: kundli.year.toString(),
-        hour: kundli.hour.toString(),
-        minute: kundli.min.toString(),
-        meridiem: kundli?.meridiem || null,
-        birthPlace: kundli.place,
-        latitude: kundli.lat,
-        longitude: kundli.lon,
-      })
-    );
+    const payload = {
+      name: kundli.name,
+      gender,
+      day: String(kundli.day),
+      month: months[kundli.month - 1],
+      year: String(kundli.year),
+      hour: String(kundli.hour),
+      minute: String(kundli.min),
+      meridiem: kundli.meridiem || "",
+      birthPlace: kundli.place,
+      latitude: kundli.lat,
+      longitude: kundli.lon,
+    };
+
+    setFormData(payload);
+    dispatch(setForm(payload));
+
     setTimeout(() => {
-      document.getElementById("kundli-tabs")?.scrollIntoView({
-        behavior: "smooth",
-        // block: "start",
-      });
+      document.getElementById("kundli-tabs")?.scrollIntoView({ behavior: "smooth" });
     }, 300);
   };
 
@@ -170,29 +184,32 @@ const KundaliHeader = () => {
       Toast.error("Please select your birth place");
       return;
     }
-    const payload = buildKundliPayload(formData);
 
     try {
-      if (token) await createKundli(payload).unwrap();
+      if (token) {
+        const payload = buildKundliPayload(formData);
+        await createKundli(payload).unwrap();
+        refetch();
+      }
+
+      dispatch(setForm(formData));
       setFormData(initialFormData);
+      setSelectedKundliId(null);
     } catch (err) {
       console.log(err);
     }
-    dispatch(setForm(formData));
   };
 
   // Delete Kundli
   const onDelete = async (id) => {
-    try {
-      await deleteKundli(id).unwrap();
+    await deleteKundli(id).unwrap();
 
-      if (selectedKundliId === id) {
-        setFormData(initialFormData);
-        setSelectedKundliId(null);
-      }
-    } catch (err) {
-      console.log("Delete failed", err);
+    if (selectedKundliId === id) {
+      setSelectedKundliId(null);
+      setFormData(initialFormData);
+      dispatch(setForm(initialFormData));
     }
+    refetch();
   };
 
   const activeStyle = {
