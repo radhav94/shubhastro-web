@@ -217,8 +217,9 @@ const ChatWindow = () => {
           setOpen={setOpenFeedback}
           sendVoiceMessage={sendVoiceMessage}
         />
-
-        <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
+        {waitingPopup && (
+          <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
+        )}
 
         <InactivityModal
           isOpen={isInactive}
