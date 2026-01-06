@@ -505,7 +505,7 @@ const TalkToAstrologer = () => {
         });
         setChatSeconds(Number(data?.remainingTime)*60);
 
-        navigate(`/talk-to-astrologers/${astrologerId}`, {
+        navigate(`/chat-with-astrologers/${astrologerId}`, {
         state: {
           userId: userId,
           astrologerId,

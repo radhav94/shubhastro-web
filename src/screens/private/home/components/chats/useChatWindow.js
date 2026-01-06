@@ -18,7 +18,7 @@ export default function useChat({
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
-  const [isMessageDisabled, setIsMessageDisabled] = useState(false);
+  const [isMessageDisabled, setIsMessageDisabled] = useState(true);
 
   const formatTime = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -32,13 +32,16 @@ export default function useChat({
     if(!roomId || !userId || !astrologerId) return;
     socketService.connect({
       onConnected: () => {
-        if(Object.keys(activeChat || {}).length > 0) startTimer(); //Start timer only when there is active chat
-        //Send msg first time only 
-        if(!refreshKey) {
-          sendMessage(`Hi ${astrologerName || ""}`); 
-          const baseUrl = window.location.origin;
-          const kundliLink = `${baseUrl}/kundli/${kundliId}`;
-          sendMessage(kundliLink);
+        if(Object.keys(activeChat || {}).length > 0) { //Check if chat is active
+          startTimer(); //Start timer only when there is active chat
+          setIsMessageDisabled(false);
+          //Send msg first time only 
+          if(!refreshKey) {
+            sendMessage(`Hi ${astrologerName || ""}`); 
+            const baseUrl = window.location.origin;
+            const kundliLink = `${baseUrl}/kundli/${kundliId}`;
+            sendMessage(kundliLink);
+          }
         }
       },
       onError: (errMsg) => {

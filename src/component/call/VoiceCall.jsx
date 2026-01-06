@@ -313,7 +313,7 @@ const AgoraVoiceCalling = ({ callData }) => {
                 setIsMinimized(true);
                 isUserSide
                   ? navigate(
-                    `/talk-to-astrologers/${activeCall.astrologerId}`,
+                    `/chat-with-astrologers/${activeCall.astrologerId}`,
                     {
                       state: {
                         roomId: activeCall.chatRoomId,

@@ -486,7 +486,7 @@ export const PATH = {
       element: Astrologers,
     },
     CHAT_WITH_ASTROLOGER: {
-      path: "/talk-to-astrologers/:id",
+      path: "/chat-with-astrologers/:id",
       element: ChatWindow,
       footer: false,
     },

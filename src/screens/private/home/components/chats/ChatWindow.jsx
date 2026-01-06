@@ -24,6 +24,7 @@ const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 const MIN_CHAT_SECONDS = 60;
 
 import { useGetS3SignedUrlMutation } from "../../../../../redux/api/s3SignedApi";
+import { PATH } from "../../../../../utils/routes/Paths";
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
@@ -122,7 +123,7 @@ const ChatWindow = () => {
   };
 
   const handleDisconnect = () => {
-    if (handleChatEnd()) navigate(-1);
+    handleChatEnd();
   };
 
   const handleSend = (kundli = null) => {
@@ -270,11 +271,11 @@ const ChatWindow = () => {
           <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
         )}
 
-        <InactivityModal
-          isOpen={isInactive && !isMessageDisabled}
-          onDisconnect={handleDisconnect}
+        {!isMessageDisabled && <InactivityModal
+          isOpen={isInactive}
+          onDisconnect={handleChatEnd}
           onContinue={resetTimer}
-        />
+        />}
 
         <Feedback
           open={openFeedback}

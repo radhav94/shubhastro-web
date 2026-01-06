@@ -293,7 +293,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
           astrologerName: data?.astrologer?.firstName || "",
         });
 
-        navigate(`/talk-to-astrologers/${astrologerId}`, {
+        navigate(`/chat-with-astrologers/${astrologerId}`, {
           state: {
             userId: userId,
             astrologerId,

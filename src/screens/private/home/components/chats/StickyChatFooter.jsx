@@ -20,7 +20,7 @@ const StickyChatFooter = () => {
   } = useChat();
   const navigate = useNavigate();
 
-  const onTalkDetailPage = useMatch("/talk-to-astrologers/:id");
+  const onTalkDetailPage = useMatch("/chat-with-astrologers/:id");
 
   useEffect(() => {
     if (!chatApproval) return;
@@ -34,7 +34,7 @@ const StickyChatFooter = () => {
       setChatApproval(false);
       resetChatFlow();
       setMissedApproval(true);
-    }, 10000);
+    }, 60000);
 
     return () => clearTimeout(timer);
   }, [chatApproval]);
@@ -65,7 +65,7 @@ const StickyChatFooter = () => {
             </div>
             <button
               onClick={() =>
-                navigate(`/talk-to-astrologers/${activeChat.astrologerId}`, {
+                navigate(`/chat-with-astrologers/${activeChat.astrologerId}`, {
                   state: {
                     userId: activeChat.userId,
                     astrologerId: activeChat.astrologerId,
