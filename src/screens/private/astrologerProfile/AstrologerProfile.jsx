@@ -109,7 +109,7 @@ const AstrologerProfile = () => {
       const roomId = res?.data?.data;
       if (!roomId) return toast.error("Room ID missing");
 
-      navigate(`/talk-to-astrologers/${astro._id}`, {
+      navigate(`/chat-with-astrologers/${astro._id}`, {
         state: {
           userId: userIdLocal,
           astrologerId: astro._id,

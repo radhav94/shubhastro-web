@@ -36,7 +36,7 @@ export const useTalkToAstrologer = () => {
   const onChat = useCallback((data) => {
     const storedWallet = JSON.parse(localStorage.getItem("wallet"));
     if (storedWallet != null) {
-      navigate(`/talk-to-astrologers/${data._id}`, { state: { data } });
+      navigate(`/chat-with-astrologers/${data._id}`, { state: { data } });
       return;
     }
     setOpenModal((prev) => ({ ...prev, details: true }));

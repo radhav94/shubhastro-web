@@ -17,7 +17,7 @@ const AstrologerCard = ({
   onAudioCall,
   onVideoCall,
   isLayoutClassic=true,
-  isActiveType
+  isActiveType = []
 }) => {
   return (
     <div className={styles.card}>
@@ -83,7 +83,7 @@ const AstrologerCard = ({
 
       <div className={styles.bottomRow}>
         <div className={styles.buttonsRow}>
-        {isActiveType === "chat" ? (
+        {isActiveType.includes("chat") &&  (
             <PrimaryButton
               bgColor={appColors.white}
               imgSrc={AppIcons.Message}
@@ -92,8 +92,8 @@ const AstrologerCard = ({
               title="Chat"
               onClick={onChat}
             />
-          ) : (
-            <>
+          )}
+          {isActiveType.includes("audio") && (
               <PrimaryButton
                 bgColor={appColors.white}
                 imgSrc={AppIcons.Call}
@@ -102,7 +102,8 @@ const AstrologerCard = ({
                 title="Voice Call"
                 onClick={onAudioCall}
               />
-
+            )}
+            {isActiveType.includes("video") && 
               <PrimaryButton
                 bgColor={appColors.white}
                 imgSrc={AppIcons.Video}
@@ -111,9 +112,7 @@ const AstrologerCard = ({
                 title="Video Call"
                 onClick={onVideoCall}
               />
-            </>
-          )}
-
+            }
         </div>
       </div>
     </div>
