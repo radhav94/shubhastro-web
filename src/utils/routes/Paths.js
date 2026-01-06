@@ -50,14 +50,28 @@ import {
   AstrologerProfile,
 } from "../../screens";
 import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
+import AgeCalc from "../../screens/private/calculator/ageCalculator/AgeCalc";
+import AgeReport from "../../screens/private/calculator/ageCalculator/AgeReport";
 import AtmakarakaCalculator from "../../screens/private/calculator/Atmakaraka/AtmakarakaCalculator";
 import AtmakarakaReport from "../../screens/private/calculator/Atmakaraka/Report";
+import BirthCalc from "../../screens/private/calculator/birthCalc/BirthCalc";
+import BirthReport from "../../screens/private/calculator/birthCalc/BirthReport";
 import DashaCalc from "../../screens/private/calculator/dasha/DashaCalc";
 import DashaReport from "../../screens/private/calculator/dasha/DashaReport";
+import DestinyCalc from "../../screens/private/calculator/destiny/DestinyCalc";
+import DestinyReport from "../../screens/private/calculator/destiny/DestinyReport";
+import FlamesCalc from "../../screens/private/calculator/flames/FlamesCalc";
+import FlamesReport from "../../screens/private/calculator/flames/FlamesReport";
+import Friendship from "../../screens/private/calculator/friendship/Friendship";
+import FriendshipReport from "../../screens/private/calculator/friendship/FriendshipReport";
 import KaalSarpCalc from "../../screens/private/calculator/kaalsarp/KaalSarpCalc";
 import KaalSarpReport from "../../screens/private/calculator/kaalsarp/KaalSarpReport";
+import LoveCalc from "../../screens/private/calculator/love/LoveCalc";
+import LoveReport from "../../screens/private/calculator/love/LoveReport";
 import MangalDosha from "../../screens/private/calculator/mangaldosha/MangalDosha";
 import MangalReport from "../../screens/private/calculator/mangaldosha/MangalReport";
+import MobileCalc from "../../screens/private/calculator/mobileNumber/MobileCalc";
+import MobileReport from "../../screens/private/calculator/mobileNumber/MobileReport";
 import NumerologyCalc from "../../screens/private/calculator/numerology/NumerologyCalc";
 import NumerologyReport from "../../screens/private/calculator/numerology/NumerologyReport";
 import RashiCalc from "../../screens/private/calculator/rashi/RashiCalc";
@@ -68,6 +82,8 @@ import ShaniReport from "../../screens/private/calculator/shanisadesati/ShaniRep
 import ShaniSadeSati from "../../screens/private/calculator/shanisadesati/ShaniSadeSati";
 import SunSignCalc from "../../screens/private/calculator/sunsign/SunSignCalc";
 import SunSignReport from "../../screens/private/calculator/sunsign/SunSignReport";
+import VehicleCalc from "../../screens/private/calculator/vehicleNumber/VehicleCalc";
+import VehicleReport from "../../screens/private/calculator/vehicleNumber/VehicleReport";
 import CompatibilityLanding from "../../screens/private/compatibility/CompatibilityLanding";
 import CompatibilityResult from "../../screens/private/compatibility/CompatibilityResult";
 import SelectPartner from "../../screens/private/compatibility/SelectPartner";
@@ -267,6 +283,14 @@ export const PATH = {
       path: "/numerology",
       element: Numerology,
     },
+    LOVE_CALC: {
+      path: "/love-calculator",
+      element: LoveCalc,
+    },
+    LOVE_REPORT: {
+      path: "/love-calculator/report",
+      element: LoveReport,
+    },
     ATMAKARAKA_CALC: {
       path: "/atmakaraka-and-darakaraka-calculator",
       element: AtmakarakaCalculator,
@@ -338,6 +362,62 @@ export const PATH = {
     NUMEROLOGY_REPORT: {
       path: "/name-numerology-calculator/report",
       element: NumerologyReport,
+    },
+    FLAMES_CALC: {
+      path: "/flames-calculator",
+      element: FlamesCalc,
+    },
+    FLAMES_REPORT: {
+      path: "/flames-calculator/report",
+      element: FlamesReport,
+    },
+    LUCKY_VEHICLE_CALC: {
+      path: "/lucky-vehicle-number-calculator",
+      element: VehicleCalc,
+    },
+    LUCKY_VEHICLE_REPORT: {
+      path: "/lucky-vehicle-number-calculator/report",
+      element: VehicleReport,
+    },
+    FRIENDSHIP_CALC: {
+      path: "/friendship-calculator",
+      element: Friendship,
+    },
+    FRIENDSHIP_REPORT: {
+      path: "/friendship-calculator/report",
+      element: FriendshipReport,
+    },
+    AGE_CALC: {
+      path: "/age-calculator",
+      element: AgeCalc,
+    },
+    AGE_REPORT: {
+      path: "/age-calculator/report",
+      element: AgeReport,
+    },
+    MOBILE_NUMBER_CALC: {
+      path: "/mobile-number-numerology-calculator",
+      element: MobileCalc,
+    },
+    MOBILE_NUMBER_REPORT: {
+      path: "/mobile-number-numerology-calculator/report",
+      element: MobileReport,
+    },
+    DESTINY_NUMBER_CALC: {
+      path: "/destiny-number-calculator",
+      element: DestinyCalc,
+    },
+    DESTINY_NUMBER_REPORT: {
+      path: "/destiny-number-calculator/report",
+      element: DestinyReport,
+    },
+    BIRTH_CHART_CALC: {
+      path: "/birth-natal-chart-calculator",
+      element: BirthCalc,
+    },
+    BIRTH_CHART__REPORT: {
+      path: "/birth-natal-chart-calculator/report",
+      element: BirthReport,
     },
     LIFE_PATH: {
       path: "/numerology/life-path",

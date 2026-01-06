@@ -1,0 +1,65 @@
+.loveForm {
+  background: #fff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  border-bottom: 6px solid #f1e517;
+}
+
+.formTitle {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.formGroup {
+  margin-bottom: 14px;
+
+  label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    outline: none;
+  }
+}
+
+.required {
+  color: #d32f2f;
+}
+
+.error {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #d32f2f;
+}
+
+.heart {
+  font-size: 26px;
+  color: #ff5b5b;
+}
+
+.submitBtn {
+  margin: 20px auto 0;
+  display: block;
+  padding: 10px 22px;
+  border-radius: 20px;
+  border: none;
+  background: #8b8000;
+  color: #fff;
+  cursor: pointer;
+}

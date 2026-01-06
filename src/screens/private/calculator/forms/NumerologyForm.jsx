@@ -8,6 +8,7 @@ const NumerologyForm = ({
   errors,
   onChange,
   onSubmit,
+  hideType = false,
 }) => {
   const { name, type, dob } = formData;
 
@@ -43,18 +44,23 @@ const NumerologyForm = ({
       </div>
 
       {/* Type */}
-      <div className={styles.formGroup}>
-        <label>
-          Type <span className={styles.required}>*</span>
-        </label>
-        <select value={type} onChange={(e) => onChange("type", e.target.value)}>
-          <option value="Cheiro/Chaldien">Cheiro / Chaldien</option>
-          <option value="ythagorean">Pythagorean</option>
-          <option value="sepharial">Sepharial</option>
-          <option value="modern">Modern</option>
-        </select>
-        {errors?.type && <p className={styles.error}>{errors.type}</p>}
-      </div>
+      {!hideType && (
+        <div className={styles.formGroup}>
+          <label>
+            Type <span className={styles.required}>*</span>
+          </label>
+          <select
+            value={type}
+            onChange={(e) => onChange("type", e.target.value)}
+          >
+            <option value="Cheiro/Chaldien">Cheiro / Chaldien</option>
+            <option value="ythagorean">Pythagorean</option>
+            <option value="sepharial">Sepharial</option>
+            <option value="modern">Modern</option>
+          </select>
+          {errors?.type && <p className={styles.error}>{errors.type}</p>}
+        </div>
+      )}
 
       <button type="submit" className={styles.submitBtn}>
         {submitText}

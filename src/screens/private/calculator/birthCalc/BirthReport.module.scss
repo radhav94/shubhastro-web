@@ -1,0 +1,51 @@
+/* PAGE WRAPPER */
+.pageWrapper {
+  background: #f6f8fc;
+  padding: 32px 16px 60px;
+}
+
+/* NAME CARD (Top Header) */
+.nameCard {
+  max-width: 1100px;
+  margin: 0 auto 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px 24px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+  }
+}
+
+/* MAIN CONTENT */
+.mainContainer {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* CHART GRID */
+.chartGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-bottom: 32px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .chartGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* TABLE WRAPPER */
+.tableWrapper {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+}

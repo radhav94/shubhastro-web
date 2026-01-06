@@ -241,6 +241,10 @@ const TopBar = () => {
       title: "Calculators",
       children: [
         {
+          title: "Love Calculator",
+          path: "/love-calculator",
+        },
+        {
           title: "Atmakaraka and Darakaraka Calculator",
           path: "/atmakaraka-and-darakaraka-calculator",
         },
@@ -273,8 +277,36 @@ const TopBar = () => {
           path: "/shani-sade-sati-calculator",
         },
         {
+          title: "Birth Chart Calculator / Natal Chart Calculator",
+          path: "/birth-natal-chart-calculator",
+        },
+        {
           title: "Kaal Sarp Dosh Calculator",
           path: "/kaal-sarp-dosh-calculator",
+        },
+        {
+          title: "Flames Calculator",
+          path: "/flames-calculator",
+        },
+        {
+          title: "Lucky Vehicle Number Calculator",
+          path: "/lucky-vehicle-number-calculator",
+        },
+        {
+          title: "Friendship Calculator",
+          path: "/friendship-calculator",
+        },
+        {
+          title: "Age Calculator",
+          path: "/age-calculator",
+        },
+        {
+          title: "Mobil Number Numerology Calculator",
+          path: "/mobile-number-numerology-calculator",
+        },
+        {
+          title: "Destiny Number Calculator",
+          path: "/destiny-number-calculator",
         },
       ],
     },

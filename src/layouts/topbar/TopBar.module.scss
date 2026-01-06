@@ -272,7 +272,6 @@ $font-primary: "Poppins", sans-serif;
   top: 120%;
   left: 50%; // 🔥 center anchor
   transform: translateX(-50%) translateY(10px); // 🔥 true centering
-
   width: max-content;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 14px;
@@ -280,16 +279,26 @@ $font-primary: "Poppins", sans-serif;
   padding: 0 0 10px 0;
   display: block;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-
   opacity: 0;
   pointer-events: none;
   transition: all 0.25s ease;
   z-index: 999;
   transition: opacity 0.25s ease, transform 0.25s ease;
+  max-height: 300px;
+  overflow-y: scroll;
 
   ul {
     gap: 0;
   }
+}
+.dropdownWrapper::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dropdownWrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
 }
 
 .dropdown:hover .dropdownWrapper {

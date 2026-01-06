@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useGetAtmakarakaQuery } from "../../../../redux/api/calculator/calcApi";
 import styles from "./AtmakarakaReport.module.scss";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 const AtmakarakaReport = () => {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ const AtmakarakaReport = () => {
 
   const { data, isLoading } = useGetAtmakarakaQuery(stored);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
   if (!data?.response) return <div>No data found</div>;
 
   // 🔥 Convert response object to array

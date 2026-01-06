@@ -61,7 +61,7 @@ const NumerologyCalc = () => {
       <PrimaryText isCenter isSemiBold size_24>
         Name Numerology Calculator | Accurate Name Number Calculator Online
       </PrimaryText>
-      <PrimaryText style={{ color: "gray" }} margin="" size_16>
+      <PrimaryText style={{ color: "gray" }} size_16>
         Want to uncover the powerful secrets about your personality and life
         path? ALL FROM YOUR NAME? There’s a way! A numerology calculator can
         reveal hidden insights or the true face of your destiny that was created

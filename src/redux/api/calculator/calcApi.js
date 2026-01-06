@@ -1,3 +1,4 @@
+import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { calculatorApi } from "../baseApi/calculatorApi";
 
 const api_key = "e19fcd25-34b1-52eb-9c7b-4270f71cbd87";
@@ -148,3 +149,90 @@ export const {
   useGetKaalSarpReportQuery,
   useGetNumerologyReportQuery,
 } = calcApi;
+
+export const ShubhCalcApi = privateRequestNew.injectEndpoints({
+  endpoints: (builder) => ({
+    //Love Calculator
+    loveCalculator: builder.mutation({
+      query: (payload) => ({
+        url: "calculators/love",
+        method: "POST",
+        body: {
+          name1: payload.name1,
+          gender1: payload.gender1,
+          name2: payload.name2,
+          gender2: payload.gender2,
+        },
+      }),
+    }),
+
+    //flames Calculator
+    flamesCalculator: builder.mutation({
+      query: (payload) => ({
+        url: "calculators/flames",
+        method: "POST",
+        body: {
+          name1: payload.name1,
+          name2: payload.name2,
+        },
+      }),
+    }),
+
+    //friendship Calculator
+    friendshipCalculator: builder.mutation({
+      query: (payload) => ({
+        url: "calculators/friendship",
+        method: "POST",
+        body: {
+          name1: payload.name1,
+          name2: payload.name2,
+        },
+      }),
+    }),
+
+    //Age Calculator
+    ageCalculator: builder.mutation({
+      query: (payload) => ({
+        url: "calculators/age",
+        method: "POST",
+        body: {
+          dob: payload.dob,
+          asOf: payload.asOf,
+        },
+      }),
+    }),
+
+    //Mobile Numerology Calculator
+    mobileNumerologyCalculator: builder.mutation({
+      query: (payload) => ({
+        url: "calculators/mobile-numerology",
+        method: "POST",
+        body: {
+          dob: payload.dob,
+          mobile: payload.mobile,
+        },
+      }),
+    }),
+
+    //Vehicle Numerology Calculator
+    vehicleNumerologyCalculator: builder.mutation({
+      query: (payload) => ({
+        url: "calculators/vehicle-numerology",
+        method: "POST",
+        body: {
+          dob: payload.dob,
+          vehicle: payload.vehicle,
+        },
+      }),
+    }),
+  }),
+});
+
+export const {
+  useLoveCalculatorMutation,
+  useFlamesCalculatorMutation,
+  useFriendshipCalculatorMutation,
+  useAgeCalculatorMutation,
+  useMobileNumerologyCalculatorMutation,
+  useVehicleNumerologyCalculatorMutation,
+} = ShubhCalcApi;
