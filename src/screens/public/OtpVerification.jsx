@@ -86,7 +86,7 @@ const handleVerifyOtp = async (event) => {
   const payload = {
     phoneNumber,
     type, // "CUSTOMER" or "ASTROLOGER"
-    otp: Number(otp),
+    otp: String(otp),
   };
 
   try {
