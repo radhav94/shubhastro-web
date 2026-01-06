@@ -182,7 +182,7 @@ const SideBar = ({ open, onClose }) => {
   const BOTTOM_MENU = [
     { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
     { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
-    { title: "Join Live", path: "/audience-live-streaming" },
+    { title: "Join Live", path: "/live" },
     { title: "Astromall", path: "/shop" },
     { title: "Blogs", path: "/blog" },
     { title: "Recharge", path: "/recharge" },
