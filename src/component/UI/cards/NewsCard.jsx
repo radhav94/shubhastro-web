@@ -9,7 +9,7 @@ const BlogCard = ({ image, title, author, date, authorIcon }) => {
       </div>
 
       <div className={Styles.contentContainer}>
-        <h3 className={Styles.blogTitle}>{title}</h3>
+        <h4 className={Styles.blogTitle}>{title}</h4>
 
         <div className={Styles.blogInfo}>
           <div className={Styles.authorDate} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
@@ -20,7 +20,13 @@ const BlogCard = ({ image, title, author, date, authorIcon }) => {
               <span className={Styles.authorText}>{author}</span>
             </div>
 
-            <span className={Styles.authorText}>{date}</span>
+            <span className={Styles.authorText}>
+              {new Date(date).toLocaleDateString("en-US", {
+                month: "short",
+                day: "2-digit",
+                year: "numeric",
+              })}
+        </span>
           </div>
         </div>
       </div>
