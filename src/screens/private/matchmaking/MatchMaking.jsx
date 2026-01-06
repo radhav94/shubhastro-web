@@ -358,7 +358,7 @@ useEffect(() => {
               : renderForm("girlData", "Girl's Detail")}
 
             <button className={styles.generateBtn} type="submit">
-              Generate Horoscope
+              Match Horoscope
             </button>
           </form>
         </div>
