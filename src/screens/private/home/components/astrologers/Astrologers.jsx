@@ -16,10 +16,13 @@ import { PATH } from "../../../../../utils/routes/Paths";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import { useCall } from "../../../../../context/CallContext";
 import WaitingPopup from "../../components/chats/WaitingPopup";
+import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
+import { useChat } from "../../../../../context/ChatContext";
 
 const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
   const navigate = useNavigate();
   const { activeCall, setActiveCall } = useCall();
+  const {setActiveChat, setWaitingList, WaitingList, resetChatFlow, activeChatRoomId, setActiveChatRoomId, setLastRequestedAstro, lastRequestedAstro, setChatSeconds } = useChat();
 
   const page = 1;
   const limit = 3;
@@ -46,6 +49,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
   const [callRoomId, setCallRoomId] = useState(null);
 
   const [createChatRoom] = useCreateChatRoomMutation();
+  const [getBalance] = useGetBalanceMutation();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
   const scrollRef = useRef(null);
 
@@ -55,37 +59,60 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
   const [activeCallAstro, setActiveCallAstro] = useState(null);
   //  keep astro in ref (important)
   const activeCallAstroRef = useRef(null);
+  const kundliRef = useRef(null);
 
   // ---------------- CHAT FLOW ----------------
 
-  const openKundliPopup = (astro) => {
-    setSelectedAstro(astro);
+  const openKundliPopup = () => {
     if (token) setKundliModalOpen(true);
     else navigate("/login");
   };
 
   const handleChatAfterKundliSelect = async (kundli) => {
     setKundliModalOpen(false);
+    
+    if (!kundli?._id) return Toast.error("Kundli not selected properly");
+    if (!selectedAstro?._id) return Toast.error("Astrologer not selected");
+    if (!userIdLocal) return Toast.error("User ID Missing");
 
     const astro = selectedAstro;
-    const res = await createChatRoom({
-      userId: userIdLocal,
-      astrologerId: astro._id,
-    });
+    localStorage.setItem("selectedAstroId", astro._id);
 
-    const roomId = astrologers || res?.data?.data;
+    try {
+      // 🔐 Auth check
+      if (!token) {
+        navigate("/login", { state: { from: location.pathname } });
+        return;
+      }
 
-    navigate(`/talk-to-astrologers/${astro._id}`, {
-      state: {
+      // ✅ Store active call info
+      activeCallAstroRef.current = astro;
+      setWaitingPopup(true);
+      kundliRef.current = kundli?._id;
+
+      // 🚀 Create call room
+      voiceSocket.emit("chat:initiate", {
         userId: userIdLocal,
         astrologerId: astro._id,
-        fullName: astro.firstName,
-        roomId,
-        kundliId: kundli._id,
-        isUserSide: true,
-      },
-    });
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
+
+    async function handleChatStart(astro) {
+      setSelectedAstro(astro);
+      setLastRequestedAstro(astro);
+      //Check if user has minimum required balance
+      const result = await getBalance({ astrologerId: astro?._id });
+      if (result.data.data.status === false) {
+        setOpenModal((prev) => ({ ...prev, recharge: true }));
+        return;
+      }
+
+      openKundliPopup();
+    }
+  
 
   // ---------------- AUDIO CALL ----------------
 
@@ -157,6 +184,12 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       setWaitingPopup(true);
     };
 
+    const handleChatRoom = (data) => {
+      setActiveChatRoomId(data?.roomId);
+      setWaitingPopup(false);
+      setWaitingList(data?.waitingTime || 2);
+    };
+
     const handleCallAccepted = ({ roomId, token, type }) => {
       setWaitingPopup(false);
 
@@ -173,10 +206,59 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       });
     };
 
+    const handleChatAccepted = async ({
+      astrologerId,
+      roomId,
+      userId,
+      ...data
+    }) => {
+      setWaitingList(false);
+      const kundliId = kundliRef.current;
+
+      try {
+        if (!roomId) throw new Error();
+
+        setActiveChat({
+          roomId,
+          activeChatRoomId,
+          callerName: data?.astrologer?.firstName,
+          isUserSide: true,
+          userId: userIdLocal,
+          astrologerId: astrologerId,
+          kundliId,
+          astrologerName: data?.astrologer?.firstName || "",
+          remainingTime: data?.remainingTime
+        });
+        setChatSeconds(Number(data?.remainingTime)*60);
+
+        navigate(`/chat-with-astrologers/${astrologerId}`, {
+        state: {
+          userId: userId,
+          astrologerId,
+          fullName: data?.astrologer?.firstName,
+          roomId,
+          isUserSide: true,
+          kundliId,
+          astrologerName: data?.astrologer?.firstName || "",
+          astroID: data?.astrologer?.astrologer_ID
+        },
+      });
+      } catch(e) {
+        console.log('e', e)
+        Toast.error("Failed to start chat");
+      }
+    };
+
     const handleCallRejected = (data) => {
-      Toast.error(data?.sessionData?.sessionEndReason || "Call rejected");
+      if(activeCallAstroRef.current === null) return;
+      const errorMsg =
+        data?.sessionData?.sessionEndReason === "rejected"
+          ? "Astrologer has rejected the chat request"
+          : "Call rejected";
+      Toast.error(errorMsg);
       setWaitingPopup(false);
       activeCallAstroRef.current = null;
+      resetChatFlow();
     };
 
     const handleCallEnded = () => {
@@ -184,14 +266,20 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       activeCallAstroRef.current = null;
     };
 
+    voiceSocket.on("chat:room", handleChatRoom);
     voiceSocket.on("return_call_room", handleReturnRoom);
     voiceSocket.on("call_accepted", handleCallAccepted);
+    voiceSocket.on("chat:accepted", handleChatAccepted);
+    voiceSocket.on("chat:rejected", handleCallRejected);
     voiceSocket.on("call_rejected", handleCallRejected);
     voiceSocket.on("call_ended", handleCallEnded);
 
     return () => {
+      voiceSocket.off("chat:room", handleChatRoom);
       voiceSocket.off("return_call_room", handleReturnRoom);
       voiceSocket.off("call_accepted", handleCallAccepted);
+      voiceSocket.off("chat:accepted", handleChatAccepted);
+      voiceSocket.off("chat:rejected", handleCallRejected);
       voiceSocket.off("call_rejected", handleCallRejected);
       voiceSocket.off("call_ended", handleCallEnded);
     };
@@ -235,12 +323,13 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           <div key={astrologer._id} className={styles.cardWrapper}>
             <AstrologerCard
               data={astrologer}
-              onChat={() => openKundliPopup(astrologer)}
+              onChat={() => handleChatStart(astrologer)}
               onProfile={() => onProfile(astrologer)}
               onAudioCall={() => handleAudioCall(astrologer)}
               onVideoCall={() => handleVideoCall(astrologer)}
               disabled={!!activeCall} //  optional UX improvement
               isLayoutClassic={false}
+              isActiveType={astrologer?.isActiveType}
             />
           </div>
         ))}
