@@ -21,17 +21,31 @@ const LivePlayerPage = () => {
         }
       });
 
+      console.log("mappppp",map);
+
       setLives(Object.values(map));
     });
   }, []);
 
   return (
-    <LiveListProvider
-      lives={lives.map((l) => ({ channel: l.channel }))}
-      autoStartIndex={0}   // 👈 important
-    >
-      <InteractiveLiveStreaming />
-    </LiveListProvider>
+   <LiveListProvider
+  lives={lives.map((l) => ({
+    channel: l.channel,
+
+    astrologerName: `${l.astrologer?.firstName || ""} ${
+      l.astrologer?.lastName || ""
+    }`.trim(),
+
+    astrologerId: l.astrologer?._id,
+    rating: l.astrologer?.rating,
+    expertise: l.astrologer?.expertise,
+    uid: l.uid,
+  }))}
+  autoStartIndex={0}
+>
+  <InteractiveLiveStreaming />
+</LiveListProvider>
+
   );
 };
 

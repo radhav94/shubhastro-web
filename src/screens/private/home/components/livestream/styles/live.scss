@@ -14,13 +14,23 @@
   align-items: center;
 
   /* Premium luxury gradient background (desktop) */
-  background:
-    radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.22), transparent 55%),
-    radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.18), transparent 60%),
-    radial-gradient(circle at 50% 100%, rgba(255, 107, 107, 0.15), transparent 60%),
+  background: radial-gradient(
+      circle at 20% 20%,
+      rgba(139, 92, 246, 0.22),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(212, 175, 55, 0.18),
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 50% 100%,
+      rgba(255, 107, 107, 0.15),
+      transparent 60%
+    ),
     #000;
 }
-
 
 /* ===============================
    ✨ COSMIC BACKGROUND GLOW
@@ -31,10 +41,21 @@
   inset: -40%;
   z-index: 0;
 
-  background:
-    radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.45), transparent 55%),
-    radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.35), transparent 60%),
-    radial-gradient(circle at 50% 100%, rgba(255, 107, 107, 0.25), transparent 60%);
+  background: radial-gradient(
+      circle at 20% 20%,
+      rgba(139, 92, 246, 0.45),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(212, 175, 55, 0.35),
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 50% 100%,
+      rgba(255, 107, 107, 0.25),
+      transparent 60%
+    );
 
   filter: blur(60px);
   opacity: 0.9;
@@ -57,7 +78,6 @@
   z-index: 2;
 }
 
-
 /* ===============================
    🎬 LIVE SLIDE (REELS ANIMATION)
    =============================== */
@@ -72,14 +92,14 @@
 
 /* Next live (scroll down / swipe up) */
 .live-slide-wrapper.up {
-  animation: slideUp 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
-             fadeIn 0.35s ease-out;
+    animation: fadeIn 0.35s ease;
+
 }
 
 /* Previous live (scroll up / swipe down) */
 .live-slide-wrapper.down {
   animation: slideDown 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
-             fadeIn 0.35s ease-out;
+    fadeIn 0.35s ease-out;
 }
 
 @keyframes slideUp {
@@ -109,7 +129,6 @@
   }
 }
 
-
 /* ===============================
    📱 MOBILE OPTIMIZATION
    =============================== */
@@ -124,3 +143,52 @@
     display: none !important;
   }
 }
+
+.live-nav-controls {
+  position: fixed;
+  top: 16px;          
+  left: -550px;         
+  right: auto;        
+  transform: none;   
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.nav-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: all 0.2s ease;
+}
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+.slide-placeholder {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+      circle at 20% 20%,
+      rgba(139, 92, 246, 0.22),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(212, 175, 55, 0.18),
+      transparent 60%
+    ),
+    #000;
+}
+

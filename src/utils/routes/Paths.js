@@ -150,14 +150,13 @@ export const PATH = {
     ASTRO_LIVE_STREAMING: {
       path: "/astrologer-dashboard/live-streaming",
       element: InteractiveLiveStreaming,
-      header: false,
-      footer: false,
+     
     },
 
    AUDIENCE_LIVE_STREAMING: {
   path: "/live",
   element: LivePlayerPage,
-  header: false,
+  // header: false,
   footer: false,
 },
 
