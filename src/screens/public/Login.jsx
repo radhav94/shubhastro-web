@@ -22,57 +22,56 @@ const Login = () => {
   useEffect(() => {
     // const token = localStorage.getItem("verifyOtpToken");
     const role = localStorage.getItem("shubhtalk_role");
-const token =
-  role === "ASTROLOGER"
-    ? localStorage.getItem("shubhtalk_astro_token")
-    : localStorage.getItem("shubhtalk_customer_token");
+    const token =
+      role === "ASTROLOGER"
+        ? localStorage.getItem("shubhtalk_astro_token")
+        : localStorage.getItem("shubhtalk_customer_token");
 
     if (token) {
       navigate(redirectPath, { replace: true });
     }
   }, [navigate, redirectPath]);
 
- const handleSendOtp = async (event) => {
-  event.preventDefault();
-  if (!isMobileNumberValid) return;
+  const handleSendOtp = async (event) => {
+    event.preventDefault();
+    if (!isMobileNumberValid) return;
 
-  const type = selectedRole === "USER" ? "CUSTOMER" : "ASTROLOGER";
+    const type = selectedRole === "USER" ? "CUSTOMER" : "ASTROLOGER";
 
-  const payload = {
-    phoneNumber: '91'+mobileNumber,
-    type: type,
-  };
+    const payload = {
+      phoneNumber: "91" + mobileNumber,
+      type: type,
+    };
 
-  try {
-    const response = await AuthServices.loginWithPhone(payload);
+    try {
+      const response = await AuthServices.loginWithPhone(payload);
 
-    if (response.status) {
+      if (response.status) {
+        navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
+          state: {
+            phoneNumber: "91" + mobileNumber,
+            type, // 👈 PASSING TYPE TO OTP PAGE
+            from: redirectPath,
+          },
+          replace: true,
+        });
+      } else {
+        Toast.error("Error", response.message);
+      }
+    } catch (error) {
+      Toast.error("Error", error?.message || "Something went wrong");
+
       navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
         state: {
-          phoneNumber: '91'+mobileNumber,
-          type,   // 👈 PASSING TYPE TO OTP PAGE
+          phoneNumber: "91" + mobileNumber,
+          type, // 👈 PASSING TYPE TO OTP PAGE
+          resendOtp: handleSendOtp,
           from: redirectPath,
         },
         replace: true,
       });
-    } else {
-      Toast.error("Error", response.message);
     }
-  } catch (error) {
-    Toast.error("Error", error?.message || "Something went wrong");
-
-    navigate(PATH.publicRoutes.OTP_VERIFICATION.path, {
-      state: {
-        phoneNumber: '91'+mobileNumber,
-        type,    // 👈 PASSING TYPE TO OTP PAGE
-        resendOtp: handleSendOtp,
-        from: redirectPath,
-      },
-      replace: true,
-    });
-  }
-};
-
+  };
 
   return (
     <LoginLayout>
@@ -110,7 +109,7 @@ const token =
 
         <div className={styles.mobileNumber}>
           <PrimaryText className={styles.label}>
-            Mobile number<span>*</span>
+            Mobile Number<span>*</span>
           </PrimaryText>
 
           <form onSubmit={handleSendOtp}>
@@ -135,7 +134,7 @@ const token =
                   }}
                   inputMode="numeric"
                   required
-                  placeholder="Mobile number"
+                  placeholder="Mobile Number"
                   pattern="[0-9]*"
                 />
               </div>
@@ -154,11 +153,9 @@ const token =
         </div>
 
         <div className={styles.byProceeding}>
-          By proceeding, you agree to our  
-          <Link to={PATH.privateRoutes.TERMSCONDITIONS.path}>
-            T&C
-          </Link> &{" "}
-          <Link to={PATH.privateRoutes.PRICING_POLICY.path}>
+          By proceeding, you agree to our
+          <Link to={PATH.privateRoutes.TERMSCONDITIONS.path}>T&C</Link> &{" "}
+          <Link to={PATH.privateRoutes.PRIVACY_POLICY.path}>
             Privacy Policy
           </Link>
         </div>
