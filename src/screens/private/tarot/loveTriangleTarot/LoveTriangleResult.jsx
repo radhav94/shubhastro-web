@@ -56,7 +56,7 @@ const LoveTriangleResult = ({ resultData, userName = "", handleReset }) => {
 
       <div style={{ textAlign: "center", marginTop: "20px" }}>
         <button className={styles.actionButton} onClick={handleReset}>
-          Ask Another Question
+          Ask Another Tarot Question
         </button>
       </div>
     </div>

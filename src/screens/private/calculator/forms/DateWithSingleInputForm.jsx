@@ -1,3 +1,4 @@
+import { TODAY } from "../../../../utils/dateFormat/date";
 import styles from "./DateWithSingleInputForm.module.scss";
 
 const DateWithSingleInputForm = ({
@@ -29,6 +30,7 @@ const DateWithSingleInputForm = ({
           type="date"
           value={dob}
           disabled={readOnly}
+          max={TODAY}
           onChange={(e) => onChange("dob", e.target.value)}
           onClick={(e) => e.target.showPicker?.()}
         />

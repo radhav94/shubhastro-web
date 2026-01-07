@@ -50,6 +50,14 @@ const Breadcrumb = () => {
 
         if (isAstroDashboard && index === 0) return null;
 
+        // Skip "horoscopes" and "tarot" from breadcrumb display
+        if (
+          name.toLowerCase() === "horoscopes" ||
+          name.toLowerCase() === "tarot"
+        ) {
+          return null;
+        }
+
         let label = name.replace(/-/g, " ");
 
         if (
