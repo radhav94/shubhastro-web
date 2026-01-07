@@ -18,7 +18,7 @@ export default function useChat({
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
-  const [isMessageDisabled, setIsMessageDisabled] = useState(true);
+  const [isMessageDisabled, setIsMessageDisabled] = useState(false);
 
   const formatTime = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -40,7 +40,7 @@ export default function useChat({
             sendMessage(`Hi ${astrologerName || ""}`); 
             const baseUrl = window.location.origin;
             const kundliLink = `${baseUrl}/kundli/${kundliId}`;
-            sendMessage(kundliLink);
+            setTimeout(() => sendMessage(kundliLink), 300);
           }
         }
       },

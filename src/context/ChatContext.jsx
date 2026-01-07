@@ -53,7 +53,7 @@ useEffect(() => {
   const handleActivity = (data) => {
     if(data?.remainingTime){
       resetTimer(); // Reset the timer
-      setChatSeconds(data?.remainingTime); // Use data.remainingTime if provided
+      setChatSeconds(data?.remainingTime*60); // Use data.remainingTime if provided
       startTimer(); // Start the timer again
     }
   }
