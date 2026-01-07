@@ -331,7 +331,6 @@ const TalkToAstrologer = () => {
       // ✅ Store active call info
       activeCallAstroRef.current = astro;
       setWaitingPopup(true);
-      kundliRef.current = kundli?._id;
 
       // 🚀 Create call room
       voiceSocket.emit("chat:initiate", {
@@ -426,15 +425,15 @@ const TalkToAstrologer = () => {
     });
   };
 
-  const handleAudioCall = (astro) => {
-    initiateCall(astro, "audio");
-  };
+  // const handleAudioCall = (astro) => {
+  //   initiateCall(astro, "audio");
+  // };
 
   // const handleVideoCall = (astro) => {
   //   initiateCall(astro, "video");
   // };
 
-  const handleVideoStart = async (astro) => {
+  const handleCallStart = async (astro, type) => {
     setSelectedAstrologer(astro);
     setLastRequestedCallAstro(astro);
     //Check if user has minimum required balance
@@ -451,7 +450,7 @@ const TalkToAstrologer = () => {
       return;
     }
 
-    setCallType("video");
+    setCallType(type);
     openKundliPopup();
   }
 
@@ -553,9 +552,9 @@ const TalkToAstrologer = () => {
     /* REJECTED */
     const handleCallRejected = (data) => {
       const errorMsg =
-        data?.sessionData?.sessionEndReason === "rejected"
+        data?.sessionData?.sessionEndReason === "rejected" && data?.type === "chat"
           ? "Astrologer has rejected the chat request"
-          : "Call rejected";
+          : "Astrologer has rejected the call request";
       Toast.error(errorMsg);
       resetCallState();
       resetChatFlow();
@@ -637,8 +636,8 @@ const TalkToAstrologer = () => {
               onFollow={() => onFollow(astro._id)}
               onChat={() => handleChatStart(astro)}
               onProfile={() => onProfile(astro)}
-              onAudioCall={() => handleAudioCall(astro)}
-              onVideoCall={() => handleVideoStart(astro)}
+              onAudioCall={() => handleCallStart(astro, "audio")}
+              onVideoCall={() => handleCallStart(astro, "video")}
             />
           </div>
         ))}
