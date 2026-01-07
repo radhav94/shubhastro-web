@@ -268,7 +268,7 @@ const VideoCalling = ({ callData }) => {
     if (endCallRef.current) return;
     endCallRef.current = true;
 
-    voiceSocket.emit("call_end", {
+    voiceSocket.emit("call:end", {
       roomId,
       endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
     });
@@ -278,12 +278,12 @@ const VideoCalling = ({ callData }) => {
 
   /* ================= SOCKET ================= */
   useEffect(() => {
-    voiceSocket.on("call_ended", safeEndCall);
+    voiceSocket.on("call:ended", safeEndCall);
     voiceSocket.on("force_call_end", safeEndCall);
     voiceSocket.on("disconnect", safeEndCall);
 
     return () => {
-      voiceSocket.off("call_ended", safeEndCall);
+      voiceSocket.off("call:ended", safeEndCall);
       voiceSocket.off("force_call_end", safeEndCall);
       voiceSocket.off("disconnect", safeEndCall);
     };
