@@ -21,7 +21,13 @@ const BlogCard = ({ image, title, author, date, authorIcon }) => {
               />
             )}
             <span className={Styles.authorText}>
-            {author ? `${author} ・ ` : ""}{date}
+            {author ? `${author} ・ ` : ""}
+            {
+                new Date(date).toLocaleDateString("en-US", {
+                month: "short",
+                day: "2-digit",
+                year: "numeric",
+              })}
             </span>
           </div>
           <IoArrowForwardOutline className={Styles.arrowIcon} />

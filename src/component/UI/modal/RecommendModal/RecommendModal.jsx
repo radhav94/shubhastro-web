@@ -9,34 +9,59 @@ import { useWalletBalance } from "../../../../screens/private/wallet/useWalletBa
 import { getToken } from "../../../../utils/token";
 import { voiceSocket } from "../../../../services/voiceSocketServices";
 import { useCreateChatRoomMutation } from "../../../../redux/api/chatApi";
-import { useNavigate,useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import WaitingModal from "../waitingModal/WaitingModal";
 import KundliSelectModal from "../../../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
 import PrimaryLoader from "../../PrimaryLoader";
+import { useTalkToAstrologer } from "../../../../screens/private/talkToAstrologer/useTalkToAstrologer";
+import { useGetBalanceMutation } from "../../../../redux/api/wallet/walletApi";
+import { useChat } from "../../../../context/ChatContext";
 
-const RecommendModal = ({ open, onClose, mode = "chat" }) => {
+const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
   const { data: recommendedAstros, isLoading } =
     useGetRecommendedAstrologersQuery();
 
-  if (!open) return null;
+  // if (!open) return null;
 
   const navigate = useNavigate();
-  const { activeCall, setActiveCall } = useCall();
-  const [waitingPopup, setWaitingPopup] = useState(false);
-  const [callRoomId, setCallRoomId] = useState(null);
+
+  const location = useLocation(); //  get current URL
+  const currentPath = location.pathname.split("/").pop();
+
+  const [
+    onFollow,
+    openModal,
+    setOpenModal,
+    onChat,
+    onProfile,
+    handleSubmit,
+    onRechargeNow,
+  ] = useTalkToAstrologer();
+
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
+  const [waitingPopup, setWaitingPopup] = useState(false); //
 
+  const { activeCall, setActiveCall } = useCall();
+  const {
+    setActiveChat,
+    setWaitingList,
+    WaitingList,
+    resetChatFlow,
+    setActiveChatRoomId,
+    setLastRequestedAstro,
+  } = useChat();
+
+  // ✅ Ref for current calling astrologer (no re-render)
   const activeCallAstroRef = useRef(null);
-  const kundliRef = useRef(null);
+  const kundliRef = useRef(null); // selected kundliId
 
-  const token = getToken();
-  const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
-  const { balance } = useWalletBalance();
+  const [callRoomId, setCallRoomId] = useState(null);
+  const [chatRoomId, setChatRoomId] = useState(null);
 
   const [createChatRoom] = useCreateChatRoomMutation();
-  const location = useLocation(); // 👈 get current URL
-  const currentPath = location.pathname.split("/").pop(); // last part of URL
+  const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+  // last part of URL
 
   // Detect type based on URL
   const getTypeFromURL = () => {
@@ -51,16 +76,43 @@ const RecommendModal = ({ open, onClose, mode = "chat" }) => {
   // 🔄 Update activeType if URL changes
   useEffect(() => {
     setActiveType(getTypeFromURL());
-  }, [location.pathname]);
+    if (!location.state?.rejoinAstro) return;
+    handleChatStart(location.state.rejoinAstro);
+    navigate(".", { replace: true, state: null });
+  }, [location]);
+
+  const token = getToken();
+  const { balance } = useWalletBalance();
+  const [getBalance] = useGetBalanceMutation();
+
   // Kundli & Chat handlers
-  const openKundliPopup = (astro) => {
-    setSelectedAstrologer(astro);
+  const openKundliPopup = () => {
     if (token) {
       setKundliModalOpen(true);
     } else {
       navigate("/login", { state: { from: location.pathname } });
     }
   };
+
+  async function handleChatStart(astro) {
+    setSelectedAstrologer(astro);
+    setLastRequestedAstro(astro);
+    //Check if user has minimum required balance
+    // 💰 Balance check
+    const result = await getBalance({ astrologerId: astro?._id });
+    if (result.data.data.status === false) {
+      setOpenModal((prev) => ({ ...prev, recharge: true }));
+      return;
+    }
+
+    //Check if astro is online
+    if (!astro?.isActive) {
+      Toast.error("Astrologer is not online");
+      return;
+    }
+
+    openKundliPopup();
+  }
 
   const handleChatAfterKundliSelect = async (kundli) => {
     setKundliModalOpen(false);
@@ -73,30 +125,29 @@ const RecommendModal = ({ open, onClose, mode = "chat" }) => {
     localStorage.setItem("selectedAstroId", astro._id);
 
     try {
-      const res = await createChatRoom({
+      // 🔐 Auth check
+      if (!token) {
+        navigate("/login", { state: { from: location.pathname } });
+        return;
+      }
+
+      // ✅ Store active call info
+      activeCallAstroRef.current = astro;
+      setWaitingPopup(true);
+      kundliRef.current = kundli?._id;
+
+      // 🚀 Create call room
+      voiceSocket.emit("chat:initiate", {
         userId: userIdLocal,
         astrologerId: astro._id,
-      });
-
-      const roomId = res?.data?.data;
-      if (!roomId) return Toast.error("Room ID missing");
-
-      navigate(`/talk-to-astrologers/${astro._id}`, {
-        state: {
-          userId: userIdLocal,
-          astrologerId: astro._id,
-          fullName: astro.firstName,
-          roomId,
-          isUserSide: true,
-          kundliId: kundli._id,
-        },
       });
     } catch (error) {
       console.error(error);
     }
   };
 
-  /* SOCKET CALL FLOW*/
+  /* ------------------- SOCKET CALL FLOW (ADDED ONLY) ------------------- */
+
   useEffect(() => {
     if (!userIdLocal) return;
 
@@ -109,13 +160,14 @@ const RecommendModal = ({ open, onClose, mode = "chat" }) => {
     }
 
     return () => {
-      voiceSocket.off(); // remove listeners only
+      voiceSocket.off();
     };
   }, [userIdLocal]);
 
   const resetCallState = () => {
     setWaitingPopup(false);
     setCallRoomId(null);
+    setChatRoomId(null);
 
     activeCallAstroRef.current = null;
     kundliRef.current = null;
@@ -124,34 +176,37 @@ const RecommendModal = ({ open, onClose, mode = "chat" }) => {
   };
 
   const initiateCall = (astro, type) => {
-    //  Auth check
+    // 🔐 Auth check
     if (!token) {
-      navigate("/login", { state: { from: location?.pathname } });
+      navigate("/login", { state: { from: location.pathname } });
       return;
     }
 
-    //  Validations
+    // ❌ Validations
     if (!astro) return Toast.error("Astrologer missing");
     if (!userIdLocal) return Toast.error("User ID missing");
 
-    //  Balance check
+    // 💰 Balance check
     const price = astro?.price?.amount || 0;
     if (balance < price) {
       setSelectedAstrologer(astro);
-      // setOpenModal((prev) => ({ ...prev, recharge: true }));
+      setOpenModal((prev) => ({ ...prev, recharge: true }));
       return;
     }
 
-    //  Already on call
+    // 📞 Already on call
     if (activeCall) {
       return Toast.error("You are already on a call");
     }
 
-    // Store active call info
+    // ✅ Store active call info
     activeCallAstroRef.current = astro;
     setWaitingPopup(true);
 
-    //  Create call room
+    // 🔌 Ensure socket connection
+    // connectSocket();
+
+    // 🚀 Create call room
     voiceSocket.emit("create_call_room", {
       userId: userIdLocal,
       astrologerId: astro._id,
@@ -174,6 +229,13 @@ const RecommendModal = ({ open, onClose, mode = "chat" }) => {
     const handleReturnRoom = ({ roomId }) => {
       setCallRoomId(roomId);
       setWaitingPopup(true);
+    };
+
+    const handleChatRoom = (data) => {
+      setChatRoomId(data?.roomId);
+      setActiveChatRoomId(data?.roomId);
+      setWaitingPopup(false);
+      setWaitingList(data?.waitingTime || 2);
     };
 
     const handleCallAccepted = async ({ roomId, token, type }) => {
@@ -207,10 +269,55 @@ const RecommendModal = ({ open, onClose, mode = "chat" }) => {
       }
     };
 
+    const handleChatAccepted = async ({
+      astrologerId,
+      roomId,
+      userId,
+      ...data
+    }) => {
+      setWaitingList(false);
+      const astro = activeCallAstroRef.current;
+      const kundliId = kundliRef.current;
+
+      try {
+        if (!roomId) throw new Error();
+
+        setActiveChat({
+          roomId,
+          chatRoomId,
+          callerName: astro.firstName,
+          isUserSide: true,
+          userId: userIdLocal,
+          astrologerId: astrologerId,
+          kundliId,
+          astrologerName: data?.astrologer?.firstName || "",
+        });
+
+        navigate(`/chat-with-astrologers/${astrologerId}`, {
+          state: {
+            userId: userId,
+            astrologerId,
+            fullName: astro.firstName,
+            roomId,
+            isUserSide: true,
+            kundliId,
+            astrologerName: data?.astrologer?.firstName || "",
+            astroID: data?.astrologer?.astrologer_ID,
+          },
+        });
+      } catch {
+        Toast.error("Failed to start chat");
+      }
+    };
     /* REJECTED */
     const handleCallRejected = (data) => {
-      Toast.error(data?.sessionData?.sessionEndReason || "Call rejected");
+      const errorMsg =
+        data?.sessionData?.sessionEndReason === "rejected"
+          ? "Astrologer has rejected the chat request"
+          : "Call rejected";
+      Toast.error(errorMsg);
       resetCallState();
+      resetChatFlow();
     };
 
     /* ERROR */
@@ -233,15 +340,21 @@ const RecommendModal = ({ open, onClose, mode = "chat" }) => {
     };
 
     // Attach events
+    voiceSocket.on("chat:room", handleChatRoom);
     voiceSocket.on("return_call_room", handleReturnRoom);
     voiceSocket.on("call_accepted", handleCallAccepted);
+    voiceSocket.on("chat:accepted", handleChatAccepted);
+    voiceSocket.on("chat:rejected", handleCallRejected);
     voiceSocket.on("call_rejected", handleCallRejected);
     voiceSocket.on("error", handleSocketError);
     voiceSocket.on("call_ended", handleCallEnded);
 
     return () => {
+      voiceSocket.off("chat:room", handleChatRoom);
       voiceSocket.off("return_call_room", handleReturnRoom);
       voiceSocket.off("call_accepted", handleCallAccepted);
+      voiceSocket.off("chat:accepted", handleChatAccepted);
+      voiceSocket.off("chat:rejected", handleCallRejected);
       voiceSocket.off("call_rejected", handleCallRejected);
       voiceSocket.off("error", handleSocketError);
       voiceSocket.off("call_ended", handleCallEnded);
@@ -279,7 +392,8 @@ const RecommendModal = ({ open, onClose, mode = "chat" }) => {
                   key={astro._id}
                   astro={astro}
                   mode={mode}
-                  onChat={() => openKundliPopup(astro)}
+                  // onChat={() => openKundliPopup(astro)}
+                  onChat={() => handleChatStart(astro)}
                   // onProfile={() => onProfile(astro)}
                   onAudioCall={() => handleAudioCall(astro)}
                   onVideoCall={() => handleVideoCall(astro)}

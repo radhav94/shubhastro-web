@@ -14,11 +14,11 @@ export default function useChat({
   astrologerName,
   refreshKey = 0
 }) {
-  const { startTimer, stopTimer, chatSeconds } = useChatContext();
+  const { startTimer, stopTimer, chatSeconds, setActiveChat, activeChat } = useChatContext();
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
-  const [isMessageDisabled, setIsMessageDisabled] = useState(false);
+  const [isMessageDisabled, setIsMessageDisabled] = useState(true);
 
   const formatTime = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -28,20 +28,30 @@ export default function useChat({
   };
 
   useEffect(() => {
+    if(activeChat?.astrologerId !== astrologerId) setIsMessageDisabled(true)
+    if(!roomId || !userId || !astrologerId) return;
     socketService.connect({
       onConnected: () => {
-        startTimer();
-        //Send msg first time only 
-        if(!refreshKey) {
-          sendMessage(`Hi ${astrologerName || ""}`); 
-          const baseUrl = window.location.origin;
-          const kundliLink = `${baseUrl}/kundli/${kundliId}`;
-          sendMessage(kundliLink);
+        if(Object.keys(activeChat || {}).length > 0) { //Check if chat is active
+          startTimer(); //Start timer only when there is active chat
+          setIsMessageDisabled(false);
+          //Send msg first time only 
+          if(!refreshKey) {
+            sendMessage(`Hi ${astrologerName || ""}`); 
+            const baseUrl = window.location.origin;
+            const kundliLink = `${baseUrl}/kundli/${kundliId}`;
+            sendMessage(kundliLink);
+          }
         }
       },
       onError: (errMsg) => {
         toast.error(errMsg ||"Something went wrong");
-        setError(errMsg)
+        setError(errMsg);
+      if(errMsg === 'Chat no longer available' || errMsg === 'Chat has already ended' || errMsg === 'Session not found'){
+        setIsMessageDisabled(true);
+        stopTimer();
+        setActiveChat(null);
+      }
       },
       onWarn: (msg) => {
         toast.warning(msg ||"Something went wrong");
@@ -62,6 +72,7 @@ export default function useChat({
       setIsMessageDisabled(true);
       setOpenFeedback(true);
       stopTimer();
+      setActiveChat(null);
     };
 
     const handleWarning = (msg) => {
@@ -77,7 +88,7 @@ export default function useChat({
       voiceSocket.off("warning", handleWarning);
       voiceSocket.off("chat:ended", handleChatEndedFromServer);
     };
-  }, [roomId]);
+  }, [roomId, activeChat]);
 
   // USER SEND
   const sendMessage = (text) => {
@@ -131,6 +142,7 @@ export default function useChat({
     sendTyping,
     chatSeconds,
     isMessageDisabled,
-    setIsMessageDisabled
+    setIsMessageDisabled,
+    remainingTime : activeChat?.remainingTime || 0
   };
 }

@@ -320,7 +320,7 @@ const VideoCalling = ({ callData }) => {
     setIsMinimized(true);
     setTimeout(() => {
       if (isUserSide) {
-        navigate(`/talk-to-astrologers/${activeCall.astrologerId}`, {
+        navigate(`/chat-with-astrologers/${activeCall.astrologerId}`, {
           state: {
             roomId: activeCall.chatRoomId,
             userId: activeCall.userId,

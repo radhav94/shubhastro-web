@@ -25,15 +25,29 @@ const Home = () => {
   const homeList = data?.data?.list;
 
   const onChat = (item) => {
-    navigate(`/talk-to-astrologers/${item._id}`, {
+    navigate(`/chat-with-astrologers/${item._id}`, {
       state: { data: item },
     });
   };
 
   const onProfile = (item) => {};
+  const astrologerSectionOnline = homeList?.find(
+    (item) => item.slug === "astrologer"
+  );
+  const astrologerTitle = "Top Online Astrologers";
+  const astrologersOnline = astrologerSectionOnline?.content || [];
+  
+  const OurastrologerSection = homeList.find(
+    (item) => item.slug === "our-astrologers"
+  );
+  const OurastrologersTitle ="Our Astrologers";
+  const Ourastrologers= OurastrologerSection?.content || [];
 
   const onClickView = () => {
     navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path);
+  };
+  const onClickViewOnline = () => {
+    navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER_ONLINE.path);
   };
 
   return (
@@ -46,15 +60,17 @@ const Home = () => {
         </section> */}
         <HeroSection/>
         <QuickActionTray />
-
+        {astrologersOnline?.length > 0 && (
         <section className={styles.section}>
           <Astrologers
-              astrologers={homeList}
+              title={astrologerTitle}
+              astrologers={astrologersOnline}
               onChat={onChat}
-              onClickView={onClickView}
+              onClickView={onClickViewOnline}
               onProfile={onProfile}
             />
         </section>
+      )}
         <News data={homeList} />
         <section className={styles.section}>
           <ServiceCards />
@@ -67,6 +83,17 @@ const Home = () => {
 
           {/* <div className={styles.sectionBlock}> */}
           <Blogs data={homeList} />
+          {Ourastrologers?.length > 0 && (
+          <section className={styles.section}>
+          <Astrologers
+              title={OurastrologersTitle}
+              astrologers={Ourastrologers}
+              onChat={onChat}
+              onClickView={onClickView}
+              onProfile={onProfile}
+            />
+          </section>
+          )}
           {/* </div> */}
           <div>
             <WhyAstro />

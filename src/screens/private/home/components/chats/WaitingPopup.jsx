@@ -1,19 +1,18 @@
-import React from "react";
+import { createPortal } from "react-dom";
 import styles from "./ChatWindow.module.scss";
+
 import { PrimaryText } from "../../../../../component";
 
-const WaitingPopup = ({ open, onCancel }) => {
-  if (!open) return null;
-
-  return (
+const WaitingPopup = ({ onCancel }) => {
+  return createPortal(
     <div className={styles.modalOverlay}>
       <div className={styles.modalContainer}>
         <PrimaryText size_18 isSemiBold>
-          ⏳ Waiting for astrologer to accept your call…
+          🔔 Calling Astrologer…
         </PrimaryText>
 
         <PrimaryText size_14 color="#777">
-          Please stay on this screen
+          Please wait while astrologer accepts the call
         </PrimaryText>
 
         <div className={styles.modalButtons}>
@@ -22,7 +21,8 @@ const WaitingPopup = ({ open, onCancel }) => {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body // 🔥 This guarantees fullscreen
   );
 };
 

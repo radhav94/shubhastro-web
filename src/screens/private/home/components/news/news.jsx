@@ -8,52 +8,9 @@ const News = ({ titleShow = true, data }) => {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
 
-  const title = data?.find((slug) => slug.display_type === "blog");
+  const title = data?.find((slug) => slug.display_type === "news");
 
-  //   const blogData = title?.content;
-  const blogData = [
-    {
-      _id: "1",
-      blogId: "how-to-start-astrology",
-      imageUrl:
-        "https://shubhastroassets.s3.ap-south-1.amazonaws.com/Zodiac/PISCES.png",
-      title: "How to Start Learning Astrology in 2025",
-      author: "Priya Sharma",
-      authorIcon: "https://via.placeholder.com/40",
-      publishDate: "Dec 15, 2025",
-    },
-    {
-      _id: "2",
-      blogId: "kundli-basics-guide",
-      imageUrl:
-        "https://shubhastroassets.s3.ap-south-1.amazonaws.com/Zodiac/PISCES.png",
-      title: "Kundli Basics: A Beginner Friendly Guide",
-      author: "Rohan Mehta",
-      authorIcon: "https://via.placeholder.com/40",
-      publishDate: "Dec 20, 2025",
-    },
-    {
-      _id: "3",
-      blogId: "vastu-tips-for-home",
-      imageUrl:
-        "https://shubhastroassets.s3.ap-south-1.amazonaws.com/Zodiac/PISCES.png",
-      title: "Vastu Tips to Improve Home Energy Flow",
-      author: "Sneha Kapoor",
-      authorIcon: "https://via.placeholder.com/40",
-      publishDate: "Jan 02, 2026",
-    },
-    {
-      _id: "4",
-      blogId: "planetary-effects-2026",
-      imageUrl:
-        "https://shubhastroassets.s3.ap-south-1.amazonaws.com/Zodiac/PISCES.png",
-      title: "Planetary Effects That Will Shape 2026",
-      author: "Amit Verma",
-      authorIcon: "https://via.placeholder.com/40",
-      publishDate: "Jan 05, 2026",
-    },
-  ];
-
+    const blogData = title?.content;
   const scrollLeft = () => {
     scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
   };
@@ -67,7 +24,6 @@ const News = ({ titleShow = true, data }) => {
       {titleShow && (
         <Title
           title="Shubhtalk in News"
-          //   onButtonClick={() => navigate("/blog")}
         />
       )}
 
@@ -85,23 +41,22 @@ const News = ({ titleShow = true, data }) => {
         ref={scrollRef}
       >
         {blogData?.map((blog, index) => (
-          //   <Link
-          //     key={blog._id}
-          //     to={PATH.privateRoutes.SINGLEBLOG.path.replace(
-          //       ":slug",
-          //       blog.blogId
-          //     )}
-          //     className={Styles.blogLink}
-          //   >
-          <NewsCard
-            image={blog?.imageUrl}
-            title={blog.title}
-            author={blog.author}
-            date={blog.publishDate}
-            authorIcon={blog.authorIcon}
-            key={blog?._id}
-          />
-          //   </Link>
+            <Link
+              key={blog._id}
+              to={blog.redirect_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={Styles.blogLink}
+            >
+              <NewsCard
+                image={blog?.imageUrl}
+                title={blog.title}
+                author={blog.news_channel}
+                date={blog.date}
+                authorIcon={blog.authorIcon}
+                key={blog?._id}
+              />
+           </Link>
         ))}
       </div>
 

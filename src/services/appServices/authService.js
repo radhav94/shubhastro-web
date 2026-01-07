@@ -16,3 +16,13 @@ export const logout = async (data) => {
 export const registerUser = async (data) => {
   return await privateRequest.post("users/registerUser", data);
 };
+
+export const getAstrologerLiveList = async (data) => {
+  return await privateRequest.get("users/live-users", data);
+};
+
+export const getViewerToken = async (channel) => {
+  return await privateRequest.post(
+    `users/live/token/viewer?channel=${channel}`
+  );
+};

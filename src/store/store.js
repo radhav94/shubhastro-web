@@ -11,7 +11,7 @@ import {
   privateRequestNew,
 } from "../services/appServices/privateRequestNew";
 import { astroTarotApi } from "../redux/api/tarot/astroTarotApi";
-
+import { calculatorApi } from "../redux/api/baseApi/calculatorApi";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -24,12 +24,10 @@ export const store = configureStore({
     [vedicApi.reducerPath]: vedicApi.reducer,
     [astroTarotApi.reducerPath]: astroTarotApi.reducer,
     [geoApi.reducerPath]: geoApi.reducer,
+    [calculatorApi.reducerPath]: calculatorApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      //   serializableCheck: false,
-    })
-      // Include all middlewares here
+    getDefaultMiddleware()
       .concat(geoApi.middleware)
       .concat(baseApi.middleware)
       .concat(privateRequestNew.middleware)
@@ -37,5 +35,6 @@ export const store = configureStore({
       .concat(pythonApi.middleware)
       .concat(horoscopeApi.middleware)
       .concat(vedicApi.middleware)
-      .concat(astroTarotApi.middleware),
+      .concat(astroTarotApi.middleware)
+      .concat(calculatorApi.middleware),
 });

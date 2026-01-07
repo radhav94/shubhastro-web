@@ -11,12 +11,14 @@ import { PATH } from "../../utils/routes/Paths";
 // Icons
 import { FiMenu } from "react-icons/fi";
 import { PrimaryText } from "../../component";
-import { IoWalletOutline } from "react-icons/io5";
 import { getUserFromStorage } from "../../utils/authStorage";
+import { useDispatch } from "react-redux";
+import { clearFormAndCache } from "../../redux/actions/clearFormAndCache";
 
 const TopBar = () => {
   const navigate = useNavigate();
   const user = getUserFromStorage();
+  const dispatch = useDispatch();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
@@ -31,6 +33,7 @@ const TopBar = () => {
       : localStorage.getItem("shubhtalk_customer_token");
 
   const handleLogout = () => {
+    dispatch(clearFormAndCache());
     const role = localStorage.getItem("shubhtalk_role");
 
     if (role === "ASTROLOGER") {
@@ -44,6 +47,17 @@ const TopBar = () => {
       localStorage.removeItem("shubhtalk_customer_wallet");
     }
     localStorage.removeItem("shubhtalk_role");
+
+    localStorage.removeItem("atmakaraka-and-darakaraka");
+    localStorage.removeItem("dasha_calc");
+    localStorage.removeItem("kaal_sarp");
+    localStorage.removeItem("mangal_dosha");
+    localStorage.removeItem("numerology_report");
+    localStorage.removeItem("rashi_moon_sign");
+    localStorage.removeItem("rising_sign");
+    localStorage.removeItem("shani_sade_sati");
+    localStorage.removeItem("sun_sign");
+
     navigate("/");
   };
 
@@ -223,9 +237,83 @@ const TopBar = () => {
     //   ],
     // },
     { title: "Numerology", path: "/numerology" },
+    {
+      title: "Calculators",
+      children: [
+        {
+          title: "Love Calculator",
+          path: "/love-calculator",
+        },
+        {
+          title: "Atmakaraka and Darakaraka Calculator",
+          path: "/atmakaraka-and-darakaraka-calculator",
+        },
+        {
+          title: "Numerology Calculator",
+          path: "/name-numerology-calculator",
+        },
+        {
+          title: "Sun Sign Calculator",
+          path: "/sun-sign-calculator",
+        },
+        {
+          title: "Rising Sign Calculator / Ascendant Calculator",
+          path: "/rising-ascendant-sign-calculator",
+        },
+        {
+          title: "Rashi Calculator",
+          path: "/rashi-moon-sign-calculator",
+        },
+        {
+          title: "Dasha Calculator",
+          path: "/dasha-calculator",
+        },
+        {
+          title: "Mangal Dosha Calculator",
+          path: "/mangal-kuja-dosha-calculator",
+        },
+        {
+          title: "Shani Sade Sati Calculator",
+          path: "/shani-sade-sati-calculator",
+        },
+        {
+          title: "Birth Chart Calculator / Natal Chart Calculator",
+          path: "/birth-natal-chart-calculator",
+        },
+        {
+          title: "Kaal Sarp Dosh Calculator",
+          path: "/kaal-sarp-dosh-calculator",
+        },
+        {
+          title: "Flames Calculator",
+          path: "/flames-calculator",
+        },
+        {
+          title: "Lucky Vehicle Number Calculator",
+          path: "/lucky-vehicle-number-calculator",
+        },
+        {
+          title: "Friendship Calculator",
+          path: "/friendship-calculator",
+        },
+        {
+          title: "Age Calculator",
+          path: "/age-calculator",
+        },
+        {
+          title: "Mobil Number Numerology Calculator",
+          path: "/mobile-number-numerology-calculator",
+        },
+        {
+          title: "Destiny Number Calculator",
+          path: "/destiny-number-calculator",
+        },
+      ],
+    },
     { title: "Chat with Astrologer", path: "/chat-with-astrologers" },
     { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
-    { title: "Join Live", path: "/audience-live-streaming" },
+    { title: "Join Live", path: "/live" },
+
     { title: "Astromall", path: "/shop" },
     // { title: "Shubhtalk Store", path: "/store" },
     { title: "Blogs", path: "/blog" },
@@ -348,31 +436,35 @@ export default TopBar;
 const NavbarItem = ({ title, path, children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  // const isActive = path && location.pathname === path;
   const isActive = isMenuActive({ title, path, children }, location.pathname);
+
+  const [open, setOpen] = useState(false);
 
   return (
     <li
       className={`${children ? styles.dropdown : ""} ${
         isActive ? styles.active : ""
-      }`}
+      } ${open ? styles.open : ""}`}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
       onClick={!children ? () => navigate(path) : undefined}
     >
-      {/* FIXED ALIGNMENT WRAPPER */}
       <div className={styles.navItemLabel}>
         <PrimaryText size_14>{title}</PrimaryText>
         {children && <span className={styles.arrow}></span>}
       </div>
 
-      {children && (
+      {children && open && (
         <div className={styles.dropdownWrapper}>
           <ul className={styles.dropdownMenu}>
             {children.map((child, idx) => (
               <li
                 key={idx}
-                onClick={() =>
-                  child?.onClick ? child?.onClick() : navigate(child.path)
-                }
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpen(false); //  CLOSE DROPDOWN
+                  child?.onClick ? child.onClick() : navigate(child.path);
+                }}
               >
                 {child.title}
               </li>

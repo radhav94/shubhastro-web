@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import styles from "./MatchMaking.module.scss";
@@ -27,6 +27,20 @@ const isDuplicateKundli = (payload, list) => {
       k.place.trim().toLowerCase() === payload.place.trim().toLowerCase()
   );
 };
+const initialFormData = {
+  boyData: {
+    name: "",
+    dob: "",
+    tob: "",
+    place: { address: "", lat: null, lng: null },
+  },
+  girlData: {
+    name: "",
+    dob: "",
+    tob: "",
+    place: { address: "", lat: null, lng: null },
+  },
+};
 
 const MatchMaking = () => {
   const navigate = useNavigate();
@@ -38,8 +52,8 @@ const MatchMaking = () => {
 
   const [isBoy, setIsBoy] = useState(true);
   const [selectedKundliId, setSelectedKundliId] = useState(null);
-
-  const { data, isLoading } = useGetAllKundlisQuery(undefined, {
+  const prevTokenRef = useRef(null);
+  const { data, isLoading, refetch } = useGetAllKundlisQuery(undefined, {
     skip: !token,
   });
   const [createKundli] = useCreateKundliMutation();
@@ -47,29 +61,45 @@ const MatchMaking = () => {
 
   const savedKundlis = data?.data || [];
 
-  const onDelete = (id) => {
-    deleteKundli(id);
-
-    if (selectedKundliId === id) {
-      setFormData(initialFormData);
-      setSelectedKundliId(null);
+  const onDelete = async (id) => {
+    try {
+      await deleteKundli(id).unwrap();
+  
+      if (selectedKundliId === id) {
+        setSelectedKundliId(null);
+        setFormData(initialFormData);
+        setIsBoy(true);
+      }
+  
+      refetch();
+    } catch (err) {
+      console.error("Delete failed", err);
     }
   };
+  const [formData, setFormData] = useState(initialFormData);
+/* --------------------- TOKEN CHANGE HANDLING ---------------------- */
+useEffect(() => {
+  const prevToken = prevTokenRef.current;
+  // CASE 1: First login (null → token)
+  if (!prevToken && token && refetch) {
+    refetch();
+  }
+  // CASE 2: User switched (token A → token B)
+  if (prevToken && token && prevToken !== token) {
+    setFormData(initialFormData);
+    setSelectedKundliId(null);
+    setIsBoy(true);
+    refetch();
+  }
+  // CASE 3: Logout (token → null)
+  if (prevToken && !token) {
+    setFormData(initialFormData);
+    setSelectedKundliId(null);
+    setIsBoy(true);
+  }
 
-  const [formData, setFormData] = useState({
-    boyData: {
-      name: "",
-      dob: "",
-      tob: "",
-      place: { address: "", lat: null, lng: null },
-    },
-    girlData: {
-      name: "",
-      dob: "",
-      tob: "",
-      place: { address: "", lat: null, lng: null },
-    },
-  });
+  prevTokenRef.current = token;
+}, [token, refetch]);
 
   const [errors, setErrors] = useState({
     boyData: {},
@@ -328,7 +358,7 @@ const MatchMaking = () => {
               : renderForm("girlData", "Girl's Detail")}
 
             <button className={styles.generateBtn} type="submit">
-              Generate Horoscope
+              Match Horoscope
             </button>
           </form>
         </div>

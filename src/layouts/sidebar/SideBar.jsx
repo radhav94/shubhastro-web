@@ -136,12 +136,53 @@ const SideBar = ({ open, onClose }) => {
             },
       ],
     },
+    {
+      title: "Calculators",
+      children: [
+        {
+          title: "Atmakaraka and Darakaraka Calculator",
+          path: "/atmakaraka-and-darakaraka-calculator",
+        },
+        {
+          title: "Numerology Calculator",
+          path: "/name-numerology-calculator",
+        },
+        {
+          title: "Sun Sign Calculator",
+          path: "/sun-sign-calculator",
+        },
+        {
+          title: "Rising Sign Calculator / Ascendant Calculator",
+          path: "/rising-ascendant-sign-calculator",
+        },
+        {
+          title: "Rashi Calculator",
+          path: "/rashi-moon-sign-calculator",
+        },
+        {
+          title: "Dasha Calculator",
+          path: "/dasha-calculator",
+        },
+        {
+          title: "Mangal Dosha Calculator",
+          path: "/mangal-kuja-dosha-calculator",
+        },
+        {
+          title: "Shani Sade Sati Calculator",
+          path: "/shani-sade-sati-calculator",
+        },
+        {
+          title: "Kaal Sarp Dosh Calculator",
+          path: "/kaal-sarp-dosh-calculator",
+        },
+      ],
+    },
   ];
 
   const BOTTOM_MENU = [
     { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
     { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
-    { title: "Join Live", path: "/audience-live-streaming" },
+    { title: "Join Live", path: "/live" },
     { title: "Astromall", path: "/shop" },
     { title: "Blogs", path: "/blog" },
     { title: "Recharge", path: "/recharge" },
@@ -214,7 +255,9 @@ const SideBar = ({ open, onClose }) => {
           }`}
           onClick={() => toggleDropdown(index)}
         >
-          <span>{typeof item.title === "string" ? item.title : item.title}</span>
+          <span>
+            {typeof item.title === "string" ? item.title : item.title}
+          </span>
           {openIndex === index ? (
             <FiChevronUp className={styles.chevron} />
           ) : (
@@ -245,7 +288,11 @@ const SideBar = ({ open, onClose }) => {
   };
 
   const renderUserProfile = (content) => {
-    if (content && content.props && content.props.className?.includes("userInfo")) {
+    if (
+      content &&
+      content.props &&
+      content.props.className?.includes("userInfo")
+    ) {
       return (
         <div className={styles.userInfo}>
           <div className={styles.userAvatar}>
@@ -316,7 +363,9 @@ const SideBar = ({ open, onClose }) => {
 
           {/* Bottom Menu Items */}
           <ul className={styles.menuList}>
-            {BOTTOM_MENU.map((item, index) => renderMenuItem(item, index, true))}
+            {BOTTOM_MENU.map((item, index) =>
+              renderMenuItem(item, index, true)
+            )}
           </ul>
 
           {/* Divider */}

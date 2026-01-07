@@ -270,8 +270,9 @@ $font-primary: "Poppins", sans-serif;
 .dropdownWrapper {
   position: absolute;
   top: 120%;
-  left: calc(50% - 90px);
-  min-width: 180px;
+  left: 50%; // 🔥 center anchor
+  transform: translateX(-50%) translateY(10px); // 🔥 true centering
+  width: max-content;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 14px;
   border: 1px solid rgba(0, 0, 0, 0.05);
@@ -279,18 +280,30 @@ $font-primary: "Poppins", sans-serif;
   display: block;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
   opacity: 0;
-  transform: translateY(10px);
   pointer-events: none;
   transition: all 0.25s ease;
   z-index: 999;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  max-height: 300px;
+  overflow-y: scroll;
+
   ul {
     gap: 0;
   }
 }
+.dropdownWrapper::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dropdownWrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+}
 
 .dropdown:hover .dropdownWrapper {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0); //
   pointer-events: auto;
 }
 

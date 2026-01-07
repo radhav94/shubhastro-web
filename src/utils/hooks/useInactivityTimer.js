@@ -5,7 +5,7 @@ export const useInactivityTimer = (timeout = 120000, isPaused = false) => {
   const timerRef = useRef(null);
 
   const resetTimer = () => {
-    if (isPaused || isInactive) return;
+    if (isPaused) return;
 
     setIsInactive(false);
     clearTimeout(timerRef.current);

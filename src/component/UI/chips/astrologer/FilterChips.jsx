@@ -1,15 +1,36 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "./FilterChips.module.scss";
 import { useLazyFilterAstrologersQuery } from "../../../../redux/api/astrologer/astrologerApi";
 
-const FilterChips = ({ onSelect, onApplyFilters,isActiveType }) => {
+const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }) => {
   const [triggerFilter, { isLoading }] = useLazyFilterAstrologersQuery();
+
+  const [active, setActive] = useState("All"); 
+  const [searchText, setSearchText] = useState("");
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const [selectedSkills, setSelectedSkills] = useState([]);
+  const [experties, setEexperties] = useState("");
+  const [selectedGender, setSelectedGender] = useState("");
+  const [selectedSort, setSelectedSort] = useState("");
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const loadingMoreRef = useRef(false); // ✅ track loading state in scroll
+  const pageRef = useRef(page); // ✅ track current page in scroll
+
+  const [activeModalTab, setActiveModalTab] = useState("Skill");
+
+  const openFilterModal = () => {
+    setFilterModalOpen(true);
+    setActiveModalTab("Skill");
+  };
 
   const filterButtons = [
     { name: "All", icon: "📋" },
+    { name: "Online", icon: "🟢" },
     { name: "Tarot", icon: "🔮" },
     { name: "Palmistry", icon: "🔮" },
-    { name: "numerology", icon: "🔢" },
+    { name: "Numerology", icon: "🔢" },
     { name: "Face Reading", icon: "🔢" },
     { name: "Vedic Astrology", icon: "🧘" },
     { name: "Love", icon: "🧘" },
@@ -23,7 +44,7 @@ const FilterChips = ({ onSelect, onApplyFilters,isActiveType }) => {
     { name: "Remedies", icon: "🔮" },
     { name: "Parents", icon: "🔮" },
     { name: "Palm reader", icon: "✋" },
-    { name: "tantra-magic", icon: "✨" },
+    { name: "Tantra-magic", icon: "✨" },
   ];
 
   const skills = [
@@ -44,74 +65,111 @@ const FilterChips = ({ onSelect, onApplyFilters,isActiveType }) => {
   const genders = ["Male", "Female"];
   const sorting = ["Sort By Price", "Sort By Rating"];
 
-  const [active, setActive] = useState("All"); // Global active filter/search
-  const [searchText, setSearchText] = useState("");
-  const [filterModalOpen, setFilterModalOpen] = useState(false);
-
-  const [selectedSkills, setSelectedSkills] = useState([]);
-  const [experties, setEexperties] = useState("");
-  const [selectedGender, setSelectedGender] = useState("");
-  const [selectedSort, setSelectedSort] = useState("");
-
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-
-  // ✅ Modal tab state
-  const [activeModalTab, setActiveModalTab] = useState("Skill");
-
-  // Open modal with default Skill tab
-  const openFilterModal = () => {
-    setFilterModalOpen(true);
-    setActiveModalTab("Skill");
-  };
-
-  const handleClick = (item) => {
-    setActive(item);
-    setPage(1);
-    setHasMore(true);
-  
-    // 🔹 RESET previous filters
-    setEexperties("");          
-    setSelectedSkills([]);
-    setSelectedGender("");
-    setSelectedSort("");
-  
-    if (item === "All") {
-      // ❌ unset speciality completely
-      onSelect?.(null);
-    }
-  
-    // ✅ set new speciality
-    setEexperties(item);
-    applyFilters({
-      pageNo: 1,
-      experties: item,
-      ignoreSearch: true,
-      append: false,
-    });
-  };
-  
-
+  // -------------------------
+  // SCROLL HANDLER
+  // -------------------------
   useEffect(() => {
-    if (active === "All") return;
-
     const handleScroll = () => {
-      if (loadingMore || isLoading || !hasMore) return;
+      if (loadingMoreRef.current || isLoading || !hasMore) return;
 
       const scrollTop = window.scrollY;
       const windowHeight = window.innerHeight;
       const fullHeight = document.documentElement.scrollHeight;
 
       if (scrollTop + windowHeight >= fullHeight - 200) {
-        applyFilters({ pageNo: page + 1, append: true });
+        loadMore();
       }
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [active, page, hasMore, loadingMore, isLoading]);
+  }, [hasMore, isLoading]);
 
+  const loadMore = () => {
+    if (!hasMore || loadingMoreRef.current) return;
+
+    const nextPage = pageRef.current + 1;
+    applyFilters({ pageNo: nextPage, append: true });
+  };
+
+  // -------------------------
+  // APPLY FILTERS
+  // -------------------------
+  const applyFilters = async ({
+    ignoreSearch = false,
+    searchValue,
+    category = "filter",
+    experties: expertiesValue,
+    pageNo = 1,
+    append = false,
+    skills,
+  } = {}) => {
+    const finalSearchText = ignoreSearch ? "" : (searchValue ?? searchText);
+    const finalExperties = expertiesValue ?? experties;
+    const finalSkills = skills ?? selectedSkills;
+
+    const isOnline = finalExperties === "Online";
+
+    try {
+      loadingMoreRef.current = true;
+
+      const response = await triggerFilter({
+        searchText: finalSearchText,
+        selectedSkills: finalSkills,
+        experties: isOnline ? null : finalExperties,
+        selectedSort,
+        selectedGender,
+        page: pageNo,
+        limit: 9,
+        ...(isOnline && { isActive: true }), 
+        isActiveType,
+      }).unwrap();
+
+      onApplyFilters?.({
+        category,
+        search: finalSearchText,
+        result: response?.data || [],
+        append,
+      });
+
+      setPage(pageNo);
+      pageRef.current = pageNo; // ✅ update ref for scroll
+      setHasMore(response?.data?.length >= 9);
+      setFilterModalOpen(false);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      loadingMoreRef.current = false;
+    }
+  };
+
+  // -------------------------
+  // URL-based Online default
+  // -------------------------
+  useEffect(() => {
+    if (active !== "All") return; // user already clicked filter
+    if (!isOnlineFromURL) return;
+
+    setActive("Online");
+    setPage(1);
+    pageRef.current = 1;
+    setHasMore(true);
+    setEexperties("Online");
+    setSelectedSkills([]);
+    setSelectedGender("");
+    setSelectedSort("");
+
+    applyFilters({
+      pageNo: 1,
+      experties: "Online",
+      ignoreSearch: true,
+      append: false,
+    });
+  }, [isOnlineFromURL]);
+
+  // -------------------------
+  // SEARCH HANDLER
+  // -------------------------
   const handleSearchClick = (e) => {
     const value = e.target.value;
     setSearchText(value);
@@ -119,7 +177,7 @@ const FilterChips = ({ onSelect, onApplyFilters,isActiveType }) => {
     if (value.length > 2) {
       setActive("search");
       clearAll();
-      applyFilters({ searchValue: value, category: "search" });
+      applyFilters({ searchValue: value, category: "search", pageNo: 1 });
     } else if (value.length === 0) {
       handleClick("All");
     }
@@ -128,10 +186,9 @@ const FilterChips = ({ onSelect, onApplyFilters,isActiveType }) => {
   const applyFiltersClick = () => {
     setActive("filter");
     setPage(1);
+    pageRef.current = 1;
     setHasMore(true);
-  
-    // ❗ do NOT call onApplyFilters here
-    // applyFilters will handle API + append logic
+
     applyFilters({
       ignoreSearch: true,
       category: "filter",
@@ -139,7 +196,6 @@ const FilterChips = ({ onSelect, onApplyFilters,isActiveType }) => {
       append: false,
     });
   };
-  
 
   const toggleValue = (value, setter, state) => setter(state === value ? "" : value);
 
@@ -157,51 +213,51 @@ const FilterChips = ({ onSelect, onApplyFilters,isActiveType }) => {
     setSelectedSort("");
   };
 
-  const applyFilters = async ({
-    ignoreSearch = false,
-    searchValue,
-    category = "filter",
-    experties: expertiesValue,
-    pageNo = 1,
-    append = false,
-    skills, // ✅ accept skills explicitly
-  } = {}) => {
-    const finalSearchText = ignoreSearch ? "" : (searchValue ?? searchText);
-    const finalExperties = expertiesValue ?? experties;
-    const finalSkills = skills ?? selectedSkills; // ✅ ARRAY
+  const handleClick = (item) => {
+    // Set active chip
+    setActive(item);
+    setPage(1);
+    pageRef.current = 1;
+    setHasMore(true);
   
-    try {
-      setLoadingMore(true);
+    // Reset filters
+    setEexperties("");
+    setSelectedSkills([]);
+    setSelectedGender("");
+    setSelectedSort("");
   
-      const response = await triggerFilter({
-        searchText: finalSearchText,
-        selectedSkills: finalSkills, // ✅ ARRAY (RTK will join)
-        experties: finalExperties,
-        selectedSort,
-        selectedGender,
-        page: pageNo,
-        limit: 9,
-        isActiveType
-      }).unwrap();
+    if (item === "All") {
+      // Only trigger onSelect callback, do NOT send isActive
+      onSelect?.(null);
   
-      onApplyFilters?.({
-        category,
-        search: finalSearchText,
-        result: response?.data || [],
-        append,
+      // Call API with minimal params for "All"
+      applyFilters({
+        pageNo: 1,
+        experties: null,
+        ignoreSearch: true,
+        append: false,
       });
   
-      setPage(pageNo);
-      setHasMore(response?.data?.length >= 9);
-      setFilterModalOpen(false);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoadingMore(false);
+      return; // Stop here to prevent other triggers
     }
+  
+    // For other chips, set experties and call API
+    setEexperties(item);
+  
+    applyFilters({
+      pageNo: 1,
+      experties: item,
+      ignoreSearch: true,
+      append: false,
+      ...(item === "Online" ? { isActive: true } : {}), // Only send isActive for Online
+    });
   };
   
+  
 
+  // -------------------------
+  // RENDER
+  // -------------------------
   return (
     <>
       {/* SEARCH + FILTER BUTTONS */}
@@ -220,7 +276,7 @@ const FilterChips = ({ onSelect, onApplyFilters,isActiveType }) => {
         <button
           key={"filter"}
           className={`${styles.chip} ${active === "filter" ? styles.activeChip : ""}`}
-          onClick={openFilterModal}
+          onClick={() => setFilterModalOpen(true)}
         >
           Filter
         </button>
@@ -320,9 +376,7 @@ const FilterChips = ({ onSelect, onApplyFilters,isActiveType }) => {
               <button
                 className={styles.resetBtn}
                 onClick={() => {
-                  setSelectedSkills([]);
-                  setSelectedGender("");
-                  setSelectedSort("");
+                  clearAll();
                   handleClick("All");
                 }}
               >

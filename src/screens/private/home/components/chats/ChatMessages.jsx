@@ -27,20 +27,28 @@ const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`${styles.msgBubble} ${msg.isSender ? styles.senderBubble : styles.receiverBubble
-              }`}
+            className={`${styles.msgBubble} ${
+              msg.isSender ? styles.senderBubble : styles.receiverBubble
+            }`}
           >
             <PrimaryText size={14} color={"#111"}>
               {(() => {
                 try {
-                  const voiceMessage = JSON.parse(msg.text);
-                  return (<VoiceMessage
-                    url={voiceMessage.audioUrl}
-                    duration={voiceMessage.duration}
-                    time={msg.time}
-                    isSender={msg.isSender}
-                  />);
-
+                  const parsed = JSON.parse(msg.text);
+                  // ONLY handle voice messages
+                  if (parsed?.type === "voice") {
+                    return (
+                      <VoiceMessage
+                        url={parsed.audioUrl}
+                        duration={parsed.duration}
+                        time={msg.time}
+                        isSender={msg.isSender}
+                      />
+                    );
+                  }
+                  if (parsed?.type === "file") {
+                    return null;
+                  }
                 } catch {
                   if (msg.text == null) {
                     return msg?.text;
