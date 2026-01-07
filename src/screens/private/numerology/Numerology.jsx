@@ -33,7 +33,7 @@ const NumerologyWeb = () => {
           AI-powered clarity designed for the modern world.
         </PrimaryText>
 
-        <button className={styles.primaryBtn}>Start Your Reading</button>
+        {/* <button className={styles.primaryBtn}>Start Your Reading</button> */}
       </section>
 
       {/* FEATURE CARDS */}
@@ -78,20 +78,19 @@ const NumerologyWeb = () => {
       </section> */}
 
       <section className={styles.features}>
-  <div
-    className={styles.premiumCard}
-    onClick={() => navigate(PATH.privateRoutes.LIFE_PATH.path)}
-  >
-    <div className={styles.cardIcon}>🔮</div>
-    <PrimaryText size_20 isSemiBold>
-      Life Path Insights
-    </PrimaryText>
-    <PrimaryText size_14 color="#6b6357">
-      Discover your purpose, strengths, and spiritual alignment.
-    </PrimaryText>
-  </div>
-</section>
-
+        <div
+          className={styles.premiumCard}
+          onClick={() => navigate(PATH.privateRoutes.LIFE_PATH.path)}
+        >
+          <div className={styles.cardIcon}>🔮</div>
+          <PrimaryText size_20 isSemiBold>
+            Life Path Insights
+          </PrimaryText>
+          <PrimaryText size_14 color="#6b6357">
+            Discover your purpose, strengths, and spiritual alignment.
+          </PrimaryText>
+        </div>
+      </section>
 
       {/* DEEP INSIGHT SECTION */}
       <section className={styles.deepSection}>
@@ -137,7 +136,7 @@ const NumerologyWeb = () => {
       </section>
 
       {/* CTA SECTION */}
-      <section className={styles.cta}>
+      {/* <section className={styles.cta}>
         <PrimaryText size_28 isBold isCenter>
           Begin Your Transformation
         </PrimaryText>
@@ -146,7 +145,7 @@ const NumerologyWeb = () => {
         </PrimaryText>
 
         <button className={styles.primaryBtnLarge}>Calculate My Numbers</button>
-      </section>
+      </section> */}
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setNumerologyPayload } from "../../../../redux/kundliform/formSlice";
 import { PATH } from "../../../../utils/routes/Paths";
+import { formatted, TODAY } from "../../../../utils/dateFormat/date";
 
 const LifePathForm = () => {
   const [fullName, setFullName] = useState("");
@@ -13,43 +14,27 @@ const LifePathForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // const handleSubmit = () => {
-  //   if (!fullName.trim() || !dob.trim()) {
-  //     alert("Please enter name and date of birth");
-  //     return;
-  //   }
-
-  //   dispatch(
-  //     setNumerologyPayload({
-  //       name: fullName,
-  //       date: dob, 
-  //     })
-  //   );
-
-  //   navigate(PATH.privateRoutes.LIFE_PATH_DETAIL.path);
-  // };
-
   const handleSubmit = () => {
-  if (!fullName.trim() || !dob.trim()) {
-    // alert();
-    Toast.error("Please enter name and date of birth");
-    return;
-  }
+    if (!fullName.trim() || !dob.trim()) {
+      // alert();
+      Toast.error("Please enter name and date of birth");
+      return;
+    }
 
-  // Convert yyyy-mm-dd → dd/mm/yyyy
-  const [year, month, day] = dob.split("-");
-  const formattedDate = `${day}/${month}/${year}`;
+    // Convert yyyy-mm-dd → dd/mm/yyyy
+    const [year, month, day] = dob.split("-");
+    const formattedDate = `${day}/${month}/${year}`;
+    const formatName = fullName.replaceAll(" ", "");
 
-  dispatch(
-    setNumerologyPayload({
-      name: fullName,
-      date: formattedDate,
-    })
-  );
+    dispatch(
+      setNumerologyPayload({
+        name: formatName,
+        date: formattedDate,
+      })
+    );
 
-  navigate(PATH.privateRoutes.LIFE_PATH_DETAIL.path);
-};
-
+    navigate(PATH.privateRoutes.LIFE_PATH_DETAIL.path);
+  };
 
   return (
     <div className={styles.pageWrapper}>
@@ -78,7 +63,12 @@ const LifePathForm = () => {
           Tell Us About Yourself
         </PrimaryText>
 
-        <PrimaryText size_16 isCenter color="#6a6155" className={styles.cardSub}>
+        <PrimaryText
+          size_16
+          isCenter
+          color="#6a6155"
+          className={styles.cardSub}
+        >
           Your cosmic journey begins with these sacred details
         </PrimaryText>
 
@@ -108,6 +98,8 @@ const LifePathForm = () => {
             placeholder="DD/MM/YYYY"
             className={styles.input}
             value={dob}
+            max={TODAY}
+            onClick={(e) => e.target.showPicker?.()}
             onChange={(e) => setDob(e.target.value)}
           />
         </div>
@@ -118,12 +110,7 @@ const LifePathForm = () => {
         </button>
       </div>
 
-      <PrimaryText
-        size_16
-        isCenter
-        color="#444"
-        className={styles.footerText}
-      >
+      <PrimaryText size_16 isCenter color="#444" className={styles.footerText}>
         Your information remains private and sacred
       </PrimaryText>
     </div>

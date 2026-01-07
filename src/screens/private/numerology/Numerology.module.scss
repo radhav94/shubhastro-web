@@ -7,7 +7,6 @@
 /* HERO */
 .hero {
   text-align: center;
-  padding: 90px 20px 130px;
   position: relative;
 }
 
@@ -17,7 +16,11 @@
   left: 50%;
   width: 650px;
   height: 650px;
-  background: radial-gradient(circle, rgba(255,210,140,0.7) 0%, rgba(245,241,233,0) 70%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 210, 140, 0.7) 0%,
+    rgba(245, 241, 233, 0) 70%
+  );
   transform: translateX(-50%);
   z-index: -1;
 }
@@ -44,14 +47,14 @@
 
 .primaryBtn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* FEATURES */
 .features {
   display: flex;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 0 20px;
 }
 
 .premiumCard {
@@ -85,13 +88,12 @@
   }
 }
 
-
 .card {
   width: 260px;
   background: #fff;
   padding: 26px;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   text-align: center;
   transition: 0.2s ease;
 }
@@ -135,7 +137,7 @@
   background: white;
   padding: 18px 20px;
   border-radius: 14px;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.07);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.07);
   justify-content: center;
 }
 
@@ -159,5 +161,5 @@
 
 .primaryBtnLarge:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
 }

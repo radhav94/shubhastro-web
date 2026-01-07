@@ -1,3 +1,4 @@
+import { TODAY } from "../../../../utils/dateFormat/date";
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import styles from "./AstroBirthForm.module.scss";
 
@@ -53,6 +54,7 @@ const AstroBirthForm = ({
           type="date"
           value={dob}
           onChange={(e) => onChange("dob", e.target.value)}
+          max={TODAY}
           onClick={(e) => e.target.showPicker?.()}
         />
         {errors?.dob && <p className={styles.error}>{errors.dob}</p>}

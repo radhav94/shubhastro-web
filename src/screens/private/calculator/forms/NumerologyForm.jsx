@@ -1,3 +1,4 @@
+import { TODAY } from "../../../../utils/dateFormat/date";
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import styles from "./NumerologyForm.module.scss";
 
@@ -36,6 +37,7 @@ const NumerologyForm = ({
         </label>
         <input
           type="date"
+          max={TODAY}
           value={dob}
           onChange={(e) => onChange("dob", e.target.value)}
           onClick={(e) => e.target.showPicker?.()}

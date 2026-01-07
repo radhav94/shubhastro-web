@@ -105,8 +105,25 @@ const TalkToAstrologer = () => {
   const [activeCallAstro, setActiveCallAstro] = useState(null);
   const [callType, setCallType] = useState(null); // audio | video
 
-  const { activeCall, setActiveCall, setWaitingList: setCallWaitingList, setActiveCallRoomId, resetCallFlow, setLastCallType, setLastSelectedKundli, setLastRequestedAstro: setLastRequestedCallAstro } = useCall();
-  const {setActiveChat, setWaitingList, WaitingList, resetChatFlow, setActiveChatRoomId, setLastRequestedAstro, setChatSeconds } = useChat();
+  const {
+    activeCall,
+    setActiveCall,
+    setWaitingList: setCallWaitingList,
+    setActiveCallRoomId,
+    resetCallFlow,
+    setLastCallType,
+    setLastSelectedKundli,
+    setLastRequestedAstro: setLastRequestedCallAstro,
+  } = useCall();
+  const {
+    setActiveChat,
+    setWaitingList,
+    WaitingList,
+    resetChatFlow,
+    setActiveChatRoomId,
+    setLastRequestedAstro,
+    setChatSeconds,
+  } = useChat();
 
   // ✅ Ref for current calling astrologer (no re-render)
   const activeCallAstroRef = useRef(null);
@@ -396,7 +413,10 @@ const TalkToAstrologer = () => {
 
     // 💰 Balance check
     const res = await getBalance({ astrologerId: astro._id, type: "call" });
-    if (!res?.data?.data?.status || res?.data?.data?.availableAmount < res?.data?.data?.requiredAmount) {
+    if (
+      !res?.data?.data?.status ||
+      res?.data?.data?.availableAmount < res?.data?.data?.requiredAmount
+    ) {
       setSelectedAstrologer(astro);
       setOpenModal((prev) => ({ ...prev, recharge: true }));
       return;
@@ -438,21 +458,21 @@ const TalkToAstrologer = () => {
     setLastRequestedCallAstro(astro);
     //Check if user has minimum required balance
     // 💰 Balance check
-    const result = await getBalance({ astrologerId : astro?._id, type: "call" });
+    const result = await getBalance({ astrologerId: astro?._id, type: "call" });
     if (result.data.data.status === false) {
       setOpenModal((prev) => ({ ...prev, recharge: true }));
       return;
     }
 
     //Check if astro is online
-    if(!astro?.isActive) {
-      Toast.error("Astrologer is not online")
+    if (!astro?.isActive) {
+      Toast.error("Astrologer is not online");
       return;
     }
 
     setCallType(type);
     openKundliPopup();
-  }
+  };
 
   useEffect(() => {
     if (!userIdLocal || isRecommendModalOpen) return;
@@ -472,7 +492,7 @@ const TalkToAstrologer = () => {
 
     const handleCallRoom = (data) => {
       setCallRoomId(data?.roomId);
-      setActiveCallRoomId(data?.roomId)
+      setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
     };
 
@@ -528,24 +548,24 @@ const TalkToAstrologer = () => {
           astrologerId: astrologerId,
           kundliId,
           astrologerName: data?.astrologer?.firstName || "",
-          remainingTime: data?.remainingTime
+          remainingTime: data?.remainingTime,
         });
-        setChatSeconds(Number(data?.remainingTime)*60);
+        setChatSeconds(Number(data?.remainingTime) * 60);
 
         navigate(`/chat-with-astrologers/${astrologerId}`, {
-        state: {
-          userId: userId,
-          astrologerId,
-          fullName: astro.firstName,
-          roomId,
-          isUserSide: true,
-          kundliId,
-          astrologerName: data?.astrologer?.firstName || "",
-          astroID: data?.astrologer?.astrologer_ID
-        },
-      });
-      } catch(e) {
-        console.log('e', e)
+          state: {
+            userId: userId,
+            astrologerId,
+            fullName: astro.firstName,
+            roomId,
+            isUserSide: true,
+            kundliId,
+            astrologerName: data?.astrologer?.firstName || "",
+            astroID: data?.astrologer?.astrologer_ID,
+          },
+        });
+      } catch (e) {
+        console.log("e", e);
         Toast.error("Failed to start chat");
       }
     };
@@ -617,7 +637,7 @@ const TalkToAstrologer = () => {
       </PrimaryText>
 
       <div className="pt-4" />
-      <Title title="Trial Offer ( 3 left )" showDivider />
+      {/* <Title title="Trial Offer ( 3 left )" showDivider /> */}
 
       <FilterChips
         onSelect={handleSelect}
