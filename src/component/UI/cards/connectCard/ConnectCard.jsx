@@ -17,7 +17,7 @@ const ConnectCard = () => {
           Talk to Astrologer
         </Link>
 
-        <Link to="/talk-to-astrologers" className={styles.btn}>
+        <Link to="/chat-with-astrologers" className={styles.btn}>
           <BsChatDots className={styles.icon} />
           Chat with Astrologer
         </Link>
