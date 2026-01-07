@@ -103,10 +103,9 @@ const TalkToAstrologer = () => {
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
   const [activeCallAstro, setActiveCallAstro] = useState(null);
-  const [waitingPopup, setWaitingPopup] = useState(false); // ⭐ Added popup state
   const [callType, setCallType] = useState(null); // audio | video
 
-  const { activeCall, setActiveCall } = useCall();
+  const { activeCall, setActiveCall, setWaitingList: setCallWaitingList, setActiveCallRoomId, resetCallFlow, setLastCallType, setLastSelectedKundli, setLastRequestedAstro: setLastRequestedCallAstro } = useCall();
   const {setActiveChat, setWaitingList, WaitingList, resetChatFlow, setActiveChatRoomId, setLastRequestedAstro, setChatSeconds } = useChat();
 
   // ✅ Ref for current calling astrologer (no re-render)
@@ -313,6 +312,8 @@ const TalkToAstrologer = () => {
     setKundliModalOpen(false);
 
     if (!kundli?._id) return Toast.error("Kundli not selected properly");
+    kundliRef.current = kundli._id;
+    setLastSelectedKundli(kundli); // Store the selected Kundli in context
     if (!selectedAstrologer?._id) return Toast.error("Astrologer not selected");
     if (!userIdLocal) return Toast.error("User ID Missing");
 
@@ -325,6 +326,7 @@ const TalkToAstrologer = () => {
         navigate("/login", { state: { from: location.pathname } });
         return;
       }
+      if (!isChatMode) return initiateCall(astro, callType);
 
       // ✅ Store active call info
       activeCallAstroRef.current = astro;
@@ -371,7 +373,6 @@ const TalkToAstrologer = () => {
   };
 
   const resetCallState = () => {
-    setWaitingPopup(false);
     setCallRoomId(null);
     setChatRoomId(null);
     setCallType(null);
@@ -383,7 +384,7 @@ const TalkToAstrologer = () => {
     setActiveCall(null);
   };
 
-  const initiateCall = (astro, type) => {
+  const initiateCall = async (astro, type) => {
     // 🔐 Auth check
     if (!token) {
       navigate("/login", { state: { from: location.pathname } });
@@ -395,8 +396,8 @@ const TalkToAstrologer = () => {
     if (!userIdLocal) return Toast.error("User ID missing");
 
     // 💰 Balance check
-    const price = astro?.price?.amount || 0;
-    if (balance < price) {
+    const res = await getBalance({ astrologerId: astro._id, type: "call" });
+    if (!res?.data?.data?.status || res?.data?.data?.availableAmount < res?.data?.data?.requiredAmount) {
       setSelectedAstrologer(astro);
       setOpenModal((prev) => ({ ...prev, recharge: true }));
       return;
@@ -411,13 +412,14 @@ const TalkToAstrologer = () => {
     activeCallAstroRef.current = astro;
     setActiveCallAstro(astro);
     setCallType(type);
-    setWaitingPopup(true);
+    setLastCallType(type); // Store the call type in context
+    setCallWaitingList(5); // Show waiting for call
 
     // 🔌 Ensure socket connection
     // connectSocket();
 
     // 🚀 Create call room
-    voiceSocket.emit("create_call_room", {
+    voiceSocket.emit("call:initiate", {
       userId: userIdLocal,
       astrologerId: astro._id,
       type, // "audio" | "video"
@@ -428,9 +430,30 @@ const TalkToAstrologer = () => {
     initiateCall(astro, "audio");
   };
 
-  const handleVideoCall = (astro) => {
-    initiateCall(astro, "video");
-  };
+  // const handleVideoCall = (astro) => {
+  //   initiateCall(astro, "video");
+  // };
+
+  const handleVideoStart = async (astro) => {
+    setSelectedAstrologer(astro);
+    setLastRequestedCallAstro(astro);
+    //Check if user has minimum required balance
+    // 💰 Balance check
+    const result = await getBalance({ astrologerId : astro?._id, type: "call" });
+    if (result.data.data.status === false) {
+      setOpenModal((prev) => ({ ...prev, recharge: true }));
+      return;
+    }
+
+    //Check if astro is online
+    if(!astro?.isActive) {
+      Toast.error("Astrologer is not online")
+      return;
+    }
+
+    setCallType("video");
+    openKundliPopup();
+  }
 
   useEffect(() => {
     if (!userIdLocal || isRecommendModalOpen) return;
@@ -438,7 +461,7 @@ const TalkToAstrologer = () => {
     /* Room ready event */
     const handleReturnRoom = ({ roomId }) => {
       setCallRoomId(roomId);
-      setWaitingPopup(true);
+      setCallWaitingList(5); // Show waiting for call
     };
 
     const handleChatRoom = (data) => {
@@ -448,9 +471,14 @@ const TalkToAstrologer = () => {
       setWaitingList(data?.waitingTime || 2);
     };
 
-    const handleCallAccepted = async ({ roomId, token, type }) => {
-      setWaitingPopup(false);
+    const handleCallRoom = (data) => {
+      setCallRoomId(data?.roomId);
+      setActiveCallRoomId(data?.roomId)
+      setCallWaitingList(data?.waitingTime || 5);
+    };
 
+    const handleCallAccepted = async ({ roomId, token, type }) => {
+      resetCallFlow();
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
 
@@ -475,7 +503,7 @@ const TalkToAstrologer = () => {
           kundliId,
         });
       } catch {
-        Toast.error("Failed to start chat");
+        Toast.error("Failed to start call");
       }
     };
 
@@ -531,6 +559,7 @@ const TalkToAstrologer = () => {
       Toast.error(errorMsg);
       resetCallState();
       resetChatFlow();
+      resetCallFlow();
     };
 
     /* ERROR */
@@ -554,21 +583,27 @@ const TalkToAstrologer = () => {
 
     // Attach events
     voiceSocket.on("chat:room", handleChatRoom);
+    voiceSocket.on("call:room", handleCallRoom);
     voiceSocket.on("return_call_room", handleReturnRoom);
     voiceSocket.on("call_accepted", handleCallAccepted);
+    voiceSocket.on("call:accepted", handleCallAccepted);
     voiceSocket.on("chat:accepted", handleChatAccepted);
     voiceSocket.on("chat:rejected", handleCallRejected);
     voiceSocket.on("call_rejected", handleCallRejected);
+    voiceSocket.on("call:rejected", handleCallRejected);
     voiceSocket.on("error", handleSocketError);
     voiceSocket.on("call_ended", handleCallEnded);
 
     return () => {
       voiceSocket.off("chat:room", handleChatRoom);
+      voiceSocket.off("call:room", handleCallRoom);
       voiceSocket.off("return_call_room", handleReturnRoom);
       voiceSocket.off("call_accepted", handleCallAccepted);
+      voiceSocket.off("call:accepted", handleCallAccepted);
       voiceSocket.off("chat:accepted", handleChatAccepted);
       voiceSocket.off("chat:rejected", handleCallRejected);
       voiceSocket.off("call_rejected", handleCallRejected);
+      voiceSocket.off("call:rejected", handleCallRejected);
       voiceSocket.off("error", handleSocketError);
       voiceSocket.off("call_ended", handleCallEnded);
     };
@@ -581,34 +616,6 @@ const TalkToAstrologer = () => {
         {activeType === "chat" ? "Chat With " : "Talk To "}Best Astrologers
         Online
       </PrimaryText>
-
-      {waitingPopup && (
-        // <WaitingModal callRoomId={callRoomId} resetCallState={resetCallState} />
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContainer}>
-            <PrimaryText size_18 isSemiBold>
-              ⏳ Connecting to astrologer…
-            </PrimaryText>
-            <PrimaryText size_14 color="#777">
-              Please wait while astrologer accepts the call
-            </PrimaryText>
-
-            <div className={styles.modalButtons}>
-              <button
-                className={styles.rejectBtn}
-                onClick={() => {
-                  if (callRoomId) {
-                    voiceSocket.emit("cancel_call", { roomId: callRoomId });
-                  }
-                  resetCallState();
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="pt-4" />
       <Title title="Trial Offer ( 3 left )" showDivider />
@@ -631,7 +638,7 @@ const TalkToAstrologer = () => {
               onChat={() => handleChatStart(astro)}
               onProfile={() => onProfile(astro)}
               onAudioCall={() => handleAudioCall(astro)}
-              onVideoCall={() => handleVideoCall(astro)}
+              onVideoCall={() => handleVideoStart(astro)}
             />
           </div>
         ))}

@@ -7,7 +7,8 @@ export const FooterWaiting = () => {
   const { waitingList, resetChatFlow, activeChatRoomId, setChatApproval, setWaitingList, lastRequestedAstro } = useChat();
 
   useEffect(() => {
-    const handleAstrologerIncoming = () => {
+    const handleAstrologerIncoming = (data) => {
+      if(data.type != "chat") return;
       setChatApproval(true);
       setWaitingList(null);
     }
