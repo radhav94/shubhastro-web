@@ -114,7 +114,7 @@ const PanchangInputCard = ({ imageSrc, title, onTap }) => {
             {/*  Location (custom search) */}
             <div className={styles.inputControl}>
               <label htmlFor="location" className={styles.label}>
-                Location <span className={styles.requiredMark}>*</span>
+                Location
               </label>
               <LocationSearch
                 value={formData.location}

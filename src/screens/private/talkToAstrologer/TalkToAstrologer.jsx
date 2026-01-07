@@ -330,7 +330,7 @@ const TalkToAstrologer = () => {
 
       // ✅ Store active call info
       activeCallAstroRef.current = astro;
-      setWaitingPopup(true);
+      // setWaitingPopup(true);
 
       // 🚀 Create call room
       voiceSocket.emit("chat:initiate", {
@@ -466,7 +466,7 @@ const TalkToAstrologer = () => {
     const handleChatRoom = (data) => {
       setChatRoomId(data?.roomId);
       setActiveChatRoomId(data?.roomId);
-      setWaitingPopup(false);
+      // setWaitingPopup(false);
       setWaitingList(data?.waitingTime || 2);
     };
 

@@ -34,30 +34,6 @@ const TopBar = () => {
 
   const handleLogout = () => {
     dispatch(clearFormAndCache());
-    const role = localStorage.getItem("shubhtalk_role");
-
-    if (role === "ASTROLOGER") {
-      localStorage.removeItem("shubhtalk_astro_token");
-      localStorage.removeItem("shubhtalk_astro_id");
-    }
-
-    if (role === "CUSTOMER") {
-      localStorage.removeItem("shubhtalk_customer_token");
-      localStorage.removeItem("shubhtalk_customer_id");
-      localStorage.removeItem("shubhtalk_customer_wallet");
-    }
-    localStorage.removeItem("shubhtalk_role");
-
-    localStorage.removeItem("atmakaraka-and-darakaraka");
-    localStorage.removeItem("dasha_calc");
-    localStorage.removeItem("kaal_sarp");
-    localStorage.removeItem("mangal_dosha");
-    localStorage.removeItem("numerology_report");
-    localStorage.removeItem("rashi_moon_sign");
-    localStorage.removeItem("rising_sign");
-    localStorage.removeItem("shani_sade_sati");
-    localStorage.removeItem("sun_sign");
-
     navigate("/");
   };
 

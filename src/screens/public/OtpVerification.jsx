@@ -195,7 +195,7 @@ const handleVerifyOtp = async (event) => {
           <span className={styles.subtitle}>
             You will receive the OTP via SMS on
             <div className={styles.phoneContainer}>
-              {phoneNumber}
+              +{phoneNumber}
               <button onClick={handleEditNumber} className={styles.editButton}>
                 <img
                   src="https://images.astroyogi.com/astroyogi/edit_icon_yellow.png"
