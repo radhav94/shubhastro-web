@@ -16,7 +16,7 @@ const Card = ({ data, scope }) => {
           <span>{data?.range}</span>
         </div>
         <p className={styles.description}>{data.overview}</p>
-        <div className={styles.luckyMain}>
+        {/* <div className={styles.luckyMain}>
           <div className={styles.luckyColor}>
             <strong>Lucky Color <span>:</span></strong>
             <span style={{ color: data?.lucky_color_code }}>{data?.lucky_color}</span>
@@ -29,7 +29,7 @@ const Card = ({ data, scope }) => {
                 : "-"}
             </span>
           </div>
-        </div>
+        </div> */}
 
       </div>
     </div>
