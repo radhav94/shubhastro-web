@@ -151,8 +151,8 @@ const KundaliHeader = () => {
   const handleSelectKundli = (kundli) => {
     setSelectedKundliId(kundli._id);
 
-    const gender =
-      kundli.gender === "M" || kundli.gender === "Male" ? "Male" : "Female";
+    const gender = ["M", "Male", "male"].includes(kundli.gender) ? "Male" : "Female";
+    const meridiem = kundli.hour >= 12 ? "PM" : "AM";
 
     const payload = {
       name: kundli.name,
@@ -162,13 +162,13 @@ const KundaliHeader = () => {
       year: String(kundli.year),
       hour: String(kundli.hour),
       minute: String(kundli.min),
-      meridiem: kundli.meridiem || "",
+      meridiem,
       birthPlace: kundli.place,
       latitude: kundli.lat,
       longitude: kundli.lon,
     };
 
-    setFormData(payload);
+    setFormData(initialFormData);
     dispatch(setForm(payload));
 
     setTimeout(() => {
