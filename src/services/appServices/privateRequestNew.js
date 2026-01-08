@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // import { getToken } from "../utils/utlis";
-import { Toast } from "../../component";
+import Toast from "../../component/toast";
 import { getToken } from "../../utils/utlis";
 
 let unAuthorizedCount = 0;

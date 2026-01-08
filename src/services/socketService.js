@@ -55,7 +55,7 @@ class SocketService {
   }
 
   // USER SEND
-  sendMessage({ roomId, userId, astrologerId, message, kundliId }) {
+  sendMessage({ roomId, userId, astrologerId, message, kundliId, type = "message" }) {
     try {
       if (!this.socket?.connected)
         throw new Error("Socket not connected, try again.");
@@ -67,7 +67,7 @@ class SocketService {
         userId,
         astrologerId,
         message,
-        type: "message"
+        type
       });
 
       return { success: true };

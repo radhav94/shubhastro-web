@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import {
   IoMic,
@@ -7,16 +7,18 @@ import {
   IoVideocamOff,
   IoArrowBack,
   IoChatbubbleEllipses,
+  IoFilter,
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import styles from "./VideoCalling.module.scss";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
+import VideoCallChat from "./VideoCallChat";
 
 const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 
 const VideoCalling = ({ callData }) => {
-  const { activeCall, setActiveCall } = useCall();
+  const { activeCall, setActiveCall, lastRequestedAstro } = useCall();
   const navigate = useNavigate();
 
   if (!activeCall || activeCall.callType !== "video") return null;
@@ -41,6 +43,7 @@ const VideoCalling = ({ callData }) => {
   const [cameraOn, setCameraOn] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: 20 });
+  const [isChatOpen, setIsChatOpen] = useState(false); // Chat panel state
 
   const [callSeconds, setCallSeconds] = useState(0);
   const timerRef = useRef(null);
@@ -316,6 +319,10 @@ const VideoCalling = ({ callData }) => {
   };
 
   /* ================= CHAT ================= */
+  const toggleChat = () => {
+    setIsChatOpen((prev) => !prev);
+  };
+
   const openChatWithMinimize = () => {
     setIsMinimized(true);
     setTimeout(() => {
@@ -339,6 +346,18 @@ const VideoCalling = ({ callData }) => {
       2,
       "0"
     )}`;
+
+  // Memoize chat data to prevent unnecessary re-renders
+  const astrologerName = lastRequestedAstro?.firstName +" "+lastRequestedAstro?.lastName;
+  const chatData = useMemo(() => ({
+    userId: activeCall.userId,
+    astrologerId: activeCall.astrologerId,
+    chatRoomId: activeCall.roomId,
+    kundliId: activeCall.kundliId,
+    isUserSide: activeCall.isUserSide,
+    astrologerName: astrologerName
+  }), [activeCall.userId, activeCall.astrologerId, activeCall.chatRoomId, activeCall.kundliId, activeCall.isUserSide, astrologerName]);
+
   return (
     <>
       {/* MINI VIEW */}
@@ -438,16 +457,31 @@ const VideoCalling = ({ callData }) => {
                 >
                   End
                 </button>
-
                 <button
                   className={styles.iconBtn}
                   onClick={openChatWithMinimize}
                 >
                   <IoChatbubbleEllipses size={22} />
                 </button>
+                <button
+                  className={`${styles.iconBtn} ${isChatOpen ? styles.active : ''}`}
+                  onClick={toggleChat}
+                  title="Toggle Chat"
+                >
+                  <IoFilter size={22} />
+                </button>
               </div>
             </div>
           </div>
+        )}
+
+        {/* Chat Panel */}
+        {isChatOpen && (
+          <VideoCallChat
+            isOpen={isChatOpen}
+            onClose={() => setIsChatOpen(false)}
+            videoCallData={chatData}
+          />
         )}
       </div>
     </>
