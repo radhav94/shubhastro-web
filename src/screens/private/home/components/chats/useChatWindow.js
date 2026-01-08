@@ -27,6 +27,13 @@ export default function useChat({
     setMessages((prev) => [...prev, msg]);
   };
 
+  const handleChatEndedFromServer = () => {
+      setIsMessageDisabled(true);
+      setOpenFeedback(true);
+      stopTimer();
+      setActiveChat(null);
+    };
+
   useEffect(() => {
     if(activeChat?.astrologerId !== astrologerId) setIsMessageDisabled(true)
     if(!roomId || !userId || !astrologerId) return;
@@ -67,13 +74,6 @@ export default function useChat({
           dateTime: data?.dateTime
         });
     }
-
-    const handleChatEndedFromServer = () => {
-      setIsMessageDisabled(true);
-      setOpenFeedback(true);
-      stopTimer();
-      setActiveChat(null);
-    };
 
     const handleWarning = (msg) => {
       toast.warning(msg.message);
@@ -143,6 +143,7 @@ export default function useChat({
     chatSeconds,
     isMessageDisabled,
     setIsMessageDisabled,
-    remainingTime : activeChat?.remainingTime || 0
+    remainingTime : activeChat?.remainingTime || 0,
+    handleChatEndedFromServer
   };
 }

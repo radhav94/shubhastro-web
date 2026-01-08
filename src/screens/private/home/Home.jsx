@@ -37,7 +37,7 @@ const Home = () => {
   const astrologerTitle = "Top Online Astrologers";
   const astrologersOnline = astrologerSectionOnline?.content || [];
   
-  const OurastrologerSection = homeList.find(
+  const OurastrologerSection = homeList?.find(
     (item) => item.slug === "our-astrologers"
   );
   const OurastrologersTitle ="Our Astrologers";
