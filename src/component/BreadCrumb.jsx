@@ -50,6 +50,32 @@ const Breadcrumb = () => {
 
         if (isAstroDashboard && index === 0) return null;
 
+        // Skip "horoscopes" and "tarot" from breadcrumb display
+        if (
+          name.toLowerCase() === "horoscopes" ||
+          name.toLowerCase() === "tarot"
+        ) {
+          return null;
+        }
+
+        // Special handling for compatibility routes
+        // Skip zodiac sign numbers (1-12) and "select" in compatibility routes
+        if (pathnames.includes("compatibility")) {
+          // Skip numeric segments that represent zodiac sign IDs (1-12)
+          if (
+            /^\d+$/.test(name) &&
+            parseInt(name) >= 1 &&
+            parseInt(name) <= 12
+          ) {
+            return null;
+          }
+
+          // Skip "select" segment in compatibility routes
+          if (name.toLowerCase() === "select") {
+            return null;
+          }
+        }
+
         let label = name.replace(/-/g, " ");
 
         if (

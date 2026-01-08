@@ -24,7 +24,6 @@ const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 const MIN_CHAT_SECONDS = 60;
 
 import { useGetS3SignedUrlMutation } from "../../../../../redux/api/s3SignedApi";
-import { PATH } from "../../../../../utils/routes/Paths";
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
@@ -55,6 +54,7 @@ const ChatWindow = () => {
     chatSeconds,
     isMessageDisabled,
     remainingTime,
+    handleChatEndedFromServer
   } = useChat({
     userId,
     astrologerId,
@@ -113,17 +113,22 @@ const ChatWindow = () => {
 
   const { isInactive, resetTimer } = useInactivityTimer(120000);
 
+  const handleDisconnect = () => {
+    try {
+      voiceSocket.emit("chat:end", { roomId, endedBy: "CUSTOMER" });
+    } catch (error) {
+      handleChatEndedFromServer();
+      console.log('chat end error', error)
+    }
+  };
+
   const handleChatEnd = () => {
     if (remainingTime * 60 - chatSeconds < MIN_CHAT_SECONDS) {
       Toast.error("Chat cannot be ended before 1 minute");
       return false;
     }
-    voiceSocket.emit("chat:end", { roomId, endedBy: "CUSTOMER" });
+    handleDisconnect();
     return true;
-  };
-
-  const handleDisconnect = () => {
-    handleChatEnd();
   };
 
   const handleSend = (kundli = null) => {

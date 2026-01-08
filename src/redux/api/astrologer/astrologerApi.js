@@ -64,7 +64,7 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
           limit,
           page,
           isActiveType,
-          Eexperties: experties, //  single value
+          experties: experties, //  single value
           sorting: selectedSort ? "true" : "false",
           sortByPrice: selectedSort === "Sort By Price" ? "1" : "0",
           sortByRating: selectedSort === "Sort By Rating" ? "1" : "0",

@@ -18,7 +18,7 @@ export default function useChat({
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
-  const [isMessageDisabled, setIsMessageDisabled] = useState(true);
+  const [isMessageDisabled, setIsMessageDisabled] = useState(false);
 
   const formatTime = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -26,6 +26,13 @@ export default function useChat({
   const addMessage = (msg) => {
     setMessages((prev) => [...prev, msg]);
   };
+
+  const handleChatEndedFromServer = () => {
+      setIsMessageDisabled(true);
+      setOpenFeedback(true);
+      stopTimer();
+      setActiveChat(null);
+    };
 
   useEffect(() => {
     if(activeChat?.astrologerId !== astrologerId) setIsMessageDisabled(true)
@@ -40,7 +47,7 @@ export default function useChat({
             sendMessage(`Hi ${astrologerName || ""}`); 
             const baseUrl = window.location.origin;
             const kundliLink = `${baseUrl}/kundli/${kundliId}`;
-            sendMessage(kundliLink);
+            setTimeout(() => sendMessage(kundliLink), 300);
           }
         }
       },
@@ -67,13 +74,6 @@ export default function useChat({
           dateTime: data?.dateTime
         });
     }
-
-    const handleChatEndedFromServer = () => {
-      setIsMessageDisabled(true);
-      setOpenFeedback(true);
-      stopTimer();
-      setActiveChat(null);
-    };
 
     const handleWarning = (msg) => {
       toast.warning(msg.message);
@@ -143,6 +143,7 @@ export default function useChat({
     chatSeconds,
     isMessageDisabled,
     setIsMessageDisabled,
-    remainingTime : activeChat?.remainingTime || 0
+    remainingTime : activeChat?.remainingTime || 0,
+    handleChatEndedFromServer
   };
 }

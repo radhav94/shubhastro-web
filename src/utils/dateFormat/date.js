@@ -4,3 +4,5 @@ export const formatted = today.toLocaleDateString("en-GB", {
   month: "long",
   year: "numeric",
 });
+
+export const TODAY = new Date().toISOString().split("T")[0];
