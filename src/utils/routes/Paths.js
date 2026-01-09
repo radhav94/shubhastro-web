@@ -98,6 +98,7 @@ import Weekly from "../../screens/private/horoscope/weeklyHoroscope/Weekly";
 import Yearly from "../../screens/private/horoscope/yearlyHoroscope/Yearly";
 import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
 import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
+import OrderHistory from "../../screens/private/orderHistory/OrderHistory";
 import FinalPay from "../../screens/private/payment/FinalPay";
 import ConsultantList from "../../screens/private/shop/consultant/ConsultantList";
 import PaymentScreen from "../../screens/private/shop/consultant/PaymentScreen";
@@ -639,6 +640,10 @@ export const PATH = {
     WalletTranscations: {
       path: "/wallet-transactions",
       element: WalletTranscations,
+    },
+     WalletTranscations: {
+      path: "/order-history",
+      element: OrderHistory,
     },
   },
 };
