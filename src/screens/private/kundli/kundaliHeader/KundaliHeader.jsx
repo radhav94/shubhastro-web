@@ -18,6 +18,7 @@ import {
   format12HourTime,
   padZero,
 } from "../../../../utils/dateFormat/dateTime";
+import DeleteConfirmationModal from "../../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
 
 // Constants
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -93,6 +94,24 @@ const KundaliHeader = () => {
   });
   const [createKundli] = useCreateKundliMutation();
   const [deleteKundli] = useDeleteKundliMutation();
+
+  /* --------------------------Delete kundli ---------------------------*/
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [kundliToDelete, setKundliToDelete] = useState(null);
+
+  const handleDeleteConfirm = () => {
+    if (kundliToDelete) {
+      onDelete(kundliToDelete);
+    }
+    setKundliToDelete(null);
+    setShowDeleteModal(false);
+  };
+
+  const handleDeleteCancel = () => {
+    setKundliToDelete(null);
+    setShowDeleteModal(false);
+  };
+  
 
   const savedKundlis = data?.data || [];
 
@@ -458,7 +477,10 @@ const KundaliHeader = () => {
 
                   <button
                     className={styles.deleteButton}
-                    onClick={() => onDelete(kundli._id)}
+                    onClick={() => {
+                      setKundliToDelete(kundli._id);
+                      setShowDeleteModal(true);
+                    }}
                   >
                     <IoTrashOutline />
                   </button>
@@ -470,6 +492,12 @@ const KundaliHeader = () => {
           )}
         </div>
       </div>
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          onCancel={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+        />
+      )}
     </div>
   );
 };
