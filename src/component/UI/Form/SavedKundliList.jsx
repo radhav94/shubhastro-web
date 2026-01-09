@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./SavedKundliList.module.scss";
 import { IoTrashOutline } from "react-icons/io5";
 import PrimaryText from "../../PrimaryText";
 import { format12HourTime, padZero } from "../../../utils/dateFormat/dateTime";
+import DeleteConfirmationModal from "../modal/deleteModal/DeleteConfirmationModal";
 const SavedKundliList = ({
   title = "Saved Kundli",
   token,
@@ -13,6 +14,22 @@ const SavedKundliList = ({
   onDelete,
   onLoginNavigate,
 }) => {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [kundliToDelete, setKundliToDelete] = useState(null);
+
+  const handleDeleteConfirm = () => {
+    if (kundliToDelete) {
+      onDelete(kundliToDelete);
+    }
+    setKundliToDelete(null);
+    setShowDeleteModal(false);
+  };
+
+  const handleDeleteCancel = () => {
+    setKundliToDelete(null);
+    setShowDeleteModal(false);
+  };
+
   return (
     <div className={styles.savedKundliContainer}>
       <h2 className={styles.sectionTitle}>{title}</h2>
@@ -56,7 +73,10 @@ const SavedKundliList = ({
 
               <button
                 className={styles.deleteButton}
-                onClick={() => onDelete(kundli._id)}
+                onClick={() => {
+                  setKundliToDelete(kundli._id);
+                  setShowDeleteModal(true);
+                }}
               >
                 <IoTrashOutline />
               </button>
@@ -65,6 +85,13 @@ const SavedKundliList = ({
         </div>
       ) : (
         <PrimaryText isCenter>No Data Found...</PrimaryText>
+      )}
+
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          onCancel={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+        />
       )}
     </div>
   );
