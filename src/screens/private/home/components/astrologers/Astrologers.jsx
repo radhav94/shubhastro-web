@@ -48,6 +48,10 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
   const [waitingPopup, setWaitingPopup] = useState(false);
   const [callRoomId, setCallRoomId] = useState(null);
 
+  // 🔹 ADDED: arrow disable states
+  const [isAtStart, setIsAtStart] = useState(true);
+  const [isAtEnd, setIsAtEnd] = useState(false);
+
   const [createChatRoom] = useCreateChatRoomMutation();
   const [getBalance] = useGetBalanceMutation();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
@@ -61,6 +65,28 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
   const activeCallAstroRef = useRef(null);
   const kundliRef = useRef(null);
 
+  // ---------------- SCROLL LOGIC (ADDED ONLY) ----------------
+
+  const checkScrollPosition = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    setIsAtStart(el.scrollLeft === 0);
+    setIsAtEnd(
+      Math.ceil(el.scrollLeft + el.clientWidth) >= el.scrollWidth
+    );
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    checkScrollPosition();
+    el.addEventListener("scroll", checkScrollPosition);
+
+    return () => el.removeEventListener("scroll", checkScrollPosition);
+  }, []);
+
   // ---------------- CHAT FLOW ----------------
 
   const openKundliPopup = () => {
@@ -68,9 +94,22 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
     else navigate("/login");
   };
 
+  async function handleChatStart(astro) {
+    setSelectedAstro(astro);
+    setLastRequestedAstro(astro);
+
+    const result = await getBalance({ astrologerId: astro?._id });
+    if (result.data.data.status === false) {
+      setOpenModal((prev) => ({ ...prev, recharge: true }));
+      return;
+    }
+
+    openKundliPopup();
+  }
+
   const handleChatAfterKundliSelect = async (kundli) => {
     setKundliModalOpen(false);
-    
+
     if (!kundli?._id) return Toast.error("Kundli not selected properly");
     if (!selectedAstro?._id) return Toast.error("Astrologer not selected");
     if (!userIdLocal) return Toast.error("User ID Missing");
@@ -80,21 +119,21 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
 
     try {
       // 🔐 Auth check
-      if (!token) {
+    if (!token) {
         navigate("/login", { state: { from: location.pathname } });
-        return;
-      }
+      return;
+    }
 
       // ✅ Store active call info
-      activeCallAstroRef.current = astro;
-      setWaitingPopup(true);
-      kundliRef.current = kundli?._id;
+    activeCallAstroRef.current = astro;
+    setWaitingPopup(true);
+    kundliRef.current = kundli?._id;
 
       // 🚀 Create call room
-      voiceSocket.emit("chat:initiate", {
-        userId: userIdLocal,
-        astrologerId: astro._id,
-      });
+    voiceSocket.emit("chat:initiate", {
+      userId: userIdLocal,
+      astrologerId: astro._id,
+    });
     } catch (error) {
       console.error(error);
     }
@@ -232,17 +271,17 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
         setChatSeconds(Number(data?.remainingTime)*60);
 
         navigate(`/chat-with-astrologers/${astrologerId}`, {
-        state: {
+          state: {
           userId: userId,
-          astrologerId,
-          fullName: data?.astrologer?.firstName,
-          roomId,
-          isUserSide: true,
-          kundliId,
-          astrologerName: data?.astrologer?.firstName || "",
+            astrologerId,
+            fullName: data?.astrologer?.firstName,
+            roomId,
+            isUserSide: true,
+            kundliId,
+            astrologerName: data?.astrologer?.firstName || "",
           astroID: data?.astrologer?.astrologer_ID
-        },
-      });
+          },
+        });
       } catch(e) {
         console.log('e', e)
         Toast.error("Failed to start chat");
@@ -310,8 +349,17 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           onCancel={cancelCall}
         />
       )}
-       {astrologers?.length > 3 && (
-        <button className={styles.leftArrow} onClick={scrollLeft}>
+
+      {astrologerList?.length > 3 && (
+        <button
+          className={styles.leftArrow}
+          onClick={scrollLeft}
+          disabled={isAtStart}
+          style={{
+            opacity: isAtStart ? 0.4 : 1,
+            cursor: isAtStart ? "not-allowed" : "pointer",
+          }}
+        >
           &lt;
         </button>
       )}
@@ -334,8 +382,17 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           </div>
         ))}
       </div>
-      {astrologers?.length > 3 && (
-        <button className={styles.rightArrow} onClick={scrollRight}>
+
+      {astrologerList?.length > 3 && (
+        <button
+          className={styles.rightArrow}
+          onClick={scrollRight}
+          disabled={isAtEnd}
+          style={{
+            opacity: isAtEnd ? 0.4 : 1,
+            cursor: isAtEnd ? "not-allowed" : "pointer",
+          }}
+        >
           &gt;
         </button>
       )}
