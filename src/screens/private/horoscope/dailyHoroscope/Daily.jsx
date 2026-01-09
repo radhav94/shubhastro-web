@@ -79,8 +79,15 @@ const Daily = () => {
 
               <PrimaryText size_16 color={appColors.greyDark}>
                 <strong>Lucky Color:</strong>{" "}
-                <span style={{ color: data.response.lucky_color_code }}>
-                  {data.response.lucky_color}
+                  <span
+                    style={{
+                      color:
+                        data?.response?.lucky_color?.toLowerCase() === "white"
+                          ? "#000"
+                          : data?.response?.lucky_color_code,
+                    }}
+                  >
+                    {data?.response?.lucky_color}
                 </span>
               </PrimaryText>
 
