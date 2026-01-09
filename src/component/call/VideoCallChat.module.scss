@@ -162,15 +162,15 @@
 .audioPlayer {
   width: 100%;
   height: 32px;
-  
+
   &::-webkit-media-controls-panel {
     background: transparent;
   }
-  
+
   &::-webkit-media-controls-play-button {
     display: none;
   }
-  
+
   &::-webkit-media-controls-current-time-display,
   &::-webkit-media-controls-time-remaining-display {
     display: none;
@@ -190,6 +190,21 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.kundliMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.KundliMessage > span {
+  text-decoration: underline;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex !important;
+  align-items: anchor-center;
+  gap: 6;
 }
 
 .imageAttachment {
@@ -306,11 +321,33 @@
   }
 }
 
+.videoMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 260px;
+}
+
+.videoWrapper {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+}
+
+.videoPlayer {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -318,9 +355,13 @@
 }
 
 @keyframes typing {
-  0%, 60%, 100% {
+
+  0%,
+  60%,
+  100% {
     transform: translateY(0);
   }
+
   30% {
     transform: translateY(-10px);
   }

@@ -15,9 +15,9 @@ export const chatApi = privateRequestNew.injectEndpoints({
     }),
 
     getChatMessages: builder.query({
-      query: ({ astrologerId }) => ({
+      query: ({ astrologerId = null, roomId = null }) => ({
         url: "chat/messages",
-        params: { astrologerId },
+        params: { astrologerId, roomId },
       }),
     }),
 

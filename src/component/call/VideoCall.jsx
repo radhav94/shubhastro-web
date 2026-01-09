@@ -476,13 +476,11 @@ const VideoCalling = ({ callData }) => {
         )}
 
         {/* Chat Panel */}
-        {isChatOpen && (
-          <VideoCallChat
-            isOpen={isChatOpen}
-            onClose={() => setIsChatOpen(false)}
-            videoCallData={chatData}
-          />
-        )}
+        <VideoCallChat
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          videoCallData={chatData}
+        />
       </div>
     </>
   );

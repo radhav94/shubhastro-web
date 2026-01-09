@@ -1,5 +1,5 @@
-import { useState, useRef, useLayoutEffect, useMemo } from "react";
-import { IoSend, IoAttach, IoClose } from "react-icons/io5";
+import { useRef, useLayoutEffect, useMemo, useState } from "react";
+import { IoAttach, IoClose } from "react-icons/io5";
 import styles from "./VideoCallChat.module.scss";
 import { useGetChatHistoryQuery } from "../../redux/api/chatApi";
 import { useGetS3SignedUrlMutation } from "../../redux/api/s3SignedApi";
@@ -7,21 +7,23 @@ import { useFileSelector } from "../../screens/private/home/components/chats/fil
 import { Toast } from "../index";
 import dayjs from "dayjs";
 import { useVideoCallChat } from "./useVideoCallChat";
+import { GrReactjs } from "react-icons/gr";
+import IframeModal from "../../screens/private/home/components/chats/IframeModal";
 
 const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 
-const VideoCallChat = ({ 
-  isOpen, 
-  onClose, 
+const VideoCallChat = ({
+  isOpen,
+  onClose,
   videoCallData
 }) => {
-  const [message, setMessage] = useState("");
   const messagesRef = useRef(null);
-  
-  const { astrologerId, userId, isUserSide, kundliId, chatRoomId, astrologerName } = videoCallData;
-  
-  // Use the custom hook for chat functionality
-  const { messages, isTyping, sendMessage: sendChatMessage, sendTyping } = useVideoCallChat({
+  const [iframeSrc, setIframeSrc] = useState(null);
+
+  const { astrologerId, userId, isUserSide, kundliId, chatRoomId, astrologerName } = videoCallData || {};
+
+  // Always call hooks - use the custom hook for chat functionality
+  const { messages, sendMessage: sendChatMessage } = useVideoCallChat({
     userId,
     astrologerId,
     roomId: chatRoomId,
@@ -29,7 +31,7 @@ const VideoCallChat = ({
     isActive: isOpen,
     astrologerName
   });
-  
+
   const [getS3SignedUrl] = useGetS3SignedUrlMutation();
   const { openFileSelector } = useFileSelector();
 
@@ -42,6 +44,8 @@ const VideoCallChat = ({
 
   // Combine history and real-time messages
   const finalMsgs = useMemo(() => {
+    if (!isOpen || !videoCallData) return [];
+
     const historyMsgs = history.map((item) => ({
       text: item.message || "",
       isSender: isUserSide
@@ -52,6 +56,7 @@ const VideoCallChat = ({
         minute: "2-digit",
       }),
       dateTime: item.createdAt,
+      type: item.type
     }));
 
     const socketMsgs = messages.map((msg, idx) => ({
@@ -61,19 +66,25 @@ const VideoCallChat = ({
       time: msg.time,
       date: msg.date || formatDate(new Date()),
       dateTime: msg.dateTime || new Date().toISOString(),
+      type: msg.type
     }));
 
     return [...historyMsgs, ...socketMsgs].sort(
       (a, b) => new Date(a.dateTime) - new Date(b.dateTime)
     );
-  }, [history, messages, isUserSide]);
+  }, [history, messages, isUserSide, isOpen, videoCallData]);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom when new messages arrive - ALWAYS call useLayoutEffect
   useLayoutEffect(() => {
+    if (!isOpen || !videoCallData) return;
+
     const container = messagesRef.current;
     if (!container) return;
     container.scrollTop = container.scrollHeight;
-  }, [finalMsgs]);
+  }, [finalMsgs, isOpen, videoCallData]);
+
+  // Early return after ALL hooks are called
+  if (!isOpen || !videoCallData) return null;
 
   // const handleSend = () => {
   //   console.log("Send button clicked, message:", message);
@@ -119,10 +130,22 @@ const VideoCallChat = ({
     return "success";
   };
 
+  const getAttachType = (mimeType) => {
+    if (mimeType.startsWith('image/')) {
+      return 'image';
+    } else if (mimeType.startsWith('video/')) {
+      return 'video';
+    } else if (mimeType.startsWith('audio/')) {
+      return 'audio';
+    } else {
+      return 'attachment';
+    }
+  };
+
   const handleAttachClick = async () => {
     // console.log("Attach button clicked");
     try {
-      const { blob, name, type, size } = await openFileSelector(
+      const { blob, type } = await openFileSelector(
         "image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx"
       );
       // console.log("File selected:", { name, type, size });
@@ -134,9 +157,10 @@ const VideoCallChat = ({
   };
 
   const renderMessage = (msg, index) => {
-    let content = msg.text;
     let isSpecialMessage = false;
+    let content = msg.text;
     // Try to parse as JSON for special message types
+    console.log("message", msg);
     try {
       if (msg.type === "audio") {
         isSpecialMessage = true;
@@ -144,12 +168,12 @@ const VideoCallChat = ({
           <div className={styles.voiceMessage}>
             <button className={styles.playButton}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M8 5v14l11-7z"/>
+                <path d="M8 5v14l11-7z" />
               </svg>
             </button>
             <div className={styles.waveformContainer}>
               <audio controls className={styles.audioPlayer}>
-                <source src={content} type="audio/mpeg" />
+                <source src={msg.text} type="audio/mpeg" />
               </audio>
             </div>
             <span className={styles.voiceDuration}>
@@ -157,27 +181,71 @@ const VideoCallChat = ({
             </span>
           </div>
         );
-      } else if (msg.type === "attachment" || msg.type === "image") {
+      } else if (msg.type === "video") {
+        isSpecialMessage = true;
+        content = (
+          <div className={styles.videoMessage}>
+            <div className={styles.videoWrapper}>
+              <video
+                className={styles.videoPlayer}
+                controls
+                preload="metadata"
+                onClick={(e) => e.target.play()}
+              >
+                <source src={msg.text} type="video/mp4" />
+                <a
+                  href={msg.text}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.fileLink}
+                >
+                  📎 {msg.text}
+                </a>
+              </video>
+            </div>
+
+            <span className={styles.videoDuration}>
+              {/* Optional: duration if you calculate later */}
+            </span>
+          </div>
+        );
+      } else if (msg.type === "kundli") {
+        isSpecialMessage = true;
+        content = (
+          <div className={styles.KundliMessage}>
+            <span
+              onClick={() => {
+                if (msg.text) setIframeSrc(msg.text);
+              }}
+            >
+              <GrReactjs/> View Kundli
+            </span>
+          </div>
+        );
+      } else if (msg.type === "image") {
+        content = (
+          <div className={styles.fileMessage}>
+            <img
+              src={msg.text}
+              alt={msg.text}
+              className={styles.imageAttachment}
+              onClick={() => window.open(msg.text, '_blank')}
+            />
+          </div>
+        )
+      } else if (msg.type === "attachment") {
         isSpecialMessage = true;
         content = (
           <div className={styles.fileMessage}>
-            {msg.type === "image" ? (
-              <img 
-                src={content} 
-                alt={content}
-                className={styles.imageAttachment}
-                onClick={() => window.open(content, '_blank')}
-              />
-            ) : (
-              <a 
-                href={content} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className={styles.fileLink}
-              >
-                📎 {content}
-              </a>
-            )}
+            <a
+              href={msg.text}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.fileLink}
+            >
+              📎 {msg.text}
+            </a>
+
           </div>
         );
       }
@@ -188,20 +256,17 @@ const VideoCallChat = ({
     return (
       <>{isSpecialMessage && (<div
         key={index}
-        className={`${styles.message} ${
-          msg.isSender ? styles.sent : styles.received
-        }`}
+        className={`${styles.message} ${msg.isSender ? styles.sent : styles.received
+          }`}
       >
         <div className={styles.messageContent}>
           <span>{content}</span>
         </div>
         <div className={styles.messageTime}>{msg.time}</div>
       </div>)}</>
-      
+
     );
   };
-
-  if (!isOpen) return null;
 
   return (
     <div className={styles.chatPanel}>
@@ -214,7 +279,7 @@ const VideoCallChat = ({
 
       <div className={styles.messagesContainer} ref={messagesRef}>
         {finalMsgs.map((msg, index) => renderMessage(msg, index))}
-        
+
         {/* {isTyping && (
           <div className={`${styles.message} ${styles.received}`}>
             <div className={styles.messageContent}>
@@ -254,6 +319,12 @@ const VideoCallChat = ({
           <IoSend size={18} />
         </button> */}
       </div>
+      {/* 👇 Modal */}
+      <IframeModal
+        open={!!iframeSrc}
+        src={iframeSrc}
+        onClose={() => setIframeSrc(null)}
+      />
     </div>
   );
 };

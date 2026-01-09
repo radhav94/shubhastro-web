@@ -16,8 +16,9 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, isAct
     setMessages((prev) => [...prev, msg]);
   };
 
+  // Initialize socket connection only once
   useEffect(() => {
-    if (!roomId || !userId || !astrologerId || !isActive) return;
+    if (!roomId || !userId || !astrologerId) return;
 
     socketService.connect({
       onConnected: () => {
@@ -69,6 +70,7 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, isAct
         sender: isSenderUser,
         time: formatTime(),
         dateTime: data?.dateTime,
+        type: data?.type
       });
     };
 
@@ -92,7 +94,7 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, isAct
       // voiceSocket.off("typing", handleTyping);
       voiceSocket.off("warning", handleWarning);
     };
-  }, [roomId, userId, astrologerId, isActive]);
+  }, [roomId, userId, astrologerId, kundliId, astrologerName]); // Removed isActive from dependencies
 
  
   const sendMessage = (text, type) => {
