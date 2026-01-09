@@ -56,7 +56,7 @@ const VideoCallChat = ({
         minute: "2-digit",
       }),
       dateTime: item.createdAt,
-      type: item.type
+      type: item?.type
     }));
 
     const socketMsgs = messages.map((msg, idx) => ({
@@ -66,7 +66,7 @@ const VideoCallChat = ({
       time: msg.time,
       date: msg.date || formatDate(new Date()),
       dateTime: msg.dateTime || new Date().toISOString(),
-      type: msg.type
+      type: msg?.type
     }));
 
     return [...historyMsgs, ...socketMsgs].sort(
@@ -159,8 +159,7 @@ const VideoCallChat = ({
   const renderMessage = (msg, index) => {
     let isSpecialMessage = false;
     let content = msg.text;
-    // Try to parse as JSON for special message types
-    console.log("message", msg);
+
     try {
       if (msg.type === "audio") {
         isSpecialMessage = true;
@@ -218,23 +217,26 @@ const VideoCallChat = ({
                 if (msg.text) setIframeSrc(msg.text);
               }}
             >
-              <GrReactjs/> View Kundli
+              <GrReactjs /> View Kundli
             </span>
           </div>
         );
       } else if (msg.type === "image") {
+        isSpecialMessage = true;
         content = (
           <div className={styles.fileMessage}>
-            <img
-              src={msg.text}
-              alt={msg.text}
-              className={styles.imageAttachment}
-              onClick={() => window.open(msg.text, '_blank')}
-            />
+            <div>
+              <img
+                src={msg.text}
+                alt={msg.text}
+                className={styles.imageAttachment}
+                onClick={() => window.open(msg.text, '_blank')}
+              />
+            </div>
           </div>
-        )
-      } else if (msg.type === "attachment") {
-        isSpecialMessage = true;
+        );
+      } else {
+        if (msg.type !== "message") isSpecialMessage = true;
         content = (
           <div className={styles.fileMessage}>
             <a
@@ -260,7 +262,7 @@ const VideoCallChat = ({
           }`}
       >
         <div className={styles.messageContent}>
-          <span>{content}</span>
+          {content}
         </div>
         <div className={styles.messageTime}>{msg.time}</div>
       </div>)}</>
