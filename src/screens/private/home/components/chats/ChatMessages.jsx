@@ -56,12 +56,13 @@ const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
                   const urlRegex = /(https?:\/\/[^\s]+)/g;
                   const match = msg.text.match(urlRegex);
 
-                  if (match) {
+                  if (msg.type=='kundli') {
                     return (
                       <div
                         onClick={() => {
-                          const path = extractKundliPath(match[0]);
-                          if (path) setIframeSrc(path);
+                          // const path = extractKundliPath(match[0]);
+                          // if (path) setIframeSrc(path);
+                          setIframeSrc(msg.text);
                         }}
                         style={{
                           textDecoration: "underline",
