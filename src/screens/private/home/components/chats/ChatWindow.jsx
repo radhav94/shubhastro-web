@@ -87,6 +87,7 @@ const ChatWindow = () => {
   const finalMsgs = useMemo(() => {
     const historyMsgs = history.map((item) => ({
       text: item.message || "",
+      type: item?.type,
       isSender: isUserSide
         ? item.sender === "user"
         : item.sender === "astrologer",
@@ -102,6 +103,7 @@ const ChatWindow = () => {
       text: msg.text,
       isSender: msg.sender,
       time: msg.time,
+      type: msg?.type,
       date: msg.date || formatDate(new Date()),
       dateTime: msg.dateTime || new Date().toISOString(),
     }));
@@ -136,7 +138,7 @@ const ChatWindow = () => {
       const baseUrl = window.location.origin;
 
       const kundliLink = `${baseUrl}/kundli/${kundli._id}`;
-      isUserSide ? sendMessage(kundliLink) : astroReply(kundliLink);
+      isUserSide ? sendMessage(kundliLink,'kundli') : astroReply(kundliLink);
 
       setMessage("");
       return;

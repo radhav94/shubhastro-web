@@ -47,7 +47,7 @@ export default function useChat({
             sendMessage(`Hi ${astrologerName || ""}`); 
             const baseUrl = window.location.origin;
             const kundliLink = `${baseUrl}/kundli/${kundliId}`;
-            setTimeout(() => sendMessage(kundliLink), 300);
+            setTimeout(() => sendMessage(kundliLink,'kundli'), 300);
           }
         }
       },
@@ -71,7 +71,9 @@ export default function useChat({
           text: data.message,
           sender: isSenderUser,
           time: formatTime(),
-          dateTime: data?.dateTime
+          dateTime: data?.dateTime,
+          type:data.type,
+
         });
     }
 
@@ -91,13 +93,14 @@ export default function useChat({
   }, [roomId, activeChat]);
 
   // USER SEND
-  const sendMessage = (text) => {
+  const sendMessage = (text,type="message") => {
     const res = socketService.sendMessage({
       message: text,
       roomId,
       userId,
       astrologerId,
       kundliId,
+      type
     });
 
     if (res?.error) {
