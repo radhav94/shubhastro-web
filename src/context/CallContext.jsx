@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useRef } from "react";
+import React, { createContext, useContext, useState, useRef, useEffect } from "react";
+import { voiceSocket } from "../services/voiceSocketServices";
 
 const CallContext = createContext();
 
@@ -18,19 +19,29 @@ export const CallProvider = ({ children }) => {
 
   const [callSeconds, setCallSeconds] = useState(0);
   const timerRef = useRef(null);
+  const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
   const startTimer = () => {
-    if (timerRef.current) return;
+    if (timerRef.current) return; // 🔒 prevent multiple timers
+
     timerRef.current = setInterval(() => {
-      setCallSeconds((s) => s + 1);
+      setCallSeconds((prev) => {
+        if (prev <= 0) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
   };
 
   const stopTimer = () => {
-    clearInterval(timerRef.current);
-    timerRef.current = null;
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
   };
-
   const resetTimer = () => {
     stopTimer();
     setCallSeconds(0);
@@ -43,6 +54,35 @@ export const CallProvider = ({ children }) => {
     resetTimer();
   };
 
+  useEffect(() => {
+    if (!userIdLocal) return;
+
+    if (!voiceSocket.connected) {
+      voiceSocket.io.opts.query = {
+        userId: userIdLocal,
+        role: "CUSTOMER",
+      };
+      voiceSocket.connect();
+    }
+    const handleActivity = (data) => {
+      if (data?.remainingTime) {
+        // Server sync every minute - update remaining time and ensure timer is running
+        setCallSeconds(data?.remainingTime * 60);
+        
+        // Make sure timer is running for local countdown
+        if (!timerRef.current) {
+          startTimer();
+        }
+      }
+    }
+
+    voiceSocket.on("activity", handleActivity)
+
+    return () => {
+      voiceSocket.off("activity", handleActivity)
+    }
+  }, [resetCallFlow, resetTimer, userIdLocal])
+
   return (
     <CallContext.Provider
       value={{
@@ -54,6 +94,7 @@ export const CallProvider = ({ children }) => {
         setMissedApproval,
         activeCallRoomId,
         callSeconds,
+        setCallSeconds,
         setActiveCall,
         waitingList,
         setWaitingList,

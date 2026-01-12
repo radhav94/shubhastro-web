@@ -496,7 +496,7 @@ const TalkToAstrologer = () => {
       setCallWaitingList(data?.waitingTime || 5);
     };
 
-    const handleCallAccepted = async ({ roomId, token, type }) => {
+    const handleCallAccepted = async ({ roomId, token, type, remainingTime }) => {
       resetCallFlow();
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
@@ -520,7 +520,8 @@ const TalkToAstrologer = () => {
           userId: userIdLocal,
           astrologerId: astro._id,
           kundliId,
-          astrologerID: astro?.astrologer_ID
+          astrologerID: astro?.astrologer_ID,
+          remainingTime
         });
       } catch {
         Toast.error("Failed to start call");
@@ -605,27 +606,23 @@ const TalkToAstrologer = () => {
     voiceSocket.on("chat:room", handleChatRoom);
     voiceSocket.on("call:room", handleCallRoom);
     voiceSocket.on("return_call_room", handleReturnRoom);
-    voiceSocket.on("call_accepted", handleCallAccepted);
     voiceSocket.on("call:accepted", handleCallAccepted);
     voiceSocket.on("chat:accepted", handleChatAccepted);
     voiceSocket.on("chat:rejected", handleCallRejected);
-    voiceSocket.on("call_rejected", handleCallRejected);
     voiceSocket.on("call:rejected", handleCallRejected);
     voiceSocket.on("error", handleSocketError);
-    voiceSocket.on("call_ended", handleCallEnded);
+    voiceSocket.on("call:ended", handleCallEnded);
 
     return () => {
       voiceSocket.off("chat:room", handleChatRoom);
       voiceSocket.off("call:room", handleCallRoom);
       voiceSocket.off("return_call_room", handleReturnRoom);
-      voiceSocket.off("call_accepted", handleCallAccepted);
       voiceSocket.off("call:accepted", handleCallAccepted);
       voiceSocket.off("chat:accepted", handleChatAccepted);
       voiceSocket.off("chat:rejected", handleCallRejected);
-      voiceSocket.off("call_rejected", handleCallRejected);
       voiceSocket.off("call:rejected", handleCallRejected);
       voiceSocket.off("error", handleSocketError);
-      voiceSocket.off("call_ended", handleCallEnded);
+      voiceSocket.off("call:ended", handleCallEnded);
     };
   }, [userIdLocal, isRecommendModalOpen]);
 

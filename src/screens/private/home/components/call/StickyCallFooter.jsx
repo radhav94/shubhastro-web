@@ -34,7 +34,7 @@ const StickyCallFooter = () => {
       setCallApproval(false);
       resetCallFlow();
       setMissedApproval(true);
-    }, 10000);
+    }, 60000);
 
     return () => clearTimeout(timer);
   }, [callApproval]);
