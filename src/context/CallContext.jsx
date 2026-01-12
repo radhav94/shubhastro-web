@@ -10,6 +10,8 @@ export const CallProvider = ({ children }) => {
   const [activeCallRoomId, setActiveCallRoomId] = useState(null);
   const [callApproval, setCallApproval] = useState(false);
   const [missedApproval, setMissedApproval] = useState(false);
+  const [openReview, setOpenReview] = useState(false);
+  const [reviewData, setReviewData] = useState(null);
 
   // 🔥 GLOBAL waiting list (persists across navigation)
   const [waitingList, setWaitingList] = useState(false);
@@ -65,6 +67,10 @@ export const CallProvider = ({ children }) => {
         startTimer,
         stopTimer,
         resetTimer,
+        openReview,
+        setOpenReview,
+        reviewData,
+        setReviewData
       }}
     >
       {children}

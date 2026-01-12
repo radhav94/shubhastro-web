@@ -218,6 +218,7 @@ const AstrologerProfile = () => {
           userId: userIdLocal,
           astrologerId: astro._id,
           kundliId,
+          astrologerID: astro?.astrologerID
         });
       } catch {
         toast.error("Failed to start chat");

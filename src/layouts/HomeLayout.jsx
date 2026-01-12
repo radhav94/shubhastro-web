@@ -13,6 +13,7 @@ import CircleSpinner from "../component/UI/CircleSpinner";
 import VideoCallContainer from "../component/call/VideoCallContainer";
 import StickyChatFooter from "../screens/private/home/components/chats/StickyChatFooter";
 import StickyCallFooter from "../screens/private/home/components/call/StickyCallFooter";
+import StickyReview from "../screens/private/home/components/call/StickyReview";
 
 const HomeLayout = () => {
   const isMobile = useIsMobile();
@@ -60,6 +61,7 @@ const HomeLayout = () => {
 
       <StickyChatFooter/>
       <StickyCallFooter/>
+      <StickyReview/>
     </div>
   );
 };
