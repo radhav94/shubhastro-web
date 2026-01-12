@@ -520,6 +520,7 @@ const TalkToAstrologer = () => {
           userId: userIdLocal,
           astrologerId: astro._id,
           kundliId,
+          astrologerID: astro?.astrologer_ID
         });
       } catch {
         Toast.error("Failed to start call");

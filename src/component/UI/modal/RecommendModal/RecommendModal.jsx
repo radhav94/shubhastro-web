@@ -263,6 +263,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
           userId: userIdLocal,
           astrologerId: astro._id,
           kundliId,
+          astrologerID: astro.astrologerID
         });
       } catch {
         Toast.error("Failed to start chat");

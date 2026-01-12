@@ -18,7 +18,7 @@ import VideoCallChat from "./VideoCallChat";
 const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 
 const VideoCalling = ({ callData }) => {
-  const { activeCall, setActiveCall, lastRequestedAstro } = useCall();
+  const { activeCall, setActiveCall, lastRequestedAstro, setOpenReview, setReviewData } = useCall();
   const navigate = useNavigate();
 
   if (!activeCall || activeCall.callType !== "video") return null;
@@ -271,11 +271,17 @@ const VideoCalling = ({ callData }) => {
     if (endCallRef.current) return;
     endCallRef.current = true;
 
+    setReviewData({
+      astrologerID: activeCall.astrologerID,
+      fullName: activeCall.callerName,
+    });
+
     voiceSocket.emit("call:end", {
       roomId,
       endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
     });
 
+    setOpenReview(true);
     await cleanup();
   };
 
@@ -348,7 +354,7 @@ const VideoCalling = ({ callData }) => {
     )}`;
 
   // Memoize chat data to prevent unnecessary re-renders
-  const astrologerName = lastRequestedAstro?.firstName +" "+lastRequestedAstro?.lastName;
+  const astrologerName = lastRequestedAstro?.firstName + " " + lastRequestedAstro?.lastName;
   const chatData = useMemo(() => ({
     userId: activeCall.userId,
     astrologerId: activeCall.astrologerId,
