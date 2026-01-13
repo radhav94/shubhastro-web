@@ -17,7 +17,7 @@ import { PATH } from "../../utils/routes/Paths";
 const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 
 const AgoraVoiceCalling = ({ callData }) => {
-  const { activeCall, setActiveCall } = useCall();
+  const { activeCall, setActiveCall, callSeconds, setCallSeconds, startTimer, stopTimer } = useCall();
   const navigate = useNavigate();
 
   if (!activeCall || activeCall.callType !== "audio") return null;
@@ -34,7 +34,6 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [micOn, setMicOn] = useState(true);
   const [joined, setJoined] = useState(false);
   const [callState, setCallState] = useState("connecting");
-  const [timer, setTimer] = useState(0);
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isVideo, setIsVideo] = useState(false);
@@ -79,6 +78,13 @@ const AgoraVoiceCalling = ({ callData }) => {
 
       setJoined(true);
       setCallState("connected");
+      
+      // Set initial call seconds and start the countdown timer
+      const seconds = Number(activeCall.remainingTime) * 60;
+      setCallSeconds(seconds);
+      
+      // Start the timer for local countdown (server syncs every minute via activity events)
+      startTimer();
     };
 
     startCall();
@@ -91,15 +97,6 @@ const AgoraVoiceCalling = ({ callData }) => {
   useEffect(() => {
     micTrackRef.current?.setEnabled(micOn);
   }, [micOn]);
-
-  /* ================= TIMER ================= */
-  useEffect(() => {
-    let interval;
-    if (callState === "connected") {
-      interval = setInterval(() => setTimer((t) => t + 1), 1000);
-    }
-    return () => clearInterval(interval);
-  }, [callState]);
 
   /* ================= CLEANUP ================= */
   const cleanup = async () => {
@@ -118,6 +115,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       micTrackRef.current = null;
       clientRef.current = null;
       setActiveCall(null);
+      stopTimer();
     }
   };
 
@@ -220,7 +218,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         >
           <div>
             <strong>{callerName}</strong>
-            <small>{joined ? formatTime(timer) : "Calling…"}</small>
+            <small>{joined ? formatTime(callSeconds) : "Calling…"}</small>
           </div>
 
           <div className={styles.miniActions}>
@@ -247,7 +245,7 @@ const AgoraVoiceCalling = ({ callData }) => {
           <div className={styles.miniInfo}>
             <p className={styles.miniName}>{callerName}</p>
             <span className={styles.miniStatus}>
-              {joined ? formatTime(timer) : "Calling…"}
+              {joined ? formatTime(callSeconds) : "Calling…"}
             </span>
           </div>
 
@@ -292,7 +290,7 @@ const AgoraVoiceCalling = ({ callData }) => {
                 alt="avatar"
               />
               <h2>{callerName}</h2>
-              <p>{joined ? formatTime(timer) : "Connecting…"}</p>
+              <p>{joined ? formatTime(callSeconds) : "Connecting…"}</p>
             </div>
           )}
           <div className={styles.callControls}>
@@ -363,7 +361,7 @@ const AgoraVoiceCalling = ({ callData }) => {
             <h2>{callerName}</h2>
 
             <p className={styles.status}>
-              {joined ? `Connected • ${formatTime(timer)}` : "Connecting…"}
+              {joined ? `Connected • ${formatTime(callSeconds)}` : "Connecting…"}
             </p>
 
             <div className={styles.controls}>

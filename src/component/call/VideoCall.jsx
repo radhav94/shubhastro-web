@@ -18,7 +18,7 @@ import VideoCallChat from "./VideoCallChat";
 const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 
 const VideoCalling = ({ callData }) => {
-  const { activeCall, setActiveCall, lastRequestedAstro, setOpenReview, setReviewData } = useCall();
+  const { activeCall, setActiveCall, lastRequestedAstro, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer } = useCall();
   const navigate = useNavigate();
 
   if (!activeCall || activeCall.callType !== "video") return null;
@@ -45,20 +45,17 @@ const VideoCalling = ({ callData }) => {
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isChatOpen, setIsChatOpen] = useState(false); // Chat panel state
 
-  const [callSeconds, setCallSeconds] = useState(0);
-  const timerRef = useRef(null);
-
   /* ================= LOCAL VIDEO ================= */
- const playLocalVideo = (container) => {
-  if (!camTrackRef.current || !container) return;
+  const playLocalVideo = (container) => {
+    if (!camTrackRef.current || !container) return;
 
-  try {
-    camTrackRef.current.stop(); // 🔥 IMPORTANT
-  } catch (e) {}
+    try {
+      camTrackRef.current.stop(); // 🔥 IMPORTANT
+    } catch (e) { }
 
-  container.innerHTML = "";
-  camTrackRef.current.play(container);
-};
+    container.innerHTML = "";
+    camTrackRef.current.play(container);
+  };
 
 
   /* ================= REMOTE VIDEO SAFE PLAY ================= */
@@ -82,34 +79,34 @@ const VideoCalling = ({ callData }) => {
   // };
 
   const safePlayRemoteVideo = (track) => {
-  if (!track) return;
+    if (!track) return;
 
-  const container = isLocalBig
-    ? localVideoFullRef.current
-    : remoteVideoRef.current;
+    const container = isLocalBig
+      ? localVideoFullRef.current
+      : remoteVideoRef.current;
 
-  if (!container) return;
+    if (!container) return;
 
-  try {
-    track.stop(); // 🔥 VERY IMPORTANT
-  } catch (e) {}
-
-  container.innerHTML = "";
-
-  const div = document.createElement("div");
-  div.style.width = "100%";
-  div.style.height = "100%";
-  container.appendChild(div);
-
-  setTimeout(() => {
     try {
-      track.play(div);
-    } catch (err) {
-      console.warn("Remote play retry");
-      setTimeout(() => track.play(div), 300);
-    }
-  }, 100);
-};
+      track.stop(); // 🔥 VERY IMPORTANT
+    } catch (e) { }
+
+    container.innerHTML = "";
+
+    const div = document.createElement("div");
+    div.style.width = "100%";
+    div.style.height = "100%";
+    container.appendChild(div);
+
+    setTimeout(() => {
+      try {
+        track.play(div);
+      } catch (err) {
+        console.warn("Remote play retry");
+        setTimeout(() => track.play(div), 300);
+      }
+    }, 100);
+  };
 
 
   /* ================= RESUME REMOTE AUDIO ================= */
@@ -173,10 +170,9 @@ const VideoCalling = ({ callData }) => {
         await client.publish([micTrackRef.current, camTrackRef.current]);
 
         setJoined(true);
-
-        timerRef.current = setInterval(() => {
-          setCallSeconds((p) => p + 1);
-        }, 1000);
+        const seconds = Number(activeCall.remainingTime) * 60;
+        setCallSeconds(seconds);
+        startTimer();
       } catch (err) {
         console.error("CALL START ERROR", err);
         safeEndCall();
@@ -189,7 +185,7 @@ const VideoCalling = ({ callData }) => {
   }, [roomId]);
 
   /* ================= LOCAL VIDEO ================= */
- 
+
 
   useEffect(() => {
     if (!joined) return;
@@ -204,9 +200,9 @@ const VideoCalling = ({ callData }) => {
   }, [joined, isMinimized, isLocalBig]);
 
   useEffect(() => {
-  if (!clientRef.current) return;
-  resumeRemoteTracks();
-}, [isLocalBig]);
+    if (!clientRef.current) return;
+    resumeRemoteTracks();
+  }, [isLocalBig]);
 
 
   useEffect(() => {
@@ -247,10 +243,6 @@ const VideoCalling = ({ callData }) => {
     } catch (e) {
       console.warn(e);
     } finally {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
 
       micTrackRef.current = null;
       camTrackRef.current = null;
@@ -261,8 +253,8 @@ const VideoCalling = ({ callData }) => {
       }
 
       setJoined(false);
-      setCallSeconds(0);
       setActiveCall(null);
+      stopTimer();
     }
   };
 
