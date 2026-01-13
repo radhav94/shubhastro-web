@@ -98,6 +98,8 @@ import Weekly from "../../screens/private/horoscope/weeklyHoroscope/Weekly";
 import Yearly from "../../screens/private/horoscope/yearlyHoroscope/Yearly";
 import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
 import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
+import SingleCallHistory from "../../screens/private/orderHistory/components/Call/SingleCallHistory";
+import SingleChatHistory from "../../screens/private/orderHistory/components/Chat/SingleChatHistory";
 import OrderHistory from "../../screens/private/orderHistory/OrderHistory";
 import FinalPay from "../../screens/private/payment/FinalPay";
 import ConsultantList from "../../screens/private/shop/consultant/ConsultantList";
@@ -641,9 +643,18 @@ export const PATH = {
       path: "/wallet-transactions",
       element: WalletTranscations,
     },
-     WalletTranscations: {
+     OrderHistory: {
       path: "/order-history",
       element: OrderHistory,
+    },
+
+     UserChatHistory: {
+      path: "/order-history/:roomId",
+      element: SingleChatHistory,
+    },
+     UserCallHistory: {
+      path: "/order-history/call",
+      element: SingleCallHistory,
     },
   },
 };

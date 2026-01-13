@@ -1,4 +1,3 @@
-
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 
 export const chatHistory = privateRequestNew.injectEndpoints({
@@ -13,8 +12,20 @@ export const chatHistory = privateRequestNew.injectEndpoints({
       }),
     }),
 
+    getRoomChatMessages: builder.query({
+      query: (roomId) => ({
+        url: "chat/messages",
+        method: "GET",
+        params: {
+          roomId,
+        },
+      }),
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useGetUserChatMessagesQuery } = chatHistory;
+export const {
+  useGetUserChatMessagesQuery,
+  useGetRoomChatMessagesQuery,
+} = chatHistory;

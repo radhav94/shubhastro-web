@@ -1,12 +1,13 @@
 import React from "react";
 import "./Call.scss";
 import { useCall } from "./Call.logic";
+import { useNavigate } from "react-router-dom";
+import { PATH } from "../../../../../utils/routes/Paths";
 
 const Call = () => {
   const userId = localStorage.getItem("shubhtalk_customer_id");
 
-  console.log("userIDddddd",userId)
-
+  const navigate=useNavigate();
   const { data, isLoading, error } = useCall(userId);
 
   if (isLoading) {
@@ -21,10 +22,22 @@ const Call = () => {
     return <div className="call-history">No call history found</div>;
   }
 
+
+  const handleCardClick = (roomId) => {
+    navigate(
+      PATH.privateRoutes.UserCallHistory.path
+    );
+  };
+
   return (
     <div className="call-history">
       {data.map((item) => (
-        <div className="call-card" key={item.id}>
+        <div className="call-card" 
+         key={item.id}
+      onClick={() => handleCardClick(item.roomId)}
+      style={{ cursor: "pointer" }}
+        >
+          
           {/* Top */}
           <div className="call-card__top">
             <span>Order Id: #{item.orderId}</span>
