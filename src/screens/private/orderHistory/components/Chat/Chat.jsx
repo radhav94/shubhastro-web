@@ -1,15 +1,18 @@
 import React from "react";
 import "./Chat.scss";
 import { useChat } from "./Chat.logic";
+import { useNavigate } from "react-router-dom";
+import { PATH } from "../../../../../utils/routes/Paths";
+
 
 const Chat = () => {
   const userId = localStorage.getItem("shubhtalk_customer_id");
 
-
-
-  console.log("userId------>>>>",userId);
-
   const { data, isLoading, error } = useChat(userId);
+
+  const navigate=useNavigate();
+
+
 
   if (isLoading) {
     return <div className="chat-history">Loading chat history...</div>;
@@ -23,25 +26,33 @@ const Chat = () => {
     return <div className="chat-history">No chat history found</div>;
   }
 
+
+const handleCardClick = (roomId) => {
+  navigate(
+    PATH.privateRoutes.UserChatHistory.path.replace(":roomId", roomId)
+  );
+};
+
+
+
   return (
     <div className="chat-history">
       {data.map((item) => (
-        <div className="chat-card" key={item.id}>
-          {/* Top */}
+        <div
+      className="chat-card"
+      key={item.id}
+      onClick={() => handleCardClick(item.roomId)}
+      style={{ cursor: "pointer" }}
+    >
           <div className="chat-card__top">
             <span>Order Id: #{item.orderId}</span>
             <span className="help">HELP</span>
           </div>
-
-          {/* Body */}
           <div className="chat-card__body">
-            {/* LEFT */}
             <div className="left">
               <img src={item.image} alt={item.name} />
               <span className="rate">₹ {item.rate}/min</span>
             </div>
-
-            {/* RIGHT */}
             <div className="right">
               <h4>{item.name}</h4>
               <p className="date">{item.date}</p>
@@ -50,8 +61,6 @@ const Chat = () => {
               </span>
             </div>
           </div>
-
-          {/* Meta */}
           <div className="chat-card__meta">
             <div>
               <span>Messages</span>
