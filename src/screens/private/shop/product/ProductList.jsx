@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import styles from "./ProductList.module.scss";
 import { FaEye, FaCircle } from "react-icons/fa";
@@ -11,7 +11,18 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { SHOP_PRODUCTS } from "../data/productData";
 
-const LIMIT = 10;
+const LIMIT = 20;
+
+const SkeletonCard = () => (
+  <div className={`${styles.card} ${styles.skeleton}`}>
+    <div className={styles.imageWrapper} />
+    <div className={styles.content}>
+      <div className={styles.skeletonLine} />
+      <div className={styles.skeletonLineSmall} />
+      <div className={styles.skeletonLineSmall} />
+    </div>
+  </div>
+);
 
 const ProductList = () => {
   const { slug } = useParams();
@@ -25,15 +36,21 @@ const ProductList = () => {
   const [hasMore, setHasMore] = useState(true);
 
   const loadMoreRef = useRef(null);
+  const observerRef = useRef(null);
 
   const {
-    data: epoojaData,
+    data: liveData,
     isLoading,
     isFetching,
-  } = useGetAllEPoojaQuery(isLiveDarshan ? { page, limit: LIMIT } : skipToken);
+  } = useGetAllEPoojaQuery(
+    isLiveDarshan ? { page, limit: LIMIT } : skipToken
+  );
 
-  const { data: oldEpoojaData } = useGetAllOldEPoojaQuery(
-    !isLiveDarshan ? slug : skipToken
+  const {
+    data: oldData,
+    isFetching: oldFetching,
+  } = useGetAllOldEPoojaQuery(
+    !isLiveDarshan ? { slug, page, limit: LIMIT } : skipToken
   );
 
   useEffect(() => {
@@ -43,52 +60,72 @@ const ProductList = () => {
   }, [slug]);
 
   useEffect(() => {
-    if (isLiveDarshan) {
-      const list = epoojaData?.data || [];
-      const meta = epoojaData?.meta;
+    if (isLiveDarshan && liveData?.data) {
+      const list = liveData.data;
+      const meta = liveData.meta;
 
-      if (!list.length) return;
-
-      setProducts((prev) =>
-        page === 1
-          ? list
-          : [...prev, ...list.filter((p) => !prev.some((x) => x._id === p._id))]
-      );
+      setProducts((prev) => {
+        const ids = new Set(prev.map((i) => i._id));
+        const unique = list.filter((i) => !ids.has(i._id));
+        return page === 1 ? list : [...prev, ...unique];
+      });
 
       setHasMore(meta?.hasNextPage === true);
       return;
     }
 
-    if (oldEpoojaData?.data) {
-      setProducts(oldEpoojaData.data);
-      setHasMore(false);
+    if (!isLiveDarshan && oldData?.data) {
+      const list = oldData.data;
+      const meta = oldData.pagination;
+
+      setProducts((prev) => {
+        const ids = new Set(prev.map((i) => i._id));
+        const unique = list.filter((i) => !ids.has(i._id));
+        return page === 1 ? list : [...prev, ...unique];
+      });
+
+      setHasMore(meta?.hasNextPage === true);
       return;
     }
 
-    setProducts(SHOP_PRODUCTS[slug] || []);
-    setHasMore(false);
-  }, [isLiveDarshan, epoojaData, oldEpoojaData, slug, page]);
+    // 🟡 FALLBACK
+    if (!isLiveDarshan && !oldData) {
+      setProducts(SHOP_PRODUCTS[slug] || []);
+      setHasMore(false);
+    }
+  }, [isLiveDarshan, liveData, oldData, page, slug]);
+
+  const handleObserver = useCallback(
+    ([entry]) => {
+      if (
+        entry.isIntersecting &&
+        hasMore &&
+        !isFetching &&
+        !oldFetching
+      ) {
+        setPage((prev) => prev + 1);
+      }
+    },
+    [hasMore, isFetching, oldFetching]
+  );
 
   useEffect(() => {
-    if (!isLiveDarshan || !hasMore || isFetching) return;
+    if (!hasMore) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setPage((prev) => prev + 1);
-        }
-      },
-      { threshold: 1 }
-    );
+    observerRef.current = new IntersectionObserver(handleObserver, {
+      threshold: 0.1,
+    });
 
-    if (loadMoreRef.current) observer.observe(loadMoreRef.current);
-    return () => observer.disconnect();
-  }, [isLiveDarshan, hasMore, isFetching]);
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
 
-  // ✅ FIX IS HERE
+    return () => observerRef.current?.disconnect();
+  }, [handleObserver, hasMore]);
+
   const getProductRouteId = (product) => {
     if (slug === "live-darshan") return product._id;
-    return product?.slug;
+    return product.slug;
   };
 
   return (
@@ -98,7 +135,7 @@ const ProductList = () => {
       <div className={styles.grid}>
         {products.map((product) => (
           <div
-            key={product._id || product.id}
+            key={product._id}
             className={styles.card}
             onClick={() =>
               navigate(`/shop/${slug}/${getProductRouteId(product)}`, {
@@ -129,9 +166,10 @@ const ProductList = () => {
                   className={styles.bookBtn}
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate(`/shop/${slug}/${getProductRouteId(product)}`, {
-                      state: product,
-                    });
+                    navigate(
+                      `/shop/${slug}/${getProductRouteId(product)}`,
+                      { state: product }
+                    );
                   }}
                 >
                   Book
@@ -144,7 +182,7 @@ const ProductList = () => {
                 <h3>{product.title || product.name}</h3>
                 <div className={styles.views}>
                   <FaEye />
-                  <span>{product.views || 1719}</span>
+                  <span>{product.views || 0}</span>
                 </div>
               </div>
 
@@ -162,11 +200,17 @@ const ProductList = () => {
             </div>
           </div>
         ))}
+
+        {/* ===== SKELETON ===== */}
+        {(isFetching || oldFetching) &&
+          Array.from({ length: 2 }).map((_, i) => (
+            <SkeletonCard key={`skeleton-${i}`} />
+          ))}
       </div>
 
-      {isLiveDarshan && <div ref={loadMoreRef} style={{ height: 1 }} />}
+      {hasMore && <div ref={loadMoreRef} style={{ height: 40 }} />}
 
-      <PrimaryLoader isLoading={isLoading} />
+      <PrimaryLoader isLoading={isLoading || oldFetching} />
     </div>
   );
 };

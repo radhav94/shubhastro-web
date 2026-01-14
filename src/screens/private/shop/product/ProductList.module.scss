@@ -134,3 +134,26 @@
   0%, 50%, 100% { opacity: 1; }
   25%, 75% { opacity: 0; }
 }
+.skeleton {
+  pointer-events: none;
+}
+
+.skeleton .imageWrapper {
+  background: #eee;
+  height: 180px;
+  border-radius: 12px;
+}
+
+.skeletonLine {
+  height: 16px;
+  background: #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.skeletonLineSmall {
+  height: 12px;
+  background: #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}

@@ -43,13 +43,19 @@ export const epoojaApi = privateRequestNew.injectEndpoints({
     }),
 
     // GET ALL Epooja
-    getAllOldEPooja: builder.query({
-      query: (slug) => ({
-        url: "ePoojas/all",
-        params: {
+ getAllOldEPooja: builder.query({
+      query: ({ slug, page = 1, limit = 1 }) => {
+        const params = new URLSearchParams({
           slug,
-        },
-      }),
+          page,
+          limit,
+        });
+
+        return {
+          url: `ePoojas/all?${params.toString()}`,
+          method: "GET",
+        };
+      },
     }),
 
     // GET Single Epooja
