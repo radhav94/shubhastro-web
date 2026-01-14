@@ -4,9 +4,17 @@ export const epoojaApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
     // GET ALL Categories
     getAllCategories: builder.query({
-      query: () => ({
-        url: "categories/all",
-      }),
+      query: ({ page = 1, limit = 6 }) => {
+        const params = new URLSearchParams({
+          page,
+          limit,
+        });
+
+        return {
+          url: `categories/all?${params.toString()}`,
+          method: "GET",
+        };
+      },
     }),
 
     // GET ALL Darshan
