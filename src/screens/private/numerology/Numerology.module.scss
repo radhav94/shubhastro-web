@@ -1,13 +1,15 @@
 .page {
-  background: #f5f1e9;
+  // background: #f5f1e9;
   min-height: 100vh;
   padding-bottom: 80px;
+  position: relative;
 }
 
 /* HERO */
 .hero {
   text-align: center;
   position: relative;
+  padding: 40px 20px;
 }
 
 .heroGlow {
@@ -18,20 +20,25 @@
   height: 650px;
   background: radial-gradient(
     circle,
-    rgba(255, 210, 140, 0.7) 0%,
+    // rgba(255, 210, 140, 0.7) 0%,
     rgba(245, 241, 233, 0) 70%
   );
   transform: translateX(-50%);
-  z-index: -1;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .heroTitle {
   margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
 }
 
 .heroSubtitle {
   max-width: 600px;
   margin: 0 auto 32px;
+  position: relative;
+  z-index: 1;
 }
 
 .primaryBtn {
@@ -54,7 +61,9 @@
 .features {
   display: flex;
   justify-content: center;
-  padding: 0 20px;
+  padding: 20px 20px 40px;
+  position: relative;
+  z-index: 1;
 }
 
 .premiumCard {
@@ -162,4 +171,1159 @@
 .primaryBtnLarge:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+/* PROFILE HEADER */
+.profileHeader {
+  display: none; /* Hidden by default on mobile */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #F3F3F3;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+/* MOBILE PROFILE BAR */
+.mobileProfileBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #F3F3F3;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.backBtn {
+  background: white;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  color: #333;
+  border-radius: 12px;
+  transition: 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 44px;
+  height: 44px;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.editBtn {
+  // background: white;
+  // border: 1px solid #e0e0e0;
+  cursor: pointer;
+  padding: 10px;
+  color: #333;
+  border-radius: 12px;
+  transition: 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 44px;
+  height: 44px;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.profileSelector {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 12px;
+  border-radius: 8px;
+  transition: 0.2s ease;
+  
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.selectLabel {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 2px;
+}
+
+.profileName {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* MODAL OVERLAY */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* BOTTOM SHEET (Select Profile) */
+.bottomSheet {
+  background: white;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.sheetHandle {
+  width: 40px;
+  height: 4px;
+  background: #ddd;
+  border-radius: 2px;
+  margin: 12px auto;
+}
+
+.sheetContent {
+  padding: 0 24px 24px;
+  position: relative;
+}
+
+.sheetTitle {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #000;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 0;
+  right: 24px;
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: 0.2s ease;
+
+  &:hover {
+    background: #f0f0f0;
+    color: #333;
+  }
+}
+
+/* PROFILE LIST */
+.profileList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.profileItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f5f5f5;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.profileItem:hover {
+  background: #ebebeb;
+}
+
+.profileAvatar {
+  width: 56px;
+  height: 56px;
+  background: #ccc;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 600;
+  color: #666;
+}
+
+.profileInfo {
+  flex: 1;
+}
+
+.relationBadge {
+  display: inline-block;
+  background: #e0e0e0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.profileName {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 4px 0;
+  color: #000;
+}
+
+.profileDetails {
+  font-size: 13px;
+  color: #666;
+  margin: 2px 0;
+}
+
+.profileLocation {
+  font-size: 13px;
+  color: #999;
+}
+
+.radioBtn {
+  font-size: 24px;
+  color: #333;
+}
+
+.addProfileBtn {
+  width: 100%;
+  padding: 16px;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.addProfileBtn:hover {
+  background: #f9f9f9;
+  border-color: #bbb;
+}
+
+/* SIDE SHEET (Add Profile) */
+.sideSheet {
+  background: white;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+/* PROFILE FORM */
+.profileForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  input,
+  select {
+    padding: 14px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    transition: 0.2s ease;
+
+    &:focus {
+      border-color: #999;
+    }
+
+    &::placeholder {
+      color: #aaa;
+    }
+  }
+
+  input[type="date"],
+  input[type="time"] {
+    cursor: pointer;
+  }
+}
+
+.identityButtons {
+  display: flex;
+  gap: 12px;
+
+  button {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    background: #f5f5f5;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s ease;
+
+    &.active {
+      background: #333;
+      color: white;
+      border-color: #333;
+    }
+
+    &:hover:not(.active) {
+      background: #ebebeb;
+    }
+  }
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
+  margin-top: 8px;
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 16px;
+  background: #000;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: #333;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .deepGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .bottomSheet,
+  .sideSheet {
+    max-width: 100%;
+  }
+}
+
+/* DESKTOP STYLES */
+@media (min-width: 769px) {
+  .page {
+    padding-bottom: 40px;
+  }
+
+  /* Hide Mobile Profile Bar on Desktop */
+  .mobileProfileBar {
+    display: none;
+  }
+
+  /* Show Desktop Profile Header */
+  .profileHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 40px;
+    background: #F3F3F3;
+  }
+
+  .profileSelector {
+    cursor: pointer;
+    transition: 0.2s ease;
+
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+
+  /* Desktop Modal Overlay */
+  .modalOverlay {
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Desktop Bottom Sheet - Square Modal */
+  .bottomSheet {
+    border-radius: 12px !important;
+    width: 90%;
+    max-width: 450px;
+    max-height: 80vh;
+    animation: fadeIn 0.3s ease-out !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Desktop Side Sheet - Square Modal */
+  .sideSheet {
+    border-radius: 20px !important;
+    width: 90%;
+    max-width: 1000px;
+    max-height: 80vh;
+    animation: fadeIn 0.3s ease-out !important;
+    position: relative !important;
+    top: 70px;
+    left: auto !important;
+    transform: none !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Desktop Hero Section */
+  .hero {
+    padding: 60px 40px;
+  }
+
+  .heroTitle {
+    font-size: 48px;
+  }
+
+  .heroSubtitle {
+    font-size: 20px;
+    max-width: 700px;
+  }
+
+  /* Desktop Features */
+  .features {
+    padding: 40px;
+  }
+
+  .premiumCard {
+    width: 380px;
+    padding: 40px;
+
+    .cardIcon {
+      font-size: 45px;
+      padding: 22px;
+    }
+  }
+
+  /* Desktop Deep Section */
+  .deepSection {
+    max-width: 1000px;
+    padding: 0 40px;
+    margin: 100px auto 0;
+  }
+
+  .deepGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .deepItem {
+    padding: 24px 28px;
+  }
+
+  /* Desktop Form Improvements */
+  .profileForm {
+    gap: 24px;
+  }
+
+  .formGroup {
+    gap: 8px;
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #555;
+    }
+
+    input,
+    select {
+      padding: 14px 18px;
+      font-size: 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fafafa;
+      color: #333;
+
+      &:hover {
+        border-color: #ccc;
+        background: #fff;
+      }
+
+      &:focus {
+        background: #fff;
+        border-color: #999;
+        outline: none;
+      }
+
+      &::placeholder {
+        color: #aaa;
+      }
+    }
+
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+    }
+  }
+
+  .identityButtons {
+    gap: 12px;
+
+    button {
+      padding: 14px;
+      font-size: 15px;
+      border-radius: 8px;
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      color: #666;
+      font-weight: 500;
+
+      &.active {
+        background: #333;
+        color: white;
+        border-color: #333;
+      }
+
+      &:hover:not(.active) {
+        background: #ebebeb;
+        border-color: #d0d0d0;
+      }
+    }
+  }
+
+  .submitBtn {
+    padding: 16px;
+    font-size: 16px;
+    border-radius: 8px;
+    margin-top: 8px;
+    font-weight: 600;
+
+    &:hover {
+      background: #1a1a1a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .checkboxLabel {
+    font-size: 14px;
+    margin-top: 10px;
+    color: #666;
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .addProfileBtn {
+    padding: 18px;
+    font-size: 17px;
+
+    &:hover {
+      background: #f5f5f5;
+      border-color: #999;
+      transform: translateY(-1px);
+    }
+  }
+
+  /* Desktop Profile List */
+  .profileItem {
+    padding: 20px;
+    transition: 0.2s ease;
+
+    &:hover {
+      background: #e8e8e8;
+      transform: translateX(4px);
+    }
+  }
+
+  .profileAvatar {
+    width: 64px;
+    height: 64px;
+    font-size: 22px;
+  }
+
+  /* Desktop Sheet Content */
+  .sheetContent {
+    padding: 32px 40px 40px;
+  }
+
+  .sheetTitle {
+    font-size: 28px;
+    margin-bottom: 28px;
+    font-weight: 700;
+    color: #000;
+  }
+
+  .closeBtn {
+    display: flex;
+    top: 20px;
+    right: 32px;
+    font-size: 28px;
+    width: 36px;
+    height: 36px;
+    color: #888;
+
+    &:hover {
+      background: #f5f5f5;
+      color: #333;
+    }
+  }
+
+  /* Hide handle on desktop */
+  .sheetHandle {
+    display: none;
+  }
+
+  /* Desktop Back Button */
+  .backBtn {
+    padding: 10px;
+    transition: 0.2s ease;
+    width: 48px;
+    height: 48px;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    &:hover {
+      background: #f5f5f5;
+    }
+  }
+
+  .editBtn {
+    padding: 10px;
+    transition: 0.2s ease;
+    width: 48px;
+    height: 48px;
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    &:hover:not(:disabled) {
+      background: #f5f5f5;
+    }
+  }
+
+  .profileName {
+    font-size: 20px;
+  }
+
+  .selectLabel {
+    font-size: 13px;
+  }
+}
+
+
+/* NUMEROLOGY SECTION */
+.numerologySection {
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.numerologyCard {
+  background: #d9d9d9;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.cardContent {
+  flex: 1;
+}
+
+.cardLabel {
+  font-size: 12px;
+  color: #484848;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #303030;
+  margin: 0 0 8px 0;
+}
+
+.cardDescription {
+  font-size: 14px;
+  color: #484848;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.cardNumber {
+  font-size: 64px;
+  font-weight: 700;
+  color: #484848;
+  min-width: 100px;
+  text-align: center;
+  background: #bcbcbc;
+  border-radius: 12px;
+  padding: 16px;
+  line-height: 1;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+/* RESPONSIVE */
+@media (min-width: 769px) {
+  .numerologySection {
+    max-width: 900px;
+    margin: 60px auto;
+    padding: 0 40px;
+  }
+
+  .numerologyCard {
+    padding: 28px;
+    gap: 24px;
+  }
+
+  .cardLabel {
+    font-size: 13px;
+  }
+
+  .cardTitle {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  .cardDescription {
+    font-size: 15px;
+  }
+
+  .cardNumber {
+    font-size: 72px;
+    min-width: 120px;
+    padding: 20px;
+  }
+}
+
+/* EXPERT SECTION */
+.expertSection {
+  max-width: 480px;
+  margin: 24px auto;
+  padding: 0 20px;
+}
+
+.expertCard {
+  background: #f4f4f4;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.expertContent {
+  flex: 1;
+}
+
+.expertTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 16px 0;
+  line-height: 1.3;
+}
+
+.consultBtn {
+  background: #000;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  &:hover {
+    background: #333;
+    transform: translateY(-1px);
+  }
+}
+
+.expertImage {
+  width: 100px;
+  height: 100px;
+  background: #d9d9d9;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+/* CYCLE SECTION */
+.cycleSection {
+  max-width: 480px;
+  margin: 24px auto;
+  padding: 0 20px;
+}
+
+.cycleCard {
+  background: #d9d9d9;
+  border-radius: 20px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.cycleBadge {
+  display: inline-block;
+  background: #606060;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.cycleTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 24px 0;
+}
+
+.cycleNumberBox {
+  width: 120px;
+  height: 120px;
+  background: #bcbcbc;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.cycleNumber {
+  font-size: 72px;
+  font-weight: 700;
+  color: #555;
+  line-height: 1;
+}
+
+.cycleSubtitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 12px 0;
+}
+
+.cycleDescription {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+/* RESPONSIVE */
+@media (min-width: 769px) {
+  .expertSection {
+    max-width: 900px;
+    padding: 0 40px;
+    margin: 40px auto;
+  }
+
+  .expertCard {
+    padding: 32px;
+    gap: 32px;
+  }
+
+  .expertTitle {
+    font-size: 24px;
+  }
+
+  .consultBtn {
+    padding: 14px 28px;
+    font-size: 16px;
+  }
+
+  .expertImage {
+    width: 140px;
+    height: 140px;
+  }
+
+  .cycleSection {
+    max-width: 900px;
+    padding: 0 40px;
+    margin: 40px auto;
+  }
+
+  .cycleCard {
+    padding: 48px 40px;
+  }
+
+  .cycleBadge {
+    font-size: 14px;
+    padding: 8px 20px;
+  }
+
+  .cycleTitle {
+    font-size: 24px;
+    margin-bottom: 32px;
+  }
+
+  .cycleNumberBox {
+    width: 140px;
+    height: 140px;
+    margin-bottom: 32px;
+  }
+
+  .cycleNumber {
+    font-size: 84px;
+  }
+
+  .cycleSubtitle {
+    font-size: 26px;
+    margin-bottom: 16px;
+  }
+
+  .cycleDescription {
+    font-size: 16px;
+    max-width: 500px;
+  }
+}
+
+/* FULL WIDTH EXPERT BUTTON */
+.fullWidthExpertSection {
+  max-width: 480px;
+  margin: 24px auto;
+  padding: 0 20px;
+}
+
+.fullWidthExpertBtn {
+  width: 100%;
+  background: #000;
+  color: white;
+  border: none;
+  padding: 18px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  &:hover {
+    background: #333;
+    transform: translateY(-1px);
+  }
+}
+
+/* WHAT THIS MEANS FOR YOU */
+.meansSection {
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.meansTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000;
+  text-align: center;
+  margin: 0 0 32px 0;
+}
+
+.meansCarousel {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 16px;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+  }
+}
+
+.meansCard {
+  min-width: 280px;
+  background: #d9d9d9;
+  border-radius: 20px;
+  padding: 32px 24px;
+  text-align: center;
+  scroll-snap-align: center;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.meansIcon {
+  width: 80px;
+  height: 80px;
+  background: #979797;
+  border-radius: 16px;
+}
+
+.meansText {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* RESPONSIVE */
+@media (min-width: 769px) {
+  .fullWidthExpertSection {
+    max-width: 900px;
+    padding: 0 40px;
+    margin: 40px auto;
+  }
+
+  .fullWidthExpertBtn {
+    padding: 20px 32px;
+    font-size: 18px;
+  }
+
+  .meansSection {
+    max-width: 900px;
+    padding: 0 40px;
+    margin: 60px auto;
+  }
+
+  .meansTitle {
+    font-size: 32px;
+    margin-bottom: 48px;
+  }
+
+  .meansCarousel {
+    justify-content: center;
+    gap: 24px;
+  }
+
+  .meansCard {
+    min-width: 320px;
+    padding: 40px 32px;
+  }
+
+  .meansIcon {
+    width: 100px;
+    height: 100px;
+  }
+
+  .meansText {
+    font-size: 20px;
+  }
 }
