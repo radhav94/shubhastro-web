@@ -7,14 +7,12 @@
   inset: 0;
   width: 100vw;
   height: 100dvh; 
-  background: #0a0d2d;
+  background: #1a1a1a;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   z-index: 99999;
   overflow: hidden;
 }
-
 
 .joinContainer {
   display: flex;
@@ -27,21 +25,51 @@
 }
 
 .videoWrapper {
-  position: relative;
-  width: 85%;
-  height: 85%;
-  border-radius: 12px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
+  background: #000;
+  z-index: 1;
 }
 
 .remoteVideoArea {
   width: 100%;
   height: 100%;
   background: #000;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .remoteVideoArea video {
   pointer-events: none;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remoteVideoArea > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.remoteVideoArea > div > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.remoteVideoArea video {
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .remoteUserVideo {
@@ -50,40 +78,34 @@
 }
 
 .localVideoPreview {
-  position: absolute;
-  right: 12px;
-  bottom: calc(120px + var(--safe-bottom));
-  width: 110px;
-  height: 80px;
-  border-radius: 10px;
+  position: fixed;
+  top: 140px;
+  right: 16px;
+  width: 140px;
+  height: 180px;
+  border-radius: 16px;
   overflow: hidden;
-  border: 2px solid #00aaff;
-  z-index: 5;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  z-index: 50;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  background: #000;
 }
 
-
-/* ===============================
-   🎛 CONTROLS
-   =============================== */
-
-
-.controlBtn {
-  background: #1a1d40;
-  border: none;
-  color: #fff;
-  padding: 12px 18px;
-  border-radius: 50px;
-  cursor: pointer;
-  font-size: 13px;
+.localVideoPreview:hover {
+  transform: scale(1.05);
 }
 
-.endBtn {
-  background: #ff3d5a;
-  color: white;
-  padding: 12px 18px;
-  border-radius: 50px;
-  border: none;
-  cursor: pointer;
+.localVideoPreview > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.localVideoPreview video {
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .waitingText {
@@ -93,6 +115,239 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+  background: #1a1a1a;
+}
+
+/* ===============================
+   📱 HEADER
+   =============================== */
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4), transparent);
+  z-index: 100;
+}
+
+.backBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.astrologerInfo {
+  flex: 1;
+  margin-left: 12px;
+}
+
+.astrologerName {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.astrologerExp {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 2px 0 0 0;
+}
+
+.walletBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.walletIcon {
+  font-size: 16px;
+}
+
+.walletAmount {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* ===============================
+   🔘 ACTION BUTTONS
+   =============================== */
+
+.actionButtons {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), transparent);
+  z-index: 100;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.actionButtons::-webkit-scrollbar {
+  display: none;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.actionBtn svg {
+  flex-shrink: 0;
+}
+
+/* ===============================
+   🎛 BOTTOM CONTROLS
+   =============================== */
+
+.bottomControls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.7), transparent);
+  padding: 20px 16px 16px;
+}
+
+.controlGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.controlItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.controlBtn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.controlBtn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.controlBtn.muted {
+  background: rgba(255, 59, 48, 0.2);
+  border: 2px solid #ff3b30;
+}
+
+.endCallBtn {
+  background: #ff3b30 !important;
+}
+
+.endCallBtn:hover {
+  background: #e5342a !important;
+}
+
+.controlLabel {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  line-height: 1.2;
+  max-width: 80px;
+}
+
+/* ===============================
+   ⏱️ BOTTOM BAR
+   =============================== */
+
+.bottomBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.callTimer {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.timerRed {
+  color: #ff3b30;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.rechargeBtn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  border-radius: 20px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.rechargeBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
 }
 
 /* ===============================
@@ -103,29 +358,57 @@
   position: fixed;
   width: 240px;
   height: 165px;
-  background: rgba(10, 12, 30, 0.75);
-  backdrop-filter: blur(14px);
+  background: rgba(10, 12, 30, 0.95);
   border-radius: 16px;
   overflow: hidden;
   z-index: 999999;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
   cursor: grab;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .miniHeader {
-  height: 32px;
-  padding: 0 10px;
+  height: 36px;
+  padding: 0 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   color: white;
   font-size: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  font-weight: 500;
+}
+
+.miniHeader button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
 }
 
 .miniVideo {
   width: 100%;
-  height: calc(100% - 72px);
+  height: calc(100% - 76px);
   background: #000;
+  overflow: hidden;
+}
+
+.miniVideo > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.miniVideo video {
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .miniControls {
@@ -133,40 +416,38 @@
   display: flex;
   justify-content: space-evenly;
   align-items: center;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.5);
+  gap: 8px;
+  padding: 0 12px;
 }
 
-.iconBtn {
-  width: 32px;
-  height: 32px;
+.miniControls button {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.15);
   color: white;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
-.activeRed,
+.miniControls button:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
 .endBtnMini {
-  background: #ff3d5a;
+  background: #ff3b30 !important;
+  font-size: 18px;
+  font-weight: 600;
 }
 
-/* ===============================
-   🔽 MINIMIZE BUTTON (LEFT — ALL)
-   =============================== */
-
-.minimizeBtn {
-  position: fixed;
-  top: calc(12px + var(--safe-top));
-  left: 12px;
-  z-index: 999999;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  border: none;
+.endBtnMini:hover {
+  background: #e5342a !important;
 }
-
 
 /* ===============================
    📱 MOBILE (≤768px)
@@ -178,35 +459,78 @@
     overflow: hidden;
   }
 
-  .videoWrapper {
-    width: 100%;
-    height: 100%;
-    border-radius: 0;
+  .header {
+    padding: 10px 12px;
   }
 
-  .localVideoPreview {
-    width: 120px;
-    height: 90px;
-    bottom: 160px;
-    right: 12px;
+  .astrologerName {
+    font-size: 16px;
   }
 
- 
-
-  .controlBtn,
-  .endBtn {
-    padding: 10px 14px;
+  .astrologerExp {
     font-size: 12px;
   }
 
-  .floatingMini {
-    width: 180px;
-    height: 130px;
+  .walletBadge {
+    padding: 6px 12px;
   }
 
-  .iconBtn {
-    width: 28px;
-    height: 28px;
+  .walletAmount {
+    font-size: 14px;
+  }
+
+  .actionButtons {
+    top: 56px;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .actionBtn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .localVideoPreview {
+    width: 110px;
+    height: 150px;
+    top: 120px;
+    right: 12px;
+    border-width: 2px;
+  }
+
+  .bottomControls {
+    padding: 16px 12px 12px;
+  }
+
+  .controlGrid {
+    gap: 12px;
+  }
+
+  .controlBtn {
+    width: 56px;
+    height: 56px;
+  }
+
+  .controlLabel {
+    font-size: 10px;
+  }
+
+  .bottomBar {
+    padding-top: 10px;
+  }
+
+  .callTimer {
+    font-size: 12px;
+  }
+
+  .rechargeBtn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .floatingMini {
+    width: 200px;
+    height: 145px;
   }
 }
 
@@ -216,188 +540,205 @@
 
 @media (max-width: 480px) {
 
-  .localVideoPreview {
-    width: 100px;
-    height: 75px;
-    bottom: 180px;
+  .header {
+    padding: 8px 10px;
   }
 
- 
+  .backBtn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .astrologerName {
+    font-size: 15px;
+  }
+
+  .astrologerExp {
+    font-size: 11px;
+  }
+
+  .walletBadge {
+    padding: 5px 10px;
+  }
+
+  .walletIcon {
+    font-size: 14px;
+  }
+
+  .walletAmount {
+    font-size: 13px;
+  }
+
+  .actionButtons {
+    top: 50px;
+    padding: 8px 10px;
+    gap: 6px;
+  }
+
+  .actionBtn {
+    padding: 7px 12px;
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .actionBtn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .localVideoPreview {
+    width: 90px;
+    height: 120px;
+    top: 105px;
+    right: 10px;
+    border-radius: 12px;
+  }
+
+  .bottomControls {
+    padding: 12px 10px 10px;
+  }
+
+  .controlGrid {
+    gap: 10px;
+  }
+
+  .controlBtn {
+    width: 52px;
+    height: 52px;
+  }
+
+  .controlBtn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .controlLabel {
+    font-size: 9px;
+    max-width: 70px;
+  }
+
+  .bottomBar {
+    padding-top: 8px;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .callTimer {
+    font-size: 11px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .rechargeBtn {
+    padding: 8px 16px;
+    font-size: 12px;
+    width: 100%;
+  }
 
   .floatingMini {
-    width: 160px;
-    height: 115px;
+    width: 170px;
+    height: 125px;
   }
 
-  .minimizeBtn {
-    top: 10px;
-    left: 10px;
+  .miniHeader {
+    height: 32px;
+    font-size: 11px;
+  }
+
+  .miniControls button {
+    width: 32px;
+    height: 32px;
   }
 }
-.chatBtn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: none;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* ===============================
+   💻 DESKTOP (>768px)
+   =============================== */
 
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  cursor: pointer;
+@media (min-width: 769px) {
+  .videoContainer {
+    max-width: 100vw;
+  }
 
-  transition: background 0.2s ease, transform 0.15s ease;
+  .header {
+    padding: 16px 24px;
+  }
+
+  .backBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .astrologerName {
+    font-size: 20px;
+  }
+
+  .astrologerExp {
+    font-size: 14px;
+  }
+
+  .walletBadge {
+    padding: 10px 16px;
+  }
+
+  .walletAmount {
+    font-size: 16px;
+  }
+
+  .actionButtons {
+    top: 72px;
+    padding: 14px 24px;
+    gap: 12px;
+  }
+
+  .actionBtn {
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+
+  .localVideoPreview {
+    width: 180px;
+    height: 240px;
+    top: 160px;
+    right: 20px;
+  }
+
+  .bottomControls {
+    padding: 24px 24px 20px;
+  }
+
+  .controlGrid {
+    gap: 20px;
+    max-width: 600px;
+    margin: 0 auto 20px;
+  }
+
+  .controlBtn {
+    width: 72px;
+    height: 72px;
+  }
+
+  .controlBtn svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .controlLabel {
+    font-size: 12px;
+  }
+
+  .bottomBar {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-top: 16px;
+  }
+
+  .callTimer {
+    font-size: 14px;
+  }
+
+  .rechargeBtn {
+    padding: 12px 24px;
+    font-size: 15px;
+  }
 }
-
-.chatBtn:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.chatBtn:active {
-  transform: scale(0.95);
-}
-
-
-
-/* Call text */
-.callInfo {
-  font-size: 16px;
-  color: #ddd;
-}
-
-.callerName {
-  margin-left: 6px;
-  font-weight: 600;
-  font-size: 17px;
-  color: #fff;
-}
-
-/* Buttons row */
-.controlButtons {
-  display: flex;
-  gap: 14px;
-  justify-content: center;
-}
-
-/* Circle icon button */
-.iconBtn {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.iconBtn:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-/* End button special */
-.endBtn {
-  width: auto;
-  padding: 0 18px;
-  border-radius: 26px;
-  background: #e53935;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.endBtn:hover {
-  background: #d32f2f;
-}
-
-
-.controls {
-  position: fixed;
-  bottom: calc(16px + var(--safe-bottom));
-  left: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  z-index: 1000;
-  pointer-events: auto;
-}
-
-/* CALL INFO */
-.callInfo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  color: #fff;
-}
-
-.callText {
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-.callerName {
-  margin-left: 6px;
-  font-weight: 600;
-  font-size: 15px;
-}
-
-/* TIMER BADGE */
-.callTimer {
-  background: rgba(0, 0, 0, 0.55);
-  padding: 4px 10px;
-  border-radius: 14px;
-  font-size: 13px;
-  font-weight: 500;
-  backdrop-filter: blur(6px);
-}
-
-/* BUTTONS */
-
-.iconBtn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(0, 0, 0, 0.55);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  backdrop-filter: blur(6px);
-  transition: transform 0.15s ease, background 0.15s ease;
-}
-
-.iconBtn:hover {
-  transform: scale(1.08);
-  background: rgba(0, 0, 0, 0.7);
-}
-
-.iconBtn.active {
-  background: #4f46e5;
-  color: white;
-}
-
-.iconBtn.active:hover {
-  background: #4338ca;
-}
-
-.endBtn {
-  background: #e53935;
-}
-
-.endBtn:hover {
-  background: #d32f2f;
-}
-
-
-

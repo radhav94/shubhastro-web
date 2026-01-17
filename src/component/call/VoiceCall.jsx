@@ -1,18 +1,22 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import {
   IoMic,
   IoMicOff,
   IoArrowBack,
-  IoChatbubbleEllipses,
-  IoVideocam,
-  IoVideocamOff
+  IoSwapHorizontal,
+  IoSparkles,
+  IoGift,
+  IoVolumeHigh,
+  IoAttach,
+  IoTime,
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import styles from "./VoiceCall.module.scss";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
 import { PATH } from "../../utils/routes/Paths";
+import GiftModal from "./GiftModal";
 
 const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 
@@ -38,6 +42,7 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isVideo, setIsVideo] = useState(false);
   const [isRemoteVideo, setIsRemoteVideo] = useState(false);
+  const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
 
   /* ================= START CALL ================= */
   useEffect(() => {
@@ -216,193 +221,170 @@ const AgoraVoiceCalling = ({ callData }) => {
           onMouseDown={startDrag}
           onTouchStart={startDrag}
         >
-          <div>
-            <strong>{callerName}</strong>
-            <small>{joined ? formatTime(callSeconds) : "Calling…"}</small>
-          </div>
-
-          <div className={styles.miniActions}>
-            <button onClick={() => setMicOn((m) => !m)}>
-              {micOn ? <IoMic size={26} /> : <IoMicOff size={26} />}
-            </button>
-
-            <button className={styles.endBtn} onClick={endCall}>
-              End
-            </button>
-
-            <button onClick={() => setIsMinimized(false)}>⤢</button>
-          </div>
-        </div>
-      )}
-      {/* Old code */}
-      {/* {isMinimized && (
-        <div
-          className={styles.premiumMini}
-          style={{ top: position.y, left: position.x }}
-          onMouseDown={startDrag}
-          onTouchStart={startDrag}
-        >
-          <div className={styles.miniInfo}>
-            <p className={styles.miniName}>{callerName}</p>
-            <span className={styles.miniStatus}>
-              {joined ? formatTime(callSeconds) : "Calling…"}
+          <div className={styles.miniHeader}>
+            <span>
+              {callerName} • {joined ? formatTime(callSeconds) : "Calling…"}
             </span>
+            <button onClick={() => setIsMinimized(false)}>⤢</button>
           </div>
 
           <div className={styles.miniControls}>
             <button onClick={() => setMicOn((m) => !m)}>
-              {micOn ? <IoMic /> : <IoMicOff />}
+              {micOn ? <IoMic size={18} /> : <IoMicOff size={18} />}
             </button>
 
-            <button className={styles.endBtn} onClick={endCall}>
-              End
+            <button className={styles.endBtnMini} onClick={endCall}>
+              ✕
             </button>
-
-            <button onClick={() => setIsMinimized(false)}>⤢</button>
           </div>
         </div>
-      )} */}
+      )}
 
       {/* FULL VIEW */}
       {!isMinimized && (
         <div className={styles.fullscreenWrapper}>
-
+          {/* Remote Video (if enabled) */}
           <div
             id="remote-video"
             className={styles.remoteVideo}
             style={{ display: isRemoteVideo ? "block" : "none" }}
           />
 
+          {/* Local Video (if enabled) */}
           {isVideo && (
             <div id="local-video" className={styles.localVideo} />
           )}
-          <div className={styles.callHeader}>
-            <button onClick={() => setIsMinimized(true)}>
-              <IoArrowBack size={20} />
+
+          {/* Header */}
+          <div className={styles.header}>
+            <button
+              className={styles.backBtn}
+              onClick={() => setIsMinimized(true)}
+            >
+              <IoArrowBack size={24} />
             </button>
-            <span>{callerName}</span>
+            
+            <div className={styles.astrologerInfo}>
+              <h3 className={styles.astrologerName}>{callerName}</h3>
+              <p className={styles.astrologerExp}>Exp. 20 Years</p>
+            </div>
+
+            <div className={styles.walletBadge}>
+              <span className={styles.walletIcon}>💰</span>
+              <span className={styles.walletAmount}>₹20</span>
+            </div>
           </div>
+
+          {/* Action Buttons */}
+          <div className={styles.actionButtons}>
+            <button className={styles.actionBtn}>
+              <IoAttach size={16} />
+              <span>Attach File</span>
+            </button>
+            <button className={styles.actionBtn}>
+              <IoSparkles size={16} />
+              <span>Suggested Remedy</span>
+            </button>
+            <button className={styles.actionBtn}>
+              <IoTime size={16} />
+              <span>View History</span>
+            </button>
+          </div>
+
+          {/* Voice Center (Avatar & Timer) */}
           {!isRemoteVideo && (
             <div className={styles.voiceCenter}>
-              <img
-                className={styles.avatar}
-                src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                alt="avatar"
-              />
-              <h2>{callerName}</h2>
-              <p>{joined ? formatTime(callSeconds) : "Connecting…"}</p>
+              <div className={styles.avatarContainer}>
+                <img
+                  className={styles.avatar}
+                  src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                  alt="avatar"
+                />
+              </div>
+              <div className={styles.callTimer}>
+                {joined ? formatTime(callSeconds) : "Connecting…"}
+              </div>
             </div>
           )}
-          <div className={styles.callControls}>
-            <button onClick={() => setMicOn((m) => !m)}>
-              {micOn ? <IoMic /> : <IoMicOff />}
-            </button>
 
-            <button onClick={toggleCamera}>
-              {isVideo ? <IoVideocamOff /> : <IoVideocam />}
-            </button>
+          {/* Bottom Controls */}
+          <div className={styles.bottomControls}>
+            {/* Control Buttons Grid */}
+            <div className={styles.controlGrid}>
+              <div className={styles.controlItem}>
+                <button className={styles.controlBtn}>
+                  <IoSwapHorizontal size={24} />
+                </button>
+                <span className={styles.controlLabel}>Switch Profile</span>
+              </div>
 
-            <button className={styles.endBtn} onClick={endCall}>
-              End
-            </button>
+              <div className={styles.controlItem}>
+                <button className={styles.controlBtn}>
+                  <IoSparkles size={24} />
+                </button>
+                <span className={styles.controlLabel}>AI Wow</span>
+              </div>
 
-            <button
-              onClick={() => {
-                setIsMinimized(true);
-                isUserSide
-                  ? navigate(
-                    `/chat-with-astrologers/${activeCall.astrologerId}`,
-                    {
-                      state: {
-                        roomId: activeCall.chatRoomId,
-                        userId: activeCall.userId,
-                        astrologerId: activeCall.astrologerId,
-                        kundliId: activeCall.kundliId,
-                        fullName: activeCall.callerName,
-                        isUserSide: true,
-                      },
-                    }
-                  )
-                  : navigate(
-                    PATH.privateRoutes.ASTROLOGER_CHAT_USER_LIST.path
-                  );
-              }}
-            >
-              <IoChatbubbleEllipses />
-            </button>
+              <div className={styles.controlItem}>
+                <button
+                  className={styles.controlBtn}
+                  onClick={() => setIsGiftModalOpen(true)}
+                >
+                  <IoGift size={24} />
+                </button>
+                <span className={styles.controlLabel}>Send Gift</span>
+              </div>
+
+              <div className={styles.controlItem}>
+                <button
+                  className={`${styles.controlBtn} ${!micOn ? styles.muted : ''}`}
+                  onClick={() => setMicOn((m) => !m)}
+                >
+                  {micOn ? <IoMic size={24} /> : <IoMicOff size={24} />}
+                </button>
+                <span className={styles.controlLabel}>
+                  {micOn ? "Unmute Audio" : "Mute Audio"}
+                </span>
+              </div>
+
+              <div className={styles.controlItem}>
+                <button
+                  className={`${styles.controlBtn} ${styles.endCallBtn}`}
+                  onClick={endCall}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M19.23 15.26L16.69 14.97C16.08 14.9 15.48 15.11 15.05 15.54L13.21 17.38C10.38 15.94 8.06004 13.63 6.62004 10.79L8.47004 8.94001C8.90004 8.51001 9.11004 7.91001 9.04004 7.30001L8.75004 4.78001C8.63004 3.77001 7.78004 3.01001 6.76004 3.01001H5.03004C3.90004 3.01001 2.96004 3.95001 3.03004 5.08001C3.56004 13.62 10.39 20.44 18.92 20.97C20.05 21.04 20.99 20.1 20.99 18.97V17.24C21 16.23 20.24 15.38 19.23 15.26Z" fill="currentColor"/>
+                  </svg>
+                </button>
+                <span className={styles.controlLabel}>End Call</span>
+              </div>
+
+              <div className={styles.controlItem}>
+                <button className={styles.controlBtn}>
+                  <IoVolumeHigh size={24} />
+                </button>
+                <span className={styles.controlLabel}>Speaker</span>
+              </div>
+            </div>
+
+            {/* Timer and Recharge */}
+            <div className={styles.bottomBar}>
+              <div className={styles.callTimerBottom}>
+                Call Ends in <span className={styles.timerRed}>{formatTime(callSeconds)}</span>
+              </div>
+              <button className={styles.rechargeBtn}>Recharge Now</button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Old Code */}
-      {/* {!isMinimized && (
-        <div className={styles.fullscreenWrapper}>
-          
-          {isRemoteVideo && (
-            <div
-              id="remote-video"
-              className="w-full h-full bg-black rounded-lg"
-            />
-          )}
-          {isVideo && (
-            <div
-              id="local-video"
-              className="absolute bottom-20 right-4 w-32 h-40 bg-black rounded-lg overflow-hidden"
-            />
-          )}
-          <button
-            className={styles.minimizeBtn}
-            onClick={() => setIsMinimized(true)}
-          >
-            <IoArrowBack size={20} />
-          </button>
-
-          <div className={styles.callingContainer}>
-            <h2>{callerName}</h2>
-
-            <p className={styles.status}>
-              {joined ? `Connected • ${formatTime(callSeconds)}` : "Connecting…"}
-            </p>
-
-            <div className={styles.controls}>
-              <button onClick={() => setMicOn((m) => !m)}>
-                {micOn ? <IoMic size={28} /> : <IoMicOff size={28} />}
-              </button>
-              <button onClick={toggleCamera}>
-                {isVideo ? <IoVideocamOff /> : <IoVideocam />}
-              </button>
-              <button className={styles.endBtn} onClick={endCall}>
-                End
-              </button>
-
-              <button
-                onClick={() => {
-                  setIsMinimized(true);
-                  isUserSide
-                    ? navigate(
-                      `/talk-to-astrologers/${activeCall.astrologerId}`,
-                      {
-                        state: {
-                          roomId: activeCall.chatRoomId,
-                          userId: activeCall.userId,
-                          astrologerId: activeCall.astrologerId,
-                          kundliId: activeCall.kundliId,
-                          fullName: activeCall.callerName,
-                          isUserSide: true,
-                        },
-                      }
-                    )
-                    : navigate(
-                      PATH.privateRoutes.ASTROLOGER_CHAT_USER_LIST.path
-                    );
-                }}
-              >
-                <IoChatbubbleEllipses size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
+      {/* Gift Modal */}
+      <GiftModal
+        isOpen={isGiftModalOpen}
+        onClose={() => setIsGiftModalOpen(false)}
+        astrologerId={activeCall?.astrologerId}
+        astrologerName={callerName}
+      />
     </>
   );
 };
