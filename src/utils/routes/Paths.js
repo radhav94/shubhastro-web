@@ -6,7 +6,7 @@ import {
   ForgotPassword,
   OtpVerification,
   VerifyPassword,
-  Home,
+  // Home,
   Horoscope,
   Panchang,
   Kundli,
@@ -118,6 +118,7 @@ import LoveTriangleTarot from "../../screens/private/tarot/loveTriangleTarot/Lov
 import MadeForEachOther from "../../screens/private/tarot/madeForEachOther/MadeForEachOther";
 import RomanticBreakUpTarot from "../../screens/private/tarot/romanticBreakupTarot/RomanticBreakUpTarot";
 import YesNoTarot from "../../screens/private/tarot/yesNoTarot/YesNoTarot";
+import Home from "../../screens/v2/home/Home"
 
 export const PATH = {
   // DEFAULT: {
@@ -151,6 +152,8 @@ export const PATH = {
     HOME: {
       path: "/",
       element: Home,
+      header: false,
+      footer: false,
     },
     ASTROLOGER_DASHBOARD: {
       path: "/astrologer-dashboard",
