@@ -1,0 +1,170 @@
+/* PROFILE HEADER */
+.profileHeader {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #F3F3F3;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+/* MOBILE PROFILE BAR */
+.mobileProfileBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #F3F3F3;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.backBtn {
+  background: white;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  color: #333;
+  border-radius: 12px;
+  transition: 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 44px;
+  height: 44px;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.editBtn {
+  cursor: pointer;
+  padding: 10px;
+  color: #333;
+  border-radius: 12px;
+  transition: 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.profileSelector {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 12px;
+  border-radius: 8px;
+  transition: 0.2s ease;
+  
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.selectLabel {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 2px;
+}
+
+.profileName {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* DESKTOP STYLES */
+@media (min-width: 769px) {
+  .mobileProfileBar {
+    display: none;
+  }
+
+  .profileHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 40px;
+    background: #F3F3F3;
+  }
+
+  .profileSelector {
+    cursor: pointer;
+    transition: 0.2s ease;
+
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+
+  .backBtn {
+    padding: 10px;
+    transition: 0.2s ease;
+    width: 48px;
+    height: 48px;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    &:hover {
+      background: #f5f5f5;
+    }
+  }
+
+  .editBtn {
+    padding: 10px;
+    transition: 0.2s ease;
+    width: 48px;
+    height: 48px;
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    &:hover:not(:disabled) {
+      background: #f5f5f5;
+    }
+  }
+
+  .profileName {
+    font-size: 20px;
+  }
+
+  .selectLabel {
+    font-size: 13px;
+  }
+}
