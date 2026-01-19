@@ -1,7 +1,8 @@
 import React, { Suspense } from "react";
 import styles from "./HomeLayout.module.scss";
 import TopBar from "./topbar/TopBar";
-import { Outlet, useMatches } from "react-router-dom";
+import TopHeader from "../component/TopHeader";
+import { Outlet, useMatches, useLocation } from "react-router-dom";
 import Divider from "../component/Divider";
 
 import { useIsMobile } from "../utils/hooks/useIsMobile";
@@ -18,6 +19,7 @@ import StickyReview from "../screens/private/home/components/call/StickyReview";
 const HomeLayout = () => {
   const isMobile = useIsMobile();
   const matches = useMatches();
+  const location = useLocation();
 
   const currentRoute = matches
     .reverse()
@@ -25,17 +27,27 @@ const HomeLayout = () => {
 
   const showHeader = currentRoute ? currentRoute.handle.header : true;
   const showFooter = currentRoute ? currentRoute.handle.footer : true;
+  
+  // Hide TopHeader on onboarding page
+  const isOnboardingPage = location.pathname === "/onboarding";
 
   return (
     <div className={styles.layout}>
       <ScrollToTop />
 
+      {/* NEW TOP HEADER - Hidden on onboarding */}
+      {!isOnboardingPage && (
+        <div className={styles.fixedTopHeader}>
+          <TopHeader />
+        </div>
+      )}
+
       {/* FIXED TOPBAR */}
-      {showHeader && (
+      {/* {showHeader && (
         <div className={styles.fixedTopBar}>
           <TopBar />
         </div>
-      )}
+      )} */}
 
       {/* Scrollable Content */}
       <div className={styles.contentWrapper}>

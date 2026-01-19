@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import {
   ChevronRight,
   Search,
-  User,
   Home as HomeIcon,
   Compass,
   Radio,
@@ -39,7 +38,6 @@ import numerology from "../../../assets/images/numerology.svg";
 import matchmaking from "../../../assets/images/matchmaking.svg";
 import tarot from "../../../assets/images/tarot.svg";
 import blog from "../../../assets/images/blog.svg";
-import { NavLink } from "react-router-dom";
 
 const Home = () => {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -131,89 +129,6 @@ const Home = () => {
 
   return (
     <div className={styles.home}>
-      {/* Header */}
-      <header className={styles.header}>
-        <div className={styles.userGreeting}>
-          <div className={styles.userAvatar}>
-            <span>🐏</span>
-          </div>
-          <div className={styles.greetingText}>
-            <span className={styles.namaste}>नमस्ते</span>
-            <span className={styles.userName}>Priya Nair</span>
-          </div>
-        </div>
-
-        <nav className={styles.headerNavigation}>
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-            end
-          >
-            Home
-          </NavLink>
-
-          <NavLink
-            to="/astrologers"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Astrologers
-          </NavLink>
-
-          <NavLink
-            to="/services"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Services
-          </NavLink>
-
-          <NavLink
-            to="/ai-experiences"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            AI WOW
-          </NavLink>
-
-          <NavLink
-            to="/blogs"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Blogs
-          </NavLink>
-
-          <NavLink
-            to="/Kundli"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Kundli
-          </NavLink>
-        </nav>
-
-        <div className={styles.headerActions}>
-          <div className={styles.walletBadge}>
-            <div className={styles.coinIcon}></div>
-            <span className={styles.walletAmount}>✦ ₹120</span>
-          </div>
-          <div
-            className={styles.profileIcon}
-            onClick={() => navigate("/onboarding?skip=welcome")}
-          >
-            <User size={24} strokeWidth={0} fill="#A67C52" />
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className={styles.mainContent}>
         {/* Today's Horoscope Card */}

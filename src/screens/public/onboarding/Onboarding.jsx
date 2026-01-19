@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import styles from "./Onboarding.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
-import TopBar from "../../../layouts/topbar/TopBar";
 import LoadingScreen from "./LoadingScreen";
 import WelcomeScreen from "./WelcomeScreen";
 import GuidanceScreen from "./GuidanceScreen";
@@ -118,11 +117,6 @@ const Onboarding = () => {
 
   return (
     <>
-      {!isLoadingScreen && (
-        <div className={styles.fixedTopBar}>
-          <TopBar />
-        </div>
-      )}
       <div className={styles.onboardingContainer}>
         {screens[currentStep]}
       </div>
