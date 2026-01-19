@@ -20,7 +20,7 @@ import {
   Blog,
   SessionDetails,
   Shop,
-  Profile,
+  // Profile,
   TalkToAstrologer,
   Payment,
   Astrologers,
@@ -127,6 +127,7 @@ import TarotCardSelectionPage from "../../screens/private/v2/tarot/TarotCardSele
 import LoveTriangleSelectionPage from "../../screens/private/v2/tarot/LoveTriangleSelectionPage";
 import LoveTriangleResultPage from "../../screens/private/v2/tarot/LoveTriangleResultPage";
 import Home from "../../screens/v2/home/Home"
+import Profile from "../../screens/v2/user/Profile"
 
 export const PATH = {
   // DEFAULT: {
@@ -198,6 +199,8 @@ export const PATH = {
     PROFILE: {
       path: "/profile",
       element: Profile,
+      header: false,
+      footer: false
     },
     TALK_TO_ASTROLOGER: {
       path: "/talk-to-astrologers",

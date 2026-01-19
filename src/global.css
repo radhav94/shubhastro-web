@@ -3,6 +3,18 @@
 :root {
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
+  --color-black: #000000;
+  --color-gray-900: #1a1a1a;
+  --color-gray-800: linear-gradient(333.33deg, #222222 15.74%, #666666 172.14%);
+  --color-gray-700: #595959;
+  --color-gray-600: #666666;
+  --color-gray-500: #808080;
+  --color-gray-400: #999999;
+  --color-gray-300: #b3b3b3;
+  --color-gray-200: #d9d9d9;
+  --color-gray-100: #e6e6e6;
+  --color-gray-50: #f4f4f4;
+  --color-white: #ffffff;
 }
 
 body {
