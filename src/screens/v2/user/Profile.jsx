@@ -49,22 +49,14 @@ const Profile = () => {
   
   // Update loaded transactions when new data arrives
   useEffect(() => {
-    if (transactionsData?.data?.transactions) {
+    if (transactionsData?.data?.transactions && shouldFetch) {
       if (currentPage === 1) {
         setAllLoadedTransactions(transactionsData.data.transactions)
       } else {
         setAllLoadedTransactions(prev => [...prev, ...transactionsData.data.transactions])
       }
     }
-  }, [transactionsData, currentPage])
-  
-  // Reset pagination when switching to Transactions tab
-  useEffect(() => {
-    if (activeTab === 'Transactions' && transactionSubTab === 'Transaction History') {
-      setCurrentPage(1)
-      setAllLoadedTransactions([])
-    }
-  }, [activeTab, transactionSubTab])
+  }, [transactionsData, currentPage, shouldFetch])
   
   // Infinite scroll handler
   const handleScroll = (e) => {
