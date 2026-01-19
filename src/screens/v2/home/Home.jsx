@@ -694,7 +694,7 @@ const Home = () => {
             <div
               className={styles.discoverCard}
               style={{ background: "#3E93C9" }}
-              onClick={() => navigate(PATH.privateRoutes.TAROT.path)}
+              onClick={() => navigate(PATH.privateRoutes.TAROT_CARD_V2.path)}
             >
               <div className={styles.discoverContent}>
                 <h3 className={styles.discoverTitle}>Tarot</h3>
@@ -781,28 +781,12 @@ const Home = () => {
           <span className={styles.activeLine} />
         </button>
 
-						{/* Match-making Card */}
-						<div className={styles.discoverCard} style={{ background: '#A560CA' }}>
-							<div className={styles.discoverContent}>
-								<h3 className={styles.discoverTitle}>Match-making</h3>
-								<p className={styles.discoverText}>Explore cosmic compatibility for love, marriage and harmony.</p>
-							</div>
-							<img src={matchmaking} alt="Match-making" className={styles.discoverImage} />
-						</div>
-						{/* Tarot Card */}
-						<div 
-							className={styles.discoverCard} 
-							style={{ background: '#3E93C9', cursor: 'pointer' }}
-							onClick={() => navigate('/v2/tarot-card')}
-						>
-							<div className={styles.discoverContent}>
-								<h3 className={styles.discoverTitle}>Tarot</h3>
-								<p className={styles.discoverText}>Unveil the unseen and gain clarity with card readings.</p>
-							</div>
-							<img src={tarot} alt="Tarot Cards" className={styles.discoverImage} />
-						</div>
-					</div>
-				</section>
+        <button className={styles.navItem}>
+          <div className={styles.iconCircle}>
+            <Compass size={22} />
+          </div>
+          <span className={styles.label}>Explore</span>
+        </button>
 
         {/* LIVE */}
         <button 
