@@ -55,7 +55,7 @@ const Home = () => {
       id: 2, 
       title: "Talk to Astrologer", 
       image: quickActionOne,
-      path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path
+      path: PATH.privateRoutes.Chat_With_ASTROLOGER.path
     },
     { 
       id: 3, 
@@ -420,7 +420,12 @@ const Home = () => {
                 <p className={styles.sessionDuration}>
                   Duration : 5 Min 30 Secs
                 </p>
-                <button className={styles.callAgainBtn}>Call Again</button>
+                <button 
+                  className={styles.callAgainBtn}
+                  onClick={() => navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)}
+                >
+                  Call Again
+                </button>
               </div>
             </div>
 
@@ -451,7 +456,12 @@ const Home = () => {
                 <p className={styles.sessionDuration}>
                   Duration : 8 Min 45 Secs
                 </p>
-                <button className={styles.callAgainBtn}>Call Again</button>
+                <button 
+                  className={styles.callAgainBtn}
+                  onClick={() => navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)}
+                >
+                  Call Again
+                </button>
               </div>
             </div>
           </div>
