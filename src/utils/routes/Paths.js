@@ -1,5 +1,6 @@
 import VideoCalling from "../../component/call/VideoCall";
 import AgoraVoiceCalling from "../../component/call/VoiceCall";
+import Onboarding from "../../screens/public/onboarding/Onboarding";
 import TarotReadingCard from "../../component/UI/cards/tarotReadingCard/TarotReadingCard";
 import {
   Login,
@@ -133,6 +134,10 @@ export const PATH = {
   //     pageName: "Home",
   // },
   publicRoutes: {
+    ONBOARDING: {
+      path: "/onboarding",
+      element: Onboarding,
+    },
     LOGIN: {
       path: "/login",
       element: Login,
