@@ -694,7 +694,7 @@ const Home = () => {
             <div
               className={styles.discoverCard}
               style={{ background: "#3E93C9" }}
-              onClick={() => navigate(PATH.privateRoutes.TAROT.path)}
+              onClick={() => navigate(PATH.privateRoutes.TAROT_CARD_V2.path)}
             >
               <div className={styles.discoverContent}>
                 <h3 className={styles.discoverTitle}>Tarot</h3>
