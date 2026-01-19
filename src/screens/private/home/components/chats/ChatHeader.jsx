@@ -1,7 +1,7 @@
 import styles from "./ChatWindow.module.scss";
-import { IoArrowBack, IoCall, IoVideocam } from "react-icons/io5";
+import { IoArrowBack } from "react-icons/io5";
+import { FaWallet } from "react-icons/fa";
 import { PrimaryText } from "../../../../../component";
-import ChatTimer from "./chatTimer";
 
 const ChatHeader = ({
   fullName,
@@ -9,7 +9,9 @@ const ChatHeader = ({
   onBack,
   onAudioCall,
   onVideoCall,
-  disabled
+  disabled,
+  experience = "20 Years",
+  walletBalance = 0
 }) => {
   return (
     <div className={styles.header}>
@@ -26,22 +28,17 @@ const ChatHeader = ({
           <PrimaryText size_16 isSemiBold>
             {fullName || "Chat User"}
           </PrimaryText>
-          <span className={styles.statusText}>
-            {isTyping ? "Typing..." : "Online"}
+          <span className={styles.experienceText}>
+            Exp. {experience}
           </span>
         </div>
       </div>
 
       <div className={styles.headerRight}>
-        <ChatTimer />
-        <IoCall
-          className={styles.callIcon}
-          onClick={disabled ? null : onAudioCall}
-        />
-        <IoVideocam
-          className={styles.videoIcon}
-          onClick={disabled ? null : onVideoCall}
-        />
+        <div className={styles.walletBadge}>
+          <FaWallet className={styles.walletIcon} />
+          <span className={styles.walletAmount}>₹{walletBalance}</span>
+        </div>
       </div>
     </div>
   );

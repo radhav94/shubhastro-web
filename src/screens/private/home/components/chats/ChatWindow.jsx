@@ -11,7 +11,9 @@ import { useRef } from "react";
 import ChatHeader from "./ChatHeader";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
+import ChatFooter from "./ChatFooter";
 import WaitingPopup from "./WaitingPopup";
+import FloatingActions from "./FloatingActions";
 import useChatSocket from "./useChatSocket";
 import Feedback from "./Feedback";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
@@ -24,6 +26,7 @@ const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 const MIN_CHAT_SECONDS = 60;
 
 import { useGetS3SignedUrlMutation } from "../../../../../redux/api/s3SignedApi";
+import { useWalletBalance } from "../../../wallet/useWalletBalance";
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
@@ -43,6 +46,9 @@ const ChatWindow = () => {
 
   const { activeCall } = useCall();
   const [openFeedback, setOpenFeedback] = useState(false);
+  
+  // Get wallet balance
+  const { balance } = useWalletBalance();
 
   const {
     messages,
@@ -239,6 +245,27 @@ const ChatWindow = () => {
     return "success";
   };
 
+  // Floating action handlers
+  const handleShuffle = () => {
+    console.log("Shuffle action");
+    // Add your shuffle logic here
+  };
+
+  const handleSparkles = () => {
+    console.log("Sparkles action");
+    // Add your sparkles logic here
+  };
+
+  const handleGift = () => {
+    navigate(`/astrologer/${astrologerId}`);
+  };
+
+  const handleRecharge = () => {
+    console.log("Recharge action");
+    navigate('/recharge');
+    // Navigate to recharge page or open recharge modal
+  };
+
   return (
     <div className={styles.chatPage}>
       <div className={styles.chatWindow}>
@@ -249,14 +276,23 @@ const ChatWindow = () => {
           onAudioCall={handleAudioCall}
           onVideoCall={handleVideoCall}
           disabled={!!activeCall}
+          walletBalance={balance || 0}
         />
 
-        <ChatMessages
-          messages={finalMsgs}
-          isTyping={isTyping}
-          error={error}
-          messagesRef={messagesRef}
-        />
+        <div className={styles.messagesContainer}>
+          <ChatMessages
+            messages={finalMsgs}
+            isTyping={isTyping}
+            error={error}
+            messagesRef={messagesRef}
+          />
+
+          <FloatingActions
+            onShuffle={handleShuffle}
+            onSparkles={handleSparkles}
+            onGift={handleGift}
+          />
+        </div>
 
         {!isMessageDisabled && (
           <ChatInput
@@ -273,6 +309,11 @@ const ChatWindow = () => {
             sendFiles={sendFiles}
           />
         )}
+
+        <ChatFooter 
+          remainingTime={chatSeconds > 0 ? chatSeconds : 0}
+          onRecharge={handleRecharge}
+        />
 
         {waitingPopup && (
           <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
