@@ -586,7 +586,11 @@ const Home = () => {
 							<img src={matchmaking} alt="Match-making" className={styles.discoverImage} />
 						</div>
 						{/* Tarot Card */}
-						<div className={styles.discoverCard} style={{ background: '#3E93C9' }}>
+						<div 
+							className={styles.discoverCard} 
+							style={{ background: '#3E93C9', cursor: 'pointer' }}
+							onClick={() => navigate('/v2/tarot-card')}
+						>
 							<div className={styles.discoverContent}>
 								<h3 className={styles.discoverTitle}>Tarot</h3>
 								<p className={styles.discoverText}>Unveil the unseen and gain clarity with card readings.</p>
