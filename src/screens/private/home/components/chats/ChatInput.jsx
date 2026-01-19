@@ -1,6 +1,5 @@
 import styles from "./ChatWindow.module.scss";
-import { IoSend, IoAttach, IoMic } from "react-icons/io5";
-import { GrReactjs } from "react-icons/gr";
+import { IoSendOutline, IoAttachOutline, IoMicOutline, IoCallSharp } from "react-icons/io5";
 import { useState } from "react";
 import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSelectModal";
 import toast from "../../../../../component/toast";
@@ -56,46 +55,40 @@ const ChatInput = ({
   return (
     <>
       <div className={styles.inputBox}>
-        <>
-          <button
-            type="button"
-            className={styles.attachButton}
-            onClick={handleAttachClick}
-          >
-            <IoAttach size={20} />
-          </button>
+        <div className={styles.inputWrapper}>
+          <input
+            className={styles.inputField}
+            value={value}
+            onChange={onChange}
+            disabled={isMessageDisabled}
+            onKeyDown={(e) => e.key === "Enter" && onSend()}
+            placeholder="| Starts typing..."
+          />
+          
+          <div className={styles.inputIcons}>
+            <button
+              type="button"
+              className={styles.iconButton}
+              onClick={handleAttachClick}
+            >
+              <IoAttachOutline />
+            </button>
 
-          {/* Hidden file input */}
-          <input type="file" style={{ display: "none" }} />
-        </>
+            <button className={styles.iconButton} onClick={handleMicClick}>
+              <IoMicOutline />
+            </button>
 
-        <button
-          onClick={() => setKundliModalOpen(true)}
-          className={styles.kundliButton}
-        >
-          <GrReactjs size={20} />
-        </button>
+            <button className={styles.sendButton} onClick={onSend}>
+              <IoSendOutline />
+            </button>
+          </div>
+        </div>
 
-        <input
-          className={styles.inputField}
-          value={value}
-          onChange={onChange}
-          disabled={isMessageDisabled}
-          onKeyDown={(e) => e.key === "Enter" && onSend()}
-          placeholder="Write a message..."
-        />
-
-        <button className={styles.sendButton} onClick={onSend}>
-          <IoSend size={20} />
-        </button>
-        <button className={styles.voiceChatButton} onClick={handleMicClick}>
-          <IoMic size={20} />
-        </button>
-
-        <button className={styles.endChatButton} onClick={onChatEnd}>
-          End
+        <button className={styles.endCallButton} onClick={onChatEnd}>
+          <IoCallSharp />
         </button>
       </div>
+      
       <KundliSelectModal
         isOpen={kundliModalOpen}
         onClose={() => setKundliModalOpen(false)}
