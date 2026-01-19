@@ -1,0 +1,244 @@
+/* TopHeader Component Styles */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+.topHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #f5e6d3;
+  font-family:
+    "Poppins",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.userGreeting {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.userAvatar {
+  width: 56px;
+  height: 56px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  border: 2px solid #f5f5f5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.greetingText {
+  display: flex;
+  flex-direction: column;
+}
+
+.namaste {
+  font-size: 14px;
+  color: #a08060;
+  font-weight: 400;
+}
+
+.userName {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.headerNavigation {
+  display: none;
+  align-items: center;
+  gap: 2rem;
+  flex: 1;
+  justify-content: center;
+  padding: 0 2rem;
+}
+
+.headerNavLink {
+  color: #8b7355;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+  white-space: nowrap;
+}
+
+.headerNavLink:hover {
+  color: #5a4a3a;
+  background: rgba(139, 115, 85, 0.1);
+}
+
+.headerNavLink.active {
+  color: #2c1b0e;
+  background: rgba(139, 115, 85, 0.15);
+  font-weight: 600;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.walletBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #8b6f47 0%, #6b4423 50%, #3e2415 100%);
+  padding: 8px 24px 8px 10px;
+  border-radius: 50px;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: visible;
+}
+
+.walletBadge::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 28%;
+  width: 22px;
+  height: 16px;
+  background: #f5e6d3;
+  border-radius: 50%;
+}
+
+.walletBadge::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 28%;
+  width: 22px;
+  height: 16px;
+  background: #e5d7c5;
+  border-radius: 50%;
+}
+
+.coinIcon {
+  width: 36px;
+  height: 36px;
+  background: radial-gradient(
+    circle at 35% 35%,
+    #ffe873 0%,
+    #ffd700 30%,
+    #e6b800 60%,
+    #cc9900 100%
+  );
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.4),
+    inset -3px -3px 6px rgba(0, 0, 0, 0.3),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.4);
+  position: relative;
+  border: 2px solid #b8860b;
+}
+
+.coinIcon::before {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(139, 111, 71, 0.5);
+  border-radius: 50%;
+}
+
+.coinIcon::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid rgba(139, 111, 71, 0.4);
+  border-radius: 50%;
+}
+
+.walletAmount {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.profileIcon {
+  width: 52px;
+  height: 52px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.profileIcon:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+/* Show navigation on tablet and desktop */
+@media (min-width: 768px) {
+  .headerNavigation {
+    display: flex;
+  }
+}
+
+/* Mobile responsive for Header - 375px */
+@media (max-width: 480px) {
+  .topHeader {
+    padding: 12px 16px;
+  }
+
+  .userAvatar {
+    width: 44px;
+    height: 44px;
+    font-size: 28px;
+  }
+
+  .greetingText {
+    gap: 2px;
+  }
+
+  .namaste {
+    font-size: 12px;
+  }
+
+  .userName {
+    font-size: 16px;
+  }
+
+  .walletBadge {
+    padding: 6px 18px 6px 8px;
+  }
+
+  .coinIcon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .walletAmount {
+    font-size: 18px;
+  }
+
+  .profileIcon {
+    width: 44px;
+    height: 44px;
+  }
+}

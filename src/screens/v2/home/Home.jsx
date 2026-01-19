@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import {
   ChevronRight,
   Search,
-  User,
   Home as HomeIcon,
   Compass,
   Radio,
@@ -39,7 +38,6 @@ import numerology from "../../../assets/images/numerology.svg";
 import matchmaking from "../../../assets/images/matchmaking.svg";
 import tarot from "../../../assets/images/tarot.svg";
 import blog from "../../../assets/images/blog.svg";
-import { NavLink } from "react-router-dom";
 
 const Home = () => {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -47,10 +45,30 @@ const Home = () => {
   const carouselRef = useRef(null);
 
   const quickActions = [
-    { id: 1, title: "Chat with Astrologer", image: quickActionOne },
-    { id: 2, title: "Talk to Astrologer", image: quickActionOne },
-    { id: 3, title: "Astromall Shop", image: quickActionTwo },
-    { id: 3, title: "Book A Pooja", image: quickActionThree },
+    { 
+      id: 1, 
+      title: "Chat with Astrologer", 
+      image: quickActionOne,
+      path: PATH.privateRoutes.Chat_With_ASTROLOGER.path
+    },
+    { 
+      id: 2, 
+      title: "Talk to Astrologer", 
+      image: quickActionOne,
+      path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path
+    },
+    { 
+      id: 3, 
+      title: "Astromall Shop", 
+      image: quickActionTwo,
+      path: PATH.privateRoutes.SHOP.path
+    },
+    { 
+      id: 4, 
+      title: "Book A Pooja", 
+      image: quickActionThree,
+      path: "shop/vip-e-pooja"
+    },
   ];
 
   const carouselSlides = [
@@ -131,89 +149,6 @@ const Home = () => {
 
   return (
     <div className={styles.home}>
-      {/* Header */}
-      <header className={styles.header}>
-        <div className={styles.userGreeting}>
-          <div className={styles.userAvatar}>
-            <span>🐏</span>
-          </div>
-          <div className={styles.greetingText}>
-            <span className={styles.namaste}>नमस्ते</span>
-            <span className={styles.userName}>Priya Nair</span>
-          </div>
-        </div>
-
-        <nav className={styles.headerNavigation}>
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-            end
-          >
-            Home
-          </NavLink>
-
-          <NavLink
-            to="/astrologers"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Astrologers
-          </NavLink>
-
-          <NavLink
-            to="/services"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Services
-          </NavLink>
-
-          <NavLink
-            to="/ai-experiences"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            AI WOW
-          </NavLink>
-
-          <NavLink
-            to="/blogs"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Blogs
-          </NavLink>
-
-          <NavLink
-            to="/Kundli"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Kundli
-          </NavLink>
-        </nav>
-
-        <div className={styles.headerActions}>
-          <div className={styles.walletBadge}>
-            <div className={styles.coinIcon}></div>
-            <span className={styles.walletAmount}>✦ ₹120</span>
-          </div>
-          <div
-            className={styles.profileIcon}
-            onClick={() => navigate("/onboarding?skip=welcome")}
-          >
-            <User size={24} strokeWidth={0} fill="#A67C52" />
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className={styles.mainContent}>
         {/* Today's Horoscope Card */}
@@ -290,7 +225,12 @@ const Home = () => {
         {/* Quick Actions */}
         <section className={styles.quickActions}>
           {quickActions.map((action) => (
-            <div key={action.id} className={styles.actionCard}>
+            <div 
+              key={action.id} 
+              className={styles.actionCard}
+              onClick={() => navigate(action.path)}
+              style={{ cursor: 'pointer' }}
+            >
               <h3 className={styles.actionTitle}>{action.title}</h3>
 
               <div className={styles.actionMedia}>
@@ -398,8 +338,10 @@ const Home = () => {
           <div className={styles.lifeAreaGrid}>
             <div
               className={styles.lifeAreaCard}
-              style={{
+              onClick={() => navigate(PATH.privateRoutes.COMPATIBILITY.path)}
+              style={{ 
                 background: "linear-gradient(135deg, #FFE5F0 0%, #FFF0F8 100%)",
+                cursor: 'pointer'
               }}
             >
               <h3 className={styles.lifeAreaTitle}>
@@ -696,6 +638,7 @@ const Home = () => {
             <div
               className={styles.discoverCard}
               style={{ background: "#AF6115" }}
+              onClick={() => navigate(PATH.privateRoutes.KUNDLI.path)}
             >
               <div className={styles.discoverContent}>
                 <h3 className={styles.discoverTitle}>Vedic Kundli</h3>
@@ -714,6 +657,7 @@ const Home = () => {
             <div
               className={styles.discoverCard}
               style={{ background: "#752B29" }}
+              onClick={() => navigate(PATH.privateRoutes.NUMEROLOGY.path)}
             >
               <div className={styles.discoverContent}>
                 <h3 className={styles.discoverTitle}>Numerology</h3>
@@ -732,6 +676,7 @@ const Home = () => {
             <div
               className={styles.discoverCard}
               style={{ background: "#A560CA" }}
+              onClick={() => navigate(PATH.privateRoutes.MATCHMAKING.path)}
             >
               <div className={styles.discoverContent}>
                 <h3 className={styles.discoverTitle}>Match-making</h3>
@@ -749,6 +694,7 @@ const Home = () => {
             <div
               className={styles.discoverCard}
               style={{ background: "#3E93C9" }}
+              onClick={() => navigate(PATH.privateRoutes.TAROT.path)}
             >
               <div className={styles.discoverContent}>
                 <h3 className={styles.discoverTitle}>Tarot</h3>
@@ -843,21 +789,30 @@ const Home = () => {
         </button>
 
         {/* LIVE */}
-        <button className={styles.liveItem}>
+        <button 
+          className={styles.liveItem}
+          onClick={() => navigate(PATH.privateRoutes.AUDIENCE_LIVE_STREAMING.path)}
+        >
           <div className={styles.liveBtn}>
             <Radio size={28} />
           </div>
           <span className={styles.label}>Live</span>
         </button>
 
-        <button className={styles.navItem}>
+        <button 
+          className={styles.navItem}
+          onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
+        >
           <div className={styles.iconCircle}>
             <UserRound size={22} />
           </div>
           <span className={styles.label}>Astrologer</span>
         </button>
 
-        <button className={styles.navItem}>
+        <button 
+          className={styles.navItem}
+          onClick={() => navigate(PATH.privateRoutes.SHOP.path)}
+        >
           <div className={styles.iconCircle}>
             <Store size={22} />
           </div>

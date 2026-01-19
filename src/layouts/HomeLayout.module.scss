@@ -41,23 +41,33 @@ $mobile-screen-width: 500px;
     width: 100%;
   }
 
-  .fixedTopBar {
+  .fixedTopHeader {
     position: fixed;
     top: 0;
+    width: 100%;
+    z-index: 2001;
+    background: #f5e6d3;
+  }
+
+  .fixedTopBar {
+    position: fixed;
+    top: 88px; // Below TopHeader
     width: 100%;
     z-index: 2000;
 
     background: #ffffff; //  FIX
     border-bottom: 1px solid #eee; //  Optional but looks premium
+
+    @media screen and (max-width: 768px) {
+      top: 76px; // Adjust for mobile TopHeader height
+    }
   }
 
   .topGap {
-    height: 95px; // same as TopBar height
-    // @media screen and (max-width: 919px) {
-    //   height: 115px;
-    // }
+    height: 183px; // TopHeader (88px) + TopBar (95px)
+    
     @media screen and (max-width: 772px) {
-      height: 68px;
+      height: 144px; // TopHeader (76px) + TopBar (68px)
     }
   }
 
