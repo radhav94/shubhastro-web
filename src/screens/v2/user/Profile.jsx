@@ -5,6 +5,7 @@ import dayjs from 'dayjs'
 import { useGetTransactionsQuery } from '../../../services/appServices/transactionService'
 import { useGetAllKundlisQuery, useDeleteKundliMutation } from '../../../services/appServices/kundliServicesNew'
 import { useWalletBalance } from '../../private/wallet/useWalletBalance'
+import { getUserFromStorage } from '../../../utils/authStorage'
 import styles from './Profile.module.scss'
 
 const Profile = () => {
@@ -14,6 +15,8 @@ const Profile = () => {
   const [pillStyle, setPillStyle] = useState({})
   const tabRefs = useRef({})
   const transactionListRef = useRef(null)
+  const user = getUserFromStorage()
+  const userName = user ? `${user.firstName} ${user.lastName}` : 'Guest User'
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -121,8 +124,8 @@ const Profile = () => {
         </button>
         
         <div className={styles.profileInfo}>
-          <h1 className={styles.profileName}>Priya Gupta</h1>
-          <p className={styles.profileDetails}>Jan 01, 2002 • 18:00</p>
+          <h1 className={styles.profileName}>{userName}</h1>
+          <p className={styles.profileDetails}>{user?.phoneNumber || 'Phone not available'}</p>
         </div>
         
         <div className={styles.logoutSection}>
