@@ -115,8 +115,17 @@ export const tarotApi = vedicApi.injectEndpoints({
         },
       }),
     }),
+    getTarotCardDetails: builder.query({
+      query: ({ reading_endpoint, card_name, lang = "en" }) => ({
+        url: `tarot/${reading_endpoint}`,
+        params: {
+          card_name,
+          lang,
+        },
+      }),
+    }),
   }),
 });
 
-export const { useGetTarotShuffleDataQuery, useGetTarotDailyDataQuery, useGetYesNoTarotQuery, useGetCareerTarotQuery, useGetFlirtTarotQuery, useGetEroticLoveTarotQuery, useGetMadeForEachOtherQuery, useGetInDepthLoveTarotQuery, useGetLoveTriangleTarotQuery, useGetRomanticBreakupQuery, useGetBusinessBreakupQuery } =
+export const { useGetTarotShuffleDataQuery, useGetTarotDailyDataQuery, useGetYesNoTarotQuery, useGetCareerTarotQuery, useGetFlirtTarotQuery, useGetEroticLoveTarotQuery, useGetMadeForEachOtherQuery, useGetInDepthLoveTarotQuery, useGetLoveTriangleTarotQuery, useGetRomanticBreakupQuery, useGetBusinessBreakupQuery, useGetTarotCardDetailsQuery } =
   tarotApi;

@@ -1,0 +1,363 @@
+/* Base styles */
+.tarotReadingPage {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 0;
+  padding-bottom: 100px;
+  position: relative;
+}
+
+.tarotHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.backButton {
+  background: #f0f0f0;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+}
+
+.tarotTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.tarotIntro {
+  padding: 24px 16px;
+  background: white;
+}
+
+.tarotHeading {
+  font-size: 28px;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.tarotDescription {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.tarotGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 16px;
+  max-width: 100%;
+}
+
+.tarotCard {
+  background: linear-gradient(135deg, #4a4a4a 0%, #2d2d2d 100%);
+  border-radius: 20px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%;
+  display: block;
+}
+
+.tarotCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.tarotBadge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  z-index: 2;
+}
+
+.tarotBadge.free {
+  background: #5dd39e;
+  color: white;
+}
+
+.tarotBadge.paid {
+  background: #d4a574;
+  color: white;
+}
+
+.tarotCardContent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px;
+  padding-top: 48px;
+  display: flex;
+  flex-direction: column;
+}
+
+.tarotCardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+  line-height: 1.3;
+  z-index: 1;
+  position: relative;
+  max-width: 65%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tarotCardImage {
+  position: absolute;
+  bottom: -38px;
+  right: -27px;
+  width: 75%;
+  height: 75%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  opacity: 1;
+  mix-blend-mode: luminosity;
+  z-index: 0;
+}
+
+.tarotCardImage svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.tarotCardImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.proceedAheadButton {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: #000;
+  color: white;
+  border: none;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 100;
+  transition: background 0.2s;
+  border-radius: 0;
+}
+
+.proceedAheadButton:hover {
+  background: #1a1a1a;
+}
+
+.loadingTrigger {
+  height: 20px;
+  width: 100%;
+  margin: 20px 0;
+}
+
+/* Laptop/Desktop - 3 cards per row (1025px and above) */
+@media (min-width: 1025px) {
+  .tarotGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .tarotCard {
+    padding: 20px;
+    border-radius: 24px;
+    aspect-ratio: 1;
+    height: auto;
+    padding-bottom: 0;
+    width: 100%;
+  }
+
+  .tarotCardContent {
+    padding: 20px;
+    padding-top: 52px;
+  }
+
+  .tarotCardTitle {
+    margin-top: 7px;
+    font-size: 20px;
+  }
+
+  .tarotBadge {
+    top: 20px;
+    left: 20px;
+    padding: 7px 18px;
+    font-size: 13px;
+  }
+
+  .tarotCardImage {
+    width: 75%;
+    height: 75%;
+    bottom: -38px;
+    right: -27px;
+  }
+
+  .tarotIntro {
+    padding: 32px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .tarotHeading {
+    font-size: 36px;
+  }
+
+  .tarotDescription {
+    font-size: 16px;
+  }
+}
+
+/* Tablet - 3 cards per row (481px to 1024px) */
+@media (min-width: 481px) and (max-width: 1024px) {
+  .tarotGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .tarotCard {
+    padding: 14px;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    padding-bottom: 0;
+  }
+
+  .tarotCardContent {
+    padding: 14px;
+    padding-top: 44px;
+  }
+
+  .tarotCardTitle {
+    margin-top: 5px;
+    font-size: 16px;
+    max-width: 60%;
+  }
+
+  .tarotBadge {
+    top: 14px;
+    left: 14px;
+    padding: 5px 14px;
+    font-size: 11px;
+  }
+
+  .tarotCardImage {
+    width: 72%;
+    height: 72%;
+    bottom: -62px;
+    right: -54px;
+  }
+
+  .tarotIntro {
+    padding: 24px 16px;
+  }
+
+  .tarotHeading {
+    font-size: 26px;
+  }
+
+  .proceedAheadButton {
+    padding: 15px;
+    font-size: 15px;
+  }
+}
+
+/* Mobile - 2 cards per row (up to 480px) */
+@media (max-width: 480px) {
+  .tarotGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .tarotCard {
+    width: 100%;
+    height: auto;
+    padding: 12px;
+    padding-bottom: 0;
+    border-radius: 16px;
+    aspect-ratio: 1;
+  }
+
+  .tarotCardContent {
+    padding: 12px;
+    padding-top: 40px;
+  }
+
+  .tarotCardTitle {
+    margin-top: 5px;
+    font-size: 12px;
+    max-width: 70%;
+  }
+
+  .tarotBadge {
+    top: 12px;
+    left: 12px;
+    padding: 4px 12px;
+    font-size: 10px;
+  }
+
+  .tarotCardImage {
+    width: 75%;
+    height: 75%;
+    bottom: -40px;
+    right: -32px;
+  }
+
+  .tarotIntro {
+    padding: 20px 12px;
+  }
+
+  .tarotHeading {
+    font-size: 24px;
+  }
+
+  .tarotDescription {
+    font-size: 13px;
+  }
+
+  .proceedAheadButton {
+    padding: 14px;
+    font-size: 15px;
+  }
+}

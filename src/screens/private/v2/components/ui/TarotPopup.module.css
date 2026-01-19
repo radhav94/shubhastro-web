@@ -1,0 +1,149 @@
+.popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.popupContent {
+  background: #f0f0f0;
+  border-radius: 24px;
+  padding: 40px 24px 24px;
+  max-width: 400px;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.dragHandle {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 4px;
+  background: #333;
+  border-radius: 2px;
+}
+
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.icon {
+  width: 80px;
+  height: 80px;
+}
+
+.message {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+  color: #000;
+  line-height: 1.4;
+  padding: 0 16px;
+}
+
+.beginButton {
+  width: 100%;
+  background: #000;
+  color: white;
+  border: none;
+  padding: 18px;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.beginButton:hover {
+  background: #1a1a1a;
+}
+
+/* Mobile - Bottom sheet style */
+@media (max-width: 768px) {
+  .popupOverlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .popupContent {
+    max-width: 100%;
+    border-radius: 24px 24px 0 0;
+    padding: 32px 20px 32px;
+    gap: 24px;
+    animation: slideUpMobile 0.3s ease-out;
+  }
+
+  @keyframes slideUpMobile {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .icon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .message {
+    font-size: 20px;
+    padding: 0 12px;
+  }
+
+  .beginButton {
+    padding: 16px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .popupContent {
+    padding: 28px 16px 28px;
+  }
+
+  .message {
+    font-size: 18px;
+  }
+}
+
+.error {
+  color: #dc2626;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 12px;
+}
+
+.beginButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
