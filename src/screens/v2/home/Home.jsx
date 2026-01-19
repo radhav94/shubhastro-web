@@ -207,7 +207,7 @@ const Home = () => {
           </div>
           <div
             className={styles.profileIcon}
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate("/onboarding?skip=welcome")}
           >
             <User size={24} strokeWidth={0} fill="#A67C52" />
           </div>
