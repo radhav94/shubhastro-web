@@ -26,6 +26,7 @@ import RecommendModal from "../../../component/UI/modal/RecommendModal/Recommend
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { useChat } from "../../../context/ChatContext";
 import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
+import ChatAstrologerCard from "../../../component/UI/cards/ChatAstrologerCard";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -629,13 +630,11 @@ const TalkToAstrologer = () => {
   //JSX
   return (
     <div className={styles.mainContainer}>
-      <PrimaryText size_24 isExtraBold>
-        {activeType === "chat" ? "Chat With " : "Talk To "}Best Astrologers
-        Online
-      </PrimaryText>
-
-      <div className="pt-4" />
-      {/* <Title title="Trial Offer ( 3 left )" showDivider /> */}
+      <div className={styles.pageHeader}>
+        <h1 className={styles.pageTitle}>
+          Chat With Best <span className={styles.highlight}>Astrologers</span> Online
+        </h1>
+      </div>
 
       <FilterChips
         onSelect={handleSelect}
@@ -647,16 +646,23 @@ const TalkToAstrologer = () => {
       <div className={styles.cardsContainer}>
         {allAstrologers.map((astro, index) => (
           <div key={astro._id} className={styles.cardWrapper}>
-            <AstrologerCard
-              isActiveType={activeType}
-              data={astro}
-              image={astroImages[index % astroImages.length]}
-              onFollow={() => onFollow(astro._id)}
-              onChat={() => handleChatStart(astro)}
-              onProfile={() => onProfile(astro)}
-              onAudioCall={() => handleCallStart(astro, "audio")}
-              onVideoCall={() => handleCallStart(astro, "video")}
-            />
+            {isChatMode ? (
+              <ChatAstrologerCard
+                data={astro}
+                onConnect={() => handleChatStart(astro)}
+              />
+            ) : (
+              <AstrologerCard
+                isActiveType={activeType}
+                data={astro}
+                image={astroImages[index % astroImages.length]}
+                onFollow={() => onFollow(astro._id)}
+                onChat={() => handleChatStart(astro)}
+                onProfile={() => onProfile(astro)}
+                onAudioCall={() => handleCallStart(astro, "audio")}
+                onVideoCall={() => handleCallStart(astro, "video")}
+              />
+            )}
           </div>
         ))}
 
