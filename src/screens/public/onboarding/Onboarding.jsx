@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import styles from "./Onboarding.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
@@ -14,8 +14,14 @@ import LoginScreen from "./LoginScreen";
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const [currentStep, setCurrentStep] = useState(0);
+  
+  // Check if we should skip welcome screen (coming from header login button)
+  const skipWelcome = searchParams.get("skip") === "welcome";
+  const initialStep = skipWelcome ? 1 : 0; // Start at LoginScreen (step 1) if skip=welcome
+  
+  const [currentStep, setCurrentStep] = useState(initialStep);
   const [formData, setFormData] = useState({
     guidance: [],
     name: "",
