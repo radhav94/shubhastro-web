@@ -153,7 +153,7 @@ const TopBar = () => {
       ) : (
         <button
           className={`${styles.ctaButton} ${styles.hideOnMobile}`}
-          onClick={() => navigate("/login")}
+          onClick={() => navigate("/onboarding?skip=welcome")}
         >
           LogIn
         </button>

@@ -1,5 +1,6 @@
 import VideoCalling from "../../component/call/VideoCall";
 import AgoraVoiceCalling from "../../component/call/VoiceCall";
+import Onboarding from "../../screens/public/onboarding/Onboarding";
 import TarotReadingCard from "../../component/UI/cards/tarotReadingCard/TarotReadingCard";
 import {
   Login,
@@ -97,6 +98,7 @@ import LivePlayerPage from "../../screens/private/home/components/livestream/Liv
 // import LivePlayerPage from "../../screens/private/home/components/livestream/LivePlayerPage";
 import Weekly from "../../screens/private/horoscope/weeklyHoroscope/Weekly";
 import Yearly from "../../screens/private/horoscope/yearlyHoroscope/Yearly";
+import HoroscopeNew from "../../screens/private/horoscope/Horoscope";
 import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
 import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
 import SingleCallHistory from "../../screens/private/orderHistory/components/Call/SingleCallHistory";
@@ -132,6 +134,10 @@ export const PATH = {
   //     pageName: "Home",
   // },
   publicRoutes: {
+    ONBOARDING: {
+      path: "/onboarding",
+      element: Onboarding,
+    },
     LOGIN: {
       path: "/login",
       element: Login,
@@ -216,13 +222,25 @@ export const PATH = {
         path: "/horoscopes/daily-horoscope/:sign",
         element: Daily,
       },
+      DAILY_NEW: {
+        path: "/horoscopes/daily-horoscope",
+        element: HoroscopeNew,
+      },
       WEEKLY_DETAIL: {
         path: "/horoscopes/weekly-horoscope/:sign",
         element: Weekly,
       },
+      WEEKLY_NEW: {
+        path: "/horoscopes/weekly-horoscope",
+        element: HoroscopeNew,
+      },
       YEARLY_DETAIL: {
         path: "/horoscopes/yearly-horoscope/:sign",
         element: Yearly,
+      },
+      YEARLY_NEW: {
+        path: "/horoscopes/yearly-horoscope",
+        element: HoroscopeNew,
       },
       MONTHLY: {
         path: "/horoscopes/monthly-horoscope",
@@ -243,6 +261,10 @@ export const PATH = {
       TODAY: {
         path: "/horoscopes/todays-horoscope/:sign",
         element: Daily,
+      },
+      TODAY_NEW: {
+        path: "/horoscopes/todays-horoscope",
+        element: HoroscopeNew,
       },
     },
     HOROSCOPEDETAILS: {

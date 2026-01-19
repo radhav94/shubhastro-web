@@ -1,1696 +1,1506 @@
 /* HomeV2 Page Styles */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
 .home {
-	min-height: 100vh;
-	background: linear-gradient(180deg, #F5E6D3 0%, #FFF9F0 50%, #FFFFFF 100%);
-	padding-bottom: 90px;
-	font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f5e6d3 0%, #fff9f0 50%, #ffffff 100%);
+  padding-bottom: 90px;
+  padding-top: 108px;
+  font-family:
+    "Poppins",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 }
 
-/* Header Styles */
-.header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 16px 20px;
-	background: #F5E6D3;
-}
-
-.userGreeting {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-}
-
-.userAvatar {
-	width: 56px;
-	height: 56px;
-	background: #FFFFFF;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 36px;
-	border: 2px solid #F5F5F5;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.greetingText {
-	display: flex;
-	flex-direction: column;
-}
-
-.namaste {
-	font-size: 14px;
-	color: #A08060;
-	font-weight: 400;
-}
-
-.userName {
-	font-size: 18px;
-	font-weight: 600;
-	color: #1a1a1a;
-}
-
-.headerActions {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-}
-
-.walletBadge {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	background: linear-gradient(135deg, #8B6F47 0%, #6B4423 50%, #3E2415 100%);
-	padding: 8px 24px 8px 10px;
-	border-radius: 50px;
-	color: #fff;
-	cursor: pointer;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-	position: relative;
-	overflow: visible;
-}
-
-.walletBadge::before {
-	content: '';
-	position: absolute;
-	top: -10px;
-	left: 28%;
-	width: 22px;
-	height: 16px;
-	background: #F5E6D3;
-	border-radius: 50%;
-}
-
-.walletBadge::after {
-	content: '';
-	position: absolute;
-	bottom: -10px;
-	left: 28%;
-	width: 22px;
-	height: 16px;
-	background: #e5d7c5;
-	border-radius: 50%;
-}
-
-.coinIcon {
-	width: 36px;
-	height: 36px;
-	background: radial-gradient(circle at 35% 35%, #FFE873 0%, #FFD700 30%, #E6B800 60%, #CC9900 100%);
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	box-shadow:
-		0 3px 8px rgba(0, 0, 0, 0.4),
-		inset -3px -3px 6px rgba(0, 0, 0, 0.3),
-		inset 3px 3px 6px rgba(255, 255, 255, 0.4);
-	position: relative;
-	border: 2px solid #B8860B;
-}
-
-.coinIcon::before {
-	content: '';
-	position: absolute;
-	width: 22px;
-	height: 22px;
-	border: 2px solid rgba(139, 111, 71, 0.5);
-	border-radius: 50%;
-}
-
-.coinIcon::after {
-	content: '';
-	position: absolute;
-	width: 14px;
-	height: 14px;
-	border: 1.5px solid rgba(139, 111, 71, 0.4);
-	border-radius: 50%;
-}
-
-.walletAmount {
-	font-size: 20px;
-	font-weight: 700;
-	letter-spacing: 0.5px;
-}
-
-.profileIcon {
-	width: 52px;
-	height: 52px;
-	background: #FFFFFF;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: #A67C52;
-	cursor: pointer;
-	transition: background 0.2s;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.profileIcon:hover {
-	background: #FFF8F0;
-}
-
-/* Mobile responsive for Header - 375px */
-@media (max-width: 480px) {
-	.header {
-		padding: 12px 16px;
-	}
-
-	.userAvatar {
-		width: 44px;
-		height: 44px;
-		font-size: 28px;
-	}
-
-	.greetingText {
-		gap: 2px;
-	}
-
-	.namaste {
-		font-size: 12px;
-	}
-
-	.userName {
-		font-size: 15px;
-	}
-
-	.headerActions {
-		gap: 8px;
-	}
-
-	.walletBadge {
-		padding: 6px 16px 6px 8px;
-		gap: 6px;
-	}
-
-	.walletBadge::before,
-	.walletBadge::after {
-		width: 18px;
-		height: 14px;
-		left: 26%;
-	}
-
-	.coinIcon {
-		width: 30px;
-		height: 30px;
-	}
-
-	.coinIcon::before {
-		width: 18px;
-		height: 18px;
-	}
-
-	.coinIcon::after {
-		width: 12px;
-		height: 12px;
-	}
-
-	.walletAmount {
-		font-size: 16px;
-	}
-
-	.profileIcon {
-		width: 44px;
-		height: 44px;
-	}
-
-	.profileIcon svg {
-		width: 20px;
-		height: 20px;
-	}
-}
+/* Main Content Styles */
 
 /* Main Content */
 .mainContent {
-	padding: 0 16px;
+  padding: 32px 16px 0;
 }
 
 /* Today's Horoscope Section */
 .horoscopeSection {
-	margin-bottom: 24px;
+  margin-bottom: 24px;
 }
 
 .horoscopeCard {
-	width: 100%;
-	height: auto;
-	min-height: 120px;
-	background: linear-gradient(151.72deg, #FFF2D4 10.17%, #FADD91 101.97%);
-	border-radius: 12px;
-	border: 1px solid #F0D07F;
-	padding: 16px 20px;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	position: relative;
-	overflow: visible;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-	cursor: pointer;
-	transition: transform 0.2s, box-shadow 0.2s;
+  width: 100%;
+  height: auto;
+  min-height: 120px;
+  background: linear-gradient(151.72deg, #fff2d4 10.17%, #fadd91 101.97%);
+  border-radius: 12px;
+  border: 1px solid #f0d07f;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: visible;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .horoscopeCard::before {
-	content: '';
-	position: absolute;
-	inset: 0;
-	border-radius: 12px;
-	background: linear-gradient(180deg, #F48A21 -12.17%, #522E0A 143.73%);
-	opacity: 0;
-	transition: opacity 0.3s;
-	pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f48a21 -12.17%, #522e0a 143.73%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
 }
 
 .horoscopeCard:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .horoscopeContent {
-	flex: 1;
-	z-index: 1;
-	padding-right: 12px;
-	min-width: 0;
-	max-width: 60%;
+  flex: 1;
+  z-index: 1;
+  padding-right: 12px;
+  min-width: 0;
+  max-width: 60%;
 }
 
 .horoscopeTitle {
-	font-family: 'Poppins', sans-serif;
-	font-size: clamp(10px, 2.5vw, 12px);
-	font-weight: 400;
-	line-height: 18px;
-	letter-spacing: 0;
-	color: #9B8B7E;
-	margin-bottom: 8px;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(10px, 2.5vw, 12px);
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: 0;
+  color: #9b8b7e;
+  margin-bottom: 8px;
 }
 
 .dividerContainer {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin-bottom: 10px;
-	width: 100%;
-	max-width: 114px;
-	height: 5.05px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  width: 100%;
+  max-width: 114px;
+  height: 5.05px;
 }
 
 .dividerLine {
-	flex: 1;
-	height: 1px;
-	background: #70430866;
+  flex: 1;
+  height: 1px;
+  background: #70430866;
 }
 
 .dividerMoon {
-	font-size: clamp(12px, 3vw, 14px);
-	color: #70430866;
-	flex-shrink: 0;
+  font-size: clamp(12px, 3vw, 14px);
+  color: #70430866;
+  flex-shrink: 0;
 }
 
 .horoscopeHeading {
-	font-family: 'Poppins', sans-serif;
-	font-size: clamp(16px, 4.5vw, 20px);
-	font-weight: 500;
-	line-height: 1.2;
-	letter-spacing: -0.4px;
-	color: #704308;
-	margin-bottom: 6px;
-	word-wrap: break-word;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(16px, 4.5vw, 20px);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.4px;
+  color: #704308;
+  margin-bottom: 6px;
+  word-wrap: break-word;
 }
 
 .horoscopeSubtext {
-	font-family: 'Poppins', sans-serif;
-	font-size: clamp(11px, 2.8vw, 12px);
-	font-weight: 400;
-	line-height: 1.2;
-	letter-spacing: -0.24px;
-	color: #704308CC;
-	margin-bottom: 10px;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(11px, 2.8vw, 12px);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.24px;
+  color: #704308cc;
+  margin-bottom: 10px;
 }
 
 .horoscopeAction {
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
-	font-family: 'Poppins', sans-serif;
-	font-size: clamp(11px, 2.8vw, 12px);
-	font-weight: 400;
-	line-height: 1.2;
-	letter-spacing: -0.24px;
-	color: #704308;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(11px, 2.8vw, 12px);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.24px;
+  color: #704308;
 }
 
 .horoscopePlanet {
-	width: 40%;
-	height: 100%;
-	position: relative;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-shrink: 0;
+  width: 40%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .planetImage {
-	width: 100%;
-	height: 100%;
-	object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* Responsive adjustments for smaller screens */
 @media (max-width: 360px) {
-	.horoscopeCard {
-		padding: 12px 16px;
-		min-height: 100px;
-	}
+  .horoscopeCard {
+    padding: 12px 16px;
+    min-height: 100px;
+  }
 
-	.horoscopeContent {
-		padding-right: 8px;
-	}
+  .horoscopeContent {
+    padding-right: 8px;
+  }
 }
-
 
 /* =========================
    Carousel Section
 ========================= */
 .carouselSection {
-	margin-bottom: 24px;
+  margin-bottom: 24px;
 }
 
 /* =========================
    Carousel Container
 ========================= */
 .carouselContainer {
-	display: flex;
-	gap: 16px;
-	overflow-x: auto;
-	scroll-snap-type: x mandatory;
-	scrollbar-width: none;
-	-ms-overflow-style: none;
-	padding: 0 0 16px;
-	flex-wrap: nowrap;
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 0 16px;
+  flex-wrap: nowrap;
 }
 
 .carouselContainer::-webkit-scrollbar {
-	display: none;
+  display: none;
 }
 
 /* =========================
    Slide Card (Mobile First)
 ========================= */
 .carouselSlide {
-	flex: 0 0 92%;
-	/* ✅ 1 card visible in mobile */
-	min-width: 92%;
-	min-height: 170px;
+  flex: 0 0 92%;
+  /* ✅ 1 card visible in mobile */
+  min-width: 92%;
+  min-height: 170px;
 
-	background: linear-gradient(151.72deg, #ffecf0 10.17%, #f2eaff 101.97%);
-	border-radius: 20px;
-	box-shadow: 0px 4px 12px rgba(127, 74, 87, 0.08);
+  background: linear-gradient(151.72deg, #ffecf0 10.17%, #f2eaff 101.97%);
+  border-radius: 20px;
+  box-shadow: 0px 4px 12px rgba(127, 74, 87, 0.08);
 
-	padding: 18px;
-	display: flex;
-	align-items: center;
+  padding: 18px;
+  display: flex;
+  align-items: center;
 
-	scroll-snap-align: center;
-	position: relative;
-	overflow: hidden;
+  scroll-snap-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
 /* =========================
    Left Side Content
 ========================= */
 .slideContent {
-	width: 65%;
-	margin-right: -10%;
-	/* ✅ overlaps on image ~10% */
-	position: relative;
-	z-index: 3;
-	/* keep text above image */
+  width: 65%;
+  margin-right: -10%;
+  /* ✅ overlaps on image ~10% */
+  position: relative;
+  z-index: 3;
+  /* keep text above image */
 
-	display: flex;
-	/* ✅ added */
-	flex-direction: column;
-	/* ✅ added */
-	gap: 12px;
-	/* ✅ added gap between title/subtitle/button */
+  display: flex;
+  /* ✅ added */
+  flex-direction: column;
+  /* ✅ added */
+  gap: 12px;
+  /* ✅ added gap between title/subtitle/button */
 }
 
 .slideTitle {
-	font-family: "Poppins", sans-serif;
-	font-size: 30px;
-	font-weight: 500;
-	/* reduced */
-	line-height: 1.15;
-	letter-spacing: -0.02em;
-	color: #101010;
-	margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 30px;
+  font-weight: 500;
+  /* reduced */
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #101010;
+  margin: 0;
 }
 
 .slideSubtitle {
-	font-family: "Poppins", sans-serif;
-	font-size: 16px;
-	font-weight: 400;
-	line-height: 1.4;
-	letter-spacing: -0.02em;
-	color: #6b6b6b;
-	margin: 0;
-	margin-top: 2px;
-	/* ✅ small extra spacing */
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  color: #6b6b6b;
+  margin: 0;
+  margin-top: 2px;
+  /* ✅ small extra spacing */
 }
 
 .slideButton {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 
-	width: fit-content;
-	background: #2a1c06;
-	color: #fff;
-	border: none;
+  width: fit-content;
+  background: #2a1c06;
+  color: #fff;
+  border: none;
 
-	padding: 14px 22px;
-	border-radius: 999px;
+  padding: 14px 22px;
+  border-radius: 999px;
 
-	font-family: "Poppins", sans-serif;
-	font-size: 16px;
-	font-weight: 500;
-	cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
 
-	margin-top: 6px;
-	/* ✅ extra gap before button */
-	box-shadow: 0 4px 12px rgba(42, 28, 6, 0.25);
-	transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 6px;
+  /* ✅ extra gap before button */
+  box-shadow: 0 4px 12px rgba(42, 28, 6, 0.25);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .slideButton:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 6px 16px rgba(42, 28, 6, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(42, 28, 6, 0.35);
 }
 
 /* =========================
    Right Side Image
 ========================= */
 .slideImageWrapper {
-	position: absolute;
-	right: 0;
-	bottom: 0;
+  position: absolute;
+  right: 0;
+  bottom: 0;
 
-	width: 50%;
-	height: 100%;
+  width: 50%;
+  height: 100%;
 
-	display: flex;
-	align-items: flex-end;
-	justify-content: flex-end;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
 
-	padding-right: 10px;
-	z-index: 1;
+  padding-right: 10px;
+  z-index: 1;
 }
 
 .astrologerImage {
-	width: 100%;
-	height: auto;
-	max-height: 95%;
-	object-fit: contain;
-	object-position: bottom right;
-	position: relative;
-	z-index: 1;
+  width: 100%;
+  height: auto;
+  max-height: 95%;
+  object-fit: contain;
+  object-position: bottom right;
+  position: relative;
+  z-index: 1;
 }
 
 /* =========================
    Carousel Dots (Moon Shapes)
 ========================= */
 .carouselDots {
-	display: flex;
-	justify-content: center;
-	gap: 12px;
-	margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
 }
 
 .dot {
-	width: 16px;
-	height: 16px;
-	border-radius: 50%;
-	background: #D4C4B0;
-	position: relative;
-	transition: all 0.3s ease;
-	cursor: pointer;
-	box-shadow: inset 6px 0 0 0 #F5E6D3;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #d4c4b0;
+  position: relative;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: inset 6px 0 0 0 #f5e6d3;
 }
 
 .dot:hover {
-	background: #C4B4A0;
+  background: #c4b4a0;
 }
 
 .dot.active {
-	background: #D4C4B0;
-	box-shadow: inset 6px 0 0 0 #3d2b0c;
-	transform: scale(1.1);
+  background: #d4c4b0;
+  box-shadow: inset 6px 0 0 0 #3d2b0c;
+  transform: scale(1.1);
 }
 
 /* =========================
    Tablet (2 cards)
 ========================= */
 @media (min-width: 768px) {
-	.carouselContainer {
-		padding: 0 20px 18px;
-	}
+  .carouselContainer {
+    padding: 0 20px 18px;
+  }
 
-	.carouselSlide {
-		flex: 0 0 calc(50% - 8px);
-		min-width: calc(50% - 8px);
-		min-height: 200px;
-		padding: 22px;
-		scroll-snap-align: start;
-	}
+  .carouselSlide {
+    flex: 0 0 calc(50% - 8px);
+    min-width: calc(50% - 8px);
+    min-height: 200px;
+    padding: 22px;
+    scroll-snap-align: start;
+  }
 
-	.slideTitle {
-		font-size: 32px;
-	}
+  .slideTitle {
+    font-size: 32px;
+  }
 
-	.slideSubtitle {
-		font-size: 17px;
-	}
+  .slideSubtitle {
+    font-size: 17px;
+  }
 }
 
 /* =========================
    Desktop (2 cards bigger)
 ========================= */
 @media (min-width: 1024px) {
-	.carouselSlide {
-		flex: 0 0 calc(60% - 10px);
-		min-width: calc(60% - 10px);
-		min-height: 220px;
-	}
+  .carouselSlide {
+    flex: 0 0 calc(60% - 10px);
+    min-width: calc(60% - 10px);
+    min-height: 220px;
+  }
 
-	.slideTitle {
-		font-size: 36px;
-	}
+  .slideTitle {
+    font-size: 36px;
+  }
 
-	.slideSubtitle {
-		font-size: 18px;
-	}
+  .slideSubtitle {
+    font-size: 18px;
+  }
 }
 
 /* =========================
    Large Desktop (3 cards)
 ========================= */
 @media (min-width: 1280px) {
-	.carouselSlide {
-		flex: 0 0 calc(33.33% - 12px);
-		min-width: calc(33.33% - 12px);
-		min-height: 240px;
-	}
+  .carouselSlide {
+    flex: 0 0 calc(33.33% - 12px);
+    min-width: calc(33.33% - 12px);
+    min-height: 240px;
+  }
 }
 
 /* =========================
    MOBILE FIX (smaller)
 ========================= */
 @media (max-width: 480px) {
-	.carouselSlide {
-		flex: 0 0 88%;
-		min-width: 88%;
-		min-height: 150px;
-		padding: 14px;
-		border-radius: 18px;
-	}
+  .carouselSlide {
+    flex: 0 0 88%;
+    min-width: 88%;
+    min-height: 150px;
+    padding: 14px;
+    border-radius: 18px;
+  }
 
-	.slideContent {
-		width: 70%;
-		margin-right: -10%;
-		gap: 10px;
-		/* ✅ mobile gap */
-	}
+  .slideContent {
+    width: 70%;
+    margin-right: -10%;
+    gap: 10px;
+    /* ✅ mobile gap */
+  }
 
-	.slideTitle {
-		font-size: 22px;
-		line-height: 1.2;
-	}
+  .slideTitle {
+    font-size: 22px;
+    line-height: 1.2;
+  }
 
-	.slideSubtitle {
-		font-size: 13px;
-		line-height: 1.3;
-	}
+  .slideSubtitle {
+    font-size: 13px;
+    line-height: 1.3;
+  }
 
-	.slideButton {
-		font-size: 13px;
-		padding: 10px 16px;
-		border-radius: 999px;
-		margin-top: 4px;
-	}
+  .slideButton {
+    font-size: 13px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    margin-top: 4px;
+  }
 
-	.slideImageWrapper {
-		width: 42%;
-		padding-right: 6px;
-	}
+  .slideImageWrapper {
+    width: 42%;
+    padding-right: 6px;
+  }
 
-	.astrologerImage {
-		max-height: 85%;
-	}
+  .astrologerImage {
+    max-height: 85%;
+  }
 }
-
 
 /* Quick Actions */
 .quickActions {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	gap: 14px;
-	margin-bottom: 24px;
-	padding: 4px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+  padding: 4px;
 }
 
 .quickActions::-webkit-scrollbar {
-	display: none;
+  display: none;
 }
 
 .actionCard {
-	width: 100%;
-	height: 170px;
+  width: 100%;
+  height: 170px;
 
-	background: linear-gradient(168.18deg,
-			#f9eed4 -7.79%,
-			#fffdf6 48.58%,
-			#f9eed4 104.96%);
+  background: linear-gradient(
+    168.18deg,
+    #f9eed4 -7.79%,
+    #fffdf6 48.58%,
+    #f9eed4 104.96%
+  );
 
-	border-radius: 26px;
-	padding: 18px 16px 0px;
-	cursor: pointer;
+  border-radius: 26px;
+  padding: 18px 16px 0px;
+  cursor: pointer;
 
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 
-	overflow: hidden;
-	position: relative;
-	box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.04);
 }
 
 .actionTitle {
-	font-family: "Poppins", sans-serif;
-	font-size: 18px;
-	font-weight: 600;
-	line-height: 1.15;
-	text-align: center;
-	color: #2c1b0e;
-	margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.15;
+  text-align: center;
+  color: #2c1b0e;
+  margin: 0;
 }
 
 /* Media Area */
 .actionMedia {
-	position: relative;
-	width: 100%;
-	height: 110px;
-	display: flex;
-	align-items: flex-end;
-	justify-content: center;
-	overflow: visible;
+  position: relative;
+  width: 100%;
+  height: 110px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: visible;
 }
 
 /* Circle behind image */
 .actionCircle {
-	width: 88px;
-	height: 88px;
-	border-radius: 999px;
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
 
-	background: linear-gradient(135deg, #f4d19b 0%, #e8c589 100%);
-	position: absolute;
-	bottom: 18px;
-	left: 50%;
-	transform: translateX(-50%);
-	z-index: 1;
+  background: linear-gradient(135deg, #f4d19b 0%, #e8c589 100%);
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
 }
 
 /* Image sits at bottom and slightly outside */
 .actionImg {
-	position: absolute;
-	bottom: -8px;
-	left: 50%;
-	transform: translateX(-50%);
-	height: 110px;
-	width: auto;
-	object-fit: contain;
-	z-index: 2;
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 110px;
+  width: auto;
+  object-fit: contain;
+  z-index: 2;
 }
 
 /* Mobile tighter */
 @media (max-width: 480px) {
-	.actionCard {
-		width: 100%;
-		height: 150px;
-		border-radius: 20px;
-		padding: 20px 12px 0;
-	}
+  .actionCard {
+    width: 100%;
+    height: 150px;
+    border-radius: 20px;
+    padding: 20px 12px 0;
+  }
 
-	.actionTitle {
-		font-size: 16px;
-		line-height: 1.2;
-		padding: 0 30px;
-	}
+  .actionTitle {
+    font-size: 16px;
+    line-height: 1.2;
+    padding: 0 30px;
+  }
 
-	.actionMedia {
-		height: 95px;
-	}
+  .actionMedia {
+    height: 95px;
+  }
 
-	.actionCircle {
-		width: 70px;
-		height: 70px;
-		bottom: 14px;
-	}
+  .actionCircle {
+    width: 70px;
+    height: 70px;
+    bottom: 14px;
+  }
 
-	.actionImg {
-		height: 90px;
-		bottom: -6px;
-	}
+  .actionImg {
+    height: 90px;
+    bottom: -6px;
+  }
 }
-
 
 /* Pandit AI Section */
 .panditAISection {
-	background: linear-gradient(277.07deg, rgba(242, 194, 165, 0.2) -3.82%, rgba(248, 219, 143, 0.2) 86.99%),
-		linear-gradient(168.18deg, #F9EED4 -7.79%, #FFFDF6 48.58%, #F9EED4 104.96%);
-	border-radius: 24px;
-	padding: 20px;
-	box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
-	margin-bottom: 24px;
+  background:
+    linear-gradient(
+      277.07deg,
+      rgba(242, 194, 165, 0.2) -3.82%,
+      rgba(248, 219, 143, 0.2) 86.99%
+    ),
+    linear-gradient(168.18deg, #f9eed4 -7.79%, #fffdf6 48.58%, #f9eed4 104.96%);
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
 }
 
 .panditAICard {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 18px;
-	gap: 12px;
-	flex-wrap: wrap;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .panditInfo {
-	display: flex;
-	align-items: center;
-	gap: 14px;
-	flex: 1;
-	min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
 }
 
 .panditAvatar {
-	width: 52px;
-	height: 52px;
-	background: #FFFFFF;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 28px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 52px;
+  height: 52px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .panditText {
-	display: flex;
-	flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .panditName {
-	font-size: 17px;
-	font-weight: 600;
-	color: #1a1a1a;
+  font-size: 17px;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 .sparkle {
-	font-size: 14px;
+  font-size: 14px;
 }
 
 .panditRole {
-	font-size: 13px;
-	color: #888;
-	margin-top: 2px;
+  font-size: 13px;
+  color: #888;
+  margin-top: 2px;
 }
 
 .freeQuestionBtn {
-	background: linear-gradient(135deg, #FF9F43 0%, #F7931E 100%);
-	color: #fff;
-	border: none;
-	padding: 12px 20px;
-	border-radius: 24px;
-	font-size: 14px;
-	font-weight: 600;
-	cursor: pointer;
-	transition: transform 0.2s;
-	box-shadow: 0 2px 8px rgba(247, 147, 30, 0.3);
-	white-space: nowrap;
-	flex-shrink: 0;
+  background: linear-gradient(135deg, #ff9f43 0%, #f7931e 100%);
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+  box-shadow: 0 2px 8px rgba(247, 147, 30, 0.3);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .freeQuestionBtn:hover {
-	transform: scale(1.02);
+  transform: scale(1.02);
 }
 
 /* Mobile responsive for Pandit AI */
 @media (max-width: 480px) {
-	.panditAISection {
-		padding: 16px;
-	}
+  .panditAISection {
+    padding: 16px;
+  }
 
-	.panditAICard {
-		gap: 10px;
-	}
+  .panditAICard {
+    gap: 10px;
+  }
 
-	.panditAvatar {
-		width: 48px;
-		height: 48px;
-		font-size: 24px;
-	}
+  .panditAvatar {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
 
-	.panditName {
-		font-size: 15px;
-	}
+  .panditName {
+    font-size: 15px;
+  }
 
-	.panditRole {
-		font-size: 12px;
-	}
+  .panditRole {
+    font-size: 12px;
+  }
 
-	.freeQuestionBtn {
-		padding: 8px 12px;
-		font-size: 11px;
-	}
+  .freeQuestionBtn {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
 
-	.searchBar {
-		padding: 6px 6px 6px 14px;
-		gap: 6px;
-	}
+  .searchBar {
+    padding: 6px 6px 6px 14px;
+    gap: 6px;
+  }
 
-	.searchInput {
-		font-size: 14px;
-		padding: 6px 0;
-	}
+  .searchInput {
+    font-size: 14px;
+    padding: 6px 0;
+  }
 
-	.searchSubmit {
-		width: 36px;
-		height: 36px;
-	}
+  .searchSubmit {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 .searchBar {
-	display: flex;
-	align-items: center;
-	background: #FFFFFF;
-	border-radius: 12px;
-	padding: 8px 8px 8px 18px;
-	gap: 10px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-	flex-wrap: nowrap;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 8px 8px 8px 18px;
+  gap: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  flex-wrap: nowrap;
 }
 
 .searchIcon {
-	color: #999;
-	flex-shrink: 0;
+  color: #999;
+  flex-shrink: 0;
 }
 
 .searchInput {
-	flex: 1;
-	border: none;
-	background: transparent;
-	font-size: 15px;
-	color: #1a1a1a;
-	outline: none;
-	min-width: 0;
-	padding: 8px 0;
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  color: #1a1a1a;
+  outline: none;
+  min-width: 0;
+  padding: 8px 0;
 }
 
 .searchInput::placeholder {
-	color: #999;
+  color: #999;
 }
 
 .searchSubmit {
-	width: 40px;
-	height: 40px;
-	background: #2C1B0E;
-	border: none;
-	border-radius: 8px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: #fff;
-	cursor: pointer;
-	transition: transform 0.2s, background 0.2s;
-	flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background: #2c1b0e;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    background 0.2s;
+  flex-shrink: 0;
 }
 
 .searchSubmit:hover {
-	transform: scale(1.05);
-	background: #1a1108;
+  transform: scale(1.05);
+  background: #1a1108;
 }
 
 /* Top Rated Astrologers Section */
 .astrologersSection {
-	margin-bottom: 24px;
+  margin-bottom: 24px;
 }
 
 .sectionHeader {
-	text-align: center;
-	margin-bottom: 24px;
+  text-align: center;
+  margin-bottom: 24px;
 }
 
 .sectionTitle {
-	font-family: 'Poppins', sans-serif;
-	font-size: 16px;
-	font-weight: 600;
-	letter-spacing: 0.5px;
-	color: #5A5A5A;
-	margin: 0 0 12px 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #5a5a5a;
+  margin: 0 0 12px 0;
 }
 
 .titleDivider {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 8px;
-	max-width: 200px;
-	margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: 200px;
+  margin: 0 auto;
 }
 
 .titleDivider .dividerLine {
-	flex: 1;
-	height: 1px;
-	background: #D4C4B0;
+  flex: 1;
+  height: 1px;
+  background: #d4c4b0;
 }
 
 .titleDivider .dividerMoon {
-	font-size: 16px;
-	color: #D4C4B0;
+  font-size: 16px;
+  color: #d4c4b0;
 }
 
 .astrologersGrid {
-	display: flex;
-	gap: 16px;
-	overflow-x: auto;
-	scrollbar-width: none;
-	-ms-overflow-style: none;
-	padding: 4px;
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px;
 }
 
 .astrologersGrid::-webkit-scrollbar {
-	display: none;
+  display: none;
 }
 
 .astrologerCard {
-	flex: 0 0 280px;
-	min-width: 280px;
-	background: #FFFFFF;
-	border-radius: 20px;
-	padding: 24px 20px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-	position: relative;
+  flex: 0 0 280px;
+  min-width: 280px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  position: relative;
 }
 
 .astrologerImageWrapper {
-	width: 180px;
-	height: 180px;
-	border-radius: 50%;
-	overflow: hidden;
-	margin-bottom: 16px;
-	background: #F5F5F5;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 16px;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .astrologerImg {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .ratingBadge {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	background: #FFF8F0;
-	padding: 6px 14px;
-	border-radius: 20px;
-	margin-bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff8f0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  margin-bottom: 12px;
 }
 
 .star {
-	font-size: 16px;
+  font-size: 16px;
 }
 
 .ratingText {
-	font-family: 'Poppins', sans-serif;
-	font-size: 15px;
-	font-weight: 600;
-	color: #2C1B0E;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #2c1b0e;
 }
 
 .astrologerName {
-	font-family: 'Poppins', sans-serif;
-	font-size: 20px;
-	font-weight: 600;
-	color: #1a1a1a;
-	margin: 0 0 10px 0;
-	text-align: center;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 10px 0;
+  text-align: center;
 }
 
 .experienceRow {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
 .bookIcon {
-	color: #D4A574;
-	flex-shrink: 0;
+  color: #d4a574;
+  flex-shrink: 0;
 }
 
 .experienceText {
-	font-family: 'Poppins', sans-serif;
-	font-size: 14px;
-	color: #888;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  color: #888;
 }
 
 .connectBtn {
-	width: 100%;
-	background: #2C1B0E;
-	color: #FFFFFF;
-	border: none;
-	padding: 14px 24px;
-	border-radius: 50px;
-	font-family: 'Poppins', sans-serif;
-	font-size: 16px;
-	font-weight: 600;
-	cursor: pointer;
-	transition: transform 0.2s, background 0.2s;
+  width: 100%;
+  background: #2c1b0e;
+  color: #ffffff;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 50px;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    background 0.2s;
 }
 
 .connectBtn:hover {
-	transform: translateY(-2px);
-	background: #1a1108;
+  transform: translateY(-2px);
+  background: #1a1108;
 }
 
 /* Explore by Life Area Section */
 .lifeAreaSection {
-	margin-bottom: 24px;
+  margin-bottom: 24px;
 }
 
 .lifeAreaGrid {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 .lifeAreaCard {
-	border-radius: 20px;
-	padding: 18px 16px;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	align-items: flex-start;
-	cursor: pointer;
-	transition: transform 0.2s, box-shadow 0.2s;
-	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-	min-height: 140px;
-	position: relative;
+  border-radius: 20px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  min-height: 140px;
+  position: relative;
 }
 
 .lifeAreaCard:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .lifeAreaTitle {
-	font-family: 'Poppins', sans-serif;
-	font-size: 16px;
-	font-weight: 600;
-	line-height: 1.3;
-	color: #1a1a1a;
-	margin: 0;
-	max-width: 70%;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #1a1a1a;
+  margin: 0;
+  max-width: 70%;
 }
 
 .lifeAreaIcon {
-	width: 60px;
-	height: 60px;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-shrink: 0;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	position: absolute;
-	bottom: 16px;
-	right: 16px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
 }
 
 /* My Sessions Section */
 .sessionsSection {
-	margin-bottom: 24px;
+  margin-bottom: 24px;
 }
 
 .sessionsHeader {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 24px;
-	gap: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
 }
 
 .sessionsHeaderLeft {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .sessionsTitle {
-	font-family: 'Poppins', sans-serif;
-	font-size: 20px;
-	font-weight: 700;
-	letter-spacing: 0.5px;
-	color: #2C2C2C;
-	margin: 0 0 12px 0;
-	text-align: left;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #2c2c2c;
+  margin: 0 0 12px 0;
+  text-align: left;
 }
 
 .sessionsHeader .titleDivider {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	max-width: 180px;
-	width: 100%;
-	margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 180px;
+  width: 100%;
+  margin: 0;
 }
 
 .sessionsHeader .dividerLine {
-	flex: 1;
-	height: 1px;
-	background: #D4C4B0;
+  flex: 1;
+  height: 1px;
+  background: #d4c4b0;
 }
 
 .sessionsHeader .dividerMoon {
-	font-size: 16px;
-	color: #D4C4B0;
-	flex-shrink: 0;
+  font-size: 16px;
+  color: #d4c4b0;
+  flex-shrink: 0;
 }
 
 .viewAllLink {
-	display: flex;
-	align-items: center;
-	gap: 4px;
-	background: transparent;
-	border: none;
-	font-family: 'Poppins', sans-serif;
-	font-size: 16px;
-	font-weight: 500;
-	color: #888;
-	cursor: pointer;
-	transition: color 0.2s;
-	flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #888;
+  cursor: pointer;
+  transition: color 0.2s;
+  flex-shrink: 0;
 }
 
 .viewAllLink:hover {
-	color: #666;
+  color: #666;
 }
 
 .sessionsGrid {
-	display: flex;
-	gap: 16px;
-	overflow-x: auto;
-	scrollbar-width: none;
-	-ms-overflow-style: none;
-	padding: 4px;
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px;
 }
 
 .sessionsGrid::-webkit-scrollbar {
-	display: none;
+  display: none;
 }
 
 .sessionCard {
-	flex: 0 0 340px;
-	min-width: 340px;
-	background: #FFFFFF;
-	border-radius: 20px;
-	padding: 0;
-	display: flex;
-	gap: 0;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-	cursor: pointer;
-	transition: transform 0.2s, box-shadow 0.2s;
-	overflow: hidden;
-	min-height: 180px;
+  flex: 0 0 340px;
+  min-width: 340px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 0;
+  display: flex;
+  gap: 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  overflow: hidden;
+  min-height: 180px;
 }
 
 .sessionCard:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
 .sessionImageWrapper {
-	flex: 0 0 40%;
-	width: 40%;
-	height: 100%;
-	overflow: hidden;
-	background: #fff;
-	padding: 12px 0px 12px 12px;
+  flex: 0 0 40%;
+  width: 40%;
+  height: 100%;
+  overflow: hidden;
+  background: #fff;
+  padding: 12px 0px 12px 12px;
 }
 
 .sessionImage {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	border-radius: 20px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
 }
 
 .sessionInfo {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-	padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
 }
 
 .sessionName {
-	font-family: 'Poppins', sans-serif;
-	font-size: 18px;
-	font-weight: 600;
-	color: #1a1a1a;
-	margin: 0;
-	line-height: 1.2;
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.2;
 }
 
 .sessionDetails {
-	display: flex;
-	/* gap: 16px; */
-	/* flex-wrap: wrap; */
+  display: flex;
+  /* gap: 16px; */
+  /* flex-wrap: wrap; */
 }
 
 .sessionDetail {
-	display: flex;
-	align-items: center;
-	gap: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .sessionIconSvg {
-	color: #FFA726;
-	flex-shrink: 0;
+  color: #ffa726;
+  flex-shrink: 0;
 }
 
 .sessionText {
-	font-family: 'Poppins', sans-serif;
-	font-size: 14px;
-	font-weight: 400;
-	color: #666;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #666;
 }
 
 .sessionDuration {
-	font-family: 'Poppins', sans-serif;
-	font-size: 14px;
-	font-weight: 400;
-	color: #888;
-	margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #888;
+  margin: 0;
 }
 
 .callAgainBtn {
-	width: 100%;
-	background: #2C1B0E;
-	color: #FFFFFF;
-	border: none;
-	padding: 12px 20px;
-	border-radius: 50px;
-	font-family: 'Poppins', sans-serif;
-	font-size: 15px;
-	font-weight: 600;
-	cursor: pointer;
-	transition: transform 0.2s, background 0.2s;
-	margin-top: auto;
+  width: 100%;
+  background: #2c1b0e;
+  color: #ffffff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 50px;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    background 0.2s;
+  margin-top: auto;
 }
 
 .callAgainBtn:hover {
-	transform: translateY(-1px);
-	background: #1a1108;
+  transform: translateY(-1px);
+  background: #1a1108;
 }
 
 /* Mobile responsive for Sessions */
 @media (max-width: 480px) {
-	.sessionsTitle {
-		font-size: 16px;
-	}
+  .sessionsTitle {
+    font-size: 16px;
+  }
 
-	.sessionsHeader .titleDivider {
-		max-width: 140px;
-	}
+  .sessionsHeader .titleDivider {
+    max-width: 140px;
+  }
 
-	.viewAllLink {
-		font-size: 14px;
-	}
+  .viewAllLink {
+    font-size: 14px;
+  }
 
-	.sessionCard {
-		flex: 0 0 300px;
-		min-width: 300px;
-		min-height: 160px;
-	}
+  .sessionCard {
+    flex: 0 0 300px;
+    min-width: 300px;
+    min-height: 160px;
+  }
 
-	.sessionInfo {
-		padding: 12px;
-	}
+  .sessionInfo {
+    padding: 12px;
+  }
 
-	.sessionName {
-		font-size: 16px;
-	}
+  .sessionName {
+    font-size: 16px;
+  }
 
-	.sessionText {
-		font-size: 13px;
-	}
+  .sessionText {
+    font-size: 13px;
+  }
 
-	.sessionDuration {
-		font-size: 13px;
-	}
+  .sessionDuration {
+    font-size: 13px;
+  }
 
-	.callAgainBtn {
-		padding: 10px 16px;
-		font-size: 14px;
-	}
+  .callAgainBtn {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
 }
 
 /* Daily Cosmic Insight Section */
 .cosmicInsightSection {
-	margin-bottom: 24px;
+  margin-bottom: 24px;
 }
 
 .cosmicInsightCard {
-	background:
-		linear-gradient(110.07deg, rgba(166, 97, 218, 0) -19.59%, #A661DA 72.06%),
-		linear-gradient(180deg, #F48A21 -12.17%, #522E0A 143.73%);
+  background:
+    linear-gradient(110.07deg, rgba(166, 97, 218, 0) -19.59%, #a661da 72.06%),
+    linear-gradient(180deg, #f48a21 -12.17%, #522e0a 143.73%);
 
-	border-radius: 24px;
-	padding: 24px 20px;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	position: relative;
-	overflow: hidden;
-	min-height: 220px;
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 24px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 220px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .cosmicContent {
-	flex: 1;
-	z-index: 2;
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	max-width: 60%;
+  flex: 1;
+  z-index: 2;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 60%;
 }
 
 .cosmicHeader {
-	margin-bottom: 16px;
+  margin-bottom: 16px;
 }
 
 .cosmicLabel {
-	font-family: 'Poppins', sans-serif;
-	font-size: 11px;
-	font-weight: 500;
-	letter-spacing: 1px;
-	color: rgba(255, 255, 255, 0.9);
-	display: block;
-	margin-bottom: 8px;
+  font-family: "Poppins", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.9);
+  display: block;
+  margin-bottom: 8px;
 }
 
 .cosmicDivider {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	max-width: 150px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 150px;
 }
 
 .cosmicDivider .dividerLine {
-	flex: 1;
-	height: 1px;
-	background: rgba(255, 255, 255, 0.4);
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.4);
 }
 
 .cosmicDivider .dividerMoon {
-	font-size: 14px;
-	color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .cosmicTitle {
-	font-family: 'Poppins', sans-serif;
-	font-size: 24px;
-	font-weight: 600;
-	color: #FFFFFF;
-	margin: 0 0 12px 0;
-	line-height: 1.2;
+  font-family: "Poppins", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 12px 0;
+  line-height: 1.2;
 }
 
 .cosmicText {
-	font-family: 'Poppins', sans-serif;
-	font-size: 14px;
-	font-weight: 400;
-	line-height: 1.5;
-	color: rgba(255, 255, 255, 0.95);
-	margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0;
 }
 
 .cosmicArt {
-	position: absolute;
-	right: 0;
-	top: 0;
-	bottom: 0;
-	width: auto;
-	z-index: 1;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: auto;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .zodiacWheel {
-	width: 100%;
-	height: 100%;
-	object-fit: contain;
-	opacity: 0.7;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.7;
 }
 
 /* Explore Panchang Section */
 .panchangSection {
-	margin-bottom: 24px;
+  margin-bottom: 24px;
 }
 
 .panchangTabs {
-	display: flex;
-	gap: 12px;
-	margin-bottom: 20px;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .panchangTab {
-	flex: 1;
-	padding: 12px 20px;
-	border: 2px solid #E5E5E5;
-	border-radius: 50px;
-	background: #FFFFFF;
-	font-family: 'Poppins', sans-serif;
-	font-size: 15px;
-	font-weight: 500;
-	color: #888;
-	cursor: pointer;
-	transition: all 0.2s;
+  flex: 1;
+  padding: 12px 20px;
+  border: 2px solid #e5e5e5;
+  border-radius: 50px;
+  background: #ffffff;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .panchangTab.active {
-	background: linear-gradient(135deg, #FFA726 0%, #FF9800 100%);
-	border-color: #FF9800;
-	color: #FFFFFF;
+  background: linear-gradient(135deg, #ffa726 0%, #ff9800 100%);
+  border-color: #ff9800;
+  color: #ffffff;
 }
 
 .panchangTab:hover:not(.active) {
-	border-color: #FFA726;
-	color: #666;
+  border-color: #ffa726;
+  color: #666;
 }
 
 .panchangCard {
-	background: #FFFFFF;
-	border-radius: 20px;
-	padding: 24px 20px;
-	box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
-	margin-bottom: 16px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px 20px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
 }
 
 .panchangHeader {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .timingsRow {
-	display: flex;
-	gap: 16px;
-	margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .timingsCard {
-	flex: 1;
-	background: #FFFBF5;
-	border-radius: 20px;
-	padding: 15px 15px;
-	box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  flex: 1;
+  background: #fffbf5;
+  border-radius: 20px;
+  padding: 15px 15px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
 }
 
 .panchangLeft,
 .panchangRight {
-	flex: 1;
+  flex: 1;
 }
 
 .panchangRight {
-	text-align: right;
+  text-align: right;
 }
 
 .panchangCenter {
-	flex: 0 0 auto;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 0 20px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
 }
 
 .sunIcon {
-	width: auto;
-	height: 75px;
-	object-fit: contain;
-	position: absolute;
-	margin-top: -35px;
+  width: auto;
+  height: 75px;
+  object-fit: contain;
+  position: absolute;
+  margin-top: -35px;
 }
 
 .panchangTitle {
-	font-family: 'Poppins', sans-serif;
-	font-size: 20px;
-	font-weight: 600;
-	color: #1a1a1a;
-	margin: 0 0 6px 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 6px 0;
 }
 
 .panchangSubtitle {
-	font-family: 'Poppins', sans-serif;
-	font-size: 14px;
-	font-weight: 400;
-	color: #888;
-	margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #888;
+  margin: 0;
 }
 
 .panchangTimings {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .timingItem {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .timingIcon {
-	width: 48px;
-	height: 48px;
-	object-fit: contain;
-	margin-bottom: 10px;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  margin-bottom: 10px;
 }
 
 .timingTime {
-	font-family: 'Poppins', sans-serif;
-	font-size: 16px;
-	font-weight: 600;
-	color: #1a1a1a;
-	margin: 0 0 4px 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
 }
 
 .timingLabel {
-	font-family: 'Poppins', sans-serif;
-	font-size: 13px;
-	font-weight: 400;
-	color: #888;
-	margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #888;
+  margin: 0;
 }
 
 .timingDivider {
-	width: 1px;
-	height: 60px;
-	background: #E5E5E5;
-	flex-shrink: 0;
+  width: 1px;
+  height: 60px;
+  background: #e5e5e5;
+  flex-shrink: 0;
 }
 
 /* Mobile specific adjustments */
 @media (max-width: 480px) {
-	.lifeAreaGrid {
-		gap: 10px;
-	}
+  .lifeAreaGrid {
+    gap: 10px;
+  }
 
-	.lifeAreaCard {
-		padding: 16px 14px;
-		min-height: 130px;
-	}
+  .lifeAreaCard {
+    padding: 16px 14px;
+    min-height: 130px;
+  }
 
-	.lifeAreaTitle {
-		font-size: 14px;
-	}
+  .lifeAreaTitle {
+    font-size: 14px;
+  }
 
-	.lifeAreaIcon {
-		width: 50px;
-		height: 50px;
-	}
+  .lifeAreaIcon {
+    width: 50px;
+    height: 50px;
+  }
 
-	.lifeAreaIcon svg {
-		width: 24px;
-		height: 24px;
-	}
+  .lifeAreaIcon svg {
+    width: 24px;
+    height: 24px;
+  }
 
-	.cosmicInsightCard {
-		padding: 20px 18px;
-		min-height: 200px;
-	}
+  .cosmicInsightCard {
+    padding: 20px 18px;
+    min-height: 200px;
+  }
 
-	.cosmicContent {
-		max-width: 70%;
-	}
+  .cosmicContent {
+    max-width: 70%;
+  }
 
-	.cosmicTitle {
-		font-size: 22px;
-	}
+  .cosmicTitle {
+    font-size: 22px;
+  }
 
-	.cosmicText {
-		font-size: 13px;
-	}
+  .cosmicText {
+    font-size: 13px;
+  }
 
-	.cosmicArt {
-		width: auto;
-		right: 0;
-	}
+  .cosmicArt {
+    width: auto;
+    right: 0;
+  }
 }
 
-
 .bottomNav {
-	position: fixed;
-	left: 0;
-	right: 0;
-	bottom: 0;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
 
-	height: 88px;
-	background: #ffffff;
+  height: 88px;
+  background: #ffffff;
 
-	display: flex;
-	align-items: flex-end;
-	justify-content: space-around;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
 
-	padding: 10px 14px 14px;
-	box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
-	z-index: 999;
+  padding: 10px 14px 14px;
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
+  z-index: 999;
 
-	/* ✅ important */
-	overflow: visible;
+  /* ✅ important */
+  overflow: visible;
 }
 
 /* ✅ notch background (cut-out look) */
@@ -1730,220 +1540,216 @@
 
 /* ---------------- Normal Items ---------------- */
 .navItem {
-	flex: 1;
-	max-width: 90px;
+  flex: 1;
+  max-width: 90px;
 
-	border: none;
-	background: transparent;
+  border: none;
+  background: transparent;
 
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-end;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
 
-	gap: 6px;
-	padding: 6px 0 2px;
-	cursor: pointer;
-	position: relative;
+  gap: 6px;
+  padding: 6px 0 2px;
+  cursor: pointer;
+  position: relative;
 
-	color: #7a7a7a;
-	z-index: 2;
-	/* above notch */
+  color: #7a7a7a;
+  z-index: 2;
+  /* above notch */
 }
 
 .iconCircle {
-	width: 42px;
-	height: 42px;
-	border-radius: 999px;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
 
-	display: flex;
-	align-items: center;
-	justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-	background: transparent;
-	transition: 0.2s ease;
+  background: transparent;
+  transition: 0.2s ease;
 }
 
 .label {
-	font-size: 13px;
-	font-weight: 500;
-	line-height: 1;
-	white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 /* ---------------- Active Item ---------------- */
 .active {
-	color: #111111;
+  color: #111111;
 }
 
 .active .iconCircle {
-	background: #f5a623;
-	color: #ffffff;
+  background: #f5a623;
+  color: #ffffff;
 }
 
 .activeLine {
-	position: absolute;
-	top: -10px;
-	left: 50%;
-	transform: translateX(-50%);
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
 
-	width: 60px;
-	height: 5px;
+  width: 60px;
+  height: 5px;
 
-	background: #f5a623;
-	border-radius: 0 0 4px 4px;
+  background: #f5a623;
+  border-radius: 0 0 4px 4px;
 
-	/* Trapezoid effect - wider at top */
-	clip-path: polygon(10% 0%,
-			/* top-left */
-			90% 0%,
-			/* top-right */
-			100% 100%,
-			/* bottom-right */
-			0% 100%
-			/* bottom-left */
-		);
+  /* Trapezoid effect - wider at top */
+  clip-path: polygon(
+    10% 0%,
+    /* top-left */ 90% 0%,
+    /* top-right */ 100% 100%,
+    /* bottom-right */ 0% 100% /* bottom-left */
+  );
 }
 
 /* ---------------- LIVE Center Button ---------------- */
 .liveItem {
-	flex: 1;
-	max-width: 90px;
+  flex: 1;
+  max-width: 90px;
 
-	border: none;
-	background: transparent;
+  border: none;
+  background: transparent;
 
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-end;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
 
-	gap: 6px;
-	cursor: pointer;
-	position: relative;
+  gap: 6px;
+  cursor: pointer;
+  position: relative;
 
-	margin-bottom: 6px;
-	z-index: 3;
-	/* above everything */
+  margin-bottom: 6px;
+  z-index: 3;
+  /* above everything */
 }
 
 .liveBtn {
-	width: 76px;
-	height: 76px;
-	border-radius: 50%;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
 
-	background: linear-gradient(135deg, #D2871C 0%, #C77A18 100%);
-	border: 5px solid #ffffff;
+  background: linear-gradient(135deg, #d2871c 0%, #c77a18 100%);
+  border: 5px solid #ffffff;
 
-	display: flex;
-	align-items: center;
-	justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-	box-shadow: 0 8px 20px rgba(210, 135, 28, 0.4);
-	position: relative;
+  box-shadow: 0 8px 20px rgba(210, 135, 28, 0.4);
+  position: relative;
 
-	color: #ffffff;
-	transition: transform 0.2s ease;
+  color: #ffffff;
+  transition: transform 0.2s ease;
 }
 
 .liveBtn:hover {
-	transform: scale(1.05);
+  transform: scale(1.05);
 }
 
 .liveItem .label {
-	color: #7a7a7a;
-	font-weight: 500;
-	font-size: 13px;
+  color: #7a7a7a;
+  font-weight: 500;
+  font-size: 13px;
 }
-
 
 /* Responsive adjustments */
 @media (max-width: 360px) {
-	.bottomNav {
-		padding: 6px 8px 16px;
-	}
+  .bottomNav {
+    padding: 6px 8px 16px;
+  }
 
-	.navItem {
-		padding: 6px 8px;
-		max-width: 70px;
-	}
+  .navItem {
+    padding: 6px 8px;
+    max-width: 70px;
+  }
 
-	.navIconWrapper {
-		width: 42px;
-		height: 42px;
-	}
+  .navIconWrapper {
+    width: 42px;
+    height: 42px;
+  }
 
-	.navIcon {
-		font-size: 22px;
-	}
+  .navIcon {
+    font-size: 22px;
+  }
 
-	.navLabel {
-		font-size: 11px;
-	}
+  .navLabel {
+    font-size: 11px;
+  }
 
-	.liveButton {
-		width: 56px;
-		height: 56px;
-		font-size: 24px;
-	}
+  .liveButton {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
 
-	.liveButton::before {
-		width: 70px;
-		height: 35px;
-	}
+  .liveButton::before {
+    width: 70px;
+    height: 35px;
+  }
 
-	.navItemLive {
-		margin-top: -28px;
-	}
+  .navItemLive {
+    margin-top: -28px;
+  }
 }
 
 @media (min-width: 768px) {
-	.bottomNav {
-		padding: 12px 32px 24px;
-		max-width: 600px;
-		left: 50%;
-		transform: translateX(-50%);
-		border-radius: 24px 24px 0 0;
-	}
+  .bottomNav {
+    padding: 12px 32px 24px;
+    max-width: 600px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 24px 24px 0 0;
+  }
 
-	.navItem {
-		padding: 10px 16px;
-		max-width: 100px;
-	}
+  .navItem {
+    padding: 10px 16px;
+    max-width: 100px;
+  }
 
-	.navIconWrapper {
-		width: 52px;
-		height: 52px;
-	}
+  .navIconWrapper {
+    width: 52px;
+    height: 52px;
+  }
 
-	.navIcon {
-		font-size: 26px;
-	}
+  .navIcon {
+    font-size: 26px;
+  }
 
-	.navLabel {
-		font-size: 13px;
-	}
+  .navLabel {
+    font-size: 13px;
+  }
 
-	.liveButton {
-		width: 72px;
-		height: 72px;
-		font-size: 32px;
-	}
+  .liveButton {
+    width: 72px;
+    height: 72px;
+    font-size: 32px;
+  }
 
-	.liveButton::before {
-		width: 90px;
-		height: 45px;
-	}
+  .liveButton::before {
+    width: 90px;
+    height: 45px;
+  }
 
-	.navItemLive {
-		margin-top: -36px;
-	}
+  .navItemLive {
+    margin-top: -36px;
+  }
 }
 
 @media (min-width: 1024px) {
-	.bottomNav {
-		display: none;
-	}
+  .bottomNav {
+    display: none;
+  }
 }
 
 /* =========================
@@ -1952,992 +1758,977 @@
 
 /* Tablet: 768px - 1023px */
 @media (min-width: 768px) {
-	.homeV2 {
-		padding-bottom: 0;
-	}
+  .homeV2 {
+    padding-bottom: 0;
+  }
 
-	.header {
-		padding: 20px 32px;
-	}
+  .header {
+    padding: 20px 32px;
+  }
 
-	.userAvatar {
-		width: 60px;
-		height: 60px;
-		font-size: 38px;
-	}
+  .mainContent {
+    padding: 0 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
 
-	.userName {
-		font-size: 19px;
-	}
+  /* Horoscope Card - Tablet */
+  .horoscopeSection {
+    margin-bottom: 32px;
+  }
 
-	.walletAmount {
-		font-size: 21px;
-	}
+  .horoscopeCard {
+    min-height: 140px;
+    padding: 24px 32px;
+  }
 
-	.profileIcon {
-		width: 56px;
-		height: 56px;
-	}
+  .horoscopeTitle {
+    font-size: 13px;
+  }
 
-	.mainContent {
-		padding: 0 32px;
-		max-width: 1400px;
-		margin: 0 auto;
-	}
+  .horoscopeHeading {
+    font-size: 22px;
+  }
 
-	/* Horoscope Card - Tablet */
-	.horoscopeSection {
-		margin-bottom: 32px;
-	}
+  .horoscopeSubtext {
+    font-size: 13px;
+  }
 
-	.horoscopeCard {
-		min-height: 140px;
-		padding: 24px 32px;
-	}
+  .horoscopePlanet {
+    width: 130px;
+    height: 130px;
+  }
 
-	.horoscopeTitle {
-		font-size: 13px;
-	}
+  /* Carousel - Tablet */
+  .carouselSection {
+    margin-bottom: 32px;
+  }
 
-	.horoscopeHeading {
-		font-size: 22px;
-	}
+  .carouselContainer {
+    gap: 20px;
+    padding: 0 20px 18px;
+  }
 
-	.horoscopeSubtext {
-		font-size: 13px;
-	}
+  .carouselSlide {
+    flex: 0 0 calc(50% - 10px);
+    min-width: calc(50% - 10px);
+    min-height: 220px;
+    padding: 22px;
+  }
 
-	.horoscopePlanet {
-		width: 130px;
-		height: 130px;
-	}
+  .slideTitle {
+    font-size: 28px;
+  }
 
-	/* Carousel - Tablet */
-	.carouselSection {
-		margin-bottom: 32px;
-	}
+  .slideSubtitle {
+    font-size: 16px;
+  }
 
-	.carouselContainer {
-		gap: 20px;
-		padding: 0 20px 18px;
-	}
+  .slideButton {
+    font-size: 15px;
+    padding: 13px 20px;
+  }
 
-	.carouselSlide {
-		flex: 0 0 calc(50% - 10px);
-		min-width: calc(50% - 10px);
-		min-height: 220px;
-		padding: 22px;
-	}
+  /* Quick Actions - Tablet */
+  .quickActions {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
 
-	.slideTitle {
-		font-size: 28px;
-	}
+  .actionCard {
+    width: 100%;
+    height: 190px;
+    padding: 20px 18px 0;
+  }
 
-	.slideSubtitle {
-		font-size: 16px;
-	}
+  .actionTitle {
+    font-size: 16px;
+  }
 
-	.slideButton {
-		font-size: 15px;
-		padding: 13px 20px;
-	}
+  .actionMedia {
+    height: 120px;
+  }
 
-	/* Quick Actions - Tablet */
-	.quickActions {
-		grid-template-columns: repeat(4, 1fr);
-		gap: 16px;
-		margin-bottom: 32px;
-	}
+  .actionCircle {
+    width: 95px;
+    height: 95px;
+    bottom: 20px;
+  }
 
-	.actionCard {
-		width: 100%;
-		height: 190px;
-		padding: 20px 18px 0;
-	}
+  .actionImg {
+    height: 120px;
+  }
 
-	.actionTitle {
-		font-size: 16px;
-	}
+  /* Pandit AI - Tablet */
+  .panditAISection {
+    padding: 24px;
+    margin-bottom: 32px;
+  }
 
-	.actionMedia {
-		height: 120px;
-	}
+  .panditAvatar {
+    width: 56px;
+    height: 56px;
+    font-size: 30px;
+  }
 
-	.actionCircle {
-		width: 95px;
-		height: 95px;
-		bottom: 20px;
-	}
+  .panditName {
+    font-size: 18px;
+  }
 
-	.actionImg {
-		height: 120px;
-	}
+  .searchInput {
+    font-size: 16px;
+  }
 
-	/* Pandit AI - Tablet */
-	.panditAISection {
-		padding: 24px;
-		margin-bottom: 32px;
-	}
+  /* Astrologers Section - Tablet */
+  .astrologersSection {
+    margin-bottom: 32px;
+  }
 
-	.panditAvatar {
-		width: 56px;
-		height: 56px;
-		font-size: 30px;
-	}
+  .sectionTitle {
+    font-size: 18px;
+  }
 
-	.panditName {
-		font-size: 18px;
-	}
+  .astrologersGrid {
+    gap: 20px;
+  }
 
-	.searchInput {
-		font-size: 16px;
-	}
+  .astrologerCard {
+    flex: 0 0 320px;
+    min-width: 320px;
+    padding: 28px 24px;
+  }
 
-	/* Astrologers Section - Tablet */
-	.astrologersSection {
-		margin-bottom: 32px;
-	}
+  .astrologerImageWrapper {
+    width: 200px;
+    height: 200px;
+  }
 
-	.sectionTitle {
-		font-size: 18px;
-	}
+  .astrologerName {
+    font-size: 22px;
+  }
 
-	.astrologersGrid {
-		gap: 20px;
-	}
+  .experienceText {
+    font-size: 15px;
+  }
 
-	.astrologerCard {
-		flex: 0 0 320px;
-		min-width: 320px;
-		padding: 28px 24px;
-	}
+  .connectBtn {
+    font-size: 17px;
+    padding: 15px 28px;
+  }
 
-	.astrologerImageWrapper {
-		width: 200px;
-		height: 200px;
-	}
+  /* Life Area Section - Tablet */
+  .lifeAreaSection {
+    margin-bottom: 32px;
+  }
 
-	.astrologerName {
-		font-size: 22px;
-	}
+  .lifeAreaGrid {
+    gap: 20px;
+  }
 
-	.experienceText {
-		font-size: 15px;
-	}
+  .lifeAreaCard {
+    padding: 28px 24px;
+    min-height: 160px;
+    flex-direction: row;
+    align-items: center;
+  }
 
-	.connectBtn {
-		font-size: 17px;
-		padding: 15px 28px;
-	}
+  .lifeAreaTitle {
+    font-size: 20px;
+    max-width: 60%;
+  }
 
-	/* Life Area Section - Tablet */
-	.lifeAreaSection {
-		margin-bottom: 32px;
-	}
+  .lifeAreaIcon {
+    width: 80px;
+    height: 80px;
+    position: static;
+  }
 
-	.lifeAreaGrid {
-		gap: 20px;
-	}
+  .lifeAreaIcon svg {
+    width: 36px;
+    height: 36px;
+  }
 
-	.lifeAreaCard {
-		padding: 28px 24px;
-		min-height: 160px;
-		flex-direction: row;
-		align-items: center;
-	}
+  /* My Sessions Section - Tablet */
+  .sessionsSection {
+    margin-bottom: 32px;
+  }
 
-	.lifeAreaTitle {
-		font-size: 20px;
-		max-width: 60%;
-	}
+  .sessionsTitle {
+    font-size: 22px;
+  }
 
-	.lifeAreaIcon {
-		width: 80px;
-		height: 80px;
-		position: static;
-	}
+  .sessionsHeader .titleDivider {
+    max-width: 200px;
+  }
 
-	.lifeAreaIcon svg {
-		width: 36px;
-		height: 36px;
-	}
+  .sessionCard {
+    flex: 0 0 380px;
+    min-width: 380px;
+    min-height: 200px;
+  }
 
-	/* My Sessions Section - Tablet */
-	.sessionsSection {
-		margin-bottom: 32px;
-	}
+  .sessionInfo {
+    padding: 24px;
+  }
 
-	.sessionsTitle {
-		font-size: 22px;
-	}
+  .sessionName {
+    font-size: 19px;
+  }
 
-	.sessionsHeader .titleDivider {
-		max-width: 200px;
-	}
+  /* Cosmic Insight - Tablet */
+  .cosmicInsightSection {
+    margin-bottom: 32px;
+  }
 
-	.sessionCard {
-		flex: 0 0 380px;
-		min-width: 380px;
-		min-height: 200px;
-	}
+  .cosmicInsightCard {
+    padding: 32px 28px;
+    min-height: 240px;
+    flex-direction: row;
+  }
 
-	.sessionInfo {
-		padding: 24px;
-	}
+  .cosmicContent {
+    padding-right: 20px;
+    padding-bottom: 0;
+  }
 
-	.sessionName {
-		font-size: 19px;
-	}
+  .cosmicLabel {
+    font-size: 12px;
+  }
 
-	/* Cosmic Insight - Tablet */
-	.cosmicInsightSection {
-		margin-bottom: 32px;
-	}
+  .cosmicTitle {
+    font-size: 32px;
+  }
 
-	.cosmicInsightCard {
-		padding: 32px 28px;
-		min-height: 240px;
-		flex-direction: row;
-	}
+  .cosmicText {
+    font-size: 16px;
+  }
 
-	.cosmicContent {
-		padding-right: 20px;
-		padding-bottom: 0;
-	}
+  .cosmicArt {
+    width: auto;
+    right: 0;
+  }
 
-	.cosmicLabel {
-		font-size: 12px;
-	}
-
-	.cosmicTitle {
-		font-size: 32px;
-	}
-
-	.cosmicText {
-		font-size: 16px;
-	}
-
-	.cosmicArt {
-		width: auto;
-		right: 0;
-	}
-
-	/* Hide bottom nav on tablet+ */
-	.bottomNav {
-		display: none;
-	}
+  /* Hide bottom nav on tablet+ */
+  .bottomNav {
+    display: none;
+  }
 }
 
 /* Desktop: 1024px - 1439px */
 @media (min-width: 1024px) {
-	.header {
-		padding: 24px 48px;
-	}
+  .header {
+    padding: 24px 48px;
+  }
 
-	.mainContent {
-		padding: 0 48px;
-		max-width: 1600px;
-	}
+  .mainContent {
+    padding: 0 48px;
+    max-width: 1600px;
+  }
 
-	/* Horoscope Card - Desktop */
-	.horoscopeCard {
-		min-height: 160px;
-		padding: 28px 40px;
-	}
+  /* Horoscope Card - Desktop */
+  .horoscopeCard {
+    min-height: 160px;
+    padding: 28px 40px;
+  }
 
-	.horoscopeTitle {
-		font-size: 14px;
-	}
+  .horoscopeTitle {
+    font-size: 14px;
+  }
 
-	.horoscopeHeading {
-		font-size: 24px;
-	}
+  .horoscopeHeading {
+    font-size: 24px;
+  }
 
-	.horoscopeSubtext {
-		font-size: 14px;
-	}
+  .horoscopeSubtext {
+    font-size: 14px;
+  }
 
-	.horoscopePlanet {
-		width: 150px;
-		height: 150px;
-	}
+  .horoscopePlanet {
+    width: 150px;
+    height: 150px;
+  }
 
-	/* Carousel - Desktop */
-	.carouselSlide {
-		flex: 0 0 calc(45% - 10px);
-		min-width: calc(45% - 10px);
-		min-height: 260px;
-		padding: 26px;
-	}
+  /* Carousel - Desktop */
+  .carouselSlide {
+    flex: 0 0 calc(45% - 10px);
+    min-width: calc(45% - 10px);
+    min-height: 260px;
+    padding: 26px;
+  }
 
-	.slideTitle {
-		font-size: 32px;
-	}
+  .slideTitle {
+    font-size: 32px;
+  }
 
-	.slideSubtitle {
-		font-size: 17px;
-	}
+  .slideSubtitle {
+    font-size: 17px;
+  }
 
-	.slideButton {
-		font-size: 16px;
-		padding: 14px 22px;
-	}
+  .slideButton {
+    font-size: 16px;
+    padding: 14px 22px;
+  }
 
-	/* Quick Actions - Desktop */
-	.quickActions {
-		grid-template-columns: repeat(4, 1fr);
-		gap: 20px;
-		margin-bottom: 40px;
-	}
+  /* Quick Actions - Desktop */
+  .quickActions {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+  }
 
-	.actionCard {
-		width: 100%;
-		height: 210px;
-		padding: 22px 20px 0;
-	}
+  .actionCard {
+    width: 100%;
+    height: 210px;
+    padding: 22px 20px 0;
+  }
 
-	.actionTitle {
-		font-size: 17px;
-	}
+  .actionTitle {
+    font-size: 17px;
+  }
 
-	.actionMedia {
-		height: 130px;
-	}
+  .actionMedia {
+    height: 130px;
+  }
 
-	.actionCircle {
-		width: 105px;
-		height: 105px;
-		bottom: 22px;
-	}
+  .actionCircle {
+    width: 105px;
+    height: 105px;
+    bottom: 22px;
+  }
 
-	.actionImg {
-		height: 130px;
-	}
+  .actionImg {
+    height: 130px;
+  }
 
-	/* Pandit AI - Desktop */
-	.panditAISection {
-		padding: 26px;
-	}
+  /* Pandit AI - Desktop */
+  .panditAISection {
+    padding: 26px;
+  }
 
-	/* Astrologers Section - Desktop */
-	.sectionTitle {
-		font-size: 19px;
-	}
+  /* Astrologers Section - Desktop */
+  .sectionTitle {
+    font-size: 19px;
+  }
 
-	.astrologerCard {
-		flex: 0 0 340px;
-		min-width: 340px;
-		padding: 30px 26px;
-	}
+  .astrologerCard {
+    flex: 0 0 340px;
+    min-width: 340px;
+    padding: 30px 26px;
+  }
 
-	.astrologerImageWrapper {
-		width: 220px;
-		height: 220px;
-	}
+  .astrologerImageWrapper {
+    width: 220px;
+    height: 220px;
+  }
 
-	.astrologerName {
-		font-size: 23px;
-	}
+  .astrologerName {
+    font-size: 23px;
+  }
 
-	/* Life Area Section - Desktop */
-	.lifeAreaCard {
-		padding: 32px 28px;
-		min-height: 160px;
-	}
+  /* Life Area Section - Desktop */
+  .lifeAreaCard {
+    padding: 32px 28px;
+    min-height: 160px;
+  }
 
-	.lifeAreaTitle {
-		font-size: 22px;
-	}
+  .lifeAreaTitle {
+    font-size: 22px;
+  }
 
-	.lifeAreaIcon {
-		width: 90px;
-		height: 90px;
-	}
+  .lifeAreaIcon {
+    width: 90px;
+    height: 90px;
+  }
 
-	/* Cosmic Insight - Desktop */
-	.cosmicInsightCard {
-		padding: 36px 32px;
-		min-height: 260px;
-	}
+  /* Cosmic Insight - Desktop */
+  .cosmicInsightCard {
+    padding: 36px 32px;
+    min-height: 260px;
+  }
 
-	.cosmicTitle {
-		font-size: 36px;
-	}
+  .cosmicTitle {
+    font-size: 36px;
+  }
 
-	.cosmicText {
-		font-size: 17px;
-	}
+  .cosmicText {
+    font-size: 17px;
+  }
 }
 
 /* Large Desktop: 1440px - 1919px */
 @media (min-width: 1440px) {
-	.header {
-		padding: 28px 64px;
-	}
+  .header {
+    padding: 28px 64px;
+  }
 
-	.mainContent {
-		padding: 0 64px;
-		max-width: 1800px;
-	}
+  .mainContent {
+    padding: 0 64px;
+    max-width: 1800px;
+  }
 
-	/* Horoscope Card - Large Desktop */
-	.horoscopeCard {
-		min-height: 180px;
-		padding: 32px 48px;
-	}
+  /* Horoscope Card - Large Desktop */
+  .horoscopeCard {
+    min-height: 180px;
+    padding: 32px 48px;
+  }
 
-	.horoscopeHeading {
-		font-size: 26px;
-	}
+  .horoscopeHeading {
+    font-size: 26px;
+  }
 
-	.horoscopePlanet {
-		width: 170px;
-		height: 170px;
-	}
+  .horoscopePlanet {
+    width: 170px;
+    height: 170px;
+  }
 
-	/* Carousel - Large Desktop */
-	.carouselSlide {
-		flex: 0 0 calc(40% - 10px);
-		min-width: calc(40% - 10px);
-		min-height: 280px;
-		padding: 28px;
-	}
+  /* Carousel - Large Desktop */
+  .carouselSlide {
+    flex: 0 0 calc(40% - 10px);
+    min-width: calc(40% - 10px);
+    min-height: 280px;
+    padding: 28px;
+  }
 
-	.slideTitle {
-		font-size: 34px;
-	}
+  .slideTitle {
+    font-size: 34px;
+  }
 
-	.slideSubtitle {
-		font-size: 18px;
-	}
+  .slideSubtitle {
+    font-size: 18px;
+  }
 
-	/* Quick Actions - Large Desktop */
-	.quickActions {
-		grid-template-columns: repeat(4, 1fr);
-		gap: 24px;
-		margin-bottom: 48px;
-	}
+  /* Quick Actions - Large Desktop */
+  .quickActions {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 48px;
+  }
 
-	.actionCard {
-		width: 100%;
-		height: 230px;
-		padding: 24px 22px 0;
-	}
+  .actionCard {
+    width: 100%;
+    height: 230px;
+    padding: 24px 22px 0;
+  }
 
-	.actionTitle {
-		font-size: 18px;
-	}
+  .actionTitle {
+    font-size: 18px;
+  }
 
-	.actionMedia {
-		height: 140px;
-	}
+  .actionMedia {
+    height: 140px;
+  }
 
-	.actionCircle {
-		width: 115px;
-		height: 115px;
-		bottom: 24px;
-	}
+  .actionCircle {
+    width: 115px;
+    height: 115px;
+    bottom: 24px;
+  }
 
-	.actionImg {
-		height: 140px;
-	}
+  .actionImg {
+    height: 140px;
+  }
 }
 
 /* Extra Large Desktop: 1920px+ */
 @media (min-width: 1920px) {
-	.header {
-		padding: 32px 80px;
-	}
+  .header {
+    padding: 32px 80px;
+  }
 
-	.mainContent {
-		padding: 0 80px;
-		max-width: 2000px;
-	}
+  .mainContent {
+    padding: 0 80px;
+    max-width: 2000px;
+  }
 
-	/* Horoscope Card - XL Desktop */
-	.horoscopeCard {
-		min-height: 200px;
-		padding: 36px 56px;
-	}
+  /* Horoscope Card - XL Desktop */
+  .horoscopeCard {
+    min-height: 200px;
+    padding: 36px 56px;
+  }
 
-	.horoscopeHeading {
-		font-size: 28px;
-	}
+  .horoscopeHeading {
+    font-size: 28px;
+  }
 
-	.horoscopePlanet {
-		width: 190px;
-		height: 190px;
-	}
+  .horoscopePlanet {
+    width: 190px;
+    height: 190px;
+  }
 
-	/* Carousel - XL Desktop */
-	.carouselSlide {
-		flex: 0 0 calc(35% - 10px);
-		min-width: calc(35% - 10px);
-		min-height: 300px;
-		padding: 30px;
-	}
+  /* Carousel - XL Desktop */
+  .carouselSlide {
+    flex: 0 0 calc(35% - 10px);
+    min-width: calc(35% - 10px);
+    min-height: 300px;
+    padding: 30px;
+  }
 
-	.slideTitle {
-		font-size: 36px;
-	}
+  .slideTitle {
+    font-size: 36px;
+  }
 
-	.slideSubtitle {
-		font-size: 19px;
-	}
+  .slideSubtitle {
+    font-size: 19px;
+  }
 
-	/* Quick Actions - XL Desktop */
-	.quickActions {
-		grid-template-columns: repeat(4, 1fr);
-		gap: 28px;
-		margin-bottom: 56px;
-	}
+  /* Quick Actions - XL Desktop */
+  .quickActions {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px;
+    margin-bottom: 56px;
+  }
 
-	.actionCard {
-		width: 100%;
-		height: 250px;
-		padding: 26px 24px 0;
-	}
+  .actionCard {
+    width: 100%;
+    height: 250px;
+    padding: 26px 24px 0;
+  }
 
-	.actionTitle {
-		font-size: 19px;
-	}
+  .actionTitle {
+    font-size: 19px;
+  }
 
-	.actionMedia {
-		height: 150px;
-	}
+  .actionMedia {
+    height: 150px;
+  }
 
-	.actionCircle {
-		width: 125px;
-		height: 125px;
-		bottom: 26px;
-	}
+  .actionCircle {
+    width: 125px;
+    height: 125px;
+    bottom: 26px;
+  }
 
-	.actionImg {
-		height: 150px;
-	}
+  .actionImg {
+    height: 150px;
+  }
 
-	/* Pandit AI - XL Desktop */
-	.panditAISection {
-		padding: 28px;
-	}
+  /* Pandit AI - XL Desktop */
+  .panditAISection {
+    padding: 28px;
+  }
 
-	/* Astrologers Section - XL Desktop */
-	.sectionTitle {
-		font-size: 20px;
-	}
+  /* Astrologers Section - XL Desktop */
+  .sectionTitle {
+    font-size: 20px;
+  }
 
-	.astrologerCard {
-		flex: 0 0 360px;
-		min-width: 360px;
-		padding: 32px 28px;
-	}
+  .astrologerCard {
+    flex: 0 0 360px;
+    min-width: 360px;
+    padding: 32px 28px;
+  }
 
-	.astrologerImageWrapper {
-		width: 240px;
-		height: 240px;
-	}
+  .astrologerImageWrapper {
+    width: 240px;
+    height: 240px;
+  }
 
-	.astrologerName {
-		font-size: 24px;
-	}
+  .astrologerName {
+    font-size: 24px;
+  }
 
-	.connectBtn {
-		font-size: 18px;
-		padding: 16px 32px;
-	}
+  .connectBtn {
+    font-size: 18px;
+    padding: 16px 32px;
+  }
 
-	/* Life Area Section - XL Desktop */
-	.lifeAreaCard {
-		padding: 36px 32px;
-		min-height: 180px;
-	}
+  /* Life Area Section - XL Desktop */
+  .lifeAreaCard {
+    padding: 36px 32px;
+    min-height: 180px;
+  }
 
-	.lifeAreaTitle {
-		font-size: 24px;
-	}
+  .lifeAreaTitle {
+    font-size: 24px;
+  }
 
-	.lifeAreaIcon {
-		width: 100px;
-		height: 100px;
-	}
+  .lifeAreaIcon {
+    width: 100px;
+    height: 100px;
+  }
 
-	/* Cosmic Insight - XL Desktop */
-	.cosmicInsightCard {
-		padding: 40px 36px;
-		min-height: 280px;
-	}
+  /* Cosmic Insight - XL Desktop */
+  .cosmicInsightCard {
+    padding: 40px 36px;
+    min-height: 280px;
+  }
 
-	.cosmicTitle {
-		font-size: 40px;
-	}
+  .cosmicTitle {
+    font-size: 40px;
+  }
 
-	.cosmicText {
-		font-size: 18px;
-	}
+  .cosmicText {
+    font-size: 18px;
+  }
 }
 
 /* Discover More Section - Fixed Grid Layout */
 .discoverSection {
-	margin-bottom: 24px;
+  margin-bottom: 24px;
 }
 
 .discoverHeader {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 20px;
-	gap: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 16px;
 }
 
 .discoverHeader .sectionHeader {
-	flex: 1;
-	margin: 0;
-	text-align: left;
+  flex: 1;
+  margin: 0;
+  text-align: left;
 }
 
 .discoverHeader .titleDivider {
-	margin: 0;
+  margin: 0;
 }
 
 .viewAllBtn {
-	width: 40px;
-	height: 40px;
-	background: #FFFFFF;
-	border: 1px solid #E5E5E5;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: #888;
-	cursor: pointer;
-	transition: all 0.2s;
-	flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .viewAllBtn:hover {
-	background: #F5F5F5;
-	color: #666;
+  background: #f5f5f5;
+  color: #666;
 }
 
 .discoverGrid {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	grid-auto-rows: 180px;
-	gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 180px;
+  gap: 16px;
 }
 
 .discoverCard {
-	border-radius: 20px;
-	padding: 24px 20px;
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-start;
-	position: relative;
-	overflow: hidden;
-	cursor: pointer;
-	transition: transform 0.2s, box-shadow 0.2s;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .discoverCard:hover {
-	transform: translateY(-4px);
-	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .discoverCard:nth-child(1) {
-	grid-row: span 2;
+  grid-row: span 2;
 }
 
 .discoverCard:nth-child(3) {
-	grid-row: span 2;
+  grid-row: span 2;
 }
 
 .discoverContent {
-	position: absolute;
-	z-index: 2;
-	bottom: 20px;
+  position: absolute;
+  z-index: 2;
+  bottom: 20px;
 }
 
 .discoverTitle {
-	font-family: 'Poppins', sans-serif;
-	font-size: 24px;
-	font-weight: 600;
-	color: #FFFFFF;
-	margin: 0 0 12px 0;
-	line-height: 1.2;
+  font-family: "Poppins", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 12px 0;
+  line-height: 1.2;
 }
 
 .discoverText {
-	font-family: 'Poppins', sans-serif;
-	font-size: 14px;
-	font-weight: 400;
-	line-height: 1.5;
-	color: rgba(255, 255, 255, 0.9);
-	margin: 0;
-	max-width: 70%;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  max-width: 70%;
 }
 
 .discoverImage {
-	position: absolute;
-	bottom: -10px;
-	right: -10px;
-	width: 50%;
-	height: auto;
-	max-height: 70%;
-	object-fit: contain;
-	opacity: 0.9;
-	z-index: 1;
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  width: 50%;
+  height: auto;
+  max-height: 70%;
+  object-fit: contain;
+  opacity: 0.9;
+  z-index: 1;
 }
 
 .discoverCard:nth-child(1) .discoverImage {
-	width: 75%;
-	max-height: 75%;
-	top: 0;
-	right: 0;
+  width: 75%;
+  max-height: 75%;
+  top: 0;
+  right: 0;
 }
 
 .discoverCard:nth-child(3) .discoverImage {
-	width: 85%;
-	max-height: 75%;
-	top: 0;
-	right: 0;
+  width: 85%;
+  max-height: 75%;
+  top: 0;
+  right: 0;
 }
 
 .discoverCard:nth-child(4) .discoverImage {
-	width: 70%;
-	max-height: 75%;
-	top: 0;
-	right: -20px;
+  width: 70%;
+  max-height: 75%;
+  top: 0;
+  right: -20px;
 }
 
 .discoverCard:nth-child(2) .discoverImage {
-	width: 70%;
-	max-height: 75%;
-	top: 0;
-	right: -35px;
+  width: 70%;
+  max-height: 75%;
+  top: 0;
+  right: -35px;
 }
 
 /* Mobile responsive for Discover More */
 @media (max-width: 480px) {
-	.discoverGrid {
-		gap: 12px;
-		grid-auto-rows: 160px;
-	}
+  .discoverGrid {
+    gap: 12px;
+    grid-auto-rows: 160px;
+  }
 
-	.discoverCard {
-		padding: 20px 16px;
-	}
+  .discoverCard {
+    padding: 20px 16px;
+  }
 
-	.discoverTitle {
-		font-size: 20px;
-	}
+  .discoverTitle {
+    font-size: 20px;
+  }
 
-	.discoverText {
-		font-size: 13px;
-		max-width: 65%;
-	}
+  .discoverText {
+    font-size: 13px;
+    max-width: 65%;
+  }
 
-	.discoverImage {
-		width: 45%;
-		max-height: 65%;
-	}
+  .discoverImage {
+    width: 45%;
+    max-height: 65%;
+  }
 }
 
 /* Explore Blogs and In The News Section */
 .blogsSection {
-	margin-bottom: 24px;
+  margin-bottom: 24px;
 }
 
 .blogsHeader {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 24px;
-	gap: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
 }
 
 .blogsHeaderLeft {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .blogsTitle {
-	font-family: 'Poppins', sans-serif;
-	font-size: 20px;
-	font-weight: 700;
-	letter-spacing: 0.5px;
-	color: #2C2C2C;
-	margin: 0 0 12px 0;
-	text-align: left;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #2c2c2c;
+  margin: 0 0 12px 0;
+  text-align: left;
 }
 
 .blogsHeader .titleDivider {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	max-width: 280px;
-	width: 100%;
-	margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 280px;
+  width: 100%;
+  margin: 0;
 }
 
 .blogsHeader .dividerLine {
-	flex: 1;
-	height: 1px;
-	background: #D4C4B0;
+  flex: 1;
+  height: 1px;
+  background: #d4c4b0;
 }
 
 .blogsHeader .dividerMoon {
-	font-size: 16px;
-	color: #D4C4B0;
-	flex-shrink: 0;
+  font-size: 16px;
+  color: #d4c4b0;
+  flex-shrink: 0;
 }
 
 .blogsHeader .viewAllBtn {
-	flex-shrink: 0;
+  flex-shrink: 0;
 }
 
 .blogsGrid {
-	display: flex;
-	gap: 16px;
-	overflow-x: auto;
-	scrollbar-width: none;
-	-ms-overflow-style: none;
-	padding: 4px;
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px;
 }
 
 .blogsGrid::-webkit-scrollbar {
-	display: none;
+  display: none;
 }
 
 .blogCard {
-	flex: 0 0 280px;
-	min-width: 280px;
-	background: #FFFFFF;
-	border-radius: 24px;
-	overflow: hidden;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-	cursor: pointer;
-	transition: transform 0.2s, box-shadow 0.2s;
+  flex: 0 0 280px;
+  min-width: 280px;
+  background: #ffffff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .blogCard:hover {
-	transform: translateY(-4px);
-	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
 .blogImageWrapper {
-	width: 100%;
-	height: 240px;
-	overflow: hidden;
-	background: #F5F5F5;
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+  background: #f5f5f5;
 }
 
 .blogImage {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .blogContent {
-	padding: 20px;
-	background: #FFFFFF;
+  padding: 20px;
+  background: #ffffff;
 }
 
 .blogTitle {
-	font-family: 'Poppins', sans-serif;
-	font-size: 20px;
-	font-weight: 600;
-	color: #1a1a1a;
-	margin: 0 0 10px 0;
-	line-height: 1.3;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 10px 0;
+  line-height: 1.3;
 }
 
 .blogDate {
-	font-family: 'Poppins', sans-serif;
-	font-size: 14px;
-	font-weight: 400;
-	color: #888;
-	margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #888;
+  margin: 0;
 }
 
 /* Mobile responsive for Blogs */
 @media (max-width: 480px) {
-	.blogsTitle {
-		font-size: 16px;
-	}
+  .blogsTitle {
+    font-size: 16px;
+  }
 
-	.blogsHeader .titleDivider {
-		max-width: 240px;
-	}
+  .blogsHeader .titleDivider {
+    max-width: 240px;
+  }
 
-	.blogCard {
-		flex: 0 0 260px;
-		min-width: 260px;
-	}
+  .blogCard {
+    flex: 0 0 260px;
+    min-width: 260px;
+  }
 
-	.blogImageWrapper {
-		height: 220px;
-	}
+  .blogImageWrapper {
+    height: 220px;
+  }
 
-	.blogTitle {
-		font-size: 18px;
-	}
+  .blogTitle {
+    font-size: 18px;
+  }
 
-	.blogDate {
-		font-size: 13px;
-	}
+  .blogDate {
+    font-size: 13px;
+  }
 }
 
 /* Tablet responsive for Blogs */
 @media (min-width: 768px) {
-	.blogsSection {
-		margin-bottom: 32px;
-	}
+  .blogsSection {
+    margin-bottom: 32px;
+  }
 
-	.blogsTitle {
-		font-size: 22px;
-	}
+  .blogsTitle {
+    font-size: 22px;
+  }
 
-	.blogsHeader .titleDivider {
-		max-width: 320px;
-	}
+  .blogsHeader .titleDivider {
+    max-width: 320px;
+  }
 
-	.blogCard {
-		flex: 0 0 320px;
-		min-width: 320px;
-	}
+  .blogCard {
+    flex: 0 0 320px;
+    min-width: 320px;
+  }
 
-	.blogImageWrapper {
-		height: 260px;
-	}
+  .blogImageWrapper {
+    height: 260px;
+  }
 
-	.blogTitle {
-		font-size: 22px;
-	}
+  .blogTitle {
+    font-size: 22px;
+  }
 
-	.blogContent {
-		padding: 24px;
-	}
+  .blogContent {
+    padding: 24px;
+  }
 }
 
 /* Desktop responsive for Blogs */
 @media (min-width: 1024px) {
-	.blogsTitle {
-		font-size: 24px;
-	}
+  .blogsTitle {
+    font-size: 24px;
+  }
 
-	.blogsHeader .titleDivider {
-		max-width: 360px;
-	}
+  .blogsHeader .titleDivider {
+    max-width: 360px;
+  }
 
-	.blogCard {
-		flex: 0 0 340px;
-		min-width: 340px;
-	}
+  .blogCard {
+    flex: 0 0 340px;
+    min-width: 340px;
+  }
 
-	.blogImageWrapper {
-		height: 280px;
-	}
+  .blogImageWrapper {
+    height: 280px;
+  }
 }
