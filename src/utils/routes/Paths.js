@@ -1,5 +1,6 @@
 import VideoCalling from "../../component/call/VideoCall";
 import AgoraVoiceCalling from "../../component/call/VoiceCall";
+import TarotReadingCard from "../../component/UI/cards/tarotReadingCard/TarotReadingCard";
 import {
   Login,
   Register,
@@ -118,6 +119,11 @@ import LoveTriangleTarot from "../../screens/private/tarot/loveTriangleTarot/Lov
 import MadeForEachOther from "../../screens/private/tarot/madeForEachOther/MadeForEachOther";
 import RomanticBreakUpTarot from "../../screens/private/tarot/romanticBreakupTarot/RomanticBreakUpTarot";
 import YesNoTarot from "../../screens/private/tarot/yesNoTarot/YesNoTarot";
+import TarotReadingPage from "../../screens/private/v2/tarot/TarotReadingPage";
+import TarotCardDetailPage from "../../screens/private/v2/tarot/TarotCardDetailPage";
+import TarotCardSelectionPage from "../../screens/private/v2/tarot/TarotCardSelectionPage";
+import LoveTriangleSelectionPage from "../../screens/private/v2/tarot/LoveTriangleSelectionPage";
+import LoveTriangleResultPage from "../../screens/private/v2/tarot/LoveTriangleResultPage";
 import Home from "../../screens/v2/home/Home"
 
 export const PATH = {
@@ -507,6 +513,26 @@ export const PATH = {
     TAROT_RESULT: {
       path: "/tarot/result",
       element: TarotResult,
+    },
+    TAROT_CARD_V2: {
+      path: "/v2/tarot-card",
+      element: TarotReadingPage,
+    },
+    TAROT_CARD_SELECTION: {
+      path: "/tarot-card-selection",
+      element: TarotCardSelectionPage,
+    },
+    LOVE_TRIANGLE_SELECTION: {
+      path: "/love-triangle-selection",
+      element: LoveTriangleSelectionPage,
+    },
+    LOVE_TRIANGLE_RESULT: {
+      path: "/love-triangle-result",
+      element: LoveTriangleResultPage,
+    },
+    TAROT_CARD_DETAIL: {
+      path: "/tarot-card",
+      element: TarotCardDetailPage,
     },
 
     FREE_READINGS: {

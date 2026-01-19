@@ -1,0 +1,292 @@
+import { useState, useRef } from 'react'
+import { ArrowLeft, Shuffle } from 'lucide-react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import styles from './TarotCardSelectionPage.module.css'
+
+const TarotCardSelectionPage = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const reading = location.state?.reading || { title: 'Yes/ No Tarot' }
+  
+  const [currentIndex, setCurrentIndex] = useState(2)
+  const [isDragging, setIsDragging] = useState(false)
+  const [startX, setStartX] = useState(0)
+  const [translateX, setTranslateX] = useState(0)
+  const containerRef = useRef(null)
+
+  const cards = [
+    { id: 1, pattern: 'floral' },
+    { id: 2, pattern: 'floral' },
+    { id: 3, pattern: 'floral' },
+    { id: 4, pattern: 'floral' },
+    { id: 5, pattern: 'floral' },
+    { id: 6, pattern: 'floral' },
+    { id: 7, pattern: 'floral' }
+  ]
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true)
+    setStartX(e.pageX || e.touches?.[0]?.pageX)
+  }
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return
+    const currentX = e.pageX || e.touches?.[0]?.pageX
+    const diff = currentX - startX
+    setTranslateX(diff)
+  }
+
+  const handleMouseUp = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    const threshold = 80 // Increased threshold for smoother feel
+    if (Math.abs(translateX) > threshold) {
+      if (translateX > 0 && currentIndex > 0) {
+        setCurrentIndex(currentIndex - 1)
+      } else if (translateX < 0 && currentIndex < cards.length - 1) {
+        setCurrentIndex(currentIndex + 1)
+      }
+    }
+    setTranslateX(0)
+  }
+
+  const handleCardClick = (card) => {
+    navigate('/tarot-card-detail', { state: { card, reading } })
+  }
+
+  const handleShuffle = () => {
+    // Shuffle animation
+    setCurrentIndex(Math.floor(Math.random() * cards.length))
+  }
+
+  return (
+    <div className={styles.selectionPage}>
+      <div className={styles.header}>
+        <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <ArrowLeft size={24} />
+        </button>
+        <button className={styles.shuffleButton} onClick={handleShuffle}>
+          <Shuffle size={24} />
+        </button>
+      </div>
+
+      <div className={styles.content}>
+        <h1 className={styles.title}>{reading.title}</h1>
+        <p className={styles.subtitle}>Choose a card to find out your tarot horoscope</p>
+
+        <p className={styles.tapText}>Tap to pick</p>
+
+        <div 
+          className={styles.cardsContainer}
+          ref={containerRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleMouseDown}
+          onTouchMove={handleMouseMove}
+          onTouchEnd={handleMouseUp}
+        >
+          {cards.map((card, index) => {
+            const offset = index - currentIndex
+            const rotation = offset * 12 // 12 degrees per card
+            const translateXPos = offset * 100 // Horizontal spacing
+            const translateYPos = Math.abs(offset) * 30 // Arc effect
+            const scale = index === currentIndex ? 1.15 : Math.max(0.75, 1 - Math.abs(offset) * 0.1)
+            const zIndex = 10 - Math.abs(offset)
+            const opacity = Math.abs(offset) > 2 ? 0 : Math.max(0.4, 1 - Math.abs(offset) * 0.2)
+            const isVisible = Math.abs(offset) <= 2 // Show only 5 cards (center + 2 on each side)
+
+            // Smooth drag effect
+            const dragOffset = isDragging ? translateX * 0.3 : 0
+
+            if (!isVisible) return null
+
+            return (
+              <div
+                key={card.id}
+                className={`${styles.card} ${index === currentIndex ? styles.activeCard : ''}`}
+                style={{
+                  transform: `translateX(calc(${translateXPos}px + ${dragOffset}px)) translateY(${translateYPos}px) rotate(${rotation}deg) scale(${scale})`,
+                  zIndex,
+                  opacity,
+                  transition: isDragging ? 'none' : undefined
+                }}
+                onClick={() => index === currentIndex && handleCardClick(card)}
+              >
+                <div className={styles.cardBack}>
+                  <svg viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id={`cardBg-${card.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style={{ stopColor: '#2c4a6e', stopOpacity: 1 }} />
+                        <stop offset="100%" style={{ stopColor: '#1e3a5f', stopOpacity: 1 }} />
+                      </linearGradient>
+                    </defs>
+                    
+                    {/* Outer dark blue border */}
+                    <rect width="200" height="320" fill="#1a2d45" rx="16"/>
+                    
+                    {/* Cream border */}
+                    <rect x="8" y="8" width="184" height="304" fill="#d4c5a0" rx="12"/>
+                    
+                    {/* Inner blue background */}
+                    <rect x="16" y="16" width="168" height="288" fill="url(#cardBg-${card.id})" rx="8"/>
+                    
+                    {/* Decorative border frame */}
+                    <rect x="20" y="20" width="160" height="280" fill="none" stroke="#d4c5a0" strokeWidth="2" rx="6"/>
+                    <rect x="24" y="24" width="152" height="272" fill="none" stroke="#d4c5a0" strokeWidth="1" rx="4"/>
+                    
+                    {/* Top border with leaves */}
+                    <g stroke="#d4c5a0" strokeWidth="1.5" fill="#d4c5a0" opacity="0.9">
+                      <path d="M 40 32 L 45 28 L 50 32 L 45 36 Z"/>
+                      <path d="M 70 32 L 75 28 L 80 32 L 75 36 Z"/>
+                      <path d="M 100 32 L 105 28 L 110 32 L 105 36 Z"/>
+                      <path d="M 130 32 L 135 28 L 140 32 L 135 36 Z"/>
+                      <path d="M 160 32 L 165 28 L 170 32 L 165 36 Z"/>
+                      <circle cx="55" cy="32" r="1.5"/>
+                      <circle cx="85" cy="32" r="1.5"/>
+                      <circle cx="115" cy="32" r="1.5"/>
+                      <circle cx="145" cy="32" r="1.5"/>
+                    </g>
+                    
+                    {/* Bottom border with leaves */}
+                    <g stroke="#d4c5a0" strokeWidth="1.5" fill="#d4c5a0" opacity="0.9">
+                      <path d="M 40 288 L 45 284 L 50 288 L 45 292 Z"/>
+                      <path d="M 70 288 L 75 284 L 80 288 L 75 292 Z"/>
+                      <path d="M 100 288 L 105 284 L 110 288 L 105 292 Z"/>
+                      <path d="M 130 288 L 135 284 L 140 288 L 135 292 Z"/>
+                      <path d="M 160 288 L 165 284 L 170 288 L 165 292 Z"/>
+                      <circle cx="55" cy="288" r="1.5"/>
+                      <circle cx="85" cy="288" r="1.5"/>
+                      <circle cx="115" cy="288" r="1.5"/>
+                      <circle cx="145" cy="288" r="1.5"/>
+                    </g>
+                    
+                    {/* Left border with leaves */}
+                    <g stroke="#d4c5a0" strokeWidth="1.5" fill="#d4c5a0" opacity="0.9">
+                      <path d="M 32 60 L 28 65 L 32 70 L 36 65 Z"/>
+                      <path d="M 32 100 L 28 105 L 32 110 L 36 105 Z"/>
+                      <path d="M 32 140 L 28 145 L 32 150 L 36 145 Z"/>
+                      <path d="M 32 180 L 28 185 L 32 190 L 36 185 Z"/>
+                      <path d="M 32 220 L 28 225 L 32 230 L 36 225 Z"/>
+                      <path d="M 32 260 L 28 265 L 32 270 L 36 265 Z"/>
+                    </g>
+                    
+                    {/* Right border with leaves */}
+                    <g stroke="#d4c5a0" strokeWidth="1.5" fill="#d4c5a0" opacity="0.9">
+                      <path d="M 168 60 L 164 65 L 168 70 L 172 65 Z"/>
+                      <path d="M 168 100 L 164 105 L 168 110 L 172 105 Z"/>
+                      <path d="M 168 140 L 164 145 L 168 150 L 172 145 Z"/>
+                      <path d="M 168 180 L 164 185 L 168 190 L 172 185 Z"/>
+                      <path d="M 168 220 L 164 225 L 168 230 L 172 225 Z"/>
+                      <path d="M 168 260 L 164 265 L 168 270 L 172 265 Z"/>
+                    </g>
+                    
+                    {/* Center ornamental design */}
+                    <g fill="#d4c5a0" opacity="0.85">
+                      {/* Top leaves cluster */}
+                      <g transform="translate(100, 70)">
+                        <ellipse cx="-15" cy="0" rx="12" ry="8" transform="rotate(-30)"/>
+                        <ellipse cx="15" cy="0" rx="12" ry="8" transform="rotate(30)"/>
+                        <path d="M -8 -5 Q 0 -10 8 -5" fill="none" stroke="#d4c5a0" strokeWidth="1.5"/>
+                        <circle cx="0" cy="5" r="3"/>
+                      </g>
+                      
+                      {/* Center flower */}
+                      <g transform="translate(100, 120)">
+                        <circle r="15" fill="none" stroke="#d4c5a0" strokeWidth="2"/>
+                        <ellipse cx="0" cy="-12" rx="8" ry="12"/>
+                        <ellipse cx="12" cy="0" rx="12" ry="8"/>
+                        <ellipse cx="0" cy="12" rx="8" ry="12"/>
+                        <ellipse cx="-12" cy="0" rx="12" ry="8"/>
+                        <circle r="6"/>
+                      </g>
+                      
+                      {/* Middle ornament */}
+                      <g transform="translate(100, 160)">
+                        <circle r="12" fill="none" stroke="#d4c5a0" strokeWidth="2"/>
+                        <circle r="6"/>
+                        <path d="M -15 0 L -10 0" stroke="#d4c5a0" strokeWidth="1.5"/>
+                        <path d="M 15 0 L 10 0" stroke="#d4c5a0" strokeWidth="1.5"/>
+                        <path d="M 0 -15 L 0 -10" stroke="#d4c5a0" strokeWidth="1.5"/>
+                        <path d="M 0 15 L 0 10" stroke="#d4c5a0" strokeWidth="1.5"/>
+                      </g>
+                      
+                      {/* Bottom leaves cluster */}
+                      <g transform="translate(100, 200)">
+                        <ellipse cx="-15" cy="0" rx="12" ry="8" transform="rotate(30)"/>
+                        <ellipse cx="15" cy="0" rx="12" ry="8" transform="rotate(-30)"/>
+                        <path d="M -8 5 Q 0 10 8 5" fill="none" stroke="#d4c5a0" strokeWidth="1.5"/>
+                        <circle cx="0" cy="-5" r="3"/>
+                      </g>
+                      
+                      {/* Bottom flower */}
+                      <g transform="translate(100, 250)">
+                        <circle r="15" fill="none" stroke="#d4c5a0" strokeWidth="2"/>
+                        <ellipse cx="0" cy="-12" rx="8" ry="12"/>
+                        <ellipse cx="12" cy="0" rx="12" ry="8"/>
+                        <ellipse cx="0" cy="12" rx="8" ry="12"/>
+                        <ellipse cx="-12" cy="0" rx="12" ry="8"/>
+                        <circle r="6"/>
+                      </g>
+                      
+                      {/* Side decorative vines */}
+                      <g opacity="0.7">
+                        {/* Left vine */}
+                        <path d="M 50 90 Q 45 110 50 130 Q 55 150 50 170" fill="none" stroke="#d4c5a0" strokeWidth="1.5"/>
+                        <ellipse cx="48" cy="100" rx="6" ry="9" transform="rotate(-20 48 100)"/>
+                        <ellipse cx="52" cy="120" rx="6" ry="9" transform="rotate(20 52 120)"/>
+                        <ellipse cx="48" cy="140" rx="6" ry="9" transform="rotate(-20 48 140)"/>
+                        <ellipse cx="52" cy="160" rx="6" ry="9" transform="rotate(20 52 160)"/>
+                        
+                        {/* Right vine */}
+                        <path d="M 150 90 Q 155 110 150 130 Q 145 150 150 170" fill="none" stroke="#d4c5a0" strokeWidth="1.5"/>
+                        <ellipse cx="152" cy="100" rx="6" ry="9" transform="rotate(20 152 100)"/>
+                        <ellipse cx="148" cy="120" rx="6" ry="9" transform="rotate(-20 148 120)"/>
+                        <ellipse cx="152" cy="140" rx="6" ry="9" transform="rotate(20 152 140)"/>
+                        <ellipse cx="148" cy="160" rx="6" ry="9" transform="rotate(-20 148 160)"/>
+                        
+                        {/* Small berries */}
+                        <circle cx="45" cy="95" r="2"/>
+                        <circle cx="45" cy="105" r="2"/>
+                        <circle cx="155" cy="95" r="2"/>
+                        <circle cx="155" cy="105" r="2"/>
+                        <circle cx="55" cy="125" r="2"/>
+                        <circle cx="145" cy="125" r="2"/>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        <div className={styles.dragHint}>
+          <svg width="400" height="80" viewBox="0 0 400 80" className={styles.curvedArrow}>
+            {/* Main curved arc */}
+            <path 
+              d="M 60 60 Q 200 10 340 60" 
+              stroke="#999" 
+              strokeWidth="2" 
+              fill="none"
+            />
+            {/* Left arrow - adjusted to match curve angle */}
+            <path 
+              d="M 60 60 L 68 52 M 60 60 L 70 62" 
+              stroke="#999" 
+              strokeWidth="2" 
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <p className={styles.dragText}>Drag to Move</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default TarotCardSelectionPage

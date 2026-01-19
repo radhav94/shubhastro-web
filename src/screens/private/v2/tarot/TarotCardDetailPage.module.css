@@ -1,0 +1,284 @@
+.detailPage {
+  min-height: 100vh;
+  background: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: white;
+}
+
+.backButton {
+  background: #f0f0f0;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 16px;
+  gap: 24px;
+}
+
+.cardDisplay {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  justify-content: center;
+}
+
+.tarotCard {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.answer {
+  font-size: 24px;
+  font-weight: 600;
+  color: #000;
+  margin: 0;
+  text-align: center;
+}
+
+.readingSection {
+  width: 100%;
+  max-width: 500px;
+  background: #f0f0f0;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.readingTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 16px 0;
+}
+
+.readingDescription {
+  font-size: 15px;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 24px 16px;
+  }
+
+  .cardDisplay {
+    max-width: 280px;
+  }
+
+  .answer {
+    font-size: 22px;
+  }
+
+  .readingTitle {
+    font-size: 20px;
+  }
+
+  .readingDescription {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cardDisplay {
+    max-width: 240px;
+  }
+
+  .answer {
+    font-size: 20px;
+  }
+
+  .readingSection {
+    padding: 20px;
+  }
+
+  .readingTitle {
+    font-size: 18px;
+  }
+
+  .readingDescription {
+    font-size: 13px;
+  }
+}
+
+.cardName {
+  font-size: 28px;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.cardNumber {
+  font-size: 20px;
+  font-weight: 600;
+  color: #666;
+  margin: 0;
+  text-align: center;
+}
+
+.meaningSection {
+  margin-top: 24px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
+  margin: 0 0 12px 0;
+}
+
+.errorContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+.errorText {
+  font-size: 16px;
+  color: #dc2626;
+  text-align: center;
+}
+
+.traitsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+  max-width: 500px;
+  margin: 8px 0;
+}
+
+.traitCapsule {
+  padding: 10px 20px;
+  background: rgba(255, 182, 193, 0.5);
+  border-radius: 25px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.traitCapsule:hover {
+  background: rgba(255, 182, 193, 0.7);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .traitCapsule {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .traitsContainer {
+    gap: 8px;
+  }
+  
+  .traitCapsule {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+}
+
+.dailyContainer {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dailySection {
+  background: #f0f0f0;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.dailySectionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dailySectionText {
+  font-size: 15px;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .dailySection {
+    padding: 16px;
+  }
+
+  .dailySectionTitle {
+    font-size: 18px;
+  }
+
+  .dailySectionText {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dailyContainer {
+    gap: 16px;
+  }
+
+  .dailySection {
+    padding: 14px;
+  }
+
+  .dailySectionTitle {
+    font-size: 16px;
+  }
+
+  .dailySectionText {
+    font-size: 13px;
+  }
+}
