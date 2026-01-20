@@ -1,31 +1,60 @@
+@use "../../../../assets/variables/variables" as *;
+
 .filterWrapper {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   overflow-x: auto;
-  padding: 10px 0;
-  scrollbar-width: none; // Firefox
+  padding: 12px 0;
+  scrollbar-width: none;
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   &::-webkit-scrollbar {
-    display: none; // Chrome/Safari
+    display: none;
+  }
+
+  > div:first-child {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    i {
+      position: absolute;
+      left: 14px;
+      color: #999;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    input {
+      padding-left: 38px;
+      min-width: 200px;
+
+      @media (max-width: 768px) {
+        min-width: 160px;
+      }
+    }
   }
 }
 
 .chip {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
-  background: #ffffff;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid #E0E0E0;
+  border-radius: 24px;
+  background: #FFFFFF;
   font-size: 14px;
+  font-weight: 500;
+  font-family: "Poppins", sans-serif;
   cursor: pointer;
   white-space: nowrap;
-  transition: 0.3s ease;
+  transition: all 0.2s ease;
+  color: #666666;
 
   &:hover {
-    background: #fff9e5;
-    border-color: #ffda75;
+    background: #FFF9E5;
+    border-color: #FFD54F;
   }
 
   .chipIcon {
@@ -34,11 +63,13 @@
 }
 
 .activeChip {
-  border-color: #ffcc00;
-  background: #fff6c4;
-  color: #000;
-  box-shadow: 0 0 6px rgba(255, 200, 0, 0.4);
+  border-color: #FFA726;
+  background: #FFF3E0;
+  color: #2C2C2C;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(255, 167, 38, 0.2);
 }
+
 /* ===========================
    MODAL OVERLAY
 =========================== */
@@ -50,23 +81,24 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 16px;
+  padding: 20px;
 }
 
 /* ===========================
-   SLIDE-UP CONTAINER
+   MODAL CONTAINER
 =========================== */
 .modalSlide {
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   max-height: 85vh;
-  background: #fff;
+  background: #FFFFFF;
   border-radius: 16px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   animation: slideUp 0.3s ease-out;
+  font-family: "Poppins", sans-serif;
 }
 
 /* ===========================
@@ -76,21 +108,34 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  font-size: 18px;
+  padding: 18px 20px;
+  font-size: 16px;
   font-weight: 700;
-  border-bottom: 1px solid #eee;
-}
+  color: #2C2C2C;
+  border-bottom: 1px solid #E8E8E8;
+  font-family: "Poppins", sans-serif;
 
-.modalHeader button {
-  font-size: 18px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
+  button {
+    font-size: 20px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #999;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #333;
+    }
+  }
 }
 
 /* ===========================
-   BODY LAYOUT
+   BODY - Two Column Layout
 =========================== */
 .modalBody {
   flex: 1;
@@ -99,29 +144,32 @@
 }
 
 /* ===========================
-   LEFT TABS
+   LEFT SIDEBAR
 =========================== */
-.leftTabs {
+.leftSidebar {
   width: 35%;
-  background: #f7f7f7;
-  border-right: 1px solid #ddd;
+  background: #F9F9F9;
+  border-right: 1px solid #E8E8E8;
   overflow-y: auto;
 }
 
-.tab {
-  padding: 14px 16px;
+.sidebarItem {
+  padding: 16px 20px;
   cursor: pointer;
+  font-size: 14px;
   font-weight: 500;
-  transition: 0.2s all;
+  color: #666666;
+  transition: all 0.2s;
+  font-family: "Poppins", sans-serif;
+
+  &:hover {
+    background: #F0F0F0;
+  }
 }
 
-.tab:hover {
-  background: #eaeaea;
-}
-
-.activeTab {
-  background: #fff;
-  color: #2b8c88;
+.activeSidebarItem {
+  background: #FFF5E6;
+  color: #2C2C2C;
   font-weight: 600;
 }
 
@@ -130,61 +178,95 @@
 =========================== */
 .rightContent {
   width: 65%;
-  padding: 16px;
+  padding: 16px 20px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
-/* ===========================
-   Select All / Clear links
-=========================== */
-.topActions {
+.contentHeader {
   display: flex;
   justify-content: flex-end;
-  gap: 16px;
   margin-bottom: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #2b8c88;
+  font-size: 13px;
+  font-family: "Poppins", sans-serif;
+}
+
+.selectAll {
+  color: #D4A574;
+  font-weight: 600;
   cursor: pointer;
+
+  &:hover {
+    color: #B8935F;
+  }
 }
 
 /* ===========================
-   OPTIONS
+   OPTIONS LIST
 =========================== */
+.optionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .option {
   display: flex;
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  font-size: 15px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  transition: background 0.2s;
+  font-size: 14px;
+  font-weight: 400;
+  color: #CCCCCC;
+  padding: 12px 12px;
+  transition: all 0.2s;
+  font-family: "Poppins", sans-serif;
+
+  &:hover {
+    background-color: #FAFAFA;
+  }
 }
 
-.option:hover {
-  background-color: #f0f0f0;
+.selectedText {
+  color: #2C2C2C;
+  font-weight: 400;
 }
 
-/* Circular checkbox */
-.check {
-  width: 22px;
-  height: 22px;
+.checkIcon {
+  color: #D4A574;
+  flex-shrink: 0;
+}
+
+.checkIconInactive {
+  color: #E0E0E0;
+  flex-shrink: 0;
+}
+
+/* Checkbox with checkmark */
+.checkbox {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
   border-radius: 50%;
-  border: 2px solid #2b8c88;
+  border: 2px solid #D8D8D8;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  color: transparent; /* hidden by default */
+  flex-shrink: 0;
+  transition: all 0.2s;
+  color: #D8D8D8;
+  
+  svg {
+    display: block;
+  }
 }
 
-.checked {
-  background: #2b8c88;
-  color: #fff; /* ✓ visible when checked */
+.checkboxChecked {
+  border-color: #2B8C88;
+  background: transparent;
+  color: #2B8C88;
 }
 
 /* ===========================
@@ -194,50 +276,80 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  border-top: 1px solid #eee;
+  padding: 20px 24px;
+  border-top: 1px solid #E8E8E8;
+  gap: 12px;
+  background: #FFFFFF;
 }
 
 .resetBtn {
-  background: none;
-  border: none;
-  color: #2b8c88;
-  font-size: 16px;
+  background: #FFFFFF;
+  border: 2px solid #E0E0E0;
+  color: #666666;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  padding: 10px 32px;
+  border-radius: 50px;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #CCCCCC;
+    background: #FAFAFA;
+  }
 }
 
 .applyBtn {
-  background: #ffeb3b;
+  background: #3D2817;
   border: none;
-  padding: 12px 32px;
-  border-radius: 12px;
-  font-size: 16px;
+  padding: 12px 48px;
+  border-radius: 50px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+  color: #FFFFFF;
+  font-family: "Poppins", sans-serif;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #2D1F10;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
 }
 
 /* ===========================
    SLIDE ANIMATION
 =========================== */
 @keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ===========================
    SCROLLBAR STYLE
 =========================== */
 .rightContent::-webkit-scrollbar,
-.leftTabs::-webkit-scrollbar {
-  width: 6px;
+.leftSidebar::-webkit-scrollbar {
+  width: 5px;
 }
 
 .rightContent::-webkit-scrollbar-thumb,
-.leftTabs::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
+.leftSidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
   border-radius: 3px;
 }
 
-.listWrapper {
-  overflow-y: auto;
+.rightContent::-webkit-scrollbar-track,
+.leftSidebar::-webkit-scrollbar-track {
+  background-color: transparent;
 }

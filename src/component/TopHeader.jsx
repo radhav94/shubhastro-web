@@ -58,7 +58,7 @@ const TopHeader = () => {
         </NavLink>
 
         <NavLink
-          to="/blog"
+          to="/blogs"
           className={({ isActive }) =>
             `${styles.headerNavLink} ${isActive ? styles.active : ""}`
           }
