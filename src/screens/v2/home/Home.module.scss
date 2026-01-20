@@ -30,9 +30,9 @@
   width: 100%;
   height: auto;
   min-height: 120px;
-  background: linear-gradient(151.72deg, #fff2d4 10.17%, #fadd91 101.97%);
+  background: linear-gradient(135deg, #FFE4BA 0%, #F48A21 50%, #FFA537 100%);
   border-radius: 12px;
-  border: 1px solid #f0d07f;
+  border: 1px solid #F48A21;
   padding: 16px 20px;
   display: flex;
   justify-content: space-between;
@@ -132,7 +132,7 @@
   font-weight: 400;
   line-height: 1.2;
   letter-spacing: -0.24px;
-  color: #704308;
+  color: #E56329;
 }
 
 .horoscopePlanet {
@@ -282,6 +282,12 @@
 .slideButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(42, 28, 6, 0.35);
+}
+
+.slideButton.loading {
+  background: #E56329;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* =========================
@@ -894,6 +900,12 @@
   background: #1a1108;
 }
 
+.connectBtn.loading {
+  background: #E56329;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Explore by Life Area Section */
 .lifeAreaSection {
   margin-bottom: 24px;
@@ -1142,6 +1154,12 @@
   background: #1a1108;
 }
 
+.callAgainBtn.loading {
+  background: #E56329;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Mobile responsive for Sessions */
 @media (max-width: 480px) {
   .sessionsTitle {
@@ -1190,10 +1208,7 @@
 }
 
 .cosmicInsightCard {
-  background:
-    linear-gradient(110.07deg, rgba(166, 97, 218, 0) -19.59%, #a661da 72.06%),
-    linear-gradient(180deg, #f48a21 -12.17%, #522e0a 143.73%);
-
+  background: linear-gradient(135deg, #1E2939 0%, #E56329 100%);
   border-radius: 24px;
   padding: 24px 20px;
   display: flex;
@@ -1310,8 +1325,8 @@
 }
 
 .panchangTab.active {
-  background: linear-gradient(135deg, #ffa726 0%, #ff9800 100%);
-  border-color: #ff9800;
+  background: #E56329;
+  border-color: #E56329;
   color: #ffffff;
 }
 

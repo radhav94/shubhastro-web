@@ -41,6 +41,9 @@ import blog from "../../../assets/images/blog.svg";
 
 const Home = () => {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [loadingConsult, setLoadingConsult] = useState(true);
+  const [loadingConnect, setLoadingConnect] = useState("all");
+  const [loadingCallAgain, setLoadingCallAgain] = useState("all");
   const navigate = useNavigate();
   const carouselRef = useRef(null);
 
@@ -128,6 +131,13 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [carouselSlides.length]);
 
+  // Clear loading states on mount
+  useEffect(() => {
+    setLoadingConsult(true);
+    setLoadingConnect("all");
+    setLoadingCallAgain("all");
+  }, []);
+
   // Scroll to active slide
   useEffect(() => {
     if (carouselRef.current) {
@@ -145,6 +155,30 @@ const Home = () => {
   // Handle dot click
   const handleDotClick = (index) => {
     setActiveSlide(index);
+  };
+
+  // Handle Consult Now button
+  const handleConsultNow = () => {
+    setLoadingConsult(true);
+    setTimeout(() => {
+      navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path);
+    }, 500);
+  };
+
+  // Handle Connect button
+  const handleConnect = (astrologerId) => {
+    setLoadingConnect(astrologerId);
+    setTimeout(() => {
+      navigate(`/chat-with-astrologers/${astrologerId}`);
+    }, 500);
+  };
+
+  // Handle Call Again button
+  const handleCallAgain = (sessionId) => {
+    setLoadingCallAgain(sessionId);
+    setTimeout(() => {
+      navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path);
+    }, 500);
   };
 
   return (
@@ -194,7 +228,11 @@ const Home = () => {
                 <div className={styles.slideContent}>
                   <h3 className={styles.slideTitle}>{slide.title}</h3>
                   <p className={styles.slideSubtitle}>{slide.subtitle}</p>
-                  <button className={styles.slideButton}>
+                  <button 
+                    className={`${styles.slideButton} ${loadingConsult ? styles.loading : ""}`}
+                    onClick={handleConsultNow}
+                    disabled={loadingConsult}
+                  >
                     {slide.buttonText} <ChevronRight size={16} />
                   </button>
                 </div>
@@ -318,7 +356,13 @@ const Home = () => {
                     </span>
                   </div>
                 )}
-                <button className={styles.connectBtn}>Connect</button>
+                <button 
+                  className={`${styles.connectBtn} ${loadingConnect === astrologer._id || loadingConnect === "all" ? styles.loading : ""}`}
+                  onClick={() => handleConnect(astrologer._id)}
+                  disabled={loadingConnect === astrologer._id || loadingConnect === "all"}
+                >
+                  Connect
+                </button>
               </div>
             ))}
           </div>
@@ -421,8 +465,9 @@ const Home = () => {
                   Duration : 5 Min 30 Secs
                 </p>
                 <button 
-                  className={styles.callAgainBtn}
-                  onClick={() => navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)}
+                  className={`${styles.callAgainBtn} ${loadingCallAgain === 1 || loadingCallAgain === "all" ? styles.loading : ""}`}
+                  onClick={() => handleCallAgain(1)}
+                  disabled={loadingCallAgain === 1 || loadingCallAgain === "all"}
                 >
                   Call Again
                 </button>
@@ -457,8 +502,9 @@ const Home = () => {
                   Duration : 8 Min 45 Secs
                 </p>
                 <button 
-                  className={styles.callAgainBtn}
-                  onClick={() => navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)}
+                  className={`${styles.callAgainBtn} ${loadingCallAgain === 2 || loadingCallAgain === "all" ? styles.loading : ""}`}
+                  onClick={() => handleCallAgain(2)}
+                  disabled={loadingCallAgain === 2 || loadingCallAgain === "all"}
                 >
                   Call Again
                 </button>
@@ -621,7 +667,13 @@ const Home = () => {
                     {astrologer.specialities.join(", ")}
                   </span>
                 </div>
-                <button className={styles.connectBtn}>Connect</button>
+                <button 
+                  className={`${styles.connectBtn} ${loadingConnect === astrologer._id || loadingConnect === "all" ? styles.loading : ""}`}
+                  onClick={() => handleConnect(astrologer._id)}
+                  disabled={loadingConnect === astrologer._id || loadingConnect === "all"}
+                >
+                  Connect
+                </button>
               </div>
             ))}
           </div>
