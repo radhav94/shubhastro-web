@@ -58,8 +58,9 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           toast.success(response.data.message || "User verified successfully");
           
           // Store tokens and user data
-          const { accessToken, refreshToken, data: userData } = response.data;
-          
+          const { data: userData } = response.data;
+          const accessToken = userData.accessToken;
+          const refreshToken = userData.refreshToken;
           // Store with keys that TopBar expects
           localStorage.setItem("accessToken", accessToken);
           localStorage.setItem("refreshToken", refreshToken);
