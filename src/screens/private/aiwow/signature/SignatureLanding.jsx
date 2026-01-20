@@ -1,0 +1,63 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import styles from './SignatureLanding.module.scss';
+
+const SignatureLanding = () => {
+  const navigate = useNavigate();
+
+  const features = [
+    {
+      title: 'Stroke Formation',
+      description: 'Analyze stroke formation to reveal hidden talents and potential career paths.',
+    },
+    {
+      title: 'Pressure Analysis',
+      description: 'Evaluate pressure points to uncover emotional depth and communication style.',
+    },
+    {
+      title: 'Letter Slant',
+      description: 'Determine personality traits based on the slant and angle of letters.',
+    },
+    {
+      title: 'Signature Size',
+      description: 'Assess self-confidence and social presence by measuring signature size.',
+    },
+  ];
+
+  return (
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <h1 className={styles.title}>AI Signature Analysis</h1>
+      </header>
+
+      <div className={styles.content}>
+        <p className={styles.description}>
+          Unlock the secrets of your inner self with our AI Signature Analysis, which deciphers the unique patterns in your signature to reveal insights about your personality, strengths, and potential.
+        </p>
+
+        <div className={styles.featuresGrid}>
+          {features.map((feature, index) => (
+            <div key={index} className={styles.featureCard}>
+              <h3 className={styles.featureTitle}>{feature.title}</h3>
+              <p className={styles.featureDescription}>{feature.description}</p>
+            </div>
+          ))}
+        </div>
+
+        <button 
+          className={styles.proceedButton}
+          onClick={() => navigate('/aiwow/signature/instructions')}
+        >
+          Proceed Ahead
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default SignatureLanding;
