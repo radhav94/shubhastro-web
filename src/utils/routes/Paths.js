@@ -165,8 +165,8 @@ export const PATH = {
     HOME: {
       path: "/",
       element: Home,
-      header: false,
-      footer: false,
+      header: true,
+      footer: true,
     },
     ASTROLOGER_DASHBOARD: {
       path: "/astrologer-dashboard",
@@ -199,8 +199,8 @@ export const PATH = {
     PROFILE: {
       path: "/profile",
       element: Profile,
-      header: false,
-      footer: false
+      header: true,
+      footer: true
     },
     TALK_TO_ASTROLOGER: {
       path: "/talk-to-astrologers",
@@ -217,8 +217,8 @@ export const PATH = {
     HOROSCOPE: {
       path: "/horoscopes",
       element: Horoscope,
-      header: false,
-      footer: false,
+      header: true,
+      footer: true,
       DAILY: {
         path: "/horoscopes/:slug",
         element: SignScreen,
@@ -230,8 +230,8 @@ export const PATH = {
       DAILY_NEW: {
         path: "/horoscopes/daily-horoscope",
         element: HoroscopeNew,
-        header: false,
-        footer: false,
+        header: true,
+        footer: true,
       },
       WEEKLY_DETAIL: {
         path: "/horoscopes/weekly-horoscope/:sign",
@@ -240,8 +240,8 @@ export const PATH = {
       WEEKLY_NEW: {
         path: "/horoscopes/weekly-horoscope",
         element: HoroscopeNew,
-        header: false,
-        footer: false,
+        header: true,
+        footer: true,
       },
       YEARLY_DETAIL: {
         path: "/horoscopes/yearly-horoscope/:sign",
@@ -250,8 +250,8 @@ export const PATH = {
       YEARLY_NEW: {
         path: "/horoscopes/yearly-horoscope",
         element: HoroscopeNew,
-        header: false,
-        footer: false,
+        header: true,
+        footer: true,
       },
       MONTHLY: {
         path: "/horoscopes/monthly-horoscope",
@@ -276,8 +276,8 @@ export const PATH = {
       TODAY_NEW: {
         path: "/horoscopes/todays-horoscope",
         element: HoroscopeNew,
-        header: false,
-        footer: false,
+        header: true,
+        footer: true,
       },
     },
     HOROSCOPEDETAILS: {
@@ -318,8 +318,8 @@ export const PATH = {
     KUNDLI_BY_ID: {
       path: "/kundli/:kundliId",
       element: Kundli,
-      header: false,
-      footer: false,
+      header: true,
+      footer: true,
     },
 
     // SADESATI: {
@@ -639,8 +639,8 @@ export const PATH = {
     PROFILE_ASTROLOGER: {
       path: "/astrologer/:id",
       element: AstrologerProfile,
-      header: false,
-      footer: false,
+      header: true,
+      footer: true,
     },
 
     VIDEO_CALL: {
@@ -665,38 +665,38 @@ export const PATH = {
     STREAMING: {
       path: "/astrolive/streaming",
       element: Streaming,
-      header: false,
-      footer: false,
+      header: true,
+      footer: true,
     },
     ABOUT: {
       path: "/aboutus",
       element: About,
-      header: false,
+      header: true,
     },
     DISCLAIMER: {
       path: "/disclaimer",
       element: Disclaimer,
-      header: false,
+      header: true,
     },
     PRICING_POLICY: {
       path: "/pricing-policy",
       element: PricingPolicy,
-      header: false,
+      header: true,
     },
     PRIVACY_POLICY: {
       path: "/privacy-policy",
       element: PrivacyPolicy,
-      header: false,
+      header: true,
     },
     REFUND_POLICY: {
       path: "/refund-and-cancellation-policy",
       element: RefundPolicy,
-      header: false,
+      header: true,
     },
     TERMSCONDITIONS: {
       path: "/terms-conditions",
       element: TermsConditions,
-      header: false,
+      header: true,
     },
 
     // Header
