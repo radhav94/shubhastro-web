@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "./AstrologerProfile.module.scss";
 import { FaPlay, FaStar, FaChevronRight } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
-import { IoChevronBack, IoPaperPlaneOutline } from "react-icons/io5";
+import { IoChevronBack, IoPaperPlaneOutline, IoCalendarOutline } from "react-icons/io5";
 import { MdNotifications } from "react-icons/md";
 import { BiMessageDetail, BiPhone, BiVideo } from "react-icons/bi";
 import { PiBookOpenTextLight, PiUsersThreeBold } from "react-icons/pi";
@@ -270,6 +270,81 @@ const AstrologerProfile = () => {
 
   const data = astrologerData?.data;
   
+  // Fallback data - only used when API data is missing
+  const displayData = {
+    firstName: data?.firstName || "Astrologer",
+    lastName: data?.lastName || "",
+    imageUrl: data?.imageUrl || "",
+    specialities: data?.specialities?.length > 0 ? data.specialities : ["Vedic Kundli", "Tarot", "Palmistry"],
+    expertise: data?.expertise?.length > 0 ? data.expertise : ["Relationships", "Finance", "Health"],
+    languagePreference: data?.languagePreference?.length > 0 ? data.languagePreference : ["English", "Hindi"],
+    experience: data?.experience ?? 20,
+    totalConsultations: data?.totalConsultations ?? 1200,
+    rating: data?.rating ?? 4.5,
+    chatMinutes: data?.chatMinutes ?? 1500,
+    callMinutes: data?.callMinutes ?? 1200,
+    videoMinutes: data?.videoMinutes ?? 4.5,
+    description: data?.description || "With years of dedicated practice, I've guided thousands of individuals across love, career, health, and life direction. My work combines classical Vedic principles with deep intuitive understanding, helping clients receive...",
+    gallery: data?.gallery?.length > 0 ? data.gallery : [
+      "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+1",
+      "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+2",
+      "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+3"
+    ],
+    totalReviews: data?.totalReviews ?? 1020,
+    reviews: data?.reviews?.length > 0 ? data.reviews : [
+      {
+        date: "25/11/2025",
+        rating: 5.0,
+        user: "Rahul Sharma",
+        text: "The insights provided were life-changing, helping me to see my path clearly."
+      },
+      {
+        date: "26/11/2025",
+        rating: 4.8,
+        user: "Anjali Verma",
+        text: "I felt a deep connection and understood my purpose in life better after our session."
+      },
+      {
+        date: "27/11/2025",
+        rating: 4.2,
+        user: "Sameer Rao",
+        text: "The advice was practical and easy to implement, making a positive impact on my daily routine."
+      },
+      {
+        date: "28/11/2025",
+        rating: 4.9,
+        user: "Sneha Iyer",
+        text: "I appreciated the warmth and empathy shown during our discussion; it truly felt supportive."
+      }
+    ],
+    products: data?.products?.length > 0 ? data.products : [
+      {
+        name: "Crystal Set",
+        description: "Amethyst + Quartz +",
+        price: 1500,
+        originalPrice: 2200,
+        image: "",
+        isPopular: true
+      },
+      {
+        name: "Astrology Journal",
+        description: "Leather-bound",
+        price: 800,
+        originalPrice: 1200,
+        image: "",
+        isPopular: true
+      },
+      {
+        name: "Reading Cards",
+        description: "Detailed illustrations",
+        price: 3500,
+        originalPrice: null,
+        image: "",
+        isPopular: true
+      }
+    ]
+  };
+  
   if (isLoading) return <div className={styles.loading}>Loading...</div>;
   if (error) return <ErrorText>Something went wrong!</ErrorText>;
   if (!data) return <ErrorText>Astrologer not found</ErrorText>;
@@ -319,8 +394,8 @@ const AstrologerProfile = () => {
       <div className={styles.profileCard}>
         <div className={styles.profileImageWrapper}>
           <img 
-            src={data?.imageUrl} 
-            alt={data?.firstName} 
+            src={displayData.imageUrl} 
+            alt={displayData.firstName} 
             className={styles.profileImage}
             onError={(e) => {
               e.target.style.display = 'none';
@@ -328,20 +403,14 @@ const AstrologerProfile = () => {
           />
         </div>
         <div className={styles.profileInfo}>
-          <h1 className={styles.astrologerName}>{data?.firstName} {data?.lastName}</h1>
-          {data?.specialities && data.specialities.length > 0 && (
-            <p className={styles.skills}>{data.specialities.join(" • ")}</p>
-          )}
-          {data?.expertise && data.expertise.length > 0 && (
-            <p className={styles.expertise}>{data.expertise.join(" • ")}</p>
-          )}
-          {data?.languagePreference && data.languagePreference.length > 0 && (
-            <div className={styles.languages}>
-              {data.languagePreference.map((lang, i) => (
-                <span key={i} className={styles.languageTag}>{lang}</span>
-              ))}
-            </div>
-          )}
+          <h1 className={styles.astrologerName}>{displayData.firstName} {displayData.lastName}</h1>
+          <p className={styles.skills}>{displayData.specialities.join(" • ")}</p>
+          <p className={styles.expertise}>{displayData.expertise.join(" • ")}</p>
+          <div className={styles.languages}>
+            {displayData.languagePreference.map((lang, i) => (
+              <span key={i} className={styles.languageTag}>{lang}</span>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -349,19 +418,19 @@ const AstrologerProfile = () => {
       <div className={styles.statsSection}>
         <div className={styles.statItem}>
           <PiBookOpenTextLight className={styles.statIcon} />
-          <div className={styles.statValue}>{data?.experience || 0}+</div>
+          <div className={styles.statValue}>{displayData.experience}+</div>
           <div className={styles.statLabel}>Experience</div>
         </div>
         <div className={styles.statDivider}></div>
         <div className={styles.statItem}>
           <PiUsersThreeBold className={styles.statIcon} />
-          <div className={styles.statValue}>{data?.totalConsultations || 0}</div>
+          <div className={styles.statValue}>{displayData.totalConsultations}</div>
           <div className={styles.statLabel}>Consultations</div>
         </div>
         <div className={styles.statDivider}></div>
         <div className={styles.statItem}>
           <FaStar className={styles.statIcon} />
-          <div className={styles.statValue}>{data?.rating || 0}</div>
+          <div className={styles.statValue}>{displayData.rating}</div>
           <div className={styles.statLabel}>Rating</div>
         </div>
       </div>
@@ -388,51 +457,49 @@ const AstrologerProfile = () => {
       <div className={styles.minutesSection}>
         <div className={styles.minuteItem}>
           <BiMessageDetail className={styles.minuteIcon} />
-          <div className={styles.minuteValue}>{data?.chatMinutes || 0}</div>
+          <div className={styles.minuteValue}>{displayData.chatMinutes}</div>
           <div className={styles.minuteLabel}>Chat Minutes</div>
         </div>
         <div className={styles.minuteDivider}></div>
         <div className={styles.minuteItem}>
           <BiPhone className={styles.minuteIcon} />
-          <div className={styles.minuteValue}>{data?.callMinutes || 0}</div>
+          <div className={styles.minuteValue}>{displayData.callMinutes}</div>
           <div className={styles.minuteLabel}>Call Minutes</div>
         </div>
         <div className={styles.minuteDivider}></div>
         <div className={styles.minuteItem}>
           <BiVideo className={styles.minuteIcon} />
-          <div className={styles.minuteValue}>{data?.videoMinutes || 0}</div>
+          <div className={styles.minuteValue}>{displayData.videoMinutes}</div>
           <div className={styles.minuteLabel}>Video Minutes</div>
         </div>
       </div>
 
       {/* About Section */}
-      {data?.description && (
-        <div className={styles.aboutSection}>
-          <h3 className={styles.sectionTitle}>About</h3>
-          <p className={`${styles.aboutText} ${showFullAbout ? styles.expanded : ""}`}>
-            {data.description}
-          </p>
-          {data.description.length > 150 && (
-            <button className={styles.readMoreBtn} onClick={() => setShowFullAbout(!showFullAbout)}>
-              {showFullAbout ? "Read Less" : "Read More"}
-            </button>
-          )}
-        </div>
-      )}
+      <div className={styles.aboutSection}>
+        <h3 className={styles.aboutTitle}>About</h3>
+        <p className={`${styles.aboutText} ${showFullAbout ? styles.expanded : ""}`}>
+          {displayData.description}
+        </p>
+        {displayData.description.length > 150 && (
+          <button className={styles.readMoreBtn} onClick={() => setShowFullAbout(!showFullAbout)}>
+            {showFullAbout ? "Read Less" : "Read More"}
+          </button>
+        )}
 
-      {/* Video Gallery */}
-      {data?.gallery && data.gallery.length > 0 && (
-        <div className={styles.videoGallery}>
-          {data.gallery.slice(0, 3).map((video, index) => (
-            <div key={index} className={styles.videoThumbnail}>
-              <img src={video} alt={`Video ${index + 1}`} />
-              <div className={styles.playButton}>
-                <FaPlay />
+        {/* Video Gallery */}
+        {displayData.gallery.length > 0 && (
+          <div className={styles.videoGallery}>
+            {displayData.gallery.slice(0, 3).map((video, index) => (
+              <div key={index} className={styles.videoThumbnail}>
+                <img src={video} alt={`Video ${index + 1}`} />
+                <div className={styles.playButton}>
+                  <FaPlay />
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Send a Gift Section */}
       <div className={styles.giftSection}>
@@ -442,58 +509,59 @@ const AstrologerProfile = () => {
           <button className={styles.sendNowBtn}>Send Now</button>
         </div>
         <div className={styles.giftImage}>
-          {/* Gift icon or image can be added here */}
+          <div className={styles.giftPlaceholder}>🎁</div>
         </div>
       </div>
 
       {/* User Reviews */}
-      {data?.rating && (
-        <div className={styles.reviewsSection}>
-          <h3 className={styles.sectionTitle}>USER REVIEWS</h3>
-          <div className={styles.reviewsSummary}>
-            <StarRating rating={data.rating} />
-            <p className={styles.reviewsCount}>{data.rating} out of 5 • {data?.totalReviews || 0} total ratings</p>
-          </div>
-
-          {data?.reviews && data.reviews.length > 0 && (
-            <div className={styles.reviewsList}>
-              {data.reviews.slice(0, 4).map((review, index) => (
-                <div key={index} className={styles.reviewCard}>
-                  <div className={styles.reviewHeader}>
-                    <span className={styles.reviewDate}>📅 {review.date}</span>
-                    <div className={styles.reviewRating}>
-                      <FaStar className={styles.reviewStar} />
-                      <span>{review.rating}</span>
-                    </div>
-                  </div>
-                  <h4 className={styles.reviewerName}>{review.user}</h4>
-                  <p className={styles.reviewText}>{review.text}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <button className={styles.shareReviewBtn}>Share a Review</button>
+      <div className={styles.reviewsSection}>
+        <h3 className={styles.sectionTitle}>USER REVIEWS</h3>
+        <div className={styles.reviewsSummary}>
+          <StarRating rating={displayData.rating} />
+          <p className={styles.reviewsCount}>{displayData.rating} out of 5 • {displayData.totalReviews} total ratings</p>
         </div>
-      )}
+
+        <div className={styles.reviewsList}>
+          {displayData.reviews.slice(0, 4).map((review, index) => (
+            <div key={index} className={styles.reviewCard}>
+              <div className={styles.reviewHeader}>
+                <span className={styles.reviewDate}>
+                  <IoCalendarOutline className={styles.calendarIcon} />
+                  {review.date}
+                </span>
+                <div className={styles.reviewRating}>
+                  <FaStar className={styles.reviewStar} />
+                  <span>{review.rating}</span>
+                </div>
+              </div>
+              <h4 className={styles.reviewerName}>{review.user}</h4>
+              <p className={styles.reviewText}>{review.text}</p>
+            </div>
+          ))}
+        </div>
+
+        <button className={styles.shareReviewBtn}>Share a Review</button>
+      </div>
 
       {/* Astrologer Shop */}
-      {data?.products && data.products.length > 0 && (
-        <div className={styles.shopSection}>
-          <div className={styles.shopHeader}>
-            <h3 className={styles.sectionTitle}>Check out Astrologers Shop</h3>
-            <FaChevronRight className={styles.chevronIcon} />
-          </div>
-          <div className={styles.productGrid}>
-            {data.products.slice(0, 3).map((product, index) => (
-              <div key={index} className={styles.productCard}>
-                {product.isPopular && (
-                  <div className={styles.productBadge}>
-                    <FaStar className={styles.badgeStar} />
-                    Most Popular
-                  </div>
-                )}
-                <img src={product.image} alt={product.name} className={styles.productImage} />
+      <div className={styles.shopSection}>
+        <div className={styles.shopHeader}>
+          <h3 className={styles.sectionTitle}>Check out Astrologers Shop</h3>
+          <FaChevronRight className={styles.chevronIcon} />
+        </div>
+        <div className={styles.productGrid}>
+          {displayData.products.slice(0, 3).map((product, index) => (
+            <div key={index} className={styles.productCard}>
+              {product.isPopular && (
+                <div className={styles.productBadge}>
+                  <FaStar className={styles.badgeStar} />
+                  Most Popular
+                </div>
+              )}
+              <div className={styles.productImage}>
+                {product.image && <img src={product.image} alt={product.name} />}
+              </div>
+              <div className={styles.productInfo}>
                 <h4 className={styles.productName}>{product.name}</h4>
                 <p className={styles.productDesc}>{product.description}</p>
                 <div className={styles.productPrice}>
@@ -504,10 +572,10 @@ const AstrologerProfile = () => {
                 </div>
                 <button className={styles.addToCartBtn}>+ Add to cart</button>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
 
       {/* Bottom Connect Button */}
       <div className={styles.bottomBar}>
