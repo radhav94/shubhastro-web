@@ -65,6 +65,7 @@ $mobile-screen-width: 500px;
 
   .topGap {
     height: 183px; // TopHeader (88px) + TopBar (95px)
+    display: none;
     
     @media screen and (max-width: 772px) {
       height: 144px; // TopHeader (76px) + TopBar (68px)

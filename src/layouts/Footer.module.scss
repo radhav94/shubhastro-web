@@ -25,12 +25,7 @@ $font-primary: "Poppins", sans-serif;
 
 // --- Main Footer Styling ---
 .footer {
-  background: linear-gradient(
-    to right,
-    $color-dark-blue,
-    $color-deep-purple,
-    $color-dark-blue
-  );
+  background: #2d0b00;
   color: $color-light-text;
   font-family: $font-primary;
   padding: 20px 0;
