@@ -7,8 +7,8 @@ const ConnectCard = () => {
   return (
     <div className={styles.connectCard}>
       <p className={styles.title}>
-        Connect with an Astrologer on Call or Chat for more personalised
-        detailed predictions.
+        When will I be financially stable? Talk to our expert astrologers for
+        personalized guidance.
       </p>
 
       <div className={styles.buttons}>

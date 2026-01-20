@@ -1,103 +1,117 @@
 import { useSelector } from "react-redux";
-import { AppImages } from "../../../../../utils/appImages";
+import { skipToken } from "@reduxjs/toolkit/query";
 import { useGetManglikDoshQuery } from "../../../../../redux/api/kundli/dashaApi";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
+import styles from "./Manglik.module.scss";
+
 const Manglik = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
 
   const queryArgs = formData
     ? {
-        dob: `${formData.day}/${formData.month}/${formData.year}`,
-        tob: `${String(formData.hour).padStart(2, "0")}:${String(
-          formData.min
-        ).padStart(2, "0")}`,
-        lat: formData.lat,
-        lon: formData.lon,
-        tz: formData.tzone,
-        lang: "en",
-      }
+      dob: `${formData.day}/${formData.month}/${formData.year}`,
+      tob: `${String(formData.hour).padStart(2, "0")}:${String(
+        formData.min
+      ).padStart(2, "0")}`,
+      lat: formData.lat,
+      lon: formData.lon,
+      tz: formData.tzone,
+      lang: "en",
+    }
     : skipToken;
 
   const { data, isLoading } = useGetManglikDoshQuery(queryArgs);
   const manglik = data?.response;
+
+  if (isLoading) {
+    return <PrimaryLoader isLoading={isLoading} />;
+  }
+
+  if (!manglik) {
+    return (
+      <div className={styles.emptyState}>
+        <p>No Manglik Dosh data available</p>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <PrimaryLoader isLoading={isLoading} />
-      <div className="relative w-[100%] h-[270px]">
-        <img
-          className="w-[100vw] h-[270px] object-cover rounded-lg"
-          src={AppImages.Dosh}
-          alt="dosh"
-        />
+    <div className={styles.manglikContainer}>
+      {/* Header Card */}
+      <div className={styles.headerCard}>
+        <div className={styles.headerOverlay}></div>
+        <div className={styles.headerContent}>
+          <h1 className={styles.headerTitle}>Manglik Dosh Analysis</h1>
 
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/30 rounded-lg"></div>
+          <div className={styles.statsGrid}>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>By Mars</span>
+              <span className={styles.statValue}>
+                {manglik.manglik_by_mars ? "Yes" : "No"}
+              </span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>By Rahu/Ketu</span>
+              <span className={styles.statValue}>
+                {manglik.manglik_by_rahuketu ? "Yes" : "No"}
+              </span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>By Saturn</span>
+              <span className={styles.statValue}>
+                {manglik.manglik_by_saturn ? "Yes" : "No"}
+              </span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Score</span>
+              <span className={styles.statValue}>{manglik.score}%</span>
+            </div>
+          </div>
 
-        {/* Text */}
-        <div className="absolute inset-0 flex flex-col text-white  p-4">
-          <h1 className="text-2xl text-center font-bold text-white tracking-wider">
-            Manglik Dosh
-          </h1>
-          <div className="flex justify-start gap-6 my-2">
-            <div className="flex-col mx-2 flex-1 bg-black/10 rounded-md ">
-              <p className="font-medium text-gray-400 ">By Mars</p>
-              <p className="text-xl font-medium">
-                {manglik?.manglik_by_mars ? "Yes" : "No"}
-              </p>
+          {manglik.bot_response && (
+            <div className={styles.summaryCard}>
+              <h3 className={styles.summaryTitle}>Summary</h3>
+              <p className={styles.summaryText}>{manglik.bot_response}</p>
             </div>
-            <div className="flex-col mx-2 flex-1 bg-black/10 rounded-md ">
-              <p className="font-medium text-gray-400 ">By Rahu / Ketu</p>
-              <p className="text-xl font-medium">
-                {manglik?.manglik_by_rahuketu ? "Yes" : "No"}
-              </p>
-            </div>
-          </div>
-          <div className="flex justify-start gap-6 my-2">
-            <div className="flex-col mx-2 flex-1 bg-black/10 rounded-md ">
-              <p className="font-medium text-gray-400 ">By Saturn</p>
-              <p className="text-xl font-medium">
-                {manglik?.manglik_by_saturn ? "Yes" : "No"}
-              </p>
-            </div>
-            <div className="flex-col mx-2 flex-1 bg-black/10 rounded-md ">
-              <p className="font-medium text-gray-400 ">Score</p>
-              <p className="text-xl font-medium">{manglik?.score}%</p>
-            </div>
-          </div>
-          <div className="flex justify-start gap-6 my-2">
-            <div className="flex-col mx-2 flex-1 bg-black/10 rounded-md ">
-              <p className="font-medium text-gray-400 ">Summary</p>
-              <p className="text-xl font-medium">
-                {manglik?.bot_response?.length > 50
-                  ? manglik?.bot_response?.length.slice(0, 50) + "..."
-                  : manglik?.bot_response}
-              </p>
-            </div>
-          </div>
+          )}
         </div>
       </div>
-      <div>
-        {manglik?.factors?.length > 0 && (
-          <div className="bg-slate-50 rounded-lg shadow-black/30 shadow-lg my-5 p-3">
-            <h1 className="text-xl font-bold">Manglik Analysis factors</h1>
-            {manglik?.factors?.map((item, i) => (
-              <div key={i} className="bg-yellow-200 my-2 p-2 rounded-lg ">
-                <p>{item}</p>
+
+      {/* Factors Section */}
+      {manglik.factors?.length > 0 && (
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            <span className={styles.sectionIcon}>🔍</span>
+            Manglik Analysis Factors
+          </h2>
+          <div className={styles.factorsList}>
+            {manglik.factors.map((item, i) => (
+              <div key={i} className={styles.factorCard}>
+                <span className={styles.factorIcon}>•</span>
+                <p className={styles.factorText}>{item}</p>
               </div>
             ))}
           </div>
-        )}
-        {manglik?.aspects.length > 0 && (
-          <div className="bg-slate-50 rounded-lg shadow-black/30 shadow-lg my-5 p-3">
-            <h1 className="text-xl font-bold">Manglik Aspects</h1>
-            {manglik?.aspects?.map((item, i) => (
-              <div key={i} className="bg-yellow-200 my-2 p-2 rounded-lg ">
-                <p>{item}</p>
+        </div>
+      )}
+
+      {/* Aspects Section */}
+      {manglik.aspects?.length > 0 && (
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            <span className={styles.sectionIcon}>✨</span>
+            Manglik Aspects
+          </h2>
+          <div className={styles.aspectsList}>
+            {manglik.aspects.map((item, i) => (
+              <div key={i} className={styles.aspectCard}>
+                <span className={styles.aspectIcon}>•</span>
+                <p className={styles.aspectText}>{item}</p>
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

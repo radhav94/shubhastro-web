@@ -27,8 +27,9 @@ const HomeLayout = () => {
 
   const showHeader = currentRoute ? currentRoute.handle.header : true;
   const showFooter = currentRoute ? currentRoute.handle.footer : true;
-  
+
   // Hide TopHeader on onboarding page or when header is disabled
+
   const isOnboardingPage = location.pathname === "/onboarding";
   const showTopHeader = !isOnboardingPage && showHeader;
 
@@ -37,11 +38,11 @@ const HomeLayout = () => {
       <ScrollToTop />
 
       {/* NEW TOP HEADER - Hidden on onboarding or when header is disabled */}
-      {showTopHeader && (
+      {
         <div className={styles.fixedTopHeader}>
           <TopHeader />
         </div>
-      )}
+      }
 
       {/* FIXED TOPBAR */}
       {/* {showHeader && (
@@ -72,9 +73,9 @@ const HomeLayout = () => {
       {/* ✅ FLOATING CALL UI (IMPORTANT LINE) */}
       <VideoCallContainer />
 
-      <StickyChatFooter/>
-      <StickyCallFooter/>
-      <StickyReview/>
+      <StickyChatFooter />
+      <StickyCallFooter />
+      <StickyReview />
     </div>
   );
 };
