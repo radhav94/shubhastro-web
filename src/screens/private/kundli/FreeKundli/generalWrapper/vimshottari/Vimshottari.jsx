@@ -8,8 +8,8 @@ import VimshottariCard from "./VimshottariCard";
 const Vimshottari = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
 
-const queryArgs = formData
-  ? {
+  const queryArgs = formData
+    ? {
       dob: `${String(formData.day).padStart(2, "0")}/${String(
         formData.month
       ).padStart(2, "0")}/${formData.year}`,
@@ -21,13 +21,13 @@ const queryArgs = formData
       tz: formData.tzone,
       lang: "en",
     }
-  : skipToken;
+    : skipToken;
 
   const { data, isLoading } = useGetVimshottariQuery(queryArgs);
   const vimshottariData = data?.response?.dashas || [];
 
   return (
-    <div>
+    <div style={{ padding: '1rem' }}>
       {isLoading && <PrimaryLoader isLoading={isLoading} />}
 
       {vimshottariData.map((dasha, index) => (

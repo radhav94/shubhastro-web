@@ -1,5 +1,5 @@
 // src/components/tabs/BasicContent.jsx
-import React from "react";
+import React, { useState } from "react";
 import styles from "./BasicContent.module.scss";
 import { PrimaryText } from "../../../../component";
 import { appColors } from "../../../../utils/theme";
@@ -8,8 +8,9 @@ import { useFetchBirthDetailsQuery } from "../../../../redux/api/kundli/kundliAp
 import { capitalizeWords } from "../../../../utils/capitalize";
 import { format12HourTime } from "../../../../utils/dateFormat/dateTime";
 
-const DetailCard = ({ title, data = {} }) => {
-  // format labels nicely (camelCase or snake_case → readable text)
+const AccordionSection = ({ title, data = {}, defaultOpen = false }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
   const formatKeyLabel = (key) => {
     if (!key) return "";
     return key
@@ -24,22 +25,30 @@ const DetailCard = ({ title, data = {} }) => {
   );
 
   return (
-    <div className={styles.detailCard}>
-      {title && <h3 className={styles.cardTitle}>{title}</h3>}
-      <div className={styles.tableWrapper}>
-        {entries.length > 0 && (
-          <table className={styles.detailsTable}>
-            <tbody>
+    <div className={styles.accordionSection}>
+      <button
+        className={styles.accordionHeader}
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+      >
+        <h3 className={styles.accordionTitle}>{title}</h3>
+        <span className={styles.accordionIcon}>{isOpen ? "−" : "+"}</span>
+      </button>
+
+      {isOpen && (
+        <div className={styles.accordionContent}>
+          {entries.length > 0 && (
+            <div className={styles.detailsList}>
               {entries.map(([key, value]) => (
-                <tr key={key}>
-                  <td className={styles.keyCell}>{formatKeyLabel(key)}</td>
-                  <td className={styles.valueCell}>{value}</td>
-                </tr>
+                <div key={key} className={styles.detailRow}>
+                  <span className={styles.detailLabel}>{formatKeyLabel(key)}</span>
+                  <span className={styles.detailValue}>{value}</span>
+                </div>
               ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -81,120 +90,82 @@ const BasicContent = (props) => {
     December: 12,
   };
 
-  const basic = {
-    title: "Basic Details",
-    data: {
-      Name: userDetails?.name || "--",
-
-      Date:
-        formatDate(userDetails.day, userDetails.month, userDetails.year) ||
-        "--",
-      Time: format12HourTime(userDetails.hour, userDetails.minute) || "--",
-
-      Place: userDetails?.birthPlace || "--",
-
-      Rasi: birthDetails?.rasi || "--",
-      Nakshatra: birthDetails?.nakshatra || "--",
-      "Nakshatra Pada": birthDetails?.nakshatra_pada ?? "--",
-
-      "Day of Birth": birthDetails?.panchang?.day_of_birth || "--",
-      "Day Lord": birthDetails?.panchang?.day_lord || "--",
-      "Hora Lord": birthDetails?.panchang?.hora_lord || "--",
-
-      Sunrise: birthDetails?.panchang?.sunrise_at_birth || "--",
-      Sunset: birthDetails?.panchang?.sunset_at_birth || "--",
-
-      Tithi: birthDetails?.panchang?.tithi || "--",
-      Yoga: birthDetails?.panchang?.yoga || "--",
-      Karana: birthDetails?.panchang?.karana || "--",
-
-      Ayanamsha: birthDetails?.panchang?.ayanamsa
-        ? birthDetails.panchang.ayanamsa.toFixed(5)
-        : "--",
-      "Ayanamsha Type": birthDetails?.panchang?.ayanamsa_name || "--",
-    },
+  const basicDetailsData = {
+    Name: userDetails?.name || "--",
+    Date: formatDate(userDetails.day, monthMap[userDetails.month] || userDetails.month, userDetails.year) || "--",
+    Time: format12HourTime(userDetails.hour, userDetails.minute) || "--",
+    Place: userDetails?.birthPlace || "--",
+    Rasi: birthDetails?.rasi || "--",
+    Nakshatra: birthDetails?.nakshatra || "--",
+    "Nakshatra Pada": birthDetails?.nakshatra_pada ?? "--",
+    "Day of Birth": birthDetails?.panchang?.day_of_birth || "--",
+    "Day Lord": birthDetails?.panchang?.day_lord || "--",
+    "Hora Lord": birthDetails?.panchang?.hora_lord || "--",
+    Sunrise: birthDetails?.panchang?.sunrise_at_birth || "--",
+    Sunset: birthDetails?.panchang?.sunset_at_birth || "--",
+    Tithi: birthDetails?.panchang?.tithi || "--",
+    Yoga: birthDetails?.panchang?.yoga || "--",
+    Karana: birthDetails?.panchang?.karana || "--",
+    Ayanamsha: birthDetails?.panchang?.ayanamsa ? birthDetails.panchang.ayanamsa.toFixed(5) : "--",
+    "Ayanamsha Type": birthDetails?.panchang?.ayanamsa_name || "--",
   };
 
-  const panchangTable = {
-    title: "Panchang Details",
-    data: {
-      Day: birthPanchang.day_of_birth,
-      Tithi: birthPanchang.tithi,
-      Yoga: birthPanchang.yoga,
-      Karana: birthPanchang.karana,
-      "Day Lord": birthPanchang.day_lord,
-      "Hora Lord": birthPanchang.hora_lord,
-      Sunrise: birthPanchang.sunrise_at_birth,
-      Sunset: birthPanchang.sunset_at_birth,
-      Ayanamsa: birthPanchang.ayanamsa_name,
-    },
+  const panchangDetailsData = {
+    Day: birthPanchang.day_of_birth || "--",
+    Tithi: birthPanchang.tithi || "--",
+    Yoga: birthPanchang.yoga || "--",
+    Karana: birthPanchang.karana || "--",
+    "Day Lord": birthPanchang.day_lord || "--",
+    "Hora Lord": birthPanchang.hora_lord || "--",
+    Sunrise: birthPanchang.sunrise_at_birth || "--",
+    Sunset: birthPanchang.sunset_at_birth || "--",
+    Ayanamsa: birthPanchang.ayanamsa_name || "--",
   };
 
-  const astros = {
-    title: "Avakhada Details",
-    data: {
-      Gana: capitalizeWords(astroDetails.gana),
-      Yoni: capitalizeWords(astroDetails.yoni),
-      Vasya: capitalizeWords(astroDetails.vasya),
-      Nadi: capitalizeWords(astroDetails.nadi),
-      Varna: capitalizeWords(astroDetails.varna),
-
-      Paya: capitalizeWords(astroDetails.paya),
-      "Paya By Nakshatra": capitalizeWords(astroDetails.paya_by_nakshatra),
-
-      Tatva: capitalizeWords(astroDetails.tatva),
-
-      "Life Stone": capitalizeWords(astroDetails.life_stone),
-      "Lucky Stone": capitalizeWords(astroDetails.lucky_stone),
-      "Fortune Stone": capitalizeWords(astroDetails.fortune_stone),
-
-      "Name Start": capitalizeWords(astroDetails.name_start),
-
-      "Ascendant Sign": capitalizeWords(astroDetails.ascendant_sign),
-      "Ascendant Nakshatra": capitalizeWords(astroDetails.ascendant_nakshatra),
-
-      Rasi: capitalizeWords(astroDetails.rasi),
-      "Rasi Lord": capitalizeWords(astroDetails.rasi_lord),
-
-      Nakshatra: capitalizeWords(astroDetails.nakshatra),
-      "Nakshatra Lord": capitalizeWords(astroDetails.nakshatra_lord),
-      "Nakshatra Pada": capitalizeWords(astroDetails.nakshatra_pada),
-
-      "Sun Sign": capitalizeWords(astroDetails.sun_sign),
-
-      Tithi: capitalizeWords(astroDetails.tithi),
-      Karana: capitalizeWords(astroDetails.karana),
-      Yoga: capitalizeWords(astroDetails.yoga),
-
-      Ayanamsha: capitalizeWords(astroDetails.ayanamsa.toFixed(5)),
-    },
+  const avakhadaDetailsData = {
+    Gana: capitalizeWords(astroDetails.gana) || "--",
+    Yoni: capitalizeWords(astroDetails.yoni) || "--",
+    Vasya: capitalizeWords(astroDetails.vasya) || "--",
+    Nadi: capitalizeWords(astroDetails.nadi) || "--",
+    Varna: capitalizeWords(astroDetails.varna) || "--",
+    Paya: capitalizeWords(astroDetails.paya) || "--",
+    "Paya By Nakshatra": capitalizeWords(astroDetails.paya_by_nakshatra) || "--",
+    Tatva: capitalizeWords(astroDetails.tatva) || "--",
+    "Life Stone": capitalizeWords(astroDetails.life_stone) || "--",
+    "Lucky Stone": capitalizeWords(astroDetails.lucky_stone) || "--",
+    "Fortune Stone": capitalizeWords(astroDetails.fortune_stone) || "--",
+    "Name Start": capitalizeWords(astroDetails.name_start) || "--",
+    "Ascendant Sign": capitalizeWords(astroDetails.ascendant_sign) || "--",
+    "Ascendant Nakshatra": capitalizeWords(astroDetails.ascendant_nakshatra) || "--",
+    Rasi: capitalizeWords(astroDetails.rasi) || "--",
+    "Rasi Lord": capitalizeWords(astroDetails.rasi_lord) || "--",
+    Nakshatra: capitalizeWords(astroDetails.nakshatra) || "--",
+    "Nakshatra Lord": capitalizeWords(astroDetails.nakshatra_lord) || "--",
+    "Nakshatra Pada": capitalizeWords(astroDetails.nakshatra_pada) || "--",
+    "Sun Sign": capitalizeWords(astroDetails.sun_sign) || "--",
+    Tithi: capitalizeWords(astroDetails.tithi) || "--",
+    Karana: capitalizeWords(astroDetails.karana) || "--",
+    Yoga: capitalizeWords(astroDetails.yoga) || "--",
+    Ayanamsha: astroDetails.ayanamsa ? astroDetails.ayanamsa.toFixed(5) : "--",
   };
 
   return (
-    <div>
-      <div className=" flex mb-4 ">
-        <PrimaryText isSemiBold size_20 color={appColors.tri}>
-          {userDetails?.name?.charAt(0).toUpperCase() +
-            userDetails?.name?.slice(1)}
-        </PrimaryText>
-        <div className=" mr-2 ml-2" />
-        <PrimaryText isSemiBold size_20 color={appColors.tri}>
-          ({userDetails?.day} - {userDetails?.month} - {userDetails?.year})
-        </PrimaryText>
-      </div>
-
-      <div className={styles.gridContainer}>
-        <div className={styles.basicCard}>
-          {/* <DetailCard title="Basic Details" data={basicDetails} /> */}
-          <DetailCard {...basic} />
-        </div>
-        <div className={styles.panchangCard}>
-          <DetailCard {...panchangTable} />
-        </div>
-        <div className={styles.avakhadaCard}>
-          <DetailCard {...astros} />
-        </div>
-      </div>
+    <div className={styles.basicContentContainer}>
+      <AccordionSection
+        title="Basic Details"
+        data={basicDetailsData}
+        defaultOpen={true}
+      />
+      <AccordionSection
+        title="Panchang Details"
+        data={panchangDetailsData}
+        defaultOpen={false}
+      />
+      <AccordionSection
+        title="Avakhada Details"
+        data={avakhadaDetailsData}
+        defaultOpen={false}
+      />
     </div>
   );
 };

@@ -126,8 +126,8 @@ import TarotCardDetailPage from "../../screens/private/v2/tarot/TarotCardDetailP
 import TarotCardSelectionPage from "../../screens/private/v2/tarot/TarotCardSelectionPage";
 import LoveTriangleSelectionPage from "../../screens/private/v2/tarot/LoveTriangleSelectionPage";
 import LoveTriangleResultPage from "../../screens/private/v2/tarot/LoveTriangleResultPage";
-import Home from "../../screens/v2/home/Home"
-import Profile from "../../screens/v2/user/Profile"
+import Home from "../../screens/v2/home/Home";
+import Profile from "../../screens/v2/user/Profile";
 
 export const PATH = {
   // DEFAULT: {
@@ -185,22 +185,20 @@ export const PATH = {
     ASTRO_LIVE_STREAMING: {
       path: "/astrologer-dashboard/live-streaming",
       element: InteractiveLiveStreaming,
-     
     },
 
-   AUDIENCE_LIVE_STREAMING: {
-  path: "/live",
-  element: LivePlayerPage,
-  // header: false,
-  footer: false,
-},
-
+    AUDIENCE_LIVE_STREAMING: {
+      path: "/live",
+      element: LivePlayerPage,
+      // header: false,
+      footer: false,
+    },
 
     PROFILE: {
       path: "/profile",
       element: Profile,
       header: false,
-      footer: false
+      footer: false,
     },
     TALK_TO_ASTROLOGER: {
       path: "/talk-to-astrologers",
@@ -314,6 +312,7 @@ export const PATH = {
     KUNDLI: {
       path: "/kundli",
       element: Kundli,
+      header: false,
     },
     KUNDLI_BY_ID: {
       path: "/kundli/:kundliId",
@@ -329,6 +328,7 @@ export const PATH = {
     NUMEROLOGY: {
       path: "/numerology",
       element: Numerology,
+      header: false,
     },
     LOVE_CALC: {
       path: "/love-calculator",
@@ -708,16 +708,16 @@ export const PATH = {
       path: "/wallet-transactions",
       element: WalletTranscations,
     },
-     OrderHistory: {
+    OrderHistory: {
       path: "/order-history",
       element: OrderHistory,
     },
 
-     UserChatHistory: {
+    UserChatHistory: {
       path: "/order-history/:roomId",
       element: SingleChatHistory,
     },
-     UserCallHistory: {
+    UserCallHistory: {
       path: "/order-history/call",
       element: SingleCallHistory,
     },

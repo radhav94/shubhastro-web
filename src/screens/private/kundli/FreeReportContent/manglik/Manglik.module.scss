@@ -1,0 +1,282 @@
+// --- Theme Variables ---
+$color-white: #ffffff;
+$color-text-primary: #2d2d2d;
+$color-text-secondary: #666666;
+$color-bg-light: #f5f5f5;
+$color-border: #e0e0e0;
+$color-accent: #ffcb03;
+$font-primary: "Poppins", sans-serif;
+
+// --- Container ---
+.manglikContainer {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 16px;
+  font-family: $font-primary;
+
+  @media (min-width: 768px) {
+    padding: 24px;
+    max-width: 900px;
+  }
+
+  @media (min-width: 1024px) {
+    max-width: 1000px;
+  }
+}
+
+// --- Header Card ---
+.headerCard {
+  position: relative;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  min-height: 300px;
+  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+}
+
+.headerOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.headerContent {
+  position: relative;
+  z-index: 1;
+  padding: 24px 20px;
+  color: #ffffff;
+
+  @media (min-width: 768px) {
+    padding: 32px 28px;
+  }
+}
+
+.headerTitle {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 24px 0;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  @media (min-width: 768px) {
+    font-size: 28px;
+  }
+}
+
+// --- Stats Grid ---
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  @media (min-width: 768px) {
+    gap: 16px;
+  }
+}
+
+.statCard {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  @media (min-width: 768px) {
+    padding: 20px;
+  }
+}
+
+.statLabel {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  @media (min-width: 768px) {
+    font-size: 13px;
+  }
+}
+
+.statValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+
+  @media (min-width: 768px) {
+    font-size: 22px;
+  }
+}
+
+// --- Summary Card ---
+.summaryCard {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  @media (min-width: 768px) {
+    padding: 20px;
+  }
+}
+
+.summaryTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  @media (min-width: 768px) {
+    font-size: 15px;
+  }
+}
+
+.summaryText {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #ffffff;
+  margin: 0;
+
+  @media (min-width: 768px) {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+}
+
+// --- Section ---
+.section {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: $color-text-primary;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  @media (min-width: 768px) {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+}
+
+.sectionIcon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+// --- Factors List ---
+.factorsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.factorCard {
+  background: #fff9e6;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid #ffe066;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  @media (min-width: 768px) {
+    padding: 18px 20px;
+  }
+}
+
+.factorIcon {
+  font-size: 20px;
+  color: #f59e0b;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.factorText {
+  font-size: 14px;
+  line-height: 1.6;
+  color: $color-text-primary;
+  margin: 0;
+  flex: 1;
+
+  @media (min-width: 768px) {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+}
+
+// --- Aspects List ---
+.aspectsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aspectCard {
+  background: #fff9e6;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid #ffe066;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  @media (min-width: 768px) {
+    padding: 18px 20px;
+  }
+}
+
+.aspectIcon {
+  font-size: 20px;
+  color: #f59e0b;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.aspectText {
+  font-size: 14px;
+  line-height: 1.6;
+  color: $color-text-primary;
+  margin: 0;
+  flex: 1;
+
+  @media (min-width: 768px) {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+}
+
+// --- Empty State ---
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: $color-text-secondary;
+  font-size: 16px;
+}

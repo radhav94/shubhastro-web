@@ -1,103 +1,119 @@
-import { AppImages } from "../../../../../utils/appImages";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useGetKaalSarpDoshQuery } from "../../../../../redux/api/kundli/dashaApi";
 import { useSelector } from "react-redux";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
+import styles from "../manglik/Manglik.module.scss";
 
 const KaalSarp = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
 
   const queryArgs = formData
     ? {
-        dob: `${formData.day}/${formData.month}/${formData.year}`,
-        tob: `${String(formData.hour).padStart(2, "0")}:${String(
-          formData.min
-        ).padStart(2, "0")}`,
-        lat: formData.lat,
-        lon: formData.lon,
-        tz: formData.tzone,
-        lang: "en",
-      }
+      dob: `${formData.day}/${formData.month}/${formData.year}`,
+      tob: `${String(formData.hour).padStart(2, "0")}:${String(
+        formData.min
+      ).padStart(2, "0")}`,
+      lat: formData.lat,
+      lon: formData.lon,
+      tz: formData.tzone,
+      lang: "en",
+    }
     : skipToken;
 
   const { data, isLoading } = useGetKaalSarpDoshQuery(queryArgs);
   const kaalsarp = data?.response;
+
+  if (isLoading) {
+    return <PrimaryLoader isLoading={isLoading} />;
+  }
+
+  if (!kaalsarp) {
+    return (
+      <div className={styles.emptyState}>
+        <p>No Kaal Sarp Dosh data available</p>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <PrimaryLoader isLoading={isLoading} />
-      <div className="relative w-[100%] h-[270px]">
-        <img
-          className="w-[100vw] h-[270px] object-cover rounded-lg"
-          src={AppImages.Dosh}
-          alt="dosh"
-        />
+    <div className={styles.manglikContainer}>
+      {/* Header Card */}
+      <div className={styles.headerCard}>
+        <div className={styles.headerOverlay}></div>
+        <div className={styles.headerContent}>
+          <h1 className={styles.headerTitle}>Kaal Sarp Dosh Analysis</h1>
 
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/30 rounded-lg"></div>
+          <div className={styles.statsGrid}>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Dosh Present</span>
+              <span className={styles.statValue}>
+                {kaalsarp.is_dosha_present ? "Yes" : "No"}
+              </span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Dosha Type</span>
+              <span className={styles.statValue}>
+                {kaalsarp.dosha_type || "--"}
+              </span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Dosha Direction</span>
+              <span className={styles.statValue}>
+                {kaalsarp.dosha_direction || "--"}
+              </span>
+            </div>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Rahu Ketu Axis</span>
+              <span className={styles.statValue}>
+                {kaalsarp.rahu_ketu_axis || "--"}
+              </span>
+            </div>
+          </div>
 
-        {/* Text */}
-        <div className="absolute inset-0 flex flex-col text-white  p-4">
-          <h1 className="text-2xl text-center font-bold text-white tracking-wider">
-            Kaal Sarp Dosh
-          </h1>
-          <div className="flex justify-start gap-6 my-2">
-            <div className="flex-col mx-2 flex-1 bg-black/10 rounded-md ">
-              <p className="font-medium text-gray-400 ">Dosh Present</p>
-              <p className="text-xl font-medium">
-                {kaalsarp?.is_dosha_present ? "Yes" : "No"}
-              </p>
+          {kaalsarp.bot_response && (
+            <div className={styles.summaryCard}>
+              <h3 className={styles.summaryTitle}>Details</h3>
+              <p className={styles.summaryText}>{kaalsarp.bot_response}</p>
             </div>
-            <div className="flex-col mx-2 flex-1 bg-black/10 rounded-md ">
-              <p className="font-medium text-gray-400 ">Dosha Type</p>
-              <p className="text-xl font-medium">--</p>
-            </div>
-          </div>
-          <div className="flex justify-start gap-6 my-2">
-            <div className="flex-col mx-2 flex-1 bg-black/10 rounded-md ">
-              <p className="font-medium text-gray-400 ">Dosha Direction</p>
-              <p className="text-xl font-medium">--</p>
-            </div>
-            <div className="flex-col mx-2 flex-1 bg-black/10 rounded-md ">
-              <p className="font-medium text-gray-400 ">Rahu Ketu Axis</p>
-              <p className="text-xl font-medium">--</p>
-            </div>
-          </div>
-          <div className="flex justify-start gap-6 my-2">
-            <div className="flex-col mx-2 flex-1 bg-black/10 rounded-md ">
-              <p className="font-medium text-gray-400 ">Details</p>
-              <p className="text-xl font-medium">
-                {kaalsarp?.bot_response
-                  ? kaalsarp.bot_response.length > 50
-                    ? kaalsarp.bot_response.slice(0, 50) + "..."
-                    : kaalsarp.bot_response
-                  : ""}
-              </p>
-            </div>
-          </div>
+          )}
         </div>
       </div>
-      <div>
-        {kaalsarp?.remedies?.length > 0 && (
-          <div className="bg-slate-50 rounded-lg shadow-black/30 shadow-lg my-5 p-3">
-            <h1 className="text-xl font-bold">Remedies</h1>
-            {kaalsarp?.remedies?.map((item, i) => (
-              <div key={i} className="bg-yellow-200 my-2 p-2 rounded-lg ">
-                <p>{item}</p>
+
+      {/* Remedies Section */}
+      {kaalsarp.remedies?.length > 0 && (
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            <span className={styles.sectionIcon}>🙏</span>
+            Remedies
+          </h2>
+          <div className={styles.factorsList}>
+            {kaalsarp.remedies.map((item, i) => (
+              <div key={i} className={styles.factorCard}>
+                <span className={styles.factorIcon}>•</span>
+                <p className={styles.factorText}>{item}</p>
               </div>
             ))}
           </div>
-        )}
-        {kaalsarp?.aspects?.length > 0 && (
-          <div className="bg-slate-50 rounded-lg shadow-black/30 shadow-lg my-5 p-3">
-            <h1 className="text-xl font-bold">Kaal Sarp Aspects</h1>
-            {kaalsarp?.aspects?.map((item, i) => (
-              <div key={i} className="bg-yellow-200 my-2 p-2 rounded-lg ">
-                <p>{item}</p>
+        </div>
+      )}
+
+      {/* Aspects Section */}
+      {kaalsarp.aspects?.length > 0 && (
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            <span className={styles.sectionIcon}>✨</span>
+            Kaal Sarp Aspects
+          </h2>
+          <div className={styles.aspectsList}>
+            {kaalsarp.aspects.map((item, i) => (
+              <div key={i} className={styles.aspectCard}>
+                <span className={styles.aspectIcon}>•</span>
+                <p className={styles.aspectText}>{item}</p>
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
