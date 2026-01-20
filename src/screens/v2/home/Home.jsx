@@ -41,7 +41,7 @@ import blog from "../../../assets/images/blog.svg";
 
 const Home = () => {
   const [activeSlide, setActiveSlide] = useState(0);
-  const [loadingConsult, setLoadingConsult] = useState(true);
+  const [loadingConsult, setLoadingConsult] = useState(false);
   const [loadingConnect, setLoadingConnect] = useState("all");
   const [loadingCallAgain, setLoadingCallAgain] = useState("all");
   const navigate = useNavigate();
@@ -133,9 +133,9 @@ const Home = () => {
 
   // Clear loading states on mount
   useEffect(() => {
-    setLoadingConsult(true);
-    setLoadingConnect("all");
-    setLoadingCallAgain("all");
+    setLoadingConsult(false);
+    setLoadingConnect(null);
+    setLoadingCallAgain(null);
   }, []);
 
   // Scroll to active slide
@@ -159,9 +159,11 @@ const Home = () => {
 
   // Handle Consult Now button
   const handleConsultNow = () => {
+    console.log("Consult Now button clicked!");
     setLoadingConsult(true);
     setTimeout(() => {
-      navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path);
+      console.log("Navigating to:", PATH.privateRoutes.Chat_With_ASTROLOGER.path);
+      navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path);
     }, 500);
   };
 

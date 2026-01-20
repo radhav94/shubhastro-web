@@ -565,6 +565,9 @@
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
 
   margin-top: 6px;
   /* ✅ extra gap before button */
