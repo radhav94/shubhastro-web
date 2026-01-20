@@ -31,7 +31,7 @@ const TopHeader = () => {
         </NavLink>
 
         <NavLink
-          to="/astrologers"
+          to="/chat-with-astrologers"
           className={({ isActive }) =>
             `${styles.headerNavLink} ${isActive ? styles.active : ""}`
           }
@@ -58,7 +58,7 @@ const TopHeader = () => {
         </NavLink>
 
         <NavLink
-          to="/blogs"
+          to="/blog"
           className={({ isActive }) =>
             `${styles.headerNavLink} ${isActive ? styles.active : ""}`
           }
@@ -67,7 +67,7 @@ const TopHeader = () => {
         </NavLink>
 
         <NavLink
-          to="/Kundli"
+          to={PATH.privateRoutes.KUNDLI.path}
           className={({ isActive }) =>
             `${styles.headerNavLink} ${isActive ? styles.active : ""}`
           }
@@ -82,6 +82,15 @@ const TopHeader = () => {
           }
         >
           Numerology
+        </NavLink>
+
+        <NavLink
+          to="/horoscopes/daily-horoscope"
+          className={({ isActive }) =>
+            `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+          }
+        >
+          Horoscopes
         </NavLink>
         
       </nav>
