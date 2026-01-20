@@ -1,0 +1,130 @@
+@use "../../../assets/variables/variables" as *;
+
+.card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 32px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.imageContainer {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 16px;
+  border: 4px solid #F5F5F5;
+
+  @media (max-width: 768px) {
+    width: 160px;
+    height: 160px;
+  }
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ratingBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #FFF5F5;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+.starIcon {
+  color: #FFC107;
+  font-size: 14px;
+}
+
+.ratingText {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333333;
+  font-family: "Poppins", sans-serif;
+}
+
+.name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2C2C2C;
+  margin: 0 0 12px 0;
+  font-family: "Poppins", sans-serif;
+  line-height: 1.3;
+  letter-spacing: -0.3px;
+  cursor: pointer;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #D4A574;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 18px;
+  }
+}
+
+.experience {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.bookIcon {
+  color: #FF9800;
+  font-size: 18px;
+}
+
+.experienceText {
+  font-size: 14px;
+  font-weight: 500;
+  color: #FF9800;
+  font-family: "Poppins", sans-serif;
+}
+
+.connectButton {
+  width: 100%;
+  max-width: 280px;
+  background: #3D2817;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 40px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.3px;
+
+  &:hover {
+    background: #2D1F10;
+    transform: scale(1.02);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+    padding: 10px 32px;
+  }
+}
