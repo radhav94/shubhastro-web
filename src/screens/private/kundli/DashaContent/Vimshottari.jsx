@@ -9,15 +9,15 @@ const Vimshottari = () => {
 
   const queryArgs = formData
     ? {
-      dob: `${formData.day}/${formData.month}/${formData.year}`,
-      tob: `${String(formData.hour).padStart(2, "0")}:${String(
-        formData.min
-      ).padStart(2, "0")}`,
-      lat: formData.lat,
-      lon: formData.lon,
-      tz: formData.tzone,
-      lang: "en",
-    }
+        dob: `${formData.day}/${formData.month}/${formData.year}`,
+        tob: `${String(formData.hour).padStart(2, "0")}:${String(
+          formData.min,
+        ).padStart(2, "0")}`,
+        lat: formData.lat,
+        lon: formData.lon,
+        tz: formData.tzone,
+        lang: "en",
+      }
     : skipToken;
 
   const { data, isLoading } = useGetMahaDashaPredictionsQuery(queryArgs);
@@ -41,8 +41,14 @@ const Vimshottari = () => {
           <div className={styles.dateRange}>
             {dasha.dasha_start_year} - {dasha.dasha_end_year}
           </div>
-          <div className={styles.dashaName}>
-            {dasha.dasha}
+          <div className={styles.dashaName}>{dasha.dasha}</div>
+          <div className="text-left text-gray-400 ">
+            <span className={styles.desc}>Prediction : </span>{" "}
+            {dasha.prediction}
+          </div>
+          <div className="text-left text-gray-400 ">
+            <span className={styles.desc}>Planet in Zodiac : </span>{" "}
+            {dasha.planet_in_zodiac}
           </div>
         </div>
       ))}
