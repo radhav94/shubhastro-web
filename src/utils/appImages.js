@@ -109,3 +109,45 @@ export const appSvgs = {
   Aquarius,
   Pisces,
 };
+
+// AI WOW Icons
+import VastuIcon from "../assets/aiwow/Group 1410084718.svg";
+import GemstoneIcon from "../assets/aiwow/Group 1410084675.svg";
+import SignatureIcon from "../assets/aiwow/Rectangle 34624973.png";
+import PalmIcon from "../assets/aiwow/Group 1410084719.svg";
+import FaceIcon from "../assets/aiwow/Rectangle 34624969.svg";
+import ClothesIcon from "../assets/aiwow/Group 1410084720.svg";
+import AuraIcon from "../assets/aiwow/Vector.svg";
+
+// AI WOW Instruction Images
+import FaceReadingInstruction from "../assets/aiwow/face-reading-1.png";
+import PalmistryInstruction from "../assets/aiwow/palmistry-1.png";
+import SignatureInstruction from "../assets/aiwow/signature-1.png";
+import GemstoneInstruction from "../assets/aiwow/gemstone-1.png";
+import ClothColorInstruction from "../assets/aiwow/cloth-color-1.png";
+
+const aiWowIcons = {
+  vastu: VastuIcon,
+  gemstone: GemstoneIcon,
+  signature: SignatureIcon,
+  palm: PalmIcon,
+  face: FaceIcon,
+  clothes: ClothesIcon,
+  aura: AuraIcon,
+};
+
+const aiWowInstructions = {
+  faceReading: FaceReadingInstruction,
+  palmistry: PalmistryInstruction,
+  signature: SignatureInstruction,
+  gemstone: GemstoneInstruction,
+  clothColor: ClothColorInstruction,
+};
+
+export const getAIWowIcon = (iconName) => {
+  return aiWowIcons[iconName] || null;
+};
+
+export const getAIWowInstructionImage = (featureName) => {
+  return aiWowInstructions[featureName] || null;
+};

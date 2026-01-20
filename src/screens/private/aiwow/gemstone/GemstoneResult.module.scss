@@ -1,0 +1,193 @@
+.container {
+  min-height: 100vh;
+  background: #ffffff;
+  padding-bottom: 80px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1f2937;
+  
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  margin-left: 12px;
+}
+
+.content {
+  padding: 24px 16px;
+}
+
+.resultHeader {
+  margin-bottom: 24px;
+}
+
+.resultTitle {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.resultSubtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.gemstoneImageWrapper {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 32px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.gemstoneImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.authenticitySection {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.authenticityTitle {
+  font-size: 18px;
+  font-weight: 400;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+}
+
+.authenticityScore {
+  font-size: 36px;
+  font-weight: 700;
+  color: #059669;
+  margin: 0;
+}
+
+.reportSection {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.reportText {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4b5563;
+  margin: 0 0 16px 0;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.detailButton {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-size: 16px;
+  color: #6b7280;
+}
+
+// Tablet
+@media (min-width: 768px) {
+  .content {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+  
+  .resultTitle {
+    font-size: 40px;
+  }
+  
+  .authenticityTitle {
+    font-size: 20px;
+  }
+  
+  .authenticityScore {
+    font-size: 42px;
+  }
+}
+
+// Desktop
+@media (min-width: 1024px) {
+  .content {
+    max-width: 700px;
+    padding: 40px 32px;
+  }
+  
+  .resultTitle {
+    font-size: 48px;
+  }
+  
+  .gemstoneImageWrapper {
+    max-width: 500px;
+  }
+  
+  .authenticityTitle {
+    font-size: 22px;
+  }
+  
+  .authenticityScore {
+    font-size: 48px;
+  }
+  
+  .reportText {
+    font-size: 15px;
+  }
+}
