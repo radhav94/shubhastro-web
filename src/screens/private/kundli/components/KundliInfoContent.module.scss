@@ -1,0 +1,36 @@
+.infoSection {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.infoParagraph {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #333;
+  margin: 0 0 20px 0;
+  text-align: justify;
+}
+
+.infoHeading {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000;
+  margin: 40px 0 20px 0;
+}
+
+@media (min-width: 769px) {
+  .infoSection {
+    padding: 60px 40px;
+  }
+
+  .infoParagraph {
+    font-size: 16px;
+    line-height: 1.9;
+  }
+
+  .infoHeading {
+    font-size: 28px;
+    margin: 50px 0 24px 0;
+  }
+}
