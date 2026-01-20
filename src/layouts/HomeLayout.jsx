@@ -28,15 +28,16 @@ const HomeLayout = () => {
   const showHeader = currentRoute ? currentRoute.handle.header : true;
   const showFooter = currentRoute ? currentRoute.handle.footer : true;
   
-  // Hide TopHeader on onboarding page
+  // Hide TopHeader on onboarding page or when header is disabled
   const isOnboardingPage = location.pathname === "/onboarding";
+  const showTopHeader = !isOnboardingPage && showHeader;
 
   return (
     <div className={styles.layout}>
       <ScrollToTop />
 
-      {/* NEW TOP HEADER - Hidden on onboarding */}
-      {!isOnboardingPage && (
+      {/* NEW TOP HEADER - Hidden on onboarding or when header is disabled */}
+      {showTopHeader && (
         <div className={styles.fixedTopHeader}>
           <TopHeader />
         </div>

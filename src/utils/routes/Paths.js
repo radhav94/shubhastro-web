@@ -640,6 +640,7 @@ export const PATH = {
       path: "/astrologer/:id",
       element: AstrologerProfile,
       header: false,
+      footer: false,
     },
 
     VIDEO_CALL: {
