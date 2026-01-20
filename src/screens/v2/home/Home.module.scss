@@ -1,9 +1,26 @@
 /* HomeV2 Page Styles */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
+@mixin line-clamp($lines: 3) {
+  @if $lines != null {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Ensures ellipsis is shown if needed */
+  } @else {
+    /* Fallback for cases where $lines is not specified, if necessary */
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    display: block;
+  }
+}
+
 .home {
   min-height: 100vh;
-  background: linear-gradient(180deg, #f5e6d3 0%, #fff9f0 50%, #ffffff 100%);
+  // background: linear-gradient(180deg, #f5e6d3 0%, #fff9f0 50%, #ffffff 100%);
+  background: #fff;
   padding-bottom: 90px;
   padding-top: 108px;
   font-family:
@@ -12,13 +29,281 @@
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+
+    @media screen and (width <= 767px) {
+      padding-top: 68px;
+    }
+}
+/* Header Styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: #f5e6d3;
+  box-shadow: 1px 1px 5px #0003;
+  margin-bottom: 1.5rem;
 }
 
+.userGreeting {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.userAvatar {
+  width: 56px;
+  height: 56px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  border: 2px solid #f5f5f5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.greetingText {
+  display: flex;
+  flex-direction: column;
+}
+
+.namaste {
+  font-size: 14px;
+  color: #a08060;
+  font-weight: 400;
+}
+
+.userName {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.walletBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  // background: linear-gradient(135deg, #8b6f47 0%, #6b4423 50%, #3e2415 100%);
+  background: linear-gradient(135deg, rgba(245, 138, 34, 1) 0%, rgba(16, 10, 6, 1) 100%);
+  padding: 8px 24px 8px 10px;
+  border-radius: 50px;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: visible;
+}
+
+.walletBadge::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 28%;
+  width: 22px;
+  height: 16px;
+  background: #f5e6d3;
+  border-radius: 50%;
+}
+
+.walletBadge::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 28%;
+  width: 22px;
+  height: 16px;
+  background: #e5d7c5;
+  border-radius: 50%;
+}
+
+.coinIcon {
+  width: 30px;
+  height: 30px;
+  // background: radial-gradient(
+  //   circle at 35% 35%,
+  //   #ffe873 0%,
+  //   #ffd700 30%,
+  //   #e6b800 60%,
+  //   #cc9900 100%
+  // );
+  background-image: url("/src/assets/svg/header-coin.svg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.4),
+    inset -3px -3px 6px rgba(0, 0, 0, 0.3),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.4);
+  position: relative;
+  // border: 2px solid #b8860b;
+}
+
+.coinIcon::before {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(139, 111, 71, 0.5);
+  border-radius: 50%;
+}
+
+.coinIcon::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid rgba(139, 111, 71, 0.4);
+  border-radius: 50%;
+}
+
+.walletAmount {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.profileIcon {
+  width: 46px;
+  height: 46px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a67c52;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profileIcon:hover {
+  background: #fff8f0;
+}
+
+.headerNavigation {
+  display: none;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  justify-content: center;
+  padding: 0 2rem;
+}
+
+.headerNavLink {
+  color: #8b7355;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+  white-space: nowrap;
+  letter-spacing: 1px;
+}
+
+.headerNavLink:hover {
+  color: #5a4a3a;
+  background: rgba(139, 115, 85, 0.1);
+}
+.headerNavLink.active {
+  color: #2c1b0e;
+  background: rgba(139, 115, 85, 0.15);
+  font-weight: 600;
+}
+
+/* Show navigation on tablet and desktop */
+@media (min-width: 768px) {
+  .headerNavigation {
+    display: flex;
+  }
+}
+
+/* Mobile responsive for Header - 375px */
+@media (max-width: 480px) {
+  .header {
+    padding: 12px 16px;
+  }
+
+  .userAvatar {
+    width: 44px;
+    height: 44px;
+    font-size: 28px;
+  }
+
+  .greetingText {
+    gap: 2px;
+  }
+
+  .namaste {
+    font-size: 12px;
+  }
+
+  .userName {
+    font-size: 15px;
+  }
+
+  .headerActions {
+    gap: 8px;
+  }
+
+  .walletBadge {
+    padding: 6px 16px 6px 8px;
+    gap: 6px;
+  }
+
+  .walletBadge::before,
+  .walletBadge::after {
+    width: 18px;
+    height: 14px;
+    left: 26%;
+  }
+
+  .coinIcon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .coinIcon::before {
+    width: 18px;
+    height: 18px;
+  }
+
+  .coinIcon::after {
+    width: 12px;
+    height: 12px;
+  }
+
+  .walletAmount {
+    font-size: 16px;
+  }
+
+  .profileIcon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .profileIcon svg {
+    width: 20px;
+    height: 20px;
+  }
+}
 /* Main Content Styles */
 
 /* Main Content */
 .mainContent {
-  padding: 32px 16px 0;
+  padding: 16px 16px 0;
 }
 
 /* Today's Horoscope Section */
@@ -29,11 +314,13 @@
 .horoscopeCard {
   width: 100%;
   height: auto;
-  min-height: 120px;
-  background: linear-gradient(135deg, #FFE4BA 0%, #F48A21 50%, #FFA537 100%);
-  border-radius: 12px;
-  border: 1px solid #F48A21;
-  padding: 16px 20px;
+  // min-height: 180px;
+  // background: linear-gradient(151.72deg, #fff2d4 10.17%, #fadd91 101.97%);
+  // background: linear-gradient(161deg, #F7B36E -19.03%, #F1E8E0 118.91%);
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  border-radius: 24px;
+  border: 1px solid #f0d07f;
+  padding: 16px 0px 16px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -76,7 +363,7 @@
   font-weight: 400;
   line-height: 18px;
   letter-spacing: 0;
-  color: #9b8b7e;
+  color: #ffffff;
   margin-bottom: 8px;
 }
 
@@ -85,16 +372,16 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
-  width: 100%;
-  max-width: 114px;
+  width: fit-content;
+  // max-width: 114px;
   height: 5.05px;
 }
 
-.dividerLine {
-  flex: 1;
-  height: 1px;
-  background: #70430866;
-}
+// .dividerLine {
+//   // flex: 1;
+//   // height: 1px;
+//   // background: #70430866;
+// }
 
 .dividerMoon {
   font-size: clamp(12px, 3vw, 14px);
@@ -105,10 +392,10 @@
 .horoscopeHeading {
   font-family: "Poppins", sans-serif;
   font-size: clamp(16px, 4.5vw, 20px);
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.4px;
-  color: #704308;
+  color: #fff;
   margin-bottom: 6px;
   word-wrap: break-word;
 }
@@ -119,20 +406,24 @@
   font-weight: 400;
   line-height: 1.2;
   letter-spacing: -0.24px;
-  color: #704308cc;
+  color: #fff;
   margin-bottom: 10px;
 }
 
 .horoscopeAction {
+  background: #fff3;
+  border-radius: 50px;
+  padding: 6px 6px 6px 10px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-family: "Poppins", sans-serif;
-  font-size: clamp(11px, 2.8vw, 12px);
+  font-size: clamp(11px, 2.8vw, 14px);
   font-weight: 400;
   line-height: 1.2;
   letter-spacing: -0.24px;
-  color: #E56329;
+  color: #fff;
+  margin-top: 5px;
 }
 
 .horoscopePlanet {
@@ -154,8 +445,9 @@
 /* Responsive adjustments for smaller screens */
 @media (max-width: 360px) {
   .horoscopeCard {
-    padding: 12px 16px;
+    padding: 0px 16px;
     min-height: 100px;
+    border-radius: 12px;
   }
 
   .horoscopeContent {
@@ -195,9 +487,10 @@
   flex: 0 0 92%;
   /* ✅ 1 card visible in mobile */
   min-width: 92%;
-  min-height: 170px;
+  min-height: auto;
 
-  background: linear-gradient(151.72deg, #ffecf0 10.17%, #f2eaff 101.97%);
+  // background: linear-gradient(151.72deg, #ffecf0 10.17%, #f2eaff 101.97%);
+  background-color: #FFE4BA;
   border-radius: 20px;
   box-shadow: 0px 4px 12px rgba(127, 74, 87, 0.08);
 
@@ -228,7 +521,6 @@
   gap: 12px;
   /* ✅ added gap between title/subtitle/button */
 }
-
 .slideTitle {
   font-family: "Poppins", sans-serif;
   font-size: 30px;
@@ -238,6 +530,7 @@
   letter-spacing: -0.02em;
   color: #101010;
   margin: 0;
+  @include line-clamp(2);
 }
 
 .slideSubtitle {
@@ -249,6 +542,7 @@
   color: #6b6b6b;
   margin: 0;
   margin-top: 2px;
+  @include line-clamp(1);
   /* ✅ small extra spacing */
 }
 
@@ -259,11 +553,12 @@
   gap: 10px;
 
   width: fit-content;
-  background: #2a1c06;
+  // background: #2a1c06;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: #fff;
   border: none;
 
-  padding: 14px 22px;
+  padding: 8px 10px 8px 16px;
   border-radius: 999px;
 
   font-family: "Poppins", sans-serif;
@@ -282,12 +577,6 @@
 .slideButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(42, 28, 6, 0.35);
-}
-
-.slideButton.loading {
-  background: #E56329;
-  cursor: not-allowed;
-  pointer-events: none;
 }
 
 /* =========================
@@ -337,7 +626,7 @@
   position: relative;
   transition: all 0.3s ease;
   cursor: pointer;
-  box-shadow: inset 6px 0 0 0 #f5e6d3;
+  box-shadow: inset 6px 0 0 0 #ffa588;
 }
 
 .dot:hover {
@@ -345,8 +634,8 @@
 }
 
 .dot.active {
-  background: #d4c4b0;
-  box-shadow: inset 6px 0 0 0 #3d2b0c;
+  background: #fff;
+  box-shadow: inset 6px 0 0 0 #D43400;
   transform: scale(1.1);
 }
 
@@ -361,7 +650,7 @@
   .carouselSlide {
     flex: 0 0 calc(50% - 8px);
     min-width: calc(50% - 8px);
-    min-height: 200px;
+    min-height: auto;
     padding: 22px;
     scroll-snap-align: start;
   }
@@ -382,7 +671,7 @@
   .carouselSlide {
     flex: 0 0 calc(60% - 10px);
     min-width: calc(60% - 10px);
-    min-height: 220px;
+    min-height: auto;
   }
 
   .slideTitle {
@@ -401,7 +690,7 @@
   .carouselSlide {
     flex: 0 0 calc(33.33% - 12px);
     min-width: calc(33.33% - 12px);
-    min-height: 240px;
+    min-height: auto;
   }
 }
 
@@ -412,7 +701,7 @@
   .carouselSlide {
     flex: 0 0 88%;
     min-width: 88%;
-    min-height: 150px;
+    min-height: auto;
     padding: 14px;
     border-radius: 18px;
   }
@@ -436,7 +725,7 @@
 
   .slideButton {
     font-size: 13px;
-    padding: 10px 16px;
+    // padding: 10px 16px;
     border-radius: 999px;
     margin-top: 4px;
   }
@@ -457,7 +746,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 14px;
   margin-bottom: 24px;
-  padding: 4px;
+  // padding: 4px;
 }
 
 .quickActions::-webkit-scrollbar {
@@ -468,14 +757,18 @@
   width: 100%;
   height: 170px;
 
-  background: linear-gradient(
-    168.18deg,
-    #f9eed4 -7.79%,
-    #fffdf6 48.58%,
-    #f9eed4 104.96%
-  );
+  // background: linear-gradient(
+  //   168.18deg,
+  //   #f9eed4 -7.79%,
+  //   #fffdf6 48.58%,
+  //   #f9eed4 104.96%
+  // );
 
-  border-radius: 26px;
+  // border-radius: 26px;
+
+  border-radius: 16px;
+  border: 1px solid rgba(189, 189, 189, 0.40);
+  background: var(--card, #F5F5F5);
   padding: 18px 16px 0px;
   cursor: pointer;
 
@@ -515,7 +808,8 @@
   height: 88px;
   border-radius: 999px;
 
-  background: linear-gradient(135deg, #f4d19b 0%, #e8c589 100%);
+  // background: linear-gradient(135deg, #f4d19b 0%, #e8c589 100%);
+  background: #fff;
   position: absolute;
   bottom: 18px;
   left: 50%;
@@ -568,13 +862,17 @@
 
 /* Pandit AI Section */
 .panditAISection {
-  background:
-    linear-gradient(
-      277.07deg,
-      rgba(242, 194, 165, 0.2) -3.82%,
-      rgba(248, 219, 143, 0.2) 86.99%
-    ),
-    linear-gradient(168.18deg, #f9eed4 -7.79%, #fffdf6 48.58%, #f9eed4 104.96%);
+  // background:
+  //   linear-gradient(
+  //     277.07deg,
+  //     rgba(242, 194, 165, 0.2) -3.82%,
+  //     rgba(248, 219, 143, 0.2) 86.99%
+  //   ),
+  //   linear-gradient(168.18deg, #f9eed4 -7.79%, #fffdf6 48.58%, #f9eed4 104.96%);
+
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   border-radius: 24px;
   padding: 20px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
@@ -618,7 +916,7 @@
 .panditName {
   font-size: 17px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #fff;
 }
 
 .sparkle {
@@ -627,13 +925,13 @@
 
 .panditRole {
   font-size: 13px;
-  color: #888;
+  color: #fff;
   margin-top: 2px;
 }
 
 .freeQuestionBtn {
-  background: linear-gradient(135deg, #ff9f43 0%, #f7931e 100%);
-  color: #fff;
+  background: #fff;
+  color: #E56329;
   border: none;
   padding: 12px 20px;
   border-radius: 24px;
@@ -729,7 +1027,8 @@
 .searchSubmit {
   width: 40px;
   height: 40px;
-  background: #2c1b0e;
+  // background: #2c1b0e;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   border: none;
   border-radius: 8px;
   display: flex;
@@ -745,7 +1044,7 @@
 
 .searchSubmit:hover {
   transform: scale(1.05);
-  background: #1a1108;
+  // background: #1a1108;
 }
 
 /* Top Rated Astrologers Section */
@@ -763,7 +1062,7 @@
   font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.5px;
-  color: #5a5a5a;
+  color: #160115;
   margin: 0 0 12px 0;
 }
 
@@ -776,11 +1075,11 @@
   margin: 0 auto;
 }
 
-.titleDivider .dividerLine {
-  flex: 1;
-  height: 1px;
-  background: #d4c4b0;
-}
+// .titleDivider .dividerLine {
+//   flex: 1;
+//   height: 1px;
+//   background: #d4c4b0;
+// }
 
 .titleDivider .dividerMoon {
   font-size: 16px;
@@ -801,21 +1100,21 @@
 }
 
 .astrologerCard {
-  flex: 0 0 280px;
   min-width: 280px;
   background: #ffffff;
   border-radius: 20px;
-  padding: 24px 20px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   position: relative;
 }
 
 .astrologerImageWrapper {
-  width: 180px;
-  height: 180px;
+  width: 24vh;
+  height: 24vh;
   border-radius: 50%;
   overflow: hidden;
   margin-bottom: 16px;
@@ -832,13 +1131,14 @@
 }
 
 .ratingBadge {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
-  background: #fff8f0;
+  background: var(--cta-10, rgba(229, 99, 41, 0.10));
   padding: 6px 14px;
   border-radius: 20px;
   margin-bottom: 12px;
+  width: fit-content;
 }
 
 .star {
@@ -859,6 +1159,7 @@
   color: #1a1a1a;
   margin: 0 0 10px 0;
   text-align: center;
+  @include line-clamp(1);
 }
 
 .experienceRow {
@@ -869,7 +1170,7 @@
 }
 
 .bookIcon {
-  color: #d4a574;
+  color: #F75801;
   flex-shrink: 0;
 }
 
@@ -878,32 +1179,32 @@
   font-size: 14px;
   color: #888;
 }
-
+.bottomWrap{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 .connectBtn {
   width: 100%;
-  background: #2c1b0e;
+  // background: #2c1b0e;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: #ffffff;
   border: none;
-  padding: 14px 24px;
+  padding: 14px 28px;
   border-radius: 50px;
   font-family: "Poppins", sans-serif;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition:
-    transform 0.2s,
-    background 0.2s;
+    transform 0.2s ease, box-shadow 0.2s ease
 }
 
 .connectBtn:hover {
   transform: translateY(-2px);
-  background: #1a1108;
-}
-
-.connectBtn.loading {
-  background: #E56329;
-  cursor: not-allowed;
-  pointer-events: none;
+  // background: #1a1108;
+  box-shadow: 0 6px 16px rgba(42, 28, 6, 0.35);
 }
 
 /* Explore by Life Area Section */
@@ -976,7 +1277,7 @@
 }
 
 .sessionsHeaderLeft {
-  flex: 1;
+  // flex: 1;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -1001,11 +1302,11 @@
   margin: 0;
 }
 
-.sessionsHeader .dividerLine {
-  flex: 1;
-  height: 1px;
-  background: #d4c4b0;
-}
+// .sessionsHeader .dividerLine {
+//   flex: 1;
+//   height: 1px;
+//   background: #d4c4b0;
+// }
 
 .sessionsHeader .dividerMoon {
   font-size: 16px;
@@ -1022,14 +1323,14 @@
   font-family: "Poppins", sans-serif;
   font-size: 16px;
   font-weight: 500;
-  color: #888;
+  color: #e24300;
   cursor: pointer;
   transition: color 0.2s;
   flex-shrink: 0;
 }
 
 .viewAllLink:hover {
-  color: #666;
+  color: #e24300;
 }
 
 .sessionsGrid {
@@ -1046,8 +1347,7 @@
 }
 
 .sessionCard {
-  flex: 0 0 340px;
-  min-width: 340px;
+  min-width: 440px;
   background: #ffffff;
   border-radius: 20px;
   padding: 0;
@@ -1060,6 +1360,10 @@
     box-shadow 0.2s;
   overflow: hidden;
   min-height: 180px;
+
+  @media screen and (width <= 767px){
+    min-width: 300px;
+  }
 }
 
 .sessionCard:hover {
@@ -1102,8 +1406,11 @@
 
 .sessionDetails {
   display: flex;
-  /* gap: 16px; */
-  /* flex-wrap: wrap; */
+  gap: 16px;
+  @media screen and (width <= 767px) {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 }
 
 .sessionDetail {
@@ -1113,7 +1420,7 @@
 }
 
 .sessionIconSvg {
-  color: #ffa726;
+  color: #F75801;
   flex-shrink: 0;
 }
 
@@ -1134,7 +1441,7 @@
 
 .callAgainBtn {
   width: 100%;
-  background: #2c1b0e;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: #ffffff;
   border: none;
   padding: 12px 20px;
@@ -1151,13 +1458,7 @@
 
 .callAgainBtn:hover {
   transform: translateY(-1px);
-  background: #1a1108;
-}
-
-.callAgainBtn.loading {
-  background: #E56329;
-  cursor: not-allowed;
-  pointer-events: none;
+  // background: #1a1108;
 }
 
 /* Mobile responsive for Sessions */
@@ -1174,11 +1475,11 @@
     font-size: 14px;
   }
 
-  .sessionCard {
-    flex: 0 0 300px;
-    min-width: 300px;
-    min-height: 160px;
-  }
+  // .sessionCard {
+  //   flex: 0 0 300px;
+  //   min-width: 300px;
+  //   min-height: 160px;
+  // }
 
   .sessionInfo {
     padding: 12px;
@@ -1208,7 +1509,10 @@
 }
 
 .cosmicInsightCard {
-  background: linear-gradient(135deg, #1E2939 0%, #E56329 100%);
+  // background:
+  //   linear-gradient(110.07deg, rgba(166, 97, 218, 0) -19.59%, #a661da 72.06%),
+  //   linear-gradient(180deg, #f48a21 -12.17%, #522e0a 143.73%);
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   border-radius: 24px;
   padding: 24px 20px;
   display: flex;
@@ -1251,11 +1555,11 @@
   max-width: 150px;
 }
 
-.cosmicDivider .dividerLine {
-  flex: 1;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.4);
-}
+// .cosmicDivider .dividerLine {
+//   flex: 1;
+//   height: 1px;
+//   background: rgba(255, 255, 255, 0.4);
+// }
 
 .cosmicDivider .dividerMoon {
   font-size: 14px;
@@ -1319,20 +1623,15 @@
   font-family: "Poppins", sans-serif;
   font-size: 15px;
   font-weight: 500;
-  color: #888;
+  color: #101010;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.panchangTab.active {
-  background: #E56329;
-  border-color: #E56329;
+.panchangTab.active,.panchangTab:hover {
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  // border-color: #ff9800;
   color: #ffffff;
-}
-
-.panchangTab:hover:not(.active) {
-  border-color: #ffa726;
-  color: #666;
 }
 
 .panchangCard {
@@ -1341,6 +1640,7 @@
   padding: 24px 20px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
   margin-bottom: 16px;
+  border: 1px solid rgba(189, 189, 189, 0.30);
 }
 
 .panchangHeader {
@@ -1357,10 +1657,10 @@
 
 .timingsCard {
   flex: 1;
-  background: #fffbf5;
   border-radius: 20px;
   padding: 15px 15px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(189, 189, 189, 0.30);
+  background: var(--card, #F5F5F5);
 }
 
 .panchangLeft,
@@ -1602,20 +1902,20 @@
 }
 
 .active .iconCircle {
-  background: #f5a623;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: #ffffff;
 }
 
 .activeLine {
   position: absolute;
-  top: -10px;
+  bottom: -14px;
   left: 50%;
   transform: translateX(-50%);
 
   width: 60px;
   height: 5px;
 
-  background: #f5a623;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   border-radius: 0 0 4px 4px;
 
   /* Trapezoid effect - wider at top */
@@ -1654,7 +1954,7 @@
   height: 76px;
   border-radius: 50%;
 
-  background: linear-gradient(135deg, #d2871c 0%, #c77a18 100%);
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   border: 5px solid #ffffff;
 
   display: flex;
@@ -1778,7 +2078,26 @@
   }
 
   .header {
-    padding: 20px 32px;
+    padding: 10px 32px;
+  }
+
+  .userAvatar {
+    width: 60px;
+    height: 60px;
+    font-size: 38px;
+  }
+
+  .userName {
+    font-size: 19px;
+  }
+
+  .walletAmount {
+    font-size: 21px;
+  }
+
+  .profileIcon {
+    width: 46px;
+    height: 46px;
   }
 
   .mainContent {
@@ -1792,10 +2111,10 @@
     margin-bottom: 32px;
   }
 
-  .horoscopeCard {
-    min-height: 140px;
-    padding: 24px 32px;
-  }
+  // .horoscopeCard {
+  //   min-height: 140px;
+  //   // padding: 0px px;
+  // }
 
   .horoscopeTitle {
     font-size: 13px;
@@ -1827,7 +2146,7 @@
   .carouselSlide {
     flex: 0 0 calc(50% - 10px);
     min-width: calc(50% - 10px);
-    min-height: 220px;
+    min-height: auto;
     padding: 22px;
   }
 
@@ -1841,7 +2160,7 @@
 
   .slideButton {
     font-size: 15px;
-    padding: 13px 20px;
+    // padding: 13px 20px;
   }
 
   /* Quick Actions - Tablet */
@@ -1908,16 +2227,14 @@
     gap: 20px;
   }
 
-  .astrologerCard {
-    flex: 0 0 320px;
-    min-width: 320px;
-    padding: 28px 24px;
-  }
+  // .astrologerCard {
+  //   min-width: 220px;
+  // }
 
-  .astrologerImageWrapper {
-    width: 200px;
-    height: 200px;
-  }
+  // .astrologerImageWrapper {
+  //   width: 200px;
+  //   height: 200px;
+  // }
 
   .astrologerName {
     font-size: 22px;
@@ -1977,11 +2294,11 @@
     max-width: 200px;
   }
 
-  .sessionCard {
-    flex: 0 0 380px;
-    min-width: 380px;
-    min-height: 200px;
-  }
+  // .sessionCard {
+  //   flex: 0 0 380px;
+  //   min-width: 380px;
+  //   min-height: 200px;
+  // }
 
   .sessionInfo {
     padding: 24px;
@@ -2033,7 +2350,7 @@
 /* Desktop: 1024px - 1439px */
 @media (min-width: 1024px) {
   .header {
-    padding: 24px 48px;
+    padding: 10px 48px;
   }
 
   .mainContent {
@@ -2042,10 +2359,10 @@
   }
 
   /* Horoscope Card - Desktop */
-  .horoscopeCard {
-    min-height: 160px;
-    padding: 28px 40px;
-  }
+  // .horoscopeCard {
+  //   min-height: 160px;
+  //   // padding: 0px 40px;
+  // }
 
   .horoscopeTitle {
     font-size: 14px;
@@ -2068,7 +2385,7 @@
   .carouselSlide {
     flex: 0 0 calc(45% - 10px);
     min-width: calc(45% - 10px);
-    min-height: 260px;
+    min-height: auto;
     padding: 26px;
   }
 
@@ -2082,7 +2399,7 @@
 
   .slideButton {
     font-size: 16px;
-    padding: 14px 22px;
+    // padding: 14px 22px;
   }
 
   /* Quick Actions - Desktop */
@@ -2126,16 +2443,16 @@
     font-size: 19px;
   }
 
-  .astrologerCard {
-    flex: 0 0 340px;
-    min-width: 340px;
-    padding: 30px 26px;
-  }
+  // .astrologerCard {
+  //   flex: 0 0 340px;
+  //   min-width: 340px;
+  //   // padding: 16px 32px;
+  // }
 
-  .astrologerImageWrapper {
-    width: 220px;
-    height: 220px;
-  }
+  // .astrologerImageWrapper {
+  //   width: 220px;
+  //   height: 220px;
+  // }
 
   .astrologerName {
     font-size: 23px;
@@ -2174,7 +2491,7 @@
 /* Large Desktop: 1440px - 1919px */
 @media (min-width: 1440px) {
   .header {
-    padding: 28px 64px;
+    padding: 10px 64px;
   }
 
   .mainContent {
@@ -2183,30 +2500,30 @@
   }
 
   /* Horoscope Card - Large Desktop */
-  .horoscopeCard {
-    min-height: 180px;
-    padding: 32px 48px;
-  }
+  // .horoscopeCard {
+  //   min-height: 180px;
+  //   // padding: 32px 48px;
+  // }
 
   .horoscopeHeading {
-    font-size: 26px;
+    font-size: 32px;
   }
 
   .horoscopePlanet {
-    width: 170px;
-    height: 170px;
+    width: 190px;
+    height: 190px;
   }
 
   /* Carousel - Large Desktop */
   .carouselSlide {
     flex: 0 0 calc(40% - 10px);
     min-width: calc(40% - 10px);
-    min-height: 280px;
+    min-height: auto;
     padding: 28px;
   }
 
   .slideTitle {
-    font-size: 34px;
+    font-size: 32px;
   }
 
   .slideSubtitle {
@@ -2248,7 +2565,7 @@
 /* Extra Large Desktop: 1920px+ */
 @media (min-width: 1920px) {
   .header {
-    padding: 32px 80px;
+    padding: 10px 80px;
   }
 
   .mainContent {
@@ -2257,10 +2574,10 @@
   }
 
   /* Horoscope Card - XL Desktop */
-  .horoscopeCard {
-    min-height: 200px;
-    padding: 36px 56px;
-  }
+  // .horoscopeCard {
+  //   min-height: 200px;
+  //   padding: 0px 26px;
+  // }
 
   .horoscopeHeading {
     font-size: 28px;
@@ -2275,7 +2592,7 @@
   .carouselSlide {
     flex: 0 0 calc(35% - 10px);
     min-width: calc(35% - 10px);
-    min-height: 300px;
+    min-height: auto;
     padding: 30px;
   }
 
@@ -2328,16 +2645,16 @@
     font-size: 20px;
   }
 
-  .astrologerCard {
-    flex: 0 0 360px;
-    min-width: 360px;
-    padding: 32px 28px;
-  }
+  // .astrologerCard {
+  //   flex: 0 0 360px;
+  //   min-width: 360px;
+  //   // padding: 32px 28px;
+  // }
 
-  .astrologerImageWrapper {
-    width: 240px;
-    height: 240px;
-  }
+  // .astrologerImageWrapper {
+  //   width: 240px;
+  //   height: 240px;
+  // }
 
   .astrologerName {
     font-size: 24px;
@@ -2345,7 +2662,7 @@
 
   .connectBtn {
     font-size: 18px;
-    padding: 16px 32px;
+    // padding: 16px 32px;
   }
 
   /* Life Area Section - XL Desktop */
@@ -2392,7 +2709,7 @@
 }
 
 .discoverHeader .sectionHeader {
-  flex: 1;
+  // flex: 1;
   margin: 0;
   text-align: left;
 }
@@ -2494,31 +2811,31 @@
 }
 
 .discoverCard:nth-child(1) .discoverImage {
-  width: 75%;
-  max-height: 75%;
+  // width: 100%;
+  max-height: 100%;
   top: 0;
   right: 0;
 }
 
 .discoverCard:nth-child(3) .discoverImage {
-  width: 85%;
-  max-height: 75%;
+  width: auto;
+  max-height: 100%;
   top: 0;
   right: 0;
 }
 
 .discoverCard:nth-child(4) .discoverImage {
-  width: 70%;
-  max-height: 75%;
+  width: auto;
+  max-height: 100%;
   top: 0;
-  right: -20px;
+  right: px;
 }
 
 .discoverCard:nth-child(2) .discoverImage {
-  width: 70%;
-  max-height: 75%;
+  width: auto;
+  max-height: 100%;
   top: 0;
-  right: -35px;
+  right: 0px;
 }
 
 /* Mobile responsive for Discover More */
@@ -2586,11 +2903,11 @@
   margin: 0;
 }
 
-.blogsHeader .dividerLine {
-  flex: 1;
-  height: 1px;
-  background: #d4c4b0;
-}
+// .blogsHeader .dividerLine {
+//   flex: 1;
+//   height: 1px;
+//   background: #d4c4b0;
+// }
 
 .blogsHeader .dividerMoon {
   font-size: 16px;
