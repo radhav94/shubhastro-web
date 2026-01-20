@@ -104,7 +104,7 @@ const TopHeader = () => {
           className={styles.profileIcon}
           onClick={() => navigate("/onboarding?skip=welcome")}
         >
-          <User size={24} strokeWidth={0} fill="#A67C52" />
+          <User size={24} strokeWidth={0} fill="#d53400" />
         </div>
       </div>
     </header>

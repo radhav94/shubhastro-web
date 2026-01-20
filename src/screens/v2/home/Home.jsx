@@ -191,9 +191,21 @@ const Home = () => {
             <div className={styles.horoscopeContent}>
               <h2 className={styles.horoscopeTitle}>TODAY'S HOROSCOPE</h2>
               <div className={styles.dividerContainer}>
-                <div className={styles.dividerLine}></div>
-                <span className={styles.dividerMoon}>☾</span>
-                <div className={styles.dividerLine}></div>
+                <div className={styles.dividerLine}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                    <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#fff" fill-opacity="0.2"/>
+                  </svg>
+                </div>
+                <span className={styles.dividerMoon}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="12" viewBox="0 0 4 6" fill="none">
+                    <path d="M3.39392 4.49489C3.03602 4.84065 2.58016 5.0493 2.08582 5.0493C0.934798 5.0493 0 3.9185 0 2.52316C0 1.1308 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00931234 2.38704 0.024961C1.91056 0.485852 1.60687 1.196 1.60687 1.99371C1.60687 3.26461 2.38458 4.31717 3.39392 4.49489Z" fill="#FEFEFE"/>
+                  </svg>
+                </span>
+                <div className={styles.dividerLine}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                    <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#fff" fill-opacity="0.2"/>
+                  </svg>
+                </div>
               </div>
               <h3 className={styles.horoscopeHeading}>Saturn in Libra</h3>
               <p className={styles.horoscopeSubtext}>
@@ -320,9 +332,17 @@ const Home = () => {
               TOP RATED ASTROLOGERS FOR YOU
             </h2>
             <div className={styles.titleDivider}>
-              <div className={styles.dividerLine}></div>
+              <div className={styles.dividerLine}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                    <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                  </svg>
+              </div>
               <span className={styles.dividerMoon}>☾</span>
-              <div className={styles.dividerLine}></div>
+              <div className={styles.dividerLine}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                  <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                </svg>
+              </div>
             </div>
           </div>
 
@@ -340,7 +360,18 @@ const Home = () => {
                   />
                 </div>
                 <div className={styles.ratingBadge}>
-                  <span className={styles.star}>⭐</span>
+                  <span className={styles.star}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="21" viewBox="0 0 12 13" fill="none">
+                      <g clip-path="url(#clip0_4961_937)">
+                        <path d="M5.94187 1.3447C6.09954 0.919606 6.69621 0.919606 6.85438 1.3447L7.87429 4.2327C7.90988 4.32678 7.97253 4.40762 8.05399 4.46454C8.13545 4.52146 8.23188 4.55179 8.33055 4.55152H10.837C11.3001 4.55152 11.5021 5.14081 11.138 5.42941L9.35441 7.06984C9.27451 7.13262 9.21612 7.21967 9.18762 7.31848C9.15912 7.41729 9.16196 7.52279 9.19575 7.61984L9.84712 10.4419C10.0058 10.8952 9.49237 11.2845 9.10411 11.0055L6.68143 9.43404C6.59847 9.37443 6.49953 9.34245 6.39812 9.34245C6.29672 9.34245 6.19778 9.37443 6.11481 9.43404L3.69214 11.0055C3.30437 11.2845 2.79047 10.8947 2.94912 10.4419L3.60049 7.61984C3.63428 7.52279 3.63713 7.41729 3.60863 7.31848C3.58012 7.21967 3.52173 7.13262 3.44184 7.06984L1.65821 5.42941C1.2936 5.14081 1.4966 4.55152 1.95877 4.55152H4.46521C4.56389 4.55186 4.66035 4.52156 4.74182 4.46463C4.82329 4.4077 4.88594 4.32682 4.92146 4.2327L5.94138 1.3447H5.94187Z" fill="#FFB246" stroke="#FFB246" stroke-width="0.985428" stroke-linecap="round" stroke-linejoin="round"/>
+                      </g>
+                      <defs>
+                        <clipPath id="clip0_4961_937">
+                          <rect width="11.8251" height="12.0879" fill="white"/>
+                        </clipPath>
+                      </defs>
+                    </svg>
+                  </span>
                   <span className={styles.ratingText}>
                     {astrologer.rating ?? 4}
                   </span>
@@ -373,9 +404,17 @@ const Home = () => {
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>EXPLORE BY LIFE AREA</h2>
             <div className={styles.titleDivider}>
-              <div className={styles.dividerLine}></div>
+              <div className={styles.dividerLine}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                  <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                </svg>
+              </div>
               <span className={styles.dividerMoon}>☾</span>
-              <div className={styles.dividerLine}></div>
+              <div className={styles.dividerLine}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                  <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                </svg>
+              </div>
             </div>
           </div>
 
@@ -426,9 +465,17 @@ const Home = () => {
             <div className={styles.sessionsHeaderLeft}>
               <h2 className={styles.sessionsTitle}>MY SESSIONS</h2>
               <div className={styles.titleDivider}>
-                <div className={styles.dividerLine}></div>
+                <div className={styles.dividerLine}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                  <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                </svg>
+                </div>
                 <span className={styles.dividerMoon}>☾</span>
-                <div className={styles.dividerLine}></div>
+                <div className={styles.dividerLine}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                    <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                  </svg>
+                </div>
               </div>
             </div>
             <button className={styles.viewAllLink}>
@@ -520,9 +567,17 @@ const Home = () => {
               <div className={styles.cosmicHeader}>
                 <span className={styles.cosmicLabel}>DAILY COSMIC INSIGHT</span>
                 <div className={styles.cosmicDivider}>
-                  <div className={styles.dividerLine}></div>
+                  <div className={styles.dividerLine}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                      <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#fff" fill-opacity="0.2"/>
+                    </svg>
+                  </div>
                   <span className={styles.dividerMoon}>☾</span>
-                  <div className={styles.dividerLine}></div>
+                  <div className={styles.dividerLine}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                      <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#fff" fill-opacity="0.2"/>
+                    </svg>
+                  </div>
                 </div>
               </div>
               <h3 className={styles.cosmicTitle}>Cosmic Insights</h3>
@@ -545,9 +600,17 @@ const Home = () => {
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>EXPLORE PANCHANG</h2>
             <div className={styles.titleDivider}>
-              <div className={styles.dividerLine}></div>
+              <div className={styles.dividerLine}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                  <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                </svg>
+              </div>
               <span className={styles.dividerMoon}>☾</span>
-              <div className={styles.dividerLine}></div>
+              <div className={styles.dividerLine}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                  <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                </svg>
+              </div>
             </div>
           </div>
 
@@ -633,9 +696,17 @@ const Home = () => {
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>ASTROLOGERS FOR YOU</h2>
             <div className={styles.titleDivider}>
-              <div className={styles.dividerLine}></div>
+              <div className={styles.dividerLine}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                  <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                </svg>
+              </div>
               <span className={styles.dividerMoon}>☾</span>
-              <div className={styles.dividerLine}></div>
+              <div className={styles.dividerLine}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                  <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                </svg>
+              </div>
             </div>
           </div>
 
@@ -653,7 +724,18 @@ const Home = () => {
                   />
                 </div>
                 <div className={styles.ratingBadge}>
-                  <span className={styles.star}>⭐</span>
+                  <span className={styles.star}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="21" viewBox="0 0 12 13" fill="none">
+                      <g clip-path="url(#clip0_4961_292)">
+                        <path d="M5.94187 1.3447C6.09954 0.919606 6.69621 0.919606 6.85438 1.3447L7.87429 4.2327C7.90988 4.32678 7.97253 4.40762 8.05399 4.46454C8.13545 4.52146 8.23188 4.55179 8.33055 4.55152H10.837C11.3001 4.55152 11.5021 5.14081 11.138 5.42941L9.35441 7.06984C9.27451 7.13262 9.21612 7.21967 9.18762 7.31848C9.15912 7.41729 9.16196 7.52279 9.19575 7.61984L9.84712 10.4419C10.0058 10.8952 9.49237 11.2845 9.10411 11.0055L6.68143 9.43404C6.59847 9.37443 6.49953 9.34245 6.39812 9.34245C6.29672 9.34245 6.19778 9.37443 6.11481 9.43404L3.69214 11.0055C3.30437 11.2845 2.79047 10.8947 2.94912 10.4419L3.60049 7.61984C3.63428 7.52279 3.63713 7.41729 3.60863 7.31848C3.58012 7.21967 3.52173 7.13262 3.44184 7.06984L1.65821 5.42941C1.2936 5.14081 1.4966 4.55152 1.95877 4.55152H4.46521C4.56389 4.55186 4.66035 4.52156 4.74182 4.46463C4.82329 4.4077 4.88594 4.32682 4.92146 4.2327L5.94138 1.3447H5.94187Z" fill="#FFB246" stroke="#FFB246" stroke-width="0.985428" stroke-linecap="round" stroke-linejoin="round"/>
+                      </g>
+                      <defs>
+                        <clipPath id="clip0_4961_292">
+                          <rect width="11.8251" height="12.0879" fill="white"/>
+                        </clipPath>
+                      </defs>
+                    </svg>
+                  </span>
                   <span className={styles.ratingText}>
                     {astrologer.experience ?? 4}
                   </span>
@@ -685,9 +767,17 @@ const Home = () => {
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>DISCOVER MORE</h2>
               <div className={styles.titleDivider}>
-                <div className={styles.dividerLine}></div>
+                <div className={styles.dividerLine}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                    <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                  </svg>
+                </div>
                 <span className={styles.dividerMoon}>☾</span>
-                <div className={styles.dividerLine}></div>
+                <div className={styles.dividerLine}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                    <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                  </svg>
+                </div>
               </div>
             </div>
             <button className={styles.viewAllBtn}>
@@ -699,7 +789,7 @@ const Home = () => {
             {/* Vedic Kundli Card */}
             <div
               className={styles.discoverCard}
-              style={{ background: "#AF6115" }}
+              style={{ background: "#D43400" }}
               onClick={() => navigate(PATH.privateRoutes.KUNDLI.path)}
             >
               <div className={styles.discoverContent}>
@@ -781,9 +871,17 @@ const Home = () => {
                 EXPLORE BLOGS AND IN THE NEWS
               </h2>
               <div className={styles.titleDivider}>
-                <div className={styles.dividerLine}></div>
+                <div className={styles.dividerLine}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                    <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                  </svg>
+                </div>
                 <span className={styles.dividerMoon}>☾</span>
-                <div className={styles.dividerLine}></div>
+                <div className={styles.dividerLine}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
+                    <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                  </svg>
+                </div>
               </div>
             </div>
             <button
