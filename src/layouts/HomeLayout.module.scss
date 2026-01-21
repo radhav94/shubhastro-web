@@ -19,6 +19,9 @@ $mobile-screen-width: 500px;
     flex-direction: column;
     flex: 1;
     margin-top: 6rem;
+    @media screen and (width <= 767px) {
+      margin-top: 4.5rem;
+    }
   }
 
   .topBarContainer {

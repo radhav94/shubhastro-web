@@ -22,7 +22,7 @@
   // background: linear-gradient(180deg, #f5e6d3 0%, #fff9f0 50%, #ffffff 100%);
   background: #fff;
   padding-bottom: 90px;
-  padding-top: 108px;
+  padding-top: 15px;
   font-family:
     "Poppins",
     -apple-system,
@@ -31,7 +31,7 @@
     sans-serif;
 
     @media screen and (width <= 767px) {
-      padding-top: 68px;
+      padding-top: 0px;
     }
 }
 /* Header Styles */
