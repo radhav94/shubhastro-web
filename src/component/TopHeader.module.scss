@@ -103,7 +103,7 @@
   border-radius: 50px;
   color: #fff;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: visible;
 }
@@ -131,8 +131,8 @@
 }
 
 .coinIcon {
-  width: 36px;
-  height: 36px;
+  width: 26px;
+  height: 26px;
   background: radial-gradient(
     circle at 35% 35%,
     #ffe873 0%,
@@ -230,10 +230,10 @@
     padding: 6px 18px 6px 8px;
   }
 
-  .coinIcon {
-    width: 32px;
-    height: 32px;
-  }
+  // .coinIcon {
+  //   width: 32px;
+  //   height: 32px;
+  // }
 
   .walletAmount {
     font-size: 18px;

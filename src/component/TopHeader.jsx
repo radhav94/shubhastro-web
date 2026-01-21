@@ -25,6 +25,16 @@ const TopHeader = () => {
       navigate("/onboarding?skip=welcome");
     }
   };
+
+  // formate amount for wallet start
+  const formatAmount = (amount) => {
+    if (amount >= 1000) {
+      const value = amount / 1000;
+      return `₹${value % 1 === 0 ? value : value.toFixed(1)}k`;
+    }
+    return `₹${amount}`;
+  };
+  // formate amount for wallet end
   
   const displayName = user ? `${user.firstName} ${user.lastName}` : "Guest";
 
@@ -119,7 +129,7 @@ const TopHeader = () => {
       <div className={styles.headerActions}>
         <div className={styles.walletBadge}>
           <div className={styles.coinIcon}></div>
-          <span className={styles.walletAmount}>+ ₹120</span>
+          <span className={styles.walletAmount}>+ {formatAmount(1240)}</span>
         </div>
         <div
           className={styles.profileIcon}
