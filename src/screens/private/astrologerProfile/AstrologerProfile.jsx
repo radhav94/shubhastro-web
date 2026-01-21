@@ -22,6 +22,20 @@ import { useTalkToAstrologer } from "../talkToAstrologer/useTalkToAstrologer";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import KundliSelectModal from "../talkToAstrologer/kundliSelect/KundliSelectModal";
 
+// Import custom SVG icons
+import ExperienceIcon from "../../../assets/icons/experience.svg";
+import ConsultationsIcon from "../../../assets/icons/consultations.svg";
+import RatingIcon from "../../../assets/icons/rating.svg";
+import ShareIcon from "../../../assets/icons/Share.svg";
+import TimeIcon from "../../../assets/icons/time-icon.svg";
+import NotificationIcon from "../../../assets/icons/notification.svg";
+import ChatMinutesIcon from "../../../assets/icons/experienceIcon.svg";
+import CallMinutesIcon from "../../../assets/icons/callMinutess.svg";
+import VideoMinutesIcon from "../../../assets/icons/videoMinutes.svg";
+import SendGiftImage from "../../../assets/images/send-gift.png";
+import AstrologerShopImage from "../../../assets/images/astrologer-shop.png";
+import AstrologerPlaceholder from "../../../assets/images/astrologer-square.svg";
+
 const AstrologerProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -270,17 +284,48 @@ const AstrologerProfile = () => {
 
   const data = astrologerData?.data;
   
+  // Helper function to format availability slots
+  const formatAvailability = (availability) => {
+    if (!availability || availability.length === 0) {
+      return [
+        { day: "Monday - Friday", time: "11 AM - 4 PM" },
+        { day: "Evening", time: "7 PM - 10 PM" }
+      ];
+    }
+
+    // Get today's day
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+    
+    // Find today's availability or use first available day
+    const todaySlots = availability.find(a => a.day === today) || availability[0];
+    
+    if (!todaySlots || !todaySlots.slots || todaySlots.slots.length === 0) {
+      return [
+        { day: "Monday - Friday", time: "11 AM - 4 PM" },
+        { day: "Evening", time: "7 PM - 10 PM" }
+      ];
+    }
+
+    // Format slots
+    return todaySlots.slots.map(slot => ({
+      day: todaySlots.day,
+      time: `${slot.start} - ${slot.end}`
+    }));
+  };
+
   // Fallback data - only used when API data is missing
   const displayData = {
     firstName: data?.firstName || "Astrologer",
     lastName: data?.lastName || "",
     imageUrl: data?.imageUrl || "",
-    specialities: data?.specialities?.length > 0 ? data.specialities : ["Vedic Kundli", "Tarot", "Palmistry"],
+    specialities: data?.specialties?.length > 0 ? data.specialties : ["Vedic Kundli", "Tarot", "Palmistry"],
     expertise: data?.expertise?.length > 0 ? data.expertise : ["Relationships", "Finance", "Health"],
     languagePreference: data?.languagePreference?.length > 0 ? data.languagePreference : ["English", "Hindi"],
     experience: data?.experience ?? 20,
     totalConsultations: data?.totalConsultations ?? 1200,
     rating: data?.rating ?? 4.5,
+    totalRatings: data?.totalRatings ?? 1020,
+    availability: formatAvailability(data?.availability),
     chatMinutes: data?.chatMinutes ?? 1500,
     callMinutes: data?.callMinutes ?? 1200,
     videoMinutes: data?.videoMinutes ?? 4.5,
@@ -290,7 +335,6 @@ const AstrologerProfile = () => {
       "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+2",
       "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+3"
     ],
-    totalReviews: data?.totalReviews ?? 1020,
     reviews: data?.reviews?.length > 0 ? data.reviews : [
       {
         date: "25/11/2025",
@@ -385,7 +429,7 @@ const AstrologerProfile = () => {
             {followLoading || unfollowLoading ? "..." : isFollowing ? "Following" : "Follow"}
           </button>
           <button className={styles.shareBtn} onClick={handleShare}>
-            <IoPaperPlaneOutline />
+            <img src={ShareIcon} alt="Share" className={styles.shareIcon} />
           </button>
         </div>
       </div>
@@ -394,12 +438,9 @@ const AstrologerProfile = () => {
       <div className={styles.profileCard}>
         <div className={styles.profileImageWrapper}>
           <img 
-            src={displayData.imageUrl} 
+            src={displayData.imageUrl || AstrologerPlaceholder} 
             alt={displayData.firstName} 
             className={styles.profileImage}
-            onError={(e) => {
-              e.target.style.display = 'none';
-            }}
           />
         </div>
         <div className={styles.profileInfo}>
@@ -417,19 +458,19 @@ const AstrologerProfile = () => {
       {/* Stats Section */}
       <div className={styles.statsSection}>
         <div className={styles.statItem}>
-          <PiBookOpenTextLight className={styles.statIcon} />
+          <img src={ExperienceIcon} alt="Experience" className={styles.statIcon} />
           <div className={styles.statValue}>{displayData.experience}+</div>
           <div className={styles.statLabel}>Experience</div>
         </div>
         <div className={styles.statDivider}></div>
         <div className={styles.statItem}>
-          <PiUsersThreeBold className={styles.statIcon} />
+          <img src={ConsultationsIcon} alt="Consultations" className={styles.statIcon} />
           <div className={styles.statValue}>{displayData.totalConsultations}</div>
           <div className={styles.statLabel}>Consultations</div>
         </div>
         <div className={styles.statDivider}></div>
         <div className={styles.statItem}>
-          <FaStar className={styles.statIcon} />
+          <img src={RatingIcon} alt="Rating" className={styles.statIcon} />
           <div className={styles.statValue}>{displayData.rating}</div>
           <div className={styles.statLabel}>Rating</div>
         </div>
@@ -438,16 +479,17 @@ const AstrologerProfile = () => {
       {/* Consultation Hours */}
       <div className={styles.consultationHours}>
         <div className={styles.hoursHeader}>
-          <IoMdTime className={styles.clockIcon} />
+          <img src={TimeIcon} alt="Time" className={styles.clockIcon} />
           <span className={styles.hoursTitle}>Consultation Hours</span>
         </div>
         <div className={styles.hoursContent}>
           <div className={styles.timeSlots}>
-            <div className={styles.timeSlot}>11 AM - 4 PM</div>
-            <div className={styles.timeSlot}>7 PM - 10 PM</div>
+            {displayData.availability.map((slot, index) => (
+              <div key={index} className={styles.timeSlot}>{slot.time}</div>
+            ))}
           </div>
           <button className={styles.reminderBtn}>
-            <MdNotifications />
+            <img src={NotificationIcon} alt="Notification" className={styles.notificationIcon} />
             Set Reminder
           </button>
         </div>
@@ -456,19 +498,19 @@ const AstrologerProfile = () => {
       {/* Minutes Section */}
       <div className={styles.minutesSection}>
         <div className={styles.minuteItem}>
-          <BiMessageDetail className={styles.minuteIcon} />
+          <img src={ChatMinutesIcon} alt="Chat" className={styles.minuteIcon} />
           <div className={styles.minuteValue}>{displayData.chatMinutes}</div>
           <div className={styles.minuteLabel}>Chat Minutes</div>
         </div>
         <div className={styles.minuteDivider}></div>
         <div className={styles.minuteItem}>
-          <BiPhone className={styles.minuteIcon} />
+          <img src={CallMinutesIcon} alt="Call" className={styles.minuteIcon} />
           <div className={styles.minuteValue}>{displayData.callMinutes}</div>
           <div className={styles.minuteLabel}>Call Minutes</div>
         </div>
         <div className={styles.minuteDivider}></div>
         <div className={styles.minuteItem}>
-          <BiVideo className={styles.minuteIcon} />
+          <img src={VideoMinutesIcon} alt="Video" className={styles.minuteIcon} />
           <div className={styles.minuteValue}>{displayData.videoMinutes}</div>
           <div className={styles.minuteLabel}>Video Minutes</div>
         </div>
@@ -509,7 +551,7 @@ const AstrologerProfile = () => {
           <button className={styles.sendNowBtn}>Send Now</button>
         </div>
         <div className={styles.giftImage}>
-          <div className={styles.giftPlaceholder}>🎁</div>
+          <img src={SendGiftImage} alt="Send Gift" />
         </div>
       </div>
 
@@ -518,7 +560,7 @@ const AstrologerProfile = () => {
         <h3 className={styles.sectionTitle}>USER REVIEWS</h3>
         <div className={styles.reviewsSummary}>
           <StarRating rating={displayData.rating} />
-          <p className={styles.reviewsCount}>{displayData.rating} out of 5 • {displayData.totalReviews} total ratings</p>
+          <p className={styles.reviewsCount}>{displayData.rating} out of 5 • {displayData.totalRatings} total ratings</p>
         </div>
 
         <div className={styles.reviewsList}>
@@ -559,7 +601,11 @@ const AstrologerProfile = () => {
                 </div>
               )}
               <div className={styles.productImage}>
-                {product.image && <img src={product.image} alt={product.name} />}
+                {product.image ? (
+                  <img src={product.image} alt={product.name} />
+                ) : (
+                  <img src={AstrologerShopImage} alt={product.name} />
+                )}
               </div>
               <div className={styles.productInfo}>
                 <h4 className={styles.productName}>{product.name}</h4>

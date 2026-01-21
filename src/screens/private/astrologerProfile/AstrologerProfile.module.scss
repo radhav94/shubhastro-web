@@ -2,7 +2,7 @@
 
 .profilePage {
   min-height: 100vh;
-  background: linear-gradient(to bottom, #F9DDBA 0%, #F9F4EF 30%);
+  background: linear-gradient(to bottom, #EDD9B8 0%, #F9F4EF 20%, #F9F4EF 100%);
   font-family: "Poppins", sans-serif;
   padding-bottom: 80px;
 }
@@ -116,10 +116,10 @@
   flex-shrink: 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 
-  svg {
-    transform: rotate(0deg);
-    stroke-linejoin: round;
-    stroke-linecap: round;
+  .shareIcon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
   }
 
   &:hover {
@@ -138,12 +138,15 @@
 .profileCard {
   background: #FFFFFF;
   border-radius: 20px;
-  padding: 24px 20px;
-  margin: 16px 16px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  padding: 12px;
+  margin: 16px 16px 32px;
   display: flex;
   align-items: flex-start;
-  gap: 20px;
-  box-shadow: none;
+  gap: 12px;
+  box-shadow: 0px 4.04px 49.48px 0px rgba(0, 0, 0, 0.06);
+  width: calc(100% - 32px);
+  min-height: 120px;
 }
 
 .profileImageWrapper {
@@ -207,14 +210,17 @@
    STATS SECTION
 =========================== */
 .statsSection {
-  background: linear-gradient(180deg, #FDF6E7 0%, #FFFBF5 35%, #FFFBF5 65%, #FDF6E7 100%);
-  border-radius: 20px;
+  background: linear-gradient(168.18deg, #F9EED4 -7.79%, #FFFDF6 48.58%, #F9EED4 104.96%);
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.02);
   padding: 32px 16px;
-  margin: 0 16px 12px;
+  margin: 0 16px 32px;
   display: flex;
   justify-content: space-around;
   align-items: center;
   box-shadow: none;
+  width: calc(100% - 32px);
+  min-height: 80px;
 }
 
 .statItem {
@@ -226,11 +232,13 @@
 }
 
 .statIcon {
-  font-size: 44px;
+  width: 44px;
+  height: 44px;
   color: #D4A574;
   stroke-width: 1.5;
   margin-bottom: 8px;
   opacity: 0.85;
+  object-fit: contain;
 }
 
 .statValue {
@@ -262,7 +270,7 @@
   background: #FFFFFF;
   border-radius: 20px;
   padding: 24px 20px;
-  margin: 0 16px 12px;
+  margin: 0 16px 32px;
   box-shadow: none;
 }
 
@@ -274,8 +282,10 @@
 }
 
 .clockIcon {
-  font-size: 22px;
+  width: 22px;
+  height: 22px;
   color: #D4A574;
+  object-fit: contain;
 }
 
 .hoursTitle {
@@ -319,8 +329,11 @@
   transition: all 0.2s;
   white-space: nowrap;
 
-  svg {
-    font-size: 16px;
+  .notificationIcon {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
   }
 
   &:hover {
@@ -336,7 +349,7 @@
   background: #FCECCF;
   border-radius: 20px;
   padding: 32px 16px;
-  margin: 0 16px 12px;
+  margin: 0 16px 32px;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -351,10 +364,12 @@
 }
 
 .minuteIcon {
-  font-size: 40px;
+  width: 40px;
+  height: 40px;
   color: #D4A574;
   margin-bottom: 8px;
   opacity: 0.85;
+  object-fit: contain;
 }
 
 .minuteValue {
@@ -387,7 +402,7 @@
   background: transparent;
   border-radius: 0;
   padding: 0 20px;
-  margin: 0 16px 20px;
+  margin: 0 16px 32px;
   box-shadow: none;
 }
 
@@ -500,7 +515,7 @@
   background: linear-gradient(to bottom, #FFF5E6 0%, #FFF5E6 50%, #FEEAC4 100%);
   border-radius: 24px;
   padding: 36px 24px;
-  margin: 0 16px 12px;
+  margin: 0 16px 32px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -560,28 +575,19 @@
 }
 
 .giftImage {
-  width: 320px;
-  height: 220px;
+  width: 280px;
+  height: 200px;
   flex-shrink: 0;
   position: relative;
   z-index: 2;
-  margin-right: -10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: contain;
     object-position: center right;
+    filter: drop-shadow(0px 9.37px 114.82px rgba(0, 0, 0, 0.06));
   }
-}
-
-.giftPlaceholder {
-  font-size: 120px;
-  opacity: 0.6;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
 }
 
 /* ===========================
@@ -591,7 +597,7 @@
   background: transparent;
   border-radius: 0;
   padding: 0 20px;
-  margin: 0 16px 20px;
+  margin: 0 16px 32px;
   box-shadow: none;
 }
 
@@ -690,9 +696,9 @@
   font-size: 15px;
   font-weight: 600;
   color: #1A1A1A;
-  background: transparent;
-  padding: 0;
-  border-radius: 0;
+  background: #FBF0F1;
+  padding: 6px 12px;
+  border-radius: 14px;
 }
 
 .reviewStar {
@@ -743,7 +749,7 @@
   background: transparent;
   border-radius: 0;
   padding: 0 20px;
-  margin: 0 16px 20px;
+  margin: 0 16px 32px;
   box-shadow: none;
 }
 
@@ -779,13 +785,15 @@
   position: relative;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
 }
 
 .productBadge {
   position: absolute;
   top: 16px;
   left: 16px;
-  background: #FFFFFF;
+  background: #FDEFD8;
   padding: 8px 14px;
   border-radius: 20px;
   font-size: 13px;
@@ -810,10 +818,21 @@
   border-radius: 0;
   margin-bottom: 0;
   background: linear-gradient(180deg, #E8D5C4 0%, #F5E6D8 100%);
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .productInfo {
   padding: 16px;
+  background: #FFFFFF;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .productName {
@@ -865,6 +884,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  margin-top: auto;
 
   &:hover {
     background: #2D1F10;
