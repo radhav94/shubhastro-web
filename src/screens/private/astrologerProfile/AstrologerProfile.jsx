@@ -37,6 +37,7 @@ import VideoMinutesIcon from "../../../assets/icons/videoMinutes.svg";
 import SendGiftImage from "../../../assets/images/send-gift.png";
 import AstrologerShopImage from "../../../assets/images/astrologer-shop.png";
 import AstrologerPlaceholder from "../../../assets/images/astrologer-square.svg";
+import GiftModal from "../../../component/call/GiftModal";
 
 const AstrologerProfile = () => {
   const { id } = useParams();
@@ -63,6 +64,7 @@ const AstrologerProfile = () => {
   const [isFollowing, setIsFollowing] = useState(isInitiallyFollowing);
   const [showFullAbout, setShowFullAbout] = useState(false);
   const [openReviewModal, setOpenReviewModal] = useState(false);
+  const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
 
   const [followAstrologer, { isLoading: followLoading }] =
     useFollowAstrologerByIdMutation();
@@ -597,7 +599,7 @@ const AstrologerProfile = () => {
         <div className={styles.giftContent}>
           <h3 className={styles.giftTitle}>Send a Gift</h3>
           <p className={styles.giftSubtitle}>Show your appreciation to your favorite astrologer.</p>
-          <button className={styles.sendNowBtn}>Send Now</button>
+          <button className={styles.sendNowBtn} onClick={() => setIsGiftModalOpen(true)}>Send Now</button>
         </div>
         <div className={styles.giftImage}>
           <img src={SendGiftImage} alt="Send Gift" />
@@ -729,6 +731,14 @@ const AstrologerProfile = () => {
           </div>
         </div>
       )}
+
+      {/* Gift Modal */}
+      <GiftModal
+        isOpen={isGiftModalOpen}
+        onClose={() => setIsGiftModalOpen(false)}
+        astrologerId={data?._id}
+        astrologerName={`${data?.firstName || ""} ${data?.lastName || ""}`}
+      />
     </div>
   );
 };
