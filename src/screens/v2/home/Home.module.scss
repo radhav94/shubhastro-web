@@ -1119,6 +1119,9 @@
   justify-content: space-between;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   position: relative;
+  @media screen and (width <= 767px) {
+      min-width: 230px;
+  }
 }
 
 .astrologerImageWrapper {
@@ -1131,6 +1134,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  @media screen and (width <= 767px) {
+      width: 30vw;
+      height: 30vw;
+  }
 }
 
 .astrologerImg {
@@ -1208,7 +1215,11 @@
   font-weight: 600;
   cursor: pointer;
   transition:
-    transform 0.2s ease, box-shadow 0.2s ease
+    transform 0.2s ease, box-shadow 0.2s ease;
+
+    @media screen and (width <= 767px) {
+      padding: 8px;
+    }
 }
 
 .connectBtn:hover {
@@ -1821,7 +1832,7 @@
   justify-content: space-around;
 
   padding: 10px 14px 14px;
-  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
+  // box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
   z-index: 999;
 
   /* ✅ important */
@@ -1957,6 +1968,8 @@
   margin-bottom: 6px;
   z-index: 3;
   /* above everything */
+  border-top: 1px solid #f35401;
+  border-radius: 100px;
 }
 
 .liveBtn {
