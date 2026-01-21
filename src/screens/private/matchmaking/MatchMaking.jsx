@@ -24,7 +24,7 @@ const isDuplicateKundli = (payload, list) => {
       Number(k.min) === Number(payload.min) &&
       Number(k.lat) === Number(payload.lat) &&
       Number(k.lon) === Number(payload.lon) &&
-      k.place.trim().toLowerCase() === payload.place.trim().toLowerCase()
+      k.place.trim().toLowerCase() === payload.place.trim().toLowerCase(),
   );
 };
 const initialFormData = {
@@ -64,42 +64,42 @@ const MatchMaking = () => {
   const onDelete = async (id) => {
     try {
       await deleteKundli(id).unwrap();
-  
+
       if (selectedKundliId === id) {
         setSelectedKundliId(null);
         setFormData(initialFormData);
         setIsBoy(true);
       }
-  
+
       refetch();
     } catch (err) {
       console.error("Delete failed", err);
     }
   };
   const [formData, setFormData] = useState(initialFormData);
-/* --------------------- TOKEN CHANGE HANDLING ---------------------- */
-useEffect(() => {
-  const prevToken = prevTokenRef.current;
-  // CASE 1: First login (null → token)
-  if (!prevToken && token && refetch) {
-    refetch();
-  }
-  // CASE 2: User switched (token A → token B)
-  if (prevToken && token && prevToken !== token) {
-    setFormData(initialFormData);
-    setSelectedKundliId(null);
-    setIsBoy(true);
-    refetch();
-  }
-  // CASE 3: Logout (token → null)
-  if (prevToken && !token) {
-    setFormData(initialFormData);
-    setSelectedKundliId(null);
-    setIsBoy(true);
-  }
+  /* --------------------- TOKEN CHANGE HANDLING ---------------------- */
+  useEffect(() => {
+    const prevToken = prevTokenRef.current;
+    // CASE 1: First login (null → token)
+    if (!prevToken && token && refetch) {
+      refetch();
+    }
+    // CASE 2: User switched (token A → token B)
+    if (prevToken && token && prevToken !== token) {
+      setFormData(initialFormData);
+      setSelectedKundliId(null);
+      setIsBoy(true);
+      refetch();
+    }
+    // CASE 3: Logout (token → null)
+    if (prevToken && !token) {
+      setFormData(initialFormData);
+      setSelectedKundliId(null);
+      setIsBoy(true);
+    }
 
-  prevTokenRef.current = token;
-}, [token, refetch]);
+    prevTokenRef.current = token;
+  }, [token, refetch]);
 
   const [errors, setErrors] = useState({
     boyData: {},
@@ -233,8 +233,7 @@ useEffect(() => {
             createKundli(girlPayload);
           }
         }
-      }
-      else {
+      } else {
         if (!isDuplicateKundli(boyPayload, savedKundlis)) {
           createKundli(boyPayload);
         }
@@ -300,8 +299,8 @@ useEffect(() => {
 
           {/* Birth Place */}
           <div className={styles.formGroup}>
-          <label>Birth Place*</label>
-          <LocationSearch
+            <label>Birth Place*</label>
+            <LocationSearch
               value={data.place.address}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -317,8 +316,8 @@ useEffect(() => {
               }
               onPlaceSelect={(loc) => handlePlaceSelect(personKey, loc)}
             />
-          {err.place && <p className={styles.error}>{err.place}</p>}
-        </div>
+            {err.place && <p className={styles.error}>{err.place}</p>}
+          </div>
         </div>
       </div>
     );

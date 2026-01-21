@@ -24,9 +24,10 @@
 .tabContainer {
   margin: 26px;
   width: 50%;
+  margin-top: 8rem;
   @media (max-width: 992px) {
     width: 95%;
-    margin: 20px auto;
+    // margin: 20px auto;
   }
 }
 /* ---------- SWITCH TABS ---------- */
@@ -46,7 +47,9 @@
     text-align: center;
     padding: 10px 0;
     font-weight: 500;
-    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    transition:
+      background 0.3s ease-in-out,
+      color 0.3s ease-in-out;
     border-radius: 30px;
 
     // &:hover {
@@ -116,7 +119,9 @@
     border: 1px solid #cfcfcf;
     border-radius: 8px;
     font-size: 15px;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
     width: 100%;
 
     &:focus {
