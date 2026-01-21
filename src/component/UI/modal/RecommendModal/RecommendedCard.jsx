@@ -1,7 +1,4 @@
-import PrimaryButton from "../../../PrimaryButton";
 import styles from "./recommendedCard.module.scss";
-import { AppIcons } from "../../../../utils/appImages";
-import { appColors } from "../../../../utils/theme";
 
 const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall, mode }) => {
   return (
@@ -13,37 +10,13 @@ const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall, mode }) => {
 
         <div className={styles.buttonsRow}>
           {mode === "chat" ? (
-            <PrimaryButton
-              bgColor={appColors.white}
-              imgSrc={AppIcons.Message}
-              imgSize={20}
-              buttonStyles={{ padding: "2px" }}
-              onClick={onChat}
-            />
+            <button className={styles.connectBtn} onClick={onChat}>
+              Connect
+            </button>
           ) : (
-            <>
-              <PrimaryButton
-                bgColor={appColors.white}
-                imgSrc={AppIcons.Call}
-                imgSize={20}
-                buttonStyles={{ padding: "2px" }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAudioCall();
-                }}
-              />
-
-              <PrimaryButton
-                bgColor={appColors.white}
-                imgSrc={AppIcons.Video}
-                imgSize={20}
-                buttonStyles={{ padding: "2px" }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onVideoCall();
-                }}
-              />
-            </>
+            <button className={styles.connectBtn} onClick={onAudioCall}>
+              Connect
+            </button>
           )}
         </div>
       </div>
