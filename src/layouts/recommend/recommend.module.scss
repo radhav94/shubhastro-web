@@ -79,8 +79,8 @@
 
 /* CTA button */
 .ctaBtn {
-  background: #ffd200;
-  color: #111;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: #fff;
   font-weight: 700;
   padding: 10px 20px;
   border-radius: 999px;
@@ -89,10 +89,12 @@
   font-size: 14px;
   transition: all 0.25s ease;
   white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(247, 88, 1, 0.25);
 
   &:hover {
-    background: #ffcc00;
+    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
     transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(247, 88, 1, 0.35);
   }
 }
 
