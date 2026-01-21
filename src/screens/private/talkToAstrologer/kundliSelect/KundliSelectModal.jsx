@@ -4,6 +4,7 @@ import styles from "./KundliSelectModal.module.scss";
 import { IoClose } from "react-icons/io5";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { padZero } from "../../../../utils/dateFormat/dateTime";
+import Toast from "../../../../component/toast";
 
 import {
   useGetAllKundlisQuery,
@@ -11,53 +12,16 @@ import {
 } from "../../../../services/appServices/kundliServicesNew";
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
 
-const days = Array.from({ length: 31 }, (_, i) => i + 1);
-const months = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
-const hours = Array.from({ length: 24 }, (_, i) => i);
-const minutes = Array.from({ length: 60 }, (_, i) => i);
-
-const monthMap = {
-  Jan: 1,
-  Feb: 2,
-  Mar: 3,
-  Apr: 4,
-  May: 5,
-  Jun: 6,
-  Jul: 7,
-  Aug: 8,
-  Sep: 9,
-  Oct: 10,
-  Nov: 11,
-  Dec: 12,
-};
-
 const initialForm = {
   name: "",
-  gender: "",
-  day: "",
-  month: "",
-  year: "",
-  hour: "",
-  minute: "",
-  second: "",
-  place: "",
-  lat: null,
-  lon: null,
+  identity: "",
+  relation: "",
+  birthDate: "",
+  birthTime: "",
+  unknownBirthTime: false,
+  birthPlace: "",
+  latitude: null,
+  longitude: null,
 };
 
 const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
@@ -68,228 +32,274 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
       ? localStorage.getItem("shubhtalk_astro_token")
       : localStorage.getItem("shubhtalk_customer_token");
 
-  const { data, isLoading } = useGetAllKundlisQuery(undefined, {
+  const { data, isLoading, refetch } = useGetAllKundlisQuery(undefined, {
     skip: !token || !isOpen,
   });
 
   const [createKundli] = useCreateKundliMutation();
   const kundlis = data?.data || [];
 
-  const [activeTab, setActiveTab] = useState("saved");
+  const [showAddProfile, setShowAddProfile] = useState(false);
+  const [selectedKundli, setSelectedKundli] = useState(null);
   const [form, setForm] = useState(initialForm);
   const [creating, setCreating] = useState(false);
+
+  const formatProfileDisplay = (profile) => {
+    const initials = profile.name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+
+    const birthDate = profile.birthDate || `${padZero(profile.day)}-${padZero(profile.month)}-${profile.year}`;
+    const birthTime = profile.birthTime || `${padZero(profile.hour)}:${padZero(profile.min)}`;
+    const relation = profile.relation || "Self";
+
+    return { initials, birthDate, birthTime, relation };
+  };
+
+  const handleAddProfile = () => {
+    setShowAddProfile(true);
+  };
+
+  const handleSubmitProfile = async (e) => {
+    e.preventDefault();
+    setCreating(true);
+
+    try {
+      const [year, month, day] = form.birthDate.split("-");
+      const [hour, minute] = form.birthTime ? form.birthTime.split(":") : ["12", "0"];
+
+      const payload = {
+        name: form.name,
+        gender: form.identity.toLowerCase(),
+        relation: form.relation,
+        day: Number(day),
+        month: Number(month),
+        year: Number(year),
+        hour: form.unknownBirthTime ? 12 : Number(hour),
+        min: form.unknownBirthTime ? 0 : Number(minute),
+        second: 0,
+        place: form.birthPlace,
+        lat: Number(form.latitude),
+        lon: Number(form.longitude),
+        tzone: 5.5,
+        birthDate: form.birthDate,
+        birthTime: form.unknownBirthTime ? "" : form.birthTime,
+      };
+
+      const res = await createKundli(payload).unwrap();
+      Toast.success("Profile added successfully");
+      setShowAddProfile(false);
+      setForm(initialForm);
+      refetch();
+    } catch (err) {
+      console.error(err);
+      Toast.error(err?.data?.message || "Failed to add profile");
+    } finally {
+      setCreating(false);
+    }
+  };
 
   if (!isOpen) return null;
 
   return createPortal(
-    <div className={styles.modalOverlay}>
-      <div className={styles.modalBox}>
-        <button className={styles.closeBtn} onClick={onClose}>
-          <IoClose size={22} />
-        </button>
+    <>
+      {/* Select Profile Modal */}
+      <div className={styles.modalOverlay} onClick={onClose}>
+        <div className={styles.bottomSheet} onClick={(e) => e.stopPropagation()}>
+          <div className={styles.sheetHandle}></div>
 
-        <div className={styles.tabs}>
-          <button
-            className={activeTab === "saved" ? styles.activeTab : ""}
-            onClick={() => setActiveTab("saved")}
-          >
-            Saved Kundli
-          </button>
+          <div className={styles.sheetContent}>
+            <button className={styles.closeBtn} onClick={onClose}>
+              ×
+            </button>
+            <h2 className={styles.sheetTitle}>Select Profile</h2>
 
-          <button
-            className={activeTab === "create" ? styles.activeTab : ""}
-            onClick={() => setActiveTab("create")}
-          >
-            Create Kundli
-          </button>
-        </div>
-
-        {/* SAVED KUNDLIS */}
-        {activeTab === "saved" && (
-          <>
             {isLoading ? (
               <PrimaryLoader />
             ) : kundlis.length > 0 ? (
-              <div className={styles.kundliList}>
-                {kundlis.map((k) => (
-                  <div
-                    key={k._id}
-                    className={styles.kundliItem}
-                    onClick={() => onSelect(k)}
-                  >
-                    <div className={styles.avatar}>{k.name.charAt(0)}</div>
+              <>
+                <div className={styles.profileList}>
+                  {kundlis.map((profile) => {
+                    const formatted = formatProfileDisplay(profile);
+                    return (
+                      <div
+                        key={profile._id}
+                        className={`${styles.profileItem} ${
+                          selectedKundli?._id === profile._id ? styles.selected : ""
+                        }`}
+                        onClick={() => setSelectedKundli(profile)}
+                      >
+                        <div className={styles.profileAvatar}>
+                          {formatted.initials}
+                        </div>
+                        <div className={styles.profileInfo}>
+                          <span className={styles.relationBadge}>
+                            {formatted.relation}
+                          </span>
+                          <h3 className={styles.profileName}>{profile.name}</h3>
+                          <p className={styles.profileDetails}>
+                            {formatted.birthDate} • {formatted.birthTime}
+                          </p>
+                          <p className={styles.profileLocation}>{profile.place}</p>
+                        </div>
+                        <div className={styles.radioBtn}>
+                          {selectedKundli?._id === profile._id ? "●" : "○"}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
 
-                    <div>
-                      <p className={styles.name}>
-                        {k.name} ({k.gender})
-                      </p>
-                      <p className={styles.dob}>
-                        {padZero(k.day)}-{padZero(k.month)}-{k.year} •{" "}
-                        {padZero(k.hour)}:{padZero(k.min)}
-                      </p>
-                      <p className={styles.place}>{k.place}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                <button className={styles.addProfileBtn} onClick={handleAddProfile}>
+                  + Add Profile
+                </button>
+
+                <button
+                  className={styles.continueBtn}
+                  disabled={!selectedKundli}
+                  onClick={() => selectedKundli && onSelect(selectedKundli)}
+                >
+                  Continue
+                </button>
+              </>
             ) : (
-              <p>No saved kundlis found.</p>
+              <div className={styles.emptyState}>
+                <p>No saved profiles found.</p>
+                <button className={styles.addProfileBtn} onClick={handleAddProfile}>
+                  + Add Profile
+                </button>
+              </div>
             )}
-          </>
-        )}
-
-        {/* CREATE KUNDLI */}
-        {activeTab === "create" && (
-          <form
-            className={styles.createForm}
-            onSubmit={async (e) => {
-              e.preventDefault();
-              setCreating(true);
-
-              try {
-                const payload = {
-                  name: form.name,
-                  gender: form.gender.toLowerCase(),
-                  day: Number(form.day),
-                  month: monthMap[form.month],
-                  year: Number(form.year),
-                  hour: Number(form.hour),
-                  min: Number(form.minute),
-                  second: Number(form.second),
-                  place: form.place,
-                  lat: Number(form.lat),
-                  lon: Number(form.lon),
-                  tzone: 5.5,
-                };
-
-                const res = await createKundli(payload).unwrap();
-                onSelect(res.data);
-                setForm(initialForm);
-              } catch (err) {
-                console.log("Create failed", err);
-              } finally {
-                setCreating(false);
-              }
-            }}
-          >
-            <input
-              placeholder="Name"
-              name="name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-            />
-
-            <select
-              name="gender"
-              value={form.gender}
-              onChange={(e) => setForm({ ...form, gender: e.target.value })}
-              required
-            >
-              <option value="">Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-
-            <div className={styles.row}>
-              <select
-                name="day"
-                value={form.day}
-                onChange={(e) => setForm({ ...form, day: e.target.value })}
-                required
-              >
-                <option value="">Day</option>
-                {days.map((d) => (
-                  <option key={d}>{d}</option>
-                ))}
-              </select>
-
-              <select
-                name="month"
-                value={form.month}
-                onChange={(e) => setForm({ ...form, month: e.target.value })}
-                required
-              >
-                <option value="">Month</option>
-                {months.map((m) => (
-                  <option key={m}>{m}</option>
-                ))}
-              </select>
-
-              <select
-                name="year"
-                value={form.year}
-                onChange={(e) => setForm({ ...form, year: e.target.value })}
-                required
-              >
-                <option value="">Year</option>
-                {years.map((y) => (
-                  <option key={y}>{y}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Time */}
-            <div className={styles.row}>
-              <select
-                name="hour"
-                value={form.hour}
-                onChange={(e) => setForm({ ...form, hour: e.target.value })}
-                required
-              >
-                <option value="">Hour</option>
-                {hours.map((h) => (
-                  <option key={h}>{h}</option>
-                ))}
-              </select>
-
-              <select
-                name="minute"
-                value={form.minute}
-                onChange={(e) => setForm({ ...form, minute: e.target.value })}
-                required
-              >
-                <option value="">Minute</option>
-                {minutes.map((m) => (
-                  <option key={m}>{m}</option>
-                ))}
-              </select>
-
-              <select
-                name="second"
-                value={form.second}
-                onChange={(e) => setForm({ ...form, second: e.target.value })}
-                required
-              >
-                <option value="">Second</option>
-                {minutes.map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.locationWrapper}>
-              <LocationSearch
-                value={form.place}
-                onChange={(e) => setForm({ ...form, place: e.target.value })}
-                onPlaceSelect={(place) =>
-                  setForm({
-                    ...form,
-                    place: place.address,
-                    lat: place.lat,
-                    lon: place.lng,
-                  })
-                }
-              />
-            </div>
-
-            <button className={styles.submitBtn} disabled={creating}>
-              {creating ? "Creating..." : "Create Kundli"}
-            </button>
-          </form>
-        )}
+          </div>
+        </div>
       </div>
-    </div>,
+
+      {/* Add Profile Side Sheet */}
+      {showAddProfile && (
+        <div className={styles.modalOverlay} onClick={() => setShowAddProfile(false)}>
+          <div className={styles.sideSheet} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.sheetHandle}></div>
+
+            <div className={styles.sheetContent}>
+              <button className={styles.closeBtn} onClick={() => setShowAddProfile(false)}>
+                ×
+              </button>
+              <h2 className={styles.sheetTitle}>Add Profile</h2>
+
+              <form onSubmit={handleSubmitProfile} className={styles.profileForm}>
+                <div className={styles.formGroup}>
+                  <label>Name</label>
+                  <input
+                    type="text"
+                    placeholder="Enter here"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Identity</label>
+                  <div className={styles.identityButtons}>
+                    <button
+                      type="button"
+                      className={form.identity === "Male" ? styles.active : ""}
+                      onClick={() => setForm({ ...form, identity: "Male" })}
+                    >
+                      Male
+                    </button>
+                    <button
+                      type="button"
+                      className={form.identity === "Female" ? styles.active : ""}
+                      onClick={() => setForm({ ...form, identity: "Female" })}
+                    >
+                      Female
+                    </button>
+                    <button
+                      type="button"
+                      className={form.identity === "Others" ? styles.active : ""}
+                      onClick={() => setForm({ ...form, identity: "Others" })}
+                    >
+                      Others
+                    </button>
+                  </div>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Relation</label>
+                  <select
+                    value={form.relation}
+                    onChange={(e) => setForm({ ...form, relation: e.target.value })}
+                    required
+                  >
+                    <option value="">Select relation</option>
+                    <option value="Self">Self</option>
+                    <option value="Brother">Brother</option>
+                    <option value="Sister">Sister</option>
+                    <option value="Mother">Mother</option>
+                    <option value="Father">Father</option>
+                    <option value="Friend">Friend</option>
+                  </select>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Birth Date</label>
+                  <input
+                    type="date"
+                    value={form.birthDate}
+                    onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Birth Time</label>
+                  <input
+                    type="time"
+                    value={form.birthTime}
+                    onChange={(e) => setForm({ ...form, birthTime: e.target.value })}
+                    disabled={form.unknownBirthTime}
+                  />
+                  <label className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={form.unknownBirthTime}
+                      onChange={(e) =>
+                        setForm({ ...form, unknownBirthTime: e.target.checked })
+                      }
+                    />
+                    Don't know the exact time of birth
+                  </label>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Place of Birth</label>
+                  <LocationSearch
+                    value={form.birthPlace}
+                    onChange={(e) => setForm({ ...form, birthPlace: e.target.value })}
+                    onPlaceSelect={(place) =>
+                      setForm({
+                        ...form,
+                        birthPlace: place.address,
+                        latitude: place.lat,
+                        longitude: place.lng,
+                      })
+                    }
+                  />
+                </div>
+
+                <button type="submit" className={styles.submitBtn} disabled={creating}>
+                  {creating ? "Adding..." : "Add Profile"}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </>,
     document.body
   );
 };

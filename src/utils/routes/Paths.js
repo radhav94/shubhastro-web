@@ -154,7 +154,7 @@ import TarotCardSelectionPage from "../../screens/private/v2/tarot/TarotCardSele
 import LoveTriangleSelectionPage from "../../screens/private/v2/tarot/LoveTriangleSelectionPage";
 import LoveTriangleResultPage from "../../screens/private/v2/tarot/LoveTriangleResultPage";
 import Home from "../../screens/v2/home/Home";
-import Profile from "../../screens/v2/user/Profile";
+import ProfileV2 from "../../screens/v2/user/Profile";
 
 export const PATH = {
   // DEFAULT: {

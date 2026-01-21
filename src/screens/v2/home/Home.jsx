@@ -21,6 +21,11 @@ import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServic
 import ConnectAstrologerPopup from "../../../screens/private/v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import KundliSelectModal from "../../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
+import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
+import { useChat } from "../../../context/ChatContext";
+import { useCall } from "../../../context/CallContext";
+import { voiceSocket } from "../../../services/voiceSocketServices";
+import { Toast } from "../../../component";
 
 // Image imports
 import quickActionOne from "../../../assets/images/quick-action-1.svg";
@@ -46,8 +51,70 @@ const Home = () => {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
+  const [callRoomId, setCallRoomId] = useState(null);
+  const [chatRoomId, setChatRoomId] = useState(null);
+  const [connectionType, setConnectionType] = useState(null); // 'chat', 'audio', 'video'
   const navigate = useNavigate();
   const carouselRef = useRef(null);
+
+  // Get contexts
+  const { 
+    waitingList: WaitingList, 
+    setWaitingList, 
+    resetChatFlow,
+    setActiveChatRoomId
+  } = useChat();
+  const { 
+    waitingList: callWaitingList, 
+    setWaitingList: setCallWaitingList,
+    resetCallFlow,
+    setActiveCallRoomId
+  } = useCall();
+
+  const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+
+  // Restore waiting state from localStorage on mount
+  useEffect(() => {
+    const savedWaitingState = localStorage.getItem("waitingState");
+    if (savedWaitingState) {
+      try {
+        const { roomId, type, timestamp } = JSON.parse(savedWaitingState);
+        
+        // Check if waiting state is not too old (max 30 minutes)
+        const now = Date.now();
+        const maxAge = 30 * 60 * 1000; // 30 minutes
+        
+        if (now - timestamp < maxAge) {
+          console.log("🔄 Restoring waiting state from localStorage", { roomId, type });
+          
+          // Restore state
+          setConnectionType(type);
+          if (type === 'chat') {
+            setChatRoomId(roomId);
+            setWaitingList(2);
+          } else {
+            setCallRoomId(roomId);
+            setCallWaitingList(5);
+          }
+          
+          // Reconnect socket if needed
+          if (!voiceSocket.connected && userIdLocal) {
+            voiceSocket.io.opts.query = {
+              userId: userIdLocal,
+              role: "CUSTOMER",
+            };
+            voiceSocket.connect();
+          }
+        } else {
+          // Clear old waiting state
+          localStorage.removeItem("waitingState");
+        }
+      } catch (error) {
+        console.error("Error restoring waiting state:", error);
+        localStorage.removeItem("waitingState");
+      }
+    }
+  }, [userIdLocal, setWaitingList, setCallWaitingList]);
 
   // Use the astrologer connect hook
   const {
@@ -161,8 +228,153 @@ const Home = () => {
     setActiveSlide(index);
   };
 
+  // Socket event listeners for waiting modal
+  useEffect(() => {
+    if (!userIdLocal) return;
+
+    const handleChatRoom = (data) => {
+      console.log("🔵 HOME: chat:room event", data);
+      setChatRoomId(data?.roomId);
+      setActiveChatRoomId(data?.roomId);
+      setWaitingList(data?.waitingTime || 2);
+      setConnectionType('chat');
+      
+      // Save to localStorage
+      localStorage.setItem("waitingState", JSON.stringify({
+        roomId: data?.roomId,
+        type: 'chat',
+        timestamp: Date.now()
+      }));
+    };
+
+    const handleCallRoom = (data) => {
+      console.log("🔵 HOME: call:room event", data);
+      setCallRoomId(data?.roomId);
+      setActiveCallRoomId(data?.roomId);
+      setCallWaitingList(data?.waitingTime || 5);
+      setConnectionType(data?.type || 'audio'); // 'audio' or 'video'
+      
+      // Save to localStorage
+      localStorage.setItem("waitingState", JSON.stringify({
+        roomId: data?.roomId,
+        type: data?.type || 'audio',
+        timestamp: Date.now()
+      }));
+    };
+
+    const handleChatAccepted = async ({ roomId, astrologerId, ...data }) => {
+      console.log("✅ HOME: chat:accepted", { roomId, astrologerId });
+      setWaitingList(false);
+      
+      // Clear localStorage
+      localStorage.removeItem("waitingState");
+      
+      // Navigate to chat page
+      navigate(`/chat-with-astrologers/${astrologerId}`, {
+        state: {
+          userId: userIdLocal,
+          astrologerId,
+          roomId,
+          isUserSide: true,
+          astrologerName: data?.astrologer?.firstName || "",
+          astroID: data?.astrologer?.astrologer_ID,
+        },
+      });
+    };
+
+    const handleCallAccepted = async ({ roomId, token, type, remainingTime }) => {
+      console.log("✅ HOME: call:accepted", { roomId, type });
+      resetCallFlow();
+      
+      // Clear localStorage
+      localStorage.removeItem("waitingState");
+      // Call will be handled by the call component
+    };
+
+    const handleRejected = (data) => {
+      console.log("❌ HOME: rejected", data);
+      const errorMsg =
+        data?.sessionData?.sessionEndReason === "rejected" && data?.type === "chat"
+          ? "Astrologer has rejected the chat request"
+          : "Astrologer has rejected the call request";
+      Toast.error(errorMsg);
+      
+      // Clear localStorage
+      localStorage.removeItem("waitingState");
+      
+      resetChatFlow();
+      resetCallFlow();
+      setConnectionType(null);
+    };
+
+    const handleSocketError = (err) => {
+      console.log("🔴 HOME: SOCKET ERROR", err);
+      Toast.error(err?.message || "Connection error");
+      
+      // Clear localStorage
+      localStorage.removeItem("waitingState");
+      
+      resetChatFlow();
+      resetCallFlow();
+      setConnectionType(null);
+    };
+
+    // Attach events
+    voiceSocket.on("chat:room", handleChatRoom);
+    voiceSocket.on("call:room", handleCallRoom);
+    voiceSocket.on("chat:accepted", handleChatAccepted);
+    voiceSocket.on("call:accepted", handleCallAccepted);
+    voiceSocket.on("chat:rejected", handleRejected);
+    voiceSocket.on("call:rejected", handleRejected);
+    voiceSocket.on("error", handleSocketError);
+
+    return () => {
+      voiceSocket.off("chat:room", handleChatRoom);
+      voiceSocket.off("call:room", handleCallRoom);
+      voiceSocket.off("chat:accepted", handleChatAccepted);
+      voiceSocket.off("call:accepted", handleCallAccepted);
+      voiceSocket.off("chat:rejected", handleRejected);
+      voiceSocket.off("call:rejected", handleRejected);
+      voiceSocket.off("error", handleSocketError);
+    };
+  }, [userIdLocal, navigate, resetChatFlow, resetCallFlow, setWaitingList, setCallWaitingList, setActiveChatRoomId, setActiveCallRoomId]);
+
+  // Reset waiting state function
+  const resetCallState = () => {
+    console.log("🔴 HOME: Resetting call state", { callRoomId, chatRoomId, connectionType });
+    
+    // Cancel the active room on server based on connection type
+    if (connectionType === 'chat' && chatRoomId) {
+      voiceSocket.emit("chat:cancel", { roomId: chatRoomId });
+    } else if ((connectionType === 'audio' || connectionType === 'video') && callRoomId) {
+      voiceSocket.emit("call:cancel", { roomId: callRoomId });
+    }
+    
+    // Explicitly reset waiting states to false
+    setWaitingList(false);
+    setCallWaitingList(false);
+    
+    // Reset local state
+    setCallRoomId(null);
+    setChatRoomId(null);
+    setConnectionType(null);
+    
+    // Clear localStorage
+    localStorage.removeItem("waitingState");
+    
+    // Reset context flows
+    resetChatFlow();
+    resetCallFlow();
+  };
+
   // Handle connect button click
   const handleConnectClick = (astrologer) => {
+    // Check if already in waiting state
+    if (WaitingList || callWaitingList) {
+      Toast.error("You are already waiting for an astrologer. Please cancel the current request first.");
+      return;
+    }
+    
     setSelectedAstrologer(astrologer);
     setIsConnectPopupOpen(true);
   };
@@ -940,6 +1152,15 @@ const Home = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Waiting Modal - shows for both chat and call */}
+      {(WaitingList || callWaitingList) && connectionType && (
+        <WaitingModal
+          callRoomId={callRoomId || chatRoomId}
+          resetCallState={resetCallState}
+          connectionType={connectionType}
+        />
       )}
     </div>
   );

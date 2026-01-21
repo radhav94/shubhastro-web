@@ -125,7 +125,7 @@ export const useAstrologerConnect = () => {
         }
 
         setLastCallType(callType);
-        setCallWaitingList(5);
+        // Don't set waiting state here - let socket event handle it
 
         voiceSocket.emit("call:initiate", {
           userId: userIdLocal,
@@ -134,6 +134,7 @@ export const useAstrologerConnect = () => {
         });
       } else {
         // Initiate chat
+        // Don't set waiting state here - let socket event handle it
         voiceSocket.emit("chat:initiate", {
           userId: userIdLocal,
           astrologerId: astro._id,
