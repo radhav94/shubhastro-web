@@ -129,7 +129,7 @@ const TopHeader = () => {
       <div className={styles.headerActions}>
         <div className={styles.walletBadge}>
           <div className={styles.coinIcon}></div>
-          <span className={styles.walletAmount}>+ {formatAmount(1240)}</span>
+          <span className={styles.walletAmount}>{formatAmount(1240)}</span>
         </div>
         <div
           className={styles.profileIcon}
