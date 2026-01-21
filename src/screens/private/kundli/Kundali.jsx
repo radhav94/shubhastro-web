@@ -145,7 +145,7 @@ const Kundali = () => {
   }, [planetLoading, isAstro]);
 
   return (
-    <div>
+    <div className="mt-10">
       {profilesLoading && <PrimaryLoader />}
 
       {/* Free Kundli Online Title - Always visible, above profile selector */}
