@@ -21,6 +21,22 @@ import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import { useTalkToAstrologer } from "../talkToAstrologer/useTalkToAstrologer";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import KundliSelectModal from "../talkToAstrologer/kundliSelect/KundliSelectModal";
+import { useAddAstrologerReviewMutation, useGetAstrologerReviewsQuery } from "../../../redux/api/review/reviewApi";
+import FeedbackModal from "../home/components/chats/FeedbackModal";
+
+// Import custom SVG icons
+import ExperienceIcon from "../../../assets/icons/experience.svg";
+import ConsultationsIcon from "../../../assets/icons/consultations.svg";
+import RatingIcon from "../../../assets/icons/rating.svg";
+import ShareIcon from "../../../assets/icons/Share.svg";
+import TimeIcon from "../../../assets/icons/time-icon.svg";
+import NotificationIcon from "../../../assets/icons/notification.svg";
+import ChatMinutesIcon from "../../../assets/icons/experienceIcon.svg";
+import CallMinutesIcon from "../../../assets/icons/callMinutess.svg";
+import VideoMinutesIcon from "../../../assets/icons/videoMinutes.svg";
+import SendGiftImage from "../../../assets/images/send-gift.png";
+import AstrologerShopImage from "../../../assets/images/astrologer-shop.png";
+import AstrologerPlaceholder from "../../../assets/images/astrologer-square.svg";
 
 const AstrologerProfile = () => {
   const { id } = useParams();
@@ -31,10 +47,22 @@ const AstrologerProfile = () => {
     isLoading,
     error,
   } = useGetAstrologerByIdQuery({ id }, { skip: !id });
+
+  const data = astrologerData?.data;
+
+  const {
+    data: reviewsData,
+    isLoading: reviewsLoading,
+    refetch: refetchReviews,
+  } = useGetAstrologerReviewsQuery(
+    { astrologerID: data?.astrologer_ID, page: 1, limit: 10 },
+    { skip: !data?.astrologer_ID }
+  );
   
   const isInitiallyFollowing = astrologerData?.data?.isFollowing || false;
   const [isFollowing, setIsFollowing] = useState(isInitiallyFollowing);
   const [showFullAbout, setShowFullAbout] = useState(false);
+  const [openReviewModal, setOpenReviewModal] = useState(false);
 
   const [followAstrologer, { isLoading: followLoading }] =
     useFollowAstrologerByIdMutation();
@@ -43,6 +71,7 @@ const AstrologerProfile = () => {
     useUnfollowAstrologerByIdMutation();
 
   const [createChatRoom] = useCreateChatRoomMutation();
+  const [addAstrologerReview, { isLoading: reviewLoading }] = useAddAstrologerReviewMutation();
   const [setOpenModal] = useTalkToAstrologer();
 
   // State
@@ -196,6 +225,29 @@ const AstrologerProfile = () => {
     initiateCall(astro, "video");
   };
 
+  const handleReviewSubmit = async ({ rating, review, anonymous }) => {
+    try {
+      const res = await addAstrologerReview({
+        astrologerID: data?.astrologer_ID,
+        rating,
+        review,
+        isAnonymous: anonymous,
+      }).unwrap();
+
+      if (res.success) {
+        toast.success(res.message || "Review submitted successfully!");
+        refetchReviews(); // Refresh reviews after submission
+      } else {
+        toast.error(res.message || "Failed to submit review");
+      }
+
+      setOpenReviewModal(false);
+    } catch (error) {
+      console.error("Review submission error:", error);
+      toast.error(error?.data?.message || "Failed to submit review");
+    }
+  };
+
   useEffect(() => {
     if (!userIdLocal) return;
 
@@ -268,19 +320,56 @@ const AstrologerProfile = () => {
     };
   }, [userIdLocal]);
 
-  const data = astrologerData?.data;
+  const reviews = reviewsData?.data?.getDetail || [];
+  const totalReviews = reviewsData?.data?.totalRecords || 0;
   
+  // Calculate average rating from reviews
+  const averageRating = reviews.length > 0 
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+    : data?.rating || 0;
+  
+  // Helper function to format availability slots
+  const formatAvailability = (availability) => {
+    if (!availability || availability.length === 0) {
+      return [
+        { day: "Monday - Friday", time: "11 AM - 4 PM" },
+        { day: "Evening", time: "7 PM - 10 PM" }
+      ];
+    }
+
+    // Get today's day
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+    
+    // Find today's availability or use first available day
+    const todaySlots = availability.find(a => a.day === today) || availability[0];
+    
+    if (!todaySlots || !todaySlots.slots || todaySlots.slots.length === 0) {
+      return [
+        { day: "Monday - Friday", time: "11 AM - 4 PM" },
+        { day: "Evening", time: "7 PM - 10 PM" }
+      ];
+    }
+
+    // Format slots
+    return todaySlots.slots.map(slot => ({
+      day: todaySlots.day,
+      time: `${slot.start} - ${slot.end}`
+    }));
+  };
+
   // Fallback data - only used when API data is missing
   const displayData = {
     firstName: data?.firstName || "Astrologer",
     lastName: data?.lastName || "",
     imageUrl: data?.imageUrl || "",
-    specialities: data?.specialities?.length > 0 ? data.specialities : ["Vedic Kundli", "Tarot", "Palmistry"],
+    specialities: data?.specialties?.length > 0 ? data.specialties : ["Vedic Kundli", "Tarot", "Palmistry"],
     expertise: data?.expertise?.length > 0 ? data.expertise : ["Relationships", "Finance", "Health"],
     languagePreference: data?.languagePreference?.length > 0 ? data.languagePreference : ["English", "Hindi"],
     experience: data?.experience ?? 20,
     totalConsultations: data?.totalConsultations ?? 1200,
     rating: data?.rating ?? 4.5,
+    totalRatings: data?.totalRatings ?? 1020,
+    availability: formatAvailability(data?.availability),
     chatMinutes: data?.chatMinutes ?? 1500,
     callMinutes: data?.callMinutes ?? 1200,
     videoMinutes: data?.videoMinutes ?? 4.5,
@@ -290,8 +379,12 @@ const AstrologerProfile = () => {
       "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+2",
       "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+3"
     ],
-    totalReviews: data?.totalReviews ?? 1020,
-    reviews: data?.reviews?.length > 0 ? data.reviews : [
+    reviews: reviews.length > 0 ? reviews.map(r => ({
+      date: new Date(r.createdAt).toLocaleDateString('en-GB'),
+      rating: r.rating,
+      user: r.customerName,
+      text: r.review || ""
+    })) : [
       {
         date: "25/11/2025",
         rating: 5.0,
@@ -385,7 +478,7 @@ const AstrologerProfile = () => {
             {followLoading || unfollowLoading ? "..." : isFollowing ? "Following" : "Follow"}
           </button>
           <button className={styles.shareBtn} onClick={handleShare}>
-            <IoPaperPlaneOutline />
+            <img src={ShareIcon} alt="Share" className={styles.shareIcon} />
           </button>
         </div>
       </div>
@@ -394,12 +487,9 @@ const AstrologerProfile = () => {
       <div className={styles.profileCard}>
         <div className={styles.profileImageWrapper}>
           <img 
-            src={displayData.imageUrl} 
+            src={displayData.imageUrl || AstrologerPlaceholder} 
             alt={displayData.firstName} 
             className={styles.profileImage}
-            onError={(e) => {
-              e.target.style.display = 'none';
-            }}
           />
         </div>
         <div className={styles.profileInfo}>
@@ -417,19 +507,19 @@ const AstrologerProfile = () => {
       {/* Stats Section */}
       <div className={styles.statsSection}>
         <div className={styles.statItem}>
-          <PiBookOpenTextLight className={styles.statIcon} />
+          <img src={ExperienceIcon} alt="Experience" className={styles.statIcon} />
           <div className={styles.statValue}>{displayData.experience}+</div>
           <div className={styles.statLabel}>Experience</div>
         </div>
         <div className={styles.statDivider}></div>
         <div className={styles.statItem}>
-          <PiUsersThreeBold className={styles.statIcon} />
+          <img src={ConsultationsIcon} alt="Consultations" className={styles.statIcon} />
           <div className={styles.statValue}>{displayData.totalConsultations}</div>
           <div className={styles.statLabel}>Consultations</div>
         </div>
         <div className={styles.statDivider}></div>
         <div className={styles.statItem}>
-          <FaStar className={styles.statIcon} />
+          <img src={RatingIcon} alt="Rating" className={styles.statIcon} />
           <div className={styles.statValue}>{displayData.rating}</div>
           <div className={styles.statLabel}>Rating</div>
         </div>
@@ -438,16 +528,17 @@ const AstrologerProfile = () => {
       {/* Consultation Hours */}
       <div className={styles.consultationHours}>
         <div className={styles.hoursHeader}>
-          <IoMdTime className={styles.clockIcon} />
+          <img src={TimeIcon} alt="Time" className={styles.clockIcon} />
           <span className={styles.hoursTitle}>Consultation Hours</span>
         </div>
         <div className={styles.hoursContent}>
           <div className={styles.timeSlots}>
-            <div className={styles.timeSlot}>11 AM - 4 PM</div>
-            <div className={styles.timeSlot}>7 PM - 10 PM</div>
+            {displayData.availability.map((slot, index) => (
+              <div key={index} className={styles.timeSlot}>{slot.time}</div>
+            ))}
           </div>
           <button className={styles.reminderBtn}>
-            <MdNotifications />
+            <img src={NotificationIcon} alt="Notification" className={styles.notificationIcon} />
             Set Reminder
           </button>
         </div>
@@ -456,19 +547,19 @@ const AstrologerProfile = () => {
       {/* Minutes Section */}
       <div className={styles.minutesSection}>
         <div className={styles.minuteItem}>
-          <BiMessageDetail className={styles.minuteIcon} />
+          <img src={ChatMinutesIcon} alt="Chat" className={styles.minuteIcon} />
           <div className={styles.minuteValue}>{displayData.chatMinutes}</div>
           <div className={styles.minuteLabel}>Chat Minutes</div>
         </div>
         <div className={styles.minuteDivider}></div>
         <div className={styles.minuteItem}>
-          <BiPhone className={styles.minuteIcon} />
+          <img src={CallMinutesIcon} alt="Call" className={styles.minuteIcon} />
           <div className={styles.minuteValue}>{displayData.callMinutes}</div>
           <div className={styles.minuteLabel}>Call Minutes</div>
         </div>
         <div className={styles.minuteDivider}></div>
         <div className={styles.minuteItem}>
-          <BiVideo className={styles.minuteIcon} />
+          <img src={VideoMinutesIcon} alt="Video" className={styles.minuteIcon} />
           <div className={styles.minuteValue}>{displayData.videoMinutes}</div>
           <div className={styles.minuteLabel}>Video Minutes</div>
         </div>
@@ -509,7 +600,7 @@ const AstrologerProfile = () => {
           <button className={styles.sendNowBtn}>Send Now</button>
         </div>
         <div className={styles.giftImage}>
-          <div className={styles.giftPlaceholder}>🎁</div>
+          <img src={SendGiftImage} alt="Send Gift" />
         </div>
       </div>
 
@@ -517,30 +608,40 @@ const AstrologerProfile = () => {
       <div className={styles.reviewsSection}>
         <h3 className={styles.sectionTitle}>USER REVIEWS</h3>
         <div className={styles.reviewsSummary}>
-          <StarRating rating={displayData.rating} />
-          <p className={styles.reviewsCount}>{displayData.rating} out of 5 • {displayData.totalReviews} total ratings</p>
+          <StarRating rating={averageRating} />
+          <p className={styles.reviewsCount}>
+            {averageRating.toFixed(1)} out of 5 • {totalReviews} total ratings
+          </p>
         </div>
 
-        <div className={styles.reviewsList}>
-          {displayData.reviews.slice(0, 4).map((review, index) => (
-            <div key={index} className={styles.reviewCard}>
-              <div className={styles.reviewHeader}>
-                <span className={styles.reviewDate}>
-                  <IoCalendarOutline className={styles.calendarIcon} />
-                  {review.date}
-                </span>
-                <div className={styles.reviewRating}>
-                  <FaStar className={styles.reviewStar} />
-                  <span>{review.rating}</span>
+        {reviewsLoading ? (
+          <div className={styles.reviewsLoading}>Loading reviews...</div>
+        ) : reviews.length > 0 ? (
+          <div className={styles.reviewsList}>
+            {reviews.slice(0, 4).map((review) => (
+              <div key={review._id} className={styles.reviewCard}>
+                <div className={styles.reviewHeader}>
+                  <span className={styles.reviewDate}>
+                    <IoCalendarOutline className={styles.calendarIcon} />
+                    {new Date(review.createdAt).toLocaleDateString('en-GB')}
+                  </span>
+                  <div className={styles.reviewRating}>
+                    <FaStar className={styles.reviewStar} />
+                    <span>{review.rating}</span>
+                  </div>
                 </div>
+                <h4 className={styles.reviewerName}>{review.customerName}</h4>
+                {review.review && <p className={styles.reviewText}>{review.review}</p>}
               </div>
-              <h4 className={styles.reviewerName}>{review.user}</h4>
-              <p className={styles.reviewText}>{review.text}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className={styles.noReviews}>No reviews yet. Be the first to review!</div>
+        )}
 
-        <button className={styles.shareReviewBtn}>Share a Review</button>
+        <button className={styles.shareReviewBtn} onClick={() => setOpenReviewModal(true)}>
+          Share a Review
+        </button>
       </div>
 
       {/* Astrologer Shop */}
@@ -559,7 +660,11 @@ const AstrologerProfile = () => {
                 </div>
               )}
               <div className={styles.productImage}>
-                {product.image && <img src={product.image} alt={product.name} />}
+                {product.image ? (
+                  <img src={product.image} alt={product.name} />
+                ) : (
+                  <img src={AstrologerShopImage} alt={product.name} />
+                )}
               </div>
               <div className={styles.productInfo}>
                 <h4 className={styles.productName}>{product.name}</h4>
@@ -589,6 +694,15 @@ const AstrologerProfile = () => {
         isOpen={kundliModalOpen}
         onClose={() => setKundliModalOpen(false)}
         onSelect={handleChatAfterKundliSelect}
+      />
+
+      <FeedbackModal
+        open={openReviewModal}
+        onClose={() => setOpenReviewModal(false)}
+        handleSubmit={handleReviewSubmit}
+        ratedUserName={displayData.firstName}
+        reviewerName={userIdLocal || "User"}
+        loading={reviewLoading}
       />
 
       {waitingPopup && (
