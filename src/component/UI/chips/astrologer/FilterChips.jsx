@@ -27,25 +27,25 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
   };
 
   const filterButtons = [
-    { name: "All", icon: "📋" },
-    { name: "Online", icon: "🟢" },
-    { name: "Tarot", icon: "🔮" },
-    { name: "Palmistry", icon: "🔮" },
-    { name: "Numerology", icon: "🔢" },
-    { name: "Face Reading", icon: "🔢" },
-    { name: "Vedic Astrology", icon: "🧘" },
-    { name: "Love", icon: "🧘" },
-    { name: "Education", icon: "🧘" },
-    { name: "Career", icon: "🧘" },
-    { name: "Marriage", icon: "🧘" },
-    { name: "Health", icon: "🧘" },
-    { name: "Wealth", icon: "🧘" },
-    { name: "Legal", icon: "🧘" },
-    { name: "Finance", icon: "🔮" },
-    { name: "Remedies", icon: "🔮" },
-    { name: "Parents", icon: "🔮" },
-    { name: "Palm reader", icon: "✋" },
-    { name: "Tantra-magic", icon: "✨" },
+    { name: "All" },
+    { name: "Online" },
+    { name: "Tarot" },
+    { name: "Palmistry" },
+    { name: "Numerology" },
+    { name: "Face Reading" },
+    { name: "Vedic Astrology" },
+    { name: "Love" },
+    { name: "Education" },
+    { name: "Career" },
+    { name: "Marriage" },
+    { name: "Health" },
+    { name: "Wealth" },
+    { name: "Legal" },
+    { name: "Finance" },
+    { name: "Remedies" },
+    { name: "Parents" },
+    { name: "Palm reader" },
+    { name: "Tantra-magic" },
   ];
 
   const skills = [
@@ -288,7 +288,6 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
             className={`${styles.chip} ${active === btn.name ? styles.activeChip : ""}`}
             onClick={() => handleClick(btn.name)}
           >
-            <span className={styles.chipIcon}>{btn.icon}</span>
             <span>{btn.name}</span>
           </div>
         ))}

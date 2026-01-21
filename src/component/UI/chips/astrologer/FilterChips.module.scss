@@ -148,7 +148,7 @@
 =========================== */
 .leftSidebar {
   width: 35%;
-  background: #F9F9F9;
+  background: #FAFAFA;
   border-right: 1px solid #E8E8E8;
   overflow-y: auto;
 }
@@ -161,16 +161,18 @@
   color: #666666;
   transition: all 0.2s;
   font-family: "Poppins", sans-serif;
+  border-left: 3px solid transparent;
 
   &:hover {
-    background: #F0F0F0;
+    background: #F5F5F5;
   }
 }
 
 .activeSidebarItem {
-  background: #FFF5E6;
-  color: #2C2C2C;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: #FFFFFF;
   font-weight: 600;
+  border-left: 3px solid #D43400;
 }
 
 /* ===========================
@@ -193,12 +195,13 @@
 }
 
 .selectAll {
-  color: #D4A574;
+  color: #F75801;
   font-weight: 600;
   cursor: pointer;
+  transition: color 0.2s;
 
   &:hover {
-    color: #B8935F;
+    color: #D43400;
   }
 }
 
@@ -234,7 +237,7 @@
 }
 
 .checkIcon {
-  color: #D4A574;
+  color: #F75801;
   flex-shrink: 0;
 }
 
@@ -301,7 +304,7 @@
 }
 
 .applyBtn {
-  background: #3D2817;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   border: none;
   padding: 12px 48px;
   border-radius: 50px;
@@ -311,9 +314,12 @@
   color: #FFFFFF;
   font-family: "Poppins", sans-serif;
   transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(247, 88, 1, 0.25);
 
   &:hover {
-    background: #2D1F10;
+    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(247, 88, 1, 0.35);
   }
 
   &:active {
