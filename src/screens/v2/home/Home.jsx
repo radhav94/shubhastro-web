@@ -218,7 +218,7 @@ const Home = () => {
                 <ChevronRight size={18} />
               </div>
             </div>
-            <div className={styles.horoscopePlanet}>
+            {/* <div className={styles.horoscopePlanet}>
               <img
                 src={horoscope}
                 alt="Planet"
@@ -227,7 +227,7 @@ const Home = () => {
                   e.target.style.display = "none";
                 }}
               />
-            </div>
+            </div> */}
           </div>
         </section>
 

@@ -97,7 +97,7 @@
   border-radius: 50px;
   color: #fff;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: visible;
 }
@@ -125,8 +125,8 @@
 }
 
 .coinIcon {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   // background: radial-gradient(
   //   circle at 35% 35%,
   //   #ffe873 0%,
@@ -270,10 +270,10 @@
     left: 26%;
   }
 
-  .coinIcon {
-    width: 30px;
-    height: 30px;
-  }
+  // .coinIcon {
+  //   width: 30px;
+  //   height: 30px;
+  // }
 
   .coinIcon::before {
     width: 18px;
@@ -309,28 +309,31 @@
 /* Today's Horoscope Section */
 .horoscopeSection {
   margin-bottom: 24px;
-}
-
-.horoscopeCard {
-  width: 100%;
-  height: auto;
-  // min-height: 180px;
-  // background: linear-gradient(151.72deg, #fff2d4 10.17%, #fadd91 101.97%);
-  // background: linear-gradient(161deg, #F7B36E -19.03%, #F1E8E0 118.91%);
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   border-radius: 24px;
   border: 1px solid #f0d07f;
-  padding: 16px 0px 16px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
   overflow: visible;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition:transform 0.2s, box-shadow 0.2s;
+}
+
+.horoscopeCard {
+  width: 100%;
+  height: auto;
+  padding: 16px 0px 16px 20px;
+  // min-height: 180px;
+  // background: linear-gradient(151.72deg, #fff2d4 10.17%, #fadd91 101.97%);
+  // background: linear-gradient(161deg, #F7B36E -19.03%, #F1E8E0 118.91%);
+  // background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background-image: url(../../../assets/images/horoscope.svg);
+  background-repeat: no-repeat;
+  background-position: center right;
+  background-size: contain;
   cursor: pointer;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
 }
 
 .horoscopeCard::before {
@@ -344,7 +347,7 @@
   pointer-events: none;
 }
 
-.horoscopeCard:hover {
+.horoscopeSection:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -427,13 +430,16 @@
 }
 
 .horoscopePlanet {
-  width: 40%;
+  width: 169px;
   height: 100%;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  @media screen and (width <= 768px) {
+    width: 150px;
+  }
 }
 
 .planetImage {
@@ -444,11 +450,11 @@
 
 /* Responsive adjustments for smaller screens */
 @media (max-width: 360px) {
-  .horoscopeCard {
-    padding: 0px 16px;
-    min-height: 100px;
-    border-radius: 12px;
-  }
+  // .horoscopeCard {
+  //   padding: 0px 16px;
+  //   min-height: 100px;
+  //   border-radius: 12px;
+  // }
 
   .horoscopeContent {
     padding-right: 8px;
@@ -977,7 +983,7 @@
 
   .freeQuestionBtn {
     padding: 8px 12px;
-    font-size: 11px;
+    font-size: 14px;
   }
 
   .searchBar {
@@ -1157,7 +1163,7 @@
 
 .astrologerName {
   font-family: "Poppins", sans-serif;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0 0 10px 0;
@@ -1181,6 +1187,7 @@
   font-family: "Poppins", sans-serif;
   font-size: 14px;
   color: #888;
+  @include line-clamp(1);
 }
 .bottomWrap{
   width: 100%;
@@ -1194,7 +1201,7 @@
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: #ffffff;
   border: none;
-  padding: 14px 28px;
+  padding: 12px;
   border-radius: 50px;
   font-family: "Poppins", sans-serif;
   font-size: 16px;
@@ -2131,10 +2138,10 @@
     font-size: 13px;
   }
 
-  .horoscopePlanet {
-    width: 130px;
-    height: 130px;
-  }
+  // .horoscopePlanet {
+  //   width: 130px;
+  //   height: 130px;
+  // }
 
   /* Carousel - Tablet */
   .carouselSection {
@@ -2239,9 +2246,9 @@
   //   height: 200px;
   // }
 
-  .astrologerName {
-    font-size: 22px;
-  }
+  // .astrologerName {
+  //   font-size: 22px;
+  // }
 
   .experienceText {
     font-size: 15px;
@@ -2249,7 +2256,7 @@
 
   .connectBtn {
     font-size: 17px;
-    padding: 15px 28px;
+    padding: 12px;
   }
 
   /* Life Area Section - Tablet */
@@ -2379,10 +2386,10 @@
     font-size: 14px;
   }
 
-  .horoscopePlanet {
-    width: 150px;
-    height: 150px;
-  }
+  // .horoscopePlanet {
+  //   width: 150px;
+  //   height: 150px;
+  // }
 
   /* Carousel - Desktop */
   .carouselSlide {
@@ -2457,9 +2464,9 @@
   //   height: 220px;
   // }
 
-  .astrologerName {
-    font-size: 23px;
-  }
+  // .astrologerName {
+  //   font-size: 23px;
+  // }
 
   /* Life Area Section - Desktop */
   .lifeAreaCard {
@@ -2512,10 +2519,10 @@
     font-size: 32px;
   }
 
-  .horoscopePlanet {
-    width: 190px;
-    height: 190px;
-  }
+  // .horoscopePlanet {
+  //   width: 190px;
+  //   height: 190px;
+  // }
 
   /* Carousel - Large Desktop */
   .carouselSlide {
@@ -2586,10 +2593,10 @@
     font-size: 28px;
   }
 
-  .horoscopePlanet {
-    width: 190px;
-    height: 190px;
-  }
+  // .horoscopePlanet {
+  //   width: 190px;
+  //   height: 190px;
+  // }
 
   /* Carousel - XL Desktop */
   .carouselSlide {
@@ -2659,9 +2666,9 @@
   //   height: 240px;
   // }
 
-  .astrologerName {
-    font-size: 24px;
-  }
+  // .astrologerName {
+  //   font-size: 24px;
+  // }
 
   .connectBtn {
     font-size: 18px;
