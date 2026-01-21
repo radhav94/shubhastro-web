@@ -1,158 +1,463 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './SignatureResult.module.scss';
 import { Toast } from '../../../../component';
 
 const SignatureResult = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('overall');
-  const [analysisData, setAnalysisData] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [resultData, setResultData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get the analysis result from localStorage
     const storedResult = localStorage.getItem('signatureResult');
+    const storedImage = localStorage.getItem('signatureImage');
     
     if (storedResult) {
       try {
         const parsedResult = JSON.parse(storedResult);
+        const apiData = parsedResult.data || parsedResult;
         
-        // Transform API response to match display format
-        if (parsedResult.data) {
-          const apiData = parsedResult.data;
-          const transformedData = transformSignatureData(apiData);
-          setAnalysisData(transformedData);
-        } else {
-          setAnalysisData(parsedResult);
-        }
+        setResultData({
+          image: apiData.signatureImage || storedImage,
+          quality: apiData.qualityMetrics || {},
+          stroke: apiData.strokeAnalysis || {},
+          letter: apiData.letterAnalysis || {},
+          baseline: apiData.baselineAnalysis || {},
+          style: apiData.overallStyle || {},
+          personality: apiData.personalityInsights || {},
+          detailed: apiData.detailedAnalysis || {},
+          confidenceScore: apiData.confidenceScore || 95,
+          metadata: apiData.metadata || {},
+        });
       } catch (error) {
         console.error('Error parsing result:', error);
         Toast.error('Failed to load analysis results');
         navigate('/aiwow/signature/instructions');
+        return;
       }
     } else {
       Toast.error('No analysis results found');
       navigate('/aiwow/signature/instructions');
+      return;
     }
     
     setLoading(false);
   }, [navigate]);
 
-  // Transform API response to display format
-  const transformSignatureData = (apiData) => {
-    const personalityTraits = apiData.personalityInsights?.personalityTraits || [];
-    const leadershipQualities = apiData.personalityInsights?.leadershipQualities || {};
-    const detailedAnalysis = apiData.detailedAnalysis || {};
-    
-    return {
-      overall: [
-        ...personalityTraits.slice(0, 4).map(trait => ({
-          category: trait.trait.charAt(0).toUpperCase() + trait.trait.slice(1),
-          strength: getStrengthLabel(trait.score),
-          percentage: trait.score,
-          description: trait.description,
-        }))
-      ],
-      personality: [
-        {
-          category: 'Leadership',
-          strength: getStrengthLabel(leadershipQualities.score || 75),
-          percentage: leadershipQualities.score || 75,
-          description: leadershipQualities.description || 'Strong leadership potential with visionary thinking.',
-        },
-        {
-          category: 'Communication',
-          strength: 'Strong',
-          percentage: 85,
-          description: apiData.personalityInsights?.communicationStyle?.description || 'Expressive and articulate communication style.',
-        },
-      ],
-      aura: [
-        {
-          category: 'Social Confidence',
-          strength: getStrengthLabel(apiData.personalityInsights?.socialConfidence?.score || 80),
-          percentage: apiData.personalityInsights?.socialConfidence?.score || 80,
-          description: apiData.personalityInsights?.socialConfidence?.description || 'High social confidence and charisma.',
-        },
-        {
-          category: 'Emotional Balance',
-          strength: 'Balanced',
-          percentage: 75,
-          description: apiData.personalityInsights?.emotionalPatterns?.description || 'Balanced emotional patterns with resilience.',
-        },
-      ],
-    };
-  };
+  const renderOverview = () => (
+    <div className={styles.tabContent}>
+      <div className={styles.signatureImageWrapper}>
+        <img src={resultData.image} alt="Signature" className={styles.signatureImage} />
+      </div>
 
-  const getStrengthLabel = (score) => {
-    if (score >= 90) return 'Exceptional';
-    if (score >= 80) return 'Very Strong';
-    if (score >= 70) return 'Strong';
-    if (score >= 60) return 'Above Average';
-    if (score >= 50) return 'Moderate';
-    return 'Developing';
-  };
+      <div className={styles.qualityCard}>
+        <h3 className={styles.cardTitle}>Quality Metrics</h3>
+        <div className={styles.scoreGrid}>
+          <div className={styles.scoreItem}>
+            <span className={styles.scoreLabel}>Overall Quality</span>
+            <span className={styles.scoreValue}>{resultData.quality.overallQuality}%</span>
+          </div>
+          <div className={styles.scoreItem}>
+            <span className={styles.scoreLabel}>Clarity</span>
+            <span className={styles.scoreValue}>{resultData.quality.clarity}%</span>
+          </div>
+          <div className={styles.scoreItem}>
+            <span className={styles.scoreLabel}>Contrast</span>
+            <span className={styles.scoreValue}>{resultData.quality.contrast}%</span>
+          </div>
+          <div className={styles.scoreItem}>
+            <span className={styles.scoreLabel}>Completeness</span>
+            <span className={styles.scoreValue}>{resultData.quality.completeness}%</span>
+          </div>
+        </div>
+        <div className={styles.acceptableStatus}>
+          <span className={styles.statusLabel}>Status:</span>
+          <span className={`${styles.statusValue} ${resultData.quality.isAcceptable ? styles.acceptable : styles.notAcceptable}`}>
+            {resultData.quality.isAcceptable ? 'Acceptable' : 'Not Acceptable'}
+          </span>
+        </div>
+      </div>
 
-  const tabs = [
-    { id: 'overall', label: 'Overall Analysis' },
-    { id: 'personality', label: 'Personality Analysis' },
-    { id: 'aura', label: 'Aura' },
-  ];
+      <div className={styles.styleCard}>
+        <h3 className={styles.cardTitle}>Overall Style</h3>
+        <div className={styles.infoRow}>
+          <span className={styles.label}>Legibility Score:</span>
+          <span className={styles.value}>{resultData.style.legibility?.score}%</span>
+        </div>
+        <p className={styles.description}>{resultData.style.legibility?.description}</p>
+        
+        <div className={styles.infoRow}>
+          <span className={styles.label}>Uniqueness Score:</span>
+          <span className={styles.value}>{resultData.style.uniqueness?.score}%</span>
+        </div>
+        <p className={styles.description}>{resultData.style.uniqueness?.description}</p>
+        
+        <div className={styles.infoRow}>
+          <span className={styles.label}>Formality:</span>
+          <span className={styles.value}>{resultData.style.formality}</span>
+        </div>
+        <div className={styles.infoRow}>
+          <span className={styles.label}>Complexity:</span>
+          <span className={styles.value}>{resultData.style.complexity}</span>
+        </div>
+        
+        {resultData.style.characteristics && resultData.style.characteristics.length > 0 && (
+          <>
+            <h4 className={styles.subTitle}>Key Characteristics</h4>
+            <div className={styles.characteristicsTags}>
+              {resultData.style.characteristics.map((char, index) => (
+                <span key={index} className={styles.tag}>{char}</span>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
 
-  // Default data structure (fallback)
-  const defaultData = {
-    overall: [
-      {
-        category: 'Creativity',
-        strength: 'Exceptional',
-        percentage: 95,
-        description: 'You possess a vivid imagination and excel at thinking outside the box to develop unique solutions.',
-      },
-      {
-        category: 'Intuition',
-        strength: 'Very Strong',
-        percentage: 92,
-        description: 'You have a deep understanding of situations and people, often sensing things that others may overlook.',
-      },
-      {
-        category: 'Empathy',
-        strength: 'High',
-        percentage: 88,
-        description: 'You are highly attuned to the emotions of others, making you a supportive and understanding friend and colleague.',
-      },
-      {
-        category: 'Resilience',
-        strength: 'Above Average',
-        percentage: 82,
-        description: 'You bounce back from setbacks and view challenges as opportunities for growth.',
-      },
-    ],
-    personality: [
-      {
-        category: 'Confidence',
-        strength: 'Very Strong',
-        percentage: 90,
-        description: 'You display strong self-assurance in your abilities and decisions.',
-      },
-      {
-        category: 'Adaptability',
-        strength: 'Strong',
-        percentage: 85,
-        description: 'You adjust well to new situations and embrace change positively.',
-      },
-    ],
-    aura: [
-      {
-        category: 'Energy',
-        strength: 'High',
-        percentage: 88,
-        description: 'Your signature radiates positive energy and enthusiasm.',
-      },
-    ],
-  };
+  const renderStrokeAnalysis = () => (
+    <div className={styles.tabContent}>
+      <div className={styles.analysisCard}>
+        <h3 className={styles.cardTitle}>Stroke Analysis</h3>
+        
+        {resultData.stroke.direction && (
+          <>
+            <h4 className={styles.subTitle}>Direction</h4>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Type:</span>
+              <span className={styles.value}>{resultData.stroke.direction.type}</span>
+            </div>
+            <p className={styles.description}>{resultData.stroke.direction.description}</p>
+          </>
+        )}
 
-  // Use API data if available, otherwise use default data
-  const displayData = analysisData || defaultData;
+        {resultData.stroke.slant && (
+          <>
+            <h4 className={styles.subTitle}>Slant</h4>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Type:</span>
+              <span className={styles.value}>{resultData.stroke.slant.type}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Angle:</span>
+              <span className={styles.value}>{resultData.stroke.slant.angle}°</span>
+            </div>
+            <p className={styles.description}>{resultData.stroke.slant.description}</p>
+          </>
+        )}
+
+        {resultData.stroke.pressure && (
+          <>
+            <h4 className={styles.subTitle}>Pressure</h4>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Level:</span>
+              <span className={styles.value}>{resultData.stroke.pressure.level}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Consistency:</span>
+              <span className={styles.value}>{resultData.stroke.pressure.consistency}</span>
+            </div>
+            <p className={styles.description}>{resultData.stroke.pressure.description}</p>
+          </>
+        )}
+
+        {resultData.stroke.speed && (
+          <>
+            <h4 className={styles.subTitle}>Speed</h4>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Type:</span>
+              <span className={styles.value}>{resultData.stroke.speed.type}</span>
+            </div>
+            <p className={styles.description}>{resultData.stroke.speed.description}</p>
+          </>
+        )}
+
+        {resultData.stroke.fluidity && (
+          <>
+            <h4 className={styles.subTitle}>Fluidity</h4>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Type:</span>
+              <span className={styles.value}>{resultData.stroke.fluidity.type}</span>
+            </div>
+            <p className={styles.description}>{resultData.stroke.fluidity.description}</p>
+          </>
+        )}
+      </div>
+
+      <div className={styles.analysisCard}>
+        <h3 className={styles.cardTitle}>Letter Analysis</h3>
+        
+        {resultData.letter.size && (
+          <>
+            <h4 className={styles.subTitle}>Size</h4>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Overall:</span>
+              <span className={styles.value}>{resultData.letter.size.overall}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Consistency:</span>
+              <span className={styles.value}>{resultData.letter.size.consistency}</span>
+            </div>
+            <p className={styles.description}>{resultData.letter.size.description}</p>
+          </>
+        )}
+
+        {resultData.letter.spacing && (
+          <>
+            <h4 className={styles.subTitle}>Spacing</h4>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Letter Spacing:</span>
+              <span className={styles.value}>{resultData.letter.spacing.letterSpacing}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Word Spacing:</span>
+              <span className={styles.value}>{resultData.letter.spacing.wordSpacing}</span>
+            </div>
+            <p className={styles.description}>{resultData.letter.spacing.description}</p>
+          </>
+        )}
+
+        {resultData.letter.style && (
+          <>
+            <h4 className={styles.subTitle}>Style</h4>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Legibility:</span>
+              <span className={styles.value}>{resultData.letter.style.legibility}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Embellishments:</span>
+              <span className={styles.value}>{resultData.letter.style.embellishments ? 'Yes' : 'No'}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Simplicity:</span>
+              <span className={styles.value}>{resultData.letter.style.simplicity}</span>
+            </div>
+            <p className={styles.description}>{resultData.letter.style.description}</p>
+          </>
+        )}
+      </div>
+
+      <div className={styles.analysisCard}>
+        <h3 className={styles.cardTitle}>Baseline Analysis</h3>
+        <div className={styles.infoRow}>
+          <span className={styles.label}>Alignment:</span>
+          <span className={styles.value}>{resultData.baseline.alignment}</span>
+        </div>
+        <div className={styles.infoRow}>
+          <span className={styles.label}>Consistency:</span>
+          <span className={styles.value}>{resultData.baseline.consistency}</span>
+        </div>
+        <div className={styles.infoRow}>
+          <span className={styles.label}>Angle:</span>
+          <span className={styles.value}>{resultData.baseline.angle}°</span>
+        </div>
+        <p className={styles.description}>{resultData.baseline.description}</p>
+      </div>
+    </div>
+  );
+
+  const renderPersonality = () => (
+    <div className={styles.tabContent}>
+      {resultData.personality.personalityTraits && resultData.personality.personalityTraits.length > 0 && (
+        <div className={styles.traitsCard}>
+          <h3 className={styles.cardTitle}>Personality Traits</h3>
+          {resultData.personality.personalityTraits.map((trait, index) => (
+            <div key={index} className={styles.traitItem}>
+              <div className={styles.traitHeader}>
+                <h4 className={styles.traitName}>{trait.trait}</h4>
+                <span className={styles.traitScore}>{trait.score}%</span>
+              </div>
+              <p className={styles.traitDescription}>{trait.description}</p>
+              {trait.indicators && trait.indicators.length > 0 && (
+                <div className={styles.indicators}>
+                  <span className={styles.indicatorLabel}>Indicators:</span>
+                  <span className={styles.indicatorValue}>{trait.indicators.join(', ')}</span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {resultData.personality.leadershipQualities && (
+        <div className={styles.leadershipCard}>
+          <h3 className={styles.cardTitle}>Leadership Qualities</h3>
+          <div className={styles.scoreHeader}>
+            <span className={styles.scoreLabel}>Leadership Score</span>
+            <span className={styles.scoreValue}>{resultData.personality.leadershipQualities.score}%</span>
+          </div>
+          <p className={styles.description}>{resultData.personality.leadershipQualities.description}</p>
+          
+          {resultData.personality.leadershipQualities.strengths && resultData.personality.leadershipQualities.strengths.length > 0 && (
+            <>
+              <h4 className={styles.subTitle}>Strengths</h4>
+              <div className={styles.strengthsTags}>
+                {resultData.personality.leadershipQualities.strengths.map((strength, index) => (
+                  <span key={index} className={styles.tag}>{strength}</span>
+                ))}
+              </div>
+            </>
+          )}
+          
+          {resultData.personality.leadershipQualities.areas && resultData.personality.leadershipQualities.areas.length > 0 && (
+            <>
+              <h4 className={styles.subTitle}>Areas for Development</h4>
+              <ul className={styles.areasList}>
+                {resultData.personality.leadershipQualities.areas.map((area, index) => (
+                  <li key={index} className={styles.areaItem}>{area}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
+
+      {resultData.personality.communicationStyle && (
+        <div className={styles.communicationCard}>
+          <h3 className={styles.cardTitle}>Communication Style</h3>
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Type:</span>
+            <span className={styles.value}>{resultData.personality.communicationStyle.type}</span>
+          </div>
+          <p className={styles.description}>{resultData.personality.communicationStyle.description}</p>
+          
+          {resultData.personality.communicationStyle.characteristics && resultData.personality.communicationStyle.characteristics.length > 0 && (
+            <>
+              <h4 className={styles.subTitle}>Characteristics</h4>
+              <div className={styles.characteristicsTags}>
+                {resultData.personality.communicationStyle.characteristics.map((char, index) => (
+                  <span key={index} className={styles.tag}>{char}</span>
+                ))}
+              </div>
+            </>
+          )}
+          
+          {resultData.personality.communicationStyle.strengths && resultData.personality.communicationStyle.strengths.length > 0 && (
+            <>
+              <h4 className={styles.subTitle}>Strengths</h4>
+              <div className={styles.strengthsTags}>
+                {resultData.personality.communicationStyle.strengths.map((strength, index) => (
+                  <span key={index} className={styles.tag}>{strength}</span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {resultData.personality.emotionalPatterns && (
+        <div className={styles.emotionalCard}>
+          <h3 className={styles.cardTitle}>Emotional Patterns</h3>
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Stability:</span>
+            <span className={styles.value}>{resultData.personality.emotionalPatterns.stability}</span>
+          </div>
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Expression:</span>
+            <span className={styles.value}>{resultData.personality.emotionalPatterns.expression}</span>
+          </div>
+          <p className={styles.description}>{resultData.personality.emotionalPatterns.description}</p>
+          
+          {resultData.personality.emotionalPatterns.characteristics && resultData.personality.emotionalPatterns.characteristics.length > 0 && (
+            <>
+              <h4 className={styles.subTitle}>Characteristics</h4>
+              <div className={styles.characteristicsTags}>
+                {resultData.personality.emotionalPatterns.characteristics.map((char, index) => (
+                  <span key={index} className={styles.tag}>{char}</span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {resultData.personality.socialConfidence && (
+        <div className={styles.socialCard}>
+          <h3 className={styles.cardTitle}>Social Confidence</h3>
+          <div className={styles.scoreHeader}>
+            <span className={styles.scoreLabel}>Confidence Score</span>
+            <span className={styles.scoreValue}>{resultData.personality.socialConfidence.score}%</span>
+          </div>
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Level:</span>
+            <span className={styles.value}>{resultData.personality.socialConfidence.level}</span>
+          </div>
+          <p className={styles.description}>{resultData.personality.socialConfidence.description}</p>
+          
+          {resultData.personality.socialConfidence.characteristics && resultData.personality.socialConfidence.characteristics.length > 0 && (
+            <>
+              <h4 className={styles.subTitle}>Characteristics</h4>
+              <div className={styles.characteristicsTags}>
+                {resultData.personality.socialConfidence.characteristics.map((char, index) => (
+                  <span key={index} className={styles.tag}>{char}</span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderInsights = () => (
+    <div className={styles.tabContent}>
+      {resultData.detailed.strengths && resultData.detailed.strengths.length > 0 && (
+        <div className={styles.insightsCard}>
+          <h3 className={styles.cardTitle}>Strengths</h3>
+          <ul className={styles.insightsList}>
+            {resultData.detailed.strengths.map((strength, index) => (
+              <li key={index} className={styles.insightItem}>{strength}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {resultData.detailed.challenges && resultData.detailed.challenges.length > 0 && (
+        <div className={styles.insightsCard}>
+          <h3 className={styles.cardTitle}>Challenges</h3>
+          <ul className={styles.challengesList}>
+            {resultData.detailed.challenges.map((challenge, index) => (
+              <li key={index} className={styles.challengeItem}>{challenge}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {resultData.detailed.recommendations && resultData.detailed.recommendations.length > 0 && (
+        <div className={styles.insightsCard}>
+          <h3 className={styles.cardTitle}>Recommendations</h3>
+          <ul className={styles.recommendationsList}>
+            {resultData.detailed.recommendations.map((recommendation, index) => (
+              <li key={index} className={styles.recommendationItem}>{recommendation}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {resultData.detailed.careerSuggestions && resultData.detailed.careerSuggestions.length > 0 && (
+        <div className={styles.insightsCard}>
+          <h3 className={styles.cardTitle}>Career Suggestions</h3>
+          <ul className={styles.careerList}>
+            {resultData.detailed.careerSuggestions.map((career, index) => (
+              <li key={index} className={styles.careerItem}>{career}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {resultData.detailed.relationshipInsights && resultData.detailed.relationshipInsights.length > 0 && (
+        <div className={styles.insightsCard}>
+          <h3 className={styles.cardTitle}>Relationship Insights</h3>
+          <ul className={styles.relationshipList}>
+            {resultData.detailed.relationshipInsights.map((insight, index) => (
+              <li key={index} className={styles.relationshipItem}>{insight}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
 
   if (loading) {
     return (
@@ -164,6 +469,10 @@ const SignatureResult = () => {
     );
   }
 
+  if (!resultData) {
+    return null;
+  }
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -172,44 +481,44 @@ const SignatureResult = () => {
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        <h1 className={styles.title}>Signature Analysis Report</h1>
+        <h1 className={styles.title}>Signature Analysis</h1>
       </header>
 
       <div className={styles.content}>
-        <div className={styles.resultHeader}>
-          <h2 className={styles.resultTitle}>Result</h2>
-          <p className={styles.resultSubtitle}>Your personalized signature analysis report is ready!</p>
+        <div className={styles.tabs}>
+          <button
+            className={`${styles.tab} ${activeTab === 'overview' ? styles.active : ''}`}
+            onClick={() => setActiveTab('overview')}
+          >
+            Overview
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'stroke' ? styles.active : ''}`}
+            onClick={() => setActiveTab('stroke')}
+          >
+            Stroke & Letter
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'personality' ? styles.active : ''}`}
+            onClick={() => setActiveTab('personality')}
+          >
+            Personality
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'insights' ? styles.active : ''}`}
+            onClick={() => setActiveTab('insights')}
+          >
+            Insights
+          </button>
         </div>
 
-        <div className={styles.tabsContainer}>
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              className={`${styles.tab} ${activeTab === tab.id ? styles.activeTab : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {activeTab === 'overview' && renderOverview()}
+        {activeTab === 'stroke' && renderStrokeAnalysis()}
+        {activeTab === 'personality' && renderPersonality()}
+        {activeTab === 'insights' && renderInsights()}
 
-        <div className={styles.analysisSection}>
-          {displayData[activeTab]?.map((item, index) => (
-            <div key={index} className={styles.analysisCard}>
-              <div className={styles.cardHeader}>
-                <div>
-                  <p className={styles.category}>{item.category}</p>
-                  <h3 className={styles.strength}>{item.strength}</h3>
-                </div>
-                <div className={styles.percentage}>{item.percentage}%</div>
-              </div>
-              <p className={styles.description}>{item.description}</p>
-            </div>
-          ))}
-        </div>
-
-        <button className={styles.detailButton}>
-          Get Detailed Report
+        <button className={styles.doneButton} onClick={() => navigate('/aiwow')}>
+          Done
         </button>
       </div>
     </div>

@@ -10,22 +10,26 @@ const PalmistryAnalysis = () => {
   const [palmImage, setPalmImage] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [selectedHand, setSelectedHand] = useState('');
 
   useEffect(() => {
     // Get the captured/uploaded image from localStorage
     const storedImage = localStorage.getItem('palmistryImage');
-    if (storedImage) {
+    const hand = localStorage.getItem('selectedHand');
+    
+    if (storedImage && hand) {
       setPalmImage(storedImage);
-      performAnalysis(storedImage);
+      setSelectedHand(hand);
+      performAnalysis(storedImage, hand);
     } else {
-      // If no image, redirect back to instructions
-      Toast.error('No image found. Please capture or upload an image.');
-      navigate('/aiwow/palmistry/instructions');
+      // If no image or hand selection, redirect back
+      Toast.error('No image or hand selection found. Please try again.');
+      navigate('/aiwow/palmistry/hand-selection');
       return;
     }
   }, [navigate]);
 
-  const performAnalysis = async (imageData) => {
+  const performAnalysis = async (imageData, hand) => {
     setIsAnalyzing(true);
     
     try {
@@ -40,8 +44,8 @@ const PalmistryAnalysis = () => {
         });
       }, 200);
 
-      // Call the API
-      const result = await analyzePalm(imageData);
+      // Call the API with hand parameter
+      const result = await analyzePalm(imageData, hand);
 
       clearInterval(progressInterval);
 
@@ -63,7 +67,7 @@ const PalmistryAnalysis = () => {
         Toast.error(result.error || 'Analysis failed. Please try again.');
         
         setTimeout(() => {
-          navigate('/aiwow/palmistry/instructions');
+          navigate('/aiwow/palmistry/hand-selection');
         }, 2000);
       }
     } catch (error) {
@@ -71,7 +75,7 @@ const PalmistryAnalysis = () => {
       Toast.error('An unexpected error occurred. Please try again.');
       
       setTimeout(() => {
-        navigate('/aiwow/palmistry/instructions');
+        navigate('/aiwow/palmistry/hand-selection');
       }, 2000);
     } finally {
       setIsAnalyzing(false);
@@ -87,34 +91,21 @@ const PalmistryAnalysis = () => {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <div className={styles.topBar}></div>
-
         <h2 className={styles.title}>Analysing Palm</h2>
 
         <div className={styles.imagesWrapper}>
           <div className={styles.imageWrapper}>
             {palmImage ? (
-              <img 
-                src={palmImage} 
-                alt="Palm being analyzed" 
-                className={styles.palmImage}
-              />
-            ) : (
-              <div className={styles.imagePlaceholder}>Loading image...</div>
-            )}
-            <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
-            <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
-            <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
-            <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
-          </div>
-
-          <div className={styles.imageWrapper}>
-            {palmImage ? (
-              <img 
-                src={palmImage} 
-                alt="Palm being analyzed" 
-                className={styles.palmImage}
-              />
+              <>
+                <img 
+                  src={palmImage} 
+                  alt="Palm being analyzed" 
+                  className={styles.palmImage}
+                />
+                <div className={styles.handLabel}>
+                  {selectedHand === 'left' ? 'Left hand Palm' : 'Right hand Palm'}
+                </div>
+              </>
             ) : (
               <div className={styles.imagePlaceholder}>Loading image...</div>
             )}
