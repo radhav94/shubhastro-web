@@ -656,7 +656,7 @@ const TalkToAstrologer = () => {
       />
 
       <div className={styles.sectionDivider}>
-        <h2 className={styles.sectionTitle}>EXPLORE ASTROLOGERS</h2>
+        <h2 className={styles.sectionTitle}>TOP ASTROLOGERS FOR YOU</h2>
         <div className={styles.dividerLine}>
           <span className={styles.dividerDot}>☾</span>
         </div>
