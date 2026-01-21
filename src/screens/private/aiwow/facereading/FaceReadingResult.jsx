@@ -10,163 +10,40 @@ const FaceReadingResult = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get the analysis result from localStorage
     const storedResult = localStorage.getItem('faceReadingResult');
     
     if (storedResult) {
       try {
         const parsedResult = JSON.parse(storedResult);
-        
-        // Transform API response to match display format
         if (parsedResult.data) {
-          const apiData = parsedResult.data;
-          const transformedData = transformFaceData(apiData);
-          setAnalysisData(transformedData);
+          setAnalysisData(parsedResult.data);
         } else {
-          setAnalysisData(parsedResult);
+          Toast.error('Invalid analysis data format');
+          navigate('/aiwow/face-reading/instructions');
+          return;
         }
       } catch (error) {
         console.error('Error parsing result:', error);
         Toast.error('Failed to load analysis results');
         navigate('/aiwow/face-reading/instructions');
+        return;
       }
     } else {
       Toast.error('No analysis results found');
       navigate('/aiwow/face-reading/instructions');
+      return;
     }
     
     setLoading(false);
   }, [navigate]);
 
-  // Transform API response to display format
-  const transformFaceData = (apiData) => {
-    const personality = apiData.personalityAnalysis || {};
-    const auraColors = apiData.auraColors || {};
-    
-    return {
-      overall: [
-        {
-          category: 'Leadership',
-          strength: personality.leadership?.level || 'Strong',
-          percentage: personality.leadership?.score || 80,
-          description: personality.leadership?.description || 'Natural leadership qualities with strategic thinking.',
-        },
-        {
-          category: 'Analytical Mind',
-          strength: personality.analyticalMind?.level || 'Excellent',
-          percentage: personality.analyticalMind?.score || 90,
-          description: personality.analyticalMind?.description || 'Exceptional logical reasoning and systematic approach.',
-        },
-        {
-          category: 'Communication',
-          strength: personality.communication?.level || 'Good',
-          percentage: personality.communication?.score || 70,
-          description: personality.communication?.description || 'Clear, concise, and honest communication style.',
-        },
-        {
-          category: 'Intuition',
-          strength: personality.intuition?.level || 'Strong',
-          percentage: personality.intuition?.score || 70,
-          description: personality.intuition?.description || 'Strong inner world and intuitive knowing.',
-        },
-      ],
-      personality: [
-        {
-          category: 'Emotional Intelligence',
-          strength: personality.emotionalIntelligence?.level || 'Very Good',
-          percentage: personality.emotionalIntelligence?.score || 75,
-          description: personality.emotionalIntelligence?.description || 'Ability to perceive nuances and process feelings thoughtfully.',
-        },
-        {
-          category: 'Creativity',
-          strength: personality.creativity?.level || 'Good',
-          percentage: personality.creativity?.score || 65,
-          description: personality.creativity?.description || 'Strong capacity for innovative problem-solving.',
-        },
-      ],
-      aura: [
-        {
-          category: auraColors.primary?.color || 'Blue',
-          strength: 'Primary',
-          percentage: auraColors.primary?.percentage || 45,
-          description: auraColors.primary?.meaning || 'Connection to truth, communication, and calm.',
-        },
-        {
-          category: auraColors.secondary?.color || 'Gold',
-          strength: 'Secondary',
-          percentage: auraColors.secondary?.percentage || 30,
-          description: auraColors.secondary?.meaning || 'Wisdom and spiritual understanding.',
-        },
-        {
-          category: auraColors.tertiary?.color || 'Green',
-          strength: 'Tertiary',
-          percentage: auraColors.tertiary?.percentage || 15,
-          description: auraColors.tertiary?.meaning || 'Connection to nature and healing.',
-        },
-      ],
-    };
-  };
-
   const tabs = [
-    { id: 'overall', label: 'Overall Analysis' },
-    { id: 'personality', label: 'Personality Analysis' },
-    { id: 'aura', label: 'Aura Reading' },
+    { id: 'overall', label: 'Overall' },
+    { id: 'personality', label: 'Personality' },
+    { id: 'aura', label: 'Aura' },
+    { id: 'features', label: 'Features' },
+    { id: 'cosmic', label: 'Cosmic' },
   ];
-
-  // Default data structure (fallback)
-  const defaultData = {
-    overall: [
-      {
-        category: 'Leadership',
-        strength: 'Very Strong',
-        percentage: 90,
-        description: 'You are driven, independent, and naturally inclined to take charge and create your own path.',
-      },
-      {
-        category: 'Teamwork',
-        strength: 'Strong',
-        percentage: 85,
-        description: 'You collaborate effectively, valuing input from others while also contributing your own ideas.',
-      },
-      {
-        category: 'Adaptability',
-        strength: 'Moderate',
-        percentage: 70,
-        description: 'You adjust well to change but may need time to fully embrace new situations or strategies.',
-      },
-    ],
-    personality: [
-      {
-        category: 'Emotional Intelligence',
-        strength: 'Very Strong',
-        percentage: 92,
-        description: 'You have exceptional ability to understand and manage emotions, both yours and others.',
-      },
-      {
-        category: 'Creativity',
-        strength: 'Strong',
-        percentage: 85,
-        description: 'You possess strong creative abilities and innovative thinking patterns.',
-      },
-    ],
-    aura: [
-      {
-        category: 'Energy Level',
-        strength: 'Strong',
-        percentage: 88,
-        description: 'Your aura indicates high energy levels and positive vibrations.',
-      },
-      {
-        category: 'Spiritual Awareness',
-        strength: 'Moderate',
-        percentage: 75,
-        description: 'You show good spiritual awareness with room for deeper exploration.',
-      },
-    ],
-  };
-
-  // Use API data if available, otherwise use default data
-  const displayData = analysisData || defaultData;
 
   if (loading) {
     return (
@@ -178,6 +55,30 @@ const FaceReadingResult = () => {
     );
   }
 
+  if (!analysisData) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.errorContainer}>
+          <p>No analysis data available</p>
+          <button onClick={() => navigate('/aiwow/face-reading/instructions')}>
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const { 
+    faceImage,
+    personalityAnalysis = {},
+    auraColors = {},
+    facialFeatures = {},
+    cosmicConnections = {},
+    overallReading = {},
+    uniqueTraits = [],
+    personalizedInsights = {}
+  } = analysisData;
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -186,15 +87,26 @@ const FaceReadingResult = () => {
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        <h1 className={styles.title}>AI Powered Face Reading</h1>
+        <h1 className={styles.title}>Face Reading Analysis</h1>
       </header>
 
       <div className={styles.content}>
-        <div className={styles.resultHeader}>
-          <h2 className={styles.resultTitle}>Result</h2>
-          <p className={styles.resultSubtitle}>Your personalized face reading report is ready!</p>
-        </div>
+        {/* Face Image */}
+        {faceImage && (
+          <div className={styles.imageSection}>
+            <img src={faceImage} alt="Face" className={styles.faceImage} />
+          </div>
+        )}
 
+        {/* Overall Summary */}
+        {overallReading.summary && (
+          <div className={styles.summaryCard}>
+            <h3 className={styles.summaryTitle}>Overall Reading</h3>
+            <p className={styles.summaryText}>{overallReading.summary}</p>
+          </div>
+        )}
+
+        {/* Tabs */}
         <div className={styles.tabsContainer}>
           {tabs.map(tab => (
             <button
@@ -207,23 +119,248 @@ const FaceReadingResult = () => {
           ))}
         </div>
 
-        <div className={styles.analysisSection}>
-          {displayData[activeTab]?.map((item, index) => (
-            <div key={index} className={styles.analysisCard}>
-              <div className={styles.cardHeader}>
-                <div>
-                  <p className={styles.category}>{item.category}</p>
-                  <h3 className={styles.strength}>{item.strength}</h3>
+        {/* Tab Content */}
+        <div className={styles.tabContent}>
+          {/* Overall Tab */}
+          {activeTab === 'overall' && (
+            <div className={styles.section}>
+              {/* Strengths */}
+              {overallReading?.strengths?.length > 0 && (
+                <div className={styles.card}>
+                  <h3 className={styles.cardTitle}>✨ Strengths</h3>
+                  <ul className={styles.list}>
+                    {overallReading.strengths.map((strength, index) => (
+                      <li key={index} className={styles.listItem}>{strength}</li>
+                    ))}
+                  </ul>
                 </div>
-                <div className={styles.percentage}>{item.percentage}%</div>
-              </div>
-              <p className={styles.description}>{item.description}</p>
+              )}
+
+              {/* Challenges */}
+              {overallReading?.challenges?.length > 0 && (
+                <div className={styles.card}>
+                  <h3 className={styles.cardTitle}>⚡ Challenges</h3>
+                  <ul className={styles.list}>
+                    {overallReading.challenges.map((challenge, index) => (
+                      <li key={index} className={styles.listItem}>{challenge}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Life Advice */}
+              {overallReading?.lifeAdvice && (
+                <div className={styles.card}>
+                  <h3 className={styles.cardTitle}>💡 Life Advice</h3>
+                  <p className={styles.cardText}>{overallReading.lifeAdvice}</p>
+                </div>
+              )}
+
+              {/* Career Suggestions */}
+              {overallReading?.careerSuggestions?.length > 0 && (
+                <div className={styles.card}>
+                  <h3 className={styles.cardTitle}>💼 Career Suggestions</h3>
+                  <div className={styles.chipContainer}>
+                    {overallReading.careerSuggestions.map((career, index) => (
+                      <span key={index} className={styles.chip}>{career}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Unique Traits */}
+              {uniqueTraits?.length > 0 && (
+                <div className={styles.card}>
+                  <h3 className={styles.cardTitle}>🌟 Unique Traits</h3>
+                  <ul className={styles.list}>
+                    {uniqueTraits.map((trait, index) => (
+                      <li key={index} className={styles.listItem}>{trait}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
-          ))}
+          )}
+
+          {/* Personality Tab */}
+          {activeTab === 'personality' && (
+            <div className={styles.section}>
+              {personalityAnalysis && Object.entries(personalityAnalysis).map(([key, value]) => (
+                value && (
+                  <div key={key} className={styles.analysisCard}>
+                    <div className={styles.cardHeader}>
+                      <div>
+                        <p className={styles.category}>{key.replace(/([A-Z])/g, ' $1').trim()}</p>
+                        <h3 className={styles.strength}>{value.level || 'N/A'}</h3>
+                      </div>
+                      <div className={styles.percentage}>{value.score || 0}%</div>
+                    </div>
+                    <div className={styles.progressBar}>
+                      <div 
+                        className={styles.progressFill} 
+                        style={{ width: `${value.score || 0}%` }}
+                      ></div>
+                    </div>
+                    <p className={styles.description}>{value.description || ''}</p>
+                  </div>
+                )
+              ))}
+            </div>
+          )}
+
+          {/* Aura Tab */}
+          {activeTab === 'aura' && (
+            <div className={styles.section}>
+              {auraColors && Object.entries(auraColors).map(([key, value]) => (
+                value && (
+                  <div key={key} className={styles.auraCard}>
+                    <div className={styles.auraHeader}>
+                      <div 
+                        className={styles.colorCircle} 
+                        style={{ backgroundColor: value.color?.toLowerCase() || '#ccc' }}
+                      ></div>
+                      <div className={styles.auraInfo}>
+                        <h3 className={styles.auraColor}>{value.color || 'Unknown'}</h3>
+                        <p className={styles.auraType}>{key.charAt(0).toUpperCase() + key.slice(1)}</p>
+                      </div>
+                      <div className={styles.auraPercentage}>{value.percentage || 0}%</div>
+                    </div>
+                    <p className={styles.auraMeaning}>{value.meaning || ''}</p>
+                  </div>
+                )
+              ))}
+            </div>
+          )}
+
+          {/* Features Tab */}
+          {activeTab === 'features' && (
+            <div className={styles.section}>
+              {facialFeatures && Object.entries(facialFeatures).map(([key, value]) => (
+                value && (
+                  <div key={key} className={styles.featureCard}>
+                    <h3 className={styles.featureTitle}>
+                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                    </h3>
+                    <p className={styles.featureShape}>
+                      <strong>Shape:</strong> {value.shape || value.shapeType || 'N/A'}
+                    </p>
+                    <p className={styles.featureInterpretation}>{value.interpretation || ''}</p>
+                  </div>
+                )
+              ))}
+            </div>
+          )}
+
+          {/* Cosmic Tab */}
+          {activeTab === 'cosmic' && (
+            <div className={styles.section}>
+              {/* Dominant Planet */}
+              {cosmicConnections.dominantPlanet && (
+                <div className={styles.cosmicCard}>
+                  <h3 className={styles.cosmicTitle}>🪐 Dominant Planet</h3>
+                  <p className={styles.cosmicPlanet}>{cosmicConnections.dominantPlanet.planet}</p>
+                  <p className={styles.cosmicText}>{cosmicConnections.dominantPlanet.influence}</p>
+                  {cosmicConnections.dominantPlanet.traits && (
+                    <div className={styles.chipContainer}>
+                      {cosmicConnections.dominantPlanet.traits.map((trait, index) => (
+                        <span key={index} className={styles.chip}>{trait}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Zodiac Alignment */}
+              {cosmicConnections.zodiacAlignment && (
+                <div className={styles.cosmicCard}>
+                  <h3 className={styles.cosmicTitle}>♈ Zodiac Alignment</h3>
+                  <p className={styles.cosmicPlanet}>{cosmicConnections.zodiacAlignment.sign}</p>
+                  <p className={styles.cosmicText}>{cosmicConnections.zodiacAlignment.description}</p>
+                  {cosmicConnections.zodiacAlignment.compatibility && (
+                    <p className={styles.compatibility}>
+                      <strong>Compatible with:</strong> {cosmicConnections.zodiacAlignment.compatibility}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Elemental Energy */}
+              {cosmicConnections.elementalEnergy && (
+                <div className={styles.cosmicCard}>
+                  <h3 className={styles.cosmicTitle}>🔥 Elemental Energy</h3>
+                  <p className={styles.cosmicPlanet}>
+                    {cosmicConnections.elementalEnergy.element} - {cosmicConnections.elementalEnergy.percentage}%
+                  </p>
+                  {cosmicConnections.elementalEnergy.characteristics && (
+                    <div className={styles.chipContainer}>
+                      {cosmicConnections.elementalEnergy.characteristics.map((char, index) => (
+                        <span key={index} className={styles.chip}>{char}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Spiritual Path */}
+              {cosmicConnections.spiritualPath && (
+                <div className={styles.cosmicCard}>
+                  <h3 className={styles.cosmicTitle}>🕉️ Spiritual Path</h3>
+                  <p className={styles.cosmicText}>{cosmicConnections.spiritualPath.path}</p>
+                  {cosmicConnections.spiritualPath.guidance && (
+                    <>
+                      <p className={styles.cosmicSubtitle}>Guidance:</p>
+                      <p className={styles.cosmicText}>{cosmicConnections.spiritualPath.guidance}</p>
+                    </>
+                  )}
+                  {cosmicConnections.spiritualPath.practices && (
+                    <>
+                      <p className={styles.cosmicSubtitle}>Recommended Practices:</p>
+                      <ul className={styles.list}>
+                        {cosmicConnections.spiritualPath.practices.map((practice, index) => (
+                          <li key={index} className={styles.listItem}>{practice}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Remedies */}
+              {personalizedInsights.remedies && personalizedInsights.remedies.length > 0 && (
+                <div className={styles.cosmicCard}>
+                  <h3 className={styles.cosmicTitle}>🔮 Astrological Remedies</h3>
+                  <ul className={styles.list}>
+                    {personalizedInsights.remedies.map((remedy, index) => (
+                      <li key={index} className={styles.listItem}>{remedy}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        <button className={styles.detailButton}>
-          Get Detailed Report
+        {/* Relationship Insights */}
+        {overallReading.relationshipInsights && (
+          <div className={styles.insightCard}>
+            <h3 className={styles.insightTitle}>💕 Relationship Insights</h3>
+            <p className={styles.insightText}>{overallReading.relationshipInsights}</p>
+          </div>
+        )}
+
+        {/* Spiritual Guidance */}
+        {overallReading.spiritualGuidance && (
+          <div className={styles.insightCard}>
+            <h3 className={styles.insightTitle}>🙏 Spiritual Guidance</h3>
+            <p className={styles.insightText}>{overallReading.spiritualGuidance}</p>
+          </div>
+        )}
+
+        <button 
+          className={styles.consultButton}
+          onClick={() => navigate('/talk-to-astrologer')}
+        >
+          Consult with Expert Astrologer
         </button>
       </div>
     </div>

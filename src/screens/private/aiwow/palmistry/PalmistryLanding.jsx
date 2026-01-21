@@ -51,7 +51,7 @@ const PalmistryLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/aiwow/palmistry/instructions')}
+          onClick={() => navigate('/aiwow/palmistry/hand-selection')}
         >
           Proceed Ahead
         </button>

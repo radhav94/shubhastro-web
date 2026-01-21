@@ -87,8 +87,6 @@ const SignatureAnalysis = () => {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <div className={styles.topBar}></div>
-
         <h2 className={styles.title}>Analysing Signature</h2>
 
         <div className={styles.imageWrapper}>

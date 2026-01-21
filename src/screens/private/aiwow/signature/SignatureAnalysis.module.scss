@@ -1,6 +1,8 @@
 @import '../../../../assets/variables/variables';
 
 .container {
+  position: relative;
+  z-index: 2100;
   min-height: 100vh;
   background: #e5e7eb;
   display: flex;
@@ -39,12 +41,15 @@
   max-width: 400px;
   margin: 0 auto 2rem;
   aspect-ratio: 1;
+  background: #f3f4f6;
+  border-radius: 0.75rem;
+  overflow: hidden;
 }
 
 .palmImage {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 0.75rem;
 }
 

@@ -103,6 +103,7 @@ import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathD
 import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
 import AIWow from "../../screens/private/aiwow/AIWow";
 import PalmistryLanding from "../../screens/private/aiwow/palmistry/PalmistryLanding";
+import PalmistryHandSelection from "../../screens/private/aiwow/palmistry/PalmistryHandSelection";
 import PalmistryInstructions from "../../screens/private/aiwow/palmistry/PalmistryInstructions";
 import PalmistryCamera from "../../screens/private/aiwow/palmistry/PalmistryCamera";
 import PalmistryAnalysis from "../../screens/private/aiwow/palmistry/PalmistryAnalysis";
@@ -506,110 +507,170 @@ export const PATH = {
     AI_WOW: {
       path: "/aiwow",
       element: AIWow,
+      header: false,
+      footer: false
     },
     PALMISTRY_LANDING: {
       path: "/aiwow/palmistry",
       element: PalmistryLanding,
+      header: false,
+      footer: false,
+    },
+    PALMISTRY_HAND_SELECTION: {
+      path: "/aiwow/palmistry/hand-selection",
+      element: PalmistryHandSelection,
+      header: false,
+      footer: false,
     },
     PALMISTRY_INSTRUCTIONS: {
       path: "/aiwow/palmistry/instructions",
       element: PalmistryInstructions,
+      header: false,
+      footer: false,
     },
     PALMISTRY_CAMERA: {
       path: "/aiwow/palmistry/camera",
       element: PalmistryCamera,
+      header: false,
+      footer: false,
     },
     PALMISTRY_ANALYSIS: {
       path: "/aiwow/palmistry/capture",
       element: PalmistryAnalysis,
+      header: false,
+      footer: false,
     },
     PALMISTRY_RESULT: {
       path: "/aiwow/palmistry/result",
       element: PalmistryResult,
+      header: false,
+      footer: false,
     },
     FACE_READING_LANDING: {
       path: "/aiwow/face-reading",
       element: FaceReadingLanding,
+      header: false,
+      footer: false,
     },
     FACE_READING_INSTRUCTIONS: {
       path: "/aiwow/face-reading/instructions",
       element: FaceReadingInstructions,
+      header: false,
+      footer: false,
     },
     FACE_READING_CAMERA: {
       path: "/aiwow/face-reading/camera",
       element: FaceReadingCamera,
+      header: false,
+      footer: false,
     },
     FACE_READING_ANALYSIS: {
       path: "/aiwow/face-reading/capture",
       element: FaceReadingAnalysis,
+      header: false,
+      footer: false,
     },
     FACE_READING_RESULT: {
       path: "/aiwow/face-reading/result",
       element: FaceReadingResult,
+      header: false,
+      footer: false,
     },
     SIGNATURE_LANDING: {
       path: "/aiwow/signature",
       element: SignatureLanding,
+      header: false,
+      footer: false,
     },
     SIGNATURE_INSTRUCTIONS: {
       path: "/aiwow/signature/instructions",
       element: SignatureInstructions,
+      header: false,
+      footer: false,
     },
     SIGNATURE_CAMERA: {
       path: "/aiwow/signature/camera",
       element: SignatureCamera,
+      header: false,
+      footer: false,
     },
     SIGNATURE_ANALYSIS: {
       path: "/aiwow/signature/capture",
       element: SignatureAnalysis,
+      header: false,
+      footer: false,
     },
     SIGNATURE_RESULT: {
       path: "/aiwow/signature/result",
       element: SignatureResult,
+      header: false,
+      footer: false,
     },
     GEMSTONE_LANDING: {
       path: "/aiwow/gemstone",
       element: GemstoneLanding,
+      header: false,
+      footer: false,
     },
     GEMSTONE_INSTRUCTIONS: {
       path: "/aiwow/gemstone/instructions",
       element: GemstoneInstructions,
+      header: false,
+      footer: false,
     },
     GEMSTONE_CAMERA: {
       path: "/aiwow/gemstone/camera",
       element: GemstoneCamera,
+      header: false,
+      footer: false,
     },
     GEMSTONE_ANALYSIS: {
       path: "/aiwow/gemstone/capture",
       element: GemstoneAnalysis,
+      header: false,
+      footer: false,
     },
     GEMSTONE_RESULT: {
       path: "/aiwow/gemstone/result",
       element: GemstoneResult,
+      header: false,
+      footer: false,
     },
     CLOTH_COLOR_LANDING: {
       path: "/aiwow/cloth-color",
       element: ClothColorLanding,
+      header: false,
+      footer: false,
     },
     CLOTH_COLOR_FORM: {
       path: "/aiwow/cloth-color/form",
       element: ClothColorForm,
+      header: false,
+      footer: false,
     },
     CLOTH_COLOR_INSTRUCTIONS: {
       path: "/aiwow/cloth-color/instructions",
       element: ClothColorInstructions,
+      header: false,
+      footer: false,
     },
     CLOTH_COLOR_CAMERA: {
       path: "/aiwow/cloth-color/camera",
       element: ClothColorCamera,
+      header: false,
+      footer: false,
     },
     CLOTH_COLOR_ANALYSIS: {
       path: "/aiwow/cloth-color/capture",
       element: ClothColorAnalysis,
+      header: false,
+      footer: false,
     },
     CLOTH_COLOR_RESULT: {
       path: "/aiwow/cloth-color/result",
       element: ClothColorResult,
+      header: false,
+      footer: false,
     },
 
     //Compatibility
