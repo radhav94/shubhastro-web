@@ -56,11 +56,6 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   border-collapse: collapse;
   font-size: 15px;
 
-  tbody tr:nth-child(even) {
-    // --- FIXED ---
-    background-color: color.adjust($color-app-bg, $lightness: 1%);
-  }
-
   td {
     padding: 14px 10px;
     border-bottom: 1px solid #f0f0f0;
@@ -177,7 +172,6 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   .detailsTable th {
     font-size: 12px;
     font-weight: 600;
-    background-color: #f7f7f7;
   }
 
   .detailsTable td {
