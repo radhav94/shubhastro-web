@@ -3,9 +3,30 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import styles from "./TopHeader.module.scss";
 import { PATH } from "../utils/routes/Paths";
 import { User } from "lucide-react";
+import { getUserFromStorage } from "../utils/authStorage";
 
 const TopHeader = () => {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  
+  useEffect(() => {
+    // Get user data on mount and when localStorage changes
+    const userData = getUserFromStorage();
+    setUser(userData);
+  }, []);
+
+  const handleProfileClick = () => {
+    const userData = getUserFromStorage();
+    const accessToken = localStorage.getItem("shubhtalk_customer_token");
+    if (userData && accessToken) {
+      navigate("/profile");
+    } else {
+      // User is not logged in, redirect to onboarding
+      navigate("/onboarding?skip=welcome");
+    }
+  };
+  
+  const displayName = user ? `${user.firstName} ${user.lastName}` : "Guest";
 
   return (
     <header className={styles.topHeader}>
@@ -15,7 +36,7 @@ const TopHeader = () => {
         </div>
         <div className={styles.greetingText}>
           <span className={styles.namaste}>नमस्ते</span>
-          <span className={styles.userName}>Priya Nair</span>
+          <span className={styles.userName}>{displayName}</span>
         </div>
       </div>
 
@@ -31,7 +52,7 @@ const TopHeader = () => {
         </NavLink>
 
         <NavLink
-          to="/astrologers"
+          to="/chat-with-astrologers"
           className={({ isActive }) =>
             `${styles.headerNavLink} ${isActive ? styles.active : ""}`
           }
@@ -67,7 +88,7 @@ const TopHeader = () => {
         </NavLink>
 
         <NavLink
-          to="/Kundli"
+          to={PATH.privateRoutes.KUNDLI.path}
           className={({ isActive }) =>
             `${styles.headerNavLink} ${isActive ? styles.active : ""}`
           }
@@ -75,7 +96,7 @@ const TopHeader = () => {
           Kundli
         </NavLink>
 
-         <NavLink
+        <NavLink
           to="/numerology"
           className={({ isActive }) =>
             `${styles.headerNavLink} ${isActive ? styles.active : ""}`
@@ -83,7 +104,16 @@ const TopHeader = () => {
         >
           Numerology
         </NavLink>
-        
+
+        <NavLink
+          to="/horoscopes/daily-horoscope"
+          className={({ isActive }) =>
+            `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+          }
+        >
+          Horoscopes
+        </NavLink>
+
       </nav>
 
       <div className={styles.headerActions}>
@@ -93,7 +123,7 @@ const TopHeader = () => {
         </div>
         <div
           className={styles.profileIcon}
-          onClick={() => navigate("/onboarding?skip=welcome")}
+          onClick={handleProfileClick}
         >
           <User size={24} strokeWidth={0} fill="#A67C52" />
         </div>

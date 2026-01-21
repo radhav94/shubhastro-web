@@ -1,14 +1,15 @@
 .mainContainer {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 2rem 3rem;
+  padding: 1rem 3rem;
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   @media (max-width: 1024px) {
-    padding: 2rem 2rem;
+    padding: 1rem 2rem;
   }
 
   @media (max-width: 768px) {
-    padding: 1rem 1rem;
+    padding: 0.5rem 1rem;
   }
 }
 
@@ -23,9 +24,11 @@
 .pageTitle {
   font-size: 32px;
   font-weight: 700;
-  color: #333;
+  color: #2C2C2C;
   margin: 0;
   line-height: 1.3;
+  font-family: "Poppins", sans-serif;
+  letter-spacing: -0.5px;
 
   @media (max-width: 768px) {
     font-size: 24px;
@@ -34,6 +37,98 @@
 
 .highlight {
   color: #ff6b35;
+}
+
+.sectionDivider {
+  margin: 2rem 0;
+  text-align: center;
+
+  @media (max-width: 768px) {
+    margin: 1.5rem 0;
+  }
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2C2C2C;
+  margin: 0 0 1rem 0;
+  letter-spacing: 2px;
+  font-family: "Poppins", sans-serif;
+
+  @media (max-width: 768px) {
+    font-size: 18px;
+    letter-spacing: 1.5px;
+  }
+}
+
+.dividerLine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #D4D4D4;
+    max-width: 200px;
+  }
+}
+
+.dividerDot {
+  font-size: 20px;
+  color: #999999;
+}
+
+.matchSection {
+  margin: 4rem 0 3rem;
+  text-align: center;
+  padding: 3rem 2rem;
+  background: #F9F9F9;
+  border-radius: 12px;
+
+  @media (max-width: 768px) {
+    margin: 3rem 0 2rem;
+    padding: 2rem 1rem;
+  }
+}
+
+.matchTitle {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2C2C2C;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.3;
+  letter-spacing: 1px;
+  font-family: "Poppins", sans-serif;
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+    margin: 0 0 1rem 0;
+  }
+}
+
+.recommendedGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 2rem;
+
+  @media (max-width: 1400px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 
 .cardsContainer {

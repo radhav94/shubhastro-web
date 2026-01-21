@@ -52,31 +52,27 @@ const TopBar = () => {
 
   const MENU_LIST = [
     { title: "Home", path: PATH.privateRoutes.HOME.path },
+    { title: "Horoscope", path: "/horoscopes/daily-horoscope" },
     {
-      title: "Panchang",
-      path: PATH.privateRoutes.PANCHANG.path,
-    },
-    { title: "Free Kundli", path: PATH.privateRoutes.KUNDLI.path },
-    // { title: "Sadesati", path: PATH.privateRoutes.SADESATI.path },
-    { title: "Match Making", path: PATH.privateRoutes.MATCHMAKING.path },
-    {
-      title: "Horoscope",
+      title: "Astrologers",
       children: [
-        { title: "Today's Horoscope", path: "/horoscopes/todays-horoscope" },
-        { title: "Daily Horoscope", path: "/horoscopes/daily-horoscope" },
-        { title: "Yearly Horoscope", path: "/horoscopes/yearly-horoscope" },
-        { title: "Weekly Horoscope", path: "/horoscopes/weekly-horoscope" },
+        { title: "Chat with Astrologer", path: PATH.privateRoutes.Chat_With_ASTROLOGER.path },
+        { title: "Talk to Astrologer", path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path },
       ],
     },
-    { title: "Compatibility", path: PATH.privateRoutes.COMPATIBILITY.path },
+    {
+      title: "Services",
+      children: [
+        { title: "Free Kundli", path: PATH.privateRoutes.KUNDLI.path },
+        { title: "Match Making", path: PATH.privateRoutes.MATCHMAKING.path },
+        { title: "Panchang", path: PATH.privateRoutes.PANCHANG.path },
+        { title: "Compatibility", path: PATH.privateRoutes.COMPATIBILITY.path },
+      ],
+    },
     {
       title: "Tarot",
       path: PATH.privateRoutes.TAROT.path,
       children: [
-        // {
-        //   title: "Shuffle Tarot",
-        //   path: PATH.privateRoutes.TAROT.path,
-        // },
         {
           title: "Yes/No Tarot",
           path: PATH.privateRoutes.YES_NO_TAROT.path,
@@ -117,10 +113,6 @@ const TopBar = () => {
           title: "Business Breakup",
           path: PATH.privateRoutes.BUISNESS_BREAKUP_TAROT.path,
         },
-        // {
-        //   title: "Fortune Cookie",
-        //   path: PATH.privateRoutes.DAILY_TAROT.path,
-        // },
       ],
     },
     {

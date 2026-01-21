@@ -1,109 +1,160 @@
-@use "sass:color"; // Import color module
-
 // --- Theme Variables ---
-$color-primary: #ffcb03;
-$color-app-bg: #f5f5f5;
 $color-white: #ffffff;
 $color-black: #1a1a1a;
-$color-grey-light: #e0e0e0;
+$color-grey-light: #e8e8e8;
 $color-grey-medium: #999999;
 $color-grey-dark: #555555;
+$color-text-primary: #2d2d2d;
+$color-text-secondary: #666666;
 $font-primary: "Poppins", sans-serif;
-$shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
 
-// --- Main Grid Layout ---
-.gridContainer {
-  display: grid;
-  grid-template-columns: 1fr; // Mobile-first layout
-  gap: 24px;
+// --- Main Container ---
+.basicContentContainer {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 16px;
   font-family: $font-primary;
 
-  // --- Desktop Layout ---
-  @media (min-width: 992px) {
-    grid-template-columns: 1fr 1fr; // Two columns
-    align-items: start; // Cards align naturally to top
-    column-gap: 24px;
-    row-gap: 24px;
+  @media (min-width: 768px) {
+    padding: 24px;
+    max-width: 900px;
+  }
 
-    .basicCard {
-      grid-column: 1 / 2;
-      grid-row: 1 / 2;
-      align-self: start;
-      height: auto; // Prevent stretching
-    }
+  @media (min-width: 1024px) {
+    max-width: 1000px;
+  }
 
-    .panchangCard {
-      grid-column: 1 / 2;
-      grid-row: 2 / 3;
-      align-self: start;
-      height: auto;
-    }
-
-    .avakhadaCard {
-      grid-column: 2 / 3;
-      grid-row: 1 / span 2; //  Align right card with both rows
-      align-self: start;
-      height: auto; // Adjust based on content only
-    }
+  @media (min-width: 1200px) {
+    max-width: 1100px;
   }
 }
 
-// --- Card Styling ---
-.detailCard {
-  background-color: $color-white;
-  border-radius: 16px;
-  padding: 24px;
-  border: 1px solid $color-grey-light;
-  box-shadow: $shadow-4;
+// --- Accordion Section ---
+.accordionSection {
+  background-color: #f5f5f5;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// --- Accordion Header ---
+.accordionHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #eeeeee;
+  }
+
+  &:active {
+    background-color: #e8e8e8;
+  }
+}
+
+.accordionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin: 0;
+  text-align: left;
+
+  @media (min-width: 768px) {
+    font-size: 20px;
+  }
+}
+
+.accordionIcon {
+  font-size: 24px;
+  font-weight: 300;
+  color: $color-text-secondary;
+  line-height: 1;
+  transition: transform 0.3s ease;
+}
+
+// --- Accordion Content ---
+.accordionContent {
+  padding: 0 20px 20px 20px;
+  background-color: #f5f5f5;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// --- Details List ---
+.detailsList {
   display: flex;
   flex-direction: column;
-  height: auto; //  auto-resize card
+  gap: 0;
 }
 
-.cardTitle {
-  font-size: 20px;
-  font-weight: 700;
-  color: $color-black;
-  margin: 0 0 16px 0;
-  border-bottom: 1px solid $color-grey-light;
-  padding-bottom: 12px;
-}
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-bottom: 1px solid #e0e0e0;
 
-// --- Table Styling ---
-.detailsTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 15px;
-
-  tbody tr {
-    transition: background-color 0.2s ease;
-
-    &:nth-child(even) {
-      background-color: color.adjust($color-app-bg, $lightness: 1%);
-    }
-
-    // &:hover {
-    //   background-color: color.adjust($color-primary, $lightness: 25%);
-    // }
-  }
-
-  td {
-    padding: 14px 10px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-
-  td:first-child {
-    font-weight: 600;
-    color: $color-grey-dark;
-    width: 45%;
-  }
-
-  td:last-child {
-    color: $color-black;
-    font-weight: 500;
-  }
-
-  tr:last-child td {
+  &:last-child {
     border-bottom: none;
+  }
+}
+
+.detailLabel {
+  font-size: 14px;
+  font-weight: 400;
+  color: $color-text-secondary;
+  flex: 0 0 45%;
+  text-align: left;
+
+  @media (min-width: 768px) {
+    font-size: 15px;
+  }
+}
+
+.detailValue {
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-text-primary;
+  flex: 0 0 50%;
+  text-align: right;
+
+  @media (min-width: 768px) {
+    font-size: 15px;
+  }
+}
+
+// --- Responsive Adjustments ---
+@media (min-width: 768px) {
+  .accordionHeader {
+    padding: 24px;
+  }
+
+  .accordionContent {
+    padding: 0 24px 24px 24px;
+  }
+
+  .detailRow {
+    padding: 16px 0;
   }
 }

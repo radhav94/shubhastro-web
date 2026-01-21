@@ -10,16 +10,16 @@
 
 /* ==================== COLOR VARIABLES ==================== */
 /* Background Colors */
-$bg-main: #ececec;
-$bg-header: #ffffff;
+$bg-main: #F9F4EF;
+$bg-header: #F9F4EF;
 $bg-input-bar: #a8a8a8;
-$bg-footer: #1a1a1a;
-$bg-sent-message: #c8c8c8;
-$bg-received-message: #e0e0e0;
-$bg-end-call: #e53935;
-$bg-recharge: #00c853;
+$bg-footer: #2A1C06;
+$bg-sent-message: #FDEFD8;
+$bg-received-message: #FFFFFF;
+$bg-end-call: #FB3748;
+$bg-recharge: #1FC16B;
 $bg-floating-button: #000000;
-$bg-wallet-badge: #000000;
+$bg-wallet-badge: linear-gradient(135deg, #8B6F47 0%, #6B4423 50%, #3E2415 100%);
 $bg-input-field: #ffffff;
 
 /* Text Colors */
@@ -33,11 +33,11 @@ $text-black: #000000;
 
 /* Interactive Colors */
 $placeholder-color: #c8c8c8;
-$icon-color: #4a4a4a;
-$hover-bg: #f5f5f5;
+$icon-color: #633F06;
+$hover-bg: #131010;
 $hover-recharge: #00b248;
 $hover-end-call: #d32f2f;
-$back-button-bg: #e0e0e0;
+$back-button-bg: #F9F4EF;
 
 /* Shadow Colors */
 $shadow-floating: rgba(0, 0, 0, 0.2);
@@ -122,6 +122,8 @@ $floating-button-gap: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid $icon-color;
+  padding: 8px;
 }
 
 .headerAvatar {
@@ -338,6 +340,16 @@ $floating-button-gap: 14px;
   transition: all 0.2s ease;
 }
 
+.floatingButton:nth-child(1) {
+  background: linear-gradient(152.93deg, #3E93C9 20.53%, #2A79AB 59.96%);
+}
+.floatingButton:nth-child(2) {
+  background: linear-gradient(160.4deg, #8BBEDF -9.95%, #1C4863 106.7%);
+}
+.floatingButton:nth-child(3) {
+  background: linear-gradient(153.91deg, #BC89E3 14.98%, #9544D3 58.56%);
+
+}
 .floatingButton svg {
   font-size: 24px;
 }

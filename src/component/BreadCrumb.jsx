@@ -36,6 +36,14 @@ const Breadcrumb = () => {
   /* Safe early return AFTER hooks */
   if (!pathnames.length) return null;
 
+  // Hide breadcrumb completely on astrologer pages
+  if (
+    pathnames.includes("chat-with-astrologers") ||
+    pathnames.includes("talk-to-astrologers")
+  ) {
+    return null;
+  }
+
   return (
     <div className={styles.breadCrumb}>
       {isAstroDashboard ? (

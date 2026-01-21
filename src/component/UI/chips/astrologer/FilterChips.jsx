@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import styles from "./FilterChips.module.scss";
 import { useLazyFilterAstrologersQuery } from "../../../../redux/api/astrologer/astrologerApi";
+import { FaCheck } from "react-icons/fa";
 
 const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }) => {
   const [triggerFilter, { isLoading }] = useLazyFilterAstrologersQuery();
@@ -298,77 +299,93 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
         <div className={styles.modalOverlay}>
           <div className={styles.modalSlide}>
             <div className={styles.modalHeader}>
-              <span>FILTERS</span>
+              <span>Filters</span>
               <button onClick={() => setFilterModalOpen(false)}>✕</button>
             </div>
 
             <div className={styles.modalBody}>
-              <div className={styles.leftTabs}>
-                {["Skill", "Gender", "Sorting"].map((tab) => (
-                  <div
-                    key={tab}
-                    className={`${styles.tab} ${activeModalTab === tab ? styles.activeTab : ""}`}
-                    onClick={() => setActiveModalTab(tab)}
-                  >
-                    {tab}
-                  </div>
-                ))}
+              {/* LEFT SIDEBAR */}
+              <div className={styles.leftSidebar}>
+                <div
+                  className={`${styles.sidebarItem} ${activeModalTab === "Skill" ? styles.activeSidebarItem : ""}`}
+                  onClick={() => setActiveModalTab("Skill")}
+                >
+                  Skill
+                </div>
+                <div
+                  className={`${styles.sidebarItem} ${activeModalTab === "Gender" ? styles.activeSidebarItem : ""}`}
+                  onClick={() => setActiveModalTab("Gender")}
+                >
+                  Gender
+                </div>
+                <div
+                  className={`${styles.sidebarItem} ${activeModalTab === "Sorting" ? styles.activeSidebarItem : ""}`}
+                  onClick={() => setActiveModalTab("Sorting")}
+                >
+                  Sorting
+                </div>
               </div>
 
+              {/* RIGHT CONTENT */}
               <div className={styles.rightContent}>
                 {activeModalTab === "Skill" && (
-                  <div className={styles.topActions}>
-                    <span onClick={selectAll}>Select all</span>
-                    <span onClick={clearAll}>Clear</span>
+                  <>
+                    <div className={styles.contentHeader}>
+                      <span onClick={selectAll} className={styles.selectAll}>Select all</span>
+                    </div>
+                    <div className={styles.optionsList}>
+                      {skills.map((skill) => {
+                        const isSelected = selectedSkills.includes(skill);
+                        return (
+                          <div
+                            key={skill}
+                            className={styles.option}
+                            onClick={() => toggleSkill(skill)}
+                          >
+                            <FaCheck className={isSelected ? styles.checkIcon : styles.checkIconInactive} size={14} />
+                            <span className={isSelected ? styles.selectedText : ""}>{skill}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+
+                {activeModalTab === "Gender" && (
+                  <div className={styles.optionsList}>
+                    {genders.map((g) => {
+                      const isSelected = selectedGender === g;
+                      return (
+                        <div
+                          key={g}
+                          className={styles.option}
+                          onClick={() => toggleValue(g, setSelectedGender, selectedGender)}
+                        >
+                          <FaCheck className={isSelected ? styles.checkIcon : styles.checkIconInactive} size={14} />
+                          <span className={isSelected ? styles.selectedText : ""}>{g}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
-                {activeModalTab === "Skill" &&
-                  skills.map((skill) => {
-                    const isSelected = selectedSkills.includes(skill);
-                    return (
-                      <div
-                        key={skill}
-                        className={`${styles.option} ${isSelected ? styles.selectedOption : ""}`}
-                        onClick={() => toggleSkill(skill)}
-                      >
-                        <span className={`${styles.check} ${isSelected ? styles.checked : ""}`}>
-                          ✓
-                        </span>
-                        {skill}
-                      </div>
-                    );
-                  })}
-
-                {activeModalTab === "Gender" &&
-                  genders.map((g) => {
-                    const isSelected = selectedGender === g;
-                    return (
-                      <div
-                        key={g}
-                        className={`${styles.option} ${isSelected ? styles.selectedOption : ""}`}
-                        onClick={() => toggleValue(g, setSelectedGender, selectedGender)}
-                      >
-                        <span className={`${styles.check} ${isSelected ? styles.checked : ""}`}>✓</span>
-                        {g}
-                      </div>
-                    );
-                  })}
-
-                {activeModalTab === "Sorting" &&
-                  sorting.map((s) => {
-                    const isSelected = selectedSort === s;
-                    return (
-                      <div
-                        key={s}
-                        className={`${styles.option} ${isSelected ? styles.selectedOption : ""}`}
-                        onClick={() => toggleValue(s, setSelectedSort, selectedSort)}
-                      >
-                        <span className={`${styles.check} ${isSelected ? styles.checked : ""}`}>✓</span>
-                        {s}
-                      </div>
-                    );
-                  })}
+                {activeModalTab === "Sorting" && (
+                  <div className={styles.optionsList}>
+                    {sorting.map((s) => {
+                      const isSelected = selectedSort === s;
+                      return (
+                        <div
+                          key={s}
+                          className={styles.option}
+                          onClick={() => toggleValue(s, setSelectedSort, selectedSort)}
+                        >
+                          <FaCheck className={isSelected ? styles.checkIcon : styles.checkIconInactive} size={14} />
+                          <span className={isSelected ? styles.selectedText : ""}>{s}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
 
