@@ -1,29 +1,49 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './FaceReadingCamera.module.scss';
+import { useFaceDetection } from '../../../../utils/hooks/useFaceDetection';
 
 const FaceReadingCamera = () => {
   const navigate = useNavigate();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const detectionCanvasRef = useRef(null);
+  
   const [stream, setStream] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
+  const [facingMode, setFacingMode] = useState('user');
+
+  const {
+    modelsLoaded,
+    faceDetected,
+    startDetection,
+    stopDetection
+  } = useFaceDetection({ videoRef, canvasRef: detectionCanvasRef });
+
+  // Start detection when models are loaded and video is ready
+  useEffect(() => {
+    if (modelsLoaded && videoRef.current && videoRef.current.readyState >= 2) {
+      console.log('Models loaded, starting detection for existing video');
+      setTimeout(() => {
+        startDetection();
+      }, 300);
+    }
+  }, [modelsLoaded]);
 
   useEffect(() => {
     startCamera();
     
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
-        videoRef.current.srcObject = null;
-      }
+      stopCamera();
     };
-  }, []);
+  }, [facingMode, modelsLoaded]);
 
   const startCamera = async () => {
     try {
+      // Stop existing stream first
+      stopCamera();
+
       // Check if mediaDevices is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setError('Camera is not supported on this device or browser.');
@@ -33,7 +53,7 @@ const FaceReadingCamera = () => {
       // Request camera permission
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: 'user',
+          facingMode,
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -43,6 +63,20 @@ const FaceReadingCamera = () => {
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
+        
+        // Start face detection once video is playing
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current.play();
+        };
+
+        videoRef.current.onplay = () => {
+          // Wait a bit for video to stabilize, then start detection
+          if (modelsLoaded) {
+            setTimeout(() => {
+              startDetection();
+            }, 300);
+          }
+        };
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
@@ -65,17 +99,25 @@ const FaceReadingCamera = () => {
   };
 
   const stopCamera = () => {
+    stopDetection();
+    
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = videoRef.current.srcObject.getTracks();
       tracks.forEach(track => track.stop());
       videoRef.current.srcObject = null;
     }
+    
     if (stream) {
       stream.getTracks().forEach(track => {
         track.stop();
       });
       setStream(null);
     }
+  };
+
+  const switchCamera = () => {
+    const nextMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(nextMode);
   };
 
   const captureImage = () => {
@@ -151,6 +193,14 @@ const FaceReadingCamera = () => {
             <path d="M15 18L9 12L15 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
+        
+        {!capturedImage && (
+          <button className={styles.switchBtn} onClick={switchCamera}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M17 8L21 12M21 12L17 16M21 12H9M7 16L3 12M3 12L7 8M3 12H15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        )}
       </div>
 
       <div className={styles.cameraWrapper}>
@@ -162,12 +212,21 @@ const FaceReadingCamera = () => {
               playsInline
               className={styles.video}
             />
+            <canvas
+              ref={detectionCanvasRef}
+              className={styles.detectionCanvas}
+            />
             <div className={styles.overlay}>
-              <div className={styles.frameCorner} style={{ top: '10%', left: '5%' }}></div>
-              <div className={styles.frameCorner} style={{ top: '10%', right: '5%' }}></div>
-              <div className={styles.frameCorner} style={{ bottom: '20%', left: '5%' }}></div>
-              <div className={styles.frameCorner} style={{ bottom: '20%', right: '5%' }}></div>
+              <div className={`${styles.frameCorner} ${faceDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', left: '5%' }}></div>
+              <div className={`${styles.frameCorner} ${faceDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', right: '5%' }}></div>
+              <div className={`${styles.frameCorner} ${faceDetected ? styles.detected : styles.notDetected}`} style={{ bottom: '20%', left: '5%' }}></div>
+              <div className={`${styles.frameCorner} ${faceDetected ? styles.detected : styles.notDetected}`} style={{ bottom: '20%', right: '5%' }}></div>
             </div>
+            {!faceDetected && modelsLoaded && (
+              <div className={styles.faceDetectionMessage}>
+                <p>Position your face within the frame</p>
+              </div>
+            )}
           </>
         ) : (
           <img src={capturedImage} alt="Captured" className={styles.capturedImage} />
@@ -178,14 +237,20 @@ const FaceReadingCamera = () => {
 
       <div className={styles.controls}>
         {!capturedImage ? (
-          <button className={styles.captureButton} onClick={captureImage}>
+          <button 
+            className={`${styles.captureButton} ${(!faceDetected && modelsLoaded) ? styles.disabled : ''}`} 
+            onClick={captureImage}
+            disabled={!faceDetected && modelsLoaded}
+          >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3"/>
-                <circle cx="20" cy="20" r="14" fill="white"/>
+                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!faceDetected && modelsLoaded) ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="14" fill="white" opacity={(!faceDetected && modelsLoaded) ? "0.5" : "1"}/>
               </svg>
             </div>
-            <span className={styles.captureText}>Capture</span>
+            <span className={styles.captureText}>
+              {!modelsLoaded ? 'Loading...' : (faceDetected ? 'Capture' : 'No Face Detected')}
+            </span>
           </button>
         ) : (
           <div className={styles.actionButtons}>

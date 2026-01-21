@@ -20,9 +20,13 @@
   padding: 1rem;
   z-index: 10;
   background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.backBtn {
+.backBtn,
+.switchBtn {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   border: none;
@@ -100,11 +104,20 @@
   position: absolute;
   width: 80px;
   height: 80px;
-  border: 4px solid #10b981;
+  border: 4px solid;
+  transition: border-color 0.3s ease;
 
   @media (min-width: 768px) {
     width: 100px;
     height: 100px;
+  }
+
+  &.detected {
+    border-color: #10b981;
+  }
+
+  &.notDetected {
+    border-color: #ef4444;
   }
 
   &[style*="top"][style*="left"] {
@@ -153,9 +166,15 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0;
+  transition: opacity 0.2s;
 
-  &:active .captureIcon {
+  &:active:not(.disabled) .captureIcon {
     transform: scale(0.95);
+  }
+
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 }
 
