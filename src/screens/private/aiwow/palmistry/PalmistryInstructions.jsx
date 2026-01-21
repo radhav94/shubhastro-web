@@ -30,8 +30,6 @@ const PalmistryInstructions = () => {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <div className={styles.topBar}></div>
-
         <h2 className={styles.title}>Before you start</h2>
 
         <div className={styles.imageWrapper}>

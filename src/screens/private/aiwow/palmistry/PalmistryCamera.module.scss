@@ -9,7 +9,7 @@
   background: #000;
   display: flex;
   flex-direction: column;
-  z-index: 1000;
+  z-index: 2100;
 }
 
 .header {
@@ -156,35 +156,6 @@
   align-items: center;
 }
 
-.captureControls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 400px;
-  gap: 1rem;
-}
-
-.thumbnail {
-  width: 60px;
-  height: 60px;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  border: 2px solid white;
-  flex-shrink: 0;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.placeholder {
-  width: 60px;
-  flex-shrink: 0;
-}
-
 .captureButton {
   background: transparent;
   border: none;
@@ -194,7 +165,6 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0;
-  flex-shrink: 0;
 
   &:active .captureIcon {
     transform: scale(0.95);
@@ -261,17 +231,40 @@
   justify-content: center;
   padding: 2rem;
   text-align: center;
+  gap: 1rem;
+}
+
+.errorIcon {
+  margin-bottom: 0.5rem;
+}
+
+.errorTitle {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
 }
 
 .errorText {
-  color: white;
-  font-size: 1rem;
-  margin-bottom: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  margin: 0;
+  max-width: 400px;
 }
 
-.backButton {
-  background: white;
-  color: #1f2937;
+.errorButtons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.retryButton {
+  flex: 1;
+  background: #10b981;
+  color: white;
   border: none;
   border-radius: 0.5rem;
   padding: 0.75rem 1.5rem;
@@ -281,6 +274,24 @@
   transition: background 0.2s;
 
   &:hover {
-    background: #f3f4f6;
+    background: #059669;
+  }
+}
+
+.backButton {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  color: white;
+  border: 2px solid white;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
   }
 }

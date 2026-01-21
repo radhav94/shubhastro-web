@@ -83,8 +83,6 @@ const ClothColorAnalysis = () => {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <div className={styles.topBar}></div>
-
         <h2 className={styles.title}>Analysing Clothes</h2>
 
         <div className={styles.imageWrapper}>

@@ -1,6 +1,8 @@
 @import '../../../../assets/variables/variables';
 
 .container {
+  position: relative;
+  z-index: 2100;
   min-height: 100vh;
   background: #e5e7eb;
   display: flex;
@@ -39,12 +41,15 @@
   max-width: 400px;
   margin: 0 auto 2rem;
   aspect-ratio: 1;
+  background: #f3f4f6;
+  border-radius: 0.75rem;
+  overflow: hidden;
 }
 
 .palmImage {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 0.75rem;
 }
 
@@ -121,6 +126,10 @@
   animation: rotate 3s linear infinite;
 }
 
+.errorIcon {
+  margin-bottom: 1rem;
+}
+
 @keyframes rotate {
   from {
     transform: rotate(0deg);
@@ -135,6 +144,13 @@
   font-weight: 600;
   color: #1f2937;
   margin: 0;
+  line-height: 1.4;
+}
+
+.subMessage {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0.5rem 0 0 0;
   line-height: 1.4;
 }
 

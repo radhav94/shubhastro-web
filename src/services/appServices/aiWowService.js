@@ -67,7 +67,7 @@ export const analyzeFace = async (imageData) => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 30000, // 30 seconds timeout
+        timeout: 60000, // 60 seconds timeout for AI processing
       }
     );
 
@@ -100,9 +100,10 @@ export const analyzeFace = async (imageData) => {
  * Palmistry Analysis API Service
  * Analyzes palm features from an uploaded image
  * @param {File|Blob|string} imageData - Image file, blob, or base64 string
+ * @param {string} hand - Hand type ('left' or 'right')
  * @returns {Promise} API response with analysis results
  */
-export const analyzePalm = async (imageData) => {
+export const analyzePalm = async (imageData, hand = 'right') => {
   try {
     const formData = new FormData();
     
@@ -115,8 +116,8 @@ export const analyzePalm = async (imageData) => {
       throw new Error('Invalid image data format');
     }
 
-    // Add hand type (default to right)
-    formData.append('hand', 'right');
+    // Add hand type
+    formData.append('hand', hand);
 
     // Add profile data
     const profileData = getProfileData();
@@ -127,13 +128,13 @@ export const analyzePalm = async (imageData) => {
     }
 
     const response = await privatePost(
-      'wow-suite/palm-analysis/analyze',
+      'wow-suite/palmistry/analyze',
       formData,
       {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 30000,
+        timeout: 60000,
       }
     );
 
@@ -193,7 +194,7 @@ export const analyzeSignature = async (imageData) => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 30000,
+        timeout: 60000,
       }
     );
 
@@ -256,7 +257,7 @@ export const analyzeClothColor = async (imageData, birthData) => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 30000,
+        timeout: 60000,
       }
     );
 
@@ -300,11 +301,21 @@ const base64ToBlob = async (base64String) => {
   }
   
   // Determine MIME type from base64 string
-  let mimeType = 'image/jpeg';
+  let mimeType = 'image/jpeg'; // default
   if (base64String.startsWith('data:image/png')) {
     mimeType = 'image/png';
   } else if (base64String.startsWith('data:image/webp')) {
     mimeType = 'image/webp';
+  } else if (base64String.startsWith('data:image/heic')) {
+    mimeType = 'image/heic';
+  } else if (base64String.startsWith('data:image/heif')) {
+    mimeType = 'image/heif';
+  } else if (base64String.startsWith('data:image/bmp')) {
+    mimeType = 'image/bmp';
+  } else if (base64String.startsWith('data:image/gif')) {
+    mimeType = 'image/gif';
+  } else if (base64String.startsWith('data:image/tiff')) {
+    mimeType = 'image/tiff';
   }
   
   return new Blob([bytes], { type: mimeType });
@@ -344,7 +355,7 @@ export const analyzeGemstone = async (imageData) => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 30000,
+        timeout: 60000,
       }
     );
 
@@ -355,17 +366,63 @@ export const analyzeGemstone = async (imageData) => {
   } catch (error) {
     console.error('Gemstone analysis error:', error);
     
+    // Handle specific error cases
     if (error.code === 'ECONNABORTED') {
       Toast.error('Request timeout. Please try again.');
+      return {
+        success: false,
+        error: 'Request timeout. Please try again.',
+        code: 'TIMEOUT'
+      };
     } else if (error.response?.status === 413) {
       Toast.error('Image file is too large. Please use a smaller image.');
+      return {
+        success: false,
+        error: 'Image file is too large',
+        code: 'FILE_TOO_LARGE'
+      };
+    } else if (error.response?.status === 415) {
+      Toast.error('Invalid image format. Please use JPG, PNG, or WEBP.');
+      return {
+        success: false,
+        error: 'Invalid image format',
+        code: 'INVALID_FORMAT'
+      };
+    } else if (error.response?.status === 500) {
+      Toast.error('Server error occurred. Please try again later.');
+      return {
+        success: false,
+        error: 'Server error occurred',
+        code: 'SERVER_ERROR'
+      };
+    } else if (error.response?.data?.error?.code === 'AI_ERROR') {
+      Toast.error('Failed to analyze gemstone. Please try with a clearer image.');
+      return {
+        success: false,
+        error: error.response.data.error.message || 'Failed to analyze gemstone image',
+        code: 'AI_ERROR'
+      };
     } else if (!error.response) {
       Toast.error('Network error. Please check your connection.');
+      return {
+        success: false,
+        error: 'Network error',
+        code: 'NETWORK_ERROR'
+      };
     }
+    
+    // Generic error handling
+    const errorMessage = error.response?.data?.error?.message || 
+                        error.response?.data?.message || 
+                        error.message || 
+                        'Analysis failed';
+    
+    Toast.error(errorMessage);
     
     return {
       success: false,
-      error: error.response?.data?.message || error.message || 'Analysis failed',
+      error: errorMessage,
+      code: error.response?.data?.error?.code || 'UNKNOWN_ERROR'
     };
   }
 };
@@ -377,7 +434,18 @@ export const analyzeGemstone = async (imageData) => {
  */
 export const validateImageFile = (file) => {
   const maxSize = 5 * 1024 * 1024; // 5MB
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  const allowedTypes = [
+    'image/jpeg', 
+    'image/jpg', 
+    'image/png', 
+    'image/webp',
+    'image/heic',
+    'image/heif',
+    'image/bmp',
+    'image/gif',
+    'image/tiff',
+    'image/svg+xml'
+  ];
   
   if (!file) {
     return { valid: false, error: 'No file provided' };
@@ -386,7 +454,7 @@ export const validateImageFile = (file) => {
   if (!allowedTypes.includes(file.type)) {
     return { 
       valid: false, 
-      error: 'Invalid file type. Please use JPG, PNG, or WEBP format.' 
+      error: 'Invalid file type. Please use common image formats (JPG, PNG, WEBP, HEIC, BMP, GIF, etc.).' 
     };
   }
   

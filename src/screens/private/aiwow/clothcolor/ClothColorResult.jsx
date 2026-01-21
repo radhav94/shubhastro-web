@@ -5,35 +5,196 @@ import { Toast } from '../../../../component';
 
 const ClothColorResult = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('recommended');
   const [resultData, setResultData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedResult = localStorage.getItem('clothColorResult');
     const storedImage = localStorage.getItem('clothColorImage');
+    const storedFormData = localStorage.getItem('clothColorFormData');
     
     if (storedResult) {
       try {
         const parsedResult = JSON.parse(storedResult);
         const apiData = parsedResult.data || parsedResult;
+        const formData = storedFormData ? JSON.parse(storedFormData) : {};
         
         setResultData({
-          image: apiData.clothesImage || storedImage,
-          matchPercentage: apiData.auraMatchScore || apiData.matchPercentage || 50,
-          analysis: apiData.analysis || apiData.summary || 'Unfortunately, your clothes clash with your aura. This report highlights the colors that detract from your natural radiance and suggests alternative shades to enhance your overall appearance.',
+          image: storedImage,
+          intention: formData.intention || apiData.intention,
+          analysisDate: apiData.analysisDate,
+          dominantPlanet: apiData.dominantPlanet,
+          recommendedColors: apiData.recommendedColors || [],
+          suggestedCombinations: apiData.suggestedCombinations || [],
+          wardrobeAnalysis: apiData.wardrobeAnalysis,
+          colorsToAvoid: apiData.colorsToAvoid || [],
         });
       } catch (error) {
         console.error('Error parsing result:', error);
         Toast.error('Failed to load analysis results');
         navigate('/aiwow/cloth-color/instructions');
+        return;
       }
     } else {
       Toast.error('No analysis results found');
       navigate('/aiwow/cloth-color/instructions');
+      return;
     }
     
     setLoading(false);
   }, [navigate]);
+
+  const getIntentionLabel = (intention) => {
+    const labels = {
+      'focus_study': 'Focus & Study',
+      'career_success': 'Career Success',
+      'love_relationships': 'Love & Relationships',
+      'health_wellness': 'Health & Wellness',
+      'general_prosperity': 'General Prosperity',
+    };
+    return labels[intention] || intention;
+  };
+
+  const renderRecommended = () => (
+    <div className={styles.tabContent}>
+      {resultData.image && (
+        <div className={styles.clothImageWrapper}>
+          <img src={resultData.image} alt="Analyzed clothes" className={styles.clothImage} />
+        </div>
+      )}
+
+      <div className={styles.intentionCard}>
+        <h3 className={styles.cardTitle}>Analysis Details</h3>
+        <div className={styles.infoRow}>
+          <span className={styles.label}>Intention:</span>
+          <span className={styles.value}>{getIntentionLabel(resultData.intention)}</span>
+        </div>
+        <div className={styles.infoRow}>
+          <span className={styles.label}>Analysis Date:</span>
+          <span className={styles.value}>{resultData.analysisDate}</span>
+        </div>
+        <div className={styles.infoRow}>
+          <span className={styles.label}>Dominant Planet:</span>
+          <span className={styles.value}>{resultData.dominantPlanet}</span>
+        </div>
+      </div>
+
+      {resultData.recommendedColors && resultData.recommendedColors.length > 0 && (
+        <div className={styles.colorsCard}>
+          <h3 className={styles.cardTitle}>Recommended Colors</h3>
+          {resultData.recommendedColors.map((color, index) => (
+            <div key={index} className={styles.colorItem}>
+              <div className={styles.colorHeader}>
+                <div className={styles.colorInfo}>
+                  <div 
+                    className={styles.colorSwatch} 
+                    style={{ backgroundColor: color.hexCode }}
+                  ></div>
+                  <div>
+                    <h4 className={styles.colorName}>{color.colorName}</h4>
+                    <span className={styles.colorType}>{color.type} • {color.planet}</span>
+                  </div>
+                </div>
+                <span className={styles.hexCode}>{color.hexCode}</span>
+              </div>
+              <p className={styles.colorDescription}>{color.description}</p>
+              
+              {color.benefits && color.benefits.length > 0 && (
+                <>
+                  <h5 className={styles.subTitle}>Benefits</h5>
+                  <ul className={styles.benefitsList}>
+                    {color.benefits.map((benefit, idx) => (
+                      <li key={idx} className={styles.benefitItem}>{benefit}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              
+              <div className={styles.whenToWear}>
+                <span className={styles.whenLabel}>When to Wear:</span>
+                <span className={styles.whenValue}>{color.whenToWear}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderCombinations = () => (
+    <div className={styles.tabContent}>
+      {resultData.suggestedCombinations && resultData.suggestedCombinations.length > 0 && (
+        <div className={styles.combinationsCard}>
+          <h3 className={styles.cardTitle}>Suggested Color Combinations</h3>
+          {resultData.suggestedCombinations.map((combo, index) => (
+            <div key={index} className={styles.comboItem}>
+              <div className={styles.comboColors}>
+                {combo.colors.map((color, idx) => (
+                  <div key={idx} className={styles.comboColorBox}>
+                    <div 
+                      className={styles.comboSwatch} 
+                      style={{ backgroundColor: color.hexCode }}
+                    ></div>
+                    <span className={styles.comboColorName}>{color.colorName}</span>
+                  </div>
+                ))}
+              </div>
+              <p className={styles.comboDescription}>{combo.description}</p>
+              <div className={styles.comboOccasion}>
+                <span className={styles.occasionLabel}>Best For:</span>
+                <span className={styles.occasionValue}>{combo.occasion}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {resultData.wardrobeAnalysis && (
+        <div className={styles.wardrobeCard}>
+          <h3 className={styles.cardTitle}>Wardrobe Analysis</h3>
+          <p className={styles.wardrobeText}>{resultData.wardrobeAnalysis}</p>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderAvoid = () => (
+    <div className={styles.tabContent}>
+      {resultData.colorsToAvoid && resultData.colorsToAvoid.length > 0 && (
+        <div className={styles.avoidCard}>
+          <h3 className={styles.cardTitle}>Colors to Avoid</h3>
+          <p className={styles.avoidIntro}>
+            These colors may not be favorable for your intention on this day:
+          </p>
+          {resultData.colorsToAvoid.map((color, index) => (
+            <div key={index} className={styles.avoidItem}>
+              <div className={styles.avoidHeader}>
+                <div className={styles.avoidColorInfo}>
+                  <div 
+                    className={styles.avoidSwatch} 
+                    style={{ backgroundColor: color.hexCode }}
+                  ></div>
+                  <div>
+                    <h4 className={styles.avoidColorName}>{color.colorName}</h4>
+                    <span className={styles.avoidHex}>{color.hexCode}</span>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.avoidReason}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={styles.warningIcon}>
+                  <path d="M8 1L1 14H15L8 1Z" stroke="#f59e0b" strokeWidth="1.5" fill="none"/>
+                  <path d="M8 6V9" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="8" cy="11.5" r="0.5" fill="#f59e0b"/>
+                </svg>
+                <span className={styles.reasonText}>{color.reason}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   if (loading) {
     return (
@@ -57,35 +218,38 @@ const ClothColorResult = () => {
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        <h1 className={styles.title}>Colour Clothes Analysis</h1>
+        <h1 className={styles.title}>Color Analysis</h1>
       </header>
 
       <div className={styles.content}>
-        <div className={styles.resultHeader}>
-          <h2 className={styles.resultTitle}>Result</h2>
-          <p className={styles.resultSubtitle}>Your personalized colour clothes analysis report is ready!</p>
+        <div className={styles.tabs}>
+          <button
+            className={`${styles.tab} ${activeTab === 'recommended' ? styles.active : ''}`}
+            onClick={() => setActiveTab('recommended')}
+          >
+            Recommended
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'combinations' ? styles.active : ''}`}
+            onClick={() => setActiveTab('combinations')}
+          >
+            Combinations
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'avoid' ? styles.active : ''}`}
+            onClick={() => setActiveTab('avoid')}
+          >
+            Avoid
+          </button>
         </div>
 
-        <div className={styles.clothImageWrapper}>
-          <img 
-            src={resultData.image} 
-            alt="Analyzed clothes" 
-            className={styles.clothImage}
-          />
-        </div>
+        {activeTab === 'recommended' && renderRecommended()}
+        {activeTab === 'combinations' && renderCombinations()}
+        {activeTab === 'avoid' && renderAvoid()}
 
-        <div className={styles.matchSection}>
-          <h3 className={styles.matchTitle}>Your clothes match</h3>
-          <div className={styles.matchPercentage}>
-            {resultData.matchPercentage}% of your aura.
-          </div>
-        </div>
-
-        <div className={styles.analysisSection}>
-          <p className={styles.analysisText}>
-            {resultData.analysis}
-          </p>
-        </div>
+        <button className={styles.doneButton} onClick={() => navigate('/aiwow')}>
+          Done
+        </button>
       </div>
     </div>
   );
