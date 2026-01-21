@@ -61,11 +61,15 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           const { data: userData } = response.data;
           const accessToken = userData.accessToken;
           const refreshToken = userData.refreshToken;
+          
+          // Set role FIRST before setting tokens
+          localStorage.setItem("shubhtalk_role", "CUSTOMER");
+          
           // Store with keys that TopBar expects
           localStorage.setItem("accessToken", accessToken);
           localStorage.setItem("refreshToken", refreshToken);
-          localStorage.setItem("shubhtalk_customer_token", accessToken); // For TopBar
-          localStorage.setItem("shubhtalk_role", "CUSTOMER"); // For TopBar
+          localStorage.setItem("shubhtalk_customer_token", accessToken);
+          localStorage.setItem("shubhtalk_customer_id", userData._id); // Add customer ID
           localStorage.setItem("userData", JSON.stringify(userData));
           
           // Store user in the format that getUserFromStorage expects
