@@ -3,7 +3,7 @@ import NestedTabs from "../../../../component/UI/tabs/nestedtabs/NestedTabs";
 import { useSelector } from "react-redux";
 import General from "./generalWrapper/general/General";
 import Planetary from "./generalWrapper/planetary/Planetary";
-import Vimshottari from "./generalWrapper/vimshottari/Vimshottari";
+import Vimshottari from "../DashaContent/Vimshottari";
 import Yoga from "./generalWrapper/yoga/Yoga";
 import FreeReport from "../FreeReportContent/FreeReportContent";
 import Rudraksha from "./remedies/rudraksha/Rudraksha";

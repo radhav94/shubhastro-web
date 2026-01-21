@@ -17,11 +17,11 @@ const Profile = () => {
   const transactionListRef = useRef(null)
   const user = getUserFromStorage()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Guest User'
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [allLoadedTransactions, setAllLoadedTransactions] = useState([])
-  
+
   // Delete confirmation state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [kundliToDelete, setKundliToDelete] = useState(null)
@@ -29,7 +29,7 @@ const Profile = () => {
   // Fetch saved kundli profiles
   const { data: kundliData, isLoading: isLoadingKundlis, refetch: refetchKundlis } = useGetAllKundlisQuery()
   const savedKundlis = kundliData?.data || []
-  
+
   // Delete kundli mutation
   const [deleteKundli, { isLoading: isDeletingKundli }] = useDeleteKundliMutation()
 
@@ -38,15 +38,15 @@ const Profile = () => {
 
   // Fetch transactions data with pagination - only when on Transactions tab
   const shouldFetch = activeTab === 'Transactions' && transactionSubTab === 'Transaction History'
-  
+
   const { data: transactionsData, isFetching: isFetchingTransactions } = useGetTransactionsQuery(
     { page: currentPage, limit: 10 },
     { skip: !shouldFetch }
   )
-  
+
   const pagination = transactionsData?.data?.pagination
   const hasNextPage = pagination?.hasNextPage || false
-  
+
   // Update loaded transactions when new data arrives
   useEffect(() => {
     if (transactionsData?.data?.transactions && shouldFetch) {
@@ -57,23 +57,23 @@ const Profile = () => {
       }
     }
   }, [transactionsData, currentPage, shouldFetch])
-  
+
   // Infinite scroll handler
   const handleScroll = (e) => {
     const element = e.target
     const isAtBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 50
-    
+
     if (isAtBottom && hasNextPage && !isFetchingTransactions) {
       setCurrentPage(prev => prev + 1)
     }
   }
-  
+
   // Delete kundli handlers
   const handleDeleteClick = (kundliId) => {
     setKundliToDelete(kundliId)
     setShowDeleteConfirm(true)
   }
-  
+
   const handleDeleteConfirm = async () => {
     if (kundliToDelete) {
       try {
@@ -86,7 +86,7 @@ const Profile = () => {
     setShowDeleteConfirm(false)
     setKundliToDelete(null)
   }
-  
+
   const handleDeleteCancel = () => {
     setShowDeleteConfirm(false)
     setKundliToDelete(null)
@@ -100,7 +100,7 @@ const Profile = () => {
       const container = activeButton.parentElement
       const containerRect = container.getBoundingClientRect()
       const buttonRect = activeButton.getBoundingClientRect()
-      
+
       setPillStyle({
         width: `${buttonRect.width}px`,
         transform: `translateX(${buttonRect.left - containerRect.left - 4}px)`
@@ -108,20 +108,34 @@ const Profile = () => {
     }
   }, [activeTab])
 
+  const handleLogout = () => {
+    // Clear all authentication related data from localStorage
+    localStorage.removeItem("shubhtalk_customer_token");
+    localStorage.removeItem("shubhtalk_role");
+    localStorage.removeItem("shubhtalk_user");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userData");
+    localStorage.removeItem("astro_wallet_balance");
+    
+    // Navigate to home page
+    navigate("/");
+  };
+
   return (
     <div className={styles.profilePage}>
       <div className={styles.profileHeader}>
         <button className={styles.backButton} onClick={() => navigate(-1)}>
           <ChevronLeft size={24} />
         </button>
-        
+
         <div className={styles.profileInfo}>
           <h1 className={styles.profileName}>{userName}</h1>
           <p className={styles.profileDetails}>{user?.phoneNumber || 'Phone not available'}</p>
         </div>
-        
+
         <div className={styles.logoutSection}>
-          <button className={styles.logoutButton}>
+          <button className={styles.logoutButton} onClick={handleLogout}>
             <div className={styles.logoutIcon}>
               <LogOut size={20} />
             </div>
@@ -129,7 +143,7 @@ const Profile = () => {
           <span className={styles.logoutText}>Logout</span>
         </div>
       </div>
-      
+
       <div className={styles.profileContainer}>
         <div className={styles.topSection}>
           <div className={styles.zodiacCards}>
@@ -142,7 +156,7 @@ const Profile = () => {
                 <span className={styles.zodiacValue}>Pisces</span>
               </div>
             </div>
-            
+
             <div className={styles.zodiacCard}>
               <div className={styles.zodiacIcon}>
                 <Moon size={28} />
@@ -152,7 +166,7 @@ const Profile = () => {
                 <span className={styles.zodiacValue}>Gemini</span>
               </div>
             </div>
-            
+
             <div className={styles.zodiacCard}>
               <div className={styles.zodiacIcon}>
                 <ArrowUp size={28} />
@@ -163,7 +177,7 @@ const Profile = () => {
               </div>
             </div>
           </div>
-          
+
           <div className={styles.balanceCard}>
             <div className={styles.balanceInfo}>
               <div className={styles.balanceHeader}>
@@ -174,14 +188,14 @@ const Profile = () => {
                 {isFetchingBalance ? '...' : `₹${balance || 0}`}
               </div>
             </div>
-            
+
             <button className={styles.addMinutesButton} onClick={() => navigate('/recharge')}>
               Add Shubh Minutes
               <ArrowRight size={20} />
             </button>
           </div>
         </div>
-        
+
         <div className={styles.bottomSection}>
           <div className={styles.tabsSection}>
             <div className={styles.tabsContainer}>
@@ -197,7 +211,7 @@ const Profile = () => {
                 </button>
               ))}
             </div>
-            
+
             <div className={styles.tabContent}>
               {activeTab === 'Profile' && (
                 <div className={styles.tabPanel}>
@@ -222,8 +236,8 @@ const Profile = () => {
                                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                     </svg>
                                   </button>
-                                  <button 
-                                    className={styles.actionIconBtn} 
+                                  <button
+                                    className={styles.actionIconBtn}
                                     onClick={() => handleDeleteClick(kundli._id)}
                                     disabled={isDeletingKundli}
                                   >
@@ -242,7 +256,7 @@ const Profile = () => {
                             </div>
                           ))}
                         </div>
-                        
+
                         <button className={styles.addProfileButton} onClick={() => navigate('/kundli')}>
                           + Add Profile
                         </button>
@@ -260,7 +274,7 @@ const Profile = () => {
                   </div>
                 </div>
               )}
-              
+
               {activeTab === 'Order History' && (
                 <div className={styles.tabPanel}>
                   <div className={styles.orderHistoryHeader}>
@@ -270,7 +284,7 @@ const Profile = () => {
                       <button className={styles.filterButton}>Sort By</button>
                     </div>
                   </div>
-                  
+
                   <div className={styles.ordersList}>
                     <h3 className={styles.yearDivider}>2025</h3>
                     <div className={styles.orderCard} onClick={() => navigate('/order-details/1896')} style={{ cursor: 'pointer' }}>
@@ -306,7 +320,7 @@ const Profile = () => {
                       </div>
                     </div>
                     <h3 className={styles.yearDivider}>2024</h3>
-                    
+
                     <div className={styles.orderCard} onClick={() => navigate('/order-details/1896')} style={{ cursor: 'pointer' }}>
                       <div className={styles.orderMain}>
                         <div className={styles.orderAvatar}></div>
@@ -342,7 +356,7 @@ const Profile = () => {
                   </div>
                 </div>
               )}
-              
+
               {activeTab === 'Transactions' && (
                 <div className={styles.tabPanel}>
                   <div className={styles.transactionsContentWrapper}>
@@ -360,8 +374,8 @@ const Profile = () => {
                         Payment Logs
                       </button>
                     </div>
-                    
-                    <div 
+
+                    <div
                       className={styles.transactionsListContainer}
                       ref={transactionListRef}
                       onScroll={handleScroll}
@@ -392,7 +406,7 @@ const Profile = () => {
                               </div>
                             ) : null}
                           </div>
-                          
+
                           {isFetchingTransactions && (
                             <div style={{ textAlign: 'center', padding: '20px' }}>
                               <p>Loading...</p>
@@ -400,7 +414,7 @@ const Profile = () => {
                           )}
                         </>
                       )}
-                      
+
                       {transactionSubTab === 'Payment Logs' && (
                         <div className={styles.transactionsList}>
                           <div className={styles.transactionItem}>
@@ -410,7 +424,7 @@ const Profile = () => {
                             </div>
                             <span className={`${styles.transactionAmount} ${styles.positive}`}>+ ₹200</span>
                           </div>
-                          
+
                           <div className={styles.transactionItem}>
                             <div className={styles.transactionDetails}>
                               <p className={styles.transactionId}>#1896 • Oct 01, 2025 • 04:36 PM</p>
@@ -418,7 +432,7 @@ const Profile = () => {
                             </div>
                             <span className={`${styles.transactionAmount} ${styles.positive}`}>+ ₹200</span>
                           </div>
-                          
+
                           <div className={styles.transactionItem}>
                             <div className={styles.transactionDetails}>
                               <p className={styles.transactionId}>#1896 • Oct 01, 2025 • 04:36 PM</p>
@@ -426,7 +440,7 @@ const Profile = () => {
                             </div>
                             <span className={`${styles.transactionAmount} ${styles.positive}`}>+ ₹200</span>
                           </div>
-                          
+
                           <div className={styles.transactionItem}>
                             <div className={styles.transactionDetails}>
                               <p className={styles.transactionId}>#1896 • Oct 01, 2025 • 04:36 PM</p>
@@ -434,7 +448,7 @@ const Profile = () => {
                             </div>
                             <span className={`${styles.transactionAmount} ${styles.negative}`}>- ₹50</span>
                           </div>
-                          
+
                           <div className={styles.transactionItem}>
                             <div className={styles.transactionDetails}>
                               <p className={styles.transactionId}>#1896 • Oct 01, 2025 • 04:36 PM</p>
@@ -442,7 +456,7 @@ const Profile = () => {
                             </div>
                             <span className={`${styles.transactionAmount} ${styles.positive}`}>+ ₹200</span>
                           </div>
-                          
+
                           <div className={styles.transactionItem}>
                             <div className={styles.transactionDetails}>
                               <p className={styles.transactionId}>#1896 • Oct 01, 2025 • 04:36 PM</p>
@@ -450,7 +464,7 @@ const Profile = () => {
                             </div>
                             <span className={`${styles.transactionAmount} ${styles.positive}`}>+ ₹200</span>
                           </div>
-                          
+
                           <div className={styles.transactionItem}>
                             <div className={styles.transactionDetails}>
                               <p className={styles.transactionId}>#1896 • Oct 01, 2025 • 04:36 PM</p>
@@ -461,14 +475,14 @@ const Profile = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     <button className={styles.contactSupportButton}>
                       Contact Support
                     </button>
                   </div>
                 </div>
               )}
-              
+
               {activeTab === 'Support' && (
                 <div className={styles.tabPanel}>
                   <div className={styles.supportGrid}>
@@ -477,29 +491,29 @@ const Profile = () => {
                       <h3 className={styles.supportTitle}>Customer Support</h3>
                       <p className={styles.supportDescription}>Chat with our team for quick help on app or consultation queries.</p>
                     </div>
-                    
+
                     <div className={styles.supportCard} onClick={() => navigate('/faqs')} style={{ cursor: 'pointer' }}>
                       <div className={styles.supportIcon}></div>
                       <h3 className={styles.supportTitle}>FAQs</h3>
                       <p className={styles.supportDescription}>Find quick answers to common astrology and app questions.</p>
                     </div>
-                    
+
                     <div className={styles.supportCard} onClick={() => navigate('/recent-tickets')} style={{ cursor: 'pointer' }}>
                       <div className={styles.supportIcon}></div>
                       <h3 className={styles.supportTitle}>Recent Tickets</h3>
                       <p className={styles.supportDescription}>Track updates on your latest support requests.</p>
                     </div>
-                    
+
                     <div className={styles.supportCard} onClick={() => navigate('/privacy-security')} style={{ cursor: 'pointer' }}>
                       <div className={styles.supportIcon}></div>
                       <h3 className={styles.supportTitle}>Privacy & Security</h3>
                       <p className={styles.supportDescription}>Manage your data and privacy preferences.</p>
                     </div>
                   </div>
-                  
+
                   <div className={styles.supportOthers}>
                     <h3 className={styles.othersHeading}>Others</h3>
-                    
+
                     <div className={styles.supportListItem}>
                       <div className={styles.supportListContent}>
                         <h4 className={styles.supportListTitle}>App Feedback</h4>
@@ -509,7 +523,7 @@ const Profile = () => {
                         <ArrowRight size={24} />
                       </button>
                     </div>
-                    
+
                     <div className={styles.supportListItem}>
                       <div className={styles.supportListContent}>
                         <h4 className={styles.supportListTitle}>Community Guidelines</h4>
@@ -526,7 +540,7 @@ const Profile = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className={styles.modalOverlay} onClick={handleDeleteCancel}>
@@ -537,8 +551,8 @@ const Profile = () => {
               <button className={`${styles.modalBtn} ${styles.cancelBtn}`} onClick={handleDeleteCancel}>
                 Cancel
               </button>
-              <button 
-                className={`${styles.modalBtn} ${styles.deleteBtn}`} 
+              <button
+                className={`${styles.modalBtn} ${styles.deleteBtn}`}
                 onClick={handleDeleteConfirm}
                 disabled={isDeletingKundli}
               >

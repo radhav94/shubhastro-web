@@ -10,7 +10,7 @@ import {
 import styles from "./TalkToAstrologer.module.scss";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTalkToAstrologer } from "./useTalkToAstrologer";
-import { useGetAstrologersQuery } from "../../../redux/api/astrologer/astrologerApi";
+import { useGetAstrologersQuery, useGetRecommendedAstrologersQuery } from "../../../redux/api/astrologer/astrologerApi";
 import FilterChips from "../../../component/UI/chips/astrologer/FilterChips";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import KundliSelectModal from "./kundliSelect/KundliSelectModal";
@@ -29,6 +29,7 @@ import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
 import ChatAstrologerCard from "../../../component/UI/cards/ChatAstrologerCard";
 import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
+import RecommendedAstrologerCard from "../../../component/UI/cards/RecommendedAstrologerCard";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -186,7 +187,10 @@ const TalkToAstrologer = () => {
     ...(isActiveOnline === true && { isActive: true }),
   });
 
+  const { data: recommendedData, isLoading: isLoadingRecommended } = useGetRecommendedAstrologersQuery();
+
   const data = astrodata?.data || [];
+  const recommendedAstrologers = recommendedData?.data || [];
   const token = getToken();
   const { balance } = useWalletBalance();
   const [getBalance] = useGetBalanceMutation();
@@ -216,7 +220,7 @@ const TalkToAstrologer = () => {
     }
 
     setHasMore(data.length >= limit);
-  }, [data, page, activeType]); // 👈 MUST add page here!!
+  }, [data, page, activeType]);
 
   const hasMoreRef = useRef(hasMore);
   const isFetchingRef = useRef(isFetching);
@@ -250,15 +254,23 @@ const TalkToAstrologer = () => {
           setPage((prev) => prev + 1);
         }
       },
-      { threshold: 1 }
+      { 
+        threshold: 0.1,
+        rootMargin: '100px'
+      }
     );
 
-    if (loadMoreRef.current) observer.observe(loadMoreRef.current);
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
 
     return () => {
-      if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
     };
-  }, [isFetching, hasMore, isFiltered]);
+  }, [isFetching, hasMore, isFiltered, allAstrologers, page]);
 
   // Filter handlers
   const resetFilters = () => {
@@ -655,6 +667,13 @@ const TalkToAstrologer = () => {
         isOnlineFromURL={isOnlineFromURL}
       />
 
+      <div className={styles.sectionDivider}>
+        <h2 className={styles.sectionTitle}>EXPLORE ASTROLOGERS</h2>
+        <div className={styles.dividerLine}>
+          <span className={styles.dividerDot}>☾</span>
+        </div>
+      </div>
+
       <div className={styles.cardsContainer}>
         {allAstrologers.map((astro, index) => (
           <div key={astro._id} className={styles.cardWrapper}>
@@ -707,6 +726,34 @@ const TalkToAstrologer = () => {
         {isFetching && <PrimaryLoader />}
       </div>
 
+      {!hasMore && allAstrologers.length > 0 && (
+        <div className={styles.matchSection}>
+          <h2 className={styles.matchTitle}>
+            NOT SURE?<br />
+            LET US MATCH YOU.
+          </h2>
+          <div className={styles.dividerLine}>
+            <span className={styles.dividerDot}>☾</span>
+          </div>
+
+          {isLoadingRecommended ? (
+            <div className={styles.loaderWrapper}>
+              <PrimaryLoader />
+            </div>
+          ) : (
+            <div className={styles.recommendedGrid}>
+              {recommendedAstrologers.map((astro) => (
+                <div key={astro._id} className={styles.cardWrapper}>
+                  <RecommendedAstrologerCard
+                    data={astro}
+                    onConnect={() => handleChatStart(astro)}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       <DetailsModal
         onClose={() => setOpenModal((prev) => ({ ...prev, details: false }))}
         isOpen={openModal.details}

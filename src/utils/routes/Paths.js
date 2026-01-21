@@ -101,6 +101,33 @@ import Yearly from "../../screens/private/horoscope/yearlyHoroscope/Yearly";
 import HoroscopeNew from "../../screens/private/horoscope/Horoscope";
 import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
 import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
+import AIWow from "../../screens/private/aiwow/AIWow";
+import PalmistryLanding from "../../screens/private/aiwow/palmistry/PalmistryLanding";
+import PalmistryInstructions from "../../screens/private/aiwow/palmistry/PalmistryInstructions";
+import PalmistryCamera from "../../screens/private/aiwow/palmistry/PalmistryCamera";
+import PalmistryAnalysis from "../../screens/private/aiwow/palmistry/PalmistryAnalysis";
+import PalmistryResult from "../../screens/private/aiwow/palmistry/PalmistryResult";
+import FaceReadingLanding from "../../screens/private/aiwow/facereading/FaceReadingLanding";
+import FaceReadingInstructions from "../../screens/private/aiwow/facereading/FaceReadingInstructions";
+import FaceReadingCamera from "../../screens/private/aiwow/facereading/FaceReadingCamera";
+import FaceReadingAnalysis from "../../screens/private/aiwow/facereading/FaceReadingAnalysis";
+import FaceReadingResult from "../../screens/private/aiwow/facereading/FaceReadingResult";
+import SignatureLanding from "../../screens/private/aiwow/signature/SignatureLanding";
+import SignatureInstructions from "../../screens/private/aiwow/signature/SignatureInstructions";
+import SignatureCamera from "../../screens/private/aiwow/signature/SignatureCamera";
+import SignatureAnalysis from "../../screens/private/aiwow/signature/SignatureAnalysis";
+import SignatureResult from "../../screens/private/aiwow/signature/SignatureResult";
+import GemstoneLanding from "../../screens/private/aiwow/gemstone/GemstoneLanding";
+import GemstoneInstructions from "../../screens/private/aiwow/gemstone/GemstoneInstructions";
+import GemstoneCamera from "../../screens/private/aiwow/gemstone/GemstoneCamera";
+import GemstoneAnalysis from "../../screens/private/aiwow/gemstone/GemstoneAnalysis";
+import GemstoneResult from "../../screens/private/aiwow/gemstone/GemstoneResult";
+import ClothColorLanding from "../../screens/private/aiwow/clothcolor/ClothColorLanding";
+import ClothColorForm from "../../screens/private/aiwow/clothcolor/ClothColorForm";
+import ClothColorInstructions from "../../screens/private/aiwow/clothcolor/ClothColorInstructions";
+import ClothColorCamera from "../../screens/private/aiwow/clothcolor/ClothColorCamera";
+import ClothColorAnalysis from "../../screens/private/aiwow/clothcolor/ClothColorAnalysis";
+import ClothColorResult from "../../screens/private/aiwow/clothcolor/ClothColorResult";
 import SingleCallHistory from "../../screens/private/orderHistory/components/Call/SingleCallHistory";
 import SingleChatHistory from "../../screens/private/orderHistory/components/Chat/SingleChatHistory";
 import OrderHistory from "../../screens/private/orderHistory/OrderHistory";
@@ -126,7 +153,8 @@ import TarotCardDetailPage from "../../screens/private/v2/tarot/TarotCardDetailP
 import TarotCardSelectionPage from "../../screens/private/v2/tarot/TarotCardSelectionPage";
 import LoveTriangleSelectionPage from "../../screens/private/v2/tarot/LoveTriangleSelectionPage";
 import LoveTriangleResultPage from "../../screens/private/v2/tarot/LoveTriangleResultPage";
-import Home from "../../screens/v2/home/Home"
+import Home from "../../screens/v2/home/Home";
+import Profile from "../../screens/v2/user/Profile";
 
 export const PATH = {
   // DEFAULT: {
@@ -184,20 +212,20 @@ export const PATH = {
     ASTRO_LIVE_STREAMING: {
       path: "/astrologer-dashboard/live-streaming",
       element: InteractiveLiveStreaming,
-     
     },
 
-   AUDIENCE_LIVE_STREAMING: {
-  path: "/live",
-  element: LivePlayerPage,
-  // header: false,
-  footer: false,
-},
-
+    AUDIENCE_LIVE_STREAMING: {
+      path: "/live",
+      element: LivePlayerPage,
+      // header: false,
+      footer: false,
+    },
 
     PROFILE: {
       path: "/profile",
       element: Profile,
+      header: false,
+      footer: false,
     },
     TALK_TO_ASTROLOGER: {
       path: "/talk-to-astrologers",
@@ -301,6 +329,7 @@ export const PATH = {
     KUNDLI: {
       path: "/kundli",
       element: Kundli,
+      header: false,
     },
     KUNDLI_BY_ID: {
       path: "/kundli/:kundliId",
@@ -316,6 +345,7 @@ export const PATH = {
     NUMEROLOGY: {
       path: "/numerology",
       element: Numerology,
+      header: false,
     },
     LOVE_CALC: {
       path: "/love-calculator",
@@ -461,6 +491,117 @@ export const PATH = {
       path: "/numerology/life-path/life-path-details",
       element: LifePathDetails,
     },
+
+    // AI WOW
+    AI_WOW: {
+      path: "/aiwow",
+      element: AIWow,
+    },
+    PALMISTRY_LANDING: {
+      path: "/aiwow/palmistry",
+      element: PalmistryLanding,
+    },
+    PALMISTRY_INSTRUCTIONS: {
+      path: "/aiwow/palmistry/instructions",
+      element: PalmistryInstructions,
+    },
+    PALMISTRY_CAMERA: {
+      path: "/aiwow/palmistry/camera",
+      element: PalmistryCamera,
+    },
+    PALMISTRY_ANALYSIS: {
+      path: "/aiwow/palmistry/capture",
+      element: PalmistryAnalysis,
+    },
+    PALMISTRY_RESULT: {
+      path: "/aiwow/palmistry/result",
+      element: PalmistryResult,
+    },
+    FACE_READING_LANDING: {
+      path: "/aiwow/face-reading",
+      element: FaceReadingLanding,
+    },
+    FACE_READING_INSTRUCTIONS: {
+      path: "/aiwow/face-reading/instructions",
+      element: FaceReadingInstructions,
+    },
+    FACE_READING_CAMERA: {
+      path: "/aiwow/face-reading/camera",
+      element: FaceReadingCamera,
+    },
+    FACE_READING_ANALYSIS: {
+      path: "/aiwow/face-reading/capture",
+      element: FaceReadingAnalysis,
+    },
+    FACE_READING_RESULT: {
+      path: "/aiwow/face-reading/result",
+      element: FaceReadingResult,
+    },
+    SIGNATURE_LANDING: {
+      path: "/aiwow/signature",
+      element: SignatureLanding,
+    },
+    SIGNATURE_INSTRUCTIONS: {
+      path: "/aiwow/signature/instructions",
+      element: SignatureInstructions,
+    },
+    SIGNATURE_CAMERA: {
+      path: "/aiwow/signature/camera",
+      element: SignatureCamera,
+    },
+    SIGNATURE_ANALYSIS: {
+      path: "/aiwow/signature/capture",
+      element: SignatureAnalysis,
+    },
+    SIGNATURE_RESULT: {
+      path: "/aiwow/signature/result",
+      element: SignatureResult,
+    },
+    GEMSTONE_LANDING: {
+      path: "/aiwow/gemstone",
+      element: GemstoneLanding,
+    },
+    GEMSTONE_INSTRUCTIONS: {
+      path: "/aiwow/gemstone/instructions",
+      element: GemstoneInstructions,
+    },
+    GEMSTONE_CAMERA: {
+      path: "/aiwow/gemstone/camera",
+      element: GemstoneCamera,
+    },
+    GEMSTONE_ANALYSIS: {
+      path: "/aiwow/gemstone/capture",
+      element: GemstoneAnalysis,
+    },
+    GEMSTONE_RESULT: {
+      path: "/aiwow/gemstone/result",
+      element: GemstoneResult,
+    },
+    CLOTH_COLOR_LANDING: {
+      path: "/aiwow/cloth-color",
+      element: ClothColorLanding,
+    },
+    CLOTH_COLOR_FORM: {
+      path: "/aiwow/cloth-color/form",
+      element: ClothColorForm,
+    },
+    CLOTH_COLOR_INSTRUCTIONS: {
+      path: "/aiwow/cloth-color/instructions",
+      element: ClothColorInstructions,
+    },
+    CLOTH_COLOR_CAMERA: {
+      path: "/aiwow/cloth-color/camera",
+      element: ClothColorCamera,
+    },
+    CLOTH_COLOR_ANALYSIS: {
+      path: "/aiwow/cloth-color/capture",
+      element: ClothColorAnalysis,
+    },
+    CLOTH_COLOR_RESULT: {
+      path: "/aiwow/cloth-color/result",
+      element: ClothColorResult,
+    },
+
     //Compatibility
     COMPATIBILITY: {
       path: "/compatibility",
@@ -627,6 +768,7 @@ export const PATH = {
       path: "/astrologer/:id",
       element: AstrologerProfile,
       header: false,
+      footer: false,
     },
 
     VIDEO_CALL: {
@@ -694,16 +836,16 @@ export const PATH = {
       path: "/wallet-transactions",
       element: WalletTranscations,
     },
-     OrderHistory: {
+    OrderHistory: {
       path: "/order-history",
       element: OrderHistory,
     },
 
-     UserChatHistory: {
+    UserChatHistory: {
       path: "/order-history/:roomId",
       element: SingleChatHistory,
     },
-     UserCallHistory: {
+    UserCallHistory: {
       path: "/order-history/call",
       element: SingleCallHistory,
     },

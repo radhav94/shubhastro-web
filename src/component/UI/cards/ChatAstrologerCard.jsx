@@ -2,8 +2,10 @@ import styles from "./ChatAstrologerCard.module.scss";
 import { FaStar } from "react-icons/fa";
 import { PiBookOpenTextLight } from "react-icons/pi";
 import astrologerImage from "../../../assets/images/top-rated-1.svg";
+import { useNavigate } from "react-router-dom";
 
 const ChatAstrologerCard = ({ data, onConnect }) => {
+  const navigate = useNavigate();
   // Handle rating - use rating field or default to 4.5
   const rating = data?.rating || 4.5;
   
@@ -59,7 +61,11 @@ const ChatAstrologerCard = ({ data, onConnect }) => {
       </div>
 
       <div className={styles.infoSection}>
-        <h3 className={styles.name}>
+        <h3 
+          className={styles.name}
+          onClick={() => navigate(`/astrologer/${data?.astrologerId || data?._id}`)}
+          style={{ cursor: 'pointer' }}
+        >
           {data?.firstName} {data?.lastName}
         </h3>
 

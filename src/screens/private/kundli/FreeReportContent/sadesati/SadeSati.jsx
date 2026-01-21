@@ -23,47 +23,81 @@ const SadeSati = () => {
     }
     : skipToken;
 
-  const { data:sadeSatiTableResponse, isLoading } = useGetSadeSatiTableQuery(queryArgs);
+  const { data: sadeSatiTableResponse, isLoading } = useGetSadeSatiTableQuery(queryArgs);
   const sadeSatiTableData = sadeSatiTableResponse?.response;
-  const { data:sadeSatiResponse } = useGetSadesatiQuery(queryArgs);
+  const { data: sadeSatiResponse } = useGetSadesatiQuery(queryArgs);
   const sadeSatiData = sadeSatiResponse?.response;
   const isInSadeSati = sadeSatiData?.shani_period_type;
 
+  if (isLoading) {
+    return <PrimaryLoader isLoading={isLoading} />;
+  }
+
+  if (!sadeSatiData) {
+    return (
+      <div className={styles.emptyState}>
+        <p>No Sade Sati data available</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full">
-      <PrimaryLoader isLoading={isLoading} />
-      <div className={styles.wrapper}>
-        <div className={styles.statusCard}>
-          <p className={styles.statusTitle}>
+    <div className={styles.wrapper}>
+      {/* Header Card */}
+      <div className={styles.headerCard}>
+        <div className={styles.headerOverlay}></div>
+        <div className={styles.headerContent}>
+          <h1 className={styles.headerTitle}>
             {isInSadeSati
               ? "You Are in Sade Sati Period"
               : "You Are Not in Sade Sati"}
-          </p>
-          <p className={styles.statusMessage}>{sadeSatiData?.bot_response}</p>
-          <p className={styles.dateText}>
-            As on {sadeSatiData?.date_considered}
-          </p>
-        </div>
-        {sadeSatiData?.remedies?.length > 0 && (
-          <div className={styles.card}>
-            <div className={styles.headingBox}>
-              <GiMeditation className={styles.headingIcon} />
-              <p className={styles.heading}>Recommended Remedies</p>
-            </div>
+          </h1>
 
-            <div className={styles.remediesGrid}>
-              {sadeSatiData.remedies.map((item, i) => (
-                <div key={i} className={styles.remedyItem}>
-                  <MdOutlineTipsAndUpdates className={styles.remedyIcon} />
-                  <p>{item}</p>
-                </div>
-              ))}
+          <div className={styles.statsGrid}>
+            <div className={styles.statCard}>
+              <span className={styles.statLabel}>Period Type</span>
+              <span className={styles.statValue}>
+                {sadeSatiData.shani_period_type || "N/A"}
+              </span>
             </div>
           </div>
-        )}
-        <Table sadeSatiTableData={sadeSatiTableData} />
+
+          {sadeSatiData.bot_response && (
+            <div className={styles.summaryCard}>
+              <h3 className={styles.summaryTitle}>Analysis</h3>
+              <p className={styles.summaryText}>{sadeSatiData.bot_response}</p>
+            </div>
+          )}
+
+          {sadeSatiData.date_considered && (
+            <p className={styles.dateText}>
+              As on {sadeSatiData.date_considered}
+            </p>
+          )}
+        </div>
       </div>
-    </div >
+
+      {/* Remedies Section */}
+      {sadeSatiData?.remedies?.length > 0 && (
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            <span className={styles.sectionIcon}>🙏</span>
+            Recommended Remedies
+          </h2>
+          <div className={styles.remediesGrid}>
+            {sadeSatiData.remedies.map((item, i) => (
+              <div key={i} className={styles.remedyItem}>
+                <MdOutlineTipsAndUpdates className={styles.remedyIcon} />
+                <p>{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Table */}
+      <Table sadeSatiTableData={sadeSatiTableData} />
+    </div>
   );
 };
 
