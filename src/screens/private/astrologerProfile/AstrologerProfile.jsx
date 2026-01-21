@@ -21,6 +21,8 @@ import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import { useTalkToAstrologer } from "../talkToAstrologer/useTalkToAstrologer";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import KundliSelectModal from "../talkToAstrologer/kundliSelect/KundliSelectModal";
+import { useAddAstrologerReviewMutation, useGetAstrologerReviewsQuery } from "../../../redux/api/review/reviewApi";
+import FeedbackModal from "../home/components/chats/FeedbackModal";
 
 // Import custom SVG icons
 import ExperienceIcon from "../../../assets/icons/experience.svg";
@@ -45,10 +47,22 @@ const AstrologerProfile = () => {
     isLoading,
     error,
   } = useGetAstrologerByIdQuery({ id }, { skip: !id });
+
+  const data = astrologerData?.data;
+
+  const {
+    data: reviewsData,
+    isLoading: reviewsLoading,
+    refetch: refetchReviews,
+  } = useGetAstrologerReviewsQuery(
+    { astrologerID: data?.astrologer_ID, page: 1, limit: 10 },
+    { skip: !data?.astrologer_ID }
+  );
   
   const isInitiallyFollowing = astrologerData?.data?.isFollowing || false;
   const [isFollowing, setIsFollowing] = useState(isInitiallyFollowing);
   const [showFullAbout, setShowFullAbout] = useState(false);
+  const [openReviewModal, setOpenReviewModal] = useState(false);
 
   const [followAstrologer, { isLoading: followLoading }] =
     useFollowAstrologerByIdMutation();
@@ -57,6 +71,7 @@ const AstrologerProfile = () => {
     useUnfollowAstrologerByIdMutation();
 
   const [createChatRoom] = useCreateChatRoomMutation();
+  const [addAstrologerReview, { isLoading: reviewLoading }] = useAddAstrologerReviewMutation();
   const [setOpenModal] = useTalkToAstrologer();
 
   // State
@@ -210,6 +225,29 @@ const AstrologerProfile = () => {
     initiateCall(astro, "video");
   };
 
+  const handleReviewSubmit = async ({ rating, review, anonymous }) => {
+    try {
+      const res = await addAstrologerReview({
+        astrologerID: data?.astrologer_ID,
+        rating,
+        review,
+        isAnonymous: anonymous,
+      }).unwrap();
+
+      if (res.success) {
+        toast.success(res.message || "Review submitted successfully!");
+        refetchReviews(); // Refresh reviews after submission
+      } else {
+        toast.error(res.message || "Failed to submit review");
+      }
+
+      setOpenReviewModal(false);
+    } catch (error) {
+      console.error("Review submission error:", error);
+      toast.error(error?.data?.message || "Failed to submit review");
+    }
+  };
+
   useEffect(() => {
     if (!userIdLocal) return;
 
@@ -282,7 +320,13 @@ const AstrologerProfile = () => {
     };
   }, [userIdLocal]);
 
-  const data = astrologerData?.data;
+  const reviews = reviewsData?.data?.getDetail || [];
+  const totalReviews = reviewsData?.data?.totalRecords || 0;
+  
+  // Calculate average rating from reviews
+  const averageRating = reviews.length > 0 
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+    : data?.rating || 0;
   
   // Helper function to format availability slots
   const formatAvailability = (availability) => {
@@ -335,7 +379,12 @@ const AstrologerProfile = () => {
       "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+2",
       "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+3"
     ],
-    reviews: data?.reviews?.length > 0 ? data.reviews : [
+    reviews: reviews.length > 0 ? reviews.map(r => ({
+      date: new Date(r.createdAt).toLocaleDateString('en-GB'),
+      rating: r.rating,
+      user: r.customerName,
+      text: r.review || ""
+    })) : [
       {
         date: "25/11/2025",
         rating: 5.0,
@@ -559,30 +608,40 @@ const AstrologerProfile = () => {
       <div className={styles.reviewsSection}>
         <h3 className={styles.sectionTitle}>USER REVIEWS</h3>
         <div className={styles.reviewsSummary}>
-          <StarRating rating={displayData.rating} />
-          <p className={styles.reviewsCount}>{displayData.rating} out of 5 • {displayData.totalRatings} total ratings</p>
+          <StarRating rating={averageRating} />
+          <p className={styles.reviewsCount}>
+            {averageRating.toFixed(1)} out of 5 • {totalReviews} total ratings
+          </p>
         </div>
 
-        <div className={styles.reviewsList}>
-          {displayData.reviews.slice(0, 4).map((review, index) => (
-            <div key={index} className={styles.reviewCard}>
-              <div className={styles.reviewHeader}>
-                <span className={styles.reviewDate}>
-                  <IoCalendarOutline className={styles.calendarIcon} />
-                  {review.date}
-                </span>
-                <div className={styles.reviewRating}>
-                  <FaStar className={styles.reviewStar} />
-                  <span>{review.rating}</span>
+        {reviewsLoading ? (
+          <div className={styles.reviewsLoading}>Loading reviews...</div>
+        ) : reviews.length > 0 ? (
+          <div className={styles.reviewsList}>
+            {reviews.slice(0, 4).map((review) => (
+              <div key={review._id} className={styles.reviewCard}>
+                <div className={styles.reviewHeader}>
+                  <span className={styles.reviewDate}>
+                    <IoCalendarOutline className={styles.calendarIcon} />
+                    {new Date(review.createdAt).toLocaleDateString('en-GB')}
+                  </span>
+                  <div className={styles.reviewRating}>
+                    <FaStar className={styles.reviewStar} />
+                    <span>{review.rating}</span>
+                  </div>
                 </div>
+                <h4 className={styles.reviewerName}>{review.customerName}</h4>
+                {review.review && <p className={styles.reviewText}>{review.review}</p>}
               </div>
-              <h4 className={styles.reviewerName}>{review.user}</h4>
-              <p className={styles.reviewText}>{review.text}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className={styles.noReviews}>No reviews yet. Be the first to review!</div>
+        )}
 
-        <button className={styles.shareReviewBtn}>Share a Review</button>
+        <button className={styles.shareReviewBtn} onClick={() => setOpenReviewModal(true)}>
+          Share a Review
+        </button>
       </div>
 
       {/* Astrologer Shop */}
@@ -635,6 +694,15 @@ const AstrologerProfile = () => {
         isOpen={kundliModalOpen}
         onClose={() => setKundliModalOpen(false)}
         onSelect={handleChatAfterKundliSelect}
+      />
+
+      <FeedbackModal
+        open={openReviewModal}
+        onClose={() => setOpenReviewModal(false)}
+        handleSubmit={handleReviewSubmit}
+        ratedUserName={displayData.firstName}
+        reviewerName={userIdLocal || "User"}
+        loading={reviewLoading}
       />
 
       {waitingPopup && (
