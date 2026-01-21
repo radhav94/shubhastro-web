@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import styles from "./GiftModal.module.scss";
 import {
   useGetAllGiftsQuery,
@@ -6,25 +6,81 @@ import {
 } from "../../redux/api/gift/giftApi";
 import toast from "../toast";
 import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance";
-import { useNavigate } from "react-router-dom";
+import { IoChevronForward } from "react-icons/io5";
+import WalletModal from "./WalletModal";
+import WalletIcon from "../../assets/icons/wallet-2.svg";
+import AstrologerShopImage from "../../assets/images/astrologer-shop.png";
 
-const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName }) => {
+// Fallback dummy data
+const DUMMY_GIFTS = [
+  { _id: "1", giftName: "Flower", price: 50, giftImg: "https://via.placeholder.com/150/FFB6C1", category: "popular", isPopular: true },
+  { _id: "2", giftName: "Thali", price: 150, giftImg: "https://via.placeholder.com/150/FFA500", category: "popular", isPopular: true },
+  { _id: "3", giftName: "Heart", price: 50, giftImg: "https://via.placeholder.com/150/FF69B4", category: "popular", isPopular: true },
+  { _id: "4", giftName: "Chocolate", price: 50, giftImg: "https://via.placeholder.com/150/8B4513", category: "popular", isPopular: true },
+  { _id: "5", giftName: "Sweets", price: 50, giftImg: "https://via.placeholder.com/150/FFA07A", category: "other" },
+  { _id: "6", giftName: "Shivling", price: 50, giftImg: "https://via.placeholder.com/150/D2691E", category: "other" },
+  { _id: "7", giftName: "Dakshina", price: 50, giftImg: "https://via.placeholder.com/150/98FB98", category: "other" },
+  { _id: "8", giftName: "Ganesha", price: 50, giftImg: "https://via.placeholder.com/150/FFD700", category: "other" },
+];
+
+const DUMMY_COMBOS = [
+  { 
+    _id: "c1", 
+    giftName: "Chocolate + Heart + Rose", 
+    price: 2000, 
+    originalPrice: 2800,
+    giftImg: AstrologerShopImage,
+    category: "combo",
+    isCombo: true,
+    description: "Perfect romantic combo"
+  },
+  { 
+    _id: "c2", 
+    giftName: "Thali + Sweets + Flower", 
+    price: 2000, 
+    originalPrice: 2800,
+    giftImg: AstrologerShopImage,
+    category: "combo",
+    isCombo: true,
+    description: "Traditional blessing combo"
+  },
+  { 
+    _id: "c3", 
+    giftName: "Ganesha + Dakshina + Incense", 
+    price: 2000, 
+    originalPrice: 2800,
+    giftImg: AstrologerShopImage,
+    category: "combo",
+    isCombo: true,
+    description: "Spiritual combo"
+  },
+];
+
+const GiftModal = ({ isOpen, onClose, astrologerId }) => {
   const { data, isLoading } = useGetAllGiftsQuery();
   const [sendGift, { isLoading: isSending }] = useSendGiftMutation();
   const [selected, setSelected] = useState(null);
-  const [disableSend, setDisableSend] = useState(false);
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const { balance, refreshWallet } = useWalletBalance();
-  const navigate = useNavigate();
 
-  const gifts = data?.data || [];
+  // Use API data if available, otherwise use dummy data
+  const gifts = data?.data && data.data.length > 0 ? data.data : DUMMY_GIFTS;
 
   // Categorize gifts
   const popularGifts = gifts.filter(g => g.category === "popular" || g.isPopular);
-  const otherGifts = gifts.filter(g => g.category !== "popular" && !g.isPopular);
+  const otherGifts = gifts.filter(g => g.category === "other" || (!g.isPopular && !g.isCombo && g.category !== "popular"));
   const combos = gifts.filter(g => g.category === "combo" || g.isCombo);
+  
+  // If no combos from API, use dummy combos
+  const displayCombos = combos.length > 0 ? combos : DUMMY_COMBOS;
 
   const handleSend = async () => {
     if (!selected || !astrologerId) return;
+
+    if (selected.price > balance) {
+      toast.error("Insufficient balance");
+      return;
+    }
 
     try {
       await sendGift({
@@ -42,164 +98,155 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName }) => {
     }
   };
 
-  const handleRecharge = () => {
-    onClose();
-    navigate("/recharge");
+  const handleAddMoney = () => {
+    setIsWalletModalOpen(true);
   };
 
-  useEffect(() => {
-    if (selected && selected.price > balance) {
-      setDisableSend(true);
-    } else {
-      setDisableSend(false);
-    }
-  }, [selected, balance]);
+  const handleWalletClose = () => {
+    setIsWalletModalOpen(false);
+    refreshWallet();
+  };
 
   if (!isOpen) return null;
 
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        {/* Handle */}
-        <div className={styles.modalHandle}></div>
+    <>
+      <div className={styles.modalOverlay} onClick={onClose}>
+        <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+          {/* Handle */}
+          <div className={styles.modalHandle}></div>
 
-        {/* Header */}
-        <div className={styles.modalHeader}>
-          <h2 className={styles.modalTitle}>Send a Gift</h2>
-          <div className={styles.balanceBadge}>
-            <span className={styles.balanceIcon}>💰</span>
-            <span className={styles.balanceText}>Balance</span>
-            <span className={styles.balanceAmount}>₹{balance}</span>
+          {/* Header */}
+          <div className={styles.modalHeader}>
+            <h2 className={styles.modalTitle}>Send a Gift</h2>
+            <div className={styles.balanceInfo}>
+              <div className={styles.balanceAmount}>₹{balance}</div>
+              <div className={styles.balanceLabel}>
+                <img src={WalletIcon} alt="Wallet" className={styles.balanceIcon} />
+                <span>Balance</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className={styles.modalBody}>
+            {isLoading ? (
+              <div className={styles.loading}>Loading gifts...</div>
+            ) : (
+              <>
+                {/* Popular Gifts */}
+                {popularGifts.length > 0 && (
+                  <div className={styles.giftSection}>
+                    <h3 className={styles.sectionTitle}>Popular Gifts</h3>
+                    <div className={styles.giftGrid}>
+                      {popularGifts.map((gift) => (
+                        <div
+                          key={gift._id}
+                          className={`${styles.giftItem} ${
+                            selected?._id === gift._id ? styles.selected : ""
+                          }`}
+                          onClick={() => setSelected(gift)}
+                        >
+                          <div className={styles.giftImageWrapper}>
+                            <img src={gift.giftImg} alt={gift.giftName} className={styles.giftImage} />
+                            <div className={styles.giftPrice}>₹{gift.price}</div>
+                          </div>
+                          <p className={styles.giftName}>{gift.giftName}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Other Gifts */}
+                {otherGifts.length > 0 && (
+                  <div className={styles.giftSection}>
+                    <h3 className={styles.sectionTitle}>Other Gifts</h3>
+                    <div className={styles.giftGrid}>
+                      {otherGifts.map((gift) => (
+                        <div
+                          key={gift._id}
+                          className={`${styles.giftItem} ${
+                            selected?._id === gift._id ? styles.selected : ""
+                          }`}
+                          onClick={() => setSelected(gift)}
+                        >
+                          <div className={styles.giftImageWrapper}>
+                            <img src={gift.giftImg} alt={gift.giftName} className={styles.giftImage} />
+                            <div className={styles.giftPrice}>₹{gift.price}</div>
+                          </div>
+                          <p className={styles.giftName}>{gift.giftName}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Popular Combos */}
+                {displayCombos.length > 0 && (
+                  <div className={styles.giftSection}>
+                    <div className={styles.sectionHeader}>
+                      <h3 className={styles.sectionTitle}>Popular Combos</h3>
+                      <IoChevronForward size={20} color="#999" />
+                    </div>
+                    <div className={styles.comboScroll}>
+                      {displayCombos.map((combo) => (
+                        <div
+                          key={combo._id}
+                          className={`${styles.comboItem} ${
+                            selected?._id === combo._id ? styles.selected : ""
+                          }`}
+                          onClick={() => setSelected(combo)}
+                        >
+                          <div className={styles.comboTag}>
+                            <span>⭐</span> Most Popular
+                          </div>
+                          <img src={combo.giftImg} alt={combo.giftName} className={styles.comboImage} />
+                          <div className={styles.comboInfo}>
+                            <p className={styles.comboName}>Popular Gift</p>
+                            <p className={styles.comboDesc}>{combo.giftName}</p>
+                            <div className={styles.comboPrice}>
+                              <span className={styles.currentPrice}>₹{combo.price}</span>
+                              {combo.originalPrice && (
+                                <span className={styles.originalPrice}>₹{combo.originalPrice}</span>
+                              )}
+                            </div>
+                          </div>
+                          <button className={styles.comboAddBtn}>+ Add to cart</button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className={styles.modalFooter}>
+            <button
+              className={styles.addMoneyBtn}
+              onClick={handleAddMoney}
+            >
+              + Add Money
+            </button>
+            <button
+              className={styles.sendBtn}
+              disabled={!selected || isSending}
+              onClick={handleSend}
+            >
+              {isSending ? "Sending..." : "Send"}
+            </button>
           </div>
         </div>
-
-        {/* Content */}
-        <div className={styles.modalBody}>
-          {isLoading ? (
-            <div className={styles.loading}>Loading gifts...</div>
-          ) : (
-            <>
-              {/* Popular Gifts */}
-              {popularGifts.length > 0 && (
-                <div className={styles.giftSection}>
-                  <h3 className={styles.sectionTitle}>Popular Gifts</h3>
-                  <div className={styles.giftGrid}>
-                    {popularGifts.slice(0, 4).map((gift) => (
-                      <div
-                        key={gift._id}
-                        className={`${styles.giftItem} ${
-                          selected?._id === gift._id ? styles.selected : ""
-                        }`}
-                        onClick={() => setSelected(gift)}
-                      >
-                        <img src={gift.giftImg} alt={gift.giftName} className={styles.giftImage} />
-                        <p className={styles.giftName}>{gift.giftName}</p>
-                        <p className={styles.giftPrice}>₹{gift.price}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Other Gifts */}
-              {otherGifts.length > 0 && (
-                <div className={styles.giftSection}>
-                  <h3 className={styles.sectionTitle}>Other Gifts</h3>
-                  <div className={styles.giftGrid}>
-                    {otherGifts.slice(0, 4).map((gift) => (
-                      <div
-                        key={gift._id}
-                        className={`${styles.giftItem} ${
-                          selected?._id === gift._id ? styles.selected : ""
-                        }`}
-                        onClick={() => setSelected(gift)}
-                      >
-                        <img src={gift.giftImg} alt={gift.giftName} className={styles.giftImage} />
-                        <p className={styles.giftName}>{gift.giftName}</p>
-                        <p className={styles.giftPrice}>₹{gift.price}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Popular Combos */}
-              {combos.length > 0 && (
-                <div className={styles.giftSection}>
-                  <h3 className={styles.sectionTitle}>Popular Combos</h3>
-                  <div className={styles.comboGrid}>
-                    {combos.slice(0, 3).map((combo) => (
-                      <div
-                        key={combo._id}
-                        className={`${styles.comboItem} ${
-                          selected?._id === combo._id ? styles.selected : ""
-                        }`}
-                        onClick={() => setSelected(combo)}
-                      >
-                        <div className={styles.comboTag}>
-                          <span>⭐</span> Most Popular
-                        </div>
-                        <img src={combo.giftImg} alt={combo.giftName} className={styles.comboImage} />
-                        <div className={styles.comboInfo}>
-                          <p className={styles.comboName}>{combo.giftName}</p>
-                          <p className={styles.comboDesc}>{combo.description || "Special combo gift"}</p>
-                          <div className={styles.comboPrice}>
-                            <span className={styles.currentPrice}>₹{combo.price}</span>
-                            {combo.originalPrice && (
-                              <span className={styles.originalPrice}>₹{combo.originalPrice}</span>
-                            )}
-                          </div>
-                        </div>
-                        <button className={styles.comboAddBtn}>+</button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Show all gifts if no categories */}
-              {popularGifts.length === 0 && otherGifts.length === 0 && combos.length === 0 && gifts.length > 0 && (
-                <div className={styles.giftSection}>
-                  <h3 className={styles.sectionTitle}>All Gifts</h3>
-                  <div className={styles.giftGrid}>
-                    {gifts.slice(0, 8).map((gift) => (
-                      <div
-                        key={gift._id}
-                        className={`${styles.giftItem} ${
-                          selected?._id === gift._id ? styles.selected : ""
-                        }`}
-                        onClick={() => setSelected(gift)}
-                      >
-                        <img src={gift.giftImg} alt={gift.giftName} className={styles.giftImage} />
-                        <p className={styles.giftName}>{gift.giftName}</p>
-                        <p className={styles.giftPrice}>₹{gift.price}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className={styles.modalFooter}>
-          <button
-            className={styles.addMoneyBtn}
-            onClick={handleRecharge}
-          >
-            + Add Money
-          </button>
-          <button
-            className={styles.sendBtn}
-            disabled={!selected || disableSend || isSending}
-            onClick={handleSend}
-          >
-            {isSending ? "Sending..." : "Send"}
-          </button>
-        </div>
       </div>
-    </div>
+
+      {/* Wallet Modal */}
+      <WalletModal
+        isOpen={isWalletModalOpen}
+        onClose={handleWalletClose}
+      />
+    </>
   );
 };
 
