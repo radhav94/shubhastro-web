@@ -132,23 +132,89 @@ const PalmistryResult = () => {
 
         {activeTab === 'lines' && (
           <>
-            {lines?.heart?.detected && (
+            {/* Fate Line - Always show if interpretation exists */}
+            {lines?.fate?.interpretation && (
               <div className={styles.lineCard}>
                 <div className={styles.lineHeader}>
-                  <h3 className={styles.lineTitle}>Heart Line</h3>
-                  <div className={styles.lineScore}>{lines.heart.score || 0}%</div>
+                  <h3 className={styles.lineTitle}>Fate Line</h3>
+                  {lines.fate.detected && <div className={styles.lineScore}>{lines.fate.score || 0}%</div>}
                 </div>
-                <p className={styles.lineSummary}>{lines.heart.interpretation?.summary || ''}</p>
+                <p className={styles.lineSummary}>{lines.fate.interpretation.summary}</p>
                 
                 <div className={styles.subsection}>
-                  <h4 className={styles.subsectionTitle}>Emotional Nature</h4>
-                  <p className={styles.text}>{lines.heart.interpretation?.emotionalNature || 'No data available'}</p>
+                  <h4 className={styles.subsectionTitle}>Career Path</h4>
+                  <p className={styles.text}>{lines.fate.interpretation.careerPath}</p>
                 </div>
 
                 <div className={styles.subsection}>
-                  <h4 className={styles.subsectionTitle}>Relationship Pattern</h4>
-                  <p className={styles.text}>{lines.heart.interpretation?.relationshipPattern || 'No data available'}</p>
+                  <h4 className={styles.subsectionTitle}>Life Purpose</h4>
+                  <p className={styles.text}>{lines.fate.interpretation.lifePurpose}</p>
                 </div>
+
+                <div className={styles.subsection}>
+                  <h4 className={styles.subsectionTitle}>Success Timing</h4>
+                  <p className={styles.text}>{lines.fate.interpretation.successTiming}</p>
+                </div>
+
+                {lines.fate.interpretation.strengths?.length > 0 && (
+                  <div className={styles.subsection}>
+                    <h4 className={styles.subsectionTitle}>Strengths</h4>
+                    <ul className={styles.list}>
+                      {lines.fate.interpretation.strengths.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {lines.fate.interpretation.challenges?.length > 0 && (
+                  <div className={styles.subsection}>
+                    <h4 className={styles.subsectionTitle}>Challenges</h4>
+                    <ul className={styles.list}>
+                      {lines.fate.interpretation.challenges.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {lines.fate.interpretation.remedies?.length > 0 && (
+                  <div className={styles.subsection}>
+                    <h4 className={styles.subsectionTitle}>Remedies</h4>
+                    <ul className={styles.list}>
+                      {lines.fate.interpretation.remedies.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Heart Line */}
+            {(lines?.heart?.detected || lines?.heart?.interpretation) && (
+              <div className={styles.lineCard}>
+                <div className={styles.lineHeader}>
+                  <h3 className={styles.lineTitle}>Heart Line</h3>
+                  {lines.heart.detected && <div className={styles.lineScore}>{lines.heart.score || 0}%</div>}
+                </div>
+                {lines.heart.interpretation?.summary && (
+                  <p className={styles.lineSummary}>{lines.heart.interpretation.summary}</p>
+                )}
+                
+                {lines.heart.interpretation?.emotionalNature && (
+                  <div className={styles.subsection}>
+                    <h4 className={styles.subsectionTitle}>Emotional Nature</h4>
+                    <p className={styles.text}>{lines.heart.interpretation.emotionalNature}</p>
+                  </div>
+                )}
+
+                {lines.heart.interpretation?.relationshipPattern && (
+                  <div className={styles.subsection}>
+                    <h4 className={styles.subsectionTitle}>Relationship Pattern</h4>
+                    <p className={styles.text}>{lines.heart.interpretation.relationshipPattern}</p>
+                  </div>
+                )}
 
                 {lines.heart.interpretation?.strengths?.length > 0 && (
                   <div className={styles.subsection}>
@@ -185,28 +251,37 @@ const PalmistryResult = () => {
               </div>
             )}
 
-            {lines?.head?.detected && (
+            {/* Head Line */}
+            {(lines?.head?.detected || lines?.head?.interpretation) && (
               <div className={styles.lineCard}>
                 <div className={styles.lineHeader}>
                   <h3 className={styles.lineTitle}>Head Line</h3>
-                  <div className={styles.lineScore}>{lines.head.score || 0}%</div>
+                  {lines.head.detected && <div className={styles.lineScore}>{lines.head.score || 0}%</div>}
                 </div>
-                <p className={styles.lineSummary}>{lines.head.interpretation?.summary || ''}</p>
+                {lines.head.interpretation?.summary && (
+                  <p className={styles.lineSummary}>{lines.head.interpretation.summary}</p>
+                )}
                 
-                <div className={styles.subsection}>
-                  <h4 className={styles.subsectionTitle}>Thinking Style</h4>
-                  <p className={styles.text}>{lines.head.interpretation?.thinkingStyle || 'No data available'}</p>
-                </div>
+                {lines.head.interpretation?.thinkingStyle && (
+                  <div className={styles.subsection}>
+                    <h4 className={styles.subsectionTitle}>Thinking Style</h4>
+                    <p className={styles.text}>{lines.head.interpretation.thinkingStyle}</p>
+                  </div>
+                )}
 
-                <div className={styles.subsection}>
-                  <h4 className={styles.subsectionTitle}>Intellectual Depth</h4>
-                  <p className={styles.text}>{lines.head.interpretation?.intellectualDepth || 'No data available'}</p>
-                </div>
+                {lines.head.interpretation?.intellectualDepth && (
+                  <div className={styles.subsection}>
+                    <h4 className={styles.subsectionTitle}>Intellectual Depth</h4>
+                    <p className={styles.text}>{lines.head.interpretation.intellectualDepth}</p>
+                  </div>
+                )}
 
-                <div className={styles.subsection}>
-                  <h4 className={styles.subsectionTitle}>Career Aptitude</h4>
-                  <p className={styles.text}>{lines.head.interpretation?.careerAptitude || 'No data available'}</p>
-                </div>
+                {lines.head.interpretation?.careerAptitude && (
+                  <div className={styles.subsection}>
+                    <h4 className={styles.subsectionTitle}>Career Aptitude</h4>
+                    <p className={styles.text}>{lines.head.interpretation.careerAptitude}</p>
+                  </div>
+                )}
 
                 {lines.head.interpretation?.strengths?.length > 0 && (
                   <div className={styles.subsection}>
@@ -232,18 +307,23 @@ const PalmistryResult = () => {
               </div>
             )}
 
-            {lines?.life?.detected && (
+            {/* Life Line */}
+            {(lines?.life?.detected || lines?.life?.interpretation) && (
               <div className={styles.lineCard}>
                 <div className={styles.lineHeader}>
                   <h3 className={styles.lineTitle}>Life Line</h3>
-                  <div className={styles.lineScore}>{lines.life.score || 0}%</div>
+                  {lines.life.detected && <div className={styles.lineScore}>{lines.life.score || 0}%</div>}
                 </div>
-                <p className={styles.lineSummary}>{lines.life.interpretation?.summary || ''}</p>
+                {lines.life.interpretation?.summary && (
+                  <p className={styles.lineSummary}>{lines.life.interpretation.summary}</p>
+                )}
                 
-                <div className={styles.subsection}>
-                  <h4 className={styles.subsectionTitle}>Vitality Level</h4>
-                  <p className={styles.text}>{lines.life.interpretation?.vitalityLevel || 'No data available'}</p>
-                </div>
+                {lines.life.interpretation?.vitalityLevel && (
+                  <div className={styles.subsection}>
+                    <h4 className={styles.subsectionTitle}>Vitality Level</h4>
+                    <p className={styles.text}>{lines.life.interpretation.vitalityLevel}</p>
+                  </div>
+                )}
 
                 {lines.life.interpretation?.healthIndicators?.length > 0 && (
                   <div className={styles.subsection}>
@@ -291,50 +371,65 @@ const PalmistryResult = () => {
               </div>
             )}
 
-            {lines?.fate?.detected && (
-              <div className={styles.lineCard}>
-                <div className={styles.lineHeader}>
-                  <h3 className={styles.lineTitle}>Fate Line</h3>
-                  <div className={styles.lineScore}>{lines.fate.score || 0}%</div>
-                </div>
-                <p className={styles.lineSummary}>{lines.fate.interpretation?.summary || ''}</p>
-                
-                <div className={styles.subsection}>
-                  <h4 className={styles.subsectionTitle}>Career Path</h4>
-                  <p className={styles.text}>{lines.fate.interpretation?.careerPath || 'No data available'}</p>
-                </div>
+            {/* Secondary Lines */}
+            {resultData.secondaryLines && (
+              <>
+                {resultData.secondaryLines.sunLine?.interpretation && (
+                  <div className={styles.lineCard}>
+                    <div className={styles.lineHeader}>
+                      <h3 className={styles.lineTitle}>Sun Line</h3>
+                    </div>
+                    <p className={styles.text}>{resultData.secondaryLines.sunLine.interpretation}</p>
+                  </div>
+                )}
 
-                <div className={styles.subsection}>
-                  <h4 className={styles.subsectionTitle}>Life Purpose</h4>
-                  <p className={styles.text}>{lines.fate.interpretation?.lifePurpose || 'No data available'}</p>
-                </div>
+                {resultData.secondaryLines.mercuryLine?.interpretation && (
+                  <div className={styles.lineCard}>
+                    <div className={styles.lineHeader}>
+                      <h3 className={styles.lineTitle}>Mercury Line</h3>
+                    </div>
+                    <p className={styles.text}>{resultData.secondaryLines.mercuryLine.interpretation}</p>
+                  </div>
+                )}
 
-                <div className={styles.subsection}>
-                  <h4 className={styles.subsectionTitle}>Success Timing</h4>
-                  <p className={styles.text}>{lines.fate.interpretation?.successTiming || 'No data available'}</p>
-                </div>
-
-                {lines.fate.interpretation?.strengths?.length > 0 && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Strengths</h4>
+                {resultData.secondaryLines.marriageLines?.count > 0 && (
+                  <div className={styles.lineCard}>
+                    <div className={styles.lineHeader}>
+                      <h3 className={styles.lineTitle}>Marriage Lines</h3>
+                      <div className={styles.lineScore}>{resultData.secondaryLines.marriageLines.count}</div>
+                    </div>
                     <ul className={styles.list}>
-                      {lines.fate.interpretation.strengths.map((item, idx) => (
+                      {resultData.secondaryLines.marriageLines.interpretations?.map((item, idx) => (
                         <li key={idx}>{item}</li>
                       ))}
                     </ul>
                   </div>
                 )}
 
-                {lines.fate.interpretation?.challenges?.length > 0 && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Challenges</h4>
+                {resultData.secondaryLines.travelLines?.count > 0 && (
+                  <div className={styles.lineCard}>
+                    <div className={styles.lineHeader}>
+                      <h3 className={styles.lineTitle}>Travel Lines</h3>
+                      <div className={styles.lineScore}>{resultData.secondaryLines.travelLines.count}</div>
+                    </div>
                     <ul className={styles.list}>
-                      {lines.fate.interpretation.challenges.map((item, idx) => (
+                      {resultData.secondaryLines.travelLines.interpretations?.map((item, idx) => (
                         <li key={idx}>{item}</li>
                       ))}
                     </ul>
                   </div>
                 )}
+              </>
+            )}
+
+            {/* Show message if no lines detected */}
+            {!lines?.fate?.interpretation && 
+             !lines?.heart?.detected && 
+             !lines?.head?.detected && 
+             !lines?.life?.detected && 
+             !resultData.secondaryLines && (
+              <div className={styles.noDataCard}>
+                <p className={styles.noDataText}>No palm line data available. Please try capturing your palm again with better lighting.</p>
               </div>
             )}
           </>
