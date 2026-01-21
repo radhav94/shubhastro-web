@@ -27,6 +27,8 @@ import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal"
 import { useChat } from "../../../context/ChatContext";
 import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
 import ChatAstrologerCard from "../../../component/UI/cards/ChatAstrologerCard";
+import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
+import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -43,6 +45,7 @@ const TalkToAstrologer = () => {
   const [isRecommendModalOpen, setIsRecommendModalOpen] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showRecommend, setShowRecommend] = useState(true);
+  const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
 
   const location = useLocation(); //  get current URL
   // const isChatMode = location.pathname === "/chat-with-astrologers";
@@ -100,6 +103,15 @@ const TalkToAstrologer = () => {
     handleSubmit,
     onRechargeNow,
   ] = useTalkToAstrologer();
+
+  // Use the astrologer connect hook
+  const {
+    handleChatStart: hookHandleChatStart,
+    handleCallStart: hookHandleCallStart,
+    handleAfterKundliSelect,
+    openModal: hookOpenModal,
+    setOpenModal: hookSetOpenModal,
+  } = useAstrologerConnect();
 
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
@@ -649,7 +661,10 @@ const TalkToAstrologer = () => {
             {isChatMode ? (
               <ChatAstrologerCard
                 data={astro}
-                onConnect={() => handleChatStart(astro)}
+                onConnect={() => {
+                  setSelectedAstrologer(astro);
+                  setIsConnectPopupOpen(true);
+                }}
               />
             ) : (
               <AstrologerCard
@@ -657,10 +672,19 @@ const TalkToAstrologer = () => {
                 data={astro}
                 image={astroImages[index % astroImages.length]}
                 onFollow={() => onFollow(astro._id)}
-                onChat={() => handleChatStart(astro)}
+                onChat={() => {
+                  setSelectedAstrologer(astro);
+                  setIsConnectPopupOpen(true);
+                }}
                 onProfile={() => onProfile(astro)}
-                onAudioCall={() => handleCallStart(astro, "audio")}
-                onVideoCall={() => handleCallStart(astro, "video")}
+                onAudioCall={() => {
+                  setSelectedAstrologer(astro);
+                  setIsConnectPopupOpen(true);
+                }}
+                onVideoCall={() => {
+                  setSelectedAstrologer(astro);
+                  setIsConnectPopupOpen(true);
+                }}
               />
             )}
           </div>
@@ -702,6 +726,13 @@ const TalkToAstrologer = () => {
         onSelect={handleChatAfterKundliSelect}
       />
 
+      {/* Kundli modal from hook for popup flow */}
+      <KundliSelectModal
+        isOpen={hookOpenModal.kundli}
+        onClose={() => hookSetOpenModal((prev) => ({ ...prev, kundli: false }))}
+        onSelect={handleAfterKundliSelect}
+      />
+
       {openModal.recharge && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContainer}>
@@ -731,6 +762,38 @@ const TalkToAstrologer = () => {
           </div>
         </div>
       )}
+
+      {/* Recharge modal from hook for popup flow */}
+      {hookOpenModal.recharge && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContainer}>
+            <PrimaryText isCenter className=" pt-4">
+              Minimum balance of 5 minutes (₹{" "}
+              {(selectedAstrologer?.price?.chatRate?.amount || 1) * 5}) is
+              required to start chat with
+              {` ${selectedAstrologer?.firstName || "Astrologer"}`}.
+            </PrimaryText>
+
+            <div className={styles.modalButtons}>
+              <button
+                className={styles.rejectBtn}
+                onClick={() =>
+                  hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
+                }
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.acceptBtn}
+                onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
+              >
+                Recharge
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showCTA && showRecommend && !WaitingList && (
         <RecommendCTA
           mode={isChatMode ? "chat" : "call"}
@@ -757,6 +820,14 @@ const TalkToAstrologer = () => {
           mode={isChatMode ? "chat" : "call"}
         />
       )}
+
+      <ConnectAstrologerPopup
+        isOpen={isConnectPopupOpen}
+        onClose={() => setIsConnectPopupOpen(false)}
+        astrologer={selectedAstrologer}
+        onChatStart={hookHandleChatStart}
+        onCallStart={hookHandleCallStart}
+      />
     </div>
   );
 };

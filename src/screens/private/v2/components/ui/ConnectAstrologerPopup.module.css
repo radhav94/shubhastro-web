@@ -1,0 +1,200 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.popup {
+  background: white;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 600px;
+  padding: 24px;
+  animation: slideUp 0.3s ease-out;
+  position: relative;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.dragHandle {
+  width: 40px;
+  height: 4px;
+  background: #E0E0E0;
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  flex: 1;
+  padding-right: 16px;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+
+.closeButton:hover {
+  color: #333;
+}
+
+.optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.optionCard {
+  background: #FFF8E1;
+  border-radius: 16px;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.optionCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: #F9A825;
+}
+
+.optionCard:active {
+  transform: translateY(-2px);
+}
+
+.iconCircle {
+  width: 64px;
+  height: 64px;
+  background: #F9A825;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.optionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.optionPrice {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .popup {
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .optionsGrid {
+    gap: 12px;
+  }
+
+  .optionCard {
+    padding: 20px 12px;
+  }
+
+  .iconCircle {
+    width: 56px;
+    height: 56px;
+  }
+
+  .iconCircle svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .optionTitle {
+    font-size: 16px;
+  }
+
+  .optionPrice {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .optionsGrid {
+    gap: 10px;
+  }
+
+  .optionCard {
+    padding: 16px 8px;
+  }
+
+  .iconCircle {
+    width: 48px;
+    height: 48px;
+  }
+
+  .iconCircle svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .optionTitle {
+    font-size: 14px;
+  }
+
+  .optionPrice {
+    font-size: 13px;
+  }
+}

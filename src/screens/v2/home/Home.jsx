@@ -18,6 +18,9 @@ import dayjs from "dayjs";
 import styles from "./Home.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
 import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices";
+import ConnectAstrologerPopup from "../../../screens/private/v2/components/ui/ConnectAstrologerPopup";
+import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
+import KundliSelectModal from "../../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
 
 // Image imports
 import quickActionOne from "../../../assets/images/quick-action-1.svg";
@@ -41,8 +44,19 @@ import blog from "../../../assets/images/blog.svg";
 
 const Home = () => {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
+  const [selectedAstrologer, setSelectedAstrologer] = useState(null);
   const navigate = useNavigate();
   const carouselRef = useRef(null);
+
+  // Use the astrologer connect hook
+  const {
+    handleChatStart,
+    handleCallStart,
+    handleAfterKundliSelect,
+    openModal: hookOpenModal,
+    setOpenModal: hookSetOpenModal,
+  } = useAstrologerConnect();
 
   const quickActions = [
     { 
@@ -145,6 +159,17 @@ const Home = () => {
   // Handle dot click
   const handleDotClick = (index) => {
     setActiveSlide(index);
+  };
+
+  // Handle connect button click
+  const handleConnectClick = (astrologer) => {
+    setSelectedAstrologer(astrologer);
+    setIsConnectPopupOpen(true);
+  };
+
+  const handleClosePopup = () => {
+    setIsConnectPopupOpen(false);
+    setSelectedAstrologer(null);
   };
 
   return (
@@ -318,7 +343,12 @@ const Home = () => {
                     </span>
                   </div>
                 )}
-                <button className={styles.connectBtn}>Connect</button>
+                <button 
+                  className={styles.connectBtn}
+                  onClick={() => handleConnectClick(astrologer)}
+                >
+                  Connect
+                </button>
               </div>
             ))}
           </div>
@@ -621,7 +651,12 @@ const Home = () => {
                     {astrologer.specialities.join(", ")}
                   </span>
                 </div>
-                <button className={styles.connectBtn}>Connect</button>
+                <button 
+                  className={styles.connectBtn}
+                  onClick={() => handleConnectClick(astrologer)}
+                >
+                  Connect
+                </button>
               </div>
             ))}
           </div>
@@ -829,6 +864,83 @@ const Home = () => {
           <span className={styles.label}>Astro Mall</span>
         </button>
       </nav>
+
+      {/* Connect Astrologer Popup */}
+      <ConnectAstrologerPopup
+        isOpen={isConnectPopupOpen}
+        onClose={handleClosePopup}
+        astrologer={selectedAstrologer}
+        onChatStart={handleChatStart}
+        onCallStart={handleCallStart}
+      />
+
+      {/* Kundli modal from hook */}
+      <KundliSelectModal
+        isOpen={hookOpenModal.kundli}
+        onClose={() => hookSetOpenModal((prev) => ({ ...prev, kundli: false }))}
+        onSelect={handleAfterKundliSelect}
+      />
+
+      {/* Recharge modal from hook */}
+      {hookOpenModal.recharge && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '24px',
+            borderRadius: '12px',
+            maxWidth: '400px',
+            width: '90%'
+          }}>
+            <p style={{ textAlign: 'center', marginBottom: '20px' }}>
+              Minimum balance of 5 minutes (₹{" "}
+              {(selectedAstrologer?.price?.chatRate?.amount || 1) * 5}) is
+              required to start chat with
+              {` ${selectedAstrologer?.firstName || "Astrologer"}`}.
+            </p>
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  border: '1px solid #ccc',
+                  backgroundColor: 'white',
+                  cursor: 'pointer'
+                }}
+                onClick={() =>
+                  hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
+                }
+              >
+                Cancel
+              </button>
+              <button
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  backgroundColor: '#FF6B35',
+                  color: 'white',
+                  cursor: 'pointer'
+                }}
+                onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
+              >
+                Recharge
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
