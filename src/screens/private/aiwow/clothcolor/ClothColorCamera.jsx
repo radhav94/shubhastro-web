@@ -1,29 +1,49 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ClothColorCamera.module.scss';
+import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
 
 const ClothColorCamera = () => {
   const navigate = useNavigate();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const detectionCanvasRef = useRef(null);
   const [stream, setStream] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
+  const [facingMode, setFacingMode] = useState('user');
+
+  const {
+    detectionReady,
+    objectDetected,
+    startDetection,
+    stopDetection
+  } = useObjectDetection({ 
+    videoRef, 
+    canvasRef: detectionCanvasRef, 
+    detectionType: 'cloth' 
+  });
 
   useEffect(() => {
     startCamera();
     
     return () => {
+      stopDetection();
       if (videoRef.current && videoRef.current.srcObject) {
         const tracks = videoRef.current.srcObject.getTracks();
         tracks.forEach(track => track.stop());
         videoRef.current.srcObject = null;
       }
     };
-  }, []);
+  }, [facingMode]);
 
   const startCamera = async () => {
     try {
+      stopDetection();
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+
       // Check if mediaDevices is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setError('Camera is not supported on this device or browser.');
@@ -33,7 +53,7 @@ const ClothColorCamera = () => {
       // Request camera permission
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: 'user',
+          facingMode,
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -43,6 +63,13 @@ const ClothColorCamera = () => {
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
+
+        videoRef.current.onloadedmetadata = async () => {
+          await videoRef.current.play();
+          if (detectionReady) {
+            startDetection();
+          }
+        };
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
@@ -65,6 +92,7 @@ const ClothColorCamera = () => {
   };
 
   const stopCamera = () => {
+    stopDetection();
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = videoRef.current.srcObject.getTracks();
       tracks.forEach(track => track.stop());
@@ -76,6 +104,10 @@ const ClothColorCamera = () => {
       });
       setStream(null);
     }
+  };
+
+  const switchCamera = () => {
+    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
   };
 
   const captureImage = () => {
@@ -153,6 +185,17 @@ const ClothColorCamera = () => {
         </button>
       </div>
 
+      {!capturedImage && (
+        <button className={styles.switchBtn} onClick={switchCamera}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M20 5L20 9L16 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M4 19L4 15L8 15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M20 9C19.0376 7.27143 17.5699 5.85765 15.7893 4.93853C14.0087 4.01942 11.9913 3.63787 9.99998 3.84537C8.00867 4.05287 6.12489 4.83993 4.59998 6.1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M4 15C4.96244 16.7286 6.43007 18.1424 8.21066 19.0615C9.99125 19.9806 12.0087 20.3621 14 20.1546C15.9913 19.9471 17.8751 19.1601 19.4 17.9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      )}
+
       <div className={styles.cameraWrapper}>
         {!capturedImage ? (
           <>
@@ -162,12 +205,18 @@ const ClothColorCamera = () => {
               playsInline
               className={styles.video}
             />
+            <canvas ref={detectionCanvasRef} className={styles.detectionCanvas} />
             <div className={styles.overlay}>
-              <div className={styles.frameCorner} style={{ top: '10%', left: '5%' }}></div>
-              <div className={styles.frameCorner} style={{ top: '10%', right: '5%' }}></div>
-              <div className={styles.frameCorner} style={{ bottom: '20%', left: '5%' }}></div>
-              <div className={styles.frameCorner} style={{ bottom: '20%', right: '5%' }}></div>
+              <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', left: '5%' }}></div>
+              <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', right: '5%' }}></div>
+              <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ bottom: '20%', left: '5%' }}></div>
+              <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ bottom: '20%', right: '5%' }}></div>
             </div>
+            {!objectDetected && (
+              <div className={styles.detectionMessage}>
+                Position cloth in frame
+              </div>
+            )}
           </>
         ) : (
           <img src={capturedImage} alt="Captured" className={styles.capturedImage} />
@@ -178,14 +227,20 @@ const ClothColorCamera = () => {
 
       <div className={styles.controls}>
         {!capturedImage ? (
-          <button className={styles.captureButton} onClick={captureImage}>
+          <button 
+            className={styles.captureButton} 
+            onClick={captureImage}
+            disabled={!objectDetected || !detectionReady}
+          >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
                 <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3"/>
                 <circle cx="20" cy="20" r="14" fill="white"/>
               </svg>
             </div>
-            <span className={styles.captureText}>Capture</span>
+            <span className={styles.captureText}>
+              {objectDetected ? 'Capture' : 'No Cloth Detected'}
+            </span>
           </button>
         ) : (
           <div className={styles.actionButtons}>
