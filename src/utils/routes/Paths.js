@@ -1,7 +1,6 @@
 import VideoCalling from "../../component/call/VideoCall";
 import AgoraVoiceCalling from "../../component/call/VoiceCall";
 import Onboarding from "../../screens/public/onboarding/Onboarding";
-import TarotReadingCard from "../../component/UI/cards/tarotReadingCard/TarotReadingCard";
 import {
   Login,
   Register,
@@ -10,7 +9,6 @@ import {
   VerifyPassword,
   // Home,
   Horoscope,
-  Panchang,
   Kundli,
   Numerology,
   Tarot,
@@ -139,7 +137,6 @@ import PlayScreen from "../../screens/private/shop/detail/playscreen/PlayScreen"
 import ProductDetail from "../../screens/private/shop/detail/ProductDetail";
 import ProductList from "../../screens/private/shop/product/ProductList";
 import BuisnessBreakupTarot from "../../screens/private/tarot/buisnessBreakupTarot/BuisnessBreakupTarot";
-import TarotCards from "../../screens/private/tarot/card/TarotCard";
 import CareerSelectTarot from "../../screens/private/tarot/careerSelectTarot/CareerSelectTarot";
 import DailyTarot from "../../screens/private/tarot/dailyTarot/DailyTarot";
 import EroticLove from "../../screens/private/tarot/eroticLove/EroticLove";

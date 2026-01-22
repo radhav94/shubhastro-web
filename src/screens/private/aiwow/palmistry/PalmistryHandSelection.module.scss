@@ -4,7 +4,7 @@
   position: relative;
   z-index: 2100;
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #fff;
   padding-bottom: 2rem;
 }
 
@@ -13,33 +13,40 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: white;
+  background: linear-gradient(135deg, #FFF5EB 0%, #FFE8D6 100%);
   position: sticky;
   top: 0;
   z-index: 10;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.08);
 }
 
 .backButton {
-  background: #f3f4f6;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   border: none;
   cursor: pointer;
   padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1f2937;
+  color: #fff;
   border-radius: 0.5rem;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
 
   &:hover {
-    background: #e5e7eb;
+    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
   }
 }
 
 .title {
   font-size: 1rem;
   font-weight: 600;
-  color: #1f2937;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
 }
 
@@ -57,7 +64,10 @@
 .instructionTitle {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1f2937;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 1rem 0;
 }
 
@@ -82,7 +92,7 @@
 .handCard {
   position: relative;
   background: white;
-  border: 2px solid #e5e7eb;
+  border: 2px solid rgba(247, 88, 1, 0.15);
   border-radius: 1rem;
   padding: 2rem 1.5rem;
   cursor: pointer;
@@ -91,17 +101,18 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.08);
 
   &:hover {
-    border-color: #d1d5db;
+    border-color: rgba(247, 88, 1, 0.3);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 16px rgba(247, 88, 1, 0.15);
   }
 
   &.selected {
-    border-color: #059669;
-    background: #f0fdf4;
-    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+    border-color: #F75801;
+    background: linear-gradient(135deg, #FFF5EB 0%, #FFE8D6 100%);
+    box-shadow: 0 4px 16px rgba(247, 88, 1, 0.2);
   }
 }
 
@@ -111,14 +122,17 @@
   transition: color 0.2s;
 
   .selected & {
-    color: #059669;
+    color: #F75801;
   }
 }
 
 .handLabel {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1f2937;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 0.5rem 0;
 }
 
@@ -136,7 +150,7 @@
 
 .proceedButton {
   width: 100%;
-  background: #1f2937;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   color: white;
   border: none;
   border-radius: 0.75rem;
@@ -145,17 +159,19 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
 
   &:hover:not(.disabled) {
-    background: #111827;
+    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
   }
 
   &.disabled {
     background: #d1d5db;
     color: #9ca3af;
     cursor: not-allowed;
+    box-shadow: none;
   }
 }
 

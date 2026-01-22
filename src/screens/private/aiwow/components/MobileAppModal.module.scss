@@ -78,7 +78,7 @@
   background: transparent;
   border: none;
   font-size: 32px;
-  color: #666;
+  color: #F75801;
   cursor: pointer;
   width: 40px;
   height: 40px;
@@ -89,7 +89,7 @@
   z-index: 10;
 
   &:hover {
-    color: #000;
+    color: #D43400;
   }
 
   @media (max-width: 768px) {
@@ -119,7 +119,10 @@
 .title {
   font-size: 28px;
   font-weight: 700;
-  color: #1A1A1A;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 8px;
 
   @media (max-width: 768px) {
@@ -130,7 +133,7 @@
 .subtitle {
   font-size: 16px;
   font-weight: 500;
-  color: #D4A574;
+  color: #F75801;
   margin: 0 0 20px;
 
   @media (max-width: 768px) {
@@ -154,10 +157,11 @@
 }
 
 .features {
-  background: #FFF5E6;
+  background: linear-gradient(135deg, #FFF5EB 0%, #FFE8D6 100%);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 28px;
+  border: 1px solid rgba(247, 88, 1, 0.1);
 
   @media (max-width: 768px) {
     padding: 16px;
@@ -180,7 +184,7 @@
   }
 
   &:not(:last-child) {
-    border-bottom: 1px solid rgba(212, 165, 116, 0.2);
+    border-bottom: 1px solid rgba(247, 88, 1, 0.15);
   }
 
   @media (max-width: 768px) {
@@ -238,10 +242,12 @@
   text-decoration: none;
   transition: all 0.2s;
   min-width: 180px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
   &:hover {
-    background: #333;
+    background: #1a1a1a;
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 
   @media (max-width: 768px) {
@@ -280,7 +286,7 @@
 .okayBtn {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, #D4A574 0%, #C89860 100%);
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   color: #FFFFFF;
   border: none;
   border-radius: 12px;
@@ -288,10 +294,12 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
 
   &:hover {
+    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
   }
 
   &:active {

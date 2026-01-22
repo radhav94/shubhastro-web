@@ -52,7 +52,7 @@ const PalmistryHandSelection = () => {
             {selectedHand === 'left' && (
               <div className={styles.checkmark}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" fill="#059669"/>
+                  <circle cx="12" cy="12" r="10" fill="#F75801"/>
                   <path d="M8 12L11 15L16 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
@@ -73,7 +73,7 @@ const PalmistryHandSelection = () => {
             {selectedHand === 'right' && (
               <div className={styles.checkmark}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" fill="#059669"/>
+                  <circle cx="12" cy="12" r="10" fill="#F75801"/>
                   <path d="M8 12L11 15L16 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
