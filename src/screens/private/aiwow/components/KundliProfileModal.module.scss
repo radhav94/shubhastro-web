@@ -54,7 +54,10 @@
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 24px;
-  color: #000;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .closeBtn {
@@ -64,7 +67,7 @@
   background: transparent;
   border: none;
   font-size: 28px;
-  color: #666;
+  color: #F75801;
   cursor: pointer;
   padding: 0;
   width: 32px;
@@ -76,8 +79,8 @@
   transition: 0.2s ease;
 
   &:hover {
-    background: #f0f0f0;
-    color: #333;
+    background: rgba(247, 88, 1, 0.1);
+    color: #D43400;
   }
 }
 
@@ -107,27 +110,30 @@
   cursor: pointer;
   transition: 0.2s ease;
   flex-shrink: 0;
+  border: 2px solid transparent;
 
   &:hover {
     background: #ebebeb;
+    border-color: rgba(247, 88, 1, 0.2);
   }
 
   &.selected {
-    background: #e8e8e8;
+    background: linear-gradient(135deg, #FFF5EB 0%, #FFE8D6 100%);
+    border-color: #F75801;
   }
 }
 
 .profileAvatar {
   width: 56px;
   height: 56px;
-  background: #ccc;
+  background: linear-gradient(135deg, #F75801 0%, #D43400 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
   font-weight: 600;
-  color: #666;
+  color: #fff;
 }
 
 .profileInfo {
@@ -136,12 +142,13 @@
 
 .relationBadge {
   display: inline-block;
-  background: #e0e0e0;
+  background: linear-gradient(135deg, #FFE8D6 0%, #FFD4B3 100%);
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 11px;
-  color: #666;
+  color: #D43400;
   margin-bottom: 4px;
+  border: 1px solid rgba(247, 88, 1, 0.2);
 }
 
 .profileName {
@@ -164,7 +171,7 @@
 
 .radioBtn {
   font-size: 24px;
-  color: #333;
+  color: #F75801;
 }
 
 .buttonGroup {
@@ -180,24 +187,25 @@
   flex: 1;
   padding: 16px;
   background: white;
-  border: 2px solid #ddd;
+  border: 2px solid #F75801;
   border-radius: 12px;
   font-size: 15px;
   font-weight: 600;
-  color: #333;
+  color: #F75801;
   cursor: pointer;
   transition: 0.2s ease;
 
   &:hover {
-    background: #f5f5f5;
-    border-color: #ccc;
+    background: rgba(247, 88, 1, 0.05);
+    border-color: #D43400;
+    color: #D43400;
   }
 }
 
 .proceedBtn {
   flex: 1;
   padding: 16px;
-  background: #000;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -205,9 +213,11 @@
   font-weight: 600;
   cursor: pointer;
   transition: 0.2s ease;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
 
   &:hover:not(:disabled) {
-    background: #333;
+    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
   }
 
   &:disabled {

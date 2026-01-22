@@ -14,10 +14,10 @@ const MobileAppModal = ({ isOpen, onClose }) => {
         
         <div className={styles.iconWrapper}>
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-            <rect width="80" height="80" rx="16" fill="#FFF5E6"/>
-            <path d="M40 20C31.7157 20 25 26.7157 25 35V45C25 53.2843 31.7157 60 40 60C48.2843 60 55 53.2843 55 45V35C55 26.7157 48.2843 20 40 20Z" stroke="#D4A574" strokeWidth="2"/>
-            <rect x="35" y="28" width="10" height="24" rx="2" fill="#D4A574"/>
-            <circle cx="40" cy="54" r="2" fill="#D4A574"/>
+            <rect width="80" height="80" rx="16" fill="#FFF5EB"/>
+            <path d="M40 20C31.7157 20 25 26.7157 25 35V45C25 53.2843 31.7157 60 40 60C48.2843 60 55 53.2843 55 45V35C55 26.7157 48.2843 20 40 20Z" stroke="#F75801" strokeWidth="2"/>
+            <rect x="35" y="28" width="10" height="24" rx="2" fill="#F75801"/>
+            <circle cx="40" cy="54" r="2" fill="#F75801"/>
           </svg>
         </div>
 
@@ -32,22 +32,22 @@ const MobileAppModal = ({ isOpen, onClose }) => {
         <div className={styles.features}>
           <div className={styles.featureItem}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M16.6667 8.33333L10 15L3.33334 8.33333" stroke="#D4A574" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M10 3.33333V15" stroke="#D4A574" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M16.6667 8.33333L10 15L3.33334 8.33333" stroke="#F75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M10 3.33333V15" stroke="#F75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <span>Real-time AR scanning</span>
           </div>
           <div className={styles.featureItem}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M16.6667 8.33333L10 15L3.33334 8.33333" stroke="#D4A574" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M10 3.33333V15" stroke="#D4A574" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M16.6667 8.33333L10 15L3.33334 8.33333" stroke="#F75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M10 3.33333V15" stroke="#F75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <span>360° room analysis</span>
           </div>
           <div className={styles.featureItem}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M16.6667 8.33333L10 15L3.33334 8.33333" stroke="#D4A574" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M10 3.33333V15" stroke="#D4A574" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M16.6667 8.33333L10 15L3.33334 8.33333" stroke="#F75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M10 3.33333V15" stroke="#F75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <span>Instant Vastu remedies</span>
           </div>
