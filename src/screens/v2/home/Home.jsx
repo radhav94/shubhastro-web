@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
 import {
   ChevronRight,
   Search,
@@ -20,7 +21,8 @@ import { PATH } from "../../../utils/routes/Paths";
 import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices";
 import ConnectAstrologerPopup from "../../../screens/private/v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
-import KundliSelectModal from "../../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
+import ProfileModals from "../../../screens/private/kundli/components/ProfileModals";
+import { useProfileManager } from "../../../screens/private/kundli/hooks/useProfileManager";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { useChat } from "../../../context/ChatContext";
 import { useCall } from "../../../context/CallContext";
@@ -48,6 +50,7 @@ import tarot from "../../../assets/images/tarot.svg";
 import blog from "../../../assets/images/blog.svg";
 
 const Home = () => {
+  const dispatch = useDispatch();
   const [activeSlide, setActiveSlide] = useState(0);
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
@@ -72,6 +75,38 @@ const Home = () => {
   } = useCall();
 
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+
+  // Use profile manager hook (same as Kundli page)
+  const {
+    selectedProfile,
+    profiles,
+    profilesLoading,
+    isCreating,
+    showSelectProfile,
+    showAddProfile,
+    showEditProfile,
+    formData,
+    editFormData,
+    setShowSelectProfile,
+    setShowAddProfile,
+    setShowEditProfile,
+    setFormData,
+    setEditFormData,
+    handleAddProfile,
+    handleEditProfile,
+    handleSubmitProfile,
+    handleSubmitEditProfile,
+    formatProfileDisplay,
+  } = useProfileManager(dispatch);
+
+  // Local state for selected profile (to avoid closing modal)
+  const [localSelectedProfile, setLocalSelectedProfile] = useState(null);
+
+  // Custom handler for profile selection (doesn't close modal)
+  const handleProfileSelect = (profile) => {
+    console.log("✅ HOME: Profile selected", profile);
+    setLocalSelectedProfile(profile);
+  };
 
   // Restore waiting state from localStorage on mount
   useEffect(() => {
@@ -120,10 +155,18 @@ const Home = () => {
   const {
     handleChatStart,
     handleCallStart,
-    handleAfterKundliSelect,
+    handleAfterKundliSelect: hookHandleAfterKundliSelect,
     openModal: hookOpenModal,
     setOpenModal: hookSetOpenModal,
   } = useAstrologerConnect();
+
+  // Handler for Continue button (triggers socket emit)
+  const handleContinueAfterKundliSelect = () => {
+    if (localSelectedProfile) {
+      console.log("✅ HOME: Continue clicked with profile", localSelectedProfile);
+      hookHandleAfterKundliSelect(localSelectedProfile);
+    }
+  };
 
   const quickActions = [
     { 
@@ -1086,11 +1129,31 @@ const Home = () => {
         onCallStart={handleCallStart}
       />
 
-      {/* Kundli modal from hook */}
-      <KundliSelectModal
-        isOpen={hookOpenModal.kundli}
-        onClose={() => hookSetOpenModal((prev) => ({ ...prev, kundli: false }))}
-        onSelect={handleAfterKundliSelect}
+      {/* Kundli modal from hook - using ProfileModals like Kundli page */}
+      <ProfileModals
+        showSelectProfile={hookOpenModal.kundli}
+        showAddProfile={showAddProfile}
+        showEditProfile={showEditProfile}
+        profiles={profiles}
+        selectedProfile={localSelectedProfile}
+        formData={formData}
+        editFormData={editFormData}
+        isCreating={isCreating}
+        onCloseSelect={() => {
+          hookSetOpenModal((prev) => ({ ...prev, kundli: false }));
+          setLocalSelectedProfile(null);
+        }}
+        onCloseAdd={() => setShowAddProfile(false)}
+        onCloseEdit={() => setShowEditProfile(false)}
+        onSelectProfile={handleProfileSelect}
+        onAddProfile={handleAddProfile}
+        onSubmitProfile={handleSubmitProfile}
+        onSubmitEditProfile={handleSubmitEditProfile}
+        setFormData={setFormData}
+        setEditFormData={setEditFormData}
+        formatProfileDisplay={formatProfileDisplay}
+        showContinueButton={true}
+        onContinue={handleContinueAfterKundliSelect}
       />
 
       {/* Recharge modal from hook */}
