@@ -20,7 +20,7 @@ import {
   Blog,
   SessionDetails,
   Shop,
-  // Profile,
+  Profile,
   TalkToAstrologer,
   Payment,
   Astrologers,
@@ -155,7 +155,7 @@ import TarotCardSelectionPage from "../../screens/private/v2/tarot/TarotCardSele
 import LoveTriangleSelectionPage from "../../screens/private/v2/tarot/LoveTriangleSelectionPage";
 import LoveTriangleResultPage from "../../screens/private/v2/tarot/LoveTriangleResultPage";
 import Home from "../../screens/v2/home/Home";
-import Profile from "../../screens/v2/user/Profile";
+import ProfileV2 from "../../screens/v2/user/Profile";
 
 export const PATH = {
   // DEFAULT: {
@@ -243,8 +243,6 @@ export const PATH = {
     HOROSCOPE: {
       path: "/horoscopes",
       element: Horoscope,
-      header: true,
-      footer: true,
       DAILY: {
         path: "/horoscopes/:slug",
         element: SignScreen,
@@ -256,8 +254,6 @@ export const PATH = {
       DAILY_NEW: {
         path: "/horoscopes/daily-horoscope",
         element: HoroscopeNew,
-        header: true,
-        footer: true,
       },
       WEEKLY_DETAIL: {
         path: "/horoscopes/weekly-horoscope/:sign",
@@ -266,8 +262,6 @@ export const PATH = {
       WEEKLY_NEW: {
         path: "/horoscopes/weekly-horoscope",
         element: HoroscopeNew,
-        header: true,
-        footer: true,
       },
       YEARLY_DETAIL: {
         path: "/horoscopes/yearly-horoscope/:sign",
@@ -276,8 +270,6 @@ export const PATH = {
       YEARLY_NEW: {
         path: "/horoscopes/yearly-horoscope",
         element: HoroscopeNew,
-        header: true,
-        footer: true,
       },
       MONTHLY: {
         path: "/horoscopes/monthly-horoscope",
@@ -302,8 +294,6 @@ export const PATH = {
       TODAY_NEW: {
         path: "/horoscopes/todays-horoscope",
         element: HoroscopeNew,
-        header: true,
-        footer: true,
       },
     },
     HOROSCOPEDETAILS: {
