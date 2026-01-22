@@ -156,7 +156,6 @@ import LoveTriangleSelectionPage from "../../screens/private/v2/tarot/LoveTriang
 import LoveTriangleResultPage from "../../screens/private/v2/tarot/LoveTriangleResultPage";
 import Home from "../../screens/v2/home/Home";
 import ProfileV2 from "../../screens/v2/user/Profile";
-import Profile from "../../screens/v2/user/Profile";
 import Explore from "../../screens/private/explore/Explore";
 
 export const PATH = {
@@ -166,12 +165,12 @@ export const PATH = {
   // },
   publicRoutes: {
     ONBOARDING: {
-      path: "/onboarding",
-      element: Onboarding,
+      // path: "/onboarding",
+      // element: Onboarding,
     },
     LOGIN: {
       path: "/login",
-      element: Login,
+      element: Onboarding,
     },
     REGISTER: {
       path: "/register",
@@ -226,7 +225,7 @@ export const PATH = {
 
     PROFILE: {
       path: "/profile",
-      element: Profile,
+      element: ProfileV2,
       header: false,
       footer: false,
     },

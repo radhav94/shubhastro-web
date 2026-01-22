@@ -22,7 +22,7 @@ const TopHeader = () => {
       navigate("/profile");
     } else {
       // User is not logged in, redirect to onboarding
-      navigate("/onboarding?skip=welcome");
+      navigate("/login?skip=welcome");
     }
   };
 
