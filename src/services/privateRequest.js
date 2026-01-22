@@ -48,6 +48,23 @@ const clearToken = () => {
 const responseErrorHandler = (error) => {
   if (error.response) {
     const { status, data, message } = error.response;
+    
+    // Helper to safely extract error message
+    const getErrorMsg = (data, message) => {
+      // Check for nested error object with message
+      if (data?.error && typeof data.error === 'object' && data.error.message) {
+        return String(data.error.message);
+      }
+      
+      const msg = data?.message || data?.error || message || "Some Error Occurred";
+      // Ensure it's a string
+      if (typeof msg === 'string') return msg;
+      if (typeof msg === 'object' && msg !== null) {
+        if (msg.message) return String(msg.message);
+        if (msg.error) return String(msg.error);
+      }
+      return "Some Error Occurred";
+    };
 
     switch (status) {
       case 401:
@@ -62,41 +79,48 @@ const responseErrorHandler = (error) => {
         }
         break;
       case 400:
-        Toast.error(
-          data.message || data?.error || message || "Invalid Value/ Bad Request"
-        );
+        // Check if it's an AI_ERROR or similar structured error
+        if (data?.error?.code) {
+          Toast.error(getErrorMsg(data, message));
+        } else {
+          Toast.error(getErrorMsg(data, message) || "Invalid Value/ Bad Request");
+        }
         break;
       case 403:
-        Toast.error(
-          data.message || data?.error || message || "Access Denied/ Forbidden"
-        );
+        Toast.error(getErrorMsg(data, message) || "Access Denied/ Forbidden");
         break;
       case 404:
-        Toast.error(
-          data.message || data?.error || message || "Item doesn't exist"
-        );
+        Toast.error(getErrorMsg(data, message) || "Item doesn't exist");
         break;
       case 405:
-        Toast.error(
-          data.message || data?.error || message || "Invalid Request"
-        );
+        Toast.error(getErrorMsg(data, message) || "Invalid Request");
         break;
       case 422:
-        Toast.error(data.message || data?.error || message || "Already Exists");
+        Toast.error(getErrorMsg(data, message) || "Already Exists");
+        break;
+      case 500:
+        // For 500 errors, check if there's a specific error message
+        if (data?.error?.message) {
+          Toast.error(getErrorMsg(data, message));
+        }
+        // If no specific message, don't show toast - let service handle it
         break;
       case 504:
-        Toast.error(data.message || data?.error || message || "Network Error");
+        Toast.error(getErrorMsg(data, message) || "Network Error");
         break;
       default:
-        Toast.error(
-          data.message || data?.error || message || "Some Error Occurred"
-        );
+        // Check if there's a structured error with code
+        if (data?.error?.code) {
+          Toast.error(getErrorMsg(data, message));
+        } else {
+          Toast.error(getErrorMsg(data, message));
+        }
         break;
     }
   } else if (error?.code === "ERR_CANCELED") {
     return Promise.reject(error);
   } else {
-    Toast.error(error?.message || "Some Error Occurred");
+    Toast.error(String(error?.message || "Some Error Occurred"));
   }
   return Promise.reject(error);
 };

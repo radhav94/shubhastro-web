@@ -1,5 +1,4 @@
 import { privatePost } from '../privateRequest';
-import { Toast } from '../../component';
 
 /**
  * Helper function to get profile data from localStorage
@@ -78,20 +77,60 @@ export const analyzeFace = async (imageData) => {
   } catch (error) {
     console.error('Face analysis error:', error);
     
-    // Handle specific error cases
+    // Extract error details from response
+    const errorData = error.response?.data;
+    const errorCode = errorData?.error?.code || error.response?.status || 'UNKNOWN_ERROR';
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Analysis failed'
+    );
+    
+    // Handle specific error cases (interceptor already showed toast)
     if (error.code === 'ECONNABORTED') {
-      Toast.error('Request timeout. Please try again.');
+      return {
+        success: false,
+        error: 'Request timeout. Please try again.',
+        code: 'TIMEOUT'
+      };
     } else if (error.response?.status === 413) {
-      Toast.error('Image file is too large. Please use a smaller image.');
+      return {
+        success: false,
+        error: 'Image file is too large',
+        code: 'FILE_TOO_LARGE'
+      };
     } else if (error.response?.status === 415) {
-      Toast.error('Invalid image format. Please use JPG, PNG, or WEBP.');
+      return {
+        success: false,
+        error: 'Invalid image format',
+        code: 'INVALID_FORMAT'
+      };
+    } else if (error.response?.status === 500) {
+      return {
+        success: false,
+        error: errorMessage,
+        code: 'SERVER_ERROR'
+      };
+    } else if (errorData?.error?.code === 'AI_ERROR') {
+      return {
+        success: false,
+        error: errorMessage,
+        code: 'AI_ERROR'
+      };
     } else if (!error.response) {
-      Toast.error('Network error. Please check your connection.');
+      return {
+        success: false,
+        error: 'Network error. Please check your connection.',
+        code: 'NETWORK_ERROR'
+      };
     }
     
+    // Generic error handling
     return {
       success: false,
-      error: error.response?.data?.message || error.message || 'Analysis failed',
+      error: errorMessage,
+      code: errorCode
     };
   }
 };
@@ -145,17 +184,60 @@ export const analyzePalm = async (imageData, hand = 'right') => {
   } catch (error) {
     console.error('Palm analysis error:', error);
     
+    // Extract error details from response
+    const errorData = error.response?.data;
+    const errorCode = errorData?.error?.code || error.response?.status || 'UNKNOWN_ERROR';
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Analysis failed'
+    );
+    
+    // Handle specific error cases (interceptor already showed toast)
     if (error.code === 'ECONNABORTED') {
-      Toast.error('Request timeout. Please try again.');
+      return {
+        success: false,
+        error: 'Request timeout. Please try again.',
+        code: 'TIMEOUT'
+      };
     } else if (error.response?.status === 413) {
-      Toast.error('Image file is too large. Please use a smaller image.');
+      return {
+        success: false,
+        error: 'Image file is too large',
+        code: 'FILE_TOO_LARGE'
+      };
+    } else if (error.response?.status === 415) {
+      return {
+        success: false,
+        error: 'Invalid image format',
+        code: 'INVALID_FORMAT'
+      };
+    } else if (error.response?.status === 500) {
+      return {
+        success: false,
+        error: errorMessage,
+        code: 'SERVER_ERROR'
+      };
+    } else if (errorData?.error?.code === 'AI_ERROR') {
+      return {
+        success: false,
+        error: errorMessage,
+        code: 'AI_ERROR'
+      };
     } else if (!error.response) {
-      Toast.error('Network error. Please check your connection.');
+      return {
+        success: false,
+        error: 'Network error. Please check your connection.',
+        code: 'NETWORK_ERROR'
+      };
     }
     
+    // Generic error handling
     return {
       success: false,
-      error: error.response?.data?.message || error.message || 'Analysis failed',
+      error: errorMessage,
+      code: errorCode
     };
   }
 };
@@ -205,17 +287,60 @@ export const analyzeSignature = async (imageData) => {
   } catch (error) {
     console.error('Signature analysis error:', error);
     
+    // Extract error details from response
+    const errorData = error.response?.data;
+    const errorCode = errorData?.error?.code || error.response?.status || 'UNKNOWN_ERROR';
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Analysis failed'
+    );
+    
+    // Handle specific error cases (interceptor already showed toast)
     if (error.code === 'ECONNABORTED') {
-      Toast.error('Request timeout. Please try again.');
+      return {
+        success: false,
+        error: 'Request timeout. Please try again.',
+        code: 'TIMEOUT'
+      };
     } else if (error.response?.status === 413) {
-      Toast.error('Image file is too large. Please use a smaller image.');
+      return {
+        success: false,
+        error: 'Image file is too large',
+        code: 'FILE_TOO_LARGE'
+      };
+    } else if (error.response?.status === 415) {
+      return {
+        success: false,
+        error: 'Invalid image format',
+        code: 'INVALID_FORMAT'
+      };
+    } else if (error.response?.status === 500) {
+      return {
+        success: false,
+        error: errorMessage,
+        code: 'SERVER_ERROR'
+      };
+    } else if (errorData?.error?.code === 'AI_ERROR') {
+      return {
+        success: false,
+        error: errorMessage,
+        code: 'AI_ERROR'
+      };
     } else if (!error.response) {
-      Toast.error('Network error. Please check your connection.');
+      return {
+        success: false,
+        error: 'Network error. Please check your connection.',
+        code: 'NETWORK_ERROR'
+      };
     }
     
+    // Generic error handling
     return {
       success: false,
-      error: error.response?.data?.message || error.message || 'Analysis failed',
+      error: errorMessage,
+      code: errorCode
     };
   }
 };
@@ -224,10 +349,10 @@ export const analyzeSignature = async (imageData) => {
  * Cloth Color Analysis API Service
  * Analyzes clothing colors and their match with user's aura
  * @param {File|Blob|string} imageData - Image file, blob, or base64 string
- * @param {Object} formData - Birth details and intention
+ * @param {Object} intentionData - Intention for the day
  * @returns {Promise} API response with analysis results
  */
-export const analyzeClothColor = async (imageData, birthData) => {
+export const analyzeClothColor = async (imageData, intentionData) => {
   try {
     const formData = new FormData();
     
@@ -241,13 +366,21 @@ export const analyzeClothColor = async (imageData, birthData) => {
       throw new Error('Invalid image data format');
     }
 
-    // Add birth details
-    if (birthData) {
-      formData.append('dateOfBirth', birthData.dateOfBirth);
-      formData.append('timeOfBirth', birthData.timeOfBirth || '');
-      formData.append('placeOfBirth', birthData.placeOfBirth);
-      formData.append('analysisDate', birthData.analysisDate);
-      formData.append('intention', birthData.intention);
+    // Add intention
+    if (intentionData?.intention) {
+      formData.append('intention', intentionData.intention);
+    }
+
+    // Add current date as analysisDate (format: YYYY-MM-DD)
+    const analysisDate = new Date().toISOString().split('T')[0];
+    formData.append('analysisDate', analysisDate);
+
+    // Add profile data from Kundli
+    const profileData = getProfileData();
+    if (profileData) {
+      Object.keys(profileData).forEach(key => {
+        formData.append(key, profileData[key]);
+      });
     }
 
     const response = await privatePost(
@@ -268,17 +401,60 @@ export const analyzeClothColor = async (imageData, birthData) => {
   } catch (error) {
     console.error('Cloth color analysis error:', error);
     
+    // Extract error details from response
+    const errorData = error.response?.data;
+    const errorCode = errorData?.error?.code || error.response?.status || 'UNKNOWN_ERROR';
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Analysis failed'
+    );
+    
+    // Handle specific error cases (interceptor already showed toast)
     if (error.code === 'ECONNABORTED') {
-      Toast.error('Request timeout. Please try again.');
+      return {
+        success: false,
+        error: 'Request timeout. Please try again.',
+        code: 'TIMEOUT'
+      };
     } else if (error.response?.status === 413) {
-      Toast.error('Image file is too large. Please use a smaller image.');
+      return {
+        success: false,
+        error: 'Image file is too large',
+        code: 'FILE_TOO_LARGE'
+      };
+    } else if (error.response?.status === 415) {
+      return {
+        success: false,
+        error: 'Invalid image format',
+        code: 'INVALID_FORMAT'
+      };
+    } else if (error.response?.status === 500) {
+      return {
+        success: false,
+        error: errorMessage,
+        code: 'SERVER_ERROR'
+      };
+    } else if (errorData?.error?.code === 'AI_ERROR') {
+      return {
+        success: false,
+        error: errorMessage,
+        code: 'AI_ERROR'
+      };
     } else if (!error.response) {
-      Toast.error('Network error. Please check your connection.');
+      return {
+        success: false,
+        error: 'Network error. Please check your connection.',
+        code: 'NETWORK_ERROR'
+      };
     }
     
+    // Generic error handling
     return {
       success: false,
-      error: error.response?.data?.message || error.message || 'Analysis failed',
+      error: errorMessage,
+      code: errorCode
     };
   }
 };
@@ -366,63 +542,60 @@ export const analyzeGemstone = async (imageData) => {
   } catch (error) {
     console.error('Gemstone analysis error:', error);
     
-    // Handle specific error cases
+    // Extract error details from response
+    const errorData = error.response?.data;
+    const errorCode = errorData?.error?.code || error.response?.status || 'UNKNOWN_ERROR';
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Analysis failed'
+    );
+    
+    // Handle specific error cases (interceptor already showed toast)
     if (error.code === 'ECONNABORTED') {
-      Toast.error('Request timeout. Please try again.');
       return {
         success: false,
         error: 'Request timeout. Please try again.',
         code: 'TIMEOUT'
       };
     } else if (error.response?.status === 413) {
-      Toast.error('Image file is too large. Please use a smaller image.');
       return {
         success: false,
         error: 'Image file is too large',
         code: 'FILE_TOO_LARGE'
       };
     } else if (error.response?.status === 415) {
-      Toast.error('Invalid image format. Please use JPG, PNG, or WEBP.');
       return {
         success: false,
         error: 'Invalid image format',
         code: 'INVALID_FORMAT'
       };
     } else if (error.response?.status === 500) {
-      Toast.error('Server error occurred. Please try again later.');
       return {
         success: false,
-        error: 'Server error occurred',
+        error: errorMessage,
         code: 'SERVER_ERROR'
       };
-    } else if (error.response?.data?.error?.code === 'AI_ERROR') {
-      Toast.error('Failed to analyze gemstone. Please try with a clearer image.');
+    } else if (errorData?.error?.code === 'AI_ERROR') {
       return {
         success: false,
-        error: error.response.data.error.message || 'Failed to analyze gemstone image',
+        error: errorMessage,
         code: 'AI_ERROR'
       };
     } else if (!error.response) {
-      Toast.error('Network error. Please check your connection.');
       return {
         success: false,
-        error: 'Network error',
+        error: 'Network error. Please check your connection.',
         code: 'NETWORK_ERROR'
       };
     }
     
     // Generic error handling
-    const errorMessage = error.response?.data?.error?.message || 
-                        error.response?.data?.message || 
-                        error.message || 
-                        'Analysis failed';
-    
-    Toast.error(errorMessage);
-    
     return {
       success: false,
       error: errorMessage,
-      code: error.response?.data?.error?.code || 'UNKNOWN_ERROR'
+      code: errorCode
     };
   }
 };

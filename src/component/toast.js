@@ -6,16 +6,29 @@ const options = {
     zIndex: 9999999999,
 };
 
+// Helper to ensure message is always a string
+const ensureString = (msg) => {
+  if (typeof msg === 'string') return msg;
+  if (typeof msg === 'object' && msg !== null) {
+    // If it's an object, try to extract message
+    if (msg.message) return String(msg.message);
+    if (msg.error) return String(msg.error);
+    // Fallback: stringify the object
+    return JSON.stringify(msg);
+  }
+  return String(msg || 'An error occurred');
+};
+
 const success = (msg) => {
-  return rht.success(msg, options);
+  return rht.success(ensureString(msg), options);
 };
 
 const error = (msg) => {
-  return rht.error(msg, options);
+  return rht.error(ensureString(msg), options);
 };
 
 const warning = (msg) => {
-  return rht(msg, { ...options, icon: "⚠️" });
+  return rht(ensureString(msg), { ...options, icon: "⚠️" });
 };
 
 const promise = (myPromise, msgObj) => {

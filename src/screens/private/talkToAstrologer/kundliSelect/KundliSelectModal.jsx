@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
+import { useDispatch } from "react-redux";
 import styles from "./KundliSelectModal.module.scss";
 import { IoClose } from "react-icons/io5";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { padZero } from "../../../../utils/dateFormat/dateTime";
 import Toast from "../../../../component/toast";
+import { setForm } from "../../../../redux/kundliform/formSlice";
 
 import {
   useGetAllKundlisQuery,
@@ -14,7 +16,7 @@ import LocationSearch from "../../../../utils/location/locationSearchVedic";
 
 const initialForm = {
   name: "",
-  identity: "",
+  identity: "Male",
   relation: "",
   birthDate: "",
   birthTime: "",
@@ -25,6 +27,7 @@ const initialForm = {
 };
 
 const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
+  const dispatch = useDispatch();
   const role = localStorage.getItem("shubhtalk_role");
 
   const token =
@@ -37,23 +40,40 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
   });
 
   const [createKundli] = useCreateKundliMutation();
-  const kundlis = data?.data || [];
+  const kundlis = Array.isArray(data?.data) ? data.data : [];
 
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [selectedKundli, setSelectedKundli] = useState(null);
   const [form, setForm] = useState(initialForm);
   const [creating, setCreating] = useState(false);
 
-  const formatProfileDisplay = (profile) => {
-    const initials = profile.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+  // Debug log
+  console.log("KundliSelectModal - data:", data);
+  console.log("KundliSelectModal - kundlis:", kundlis);
 
-    const birthDate = profile.birthDate || `${padZero(profile.day)}-${padZero(profile.month)}-${profile.year}`;
-    const birthTime = profile.birthTime || `${padZero(profile.hour)}:${padZero(profile.min)}`;
+  const formatProfileDisplay = (profile) => {
+    if (!profile) return { initials: "?", birthDate: "", birthTime: "", relation: "Self" };
+    
+    const initials = profile.name
+      ? profile.name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2)
+      : "?";
+
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const birthDate = profile.day && profile.month && profile.year
+      ? `${String(profile.day).padStart(2, '0')} ${monthNames[profile.month - 1] || ""} ${profile.year}`
+      : "";
+    
+    const hour12 = profile.hour > 12 ? profile.hour - 12 : profile.hour === 0 ? 12 : profile.hour;
+    const meridiem = profile.hour >= 12 ? 'PM' : 'AM';
+    const birthTime = profile.hour !== undefined && profile.min !== undefined
+      ? `${String(hour12).padStart(2, '0')}:${String(profile.min).padStart(2, '0')} ${meridiem}`
+      : "";
+    
     const relation = profile.relation || "Self";
 
     return { initials, birthDate, birthTime, relation };
@@ -63,42 +83,113 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
     setShowAddProfile(true);
   };
 
+  const buildKundliPayload = (data) => {
+    const dateObj = new Date(data.birthDate);
+    const timeObj = data.birthTime ? data.birthTime.split(':') : ['12', '0'];
+    
+    return {
+      name: data.name,
+      gender: data.identity.toLowerCase(),
+      relation: data.relation,
+      day: dateObj.getDate(),
+      month: dateObj.getMonth() + 1,
+      year: dateObj.getFullYear(),
+      hour: data.unknownBirthTime ? 12 : parseInt(timeObj[0]),
+      min: data.unknownBirthTime ? 0 : parseInt(timeObj[1]),
+      second: 0,
+      place: data.birthPlace,
+      lat: data.latitude || 0,
+      lon: data.longitude || 0,
+      tzone: 5.5,
+      birthDate: data.birthDate,
+      birthTime: data.unknownBirthTime ? "" : data.birthTime,
+    };
+  };
+
   const handleSubmitProfile = async (e) => {
     e.preventDefault();
+
+    if (!form.birthPlace) {
+      Toast.error("Please enter birth place");
+      return;
+    }
+
     setCreating(true);
 
     try {
-      const [year, month, day] = form.birthDate.split("-");
-      const [hour, minute] = form.birthTime ? form.birthTime.split(":") : ["12", "0"];
-
-      const payload = {
-        name: form.name,
-        gender: form.identity.toLowerCase(),
-        relation: form.relation,
-        day: Number(day),
-        month: Number(month),
-        year: Number(year),
-        hour: form.unknownBirthTime ? 12 : Number(hour),
-        min: form.unknownBirthTime ? 0 : Number(minute),
-        second: 0,
-        place: form.birthPlace,
-        lat: Number(form.latitude),
-        lon: Number(form.longitude),
-        tzone: 5.5,
-        birthDate: form.birthDate,
-        birthTime: form.unknownBirthTime ? "" : form.birthTime,
-      };
-
-      const res = await createKundli(payload).unwrap();
+      const payload = buildKundliPayload(form);
+      const result = await createKundli(payload).unwrap();
+      
       Toast.success("Profile added successfully");
       setShowAddProfile(false);
       setForm(initialForm);
       refetch();
+
+      // Dispatch to Redux for kundli page compatibility
+      if (result?.data) {
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const profileData = result.data;
+        const meridiem = profileData.hour >= 12 ? "PM" : "AM";
+        const hour12 = profileData.hour > 12 ? profileData.hour - 12 : profileData.hour === 0 ? 12 : profileData.hour;
+
+        const profilePayload = {
+          name: profileData.name,
+          gender: profileData.gender === "male" ? "Male" : profileData.gender === "female" ? "Female" : "Others",
+          day: String(profileData.day),
+          month: months[profileData.month - 1],
+          year: String(profileData.year),
+          hour: String(hour12),
+          minute: String(profileData.min),
+          meridiem,
+          birthPlace: profileData.place,
+          latitude: profileData.lat,
+          longitude: profileData.lon,
+        };
+
+        dispatch(setForm(profilePayload));
+      }
     } catch (err) {
       console.error(err);
       Toast.error(err?.data?.message || "Failed to add profile");
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleSelectAndContinue = () => {
+    if (!selectedKundli) {
+      Toast.error("Please select a profile");
+      return;
+    }
+
+    try {
+      // Dispatch to Redux
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const meridiem = selectedKundli.hour >= 12 ? "PM" : "AM";
+      const hour12 = selectedKundli.hour > 12 ? selectedKundli.hour - 12 : selectedKundli.hour === 0 ? 12 : selectedKundli.hour;
+
+      const profilePayload = {
+        name: selectedKundli.name || "",
+        gender: selectedKundli.gender === "male" ? "Male" : selectedKundli.gender === "female" ? "Female" : "Others",
+        day: String(selectedKundli.day || 1),
+        month: months[(selectedKundli.month || 1) - 1] || "Jan",
+        year: String(selectedKundli.year || new Date().getFullYear()),
+        hour: String(hour12 || 12),
+        minute: String(selectedKundli.min || 0),
+        meridiem,
+        birthPlace: selectedKundli.place || "",
+        latitude: selectedKundli.lat || 0,
+        longitude: selectedKundli.lon || 0,
+      };
+
+      console.log("📤 Dispatching setForm with payload:", profilePayload);
+      dispatch(setForm(profilePayload));
+      
+      console.log("✅ Calling onSelect with kundli:", selectedKundli);
+      onSelect(selectedKundli);
+    } catch (error) {
+      console.error("❌ Error in handleSelectAndContinue:", error);
+      Toast.error("Failed to select profile");
     }
   };
 
@@ -160,7 +251,7 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                 <button
                   className={styles.continueBtn}
                   disabled={!selectedKundli}
-                  onClick={() => selectedKundli && onSelect(selectedKundli)}
+                  onClick={handleSelectAndContinue}
                 >
                   Continue
                 </button>

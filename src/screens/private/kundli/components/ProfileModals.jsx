@@ -20,6 +20,8 @@ const ProfileModals = ({
     setFormData,
     setEditFormData,
     formatProfileDisplay,
+    showContinueButton = false,
+    onContinue,
 }) => {
     return (
         <>
@@ -62,6 +64,16 @@ const ProfileModals = ({
                             <button className={styles.addProfileBtn} onClick={onAddProfile}>
                                 + Add Profile
                             </button>
+
+                            {showContinueButton && (
+                                <button 
+                                    className={styles.continueBtn} 
+                                    onClick={onContinue}
+                                    disabled={!selectedProfile}
+                                >
+                                    Continue
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

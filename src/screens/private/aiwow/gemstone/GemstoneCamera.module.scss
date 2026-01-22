@@ -18,7 +18,7 @@
   left: 0;
   right: 0;
   padding: 1rem;
-  z-index: 10;
+  z-index: 20;
   background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
 }
 
@@ -54,6 +54,16 @@
   object-fit: cover;
 }
 
+.detectionCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
 .capturedImage {
   width: 100%;
   height: 100%;
@@ -74,10 +84,19 @@
   width: 80px;
   height: 80px;
   border: 4px solid #10b981;
+  transition: border-color 0.3s ease;
 
   @media (min-width: 768px) {
     width: 100px;
     height: 100px;
+  }
+
+  &.detected {
+    border-color: #10b981;
+  }
+
+  &.notDetected {
+    border-color: #ef4444;
   }
 
   &[style*="top"][style*="left"] {
@@ -105,6 +124,43 @@
   }
 }
 
+.detectionMessage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.switchBtn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  z-index: 20;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
 .controls {
   position: absolute;
   bottom: 0;
@@ -115,6 +171,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 20;
 }
 
 .captureButton {
@@ -126,8 +183,14 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0;
+  transition: opacity 0.2s;
 
-  &:active .captureIcon {
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:active:not(:disabled) .captureIcon {
     transform: scale(0.95);
   }
 }
