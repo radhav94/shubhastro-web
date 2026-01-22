@@ -166,7 +166,7 @@
 .scoreValue {
   font-size: 24px;
   font-weight: 700;
-  color: #059669;
+  color: #D43400;
 }
 
 .acceptableStatus {
@@ -189,7 +189,7 @@
   font-weight: 600;
   
   &.acceptable {
-    color: #059669;
+    color: #D43400;
   }
   
   &.notAcceptable {
@@ -279,7 +279,7 @@
 .traitScore {
   font-size: 20px;
   font-weight: 700;
-  color: #059669;
+  color: #D43400;
 }
 
 .traitDescription {
@@ -342,7 +342,7 @@
     content: '•';
     position: absolute;
     left: 8px;
-    color: #059669;
+    color: #D43400;
     font-weight: 700;
   }
 }
@@ -386,7 +386,7 @@
   transition: all 0.2s;
   
   &:hover {
-    background: #1f2937;
+    background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   }
   
   &:active {
