@@ -58,9 +58,8 @@ const FaceReadingAnalysis = () => {
           navigate('/aiwow/face-reading/result');
         }, 1000);
       } else {
-        // Handle error
+        // Handle error - interceptor already showed toast
         setProgress(0);
-        Toast.error(result.error || 'Analysis failed. Please try again.');
         
         setTimeout(() => {
           navigate('/aiwow/face-reading/instructions');
@@ -68,7 +67,7 @@ const FaceReadingAnalysis = () => {
       }
     } catch (error) {
       console.error('Analysis error:', error);
-      Toast.error('An unexpected error occurred. Please try again.');
+      // Interceptor already showed toast
       
       setTimeout(() => {
         navigate('/aiwow/face-reading/instructions');

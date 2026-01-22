@@ -1,40 +1,45 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './GemstoneCamera.module.scss';
+import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
 
 const GemstoneCamera = () => {
   const navigate = useNavigate();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const detectionCanvasRef = useRef(null);
   const [stream, setStream] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
+  const [facingMode, setFacingMode] = useState('environment');
+
+  const {
+    detectionReady,
+    objectDetected,
+    startDetection,
+    stopDetection
+  } = useObjectDetection({ videoRef, canvasRef: detectionCanvasRef, detectionType: 'gemstone' });
 
   useEffect(() => {
     startCamera();
     
-    // Cleanup function to stop camera when component unmounts
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
-        videoRef.current.srcObject = null;
-      }
+      stopCamera();
     };
-  }, []); // Empty dependency array - only run once on mount
+  }, [facingMode]);
 
   const startCamera = async () => {
     try {
-      // Check if mediaDevices is supported
+      stopCamera();
+
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setError('Camera is not supported on this device or browser.');
         return;
       }
 
-      // Request camera permission
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: 'user', // Use front camera
+          facingMode: { ideal: facingMode },
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -44,11 +49,18 @@ const GemstoneCamera = () => {
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
+        
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current.play();
+        };
+
+        videoRef.current.onplay = () => {
+          startDetection();
+        };
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
       
-      // Provide specific error messages based on error type
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         setError('Camera permission denied. Please allow camera access in your browser settings and refresh the page.');
       } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
@@ -66,6 +78,8 @@ const GemstoneCamera = () => {
   };
 
   const stopCamera = () => {
+    stopDetection();
+    
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = videoRef.current.srcObject.getTracks();
       tracks.forEach(track => track.stop());
@@ -79,7 +93,14 @@ const GemstoneCamera = () => {
     }
   };
 
+  const switchCamera = () => {
+    const nextMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(nextMode);
+  };
+
   const captureImage = () => {
+    stopDetection();
+    
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -102,7 +123,6 @@ const GemstoneCamera = () => {
   };
 
   const proceedWithImage = () => {
-    // Store the captured image
     if (capturedImage) {
       localStorage.setItem('gemstoneImage', capturedImage);
       navigate('/aiwow/gemstone/capture');
@@ -153,6 +173,14 @@ const GemstoneCamera = () => {
             <path d="M15 18L9 12L15 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
+        
+        {!capturedImage && (
+          <button className={styles.switchBtn} onClick={switchCamera}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M17 8L21 12M21 12L17 16M21 12H9M7 16L3 12M3 12L7 8M3 12H15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        )}
       </div>
 
       <div className={styles.cameraWrapper}>
@@ -164,12 +192,21 @@ const GemstoneCamera = () => {
               playsInline
               className={styles.video}
             />
+            <canvas
+              ref={detectionCanvasRef}
+              className={styles.detectionCanvas}
+            />
             <div className={styles.overlay}>
-              <div className={styles.frameCorner} style={{ top: '10%', left: '5%' }}></div>
-              <div className={styles.frameCorner} style={{ top: '10%', right: '5%' }}></div>
-              <div className={styles.frameCorner} style={{ bottom: '20%', left: '5%' }}></div>
-              <div className={styles.frameCorner} style={{ bottom: '20%', right: '5%' }}></div>
+              <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', left: '5%' }}></div>
+              <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', right: '5%' }}></div>
+              <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ bottom: '20%', left: '5%' }}></div>
+              <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ bottom: '20%', right: '5%' }}></div>
             </div>
+            {!objectDetected && detectionReady && (
+              <div className={styles.detectionMessage}>
+                <p>Position your gemstone in the center</p>
+              </div>
+            )}
           </>
         ) : (
           <img src={capturedImage} alt="Captured" className={styles.capturedImage} />
@@ -180,14 +217,20 @@ const GemstoneCamera = () => {
 
       <div className={styles.controls}>
         {!capturedImage ? (
-          <button className={styles.captureButton} onClick={captureImage}>
+          <button 
+            className={`${styles.captureButton} ${(!detectionReady || !objectDetected) ? styles.disabled : ''}`} 
+            onClick={captureImage}
+            disabled={!detectionReady || !objectDetected}
+          >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3"/>
-                <circle cx="20" cy="20" r="14" fill="white"/>
+                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!detectionReady || !objectDetected) ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="14" fill="white" opacity={(!detectionReady || !objectDetected) ? "0.5" : "1"}/>
               </svg>
             </div>
-            <span className={styles.captureText}>Capture</span>
+            <span className={styles.captureText}>
+              {!detectionReady ? 'Loading...' : (objectDetected ? 'Capture' : 'No Gemstone Detected')}
+            </span>
           </button>
         ) : (
           <div className={styles.actionButtons}>

@@ -153,6 +153,7 @@ import LoveTriangleSelectionPage from "../../screens/private/v2/tarot/LoveTriang
 import LoveTriangleResultPage from "../../screens/private/v2/tarot/LoveTriangleResultPage";
 import Home from "../../screens/v2/home/Home";
 import ProfileV2 from "../../screens/v2/user/Profile";
+import Explore from "../../screens/private/explore/Explore";
 
 export const PATH = {
   // DEFAULT: {
@@ -161,12 +162,12 @@ export const PATH = {
   // },
   publicRoutes: {
     ONBOARDING: {
-      path: "/onboarding",
-      element: Onboarding,
+      // path: "/onboarding",
+      // element: Onboarding,
     },
     LOGIN: {
       path: "/login",
-      element: Login,
+      element: Onboarding,
     },
     REGISTER: {
       path: "/register",
@@ -318,6 +319,7 @@ export const PATH = {
     MATCHMAKING: {
       path: "/matchmaking",
       element: MatchMaking,
+      header: false,
     },
     MATCHMAKING_DETAILS: {
       path: "/matchmaking/match-making-details",
@@ -495,7 +497,7 @@ export const PATH = {
       path: "/aiwow",
       element: AIWow,
       header: false,
-      footer: false
+      footer: false,
     },
     PALMISTRY_LANDING: {
       path: "/aiwow/palmistry",
@@ -783,6 +785,7 @@ export const PATH = {
     SHOP: {
       path: "/shop",
       element: Shop,
+      header: false,
     },
     PRODUCT_LIST: {
       path: "/shop/:slug",
@@ -906,6 +909,11 @@ export const PATH = {
     UserCallHistory: {
       path: "/order-history/call",
       element: SingleCallHistory,
+    },
+    EXPLORE: {
+      path: "/explore",
+      element: Explore,
+      header: false,
     },
   },
 };

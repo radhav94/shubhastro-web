@@ -34,8 +34,27 @@ const FaceReadingCamera = () => {
   useEffect(() => {
     startCamera();
     
+    // Cleanup function to stop camera when component unmounts
     return () => {
-      stopCamera();
+      console.log('FaceReadingCamera unmounting, stopping camera');
+      stopDetection();
+      
+      // Stop video stream
+      if (videoRef.current && videoRef.current.srcObject) {
+        const tracks = videoRef.current.srcObject.getTracks();
+        tracks.forEach(track => {
+          console.log('Stopping track:', track.kind);
+          track.stop();
+        });
+        videoRef.current.srcObject = null;
+      }
+      
+      // Stop stream state
+      if (stream) {
+        stream.getTracks().forEach(track => {
+          track.stop();
+        });
+      }
     };
   }, [facingMode, modelsLoaded]);
 

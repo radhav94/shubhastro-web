@@ -1,5 +1,6 @@
 .profilePage {
   min-height: 100vh;
+  margin-top: 6rem;
   // background: #F9F4EF;
   // padding-bottom: 2rem;
 }
@@ -17,7 +18,7 @@
   width: 48px;
   height: 48px;
   background: transparent;
-  border: 1px solid #A4A4A4;
+  border: 1px solid #a4a4a4;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -25,10 +26,10 @@
   cursor: pointer;
   flex-shrink: 0;
   transition: all 0.2s;
-  color: #633F06;
+  color: #633f06;
 
   &:hover {
-    background: #F5F5F5;
+    background: #f5f5f5;
   }
 }
 
@@ -42,8 +43,8 @@
 .userAvatar {
   width: 48px;
   height: 48px;
-  background: #FFF;
-  border: 2px solid #FDEFD8;
+  background: #fff;
+  border: 2px solid #fdefd8;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -73,14 +74,14 @@
 .logoutButton {
   width: 48px;
   height: 48px;
-  background: #FFE5E5;
+  background: #ffe5e5;
   border: none;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #FF4444;
+  color: #ff4444;
   flex-shrink: 0;
 }
 
@@ -141,13 +142,17 @@
   overflow: hidden;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(154.36deg, rgba(245, 138, 34, 0.7) -15.4%, rgba(16, 10, 6, 0.8) 99.8%);
+    background: linear-gradient(
+      154.36deg,
+      rgba(245, 138, 34, 0.7) -15.4%,
+      rgba(16, 10, 6, 0.8) 99.8%
+    );
     z-index: 0;
   }
 
@@ -179,19 +184,19 @@
 
 .balanceLabel {
   font-size: 0.875rem;
-  color: #FFF;
+  color: #fff;
   font-weight: 500;
 }
 
 .balanceAmount {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #FFF;
+  color: #fff;
   line-height: 1;
 }
 
 .addMinutesButton {
-  background: #FFF;
+  background: #fff;
   color: #000;
   border: none;
   border-radius: 30px;
@@ -225,8 +230,8 @@
 }
 
 .tabButton {
-  background: #FFF;
-  border: 1px solid #E0E0E0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
   border-radius: 30px;
   padding: 0.75rem 1.5rem;
   font-size: 0.9375rem;
@@ -237,21 +242,21 @@
   transition: all 0.2s;
 
   &.active {
-    background: #F3AD3D;
-    border-color: #F3AD3D;
-    color: #FFF;
+    background: #f3ad3d;
+    border-color: #f3ad3d;
+    color: #fff;
   }
 
   &:hover:not(.active) {
-    border-color: #F3AD3D;
-    color: #F3AD3D;
+    border-color: #f3ad3d;
+    color: #f3ad3d;
   }
 }
 
 // Tab Content
 .tabContent {
   padding: 1rem;
-  background: #F9F4EF;
+  background: #f9f4ef;
   min-height: 400px;
 }
 
@@ -263,7 +268,7 @@
 }
 
 .profileCard {
-  background: #FFF;
+  background: #fff;
   border-radius: 20px;
   padding: 1rem;
   display: flex;
@@ -275,15 +280,15 @@
 .avatarCircle {
   width: 80px;
   height: 80px;
-  background: #E8E8E8;
-  border: 2px solid #FDEFD8;
+  background: #e8e8e8;
+  border: 2px solid #fdefd8;
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2rem;
   font-weight: 700;
-  color: #2A1C06;
+  color: #2a1c06;
   flex-shrink: 0;
 }
 
@@ -302,8 +307,8 @@
 }
 
 .badge {
-  background: #FDEFD8;
-  color: #2A1C06;
+  background: #fdefd8;
+  color: #2a1c06;
   padding: 0.375rem 1rem;
   border-radius: 20px;
   font-size: 0.875rem;
@@ -319,8 +324,8 @@
 .iconButton {
   width: 44px;
   height: 44px;
-  background: #FFF5E6;
-  border: 2px solid #FDEFD8;
+  background: #fff5e6;
+  border: 2px solid #fdefd8;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -330,7 +335,7 @@
   transition: all 0.2s;
 
   &:hover {
-    background: #FFE5CC;
+    background: #ffe5cc;
   }
 
   &:disabled {
@@ -370,8 +375,8 @@
 }
 
 .addProfileButton {
-  background: #FFB84D;
-  color: #FFF;
+  background: #ffb84d;
+  color: #fff;
   border: none;
   border-radius: 12px;
   padding: 0.875rem 1.5rem;
@@ -395,8 +400,8 @@
 
 .addProfileButtonSticky {
   width: 100%;
-  background: #2A1C06;
-  color: #FFF;
+  background: #2a1c06;
+  color: #fff;
   border: none;
   border-radius: 50px;
   padding: 1rem 1.5rem;
@@ -410,7 +415,7 @@
   gap: 0.5rem;
 
   &:hover {
-    background: #1A1006;
+    background: #1a1006;
     transform: translateY(-2px);
   }
 
@@ -434,16 +439,16 @@
   }
 
   &::-webkit-scrollbar-track {
-    background: #F0F0F0;
+    background: #f0f0f0;
     border-radius: 3px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #CCC;
+    background: #ccc;
     border-radius: 3px;
 
     &:hover {
-      background: #AAA;
+      background: #aaa;
     }
   }
 }
@@ -469,8 +474,8 @@
 
 .filterButton,
 .sortButton {
-  background: #FFF;
-  border: 1px solid #E0E0E0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
   border-radius: 30px;
   padding: 0.625rem 1.25rem;
   font-size: 0.875rem;
@@ -483,8 +488,8 @@
   transition: all 0.2s;
 
   &:hover {
-    border-color: #F3AD3D;
-    color: #F3AD3D;
+    border-color: #f3ad3d;
+    color: #f3ad3d;
   }
 }
 
@@ -500,7 +505,7 @@
 }
 
 .orderCard {
-  background: #FFF;
+  background: #fff;
   border-radius: 20px;
   padding: 1.25rem;
   margin-bottom: 1rem;
@@ -513,7 +518,7 @@
   align-items: flex-start;
   margin-bottom: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #F0F0F0;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .orderLeft {
@@ -533,15 +538,15 @@
 .astrologerAvatar {
   width: 80px;
   height: 80px;
-  background: #E8E8E8;
-  border: 2px solid #FDEFD8;
+  background: #e8e8e8;
+  border: 2px solid #fdefd8;
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #2A1C06;
+  color: #2a1c06;
   flex-shrink: 0;
 }
 
@@ -570,7 +575,7 @@
 .orderDate,
 .orderTime {
   font-size: 0.875rem;
-  color: #F3AD3D;
+  color: #f3ad3d;
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -592,13 +597,13 @@
 .orderTypeIcon {
   width: 48px;
   height: 48px;
-  background: #FFF5E6;
+  background: #fff5e6;
   border: none;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #F3AD3D;
+  color: #f3ad3d;
   flex-shrink: 0;
 }
 
@@ -625,8 +630,8 @@
 }
 
 .ratingButton {
-  background: #FFF;
-  border: 1px solid #E0E0E0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
   color: #999;
   flex-direction: column;
   gap: 0.25rem;
@@ -643,30 +648,30 @@
 }
 
 .rateButton {
-  background: #FFF;
-  border: 1px solid #E0E0E0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
   color: #999;
 
   &:hover {
-    border-color: #F3AD3D;
-    color: #F3AD3D;
+    border-color: #f3ad3d;
+    color: #f3ad3d;
   }
 }
 
 .consultAgainButton {
-  background: #FFF;
-  border: 1px solid #E0E0E0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
   color: #999;
 
   &:hover {
-    border-color: #F3AD3D;
-    color: #F3AD3D;
+    border-color: #f3ad3d;
+    color: #f3ad3d;
   }
 }
 
 .exploreButton {
-  background: #F3AD3D;
-  color: #FFF;
+  background: #f3ad3d;
+  color: #fff;
   border: none;
   border-radius: 30px;
   padding: 0.875rem 2rem;
@@ -677,7 +682,7 @@
   transition: all 0.2s;
 
   &:hover {
-    background: #E09A2A;
+    background: #e09a2a;
     transform: translateY(-2px);
   }
 }
@@ -694,12 +699,12 @@
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  
+
   @media (min-width: 768px) {
     gap: 1rem;
     justify-content: center;
   }
-  
+
   @media (min-width: 1024px) {
     gap: 1.5rem;
   }
@@ -707,8 +712,8 @@
 
 .subTabButton {
   flex: 1;
-  background: #FFF;
-  border: 1px solid #E0E0E0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
   border-radius: 30px;
   padding: 0.75rem 1rem;
   font-size: 0.9375rem;
@@ -723,7 +728,7 @@
     padding: 0.875rem 2rem;
     font-size: 1rem;
   }
-  
+
   @media (min-width: 1024px) {
     min-width: 180px;
     padding: 1rem 2.5rem;
@@ -731,14 +736,14 @@
   }
 
   &.active {
-    background: #F3AD3D;
-    border-color: #F3AD3D;
-    color: #FFF;
+    background: #f3ad3d;
+    border-color: #f3ad3d;
+    color: #fff;
   }
 
   &:hover:not(.active) {
-    border-color: #F3AD3D;
-    color: #F3AD3D;
+    border-color: #f3ad3d;
+    color: #f3ad3d;
   }
 }
 
@@ -756,22 +761,22 @@
   }
 
   &::-webkit-scrollbar-track {
-    background: #F0F0F0;
+    background: #f0f0f0;
     border-radius: 3px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #CCC;
+    background: #ccc;
     border-radius: 3px;
 
     &:hover {
-      background: #AAA;
+      background: #aaa;
     }
   }
 }
 
 .transactionItem {
-  background: #FFF;
+  background: #fff;
   border-radius: 20px;
   padding: 1.25rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -824,11 +829,11 @@
   white-space: nowrap;
 
   &.credit {
-    color: #10B981;
+    color: #10b981;
   }
 
   &.debit {
-    color: #EF4444;
+    color: #ef4444;
   }
 }
 
@@ -841,8 +846,8 @@
 
 .contactSupportButton {
   width: 100%;
-  background: #2A1C06;
-  color: #FFF;
+  background: #2a1c06;
+  color: #fff;
   border: none;
   border-radius: 50px;
   padding: 1rem 1.5rem;
@@ -856,7 +861,7 @@
   gap: 0.5rem;
 
   &:hover {
-    background: #1A1006;
+    background: #1a1006;
     transform: translateY(-2px);
   }
 
@@ -887,7 +892,7 @@
 }
 
 .supportGridCard {
-  background: #FFF;
+  background: #fff;
   border-radius: 20px;
   padding: 1.75rem 1.5rem;
   display: flex;
@@ -908,7 +913,7 @@
 .supportGridIcon {
   width: 72px;
   height: 72px;
-  background: #F3AD3D;
+  background: #f3ad3d;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -924,13 +929,13 @@
   margin: 0 0 1.25rem 0;
   line-height: 1.3;
   padding-bottom: 1.25rem;
-  border-bottom: 1px solid #E0E0E0;
+  border-bottom: 1px solid #e0e0e0;
   width: 100%;
 }
 
 .supportGridDesc {
   font-size: 0.9375rem;
-  color: #AAA;
+  color: #aaa;
   margin: 0;
   line-height: 1.5;
   padding-top: 0.75rem;
@@ -951,7 +956,7 @@
 }
 
 .otherCard {
-  background: #FFF;
+  background: #fff;
   border-radius: 20px;
   padding: 1.25rem 1.5rem;
   display: flex;
@@ -999,7 +1004,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  border-bottom: 2px solid #E0E0E0;
+  border-bottom: 2px solid #e0e0e0;
   margin-bottom: 1rem;
 }
 
@@ -1042,7 +1047,7 @@
   justify-content: space-between;
   align-items: flex-start;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #E0E0E0;
+  border-bottom: 1px solid #e0e0e0;
 
   &:last-child {
     border-bottom: none;
@@ -1075,18 +1080,18 @@
   flex-shrink: 0;
 
   &.positive {
-    color: #10B981;
+    color: #10b981;
   }
 
   &.negative {
-    color: #EF4444;
+    color: #ef4444;
   }
 }
 
 .contactSupportButton {
   width: 100%;
   background: #000;
-  color: #FFF;
+  color: #fff;
   border: none;
   border-radius: 12px;
   padding: 1rem;
@@ -1116,7 +1121,7 @@
 }
 
 .modalContent {
-  background: #FFF;
+  background: #fff;
   border-radius: 20px;
   padding: 2rem;
   max-width: 400px;
@@ -1154,20 +1159,20 @@
 }
 
 .cancelBtn {
-  background: #F0F0F0;
+  background: #f0f0f0;
   color: #000;
 
   &:hover {
-    background: #E0E0E0;
+    background: #e0e0e0;
   }
 }
 
 .deleteBtn {
-  background: #FF4444;
-  color: #FFF;
+  background: #ff4444;
+  color: #fff;
 
   &:hover:not(:disabled) {
-    background: #DC2626;
+    background: #dc2626;
   }
 
   &:disabled {

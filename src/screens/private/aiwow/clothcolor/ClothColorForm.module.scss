@@ -1,7 +1,7 @@
 .container {
   position: relative;
-  z-index: 2100;
   min-height: 100vh;
+  padding-top: 120px;
   background: #ffffff;
   padding-bottom: 80px;
 }
@@ -46,6 +46,47 @@
   padding: 24px 16px;
   max-width: 600px;
   margin: 0 auto;
+}
+
+.profileInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.profileIcon {
+  width: 48px;
+  height: 48px;
+  background: #22c55e;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.profileDetails {
+  flex: 1;
+}
+
+.profileLabel {
+  font-size: 12px;
+  color: #16a34a;
+  margin: 0 0 4px 0;
+  font-weight: 500;
+}
+
+.profileName {
+  font-size: 16px;
+  color: #15803d;
+  margin: 0;
+  font-weight: 600;
 }
 
 .description {

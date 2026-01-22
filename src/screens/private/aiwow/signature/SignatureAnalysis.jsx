@@ -58,13 +58,32 @@ const SignatureAnalysis = () => {
           navigate('/aiwow/signature/result');
         }, 1000);
       } else {
-        // Handle error
+        // Handle error - extract detailed error message
         setProgress(0);
-        Toast.error(result.error || 'Analysis failed. Please try again.');
+        
+        let errorMessage = 'Analysis failed. Please try again.';
+        
+        if (result.error) {
+          if (typeof result.error === 'string') {
+            errorMessage = result.error;
+          } else if (result.error.message) {
+            errorMessage = result.error.message;
+            
+            // Add details if available
+            if (result.error.details?.detectedIssue) {
+              errorMessage += `\n\n${result.error.details.detectedIssue}`;
+            }
+            if (result.error.details?.expected) {
+              errorMessage += `\n\nExpected: ${result.error.details.expected}`;
+            }
+          }
+        }
+        
+        Toast.error(errorMessage);
         
         setTimeout(() => {
           navigate('/aiwow/signature/instructions');
-        }, 2000);
+        }, 3000);
       }
     } catch (error) {
       console.error('Analysis error:', error);

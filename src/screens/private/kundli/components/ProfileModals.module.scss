@@ -177,6 +177,29 @@
   }
 }
 
+.continueBtn {
+  width: 100%;
+  padding: 16px;
+  background: #000;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: #333;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 /* SIDE SHEET (Add/Edit Profile) */
 .sideSheet {
   background: white;
@@ -432,6 +455,18 @@
       background: #f5f5f5;
       border-color: #999;
       transform: translateY(-1px);
+    }
+  }
+
+  .continueBtn {
+    padding: 18px;
+    font-size: 17px;
+    margin-top: 12px;
+
+    &:hover:not(:disabled) {
+      background: #1a1a1a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
   }
 

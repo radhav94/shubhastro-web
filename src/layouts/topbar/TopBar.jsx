@@ -23,7 +23,7 @@ const TopBar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
   const [currentLang, setCurrentLang] = useState(
-    localStorage.getItem("selectedLanguage") || "en"
+    localStorage.getItem("selectedLanguage") || "en",
   );
 
   const role = localStorage.getItem("shubhtalk_role");
@@ -56,8 +56,14 @@ const TopBar = () => {
     {
       title: "Astrologers",
       children: [
-        { title: "Chat with Astrologer", path: PATH.privateRoutes.Chat_With_ASTROLOGER.path },
-        { title: "Talk to Astrologer", path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path },
+        {
+          title: "Chat with Astrologer",
+          path: PATH.privateRoutes.Chat_With_ASTROLOGER.path,
+        },
+        {
+          title: "Talk to Astrologer",
+          path: PATH.privateRoutes.TALK_TO_ASTROLOGER.path,
+        },
       ],
     },
     {
@@ -145,7 +151,7 @@ const TopBar = () => {
       ) : (
         <button
           className={`${styles.ctaButton} ${styles.hideOnMobile}`}
-          onClick={() => navigate("/onboarding?skip=welcome")}
+          onClick={() => navigate("/login?skip=welcome")}
         >
           LogIn
         </button>
@@ -450,7 +456,7 @@ const isMenuActive = (item, pathname) => {
     const childActive = item.children.some(
       (child) =>
         child.path &&
-        (pathname === child.path || pathname.startsWith(child.path + "/"))
+        (pathname === child.path || pathname.startsWith(child.path + "/")),
     );
 
     if (childActive) return true;
