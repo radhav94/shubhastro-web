@@ -14,6 +14,7 @@ import ashtakvargaImg from "../../../assets/explore/ashtakvarga.png";
 import matchmakingImg from "../../../assets/explore/matchmaking.png";
 import tarotImg from "../../../assets/explore/tarot.png";
 import newsImg from "../../../assets/explore/news.png";
+import numerology from "../../../assets/images/numerology.svg";
 
 const Explore = () => {
   const navigate = useNavigate();
@@ -84,7 +85,7 @@ const Explore = () => {
       title: "Numerology",
       subtitle: "Decode the power of numbers",
       bgColor: "#8B4513",
-      image: null,
+      image: numerology,
       link: "/numerology",
     },
   ];
@@ -149,7 +150,11 @@ const Explore = () => {
                 style={{ backgroundColor: card.bgColor }}
                 onClick={() => navigate(card.link)}
               >
-                <img src={card.image} alt={card.title} className={styles.cardIcon} />
+                <img
+                  src={card.image}
+                  alt={card.title}
+                  className={styles.cardIcon}
+                />
                 <h3 className={styles.cardTitle}>{card.title}</h3>
               </div>
             ))}
@@ -172,7 +177,11 @@ const Explore = () => {
                   onClick={() => navigate(card.link)}
                 >
                   <div className={styles.kundliCardImage}>
-                    <img src={card.image} alt={card.title} className={styles.chartImage} />
+                    <img
+                      src={card.image}
+                      alt={card.title}
+                      className={styles.chartImage}
+                    />
                   </div>
                   <div className={styles.kundliCardContent}>
                     <h3 className={styles.kundliCardTitle}>{card.title}</h3>
@@ -192,7 +201,11 @@ const Explore = () => {
               Measures emotional alignment and long-term compatibility
             </p>
           </div>
-          <img src={matchmakingImg} alt="Matchmaking" className={styles.matchmakingIcon} />
+          <img
+            src={matchmakingImg}
+            alt="Matchmaking"
+            className={styles.matchmakingIcon}
+          />
         </div>
 
         {/* Explore Your Destiny */}
@@ -215,17 +228,11 @@ const Explore = () => {
                   <p className={styles.destinyCardSubtitle}>{card.subtitle}</p>
                 </div>
                 {card.image && (
-                  <img src={card.image} alt={card.title} className={styles.destinyCardImage} />
-                )}
-                {card.id === 2 && (
-                  <div className={styles.numerologyNumbers}>
-                    <span>1</span>
-                    <span>2</span>
-                    <span>3</span>
-                    <span>4</span>
-                    <span>5</span>
-                    <span>6</span>
-                  </div>
+                  <img
+                    src={card.image}
+                    alt={card.title}
+                    className={styles.destinyCardImage}
+                  />
                 )}
               </div>
             ))}
@@ -239,14 +246,20 @@ const Explore = () => {
                 Smart recommendations aligned with your birth chart
               </p>
             </div>
-            <img src={remediesImg} alt="Gemstones" className={styles.gemstonesIcon} />
+            <img
+              src={remediesImg}
+              alt="Gemstones"
+              className={styles.gemstonesIcon}
+            />
           </div>
         </section>
 
         {/* Explore Blogs */}
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>EXPLORE BLOGS AND IN THE NEWS</h2>
+            <h2 className={styles.sectionTitle}>
+              EXPLORE BLOGS AND IN THE NEWS
+            </h2>
             <ChevronRight size={24} className={styles.sectionArrow} />
           </div>
 
@@ -258,7 +271,11 @@ const Explore = () => {
                 onClick={() => navigate(blog.link)}
               >
                 <div className={styles.blogImage}>
-                  <img src={blog.image} alt={blog.title} className={styles.blogBgImage} />
+                  <img
+                    src={blog.image}
+                    alt={blog.title}
+                    className={styles.blogBgImage}
+                  />
                   <span className={styles.blogDate}>{blog.date}</span>
                 </div>
                 <h4 className={styles.blogTitle}>{blog.title}</h4>

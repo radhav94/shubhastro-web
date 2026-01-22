@@ -30,7 +30,7 @@ const HomeLayout = () => {
 
   // Hide TopHeader on onboarding page or when header is disabled
 
-  const isOnboardingPage = location.pathname === "/onboarding";
+  const isOnboardingPage = location.pathname === "/login";
   const showTopHeader = !isOnboardingPage && showHeader;
 
   return (
