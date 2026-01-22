@@ -1,203 +1,469 @@
 @import '../../../../assets/variables/variables';
 
 .container {
+  position: relative;
+  z-index: 2100;
   min-height: 100vh;
-  background: #f5f5f5;
-  padding-bottom: 2rem;
+  background: #ffffff;
+  padding-bottom: 80px;
 }
 
 .header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: white;
+  padding: 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
 .backButton {
-  background: #f3f4f6;
+  background: none;
   border: none;
+  padding: 8px;
   cursor: pointer;
-  padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #1f2937;
-  border-radius: 0.5rem;
-  transition: background 0.2s;
-
+  
   &:hover {
-    background: #e5e7eb;
+    opacity: 0.7;
   }
 }
 
 .title {
-  font-size: 1rem;
+  font-size: 18px;
   font-weight: 600;
   color: #1f2937;
   margin: 0;
+  margin-left: 12px;
 }
 
 .content {
+  padding: 0;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
 }
 
-.resultHeader {
-  margin-bottom: 1.5rem;
-}
-
-.resultTitle {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 0.5rem 0;
-}
-
-.resultSubtitle {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin: 0;
-}
-
-.tabsContainer {
+.tabs {
   display: flex;
-  gap: 0.5rem;
+  gap: 0;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+  position: sticky;
+  top: 57px;
+  z-index: 9;
   overflow-x: auto;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
   -webkit-overflow-scrolling: touch;
-
+  
   &::-webkit-scrollbar {
     display: none;
   }
 }
 
 .tab {
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 100px;
+  padding: 16px 12px;
   background: transparent;
-  color: #9ca3af;
   border: none;
-  padding: 0.625rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
   border-bottom: 2px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
-
+  
   &:hover {
-    color: #6b7280;
+    color: #1f2937;
+  }
+  
+  &.active {
+    color: #000000;
+    border-bottom-color: #000000;
   }
 }
 
-.activeTab {
-  color: #1f2937;
-  border-bottom-color: #1f2937;
-  font-weight: 600;
+.tabContent {
+  padding: 24px 16px;
 }
 
-.analysisSection {
+.signatureImageWrapper {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 24px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+}
+
+.signatureImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  padding: 20px;
+}
+
+.qualityCard,
+.styleCard,
+.analysisCard,
+.traitsCard,
+.leadershipCard,
+.communicationCard,
+.emotionalCard,
+.socialCard,
+.insightsCard {
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+}
+
+.subTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 16px 0 12px 0;
+}
+
+.scoreGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.scoreItem {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
 }
 
-.analysisCard {
-  background: #d1d5db;
-  border-radius: 0.75rem;
-  padding: 1.25rem;
+.scoreLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 8px;
+  text-align: center;
+}
 
-  @media (min-width: 768px) {
-    padding: 1.5rem;
+.scoreValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.acceptableStatus {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.statusLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.statusValue {
+  font-size: 14px;
+  font-weight: 600;
+  
+  &.acceptable {
+    color: #059669;
+  }
+  
+  &.notAcceptable {
+    color: #dc2626;
   }
 }
 
-.cardHeader {
+.infoRow {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 0.75rem;
-  gap: 1rem;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+  
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
-.category {
-  font-size: 0.75rem;
+.label {
+  font-size: 14px;
+  font-weight: 500;
   color: #6b7280;
-  margin: 0 0 0.25rem 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  margin-right: 16px;
 }
 
-.strength {
-  font-size: 1.125rem;
-  font-weight: 700;
+.value {
+  font-size: 14px;
+  font-weight: 400;
   color: #1f2937;
-  margin: 0;
-}
-
-.percentage {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1f2937;
-  line-height: 1;
+  text-align: right;
 }
 
 .description {
-  font-size: 0.8125rem;
+  font-size: 14px;
+  line-height: 1.6;
   color: #4b5563;
-  line-height: 1.5;
-  margin: 0;
+  margin: 12px 0 0 0;
+}
 
-  @media (min-width: 768px) {
-    font-size: 0.875rem;
+.characteristicsTags,
+.strengthsTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 6px 12px;
+  background: #ffffff;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f2937;
+  text-transform: capitalize;
+}
+
+.traitItem {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  
+  &:last-child {
+    margin-bottom: 0;
   }
 }
 
-.detailButton {
-  width: 100%;
-  background: #1f2937;
+.traitHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.traitName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.traitScore {
+  font-size: 20px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.traitDescription {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4b5563;
+  margin: 0 0 8px 0;
+}
+
+.indicators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.indicatorLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.indicatorValue {
+  font-size: 12px;
+  color: #4b5563;
+  font-style: italic;
+}
+
+.scoreHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.areasList,
+.insightsList,
+.challengesList,
+.recommendationsList,
+.careerList,
+.relationshipList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.areaItem,
+.insightItem,
+.challengeItem,
+.recommendationItem,
+.careerItem,
+.relationshipItem {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4b5563;
+  padding: 8px 0 8px 24px;
+  position: relative;
+  
+  &:before {
+    content: '•';
+    position: absolute;
+    left: 8px;
+    color: #059669;
+    font-weight: 700;
+  }
+}
+
+.challengeItem {
+  &:before {
+    content: '⚠';
+    color: #f59e0b;
+  }
+}
+
+.recommendationItem {
+  &:before {
+    content: '💡';
+  }
+}
+
+.careerItem {
+  &:before {
+    content: '💼';
+  }
+}
+
+.relationshipItem {
+  &:before {
+    content: '❤';
+  }
+}
+
+.doneButton {
+  width: calc(100% - 32px);
+  margin: 24px 16px;
+  padding: 16px;
+  background: #000000;
   color: white;
   border: none;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  font-size: 0.9375rem;
+  border-radius: 12px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
-
+  transition: all 0.2s;
+  
   &:hover {
-    background: #111827;
+    background: #1f2937;
   }
-
-  @media (min-width: 768px) {
-    font-size: 1rem;
+  
+  &:active {
+    transform: scale(0.98);
   }
 }
 
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-size: 16px;
+  color: #6b7280;
+}
+
+// Tablet
 @media (min-width: 768px) {
-  .content {
-    padding: 2rem;
+  .tabContent {
+    padding: 32px 24px;
   }
-
-  .header {
-    padding: 1rem 2rem;
+  
+  .tab {
+    font-size: 15px;
+    padding: 18px 16px;
   }
-
-  .title {
-    font-size: 1.125rem;
+  
+  .signatureImageWrapper {
+    max-width: 600px;
   }
-
-  .resultTitle {
-    font-size: 2rem;
+  
+  .cardTitle {
+    font-size: 20px;
   }
+  
+  .subTitle {
+    font-size: 16px;
+  }
+  
+  .scoreGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .doneButton {
+    width: calc(100% - 48px);
+    margin: 32px 24px;
+  }
+}
 
-  .resultSubtitle {
-    font-size: 0.9375rem;
+// Desktop
+@media (min-width: 1024px) {
+  .tabContent {
+    padding: 40px 32px;
+  }
+  
+  .signatureImageWrapper {
+    max-width: 700px;
+  }
+  
+  .cardTitle {
+    font-size: 22px;
+  }
+  
+  .qualityCard,
+  .styleCard,
+  .analysisCard,
+  .traitsCard,
+  .leadershipCard,
+  .communicationCard,
+  .emotionalCard,
+  .socialCard,
+  .insightsCard {
+    padding: 24px;
+  }
+  
+  .doneButton {
+    max-width: 400px;
+    margin: 40px auto;
   }
 }

@@ -25,31 +25,32 @@ const RecommendedAstrologerCard = ({ data, onConnect }) => {
             e.target.src = astrologerImage;
           }}
         />
-      </div>
-
-      <div className={styles.ratingBadge}>
-        <FaStar className={styles.starIcon} />
-        <span className={styles.ratingText}>{rating || "0"}</span>
-      </div>
-
-      <h3 
-        className={styles.name}
-        onClick={() => navigate(`/astrologer/${data?.astrologerId || data?._id}`)}
-        style={{ cursor: 'pointer' }}
-      >
-        {fullName}
-      </h3>
-
-      {displayExperience && (
-        <div className={styles.experience}>
-          <PiBookOpenTextLight className={styles.bookIcon} />
-          <span className={styles.experienceText}>{displayExperience}</span>
+        <div className={styles.ratingBadge}>
+          <FaStar className={styles.starIcon} />
+          <span className={styles.ratingText}>{rating || "0"}</span>
         </div>
-      )}
+      </div>
 
-      <button className={styles.connectButton} onClick={onConnect}>
-        Connect
-      </button>
+      <div className={styles.leftSection}>
+        <h3 
+          className={styles.name}
+          onClick={() => navigate(`/astrologer/${data?.astrologerId || data?._id}`)}
+          style={{ cursor: 'pointer' }}
+        >
+          {fullName}
+        </h3>
+
+        {displayExperience && (
+          <div className={styles.experience}>
+            <PiBookOpenTextLight className={styles.bookIcon} />
+            <span className={styles.experienceText}>{displayExperience}</span>
+          </div>
+        )}
+
+        <button className={styles.connectButton} onClick={onConnect}>
+          Connect
+        </button>
+      </div>
     </div>
   );
 };

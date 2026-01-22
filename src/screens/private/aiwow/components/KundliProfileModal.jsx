@@ -124,19 +124,19 @@ const KundliProfileModal = ({ isOpen, onClose, onSelectProfile, targetRoute }) =
               })}
             </div>
           )}
+        </div>
 
-          <div className={styles.buttonGroup}>
-            <button className={styles.addProfileBtn} onClick={handleAddProfile}>
-              + Add Profile
-            </button>
-            <button 
-              className={styles.proceedBtn} 
-              onClick={handleSelectAndProceed}
-              disabled={!selectedProfile}
-            >
-              Proceed
-            </button>
-          </div>
+        <div className={styles.buttonGroup}>
+          <button className={styles.addProfileBtn} onClick={handleAddProfile}>
+            + Add Profile
+          </button>
+          <button 
+            className={styles.proceedBtn} 
+            onClick={handleSelectAndProceed}
+            disabled={!selectedProfile}
+          >
+            Proceed
+          </button>
         </div>
       </div>
     </div>

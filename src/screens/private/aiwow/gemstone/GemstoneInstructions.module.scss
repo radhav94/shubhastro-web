@@ -1,6 +1,8 @@
 @import '../../../../assets/variables/variables';
 
 .container {
+  position: relative;
+  z-index: 2100;
   min-height: 100vh;
   background: #f5f5f5;
   display: flex;

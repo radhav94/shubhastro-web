@@ -24,6 +24,13 @@ const ClothColorCamera = () => {
 
   const startCamera = async () => {
     try {
+      // Check if mediaDevices is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError('Camera is not supported on this device or browser.');
+        return;
+      }
+
+      // Request camera permission
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'user',
@@ -35,10 +42,25 @@ const ClothColorCamera = () => {
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
+        setError(null);
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
-      setError('Unable to access camera. Please check permissions.');
+      
+      // Provide specific error messages based on error type
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setError('Camera permission denied. Please allow camera access in your browser settings and refresh the page.');
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setError('No camera found on this device.');
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        setError('Camera is already in use by another application.');
+      } else if (err.name === 'OverconstrainedError') {
+        setError('Camera does not meet the required specifications.');
+      } else if (err.name === 'SecurityError') {
+        setError('Camera access is blocked due to security settings. Please use HTTPS.');
+      } else {
+        setError('Unable to access camera. Please check permissions and try again.');
+      }
     }
   };
 
@@ -93,11 +115,29 @@ const ClothColorCamera = () => {
   if (error) {
     return (
       <div className={styles.container}>
-        <div className={styles.errorContainer}>
-          <p className={styles.errorText}>{error}</p>
-          <button className={styles.backButton} onClick={handleBack}>
-            Go Back
+        <div className={styles.header}>
+          <button className={styles.backBtn} onClick={handleBack}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
+        </div>
+        <div className={styles.errorContainer}>
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className={styles.errorIcon}>
+            <circle cx="32" cy="32" r="30" stroke="#ef4444" strokeWidth="2" fill="none"/>
+            <path d="M32 20V36" stroke="#ef4444" strokeWidth="3" strokeLinecap="round"/>
+            <circle cx="32" cy="44" r="2" fill="#ef4444"/>
+          </svg>
+          <h3 className={styles.errorTitle}>Camera Access Required</h3>
+          <p className={styles.errorText}>{error}</p>
+          <div className={styles.errorButtons}>
+            <button className={styles.retryButton} onClick={startCamera}>
+              Try Again
+            </button>
+            <button className={styles.backButton} onClick={handleBack}>
+              Go Back
+            </button>
+          </div>
         </div>
       </div>
     );

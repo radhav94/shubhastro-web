@@ -21,8 +21,8 @@
   border-radius: 16px;
   padding: 16px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-direction: row;
+  gap: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   width: 100%;
@@ -37,24 +37,30 @@
 
   @media (max-width: 768px) {
     padding: 14px;
-    gap: 10px;
+    // gap: 10px;
   }
 }
 
 .imageSection {
   position: relative;
-  width: 100%;
-  height: fit-content;
+  width: 130px;
+  height: 183px;
+  flex-shrink: 0;
+  @media (width <= 767px){
+    width: 100px;
+    height: 160px;
+  }
+  // height: fit-content;
 }
 
 .astrologerImage {
-  width: 70%;
-  // height: 100%;
-  border-radius: 200px;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
   overflow: hidden;
   object-fit: cover;
   display: block;
-  margin: 0 auto;
+  // margin: 0 auto;
 
   // @media (max-width: 1200px) {
   //   height: 260px;
@@ -68,8 +74,8 @@
 
 .ratingBadge {
   position: absolute;
-  top: -7px;
-  left: -7px;
+  top: 7px;
+  left: 7px;
   background: rgba(255, 255, 255, 0.95);
   padding: 6px 12px;
   border-radius: 20px;
@@ -86,6 +92,8 @@
   @media (max-width: 768px) {
     padding: 5px 10px;
     font-size: 12px;
+    top: 7px;
+    left: 7px;
   }
 }
 
@@ -100,12 +108,12 @@
 
 .infoSection {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   flex-direction: column;
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  height: 184px;
+  // height: 184px;
 
   @media (max-width: 768px) {
     gap: 6px;
