@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useDispatch } from "react-redux";
 import {
   AstrologerCard,
   DetailsModal,
@@ -13,7 +14,8 @@ import { useTalkToAstrologer } from "./useTalkToAstrologer";
 import { useGetAstrologersQuery, useGetRecommendedAstrologersQuery } from "../../../redux/api/astrologer/astrologerApi";
 import FilterChips from "../../../component/UI/chips/astrologer/FilterChips";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
-import KundliSelectModal from "./kundliSelect/KundliSelectModal";
+import ProfileModals from "../kundli/components/ProfileModals";
+import { useProfileManager } from "../kundli/hooks/useProfileManager";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { PATH } from "../../../utils/routes/Paths";
 import { getToken } from "../../../utils/token";
@@ -27,6 +29,8 @@ import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal"
 import { useChat } from "../../../context/ChatContext";
 import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
 import ChatAstrologerCard from "../../../component/UI/cards/ChatAstrologerCard";
+import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
+import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import RecommendedAstrologerCard from "../../../component/UI/cards/RecommendedAstrologerCard";
 
 const astroImages = [
@@ -41,9 +45,11 @@ const astroImages = [
 
 const TalkToAstrologer = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [isRecommendModalOpen, setIsRecommendModalOpen] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showRecommend, setShowRecommend] = useState(true);
+  const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
 
   const location = useLocation(); //  get current URL
   // const isChatMode = location.pathname === "/chat-with-astrologers";
@@ -102,14 +108,48 @@ const TalkToAstrologer = () => {
     onRechargeNow,
   ] = useTalkToAstrologer();
 
-  const [kundliModalOpen, setKundliModalOpen] = useState(false);
+  // Use the astrologer connect hook
+  const {
+    handleChatStart: hookHandleChatStart,
+    handleCallStart: hookHandleCallStart,
+    handleAfterKundliSelect: hookHandleAfterKundliSelect,
+    openModal: hookOpenModal,
+    setOpenModal: hookSetOpenModal,
+  } = useAstrologerConnect();
+
+  // Use profile manager hook (same as Home page)
+  const {
+    selectedProfile: profileManagerSelectedProfile,
+    profiles,
+    profilesLoading,
+    isCreating,
+    showSelectProfile,
+    showAddProfile,
+    showEditProfile,
+    formData,
+    editFormData,
+    setShowSelectProfile,
+    setShowAddProfile,
+    setShowEditProfile,
+    setFormData,
+    setEditFormData,
+    handleAddProfile,
+    handleEditProfile,
+    handleSubmitProfile,
+    handleSubmitEditProfile,
+    formatProfileDisplay,
+  } = useProfileManager(dispatch);
+
+  // Local state for selected profile (to avoid closing modal)
+  const [localSelectedProfile, setLocalSelectedProfile] = useState(null);
+
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
   const [activeCallAstro, setActiveCallAstro] = useState(null);
-  const [callType, setCallType] = useState(null); // audio | video
 
   const {
     activeCall,
     setActiveCall,
+    waitingList: callWaitingList,
     setWaitingList: setCallWaitingList,
     setActiveCallRoomId,
     resetCallFlow,
@@ -309,66 +349,17 @@ const TalkToAstrologer = () => {
     setHasMore(result.length >= limit);
   };
 
-  // Kundli & Chat handlers
-  const openKundliPopup = () => {
-    if (token) {
-      setKundliModalOpen(true);
-    } else {
-      navigate("/login", { state: { from: location.pathname } });
-    }
+  // Custom handler for profile selection (doesn't close modal)
+  const handleProfileSelect = (profile) => {
+    console.log("✅ TALK_TO_ASTROLOGER: Profile selected", profile);
+    setLocalSelectedProfile(profile);
   };
 
-  async function handleChatStart(astro) {
-    setSelectedAstrologer(astro);
-    setLastRequestedAstro(astro);
-    //Check if user has minimum required balance
-    // 💰 Balance check
-    const result = await getBalance({ astrologerId: astro?._id });
-    if (result.data.data.status === false) {
-      setOpenModal((prev) => ({ ...prev, recharge: true }));
-      return;
-    }
-
-    //Check if astro is online
-    if (!astro?.isActive) {
-      Toast.error("Astrologer is not online");
-      return;
-    }
-
-    openKundliPopup();
-  }
-
-  const handleChatAfterKundliSelect = async (kundli) => {
-    setKundliModalOpen(false);
-
-    if (!kundli?._id) return Toast.error("Kundli not selected properly");
-    kundliRef.current = kundli._id;
-    setLastSelectedKundli(kundli); // Store the selected Kundli in context
-    if (!selectedAstrologer?._id) return Toast.error("Astrologer not selected");
-    if (!userIdLocal) return Toast.error("User ID Missing");
-
-    const astro = selectedAstrologer;
-    localStorage.setItem("selectedAstroId", astro._id);
-
-    try {
-      // 🔐 Auth check
-      if (!token) {
-        navigate("/login", { state: { from: location.pathname } });
-        return;
-      }
-      if (!isChatMode) return initiateCall(astro, callType);
-
-      // ✅ Store active call info
-      activeCallAstroRef.current = astro;
-      // setWaitingPopup(true);
-
-      // 🚀 Create call room
-      voiceSocket.emit("chat:initiate", {
-        userId: userIdLocal,
-        astrologerId: astro._id,
-      });
-    } catch (error) {
-      console.error(error);
+  // Handler for Continue button (triggers socket emit)
+  const handleContinueAfterKundliSelect = () => {
+    if (localSelectedProfile) {
+      console.log("✅ TALK_TO_ASTROLOGER: Continue clicked with profile", localSelectedProfile);
+      hookHandleAfterKundliSelect(localSelectedProfile);
     }
   };
 
@@ -404,87 +395,12 @@ const TalkToAstrologer = () => {
   const resetCallState = () => {
     setCallRoomId(null);
     setChatRoomId(null);
-    setCallType(null);
     setActiveCallAstro(null);
 
     activeCallAstroRef.current = null;
     kundliRef.current = null;
 
     setActiveCall(null);
-  };
-
-  const initiateCall = async (astro, type) => {
-    // 🔐 Auth check
-    if (!token) {
-      navigate("/login", { state: { from: location.pathname } });
-      return;
-    }
-
-    // ❌ Validations
-    if (!astro) return Toast.error("Astrologer missing");
-    if (!userIdLocal) return Toast.error("User ID missing");
-
-    // 💰 Balance check
-    const res = await getBalance({ astrologerId: astro._id, type: "call" });
-    if (
-      !res?.data?.data?.status ||
-      res?.data?.data?.availableAmount < res?.data?.data?.requiredAmount
-    ) {
-      setSelectedAstrologer(astro);
-      setOpenModal((prev) => ({ ...prev, recharge: true }));
-      return;
-    }
-
-    // 📞 Already on call
-    if (activeCall) {
-      return Toast.error("You are already on a call");
-    }
-
-    // ✅ Store active call info
-    activeCallAstroRef.current = astro;
-    setActiveCallAstro(astro);
-    setCallType(type);
-    setLastCallType(type); // Store the call type in context
-    setCallWaitingList(5); // Show waiting for call
-
-    // 🔌 Ensure socket connection
-    // connectSocket();
-
-    // 🚀 Create call room
-    voiceSocket.emit("call:initiate", {
-      userId: userIdLocal,
-      astrologerId: astro._id,
-      type, // "audio" | "video"
-    });
-  };
-
-  // const handleAudioCall = (astro) => {
-  //   initiateCall(astro, "audio");
-  // };
-
-  // const handleVideoCall = (astro) => {
-  //   initiateCall(astro, "video");
-  // };
-
-  const handleCallStart = async (astro, type) => {
-    setSelectedAstrologer(astro);
-    setLastRequestedCallAstro(astro);
-    //Check if user has minimum required balance
-    // 💰 Balance check
-    const result = await getBalance({ astrologerId: astro?._id, type: "call" });
-    if (result.data.data.status === false) {
-      setOpenModal((prev) => ({ ...prev, recharge: true }));
-      return;
-    }
-
-    //Check if astro is online
-    if (!astro?.isActive) {
-      Toast.error("Astrologer is not online");
-      return;
-    }
-
-    setCallType(type);
-    openKundliPopup();
   };
 
   useEffect(() => {
@@ -668,7 +584,11 @@ const TalkToAstrologer = () => {
             {isChatMode ? (
               <ChatAstrologerCard
                 data={astro}
-                onConnect={() => handleChatStart(astro)}
+                onConnect={() => {
+                  setSelectedAstrologer(astro);
+                  setIsConnectPopupOpen(true);
+                  activeCallAstroRef.current = astro;
+                }}
               />
             ) : (
               <AstrologerCard
@@ -676,10 +596,19 @@ const TalkToAstrologer = () => {
                 data={astro}
                 image={astroImages[index % astroImages.length]}
                 onFollow={() => onFollow(astro._id)}
-                onChat={() => handleChatStart(astro)}
+                onChat={() => {
+                  setSelectedAstrologer(astro);
+                  setIsConnectPopupOpen(true);
+                }}
                 onProfile={() => onProfile(astro)}
-                onAudioCall={() => handleCallStart(astro, "audio")}
-                onVideoCall={() => handleCallStart(astro, "video")}
+                onAudioCall={() => {
+                  setSelectedAstrologer(astro);
+                  setIsConnectPopupOpen(true);
+                }}
+                onVideoCall={() => {
+                  setSelectedAstrologer(astro);
+                  setIsConnectPopupOpen(true);
+                }}
               />
             )}
           </div>
@@ -743,10 +672,31 @@ const TalkToAstrologer = () => {
         astrologer={selectedAstrologer}
       /> */}
 
-      <KundliSelectModal
-        isOpen={kundliModalOpen}
-        onClose={() => setKundliModalOpen(false)}
-        onSelect={handleChatAfterKundliSelect}
+      {/* Kundli modal - using ProfileModals like Home page */}
+      <ProfileModals
+        showSelectProfile={hookOpenModal.kundli}
+        showAddProfile={showAddProfile}
+        showEditProfile={showEditProfile}
+        profiles={profiles}
+        selectedProfile={localSelectedProfile}
+        formData={formData}
+        editFormData={editFormData}
+        isCreating={isCreating}
+        onCloseSelect={() => {
+          hookSetOpenModal((prev) => ({ ...prev, kundli: false }));
+          setLocalSelectedProfile(null);
+        }}
+        onCloseAdd={() => setShowAddProfile(false)}
+        onCloseEdit={() => setShowEditProfile(false)}
+        onSelectProfile={handleProfileSelect}
+        onAddProfile={handleAddProfile}
+        onSubmitProfile={handleSubmitProfile}
+        onSubmitEditProfile={handleSubmitEditProfile}
+        setFormData={setFormData}
+        setEditFormData={setEditFormData}
+        formatProfileDisplay={formatProfileDisplay}
+        showContinueButton={true}
+        onContinue={handleContinueAfterKundliSelect}
       />
 
       {openModal.recharge && (
@@ -778,6 +728,38 @@ const TalkToAstrologer = () => {
           </div>
         </div>
       )}
+
+      {/* Recharge modal from hook for popup flow */}
+      {hookOpenModal.recharge && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContainer}>
+            <PrimaryText isCenter className=" pt-4">
+              Minimum balance of 5 minutes (₹{" "}
+              {(selectedAstrologer?.price?.chatRate?.amount || 1) * 5}) is
+              required to start chat with
+              {` ${selectedAstrologer?.firstName || "Astrologer"}`}.
+            </PrimaryText>
+
+            <div className={styles.modalButtons}>
+              <button
+                className={styles.rejectBtn}
+                onClick={() =>
+                  hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
+                }
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.acceptBtn}
+                onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
+              >
+                Recharge
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showCTA && showRecommend && !WaitingList && (
         <RecommendCTA
           mode={isChatMode ? "chat" : "call"}
@@ -802,6 +784,23 @@ const TalkToAstrologer = () => {
             setIsRecommendModalOpen(false);
           }}
           mode={isChatMode ? "chat" : "call"}
+        />
+      )}
+
+      <ConnectAstrologerPopup
+        isOpen={isConnectPopupOpen}
+        onClose={() => setIsConnectPopupOpen(false)}
+        astrologer={selectedAstrologer}
+        onChatStart={hookHandleChatStart}
+        onCallStart={hookHandleCallStart}
+      />
+
+      {/* Waiting Modal - shows for both chat and call */}
+      {(WaitingList || callWaitingList) && (
+        <WaitingModal
+          callRoomId={callRoomId || chatRoomId}
+          resetCallState={resetCallState}
+          connectionType={WaitingList ? 'chat' : 'audio'}
         />
       )}
     </div>

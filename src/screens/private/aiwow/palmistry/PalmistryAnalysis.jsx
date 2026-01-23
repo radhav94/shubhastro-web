@@ -123,19 +123,20 @@ const PalmistryAnalysis = () => {
               style={{ width: `${progress}%` }}
             ></div>
           </div>
-          <div className={styles.progressBar}>
-            <div 
-              className={styles.progressFill} 
-              style={{ width: `${Math.max(0, progress - 20)}%` }}
-            ></div>
-          </div>
+          <div className={styles.progressText}>{progress}%</div>
         </div>
 
         <div className={styles.messageSection}>
           <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className={styles.sparkleIcon}>
-            <path d="M20 5L22.5 15L30 17.5L22.5 20L20 30L17.5 20L10 17.5L17.5 15L20 5Z" fill="#1f2937"/>
+            <path d="M20 5L22.5 15L30 17.5L22.5 20L20 30L17.5 20L10 17.5L17.5 15L20 5Z" fill="url(#orangeGradient)"/>
+            <defs>
+              <linearGradient id="orangeGradient" x1="10" y1="5" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#F75801"/>
+                <stop offset="1" stopColor="#D43400"/>
+              </linearGradient>
+            </defs>
           </svg>
-          <h3 className={styles.message}>Hold tight as we are analysing your face</h3>
+          <h3 className={styles.message}>Hold tight as we are analysing your palm</h3>
         </div>
 
         <button 

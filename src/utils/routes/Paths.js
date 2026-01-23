@@ -18,7 +18,7 @@ import {
   Blog,
   SessionDetails,
   Shop,
-  // Profile,
+  Profile,
   TalkToAstrologer,
   Payment,
   Astrologers,
@@ -152,7 +152,8 @@ import TarotCardSelectionPage from "../../screens/private/v2/tarot/TarotCardSele
 import LoveTriangleSelectionPage from "../../screens/private/v2/tarot/LoveTriangleSelectionPage";
 import LoveTriangleResultPage from "../../screens/private/v2/tarot/LoveTriangleResultPage";
 import Home from "../../screens/v2/home/Home";
-import Profile from "../../screens/v2/user/Profile";
+import ProfileV2 from "../../screens/v2/user/Profile";
+import Explore from "../../screens/private/explore/Explore";
 
 export const PATH = {
   // DEFAULT: {
@@ -161,12 +162,12 @@ export const PATH = {
   // },
   publicRoutes: {
     ONBOARDING: {
-      path: "/onboarding",
-      element: Onboarding,
+      // path: "/onboarding",
+      // element: Onboarding,
     },
     LOGIN: {
       path: "/login",
-      element: Login,
+      element: Onboarding,
     },
     REGISTER: {
       path: "/register",
@@ -240,8 +241,6 @@ export const PATH = {
     HOROSCOPE: {
       path: "/horoscopes",
       element: Horoscope,
-      header: true,
-      footer: true,
       DAILY: {
         path: "/horoscopes/:slug",
         element: SignScreen,
@@ -253,8 +252,6 @@ export const PATH = {
       DAILY_NEW: {
         path: "/horoscopes/daily-horoscope",
         element: HoroscopeNew,
-        header: true,
-        footer: true,
       },
       WEEKLY_DETAIL: {
         path: "/horoscopes/weekly-horoscope/:sign",
@@ -263,8 +260,6 @@ export const PATH = {
       WEEKLY_NEW: {
         path: "/horoscopes/weekly-horoscope",
         element: HoroscopeNew,
-        header: true,
-        footer: true,
       },
       YEARLY_DETAIL: {
         path: "/horoscopes/yearly-horoscope/:sign",
@@ -273,8 +268,6 @@ export const PATH = {
       YEARLY_NEW: {
         path: "/horoscopes/yearly-horoscope",
         element: HoroscopeNew,
-        header: true,
-        footer: true,
       },
       MONTHLY: {
         path: "/horoscopes/monthly-horoscope",
@@ -299,8 +292,6 @@ export const PATH = {
       TODAY_NEW: {
         path: "/horoscopes/todays-horoscope",
         element: HoroscopeNew,
-        header: true,
-        footer: true,
       },
     },
     HOROSCOPEDETAILS: {
@@ -328,6 +319,7 @@ export const PATH = {
     MATCHMAKING: {
       path: "/matchmaking",
       element: MatchMaking,
+      header: false,
     },
     MATCHMAKING_DETAILS: {
       path: "/matchmaking/match-making-details",
@@ -505,7 +497,7 @@ export const PATH = {
       path: "/aiwow",
       element: AIWow,
       header: false,
-      footer: false
+      footer: false,
     },
     PALMISTRY_LANDING: {
       path: "/aiwow/palmistry",
@@ -793,6 +785,7 @@ export const PATH = {
     SHOP: {
       path: "/shop",
       element: Shop,
+      header: false,
     },
     PRODUCT_LIST: {
       path: "/shop/:slug",
@@ -916,6 +909,11 @@ export const PATH = {
     UserCallHistory: {
       path: "/order-history/call",
       element: SingleCallHistory,
+    },
+    EXPLORE: {
+      path: "/explore",
+      element: Explore,
+      header: false,
     },
   },
 };

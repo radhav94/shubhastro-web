@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
 import {
   ChevronRight,
   Search,
@@ -18,6 +19,16 @@ import dayjs from "dayjs";
 import styles from "./Home.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
 import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices";
+import ConnectAstrologerPopup from "../../../screens/private/v2/components/ui/ConnectAstrologerPopup";
+import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
+import ProfileModals from "../../../screens/private/kundli/components/ProfileModals";
+import { useProfileManager } from "../../../screens/private/kundli/hooks/useProfileManager";
+import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
+import { useChat } from "../../../context/ChatContext";
+import { useCall } from "../../../context/CallContext";
+import { voiceSocket } from "../../../services/voiceSocketServices";
+import { Toast } from "../../../component";
+import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 
 // Image imports
 import quickActionOne from "../../../assets/images/quick-action-1.svg";
@@ -40,12 +51,133 @@ import tarot from "../../../assets/images/tarot.svg";
 import blog from "../../../assets/images/blog.svg";
 
 const Home = () => {
+  const dispatch = useDispatch();
   const [activeSlide, setActiveSlide] = useState(0);
   const [loadingConsult, setLoadingConsult] = useState(false);
   const [loadingConnect, setLoadingConnect] = useState("all");
   const [loadingCallAgain, setLoadingCallAgain] = useState("all");
+  const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
+  const [selectedAstrologer, setSelectedAstrologer] = useState(null);
+  const [callRoomId, setCallRoomId] = useState(null);
+  const [chatRoomId, setChatRoomId] = useState(null);
+  const [connectionType, setConnectionType] = useState(null); // 'chat', 'audio', 'video'
   const navigate = useNavigate();
   const carouselRef = useRef(null);
+  
+  // ✅ Ref for current astrologer (no re-render, persists across socket events)
+  const activeAstroRef = useRef(null);
+
+  // Get contexts
+  const { 
+    waitingList: WaitingList, 
+    setWaitingList, 
+    resetChatFlow,
+    setActiveChatRoomId,
+    setActiveChat,
+    setChatSeconds
+  } = useChat();
+  const { 
+    waitingList: callWaitingList, 
+    setWaitingList: setCallWaitingList,
+    resetCallFlow,
+    setActiveCallRoomId,
+    setActiveCall
+  } = useCall();
+
+  const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+  const [createChatRoom] = useCreateChatRoomMutation();
+
+  // Use profile manager hook (same as Kundli page)
+  const {
+    selectedProfile,
+    profiles,
+    profilesLoading,
+    isCreating,
+    showSelectProfile,
+    showAddProfile,
+    showEditProfile,
+    formData,
+    editFormData,
+    setShowSelectProfile,
+    setShowAddProfile,
+    setShowEditProfile,
+    setFormData,
+    setEditFormData,
+    handleAddProfile,
+    handleEditProfile,
+    handleSubmitProfile,
+    handleSubmitEditProfile,
+    formatProfileDisplay,
+  } = useProfileManager(dispatch);
+
+  // Local state for selected profile (to avoid closing modal)
+  const [localSelectedProfile, setLocalSelectedProfile] = useState(null);
+
+  // Custom handler for profile selection (doesn't close modal)
+  const handleProfileSelect = (profile) => {
+    console.log("✅ HOME: Profile selected", profile);
+    setLocalSelectedProfile(profile);
+  };
+
+  // Restore waiting state from localStorage on mount
+  useEffect(() => {
+    const savedWaitingState = localStorage.getItem("waitingState");
+    if (savedWaitingState) {
+      try {
+        const { roomId, type, timestamp } = JSON.parse(savedWaitingState);
+        
+        // Check if waiting state is not too old (max 30 minutes)
+        const now = Date.now();
+        const maxAge = 30 * 60 * 1000; // 30 minutes
+        
+        if (now - timestamp < maxAge) {
+          console.log("🔄 Restoring waiting state from localStorage", { roomId, type });
+          
+          // Restore state
+          setConnectionType(type);
+          if (type === 'chat') {
+            setChatRoomId(roomId);
+            setWaitingList(2);
+          } else {
+            setCallRoomId(roomId);
+            setCallWaitingList(5);
+          }
+          
+          // Reconnect socket if needed
+          if (!voiceSocket.connected && userIdLocal) {
+            voiceSocket.io.opts.query = {
+              userId: userIdLocal,
+              role: "CUSTOMER",
+            };
+            voiceSocket.connect();
+          }
+        } else {
+          // Clear old waiting state
+          localStorage.removeItem("waitingState");
+        }
+      } catch (error) {
+        console.error("Error restoring waiting state:", error);
+        localStorage.removeItem("waitingState");
+      }
+    }
+  }, [userIdLocal, setWaitingList, setCallWaitingList]);
+
+  // Use the astrologer connect hook
+  const {
+    handleChatStart,
+    handleCallStart,
+    handleAfterKundliSelect: hookHandleAfterKundliSelect,
+    openModal: hookOpenModal,
+    setOpenModal: hookSetOpenModal,
+  } = useAstrologerConnect();
+
+  // Handler for Continue button (triggers socket emit)
+  const handleContinueAfterKundliSelect = () => {
+    if (localSelectedProfile) {
+      console.log("✅ HOME: Continue clicked with profile", localSelectedProfile);
+      hookHandleAfterKundliSelect(localSelectedProfile);
+    }
+  };
 
   const quickActions = [
     { 
@@ -181,6 +313,223 @@ const Home = () => {
     setTimeout(() => {
       navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path);
     }, 500);
+  };
+
+  // Socket event listeners for waiting modal
+  useEffect(() => {
+    if (!userIdLocal) return;
+
+    const handleChatRoom = (data) => {
+      console.log("🔵 HOME: chat:room event", data);
+      setChatRoomId(data?.roomId);
+      setActiveChatRoomId(data?.roomId);
+      setWaitingList(data?.waitingTime || 2);
+      setConnectionType('chat');
+      
+      // Save to localStorage
+      localStorage.setItem("waitingState", JSON.stringify({
+        roomId: data?.roomId,
+        type: 'chat',
+        timestamp: Date.now()
+      }));
+    };
+
+    const handleCallRoom = (data) => {
+      console.log("🔵 HOME: call:room event", data);
+      setCallRoomId(data?.roomId);
+      setActiveCallRoomId(data?.roomId);
+      setCallWaitingList(data?.waitingTime || 5);
+      setConnectionType(data?.type || 'audio'); // 'audio' or 'video'
+      
+      // Save to localStorage
+      localStorage.setItem("waitingState", JSON.stringify({
+        roomId: data?.roomId,
+        type: data?.type || 'audio',
+        timestamp: Date.now()
+      }));
+    };
+
+    const handleChatAccepted = async ({ roomId, astrologerId, userId, ...data }) => {
+      console.log("✅ HOME: chat:accepted", { roomId, astrologerId });
+      setWaitingList(false);
+      
+      // Clear localStorage
+      localStorage.removeItem("waitingState");
+      
+      const astro = activeAstroRef.current; // ✅ Use ref instead of state
+      const kundliId = localSelectedProfile?._id;
+
+      try {
+        if (!roomId) throw new Error("Room ID missing");
+
+        setActiveChat({
+          roomId,
+          chatRoomId: roomId,
+          callerName: astro?.firstName || "",
+          isUserSide: true,
+          userId: userIdLocal,
+          astrologerId: astrologerId,
+          kundliId,
+          astrologerName: data?.astrologer?.firstName || "",
+          remainingTime: data?.remainingTime,
+        });
+        setChatSeconds(Number(data?.remainingTime) * 60);
+
+        // Navigate to chat page
+        navigate(`/chat-with-astrologers/${astrologerId}`, {
+          state: {
+            userId: userIdLocal,
+            astrologerId,
+            fullName: astro?.firstName || "",
+            roomId,
+            isUserSide: true,
+            kundliId,
+            astrologerName: data?.astrologer?.firstName || "",
+            astroID: data?.astrologer?.astrologer_ID,
+          },
+        });
+      } catch (e) {
+        console.error("Chat accepted error:", e);
+        Toast.error("Failed to start chat");
+      }
+    };
+
+    const handleCallAccepted = async ({ roomId, token, type, remainingTime }) => {
+      console.log("✅ HOME: call:accepted", { roomId, type });
+      resetCallFlow();
+      
+      // Clear localStorage
+      localStorage.removeItem("waitingState");
+      
+      const astro = activeAstroRef.current; // ✅ Use ref instead of state
+      const kundliId = localSelectedProfile?._id;
+
+      try {
+        if (!astro) {
+          console.error("❌ Astrologer data missing in ref");
+          Toast.error("Astrologer data missing");
+          return;
+        }
+
+        const res = await createChatRoom({
+          userId: userIdLocal,
+          astrologerId: astro._id,
+        });
+
+        const chatRoomId = res?.data?.data;
+        if (!chatRoomId) throw new Error("Failed to create chat room");
+
+        setActiveCall({
+          roomId,
+          chatRoomId,
+          agoraToken: token,
+          callerName: astro?.firstName || "",
+          isUserSide: true,
+          callType: type,
+          userId: userIdLocal,
+          astrologerId: astro._id,
+          kundliId,
+          astrologerID: astro?.astrologer_ID,
+          remainingTime
+        });
+      } catch (error) {
+        console.error("Call accepted error:", error);
+        Toast.error("Failed to start call");
+      }
+    };
+
+    const handleRejected = (data) => {
+      console.log("❌ HOME: rejected", data);
+      const errorMsg =
+        data?.sessionData?.sessionEndReason === "rejected" && data?.type === "chat"
+          ? "Astrologer has rejected the chat request"
+          : "Astrologer has rejected the call request";
+      Toast.error(errorMsg);
+      
+      // Clear localStorage
+      localStorage.removeItem("waitingState");
+      
+      resetChatFlow();
+      resetCallFlow();
+      setConnectionType(null);
+    };
+
+    const handleSocketError = (err) => {
+      console.log("🔴 HOME: SOCKET ERROR", err);
+      Toast.error(err?.message || "Connection error");
+      
+      // Clear localStorage
+      localStorage.removeItem("waitingState");
+      
+      resetChatFlow();
+      resetCallFlow();
+      setConnectionType(null);
+    };
+
+    // Attach events
+    voiceSocket.on("chat:room", handleChatRoom);
+    voiceSocket.on("call:room", handleCallRoom);
+    voiceSocket.on("chat:accepted", handleChatAccepted);
+    voiceSocket.on("call:accepted", handleCallAccepted);
+    voiceSocket.on("chat:rejected", handleRejected);
+    voiceSocket.on("call:rejected", handleRejected);
+    voiceSocket.on("error", handleSocketError);
+
+    return () => {
+      voiceSocket.off("chat:room", handleChatRoom);
+      voiceSocket.off("call:room", handleCallRoom);
+      voiceSocket.off("chat:accepted", handleChatAccepted);
+      voiceSocket.off("call:accepted", handleCallAccepted);
+      voiceSocket.off("chat:rejected", handleRejected);
+      voiceSocket.off("call:rejected", handleRejected);
+      voiceSocket.off("error", handleSocketError);
+    };
+  }, [userIdLocal, navigate, resetChatFlow, resetCallFlow, setWaitingList, setCallWaitingList, setActiveChatRoomId, setActiveCallRoomId]);
+
+  // Reset waiting state function
+  const resetCallState = () => {
+    console.log("🔴 HOME: Resetting call state", { callRoomId, chatRoomId, connectionType });
+    
+    // Cancel the active room on server based on connection type
+    if (connectionType === 'chat' && chatRoomId) {
+      voiceSocket.emit("chat:cancel", { roomId: chatRoomId });
+    } else if ((connectionType === 'audio' || connectionType === 'video') && callRoomId) {
+      voiceSocket.emit("call:cancel", { roomId: callRoomId });
+    }
+    
+    // Explicitly reset waiting states to false
+    setWaitingList(false);
+    setCallWaitingList(false);
+    
+    // Reset local state
+    setCallRoomId(null);
+    setChatRoomId(null);
+    setConnectionType(null);
+    
+    // Clear localStorage
+    localStorage.removeItem("waitingState");
+    
+    // Reset context flows
+    resetChatFlow();
+    resetCallFlow();
+  };
+
+  // Handle connect button click
+  const handleConnectClick = (astrologer) => {
+    // Check if already in waiting state
+    if (WaitingList || callWaitingList) {
+      Toast.error("You are already waiting for an astrologer. Please cancel the current request first.");
+      return;
+    }
+    
+    setSelectedAstrologer(astrologer);
+    activeAstroRef.current = astrologer; // ✅ Store in ref for socket events
+    setIsConnectPopupOpen(true);
+  };
+
+  const handleClosePopup = () => {
+    setIsConnectPopupOpen(false);
+    setSelectedAstrologer(null);
   };
 
   return (
@@ -390,9 +739,8 @@ const Home = () => {
                   </div>
                 )}
                 <button 
-                  className={`${styles.connectBtn} ${loadingConnect === astrologer._id || loadingConnect === "all" ? styles.loading : ""}`}
-                  onClick={() => handleConnect(astrologer._id)}
-                  disabled={loadingConnect === astrologer._id || loadingConnect === "all"}
+                  className={styles.connectBtn}
+                  onClick={() => handleConnectClick(astrologer)}
                 >
                   Connect
                 </button>
@@ -756,9 +1104,8 @@ const Home = () => {
                   </span>
                 </div>
                 <button 
-                  className={`${styles.connectBtn} ${loadingConnect === astrologer._id || loadingConnect === "all" ? styles.loading : ""}`}
-                  onClick={() => handleConnect(astrologer._id)}
-                  disabled={loadingConnect === astrologer._id || loadingConnect === "all"}
+                  className={styles.connectBtn}
+                  onClick={() => handleConnectClick(astrologer)}
                 >
                   Connect
                 </button>
@@ -985,6 +1332,112 @@ const Home = () => {
           <span className={styles.label}>Astro Mall</span>
         </button>
       </nav>
+
+      {/* Connect Astrologer Popup */}
+      <ConnectAstrologerPopup
+        isOpen={isConnectPopupOpen}
+        onClose={handleClosePopup}
+        astrologer={selectedAstrologer}
+        onChatStart={handleChatStart}
+        onCallStart={handleCallStart}
+      />
+
+      {/* Kundli modal from hook - using ProfileModals like Kundli page */}
+      <ProfileModals
+        showSelectProfile={hookOpenModal.kundli}
+        showAddProfile={showAddProfile}
+        showEditProfile={showEditProfile}
+        profiles={profiles}
+        selectedProfile={localSelectedProfile}
+        formData={formData}
+        editFormData={editFormData}
+        isCreating={isCreating}
+        onCloseSelect={() => {
+          hookSetOpenModal((prev) => ({ ...prev, kundli: false }));
+          setLocalSelectedProfile(null);
+        }}
+        onCloseAdd={() => setShowAddProfile(false)}
+        onCloseEdit={() => setShowEditProfile(false)}
+        onSelectProfile={handleProfileSelect}
+        onAddProfile={handleAddProfile}
+        onSubmitProfile={handleSubmitProfile}
+        onSubmitEditProfile={handleSubmitEditProfile}
+        setFormData={setFormData}
+        setEditFormData={setEditFormData}
+        formatProfileDisplay={formatProfileDisplay}
+        showContinueButton={true}
+        onContinue={handleContinueAfterKundliSelect}
+      />
+
+      {/* Recharge modal from hook */}
+      {hookOpenModal.recharge && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '24px',
+            borderRadius: '12px',
+            maxWidth: '400px',
+            width: '90%'
+          }}>
+            <p style={{ textAlign: 'center', marginBottom: '20px' }}>
+              Minimum balance of 5 minutes (₹{" "}
+              {(selectedAstrologer?.price?.chatRate?.amount || 1) * 5}) is
+              required to start chat with
+              {` ${selectedAstrologer?.firstName || "Astrologer"}`}.
+            </p>
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  border: '1px solid #ccc',
+                  backgroundColor: 'white',
+                  cursor: 'pointer'
+                }}
+                onClick={() =>
+                  hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
+                }
+              >
+                Cancel
+              </button>
+              <button
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  backgroundColor: '#FF6B35',
+                  color: 'white',
+                  cursor: 'pointer'
+                }}
+                onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
+              >
+                Recharge
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Waiting Modal - shows for both chat and call */}
+      {(WaitingList || callWaitingList) && connectionType && (
+        <WaitingModal
+          callRoomId={callRoomId || chatRoomId}
+          resetCallState={resetCallState}
+          connectionType={connectionType}
+        />
+      )}
     </div>
   );
 };

@@ -1,16 +1,16 @@
-import { useNavigate } from "react-router-dom";
 import styles from "./Onboarding.module.scss";
+import onboardingBg from "../../../assets/images/onboarding.png";
 
 const WelcomeScreen = ({ onNext }) => {
-  const navigate = useNavigate();
-
   return (
     <div className={styles.welcomeScreen}>
-      {/* <button className={styles.backBtn} onClick={() => navigate(-1)}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button> */}
+      <div className={styles.welcomeBackground}>
+        <img
+          src={onboardingBg}
+          alt="Astrology"
+          className={styles.backgroundImage}
+        />
+      </div>
 
       <div className={styles.welcomeContent}>
         <h1 className={styles.welcomeTitle}>
@@ -27,11 +27,11 @@ const WelcomeScreen = ({ onNext }) => {
           <span>🌔</span>
           <span>🌕</span>
         </div>
-      </div>
 
-      <button className={styles.primaryBtn} onClick={onNext}>
-        Begin My Journey
-      </button>
+        <button className={styles.primaryBtn} onClick={onNext}>
+          Begin My Journey
+        </button>
+      </div>
     </div>
   );
 };

@@ -18,9 +18,9 @@ $mobile-screen-width: 500px;
     display: flex;
     flex-direction: column;
     flex: 1;
-    margin-top: 6rem;
-    @media screen and (width <= 767px) {
-      margin-top: 4.5rem;
+    margin-top: 1rem;
+    @media screen and (max-width: 768px) {
+      margin-top: 0rem;
     }
   }
 
@@ -68,11 +68,10 @@ $mobile-screen-width: 500px;
   }
 
   .topGap {
-    height: 183px; // TopHeader (88px) + TopBar (95px)
-    display: none;
-    
-    @media screen and (max-width: 772px) {
-      height: 144px; // TopHeader (76px) + TopBar (68px)
+    height: 100px; // TopHeader (88px) + TopBar (95px)
+
+    @media screen and (max-width: 767px) {
+      height: 70px; // TopHeader (76px) + TopBar (68px)
     }
   }
 

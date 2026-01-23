@@ -4,11 +4,34 @@ import styles from './GemstoneAnalysis.module.scss';
 import { analyzeGemstone } from '../../../../services/appServices/aiWowService';
 import { Toast } from '../../../../component';
 
+/**
+ * Helper to normalize error to a string (bulletproof)
+ */
+const getErrorMessage = (error) => {
+  if (!error) return 'Analysis failed. Please try again.';
+  
+  if (typeof error === 'string') return error;
+  
+  if (typeof error === 'object') {
+    // Handle nested error structures
+    if (error.message && typeof error.message === 'string') {
+      return error.message;
+    }
+    if (error.error?.message && typeof error.error.message === 'string') {
+      return error.error.message;
+    }
+    // Fallback for any object
+    return 'Analysis failed. Please try again.';
+  }
+  
+  return 'Analysis failed. Please try again.';
+};
+
 const GemstoneAnalysis = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
   const [gemstoneImage, setGemstoneImage] = useState(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -28,7 +51,6 @@ const GemstoneAnalysis = () => {
   }, [navigate]);
 
   const performAnalysis = async (imageData) => {
-    setIsAnalyzing(true);
     let progressInterval = null;
     
     try {
@@ -45,50 +67,37 @@ const GemstoneAnalysis = () => {
       // Call the API
       const result = await analyzeGemstone(imageData);
 
-      // Clear interval in all cases
+      // Clear interval
       if (progressInterval) {
         clearInterval(progressInterval);
         progressInterval = null;
       }
 
-      if (result.success && result.data) {
+      if (result?.success && result?.data) {
         // Store the analysis result
-        localStorage.setItem('gemstoneResult', JSON.stringify(result.data));
+        localStorage.setItem('gemstoneResult', JSON.stringify(result?.data || {}));
         
         // Complete progress
         setProgress(100);
         setAnalysisComplete(true);
-        setIsAnalyzing(false);
         
         // Navigate to results after a short delay
         setTimeout(() => {
           navigate('/aiwow/gemstone/result');
         }, 1000);
-      } else {
-        // Handle error - stop progress and show error
+      } 
+      else {
+        // Handle API error response
         setProgress(0);
-        setIsAnalyzing(false);
         setHasError(true);
         
-        const errorMsg = result.error || 'Analysis failed. Please try again.';
+        // CRITICAL: Always convert to string immediately to prevent React render errors
+        const errorMsg = String(getErrorMessage(result?.error || result));
         setErrorMessage(errorMsg);
         
-        // Show specific error message based on error code
-        if (result.code === 'AI_ERROR') {
-          Toast.error('Could not analyze this gemstone image. Please try with a clearer, well-lit photo.');
-        } else if (result.code === 'TIMEOUT') {
-          Toast.error('Analysis is taking too long. Please try again.');
-        } else if (result.code === 'FILE_TOO_LARGE') {
-          Toast.error('Image file is too large. Please use a smaller image.');
-        } else if (result.code === 'INVALID_FORMAT') {
-          Toast.error('Invalid image format. Please use JPG, PNG, or WEBP.');
-        } else if (result.code === 'SERVER_ERROR') {
-          Toast.error('Server error occurred. Please try again later.');
-        } else {
-          Toast.error(errorMsg);
-        }
+        console.error('API returned error:', result);
         
-        // Navigate back to instructions after showing error
+        // Service already showed toast, just navigate back
         setTimeout(() => {
           navigate('/aiwow/gemstone/instructions');
         }, 3000);
@@ -100,14 +109,27 @@ const GemstoneAnalysis = () => {
         progressInterval = null;
       }
       
-      console.error('Analysis error:', error);
+      console.error('Analysis exception:', error);
+      
+      // CRITICAL: Extract error message and convert to string immediately
+      const axiosMessage = String(
+        error?.response?.data?.message ||
+        error?.message ||
+        'An unexpected error occurred.'
+      );
+      
+      // Update state to show error UI
       setProgress(0);
-      setIsAnalyzing(false);
-      Toast.error('An unexpected error occurred. Please try again.');
+      setHasError(true);
+      setErrorMessage(axiosMessage);
+      
+      // Service already showed toast
       
       setTimeout(() => {
         navigate('/aiwow/gemstone/instructions');
       }, 2000);
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -116,6 +138,14 @@ const GemstoneAnalysis = () => {
       navigate('/aiwow/gemstone/result');
     }
   };
+
+  console.log('hasError :>> ', hasError);
+  console.log('gemstoneImage :>> ', gemstoneImage);
+  console.log('progress :>> ', progress);
+  console.log('errorMessage :>> ', errorMessage);
+  console.log('errorMessage type :>> ', typeof errorMessage);
+  console.log('analysisComplete :>> ', analysisComplete);
+  console.log('isAnalyzing :>> ', isAnalyzing);
 
   return (
     <div className={styles.container}>
@@ -165,7 +195,9 @@ const GemstoneAnalysis = () => {
                 <path d="M20 12V22" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"/>
                 <circle cx="20" cy="28" r="1.5" fill="#ef4444"/>
               </svg>
-              <h3 className={styles.message}>{errorMessage || 'Failed to analyze gemstone'}</h3>
+              <h3 className={styles.message}>
+                {typeof errorMessage === 'string' ? errorMessage : 'Failed to analyze gemstone'}
+              </h3>
               <p className={styles.subMessage}>Redirecting back to try again...</p>
             </>
           ) : (

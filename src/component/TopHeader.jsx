@@ -8,7 +8,7 @@ import { getUserFromStorage } from "../utils/authStorage";
 const TopHeader = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  
+
   useEffect(() => {
     // Get user data on mount and when localStorage changes
     const userData = getUserFromStorage();
@@ -22,7 +22,7 @@ const TopHeader = () => {
       navigate("/profile");
     } else {
       // User is not logged in, redirect to onboarding
-      navigate("/onboarding?skip=welcome");
+      navigate("/login?skip=welcome");
     }
   };
 
@@ -50,82 +50,103 @@ const TopHeader = () => {
         </div>
       </div>
 
-      <nav className={styles.headerNavigation}>
-        <NavLink
-          to="/"
-          className={({ isActive }) =>
-            `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-          }
-          end
-        >
-          Home
-        </NavLink>
+        <nav className={styles.headerNavigation}>
+          {/* First Row */}
+          <div className={styles.navRow}>
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+              end
+            >
+              Home
+            </NavLink>
 
-        <NavLink
-          to="/chat-with-astrologers"
-          className={({ isActive }) =>
-            `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-          }
-        >
-          Astrologers
-        </NavLink>
+            <NavLink
+              to="/chat-with-astrologers"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Astrologers
+            </NavLink>
 
-        <NavLink
-          to="/services"
-          className={({ isActive }) =>
-            `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-          }
-        >
-          Services
-        </NavLink>
+            <NavLink
+              to="/services"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Services
+            </NavLink>
 
-        <NavLink
-          to="/aiwow"
-          className={({ isActive }) =>
-            `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-          }
-        >
-          AI WOW
-        </NavLink>
+            <NavLink
+              to="/aiwow"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              AI WOW
+            </NavLink>
 
-        <NavLink
-          to="/blogs"
-          className={({ isActive }) =>
-            `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-          }
-        >
-          Blogs
-        </NavLink>
+            <NavLink
+              to="/blogs"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Blogs
+            </NavLink>
+          </div>
 
-        <NavLink
-          to={PATH.privateRoutes.KUNDLI.path}
-          className={({ isActive }) =>
-            `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-          }
-        >
-          Kundli
-        </NavLink>
+          {/* Second Row */}
+          <div className={styles.navRow}>
+            <NavLink
+              to={PATH.privateRoutes.KUNDLI.path}
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Kundli
+            </NavLink>
+            <NavLink
+              to="/matchmaking"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Match Matching
+            </NavLink>
 
-        <NavLink
-          to="/numerology"
-          className={({ isActive }) =>
-            `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-          }
-        >
-          Numerology
-        </NavLink>
+            <NavLink
+              to="/numerology"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Numerology
+            </NavLink>
 
-        <NavLink
-          to="/horoscopes/daily-horoscope"
-          className={({ isActive }) =>
-            `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-          }
-        >
-          Horoscopes
-        </NavLink>
+            <NavLink
+              to="/horoscopes/daily-horoscope"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Horoscopes
+            </NavLink>
 
-      </nav>
-
+            <NavLink
+              to="/explore"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Explore
+            </NavLink>
+          </div>
+        </nav>
       <div className={styles.headerActions}>
         <div className={styles.walletBadge}>
           <div className={styles.coinIcon}></div>

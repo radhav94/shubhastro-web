@@ -222,10 +222,13 @@ const PalmistryCamera = () => {
               className={styles.detectionCanvas}
             />
             <div className={styles.overlay}>
-              <div className={`${styles.frameCorner} ${handDetected && isPalmOpen ? styles.detected : styles.notDetected}`} style={{ top: '10%', left: '5%' }}></div>
-              <div className={`${styles.frameCorner} ${handDetected && isPalmOpen ? styles.detected : styles.notDetected}`} style={{ top: '10%', right: '5%' }}></div>
-              <div className={`${styles.frameCorner} ${handDetected && isPalmOpen ? styles.detected : styles.notDetected}`} style={{ bottom: '30%', left: '5%' }}></div>
-              <div className={`${styles.frameCorner} ${handDetected && isPalmOpen ? styles.detected : styles.notDetected}`} style={{ bottom: '30%', right: '5%' }}></div>
+              {/* Capture area frame - smaller and centered on palm */}
+              <div className={styles.captureArea}>
+                <div className={`${styles.frameCorner} ${handDetected && isPalmOpen ? styles.detected : styles.notDetected}`} style={{ top: 0, left: 0 }}></div>
+                <div className={`${styles.frameCorner} ${handDetected && isPalmOpen ? styles.detected : styles.notDetected}`} style={{ top: 0, right: 0 }}></div>
+                <div className={`${styles.frameCorner} ${handDetected && isPalmOpen ? styles.detected : styles.notDetected}`} style={{ bottom: 0, left: 0 }}></div>
+                <div className={`${styles.frameCorner} ${handDetected && isPalmOpen ? styles.detected : styles.notDetected}`} style={{ bottom: 0, right: 0 }}></div>
+              </div>
               
               <div className={styles.palmLabel}>
                 <span>{selectedHand === 'left' ? 'Left hand' : 'Right hand'}</span>

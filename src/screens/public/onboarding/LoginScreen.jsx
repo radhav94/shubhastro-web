@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
 import { loginWithPhone } from "../../../services/appServices/authService";
+import onboardingBg from "../../../assets/images/onboarding.png";
 
 const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const navigate = useNavigate();
@@ -16,11 +17,11 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
       try {
         const payload = {
           phoneNumber: `91${phoneNumber}`,
-          type: "CUSTOMER"
+          type: "CUSTOMER",
         };
-        
+
         const response = await loginWithPhone(payload);
-        
+
         if (response.data.success && response.data.statusCode === 200) {
           toast.success(response.data.message || "OTP sent successfully");
           updateFormData({ phoneNumber });
@@ -30,7 +31,10 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
         }
       } catch (error) {
         console.error("Login error:", error);
-        toast.error(error.response?.data?.message || "Failed to send OTP. Please try again.");
+        toast.error(
+          error.response?.data?.message ||
+            "Failed to send OTP. Please try again.",
+        );
       } finally {
         setLoading(false);
       }
@@ -43,6 +47,14 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
   return (
     <div className={styles.loginScreen}>
+      <div className={styles.loginBackground}>
+        <img
+          src={onboardingBg}
+          alt="Astrology"
+          className={styles.backgroundImage}
+        />
+      </div>
+
       <button className={styles.backBtn} onClick={onBack}>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path
@@ -68,7 +80,8 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
               alt="India"
               className={styles.flag}
             />
-            <span>▼</span>
+            <span>+91</span>
+            <span className={styles.dropdownIcon}>▼</span>
           </div>
           <input
             type="tel"
@@ -77,6 +90,7 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
             placeholder="Enter your Number"
             className={styles.phoneInput}
             maxLength={10}
+            inputMode="numeric"
           />
         </div>
 
@@ -130,7 +144,6 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
           <a href="/terms" className={styles.termsLink}>
             Terms & Conditions
           </a>
-          .
         </p>
       </div>
     </div>

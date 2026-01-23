@@ -1,4 +1,4 @@
-@import '../../../../assets/variables/variables';
+@use '../../../../assets/variables/variables' as *;
 
 .container {
   position: fixed;
@@ -113,7 +113,7 @@
   }
 
   &.detected {
-    border-color: #10b981;
+    border-color: #F75801;
   }
 
   &.notDetected {
@@ -270,7 +270,7 @@
 
 .retryButton {
   flex: 1;
-  background: #10b981;
+  background: #F75801;
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -281,7 +281,7 @@
   transition: background 0.2s;
 
   &:hover {
-    background: #059669;
+    background: #D43400;
   }
 }
 
