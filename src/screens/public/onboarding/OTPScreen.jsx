@@ -197,6 +197,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
               key={index}
               ref={inputRefs[index]}
               type="text"
+              autoFocus={index === 0}
               inputMode="numeric"
               maxLength={1}
               value={digit}

@@ -7,6 +7,7 @@ export const useFaceDetection = ({ videoRef, canvasRef }) => {
   
   const detectionStartedRef = useRef(false);
   const rafRef = useRef(null);
+  const stoppedRef = useRef(false); // ⭐ NEW - Hard stop flag
 
   /* ------------------ LOAD MODELS ------------------ */
   useEffect(() => {
@@ -30,21 +31,32 @@ export const useFaceDetection = ({ videoRef, canvasRef }) => {
   /* ------------------ DETECTION LOOP ------------------ */
   const startDetection = () => {
     if (!modelsLoaded || detectionStartedRef.current) return;
+    
+    stoppedRef.current = false; // ⭐ Reset stop flag
     detectionStartedRef.current = true;
     console.log('Starting face detection with RAF');
     detectLoop();
   };
 
   const stopDetection = () => {
+    console.log('Stopping face detection, cancelling RAF');
+    stoppedRef.current = true; // ⭐ HARD STOP - prevents late async results
     detectionStartedRef.current = false;
+    
+    // Cancel any pending animation frame
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      console.log('RAF cancelled');
     }
+    
     setFaceDetected(false);
     clearCanvas(canvasRef.current);
   };
 
   const detectLoop = async () => {
+    if (stoppedRef.current) return; // ⭐ EARLY EXIT if stopped
+    
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
@@ -63,6 +75,8 @@ export const useFaceDetection = ({ videoRef, canvasRef }) => {
           })
         )
         .withFaceLandmarks();
+
+      if (stoppedRef.current) return; // ⭐ IGNORE LATE RESULT after async operation
 
       let isValid = false;
 
@@ -94,10 +108,12 @@ export const useFaceDetection = ({ videoRef, canvasRef }) => {
 
       setFaceDetected(prev => (prev !== isValid ? isValid : prev));
     } catch (err) {
-      console.error("Face detection error:", err);
+      if (!stoppedRef.current) {
+        console.error("Face detection error:", err);
+      }
     }
 
-    if (detectionStartedRef.current) {
+    if (detectionStartedRef.current && !stoppedRef.current) {
       rafRef.current = requestAnimationFrame(detectLoop);
     }
   };

@@ -28,11 +28,25 @@ const ClothColorCamera = () => {
     startCamera();
     
     return () => {
+      console.log('ClothColorCamera unmounting, stopping camera');
       stopDetection();
+      stopCamera();
+      
+      // Stop video stream from video element
       if (videoRef.current && videoRef.current.srcObject) {
         const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
+        tracks.forEach(track => {
+          console.log('Stopping track:', track.kind);
+          track.stop();
+        });
         videoRef.current.srcObject = null;
+      }
+      
+      // Stop stream state
+      if (stream) {
+        stream.getTracks().forEach(track => {
+          track.stop();
+        });
       }
     };
   }, [facingMode]);
@@ -107,7 +121,14 @@ const ClothColorCamera = () => {
   };
 
   const switchCamera = () => {
-    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
+    // Stop current camera completely before switching
+    stopCamera();
+    
+    // Switch facing mode
+    const nextMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(nextMode);
+    
+    // Start camera with new mode will be handled by useEffect
   };
 
   const captureImage = () => {
@@ -140,7 +161,30 @@ const ClothColorCamera = () => {
   };
 
   const handleBack = () => {
-    stopCamera();
+    console.log('Back button clicked, stopping camera immediately');
+    
+    // Stop detection immediately
+    stopDetection();
+    
+    // Stop all video tracks immediately
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = videoRef.current.srcObject.getTracks();
+      tracks.forEach(track => {
+        console.log('Stopping track immediately:', track.kind);
+        track.stop();
+      });
+      videoRef.current.srcObject = null;
+    }
+    
+    // Stop stream state immediately
+    if (stream) {
+      stream.getTracks().forEach(track => {
+        track.stop();
+      });
+      setStream(null);
+    }
+    
+    // Navigate after stopping camera
     navigate(-1);
   };
 

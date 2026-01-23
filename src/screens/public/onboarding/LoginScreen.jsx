@@ -86,6 +86,7 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
           <input
             type="tel"
             value={phoneNumber}
+            autoFocus
             onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
             placeholder="Enter your Number"
             className={styles.phoneInput}
