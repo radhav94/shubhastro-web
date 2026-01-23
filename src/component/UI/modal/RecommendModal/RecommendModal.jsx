@@ -263,7 +263,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
           userId: userIdLocal,
           astrologerId: astro._id,
           kundliId,
-          astrologerID: astro.astrologerID
+          astrologerID: astro.astrologerID,
         });
       } catch {
         Toast.error("Failed to start chat");
@@ -323,7 +323,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
 
     /* ERROR */
     const handleSocketError = (err) => {
-      console.log("SOCKET ERROR:", err);
+      console.error("SOCKET ERROR:", err);
 
       if (err?.message === "Call has already ended") {
         // soft reset only

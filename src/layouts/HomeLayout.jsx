@@ -24,8 +24,9 @@ const HomeLayout = () => {
   const currentRoute = matches
     .reverse()
     .find((match) => match.handle && match.handle.header !== undefined);
+  console.log("currentRoute", currentRoute);
 
-  const showHeader = currentRoute ? currentRoute.handle.header : true;
+  const showHeader = currentRoute ? currentRoute.handle.header : false;
   const showFooter = currentRoute ? currentRoute.handle.footer : true;
 
   // Hide TopHeader on onboarding page or when header is disabled

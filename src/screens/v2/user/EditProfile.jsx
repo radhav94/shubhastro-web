@@ -1,21 +1,27 @@
-import { ChevronLeft, Camera, Calendar, Clock, MapPin } from 'lucide-react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import { useGetAllKundlisQuery } from '../../../services/appServices/kundliServicesNew'
-import toast from 'react-hot-toast'
-import styles from './AddProfile.module.scss'
+import {
+  ChevronLeft,
+  Upload,
+  Calendar,
+  Clock,
+  MapPin,
+  ChevronDown,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import styles from "./EditProfile.module.css";
 
 const EditProfile = () => {
-  const navigate = useNavigate()
-  const { id } = useParams()
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
-    gender: 'female',
-    relation: '',
-    birthDate: '',
-    birthTime: '',
-    placeOfBirth: '',
-  })
+    name: "Priya Gupta",
+    profilePhoto: "",
+    identity: "Female",
+    relation: "Self",
+    birthDate: "01/01/2002",
+    birthTime: "12:01 PM",
+    unknownBirthTime: false,
+    placeOfBirth: "New Delhi, India",
+  });
 
   // Fetch kundli data
   const { data: kundliData, isLoading } = useGetAllKundlisQuery(id, {
@@ -45,53 +51,12 @@ const EditProfile = () => {
   }, [kundliData])
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
-  const handleSubmit = async () => {
-    try {
-      // Parse date and time
-      const [day, month, year] = formData.birthDate.split('/')
-      const [hour, min] = formData.birthTime.split(':')
-
-      const payload = {
-        name: formData.name,
-        gender: formData.gender,
-        relation: formData.relation,
-        day: parseInt(day),
-        month: parseInt(month),
-        year: parseInt(year),
-        hour: parseInt(hour),
-        min: parseInt(min),
-        place: formData.placeOfBirth,
-      }
-
-      // await updateKundli({ id, data: payload }).unwrap()
-      toast.success('Profile updated successfully')
-      navigate('/profile')
-    } catch (error) {
-      console.error('Failed to update profile:', error)
-      toast.error('Failed to update profile')
-    }
-  }
-
-  if (isLoading) {
-    return (
-      <div className={styles.addProfilePage}>
-        <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
-            <ChevronLeft size={24} />
-          </button>
-          <h1 className={styles.title}>Edit Profile</h1>
-        </div>
-        <div className={styles.content}>
-          <div className={styles.loadingState}>
-            <p>Loading profile...</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const handleSubmit = () => {
+    navigate("/profile");
+  };
 
   return (
     <div className={styles.addProfilePage}>
@@ -127,7 +92,7 @@ const EditProfile = () => {
             className={styles.input}
             placeholder="Enter here"
             value={formData.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
+            onChange={(e) => handleInputChange("name", e.target.value)}
           />
         </div>
 
@@ -136,22 +101,22 @@ const EditProfile = () => {
           <label className={styles.label}>Your Identity</label>
           <div className={styles.genderButtons}>
             <button
-              className={`${styles.genderButton} ${formData.gender === 'male' ? styles.active : ''}`}
-              onClick={() => handleInputChange('gender', 'male')}
+              className={`${styles.identityBtn} ${formData.identity === "Male" ? styles.active : ""}`}
+              onClick={() => handleInputChange("identity", "Male")}
             >
               <span className={styles.genderIcon}>♂</span>
               <span>Male</span>
             </button>
             <button
-              className={`${styles.genderButton} ${formData.gender === 'female' ? styles.active : ''}`}
-              onClick={() => handleInputChange('gender', 'female')}
+              className={`${styles.identityBtn} ${formData.identity === "Female" ? styles.active : ""}`}
+              onClick={() => handleInputChange("identity", "Female")}
             >
               <span className={styles.genderIcon}>♀</span>
               <span>Female</span>
             </button>
             <button
-              className={`${styles.genderButton} ${formData.gender === 'others' ? styles.active : ''}`}
-              onClick={() => handleInputChange('gender', 'others')}
+              className={`${styles.identityBtn} ${formData.identity === "Others" ? styles.active : ""}`}
+              onClick={() => handleInputChange("identity", "Others")}
             >
               <span className={styles.genderIcon}>⚥</span>
               <span>Others</span>
@@ -166,18 +131,9 @@ const EditProfile = () => {
             <select
               className={styles.select}
               value={formData.relation}
-              onChange={(e) => handleInputChange('relation', e.target.value)}
-            >
-              <option value="">Select here</option>
-              <option value="self">Self</option>
-              <option value="spouse">Spouse</option>
-              <option value="child">Child</option>
-              <option value="parent">Parent</option>
-              <option value="sibling">Sibling</option>
-              <option value="friend">Friend</option>
-              <option value="other">Other</option>
-            </select>
-            <ChevronLeft size={20} className={styles.selectIcon} />
+              onChange={(e) => handleInputChange("relation", e.target.value)}
+            />
+            <ChevronDown size={20} className={styles.inputIcon} />
           </div>
         </div>
 
@@ -190,7 +146,7 @@ const EditProfile = () => {
               className={styles.input}
               placeholder="01/01/2002"
               value={formData.birthDate}
-              onChange={(e) => handleInputChange('birthDate', e.target.value)}
+              onChange={(e) => handleInputChange("birthDate", e.target.value)}
             />
             <Calendar size={20} className={styles.inputIcon} />
           </div>
@@ -205,10 +161,21 @@ const EditProfile = () => {
               className={styles.input}
               placeholder="12:01 PM"
               value={formData.birthTime}
-              onChange={(e) => handleInputChange('birthTime', e.target.value)}
+              onChange={(e) => handleInputChange("birthTime", e.target.value)}
+              disabled={formData.unknownBirthTime}
             />
             <Clock size={20} className={styles.inputIcon} />
           </div>
+          <label className={styles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={formData.unknownBirthTime}
+              onChange={(e) =>
+                handleInputChange("unknownBirthTime", e.target.checked)
+              }
+            />
+            <span>Don't know the exact time of birth</span>
+          </label>
         </div>
 
         {/* Place of Birth Field */}
@@ -220,7 +187,9 @@ const EditProfile = () => {
               className={styles.input}
               placeholder="New Delhi, India"
               value={formData.placeOfBirth}
-              onChange={(e) => handleInputChange('placeOfBirth', e.target.value)}
+              onChange={(e) =>
+                handleInputChange("placeOfBirth", e.target.value)
+              }
             />
             <MapPin size={20} className={styles.inputIcon} />
           </div>
@@ -237,7 +206,7 @@ const EditProfile = () => {
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default EditProfile
+export default EditProfile;

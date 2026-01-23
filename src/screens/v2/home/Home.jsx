@@ -14,7 +14,7 @@ import {
   Calendar,
   Clock,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import styles from "./Home.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
@@ -63,25 +63,25 @@ const Home = () => {
   const [connectionType, setConnectionType] = useState(null); // 'chat', 'audio', 'video'
   const navigate = useNavigate();
   const carouselRef = useRef(null);
-  
+
   // ✅ Ref for current astrologer (no re-render, persists across socket events)
   const activeAstroRef = useRef(null);
 
   // Get contexts
-  const { 
-    waitingList: WaitingList, 
-    setWaitingList, 
+  const {
+    waitingList: WaitingList,
+    setWaitingList,
     resetChatFlow,
     setActiveChatRoomId,
     setActiveChat,
-    setChatSeconds
+    setChatSeconds,
   } = useChat();
-  const { 
-    waitingList: callWaitingList, 
+  const {
+    waitingList: callWaitingList,
     setWaitingList: setCallWaitingList,
     resetCallFlow,
     setActiveCallRoomId,
-    setActiveCall
+    setActiveCall,
   } = useCall();
 
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
@@ -115,7 +115,6 @@ const Home = () => {
 
   // Custom handler for profile selection (doesn't close modal)
   const handleProfileSelect = (profile) => {
-    console.log("✅ HOME: Profile selected", profile);
     setLocalSelectedProfile(profile);
   };
 
@@ -125,24 +124,22 @@ const Home = () => {
     if (savedWaitingState) {
       try {
         const { roomId, type, timestamp } = JSON.parse(savedWaitingState);
-        
+
         // Check if waiting state is not too old (max 30 minutes)
         const now = Date.now();
         const maxAge = 30 * 60 * 1000; // 30 minutes
-        
+
         if (now - timestamp < maxAge) {
-          console.log("🔄 Restoring waiting state from localStorage", { roomId, type });
-          
           // Restore state
           setConnectionType(type);
-          if (type === 'chat') {
+          if (type === "chat") {
             setChatRoomId(roomId);
             setWaitingList(2);
           } else {
             setCallRoomId(roomId);
             setCallWaitingList(5);
           }
-          
+
           // Reconnect socket if needed
           if (!voiceSocket.connected && userIdLocal) {
             voiceSocket.io.opts.query = {
@@ -174,35 +171,34 @@ const Home = () => {
   // Handler for Continue button (triggers socket emit)
   const handleContinueAfterKundliSelect = () => {
     if (localSelectedProfile) {
-      console.log("✅ HOME: Continue clicked with profile", localSelectedProfile);
       hookHandleAfterKundliSelect(localSelectedProfile);
     }
   };
 
   const quickActions = [
-    { 
-      id: 1, 
-      title: "Chat with Astrologer", 
+    {
+      id: 1,
+      title: "Chat with Astrologer",
       image: quickActionOne,
-      path: PATH.privateRoutes.Chat_With_ASTROLOGER.path
+      path: PATH.privateRoutes.Chat_With_ASTROLOGER.path,
     },
-    { 
-      id: 2, 
-      title: "Talk to Astrologer", 
+    {
+      id: 2,
+      title: "Talk to Astrologer",
       image: quickActionOne,
-      path: PATH.privateRoutes.Chat_With_ASTROLOGER.path
+      path: PATH.privateRoutes.Chat_With_ASTROLOGER.path,
     },
-    { 
-      id: 3, 
-      title: "Astromall Shop", 
+    {
+      id: 3,
+      title: "Astromall Shop",
       image: quickActionTwo,
-      path: PATH.privateRoutes.SHOP.path
+      path: PATH.privateRoutes.SHOP.path,
     },
-    { 
-      id: 4, 
-      title: "Book A Pooja", 
+    {
+      id: 4,
+      title: "Book A Pooja",
       image: quickActionThree,
-      path: "shop/vip-e-pooja"
+      path: "shop/vip-e-pooja",
     },
   ];
 
@@ -253,7 +249,6 @@ const Home = () => {
   const blogSection = homeList?.find((item) => item.display_type === "blog");
   const blogData = blogSection?.content || [];
 
-  console.log("Ourastrologers", Ourastrologers);
   // Auto-slide functionality
   useEffect(() => {
     const interval = setInterval(() => {
@@ -291,10 +286,8 @@ const Home = () => {
 
   // Handle Consult Now button
   const handleConsultNow = () => {
-    console.log("Consult Now button clicked!");
     setLoadingConsult(true);
     setTimeout(() => {
-      console.log("Navigating to:", PATH.privateRoutes.Chat_With_ASTROLOGER.path);
       navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path);
     }, 500);
   };
@@ -320,42 +313,50 @@ const Home = () => {
     if (!userIdLocal) return;
 
     const handleChatRoom = (data) => {
-      console.log("🔵 HOME: chat:room event", data);
       setChatRoomId(data?.roomId);
       setActiveChatRoomId(data?.roomId);
       setWaitingList(data?.waitingTime || 2);
-      setConnectionType('chat');
-      
+      setConnectionType("chat");
+
       // Save to localStorage
-      localStorage.setItem("waitingState", JSON.stringify({
-        roomId: data?.roomId,
-        type: 'chat',
-        timestamp: Date.now()
-      }));
+      localStorage.setItem(
+        "waitingState",
+        JSON.stringify({
+          roomId: data?.roomId,
+          type: "chat",
+          timestamp: Date.now(),
+        }),
+      );
     };
 
     const handleCallRoom = (data) => {
-      console.log("🔵 HOME: call:room event", data);
       setCallRoomId(data?.roomId);
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
-      setConnectionType(data?.type || 'audio'); // 'audio' or 'video'
-      
+      setConnectionType(data?.type || "audio"); // 'audio' or 'video'
+
       // Save to localStorage
-      localStorage.setItem("waitingState", JSON.stringify({
-        roomId: data?.roomId,
-        type: data?.type || 'audio',
-        timestamp: Date.now()
-      }));
+      localStorage.setItem(
+        "waitingState",
+        JSON.stringify({
+          roomId: data?.roomId,
+          type: data?.type || "audio",
+          timestamp: Date.now(),
+        }),
+      );
     };
 
-    const handleChatAccepted = async ({ roomId, astrologerId, userId, ...data }) => {
-      console.log("✅ HOME: chat:accepted", { roomId, astrologerId });
+    const handleChatAccepted = async ({
+      roomId,
+      astrologerId,
+      userId,
+      ...data
+    }) => {
       setWaitingList(false);
-      
+
       // Clear localStorage
       localStorage.removeItem("waitingState");
-      
+
       const astro = activeAstroRef.current; // ✅ Use ref instead of state
       const kundliId = localSelectedProfile?._id;
 
@@ -394,13 +395,17 @@ const Home = () => {
       }
     };
 
-    const handleCallAccepted = async ({ roomId, token, type, remainingTime }) => {
-      console.log("✅ HOME: call:accepted", { roomId, type });
+    const handleCallAccepted = async ({
+      roomId,
+      token,
+      type,
+      remainingTime,
+    }) => {
       resetCallFlow();
-      
+
       // Clear localStorage
       localStorage.removeItem("waitingState");
-      
+
       const astro = activeAstroRef.current; // ✅ Use ref instead of state
       const kundliId = localSelectedProfile?._id;
 
@@ -430,7 +435,7 @@ const Home = () => {
           astrologerId: astro._id,
           kundliId,
           astrologerID: astro?.astrologer_ID,
-          remainingTime
+          remainingTime,
         });
       } catch (error) {
         console.error("Call accepted error:", error);
@@ -439,28 +444,27 @@ const Home = () => {
     };
 
     const handleRejected = (data) => {
-      console.log("❌ HOME: rejected", data);
       const errorMsg =
-        data?.sessionData?.sessionEndReason === "rejected" && data?.type === "chat"
+        data?.sessionData?.sessionEndReason === "rejected" &&
+        data?.type === "chat"
           ? "Astrologer has rejected the chat request"
           : "Astrologer has rejected the call request";
       Toast.error(errorMsg);
-      
+
       // Clear localStorage
       localStorage.removeItem("waitingState");
-      
+
       resetChatFlow();
       resetCallFlow();
       setConnectionType(null);
     };
 
     const handleSocketError = (err) => {
-      console.log("🔴 HOME: SOCKET ERROR", err);
       Toast.error(err?.message || "Connection error");
-      
+
       // Clear localStorage
       localStorage.removeItem("waitingState");
-      
+
       resetChatFlow();
       resetCallFlow();
       setConnectionType(null);
@@ -484,31 +488,41 @@ const Home = () => {
       voiceSocket.off("call:rejected", handleRejected);
       voiceSocket.off("error", handleSocketError);
     };
-  }, [userIdLocal, navigate, resetChatFlow, resetCallFlow, setWaitingList, setCallWaitingList, setActiveChatRoomId, setActiveCallRoomId]);
+  }, [
+    userIdLocal,
+    navigate,
+    resetChatFlow,
+    resetCallFlow,
+    setWaitingList,
+    setCallWaitingList,
+    setActiveChatRoomId,
+    setActiveCallRoomId,
+  ]);
 
   // Reset waiting state function
   const resetCallState = () => {
-    console.log("🔴 HOME: Resetting call state", { callRoomId, chatRoomId, connectionType });
-    
     // Cancel the active room on server based on connection type
-    if (connectionType === 'chat' && chatRoomId) {
+    if (connectionType === "chat" && chatRoomId) {
       voiceSocket.emit("chat:cancel", { roomId: chatRoomId });
-    } else if ((connectionType === 'audio' || connectionType === 'video') && callRoomId) {
+    } else if (
+      (connectionType === "audio" || connectionType === "video") &&
+      callRoomId
+    ) {
       voiceSocket.emit("call:cancel", { roomId: callRoomId });
     }
-    
+
     // Explicitly reset waiting states to false
     setWaitingList(false);
     setCallWaitingList(false);
-    
+
     // Reset local state
     setCallRoomId(null);
     setChatRoomId(null);
     setConnectionType(null);
-    
+
     // Clear localStorage
     localStorage.removeItem("waitingState");
-    
+
     // Reset context flows
     resetChatFlow();
     resetCallFlow();
@@ -518,10 +532,12 @@ const Home = () => {
   const handleConnectClick = (astrologer) => {
     // Check if already in waiting state
     if (WaitingList || callWaitingList) {
-      Toast.error("You are already waiting for an astrologer. Please cancel the current request first.");
+      Toast.error(
+        "You are already waiting for an astrologer. Please cancel the current request first.",
+      );
       return;
     }
-    
+
     setSelectedAstrologer(astrologer);
     activeAstroRef.current = astrologer; // ✅ Store in ref for socket events
     setIsConnectPopupOpen(true);
@@ -543,18 +559,47 @@ const Home = () => {
               <h2 className={styles.horoscopeTitle}>TODAY'S HOROSCOPE</h2>
               <div className={styles.dividerContainer}>
                 <div className={styles.dividerLine}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                    <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#fff" fill-opacity="1"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="53"
+                    height="1"
+                    viewBox="0 0 53 1"
+                    fill="none"
+                  >
+                    <path
+                      d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z"
+                      fill="#fff"
+                      fill-opacity="1"
+                    />
                   </svg>
                 </div>
                 <span className={styles.dividerMoon}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="12" viewBox="0 0 4 6" fill="none">
-                    <path d="M3.39392 4.49489C3.03602 4.84065 2.58016 5.0493 2.08582 5.0493C0.934798 5.0493 0 3.9185 0 2.52316C0 1.1308 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00931234 2.38704 0.024961C1.91056 0.485852 1.60687 1.196 1.60687 1.99371C1.60687 3.26461 2.38458 4.31717 3.39392 4.49489Z" fill="#FEFEFE"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="10"
+                    height="12"
+                    viewBox="0 0 4 6"
+                    fill="none"
+                  >
+                    <path
+                      d="M3.39392 4.49489C3.03602 4.84065 2.58016 5.0493 2.08582 5.0493C0.934798 5.0493 0 3.9185 0 2.52316C0 1.1308 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00931234 2.38704 0.024961C1.91056 0.485852 1.60687 1.196 1.60687 1.99371C1.60687 3.26461 2.38458 4.31717 3.39392 4.49489Z"
+                      fill="#FEFEFE"
+                    />
                   </svg>
                 </span>
                 <div className={styles.dividerLine}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                    <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#fff" fill-opacity="1"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="53"
+                    height="1"
+                    viewBox="0 0 53 1"
+                    fill="none"
+                  >
+                    <path
+                      d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z"
+                      fill="#fff"
+                      fill-opacity="1"
+                    />
                   </svg>
                 </div>
               </div>
@@ -563,7 +608,9 @@ const Home = () => {
                 Time to balance emotions
               </p>
               <div className={styles.horoscopeAction}>
-                <span>Tap for Daily Horoscope</span>
+                <Link to="/horoscopes/daily-horoscope">
+                  Tap for Daily Horoscope
+                </Link>
                 <ChevronRight size={18} />
               </div>
             </div>
@@ -591,7 +638,7 @@ const Home = () => {
                 <div className={styles.slideContent}>
                   <h3 className={styles.slideTitle}>{slide.title}</h3>
                   <p className={styles.slideSubtitle}>{slide.subtitle}</p>
-                  <button 
+                  <button
                     className={`${styles.slideButton} ${loadingConsult ? styles.loading : ""}`}
                     onClick={handleConsultNow}
                     disabled={loadingConsult}
@@ -626,11 +673,11 @@ const Home = () => {
         {/* Quick Actions */}
         <section className={styles.quickActions}>
           {quickActions.map((action) => (
-            <div 
-              key={action.id} 
+            <div
+              key={action.id}
               className={styles.actionCard}
               onClick={() => navigate(action.path)}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
             >
               <h3 className={styles.actionTitle}>{action.title}</h3>
 
@@ -684,14 +731,34 @@ const Home = () => {
             </h2>
             <div className={styles.titleDivider}>
               <div className={styles.dividerLine}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                    <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
-                  </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="53"
+                  height="1"
+                  viewBox="0 0 53 1"
+                  fill="none"
+                >
+                  <path
+                    d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z"
+                    fill="#2A161B"
+                    fill-opacity="0.2"
+                  />
+                </svg>
               </div>
               <span className={styles.dividerMoon}>☾</span>
               <div className={styles.dividerLine}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                  <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="53"
+                  height="1"
+                  viewBox="0 0 53 1"
+                  fill="none"
+                >
+                  <path
+                    d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z"
+                    fill="#2A161B"
+                    fill-opacity="0.2"
+                  />
                 </svg>
               </div>
             </div>
@@ -712,13 +779,26 @@ const Home = () => {
                 </div>
                 <div className={styles.ratingBadge}>
                   <span className={styles.star}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="21" viewBox="0 0 12 13" fill="none">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="21"
+                      viewBox="0 0 12 13"
+                      fill="none"
+                    >
                       <g clip-path="url(#clip0_4961_937)">
-                        <path d="M5.94187 1.3447C6.09954 0.919606 6.69621 0.919606 6.85438 1.3447L7.87429 4.2327C7.90988 4.32678 7.97253 4.40762 8.05399 4.46454C8.13545 4.52146 8.23188 4.55179 8.33055 4.55152H10.837C11.3001 4.55152 11.5021 5.14081 11.138 5.42941L9.35441 7.06984C9.27451 7.13262 9.21612 7.21967 9.18762 7.31848C9.15912 7.41729 9.16196 7.52279 9.19575 7.61984L9.84712 10.4419C10.0058 10.8952 9.49237 11.2845 9.10411 11.0055L6.68143 9.43404C6.59847 9.37443 6.49953 9.34245 6.39812 9.34245C6.29672 9.34245 6.19778 9.37443 6.11481 9.43404L3.69214 11.0055C3.30437 11.2845 2.79047 10.8947 2.94912 10.4419L3.60049 7.61984C3.63428 7.52279 3.63713 7.41729 3.60863 7.31848C3.58012 7.21967 3.52173 7.13262 3.44184 7.06984L1.65821 5.42941C1.2936 5.14081 1.4966 4.55152 1.95877 4.55152H4.46521C4.56389 4.55186 4.66035 4.52156 4.74182 4.46463C4.82329 4.4077 4.88594 4.32682 4.92146 4.2327L5.94138 1.3447H5.94187Z" fill="#FFB246" stroke="#FFB246" stroke-width="0.985428" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path
+                          d="M5.94187 1.3447C6.09954 0.919606 6.69621 0.919606 6.85438 1.3447L7.87429 4.2327C7.90988 4.32678 7.97253 4.40762 8.05399 4.46454C8.13545 4.52146 8.23188 4.55179 8.33055 4.55152H10.837C11.3001 4.55152 11.5021 5.14081 11.138 5.42941L9.35441 7.06984C9.27451 7.13262 9.21612 7.21967 9.18762 7.31848C9.15912 7.41729 9.16196 7.52279 9.19575 7.61984L9.84712 10.4419C10.0058 10.8952 9.49237 11.2845 9.10411 11.0055L6.68143 9.43404C6.59847 9.37443 6.49953 9.34245 6.39812 9.34245C6.29672 9.34245 6.19778 9.37443 6.11481 9.43404L3.69214 11.0055C3.30437 11.2845 2.79047 10.8947 2.94912 10.4419L3.60049 7.61984C3.63428 7.52279 3.63713 7.41729 3.60863 7.31848C3.58012 7.21967 3.52173 7.13262 3.44184 7.06984L1.65821 5.42941C1.2936 5.14081 1.4966 4.55152 1.95877 4.55152H4.46521C4.56389 4.55186 4.66035 4.52156 4.74182 4.46463C4.82329 4.4077 4.88594 4.32682 4.92146 4.2327L5.94138 1.3447H5.94187Z"
+                          fill="#FFB246"
+                          stroke="#FFB246"
+                          stroke-width="0.985428"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
                       </g>
                       <defs>
                         <clipPath id="clip0_4961_937">
-                          <rect width="11.8251" height="12.0879" fill="white"/>
+                          <rect width="11.8251" height="12.0879" fill="white" />
                         </clipPath>
                       </defs>
                     </svg>
@@ -738,7 +818,7 @@ const Home = () => {
                     </span>
                   </div>
                 )}
-                <button 
+                <button
                   className={styles.connectBtn}
                   onClick={() => handleConnectClick(astrologer)}
                 >
@@ -755,14 +835,34 @@ const Home = () => {
             <h2 className={styles.sectionTitle}>EXPLORE BY LIFE AREA</h2>
             <div className={styles.titleDivider}>
               <div className={styles.dividerLine}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                  <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="53"
+                  height="1"
+                  viewBox="0 0 53 1"
+                  fill="none"
+                >
+                  <path
+                    d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z"
+                    fill="#2A161B"
+                    fill-opacity="0.2"
+                  />
                 </svg>
               </div>
               <span className={styles.dividerMoon}>☾</span>
               <div className={styles.dividerLine}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                  <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="53"
+                  height="1"
+                  viewBox="0 0 53 1"
+                  fill="none"
+                >
+                  <path
+                    d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z"
+                    fill="#2A161B"
+                    fill-opacity="0.2"
+                  />
                 </svg>
               </div>
             </div>
@@ -772,9 +872,9 @@ const Home = () => {
             <div
               className={styles.lifeAreaCard}
               onClick={() => navigate(PATH.privateRoutes.COMPATIBILITY.path)}
-              style={{ 
+              style={{
                 background: "linear-gradient(135deg, #FFE5F0 0%, #FFF0F8 100%)",
-                cursor: 'pointer'
+                cursor: "pointer",
               }}
             >
               <h3 className={styles.lifeAreaTitle}>
@@ -816,14 +916,34 @@ const Home = () => {
               <h2 className={styles.sessionsTitle}>MY SESSIONS</h2>
               <div className={styles.titleDivider}>
                 <div className={styles.dividerLine}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                  <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
-                </svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="53"
+                    height="1"
+                    viewBox="0 0 53 1"
+                    fill="none"
+                  >
+                    <path
+                      d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z"
+                      fill="#2A161B"
+                      fill-opacity="0.2"
+                    />
+                  </svg>
                 </div>
                 <span className={styles.dividerMoon}>☾</span>
                 <div className={styles.dividerLine}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                    <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="53"
+                    height="1"
+                    viewBox="0 0 53 1"
+                    fill="none"
+                  >
+                    <path
+                      d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z"
+                      fill="#2A161B"
+                      fill-opacity="0.2"
+                    />
                   </svg>
                 </div>
               </div>
@@ -861,10 +981,12 @@ const Home = () => {
                 <p className={styles.sessionDuration}>
                   Duration : 5 Min 30 Secs
                 </p>
-                <button 
+                <button
                   className={`${styles.callAgainBtn} ${loadingCallAgain === 1 || loadingCallAgain === "all" ? styles.loading : ""}`}
                   onClick={() => handleCallAgain(1)}
-                  disabled={loadingCallAgain === 1 || loadingCallAgain === "all"}
+                  disabled={
+                    loadingCallAgain === 1 || loadingCallAgain === "all"
+                  }
                 >
                   Call Again
                 </button>
@@ -898,10 +1020,12 @@ const Home = () => {
                 <p className={styles.sessionDuration}>
                   Duration : 8 Min 45 Secs
                 </p>
-                <button 
+                <button
                   className={`${styles.callAgainBtn} ${loadingCallAgain === 2 || loadingCallAgain === "all" ? styles.loading : ""}`}
                   onClick={() => handleCallAgain(2)}
-                  disabled={loadingCallAgain === 2 || loadingCallAgain === "all"}
+                  disabled={
+                    loadingCallAgain === 2 || loadingCallAgain === "all"
+                  }
                 >
                   Call Again
                 </button>
@@ -918,18 +1042,47 @@ const Home = () => {
                 <span className={styles.cosmicLabel}>DAILY COSMIC INSIGHT</span>
                 <div className={styles.cosmicDivider}>
                   <div className={styles.dividerLine}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                      <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#fff" fill-opacity="1"/>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="53"
+                      height="1"
+                      viewBox="0 0 53 1"
+                      fill="none"
+                    >
+                      <path
+                        d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z"
+                        fill="#fff"
+                        fill-opacity="1"
+                      />
                     </svg>
                   </div>
                   <span className={styles.dividerMoon}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="12" viewBox="0 0 4 6" fill="none">
-                      <path d="M3.39392 4.49489C3.03602 4.84065 2.58016 5.0493 2.08582 5.0493C0.934798 5.0493 0 3.9185 0 2.52316C0 1.1308 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00931234 2.38704 0.024961C1.91056 0.485852 1.60687 1.196 1.60687 1.99371C1.60687 3.26461 2.38458 4.31717 3.39392 4.49489Z" fill="#FEFEFE"/>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="10"
+                      height="12"
+                      viewBox="0 0 4 6"
+                      fill="none"
+                    >
+                      <path
+                        d="M3.39392 4.49489C3.03602 4.84065 2.58016 5.0493 2.08582 5.0493C0.934798 5.0493 0 3.9185 0 2.52316C0 1.1308 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00931234 2.38704 0.024961C1.91056 0.485852 1.60687 1.196 1.60687 1.99371C1.60687 3.26461 2.38458 4.31717 3.39392 4.49489Z"
+                        fill="#FEFEFE"
+                      />
                     </svg>
                   </span>
                   <div className={styles.dividerLine}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                      <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#fff" fill-opacity="1"/>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="53"
+                      height="1"
+                      viewBox="0 0 53 1"
+                      fill="none"
+                    >
+                      <path
+                        d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z"
+                        fill="#fff"
+                        fill-opacity="1"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -955,14 +1108,34 @@ const Home = () => {
             <h2 className={styles.sectionTitle}>EXPLORE PANCHANG</h2>
             <div className={styles.titleDivider}>
               <div className={styles.dividerLine}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                  <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="53"
+                  height="1"
+                  viewBox="0 0 53 1"
+                  fill="none"
+                >
+                  <path
+                    d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z"
+                    fill="#2A161B"
+                    fill-opacity="0.2"
+                  />
                 </svg>
               </div>
               <span className={styles.dividerMoon}>☾</span>
               <div className={styles.dividerLine}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                  <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="53"
+                  height="1"
+                  viewBox="0 0 53 1"
+                  fill="none"
+                >
+                  <path
+                    d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z"
+                    fill="#2A161B"
+                    fill-opacity="0.2"
+                  />
                 </svg>
               </div>
             </div>
@@ -1051,22 +1224,42 @@ const Home = () => {
             <h2 className={styles.sectionTitle}>ASTROLOGERS FOR YOU</h2>
             <div className={styles.titleDivider}>
               <div className={styles.dividerLine}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                  <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="53"
+                  height="1"
+                  viewBox="0 0 53 1"
+                  fill="none"
+                >
+                  <path
+                    d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z"
+                    fill="#2A161B"
+                    fill-opacity="0.2"
+                  />
                 </svg>
               </div>
               <span className={styles.dividerMoon}>☾</span>
               <div className={styles.dividerLine}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                  <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="53"
+                  height="1"
+                  viewBox="0 0 53 1"
+                  fill="none"
+                >
+                  <path
+                    d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z"
+                    fill="#2A161B"
+                    fill-opacity="0.2"
+                  />
                 </svg>
               </div>
             </div>
           </div>
 
           <div className={styles.astrologersGrid}>
-            {Ourastrologers.map((astrologer) => (
-              <div key={astrologer.id} className={styles.astrologerCard}>
+            {Ourastrologers.map((astrologer, i) => (
+              <div key={i} className={styles.astrologerCard}>
                 <div className={styles.astrologerImageWrapper}>
                   <img
                     src={astrologer.imageUrl}
@@ -1079,13 +1272,26 @@ const Home = () => {
                 </div>
                 <div className={styles.ratingBadge}>
                   <span className={styles.star}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="21" viewBox="0 0 12 13" fill="none">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="21"
+                      viewBox="0 0 12 13"
+                      fill="none"
+                    >
                       <g clip-path="url(#clip0_4961_292)">
-                        <path d="M5.94187 1.3447C6.09954 0.919606 6.69621 0.919606 6.85438 1.3447L7.87429 4.2327C7.90988 4.32678 7.97253 4.40762 8.05399 4.46454C8.13545 4.52146 8.23188 4.55179 8.33055 4.55152H10.837C11.3001 4.55152 11.5021 5.14081 11.138 5.42941L9.35441 7.06984C9.27451 7.13262 9.21612 7.21967 9.18762 7.31848C9.15912 7.41729 9.16196 7.52279 9.19575 7.61984L9.84712 10.4419C10.0058 10.8952 9.49237 11.2845 9.10411 11.0055L6.68143 9.43404C6.59847 9.37443 6.49953 9.34245 6.39812 9.34245C6.29672 9.34245 6.19778 9.37443 6.11481 9.43404L3.69214 11.0055C3.30437 11.2845 2.79047 10.8947 2.94912 10.4419L3.60049 7.61984C3.63428 7.52279 3.63713 7.41729 3.60863 7.31848C3.58012 7.21967 3.52173 7.13262 3.44184 7.06984L1.65821 5.42941C1.2936 5.14081 1.4966 4.55152 1.95877 4.55152H4.46521C4.56389 4.55186 4.66035 4.52156 4.74182 4.46463C4.82329 4.4077 4.88594 4.32682 4.92146 4.2327L5.94138 1.3447H5.94187Z" fill="#FFB246" stroke="#FFB246" stroke-width="0.985428" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path
+                          d="M5.94187 1.3447C6.09954 0.919606 6.69621 0.919606 6.85438 1.3447L7.87429 4.2327C7.90988 4.32678 7.97253 4.40762 8.05399 4.46454C8.13545 4.52146 8.23188 4.55179 8.33055 4.55152H10.837C11.3001 4.55152 11.5021 5.14081 11.138 5.42941L9.35441 7.06984C9.27451 7.13262 9.21612 7.21967 9.18762 7.31848C9.15912 7.41729 9.16196 7.52279 9.19575 7.61984L9.84712 10.4419C10.0058 10.8952 9.49237 11.2845 9.10411 11.0055L6.68143 9.43404C6.59847 9.37443 6.49953 9.34245 6.39812 9.34245C6.29672 9.34245 6.19778 9.37443 6.11481 9.43404L3.69214 11.0055C3.30437 11.2845 2.79047 10.8947 2.94912 10.4419L3.60049 7.61984C3.63428 7.52279 3.63713 7.41729 3.60863 7.31848C3.58012 7.21967 3.52173 7.13262 3.44184 7.06984L1.65821 5.42941C1.2936 5.14081 1.4966 4.55152 1.95877 4.55152H4.46521C4.56389 4.55186 4.66035 4.52156 4.74182 4.46463C4.82329 4.4077 4.88594 4.32682 4.92146 4.2327L5.94138 1.3447H5.94187Z"
+                          fill="#FFB246"
+                          stroke="#FFB246"
+                          stroke-width="0.985428"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
                       </g>
                       <defs>
                         <clipPath id="clip0_4961_292">
-                          <rect width="11.8251" height="12.0879" fill="white"/>
+                          <rect width="11.8251" height="12.0879" fill="white" />
                         </clipPath>
                       </defs>
                     </svg>
@@ -1103,7 +1309,7 @@ const Home = () => {
                     {astrologer.specialities.join(", ")}
                   </span>
                 </div>
-                <button 
+                <button
                   className={styles.connectBtn}
                   onClick={() => handleConnectClick(astrologer)}
                 >
@@ -1121,14 +1327,34 @@ const Home = () => {
               <h2 className={styles.sectionTitle}>DISCOVER MORE</h2>
               <div className={styles.titleDivider}>
                 <div className={styles.dividerLine}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                    <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="53"
+                    height="1"
+                    viewBox="0 0 53 1"
+                    fill="none"
+                  >
+                    <path
+                      d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z"
+                      fill="#2A161B"
+                      fill-opacity="0.2"
+                    />
                   </svg>
                 </div>
                 <span className={styles.dividerMoon}>☾</span>
                 <div className={styles.dividerLine}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                    <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="53"
+                    height="1"
+                    viewBox="0 0 53 1"
+                    fill="none"
+                  >
+                    <path
+                      d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z"
+                      fill="#2A161B"
+                      fill-opacity="0.2"
+                    />
                   </svg>
                 </div>
               </div>
@@ -1225,14 +1451,34 @@ const Home = () => {
               </h2>
               <div className={styles.titleDivider}>
                 <div className={styles.dividerLine}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                    <path d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="53"
+                    height="1"
+                    viewBox="0 0 53 1"
+                    fill="none"
+                  >
+                    <path
+                      d="M52.2858 0.406393C52.2858 0.630933 51.128 0.812789 49.6998 0.812789C48.2716 0.812789 0 0.630933 0 0.406393C0 0.181853 48.2719 0 49.6998 0C51.128 0 52.2858 0.181853 52.2858 0.406393Z"
+                      fill="#2A161B"
+                      fill-opacity="0.2"
+                    />
                   </svg>
                 </div>
                 <span className={styles.dividerMoon}>☾</span>
                 <div className={styles.dividerLine}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="53" height="1" viewBox="0 0 53 1" fill="none">
-                    <path d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z" fill="#2A161B" fill-opacity="0.2"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="53"
+                    height="1"
+                    viewBox="0 0 53 1"
+                    fill="none"
+                  >
+                    <path
+                      d="M0 0.406393C0 0.630933 1.15779 0.812789 2.58601 0.812789C4.01424 0.812789 52.2858 0.630933 52.2858 0.406393C52.2858 0.181853 4.01393 0 2.58601 0C1.15779 0 0 0.181853 0 0.406393Z"
+                      fill="#2A161B"
+                      fill-opacity="0.2"
+                    />
                   </svg>
                 </div>
               </div>
@@ -1302,9 +1548,11 @@ const Home = () => {
         </button>
 
         {/* LIVE */}
-        <button 
+        <button
           className={styles.liveItem}
-          onClick={() => navigate(PATH.privateRoutes.AUDIENCE_LIVE_STREAMING.path)}
+          onClick={() =>
+            navigate(PATH.privateRoutes.AUDIENCE_LIVE_STREAMING.path)
+          }
         >
           <div className={styles.liveBtn}>
             <Radio size={28} />
@@ -1312,7 +1560,7 @@ const Home = () => {
           <span className={styles.label}>Live</span>
         </button>
 
-        <button 
+        <button
           className={styles.navItem}
           onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
         >
@@ -1322,7 +1570,7 @@ const Home = () => {
           <span className={styles.label}>Astrologer</span>
         </button>
 
-        <button 
+        <button
           className={styles.navItem}
           onClick={() => navigate(PATH.privateRoutes.SHOP.path)}
         >
@@ -1371,40 +1619,46 @@ const Home = () => {
 
       {/* Recharge modal from hook */}
       {hookOpenModal.recharge && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '24px',
-            borderRadius: '12px',
-            maxWidth: '400px',
-            width: '90%'
-          }}>
-            <p style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              padding: "24px",
+              borderRadius: "12px",
+              maxWidth: "400px",
+              width: "90%",
+            }}
+          >
+            <p style={{ textAlign: "center", marginBottom: "20px" }}>
               Minimum balance of 5 minutes (₹{" "}
               {(selectedAstrologer?.price?.chatRate?.amount || 1) * 5}) is
               required to start chat with
               {` ${selectedAstrologer?.firstName || "Astrologer"}`}.
             </p>
 
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <div
+              style={{ display: "flex", gap: "12px", justifyContent: "center" }}
+            >
               <button
                 style={{
-                  padding: '10px 20px',
-                  borderRadius: '8px',
-                  border: '1px solid #ccc',
-                  backgroundColor: 'white',
-                  cursor: 'pointer'
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  border: "1px solid #ccc",
+                  backgroundColor: "white",
+                  cursor: "pointer",
                 }}
                 onClick={() =>
                   hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
@@ -1414,12 +1668,12 @@ const Home = () => {
               </button>
               <button
                 style={{
-                  padding: '10px 20px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  backgroundColor: '#FF6B35',
-                  color: 'white',
-                  cursor: 'pointer'
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  border: "none",
+                  backgroundColor: "#FF6B35",
+                  color: "white",
+                  cursor: "pointer",
                 }}
                 onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
               >

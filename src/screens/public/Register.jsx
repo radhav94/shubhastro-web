@@ -113,7 +113,7 @@ const Register = () => {
       try {
         response = await registerUser(payload);
       } catch (apiErr) {
-        console.log("apiErrror", apiErr);
+        console.error("apiErrror", apiErr);
 
         const backendMessage =
           apiErr?.response?.data?.message ||
@@ -137,7 +137,7 @@ const Register = () => {
         Toast.error(response?.data?.message || "Something went wrong!");
       }
     } catch (err) {
-      console.error("Unexpected error:", err)
+      console.error("Unexpected error:", err);
 
       Toast.error("Unexpected error occurred.");
     } finally {
