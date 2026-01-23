@@ -6,6 +6,7 @@ export { default as PrimaryText } from "../component/PrimaryText";
 export { default as PrimaryButton } from "../component/PrimaryButton";
 export { default as ErrorText } from "../component/ErrorText";
 export { default as Toast } from "../component/toast";
+export { default as ErrorBoundary } from "../component/ErrorBoundary";
 
 //UI releated component
 

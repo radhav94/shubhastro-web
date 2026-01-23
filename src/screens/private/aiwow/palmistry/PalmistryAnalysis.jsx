@@ -22,8 +22,7 @@ const PalmistryAnalysis = () => {
       setSelectedHand(hand);
       performAnalysis(storedImage, hand);
     } else {
-      // If no image or hand selection, redirect back
-      Toast.error('No image or hand selection found. Please try again.');
+      // If no image or hand selection, silently redirect back
       navigate('/aiwow/palmistry/hand-selection');
       return;
     }
@@ -62,9 +61,8 @@ const PalmistryAnalysis = () => {
           navigate('/aiwow/palmistry/result');
         }, 1000);
       } else {
-        // Handle error
+        // Error already shown by Axios interceptor, just navigate back
         setProgress(0);
-        Toast.error(result.error || 'Analysis failed. Please try again.');
         
         setTimeout(() => {
           navigate('/aiwow/palmistry/hand-selection');
@@ -72,7 +70,7 @@ const PalmistryAnalysis = () => {
       }
     } catch (error) {
       console.error('Analysis error:', error);
-      Toast.error('An unexpected error occurred. Please try again.');
+      // Error already shown by Axios interceptor, just navigate back
       
       setTimeout(() => {
         navigate('/aiwow/palmistry/hand-selection');

@@ -8,7 +8,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 2000;
   padding: 20px;
 
   @media (max-width: 768px) {
@@ -28,6 +28,8 @@
   animation: slideUp 0.3s ease-out;
   max-height: 90vh;
   overflow-y: auto;
+  margin: auto;
+  margin-top: 100px;
 
   @media (max-width: 768px) {
     border-radius: 24px 24px 0 0;
@@ -35,6 +37,7 @@
     max-width: 100%;
     max-height: 85vh;
     animation: slideUpMobile 0.3s ease-out;
+    margin: 0;
   }
 }
 

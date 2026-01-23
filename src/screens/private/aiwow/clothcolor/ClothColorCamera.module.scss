@@ -83,7 +83,7 @@
   position: absolute;
   width: 80px;
   height: 80px;
-  border: 4px solid #10b981;
+  border: 4px solid;
   transition: border-color 0.3s ease;
 
   @media (min-width: 768px) {
@@ -92,11 +92,11 @@
   }
 
   &.detected {
-    border-color: #10b981;
+    border-color: #22c55e; // Green when cloth detected
   }
 
   &.notDetected {
-    border-color: #ef4444;
+    border-color: #ef4444; // Red when no cloth detected
   }
 
   &[style*="top"][style*="left"] {
