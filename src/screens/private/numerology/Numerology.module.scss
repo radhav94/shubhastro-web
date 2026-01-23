@@ -3,6 +3,7 @@
   min-height: 100vh;
   padding-bottom: 80px;
   position: relative;
+  margin-top: 6rem;
 }
 
 /* HERO */
@@ -179,7 +180,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: #F3F3F3;
+  background: #f3f3f3;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(10px);
 }
@@ -190,7 +191,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: #F3F3F3;
+  background: #f3f3f3;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -213,12 +214,12 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   width: 44px;
   height: 44px;
-  
+
   svg {
     width: 20px;
     height: 20px;
   }
-  
+
   &:active {
     transform: scale(0.95);
   }
@@ -238,12 +239,12 @@
   // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   width: 44px;
   height: 44px;
-  
+
   svg {
     width: 20px;
     height: 20px;
   }
-  
+
   &:active {
     transform: scale(0.95);
   }
@@ -262,7 +263,7 @@
   padding: 4px 12px;
   border-radius: 8px;
   transition: 0.2s ease;
-  
+
   &:active {
     transform: scale(0.98);
   }
@@ -608,7 +609,7 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px 40px;
-    background: #F3F3F3;
+    background: #f3f3f3;
   }
 
   .profileSelector {
@@ -898,7 +899,6 @@
     font-size: 13px;
   }
 }
-
 
 /* NUMEROLOGY SECTION */
 .numerologySection {
