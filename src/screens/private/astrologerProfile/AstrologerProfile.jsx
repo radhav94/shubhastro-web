@@ -2,7 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "./AstrologerProfile.module.scss";
 import { FaPlay, FaStar, FaChevronRight } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
-import { IoChevronBack, IoPaperPlaneOutline, IoCalendarOutline } from "react-icons/io5";
+import {
+  IoChevronBack,
+  IoPaperPlaneOutline,
+  IoCalendarOutline,
+} from "react-icons/io5";
 import { MdNotifications } from "react-icons/md";
 import { BiMessageDetail, BiPhone, BiVideo } from "react-icons/bi";
 import { PiBookOpenTextLight, PiUsersThreeBold } from "react-icons/pi";
@@ -21,7 +25,10 @@ import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import { useTalkToAstrologer } from "../talkToAstrologer/useTalkToAstrologer";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import KundliSelectModal from "../talkToAstrologer/kundliSelect/KundliSelectModal";
-import { useAddAstrologerReviewMutation, useGetAstrologerReviewsQuery } from "../../../redux/api/review/reviewApi";
+import {
+  useAddAstrologerReviewMutation,
+  useGetAstrologerReviewsQuery,
+} from "../../../redux/api/review/reviewApi";
 import FeedbackModal from "../home/components/chats/FeedbackModal";
 
 // Import custom SVG icons
@@ -57,9 +64,9 @@ const AstrologerProfile = () => {
     refetch: refetchReviews,
   } = useGetAstrologerReviewsQuery(
     { astrologerID: data?.astrologer_ID, page: 1, limit: 10 },
-    { skip: !data?.astrologer_ID }
+    { skip: !data?.astrologer_ID },
   );
-  
+
   const isInitiallyFollowing = astrologerData?.data?.isFollowing || false;
   const [isFollowing, setIsFollowing] = useState(isInitiallyFollowing);
   const [showFullAbout, setShowFullAbout] = useState(false);
@@ -73,7 +80,8 @@ const AstrologerProfile = () => {
     useUnfollowAstrologerByIdMutation();
 
   const [createChatRoom] = useCreateChatRoomMutation();
-  const [addAstrologerReview, { isLoading: reviewLoading }] = useAddAstrologerReviewMutation();
+  const [addAstrologerReview, { isLoading: reviewLoading }] =
+    useAddAstrologerReviewMutation();
   const [setOpenModal] = useTalkToAstrologer();
 
   // State
@@ -98,7 +106,7 @@ const AstrologerProfile = () => {
       if (!isFollowing) {
         await followAstrologer({ astrologerId: data._id }).unwrap();
         toast.success(
-          `We will notify you when ${data?.firstName || ""} goes live or posts an update!`
+          `We will notify you when ${data?.firstName || ""} goes live or posts an update!`,
         );
       } else {
         await unfollowAstrologer({ astrologerId: data._id }).unwrap();
@@ -127,7 +135,7 @@ const AstrologerProfile = () => {
       }
     } catch (err) {
       if (err.name !== "AbortError") {
-        console.log("Share error:", err);
+        console.error("Share error:", err);
         toast.error("Failed to share profile");
       }
     }
@@ -283,7 +291,7 @@ const AstrologerProfile = () => {
           userId: userIdLocal,
           astrologerId: astro._id,
           kundliId,
-          astrologerID: astro?.astrologerID
+          astrologerID: astro?.astrologerID,
         });
       } catch {
         toast.error("Failed to start chat");
@@ -324,38 +332,40 @@ const AstrologerProfile = () => {
 
   const reviews = reviewsData?.data?.getDetail || [];
   const totalReviews = reviewsData?.data?.totalRecords || 0;
-  
+
   // Calculate average rating from reviews
-  const averageRating = reviews.length > 0 
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
-    : data?.rating || 0;
-  
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : data?.rating || 0;
+
   // Helper function to format availability slots
   const formatAvailability = (availability) => {
     if (!availability || availability.length === 0) {
       return [
         { day: "Monday - Friday", time: "11 AM - 4 PM" },
-        { day: "Evening", time: "7 PM - 10 PM" }
+        { day: "Evening", time: "7 PM - 10 PM" },
       ];
     }
 
     // Get today's day
-    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-    
+    const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+
     // Find today's availability or use first available day
-    const todaySlots = availability.find(a => a.day === today) || availability[0];
-    
+    const todaySlots =
+      availability.find((a) => a.day === today) || availability[0];
+
     if (!todaySlots || !todaySlots.slots || todaySlots.slots.length === 0) {
       return [
         { day: "Monday - Friday", time: "11 AM - 4 PM" },
-        { day: "Evening", time: "7 PM - 10 PM" }
+        { day: "Evening", time: "7 PM - 10 PM" },
       ];
     }
 
     // Format slots
-    return todaySlots.slots.map(slot => ({
+    return todaySlots.slots.map((slot) => ({
       day: todaySlots.day,
-      time: `${slot.start} - ${slot.end}`
+      time: `${slot.start} - ${slot.end}`,
     }));
   };
 
@@ -364,9 +374,18 @@ const AstrologerProfile = () => {
     firstName: data?.firstName || "Astrologer",
     lastName: data?.lastName || "",
     imageUrl: data?.imageUrl || "",
-    specialities: data?.specialties?.length > 0 ? data.specialties : ["Vedic Kundli", "Tarot", "Palmistry"],
-    expertise: data?.expertise?.length > 0 ? data.expertise : ["Relationships", "Finance", "Health"],
-    languagePreference: data?.languagePreference?.length > 0 ? data.languagePreference : ["English", "Hindi"],
+    specialities:
+      data?.specialties?.length > 0
+        ? data.specialties
+        : ["Vedic Kundli", "Tarot", "Palmistry"],
+    expertise:
+      data?.expertise?.length > 0
+        ? data.expertise
+        : ["Relationships", "Finance", "Health"],
+    languagePreference:
+      data?.languagePreference?.length > 0
+        ? data.languagePreference
+        : ["English", "Hindi"],
     experience: data?.experience ?? 20,
     totalConsultations: data?.totalConsultations ?? 1200,
     rating: data?.rating ?? 4.5,
@@ -375,71 +394,82 @@ const AstrologerProfile = () => {
     chatMinutes: data?.chatMinutes ?? 1500,
     callMinutes: data?.callMinutes ?? 1200,
     videoMinutes: data?.videoMinutes ?? 4.5,
-    description: data?.description || "With years of dedicated practice, I've guided thousands of individuals across love, career, health, and life direction. My work combines classical Vedic principles with deep intuitive understanding, helping clients receive...",
-    gallery: data?.gallery?.length > 0 ? data.gallery : [
-      "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+1",
-      "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+2",
-      "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+3"
-    ],
-    reviews: reviews.length > 0 ? reviews.map(r => ({
-      date: new Date(r.createdAt).toLocaleDateString('en-GB'),
-      rating: r.rating,
-      user: r.customerName,
-      text: r.review || ""
-    })) : [
-      {
-        date: "25/11/2025",
-        rating: 5.0,
-        user: "Rahul Sharma",
-        text: "The insights provided were life-changing, helping me to see my path clearly."
-      },
-      {
-        date: "26/11/2025",
-        rating: 4.8,
-        user: "Anjali Verma",
-        text: "I felt a deep connection and understood my purpose in life better after our session."
-      },
-      {
-        date: "27/11/2025",
-        rating: 4.2,
-        user: "Sameer Rao",
-        text: "The advice was practical and easy to implement, making a positive impact on my daily routine."
-      },
-      {
-        date: "28/11/2025",
-        rating: 4.9,
-        user: "Sneha Iyer",
-        text: "I appreciated the warmth and empathy shown during our discussion; it truly felt supportive."
-      }
-    ],
-    products: data?.products?.length > 0 ? data.products : [
-      {
-        name: "Crystal Set",
-        description: "Amethyst + Quartz +",
-        price: 1500,
-        originalPrice: 2200,
-        image: "",
-        isPopular: true
-      },
-      {
-        name: "Astrology Journal",
-        description: "Leather-bound",
-        price: 800,
-        originalPrice: 1200,
-        image: "",
-        isPopular: true
-      },
-      {
-        name: "Reading Cards",
-        description: "Detailed illustrations",
-        price: 3500,
-        originalPrice: null,
-        image: "",
-        isPopular: true
-      }
-    ]
+    description:
+      data?.description ||
+      "With years of dedicated practice, I've guided thousands of individuals across love, career, health, and life direction. My work combines classical Vedic principles with deep intuitive understanding, helping clients receive...",
+    gallery:
+      data?.gallery?.length > 0
+        ? data.gallery
+        : [
+            "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+1",
+            "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+2",
+            "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+3",
+          ],
+    reviews:
+      reviews.length > 0
+        ? reviews.map((r) => ({
+            date: new Date(r.createdAt).toLocaleDateString("en-GB"),
+            rating: r.rating,
+            user: r.customerName,
+            text: r.review || "",
+          }))
+        : [
+            {
+              date: "25/11/2025",
+              rating: 5.0,
+              user: "Rahul Sharma",
+              text: "The insights provided were life-changing, helping me to see my path clearly.",
+            },
+            {
+              date: "26/11/2025",
+              rating: 4.8,
+              user: "Anjali Verma",
+              text: "I felt a deep connection and understood my purpose in life better after our session.",
+            },
+            {
+              date: "27/11/2025",
+              rating: 4.2,
+              user: "Sameer Rao",
+              text: "The advice was practical and easy to implement, making a positive impact on my daily routine.",
+            },
+            {
+              date: "28/11/2025",
+              rating: 4.9,
+              user: "Sneha Iyer",
+              text: "I appreciated the warmth and empathy shown during our discussion; it truly felt supportive.",
+            },
+          ],
+    products:
+      data?.products?.length > 0
+        ? data.products
+        : [
+            {
+              name: "Crystal Set",
+              description: "Amethyst + Quartz +",
+              price: 1500,
+              originalPrice: 2200,
+              image: "",
+              isPopular: true,
+            },
+            {
+              name: "Astrology Journal",
+              description: "Leather-bound",
+              price: 800,
+              originalPrice: 1200,
+              image: "",
+              isPopular: true,
+            },
+            {
+              name: "Reading Cards",
+              description: "Detailed illustrations",
+              price: 3500,
+              originalPrice: null,
+              image: "",
+              isPopular: true,
+            },
+          ],
   };
-  
+
   if (isLoading) return <div className={styles.loading}>Loading...</div>;
   if (error) return <ErrorText>Something went wrong!</ErrorText>;
   if (!data) return <ErrorText>Astrologer not found</ErrorText>;
@@ -477,7 +507,11 @@ const AstrologerProfile = () => {
             onClick={handleFollow}
             disabled={followLoading || unfollowLoading}
           >
-            {followLoading || unfollowLoading ? "..." : isFollowing ? "Following" : "Follow"}
+            {followLoading || unfollowLoading
+              ? "..."
+              : isFollowing
+                ? "Following"
+                : "Follow"}
           </button>
           <button className={styles.shareBtn} onClick={handleShare}>
             <img src={ShareIcon} alt="Share" className={styles.shareIcon} />
@@ -488,19 +522,27 @@ const AstrologerProfile = () => {
       {/* Profile Card */}
       <div className={styles.profileCard}>
         <div className={styles.profileImageWrapper}>
-          <img 
-            src={displayData.imageUrl || AstrologerPlaceholder} 
-            alt={displayData.firstName} 
+          <img
+            src={displayData.imageUrl || AstrologerPlaceholder}
+            alt={displayData.firstName}
             className={styles.profileImage}
           />
         </div>
         <div className={styles.profileInfo}>
-          <h1 className={styles.astrologerName}>{displayData.firstName} {displayData.lastName}</h1>
-          <p className={styles.skills}>{displayData.specialities.join(" • ")}</p>
-          <p className={styles.expertise}>{displayData.expertise.join(" • ")}</p>
+          <h1 className={styles.astrologerName}>
+            {displayData.firstName} {displayData.lastName}
+          </h1>
+          <p className={styles.skills}>
+            {displayData.specialities.join(" • ")}
+          </p>
+          <p className={styles.expertise}>
+            {displayData.expertise.join(" • ")}
+          </p>
           <div className={styles.languages}>
             {displayData.languagePreference.map((lang, i) => (
-              <span key={i} className={styles.languageTag}>{lang}</span>
+              <span key={i} className={styles.languageTag}>
+                {lang}
+              </span>
             ))}
           </div>
         </div>
@@ -509,14 +551,24 @@ const AstrologerProfile = () => {
       {/* Stats Section */}
       <div className={styles.statsSection}>
         <div className={styles.statItem}>
-          <img src={ExperienceIcon} alt="Experience" className={styles.statIcon} />
+          <img
+            src={ExperienceIcon}
+            alt="Experience"
+            className={styles.statIcon}
+          />
           <div className={styles.statValue}>{displayData.experience}+</div>
           <div className={styles.statLabel}>Experience</div>
         </div>
         <div className={styles.statDivider}></div>
         <div className={styles.statItem}>
-          <img src={ConsultationsIcon} alt="Consultations" className={styles.statIcon} />
-          <div className={styles.statValue}>{displayData.totalConsultations}</div>
+          <img
+            src={ConsultationsIcon}
+            alt="Consultations"
+            className={styles.statIcon}
+          />
+          <div className={styles.statValue}>
+            {displayData.totalConsultations}
+          </div>
           <div className={styles.statLabel}>Consultations</div>
         </div>
         <div className={styles.statDivider}></div>
@@ -536,11 +588,17 @@ const AstrologerProfile = () => {
         <div className={styles.hoursContent}>
           <div className={styles.timeSlots}>
             {displayData.availability.map((slot, index) => (
-              <div key={index} className={styles.timeSlot}>{slot.time}</div>
+              <div key={index} className={styles.timeSlot}>
+                {slot.time}
+              </div>
             ))}
           </div>
           <button className={styles.reminderBtn}>
-            <img src={NotificationIcon} alt="Notification" className={styles.notificationIcon} />
+            <img
+              src={NotificationIcon}
+              alt="Notification"
+              className={styles.notificationIcon}
+            />
             Set Reminder
           </button>
         </div>
@@ -561,7 +619,11 @@ const AstrologerProfile = () => {
         </div>
         <div className={styles.minuteDivider}></div>
         <div className={styles.minuteItem}>
-          <img src={VideoMinutesIcon} alt="Video" className={styles.minuteIcon} />
+          <img
+            src={VideoMinutesIcon}
+            alt="Video"
+            className={styles.minuteIcon}
+          />
           <div className={styles.minuteValue}>{displayData.videoMinutes}</div>
           <div className={styles.minuteLabel}>Video Minutes</div>
         </div>
@@ -570,11 +632,16 @@ const AstrologerProfile = () => {
       {/* About Section */}
       <div className={styles.aboutSection}>
         <h3 className={styles.aboutTitle}>About</h3>
-        <p className={`${styles.aboutText} ${showFullAbout ? styles.expanded : ""}`}>
+        <p
+          className={`${styles.aboutText} ${showFullAbout ? styles.expanded : ""}`}
+        >
           {displayData.description}
         </p>
         {displayData.description.length > 150 && (
-          <button className={styles.readMoreBtn} onClick={() => setShowFullAbout(!showFullAbout)}>
+          <button
+            className={styles.readMoreBtn}
+            onClick={() => setShowFullAbout(!showFullAbout)}
+          >
             {showFullAbout ? "Read Less" : "Read More"}
           </button>
         )}
@@ -598,8 +665,15 @@ const AstrologerProfile = () => {
       <div className={styles.giftSection}>
         <div className={styles.giftContent}>
           <h3 className={styles.giftTitle}>Send a Gift</h3>
-          <p className={styles.giftSubtitle}>Show your appreciation to your favorite astrologer.</p>
-          <button className={styles.sendNowBtn} onClick={() => setIsGiftModalOpen(true)}>Send Now</button>
+          <p className={styles.giftSubtitle}>
+            Show your appreciation to your favorite astrologer.
+          </p>
+          <button
+            className={styles.sendNowBtn}
+            onClick={() => setIsGiftModalOpen(true)}
+          >
+            Send Now
+          </button>
         </div>
         <div className={styles.giftImage}>
           <img src={SendGiftImage} alt="Send Gift" />
@@ -625,7 +699,7 @@ const AstrologerProfile = () => {
                 <div className={styles.reviewHeader}>
                   <span className={styles.reviewDate}>
                     <IoCalendarOutline className={styles.calendarIcon} />
-                    {new Date(review.createdAt).toLocaleDateString('en-GB')}
+                    {new Date(review.createdAt).toLocaleDateString("en-GB")}
                   </span>
                   <div className={styles.reviewRating}>
                     <FaStar className={styles.reviewStar} />
@@ -633,15 +707,22 @@ const AstrologerProfile = () => {
                   </div>
                 </div>
                 <h4 className={styles.reviewerName}>{review.customerName}</h4>
-                {review.review && <p className={styles.reviewText}>{review.review}</p>}
+                {review.review && (
+                  <p className={styles.reviewText}>{review.review}</p>
+                )}
               </div>
             ))}
           </div>
         ) : (
-          <div className={styles.noReviews}>No reviews yet. Be the first to review!</div>
+          <div className={styles.noReviews}>
+            No reviews yet. Be the first to review!
+          </div>
         )}
 
-        <button className={styles.shareReviewBtn} onClick={() => setOpenReviewModal(true)}>
+        <button
+          className={styles.shareReviewBtn}
+          onClick={() => setOpenReviewModal(true)}
+        >
           Share a Review
         </button>
       </div>
@@ -674,7 +755,9 @@ const AstrologerProfile = () => {
                 <div className={styles.productPrice}>
                   <span className={styles.currentPrice}>₹{product.price}</span>
                   {product.originalPrice && (
-                    <span className={styles.originalPrice}>₹{product.originalPrice}</span>
+                    <span className={styles.originalPrice}>
+                      ₹{product.originalPrice}
+                    </span>
                   )}
                 </div>
                 <button className={styles.addToCartBtn}>+ Add to cart</button>
@@ -686,7 +769,10 @@ const AstrologerProfile = () => {
 
       {/* Bottom Connect Button */}
       <div className={styles.bottomBar}>
-        <button className={styles.connectNowBtn} onClick={() => openKundliPopup(data)}>
+        <button
+          className={styles.connectNowBtn}
+          onClick={() => openKundliPopup(data)}
+        >
           Connect Now
         </button>
       </div>

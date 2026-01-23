@@ -35,7 +35,7 @@ const TopHeader = () => {
     return `₹${amount}`;
   };
   // formate amount for wallet end
-  
+
   const displayName = user ? `${user.firstName} ${user.lastName}` : "Guest";
 
   return (
@@ -72,14 +72,14 @@ const TopHeader = () => {
               Astrologers
             </NavLink>
 
-            <NavLink
+            {/* <NavLink
               to="/services"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
               Services
-            </NavLink>
+            </NavLink> */}
 
             <NavLink
               to="/aiwow"
@@ -97,6 +97,14 @@ const TopHeader = () => {
               }
             >
               Blogs
+            </NavLink>
+            <NavLink
+              to="/explore"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Explore
             </NavLink>
           </div>
 
@@ -136,15 +144,6 @@ const TopHeader = () => {
             >
               Horoscopes
             </NavLink>
-
-            <NavLink
-              to="/explore"
-              className={({ isActive }) =>
-                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-              }
-            >
-              Explore
-            </NavLink>
           </div>
         </nav>
       <div className={styles.headerActions}>
@@ -152,10 +151,7 @@ const TopHeader = () => {
           <div className={styles.coinIcon}></div>
           <span className={styles.walletAmount}>{formatAmount(1240)}</span>
         </div>
-        <div
-          className={styles.profileIcon}
-          onClick={handleProfileClick}
-        >
+        <div className={styles.profileIcon} onClick={handleProfileClick}>
           <User size={24} strokeWidth={0} fill="#d53400" />
         </div>
       </div>

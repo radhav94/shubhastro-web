@@ -3,7 +3,13 @@ import styles from "./Onboarding.module.scss";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 
-const BirthDetailsScreen = ({ onNext, onBack, onSkip, formData, updateFormData }) => {
+const BirthDetailsScreen = ({
+  onNext,
+  onBack,
+  onSkip,
+  formData,
+  updateFormData,
+}) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [localData, setLocalData] = useState({
     birthDate: formData.birthDate || "",
@@ -33,7 +39,9 @@ const BirthDetailsScreen = ({ onNext, onBack, onSkip, formData, updateFormData }
       </div>
 
       <div className={styles.content}>
-        <h1 className={styles.title}>Share the moment the stars welcomed you</h1>
+        <h1 className={styles.title}>
+          Share the moment the stars welcomed you
+        </h1>
 
         <div className={styles.formGroup}>
           <label>Birth Date</label>
@@ -41,7 +49,10 @@ const BirthDetailsScreen = ({ onNext, onBack, onSkip, formData, updateFormData }
             <input
               type="date"
               value={localData.birthDate}
-              onChange={(e) => setLocalData({ ...localData, birthDate: e.target.value })}
+              onClick={(e) => e.target.showPicker?.()}
+              onChange={(e) =>
+                setLocalData({ ...localData, birthDate: e.target.value })
+              }
               className={styles.input}
             />
             <Calendar className={styles.inputIcon} size={20} />
@@ -54,7 +65,10 @@ const BirthDetailsScreen = ({ onNext, onBack, onSkip, formData, updateFormData }
             <input
               type="time"
               value={localData.birthTime}
-              onChange={(e) => setLocalData({ ...localData, birthTime: e.target.value })}
+              onClick={(e) => e.target.showPicker?.()}
+              onChange={(e) =>
+                setLocalData({ ...localData, birthTime: e.target.value })
+              }
               className={styles.input}
               placeholder="Select here"
               disabled={localData.unknownBirthTime}
@@ -66,7 +80,10 @@ const BirthDetailsScreen = ({ onNext, onBack, onSkip, formData, updateFormData }
               type="checkbox"
               checked={localData.unknownBirthTime}
               onChange={(e) =>
-                setLocalData({ ...localData, unknownBirthTime: e.target.checked })
+                setLocalData({
+                  ...localData,
+                  unknownBirthTime: e.target.checked,
+                })
               }
             />
             Don't know the exact time of birth
@@ -78,7 +95,9 @@ const BirthDetailsScreen = ({ onNext, onBack, onSkip, formData, updateFormData }
           <div className={styles.inputWrapper}>
             <LocationSearch
               value={localData.birthPlace}
-              onChange={(e) => setLocalData({ ...localData, birthPlace: e.target.value })}
+              onChange={(e) =>
+                setLocalData({ ...localData, birthPlace: e.target.value })
+              }
               onPlaceSelect={(place) =>
                 setLocalData({
                   ...localData,

@@ -138,12 +138,6 @@ const Profile = () => {
   // Filter orders based on sub-tab
   const filteredOrders = orderHistoryTab === "call" ? callOrders : chatOrders;
 
-  console.log("Profile - orderHistoryTab:", orderHistoryTab);
-  console.log("Profile - callOrders:", callOrders);
-  console.log("Profile - chatOrders:", chatOrders);
-  console.log("Profile - filteredOrders:", filteredOrders);
-  console.log("Profile - chatHistoryData structure:", chatHistoryData);
-
   // Group orders by year
   const ordersByYear = filteredOrders.reduce((acc, order) => {
     if (!acc[order.year]) {
