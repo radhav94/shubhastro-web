@@ -6,7 +6,7 @@ import { useCall } from "../../../../context/CallContext";
 import { Toast } from "../../../../component";
 import { useCreateChatRoomMutation } from "../../../../redux/api/chatApi";
 
-export const useAstrologerConnection = () => {
+export const useAstrologerConnection = (externalAstroRef = null) => {
   const navigate = useNavigate();
   const [callRoomId, setCallRoomId] = useState(null);
   const [chatRoomId, setChatRoomId] = useState(null);
@@ -116,7 +116,8 @@ export const useAstrologerConnection = () => {
       setWaitingList(false);
       localStorage.removeItem("waitingState");
 
-      const astro = activeAstroRef.current;
+      // Use external ref if provided, otherwise use local ref
+      const astro = externalAstroRef?.current || activeAstroRef.current;
       const kundliId = localSelectedProfile?._id;
 
       try {
@@ -158,12 +159,28 @@ export const useAstrologerConnection = () => {
       token,
       type,
       remainingTime,
+      astrologerId,
+      chatRoomId: socketChatRoomId, // Check if socket already provides chatRoomId
+      ...rest
     }) => {
       resetCallFlow();
       localStorage.removeItem("waitingState");
 
-      const astro = activeAstroRef.current;
+      // Use external ref if provided, otherwise use local ref
+      const astro = externalAstroRef?.current || activeAstroRef.current;
       const kundliId = localSelectedProfile?._id;
+
+      console.log("🔍 Call Accepted - Full Socket Data:", {
+        roomId,
+        token,
+        type,
+        remainingTime,
+        astrologerId,
+        socketChatRoomId,
+        ...rest
+      });
+      console.log("External Ref:", externalAstroRef?.current);
+      console.log("Astro from ref:", astro);
 
       try {
         if (!astro) {
@@ -172,13 +189,44 @@ export const useAstrologerConnection = () => {
           return;
         }
 
-        const res = await createChatRoom({
-          userId: userIdLocal,
-          astrologerId: astro._id,
-        });
+        // Use astrologerId from socket response as primary, fallback to astro._id
+        const astroId = astrologerId || astro._id;
+        
+        if (!astroId) {
+          console.error("❌ Astrologer ID missing");
+          Toast.error("Astrologer ID missing");
+          return;
+        }
 
-        const chatRoomId = res?.data?.data;
-        if (!chatRoomId) throw new Error("Failed to create chat room");
+        let chatRoomId = socketChatRoomId; // Use from socket if provided
+
+        // Only create chat room if not provided by socket
+        if (!chatRoomId) {
+          console.log("Creating chat room with:", {
+            userId: userIdLocal,
+            astrologerId: astroId,
+          });
+
+          const res = await createChatRoom({
+            userId: userIdLocal,
+            astrologerId: astroId,
+          });
+
+          console.log("Chat room creation response:", res);
+
+          // Check if the response has an error
+          if (res?.error) {
+            console.error("API Error:", res.error);
+            // Don't throw, just log and continue - maybe the call can work without it
+            console.warn("Continuing without chat room creation");
+            chatRoomId = null;
+          } else {
+            chatRoomId = res?.data?.data;
+            console.log("✅ Chat room created:", chatRoomId);
+          }
+        } else {
+          console.log("✅ Using chat room from socket:", chatRoomId);
+        }
 
         setActiveCall({
           roomId,
@@ -188,14 +236,16 @@ export const useAstrologerConnection = () => {
           isUserSide: true,
           callType: type,
           userId: userIdLocal,
-          astrologerId: astro._id,
+          astrologerId: astroId,
           kundliId,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
         });
+        
+        console.log("✅ Active call set successfully");
       } catch (error) {
         console.error("Call accepted error:", error);
-        Toast.error("Failed to start call");
+        Toast.error(error.message || "Failed to start call");
       }
     };
 
