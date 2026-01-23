@@ -15,7 +15,7 @@
   -moz-osx-font-smoothing: grayscale;
   color: #000000;
   position: relative;
-  padding-top: 88px; /* Space for fixed TopHeader */
+  padding-top: 20px; /* Space for fixed TopHeader */
 }
 
 .horoscope-page-content {

@@ -6,7 +6,7 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+  z-index: 9999;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -19,7 +19,7 @@
   width: 100%;
   max-width: 500px;
   max-height: 80vh;
-  overflow-y: auto;
+  // overflow-y: auto;
   animation: slideUp 0.3s ease-out;
 }
 
@@ -57,7 +57,7 @@
 }
 
 .sheetTitle {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   margin-bottom: 24px;
   color: #000;
@@ -65,17 +65,18 @@
 
 .closeBtn {
   position: absolute;
-  top: 0;
+  top: -12px;
   right: 24px;
   background: transparent;
   border: none;
   font-size: 28px;
-  color: #666;
+  color: #000;
   cursor: pointer;
   padding: 0;
-  width: 32px;
-  height: 32px;
-  display: none;
+  width: 50px;
+  height: 50px;
+  background-color: #d435002b;
+  // display: none;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
@@ -83,7 +84,7 @@
 
   &:hover {
     background: #f0f0f0;
-    color: #333;
+    color: #747474;
   }
 }
 
@@ -93,6 +94,8 @@
   flex-direction: column;
   gap: 16px;
   margin-bottom: 24px;
+  height: 350px;
+  overflow: auto;
 }
 
 .profileItem {
@@ -180,7 +183,7 @@
 .continueBtn {
   width: 100%;
   padding: 16px;
-  background: #000;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: white;
   border: none;
   border-radius: 12px;
@@ -487,12 +490,12 @@
   }
 
   .sheetContent {
-    padding: 32px 40px 40px;
+    padding: 24px 40px 40px;
   }
 
   .sheetTitle {
-    font-size: 28px;
-    margin-bottom: 28px;
+    font-size: 20px;
+    // margin-bottom: 28px;
     font-weight: 700;
     color: #000;
   }
@@ -504,12 +507,7 @@
     font-size: 28px;
     width: 36px;
     height: 36px;
-    color: #888;
-
-    &:hover {
-      background: #f5f5f5;
-      color: #333;
-    }
+    // color: #888;
   }
 
   .sheetHandle {
