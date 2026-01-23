@@ -18,8 +18,7 @@ const SignatureAnalysis = () => {
       setSignatureImage(storedImage);
       performAnalysis(storedImage);
     } else {
-      // If no image, redirect back to instructions
-      Toast.error('No image found. Please capture or upload an image.');
+      // If no image, silently redirect back to instructions
       navigate('/aiwow/signature/instructions');
       return;
     }
@@ -58,28 +57,8 @@ const SignatureAnalysis = () => {
           navigate('/aiwow/signature/result');
         }, 1000);
       } else {
-        // Handle error - extract detailed error message
+        // Error already shown by Axios interceptor, just navigate back
         setProgress(0);
-        
-        let errorMessage = 'Analysis failed. Please try again.';
-        
-        if (result.error) {
-          if (typeof result.error === 'string') {
-            errorMessage = result.error;
-          } else if (result.error.message) {
-            errorMessage = result.error.message;
-            
-            // Add details if available
-            if (result.error.details?.detectedIssue) {
-              errorMessage += `\n\n${result.error.details.detectedIssue}`;
-            }
-            if (result.error.details?.expected) {
-              errorMessage += `\n\nExpected: ${result.error.details.expected}`;
-            }
-          }
-        }
-        
-        Toast.error(errorMessage);
         
         setTimeout(() => {
           navigate('/aiwow/signature/instructions');
@@ -87,7 +66,7 @@ const SignatureAnalysis = () => {
       }
     } catch (error) {
       console.error('Analysis error:', error);
-      Toast.error('An unexpected error occurred. Please try again.');
+      // Error already shown by Axios interceptor, just navigate back
       
       setTimeout(() => {
         navigate('/aiwow/signature/instructions');

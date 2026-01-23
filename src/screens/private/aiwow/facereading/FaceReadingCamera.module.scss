@@ -113,11 +113,11 @@
   }
 
   &.detected {
-    border-color: #F75801;
+    border-color: #22c55e; // Green when face detected
   }
 
   &.notDetected {
-    border-color: #ef4444;
+    border-color: #ef4444; // Red when no face detected
   }
 
   &[style*="top"][style*="left"] {

@@ -17,19 +17,43 @@ const ClothColorResult = () => {
     if (storedResult) {
       try {
         const parsedResult = JSON.parse(storedResult);
+        console.log('📦 Parsed result:', parsedResult);
+        
+        // Handle the actual API response structure
         const apiData = parsedResult.data || parsedResult;
         const formData = storedFormData ? JSON.parse(storedFormData) : {};
         
-        setResultData({
-          image: storedImage,
-          intention: formData.intention || apiData.intention,
-          analysisDate: apiData.analysisDate,
-          dominantPlanet: apiData.dominantPlanet,
-          recommendedColors: apiData.recommendedColors || [],
-          suggestedCombinations: apiData.suggestedCombinations || [],
-          wardrobeAnalysis: apiData.wardrobeAnalysis,
-          colorsToAvoid: apiData.colorsToAvoid || [],
-        });
+        // Check if we have the new API structure with detectedColors, aiConfidence, astrologicalMatches
+        if (apiData.detectedColors || apiData.astrologicalMatches) {
+          console.log('✅ Using new API structure');
+          setResultData({
+            image: storedImage,
+            intention: formData.intention || apiData.intention,
+            analysisDate: apiData.analysisDate,
+            dominantPlanet: apiData.dominantPlanet || apiData.astrologicalMatches?.dominantPlanet,
+            detectedColors: apiData.detectedColors || [],
+            aiConfidence: apiData.aiConfidence,
+            astrologicalMatches: apiData.astrologicalMatches || {},
+            // Map to old structure for backward compatibility
+            recommendedColors: apiData.recommendedColors || apiData.astrologicalMatches?.recommendedColors || [],
+            suggestedCombinations: apiData.suggestedCombinations || apiData.astrologicalMatches?.suggestedCombinations || [],
+            wardrobeAnalysis: apiData.wardrobeAnalysis || apiData.astrologicalMatches?.wardrobeAnalysis,
+            colorsToAvoid: apiData.colorsToAvoid || apiData.astrologicalMatches?.colorsToAvoid || [],
+          });
+        } else {
+          // Old structure
+          console.log('✅ Using old API structure');
+          setResultData({
+            image: storedImage,
+            intention: formData.intention || apiData.intention,
+            analysisDate: apiData.analysisDate,
+            dominantPlanet: apiData.dominantPlanet,
+            recommendedColors: apiData.recommendedColors || [],
+            suggestedCombinations: apiData.suggestedCombinations || [],
+            wardrobeAnalysis: apiData.wardrobeAnalysis,
+            colorsToAvoid: apiData.colorsToAvoid || [],
+          });
+        }
       } catch (error) {
         console.error('Error parsing result:', error);
         Toast.error('Failed to load analysis results');
@@ -70,17 +94,21 @@ const ClothColorResult = () => {
           <span className={styles.label}>Intention:</span>
           <span className={styles.value}>{getIntentionLabel(resultData.intention)}</span>
         </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Analysis Date:</span>
-          <span className={styles.value}>{resultData.analysisDate}</span>
-        </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Dominant Planet:</span>
-          <span className={styles.value}>{resultData.dominantPlanet}</span>
-        </div>
+        {resultData.analysisDate && (
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Analysis Date:</span>
+            <span className={styles.value}>{String(resultData.analysisDate)}</span>
+          </div>
+        )}
+        {resultData.dominantPlanet && (
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Dominant Planet:</span>
+            <span className={styles.value}>{String(resultData.dominantPlanet)}</span>
+          </div>
+        )}
       </div>
 
-      {resultData.recommendedColors && resultData.recommendedColors.length > 0 && (
+      {resultData.recommendedColors && Array.isArray(resultData.recommendedColors) && resultData.recommendedColors.length > 0 && (
         <div className={styles.colorsCard}>
           <h3 className={styles.cardTitle}>Recommended Colors</h3>
           {resultData.recommendedColors.map((color, index) => (
@@ -89,32 +117,38 @@ const ClothColorResult = () => {
                 <div className={styles.colorInfo}>
                   <div 
                     className={styles.colorSwatch} 
-                    style={{ backgroundColor: color.hexCode }}
+                    style={{ backgroundColor: color.hexCode || '#000' }}
                   ></div>
                   <div>
-                    <h4 className={styles.colorName}>{color.colorName}</h4>
-                    <span className={styles.colorType}>{color.type} • {color.planet}</span>
+                    <h4 className={styles.colorName}>{String(color.colorName || 'Unknown')}</h4>
+                    <span className={styles.colorType}>
+                      {color.type ? String(color.type) : ''}{color.type && color.planet ? ' • ' : ''}{color.planet ? String(color.planet) : ''}
+                    </span>
                   </div>
                 </div>
-                <span className={styles.hexCode}>{color.hexCode}</span>
+                <span className={styles.hexCode}>{String(color.hexCode || '')}</span>
               </div>
-              <p className={styles.colorDescription}>{color.description}</p>
+              {color.description && (
+                <p className={styles.colorDescription}>{String(color.description)}</p>
+              )}
               
-              {color.benefits && color.benefits.length > 0 && (
+              {color.benefits && Array.isArray(color.benefits) && color.benefits.length > 0 && (
                 <>
                   <h5 className={styles.subTitle}>Benefits</h5>
                   <ul className={styles.benefitsList}>
                     {color.benefits.map((benefit, idx) => (
-                      <li key={idx} className={styles.benefitItem}>{benefit}</li>
+                      <li key={idx} className={styles.benefitItem}>{String(benefit)}</li>
                     ))}
                   </ul>
                 </>
               )}
               
-              <div className={styles.whenToWear}>
-                <span className={styles.whenLabel}>When to Wear:</span>
-                <span className={styles.whenValue}>{color.whenToWear}</span>
-              </div>
+              {color.whenToWear && (
+                <div className={styles.whenToWear}>
+                  <span className={styles.whenLabel}>When to Wear:</span>
+                  <span className={styles.whenValue}>{String(color.whenToWear)}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -124,27 +158,33 @@ const ClothColorResult = () => {
 
   const renderCombinations = () => (
     <div className={styles.tabContent}>
-      {resultData.suggestedCombinations && resultData.suggestedCombinations.length > 0 && (
+      {resultData.suggestedCombinations && Array.isArray(resultData.suggestedCombinations) && resultData.suggestedCombinations.length > 0 && (
         <div className={styles.combinationsCard}>
           <h3 className={styles.cardTitle}>Suggested Color Combinations</h3>
           {resultData.suggestedCombinations.map((combo, index) => (
             <div key={index} className={styles.comboItem}>
-              <div className={styles.comboColors}>
-                {combo.colors.map((color, idx) => (
-                  <div key={idx} className={styles.comboColorBox}>
-                    <div 
-                      className={styles.comboSwatch} 
-                      style={{ backgroundColor: color.hexCode }}
-                    ></div>
-                    <span className={styles.comboColorName}>{color.colorName}</span>
-                  </div>
-                ))}
-              </div>
-              <p className={styles.comboDescription}>{combo.description}</p>
-              <div className={styles.comboOccasion}>
-                <span className={styles.occasionLabel}>Best For:</span>
-                <span className={styles.occasionValue}>{combo.occasion}</span>
-              </div>
+              {combo.colors && Array.isArray(combo.colors) && (
+                <div className={styles.comboColors}>
+                  {combo.colors.map((color, idx) => (
+                    <div key={idx} className={styles.comboColorBox}>
+                      <div 
+                        className={styles.comboSwatch} 
+                        style={{ backgroundColor: color.hexCode || '#000' }}
+                      ></div>
+                      <span className={styles.comboColorName}>{String(color.colorName || 'Unknown')}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {combo.description && (
+                <p className={styles.comboDescription}>{String(combo.description)}</p>
+              )}
+              {combo.occasion && (
+                <div className={styles.comboOccasion}>
+                  <span className={styles.occasionLabel}>Best For:</span>
+                  <span className={styles.occasionValue}>{String(combo.occasion)}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -153,7 +193,7 @@ const ClothColorResult = () => {
       {resultData.wardrobeAnalysis && (
         <div className={styles.wardrobeCard}>
           <h3 className={styles.cardTitle}>Wardrobe Analysis</h3>
-          <p className={styles.wardrobeText}>{resultData.wardrobeAnalysis}</p>
+          <p className={styles.wardrobeText}>{String(resultData.wardrobeAnalysis)}</p>
         </div>
       )}
     </div>
@@ -161,7 +201,7 @@ const ClothColorResult = () => {
 
   const renderAvoid = () => (
     <div className={styles.tabContent}>
-      {resultData.colorsToAvoid && resultData.colorsToAvoid.length > 0 && (
+      {resultData.colorsToAvoid && Array.isArray(resultData.colorsToAvoid) && resultData.colorsToAvoid.length > 0 ? (
         <div className={styles.avoidCard}>
           <h3 className={styles.cardTitle}>Colors to Avoid</h3>
           <p className={styles.avoidIntro}>
@@ -173,24 +213,33 @@ const ClothColorResult = () => {
                 <div className={styles.avoidColorInfo}>
                   <div 
                     className={styles.avoidSwatch} 
-                    style={{ backgroundColor: color.hexCode }}
+                    style={{ backgroundColor: color.hexCode || '#000' }}
                   ></div>
                   <div>
-                    <h4 className={styles.avoidColorName}>{color.colorName}</h4>
-                    <span className={styles.avoidHex}>{color.hexCode}</span>
+                    <h4 className={styles.avoidColorName}>{String(color.colorName || 'Unknown')}</h4>
+                    <span className={styles.avoidHex}>{String(color.hexCode || '')}</span>
                   </div>
                 </div>
               </div>
-              <div className={styles.avoidReason}>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={styles.warningIcon}>
-                  <path d="M8 1L1 14H15L8 1Z" stroke="#f59e0b" strokeWidth="1.5" fill="none"/>
-                  <path d="M8 6V9" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round"/>
-                  <circle cx="8" cy="11.5" r="0.5" fill="#f59e0b"/>
-                </svg>
-                <span className={styles.reasonText}>{color.reason}</span>
-              </div>
+              {color.reason && (
+                <div className={styles.avoidReason}>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={styles.warningIcon}>
+                    <path d="M8 1L1 14H15L8 1Z" stroke="#f59e0b" strokeWidth="1.5" fill="none"/>
+                    <path d="M8 6V9" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="8" cy="11.5" r="0.5" fill="#f59e0b"/>
+                  </svg>
+                  <span className={styles.reasonText}>{String(color.reason)}</span>
+                </div>
+              )}
             </div>
           ))}
+        </div>
+      ) : (
+        <div className={styles.avoidCard}>
+          <h3 className={styles.cardTitle}>Colors to Avoid</h3>
+          <p className={styles.avoidIntro}>
+            No specific colors to avoid for your intention today.
+          </p>
         </div>
       )}
     </div>
@@ -213,7 +262,7 @@ const ClothColorResult = () => {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
+        <button className={styles.backButton} onClick={() => navigate('/aiwow')}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>

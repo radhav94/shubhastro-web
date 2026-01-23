@@ -17,7 +17,7 @@ const ClothColorAnalysis = () => {
       setClothImage(storedImage);
       performAnalysis(storedImage);
     } else {
-      Toast.error('No image found. Please capture or upload an image.');
+      // No image found, silently redirect back
       navigate('/aiwow/cloth-color/instructions');
       return;
     }
@@ -56,16 +56,14 @@ const ClothColorAnalysis = () => {
         }, 1000);
       } else {
         setProgress(0);
-        Toast.error(result.error || 'Analysis failed. Please try again.');
-        
+        // Error already shown by Axios interceptor, just navigate back
         setTimeout(() => {
           navigate('/aiwow/cloth-color/instructions');
         }, 2000);
       }
     } catch (error) {
       console.error('Analysis error:', error);
-      Toast.error('An unexpected error occurred. Please try again.');
-      
+      // Error already shown by Axios interceptor, just navigate back
       setTimeout(() => {
         navigate('/aiwow/cloth-color/instructions');
       }, 2000);

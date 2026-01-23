@@ -312,11 +312,11 @@
   transition: border-color 0.3s ease;
 
   &.detected {
-    border-color: #10b981;
+    border-color: #22c55e; // Green when signature detected
   }
 
   &.notDetected {
-    border-color: #ef4444;
+    border-color: #ef4444; // Red when no signature detected
   }
 }
 

@@ -43,8 +43,7 @@ const GemstoneAnalysis = () => {
       setGemstoneImage(storedImage);
       performAnalysis(storedImage);
     } else {
-      // If no image, redirect back to instructions
-      Toast.error('No image found. Please capture or upload an image.');
+      // If no image, silently redirect back to instructions
       navigate('/aiwow/gemstone/instructions');
       return;
     }
