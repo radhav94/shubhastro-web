@@ -154,6 +154,8 @@ import LoveTriangleResultPage from "../../screens/private/v2/tarot/LoveTriangleR
 import Home from "../../screens/v2/home/Home";
 import ProfileV2 from "../../screens/v2/user/Profile";
 import Explore from "../../screens/private/explore/Explore";
+import AddProfile from "../../screens/v2/user/AddProfile";
+import EditProfile from "../../screens/v2/user/EditProfile";
 
 export const PATH = {
   // DEFAULT: {
@@ -915,5 +917,13 @@ export const PATH = {
       element: Explore,
       header: false,
     },
+    ADDPROFILE: {
+      path: "/profile/add",
+      element: AddProfile,
+    },
+    EDITPROFILE: {
+      path: "/profile/edit/:id",
+      element: EditProfile,
+    }
   },
 };

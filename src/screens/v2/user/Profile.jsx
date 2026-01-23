@@ -414,63 +414,69 @@ const Profile = () => {
                 <p>Loading profiles...</p>
               </div>
             ) : savedKundlis.length > 0 ? (
-              savedKundlis.map((kundli, index) => (
-                <div key={kundli._id} className={styles.profileCard}>
-                  <div className={styles.avatarCircle}>
-                    <span>{getInitials(kundli.name)}</span>
-                  </div>
-
-                  <div className={styles.profileCardContent}>
-                    <div className={styles.profileCardHeader}>
-                      <div className={styles.badge}>
-                        {index === 0 ? "Self" : kundli.relation || "Brother"}
-                      </div>
-                      <div className={styles.profileActions}>
-                        <button
-                          className={styles.iconButton}
-                          onClick={() =>
-                            navigate(`/edit-profile/${kundli._id}`)
-                          }
-                        >
-                          <LuPencilLine size={18} />
-                        </button>
-                        <button
-                          className={styles.iconButton}
-                          onClick={() => handleDeleteClick(kundli._id)}
-                          disabled={isDeletingKundli}
-                        >
-                          <TiUserDelete size={18} />
-                        </button>
-                      </div>
+              <>
+                {savedKundlis.map((kundli, index) => (
+                  <div key={kundli._id} className={styles.profileCard}>
+                    <div className={styles.avatarCircle}>
+                      <span>{getInitials(kundli.name)}</span>
                     </div>
 
-                    <h3 className={styles.profileCardName}>{kundli.name}</h3>
-                    <p className={styles.profileCardDate}>
-                      {dayjs(
-                        `${kundli.year}-${kundli.month}-${kundli.day}`,
-                      ).format("DD MMM YYYY")}{" "}
-                      • {String(kundli.hour).padStart(2, "0")}:
-                      {String(kundli.min).padStart(2, "0")} PM
-                    </p>
-                    <p className={styles.profileCardLocation}>{kundli.place}</p>
+                    <div className={styles.profileCardContent}>
+                      <div className={styles.profileCardHeader}>
+                        <div className={styles.badge}>
+                          {index === 0 ? "Self" : kundli.relation || "Brother"}
+                        </div>
+                        <div className={styles.profileActions}>
+                          <button
+                            className={styles.iconButton}
+                            onClick={() =>
+                              navigate(`/profile/edit/${kundli._id}`)
+                            }
+                          >
+                            <LuPencilLine size={18} />
+                          </button>
+                          <button
+                            className={styles.iconButton}
+                            onClick={() => handleDeleteClick(kundli._id)}
+                            disabled={isDeletingKundli}
+                          >
+                            <TiUserDelete size={18} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <h3 className={styles.profileCardName}>{kundli.name}</h3>
+                      <p className={styles.profileCardDate}>
+                        {dayjs(
+                          `${kundli.year}-${kundli.month}-${kundli.day}`,
+                        ).format("DD MMM YYYY")}{" "}
+                        • {String(kundli.hour).padStart(2, "0")}:
+                        {String(kundli.min).padStart(2, "0")} PM
+                      </p>
+                      <p className={styles.profileCardLocation}>{kundli.place}</p>
+                    </div>
                   </div>
-                </div>
-              ))
+                ))}
+                
+                {/* Add Profile Button - now part of the list */}
+                <button
+                  className={styles.addProfileButton}
+                  onClick={() => navigate("/profile/add")}
+                >
+                  Add Profile +
+                </button>
+              </>
             ) : (
               <div className={styles.emptyState}>
                 <p>No profiles found</p>
+                <button
+                  className={styles.addProfileButton}
+                  onClick={() => navigate("/profile/add")}
+                >
+                  Add Profile +
+                </button>
               </div>
             )}
-
-            {/* Sticky Add Profile Button */}
-            <div className={styles.stickyButtonContainer}>
-              <button
-                className={styles.addProfileButtonSticky}
-                onClick={() => navigate("/add-profile")}
-              >
-                Add Profile +
-              </button>
-            </div>
           </div>
         )}
 
@@ -554,6 +560,7 @@ const Profile = () => {
                             <button className={styles.rateButton}>
                               Rate Consultation
                             </button>
+                            <div className={styles.buttonSeparator}></div>
                             <button className={styles.consultAgainButton}>
                               Consult Again
                             </button>
