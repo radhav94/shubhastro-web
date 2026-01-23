@@ -1,14 +1,7 @@
-import {
-  ChevronLeft,
-  Upload,
-  Calendar,
-  Clock,
-  MapPin,
-  ChevronDown,
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import styles from "./EditProfile.module.css";
+import { ChevronLeft, Camera, Calendar, Clock, MapPin, ChevronDown } from 'lucide-react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import styles from './AddProfile.module.scss'
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -22,33 +15,6 @@ const EditProfile = () => {
     unknownBirthTime: false,
     placeOfBirth: "New Delhi, India",
   });
-
-  // Fetch kundli data
-  const { data: kundliData, isLoading } = useGetAllKundlisQuery(id, {
-    skip: !id,
-  })
-
-  // // Update mutation
-  // const [updateKundli, { isLoading: isUpdating }] = useUpdateKundliMutation()
-  const isUpdating = false;
-  // Populate form when data is loaded
-  useEffect(() => {
-    if (kundliData?.data) {
-      const kundli = kundliData.data
-      setFormData({
-        name: kundli.name || '',
-        gender: kundli.gender || 'female',
-        relation: kundli.relation || '',
-        birthDate: kundli.day && kundli.month && kundli.year 
-          ? `${String(kundli.day).padStart(2, '0')}/${String(kundli.month).padStart(2, '0')}/${kundli.year}`
-          : '',
-        birthTime: kundli.hour !== undefined && kundli.min !== undefined
-          ? `${String(kundli.hour).padStart(2, '0')}:${String(kundli.min).padStart(2, '0')}`
-          : '',
-        placeOfBirth: kundli.place || '',
-      })
-    }
-  }, [kundliData])
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -199,9 +165,8 @@ const EditProfile = () => {
         <button 
           className={styles.saveButton} 
           onClick={handleSubmit}
-          disabled={isUpdating}
         >
-          {isUpdating ? 'Saving...' : 'Save Profile'}
+          {'Save Profile'}
           <ChevronLeft size={20} style={{ transform: 'rotate(180deg)' }} />
         </button>
       </div>
