@@ -21,9 +21,11 @@ const SignatureCamera = () => {
   } = useObjectDetection({ videoRef, canvasRef: detectionCanvasRef, detectionType: 'signature' });
 
   useEffect(() => {
+    console.log('SignatureCamera mounted, starting camera');
     startCamera();
     
     return () => {
+      console.log('SignatureCamera unmounting, stopping camera');
       stopCamera();
     };
   }, [facingMode]);
@@ -94,8 +96,14 @@ const SignatureCamera = () => {
   };
 
   const switchCamera = () => {
+    // Stop current camera completely before switching
+    stopCamera();
+    
+    // Switch facing mode
     const nextMode = facingMode === 'user' ? 'environment' : 'user';
     setFacingMode(nextMode);
+    
+    // Start camera with new mode will be handled by useEffect
   };
 
   const captureImage = () => {
@@ -130,7 +138,30 @@ const SignatureCamera = () => {
   };
 
   const handleBack = () => {
-    stopCamera();
+    console.log('Back button clicked, stopping camera immediately');
+    
+    // Stop detection immediately
+    stopDetection();
+    
+    // Stop all video tracks immediately
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = videoRef.current.srcObject.getTracks();
+      tracks.forEach(track => {
+        console.log('Stopping track immediately:', track.kind);
+        track.stop();
+      });
+      videoRef.current.srcObject = null;
+    }
+    
+    // Stop stream state immediately
+    if (stream) {
+      stream.getTracks().forEach(track => {
+        track.stop();
+      });
+      setStream(null);
+    }
+    
+    // Navigate after stopping camera
     navigate(-1);
   };
 
