@@ -6,7 +6,7 @@
   width: min(720px, calc(100% - 24px));
   background: #fff;
   border-radius: 18px;
-  padding: 30px 20px 20px 88px;
+  padding: 30px 20px 20px 100px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
@@ -51,7 +51,7 @@
 .illustration {
   position: absolute;
   left: 20px;
-  bottom: 12px;
+  // bottom: 12px;
 
   img {
     width: 54px;
@@ -101,7 +101,7 @@
 /* Mobile */
 @media (max-width: 768px) {
   .wrapper {
-    padding: 18px 16px 18px 72px;
+    padding: 18px 16px 18px 90px;
     bottom: 60px;
   }
 

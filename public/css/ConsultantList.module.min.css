@@ -1,0 +1,1 @@
+.mainContainer{margin:0 1rem}.cardsContainer{display:grid;grid-template-columns:repeat(3, 1fr);gap:16px;margin:2rem}.cardWrapper{min-width:200px}@media(max-width: 1024px){.cardsContainer{grid-template-columns:repeat(2, 1fr)}}@media(max-width: 768px){.cardsContainer{grid-template-columns:1fr;overflow-x:auto;padding-bottom:8px}.cardWrapper{min-width:250px}}

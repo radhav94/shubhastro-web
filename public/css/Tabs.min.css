@@ -1,0 +1,1 @@
+.order-tabs{display:flex;gap:12px}.order-tabs__item{padding:10px 24px;border-radius:20px;border:none;background:#eee;cursor:pointer;font-weight:500}.order-tabs__item.active{background:#ffeb00}

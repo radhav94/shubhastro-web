@@ -1,0 +1,1 @@
+.breadCrumb{display:flex;justify-content:flex-start;align-items:center;gap:4px;padding:12px 24px;background:#fff;font-size:14px}.breadCrumb a{color:#666;text-decoration:none;transition:color .2s ease}.breadCrumb a:hover{color:#000}@media screen and (max-width: 772px){.breadCrumb{display:none}}

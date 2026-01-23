@@ -1,0 +1,1 @@
+.wrapper{display:flex;align-items:center;width:100%;position:relative;text-align:center}.wrapper::before,.wrapper::after{content:"";flex:1;height:var(--line‑height, 1px);background-color:var(--line‑color, #ccc);align-self:center}.image{width:60px;height:60px;border-radius:50%;border:1px solid gray;-o-object-fit:cover;object-fit:cover;display:block}

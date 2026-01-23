@@ -20,7 +20,7 @@
 .home {
   min-height: 100vh;
   // background: linear-gradient(180deg, #f5e6d3 0%, #fff9f0 50%, #ffffff 100%);
-  background: #fff;
+  // background: #fff;
   padding-bottom: 90px;
   padding-top: 15px;
   font-family:
@@ -777,7 +777,7 @@
 
   border-radius: 16px;
   border: 1px solid rgba(189, 189, 189, 0.40);
-  background: var(--card, #F5F5F5);
+  background: var(--card, #ffffff);
   padding: 18px 16px 0px;
   cursor: pointer;
 
@@ -818,7 +818,7 @@
   border-radius: 999px;
 
   // background: linear-gradient(135deg, #f4d19b 0%, #e8c589 100%);
-  background: #fff;
+  background: #f5f5f5;
   position: absolute;
   bottom: 18px;
   left: 50%;
@@ -1101,7 +1101,7 @@
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 4px;
+  padding: 4px 4px 20px 4px;
 }
 
 .astrologersGrid::-webkit-scrollbar {
@@ -1117,7 +1117,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   position: relative;
   @media screen and (width <= 767px) {
       min-width: 230px;
@@ -1360,7 +1360,7 @@
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 4px;
+  padding: 4px 4px 20px 4px;
 }
 
 .sessionsGrid::-webkit-scrollbar {
@@ -1681,7 +1681,8 @@
   border-radius: 20px;
   padding: 15px 15px;
   border: 1px solid rgba(189, 189, 189, 0.30);
-  background: var(--card, #F5F5F5);
+  background: var(--card, #ffffff);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
 }
 
 .panchangLeft,
@@ -2948,7 +2949,7 @@
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 4px;
+  padding: 4px 4px 20px 4px;
 }
 
 .blogsGrid::-webkit-scrollbar {

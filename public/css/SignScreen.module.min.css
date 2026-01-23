@@ -1,0 +1,1 @@
+.dailyContainer{max-width:1200px;margin:0 auto 1rem}.cardsContainer{display:grid;gap:20px;margin-top:24px;grid-template-columns:1fr}@media(min-width: 768px){.cardsContainer{grid-template-columns:repeat(2, 1fr)}}
