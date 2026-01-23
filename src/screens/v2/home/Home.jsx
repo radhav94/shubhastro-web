@@ -28,6 +28,7 @@ import { useChat } from "../../../context/ChatContext";
 import { useCall } from "../../../context/CallContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
 import { Toast } from "../../../component";
+import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 
 // Image imports
 import quickActionOne from "../../../assets/images/quick-action-1.svg";
@@ -59,22 +60,29 @@ const Home = () => {
   const [connectionType, setConnectionType] = useState(null); // 'chat', 'audio', 'video'
   const navigate = useNavigate();
   const carouselRef = useRef(null);
+  
+  // ✅ Ref for current astrologer (no re-render, persists across socket events)
+  const activeAstroRef = useRef(null);
 
   // Get contexts
   const { 
     waitingList: WaitingList, 
     setWaitingList, 
     resetChatFlow,
-    setActiveChatRoomId
+    setActiveChatRoomId,
+    setActiveChat,
+    setChatSeconds
   } = useChat();
   const { 
     waitingList: callWaitingList, 
     setWaitingList: setCallWaitingList,
     resetCallFlow,
-    setActiveCallRoomId
+    setActiveCallRoomId,
+    setActiveCall
   } = useCall();
 
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+  const [createChatRoom] = useCreateChatRoomMutation();
 
   // Use profile manager hook (same as Kundli page)
   const {
@@ -305,24 +313,49 @@ const Home = () => {
       }));
     };
 
-    const handleChatAccepted = async ({ roomId, astrologerId, ...data }) => {
+    const handleChatAccepted = async ({ roomId, astrologerId, userId, ...data }) => {
       console.log("✅ HOME: chat:accepted", { roomId, astrologerId });
       setWaitingList(false);
       
       // Clear localStorage
       localStorage.removeItem("waitingState");
       
-      // Navigate to chat page
-      navigate(`/chat-with-astrologers/${astrologerId}`, {
-        state: {
-          userId: userIdLocal,
-          astrologerId,
+      const astro = activeAstroRef.current; // ✅ Use ref instead of state
+      const kundliId = localSelectedProfile?._id;
+
+      try {
+        if (!roomId) throw new Error("Room ID missing");
+
+        setActiveChat({
           roomId,
+          chatRoomId: roomId,
+          callerName: astro?.firstName || "",
           isUserSide: true,
+          userId: userIdLocal,
+          astrologerId: astrologerId,
+          kundliId,
           astrologerName: data?.astrologer?.firstName || "",
-          astroID: data?.astrologer?.astrologer_ID,
-        },
-      });
+          remainingTime: data?.remainingTime,
+        });
+        setChatSeconds(Number(data?.remainingTime) * 60);
+
+        // Navigate to chat page
+        navigate(`/chat-with-astrologers/${astrologerId}`, {
+          state: {
+            userId: userIdLocal,
+            astrologerId,
+            fullName: astro?.firstName || "",
+            roomId,
+            isUserSide: true,
+            kundliId,
+            astrologerName: data?.astrologer?.firstName || "",
+            astroID: data?.astrologer?.astrologer_ID,
+          },
+        });
+      } catch (e) {
+        console.error("Chat accepted error:", e);
+        Toast.error("Failed to start chat");
+      }
     };
 
     const handleCallAccepted = async ({ roomId, token, type, remainingTime }) => {
@@ -331,7 +364,42 @@ const Home = () => {
       
       // Clear localStorage
       localStorage.removeItem("waitingState");
-      // Call will be handled by the call component
+      
+      const astro = activeAstroRef.current; // ✅ Use ref instead of state
+      const kundliId = localSelectedProfile?._id;
+
+      try {
+        if (!astro) {
+          console.error("❌ Astrologer data missing in ref");
+          Toast.error("Astrologer data missing");
+          return;
+        }
+
+        const res = await createChatRoom({
+          userId: userIdLocal,
+          astrologerId: astro._id,
+        });
+
+        const chatRoomId = res?.data?.data;
+        if (!chatRoomId) throw new Error("Failed to create chat room");
+
+        setActiveCall({
+          roomId,
+          chatRoomId,
+          agoraToken: token,
+          callerName: astro?.firstName || "",
+          isUserSide: true,
+          callType: type,
+          userId: userIdLocal,
+          astrologerId: astro._id,
+          kundliId,
+          astrologerID: astro?.astrologer_ID,
+          remainingTime
+        });
+      } catch (error) {
+        console.error("Call accepted error:", error);
+        Toast.error("Failed to start call");
+      }
     };
 
     const handleRejected = (data) => {
@@ -419,6 +487,7 @@ const Home = () => {
     }
     
     setSelectedAstrologer(astrologer);
+    activeAstroRef.current = astrologer; // ✅ Store in ref for socket events
     setIsConnectPopupOpen(true);
   };
 

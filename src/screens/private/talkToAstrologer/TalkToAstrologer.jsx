@@ -587,6 +587,7 @@ const TalkToAstrologer = () => {
                 onConnect={() => {
                   setSelectedAstrologer(astro);
                   setIsConnectPopupOpen(true);
+                  activeCallAstroRef.current = astro;
                 }}
               />
             ) : (
