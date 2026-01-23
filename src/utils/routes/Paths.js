@@ -222,9 +222,9 @@ export const PATH = {
 
     PROFILE: {
       path: "/profile",
-      element: Profile,
-      header: true,
-      footer: true
+      element: ProfileV2,
+      header: false,
+      footer: true,
     },
     TALK_TO_ASTROLOGER: {
       path: "/talk-to-astrologers",
