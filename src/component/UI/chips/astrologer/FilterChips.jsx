@@ -263,34 +263,40 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
     <>
       {/* SEARCH + FILTER BUTTONS */}
       <div className={styles.filterWrapper}>
-        <div>
-          <i className="fa fa-search" />
-          <input
-            className={`${styles.chip} ${active === "search" ? styles.activeChip : ""}`}
-            type="text"
-            placeholder="Search Name"
-            value={searchText}
-            onInput={handleSearchClick}
-          />
-        </div>
-
-        <button
-          key={"filter"}
-          className={`${styles.chip} ${active === "filter" ? styles.activeChip : ""}`}
-          onClick={() => setFilterModalOpen(true)}
-        >
-          Filter
-        </button>
-
-        {filterButtons.map((btn) => (
-          <div
-            key={btn.name}
-            className={`${styles.chip} ${active === btn.name ? styles.activeChip : ""}`}
-            onClick={() => handleClick(btn.name)}
-          >
-            <span>{btn.name}</span>
+        <div className={styles.inputFilter}>
+          <div>
+            <i className="fa fa-search" />
+            <input
+              className={`${styles.chip} ${active === "search" ? styles.activeChip : ""}`}
+              type="text"
+              placeholder="Search Name"
+              value={searchText}
+              onInput={handleSearchClick}
+            />
           </div>
-        ))}
+
+          <button
+            key={"filter"}
+            className={`${styles.chip} ${active === "filter" ? styles.activeChip : ""}`}
+            onClick={() => setFilterModalOpen(true)}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M3.6 1.39999H12.4C13.1333 1.39999 13.7333 1.99999 13.7333 2.73333V4.19999C13.7333 4.73333 13.4 5.39999 13.0667 5.73333L10.2 8.26666C9.8 8.59999 9.53333 9.26666 9.53333 9.79999V12.6667C9.53333 13.0667 9.26666 13.6 8.93333 13.8L8 14.4C7.13333 14.9333 5.93333 14.3333 5.93333 13.2667V9.73333C5.93333 9.26666 5.66666 8.66666 5.4 8.33333L2.86666 5.66666C2.53333 5.33333 2.26666 4.73333 2.26666 4.33333V2.79999C2.26666 1.99999 2.86666 1.39999 3.6 1.39999Z" stroke="white" stroke-width="1.2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M7.28667 1.39999L4 6.66666" stroke="white" stroke-width="1.2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg> Filter
+          </button>
+        </div>
+      <div className={styles.filterTabs}>
+          {filterButtons.map((btn) => (
+            <div
+              key={btn.name}
+              className={`${styles.chip} ${active === btn.name ? styles.activeChip : ""}`}
+              onClick={() => handleClick(btn.name)}
+            >
+              <span>{btn.name}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* FILTER MODAL */}

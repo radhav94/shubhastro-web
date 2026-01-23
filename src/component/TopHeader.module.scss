@@ -1,6 +1,20 @@
 /* TopHeader Component Styles */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
-
+@mixin line-clamp($lines: 3) {
+  @if $lines != null {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Ensures ellipsis is shown if needed */
+  } @else {
+    /* Fallback for cases where $lines is not specified, if necessary */
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    display: block;
+  }
+}
 .topHeader {
   display: flex;
   justify-content: space-between;
@@ -53,6 +67,7 @@
   font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
+  @include line-clamp(1);
 }
 
 .headerNavigation {

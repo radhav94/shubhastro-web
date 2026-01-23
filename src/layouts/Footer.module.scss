@@ -98,8 +98,17 @@ $font-primary: "Poppins", sans-serif;
 
 .footer_logo {
   width: 120px;
-  margin-bottom: 15px;
+  margin: 0 0 15px 0;
+  @media screen and (width <= 767px) {
+    margin: 0 auto 15px auto;
+  }
 }
+
+// .footer_column:nth-child(2),.footer_column:nth-child(3),.footer_column:nth-child(4){
+//   @media screen and (width <= 767px) {
+//     width: 50%;
+//   }
+// }
 
 .footer_tagline,
 .footer_column p {

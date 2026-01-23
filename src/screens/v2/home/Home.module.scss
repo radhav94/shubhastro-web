@@ -21,7 +21,7 @@
   min-height: 100vh;
   // background: linear-gradient(180deg, #f5e6d3 0%, #fff9f0 50%, #ffffff 100%);
   // background: #fff;
-  padding-bottom: 90px;
+  // padding-bottom: 90px;
   padding-top: 15px;
   font-family:
     "Poppins",
@@ -32,6 +32,7 @@
 
     @media screen and (width <= 767px) {
       padding-top: 0px;
+      padding-bottom: 0px;
     }
 }
 /* Header Styles */
@@ -319,6 +320,9 @@
   overflow: visible;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   transition:transform 0.2s, box-shadow 0.2s;
+  @media screen and (width <= 767px) {
+        border-radius: 18px;
+  }
 }
 
 .horoscopeCard {
@@ -480,6 +484,9 @@
   -ms-overflow-style: none;
   padding: 0 0 16px;
   flex-wrap: nowrap;
+  @media screen and (width <= 767px) {
+    gap: 12px;
+  }
 }
 
 .carouselContainer::-webkit-scrollbar {
@@ -665,7 +672,7 @@
   }
 
   .slideTitle {
-    font-size: 32px;
+    font-size: 22px;
   }
 
   .slideSubtitle {
@@ -684,7 +691,7 @@
   }
 
   .slideTitle {
-    font-size: 36px;
+    font-size: 26px;
   }
 
   .slideSubtitle {
@@ -723,7 +730,7 @@
   }
 
   .slideTitle {
-    font-size: 22px;
+    font-size: 18px;
     line-height: 1.2;
   }
 
@@ -756,6 +763,9 @@
   gap: 14px;
   margin-bottom: 24px;
   // padding: 4px;
+  @media screen and (width <= 767px) {
+    gap: 10px;
+  }
 }
 
 .quickActions::-webkit-scrollbar {
@@ -848,9 +858,9 @@
   }
 
   .actionTitle {
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1.2;
-    padding: 0 30px;
+    padding: 0px 0px;
   }
 
   .actionMedia {
@@ -961,6 +971,7 @@
 @media (max-width: 480px) {
   .panditAISection {
     padding: 16px;
+    border-radius: 20px;
   }
 
   .panditAICard {
@@ -1059,11 +1070,17 @@
 /* Top Rated Astrologers Section */
 .astrologersSection {
   margin-bottom: 24px;
+  @media screen and (width <= 767px) {
+      margin-bottom: 12px;
+  }
 }
 
 .sectionHeader {
   text-align: center;
   margin-bottom: 24px;
+  @media screen and (width <= 767px) {
+      margin-bottom: 12px;
+  }
 }
 
 .sectionTitle {
@@ -1072,7 +1089,7 @@
   font-weight: 600;
   letter-spacing: 0.5px;
   color: #160115;
-  margin: 0 0 12px 0;
+  // margin: 0 0 12px 0;
 }
 
 .titleDivider {
@@ -1120,7 +1137,7 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   position: relative;
   @media screen and (width <= 767px) {
-      min-width: 230px;
+      min-width: 200px;
   }
 }
 
@@ -1135,8 +1152,8 @@
   align-items: center;
   justify-content: center;
   @media screen and (width <= 767px) {
-      width: 30vw;
-      height: 30vw;
+      width: 25vw;
+      height: 25vw;
   }
 }
 
@@ -1155,6 +1172,9 @@
   border-radius: 20px;
   margin-bottom: 12px;
   width: fit-content;
+  @media screen and (width <= 767px) {
+      margin-bottom: 6px;
+  }
 }
 
 .star {
@@ -1176,6 +1196,10 @@
   margin: 0 0 10px 0;
   text-align: center;
   @include line-clamp(1);
+  @media screen and (width <= 767px) {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
 }
 
 .experienceRow {
@@ -1183,6 +1207,9 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 20px;
+  @media screen and (width <= 767px) {
+    margin-bottom: 8px;
+  }
 }
 
 .bookIcon {
@@ -1295,6 +1322,9 @@
   justify-content: space-between;
   margin-bottom: 24px;
   gap: 16px;
+  @media screen and (width <= 767px){
+    margin-bottom: 12px;
+  }
 }
 
 .sessionsHeaderLeft {
@@ -1310,7 +1340,7 @@
   font-weight: 700;
   letter-spacing: 0.5px;
   color: #2c2c2c;
-  margin: 0 0 12px 0;
+  // margin: 0 0 12px 0;
   text-align: left;
 }
 
@@ -1541,7 +1571,7 @@
   align-items: center;
   position: relative;
   overflow: hidden;
-  min-height: 220px;
+  // min-height: 220px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
@@ -1637,7 +1667,7 @@
 
 .panchangTab {
   flex: 1;
-  padding: 12px 12px;
+  padding: 12px 24px;
   border: 2px solid #e5e5e5;
   border-radius: 50px;
   background: #ffffff;
@@ -1647,6 +1677,9 @@
   color: #101010;
   cursor: pointer;
   transition: all 0.2s;
+  @media screen and (width <= 767px) {
+    padding: 6px 12px;
+  }
 }
 
 .panchangTab.active,.panchangTab:hover {
@@ -1678,6 +1711,7 @@
 
 .timingsCard {
   flex: 1;
+  width: 50%;
   border-radius: 20px;
   padding: 15px 15px;
   border: 1px solid rgba(189, 189, 189, 0.30);
@@ -1798,7 +1832,7 @@
 
   .cosmicInsightCard {
     padding: 20px 18px;
-    min-height: 200px;
+    // min-height: 200px;
   }
 
   .cosmicContent {
@@ -2163,7 +2197,7 @@
   }
 
   .carouselContainer {
-    gap: 20px;
+    gap: 12px;
     padding: 0 20px 18px;
   }
 
@@ -2175,7 +2209,7 @@
   }
 
   .slideTitle {
-    font-size: 28px;
+    font-size: 22px;
   }
 
   .slideSubtitle {
@@ -2339,7 +2373,7 @@
 
   .cosmicInsightCard {
     padding: 32px 28px;
-    min-height: 240px;
+    // min-height: 240px;
     flex-direction: row;
   }
 
@@ -2414,7 +2448,7 @@
   }
 
   .slideTitle {
-    font-size: 32px;
+    font-size: 22px;
   }
 
   .slideSubtitle {
@@ -2500,7 +2534,7 @@
   /* Cosmic Insight - Desktop */
   .cosmicInsightCard {
     padding: 36px 32px;
-    min-height: 260px;
+    // min-height: 260px;
   }
 
   .cosmicTitle {
@@ -2547,7 +2581,7 @@
   }
 
   .slideTitle {
-    font-size: 32px;
+    font-size: 22px;
   }
 
   .slideSubtitle {
@@ -2621,7 +2655,7 @@
   }
 
   .slideTitle {
-    font-size: 36px;
+    font-size: 26px;
   }
 
   .slideSubtitle {
@@ -2707,7 +2741,7 @@
   /* Cosmic Insight - XL Desktop */
   .cosmicInsightCard {
     padding: 40px 36px;
-    min-height: 280px;
+    // min-height: 280px;
   }
 
   .cosmicTitle {
@@ -2721,7 +2755,7 @@
 
 /* Discover More Section - Fixed Grid Layout */
 .discoverSection {
-  margin-bottom: 24px;
+  margin-bottom: 40px;
 }
 
 .discoverHeader {
@@ -2771,7 +2805,7 @@
 
 .discoverCard {
   border-radius: 20px;
-  padding: 24px 20px;
+  padding: 24px 12px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -2801,6 +2835,7 @@
   position: absolute;
   z-index: 2;
   bottom: 20px;
+  width: calc(100% - 24px);
 }
 
 .discoverTitle {
@@ -2846,6 +2881,9 @@
   max-height: 100%;
   top: 0;
   right: 0;
+  @media screen and (width <= 767px) {
+    width: 80%;
+  }
 }
 
 .discoverCard:nth-child(4) .discoverImage {
@@ -2866,24 +2904,24 @@
 @media (max-width: 480px) {
   .discoverGrid {
     gap: 12px;
-    grid-auto-rows: 160px;
+    grid-auto-rows: 130px;
   }
 
-  .discoverCard {
-    padding: 20px 16px;
-  }
+  // .discoverCard {
+  //   padding: 20px 16px;
+  // }
 
   .discoverTitle {
-    font-size: 20px;
+    font-size: 16px;
   }
 
   .discoverText {
     font-size: 13px;
-    max-width: 65%;
+    max-width: 100%;
   }
 
   .discoverImage {
-    width: 45%;
+    width: 80%;
     max-height: 65%;
   }
 }
@@ -2899,6 +2937,9 @@
   justify-content: space-between;
   margin-bottom: 24px;
   gap: 16px;
+  @media screen and (width <= 767px){
+    margin-bottom: 12px;
+  }
 }
 
 .blogsHeaderLeft {
@@ -2914,7 +2955,7 @@
   font-weight: 700;
   letter-spacing: 0.5px;
   color: #2c2c2c;
-  margin: 0 0 12px 0;
+  // margin: 0 0 12px 0;
   text-align: left;
 }
 
@@ -2976,7 +3017,7 @@
 
 .blogImageWrapper {
   width: 100%;
-  height: 240px;
+  height: 210px;
   overflow: hidden;
   background: #f5f5f5;
 }
@@ -2994,11 +3035,12 @@
 
 .blogTitle {
   font-family: "Poppins", sans-serif;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0 0 10px 0;
   line-height: 1.3;
+  @include line-clamp(2);
 }
 
 .blogDate {
@@ -3016,7 +3058,8 @@
   }
 
   .blogsHeader .titleDivider {
-    max-width: 240px;
+    max-width: auto;
+    width: auto;
   }
 
   .blogCard {
@@ -3025,11 +3068,11 @@
   }
 
   .blogImageWrapper {
-    height: 220px;
+    height: 170px;
   }
 
   .blogTitle {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .blogDate {
@@ -3056,12 +3099,12 @@
     min-width: 320px;
   }
 
-  .blogImageWrapper {
-    height: 260px;
-  }
+  // .blogImageWrapper {
+  //   height: 260px;
+  // }
 
   .blogTitle {
-    font-size: 22px;
+    font-size: 16px;
   }
 
   .blogContent {
@@ -3084,7 +3127,7 @@
     min-width: 340px;
   }
 
-  .blogImageWrapper {
-    height: 280px;
-  }
+  // .blogImageWrapper {
+  //   height: 280px;
+  // }
 }

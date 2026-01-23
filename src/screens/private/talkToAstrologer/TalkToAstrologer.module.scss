@@ -21,6 +21,9 @@
   @media (max-width: 768px) {
     margin-bottom: 1rem;
   }
+  @media (max-width: 767px) {
+    display: none;
+  }
 }
 
 .pageTitle {
@@ -46,11 +49,11 @@
 
 .sectionDivider {
   text-align: center;
-  margin: 2.5rem 0 2rem 0;
+  margin: 1rem 0 1.5rem 0;
 
-  @media (max-width: 768px) {
-    margin: 2rem 0 1.5rem 0;
-  }
+  // @media (max-width: 768px) {
+  //   margin: 2rem 0 1.5rem 0;
+  // }
 }
 
 .sectionTitle {
@@ -72,13 +75,21 @@
   justify-content: center;
   gap: 1rem;
   
-  &::before,
-  &::after {
-    content: "";
-    flex: 1;
-    max-width: 100px;
-    height: 1px;
-    background: linear-gradient(135deg, #f75801 0%, #d43400 100%);
+  // &::before,
+  // &::after {
+  //   content: "";
+  //   flex: 1;
+  //   max-width: 100px;
+  //   height: 1px;
+  //   background: linear-gradient(135deg, #f75801 0%, #d43400 100%);
+  // }
+}
+
+.dividerContainer{
+  display: flex;
+  justify-content: center;
+  span{
+    margin-left: 5px;
   }
 }
 

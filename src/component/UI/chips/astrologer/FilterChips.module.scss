@@ -2,11 +2,16 @@
 
 .filterWrapper {
   display: flex;
+  flex-direction: row;
   gap: 12px;
   overflow-x: auto;
-  padding: 12px 0;
+  // padding: 12px 0;
   scrollbar-width: none;
   font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+   @media (max-width: 767px) {
+      flex-direction: column;
+  }
 
   &::-webkit-scrollbar {
     display: none;
@@ -26,7 +31,7 @@
     }
 
     input {
-      padding-left: 38px;
+      padding-left: 12px;
       min-width: 200px;
 
       @media (max-width: 768px) {
@@ -35,7 +40,27 @@
     }
   }
 }
-
+.inputFilter{
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  > div{
+    width: 100%;
+    input{
+      width: 100%;
+      max-width: 100%;
+    }
+  }
+  button.chip{
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+    color: #fff;
+  }
+}
+.filterTabs{
+  display: flex;
+  gap: 12px;
+  overflow: auto;
+}
 .chip {
   display: flex;
   align-items: center;

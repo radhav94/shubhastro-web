@@ -3,6 +3,10 @@
   min-height: 100vh;
   padding-bottom: 80px;
   position: relative;
+  margin-top: 80px;
+  @media screen and (width <= 767px) {
+    margin-top: 70px;
+  }
 }
 
 /* HERO */
@@ -182,6 +186,7 @@
   background: #F3F3F3;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(10px);
+  margin-top: 100px;
 }
 
 /* MOBILE PROFILE BAR */
@@ -591,9 +596,9 @@
 
 /* DESKTOP STYLES */
 @media (min-width: 769px) {
-  .page {
-    padding-bottom: 40px;
-  }
+  // .page {
+  //   padding-bottom: 40px;
+  // }
 
   /* Hide Mobile Profile Bar on Desktop */
   .mobileProfileBar {
@@ -605,7 +610,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 20px 40px;
     background: #F3F3F3;

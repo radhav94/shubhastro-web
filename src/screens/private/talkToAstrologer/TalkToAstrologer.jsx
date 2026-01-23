@@ -573,8 +573,22 @@ const TalkToAstrologer = () => {
 
       <div className={styles.sectionDivider}>
         <h2 className={styles.sectionTitle}>TOP ASTROLOGERS FOR YOU</h2>
-        <div className={styles.dividerLine}>
-          <span className={styles.dividerDot}>☾</span>
+        <div className={styles.dividerContainer}>
+          <div className={styles.dividerLine}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="104" height="1" viewBox="0 0 104 1" fill="none">
+              <path d="M103.803 0.406393C103.803 0.630933 101.504 0.812789 98.669 0.812789C95.8336 0.812789 0 0.630933 0 0.406393C0 0.181853 95.8342 0 98.669 0C101.504 0 103.803 0.181853 103.803 0.406393Z" fill="#030303"/>
+            </svg>  
+          </div>
+          <span className={styles.dividerMoon}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 4 5" fill="none">
+              <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
+            </svg>
+          </span>
+          <div className={styles.dividerLine}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="104" height="1" viewBox="0 0 104 1" fill="none">
+              <path d="M-4.48009e-06 0.406393C-4.48009e-06 0.630933 2.29856 0.812789 5.13401 0.812789C7.96946 0.812789 103.803 0.630933 103.803 0.406393C103.803 0.181853 7.96885 0 5.13401 0C2.29856 0 -4.48009e-06 0.181853 -4.48009e-06 0.406393Z" fill="#030303"/>
+            </svg>
+          </div>
         </div>
       </div>
 
@@ -637,8 +651,22 @@ const TalkToAstrologer = () => {
             NOT SURE?<br />
             LET US MATCH YOU.
           </h2>
-          <div className={styles.dividerLine}>
-            <span className={styles.dividerDot}>☾</span>
+          <div className={styles.dividerContainer}>
+            <div className={styles.dividerLine}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="104" height="1" viewBox="0 0 104 1" fill="none">
+                <path d="M103.803 0.406393C103.803 0.630933 101.504 0.812789 98.669 0.812789C95.8336 0.812789 0 0.630933 0 0.406393C0 0.181853 95.8342 0 98.669 0C101.504 0 103.803 0.181853 103.803 0.406393Z" fill="#030303"/>
+              </svg>  
+            </div>
+            <span className={styles.dividerMoon}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 4 5" fill="none">
+                <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
+              </svg>
+            </span>
+            <div className={styles.dividerLine}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="104" height="1" viewBox="0 0 104 1" fill="none">
+                <path d="M-4.48009e-06 0.406393C-4.48009e-06 0.630933 2.29856 0.812789 5.13401 0.812789C7.96946 0.812789 103.803 0.630933 103.803 0.406393C103.803 0.181853 7.96885 0 5.13401 0C2.29856 0 -4.48009e-06 0.181853 -4.48009e-06 0.406393Z" fill="#030303"/>
+              </svg>
+            </div>
           </div>
 
           {isLoadingRecommended ? (

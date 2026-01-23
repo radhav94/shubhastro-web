@@ -24,7 +24,7 @@
 
 @media (max-width: 768px) {
   .horoscope-page {
-    padding-top: 76px; /* Adjust for mobile TopHeader height */
+    padding-top: 20px; /* Adjust for mobile TopHeader height */
   }
 }
 
@@ -111,7 +111,9 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  padding: 32px 0 24px;
+  padding: 0px 20px 24px;
+  background: antiquewhite;
+  border-radius: 12px;
 }
 
 .zodiac-info {
@@ -164,6 +166,7 @@
   height: 140px;
   object-fit: contain;
   flex-shrink: 0;
+  background-color: antiquewhite;
 }
 
 /* Time Tabs Section */
@@ -495,9 +498,9 @@
     padding: 0 24px 24px;
   }
 
-  .zodiac-display {
+  /* .zodiac-display {
     padding: 36px 0 28px;
-  }
+  } */
 
   .zodiac-name {
     font-size: 48px;
@@ -591,9 +594,9 @@
 }
 
 @media (max-width: 375px) {
-  .zodiac-display {
+  /* .zodiac-display {
     padding: 24px 0 20px;
-  }
+  } */
 
   .zodiac-name {
     font-size: 40px;
@@ -615,9 +618,9 @@
 }
 
 @media (max-width: 360px) {
-  .zodiac-display {
+  /* .zodiac-display {
     padding: 20px 0 16px;
-  }
+  } */
 
   .zodiac-name {
     font-size: 36px;
@@ -747,7 +750,7 @@
 
   /* Desktop Zodiac Display */
   .zodiac-display {
-    padding: 40px 0 32px;
+    /* padding: 40px 0 32px; */
     gap: 24px;
   }
 
@@ -944,9 +947,9 @@
     padding: 0 40px 40px;
   }
 
-  .zodiac-display {
+  /* .zodiac-display {
     padding: 48px 0 40px;
-  }
+  } */
 
   .zodiac-name {
     font-size: 64px;
