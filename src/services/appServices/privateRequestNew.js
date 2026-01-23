@@ -78,12 +78,16 @@ export const privateRequestNew = createApi({
       baseUrl: `${BASE_URL}/api/`,
       prepareHeaders: (headers) => {
         const role = localStorage.getItem("shubhtalk_role");
-        const token =
-          role === "ASTROLOGER"
-            ? localStorage.getItem("shubhtalk_astro_token")
-            : localStorage.getItem("shubhtalk_customer_token");
+        let token = null;
 
-        headers.set("Content-Type", "application/json");
+        if (role === "ASTROLOGER") {
+          token = localStorage.getItem("shubhtalk_astro_token");
+        } else if (role === "CUSTOMER") {
+          token = localStorage.getItem("shubhtalk_customer_token");
+        }
+
+        // ✅ Backend REQUIRES this
+        headers.set("Content-Type", "text/plain");
 
         if (token) {
           headers.set("Authorization", `Bearer ${token}`);

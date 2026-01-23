@@ -51,8 +51,13 @@ export const useAstrologerConnect = () => {
 
   // Chat handler
   const handleChatStart = useCallback(async (astro) => {
+    console.log("🚀 Chat Start - Astrologer:", astro);
     setSelectedAstrologer(astro);
     setLastRequestedAstro(astro);
+    activeCallAstroRef.current = astro; // Store in ref immediately
+    setCallType(null); // Reset call type for chat
+    console.log("📝 Stored in activeCallAstroRef:", activeCallAstroRef.current);
+    console.log("💬 Call type reset to null for chat");
 
     // Check balance
     const result = await getBalance({ astrologerId: astro?._id });
@@ -74,8 +79,12 @@ export const useAstrologerConnect = () => {
 
   // Call handler
   const handleCallStart = useCallback(async (astro, type) => {
+    console.log("📞 Call Start - Astrologer:", astro);
+    console.log("📞 Call Type:", type);
     setSelectedAstrologer(astro);
     setLastRequestedCallAstro(astro);
+    activeCallAstroRef.current = astro; // Store in ref immediately
+    console.log("📝 Stored in activeCallAstroRef:", activeCallAstroRef.current);
 
     // Check balance
     const result = await getBalance({ astrologerId: astro?._id, type: "call" });
@@ -117,6 +126,8 @@ export const useAstrologerConnect = () => {
 
       activeCallAstroRef.current = astro;
 
+      console.log("🎯 Initiating connection - Call Type:", callType);
+
       // If call type exists, initiate call, otherwise chat
       if (callType) {
         // Initiate call
@@ -124,17 +135,20 @@ export const useAstrologerConnect = () => {
           return Toast.error("You are already on a call");
         }
 
+        console.log("📞 Emitting call:initiate with type:", callType);
         setLastCallType(callType);
-        // Don't set waiting state here - let socket event handle it
 
         voiceSocket.emit("call:initiate", {
           userId: userIdLocal,
           astrologerId: astro._id,
           type: callType,
         });
+        
+        // Reset call type after emitting
+        setCallType(null);
       } else {
         // Initiate chat
-        // Don't set waiting state here - let socket event handle it
+        console.log("💬 Emitting chat:initiate");
         voiceSocket.emit("chat:initiate", {
           userId: userIdLocal,
           astrologerId: astro._id,

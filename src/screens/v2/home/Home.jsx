@@ -45,37 +45,21 @@ const Home = () => {
 
     // Use profile manager hook
     const {
-        selectedProfile,
         profiles,
-        profilesLoading,
         isCreating,
-        showSelectProfile,
         showAddProfile,
         showEditProfile,
         formData,
         editFormData,
-        setShowSelectProfile,
         setShowAddProfile,
         setShowEditProfile,
         setFormData,
         setEditFormData,
         handleAddProfile,
-        handleEditProfile,
         handleSubmitProfile,
         handleSubmitEditProfile,
         formatProfileDisplay,
     } = useProfileManager();
-
-    // Use astrologer connection hook
-    const {
-        WaitingList,
-        callWaitingList,
-        connectionType,
-        localSelectedProfile,
-        setLocalSelectedProfile,
-        resetCallState,
-        setSelectedAstrologer: setAstrologerRef,
-    } = useAstrologerConnection();
 
     // Use the astrologer connect hook
     const {
@@ -84,7 +68,20 @@ const Home = () => {
         handleAfterKundliSelect: hookHandleAfterKundliSelect,
         openModal: hookOpenModal,
         setOpenModal: hookSetOpenModal,
+        selectedAstrologer: hookSelectedAstrologer,
+        activeCallAstroRef,
     } = useAstrologerConnect();
+
+    // Use astrologer connection hook (pass the ref from useAstrologerConnect)
+    const {
+        WaitingList,
+        callWaitingList,
+        connectionType,
+        localSelectedProfile,
+        setLocalSelectedProfile,
+        resetCallState,
+        setSelectedAstrologer: setAstrologerRef,
+    } = useAstrologerConnection(activeCallAstroRef);
 
     // Handler for profile selection
     const handleProfileSelect = (profile) => {
@@ -159,34 +156,39 @@ const Home = () => {
             {/* Connect Astrologer Popup */}
             {isConnectPopupOpen && selectedAstrologer && (
                 <ConnectAstrologerPopup
+                    isOpen={isConnectPopupOpen}
                     astrologer={selectedAstrologer}
                     onClose={handleClosePopup}
+                    onChatStart={handleChatStart}
+                    onCallStart={handleCallStart}
                 />
             )}
 
             {/* Profile Modals */}
             <ProfileModals
-                showSelectProfile={showSelectProfile}
+                showSelectProfile={hookOpenModal.kundli}
                 showAddProfile={showAddProfile}
                 showEditProfile={showEditProfile}
                 profiles={profiles}
-                profilesLoading={profilesLoading}
-                isCreating={isCreating}
+                selectedProfile={localSelectedProfile}
                 formData={formData}
                 editFormData={editFormData}
-                selectedProfile={localSelectedProfile}
-                setShowSelectProfile={setShowSelectProfile}
-                setShowAddProfile={setShowAddProfile}
-                setShowEditProfile={setShowEditProfile}
+                isCreating={isCreating}
+                onCloseSelect={() => {
+                    hookSetOpenModal((prev) => ({ ...prev, kundli: false }));
+                    setLocalSelectedProfile(null);
+                }}
+                onCloseAdd={() => setShowAddProfile(false)}
+                onCloseEdit={() => setShowEditProfile(false)}
+                onSelectProfile={handleProfileSelect}
+                onAddProfile={handleAddProfile}
+                onSubmitProfile={handleSubmitProfile}
+                onSubmitEditProfile={handleSubmitEditProfile}
                 setFormData={setFormData}
                 setEditFormData={setEditFormData}
-                handleAddProfile={handleAddProfile}
-                handleEditProfile={handleEditProfile}
-                handleSubmitProfile={handleSubmitProfile}
-                handleSubmitEditProfile={handleSubmitEditProfile}
                 formatProfileDisplay={formatProfileDisplay}
-                handleProfileSelect={handleProfileSelect}
-                handleContinue={handleContinueAfterKundliSelect}
+                showContinueButton={true}
+                onContinue={handleContinueAfterKundliSelect}
             />
 
             {/* Waiting Modal */}
