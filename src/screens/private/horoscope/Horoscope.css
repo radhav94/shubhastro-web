@@ -186,7 +186,7 @@
   border-bottom: 2px solid transparent;
   font-size: 15px;
   font-weight: 500;
-  color: #c0c0c0;
+  color: #2c1b0e;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -195,9 +195,9 @@
 }
 
 .time-tab.active {
-  color: #000000;
+  color: #F75801;
   font-weight: 700;
-  border-bottom-color: #000000;
+  border-bottom-color: #F75801;
 }
 
 /* Category Cards Section */
