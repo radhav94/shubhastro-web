@@ -895,7 +895,10 @@
   border-radius: 24px;
   padding: 20px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
-  margin-bottom: 24px;
+  margin-bottom: 40px;
+  @media (width <= 767px) {
+    margin-bottom: 24px;
+  }
 }
 
 .panditAICard {
@@ -2255,7 +2258,7 @@
   /* Pandit AI - Tablet */
   .panditAISection {
     padding: 24px;
-    margin-bottom: 32px;
+    // margin-bottom: 32px;
   }
 
   .panditAvatar {

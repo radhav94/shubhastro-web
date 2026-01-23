@@ -133,10 +133,10 @@
 .walletBadge::before {
   content: "";
   position: absolute;
-  top: -10px;
+  top: -17px;
   left: 28%;
   width: 22px;
-  height: 16px;
+  height: 22px;
   background: #fff;
   border-radius: 50%;
 }
@@ -144,10 +144,10 @@
 .walletBadge::after {
   content: "";
   position: absolute;
-  bottom: -10px;
+  bottom: -17px;
   left: 28%;
   width: 22px;
-  height: 16px;
+  height: 22px;
   background: #fff;
   border-radius: 50%;
 }
