@@ -1,7 +1,18 @@
 @use '../../../../assets/variables/variables' as *;
 
 .section {
-  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: #FFF5EC;
+  margin-bottom: 20px;
+  border-radius: 1rem;
+  @media screen and (width <= 767px) {
+    padding: 1rem 1.5rem;
+    background: #FFF5EC;
+    margin-bottom: 20px;
+    margin-left: -20px;
+    border-radius: 0rem;
+    width: calc(100% + 40px);
+  }
 }
 
 .sectionTitle {
@@ -76,8 +87,14 @@
   flex: 1;
   padding-right: 0.5rem;
 
-  @media (min-width: 768px) {
-    font-size: 1rem;
+  @media (max-width: 767px) {
+    font-size: 0.8rem;
+  }
+  @media (max-width: 390px) {
+    font-size: 0.7rem;
+  }
+  @media (max-width: 375px) {
+    font-size: 0.6rem;
   }
 }
 

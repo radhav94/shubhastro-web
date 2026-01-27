@@ -15,7 +15,7 @@
   -moz-osx-font-smoothing: grayscale;
   color: #000000;
   position: relative;
-  padding-top: 20px; /* Space for fixed TopHeader */
+  /* padding-top: 20px; */
 }
 
 .horoscope-page-content {
@@ -24,7 +24,7 @@
 
 @media (max-width: 768px) {
   .horoscope-page {
-    padding-top: 20px; /* Adjust for mobile TopHeader height */
+    padding-top: 0px; /* Adjust for mobile TopHeader height */
   }
 }
 
@@ -35,6 +35,10 @@
   padding: 16px;
   background: #ffffff;
   gap: 12px;
+  margin-bottom: 10px;
+  @media media and (width <= 767px) {
+
+  }
 }
 
 .back-button {
@@ -220,7 +224,7 @@
 }
 
 .category-card {
-  background: #e8e8e8;
+  background: #f7570112;
   border: none;
   border-radius: 10px;
   padding: 0;
@@ -231,7 +235,7 @@
 }
 
 .category-card.active {
-  background: #5a5a5a;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
 }
 
 .category-label {
@@ -462,7 +466,7 @@
 .select-zodiac-button {
   margin: 0 24px 24px;
   padding: 16px;
-  background: #000000;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: #ffffff;
   border: none;
   border-radius: 12px;
@@ -852,7 +856,7 @@
   /* Desktop Overview Sections */
   .overview-sections {
     gap: 32px;
-    max-width: 900px;
+    max-width: 100%;
   }
 
   .overview-section {
@@ -972,6 +976,6 @@
   .content-text,
   .lucky-details,
   .overview-sections {
-    max-width: 1000px;
+    max-width: 100%;
   }
 }

@@ -115,14 +115,9 @@
   width: 100%;
   padding: 10px;
   border-radius: 22px;
-  border: 1px solid #1fa971;
-  background: #fff;
-  color: #1fa971;
+  border: 1px solid #000;
+  background: #000;
+  color: #fff;
   font-weight: 600;
   cursor: pointer;
-
-  &:hover {
-    background: #1fa971;
-    color: #fff;
-  }
 }

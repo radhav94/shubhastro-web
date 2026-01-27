@@ -1,0 +1,427 @@
+.liveLanding {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 9999;
+}
+
+/* Header with Tabs */
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 10;
+
+  @media (min-width: 769px) {
+    padding: 24px 60px;
+    justify-content: flex-start;
+    gap: 60px;
+  }
+}
+
+.backButton {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  svg {
+    width: 32px;
+    height: 32px;
+    stroke: #fff;
+    stroke-width: 3;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  }
+
+  &:hover {
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  @media (min-width: 769px) {
+    position: static;
+    transform: none;
+    width: 36px;
+    height: 36px;
+
+    svg {
+      width: 36px;
+      height: 36px;
+    }
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+
+.tabs {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+
+  @media (min-width: 769px) {
+    gap: 48px;
+  }
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  padding: 10px 20px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+
+  &.active {
+    color: #fff;
+  }
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  @media (min-width: 769px) {
+    font-size: 22px;
+    padding: 12px 24px;
+  }
+}
+
+/* Content Area - Mobile: Vertical Scroll, Desktop: Horizontal Scroll */
+.content {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+
+  /* Hide scrollbar */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  scrollbar-width: none;
+}
+
+/* Insight Card - Full Screen on Mobile */
+.insightCard {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  overflow: hidden;
+}
+
+.cardBackground {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  filter: brightness(0.5);
+}
+
+/* Blue Border Effect */
+.cardBorder {
+  position: absolute;
+  inset: 0;
+  // border: 3px solid #0ea5e9;
+  border-radius: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Content Overlay */
+.cardContent {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 30px 20px;
+  
+  z-index: 3;
+}
+
+.textContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 120px;
+  max-width: 800px;
+}
+
+.cardTitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: #fff;
+  text-shadow: 
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000,
+    0 0 30px rgba(0, 0, 0, 1),
+    0 0 50px rgba(0, 0, 0, 0.95),
+    0 4px 20px rgba(0, 0, 0, 0.98),
+    0 2px 10px rgba(0, 0, 0, 0.95);
+  line-height: 1.2;
+}
+
+.cardDescription {
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0 0 20px rgba(0, 0, 0, 1),
+    0 0 35px rgba(0, 0, 0, 0.95),
+    0 3px 14px rgba(0, 0, 0, 0.95),
+    0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.ctaButton {
+  width: fit-content;
+  padding: 14px 32px;
+  background: transparent;
+  border: 2px solid #fff;
+  border-radius: 50px;
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-shadow: 
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0 0 15px rgba(0, 0, 0, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+  &:hover {
+    background: #fff;
+    color: #000;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+    text-shadow: none;
+  }
+}
+
+/* Action Buttons - Right Side */
+.actionButtons {
+  position: absolute;
+  right: 20px;
+  bottom: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  z-index: 4;
+}
+
+.actionBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  padding: 8px;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+  }
+
+  span {
+    font-family: "Poppins", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    position: absolute;
+    bottom: -20px;
+    white-space: nowrap;
+  }
+}
+
+/* Desktop - Horizontal Side-by-Side with Auto-scroll */
+@media (min-width: 769px) {
+  .content {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    gap: 0;
+    padding: 0;
+  }
+
+  .insightCard {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: none;
+    flex-shrink: 0;
+  }
+
+  .cardBorder {
+    border-radius: 0;
+  }
+
+  .cardContent {
+    padding: 60px 80px;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.95) 0%,
+      rgba(0, 0, 0, 0.7) 50%,
+      rgba(0, 0, 0, 0.3) 80%,
+      transparent 100%
+    );
+  }
+
+  .textContent {
+    max-width: 900px;
+    padding-bottom: 100px;
+    padding-top: 80px;
+  }
+
+  .cardTitle {
+    font-size: 48px;
+    margin-bottom: 24px;
+    text-shadow: 0 4px 16px rgba(0, 0, 0, 0.95), 0 2px 8px rgba(0, 0, 0, 0.9);
+  }
+
+  .cardDescription {
+    font-size: 20px;
+    line-height: 1.7;
+    margin-bottom: 32px;
+    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.95), 0 2px 6px rgba(0, 0, 0, 0.8);
+  }
+
+  .ctaButton {
+    padding: 16px 40px;
+    font-size: 18px;
+  }
+
+  .actionButtons {
+    bottom: 180px;
+    right: 60px;
+    gap: 28px;
+  }
+
+  .actionBtn {
+    width: 64px;
+    height: 64px;
+
+    svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    span {
+      font-size: 13px;
+    }
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .header {
+    padding: 15px;
+  }
+
+  .backButton {
+    left: 15px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .tabs {
+    gap: 20px;
+  }
+
+  .tab {
+    font-size: 16px;
+    padding: 8px 12px;
+  }
+
+  .cardTitle {
+    font-size: 26px;
+    margin-bottom: 12px;
+  }
+
+  .cardDescription {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .ctaButton {
+    padding: 12px 28px;
+    font-size: 15px;
+  }
+
+  .actionButtons {
+    bottom: 100px;
+    right: 15px;
+    gap: 20px;
+  }
+
+  .actionBtn {
+    width: 50px;
+    height: 50px;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    span {
+      font-size: 11px;
+    }
+  }
+}
