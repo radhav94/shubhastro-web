@@ -1,40 +1,24 @@
-import { use, useState } from "react";
+import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { PATH } from "../../../../utils/routes/Paths";
-import SectionHeader from "./SectionHeader";
 import SessionCard from "./SessionCard";
 import styles from "../Home.module.scss";
 import { useGetAllUserSessionQuery } from "../../../../redux/api/userSession/userSessionApi";
-import { getToken } from "../../../../utils/token";
 
 const MySessionsSection = () => {
+
   const [loadingCallAgain, setLoadingCallAgain] = useState(null);
   const navigate = useNavigate();
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
 
-  const token = getToken();
   const { data, isLoading } = useGetAllUserSessionQuery(undefined, {
-    skip: !token,
+    skip: !isLoggedIn,
   });
   const sessions = data?.data?.recentSessions || [];
 
-  // Mock data - replace with actual data from API
-  //   const sessions = [
-  //     {
-  //       id: 1,
-  //       name: "Dr. K Jagdish Rao",
-  //       date: "Oct 17, 2025",
-  //       time: "04:36 PM",
-  //       duration: "5 Min 30 Secs",
-  //     },
-  //     {
-  //       id: 2,
-  //       name: "Pandit Jagdish",
-  //       date: "Oct 15, 2025",
-  //       time: "02:15 PM",
-  //       duration: "8 Min 45 Secs",
-  //     },
-  //   ];
+
 
   const handleCallAgain = (sessionId) => {
     setLoadingCallAgain(sessionId);
@@ -42,6 +26,26 @@ const MySessionsSection = () => {
       //   navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path);
     }, 500);
   };
+
+  // Don't render the section if user is not logged in
+  if (!isLoggedIn) {
+    console.log("Hiding: Not logged in");
+    return null;
+  }
+
+  // Don't render while loading
+  if (isLoading) {
+    console.log("Hiding: Still loading");
+    return null;
+  }
+
+  // Don't render if there are no sessions
+  if (!sessions || sessions.length === 0) {
+    console.log("Hiding: No sessions");
+    return null;
+  }
+
+  console.log("Showing section with", sessions.length, "sessions");
 
   return (
     <section className={styles.sessionsSection}>
@@ -82,7 +86,10 @@ const MySessionsSection = () => {
             </div>
           </div>
         </div>
-        <button className={styles.viewAllLink}>
+        <button 
+          className={styles.viewAllLink}
+          onClick={() => navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)}
+        >
           View All <ChevronRight size={20} />
         </button>
       </div>

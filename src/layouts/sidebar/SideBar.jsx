@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import styles from "./SideBar.module.scss";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { FiX, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { PrimaryText } from "../../component";
 import { PATH } from "../../utils/routes/Paths";
 import { getUserFromStorage } from "../../utils/authStorage";
+import { logout } from "../../redux/auth/authSlice";
 
 const SideBar = ({ open, onClose }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [openIndex, setOpenIndex] = useState(null); // for accordion
   const user = getUserFromStorage();
 
@@ -22,6 +25,9 @@ const SideBar = ({ open, onClose }) => {
   );
 
   const handleLogout = () => {
+    // Dispatch Redux logout action
+    dispatch(logout());
+    
     const role = localStorage.getItem("shubhtalk_role");
 
     if (role === "ASTROLOGER") {
