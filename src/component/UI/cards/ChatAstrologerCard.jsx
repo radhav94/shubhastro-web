@@ -8,40 +8,45 @@ const ChatAstrologerCard = ({ data, onConnect }) => {
   const navigate = useNavigate();
   // Handle rating - use rating field or default to 4.5
   const rating = data?.rating || 4.5;
-  
+
   // Handle experience - convert to number if string
   const experience = parseInt(data?.experience) || 0;
-  
+
   // Handle expertise - format the snake_case to readable text
   const formatExpertise = (expertise) => {
     return expertise
-      ?.replace(/_/g, ' ')
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+      ?.replace(/_/g, " ")
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
   };
-  
+
   // Use expertise field instead of specialities
   const expertiseList = (data?.expertise || [])
     .slice(0, 3)
     .map(formatExpertise);
-  
+
   // Handle languages - extract languageName from objects or use strings
-  const languagesRaw = (data?.languagePreference || [])
-    .map(lang => typeof lang === 'object' ? lang.languageName : lang);
-  
+  const languagesRaw = (data?.languagePreference || []).map((lang) =>
+    typeof lang === "object" ? lang.languageName : lang,
+  );
+
   // Sort languages to show English first, then Hindi, then others
   const languages = languagesRaw
     .sort((a, b) => {
-      const order = { 'English': 0, 'Hindi': 1 };
+      const order = { English: 0, Hindi: 1 };
       const aOrder = order[a] !== undefined ? order[a] : 2;
       const bOrder = order[b] !== undefined ? order[b] : 2;
       return aOrder - bOrder;
     })
     .slice(0, 2);
-  
+
   // Handle image - try multiple possible fields
-  const imageUrl = data?.imageUrl || data?.aadharCardImgUrl || data?.panCardImgUrl || astrologerImage;
+  const imageUrl =
+    data?.imageUrl ||
+    data?.aadharCardImgUrl ||
+    data?.panCardImgUrl ||
+    astrologerImage;
 
   return (
     <div className={styles.card}>
@@ -49,6 +54,9 @@ const ChatAstrologerCard = ({ data, onConnect }) => {
         <img
           src={imageUrl}
           alt={`${data?.firstName} ${data?.lastName}`}
+          onClick={() =>
+            navigate(`/astrologer/${data?.astrologerId || data?._id}`)
+          }
           className={styles.astrologerImage}
           onError={(e) => {
             e.target.src = astrologerImage;
@@ -61,10 +69,12 @@ const ChatAstrologerCard = ({ data, onConnect }) => {
       </div>
 
       <div className={styles.infoSection}>
-        <h3 
+        <h3
           className={styles.name}
-          onClick={() => navigate(`/astrologer/${data?.astrologerId || data?._id}`)}
-          style={{ cursor: 'pointer' }}
+          onClick={() =>
+            navigate(`/astrologer/${data?.astrologerId || data?._id}`)
+          }
+          style={{ cursor: "pointer" }}
         >
           {data?.firstName} {data?.lastName}
         </h3>

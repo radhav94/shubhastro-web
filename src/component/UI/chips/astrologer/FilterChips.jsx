@@ -3,10 +3,16 @@ import styles from "./FilterChips.module.scss";
 import { useLazyFilterAstrologersQuery } from "../../../../redux/api/astrologer/astrologerApi";
 import { FaCheck } from "react-icons/fa";
 
-const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }) => {
+const FilterChips = ({
+  onSelect,
+  onApplyFilters,
+  isActiveType,
+  isOnlineFromURL,
+  selectedType = "All",
+}) => {
   const [triggerFilter, { isLoading }] = useLazyFilterAstrologersQuery();
 
-  const [active, setActive] = useState("All");
+  const [active, setActive] = useState(selectedType);
   const [searchText, setSearchText] = useState("");
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState([]);
@@ -21,6 +27,56 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
   const isFilterActiveRef = useRef(false);
 
   const [activeModalTab, setActiveModalTab] = useState("Skill");
+
+  // Refs for auto-scroll functionality
+  const filterTabsRef = useRef(null);
+  const chipRefs = useRef({});
+
+  // Auto-scroll to active chip when selectedType changes from parent
+  useEffect(() => {
+    if (
+      selectedType &&
+      selectedType !== "All" &&
+      chipRefs.current[selectedType]
+    ) {
+      const chipElement = chipRefs.current[selectedType];
+      const container = filterTabsRef.current;
+
+      if (chipElement && container) {
+        // Calculate scroll position to center the chip
+        const chipLeft = chipElement.offsetLeft;
+        const chipWidth = chipElement.offsetWidth;
+        const containerWidth = container.offsetWidth;
+        const scrollLeft = chipLeft - containerWidth / 2 + chipWidth / 2;
+
+        // Smooth scroll to the chip
+        container.scrollTo({
+          left: scrollLeft,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [selectedType]);
+
+  // Update active state when selectedType prop changes from parent (but not on every render)
+  useEffect(() => {
+    if (selectedType && selectedType !== "All") {
+      setActive(selectedType);
+      setEexperties(selectedType);
+      setPage(1);
+      pageRef.current = 1;
+      setHasMore(true);
+      isFilterActiveRef.current = true;
+
+      // Trigger the filter API call
+      applyFilters({
+        pageNo: 1,
+        experties: selectedType,
+        ignoreSearch: true,
+        append: false,
+      });
+    }
+  }, [selectedType]);
 
   const openFilterModal = () => {
     setFilterModalOpen(true);
@@ -72,7 +128,13 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
   // -------------------------
   useEffect(() => {
     const handleScroll = () => {
-      if (!isFilterActiveRef.current || loadingMoreRef.current || isLoading || !hasMore) return;
+      if (
+        !isFilterActiveRef.current ||
+        loadingMoreRef.current ||
+        isLoading ||
+        !hasMore
+      )
+        return;
 
       const scrollTop = window.scrollY;
       const windowHeight = window.innerHeight;
@@ -88,7 +150,8 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
   }, [hasMore, isLoading]);
 
   const loadMore = () => {
-    if (!hasMore || loadingMoreRef.current || !isFilterActiveRef.current) return;
+    if (!hasMore || loadingMoreRef.current || !isFilterActiveRef.current)
+      return;
 
     const nextPage = pageRef.current + 1;
     applyFilters({ pageNo: nextPage, append: true });
@@ -203,11 +266,12 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
     });
   };
 
-  const toggleValue = (value, setter, state) => setter(state === value ? "" : value);
+  const toggleValue = (value, setter, state) =>
+    setter(state === value ? "" : value);
 
   const toggleSkill = (skill) => {
     setSelectedSkills((prev) =>
-      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill],
     );
   };
 
@@ -251,6 +315,7 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
   // -------------------------
   // RENDER
   // -------------------------
+
   return (
     <>
       <div className={styles.filterWrapper}>
@@ -271,22 +336,47 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
             className={`${styles.chip} ${active === "filter" ? styles.activeChip : ""}`}
             onClick={() => setFilterModalOpen(true)}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M3.6 1.39999H12.4C13.1333 1.39999 13.7333 1.99999 13.7333 2.73333V4.19999C13.7333 4.73333 13.4 5.39999 13.0667 5.73333L10.2 8.26666C9.8 8.59999 9.53333 9.26666 9.53333 9.79999V12.6667C9.53333 13.0667 9.26666 13.6 8.93333 13.8L8 14.4C7.13333 14.9333 5.93333 14.3333 5.93333 13.2667V9.73333C5.93333 9.26666 5.66666 8.66666 5.4 8.33333L2.86666 5.66666C2.53333 5.33333 2.26666 4.73333 2.26666 4.33333V2.79999C2.26666 1.99999 2.86666 1.39999 3.6 1.39999Z" stroke="white" strokeWidth="1.2" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M7.28667 1.39999L4 6.66666" stroke="white" strokeWidth="1.2" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
-            </svg> Filter
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="M3.6 1.39999H12.4C13.1333 1.39999 13.7333 1.99999 13.7333 2.73333V4.19999C13.7333 4.73333 13.4 5.39999 13.0667 5.73333L10.2 8.26666C9.8 8.59999 9.53333 9.26666 9.53333 9.79999V12.6667C9.53333 13.0667 9.26666 13.6 8.93333 13.8L8 14.4C7.13333 14.9333 5.93333 14.3333 5.93333 13.2667V9.73333C5.93333 9.26666 5.66666 8.66666 5.4 8.33333L2.86666 5.66666C2.53333 5.33333 2.26666 4.73333 2.26666 4.33333V2.79999C2.26666 1.99999 2.86666 1.39999 3.6 1.39999Z"
+                stroke="white"
+                strokeWidth="1.2"
+                strokeMiterlimit="10"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M7.28667 1.39999L4 6.66666"
+                stroke="white"
+                strokeWidth="1.2"
+                strokeMiterlimit="10"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>{" "}
+            Filter
           </button>
         </div>
-        <div className={styles.filterTabs}>
-          {filterButtons.map((btn) => (
-            <div
-              key={btn.name}
-              className={`${styles.chip} ${active === btn.name ? styles.activeChip : ""}`}
-              onClick={() => handleClick(btn.name)}
-            >
-              <span>{btn.name}</span>
-            </div>
-          ))}
+        <div className={styles.filterTabs} ref={filterTabsRef}>
+          {filterButtons.map((btn) => {
+            const isActive = active === btn.name;
+            return (
+              <div
+                key={btn.name}
+                ref={(el) => (chipRefs.current[btn.name] = el)}
+                className={`${styles.chip} ${isActive ? styles.activeChip : ""}`}
+                onClick={() => handleClick(btn.name)}
+              >
+                <span>{btn.name}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -324,7 +414,9 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
                 {activeModalTab === "Skill" && (
                   <>
                     <div className={styles.contentHeader}>
-                      <span onClick={selectAll} className={styles.selectAll}>Select all</span>
+                      <span onClick={selectAll} className={styles.selectAll}>
+                        Select all
+                      </span>
                     </div>
                     <div className={styles.optionsList}>
                       {skills.map((skill) => {
@@ -335,8 +427,19 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
                             className={styles.option}
                             onClick={() => toggleSkill(skill)}
                           >
-                            <FaCheck className={isSelected ? styles.checkIcon : styles.checkIconInactive} size={14} />
-                            <span className={isSelected ? styles.selectedText : ""}>{skill}</span>
+                            <FaCheck
+                              className={
+                                isSelected
+                                  ? styles.checkIcon
+                                  : styles.checkIconInactive
+                              }
+                              size={14}
+                            />
+                            <span
+                              className={isSelected ? styles.selectedText : ""}
+                            >
+                              {skill}
+                            </span>
                           </div>
                         );
                       })}
@@ -352,10 +455,23 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
                         <div
                           key={g}
                           className={styles.option}
-                          onClick={() => toggleValue(g, setSelectedGender, selectedGender)}
+                          onClick={() =>
+                            toggleValue(g, setSelectedGender, selectedGender)
+                          }
                         >
-                          <FaCheck className={isSelected ? styles.checkIcon : styles.checkIconInactive} size={14} />
-                          <span className={isSelected ? styles.selectedText : ""}>{g}</span>
+                          <FaCheck
+                            className={
+                              isSelected
+                                ? styles.checkIcon
+                                : styles.checkIconInactive
+                            }
+                            size={14}
+                          />
+                          <span
+                            className={isSelected ? styles.selectedText : ""}
+                          >
+                            {g}
+                          </span>
                         </div>
                       );
                     })}
@@ -370,10 +486,23 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
                         <div
                           key={s}
                           className={styles.option}
-                          onClick={() => toggleValue(s, setSelectedSort, selectedSort)}
+                          onClick={() =>
+                            toggleValue(s, setSelectedSort, selectedSort)
+                          }
                         >
-                          <FaCheck className={isSelected ? styles.checkIcon : styles.checkIconInactive} size={14} />
-                          <span className={isSelected ? styles.selectedText : ""}>{s}</span>
+                          <FaCheck
+                            className={
+                              isSelected
+                                ? styles.checkIcon
+                                : styles.checkIconInactive
+                            }
+                            size={14}
+                          />
+                          <span
+                            className={isSelected ? styles.selectedText : ""}
+                          >
+                            {s}
+                          </span>
                         </div>
                       );
                     })}

@@ -57,6 +57,7 @@ const TalkToAstrologer = () => {
 
   const location = useLocation(); //  get current URL
   // const isChatMode = location.pathname === "/chat-with-astrologers";
+  console.log("location location", location);
   const currentPath = location.pathname.split("/").pop();
 
   const showCTA = useRecommendTrigger(120, resetTrigger);
@@ -604,10 +605,11 @@ const TalkToAstrologer = () => {
         isActiveType={activeType}
         onApplyFilters={handleApplyFilters}
         isOnlineFromURL={isOnlineFromURL}
+        selectedType={location.state?.selectedType}
       />
 
       {/* Top Astrologers Section - New Design */}
-      {topTenAstrologers.length > 0 && (
+      {/* {topTenAstrologers.length > 0 && (
         <>
           <div className={styles.sectionDivider}>
             <h2 className={styles.sectionTitle}>TOP ASTROLOGERS FOR YOU</h2>
@@ -671,7 +673,7 @@ const TalkToAstrologer = () => {
             ))}
           </div>
         </>
-      )}
+      )} */}
 
       {/* Explore Astrologers Section - Original Design */}
 
