@@ -112,8 +112,11 @@ const TopHeader = () => {
             <NavLink to="/aiwow" onClick={() => setIsDrawerOpen(false)}>AI WOW</NavLink>
             <NavLink to="/blogs" onClick={() => setIsDrawerOpen(false)}>Blogs</NavLink>
             <NavLink to="/explore" onClick={() => setIsDrawerOpen(false)}>Explore</NavLink>
+            <NavLink to={PATH.privateRoutes.KUNDLI.path} onClick={() => setIsDrawerOpen(false)}>Kundli</NavLink>
+            <NavLink to="/matchmaking" onClick={() => setIsDrawerOpen(false)}>Match Matching</NavLink>
             <NavLink to="/numerology" onClick={() => setIsDrawerOpen(false)}>Numerology</NavLink>
             <NavLink to="/horoscopes/daily-horoscope" onClick={() => setIsDrawerOpen(false)}>Horoscopes</NavLink>
+
           </div>
         </>
       )}

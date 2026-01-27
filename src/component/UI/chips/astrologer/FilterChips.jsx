@@ -6,7 +6,7 @@ import { FaCheck } from "react-icons/fa";
 const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }) => {
   const [triggerFilter, { isLoading }] = useLazyFilterAstrologersQuery();
 
-  const [active, setActive] = useState("All"); 
+  const [active, setActive] = useState("All");
   const [searchText, setSearchText] = useState("");
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState([]);
@@ -16,8 +16,9 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const loadingMoreRef = useRef(false); // ✅ track loading state in scroll
-  const pageRef = useRef(page); // ✅ track current page in scroll
+  const loadingMoreRef = useRef(false);
+  const pageRef = useRef(1);
+  const isFilterActiveRef = useRef(false);
 
   const [activeModalTab, setActiveModalTab] = useState("Skill");
 
@@ -67,11 +68,11 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
   const sorting = ["Sort By Price", "Sort By Rating"];
 
   // -------------------------
-  // SCROLL HANDLER
+  // SCROLL HANDLER - only when filter is active
   // -------------------------
   useEffect(() => {
     const handleScroll = () => {
-      if (loadingMoreRef.current || isLoading || !hasMore) return;
+      if (!isFilterActiveRef.current || loadingMoreRef.current || isLoading || !hasMore) return;
 
       const scrollTop = window.scrollY;
       const windowHeight = window.innerHeight;
@@ -87,7 +88,7 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
   }, [hasMore, isLoading]);
 
   const loadMore = () => {
-    if (!hasMore || loadingMoreRef.current) return;
+    if (!hasMore || loadingMoreRef.current || !isFilterActiveRef.current) return;
 
     const nextPage = pageRef.current + 1;
     applyFilters({ pageNo: nextPage, append: true });
@@ -113,6 +114,7 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
 
     try {
       loadingMoreRef.current = true;
+      isFilterActiveRef.current = true;
 
       const response = await triggerFilter({
         searchText: finalSearchText,
@@ -122,7 +124,7 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
         selectedGender,
         page: pageNo,
         limit: 9,
-        ...(isOnline && { isActive: true }), 
+        ...(isOnline && { isActive: true }),
         isActiveType,
       }).unwrap();
 
@@ -134,8 +136,8 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
       });
 
       setPage(pageNo);
-      pageRef.current = pageNo; // ✅ update ref for scroll
-      setHasMore(response?.data?.length >= 9);
+      pageRef.current = pageNo;
+      setHasMore((response?.data?.result || []).length >= 9);
       setFilterModalOpen(false);
     } catch (error) {
       console.error(error);
@@ -148,7 +150,7 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
   // URL-based Online default
   // -------------------------
   useEffect(() => {
-    if (active !== "All") return; // user already clicked filter
+    if (active !== "All") return;
     if (!isOnlineFromURL) return;
 
     setActive("Online");
@@ -159,6 +161,7 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
     setSelectedSkills([]);
     setSelectedGender("");
     setSelectedSort("");
+    isFilterActiveRef.current = true;
 
     applyFilters({
       pageNo: 1,
@@ -178,6 +181,7 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
     if (value.length > 2) {
       setActive("search");
       clearAll();
+      isFilterActiveRef.current = true;
       applyFilters({ searchValue: value, category: "search", pageNo: 1 });
     } else if (value.length === 0) {
       handleClick("All");
@@ -189,6 +193,7 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
     setPage(1);
     pageRef.current = 1;
     setHasMore(true);
+    isFilterActiveRef.current = true;
 
     applyFilters({
       ignoreSearch: true,
@@ -215,53 +220,39 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
   };
 
   const handleClick = (item) => {
-    // Set active chip
     setActive(item);
     setPage(1);
     pageRef.current = 1;
     setHasMore(true);
-  
-    // Reset filters
+
     setEexperties("");
     setSelectedSkills([]);
     setSelectedGender("");
     setSelectedSort("");
-  
+    setSearchText("");
+
     if (item === "All") {
-      // Only trigger onSelect callback, do NOT send isActive
+      isFilterActiveRef.current = false;
       onSelect?.(null);
-  
-      // Call API with minimal params for "All"
-      applyFilters({
-        pageNo: 1,
-        experties: null,
-        ignoreSearch: true,
-        append: false,
-      });
-  
-      return; // Stop here to prevent other triggers
+      return;
     }
-  
-    // For other chips, set experties and call API
+
     setEexperties(item);
-  
+    isFilterActiveRef.current = true;
+
     applyFilters({
       pageNo: 1,
       experties: item,
       ignoreSearch: true,
       append: false,
-      ...(item === "Online" ? { isActive: true } : {}), // Only send isActive for Online
     });
   };
-  
-  
 
   // -------------------------
   // RENDER
   // -------------------------
   return (
     <>
-      {/* SEARCH + FILTER BUTTONS */}
       <div className={styles.filterWrapper}>
         <div className={styles.inputFilter}>
           <div>
@@ -281,12 +272,12 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
             onClick={() => setFilterModalOpen(true)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M3.6 1.39999H12.4C13.1333 1.39999 13.7333 1.99999 13.7333 2.73333V4.19999C13.7333 4.73333 13.4 5.39999 13.0667 5.73333L10.2 8.26666C9.8 8.59999 9.53333 9.26666 9.53333 9.79999V12.6667C9.53333 13.0667 9.26666 13.6 8.93333 13.8L8 14.4C7.13333 14.9333 5.93333 14.3333 5.93333 13.2667V9.73333C5.93333 9.26666 5.66666 8.66666 5.4 8.33333L2.86666 5.66666C2.53333 5.33333 2.26666 4.73333 2.26666 4.33333V2.79999C2.26666 1.99999 2.86666 1.39999 3.6 1.39999Z" stroke="white" stroke-width="1.2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M7.28667 1.39999L4 6.66666" stroke="white" stroke-width="1.2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M3.6 1.39999H12.4C13.1333 1.39999 13.7333 1.99999 13.7333 2.73333V4.19999C13.7333 4.73333 13.4 5.39999 13.0667 5.73333L10.2 8.26666C9.8 8.59999 9.53333 9.26666 9.53333 9.79999V12.6667C9.53333 13.0667 9.26666 13.6 8.93333 13.8L8 14.4C7.13333 14.9333 5.93333 14.3333 5.93333 13.2667V9.73333C5.93333 9.26666 5.66666 8.66666 5.4 8.33333L2.86666 5.66666C2.53333 5.33333 2.26666 4.73333 2.26666 4.33333V2.79999C2.26666 1.99999 2.86666 1.39999 3.6 1.39999Z" stroke="white" strokeWidth="1.2" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M7.28667 1.39999L4 6.66666" stroke="white" strokeWidth="1.2" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
             </svg> Filter
           </button>
         </div>
-      <div className={styles.filterTabs}>
+        <div className={styles.filterTabs}>
           {filterButtons.map((btn) => (
             <div
               key={btn.name}
@@ -299,7 +290,6 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
         </div>
       </div>
 
-      {/* FILTER MODAL */}
       {filterModalOpen && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalSlide}>
@@ -309,7 +299,6 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
             </div>
 
             <div className={styles.modalBody}>
-              {/* LEFT SIDEBAR */}
               <div className={styles.leftSidebar}>
                 <div
                   className={`${styles.sidebarItem} ${activeModalTab === "Skill" ? styles.activeSidebarItem : ""}`}
@@ -331,7 +320,6 @@ const FilterChips = ({ onSelect, onApplyFilters, isActiveType, isOnlineFromURL }
                 </div>
               </div>
 
-              {/* RIGHT CONTENT */}
               <div className={styles.rightContent}>
                 {activeModalTab === "Skill" && (
                   <>

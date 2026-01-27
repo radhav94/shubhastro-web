@@ -8,7 +8,7 @@ import styles from "../Home.module.scss";
 import { useGetAllUserSessionQuery } from "../../../../redux/api/userSession/userSessionApi";
 import { getToken } from "../../../../utils/token";
 
-const MySessionsSection = () => {
+const MySessionsSection = ({ onConnectClick }) => {
   const [loadingCallAgain, setLoadingCallAgain] = useState(null);
   const navigate = useNavigate();
 
@@ -36,11 +36,24 @@ const MySessionsSection = () => {
   //     },
   //   ];
 
-  const handleCallAgain = (sessionId) => {
-    setLoadingCallAgain(sessionId);
-    setTimeout(() => {
-      //   navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path);
-    }, 500);
+  const handleCallAgain = (session) => {
+    if (onConnectClick) {
+      // If session has full astrologer object, use it
+      if (session.astrologer) {
+        onConnectClick(session.astrologer);
+      } else if (session.astrologerId || session.astrologerName) {
+        // Otherwise, construct astrologer object from session data
+        const astrologer = {
+          _id: session.astrologerId,
+          firstName: session.astrologerName?.split(' ')[0] || session.astrologerName || 'Astrologer',
+          lastName: session.astrologerName?.split(' ').slice(1).join(' ') || '',
+          imageUrl: session.astrologerImage,
+        };
+        onConnectClick(astrologer);
+      } else {
+        console.error('Session data missing astrologer information:', session);
+      }
+    }
   };
 
   return (
@@ -92,7 +105,7 @@ const MySessionsSection = () => {
           <SessionCard
             key={i}
             session={session}
-            onCallAgain={handleCallAgain}
+            onCallAgain={() => handleCallAgain(session)}
             isLoading={loadingCallAgain === session.id}
           />
         ))}

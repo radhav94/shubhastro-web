@@ -65,40 +65,35 @@
 
 .cardsContainer {
   width: 100%;
-  max-width: 600px;
-  height: 400px;
-  position: relative;
+  max-width: 100%;
+  min-height: 400px;
+  margin: 0 auto;
+  padding: 40px 20px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  cursor: grab;
-  touch-action: pan-y;
-  perspective: 1000px;
-}
-
-.cardsContainer:active {
-  cursor: grabbing;
+  align-items: center;
+  position: relative;
+  overflow: visible;
 }
 
 .card {
   position: absolute;
-  width: 200px;
-  height: 320px;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-origin: center center;
-  pointer-events: auto;
-  will-change: transform, opacity;
-}
-
-.activeCard {
+  width: 160px;
+  height: 256px;
   cursor: pointer;
-  pointer-events: auto;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease-out;
+  transform-origin: center center;
 }
 
-.card:not(.activeCard) {
-  pointer-events: none;
+.card:hover:not(.selectedCard) {
+  filter: brightness(1.1);
 }
+
+.selectedCard {
+  z-index: 100 !important;
+}
+
+/* Remove orange border - no visual change except lift */
 
 .cardBack {
   width: 100%;
@@ -177,4 +172,87 @@
     width: 160px;
     height: 256px;
   }
+}
+
+/* Selected card styles for multi-card readings */
+.selectedCard .cardBack {
+  border: 4px solid #ff6b35;
+  border-radius: 16px;
+  box-shadow: 0 0 30px rgba(255, 107, 53, 0.8), 0 15px 30px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes cardGlow {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(255, 107, 53, 0);
+  }
+  50% {
+    transform: scale(1.2);
+    box-shadow: 0 0 40px rgba(255, 107, 53, 1), 0 20px 40px rgba(0, 0, 0, 0.7);
+  }
+  100% {
+    transform: scale(1.15);
+    box-shadow: 0 0 30px rgba(255, 107, 53, 0.8), 0 15px 30px rgba(0, 0, 0, 0.6);
+  }
+}
+
+.selectedBadge {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  background: #ff6b35;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 20px;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  border: 3px solid white;
+  animation: badgePulse 0.5s ease-out;
+}
+
+@keyframes badgePulse {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Show Reading button for Love Triangle */
+.showReadingButton {
+  margin-top: 24px;
+  padding: 16px 48px;
+  background: #ff6b35;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.showReadingButton:hover:not(.disabled) {
+  background: #ff5722;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+}
+
+.showReadingButton.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
 }

@@ -3,9 +3,12 @@ import { useLazyGeoSearchQuery } from "../../redux/api/geoApi";
 import styles from "./locationSearch.module.scss";
 
 const LocationSearch = ({ value, onChange, onPlaceSelect }) => {
-  const [triggerGeoSearch, { data = [], isFetching }] = useLazyGeoSearchQuery();
+  const [triggerGeoSearch, { data, isFetching }] = useLazyGeoSearchQuery();
   const [open, setOpen] = useState(false);
   const selectionMade = useRef(false); // Track if a place is selected
+
+  // Ensure data is always an array
+  const results = Array.isArray(data) ? data : [];
 
   // Only call API when user types in input
   const handleInputChange = (e) => {
@@ -50,12 +53,12 @@ const LocationSearch = ({ value, onChange, onPlaceSelect }) => {
         <div className={styles.dropdown}>
           {isFetching && <div className={styles.loading}>Searching…</div>}
 
-          {!isFetching && data.length === 0 && (
+          {!isFetching && results.length === 0 && (
             <div className={styles.noResult}>No results</div>
           )}
 
           {!isFetching &&
-            data.map((item, index) => {
+            results.map((item, index) => {
               const displayName =
                 item.full_name && item.country && item.country_name
                   ? item.full_name.replace(new RegExp(`${item.country}$`), item.country_name)

@@ -30,7 +30,7 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
         {/* <p className={styles.sessionDuration}>Duration : {session.duration}</p> */}
         <button
           className={`${styles.callAgainBtn} ${isLoading ? styles.loading : ""}`}
-          onClick={() => onCallAgain(session.roomId)}
+          onClick={onCallAgain}
           disabled={isLoading}
         >
           Connect Now
