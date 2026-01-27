@@ -16,11 +16,8 @@ const Onboarding = () => {
   const [searchParams] = useSearchParams();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   
-  // Check if we should skip welcome screen (coming from header login button)
-  const skipWelcome = searchParams.get("skip") === "welcome";
-  const initialStep = skipWelcome ? 1 : 0; // Start at LoginScreen (step 1) if skip=welcome
-  
-  const [currentStep, setCurrentStep] = useState(initialStep);
+  // Start directly at LoginScreen (skip WelcomeScreen)
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     guidance: [],
     name: "",

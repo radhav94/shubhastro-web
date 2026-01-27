@@ -1,35 +1,101 @@
+import { useState, useEffect } from 'react'
 import ChevronLeft from '../components/ui/ChevronLeft'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useGetTarotCardDetailsQuery } from '../../../../redux/api/tarot/tarotApi'
+import { 
+  useGetTarotCardDetailsQuery,
+  useGetRomanticBreakupQuery,
+  useGetBusinessBreakupQuery
+} from '../../../../redux/api/tarot/tarotApi'
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader'
 import styles from './TarotCardDetailPage.module.css'
 
 const TarotCardDetailPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { card, reading } = location.state || { 
+  const { card, cards, reading, isMultiCard, cardNames } = location.state || { 
     reading: { title: 'Yes/ No Tarot', apiEndpoint: 'yes-no' },
     card: { id: 1, name: 'the-fool' }
   }
 
-  // Fetch card details from API
-  const cardName = card?.id || card?.name || 'the-fool'
+  // State for tab selection (for multi-card readings)
+  const [activeTab, setActiveTab] = useState(0)
+
+  // Determine if this is a breakup reading
+  const isRomanticBreakup = reading?.title === 'Romantic Breakup'
+  const isBusinessBreakup = reading?.title === 'Business Breakup'
+  const isBreakupReading = isMultiCard && (isRomanticBreakup || isBusinessBreakup)
+  
+  const currentCard = isBreakupReading ? cards[activeTab] : card
+
+  // For breakup readings, use specific API hooks
+  const { 
+    data: romanticBreakupData, 
+    isLoading: isLoadingRomantic, 
+    error: errorRomantic 
+  } = useGetRomanticBreakupQuery(
+    {
+      card_cause: cardNames?.card_cause,
+      card_advise: cardNames?.card_advise,
+      lang: 'en',
+    },
+    {
+      skip: !isRomanticBreakup || !cardNames,
+    }
+  )
+
+  const { 
+    data: businessBreakupData, 
+    isLoading: isLoadingBusiness, 
+    error: errorBusiness 
+  } = useGetBusinessBreakupQuery(
+    {
+      card_cause: cardNames?.card_cause,
+      card_advise: cardNames?.card_advise,
+      lang: 'en',
+    },
+    {
+      skip: !isBusinessBreakup || !cardNames,
+    }
+  )
+
+  // For regular readings, use the generic API
+  const cardName = currentCard?.card_id || currentCard?.id || currentCard?.name || 'the-fool'
   const readingEndpoint = reading?.apiEndpoint || 'yes-no'
   
-  const { data, isLoading, error } = useGetTarotCardDetailsQuery(
+  const { 
+    data: regularData, 
+    isLoading: isLoadingRegular, 
+    error: errorRegular 
+  } = useGetTarotCardDetailsQuery(
     {
       reading_endpoint: readingEndpoint,
       card_name: cardName,
       lang: 'en',
     },
     {
-      skip: !cardName || !readingEndpoint,
+      skip: isBreakupReading || !cardName || !readingEndpoint,
     }
   )
 
+  // Determine which data to use
+  let data, isLoading, error
+  if (isRomanticBreakup) {
+    data = romanticBreakupData
+    isLoading = isLoadingRomantic
+    error = errorRomantic
+  } else if (isBusinessBreakup) {
+    data = businessBreakupData
+    isLoading = isLoadingBusiness
+    error = errorBusiness
+  } else {
+    data = regularData
+    isLoading = isLoadingRegular
+    error = errorRegular
+  }
+
   console.log('Card details API response:', data)
-  console.log('Card name used:', cardName)
-  console.log('Reading endpoint:', readingEndpoint)
+  console.log('Is breakup reading:', isBreakupReading)
+  console.log('Card names:', cardNames)
 
   if (isLoading) {
     return <PrimaryLoader />
@@ -53,6 +119,13 @@ const TarotCardDetailPage = () => {
 
   const cardData = data?.response || {}
   const isDaily = readingEndpoint === 'daily'
+  
+  // For breakup readings, get the appropriate card data based on active tab
+  let displayData = cardData
+  if (isBreakupReading && cardData.cause && cardData.advise) {
+    // Tab 0 = You (cause), Tab 1 = Partner (advise)
+    displayData = activeTab === 0 ? cardData.cause : cardData.advise
+  }
 
   return (
     <div className={styles.detailPage}>
@@ -63,12 +136,30 @@ const TarotCardDetailPage = () => {
         <h1 className={styles.title}>{reading.title}</h1>
       </div>
 
+      {/* Tabs for Breakup Readings */}
+      {isBreakupReading && (
+        <div className={styles.tabsContainer}>
+          <button 
+            className={`${styles.tab} ${activeTab === 0 ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab(0)}
+          >
+            You
+          </button>
+          <button 
+            className={`${styles.tab} ${activeTab === 1 ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab(1)}
+          >
+            Partner
+          </button>
+        </div>
+      )}
+
       <div className={styles.content}>
         <div className={styles.cardDisplay}>
-          {cardData.card_image ? (
+          {displayData.card_image ? (
             <img 
-              src={cardData.card_image?.classic || cardData.card_image?.artwork || cardData.card_image} 
-              alt={cardData.card_name || cardData.name || 'Tarot Card'}
+              src={displayData.card_image?.classic || displayData.card_image?.artwork || displayData.card_image} 
+              alt={displayData.card_name || displayData.name || 'Tarot Card'}
               className={styles.tarotCard}
             />
           ) : (
@@ -80,22 +171,22 @@ const TarotCardDetailPage = () => {
           )}
         </div>
 
-        {(cardData.card_name || cardData.name) && (
-          <h2 className={styles.cardName}>{cardData.card_name || cardData.name}</h2>
+        {(displayData.card_name || displayData.name) && (
+          <h2 className={styles.cardName}>{displayData.card_name || displayData.name}</h2>
         )}
 
-        {cardData.card_number && (
-          <p className={styles.cardNumber}>{cardData.card_number}</p>
+        {displayData.card_number && (
+          <p className={styles.cardNumber}>{displayData.card_number}</p>
         )}
 
-        {cardData.answer && (
-          <p className={styles.answer}>Answer: {cardData.answer}</p>
+        {displayData.answer && (
+          <p className={styles.answer}>Answer: {displayData.answer}</p>
         )}
 
         {/* Traits Capsules */}
-        {cardData.traits && cardData.traits.length > 0 && (
+        {displayData.traits && displayData.traits.length > 0 && (
           <div className={styles.traitsContainer}>
-            {cardData.traits.map((trait, index) => (
+            {displayData.traits.map((trait, index) => (
               <span key={index} className={styles.traitCapsule}>
                 {trait}
               </span>
@@ -137,33 +228,48 @@ const TarotCardDetailPage = () => {
         ) : (
           /* Regular Format - Title, Description, Meaning, etc. */
           <div className={styles.readingSection}>
-            {cardData.title && (
-              <h2 className={styles.readingTitle}>{cardData.title}</h2>
-            )}
-            
-            {cardData.description && (
-              <p className={styles.readingDescription}>{cardData.description}</p>
-            )}
-
-            {cardData.meaning && (
+            {/* Breakup Reading - Show description */}
+            {isBreakupReading && displayData.description && (
               <div className={styles.meaningSection}>
-                <h3 className={styles.sectionTitle}>Meaning</h3>
-                <p className={styles.readingDescription}>{cardData.meaning}</p>
+                <h3 className={styles.sectionTitle}>
+                  {activeTab === 0 ? '🔍 Cause of Breakup' : '💡 Advice for Moving Forward'}
+                </h3>
+                <p className={styles.readingDescription}>{displayData.description}</p>
               </div>
             )}
 
-            {cardData.upright && (
-              <div className={styles.meaningSection}>
-                <h3 className={styles.sectionTitle}>Upright</h3>
-                <p className={styles.readingDescription}>{cardData.upright}</p>
-              </div>
-            )}
+            {/* Regular readings */}
+            {!isBreakupReading && (
+              <>
+                {displayData.title && (
+                  <h2 className={styles.readingTitle}>{displayData.title}</h2>
+                )}
+                
+                {displayData.description && (
+                  <p className={styles.readingDescription}>{displayData.description}</p>
+                )}
 
-            {cardData.reversed && (
-              <div className={styles.meaningSection}>
-                <h3 className={styles.sectionTitle}>Reversed</h3>
-                <p className={styles.readingDescription}>{cardData.reversed}</p>
-              </div>
+                {displayData.meaning && (
+                  <div className={styles.meaningSection}>
+                    <h3 className={styles.sectionTitle}>Meaning</h3>
+                    <p className={styles.readingDescription}>{displayData.meaning}</p>
+                  </div>
+                )}
+
+                {displayData.upright && (
+                  <div className={styles.meaningSection}>
+                    <h3 className={styles.sectionTitle}>Upright</h3>
+                    <p className={styles.readingDescription}>{displayData.upright}</p>
+                  </div>
+                )}
+
+                {displayData.reversed && (
+                  <div className={styles.meaningSection}>
+                    <h3 className={styles.sectionTitle}>Reversed</h3>
+                    <p className={styles.readingDescription}>{displayData.reversed}</p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}

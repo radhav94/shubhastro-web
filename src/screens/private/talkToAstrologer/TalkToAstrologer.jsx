@@ -264,7 +264,7 @@ const TalkToAstrologer = () => {
     } else {
       setAllAstrologers((prev) => {
         const existingIds = new Set(prev.map((i) => i._id));
-        const newOnes = data.filter((i) => !existingIds.has(i._id));
+        const newOnes = astrologersList.filter((i) => !existingIds.has(i._id));
         if (newOnes.length === 0) return prev;
         return [...prev, ...newOnes];
       });
