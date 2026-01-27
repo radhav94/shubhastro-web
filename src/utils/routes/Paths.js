@@ -127,6 +127,19 @@ import ClothColorInstructions from "../../screens/private/aiwow/clothcolor/Cloth
 import ClothColorCamera from "../../screens/private/aiwow/clothcolor/ClothColorCamera";
 import ClothColorAnalysis from "../../screens/private/aiwow/clothcolor/ClothColorAnalysis";
 import ClothColorResult from "../../screens/private/aiwow/clothcolor/ClothColorResult";
+import TalkToKundliChat from "../../screens/private/aiwow/talktokundli/TalkToKundliChat";
+import CosmicChat from "../../screens/private/aiwow/cosmicchat/CosmicChat";
+import DailyCosmicBriefing from "../../screens/private/aiwow/dailycosmicbriefing/DailyCosmicBriefing";
+import DreamInterpreter from "../../screens/private/aiwow/dreaminterpreter/DreamInterpreter";
+import AgenticCalendar from "../../screens/private/aiwow/agenticcalendar/AgenticCalendar";
+import SmartMatchmaking from "../../screens/private/aiwow/smartmatchmaking/SmartMatchmaking";
+import KarmicDebtTracker from "../../screens/private/aiwow/karmicdebt/KarmicDebtTracker";
+import AstroVitals from "../../screens/private/aiwow/astrovitals/AstroVitals";
+import AuraLanding from "../../screens/private/aiwow/aura/AuraLanding";
+import AuraInstructions from "../../screens/private/aiwow/aura/AuraInstructions";
+import AuraCamera from "../../screens/private/aiwow/aura/AuraCamera";
+import AuraAnalysis from "../../screens/private/aiwow/aura/AuraAnalysis";
+import AuraResult from "../../screens/private/aiwow/aura/AuraResult";
 import SingleCallHistory from "../../screens/private/orderHistory/components/Call/SingleCallHistory";
 import SingleChatHistory from "../../screens/private/orderHistory/components/Chat/SingleChatHistory";
 import OrderHistory from "../../screens/private/orderHistory/OrderHistory";
@@ -660,6 +673,84 @@ export const PATH = {
     CLOTH_COLOR_RESULT: {
       path: "/aiwow/cloth-color/result",
       element: ClothColorResult,
+      header: false,
+      footer: false,
+    },
+    TALK_TO_KUNDLI_CHAT: {
+      path: "/aiwow/talk-to-kundli",
+      element: TalkToKundliChat,
+      header: false,
+      footer: false,
+    },
+    COSMIC_CHAT: {
+      path: "/aiwow/cosmic-chat",
+      element: CosmicChat,
+      header: false,
+      footer: false,
+    },
+    DAILY_COSMIC_BRIEFING: {
+      path: "/aiwow/daily-cosmic-briefing",
+      element: DailyCosmicBriefing,
+      header: false,
+      footer: false,
+    },
+    DREAM_INTERPRETER: {
+      path: "/aiwow/dream-interpreter",
+      element: DreamInterpreter,
+      header: false,
+      footer: false,
+    },
+    AGENTIC_CALENDAR: {
+      path: "/aiwow/agentic-calendar",
+      element: AgenticCalendar,
+      header: false,
+      footer: false,
+    },
+    SMART_MATCHMAKING: {
+      path: "/aiwow/smart-matchmaking",
+      element: SmartMatchmaking,
+      header: false,
+      footer: false,
+    },
+    KARMIC_DEBT_TRACKER: {
+      path: "/aiwow/karmic-debt-tracker",
+      element: KarmicDebtTracker,
+      header: false,
+      footer: false,
+    },
+    ASTRO_VITALS: {
+      path: "/aiwow/astro-vitals",
+      element: AstroVitals,
+      header: false,
+      footer: false,
+    },
+    AURA_LANDING: {
+      path: "/aiwow/aura",
+      element: AuraLanding,
+      header: false,
+      footer: false,
+    },
+    AURA_INSTRUCTIONS: {
+      path: "/aiwow/aura/instructions",
+      element: AuraInstructions,
+      header: false,
+      footer: false,
+    },
+    AURA_CAMERA: {
+      path: "/aiwow/aura/camera",
+      element: AuraCamera,
+      header: false,
+      footer: false,
+    },
+    AURA_ANALYSIS: {
+      path: "/aiwow/aura/capture",
+      element: AuraAnalysis,
+      header: false,
+      footer: false,
+    },
+    AURA_RESULT: {
+      path: "/aiwow/aura/result",
+      element: AuraResult,
       header: false,
       footer: false,
     },
