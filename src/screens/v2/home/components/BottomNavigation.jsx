@@ -1,7 +1,14 @@
 import { Home, Compass, Radio, UserRound, Store } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import styles from "../Home.module.scss";
 
 const BottomNavigation = () => {
+    const navigate = useNavigate();
+
+    const handleLiveClick = () => {
+        navigate("/live-landing");
+    };
+
     return (
         <nav className={styles.bottomNav}>
             <button className={`${styles.navItem} ${styles.active}`}>
@@ -19,7 +26,7 @@ const BottomNavigation = () => {
                 <span className={styles.label}>Explore</span>
             </button>
 
-            <button className={styles.liveItem}>
+            <button className={styles.liveItem} onClick={handleLiveClick}>
                 <div className={styles.liveCircle}>
                     <Radio size={22} />
                 </div>

@@ -144,6 +144,15 @@ const TopHeader = () => {
             >
               Horoscopes
             </NavLink>
+
+            <NavLink
+              to="/live-landing"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Live
+            </NavLink>
           </div>
         </nav>
       <div className={styles.headerActions}>

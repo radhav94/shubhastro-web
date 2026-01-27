@@ -60,6 +60,10 @@ import Dosh from "../assets/images/dosh.png";
 import Ring from "../assets/images/ring.png";
 import ChatBg from "../assets/images/Chat.png";
 import tarotCard from "../assets/images/tarotCard.png";
+import cosmicMoon from "../assets/images/daily-insight-1.png";
+import cosmicChronicles from "../assets/images/daily-insight-2.png";
+import cosmicUnity from "../assets/images/daily-insight-3.png";
+
 export const AppImages = {
   Hero,
   Astro1,
@@ -78,6 +82,9 @@ export const AppImages = {
   Ring,
   ChatBg,
   tarotCard,
+  cosmicMoon,
+  cosmicChronicles,
+  cosmicUnity,
 };
 
 //svgs
