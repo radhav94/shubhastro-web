@@ -12,6 +12,7 @@
   margin-bottom: 1rem;
   transition: transform 0.2s, box-shadow 0.2s;
   border: 1px solid rgba(247, 88, 1, 0.1);
+  position: relative;
 
   &:hover {
     transform: translateY(-2px);
@@ -131,18 +132,24 @@
   align-items: center;
   justify-content: center;
 
-  @media (min-width: 768px) {
-    width: 120px;
-    height: 120px;
-  }
+  @media (max-width: 767px) {
+      width: 50px;
+      height: 50px;
+      position: absolute;
+      right: 20px;
+      top: 11px;
+    }
 
   &.largeIcon {
     width: 120px;
     height: 120px;
 
-    @media (min-width: 768px) {
-      width: 140px;
-      height: 140px;
+    @media (max-width: 767px) {
+      width: 50px;
+      height: 50px;
+      position: absolute;
+      right: 20px;
+      top: 11px;
     }
   }
 }

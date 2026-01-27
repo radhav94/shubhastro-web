@@ -40,7 +40,7 @@ const AIWow = () => {
       <div className={styles.content}>
         <div className={styles.heroSection}>
           <h2 className={styles.heroTitle}>
-            Future of Astrology <span className={styles.sparkle}>✨</span>
+            Future of Astrology <span>✨</span>
           </h2>
           <p className={styles.heroSubtitle}>
             Explore the future of astrology with our cutting-edge AI-powered tools and experiences
