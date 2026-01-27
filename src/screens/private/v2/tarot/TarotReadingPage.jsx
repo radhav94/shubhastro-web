@@ -218,7 +218,9 @@ const TarotReadingPage = () => {
         <div ref={observerRef} className={styles.loadingTrigger} />
       )}
 
-      <button className={styles.proceedAheadButton}>Proceed Ahead</button>
+      <div className={styles.proceedAheadBtn}>
+        <button className={styles.proceedAheadButton}>Proceed Ahead</button>
+      </div>
 
       <TarotPopup 
         isOpen={isPopupOpen}
