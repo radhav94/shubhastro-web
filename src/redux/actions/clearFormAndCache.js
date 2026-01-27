@@ -11,10 +11,15 @@ import { vedicApi } from "../api/baseApi/vedicApi";
 import { geoApi } from "../api/geoApi";
 import { astroTarotApi } from "../api/tarot/astroTarotApi";
 import { clearForm } from "../kundliform/formSlice";
+import { logout } from "../auth/authSlice";
 
 export const clearFormAndCache = () => (dispatch) => {
   // 1️⃣ Clear form slice
   dispatch(clearForm());
+  
+  // 2️⃣ Dispatch logout action to update auth state
+  dispatch(logout());
+  
   const role = localStorage.getItem("shubhtalk_role");
 
   if (role === "ASTROLOGER") {

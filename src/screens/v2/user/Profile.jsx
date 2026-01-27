@@ -13,6 +13,7 @@ import {
 import { TiUserDelete } from "react-icons/ti";
 import { LuPencilLine } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { useState, useRef, useEffect } from "react";
 import dayjs from "dayjs";
 import { useGetTransactionsQuery } from "../../../services/appServices/transactionService";
@@ -24,10 +25,12 @@ import { useGetCallHistoryQuery } from "../../../redux/api/callHistory/callHisto
 import { useGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chatHistory";
 import { useWalletBalance } from "../../private/wallet/useWalletBalance";
 import { getUserFromStorage } from "../../../utils/authStorage";
+import { logout } from "../../../redux/auth/authSlice";
 import styles from "./Profile.module.scss";
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
 
 const Profile = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Profile");
   const [orderHistoryTab, setOrderHistoryTab] = useState("call"); // Sub-tab for order history
@@ -251,6 +254,9 @@ const Profile = () => {
   };
 
   const handleLogout = () => {
+    // Dispatch Redux logout action
+    dispatch(logout());
+    
     // Clear all authentication related data from localStorage
     localStorage.removeItem("shubhtalk_customer_token");
     localStorage.removeItem("shubhtalk_role");

@@ -15,7 +15,9 @@ import {
 import { TbLogout } from "react-icons/tb";
 import { Home, Compass, Radio, UserRound, Store } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
+import { logout } from "../redux/auth/authSlice";
 
 // Data for links - easy to manage and update
 const quickLinks = [
@@ -39,6 +41,7 @@ const usefulLinks = [
 
 const Footer = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const location = useLocation();
 
   const currentYear = new Date().getFullYear();
@@ -60,6 +63,9 @@ const Footer = () => {
   // ✅ Logout Handler for Both Roles
   // -------------------------------
   const handleLogout = () => {
+    // Dispatch Redux logout action
+    dispatch(logout());
+    
     const role = localStorage.getItem("shubhtalk_role");
 
     if (role === "ASTROLOGER") {
