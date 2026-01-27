@@ -1122,6 +1122,9 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: 4px 4px 20px 4px;
+  @media screen and (width <= 767px) {
+    padding: 4px 4px 20px 0px;
+  }
 }
 
 .astrologersGrid::-webkit-scrollbar {
@@ -3066,8 +3069,8 @@
   }
 
   .blogCard {
-    flex: 0 0 260px;
-    min-width: 260px;
+    flex: 0 0 200px;
+    min-width: 200px;
   }
 
   .blogImageWrapper {
