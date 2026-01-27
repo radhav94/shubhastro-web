@@ -132,6 +132,7 @@ import PalmistryInstruction from "../assets/aiwow/palmistry-1.png";
 import SignatureInstruction from "../assets/aiwow/signature-1.png";
 import GemstoneInstruction from "../assets/aiwow/gemstone-1.png";
 import ClothColorInstruction from "../assets/aiwow/cloth-color-1.png";
+import AuraInstruction from "../assets/aiwow/face-reading-1.png"; // Using face reading image as placeholder
 
 const aiWowIcons = {
   vastu: VastuIcon,
@@ -141,6 +142,16 @@ const aiWowIcons = {
   face: FaceIcon,
   clothes: ClothesIcon,
   aura: AuraIcon,
+  // Companion Suite icons (using existing icons as placeholders)
+  chat: SignatureIcon, // Chat icon
+  message: SignatureIcon, // Message icon
+  sun: AuraIcon, // Sun icon for daily briefing
+  moon: AuraIcon, // Moon icon for dream interpreter
+  // Action Suite icons (using existing icons as placeholders)
+  heart: GemstoneIcon, // Heart icon for matchmaking
+  calendar: VastuIcon, // Calendar icon
+  health: ClothesIcon, // Health icon
+  karma: AuraIcon, // Karma icon
 };
 
 const aiWowInstructions = {
@@ -149,6 +160,7 @@ const aiWowInstructions = {
   signature: SignatureInstruction,
   gemstone: GemstoneInstruction,
   clothColor: ClothColorInstruction,
+  aura: AuraInstruction,
 };
 
 export const getAIWowIcon = (iconName) => {
