@@ -38,7 +38,9 @@ const TopHeader = () => {
     amount >= 1000 ? `₹${(amount / 1000).toFixed(1)}k` : `₹${amount}`;
 
   const displayName = user
-    ? `${user.firstName} ${user.lastName}`
+    ? (user.firstName && user.lastName 
+        ? `${user.firstName} ${user.lastName}` 
+        : user.phoneNumber || "Guest")
     : "Guest";
 
   return (
@@ -70,7 +72,7 @@ const TopHeader = () => {
           <NavLink to="/aiwow">AI WOW</NavLink>
           <NavLink to="/blog">Blogs</NavLink>
           <NavLink to="/explore">Explore</NavLink>
-          {/* <NavLink to="/shop">Astromall</NavLink> */}
+          <NavLink to="/shop">Astromall</NavLink>
           <NavLink to={PATH.privateRoutes.KUNDLI.path}>Kundli</NavLink>
           <NavLink to="/matchmaking">Match Matching</NavLink>
           <NavLink to="/numerology">Numerology</NavLink>
