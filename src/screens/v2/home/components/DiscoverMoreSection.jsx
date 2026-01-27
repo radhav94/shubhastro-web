@@ -50,9 +50,9 @@ const DiscoverMoreSection = () => {
     <section className={styles.discoverSection}>
       <div className={styles.discoverHeader}>
         <SectionHeader title="DISCOVER MORE" />
-        <button className={styles.viewAllBtn}>
-          <ChevronRight size={24} />
-        </button>
+        <button className={styles.viewAllBtn} onClick={() => navigate("/explore")}>
+                    <ChevronRight size={24} />
+                </button>
       </div>
 
       <div className={styles.discoverGrid}>
@@ -61,7 +61,7 @@ const DiscoverMoreSection = () => {
             key={item.id}
             className={styles.discoverCard}
             style={{ background: item.background }}
-            onClick={() => navigate("/explore")}
+            onClick={() => navigate(item.path)}
           >
             <div className={styles.discoverContent}>
               <h3 className={styles.discoverTitle}>{item.title}</h3>
