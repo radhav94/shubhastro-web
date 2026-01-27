@@ -50,7 +50,7 @@ const DiscoverMoreSection = () => {
         <section className={styles.discoverSection}>
             <div className={styles.discoverHeader}>
                 <SectionHeader title="DISCOVER MORE" />
-                <button className={styles.viewAllBtn}>
+                <button className={styles.viewAllBtn} onClick={() => navigate("/explore")}>
                     <ChevronRight size={24} />
                 </button>
             </div>

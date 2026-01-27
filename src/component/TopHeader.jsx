@@ -1,181 +1,83 @@
 import { useEffect, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import styles from "./TopHeader.module.scss";
 import { PATH } from "../utils/routes/Paths";
 import { User } from "lucide-react";
 import { getUserFromStorage } from "../utils/authStorage";
+import ShubhTalkLogo from "../assets/images/ShubhAstrologo.svg";
+import ShubhTalkLogoMobile from "../assets/images/mobile-shubh-astro-logo.svg";
 
 const TopHeader = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
+  /* lock body scroll when drawer open */
+  useEffect(() => {
+    document.body.style.overflow = isDrawerOpen ? "hidden" : "auto";
+    return () => (document.body.style.overflow = "auto");
+  }, [isDrawerOpen]);
+
+  /* sync user */
   useEffect(() => {
     const syncUser = () => {
-      const userData = getUserFromStorage();
-      console.log("User Data in TopHeader:", userData);
-      setUser(userData);
+      setUser(getUserFromStorage());
     };
 
-    // ✅ set user on first render
     syncUser();
-
-    // ✅ listen for login / logout anywhere in app
     window.addEventListener("auth-change", syncUser);
-
-    return () => {
-      window.removeEventListener("auth-change", syncUser);
-    };
+    return () => window.removeEventListener("auth-change", syncUser);
   }, []);
 
   const handleProfileClick = () => {
-    const userData = getUserFromStorage();
-    const accessToken = localStorage.getItem("shubhtalk_customer_token");
-    if (userData && accessToken) {
-      navigate("/profile");
-    } else {
-      // User is not logged in, redirect to onboarding
-      navigate("/login?skip=welcome");
-    }
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    token ? navigate("/profile") : navigate("/login?skip=welcome");
   };
 
-  // formate amount for wallet start
-  const formatAmount = (amount) => {
-    if (amount >= 1000) {
-      const value = amount / 1000;
-      return `₹${value % 1 === 0 ? value : value.toFixed(1)}k`;
-    }
-    return `₹${amount}`;
-  };
-  // formate amount for wallet end
+  const formatAmount = (amount) =>
+    amount >= 1000 ? `₹${(amount / 1000).toFixed(1)}k` : `₹${amount}`;
 
-  const displayName = user ? `${user.firstName} ${user.lastName}` : "Guest";
+  const displayName = user
+    ? `${user.firstName} ${user.lastName}`
+    : "Guest";
 
   return (
-    <header className={styles.topHeader}>
-      <div className={styles.userGreeting}>
-        <div className={styles.userAvatar}>
-          <span>🐏</span>
-        </div>
-        <div className={styles.greetingText}>
-          <span className={styles.namaste}>नमस्ते</span>
-          <span className={styles.userName}>{displayName}</span>
-        </div>
-      </div>
+    <>
+      <header className={styles.topHeader}>
 
-      <nav className={styles.headerNavigation}>
-        {/* First Row */}
-        <div className={styles.navRow}>
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-            end
+        <div className={styles.mainLeftMain}>
+          <div
+            className={styles.hamburger}
+            onClick={() => setIsDrawerOpen(true)}
           >
-            Home
-          </NavLink>
-
-          <NavLink
-            to="/chat-with-astrologers"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Astrologers
-          </NavLink>
-
-          {/* <NavLink
-              to="/services"
-              className={({ isActive }) =>
-                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-              }
-            >
-              Services
-            </NavLink> */}
-
-          <NavLink
-            to="/aiwow"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            AI WOW
-          </NavLink>
-
-          <NavLink
-            to="/blog"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Blogs
-          </NavLink>
-          <NavLink
-            to="/explore"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Explore
-          </NavLink>
-           <NavLink
-            to="/shop"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Astromall
-          </NavLink>
-        </div>
-
-        {/* Second Row */}
-        <div className={styles.navRow}>
-          <NavLink
-            to={PATH.privateRoutes.KUNDLI.path}
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Kundli
-          </NavLink>
-          <NavLink
-            to="/matchmaking"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Match Matching
-          </NavLink>
-
-          <NavLink
-            to="/numerology"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Numerology
-          </NavLink>
-
-            <NavLink
-              to="/horoscopes/daily-horoscope"
-              className={({ isActive }) =>
-                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-              }
-            >
-              Horoscopes
-            </NavLink>
-
-            <NavLink
-              to="/live-landing"
-              className={({ isActive }) =>
-                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-              }
-            >
-              Live
-            </NavLink>
+            ☰
           </div>
+
+          <div className={styles.logoHeader} onClick={()=> navigate('/')}>
+            <img src={ShubhTalkLogo}  alt="Shubh Talk Logo" />
+          </div>
+
+          <div className={styles.logoHeaderMobile} onClick={()=> navigate('/')}>
+            <img src={ShubhTalkLogoMobile} alt="Shubh Talk Logo" />
+          </div>
+        </div>
+
+
+        {/* Desktop Navigation */}
+        <nav className={styles.headerNavigation}>
+          <NavLink to="/" end>Home</NavLink>
+          <NavLink to="/chat-with-astrologers">Astrologers</NavLink>
+          <NavLink to="/aiwow">AI WOW</NavLink>
+          <NavLink to="/blog">Blogs</NavLink>
+          <NavLink to="/explore">Explore</NavLink>
+          {/* <NavLink to="/shop">Astromall</NavLink> */}
+          <NavLink to={PATH.privateRoutes.KUNDLI.path}>Kundli</NavLink>
+          <NavLink to="/matchmaking">Match Matching</NavLink>
+          <NavLink to="/numerology">Numerology</NavLink>
+          <NavLink to="/horoscopes/daily-horoscope">Horoscopes</NavLink>
         </nav>
-      <div className={styles.headerActions}>
+
+        <div className={styles.headerActions}>
         <div className={styles.walletBadge}>
           <div className={styles.coinIcon}></div>
           <span className={styles.walletAmount}>{formatAmount(1240)}</span>
@@ -183,8 +85,43 @@ const TopHeader = () => {
         <div className={styles.profileIcon} onClick={handleProfileClick}>
           <User size={24} strokeWidth={0} fill="#d53400" />
         </div>
+        <div className={styles.greetingText}>
+          <span className={styles.namaste}>नमस्ते</span>
+          <span className={styles.userName}>{displayName}</span>
+        </div>
       </div>
-    </header>
+      </header>
+
+      {/* 📱 Mobile Drawer */}
+      {isDrawerOpen && (
+        <>
+          <div
+            className={styles.drawerOverlay}
+            onClick={() => setIsDrawerOpen(false)}
+          />
+
+          <div className={styles.mobileDrawer}>
+            <button
+              className={styles.drawerClose}
+              onClick={() => setIsDrawerOpen(false)}
+            >
+              ✕
+            </button>
+
+            <NavLink to="/" onClick={() => setIsDrawerOpen(false)}>Home</NavLink>
+            <NavLink to="/chat-with-astrologers" onClick={() => setIsDrawerOpen(false)}>Astrologers</NavLink>
+            <NavLink to="/aiwow" onClick={() => setIsDrawerOpen(false)}>AI WOW</NavLink>
+            <NavLink to="/blog" onClick={() => setIsDrawerOpen(false)}>Blogs</NavLink>
+            <NavLink to="/explore" onClick={() => setIsDrawerOpen(false)}>Explore</NavLink>
+            <NavLink to={PATH.privateRoutes.KUNDLI.path} onClick={() => setIsDrawerOpen(false)}>Kundli</NavLink>
+            <NavLink to="/matchmaking" onClick={() => setIsDrawerOpen(false)}>Match Matching</NavLink>
+            <NavLink to="/numerology" onClick={() => setIsDrawerOpen(false)}>Numerology</NavLink>
+            <NavLink to="/horoscopes/daily-horoscope" onClick={() => setIsDrawerOpen(false)}>Horoscopes</NavLink>
+
+          </div>
+        </>
+      )}
+    </>
   );
 };
 
