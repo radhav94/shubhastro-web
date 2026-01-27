@@ -184,7 +184,7 @@ const TalkToAstrologer = () => {
 
   const limit = 9;
 
-  const [createChatRoom] = useCreateChatRoomMutation();
+  // const [createChatRoom] = useCreateChatRoomMutation();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
   // last part of URL
 
@@ -449,13 +449,13 @@ const TalkToAstrologer = () => {
       const kundliId = kundliRef.current;
 
       try {
-        const res = await createChatRoom({
-          userId: userIdLocal,
-          astrologerId: astro._id,
-        });
+        // const res = await createChatRoom({
+        //   userId: userIdLocal,
+        //   astrologerId: astro._id,
+        // });
 
-        const chatRoomId = res?.data?.data;
-        if (!chatRoomId) throw new Error();
+        // const chatRoomId = res?.data?.data;
+        // if (!chatRoomId) throw new Error();
 
         setActiveCall({
           roomId,
