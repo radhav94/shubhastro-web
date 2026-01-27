@@ -11,6 +11,11 @@ import { useNavigate } from "react-router-dom";
 
 import { useGetAllGiftsQuery } from "../../../../../redux/api/gift/giftApi";
 import { useLiveList } from "../../../../../context/LiveListContext";
+import { useCall } from "../../../../../context/CallContext";
+import { voiceSocket } from "../../../../../services/voiceSocketServices";
+import Toast from "../../../../../component/toast";
+import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
+import WaitingModal from "../../../../../component/UI/modal/waitingModal/WaitingModal";
 
 import { createPortal } from "react-dom";
 import { ChevronLeft } from "lucide-react";
@@ -43,6 +48,24 @@ const LiveView = (props) => {
   const [showCallPopup, setShowCallPopup] = useState(false);
   const [activeTab, setActiveTab] = useState("live");
   const [showChatModal, setShowChatModal] = useState(false);
+  const [showWaitingModal, setShowWaitingModal] = useState(false);
+
+  const { 
+    activeCall, 
+    setLastRequestedAstro, 
+    setActiveCall, 
+    setCallSeconds, 
+    resetCallFlow, 
+    setActiveCallRoomId 
+  } = useCall();
+  
+  const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+  const token = localStorage.getItem("shubhtalk_customer_token");
+  const [callRoomId, setCallRoomId] = useState(null);
+  const [callWaitingList, setCallWaitingList] = useState(null);
+  const astrologerRef = useRef(null);
+  
+  const [createChatRoom] = useCreateChatRoomMutation();
 
   // Sample messages for display
   const sampleMessages = [
@@ -130,6 +153,175 @@ const LiveView = (props) => {
   const handleDailyInsightsClick = () => {
     navigate("/live-landing");
   };
+
+  // Handle call initiation - directly start video call (DEMO MODE)
+  const handleDirectVideoCall = async () => {
+    // Set a demo room ID so cancel button works
+    setCallRoomId("demo-room-" + Date.now());
+    setShowWaitingModal(true);
+
+    // Store timeout ID so we can cancel it
+    const timeoutId = setTimeout(() => {
+      setShowWaitingModal(false);
+
+      // Create mock call data
+      const mockCallData = {
+        roomId: "demo-room-" + Date.now(),
+        chatRoomId: "demo-chat-" + Date.now(),
+        agoraToken: "demo-token-" + Date.now(),
+        callerName: astrologer?.astrologerName || astrologer?.firstName || "Demo Astrologer",
+        isUserSide: true,
+        callType: "video",
+        userId: userIdLocal || "demo-user",
+        astrologerId: astrologer?._id || "demo-astrologer",
+        astrologerID: "DEMO001",
+        remainingTime: 30 // 30 minutes
+      };
+
+      setActiveCall(mockCallData);
+      setCallSeconds(30 * 60); // 30 minutes in seconds
+      
+      Toast.success("Video call started (Demo Mode)");
+    }, 2000); // 2 second delay to show waiting modal
+
+    // Store timeout ID in ref so we can clear it on cancel
+    astrologerRef.current = { timeoutId };
+  };
+
+  // Handle call initiation from popup (with choice)
+  const handleCallRequest = (type) => {
+    if (!token) {
+      Toast.error("Please login to make a call");
+      navigate("/login");
+      return;
+    }
+
+    if (!userIdLocal) {
+      Toast.error("User not found");
+      return;
+    }
+
+    if (activeCall) {
+      Toast.error("You are already on a call");
+      return;
+    }
+
+    if (!astrologer?._id) {
+      Toast.error("Astrologer information not available");
+      return;
+    }
+
+    // Store astrologer info in context and ref
+    setLastRequestedAstro(astrologer);
+    astrologerRef.current = astrologer;
+
+    // Show waiting modal
+    setShowWaitingModal(true);
+
+    // Emit socket event to initiate call
+    voiceSocket.emit("call:initiate", {
+      userId: userIdLocal,
+      astrologerId: astrologer._id,
+      type, // "audio" | "video"
+    });
+
+    setShowCallPopup(false);
+    Toast.success(`${type === "audio" ? "Voice" : "Video"} call request sent`);
+  };
+
+  // Reset call state
+  const resetCallState = () => {
+    // Clear the timeout if it exists
+    if (astrologerRef.current?.timeoutId) {
+      clearTimeout(astrologerRef.current.timeoutId);
+    }
+    
+    setShowWaitingModal(false);
+    setCallRoomId(null);
+    astrologerRef.current = null;
+    
+    Toast.info("Call request cancelled");
+  };
+
+  // Socket event handlers
+  useEffect(() => {
+    if (!userIdLocal) return;
+
+    const handleCallRoom = (data) => {
+      setCallRoomId(data?.roomId);
+      setActiveCallRoomId(data?.roomId);
+      setCallWaitingList(data?.waitingTime || 5);
+      setShowWaitingModal(true);
+    };
+
+    const handleCallAccepted = async ({ roomId, token: agoraToken, type, remainingTime }) => {
+      setShowWaitingModal(false);
+      resetCallFlow();
+      const astro = astrologerRef.current;
+      
+      if (!astro) {
+        Toast.error("Astrologer information not available");
+        return;
+      }
+
+      try {
+        // Create chat room for the call
+        const res = await createChatRoom({
+          userId: userIdLocal,
+          astrologerId: astro._id,
+        });
+
+        const chatRoomId = res?.data?.data;
+        if (!chatRoomId) throw new Error("Failed to create chat room");
+
+        // Set active call in context - this will trigger VideoCall or VoiceCall component
+        setActiveCall({
+          roomId,
+          chatRoomId,
+          agoraToken,
+          callerName: astro.astrologerName || astro.firstName || "Astrologer",
+          isUserSide: true,
+          callType: type, // "audio" or "video"
+          userId: userIdLocal,
+          astrologerId: astro._id,
+          astrologerID: astro?.astrologer_ID,
+          remainingTime
+        });
+        
+        setCallSeconds(Number(remainingTime) * 60);
+        Toast.success(`${type === "video" ? "Video" : "Voice"} call started`);
+      } catch (error) {
+        console.error("Call acceptance error:", error);
+        Toast.error("Failed to start call");
+      }
+    };
+
+    const handleCallRejected = (data) => {
+      const errorMsg =
+        data?.sessionData?.sessionEndReason === "rejected"
+          ? "Astrologer has rejected the call request"
+          : "Call rejected";
+      Toast.error(errorMsg);
+      resetCallState();
+    };
+
+    const handleCallEnded = () => {
+      resetCallState();
+    };
+
+    // Register socket listeners
+    voiceSocket.on("call:room", handleCallRoom);
+    voiceSocket.on("call:accepted", handleCallAccepted);
+    voiceSocket.on("call:rejected", handleCallRejected);
+    voiceSocket.on("call:ended", handleCallEnded);
+
+    return () => {
+      voiceSocket.off("call:room", handleCallRoom);
+      voiceSocket.off("call:accepted", handleCallAccepted);
+      voiceSocket.off("call:rejected", handleCallRejected);
+      voiceSocket.off("call:ended", handleCallEnded);
+    };
+  }, [userIdLocal, setActiveCall, setCallSeconds, resetCallFlow, setActiveCallRoomId, createChatRoom]);
 
   return (
     <FixedLayer>
@@ -263,12 +455,15 @@ const LiveView = (props) => {
               </div>
               
               {!isHost && (
-                <button className="call-price-btn">
+                <button 
+                  className="call-price-btn"
+                  onClick={handleDirectVideoCall}
+                >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                     <circle cx="18" cy="6" r="3" fill="currentColor" stroke="none"/>
                   </svg>
-                  <span>₹20/ min</span>
+                  <span>₹{astrologer?.videoCallRate || astrologer?.audioCallRate || 20}/ min</span>
                 </button>
               )}
             </div>
@@ -372,12 +567,21 @@ const LiveView = (props) => {
           <CallRequestPopup
             show={showCallPopup}
             onClose={() => setShowCallPopup(false)}
-            onJoin={() => {
-              setShowCallPopup(false);
-              alert("Private Call starting soon...");
-            }}
+            onJoinAudio={() => handleCallRequest("audio")}
+            onJoinVideo={() => handleCallRequest("video")}
             host={hostData}
+            astrologer={astrologer}
+            waitingList={callWaitingList}
           />
+
+          {/* Waiting Modal */}
+          {showWaitingModal && (
+            <WaitingModal
+              callRoomId={callRoomId}
+              resetCallState={resetCallState}
+              connectionType="video"
+            />
+          )}
 
           {/* NEW BOTTOM ACTION BAR */}
           <div className="right-action-bar">
