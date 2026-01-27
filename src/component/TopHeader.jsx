@@ -38,7 +38,9 @@ const TopHeader = () => {
     amount >= 1000 ? `₹${(amount / 1000).toFixed(1)}k` : `₹${amount}`;
 
   const displayName = user
-    ? `${user.firstName} ${user.lastName}`
+    ? (user.firstName && user.lastName 
+        ? `${user.firstName} ${user.lastName}` 
+        : user.phoneNumber || "Guest")
     : "Guest";
 
   return (
@@ -53,11 +55,11 @@ const TopHeader = () => {
             ☰
           </div>
 
-          <div className={styles.logoHeader}>
-            <img src={ShubhTalkLogo} alt="Shubh Talk Logo" />
+          <div className={styles.logoHeader} onClick={()=> navigate('/')}>
+            <img src={ShubhTalkLogo}  alt="Shubh Talk Logo" />
           </div>
 
-          <div className={styles.logoHeaderMobile}>
+          <div className={styles.logoHeaderMobile} onClick={()=> navigate('/')}>
             <img src={ShubhTalkLogoMobile} alt="Shubh Talk Logo" />
           </div>
         </div>
@@ -68,8 +70,9 @@ const TopHeader = () => {
           <NavLink to="/" end>Home</NavLink>
           <NavLink to="/chat-with-astrologers">Astrologers</NavLink>
           <NavLink to="/aiwow">AI WOW</NavLink>
-          <NavLink to="/blogs">Blogs</NavLink>
+          <NavLink to="/blog">Blogs</NavLink>
           <NavLink to="/explore">Explore</NavLink>
+          <NavLink to="/shop">Astromall</NavLink>
           <NavLink to={PATH.privateRoutes.KUNDLI.path}>Kundli</NavLink>
           <NavLink to="/matchmaking">Match Matching</NavLink>
           <NavLink to="/numerology">Numerology</NavLink>
@@ -110,7 +113,7 @@ const TopHeader = () => {
             <NavLink to="/" onClick={() => setIsDrawerOpen(false)}>Home</NavLink>
             <NavLink to="/chat-with-astrologers" onClick={() => setIsDrawerOpen(false)}>Astrologers</NavLink>
             <NavLink to="/aiwow" onClick={() => setIsDrawerOpen(false)}>AI WOW</NavLink>
-            <NavLink to="/blogs" onClick={() => setIsDrawerOpen(false)}>Blogs</NavLink>
+            <NavLink to="/blog" onClick={() => setIsDrawerOpen(false)}>Blogs</NavLink>
             <NavLink to="/explore" onClick={() => setIsDrawerOpen(false)}>Explore</NavLink>
             <NavLink to={PATH.privateRoutes.KUNDLI.path} onClick={() => setIsDrawerOpen(false)}>Kundli</NavLink>
             <NavLink to="/matchmaking" onClick={() => setIsDrawerOpen(false)}>Match Matching</NavLink>

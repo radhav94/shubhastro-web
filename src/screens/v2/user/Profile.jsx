@@ -37,7 +37,11 @@ const Profile = () => {
   const transactionListRef = useRef(null);
   const orderListRef = useRef(null); // Ref for order history scroll
   const user = getUserFromStorage();
-  const userName = user ? `${user.firstName} ${user.lastName}` : "Guest User";
+  const userName = user
+    ? (user.firstName && user.lastName 
+        ? `${user.firstName} ${user.lastName}` 
+        : user.phoneNumber || "Guest User")
+    : "Guest User";
   const userId = localStorage.getItem("shubhtalk_customer_id");
 
   // Pagination state
@@ -301,7 +305,7 @@ const Profile = () => {
             <p className={styles.profileDetails}>
               {savedKundlis[0]
                 ? `${dayjs(`${savedKundlis[0].year}-${savedKundlis[0].month}-${savedKundlis[0].day}`).format("MMM DD, YYYY")} • ${String(savedKundlis[0].hour).padStart(2, "0")}:${String(savedKundlis[0].min).padStart(2, "0")}`
-                : "Jan 01, 2002 • 18:00"}
+                : " "}
             </p>
           </div>
         </div>

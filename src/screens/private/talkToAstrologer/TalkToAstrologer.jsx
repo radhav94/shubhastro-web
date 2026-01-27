@@ -265,7 +265,7 @@ const TalkToAstrologer = () => {
     } else {
       setAllAstrologers((prev) => {
         const existingIds = new Set(prev.map((i) => i._id));
-        const newOnes = astrologersList.filter((i) => !existingIds.has(i._id));
+        const newOnes = data.filter((i) => !existingIds.has(i._id));
         if (newOnes.length === 0) return prev;
         return [...prev, ...newOnes];
       });
@@ -609,7 +609,7 @@ const TalkToAstrologer = () => {
       />
 
       {/* Top Astrologers Section - New Design */}
-      {/* {topTenAstrologers.length > 0 && (
+      {topTenAstrologers.length > 0 && (
         <>
           <div className={styles.sectionDivider}>
             <h2 className={styles.sectionTitle}>TOP ASTROLOGERS FOR YOU</h2>
@@ -673,7 +673,7 @@ const TalkToAstrologer = () => {
             ))}
           </div>
         </>
-      )} */}
+      )}
 
       {/* Explore Astrologers Section - Original Design */}
 

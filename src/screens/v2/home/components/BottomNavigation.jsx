@@ -9,6 +9,14 @@ const BottomNavigation = () => {
         navigate("/live-landing");
     };
 
+    const handleExploreClick = () => {
+        navigate("/explore");
+    };
+
+    const handleShopClick = () => {
+        navigate("/shop");
+    };
+
     return (
         <nav className={styles.bottomNav}>
             <button className={`${styles.navItem} ${styles.active}`}>
@@ -19,7 +27,7 @@ const BottomNavigation = () => {
                 <span className={styles.activeLine} />
             </button>
 
-            <button className={styles.navItem}>
+            <button className={styles.navItem} onClick={handleExploreClick}>
                 <div className={styles.iconCircle}>
                     <Compass size={22} />
                 </div>
@@ -33,7 +41,7 @@ const BottomNavigation = () => {
                 <span className={styles.label}>Live</span>
             </button>
 
-            <button className={styles.navItem}>
+            <button className={styles.navItem} onClick={handleShopClick}>
                 <div className={styles.iconCircle}>
                     <Store size={22} />
                 </div>
