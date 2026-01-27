@@ -224,7 +224,7 @@
 }
 
 .category-card {
-  background: #e8e8e8;
+  background: #f7570112;
   border: none;
   border-radius: 10px;
   padding: 0;
@@ -856,7 +856,7 @@
   /* Desktop Overview Sections */
   .overview-sections {
     gap: 32px;
-    max-width: 900px;
+    max-width: 100%;
   }
 
   .overview-section {
@@ -976,6 +976,6 @@
   .content-text,
   .lucky-details,
   .overview-sections {
-    max-width: 1000px;
+    max-width: 100%;
   }
 }

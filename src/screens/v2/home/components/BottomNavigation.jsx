@@ -27,10 +27,10 @@ const BottomNavigation = () => {
             </button>
 
             <button className={styles.liveItem} onClick={handleLiveClick}>
-                <div className={styles.liveCircle}>
-                    <Radio size={22} />
+                <div className={styles.liveBtn}>
+                    <Radio size={28} strokeWidth={2.5} />
                 </div>
-                <span className={styles.liveLabel}>LIVE</span>
+                <span className={styles.label}>Live</span>
             </button>
 
             <button className={styles.navItem}>

@@ -211,6 +211,10 @@
   height: 22px;
   background: #fff;
   border-radius: 50%;
+  @media screen and (width <= 767px) {
+    height: 16px;
+    top: -10px;
+  }
 }
 
 .walletBadge::after {
@@ -222,6 +226,10 @@
   height: 22px;
   background: #fff;
   border-radius: 50%;
+  @media screen and (width <= 767px) {
+    height: 16px;
+    bottom: -10px;
+  }
 }
 
 .coinIcon {
