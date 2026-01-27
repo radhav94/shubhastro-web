@@ -282,3 +282,39 @@
     font-size: 13px;
   }
 }
+
+/* Tabs for multi-card readings */
+.tabsContainer {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tab {
+  flex: 1;
+  padding: 12px 24px;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab:hover {
+  background: #e8e8e8;
+}
+
+.activeTab {
+  background: #ff6b35;
+  color: white;
+  font-weight: 600;
+}
+
+.activeTab:hover {
+  background: #ff5722;
+}

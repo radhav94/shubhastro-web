@@ -137,7 +137,7 @@ const Home = () => {
                 />
 
                 <LifeAreaSection />
-                <MySessionsSection />
+                <MySessionsSection onConnectClick={handleConnectClick} />
                 <CosmicInsightSection />
                 <PanchangSection />
 

@@ -13,6 +13,7 @@ import {
   IoLogoTwitter,
 } from "react-icons/io5";
 import { TbLogout } from "react-icons/tb";
+import { Home, Compass, Radio, UserRound, Store } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
@@ -95,7 +96,7 @@ const Footer = () => {
   }, []);
 
   // -------------------------------
-  // Mobile Bottom Nav
+  // Mobile Bottom Nav (Old version - kept for backward compatibility)
   // -------------------------------
   const mobileNavLinks = [
     { href: "/", icon: <IoHomeOutline />, text: "Home" },
@@ -210,7 +211,7 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Sticky Mobile Footer Navigation */}
+      {/* Sticky PWA Footer Navigation (Old version) */}
       <div className={styles.pwa_footer}>
         <nav>
           <ul>
@@ -237,6 +238,63 @@ const Footer = () => {
           </ul>
         </nav>
       </div>
+
+      {/* New Bottom Navigation (Modern Design) */}
+      <nav className={styles.bottomNav}>
+        <button 
+          className={`${styles.navItem} ${location.pathname === "/" ? styles.active : ""}`} 
+          onClick={() => navigate("/")}
+        >
+          <div className={styles.iconCircle}>
+            <Home size={22} />
+          </div>
+          <span className={styles.label}>Home</span>
+          {location.pathname === "/" && <span className={styles.activeLine} />}
+        </button>
+
+        <button 
+          className={`${styles.navItem} ${location.pathname.startsWith("/talk-to-astrologers") || location.pathname.startsWith("/chat-with-astrologers") ? styles.active : ""}`} 
+          onClick={() => navigate("/talk-to-astrologers")}
+        >
+          <div className={styles.iconCircle}>
+            <Compass size={22} />
+          </div>
+          <span className={styles.label}>Explore</span>
+          {(location.pathname.startsWith("/talk-to-astrologers") || location.pathname.startsWith("/chat-with-astrologers")) && <span className={styles.activeLine} />}
+        </button>
+
+        <button 
+          className={styles.liveItem} 
+          onClick={() => navigate("/astrologer-live")}
+        >
+          <div className={styles.liveCircle}>
+            <Radio size={22} />
+          </div>
+          <span className={styles.liveLabel}>LIVE</span>
+        </button>
+
+        <button 
+          className={`${styles.navItem} ${location.pathname.startsWith("/shop") ? styles.active : ""}`} 
+          onClick={() => navigate("/shop")}
+        >
+          <div className={styles.iconCircle}>
+            <Store size={22} />
+          </div>
+          <span className={styles.label}>Shop</span>
+          {location.pathname.startsWith("/shop") && <span className={styles.activeLine} />}
+        </button>
+
+        <button 
+          className={`${styles.navItem} ${location.pathname.startsWith("/profile") ? styles.active : ""}`} 
+          onClick={() => navigate("/profile")}
+        >
+          <div className={styles.iconCircle}>
+            <UserRound size={22} />
+          </div>
+          <span className={styles.label}>Profile</span>
+          {location.pathname.startsWith("/profile") && <span className={styles.activeLine} />}
+        </button>
+      </nav>
     </footer>
   );
 };

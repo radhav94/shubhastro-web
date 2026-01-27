@@ -95,12 +95,12 @@
 
 .bannerBox {
   background: url("/path/banner-bg.png") center/cover no-repeat;
-  background: #fffdf0;
+  background: #f7560010;
   padding: 25px 15px;
   border-radius: 16px;
   text-align: center;
   margin-bottom: 28px;
-  border: 2px solid #ffe680;
+  border: 2px solid #f7580069;
   
   @media (max-width: 768px) {
     padding: 20px 12px;
@@ -159,11 +159,13 @@
   }
 
   .callBtn {
-    background: #ffd33f;
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+    color: #fff;
   }
 
   .chatBtn {
-    background: #ffd33f;
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+    color: #fff;
   }
 }
 
