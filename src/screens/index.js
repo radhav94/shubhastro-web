@@ -29,11 +29,11 @@ export { default as Tithi } from "./private/panchang/tithi/Tithi";
 export { default as Kundli } from "./private/kundli/Kundali";
 export { default as Numerology } from "./private/numerology/Numerology";
 
-export { default as MatchMaking } from "./private/matchmaking/MatchMaking";
+export { default as MatchMaking } from "./private/matchmaking/MatchMakingV2";
 
 export { default as Sadesati } from "./private/sadesati/Sadesati";
 
-export { default as MatchDetails } from "./private/matchmaking/details/MatchDetails";
+export { default as MatchDetails } from "./private/matchmaking/details/MatchDetailsV2";
 
 export { default as Tarot } from "./private/tarot/Tarot";
 export { default as OneCardTarot } from "./private/tarot/oneCardTarot/OneCardTarot";

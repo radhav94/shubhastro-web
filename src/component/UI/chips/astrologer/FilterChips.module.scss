@@ -85,14 +85,14 @@
   .chipIcon {
     font-size: 16px;
   }
-}
 
-.activeChip {
-  border-color: #FFA726;
-  background: #FFF3E0;
-  color: #2C2C2C;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(255, 167, 38, 0.2);
+  &.activeChip {
+    border-color: #FFA726 !important;
+    background: #FFF3E0 !important;
+    color: #2C2C2C !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255, 167, 38, 0.2);
+  }
 }
 
 /* ===========================

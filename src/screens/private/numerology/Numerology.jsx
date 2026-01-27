@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import styles from "./Numerology.module.scss";
 import PrimaryText from "../../../component/PrimaryText";
 import { PATH } from "../../../utils/routes/Paths";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   useGetAllKundlisQuery,
   useCreateKundliMutation,
@@ -12,6 +12,7 @@ import { useLazyGetNumerologyPredictionQuery } from "../../../services/appServic
 import { Toast } from "../../../component";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
+import { getToken } from "../../../utils/token";
 
 const NumerologyWeb = () => {
   const navigate = useNavigate();
@@ -26,6 +27,14 @@ const NumerologyWeb = () => {
     role === "ASTROLOGER"
       ? localStorage.getItem("shubhtalk_astro_token")
       : localStorage.getItem("shubhtalk_customer_token");
+
+  // Check authentication on mount
+  useEffect(() => {
+    const authToken = getToken();
+    if (!authToken) {
+      navigate("/login?skip=welcome");
+    }
+  }, [navigate]);
 
   // API Hooks
   const { data, isLoading, refetch } = useGetAllKundlisQuery(undefined, {
@@ -464,9 +473,16 @@ const NumerologyWeb = () => {
 
       {/* TALK TO EXPERT BUTTON (Full Width) */}
       <section className={styles.fullWidthExpertSection}>
-        <button className={styles.fullWidthExpertBtn}>
-          Talk to a Numerology Expert
-        </button>
+        <Link
+          to={PATH.privateRoutes.Chat_With_ASTROLOGER.path}
+          state={{
+            selectedType: "Numerology",
+          }}
+        >
+          <button className={styles.fullWidthExpertBtn}>
+            Talk to a Numerology Expert
+          </button>
+        </Link>
       </section>
 
       {/* WHAT THIS MEANS FOR YOU */}
@@ -502,7 +518,14 @@ const NumerologyWeb = () => {
         <div className={styles.expertCard}>
           <div className={styles.expertContent}>
             <h3 className={styles.expertTitle}>Talk to a Numerology Expert</h3>
-            <button className={styles.consultBtn}>Consult Now →</button>
+            <Link
+              to={PATH.privateRoutes.Chat_With_ASTROLOGER.path}
+              state={{
+                selectedType: "Numerology",
+              }}
+            >
+              <button className={styles.consultBtn}>Consult Now →</button>
+            </Link>
           </div>
           <div className={styles.expertImage}>
             {/* Placeholder for expert image */}
@@ -533,7 +556,14 @@ const NumerologyWeb = () => {
         <div className={styles.expertCard}>
           <div className={styles.expertContent}>
             <h3 className={styles.expertTitle}>Get Detailed Year Guidance</h3>
-            <button className={styles.consultBtn}>Consult Now →</button>
+            <Link
+              to={PATH.privateRoutes.Chat_With_ASTROLOGER.path}
+              state={{
+                selectedType: "Numerology",
+              }}
+            >
+              <button className={styles.consultBtn}>Consult Now →</button>
+            </Link>
           </div>
           <div className={styles.expertImage}>
             {/* Placeholder for guidance image */}
