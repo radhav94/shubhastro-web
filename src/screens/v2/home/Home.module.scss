@@ -1148,8 +1148,8 @@
 }
 
 .astrologerImageWrapper {
-  width: 24vh;
-  height: 24vh;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   overflow: hidden;
   margin-bottom: 16px;
@@ -1267,9 +1267,11 @@
 }
 
 .lifeAreaGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  overflow: auto;
+  // grid-template-columns: 1fr 1fr;
   gap: 12px;
+  padding-bottom: 10px;
 }
 
 .lifeAreaCard {
@@ -1286,6 +1288,12 @@
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   min-height: 140px;
   position: relative;
+  width: 340px;
+  gap: 20px;
+  flex-shrink: 0;
+  @media screen and (width <= 767px) {
+    width: 220px;
+  }
 }
 
 .lifeAreaCard:hover {
