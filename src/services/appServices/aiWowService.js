@@ -1,4 +1,4 @@
-import { privatePost } from '../privateRequest';
+import { privatePost, privateGet } from '../privateRequest';
 
 /**
  * Helper function to get profile data from localStorage
@@ -498,6 +498,122 @@ const base64ToBlob = async (base64String) => {
 };
 
 /**
+ * Aura Analysis API Service
+ * Analyzes aura colors and energy from an uploaded image
+ * @param {File|Blob|string} imageData - Image file, blob, or base64 string
+ * @returns {Promise} API response with analysis results
+ */
+export const analyzeAura = async (imageData) => {
+  try {
+    const formData = new FormData();
+    
+    if (imageData instanceof File || imageData instanceof Blob) {
+      formData.append('image', imageData);
+    } else if (typeof imageData === 'string') {
+      const blob = await base64ToBlob(imageData);
+      formData.append('image', blob, 'aura-image.jpg');
+    } else {
+      throw new Error('Invalid image data format');
+    }
+
+    // Add profile data
+    const profileData = getProfileData();
+    if (profileData) {
+      Object.keys(profileData).forEach(key => {
+        formData.append(key, profileData[key]);
+      });
+      
+      // Add sun sign, moon sign, and ascendant if available
+      const kundliData = localStorage.getItem('selectedKundliProfile');
+      if (kundliData) {
+        try {
+          const kundli = JSON.parse(kundliData);
+          if (kundli.sunSign) formData.append('sunSign', kundli.sunSign);
+          if (kundli.moonSign) formData.append('moonSign', kundli.moonSign);
+          if (kundli.ascendant) formData.append('ascendant', kundli.ascendant);
+        } catch (e) {
+          console.error('Error parsing kundli data:', e);
+        }
+      }
+    }
+
+    const response = await privatePost(
+      'wow-suite/aura/generate',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 60000,
+      }
+    );
+
+    return {
+      success: true,
+      data: response.data,
+    };
+  } catch (error) {
+    console.error('Aura analysis error:', error);
+    
+    // Extract error details from response
+    const errorData = error.response?.data;
+    const errorCode = errorData?.error?.code || error.response?.status || 'UNKNOWN_ERROR';
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Analysis failed'
+    );
+    
+    // Handle specific error cases (interceptor already showed toast)
+    if (error.code === 'ECONNABORTED') {
+      return {
+        success: false,
+        error: 'Request timeout. Please try again.',
+        code: 'TIMEOUT'
+      };
+    } else if (error.response?.status === 413) {
+      return {
+        success: false,
+        error: 'Image file is too large',
+        code: 'FILE_TOO_LARGE'
+      };
+    } else if (error.response?.status === 415) {
+      return {
+        success: false,
+        error: 'Invalid image format',
+        code: 'INVALID_FORMAT'
+      };
+    } else if (error.response?.status === 500) {
+      return {
+        success: false,
+        error: errorMessage,
+        code: 'SERVER_ERROR'
+      };
+    } else if (errorData?.error?.code === 'AI_ERROR') {
+      return {
+        success: false,
+        error: errorMessage,
+        code: 'AI_ERROR'
+      };
+    } else if (!error.response) {
+      return {
+        success: false,
+        error: 'Network error. Please check your connection.',
+        code: 'NETWORK_ERROR'
+      };
+    }
+    
+    // Generic error handling
+    return {
+      success: false,
+      error: errorMessage,
+      code: errorCode
+    };
+  }
+};
+
+/**
  * Gemstone Analysis API Service
  * Analyzes gemstone authenticity from an uploaded image
  * @param {File|Blob|string} imageData - Image file, blob, or base64 string
@@ -596,6 +712,393 @@ export const analyzeGemstone = async (imageData) => {
       success: false,
       error: errorMessage,
       code: errorCode
+    };
+  }
+};
+
+/**
+ * Talk to Kundli Chat API Services
+ * AI-powered chat assistant based on user's birth chart
+ */
+
+/**
+ * Start a new Kundli chat session
+ * @param {Object} kundliData - Birth chart data
+ * @returns {Promise} API response with session ID and welcome message
+ */
+export const startKundliChat = async (kundliData) => {
+  try {
+    const response = await privatePost(
+      'companion-suite/kundli-chat/start',
+      { kundliData }
+    );
+
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Start Kundli chat error:', error);
+    
+    const errorData = error.response?.data;
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Failed to start chat session'
+    );
+    
+    return {
+      success: false,
+      error: errorMessage,
+      code: error.response?.status || 'UNKNOWN_ERROR'
+    };
+  }
+};
+
+/**
+ * Send a message in Kundli chat session
+ * @param {string} sessionId - Active session ID
+ * @param {string} message - User's message
+ * @returns {Promise} API response with AI's reply
+ */
+export const sendKundliChatMessage = async (sessionId, message) => {
+  try {
+    const response = await privatePost(
+      'companion-suite/kundli-chat/message',
+      { sessionId, message }
+    );
+
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Send Kundli chat message error:', error);
+    
+    const errorData = error.response?.data;
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Failed to send message'
+    );
+    
+    return {
+      success: false,
+      error: errorMessage,
+      code: error.response?.status || 'UNKNOWN_ERROR'
+    };
+  }
+};
+
+/**
+ * Karmic Debt Tracker API Service
+ * Analyze karmic debt based on birth date numerology
+ * @param {Object} data - Birth date information
+ * @returns {Promise} API response with karmic analysis
+ */
+export const analyzeKarmicDebt = async (data) => {
+  try {
+    const response = await privatePost(
+      'action-suite/karmic-debt/Analyze',
+      data
+    );
+
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Karmic debt analysis error:', error);
+    
+    const errorData = error.response?.data;
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Failed to analyze karmic debt'
+    );
+    
+    return {
+      success: false,
+      error: errorMessage,
+      code: error.response?.status || 'UNKNOWN_ERROR'
+    };
+  }
+};
+
+/**
+ * Smart Matchmaking API Service
+ * Complete matchmaking profile for AI-powered compatibility
+ * @param {Object} profileData - Complete profile information
+ * @returns {Promise} API response with profile creation result
+ */
+export const completeMatchmakingProfile = async (profileData) => {
+  try {
+    const response = await privatePost(
+      'action-suite/smart-matchmaking/profile/complete',
+      profileData
+    );
+
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Matchmaking profile error:', error);
+    
+    const errorData = error.response?.data;
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Failed to complete profile'
+    );
+    
+    return {
+      success: false,
+      error: errorMessage,
+      code: error.response?.status || 'UNKNOWN_ERROR'
+    };
+  }
+};
+
+/**
+ * Agentic Calendar API Service
+ * Analyze events and get astrologically optimal timing recommendations
+ * @param {Array<string>} events - List of events to analyze
+ * @returns {Promise} API response with timing recommendations
+ */
+export const analyzeCalendarEvents = async (events) => {
+  try {
+    const response = await privatePost(
+      'companion-suite/agentic-calendar/analyze',
+      { events }
+    );
+
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Calendar analysis error:', error);
+    
+    const errorData = error.response?.data;
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Failed to analyze events'
+    );
+    
+    return {
+      success: false,
+      error: errorMessage,
+      code: error.response?.status || 'UNKNOWN_ERROR'
+    };
+  }
+};
+
+/**
+ * Dream Interpreter API Service
+ * Interpret dreams with psychological and astrological insights
+ * @param {Object} dreamData - Dream description and user context
+ * @returns {Promise} API response with dream interpretation
+ */
+export const interpretDream = async (dreamData) => {
+  try {
+    const response = await privatePost(
+      'companion-suite/dream-interpreter/interpret',
+      dreamData
+    );
+
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Dream interpretation error:', error);
+    
+    const errorData = error.response?.data;
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Failed to interpret dream'
+    );
+    
+    return {
+      success: false,
+      error: errorMessage,
+      code: error.response?.status || 'UNKNOWN_ERROR'
+    };
+  }
+};
+
+/**
+ * Daily Cosmic Briefing API Service
+ * Get personalized daily horoscope based on zodiac sign and birth details
+ * @param {string} zodiacSign - User's zodiac sign (e.g., 'Taurus', 'Aries')
+ * @param {Object} params - Birth details and location
+ * @returns {Promise} API response with daily briefing
+ */
+export const getDailyCosmicBriefing = async (zodiacSign, params) => {
+  try {
+    const queryParams = new URLSearchParams({
+      name: params.name,
+      gender: params.gender,
+      day: String(params.day),
+      month: String(params.month),
+      year: String(params.year),
+      hour: String(params.hour),
+      min: String(params.min),
+      second: String(params.second),
+      place: params.place,
+      lat: String(params.lat),
+      lon: String(params.lon),
+      tzone: String(params.tzone)
+    }).toString();
+
+    const response = await privateGet(
+      `companion-suite/daily-horoscope/${zodiacSign}?${queryParams}`
+    );
+
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Daily cosmic briefing error:', error);
+    
+    const errorData = error.response?.data;
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Failed to fetch daily briefing'
+    );
+    
+    return {
+      success: false,
+      error: errorMessage,
+      code: error.response?.status || 'UNKNOWN_ERROR'
+    };
+  }
+};
+
+/**
+ * Cosmic Chat API Services
+ * AI-powered cosmic guidance based on user's birth chart and planetary transits
+ */
+
+/**
+ * Start a new Cosmic Chat session
+ * @param {Object} kundliData - Birth chart data with cosmic details
+ * @returns {Promise} API response with session ID and welcome message
+ */
+export const startCosmicChat = async (kundliData) => {
+  try {
+    const response = await privatePost(
+      'wow-suite/cosmic-chat/session',
+      { 
+        userId: '',
+        kundliData,
+        isGuestSession: true
+      }
+    );
+
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Start Cosmic chat error:', error);
+    
+    const errorData = error.response?.data;
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Failed to start cosmic chat session'
+    );
+    
+    return {
+      success: false,
+      error: errorMessage,
+      code: error.response?.status || 'UNKNOWN_ERROR'
+    };
+  }
+};
+
+/**
+ * Send a message in Cosmic Chat session
+ * @param {string} sessionId - Active session ID
+ * @param {string} message - User's message
+ * @returns {Promise} API response with AI's cosmic guidance
+ */
+export const sendCosmicChatMessage = async (sessionId, message) => {
+  try {
+    const response = await privatePost(
+      'wow-suite/cosmic-chat/message',
+      { sessionId, message }
+    );
+
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Send Cosmic chat message error:', error);
+    
+    const errorData = error.response?.data;
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Failed to send message'
+    );
+    
+    return {
+      success: false,
+      error: errorMessage,
+      code: error.response?.status || 'UNKNOWN_ERROR'
+    };
+  }
+};
+
+/**
+ * AstroVitals API Service
+ * Sync health vitals with astrological insights
+ * @param {Object} vitalsData - Health vitals and birth details
+ * @returns {Promise} API response with health insights
+ */
+export const syncAstroVitals = async (vitalsData) => {
+  try {
+    const response = await privatePost(
+      'action-suite/astro-vitals/data-sync',
+      vitalsData
+    );
+
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('AstroVitals sync error:', error);
+    
+    const errorData = error.response?.data;
+    const errorMessage = String(
+      errorData?.error?.message || 
+      errorData?.message || 
+      error.message || 
+      'Failed to sync vitals'
+    );
+    
+    return {
+      success: false,
+      error: errorMessage,
+      code: error.response?.status || 'UNKNOWN_ERROR'
     };
   }
 };
