@@ -260,6 +260,8 @@ const Profile = () => {
     localStorage.removeItem("userData");
     localStorage.removeItem("astro_wallet_balance");
 
+    window.dispatchEvent(new Event("auth-change"));
+
     // Navigate to home page
     navigate("/");
   };
@@ -453,11 +455,13 @@ const Profile = () => {
                         • {String(kundli.hour).padStart(2, "0")}:
                         {String(kundli.min).padStart(2, "0")} PM
                       </p>
-                      <p className={styles.profileCardLocation}>{kundli.place}</p>
+                      <p className={styles.profileCardLocation}>
+                        {kundli.place}
+                      </p>
                     </div>
                   </div>
                 ))}
-                
+
                 {/* Add Profile Button - now part of the list */}
                 <button
                   className={styles.addProfileButton}
