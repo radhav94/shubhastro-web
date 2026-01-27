@@ -35,6 +35,7 @@ import ChatAstrologerCard from "../../../component/UI/cards/ChatAstrologerCard";
 import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import RecommendedAstrologerCard from "../../../component/UI/cards/RecommendedAstrologerCard";
+import TopAstrologerCard from "../../../component/UI/cards/TopAstrologerCard";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -176,6 +177,7 @@ const TalkToAstrologer = () => {
 
   const [page, setPage] = useState(1);
   const [specialty, setSpecialty] = useState("");
+  const [topTenAstrologers, setTopTenAstrologers] = useState([]);
   const [allAstrologers, setAllAstrologers] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [callRoomId, setCallRoomId] = useState(null);
@@ -210,13 +212,18 @@ const TalkToAstrologer = () => {
     navigate(".", { replace: true, state: null });
   }, [location]);
 
-  const { data: astrodata, isFetching } = useGetAstrologersQuery({
-    page,
-    limit,
-    specialties: specialty || "",
-    isActiveType,
-    ...(isActiveOnline === true && { isActive: true }),
-  });
+  const { data: astrodata, isFetching } = useGetAstrologersQuery(
+    {
+      page,
+      limit,
+      specialties: specialty || "",
+      isActiveType,
+      ...(isActiveOnline === true && { isActive: true }),
+    },
+    {
+      skip: isFiltered, // Skip normal API when in filtered mode
+    },
+  );
 
   const { data: recommendedData, isLoading: isLoadingRecommended } =
     useGetRecommendedAstrologersQuery();
@@ -228,23 +235,32 @@ const TalkToAstrologer = () => {
   const [getBalance] = useGetBalanceMutation();
 
   useEffect(() => {
+    const incomingTopTen = astrodata?.data?.topTenAstrologer;
+
+    if (
+      incomingTopTen &&
+      incomingTopTen.length > 0 &&
+      topTenAstrologers.length === 0
+    ) {
+      setTopTenAstrologers(incomingTopTen);
+    }
+  }, [astrodata?.data?.topTenAstrologer]);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
     setPage(1);
     setAllAstrologers([]);
     setHasMore(true);
+    setIsFiltered(false);
   }, []);
 
-  // MERGE API DATA
+  // MERGE API DATA - only for normal (non-filtered) mode
   useEffect(() => {
-    if (!data) return;
+    if (isFiltered) return; // Don't process normal API data when in filtered mode
+    if (!data || data.length === 0) return;
 
-    // Ensure data is always an array
-    const astrologersList = Array.isArray(data) ? data : [];
-
-    // If same data count as current list → stop update → stop loop
     if (page === 1) {
-      if (allAstrologers.length === astrologersList.length) return;
-      setAllAstrologers(astrologersList);
+      setAllAstrologers(data);
     } else {
       setAllAstrologers((prev) => {
         const existingIds = new Set(prev.map((i) => i._id));
@@ -254,44 +270,48 @@ const TalkToAstrologer = () => {
       });
     }
 
-    setHasMore(astrologersList.length >= limit);
-  }, [data, page, activeType]);
+    setHasMore(data.length >= limit);
+  }, [data, page, isFiltered]);
 
   const hasMoreRef = useRef(hasMore);
   const isFetchingRef = useRef(isFetching);
+  const isFilteredRef = useRef(isFiltered);
   const loadMoreRef = useRef(null);
+  const initialLoadComplete = useRef(false);
 
   // Keep refs updated
   useEffect(() => {
     hasMoreRef.current = hasMore;
     isFetchingRef.current = isFetching;
-  }, [hasMore, isFetching]);
+    isFilteredRef.current = isFiltered;
+  }, [hasMore, isFetching, isFiltered]);
 
-  // Auto-load if no scrollbar exists (important!)
+  // Mark when initial data is loaded
   useEffect(() => {
-    if (isFiltered) return;
-
-    if (
-      document.documentElement.scrollHeight <= window.innerHeight &&
-      hasMoreRef.current &&
-      !isFetchingRef.current
-    ) {
-      setPage((prev) => prev + 1);
+    if (allAstrologers.length > 0 && page === 1 && !isFiltered) {
+      initialLoadComplete.current = true;
     }
-  }, [allAstrologers, isFiltered]);
+  }, [allAstrologers.length, page, isFiltered]);
 
+  // Intersection Observer for infinite scroll - only in normal mode
   useEffect(() => {
-    if (isFiltered || !hasMore || isFetching) return;
+    // Don't set up observer until initial data is loaded
+    if (isFiltered || !hasMore || isFetching || !initialLoadComplete.current)
+      return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (
+          entries[0].isIntersecting &&
+          !isFilteredRef.current &&
+          !isFetchingRef.current
+        ) {
           setPage((prev) => prev + 1);
         }
       },
       {
         threshold: 0.1,
-        rootMargin: "100px",
+        rootMargin: "50px",
       },
     );
 
@@ -305,7 +325,7 @@ const TalkToAstrologer = () => {
         observer.unobserve(currentRef);
       }
     };
-  }, [isFetching, hasMore, isFiltered, allAstrologers, page]);
+  }, [isFetching, hasMore, isFiltered, allAstrologers.length]);
 
   // Filter handlers
   const resetFilters = () => {
@@ -318,6 +338,7 @@ const TalkToAstrologer = () => {
 
   const handleSelect = (category) => {
     if (!category) {
+      // Reset to normal pagination mode
       resetFilters();
     } else {
       setSpecialty(category);
@@ -328,38 +349,29 @@ const TalkToAstrologer = () => {
     }
   };
 
-  // const handleApplyFilters = (payload) => {
-  //   setIsFiltered(true);
-  //   setPage(1);
-  //   setAllAstrologers(payload.result || []);
-  //   setHasMore(false); // stop infinite scroll
-  // };
-
   const handleApplyFilters = (payload) => {
     const {
       result: { result: filteredData },
       append = false,
     } = payload || {};
 
-    console.log(filteredData, "filteredData");
-    console.log(allAstrologers, "allAstrologers");
-
     setIsFiltered(true);
 
     if (!append) {
-      // 🔹 first page OR new filter → reset list
-      setPage(1);
-      setAllAstrologers(filteredData);
+      // First page OR new filter → reset list
+      setAllAstrologers(filteredData || []);
     } else {
-      // 🔹 scroll load → append only new items
+      // Scroll load → append only new items
       setAllAstrologers((prev) => {
         const existingIds = new Set(prev.map((i) => i._id));
-        const newOnes = filteredData.filter((i) => !existingIds.has(i._id));
+        const newOnes = (filteredData || []).filter(
+          (i) => !existingIds.has(i._id),
+        );
         return [...prev, ...newOnes];
       });
     }
 
-    setHasMore(filteredData.length >= limit);
+    setHasMore((filteredData || []).length >= limit);
   };
 
   // Custom handler for profile selection (doesn't close modal)
@@ -594,8 +606,77 @@ const TalkToAstrologer = () => {
         isOnlineFromURL={isOnlineFromURL}
       />
 
+      {/* Top Astrologers Section - New Design */}
+      {topTenAstrologers.length > 0 && (
+        <>
+          <div className={styles.sectionDivider}>
+            <h2 className={styles.sectionTitle}>TOP ASTROLOGERS FOR YOU</h2>
+            <div className={styles.dividerContainer}>
+              <div className={styles.dividerLine}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="104"
+                  height="1"
+                  viewBox="0 0 104 1"
+                  fill="none"
+                >
+                  <path
+                    d="M103.803 0.406393C103.803 0.630933 101.504 0.812789 98.669 0.812789C95.8336 0.812789 0 0.630933 0 0.406393C0 0.181853 95.8342 0 98.669 0C101.504 0 103.803 0.181853 103.803 0.406393Z"
+                    fill="#030303"
+                  />
+                </svg>
+              </div>
+              <span className={styles.dividerMoon}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="16"
+                  viewBox="0 0 4 5"
+                  fill="none"
+                >
+                  <path
+                    d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z"
+                    fill="#030303"
+                  />
+                </svg>
+              </span>
+              <div className={styles.dividerLine}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="104"
+                  height="1"
+                  viewBox="0 0 104 1"
+                  fill="none"
+                >
+                  <path
+                    d="M-4.48009e-06 0.406393C-4.48009e-06 0.630933 2.29856 0.812789 5.13401 0.812789C7.96946 0.812789 103.803 0.630933 103.803 0.406393C103.803 0.181853 7.96885 0 5.13401 0C2.29856 0 -4.48009e-06 0.181853 -4.48009e-06 0.406393Z"
+                    fill="#030303"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.topAstrologersGrid}>
+            {topTenAstrologers.map((astro) => (
+              <TopAstrologerCard
+                key={astro._id}
+                data={astro}
+                onConnect={() => {
+                  setSelectedAstrologer(astro);
+                  setIsConnectPopupOpen(true);
+                  activeCallAstroRef.current = astro;
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Explore Astrologers Section - Original Design */}
+
       <div className={styles.sectionDivider}>
-        <h2 className={styles.sectionTitle}>TOP ASTROLOGERS FOR YOU</h2>
+        <h2 className={styles.sectionTitle}>EXPLORE ASTROLOGERS</h2>
         <div className={styles.dividerContainer}>
           <div className={styles.dividerLine}>
             <svg
