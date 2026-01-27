@@ -11,7 +11,10 @@ import {
 import styles from "./TalkToAstrologer.module.scss";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTalkToAstrologer } from "./useTalkToAstrologer";
-import { useGetAstrologersQuery, useGetRecommendedAstrologersQuery } from "../../../redux/api/astrologer/astrologerApi";
+import {
+  useGetAstrologersQuery,
+  useGetRecommendedAstrologersQuery,
+} from "../../../redux/api/astrologer/astrologerApi";
 import FilterChips from "../../../component/UI/chips/astrologer/FilterChips";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import ProfileModals from "../kundli/components/ProfileModals";
@@ -82,7 +85,7 @@ const TalkToAstrologer = () => {
   };
 
   const [{ isActiveOnline, isActiveType }, setActiveConfig] = useState(
-    getActiveConfigFromURL()
+    getActiveConfigFromURL(),
   );
 
   useEffect(() => {
@@ -215,9 +218,10 @@ const TalkToAstrologer = () => {
     ...(isActiveOnline === true && { isActive: true }),
   });
 
-  const { data: recommendedData, isLoading: isLoadingRecommended } = useGetRecommendedAstrologersQuery();
+  const { data: recommendedData, isLoading: isLoadingRecommended } =
+    useGetRecommendedAstrologersQuery();
 
-  const data = astrodata?.data || [];
+  const data = astrodata?.data?.result || [];
   const recommendedAstrologers = recommendedData?.data || [];
   const token = getToken();
   const { balance } = useWalletBalance();
@@ -282,10 +286,10 @@ const TalkToAstrologer = () => {
           setPage((prev) => prev + 1);
         }
       },
-      { 
+      {
         threshold: 0.1,
-        rootMargin: '100px'
-      }
+        rootMargin: "100px",
+      },
     );
 
     const currentRef = loadMoreRef.current;
@@ -329,24 +333,30 @@ const TalkToAstrologer = () => {
   // };
 
   const handleApplyFilters = (payload) => {
-    const { result = [], append = false } = payload || {};
+    const {
+      result: { result: filteredData },
+      append = false,
+    } = payload || {};
+
+    console.log(filteredData, "filteredData");
+    console.log(allAstrologers, "allAstrologers");
 
     setIsFiltered(true);
 
     if (!append) {
       // 🔹 first page OR new filter → reset list
       setPage(1);
-      setAllAstrologers(result);
+      setAllAstrologers(filteredData);
     } else {
       // 🔹 scroll load → append only new items
       setAllAstrologers((prev) => {
         const existingIds = new Set(prev.map((i) => i._id));
-        const newOnes = result.filter((i) => !existingIds.has(i._id));
+        const newOnes = filteredData.filter((i) => !existingIds.has(i._id));
         return [...prev, ...newOnes];
       });
     }
 
-    setHasMore(result.length >= limit);
+    setHasMore(filteredData.length >= limit);
   };
 
   // Custom handler for profile selection (doesn't close modal)
@@ -358,7 +368,10 @@ const TalkToAstrologer = () => {
   // Handler for Continue button (triggers socket emit)
   const handleContinueAfterKundliSelect = () => {
     if (localSelectedProfile) {
-      console.log("✅ TALK_TO_ASTROLOGER: Continue clicked with profile", localSelectedProfile);
+      console.log(
+        "✅ TALK_TO_ASTROLOGER: Continue clicked with profile",
+        localSelectedProfile,
+      );
       hookHandleAfterKundliSelect(localSelectedProfile);
     }
   };
@@ -425,7 +438,12 @@ const TalkToAstrologer = () => {
       setCallWaitingList(data?.waitingTime || 5);
     };
 
-    const handleCallAccepted = async ({ roomId, token, type, remainingTime }) => {
+    const handleCallAccepted = async ({
+      roomId,
+      token,
+      type,
+      remainingTime,
+    }) => {
       resetCallFlow();
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
@@ -450,7 +468,7 @@ const TalkToAstrologer = () => {
           astrologerId: astro._id,
           kundliId,
           astrologerID: astro?.astrologer_ID,
-          remainingTime
+          remainingTime,
         });
       } catch {
         Toast.error("Failed to start call");
@@ -503,7 +521,8 @@ const TalkToAstrologer = () => {
     /* REJECTED */
     const handleCallRejected = (data) => {
       const errorMsg =
-        data?.sessionData?.sessionEndReason === "rejected" && data?.type === "chat"
+        data?.sessionData?.sessionEndReason === "rejected" &&
+        data?.type === "chat"
           ? "Astrologer has rejected the chat request"
           : "Astrologer has rejected the call request";
       Toast.error(errorMsg);
@@ -560,7 +579,8 @@ const TalkToAstrologer = () => {
     <div className={styles.mainContainer}>
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>
-          Chat With Best <span className={styles.highlight}>Astrologers</span> Online
+          Chat With Best <span className={styles.highlight}>Astrologers</span>{" "}
+          Online
         </h1>
       </div>
 
@@ -575,25 +595,52 @@ const TalkToAstrologer = () => {
         <h2 className={styles.sectionTitle}>TOP ASTROLOGERS FOR YOU</h2>
         <div className={styles.dividerContainer}>
           <div className={styles.dividerLine}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="104" height="1" viewBox="0 0 104 1" fill="none">
-              <path d="M103.803 0.406393C103.803 0.630933 101.504 0.812789 98.669 0.812789C95.8336 0.812789 0 0.630933 0 0.406393C0 0.181853 95.8342 0 98.669 0C101.504 0 103.803 0.181853 103.803 0.406393Z" fill="#030303"/>
-            </svg>  
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="104"
+              height="1"
+              viewBox="0 0 104 1"
+              fill="none"
+            >
+              <path
+                d="M103.803 0.406393C103.803 0.630933 101.504 0.812789 98.669 0.812789C95.8336 0.812789 0 0.630933 0 0.406393C0 0.181853 95.8342 0 98.669 0C101.504 0 103.803 0.181853 103.803 0.406393Z"
+                fill="#030303"
+              />
+            </svg>
           </div>
           <span className={styles.dividerMoon}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 4 5" fill="none">
-              <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="15"
+              height="16"
+              viewBox="0 0 4 5"
+              fill="none"
+            >
+              <path
+                d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z"
+                fill="#030303"
+              />
             </svg>
           </span>
           <div className={styles.dividerLine}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="104" height="1" viewBox="0 0 104 1" fill="none">
-              <path d="M-4.48009e-06 0.406393C-4.48009e-06 0.630933 2.29856 0.812789 5.13401 0.812789C7.96946 0.812789 103.803 0.630933 103.803 0.406393C103.803 0.181853 7.96885 0 5.13401 0C2.29856 0 -4.48009e-06 0.181853 -4.48009e-06 0.406393Z" fill="#030303"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="104"
+              height="1"
+              viewBox="0 0 104 1"
+              fill="none"
+            >
+              <path
+                d="M-4.48009e-06 0.406393C-4.48009e-06 0.630933 2.29856 0.812789 5.13401 0.812789C7.96946 0.812789 103.803 0.630933 103.803 0.406393C103.803 0.181853 7.96885 0 5.13401 0C2.29856 0 -4.48009e-06 0.181853 -4.48009e-06 0.406393Z"
+                fill="#030303"
+              />
             </svg>
           </div>
         </div>
       </div>
 
       <div className={styles.cardsContainer}>
-        {allAstrologers.map((astro, index) => (
+        {allAstrologers?.map((astro, index) => (
           <div key={astro._id} className={styles.cardWrapper}>
             {isChatMode ? (
               <ChatAstrologerCard
@@ -648,23 +695,51 @@ const TalkToAstrologer = () => {
       {!hasMore && allAstrologers.length > 0 && (
         <div className={styles.matchSection}>
           <h2 className={styles.matchTitle}>
-            NOT SURE?<br />
+            NOT SURE?
+            <br />
             LET US MATCH YOU.
           </h2>
           <div className={styles.dividerContainer}>
             <div className={styles.dividerLine}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="104" height="1" viewBox="0 0 104 1" fill="none">
-                <path d="M103.803 0.406393C103.803 0.630933 101.504 0.812789 98.669 0.812789C95.8336 0.812789 0 0.630933 0 0.406393C0 0.181853 95.8342 0 98.669 0C101.504 0 103.803 0.181853 103.803 0.406393Z" fill="#030303"/>
-              </svg>  
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="104"
+                height="1"
+                viewBox="0 0 104 1"
+                fill="none"
+              >
+                <path
+                  d="M103.803 0.406393C103.803 0.630933 101.504 0.812789 98.669 0.812789C95.8336 0.812789 0 0.630933 0 0.406393C0 0.181853 95.8342 0 98.669 0C101.504 0 103.803 0.181853 103.803 0.406393Z"
+                  fill="#030303"
+                />
+              </svg>
             </div>
             <span className={styles.dividerMoon}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 4 5" fill="none">
-                <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="16"
+                viewBox="0 0 4 5"
+                fill="none"
+              >
+                <path
+                  d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z"
+                  fill="#030303"
+                />
               </svg>
             </span>
             <div className={styles.dividerLine}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="104" height="1" viewBox="0 0 104 1" fill="none">
-                <path d="M-4.48009e-06 0.406393C-4.48009e-06 0.630933 2.29856 0.812789 5.13401 0.812789C7.96946 0.812789 103.803 0.630933 103.803 0.406393C103.803 0.181853 7.96885 0 5.13401 0C2.29856 0 -4.48009e-06 0.181853 -4.48009e-06 0.406393Z" fill="#030303"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="104"
+                height="1"
+                viewBox="0 0 104 1"
+                fill="none"
+              >
+                <path
+                  d="M-4.48009e-06 0.406393C-4.48009e-06 0.630933 2.29856 0.812789 5.13401 0.812789C7.96946 0.812789 103.803 0.630933 103.803 0.406393C103.803 0.181853 7.96885 0 5.13401 0C2.29856 0 -4.48009e-06 0.181853 -4.48009e-06 0.406393Z"
+                  fill="#030303"
+                />
               </svg>
             </div>
           </div>
@@ -828,7 +903,7 @@ const TalkToAstrologer = () => {
         <WaitingModal
           callRoomId={callRoomId || chatRoomId}
           resetCallState={resetCallState}
-          connectionType={WaitingList ? 'chat' : 'audio'}
+          connectionType={WaitingList ? "chat" : "audio"}
         />
       )}
     </div>
