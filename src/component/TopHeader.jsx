@@ -148,16 +148,25 @@ const TopHeader = () => {
             Numerology
           </NavLink>
 
-          <NavLink
-            to="/horoscopes/daily-horoscope"
-            className={({ isActive }) =>
-              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-            }
-          >
-            Horoscopes
-          </NavLink>
-        </div>
-      </nav>
+            <NavLink
+              to="/horoscopes/daily-horoscope"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Horoscopes
+            </NavLink>
+
+            <NavLink
+              to="/live-landing"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Live
+            </NavLink>
+          </div>
+        </nav>
       <div className={styles.headerActions}>
         <div className={styles.walletBadge}>
           <div className={styles.coinIcon}></div>

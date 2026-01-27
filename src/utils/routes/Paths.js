@@ -169,6 +169,7 @@ import ProfileV2 from "../../screens/v2/user/Profile";
 import Explore from "../../screens/private/explore/Explore";
 import AddProfile from "../../screens/v2/user/AddProfile";
 import EditProfile from "../../screens/v2/user/EditProfile";
+import LiveLanding from "../../screens/private/live/LiveLanding";
 
 export const PATH = {
   // DEFAULT: {
@@ -226,6 +227,13 @@ export const PATH = {
     ASTRO_LIVE_STREAMING: {
       path: "/astrologer-dashboard/live-streaming",
       element: InteractiveLiveStreaming,
+    },
+
+    LIVE_LANDING: {
+      path: "/live-landing",
+      element: LiveLanding,
+      header: false,
+      footer: false,
     },
 
     AUDIENCE_LIVE_STREAMING: {
