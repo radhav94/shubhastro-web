@@ -15,6 +15,123 @@
     display: block;
   }
 }
+
+.mainLeftMain{
+  display: flex;
+}
+.topHeader {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: #fff;
+  position: relative;
+}
+
+.logoHeader img {
+  height: 40px;
+}
+
+// .logoHeaderMobile {
+//   display: none;
+// }
+
+.headerNavigation {
+  display: flex;
+  flex-direction: row;
+  margin-left: auto;
+
+  a {
+    text-decoration: none;
+    color: #000;
+    font-size: 14px;
+    padding: 8px;
+    &.active{
+      background-color: #a08060;
+    }
+  }
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 16px;
+}
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  font-size: 26px;
+  cursor: pointer;
+  margin-right: 10px;
+  @media screen and (width <= 1180px) {
+    display: block;
+  }
+}
+
+/* Drawer Overlay */
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 99;
+}
+
+/* Drawer */
+.mobileDrawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 80%;
+  max-width: 320px;
+  height: 100%;
+  background: #fff;
+  z-index: 100;
+  padding: 20px;
+  animation: slideIn 0.3s ease forwards;
+
+  a {
+    display: block;
+    padding: 14px 0;
+    font-size: 16px;
+    color: #000;
+    text-decoration: none;
+  }
+}
+
+.drawerClose {
+  font-size: 22px;
+  background: none;
+  border: none;
+  margin-bottom: 20px;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* 📱 Mobile */
+@media (max-width: 768px) {
+  // .hamburger {
+  //   display: block;
+  // }
+
+  // .logoHeader {
+  //   display: none;
+  // }
+
+  // .logoHeaderMobile {
+  //   display: block;
+  // }
+}
+
+
+
 .topHeader {
   display: flex;
   justify-content: space-between;
@@ -31,6 +148,27 @@
   position: sticky;
   top: 0;
   z-index: 100;
+}
+.logoHeader{
+  width: fit-content;
+  height: auto;
+  @media screen and (width <= 767px) {
+    display: none;    
+  }
+  img{
+    width: 100%;
+  }
+}
+.logoHeaderMobile{
+  width: 44px;
+  height: 44px;
+  display: none;
+  @media screen and (width <= 767px) {
+    display: block;    
+  }
+  img{
+    width: 100%;
+  }
 }
 
 .userGreeting {
@@ -71,12 +209,16 @@
 }
 
 .headerNavigation {
-  display: none;
-  flex-direction: column;
-  gap: 0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0px;
   flex: 1;
   align-items: center;
   padding: 0 1rem;
+  @media screen and (width <= 1180px) {
+      display: none!important;
+  }
 }
 
 .navRow {
@@ -225,12 +367,6 @@
   transform: translateY(-1px);
 }
 
-/* Show navigation on tablet and desktop */
-@media (min-width: 768px) {
-  .headerNavigation {
-    display: flex;
-  }
-}
 
 /* Mobile responsive for Header - 375px */
 @media (max-width: 480px) {
@@ -246,6 +382,7 @@
 
   .greetingText {
     gap: 2px;
+    width: 27vw;
   }
 
   .namaste {
