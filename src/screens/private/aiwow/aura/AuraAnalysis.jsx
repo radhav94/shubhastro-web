@@ -1,0 +1,132 @@
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styles from './AuraAnalysis.module.scss';
+import { analyzeAura } from '../../../../services/appServices/aiWowService';
+import { Toast } from '../../../../component';
+
+const AuraAnalysis = () => {
+  const navigate = useNavigate();
+  const [progress, setProgress] = useState(0);
+  const [auraImage, setAuraImage] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisComplete, setAnalysisComplete] = useState(false);
+
+  useEffect(() => {
+    const storedImage = localStorage.getItem('auraImage');
+    if (storedImage) {
+      setAuraImage(storedImage);
+      performAnalysis(storedImage);
+    } else {
+      navigate('/aiwow/aura/instructions');
+      return;
+    }
+  }, [navigate]);
+
+  const performAnalysis = async (imageData) => {
+    setIsAnalyzing(true);
+    
+    try {
+      const progressInterval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 5;
+        });
+      }, 200);
+
+      const result = await analyzeAura(imageData);
+
+      clearInterval(progressInterval);
+
+      if (result.success) {
+        localStorage.setItem('auraResult', JSON.stringify(result.data));
+        
+        setProgress(100);
+        setAnalysisComplete(true);
+        
+        setTimeout(() => {
+          navigate('/aiwow/aura/result');
+        }, 1000);
+      } else {
+        setProgress(0);
+        
+        setTimeout(() => {
+          navigate('/aiwow/aura/instructions');
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Analysis error:', error);
+      
+      setTimeout(() => {
+        navigate('/aiwow/aura/instructions');
+      }, 2000);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleShowResult = () => {
+    if (analysisComplete) {
+      navigate('/aiwow/aura/result');
+    }
+  };
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.content}>
+        <h2 className={styles.title}>Analysing your aura</h2>
+
+        <div className={styles.imageWrapper}>
+          {auraImage ? (
+            <img 
+              src={auraImage} 
+              alt="Aura being analyzed" 
+              className={styles.auraImage}
+            />
+          ) : (
+            <div className={styles.imagePlaceholder}>Loading image...</div>
+          )}
+          <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
+          <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
+          <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
+          <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
+        </div>
+
+        <div className={styles.progressSection}>
+          <div className={styles.progressBar}>
+            <div 
+              className={styles.progressFill} 
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          <div className={styles.progressBar}>
+            <div 
+              className={styles.progressFill} 
+              style={{ width: `${Math.max(0, progress - 20)}%` }}
+            ></div>
+          </div>
+        </div>
+
+        <div className={styles.messageSection}>
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className={styles.sparkleIcon}>
+            <path d="M20 5L22.5 15L30 17.5L22.5 20L20 30L17.5 20L10 17.5L17.5 15L20 5Z" fill="#1f2937"/>
+          </svg>
+          <h3 className={styles.message}>Hold tight as we are analysing your aura</h3>
+        </div>
+
+        <button 
+          className={styles.resultButton}
+          onClick={handleShowResult}
+          disabled={!analysisComplete}
+          style={{ opacity: analysisComplete ? 1 : 0.6 }}
+        >
+          {isAnalyzing ? 'Analyzing...' : 'Show Result'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default AuraAnalysis;
