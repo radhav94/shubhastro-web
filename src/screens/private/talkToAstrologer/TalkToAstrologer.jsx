@@ -217,7 +217,7 @@ const TalkToAstrologer = () => {
 
   const { data: recommendedData, isLoading: isLoadingRecommended } = useGetRecommendedAstrologersQuery();
 
-  const data = astrodata?.data || [];
+  const data = astrodata?.data?.result || [];
   const recommendedAstrologers = recommendedData?.data || [];
   const token = getToken();
   const { balance } = useWalletBalance();
@@ -234,20 +234,23 @@ const TalkToAstrologer = () => {
   useEffect(() => {
     if (!data) return;
 
+    // Ensure data is always an array
+    const astrologersList = Array.isArray(data) ? data : [];
+
     // If same data count as current list → stop update → stop loop
     if (page === 1) {
-      if (allAstrologers.length === data.length) return;
-      setAllAstrologers(data);
+      if (allAstrologers.length === astrologersList.length) return;
+      setAllAstrologers(astrologersList);
     } else {
       setAllAstrologers((prev) => {
         const existingIds = new Set(prev.map((i) => i._id));
-        const newOnes = data.filter((i) => !existingIds.has(i._id));
+        const newOnes = astrologersList.filter((i) => !existingIds.has(i._id));
         if (newOnes.length === 0) return prev;
         return [...prev, ...newOnes];
       });
     }
 
-    setHasMore(data.length >= limit);
+    setHasMore(astrologersList.length >= limit);
   }, [data, page, activeType]);
 
   const hasMoreRef = useRef(hasMore);
@@ -329,24 +332,27 @@ const TalkToAstrologer = () => {
   // };
 
   const handleApplyFilters = (payload) => {
-    const { result = [], append = false } = payload || {};
+    const { result, append = false } = payload || {};
+    
+    // Ensure result is always an array
+    const astrologers = Array.isArray(result) ? result : [];
 
     setIsFiltered(true);
 
     if (!append) {
       // 🔹 first page OR new filter → reset list
       setPage(1);
-      setAllAstrologers(result);
+      setAllAstrologers(astrologers);
     } else {
       // 🔹 scroll load → append only new items
       setAllAstrologers((prev) => {
         const existingIds = new Set(prev.map((i) => i._id));
-        const newOnes = result.filter((i) => !existingIds.has(i._id));
+        const newOnes = astrologers.filter((i) => !existingIds.has(i._id));
         return [...prev, ...newOnes];
       });
     }
 
-    setHasMore(result.length >= limit);
+    setHasMore(astrologers.length >= limit);
   };
 
   // Custom handler for profile selection (doesn't close modal)

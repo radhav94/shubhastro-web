@@ -3,6 +3,12 @@ import ChevronLeft from '../components/ui/ChevronLeft'
 import { Shuffle } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import styles from './TarotCardSelectionPage.module.css'
+import { 
+  useGetLoveTriangleTarotQuery, 
+  useGetRomanticBreakupQuery, 
+  useGetBusinessBreakupQuery 
+} from '../../../../redux/api/tarot/tarotApi'
+import toast from 'react-hot-toast'
 
 const TarotCardSelectionPage = () => {
   const navigate = useNavigate()
@@ -10,13 +16,24 @@ const TarotCardSelectionPage = () => {
   const reading = location.state?.reading || { title: 'Yes/ No Tarot' }
   const cardsData = location.state?.cards || []
   
-  const [currentIndex, setCurrentIndex] = useState(2)
-  const [isDragging, setIsDragging] = useState(false)
-  const [startX, setStartX] = useState(0)
-  const [translateX, setTranslateX] = useState(0)
+  // Check if it's Love Triangle reading (3 cards) or Breakup readings (2 cards)
+  const isLoveTriangle = reading.title === 'Love Triangle'
+  const isRomanticBreakup = reading.title === 'Romantic Breakup'
+  const isBusinessBreakup = reading.title === 'Business Breakup'
+  const isMultiCardReading = isLoveTriangle || isRomanticBreakup || isBusinessBreakup
+  
+  let maxCards = 1
+  if (isLoveTriangle) maxCards = 3
+  else if (isRomanticBreakup || isBusinessBreakup) maxCards = 2
+  
+  const [selectedCards, setSelectedCards] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
   const containerRef = useRef(null)
 
-  // Use cards from API or fallback to default
+  // Skip API hooks - we'll call them manually on button click
+  const [skipQuery, setSkipQuery] = useState(true)
+
+  // Use cards from API or fallback to default (10 cards)
   const cards = cardsData.length > 0 
     ? cardsData.map((card, index) => ({ 
         id: index + 1, 
@@ -30,44 +47,81 @@ const TarotCardSelectionPage = () => {
         { id: 4, pattern: 'floral' },
         { id: 5, pattern: 'floral' },
         { id: 6, pattern: 'floral' },
-        { id: 7, pattern: 'floral' }
+        { id: 7, pattern: 'floral' },
+        { id: 8, pattern: 'floral' },
+        { id: 9, pattern: 'floral' },
+        { id: 10, pattern: 'floral' }
       ]
-
-  const handleMouseDown = (e) => {
-    setIsDragging(true)
-    setStartX(e.pageX || e.touches?.[0]?.pageX)
-  }
-
-  const handleMouseMove = (e) => {
-    if (!isDragging) return
-    const currentX = e.pageX || e.touches?.[0]?.pageX
-    const diff = currentX - startX
-    setTranslateX(diff)
-  }
-
-  const handleMouseUp = () => {
-    if (!isDragging) return
-    setIsDragging(false)
-
-    const threshold = 80 // Increased threshold for smoother feel
-    if (Math.abs(translateX) > threshold) {
-      if (translateX > 0 && currentIndex > 0) {
-        setCurrentIndex(currentIndex - 1)
-      } else if (translateX < 0 && currentIndex < cards.length - 1) {
-        setCurrentIndex(currentIndex + 1)
-      }
-    }
-    setTranslateX(0)
-  }
 
   const handleCardClick = (card) => {
     console.log('Selected card:', card)
-    navigate('/tarot-card', { state: { card, reading } })
+    
+    if (isMultiCardReading) {
+      // For multi-card readings (Love Triangle, Romantic Breakup, Business Breakup)
+      if (selectedCards.find(c => c.id === card.id)) {
+        // Deselect if already selected
+        setSelectedCards(selectedCards.filter(c => c.id !== card.id))
+      } else if (selectedCards.length < maxCards) {
+        // Add to selection if under limit
+        setSelectedCards([...selectedCards, card])
+      }
+    } else {
+      // For other readings, navigate immediately
+      navigate('/tarot-card', { state: { card, reading } })
+    }
   }
 
   const handleShuffle = () => {
-    // Shuffle animation
-    setCurrentIndex(Math.floor(Math.random() * cards.length))
+    // Shuffle cards array
+    const shuffled = [...cards].sort(() => Math.random() - 0.5)
+    // Note: You may need to update the cards state if you want to persist the shuffle
+    console.log('Cards shuffled')
+  }
+
+  const handleShowReading = async () => {
+    if (selectedCards.length !== maxCards) return
+
+    setIsLoading(true)
+
+    try {
+      if (isLoveTriangle) {
+        // Love Triangle - navigate to special result page with selected cards
+        navigate('/love-triangle-result', {
+          state: {
+            reading,
+            selectedCards: {
+              you: selectedCards[0],
+              partner1: selectedCards[1],
+              partner2: selectedCards[2]
+            },
+            type: 'love-triangle'
+          }
+        })
+      } else if (isRomanticBreakup || isBusinessBreakup) {
+        // Breakup readings - fetch data and navigate
+        const card1 = selectedCards[0]
+        const card2 = selectedCards[1]
+        
+        // Navigate to result page with selected cards
+        // The TarotCardDetailPage will handle the API call
+        navigate('/tarot-card', {
+          state: {
+            cards: selectedCards,
+            reading,
+            isMultiCard: true,
+            cardNames: {
+              card_cause: card1.card_id || card1.id,
+              card_advise: card2.card_id || card2.id
+            }
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching reading:', error)
+      toast.error('Failed to fetch reading. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -83,77 +137,69 @@ const TarotCardSelectionPage = () => {
 
       <div className={styles.content}>
         <h1 className={styles.title}>{reading.title}</h1>
-        <p className={styles.subtitle}>Choose a card to find out your tarot horoscope</p>
+        <p className={styles.subtitle}>
+          {isMultiCardReading
+            ? `Choose ${maxCards} cards for your reading (${selectedCards.length}/${maxCards} selected)` 
+            : 'Choose a card to find out your tarot horoscope'}
+        </p>
 
         <p className={styles.tapText}>Tap to pick</p>
 
         <div 
           className={styles.cardsContainer}
           ref={containerRef}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onTouchStart={handleMouseDown}
-          onTouchMove={handleMouseMove}
-          onTouchEnd={handleMouseUp}
         >
           {cards.map((card, index) => {
-            const offset = index - currentIndex
-            const rotation = offset * 12 // 12 degrees per card
-            const translateXPos = offset * 100 // Horizontal spacing
-            const translateYPos = Math.abs(offset) * 30 // Arc effect
-            const scale = index === currentIndex ? 1.15 : Math.max(0.75, 1 - Math.abs(offset) * 0.1)
-            const zIndex = 10 - Math.abs(offset)
-            const opacity = Math.abs(offset) > 2 ? 0 : Math.max(0.4, 1 - Math.abs(offset) * 0.2)
-            const isVisible = Math.abs(offset) <= 2 // Show only 5 cards (center + 2 on each side)
+            const isSelected = isMultiCardReading && selectedCards.find(c => c.id === card.id)
+            const totalCards = cards.length
+            const centerIndex = (totalCards - 1) / 2
+            const offset = index - centerIndex
+            
+            // Fan layout - cards spread from center like in video
+            const angle = offset * 8 // rotation angle
+            const spread = offset * 45 // horizontal spread
+            const verticalLift = Math.abs(offset) * 18 // arc curve
+            
+            // Selected card moves up from its position
+            const selectedLift = isSelected ? -30 : 0
+            
+            const rotation = angle
+            const zIndex = isSelected ? 100 : index
 
-            // Smooth drag effect
-            const dragOffset = isDragging ? translateX * 0.3 : 0
-
-            if (!isVisible) return null
+            const transform = `translateX(${spread}px) translateY(${verticalLift + selectedLift}px) rotate(${rotation}deg)`
 
             return (
               <div
                 key={card.id}
-                className={`${styles.card} ${index === currentIndex ? styles.activeCard : ''}`}
+                className={`${styles.card} ${isSelected ? styles.selectedCard : ''}`}
                 style={{
-                  transform: `translateX(calc(${translateXPos}px + ${dragOffset}px)) translateY(${translateYPos}px) rotate(${rotation}deg) scale(${scale})`,
+                  transform,
                   zIndex,
-                  opacity,
-                  transition: isDragging ? 'none' : undefined
                 }}
-                onClick={() => index === currentIndex && handleCardClick(card)}
+                onClick={() => handleCardClick(card)}
               >
                 <div className={styles.cardBack}>
                   <img src="/images/black-back-card.jpg" alt="Tarot Card Back" />
+                  {isSelected && (
+                    <div className={styles.selectedBadge}>
+                      {selectedCards.findIndex(c => c.id === card.id) + 1}
+                    </div>
+                  )}
                 </div>
               </div>
             )
           })}
         </div>
 
-        <div className={styles.dragHint}>
-          <svg width="400" height="80" viewBox="0 0 400 80" className={styles.curvedArrow}>
-            {/* Main curved arc */}
-            <path 
-              d="M 60 60 Q 200 10 340 60" 
-              stroke="#999" 
-              strokeWidth="2" 
-              fill="none"
-            />
-            {/* Left arrow - adjusted to match curve angle */}
-            <path 
-              d="M 60 60 L 68 52 M 60 60 L 70 62" 
-              stroke="#999" 
-              strokeWidth="2" 
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <p className={styles.dragText}>Drag to Move</p>
-        </div>
+        {isMultiCardReading && (
+          <button 
+            className={`${styles.showReadingButton} ${selectedCards.length === maxCards ? '' : styles.disabled}`}
+            disabled={selectedCards.length !== maxCards || isLoading}
+            onClick={handleShowReading}
+          >
+            {isLoading ? 'Loading...' : 'Show Reading'}
+          </button>
+        )}
       </div>
     </div>
   )
