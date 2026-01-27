@@ -1,10 +1,18 @@
+import { useNavigate } from "react-router-dom";
 import wheel from "../../../../assets/images/wheel.svg";
 import styles from "../Home.module.scss";
 
 const CosmicInsightSection = () => {
+    const navigate = useNavigate();
+
+    const handleCardClick = () => {
+        // Navigate to AIWow page with hash to scroll to Companion Suite section
+        navigate("/aiwow#companion-suite");
+    };
+
     return (
         <section className={styles.cosmicInsightSection}>
-            <div className={styles.cosmicInsightCard}>
+            <div className={styles.cosmicInsightCard} onClick={handleCardClick} style={{ cursor: 'pointer' }}>
                 <div className={styles.cosmicContent}>
                     <div className={styles.cosmicHeader}>
                         <span className={styles.cosmicLabel}>DAILY COSMIC INSIGHT</span>

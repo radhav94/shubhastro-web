@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './AIWow.module.scss';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import FeatureCard from './components/FeatureCard';
 import ComingSoonCard from './components/ComingSoonCard';
 import KundliProfileModal from './components/KundliProfileModal';
@@ -8,9 +8,23 @@ import MobileAppModal from './components/MobileAppModal';
 
 const AIWow = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
   const [targetRoute, setTargetRoute] = useState('');
+
+  // Scroll to section if hash is present in URL
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace('#', '');
+      const element = document.getElementById(id);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  }, [location]);
 
   const handleARVastuClick = () => {
     setShowMobileAppModal(true);
@@ -234,11 +248,13 @@ const AIWow = () => {
         )}
 
         {/* Companion Suite */}
-        {renderSection(
-          'Companion Suite',
-          'Conversational AI Assistants',
-          companionSuite
-        )}
+        <div id="companion-suite">
+          {renderSection(
+            'Companion Suite',
+            'Conversational AI Assistants',
+            companionSuite
+          )}
+        </div>
 
         {/* Action Suite */}
         {renderSection(
