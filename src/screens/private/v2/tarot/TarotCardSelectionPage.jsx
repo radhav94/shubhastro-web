@@ -155,16 +155,46 @@ const TarotCardSelectionPage = () => {
             const centerIndex = (totalCards - 1) / 2
             const offset = index - centerIndex
             
-            // Fan layout - cards spread from center like in video
-            const angle = offset * 8 // rotation angle
-            const spread = offset * 45 // horizontal spread
-            const verticalLift = Math.abs(offset) * 18 // arc curve
+            // Create normalized offset first (needed for calculations)
+            const normalizedOffset = offset / centerIndex // -1 to 1
             
-            // Selected card moves up from its position
-            const selectedLift = isSelected ? -30 : 0
+            // Responsive spread values based on screen width
+            const screenWidth = window.innerWidth
+            const isMobile = screenWidth <= 480
+            const isTablet = screenWidth > 480 && screenWidth <= 768
+            const isLaptop = screenWidth > 768 && screenWidth <= 1024
+            
+            // Fan layout - cards spread in proper semicircular arc with responsive spacing
+            let angle, spread, curveHeight, selectedLift
+            
+            if (isMobile) {
+              angle = offset * 5
+              spread = offset * 32
+              curveHeight = Math.pow(normalizedOffset, 2) * 35
+              selectedLift = isSelected ? -25 : 0
+            } else if (isTablet) {
+              angle = offset * 6.5
+              spread = offset * 50
+              curveHeight = Math.pow(normalizedOffset, 2) * 55
+              selectedLift = isSelected ? -35 : 0
+            } else if (isLaptop) {
+              angle = offset * 7.5
+              spread = offset * 65
+              curveHeight = Math.pow(normalizedOffset, 2) * 70
+              selectedLift = isSelected ? -40 : 0
+            } else {
+              // Desktop
+              angle = offset * 8
+              spread = offset * 75
+              curveHeight = Math.pow(normalizedOffset, 2) * 80
+              selectedLift = isSelected ? -40 : 0
+            }
+            
+            // Apply vertical lift for semicircular curve
+            const verticalLift = curveHeight
             
             const rotation = angle
-            const zIndex = isSelected ? 100 : index
+            const zIndex = index // Keep same z-index for all cards
 
             const transform = `translateX(${spread}px) translateY(${verticalLift + selectedLift}px) rotate(${rotation}deg)`
 
