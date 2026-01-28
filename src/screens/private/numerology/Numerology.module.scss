@@ -910,7 +910,7 @@
 /* NUMEROLOGY SECTION */
 .numerologySection {
   max-width: 480px;
-  margin: 40px auto;
+  margin: 0px auto 40px auto;
   padding: 0 20px;
   display: flex;
   flex-direction: column;
@@ -918,13 +918,15 @@
 }
 
 .numerologyCard {
-  background: #d9d9d9;
   border-radius: 16px;
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 16px;
   transition: 0.2s ease;
+  border-radius: 15px;
+  border: 1px solid rgba(189, 189, 189, 0.30);
+  background: var(--surface, #FEFEFE);
 
   &:hover {
     transform: translateY(-2px);
@@ -962,14 +964,14 @@
 
 .cardNumber {
   font-size: 64px;
-  font-weight: 700;
-  color: #484848;
+  font-weight: 500;
+  color: #E56329;
   min-width: 100px;
   text-align: center;
-  background: #bcbcbc;
   border-radius: 12px;
   padding: 16px;
   line-height: 1;
+  background: var(--card-2, #FFF5EC);
 }
 
 .loadingContainer {
@@ -983,7 +985,7 @@
 @media (min-width: 769px) {
   .numerologySection {
     max-width: 900px;
-    margin: 60px auto;
+    margin: 0px auto 60px auto;
     padding: 0 40px;
   }
 
