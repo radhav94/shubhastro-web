@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Toast } from "../../../../../component";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import { useCall } from "../../../../../context/CallContext";
+import { useChat } from "../../../../../context/ChatContext";
 
 const useChatSocket = ({
   userId,
@@ -11,7 +12,18 @@ const useChatSocket = ({
   roomId: chatRoomId,
   isUserSide,
 }) => {
-  const { activeCall, setActiveCall } = useCall();
+  const { 
+    activeCall, 
+    setActiveCall, 
+    setWaitingList: setGlobalWaitingList,
+    setActiveCallRoomId,
+    resetCallFlow 
+  } = useCall();
+
+  const {
+    stopTimer,
+    setActiveChat,
+  } = useChat();
 
   const [waitingPopup, setWaitingPopup] = useState(false);
   const [callRoomId, setCallRoomId] = useState(null);
@@ -31,14 +43,23 @@ const useChatSocket = ({
   };
 
   const handleAudioCall = () => {
+    console.log("🎵 Audio Call Clicked", { userId, astrologerId, kundliId, activeCall });
+    
     if (activeCall) {
       Toast.error("You are already on a call");
       return;
     }
 
+    // End the chat session completely before initiating call
+    console.log("🔚 Ending chat session");
+    setActiveChat(null);
+    stopTimer();
+    console.log("✅ Chat session ended, timer stopped, state reset");
+
     connectSocket();
 
-    voiceSocket.emit("create_call_room", {
+    console.log("🎵 Emitting call:initiate for audio");
+    voiceSocket.emit("call:initiate", {
       userId,
       astrologerId,
       type: "audio",
@@ -46,14 +67,23 @@ const useChatSocket = ({
   };
 
   const handleVideoCall = () => {
+    console.log("📹 Video Call Clicked", { userId, astrologerId, kundliId, activeCall });
+    
     if (activeCall) {
       Toast.error("You are already on a call");
       return;
     }
 
+    // End the chat session completely before initiating call
+    console.log("🔚 Ending chat session");
+    setActiveChat(null);
+    stopTimer();
+    console.log("✅ Chat session ended, timer stopped, state reset");
+
     connectSocket();
 
-    voiceSocket.emit("create_call_room", {
+    console.log("📹 Emitting call:initiate for video");
+    voiceSocket.emit("call:initiate", {
       userId,
       astrologerId,
       type: "video",
@@ -63,12 +93,16 @@ const useChatSocket = ({
   useEffect(() => {
     if (!isUserSide) return;
 
-    const handleReturnRoom = ({ roomId,status}) => {
-      setCallRoomId(roomId); 
+    const handleCallRoom = (data) => {
+      console.log("📞 call:room event received", data);
+      setCallRoomId(data?.roomId);
+      setActiveCallRoomId(data?.roomId);
       setWaitingPopup(true);
+      setGlobalWaitingList(data?.waitingTime || 5);
     };
 
-    const handleCallAccepted = ({ roomId, token, type }) => {
+    const handleCallAccepted = ({ roomId, token, type, remainingTime }) => {
+      console.log("✅ call:accepted event received", { roomId, type });
       setActiveCall({
         roomId,
         chatRoomId,
@@ -79,33 +113,62 @@ const useChatSocket = ({
         userId,
         astrologerId,
         kundliId,
+        remainingTime,
       });
 
       setWaitingPopup(false);
+      setGlobalWaitingList(null);
       setCallRoomId(null);
     };
 
     const handleCallRejected = (data) => {
-      Toast.error(data?.sessionData?.sessionEndReason || "Call Rejected");
+      console.log("❌ call:rejected event received", data);
+      const errorMsg = data?.sessionData?.sessionEndReason === "rejected"
+        ? "Astrologer has rejected the call request"
+        : "Call request was rejected";
+      Toast.error(errorMsg);
       setWaitingPopup(false);
+      setGlobalWaitingList(null);
       setCallRoomId(null);
+      resetCallFlow();
     };
 
     const handleCallEnded = () => {
+      console.log("🔚 call:ended event received");
       setWaitingPopup(false);
+      setGlobalWaitingList(null);
       setCallRoomId(null);
     };
 
-    voiceSocket.on("return_call_room", handleReturnRoom);
-    voiceSocket.on("call_accepted", handleCallAccepted);
-    voiceSocket.on("call_rejected", handleCallRejected);
-    voiceSocket.on("call_ended", handleCallEnded);
+    const handleSocketError = (err) => {
+      console.log("⚠️ SOCKET ERROR:", err);
+      
+      if (err?.message === "Call has already ended") {
+        // Soft reset only
+        setWaitingPopup(false);
+        setGlobalWaitingList(null);
+        setCallRoomId(null);
+        return;
+      }
+
+      Toast.error(err?.message || "Connection error");
+      setWaitingPopup(false);
+      setGlobalWaitingList(null);
+      setCallRoomId(null);
+    };
+
+    voiceSocket.on("call:room", handleCallRoom);
+    voiceSocket.on("call:accepted", handleCallAccepted);
+    voiceSocket.on("call:rejected", handleCallRejected);
+    voiceSocket.on("call:ended", handleCallEnded);
+    voiceSocket.on("error", handleSocketError);
 
     return () => {
-      voiceSocket.off("return_call_room", handleReturnRoom);
-      voiceSocket.off("call_accepted", handleCallAccepted);
-      voiceSocket.off("call_rejected", handleCallRejected);
-      voiceSocket.off("call_ended", handleCallEnded);
+      voiceSocket.off("call:room", handleCallRoom);
+      voiceSocket.off("call:accepted", handleCallAccepted);
+      voiceSocket.off("call:rejected", handleCallRejected);
+      voiceSocket.off("call:ended", handleCallEnded);
+      voiceSocket.off("error", handleSocketError);
     };
   }, [
     isUserSide,
@@ -115,17 +178,25 @@ const useChatSocket = ({
     astrologerId,
     kundliId,
     setActiveCall,
+    setGlobalWaitingList,
+    setActiveCallRoomId,
+    resetCallFlow,
+    setActiveChat,
+    stopTimer,
   ]);
 
   const handleCancelCall = () => {
     if (!callRoomId) return;
 
-    voiceSocket.emit("cancel_call", {
+    voiceSocket.emit("call:cancel", {
       roomId: callRoomId,
+      canceledBy: "CUSTOMER",
     });
 
     setWaitingPopup(false);
+    setGlobalWaitingList(null);
     setCallRoomId(null);
+    resetCallFlow();
   };
 
   return {
