@@ -38,14 +38,19 @@
 .headerNavigation {
   display: flex;
   flex-direction: row;
-  margin-left: auto;
+  // margin-left: auto;
 
   a {
     text-decoration: none;
     color: #000;
     font-size: 14px;
-    padding: 8px;
+    padding: 6px 15px;
+    border-radius: 5px;
   }
+}
+
+.active{
+  background-color: #000;
 }
 
 .headerActions {
@@ -213,6 +218,8 @@
   flex: 1;
   align-items: center;
   padding: 0 1rem;
+  max-width: 600px;
+  justify-content: center;
   @media screen and (width <= 1180px) {
       display: none!important;
   }
