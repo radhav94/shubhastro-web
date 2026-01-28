@@ -1241,7 +1241,7 @@
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: #ffffff;
   border: none;
-  padding: 12px;
+  padding: 10px 12px;
   border-radius: 50px;
   font-family: "Poppins", sans-serif;
   font-size: 16px;
@@ -1251,7 +1251,8 @@
     transform 0.2s ease, box-shadow 0.2s ease;
 
     @media screen and (width <= 767px) {
-      padding: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
     }
 }
 
@@ -2316,11 +2317,6 @@
     font-size: 15px;
   }
 
-  .connectBtn {
-    font-size: 17px;
-    padding: 12px;
-  }
-
   /* Life Area Section - Tablet */
   .lifeAreaSection {
     margin-bottom: 32px;
@@ -2731,11 +2727,6 @@
   // .astrologerName {
   //   font-size: 24px;
   // }
-
-  .connectBtn {
-    font-size: 18px;
-    // padding: 16px 32px;
-  }
 
   /* Life Area Section - XL Desktop */
   .lifeAreaCard {
