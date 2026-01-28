@@ -6,11 +6,14 @@ export const homeApi = privateRequestNew.injectEndpoints({
       query: () => ({
         url: "homepage",
         method: "GET",
+        params: {
+          slug: "customerlandingpage",
+        },
       }),
       providesTags: ["Kundlis"],
     }),
   }),
 });
 
-// ⭐ Correct Hook Export
+// ⭐ Hook Export
 export const { useGetHomeDetailsQuery } = homeApi;

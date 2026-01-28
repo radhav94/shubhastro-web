@@ -5,7 +5,7 @@ import { PATH } from "../../../../utils/routes/Paths";
 import SectionHeader from "./SectionHeader";
 import styles from "../Home.module.scss";
 
-const BlogsSection = ({ blogData = [] }) => {
+const BlogsSection = ({ blogData = [], title, showMore }) => {
     const navigate = useNavigate();
 
     if (!blogData || blogData.length === 0) return null;
@@ -14,7 +14,7 @@ const BlogsSection = ({ blogData = [] }) => {
         <section className={styles.blogsSection}>
             <div className={styles.blogsHeader}>
                 <div className={styles.blogsHeaderLeft}>
-                    <h2 className={styles.blogsTitle}>EXPLORE BLOGS AND IN THE NEWS</h2>
+                    <h2 className={styles.blogsTitle}>{title || "EXPLORE BLOGS AND IN THE NEWS"}</h2>
                     <div className={styles.titleDivider}>
                         <div className={styles.dividerLine}>
                             <svg
@@ -49,12 +49,14 @@ const BlogsSection = ({ blogData = [] }) => {
                         </div>
                     </div>
                 </div>
-                <button
-                    className={styles.viewAllBtn}
-                    onClick={() => navigate(PATH.privateRoutes.BLOG.path)}
-                >
-                    <ChevronRight size={24} />
-                </button>
+                {showMore && (
+                    <button
+                        className={styles.viewAllBtn}
+                        onClick={() => navigate(PATH.privateRoutes.BLOG.path)}
+                    >
+                        <ChevronRight size={24} />
+                    </button>
+                )}
             </div>
 
             <div className={styles.blogsGrid}>

@@ -847,7 +847,7 @@
   border-radius: 999px;
 
   // background: linear-gradient(135deg, #f4d19b 0%, #e8c589 100%);
-  background: #f5f5f5;
+  // background: #f5f5f5;
   position: absolute;
   bottom: 18px;
   left: 50%;
@@ -860,6 +860,7 @@
   position: absolute;
   bottom: -8px;
   left: 50%;
+  top: -40%;
   transform: translateX(-50%);
   height: 110px;
   width: auto;
@@ -3180,4 +3181,58 @@
   // .blogImageWrapper {
   //   height: 280px;
   // }
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  padding: 40px 20px;
+
+  p {
+    font-family: "Poppins", sans-serif;
+    font-size: 16px;
+    color: #888;
+    text-align: center;
+  }
+}
+
+/* News Section Specific Styles */
+.blogMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.blogChannel {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f75801;
+  text-transform: uppercase;
+}
+
+.blogDate {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  color: #888;
+}
+
+.blogLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #f75801;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
 }

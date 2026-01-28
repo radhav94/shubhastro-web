@@ -2,8 +2,10 @@ import { useNavigate } from "react-router-dom";
 import wheel from "../../../../assets/images/wheel.svg";
 import styles from "../Home.module.scss";
 
-const CosmicInsightSection = () => {
+const CosmicInsightSection = ({ data }) => {
     const navigate = useNavigate();
+    const title = data?.display_title || "DAILY COSMIC INSIGHT";
+    const imageUrl = data?.image_url || wheel;
 
     const handleCardClick = () => {
         // Navigate to AIWow page with hash to scroll to Companion Suite section
@@ -15,7 +17,7 @@ const CosmicInsightSection = () => {
             <div className={styles.cosmicInsightCard} onClick={handleCardClick} style={{ cursor: 'pointer' }}>
                 <div className={styles.cosmicContent}>
                     <div className={styles.cosmicHeader}>
-                        <span className={styles.cosmicLabel}>DAILY COSMIC INSIGHT</span>
+                        <span className={styles.cosmicLabel}>{title}</span>
                         <div className={styles.cosmicDivider}>
                             <div className={styles.dividerLine}>
                                 <svg
@@ -70,7 +72,7 @@ const CosmicInsightSection = () => {
                 </div>
                 <div className={styles.cosmicArt}>
                     <img
-                        src={wheel}
+                        src={imageUrl}
                         alt="Zodiac Wheel"
                         className={styles.zodiacWheel}
                     />
