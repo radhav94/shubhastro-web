@@ -25,13 +25,13 @@ const RecommendedAstrologerCard = ({ data, onConnect }) => {
             e.target.src = astrologerImage;
           }}
         />
+      </div>
+
+      <div className={styles.leftSection}>
         <div className={styles.ratingBadge}>
           <FaStar className={styles.starIcon} />
           <span className={styles.ratingText}>{rating || "0"}</span>
         </div>
-      </div>
-
-      <div className={styles.leftSection}>
         <h3 
           className={styles.name}
           onClick={() => navigate(`/astrologer/${data?.astrologerId || data?._id}`)}

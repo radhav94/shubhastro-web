@@ -837,7 +837,7 @@ const TalkToAstrologer = () => {
           ) : (
             <div className={styles.recommendedGrid}>
               {recommendedAstrologers.map((astro) => (
-                <div key={astro._id} className={styles.cardWrapper}>
+                <div key={astro._id} className={styles.notSureCard}>
                   <RecommendedAstrologerCard
                     data={astro}
                     onConnect={() => handleChatStart(astro)}
