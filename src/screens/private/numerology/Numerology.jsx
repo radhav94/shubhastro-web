@@ -9,16 +9,21 @@ import {
   useDeleteKundliMutation,
 } from "../../../services/appServices/kundliServicesNew";
 import { useLazyGetNumerologyPredictionQuery } from "../../../services/appServices/numerologyServices";
-import { Toast } from "../../../component";
+import {
+  Toast,
+  AddProfileModal,
+  ProfileListingModal,
+  DeleteConfirmationModal,
+} from "../../../component";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
-import LocationSearch from "../../../utils/location/locationSearchVedic";
 import { getToken } from "../../../utils/token";
 
 const NumerologyWeb = () => {
   const navigate = useNavigate();
   const [showSelectProfile, setShowSelectProfile] = useState(false);
   const [showAddProfile, setShowAddProfile] = useState(false);
-  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [profileToDelete, setProfileToDelete] = useState(null);
   const [selectedProfile, setSelectedProfile] = useState(null);
 
   // Get token
@@ -50,31 +55,6 @@ const NumerologyWeb = () => {
   // Get profiles from API
   const profiles = data?.data || [];
   const numerologyResponse = numerologyData?.response || null;
-  console.log(profiles, "ashish");
-
-  const [formData, setFormData] = useState({
-    name: "",
-    identity: "Male",
-    relation: "",
-    birthDate: "",
-    birthTime: "",
-    birthPlace: "",
-    unknownBirthTime: false,
-    latitude: null,
-    longitude: null,
-  });
-
-  const [editFormData, setEditFormData] = useState({
-    name: "",
-    identity: "Male",
-    relation: "",
-    birthDate: "",
-    birthTime: "",
-    birthPlace: "",
-    unknownBirthTime: false,
-    latitude: null,
-    longitude: null,
-  });
 
   // Auto-select first profile on load
   useEffect(() => {
@@ -106,35 +86,32 @@ const NumerologyWeb = () => {
     setShowAddProfile(true);
   };
 
-  const handleEditProfile = () => {
-    // Pre-fill form with selected profile data
-    if (selectedProfile) {
-      const birthDateTime = new Date(
-        selectedProfile.year,
-        selectedProfile.month - 1,
-        selectedProfile.day,
-        selectedProfile.hour,
-        selectedProfile.min,
-      );
+  const handleDeleteProfile = (profileId) => {
+    setProfileToDelete(profileId);
+    setShowDeleteModal(true);
+  };
 
-      setEditFormData({
-        name: selectedProfile.name,
-        identity:
-          selectedProfile.gender === "male"
-            ? "Male"
-            : selectedProfile.gender === "female"
-              ? "Female"
-              : "Others",
-        relation: "Self", // You may need to add this field to API
-        birthDate: `${selectedProfile.year}-${String(selectedProfile.month).padStart(2, "0")}-${String(selectedProfile.day).padStart(2, "0")}`,
-        birthTime: `${String(selectedProfile.hour).padStart(2, "0")}:${String(selectedProfile.min).padStart(2, "0")}`,
-        birthPlace: selectedProfile.place,
-        unknownBirthTime: false,
-        latitude: selectedProfile.lat,
-        longitude: selectedProfile.lon,
-      });
+  const confirmDeleteProfile = async () => {
+    if (!profileToDelete) return;
+
+    try {
+      await deleteKundli(profileToDelete).unwrap();
+      Toast.success("Profile deleted successfully");
+
+      // Clear selection if deleted profile was selected
+      if (selectedProfile?._id === profileToDelete) {
+        setSelectedProfile(null);
+      }
+
+      await refetch();
+      setShowDeleteModal(false);
+      setProfileToDelete(null);
+    } catch (err) {
+      console.error(err);
+      Toast.error(err?.data?.message || "Failed to delete profile");
+      setShowDeleteModal(false);
+      setProfileToDelete(null);
     }
-    setShowEditProfile(true);
   };
 
   const buildKundliPayload = (data) => {
@@ -157,113 +134,49 @@ const NumerologyWeb = () => {
     };
   };
 
-  const handleSubmitProfile = async (e) => {
-    e.preventDefault();
+  const isDuplicateKundli = (payload, list) =>
+    list.some(
+      (k) =>
+        k.name.trim().toLowerCase() === payload.name.trim().toLowerCase() &&
+        k.gender.toLowerCase() === payload.gender.toLowerCase() &&
+        Number(k.day) === Number(payload.day) &&
+        Number(k.month) === Number(payload.month) &&
+        Number(k.year) === Number(payload.year) &&
+        Number(k.hour) === Number(payload.hour) &&
+        Number(k.min) === Number(payload.min) &&
+        Math.abs(Number(k.lat) - Number(payload.lat)) < 0.0001 &&
+        Math.abs(Number(k.lon) - Number(payload.lon)) < 0.0001 &&
+        k.place.trim().toLowerCase() === payload.place.trim().toLowerCase()
+    );
 
-    if (!formData.birthPlace) {
-      Toast.error("Please enter birth place");
-      return;
-    }
-
+  const handleSubmitProfile = async (formData) => {
     try {
       const payload = buildKundliPayload(formData);
-      await createKundli(payload).unwrap();
-      Toast.success("Profile added successfully");
-      setShowAddProfile(false);
-      refetch();
 
-      // Reset form
-      setFormData({
-        name: "",
-        identity: "Male",
-        relation: "",
-        birthDate: "",
-        birthTime: "",
-        birthPlace: "",
-        unknownBirthTime: false,
-        latitude: null,
-        longitude: null,
-      });
-    } catch (err) {
-      console.error(err);
-      Toast.error(err?.data?.message || "Failed to add profile");
-    }
-  };
-
-  const handleSubmitEditProfile = async (e) => {
-    e.preventDefault();
-
-    if (!editFormData.birthPlace) {
-      Toast.error("Please enter birth place");
-      return;
-    }
-
-    try {
-      // Delete old profile and create new one (since there's no update endpoint)
-      if (selectedProfile?._id) {
-        await deleteKundli(selectedProfile._id).unwrap();
+      // Check for duplicate
+      if (isDuplicateKundli(payload, profiles)) {
+        Toast.error("This profile already exists");
+        throw new Error("Duplicate profile");
       }
 
-      const payload = buildKundliPayload(editFormData);
       const result = await createKundli(payload).unwrap();
+      Toast.success("Profile added successfully");
 
-      Toast.success("Profile updated successfully");
-      setShowEditProfile(false);
-      refetch();
+      await refetch();
 
-      // Update selected profile
+      // Auto-select the newly created profile
       if (result?.data) {
         setSelectedProfile(result.data);
       }
+
+      setShowAddProfile(false);
     } catch (err) {
       console.error(err);
-      Toast.error(err?.data?.message || "Failed to update profile");
+      const errorMessage =
+        err?.data?.message || err?.message || "Failed to add profile";
+      Toast.error(errorMessage);
+      throw err;
     }
-  };
-
-  // Helper function to format profile display
-  const formatProfileDisplay = (profile) => {
-    if (!profile)
-      return { initials: "", birthDate: "", birthTime: "", relation: "" };
-
-    const initials = profile.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    const birthDate = `${String(profile.day).padStart(2, "0")} ${monthNames[profile.month - 1]} ${profile.year}`;
-
-    const hour12 =
-      profile.hour > 12
-        ? profile.hour - 12
-        : profile.hour === 0
-          ? 12
-          : profile.hour;
-    const meridiem = profile.hour >= 12 ? "PM" : "AM";
-    const birthTime = `${String(hour12).padStart(2, "0")}:${String(profile.min).padStart(2, "0")} ${meridiem}`;
-
-    return {
-      initials,
-      birthDate,
-      birthTime,
-      relation: "Self", // You may need to add this to API
-    };
   };
 
   return (
@@ -318,34 +231,6 @@ const NumerologyWeb = () => {
             </svg>
           </span>
         </div>
-        <button
-          className={styles.editBtn}
-          onClick={handleEditProfile}
-          disabled={!selectedProfile}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
       </div>
 
       {/* Mobile Profile Bar */}
@@ -396,34 +281,6 @@ const NumerologyWeb = () => {
             </svg>
           </span>
         </div>
-        <button
-          className={styles.editBtn}
-          onClick={handleEditProfile}
-          disabled={!selectedProfile}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
       </div>
 
       {/* HERO SECTION */}
@@ -671,408 +528,40 @@ const NumerologyWeb = () => {
         <button className={styles.primaryBtnLarge}>Calculate My Numbers</button>
       </section> */}
 
-      {/* Select Profile Modal */}
-      {showSelectProfile && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => setShowSelectProfile(false)}
-        >
-          <div
-            className={styles.bottomSheet}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={styles.sheetHandle}></div>
-
-            <div className={styles.sheetContent}>
-              <button
-                className={styles.closeBtn}
-                onClick={() => setShowSelectProfile(false)}
-              >
-                ×
-              </button>
-              <h2 className={styles.sheetTitle}>Select Profile</h2>
-
-              <div className={styles.profileList}>
-                {profiles.map((profile) => {
-                  const formatted = formatProfileDisplay(profile);
-                  return (
-                    <div
-                      key={profile._id}
-                      className={styles.profileItem}
-                      onClick={() => handleSelectProfile(profile)}
-                    >
-                      <div className={styles.profileAvatar}>
-                        {formatted.initials}
-                      </div>
-                      <div className={styles.profileInfo}>
-                        <span className={styles.relationBadge}>
-                          {formatted.relation}
-                        </span>
-                        <h3 className={styles.profileName}>{profile.name}</h3>
-                        <p className={styles.profileDetails}>
-                          {formatted.birthDate} • {formatted.birthTime}
-                        </p>
-                        <p className={styles.profileLocation}>
-                          {profile.place}
-                        </p>
-                      </div>
-                      <div className={styles.radioBtn}>
-                        {selectedProfile?._id === profile._id ? "●" : "○"}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <button
-                className={styles.addProfileBtn}
-                onClick={handleAddProfile}
-              >
-                + Add Profile
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Profile Listing Modal */}
+      <ProfileListingModal
+        isOpen={showSelectProfile}
+        onClose={() => setShowSelectProfile(false)}
+        profiles={profiles}
+        selectedProfileId={selectedProfile?._id}
+        onSelectProfile={handleSelectProfile}
+        onDeleteProfile={handleDeleteProfile}
+        onAddProfile={handleAddProfile}
+        title="Select Profile"
+        showAddButton={true}
+        showDeleteButton={true}
+      />
 
       {/* Add Profile Modal */}
-      {showAddProfile && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => setShowAddProfile(false)}
-        >
-          <div
-            className={styles.sideSheet}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={styles.sheetHandle}></div>
+      <AddProfileModal
+        isOpen={showAddProfile}
+        onClose={() => setShowAddProfile(false)}
+        onSubmit={handleSubmitProfile}
+        isLoading={isCreating}
+        title="Add Profile"
+      />
 
-            <div className={styles.sheetContent}>
-              <button
-                className={styles.closeBtn}
-                onClick={() => setShowAddProfile(false)}
-              >
-                ×
-              </button>
-              <h2 className={styles.sheetTitle}>Add Profile</h2>
-
-              <form
-                onSubmit={handleSubmitProfile}
-                className={styles.profileForm}
-              >
-                <div className={styles.formGroup}>
-                  <label>Name</label>
-                  <input
-                    type="text"
-                    placeholder="Enter here"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Identity</label>
-                  <div className={styles.identityButtons}>
-                    <button
-                      type="button"
-                      className={
-                        formData.identity === "Male" ? styles.active : ""
-                      }
-                      onClick={() =>
-                        setFormData({ ...formData, identity: "Male" })
-                      }
-                    >
-                      Male
-                    </button>
-                    <button
-                      type="button"
-                      className={
-                        formData.identity === "Female" ? styles.active : ""
-                      }
-                      onClick={() =>
-                        setFormData({ ...formData, identity: "Female" })
-                      }
-                    >
-                      Female
-                    </button>
-                    <button
-                      type="button"
-                      className={
-                        formData.identity === "Others" ? styles.active : ""
-                      }
-                      onClick={() =>
-                        setFormData({ ...formData, identity: "Others" })
-                      }
-                    >
-                      Others
-                    </button>
-                  </div>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Relation</label>
-                  <select
-                    value={formData.relation}
-                    onChange={(e) =>
-                      setFormData({ ...formData, relation: e.target.value })
-                    }
-                    required
-                  >
-                    <option value="">Select relation</option>
-                    <option value="Self">Self</option>
-                    <option value="Brother">Brother</option>
-                    <option value="Sister">Sister</option>
-                    <option value="Mother">Mother</option>
-                    <option value="Father">Father</option>
-                    <option value="Friend">Friend</option>
-                  </select>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Birth Date</label>
-                  <input
-                    type="date"
-                    value={formData.birthDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, birthDate: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Birth Time</label>
-                  <input
-                    type="time"
-                    value={formData.birthTime}
-                    onChange={(e) =>
-                      setFormData({ ...formData, birthTime: e.target.value })
-                    }
-                    disabled={formData.unknownBirthTime}
-                  />
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      checked={formData.unknownBirthTime}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          unknownBirthTime: e.target.checked,
-                        })
-                      }
-                    />
-                    Don't know the exact time of birth
-                  </label>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Place of Birth</label>
-                  <LocationSearch
-                    value={formData.birthPlace}
-                    onChange={(e) =>
-                      setFormData({ ...formData, birthPlace: e.target.value })
-                    }
-                    onPlaceSelect={(place) =>
-                      setFormData({
-                        ...formData,
-                        birthPlace: place.address,
-                        latitude: place.lat,
-                        longitude: place.lng,
-                      })
-                    }
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className={styles.submitBtn}
-                  disabled={isCreating}
-                >
-                  {isCreating ? "Adding..." : "Add Profile"}
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Profile Modal */}
-      {showEditProfile && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => setShowEditProfile(false)}
-        >
-          <div
-            className={styles.sideSheet}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={styles.sheetHandle}></div>
-
-            <div className={styles.sheetContent}>
-              <button
-                className={styles.closeBtn}
-                onClick={() => setShowEditProfile(false)}
-              >
-                ×
-              </button>
-              <h2 className={styles.sheetTitle}>Edit Profile</h2>
-
-              <form
-                onSubmit={handleSubmitEditProfile}
-                className={styles.profileForm}
-              >
-                <div className={styles.formGroup}>
-                  <label>Name</label>
-                  <input
-                    type="text"
-                    placeholder="Enter here"
-                    value={editFormData.name}
-                    onChange={(e) =>
-                      setEditFormData({ ...editFormData, name: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Identity</label>
-                  <div className={styles.identityButtons}>
-                    <button
-                      type="button"
-                      className={
-                        editFormData.identity === "Male" ? styles.active : ""
-                      }
-                      onClick={() =>
-                        setEditFormData({ ...editFormData, identity: "Male" })
-                      }
-                    >
-                      Male
-                    </button>
-                    <button
-                      type="button"
-                      className={
-                        editFormData.identity === "Female" ? styles.active : ""
-                      }
-                      onClick={() =>
-                        setEditFormData({ ...editFormData, identity: "Female" })
-                      }
-                    >
-                      Female
-                    </button>
-                    <button
-                      type="button"
-                      className={
-                        editFormData.identity === "Others" ? styles.active : ""
-                      }
-                      onClick={() =>
-                        setEditFormData({ ...editFormData, identity: "Others" })
-                      }
-                    >
-                      Others
-                    </button>
-                  </div>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Relation</label>
-                  <select
-                    value={editFormData.relation}
-                    onChange={(e) =>
-                      setEditFormData({
-                        ...editFormData,
-                        relation: e.target.value,
-                      })
-                    }
-                    required
-                  >
-                    <option value="">Select relation</option>
-                    <option value="Self">Self</option>
-                    <option value="Brother">Brother</option>
-                    <option value="Sister">Sister</option>
-                    <option value="Mother">Mother</option>
-                    <option value="Father">Father</option>
-                    <option value="Friend">Friend</option>
-                  </select>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Birth Date</label>
-                  <input
-                    type="date"
-                    value={editFormData.birthDate}
-                    onChange={(e) =>
-                      setEditFormData({
-                        ...editFormData,
-                        birthDate: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Birth Time</label>
-                  <input
-                    type="time"
-                    value={editFormData.birthTime}
-                    onChange={(e) =>
-                      setEditFormData({
-                        ...editFormData,
-                        birthTime: e.target.value,
-                      })
-                    }
-                    disabled={editFormData.unknownBirthTime}
-                  />
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      checked={editFormData.unknownBirthTime}
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          unknownBirthTime: e.target.checked,
-                        })
-                      }
-                    />
-                    Don't know the exact time of birth
-                  </label>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Place of Birth</label>
-                  <LocationSearch
-                    value={editFormData.birthPlace}
-                    onChange={(e) =>
-                      setEditFormData({
-                        ...editFormData,
-                        birthPlace: e.target.value,
-                      })
-                    }
-                    onPlaceSelect={(place) =>
-                      setEditFormData({
-                        ...editFormData,
-                        birthPlace: place.address,
-                        latitude: place.lat,
-                        longitude: place.lng,
-                      })
-                    }
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className={styles.submitBtn}
-                  disabled={isCreating}
-                >
-                  {isCreating ? "Updating..." : "Edit Profile"}
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          title="Delete Profile"
+          message="Are you sure you want to delete this profile? This action cannot be undone."
+          onCancel={() => {
+            setShowDeleteModal(false);
+            setProfileToDelete(null);
+          }}
+          onConfirm={confirmDeleteProfile}
+        />
       )}
     </div>
   );
