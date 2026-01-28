@@ -1,12 +1,17 @@
 import styles from "./ChatWindow.module.scss";
-import { IoSendOutline, IoAttachOutline, IoMicOutline, IoCallSharp } from "react-icons/io5";
+import toast from "../../../../../component/toast";
 import { useState } from "react";
 import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSelectModal";
-import toast from "../../../../../component/toast";
 import { useChat } from "../../../../../context/ChatContext";
 import { useVoiceRecorder } from "../../../talkToAstrologer/voiceChat/useVoiceRecorder";
 import VoiceRecorderPopup from "../../../talkToAstrologer/voiceChat/VoiceRecorderPopup";
 import { useFileSelector } from "./filePicker/useFileSelector";
+import { IoCallSharp } from "react-icons/io5";
+
+// Import SVG icons
+import SendIcon from "../../../../../assets/chat/send.svg";
+import AttachIcon from "../../../../../assets/chat/mingcute_attachment-line.svg";
+import MicIcon from "../../../../../assets/chat/Microphone Icon.svg";
 
 const ChatInput = ({
   value,
@@ -71,15 +76,15 @@ const ChatInput = ({
               className={styles.iconButton}
               onClick={handleAttachClick}
             >
-              <IoAttachOutline />
+              <img src={AttachIcon} alt="Attach" width="20" height="20" />
             </button>
 
             <button className={styles.iconButton} onClick={handleMicClick}>
-              <IoMicOutline />
+              <img src={MicIcon} alt="Microphone" width="20" height="20" />
             </button>
 
             <button className={styles.sendButton} onClick={onSend}>
-              <IoSendOutline />
+              <img src={SendIcon} alt="Send" width="20" height="20" />
             </button>
           </div>
         </div>

@@ -1,5 +1,9 @@
 import styles from "./ChatWindow.module.scss";
-import { IoShuffle, IoSparkles, IoGift } from "react-icons/io5";
+
+// Import SVG icons
+import SwitchIcon from "../../../../../assets/chat/Horizontal_switch.svg";
+import GiftIcon from "../../../../../assets/chat/GIft_fill.svg";
+import { IoSparkles } from "react-icons/io5";
 
 const FloatingActions = ({ onShuffle, onSparkles, onGift }) => {
   return (
@@ -9,21 +13,21 @@ const FloatingActions = ({ onShuffle, onSparkles, onGift }) => {
         onClick={onShuffle}
         aria-label="Shuffle"
       >
-        <IoShuffle size={20} />
+        <img src={SwitchIcon} alt="Switch" width="32" height="32" />
       </button>
       <button
         className={styles.floatingButton}
         onClick={onSparkles}
         aria-label="Sparkles"
       >
-        <IoSparkles size={20} />
+        <IoSparkles size={32} />
       </button>
       <button
         className={styles.floatingButton}
         onClick={onGift}
         aria-label="Gift"
       >
-        <IoGift size={20} />
+        <img src={GiftIcon} alt="Gift" width="32" height="32" />
       </button>
     </div>
   );

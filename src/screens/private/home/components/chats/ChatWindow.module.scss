@@ -10,32 +10,33 @@
 
 /* ==================== COLOR VARIABLES ==================== */
 /* Background Colors */
-$bg-main: #F9F4EF;
-$bg-header: #F9F4EF;
-$bg-input-bar: #a8a8a8;
-$bg-footer: #2A1C06;
-$bg-sent-message: #FDEFD8;
+$bg-main: #F7F7F7;
+$bg-header: #FFF5EC;
+$bg-input-bar: #FFFFFF;
+$bg-footer: #2A3B4D;
+$bg-sent-message: #FFF4E6;
 $bg-received-message: #FFFFFF;
-$bg-end-call: #FB3748;
-$bg-recharge: #1FC16B;
+$bg-end-call: #E4342F;
+$bg-recharge: linear-gradient(90deg, #F75801 0%, #D43400 100%);
 $bg-floating-button: #000000;
 $bg-wallet-badge: linear-gradient(135deg, #8B6F47 0%, #6B4423 50%, #3E2415 100%);
 $bg-input-field: #ffffff;
 
 /* Text Colors */
 $text-primary: #4a4a4a;
-$text-timestamp: #7a7a7a;
+$text-receiver: #666666;
+$text-timestamp: #999999;
 $text-experience: #888888;
 $text-date-header: #9e9e9e;
-$text-timer-highlight: #ff3b30;
+$text-timer-highlight: #FFA726;
 $text-white: #ffffff;
 $text-black: #000000;
 
 /* Interactive Colors */
 $placeholder-color: #c8c8c8;
-$icon-color: #633F06;
-$hover-bg: #131010;
-$hover-recharge: #00b248;
+$icon-color: #F75801;
+$hover-bg: #FFF3E6;
+$hover-recharge: #E54F00;
 $hover-end-call: #d32f2f;
 $back-button-bg: #F9F4EF;
 
@@ -95,6 +96,62 @@ $floating-button-gap: 14px;
   justify-content: space-between;
   background: $bg-header;
   border-bottom: none;
+  flex-shrink: 0;
+}
+
+/* ==================== CALL BUTTONS BELOW HEADER ==================== */
+.callButtonsContainer {
+  display: flex;
+  gap: $spacing-xl;
+  padding: $spacing-xxxl;
+  background: #FFFFFF;
+  flex-shrink: 0;
+  justify-content: center;
+}
+
+.voiceCallButton,
+.videoCallButton {
+  flex: 1;
+  max-width: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-lg;
+  padding: $spacing-xl 24px;
+  border-radius: 32px;
+  border: 2px solid #F75801;
+  background: transparent;
+  color: #F75801;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.voiceCallButton:hover,
+.videoCallButton:hover {
+  background: #FFF3E6;
+  transform: translateY(-1px);
+}
+
+.voiceCallButton:active,
+.videoCallButton:active {
+  transform: translateY(0);
+}
+
+.voiceCallButton:disabled,
+.videoCallButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.voiceCallButton svg,
+.videoCallButton svg,
+.voiceCallButton img,
+.videoCallButton img {
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
 }
 
@@ -246,13 +303,15 @@ $floating-button-gap: 14px;
   background: $bg-sent-message;
   color: $text-primary;
   border-radius: 18px 18px 4px 18px;
+  padding-right: 60px; /* Extra space for timestamp */
 }
 
 .receiverBubble {
   margin-right: auto;
   background: $bg-received-message;
-  color: $text-primary;
+  color: $text-receiver;
   border-radius: 18px 18px 18px 4px;
+  border: 1px solid #E0E0E0;
 }
 
 .bubbleContent {
@@ -272,13 +331,13 @@ $floating-button-gap: 14px;
 }
 
 .msgTime {
-  font-size: 11px;
+  font-size: 13px;
   color: $text-timestamp;
   font-weight: 400;
 }
 
 .checkmark {
-  font-size: 14px;
+  font-size: 16px;
   color: $text-timestamp;
 }
 
@@ -318,7 +377,7 @@ $floating-button-gap: 14px;
 .floatingActions {
   position: absolute;
   right: $spacing-xxxl;
-  bottom: 140px;
+  bottom: 40px;
   display: flex;
   flex-direction: column;
   gap: $spacing-xxxl;
@@ -330,28 +389,30 @@ $floating-button-gap: 14px;
   height: 64px;
   border-radius: 50%;
   border: none;
-  background: $bg-floating-button;
-  color: $text-white;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 4px 12px $shadow-floating;
   transition: all 0.2s ease;
+  color: $text-white;
 }
 
 .floatingButton:nth-child(1) {
-  background: linear-gradient(152.93deg, #3E93C9 20.53%, #2A79AB 59.96%);
+  background: #1E2939;
 }
 .floatingButton:nth-child(2) {
-  background: linear-gradient(160.4deg, #8BBEDF -9.95%, #1C4863 106.7%);
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
 }
 .floatingButton:nth-child(3) {
-  background: linear-gradient(153.91deg, #BC89E3 14.98%, #9544D3 58.56%);
-
+  background: #4CAF50;
 }
-.floatingButton svg {
-  font-size: 24px;
+
+.floatingButton svg,
+.floatingButton img {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
 }
 
 .floatingButton:hover {
@@ -361,6 +422,12 @@ $floating-button-gap: 14px;
 
 .floatingButton:active {
   transform: scale(0.95);
+}
+
+.floatingButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* ==================== INPUT BAR ==================== */
@@ -380,7 +447,7 @@ $floating-button-gap: 14px;
   display: flex;
   align-items: center;
   background: $bg-input-field;
-  border: none;
+  border: 1px solid #D2D2D2;
   border-radius: 32px;
   padding: 0 $spacing-xl 0 20px;
   box-shadow: none;
@@ -437,7 +504,8 @@ $floating-button-gap: 14px;
   transform: scale(0.95);
 }
 
-.iconButton svg {
+.iconButton svg,
+.iconButton img {
   width: 26px;
   height: 26px;
 }
@@ -467,7 +535,8 @@ $floating-button-gap: 14px;
   transform: scale(0.95);
 }
 
-.sendButton svg {
+.sendButton svg,
+.sendButton img {
   width: 26px;
   height: 26px;
 }
@@ -535,6 +604,15 @@ $floating-button-gap: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rechargeButton img {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 .rechargeButton:hover {
@@ -593,6 +671,24 @@ $floating-button-gap: 14px;
     flex-shrink: 0;
   }
 
+  .callButtonsContainer {
+    padding: $spacing-xl;
+    gap: $spacing-lg;
+  }
+
+  .voiceCallButton,
+  .videoCallButton {
+    padding: $spacing-lg 20px;
+    font-size: 14px;
+    max-width: none;
+  }
+
+  .voiceCallButton svg,
+  .videoCallButton svg {
+    width: 20px;
+    height: 20px;
+  }
+
   .headerLeft {
     gap: $spacing-lg;
   }
@@ -640,17 +736,21 @@ $floating-button-gap: 14px;
     min-width: 70px;
   }
 
+  .senderBubble {
+    padding-right: 50px; /* Mobile: smaller space for timestamp */
+  }
+
   .msgTime {
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .checkmark {
-    font-size: 13px;
+    font-size: 15px;
   }
 
   .floatingActions {
     right: $spacing-xl;
-    bottom: 130px;
+    bottom: 60px;
     gap: $spacing-xxxl;
   }
 
@@ -666,7 +766,7 @@ $floating-button-gap: 14px;
   .inputBox {
     padding: $spacing-lg $spacing-xl;
     gap: $spacing-lg;
-    background: #d9d9d9;
+    // background: #d9d9d9;
     height: var(--chat-input-height);
     min-height: var(--chat-input-height);
     max-height: var(--chat-input-height);
@@ -731,7 +831,7 @@ $floating-button-gap: 14px;
 
   .chatFooter {
     padding: $spacing-lg $spacing-xl;
-    background: #1a1a1a;
+    // background: #1a1a1a;
     height: var(--chat-footer-height);
     min-height: var(--chat-footer-height);
     max-height: var(--chat-footer-height);
@@ -776,7 +876,7 @@ $floating-button-gap: 14px;
 
   .floatingActions {
     right: $spacing-lg;
-    bottom: 120px;
+    bottom: 40px;
     gap: $floating-button-gap;
   }
 
@@ -798,7 +898,7 @@ $floating-button-gap: 14px;
 
   .floatingActions {
     right: $spacing-xl;
-    bottom: 130px;
+    bottom: 40px;
   }
 
   .floatingButton {
@@ -817,9 +917,13 @@ $floating-button-gap: 14px;
     max-width: 75%;
   }
 
+  .senderBubble {
+    padding-right: 70px; /* Desktop: more space for timestamp */
+  }
+
   .floatingActions {
     right: $spacing-xxxl;
-    bottom: 140px;
+    bottom: 40px;
     gap: $spacing-xxxl;
   }
 
@@ -828,8 +932,42 @@ $floating-button-gap: 14px;
     height: 64px;
   }
 
-  .floatingButton svg {
-    font-size: 24px;
+  .floatingButton svg,
+  .floatingButton img {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Larger icons for desktop in input bar */
+  .iconButton,
+  .sendButton {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+
+  .iconButton svg,
+  .iconButton img,
+  .sendButton svg,
+  .sendButton img {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Larger call button icons for desktop */
+  .voiceCallButton svg,
+  .videoCallButton svg,
+  .voiceCallButton img,
+  .videoCallButton img {
+    width: 26px;
+    height: 26px;
+  }
+
+  /* Larger arrow icon in recharge button */
+  .rechargeButton img {
+    width: 20px;
+    height: 20px;
   }
 }
 
