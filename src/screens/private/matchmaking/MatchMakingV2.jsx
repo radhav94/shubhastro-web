@@ -1,3 +1,4 @@
+import styles from "./MatchMakingV2.module.scss";
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronDown, Heart } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -12,6 +13,7 @@ import { Toast } from "../../../component";
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
 import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
 import ProfileListingModal from "../../../component/UI/Profile/ProfileListingModal";
+import bondIcon from "../../../assets/icons/destiny-icon.svg";
 
 const MatchMaking = () => {
   const navigate = useNavigate();
@@ -455,8 +457,8 @@ const MatchMaking = () => {
   };
   /* -------------------- UI -------------------- */
   return (
-    <div className="min-h-screen bg-[#FFF4EA] mt-[100px] flex justify-center">
-      <div className="w-full max-w-md bg-white min-h-screen flex flex-col">
+    <div className={styles.matchMaking}>
+      <div className="w-full max-w-md bg-white flex flex-col">
         {/* HEADER */}
         <div className="bg-[#FFF4EA] px-4 py-4 flex items-center justify-between">
           <button
@@ -484,11 +486,11 @@ const MatchMaking = () => {
         </div>
 
         {/* CONTENT */}
-        <div className="flex-1 px-4 pt-4 pb-28">
+        <div className={styles.matchMakingCard}>
           <div className="bg-white border rounded-2xl p-6 text-center shadow-sm">
             <div className="flex justify-center mb-4">
-              <div className="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center">
-                <Heart className="text-orange-500 w-7 h-7" />
+              <div className="w-14 h-14 rounded-full flex items-center justify-center">
+                <img src={bondIcon} alt="Shubh Talk Logo" />
               </div>
             </div>
             <h2 className="text-xl font-semibold mb-2">Bonded by Destiny</h2>
@@ -539,7 +541,7 @@ const MatchMaking = () => {
         </div>
 
         {/* BUTTON */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white px-4 py-4 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] md:static md:shadow-none">
+        <div className="bg-white px-4 py-4 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] md:static md:shadow-none">
           <button
             onClick={handleProceed}
             className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold py-4 rounded-full flex items-center justify-center gap-2"

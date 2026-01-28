@@ -1,3 +1,16 @@
+.matchMakingCard{
+  padding: 16px;
+  border-radius: 12px;
+}
+.matchMaking{
+  margin-top: 90px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  @media (width <= 767px) {
+    margin-top: 68px;
+  }
+}
 .page {
     // background: #f5f1e9;
     min-height: 100vh;
