@@ -22,15 +22,15 @@ export const FooterWaiting = () => {
 
   return (
     <>
-      <div className="flex items-center gap-3 text-white">
-        <span className="text-xl">⏳</span>
-        <div>
-          <p className="text-sm font-medium">Waiting in queue</p>
-          <p className="text-xs text-zinc-400">
+      <div className="flex items-center gap-2 sm:gap-3 text-white">
+        <span className="text-lg sm:text-xl flex-shrink-0">⏳</span>
+        <div className="min-w-0">
+          <p className="text-xs sm:text-sm font-medium">Waiting in queue</p>
+          <p className="text-[11px] sm:text-xs text-zinc-400">
             Approx {waitingList || "5"} mins
           </p>
           {astrologerName && (
-            <p className="text-xs text-zinc-400">
+            <p className="text-[11px] sm:text-xs text-zinc-400 truncate">
               Astrologer: {astrologerName}
             </p>
           )}
@@ -42,7 +42,7 @@ export const FooterWaiting = () => {
           voiceSocket.emit("call:cancel", {roomId : activeCallRoomId, canceledBy : "CUSTOMER"});
           resetCallFlow();
         }}
-        className="rounded-xl border border-red-500/40 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition"
+        className="rounded-xl border border-red-500/40 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm text-red-400 hover:bg-red-500/10 transition flex-shrink-0"
       >
         Cancel
       </button>

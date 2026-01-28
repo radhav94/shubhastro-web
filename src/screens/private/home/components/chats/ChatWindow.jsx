@@ -22,11 +22,16 @@ import { Toast } from "../../../../../component";
 import dayjs from "dayjs";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
+// Import SVG icons
+import CallIcon from "../../../../../assets/chat/Call.svg";
+import VideocamIcon from "../../../../../assets/chat/Videocam.svg";
+
 const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 const MIN_CHAT_SECONDS = 60;
 
 import { useGetS3SignedUrlMutation } from "../../../../../redux/api/s3SignedApi";
 import { useWalletBalance } from "../../../wallet/useWalletBalance";
+import { PATH } from "../../../../../utils/routes/Paths";
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
@@ -74,15 +79,23 @@ const ChatWindow = () => {
 
   const [message, setMessage] = useState("");
 
-  const { waitingPopup, handleAudioCall, handleVideoCall, handleCancelCall } =
-    useChatSocket({
-      userId,
-      astrologerId,
-      fullName,
-      kundliId,
-      roomId,
-      isUserSide,
-    });
+  const { 
+    waitingPopup: localWaitingPopup, 
+    handleAudioCall, 
+    handleVideoCall, 
+    handleCancelCall 
+  } = useChatSocket({
+    userId,
+    astrologerId,
+    fullName,
+    kundliId,
+    roomId,
+    isUserSide,
+  });
+
+  // Use global waiting list from CallContext
+  const { waitingList: globalWaitingList } = useCall();
+  const waitingPopup = localWaitingPopup || globalWaitingList;
 
   const { data } = useGetChatHistoryQuery(
     { userId: astrologerId },
@@ -253,6 +266,7 @@ const ChatWindow = () => {
 
   const handleSparkles = () => {
     console.log("Sparkles action");
+    navigate(PATH.privateRoutes.AI_WOW.path)
     // Add your sparkles logic here
   };
 
@@ -278,6 +292,27 @@ const ChatWindow = () => {
           disabled={!!activeCall}
           walletBalance={balance || 0}
         />
+
+        {/* Call Buttons Below Header */}
+        <div className={styles.callButtonsContainer}>
+          <button 
+            className={styles.voiceCallButton} 
+            onClick={handleAudioCall}
+            disabled={!!activeCall}
+          >
+            <img src={CallIcon} alt="Voice Call" width="20" height="20" />
+            Voice Call
+          </button>
+          
+          <button 
+            className={styles.videoCallButton} 
+            onClick={handleVideoCall}
+            disabled={!!activeCall}
+          >
+            <img src={VideocamIcon} alt="Video Call" width="20" height="20" />
+            Video Call
+          </button>
+        </div>
 
         <div className={styles.messagesContainer}>
           <ChatMessages
@@ -315,9 +350,9 @@ const ChatWindow = () => {
           onRecharge={handleRecharge}
         />
 
-        {waitingPopup && (
+        {/* {waitingPopup && (
           <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
-        )}
+        )} */}
 
         {!isMessageDisabled && <InactivityModal
           isOpen={isInactive}
