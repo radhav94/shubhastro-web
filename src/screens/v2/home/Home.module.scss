@@ -223,7 +223,12 @@
   background: rgba(139, 115, 85, 0.15);
   font-weight: 600;
 }
-
+.lifeAreaCardMain{
+  background: linear-gradient(136deg, #E9FAE3 37.95%, #C5FFB1 180.73%), linear-gradient(0deg, #FCEBF3 0%, #FCEBF3 100%), #FFF;
+}
+.wealthFinance{
+  background: linear-gradient(180deg, #30D14D 0%, #84F237 100%);
+}
 /* Show navigation on tablet and desktop */
 @media (min-width: 768px) {
   .headerNavigation {

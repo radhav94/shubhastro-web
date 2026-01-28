@@ -22,53 +22,21 @@ $font-primary: "Poppins", sans-serif;
 -----------------------------------------*/
 .blogsContainer {
   display: grid;
-  grid-template-columns: 1fr; // Single column on mobile
-  gap: 20px;
-  width: 100%;
+  grid-template-columns: repeat(4, 1fr); // Single column on mobile
+  gap: 16px;
   margin: 0 auto;
-  padding: 10px 0;
+  padding: 16px;
+  max-width: 1280px;
 
   // Small tablets and landscape phones
-  @media (min-width: 576px) {
-    grid-template-columns: repeat(2, 1fr); // 2 columns
-    gap: 20px;
-    padding: 0px 0px 0px 4px;
+  @media (width <= 1200px) {
+    grid-template-columns: repeat(4, 1fr); // 2 columns
   }
-
-  // Tablets
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, 1fr); // 2 columns
-    gap: 24px;
-    padding: 0px 0px 0px 4px;
+  @media (width <= 768px) {
+    grid-template-columns: repeat(3, 1fr); // 2 columns
   }
-
-  // Large tablets / small desktops
-  @media (min-width: 992px) {
-    grid-template-columns: repeat(3, 1fr); // 3 columns
-    gap: 28px;
-    padding: 0px 0px 0px 4px;
-  }
-
-  // Desktops
-  @media (min-width: 1200px) {
-    grid-template-columns: repeat(3, 1fr); // 3 columns
-    gap: 30px;
-    padding: 0px 0px 0px 4px;
-  }
-
-  // Large desktops
-  @media (min-width: 1400px) {
-    grid-template-columns: repeat(4, 1fr); // 4 columns
-    gap: 32px;
-    max-width: 1600px;
-    padding: 0px 0px 0px 4px;
-  }
-
-  // Extra large screens
-  @media (min-width: 1600px) {
-    grid-template-columns: repeat(4, 1fr); // 4 columns
-    gap: 36px;
-    padding: 0px 0px 0px 4px;
+  @media (width <= 767px) {
+    grid-template-columns: repeat(1, 1fr); // 2 columns
   }
 }
 
