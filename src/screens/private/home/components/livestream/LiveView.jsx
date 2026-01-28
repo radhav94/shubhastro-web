@@ -364,20 +364,19 @@ const LiveView = (props) => {
               </div>
             </div>
 
-            <div className="live-status">
+            {/* <div className="live-status">
               <div className="live-badge">LIVE</div>
               <div className="viewer-pill">
                 <span className="viewer-dot" />
                 <span className="viewer-count">{viewerCount} watching</span>
                 {liveListCtx && (
                   <span className="viewer-count">
-                    {" "}
                     | Live {liveListCtx.currentIndex + 1} /{" "}
                     {liveListCtx.lives.length}
                   </span>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* LIVE INDEX INDICATOR */}

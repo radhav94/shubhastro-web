@@ -71,8 +71,10 @@ const LiveLanding = () => {
         navigate("/live");
     };
 
-    const handleBackClick = () => {
-        navigate(-1);
+    const handleBackClick = (e) => {
+        e.preventDefault();
+        e.stopPropagation(); 
+        navigate("/", { replace: false });
     };
 
     const handleTalkToAstrologer = () => {
