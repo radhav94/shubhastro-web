@@ -5,10 +5,30 @@ import quickActionTwo from "../../../../assets/images/quick-action-2.svg";
 import quickActionThree from "../../../../assets/images/quick-action-3.svg";
 import styles from "../Home.module.scss";
 
-const QuickActions = () => {
+const QuickActions = ({ data = [], title }) => {
     const navigate = useNavigate();
 
-    const quickActions = [
+    // Map API data to quick actions format
+    const quickActions = data.length > 0 ? data.map((item, index) => {
+        // Determine path based on slug
+        let path = PATH.privateRoutes.Chat_With_ASTROLOGER.path;
+        if (item.slug === "talk-to-astrologer") {
+            path = PATH.privateRoutes.Chat_With_ASTROLOGER.path;
+        } else if (item.slug === "daily-horoscope") {
+            path = "/horoscopes/daily-horoscope";
+        } else if (item.slug === "free-kundli") {
+            path = "/kundli";
+        } else if (item.redirect_url) {
+            path = item.redirect_url;
+        }
+
+        return {
+            id: item._id || item.ID || index,
+            title: item.title,
+            image: item.image_url || item.icon || quickActionOne,
+            path: path,
+        };
+    }) : [
         {
             id: 1,
             title: "Chat with Astrologer",

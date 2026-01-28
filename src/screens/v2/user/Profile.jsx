@@ -38,9 +38,9 @@ const Profile = () => {
   const orderListRef = useRef(null); // Ref for order history scroll
   const user = getUserFromStorage();
   const userName = user
-    ? (user.firstName && user.lastName 
-        ? `${user.firstName} ${user.lastName}` 
-        : user.phoneNumber || "Guest User")
+    ? user.firstName && user.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user.phoneNumber || "Guest User"
     : "Guest User";
   const userId = localStorage.getItem("shubhtalk_customer_id");
 
@@ -260,7 +260,7 @@ const Profile = () => {
   const handleLogout = () => {
     // Dispatch Redux logout action
     dispatch(logout());
-    
+
     // Clear all authentication related data from localStorage
     localStorage.removeItem("shubhtalk_customer_token");
     localStorage.removeItem("shubhtalk_role");
@@ -391,7 +391,7 @@ const Profile = () => {
             <span className={styles.balanceLabel}>Balance</span>
           </div>
           <div className={styles.balanceAmount}>
-            ₹{isFetchingBalance ? "..." : balance || 100}
+            ₹{isFetchingBalance ? "..." : balance || 0}
           </div>
         </div>
 

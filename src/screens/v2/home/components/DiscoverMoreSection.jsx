@@ -8,10 +8,37 @@ import matchmaking from "../../../../assets/images/matchmaking.svg";
 import tarot from "../../../../assets/images/tarot.svg";
 import styles from "../Home.module.scss";
 
-const DiscoverMoreSection = () => {
+const DiscoverMoreSection = ({ data = [], title, showMore }) => {
   const navigate = useNavigate();
 
-  const discoverItems = [
+  // Use API data if available, otherwise use default items
+  const discoverItems = data.length > 0 ? data.map((item, index) => {
+    // Determine path based on slug
+    let path = "/explore";
+    if (item.slug === "vedic-kundli") {
+      path = PATH.privateRoutes.KUNDLI.path;
+    } else if (item.slug === "numerology") {
+      path = PATH.privateRoutes.NUMEROLOGY.path;
+    } else if (item.slug === "match-making") {
+      path = PATH.privateRoutes.MATCHMAKING.path;
+    } else if (item.slug === "tarot") {
+      path = PATH.privateRoutes.TAROT_CARD_V2.path;
+    } else if (item.redirect_url) {
+      path = item.redirect_url;
+    }
+
+    // Background colors for cards
+    const backgrounds = ["#D43400", "#752B29", "#A560CA", "#3E93C9"];
+
+    return {
+      id: item._id || item.ID || index,
+      title: item.title,
+      description: item.description || "",
+      image: item.image_url || item.icon || vedikKundli,
+      background: backgrounds[index % backgrounds.length],
+      path: path,
+    };
+  }) : [
     {
       id: 1,
       title: "Vedic Kundli",
@@ -46,13 +73,17 @@ const DiscoverMoreSection = () => {
     },
   ];
 
+  if (discoverItems.length === 0) return null;
+
   return (
     <section className={styles.discoverSection}>
       <div className={styles.discoverHeader}>
-        <SectionHeader title="DISCOVER MORE" />
-        <button className={styles.viewAllBtn} onClick={() => navigate("/explore")}>
-                    <ChevronRight size={24} />
-                </button>
+        <SectionHeader title={title || "DISCOVER MORE"} />
+        {showMore && (
+          <button className={styles.viewAllBtn} onClick={() => navigate("/explore")}>
+            <ChevronRight size={24} />
+          </button>
+        )}
       </div>
 
       <div className={styles.discoverGrid}>

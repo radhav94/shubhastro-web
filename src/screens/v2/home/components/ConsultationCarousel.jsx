@@ -5,13 +5,20 @@ import { PATH } from "../../../../utils/routes/Paths";
 import consult from "../../../../assets/images/astrologer.svg";
 import styles from "../Home.module.scss";
 
-const ConsultationCarousel = () => {
+const ConsultationCarousel = ({ data = [], title }) => {
     const [activeSlide, setActiveSlide] = useState(0);
     const [loadingConsult, setLoadingConsult] = useState(false);
     const navigate = useNavigate();
     const carouselRef = useRef(null);
 
-    const carouselSlides = [
+    // Use API data if available, otherwise use default slides
+    const carouselSlides = data.length > 0 ? data.map((item, index) => ({
+        id: item._id || index,
+        title: item.title || "Consult our astrologers today.",
+        subtitle: item.description || "Get advice from astrologers.",
+        buttonText: "Consult Now",
+        image: item.image_url || consult,
+    })) : [
         {
             id: 1,
             title: "Consult our astrologers today.",
@@ -23,20 +30,6 @@ const ConsultationCarousel = () => {
             id: 2,
             title: "Want to know your future?",
             subtitle: "Get advice from experts.",
-            buttonText: "Consult Now",
-            image: consult,
-        },
-        {
-            id: 3,
-            title: "Want to know your future?",
-            subtitle: "Get advice from experts.",
-            buttonText: "Consult Now",
-            image: consult,
-        },
-        {
-            id: 4,
-            title: "Consult our astrologers today.",
-            subtitle: "Get advice from astrologers.",
             buttonText: "Consult Now",
             image: consult,
         },

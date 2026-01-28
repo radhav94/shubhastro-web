@@ -1023,6 +1023,6 @@ export const PATH = {
     EDITPROFILE: {
       path: "/profile/edit/:id",
       element: EditProfile,
-    }
+    },
   },
 };
