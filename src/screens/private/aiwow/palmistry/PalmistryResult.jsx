@@ -44,7 +44,7 @@ const PalmistryResult = () => {
     );
   }
 
-  const { hand, qualityScore, lines, overallReading, astroCorrelation } = resultData;
+  const { hand, lines, overallReading, astroCorrelation } = resultData;
 
   // Safety checks for nested data
   if (!lines || !overallReading) {
@@ -103,16 +103,6 @@ const PalmistryResult = () => {
               )}
             </div>
 
-            <div className={styles.scoreCard}>
-              <div className={styles.scoreHeader}>
-                <h3 className={styles.scoreTitle}>Quality Score</h3>
-                <div className={styles.scoreValue}>{qualityScore || 0}%</div>
-              </div>
-              <div className={styles.progressBar}>
-                <div className={styles.progressFill} style={{ width: `${qualityScore || 0}%` }}></div>
-              </div>
-            </div>
-
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Personality Type</h3>
               <p className={styles.text}>{overallReading?.personalityType || 'No data available'}</p>
@@ -137,7 +127,6 @@ const PalmistryResult = () => {
               <div className={styles.lineCard}>
                 <div className={styles.lineHeader}>
                   <h3 className={styles.lineTitle}>Fate Line</h3>
-                  {lines.fate.detected && <div className={styles.lineScore}>{lines.fate.score || 0}%</div>}
                 </div>
                 <p className={styles.lineSummary}>{lines.fate.interpretation.summary}</p>
                 
@@ -196,7 +185,6 @@ const PalmistryResult = () => {
               <div className={styles.lineCard}>
                 <div className={styles.lineHeader}>
                   <h3 className={styles.lineTitle}>Heart Line</h3>
-                  {lines.heart.detected && <div className={styles.lineScore}>{lines.heart.score || 0}%</div>}
                 </div>
                 {lines.heart.interpretation?.summary && (
                   <p className={styles.lineSummary}>{lines.heart.interpretation.summary}</p>
@@ -256,7 +244,6 @@ const PalmistryResult = () => {
               <div className={styles.lineCard}>
                 <div className={styles.lineHeader}>
                   <h3 className={styles.lineTitle}>Head Line</h3>
-                  {lines.head.detected && <div className={styles.lineScore}>{lines.head.score || 0}%</div>}
                 </div>
                 {lines.head.interpretation?.summary && (
                   <p className={styles.lineSummary}>{lines.head.interpretation.summary}</p>
@@ -312,7 +299,6 @@ const PalmistryResult = () => {
               <div className={styles.lineCard}>
                 <div className={styles.lineHeader}>
                   <h3 className={styles.lineTitle}>Life Line</h3>
-                  {lines.life.detected && <div className={styles.lineScore}>{lines.life.score || 0}%</div>}
                 </div>
                 {lines.life.interpretation?.summary && (
                   <p className={styles.lineSummary}>{lines.life.interpretation.summary}</p>

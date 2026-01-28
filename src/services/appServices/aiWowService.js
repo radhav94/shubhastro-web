@@ -79,58 +79,75 @@ export const analyzeFace = async (imageData) => {
     
     // Extract error details from response
     const errorData = error.response?.data;
-    const errorCode = errorData?.error?.code || error.response?.status || 'UNKNOWN_ERROR';
-    const errorMessage = String(
-      errorData?.error?.message || 
-      errorData?.message || 
-      error.message || 
-      'Analysis failed'
-    );
     
-    // Handle specific error cases (interceptor already showed toast)
+    // Return full error structure if available
+    if (errorData?.error) {
+      return {
+        success: false,
+        error: {
+          code: errorData.error.code || 'UNKNOWN_ERROR',
+          message: errorData.error.message || 'Analysis failed',
+          details: errorData.error.details || null
+        }
+      };
+    }
+    
+    // Handle specific error cases
     if (error.code === 'ECONNABORTED') {
       return {
         success: false,
-        error: 'Request timeout. Please try again.',
-        code: 'TIMEOUT'
+        error: {
+          code: 'TIMEOUT',
+          message: 'Request timeout. Please try again.',
+          details: null
+        }
       };
     } else if (error.response?.status === 413) {
       return {
         success: false,
-        error: 'Image file is too large',
-        code: 'FILE_TOO_LARGE'
+        error: {
+          code: 'FILE_TOO_LARGE',
+          message: 'Image file is too large',
+          details: null
+        }
       };
     } else if (error.response?.status === 415) {
       return {
         success: false,
-        error: 'Invalid image format',
-        code: 'INVALID_FORMAT'
+        error: {
+          code: 'INVALID_FORMAT',
+          message: 'Invalid image format',
+          details: null
+        }
       };
     } else if (error.response?.status === 500) {
       return {
         success: false,
-        error: errorMessage,
-        code: 'SERVER_ERROR'
-      };
-    } else if (errorData?.error?.code === 'AI_ERROR') {
-      return {
-        success: false,
-        error: errorMessage,
-        code: 'AI_ERROR'
+        error: {
+          code: 'SERVER_ERROR',
+          message: errorData?.message || 'Server error occurred',
+          details: null
+        }
       };
     } else if (!error.response) {
       return {
         success: false,
-        error: 'Network error. Please check your connection.',
-        code: 'NETWORK_ERROR'
+        error: {
+          code: 'NETWORK_ERROR',
+          message: 'Network error. Please check your connection.',
+          details: null
+        }
       };
     }
     
     // Generic error handling
     return {
       success: false,
-      error: errorMessage,
-      code: errorCode
+      error: {
+        code: 'UNKNOWN_ERROR',
+        message: errorData?.message || error.message || 'Analysis failed',
+        details: null
+      }
     };
   }
 };
@@ -186,58 +203,75 @@ export const analyzePalm = async (imageData, hand = 'right') => {
     
     // Extract error details from response
     const errorData = error.response?.data;
-    const errorCode = errorData?.error?.code || error.response?.status || 'UNKNOWN_ERROR';
-    const errorMessage = String(
-      errorData?.error?.message || 
-      errorData?.message || 
-      error.message || 
-      'Analysis failed'
-    );
     
-    // Handle specific error cases (interceptor already showed toast)
+    // Return full error structure if available
+    if (errorData?.error) {
+      return {
+        success: false,
+        error: {
+          code: errorData.error.code || 'UNKNOWN_ERROR',
+          message: errorData.error.message || 'Analysis failed',
+          details: errorData.error.details || null
+        }
+      };
+    }
+    
+    // Handle specific error cases
     if (error.code === 'ECONNABORTED') {
       return {
         success: false,
-        error: 'Request timeout. Please try again.',
-        code: 'TIMEOUT'
+        error: {
+          code: 'TIMEOUT',
+          message: 'Request timeout. Please try again.',
+          details: null
+        }
       };
     } else if (error.response?.status === 413) {
       return {
         success: false,
-        error: 'Image file is too large',
-        code: 'FILE_TOO_LARGE'
+        error: {
+          code: 'FILE_TOO_LARGE',
+          message: 'Image file is too large',
+          details: null
+        }
       };
     } else if (error.response?.status === 415) {
       return {
         success: false,
-        error: 'Invalid image format',
-        code: 'INVALID_FORMAT'
+        error: {
+          code: 'INVALID_FORMAT',
+          message: 'Invalid image format',
+          details: null
+        }
       };
     } else if (error.response?.status === 500) {
       return {
         success: false,
-        error: errorMessage,
-        code: 'SERVER_ERROR'
-      };
-    } else if (errorData?.error?.code === 'AI_ERROR') {
-      return {
-        success: false,
-        error: errorMessage,
-        code: 'AI_ERROR'
+        error: {
+          code: 'SERVER_ERROR',
+          message: errorData?.message || 'Server error occurred',
+          details: null
+        }
       };
     } else if (!error.response) {
       return {
         success: false,
-        error: 'Network error. Please check your connection.',
-        code: 'NETWORK_ERROR'
+        error: {
+          code: 'NETWORK_ERROR',
+          message: 'Network error. Please check your connection.',
+          details: null
+        }
       };
     }
     
     // Generic error handling
     return {
       success: false,
-      error: errorMessage,
-      code: errorCode
+      error: {
+        code: 'UNKNOWN_ERROR',
+        message: errorData?.message || error.message || 'Analysis failed',
+        details: null
+      }
     };
   }
 };
@@ -289,58 +323,75 @@ export const analyzeSignature = async (imageData) => {
     
     // Extract error details from response
     const errorData = error.response?.data;
-    const errorCode = errorData?.error?.code || error.response?.status || 'UNKNOWN_ERROR';
-    const errorMessage = String(
-      errorData?.error?.message || 
-      errorData?.message || 
-      error.message || 
-      'Analysis failed'
-    );
     
-    // Handle specific error cases (interceptor already showed toast)
+    // Return full error structure if available
+    if (errorData?.error) {
+      return {
+        success: false,
+        error: {
+          code: errorData.error.code || 'UNKNOWN_ERROR',
+          message: errorData.error.message || 'Analysis failed',
+          details: errorData.error.details || null
+        }
+      };
+    }
+    
+    // Handle specific error cases
     if (error.code === 'ECONNABORTED') {
       return {
         success: false,
-        error: 'Request timeout. Please try again.',
-        code: 'TIMEOUT'
+        error: {
+          code: 'TIMEOUT',
+          message: 'Request timeout. Please try again.',
+          details: null
+        }
       };
     } else if (error.response?.status === 413) {
       return {
         success: false,
-        error: 'Image file is too large',
-        code: 'FILE_TOO_LARGE'
+        error: {
+          code: 'FILE_TOO_LARGE',
+          message: 'Image file is too large',
+          details: null
+        }
       };
     } else if (error.response?.status === 415) {
       return {
         success: false,
-        error: 'Invalid image format',
-        code: 'INVALID_FORMAT'
+        error: {
+          code: 'INVALID_FORMAT',
+          message: 'Invalid image format',
+          details: null
+        }
       };
     } else if (error.response?.status === 500) {
       return {
         success: false,
-        error: errorMessage,
-        code: 'SERVER_ERROR'
-      };
-    } else if (errorData?.error?.code === 'AI_ERROR') {
-      return {
-        success: false,
-        error: errorMessage,
-        code: 'AI_ERROR'
+        error: {
+          code: 'SERVER_ERROR',
+          message: errorData?.message || 'Server error occurred',
+          details: null
+        }
       };
     } else if (!error.response) {
       return {
         success: false,
-        error: 'Network error. Please check your connection.',
-        code: 'NETWORK_ERROR'
+        error: {
+          code: 'NETWORK_ERROR',
+          message: 'Network error. Please check your connection.',
+          details: null
+        }
       };
     }
     
     // Generic error handling
     return {
       success: false,
-      error: errorMessage,
-      code: errorCode
+      error: {
+        code: 'UNKNOWN_ERROR',
+        message: errorData?.message || error.message || 'Analysis failed',
+        details: null
+      }
     };
   }
 };
@@ -403,58 +454,75 @@ export const analyzeClothColor = async (imageData, intentionData) => {
     
     // Extract error details from response
     const errorData = error.response?.data;
-    const errorCode = errorData?.error?.code || error.response?.status || 'UNKNOWN_ERROR';
-    const errorMessage = String(
-      errorData?.error?.message || 
-      errorData?.message || 
-      error.message || 
-      'Analysis failed'
-    );
     
-    // Handle specific error cases (interceptor already showed toast)
+    // Return full error structure if available
+    if (errorData?.error) {
+      return {
+        success: false,
+        error: {
+          code: errorData.error.code || 'UNKNOWN_ERROR',
+          message: errorData.error.message || 'Analysis failed',
+          details: errorData.error.details || null
+        }
+      };
+    }
+    
+    // Handle specific error cases
     if (error.code === 'ECONNABORTED') {
       return {
         success: false,
-        error: 'Request timeout. Please try again.',
-        code: 'TIMEOUT'
+        error: {
+          code: 'TIMEOUT',
+          message: 'Request timeout. Please try again.',
+          details: null
+        }
       };
     } else if (error.response?.status === 413) {
       return {
         success: false,
-        error: 'Image file is too large',
-        code: 'FILE_TOO_LARGE'
+        error: {
+          code: 'FILE_TOO_LARGE',
+          message: 'Image file is too large',
+          details: null
+        }
       };
     } else if (error.response?.status === 415) {
       return {
         success: false,
-        error: 'Invalid image format',
-        code: 'INVALID_FORMAT'
+        error: {
+          code: 'INVALID_FORMAT',
+          message: 'Invalid image format',
+          details: null
+        }
       };
     } else if (error.response?.status === 500) {
       return {
         success: false,
-        error: errorMessage,
-        code: 'SERVER_ERROR'
-      };
-    } else if (errorData?.error?.code === 'AI_ERROR') {
-      return {
-        success: false,
-        error: errorMessage,
-        code: 'AI_ERROR'
+        error: {
+          code: 'SERVER_ERROR',
+          message: errorData?.message || 'Server error occurred',
+          details: null
+        }
       };
     } else if (!error.response) {
       return {
         success: false,
-        error: 'Network error. Please check your connection.',
-        code: 'NETWORK_ERROR'
+        error: {
+          code: 'NETWORK_ERROR',
+          message: 'Network error. Please check your connection.',
+          details: null
+        }
       };
     }
     
     // Generic error handling
     return {
       success: false,
-      error: errorMessage,
-      code: errorCode
+      error: {
+        code: 'UNKNOWN_ERROR',
+        message: errorData?.message || error.message || 'Analysis failed',
+        details: null
+      }
     };
   }
 };
@@ -557,58 +625,75 @@ export const analyzeAura = async (imageData) => {
     
     // Extract error details from response
     const errorData = error.response?.data;
-    const errorCode = errorData?.error?.code || error.response?.status || 'UNKNOWN_ERROR';
-    const errorMessage = String(
-      errorData?.error?.message || 
-      errorData?.message || 
-      error.message || 
-      'Analysis failed'
-    );
     
-    // Handle specific error cases (interceptor already showed toast)
+    // Return full error structure if available
+    if (errorData?.error) {
+      return {
+        success: false,
+        error: {
+          code: errorData.error.code || 'UNKNOWN_ERROR',
+          message: errorData.error.message || 'Analysis failed',
+          details: errorData.error.details || null
+        }
+      };
+    }
+    
+    // Handle specific error cases
     if (error.code === 'ECONNABORTED') {
       return {
         success: false,
-        error: 'Request timeout. Please try again.',
-        code: 'TIMEOUT'
+        error: {
+          code: 'TIMEOUT',
+          message: 'Request timeout. Please try again.',
+          details: null
+        }
       };
     } else if (error.response?.status === 413) {
       return {
         success: false,
-        error: 'Image file is too large',
-        code: 'FILE_TOO_LARGE'
+        error: {
+          code: 'FILE_TOO_LARGE',
+          message: 'Image file is too large',
+          details: null
+        }
       };
     } else if (error.response?.status === 415) {
       return {
         success: false,
-        error: 'Invalid image format',
-        code: 'INVALID_FORMAT'
+        error: {
+          code: 'INVALID_FORMAT',
+          message: 'Invalid image format',
+          details: null
+        }
       };
     } else if (error.response?.status === 500) {
       return {
         success: false,
-        error: errorMessage,
-        code: 'SERVER_ERROR'
-      };
-    } else if (errorData?.error?.code === 'AI_ERROR') {
-      return {
-        success: false,
-        error: errorMessage,
-        code: 'AI_ERROR'
+        error: {
+          code: 'SERVER_ERROR',
+          message: errorData?.message || 'Server error occurred',
+          details: null
+        }
       };
     } else if (!error.response) {
       return {
         success: false,
-        error: 'Network error. Please check your connection.',
-        code: 'NETWORK_ERROR'
+        error: {
+          code: 'NETWORK_ERROR',
+          message: 'Network error. Please check your connection.',
+          details: null
+        }
       };
     }
     
     // Generic error handling
     return {
       success: false,
-      error: errorMessage,
-      code: errorCode
+      error: {
+        code: 'UNKNOWN_ERROR',
+        message: errorData?.message || error.message || 'Analysis failed',
+        details: null
+      }
     };
   }
 };
@@ -660,58 +745,75 @@ export const analyzeGemstone = async (imageData) => {
     
     // Extract error details from response
     const errorData = error.response?.data;
-    const errorCode = errorData?.error?.code || error.response?.status || 'UNKNOWN_ERROR';
-    const errorMessage = String(
-      errorData?.error?.message || 
-      errorData?.message || 
-      error.message || 
-      'Analysis failed'
-    );
     
-    // Handle specific error cases (interceptor already showed toast)
+    // Return full error structure if available
+    if (errorData?.error) {
+      return {
+        success: false,
+        error: {
+          code: errorData.error.code || 'UNKNOWN_ERROR',
+          message: errorData.error.message || 'Analysis failed',
+          details: errorData.error.details || null
+        }
+      };
+    }
+    
+    // Handle specific error cases
     if (error.code === 'ECONNABORTED') {
       return {
         success: false,
-        error: 'Request timeout. Please try again.',
-        code: 'TIMEOUT'
+        error: {
+          code: 'TIMEOUT',
+          message: 'Request timeout. Please try again.',
+          details: null
+        }
       };
     } else if (error.response?.status === 413) {
       return {
         success: false,
-        error: 'Image file is too large',
-        code: 'FILE_TOO_LARGE'
+        error: {
+          code: 'FILE_TOO_LARGE',
+          message: 'Image file is too large',
+          details: null
+        }
       };
     } else if (error.response?.status === 415) {
       return {
         success: false,
-        error: 'Invalid image format',
-        code: 'INVALID_FORMAT'
+        error: {
+          code: 'INVALID_FORMAT',
+          message: 'Invalid image format',
+          details: null
+        }
       };
     } else if (error.response?.status === 500) {
       return {
         success: false,
-        error: errorMessage,
-        code: 'SERVER_ERROR'
-      };
-    } else if (errorData?.error?.code === 'AI_ERROR') {
-      return {
-        success: false,
-        error: errorMessage,
-        code: 'AI_ERROR'
+        error: {
+          code: 'SERVER_ERROR',
+          message: errorData?.message || 'Server error occurred',
+          details: null
+        }
       };
     } else if (!error.response) {
       return {
         success: false,
-        error: 'Network error. Please check your connection.',
-        code: 'NETWORK_ERROR'
+        error: {
+          code: 'NETWORK_ERROR',
+          message: 'Network error. Please check your connection.',
+          details: null
+        }
       };
     }
     
     // Generic error handling
     return {
       success: false,
-      error: errorMessage,
-      code: errorCode
+      error: {
+        code: 'UNKNOWN_ERROR',
+        message: errorData?.message || error.message || 'Analysis failed',
+        details: null
+      }
     };
   }
 };
@@ -830,15 +932,21 @@ export const analyzeKarmicDebt = async (data) => {
 
 /**
  * Smart Matchmaking API Service
- * Complete matchmaking profile for AI-powered compatibility
- * @param {Object} profileData - Complete profile information
- * @returns {Promise} API response with profile creation result
+ * Analyze compatibility between two users based on birth details and relationship goals
+ * @param {Object} userA - First user's birth details
+ * @param {Object} userB - Second user's birth details
+ * @param {Object} relationshipGoals - Relationship priority scores (1-5)
+ * @returns {Promise} API response with compatibility analysis
  */
-export const completeMatchmakingProfile = async (profileData) => {
+export const analyzeSmartMatchmaking = async (userA, userB, relationshipGoals) => {
   try {
     const response = await privatePost(
-      'action-suite/smart-matchmaking/profile/complete',
-      profileData
+      'action-suite/smart-matchmaking/smart-matchmaking',
+      {
+        userA,
+        userB,
+        relationshipGoals
+      }
     );
 
     return {
@@ -846,20 +954,30 @@ export const completeMatchmakingProfile = async (profileData) => {
       data: response.data?.data || response.data,
     };
   } catch (error) {
-    console.error('Matchmaking profile error:', error);
+    console.error('Smart matchmaking error:', error);
     
     const errorData = error.response?.data;
-    const errorMessage = String(
-      errorData?.error?.message || 
-      errorData?.message || 
-      error.message || 
-      'Failed to complete profile'
-    );
     
+    // Return full error structure if available
+    if (errorData?.error) {
+      return {
+        success: false,
+        error: {
+          code: errorData.error.code || 'UNKNOWN_ERROR',
+          message: errorData.error.message || 'Matchmaking analysis failed',
+          details: errorData.error.details || null
+        }
+      };
+    }
+    
+    // Generic error handling
     return {
       success: false,
-      error: errorMessage,
-      code: error.response?.status || 'UNKNOWN_ERROR'
+      error: {
+        code: 'UNKNOWN_ERROR',
+        message: errorData?.message || error.message || 'Failed to analyze compatibility',
+        details: null
+      }
     };
   }
 };

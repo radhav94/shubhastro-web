@@ -10,6 +10,7 @@ const SignatureAnalysis = () => {
   const [signatureImage, setSignatureImage] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Get the captured/uploaded image from localStorage
@@ -45,32 +46,22 @@ const SignatureAnalysis = () => {
       clearInterval(progressInterval);
 
       if (result.success) {
-        // Store the analysis result
         localStorage.setItem('signatureResult', JSON.stringify(result.data));
         
-        // Complete progress
         setProgress(100);
         setAnalysisComplete(true);
         
-        // Navigate to results after a short delay
         setTimeout(() => {
           navigate('/aiwow/signature/result');
         }, 1000);
       } else {
-        // Error already shown by Axios interceptor, just navigate back
         setProgress(0);
-        
-        setTimeout(() => {
-          navigate('/aiwow/signature/instructions');
-        }, 3000);
+        setError(result.error || { message: 'Analysis failed. Please try again.' });
       }
     } catch (error) {
       console.error('Analysis error:', error);
-      // Error already shown by Axios interceptor, just navigate back
-      
-      setTimeout(() => {
-        navigate('/aiwow/signature/instructions');
-      }, 2000);
+      setProgress(0);
+      setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {
       setIsAnalyzing(false);
     }
@@ -82,10 +73,17 @@ const SignatureAnalysis = () => {
     }
   };
 
+  const handleRetry = () => {
+    setError(null);
+    navigate('/aiwow/signature/instructions');
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <h2 className={styles.title}>Analysing Signature</h2>
+        <h2 className={styles.title}>
+          {error ? 'Analysis Failed' : 'Analysing Signature'}
+        </h2>
 
         <div className={styles.imageWrapper}>
           {signatureImage ? (
@@ -103,30 +101,73 @@ const SignatureAnalysis = () => {
           <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
         </div>
 
-        <div className={styles.progressSection}>
-          <div className={styles.progressBar}>
-            <div 
-              className={styles.progressFill} 
-              style={{ width: `${progress}%` }}
-            ></div>
+        {!error ? (
+          <>
+            <div className={styles.progressSection}>
+              <div className={styles.progressBar}>
+                <div 
+                  className={styles.progressFill} 
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+            </div>
+
+            <div className={styles.messageSection}>
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className={styles.sparkleIcon}>
+                <path d="M20 5L22.5 15L30 17.5L22.5 20L20 30L17.5 20L10 17.5L17.5 15L20 5Z" fill="#1f2937"/>
+              </svg>
+              <h3 className={styles.message}>Hold tight as we are analysing your Signature</h3>
+            </div>
+
+            <button 
+              className={styles.resultButton}
+              onClick={handleShowResult}
+              disabled={!analysisComplete}
+              style={{ opacity: analysisComplete ? 1 : 0.6 }}
+            >
+              {isAnalyzing ? 'Analyzing...' : 'Show Result'}
+            </button>
+          </>
+        ) : (
+          <div className={styles.errorSection}>
+            <div className={styles.errorIcon}>
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="32" r="30" stroke="#ef4444" strokeWidth="2" fill="none"/>
+                <path d="M32 20V36" stroke="#ef4444" strokeWidth="3" strokeLinecap="round"/>
+                <circle cx="32" cy="44" r="2" fill="#ef4444"/>
+              </svg>
+            </div>
+
+            <div className={styles.errorDetails}>
+              <h3 className={styles.errorMessage}>{error.message}</h3>
+              
+              {error.details && (
+                <div className={styles.errorDetailsBox}>
+                  {error.details.detectedIssue && (
+                    <div className={styles.errorDetailItem}>
+                      <strong>Issue Detected:</strong>
+                      <p>{error.details.detectedIssue}</p>
+                    </div>
+                  )}
+                  
+                  {error.details.expected && (
+                    <div className={styles.errorDetailItem}>
+                      <strong>Expected:</strong>
+                      <p>{error.details.expected}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <button 
+              className={styles.retryButton}
+              onClick={handleRetry}
+            >
+              Try Again
+            </button>
           </div>
-        </div>
-
-        <div className={styles.messageSection}>
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className={styles.sparkleIcon}>
-            <path d="M20 5L22.5 15L30 17.5L22.5 20L20 30L17.5 20L10 17.5L17.5 15L20 5Z" fill="#1f2937"/>
-          </svg>
-          <h3 className={styles.message}>Hold tight as we are analysing your Signature</h3>
-        </div>
-
-        <button 
-          className={styles.resultButton}
-          onClick={handleShowResult}
-          disabled={!analysisComplete}
-          style={{ opacity: analysisComplete ? 1 : 0.6 }}
-        >
-          {isAnalyzing ? 'Analyzing...' : 'Show Result'}
-        </button>
+        )}
       </div>
     </div>
   );
