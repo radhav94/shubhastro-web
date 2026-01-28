@@ -4,6 +4,7 @@ import styles from "../Home.module.scss";
 
 const HoroscopeCard = () => {
     return (
+        <Link to="/horoscopes/daily-horoscope">
         <section className={styles.horoscopeSection}>
             <div className={styles.horoscopeCard}>
                 <div className={styles.horoscopeContent}>
@@ -57,14 +58,13 @@ const HoroscopeCard = () => {
                     <h3 className={styles.horoscopeHeading}>Saturn in Libra</h3>
                     <p className={styles.horoscopeSubtext}>Time to balance emotions</p>
                     <div className={styles.horoscopeAction}>
-                        <Link to="/horoscopes/daily-horoscope">
                             Tap for Daily Horoscope
-                        </Link>
                         <ChevronRight size={18} />
                     </div>
                 </div>
             </div>
         </section>
+        </Link>
     );
 };
 

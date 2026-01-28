@@ -13,8 +13,14 @@
     transform 0.2s ease,
     box-shadow 0.2s ease;
   position: relative;
-  min-width: 160px;
+  min-width: 220px;
   max-width: 220px;
+  padding: 0px 16px 16px 16px;
+
+  @media screen and (width <= 767px) {
+    min-width: 180px;
+    padding: 0px 14px 14px 14px;
+  }
 
   &:hover {
     transform: translateY(-4px);
@@ -60,7 +66,7 @@
 }
 
 .name {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
   text-align: center;
@@ -70,7 +76,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
 
   @media (max-width: 768px) {
@@ -103,12 +109,13 @@
   align-items: center;
   width: 100%;
   cursor: pointer;
-  padding: 16px 12px;
+  padding: 16px 0;
+  gap: 10px;
 }
 
 .connectButton {
-  width: 80%;
-  background: #ff6b35;
+  width: 100%;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: white;
   border: none;
   border-radius: 20px;

@@ -67,16 +67,36 @@ const TopHeader = () => {
 
         {/* Desktop Navigation */}
         <nav className={styles.headerNavigation}>
-          <NavLink to="/" end>Home</NavLink>
-          <NavLink to="/chat-with-astrologers">Astrologers</NavLink>
-          <NavLink to="/aiwow">AI WOW</NavLink>
-          <NavLink to="/blog">Blogs</NavLink>
-          <NavLink to="/explore">Explore</NavLink>
-          <NavLink to="/shop">Astromall</NavLink>
-          <NavLink to={PATH.privateRoutes.KUNDLI.path}>Kundli</NavLink>
-          <NavLink to="/matchmaking">Match Matching</NavLink>
-          <NavLink to="/numerology">Numerology</NavLink>
-          <NavLink to="/horoscopes/daily-horoscope">Horoscopes</NavLink>
+          <NavLink to="/" className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            } end>Home</NavLink>
+          <NavLink to="/chat-with-astrologers" className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Astrologers</NavLink>
+          <NavLink to="/aiwow" className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>AI WOW</NavLink>
+          <NavLink to="/blog" className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Blogs</NavLink>
+          <NavLink to="/explore" className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Explore</NavLink>
+          <NavLink to="/shop" className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Astromall</NavLink>
+          <NavLink to={PATH.privateRoutes.KUNDLI.path} className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Kundli</NavLink>
+          <NavLink to="/matchmaking" className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Match Matching</NavLink>
+          <NavLink to="/numerology" className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Numerology</NavLink>
+          <NavLink to="/horoscopes/daily-horoscope" className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Horoscopes</NavLink>
         </nav>
 
         <div className={styles.headerActions}>
@@ -110,15 +130,33 @@ const TopHeader = () => {
               ✕
             </button>
 
-            <NavLink to="/" onClick={() => setIsDrawerOpen(false)}>Home</NavLink>
-            <NavLink to="/chat-with-astrologers" onClick={() => setIsDrawerOpen(false)}>Astrologers</NavLink>
-            <NavLink to="/aiwow" onClick={() => setIsDrawerOpen(false)}>AI WOW</NavLink>
-            <NavLink to="/blog" onClick={() => setIsDrawerOpen(false)}>Blogs</NavLink>
-            <NavLink to="/explore" onClick={() => setIsDrawerOpen(false)}>Explore</NavLink>
-            <NavLink to={PATH.privateRoutes.KUNDLI.path} onClick={() => setIsDrawerOpen(false)}>Kundli</NavLink>
-            <NavLink to="/matchmaking" onClick={() => setIsDrawerOpen(false)}>Match Matching</NavLink>
-            <NavLink to="/numerology" onClick={() => setIsDrawerOpen(false)}>Numerology</NavLink>
-            <NavLink to="/horoscopes/daily-horoscope" onClick={() => setIsDrawerOpen(false)}>Horoscopes</NavLink>
+            <NavLink to="/" onClick={() => setIsDrawerOpen(false)} className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Home</NavLink>
+            <NavLink to="/chat-with-astrologers" onClick={() => setIsDrawerOpen(false)} className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Astrologers</NavLink>
+            <NavLink to="/aiwow" onClick={() => setIsDrawerOpen(false)} className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>AI WOW</NavLink>
+            <NavLink to="/blog" onClick={() => setIsDrawerOpen(false)} className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Blogs</NavLink>
+            <NavLink to="/explore" onClick={() => setIsDrawerOpen(false)} className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Explore</NavLink>
+            <NavLink to={PATH.privateRoutes.KUNDLI.path} onClick={() => setIsDrawerOpen(false)} className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Kundli</NavLink>
+            <NavLink to="/matchmaking" onClick={() => setIsDrawerOpen(false)} className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Match Matching</NavLink>
+            <NavLink to="/numerology" onClick={() => setIsDrawerOpen(false)} className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Numerology</NavLink>
+            <NavLink to="/horoscopes/daily-horoscope" onClick={() => setIsDrawerOpen(false)} className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }>Horoscopes</NavLink>
 
           </div>
         </>

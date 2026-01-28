@@ -1241,7 +1241,7 @@
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: #ffffff;
   border: none;
-  padding: 12px;
+  padding: 10px 12px;
   border-radius: 50px;
   font-family: "Poppins", sans-serif;
   font-size: 16px;
@@ -1251,7 +1251,8 @@
     transform 0.2s ease, box-shadow 0.2s ease;
 
     @media screen and (width <= 767px) {
-      padding: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
     }
 }
 
@@ -2316,11 +2317,6 @@
     font-size: 15px;
   }
 
-  .connectBtn {
-    font-size: 17px;
-    padding: 12px;
-  }
-
   /* Life Area Section - Tablet */
   .lifeAreaSection {
     margin-bottom: 32px;
@@ -2732,11 +2728,6 @@
   //   font-size: 24px;
   // }
 
-  .connectBtn {
-    font-size: 18px;
-    // padding: 16px 32px;
-  }
-
   /* Life Area Section - XL Desktop */
   .lifeAreaCard {
     padding: 36px 32px;
@@ -2891,7 +2882,7 @@
 }
 
 .discoverCard:nth-child(3) .discoverImage {
-  width: auto;
+  // width: auto;
   max-height: 100%;
   top: 0;
   right: 0;
@@ -3022,6 +3013,10 @@
   transition:
     transform 0.2s,
     box-shadow 0.2s;
+    @media screen and (width <= 767px) {
+      flex: 0 0 200px;
+      min-width: 200px;
+    }
 }
 
 .blogCard:hover {
@@ -3031,7 +3026,7 @@
 
 .blogImageWrapper {
   width: 100%;
-  height: 210px;
+  height: 170px;
   overflow: hidden;
   background: #f5f5f5;
 }
@@ -3076,11 +3071,6 @@
     width: auto;
   }
 
-  .blogCard {
-    flex: 0 0 200px;
-    min-width: 200px;
-  }
-
   .blogImageWrapper {
     height: 130px;
   }
@@ -3107,12 +3097,7 @@
   .blogsHeader .titleDivider {
     max-width: 320px;
   }
-
-  .blogCard {
-    flex: 0 0 320px;
-    min-width: 320px;
-  }
-
+  
   // .blogImageWrapper {
   //   height: 260px;
   // }
@@ -3134,11 +3119,6 @@
 
   .blogsHeader .titleDivider {
     max-width: 360px;
-  }
-
-  .blogCard {
-    flex: 0 0 340px;
-    min-width: 340px;
   }
 
   // .blogImageWrapper {
