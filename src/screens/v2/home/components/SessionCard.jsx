@@ -1,8 +1,33 @@
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, Phone } from "lucide-react";
 import astrologerSquare from "../../../../assets/images/astrologer-square.svg";
 import styles from "../Home.module.scss";
 
 const SessionCard = ({ session, onCallAgain, isLoading }) => {
+  // Format date from startTime
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const options = { month: "short", day: "numeric", year: "numeric" };
+    return date.toLocaleDateString("en-US", options);
+  };
+
+  // Format time from startTime
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  // Format duration from billedMinutes
+  const formatDuration = (minutes) => {
+    if (!minutes) return "0 Min 0 Secs";
+    const mins = Math.floor(minutes);
+    const secs = Math.round((minutes - mins) * 60);
+    return `${mins} Min ${secs} Secs`;
+  };
+
   return (
     <div className={styles.sessionCard}>
       <div className={styles.sessionImageWrapper}>
@@ -19,21 +44,28 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
         <h3 className={styles.sessionName}>{session.astrologerName}</h3>
         <div className={styles.sessionDetails}>
           <div className={styles.sessionDetail}>
-            {/* <Calendar size={16} className={styles.sessionIconSvg} /> */}
-            {/* <span className={styles.sessionText}>{session.date}</span> */}
+            <Calendar size={16} className={styles.sessionIconSvg} />
+            <span className={styles.sessionText}>
+              {formatDate(session.startTime)}
+            </span>
           </div>
           <div className={styles.sessionDetail}>
-            {/* <Clock size={16} className={styles.sessionIconSvg} /> */}
-            {/* <span className={styles.sessionText}>{session.time}</span> */}
+            <Clock size={16} className={styles.sessionIconSvg} />
+            <span className={styles.sessionText}>
+              {formatTime(session.startTime)}
+            </span>
           </div>
         </div>
-        {/* <p className={styles.sessionDuration}>Duration : {session.duration}</p> */}
+        <p className={styles.sessionDuration}>
+          Duration : {formatDuration(session.billedMinutes)}
+        </p>
         <button
           className={`${styles.callAgainBtn} ${isLoading ? styles.loading : ""}`}
           onClick={onCallAgain}
           disabled={isLoading}
         >
-          Connect Now
+          <Phone size={18} />
+          Connect now
         </button>
       </div>
     </div>
