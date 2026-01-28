@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronDown, Edit2, Heart } from "lucide-react";
+import { ChevronLeft, ChevronDown, Heart } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   useGetAllKundlisQuery,
   useCreateKundliMutation,
   useDeleteKundliMutation,
 } from "../../../services/appServices/kundliServicesNew";
-import styles from "./MatchMakingV2.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
 import { useLazyGetNumerologyPredictionQuery } from "../../../services/appServices/numerologyServices";
-import LocationSearch from "../../../utils/location/locationSearchVedic";
 import { Toast } from "../../../component";
+import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
+import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
+import ProfileListingModal from "../../../component/UI/Profile/ProfileListingModal";
 
 const MatchMaking = () => {
   const navigate = useNavigate();
@@ -18,19 +19,45 @@ const MatchMaking = () => {
   /* -------------------- STATE -------------------- */
   const [showSelectProfile, setShowSelectProfile] = useState(false);
   const [showAddProfile, setShowAddProfile] = useState(false);
-  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [profileToDelete, setProfileToDelete] = useState(null);
 
   const [selectedProfile, setSelectedProfile] = useState(null); // header display
   const [primaryProfile, setPrimaryProfile] = useState(null);
   const [partnerProfile, setPartnerProfile] = useState(null);
   const [selectingType, setSelectingType] = useState(null); // PRIMARY | PARTNER
 
-  /* -------------------- TOKEN -------------------- */
+  /* -------------------- TOKEN & AUTH -------------------- */
   const role = localStorage.getItem("shubhtalk_role");
   const token =
     role === "ASTROLOGER"
       ? localStorage.getItem("shubhtalk_astro_token")
       : localStorage.getItem("shubhtalk_customer_token");
+  
+  const isLoggedIn = !!token;
+
+  /* -------------------- TEMPORARY PROFILES (NON-LOGGED-IN) -------------------- */
+  const [tempProfiles, setTempProfiles] = useState([]);
+
+  /* -------------------- CURL GENERATOR -------------------- */
+  const generateCurlCommand = (endpoint, _method, payload, token) => {
+    const baseUrl = import.meta.env.VITE_APP_API_BASE_URL || "https://devapi-shubhtalk.epicon.in";
+    const url = `${baseUrl}/api/${endpoint}`;
+    
+    let curl = `curl --location '${url}' \\\n`;
+    curl += `  --header 'accept: application/json' \\\n`;
+    curl += `  --header 'Content-Type: application/json' \\\n`;
+    
+    if (token) {
+      curl += `  --header 'Authorization: Bearer ${token}' \\\n`;
+    }
+    
+    if (payload) {
+      curl += `  --data '${JSON.stringify(payload)}'`;
+    }
+    
+    return curl;
+  };
 
   /* -------------------- API -------------------- */
   const { data, refetch } = useGetAllKundlisQuery(undefined, {
@@ -40,9 +67,13 @@ const MatchMaking = () => {
     useCreateKundliMutation();
   const [deleteKundli] = useDeleteKundliMutation();
 
-  const [getNumerologyPrediction, { data: numerologyData }] =
+  const [getNumerologyPrediction] =
     useLazyGetNumerologyPredictionQuery();
-  const profiles = data?.data || [];
+  
+  // Combine saved profiles (if logged in) with temporary profiles (if not logged in)
+  const savedProfiles = data?.data || [];
+  const profiles = isLoggedIn ? savedProfiles : tempProfiles;
+  
   const location = useLocation();
   useEffect(() => {
     if (location.state?.boyData && location.state?.girlData && profiles.length) {
@@ -67,28 +98,6 @@ const MatchMaking = () => {
       }
     }
   }, [location.state, profiles]);
-  const [formData, setFormData] = useState({
-    name: "",
-    identity: "Male",
-    relation: "",
-    birthDate: "",
-    birthTime: "",
-    birthPlace: "",
-    unknownBirthTime: false,
-    latitude: null,
-    longitude: null,
-  });
-  const [editFormData, setEditFormData] = useState({
-    name: "",
-    identity: "Male",
-    relation: "",
-    birthDate: "",
-    birthTime: "",
-    birthPlace: "",
-    unknownBirthTime: false,
-    latitude: null,
-    longitude: null,
-  });
   /* -------------------- AUTO SELECT -------------------- */
   useEffect(() => {
     if (profiles.length && !primaryProfile) {
@@ -109,21 +118,6 @@ const MatchMaking = () => {
   }, [selectedProfile, getNumerologyPrediction]);
 
   /* -------------------- HELPERS -------------------- */
-  const buildPayloadFromProfile = (profile) => ({
-    name: profile.name,
-    gender: profile.gender,
-    day: profile.day,
-    month: profile.month,
-    year: profile.year,
-    hour: profile.hour,
-    min: profile.min,
-    second: 0,
-    place: profile.place,
-    lat: profile.lat,
-    lon: profile.lon,
-    tzone: 5.5,
-  });
-
   const isDuplicateKundli = (payload, list) =>
     list.some(
       (k) =>
@@ -134,8 +128,9 @@ const MatchMaking = () => {
         Number(k.year) === Number(payload.year) &&
         Number(k.hour) === Number(payload.hour) &&
         Number(k.min) === Number(payload.min) &&
-        Number(k.lat) === Number(payload.lat) &&
-        Number(k.lon) === Number(payload.lon) &&
+        // Compare lat/lon with tolerance for floating point precision
+        Math.abs(Number(k.lat) - Number(payload.lat)) < 0.0001 &&
+        Math.abs(Number(k.lon) - Number(payload.lon)) < 0.0001 &&
         k.place.trim().toLowerCase() === payload.place.trim().toLowerCase()
     );
 
@@ -166,6 +161,78 @@ const MatchMaking = () => {
 
     setShowSelectProfile(false);
     setSelectingType(null);
+  };
+
+  /* -------------------- DELETE PROFILE -------------------- */
+  const handleDeleteProfile = (e, profileId) => {
+    e.stopPropagation(); // Prevent triggering profile selection
+    setProfileToDelete(profileId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteProfile = async () => {
+    if (!profileToDelete) return;
+
+    try {
+      if (isLoggedIn) {
+        // LOGGED IN: Delete from database
+        console.log("=== DELETE KUNDLI ===");
+        console.log("Deleting profile ID:", profileToDelete);
+        
+        const deleteCurl = generateCurlCommand(
+          "kundlis/delete", 
+          "DELETE", 
+          { kundliId: profileToDelete }, 
+          token
+        );
+        console.log("\n📋 DELETE CURL Command:\n");
+        console.log(deleteCurl);
+        console.log("\n====================");
+        
+        await deleteKundli(profileToDelete).unwrap();
+        console.log("✅ Profile deleted successfully");
+        
+        Toast.success("Profile deleted successfully");
+        
+        // Refetch profiles
+        await refetch();
+      } else {
+        // NOT LOGGED IN: Remove from temporary profiles
+        console.log("=== DELETE TEMPORARY PROFILE ===");
+        console.log("Deleting profile ID:", profileToDelete);
+        
+        setTempProfiles(prev => prev.filter(p => p._id !== profileToDelete));
+        console.log("✅ Temporary profile deleted");
+        Toast.success("Profile deleted");
+      }
+      
+      // Clear selections if deleted profile was selected
+      if (primaryProfile?._id === profileToDelete) {
+        setPrimaryProfile(null);
+        setSelectedProfile(null);
+      }
+      if (partnerProfile?._id === profileToDelete) {
+        setPartnerProfile(null);
+      }
+      
+      // Close modal
+      setShowDeleteModal(false);
+      setProfileToDelete(null);
+    } catch (err) {
+      console.error("=== DELETE KUNDLI ERROR ===");
+      console.error("Error object:", err);
+      console.error("Error data:", err?.data);
+      console.error("===========================");
+      
+      const errorMessage = 
+        err?.data?.message || 
+        err?.message || 
+        "Failed to delete profile";
+      
+      Toast.error(errorMessage);
+      setShowDeleteModal(false);
+      setProfileToDelete(null);
+    }
   };
 
   /* -------------------- PROCEED -------------------- */
@@ -238,98 +305,92 @@ const MatchMaking = () => {
     navigate(PATH.privateRoutes.MATCHMAKING_DETAILS.path, { state });
   };
   
-  const handleSubmitProfile = async (e) => {
-    e.preventDefault();
-
-    if (!formData.birthPlace) {
-      Toast.error("Please enter birth place");
-      return;
-    }
-
+  /* -------------------- ADD PROFILE -------------------- */
+  const handleSubmitProfile = async (formData) => {
     try {
       const payload = buildKundliPayload(formData);
-      await createKundli(payload).unwrap();
-      Toast.success("Profile added successfully");
+      
+      // Check for duplicate
+      if (isDuplicateKundli(payload, profiles)) {
+        console.log("❌ Duplicate detected by frontend check");
+        Toast.error("This profile already exists");
+        throw new Error("Duplicate profile");
+      }
+
+      if (isLoggedIn) {
+        // LOGGED IN: Save to database
+        console.log("=== CREATE KUNDLI API CALL ===");
+        console.log("Form Data:", formData);
+        console.log("Payload being sent:", JSON.stringify(payload, null, 2));
+        console.log("Existing profiles count:", profiles.length);
+        
+        // Generate and log curl command
+        const curlCommand = generateCurlCommand("kundlis/create", "POST", payload, token);
+        console.log("\n📋 CURL Command:\n");
+        console.log(curlCommand);
+        console.log("\n==============================");
+
+        const result = await createKundli(payload).unwrap();
+        console.log("✅ API Response:", result);
+        Toast.success("Profile added successfully");
+        
+        // Refetch to get updated list
+        await refetch();
+        
+        // Auto-select the newly created profile based on selectingType
+        if (result?.data) {
+          const newProfile = result.data;
+          
+          if (selectingType === "PRIMARY") {
+            setPrimaryProfile(newProfile);
+            setSelectedProfile(newProfile);
+          } else if (selectingType === "PARTNER") {
+            setPartnerProfile(newProfile);
+          }
+        }
+      } else {
+        // NOT LOGGED IN: Add to temporary profiles
+        console.log("=== ADD TEMPORARY PROFILE ===");
+        console.log("Form Data:", formData);
+        console.log("Payload:", JSON.stringify(payload, null, 2));
+        
+        // Generate temporary ID
+        const tempProfile = {
+          ...payload,
+          _id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        };
+        
+        setTempProfiles(prev => [...prev, tempProfile]);
+        console.log("✅ Temporary profile added");
+        Toast.success("Profile added");
+        
+        // Auto-select the newly created profile based on selectingType
+        if (selectingType === "PRIMARY") {
+          setPrimaryProfile(tempProfile);
+          setSelectedProfile(tempProfile);
+        } else if (selectingType === "PARTNER") {
+          setPartnerProfile(tempProfile);
+        }
+      }
+      
       setShowAddProfile(false);
-      refetch();
-
-      // Reset form
-      setFormData({
-        name: "",
-        identity: "Male",
-        relation: "",
-        birthDate: "",
-        birthTime: "",
-        birthPlace: "",
-        unknownBirthTime: false,
-        latitude: null,
-        longitude: null,
-      });
+      setSelectingType(null);
     } catch (err) {
-      console.error(err);
-      Toast.error(err?.data?.message || "Failed to add profile");
+      console.error("=== CREATE KUNDLI ERROR ===");
+      console.error("Error object:", err);
+      console.error("Error data:", err?.data);
+      console.error("===========================");
+      
+      const errorMessage = 
+        err?.data?.message || 
+        err?.message || 
+        "Failed to add profile";
+      
+      Toast.error(errorMessage);
+      throw err;
     }
   };
-  const handleSubmitEditProfile = async (e) => {
-    e.preventDefault();
 
-    if (!editFormData.birthPlace) {
-      Toast.error("Please enter birth place");
-      return;
-    }
-
-    try {
-      // Delete old profile and create new one (since there's no update endpoint)
-      if (selectedProfile?._id) {
-        await deleteKundli(selectedProfile._id).unwrap();
-      }
-
-      const payload = buildKundliPayload(editFormData);
-      const result = await createKundli(payload).unwrap();
-
-      Toast.success("Profile updated successfully");
-      setShowEditProfile(false);
-      refetch();
-
-      // Update selected profile
-      if (result?.data) {
-        setSelectedProfile(result.data);
-      }
-    } catch (err) {
-      console.error(err);
-      Toast.error(err?.data?.message || "Failed to update profile");
-    }
-  };
-  const handleEditProfile = () => {
-    // Pre-fill form with selected profile data
-    if (selectedProfile) {
-      const birthDateTime = new Date(
-        selectedProfile.year,
-        selectedProfile.month - 1,
-        selectedProfile.day,
-        selectedProfile.hour,
-        selectedProfile.min,
-      );
-
-      setEditFormData({
-        name: selectedProfile.name,
-        identity:
-          selectedProfile.gender === "male"
-            ? "Male"
-            : selectedProfile.gender === "female"
-              ? "Female"
-              : "Others",
-        relation: "Self", // You may need to add this field to API
-        birthDate: `${selectedProfile.year}-${String(selectedProfile.month).padStart(2, "0")}-${String(selectedProfile.day).padStart(2, "0")}`,
-        birthTime: `${String(selectedProfile.hour).padStart(2, "0")}:${String(selectedProfile.min).padStart(2, "0")}`,
-        birthPlace: selectedProfile.place,
-        unknownBirthTime: false,
-        latitude: selectedProfile.lat,
-        longitude: selectedProfile.lon,
-      });
-    }
-    setShowEditProfile(true);
-  };
   const buildKundliPayload = (data) => {
     const dateObj = new Date(data.birthDate);
     const timeObj = data.birthTime ? data.birthTime.split(":") : ["0", "0"];
@@ -490,422 +551,75 @@ const MatchMaking = () => {
       </div>
 
       {/* SELECT PROFILE POPUP */}
-      {showSelectProfile && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => setShowSelectProfile(false)}
-        >
-          <div
-            className={styles.bottomSheet}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={styles.sheetHandle}></div>
-            <div className={styles.sheetContent}>
-              <button
-                className={styles.closeBtn}
-                onClick={() => setShowSelectProfile(false)}
-              >
-                ×
-              </button>
-              <h2 className={styles.sheetTitle}>
-                {selectingType === "PRIMARY"
-                  ? "Select Primary Profile"
-                  : "Select Partner’s Profile"}
-              </h2>
-
-              <div className={styles.profileList}>
-                {filteredProfiles.map((profile) => {
-                  const formatted = formatProfileDisplay(profile);
-
-                  return (
-                    <div
-                      key={profile._id}
-                      className={styles.profileItem}
-                      onClick={() => handleSelectProfile(profile)}
-                    >
-                      <div className={styles.profileAvatar}>
-                        {profile.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()
-                          .slice(0, 2)}
-                      </div>
-
-                      <div className={styles.profileInfo}>
-                      <span className={styles.relationBadge}>
-                          {formatted.relation}
-                        </span>
-                        <h3 className={styles.profileName}>{profile.name}</h3>
-                        <p className={styles.profileMeta}>
-                          {formatted.birthDate} • {formatted.birthTime}
-                        </p>
-                        <p className={styles.profileLocation}>{profile.place}</p>
-                      </div>
-
-                      <div className={styles.radioBtn}>
-                        {((selectingType === "PRIMARY" &&
-                          primaryProfile?._id === profile._id) ||
-                          (selectingType === "PARTNER" &&
-                            partnerProfile?._id === profile._id))
-                          ? "●"
-                          : "○"}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <button
-                className={styles.addProfileBtn}
-                onClick={() => {
-                  setShowAddProfile(true);
-                  setShowSelectProfile(false);
-                }}
-              >
-                + Add Profile
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ProfileListingModal
+        isOpen={showSelectProfile}
+        onClose={() => {
+          setShowSelectProfile(false);
+          setSelectingType(null);
+        }}
+        profiles={filteredProfiles}
+        selectedProfileId={
+          selectingType === "PRIMARY"
+            ? primaryProfile?._id
+            : partnerProfile?._id
+        }
+        onSelectProfile={handleSelectProfile}
+        onDeleteProfile={(profileId) => handleDeleteProfile({ stopPropagation: () => {} }, profileId)}
+        onAddProfile={() => {
+          setShowAddProfile(true);
+          setShowSelectProfile(false);
+        }}
+        title={
+          selectingType === "PRIMARY"
+            ? "Select Primary Profile"
+            : "Select Partner's Profile"
+        }
+        showAddButton={true}
+        showDeleteButton={true}
+        emptyMessage={isLoggedIn ? "No profiles found. Add a profile to get started." : "Add profiles to see match results."}
+      />
+      
       {/* Add Profile Modal */}
-      {showAddProfile && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => setShowAddProfile(false)}
-        >
-          <div
-            className={styles.sideSheet}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={styles.sheetHandle}></div>
-
-            <div className={styles.sheetContent}>
-              <button
-                className={styles.closeBtn}
-                onClick={() => setShowAddProfile(false)}
-              >
-                ×
-              </button>
-              <h2 className={styles.sheetTitle}>Add Profile</h2>
-
-              <form
-                onSubmit={handleSubmitProfile}
-                className={styles.profileForm}
-              >
-                <div className={styles.formGroup}>
-                  <label>Name</label>
-                  <input
-                    type="text"
-                    placeholder="Enter here"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Identity</label>
-                  <div className={styles.identityButtons}>
-                    <button
-                      type="button"
-                      className={
-                        formData.identity === "Male" ? styles.active : ""
-                      }
-                      onClick={() =>
-                        setFormData({ ...formData, identity: "Male" })
-                      }
-                    >
-                      Male
-                    </button>
-                    <button
-                      type="button"
-                      className={
-                        formData.identity === "Female" ? styles.active : ""
-                      }
-                      onClick={() =>
-                        setFormData({ ...formData, identity: "Female" })
-                      }
-                    >
-                      Female
-                    </button>
-                    <button
-                      type="button"
-                      className={
-                        formData.identity === "Others" ? styles.active : ""
-                      }
-                      onClick={() =>
-                        setFormData({ ...formData, identity: "Others" })
-                      }
-                    >
-                      Others
-                    </button>
-                  </div>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Relation</label>
-                  <select
-                    value={formData.relation}
-                    onChange={(e) =>
-                      setFormData({ ...formData, relation: e.target.value })
-                    }
-                    required
-                  >
-                    <option value="">Select relation</option>
-                    <option value="Self">Self</option>
-                    <option value="Brother">Brother</option>
-                    <option value="Sister">Sister</option>
-                    <option value="Mother">Mother</option>
-                    <option value="Father">Father</option>
-                    <option value="Friend">Friend</option>
-                  </select>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Birth Date</label>
-                  <input
-                    type="date"
-                    value={formData.birthDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, birthDate: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Birth Time</label>
-                  <input
-                    type="time"
-                    value={formData.birthTime}
-                    onChange={(e) =>
-                      setFormData({ ...formData, birthTime: e.target.value })
-                    }
-                    disabled={formData.unknownBirthTime}
-                  />
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      checked={formData.unknownBirthTime}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          unknownBirthTime: e.target.checked,
-                        })
-                      }
-                    />
-                    Don't know the exact time of birth
-                  </label>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Place of Birth</label>
-                  <LocationSearch
-                    value={formData.birthPlace}
-                    onChange={(e) =>
-                      setFormData({ ...formData, birthPlace: e.target.value })
-                    }
-                    onPlaceSelect={(place) =>
-                      setFormData({
-                        ...formData,
-                        birthPlace: place.address,
-                        latitude: place.lat,
-                        longitude: place.lng,
-                      })
-                    }
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className={styles.submitBtn}
-                  disabled={isCreating}
-                >
-                  {isCreating ? "Adding..." : "Add Profile"}
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Profile Modal */}
-      {showEditProfile && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => setShowEditProfile(false)}
-        >
-          <div
-            className={styles.sideSheet}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={styles.sheetHandle}></div>
-
-            <div className={styles.sheetContent}>
-              <button
-                className={styles.closeBtn}
-                onClick={() => setShowEditProfile(false)}
-              >
-                ×
-              </button>
-              <h2 className={styles.sheetTitle}>Edit Profile</h2>
-
-              <form
-                onSubmit={handleSubmitEditProfile}
-                className={styles.profileForm}
-              >
-                <div className={styles.formGroup}>
-                  <label>Name</label>
-                  <input
-                    type="text"
-                    placeholder="Enter here"
-                    value={editFormData.name}
-                    onChange={(e) =>
-                      setEditFormData({ ...editFormData, name: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Identity</label>
-                  <div className={styles.identityButtons}>
-                    <button
-                      type="button"
-                      className={
-                        editFormData.identity === "Male" ? styles.active : ""
-                      }
-                      onClick={() =>
-                        setEditFormData({ ...editFormData, identity: "Male" })
-                      }
-                    >
-                      Male
-                    </button>
-                    <button
-                      type="button"
-                      className={
-                        editFormData.identity === "Female" ? styles.active : ""
-                      }
-                      onClick={() =>
-                        setEditFormData({ ...editFormData, identity: "Female" })
-                      }
-                    >
-                      Female
-                    </button>
-                    <button
-                      type="button"
-                      className={
-                        editFormData.identity === "Others" ? styles.active : ""
-                      }
-                      onClick={() =>
-                        setEditFormData({ ...editFormData, identity: "Others" })
-                      }
-                    >
-                      Others
-                    </button>
-                  </div>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Relation</label>
-                  <select
-                    value={editFormData.relation}
-                    onChange={(e) =>
-                      setEditFormData({
-                        ...editFormData,
-                        relation: e.target.value,
-                      })
-                    }
-                    required
-                  >
-                    <option value="">Select relation</option>
-                    <option value="Self">Self</option>
-                    <option value="Brother">Brother</option>
-                    <option value="Sister">Sister</option>
-                    <option value="Mother">Mother</option>
-                    <option value="Father">Father</option>
-                    <option value="Friend">Friend</option>
-                  </select>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Birth Date</label>
-                  <input
-                    type="date"
-                    value={editFormData.birthDate}
-                    onChange={(e) =>
-                      setEditFormData({
-                        ...editFormData,
-                        birthDate: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Birth Time</label>
-                  <input
-                    type="time"
-                    value={editFormData.birthTime}
-                    onChange={(e) =>
-                      setEditFormData({
-                        ...editFormData,
-                        birthTime: e.target.value,
-                      })
-                    }
-                    disabled={editFormData.unknownBirthTime}
-                  />
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      checked={editFormData.unknownBirthTime}
-                      onChange={(e) =>
-                        setEditFormData({
-                          ...editFormData,
-                          unknownBirthTime: e.target.checked,
-                        })
-                      }
-                    />
-                    Don't know the exact time of birth
-                  </label>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Place of Birth</label>
-                  <LocationSearch
-                    value={editFormData.birthPlace}
-                    onChange={(e) =>
-                      setEditFormData({
-                        ...editFormData,
-                        birthPlace: e.target.value,
-                      })
-                    }
-                    onPlaceSelect={(place) =>
-                      setEditFormData({
-                        ...editFormData,
-                        birthPlace: place.address,
-                        latitude: place.lat,
-                        longitude: place.lng,
-                      })
-                    }
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className={styles.submitBtn}
-                  disabled={isCreating}
-                >
-                  {isCreating ? "Updating..." : "Edit Profile"}
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
+      <AddProfileModal
+        isOpen={showAddProfile}
+        onClose={() => {
+          setShowAddProfile(false);
+          setSelectingType(null);
+        }}
+        onSubmit={handleSubmitProfile}
+        isLoading={isCreating}
+        title="Add Profile"
+        showProfileListing={true}
+        profiles={profiles}
+        selectedProfileId={
+          selectingType === "PRIMARY"
+            ? primaryProfile?._id
+            : partnerProfile?._id
+        }
+        onSelectProfile={(profile) => {
+          if (selectingType === "PRIMARY") {
+            setPrimaryProfile(profile);
+            setSelectedProfile(profile);
+          } else if (selectingType === "PARTNER") {
+            setPartnerProfile(profile);
+          }
+        }}
+        onDeleteProfile={(profileId) => {
+          setProfileToDelete(profileId);
+          setShowDeleteModal(true);
+        }}
+      />
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          title="Delete Profile"
+          message="Are you sure you want to delete this profile? This action cannot be undone."
+          onCancel={() => {
+            setShowDeleteModal(false);
+            setProfileToDelete(null);
+          }}
+          onConfirm={confirmDeleteProfile}
+        />
       )}
     </div>
   );

@@ -76,7 +76,7 @@ export const privateRequestNew = createApi({
   baseQuery: async (args, api, extraOptions) => {
     const rawBaseQuery = fetchBaseQuery({
       baseUrl: `${BASE_URL}/api/`,
-      prepareHeaders: (headers) => {
+      prepareHeaders: (headers, { endpoint }) => {
         const role = localStorage.getItem("shubhtalk_role");
         let token = null;
 
@@ -86,8 +86,10 @@ export const privateRequestNew = createApi({
           token = localStorage.getItem("shubhtalk_customer_token");
         }
 
-        // ✅ Backend REQUIRES this
-        headers.set("Content-Type", "text/plain");
+        // ✅ Only set text/plain if not already set by endpoint
+        if (!headers.has("Content-Type")) {
+          headers.set("Content-Type", "text/plain");
+        }
 
         if (token) {
           headers.set("Authorization", `Bearer ${token}`);

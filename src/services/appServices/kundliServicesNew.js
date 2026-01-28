@@ -21,6 +21,10 @@ export const kundliApi = privateRequestNew.injectEndpoints({
         url: "kundlis/create",
         method: "POST",
         body,
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': 'application/json',
+        },
       }),
       invalidatesTags: ["Kundlis"],     // ⭐ Refetch GET after success
     }),
@@ -31,6 +35,10 @@ export const kundliApi = privateRequestNew.injectEndpoints({
         url: "kundlis/delete",
         method: "DELETE",
         body: { kundliId: id },
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': 'application/json',
+        },
       }),
       invalidatesTags: ["Kundlis"],     // ⭐ Refetch on delete
     }),
