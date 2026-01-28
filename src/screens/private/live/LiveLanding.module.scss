@@ -19,7 +19,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 20px 60px;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -47,6 +47,8 @@
   color: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
+  z-index: 100;
+  pointer-events: auto;
 
   svg {
     width: 32px;
@@ -54,6 +56,7 @@
     stroke: #fff;
     stroke-width: 3;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    pointer-events: none;
   }
 
   &:hover {
@@ -79,7 +82,7 @@
 
 .tabs {
   display: flex;
-  gap: 40px;
+  gap: 24px;
   align-items: center;
 
   @media (min-width: 769px) {
@@ -92,12 +95,13 @@
   border: none;
   color: rgba(255, 255, 255, 0.6);
   font-family: "Poppins", sans-serif;
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 600;
-  padding: 10px 20px;
+  padding: 10px 8px;
   cursor: pointer;
   position: relative;
   transition: all 0.3s ease;
+  white-space: nowrap;
 
   &.active {
     color: #fff;
@@ -372,22 +376,27 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .header {
-    padding: 15px;
+    padding: 15px 20px 15px 15px;
   }
 
   .backButton {
-    left: 15px;
-    width: 36px;
-    height: 36px;
+    left: 10px;
+    width: 32px;
+    height: 32px;
+    
+    svg {
+      width: 28px;
+      height: 28px;
+    }
   }
 
   .tabs {
-    gap: 20px;
+    gap: 16px;
   }
 
   .tab {
-    font-size: 16px;
-    padding: 8px 12px;
+    font-size: 14px;
+    padding: 8px 6px;
   }
 
   .cardTitle {
