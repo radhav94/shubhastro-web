@@ -428,27 +428,16 @@ const NumerologyWeb = () => {
 
       {/* HERO SECTION */}
       <section className={styles.hero}>
-        <div className={styles.heroGlow}></div>
+        {/* <div className={styles.heroGlow}></div> */}
 
-        <PrimaryText
-          as="h1"
-          size_32
-          isExtraBold
-          isCenter
-          className={styles.heroTitle}
-        >
+        <h1 className={styles.heroTitle}>
           Let the Numbers Guide You
-        </PrimaryText>
+        </h1>
 
-        <PrimaryText
-          size_18
-          isRegular
-          color="#6b5e4d"
-          className={styles.heroSubtitle}
-        >
+        <p className={styles.heroSubtitle}>
           Based on your name and birth date, your numerology chart highlights
           key patterns shaping your life journey.
-        </PrimaryText>
+        </p>
       </section>
 
       {/* NUMEROLOGY CARDS */}
@@ -517,7 +506,7 @@ const NumerologyWeb = () => {
       <section className={styles.expertSection}>
         <div className={styles.expertCard}>
           <div className={styles.expertContent}>
-            <h3 className={styles.expertTitle}>Talk to a Numerology Expert</h3>
+            <h3 className={styles.expertTitle}>Talk to a <br/> Numerology Expert</h3>
             <Link
               to={PATH.privateRoutes.Chat_With_ASTROLOGER.path}
               state={{
@@ -528,7 +517,7 @@ const NumerologyWeb = () => {
             </Link>
           </div>
           <div className={styles.expertImage}>
-            {/* Placeholder for expert image */}
+            {/* <img src={talkToPik} alt="pik" className={styles.footer_logo} /> */}
           </div>
         </div>
       </section>
