@@ -90,7 +90,7 @@
 }
 
 .selectedCard {
-  z-index: 100 !important;
+  /* Removed z-index override - cards maintain their natural stacking order */
 }
 
 /* Remove orange border - no visual change except lift */
@@ -142,35 +142,74 @@
 
 @media (max-width: 768px) {
   .title {
-    font-size: 28px;
+    font-size: 22px;
   }
 
   .subtitle {
-    font-size: 14px;
+    font-size: 13px;
+    padding: 0 16px;
+  }
+
+  .tapText {
+    font-size: 12px;
   }
 
   .cardsContainer {
-    height: 350px;
+    min-height: 250px;
+    padding: 30px 10px;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .card {
-    width: 180px;
-    height: 288px;
+    width: 90px;
+    height: 144px;
   }
 }
 
 @media (max-width: 480px) {
   .title {
-    font-size: 24px;
+    font-size: 20px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .tapText {
+    font-size: 11px;
+    margin-bottom: 16px;
   }
 
   .cardsContainer {
-    height: 320px;
+    min-height: 220px;
+    padding: 25px 5px;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .card {
-    width: 160px;
-    height: 256px;
+    width: 70px;
+    height: 112px;
+  }
+
+  .cardBack img {
+    border-radius: 12px;
+  }
+
+  .selectedBadge {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    top: -8px;
+    right: -8px;
+    border: 2px solid white;
+  }
+
+  .showReadingButton {
+    padding: 12px 28px;
+    font-size: 15px;
+    margin-top: 16px;
   }
 }
 
