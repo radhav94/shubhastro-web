@@ -92,42 +92,35 @@ $color-text-secondary: #6c757d;
 }
 @media (max-width: 576px) {
   .blogCard {
-    flex-direction: row;
-    align-items: center;
-    padding: 10px;
-    gap: 12px;
+    flex-direction: column;
     border-radius: 14px;
   }
 
   .imageContainer {
-    width: 88px;
-    height: 88px;
-    aspect-ratio: auto;
-    border-radius: 12px;
-    flex-shrink: 0;
+    width: 100%;
+    height: 160px;
+    border-radius: 12px 12px 0 0;
   }
 
   .mainImage {
-    border-radius: 12px;
+    border-radius: 12px 12px 0 0;
   }
 
   .contentContainer {
-    padding: 0;
+    padding: 12px;
     flex-grow: 1;
-    justify-content: center;
   }
 
   .blogTitle {
     font-size: 14px;
     font-weight: 600;
     line-height: 1.4;
-    margin-bottom: 6px;
-
+    margin-bottom: 8px;
     -webkit-line-clamp: 2;
-  }
+      }
 
   .blogInfo {
-    margin-top: 4px;
+    margin-top: 8px;
   }
 
   .authorText {

@@ -1,8 +1,8 @@
 .singleBlogWrapper {
-  max-width: 1200px;   // 👈 increased width
-  margin: 40px auto;
-  padding: 0 24px;     // keep slight padding
-  line-height: 1.7;
+  max-width: 1600px;   // 👈 increased width
+  // margin: 40px auto;
+  padding: 0 48px;     // keep slight padding
+  // line-height: 1.7;
 
   @media (max-width: 900px) {
     padding: 0 16px;
