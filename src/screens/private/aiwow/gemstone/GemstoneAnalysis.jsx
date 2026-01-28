@@ -4,37 +4,13 @@ import styles from './GemstoneAnalysis.module.scss';
 import { analyzeGemstone } from '../../../../services/appServices/aiWowService';
 import { Toast } from '../../../../component';
 
-/**
- * Helper to normalize error to a string (bulletproof)
- */
-const getErrorMessage = (error) => {
-  if (!error) return 'Analysis failed. Please try again.';
-  
-  if (typeof error === 'string') return error;
-  
-  if (typeof error === 'object') {
-    // Handle nested error structures
-    if (error.message && typeof error.message === 'string') {
-      return error.message;
-    }
-    if (error.error?.message && typeof error.error.message === 'string') {
-      return error.error.message;
-    }
-    // Fallback for any object
-    return 'Analysis failed. Please try again.';
-  }
-  
-  return 'Analysis failed. Please try again.';
-};
-
 const GemstoneAnalysis = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
   const [gemstoneImage, setGemstoneImage] = useState(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(true);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Get the captured/uploaded image from localStorage
@@ -50,13 +26,14 @@ const GemstoneAnalysis = () => {
   }, [navigate]);
 
   const performAnalysis = async (imageData) => {
-    let progressInterval = null;
+    setIsAnalyzing(true);
     
     try {
       // Start progress animation
-      progressInterval = setInterval(() => {
+      const progressInterval = setInterval(() => {
         setProgress(prev => {
           if (prev >= 90) {
+            clearInterval(progressInterval);
             return 90; // Stop at 90% until API responds
           }
           return prev + 5;
@@ -66,67 +43,25 @@ const GemstoneAnalysis = () => {
       // Call the API
       const result = await analyzeGemstone(imageData);
 
-      // Clear interval
-      if (progressInterval) {
-        clearInterval(progressInterval);
-        progressInterval = null;
-      }
+      clearInterval(progressInterval);
 
-      if (result?.success && result?.data) {
-        // Store the analysis result
-        localStorage.setItem('gemstoneResult', JSON.stringify(result?.data || {}));
+      if (result.success) {
+        localStorage.setItem('gemstoneResult', JSON.stringify(result.data));
         
-        // Complete progress
         setProgress(100);
         setAnalysisComplete(true);
         
-        // Navigate to results after a short delay
         setTimeout(() => {
           navigate('/aiwow/gemstone/result');
         }, 1000);
-      } 
-      else {
-        // Handle API error response
+      } else {
         setProgress(0);
-        setHasError(true);
-        
-        // CRITICAL: Always convert to string immediately to prevent React render errors
-        const errorMsg = String(getErrorMessage(result?.error || result));
-        setErrorMessage(errorMsg);
-        
-        console.error('API returned error:', result);
-        
-        // Service already showed toast, just navigate back
-        setTimeout(() => {
-          navigate('/aiwow/gemstone/instructions');
-        }, 3000);
+        setError(result.error || { message: 'Analysis failed. Please try again.' });
       }
     } catch (error) {
-      // Clear interval if still running
-      if (progressInterval) {
-        clearInterval(progressInterval);
-        progressInterval = null;
-      }
-      
-      console.error('Analysis exception:', error);
-      
-      // CRITICAL: Extract error message and convert to string immediately
-      const axiosMessage = String(
-        error?.response?.data?.message ||
-        error?.message ||
-        'An unexpected error occurred.'
-      );
-      
-      // Update state to show error UI
+      console.error('Analysis error:', error);
       setProgress(0);
-      setHasError(true);
-      setErrorMessage(axiosMessage);
-      
-      // Service already showed toast
-      
-      setTimeout(() => {
-        navigate('/aiwow/gemstone/instructions');
-      }, 2000);
+      setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {
       setIsAnalyzing(false);
     }
@@ -138,19 +73,16 @@ const GemstoneAnalysis = () => {
     }
   };
 
-  console.log('hasError :>> ', hasError);
-  console.log('gemstoneImage :>> ', gemstoneImage);
-  console.log('progress :>> ', progress);
-  console.log('errorMessage :>> ', errorMessage);
-  console.log('errorMessage type :>> ', typeof errorMessage);
-  console.log('analysisComplete :>> ', analysisComplete);
-  console.log('isAnalyzing :>> ', isAnalyzing);
+  const handleRetry = () => {
+    setError(null);
+    navigate('/aiwow/gemstone/instructions');
+  };
 
   return (
     <div className={styles.container}>
       <div className={styles.content}>
         <h2 className={styles.title}>
-          {hasError ? 'Analysis Failed' : 'Analysing gemstone'}
+          {error ? 'Analysis Failed' : 'Analysing gemstone'}
         </h2>
 
         <div className={styles.imageWrapper}>
@@ -169,54 +101,79 @@ const GemstoneAnalysis = () => {
           <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
         </div>
 
-        {!hasError && (
-          <div className={styles.progressSection}>
-            <div className={styles.progressBar}>
-              <div 
-                className={styles.progressFill} 
-                style={{ width: `${progress}%` }}
-              ></div>
+        {!error ? (
+          <>
+            <div className={styles.progressSection}>
+              <div className={styles.progressBar}>
+                <div 
+                  className={styles.progressFill} 
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+              <div className={styles.progressBar}>
+                <div 
+                  className={styles.progressFill} 
+                  style={{ width: `${Math.max(0, progress - 20)}%` }}
+                ></div>
+              </div>
             </div>
-            <div className={styles.progressBar}>
-              <div 
-                className={styles.progressFill} 
-                style={{ width: `${Math.max(0, progress - 20)}%` }}
-              ></div>
-            </div>
-          </div>
-        )}
 
-        <div className={styles.messageSection}>
-          {hasError ? (
-            <>
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className={styles.errorIcon}>
-                <circle cx="20" cy="20" r="18" stroke="#ef4444" strokeWidth="2" fill="none"/>
-                <path d="M20 12V22" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"/>
-                <circle cx="20" cy="28" r="1.5" fill="#ef4444"/>
-              </svg>
-              <h3 className={styles.message}>
-                {typeof errorMessage === 'string' ? errorMessage : 'Failed to analyze gemstone'}
-              </h3>
-              <p className={styles.subMessage}>Redirecting back to try again...</p>
-            </>
-          ) : (
-            <>
+            <div className={styles.messageSection}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className={styles.sparkleIcon}>
                 <path d="M20 5L22.5 15L30 17.5L22.5 20L20 30L17.5 20L10 17.5L17.5 15L20 5Z" fill="#1f2937"/>
               </svg>
               <h3 className={styles.message}>Hold tight as we are analysing your gemstone</h3>
-            </>
-          )}
-        </div>
+            </div>
 
-        <button 
-          className={styles.resultButton}
-          onClick={hasError ? () => navigate('/aiwow/gemstone/instructions') : handleShowResult}
-          disabled={!analysisComplete && !hasError}
-          style={{ opacity: (analysisComplete || hasError) ? 1 : 0.6 }}
-        >
-          {hasError ? 'Try Again' : isAnalyzing ? 'Analyzing...' : 'Show Result'}
-        </button>
+            <button 
+              className={styles.resultButton}
+              onClick={handleShowResult}
+              disabled={!analysisComplete}
+              style={{ opacity: analysisComplete ? 1 : 0.6 }}
+            >
+              {isAnalyzing ? 'Analyzing...' : 'Show Result'}
+            </button>
+          </>
+        ) : (
+          <div className={styles.errorSection}>
+            <div className={styles.errorIcon}>
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="32" r="30" stroke="#ef4444" strokeWidth="2" fill="none"/>
+                <path d="M32 20V36" stroke="#ef4444" strokeWidth="3" strokeLinecap="round"/>
+                <circle cx="32" cy="44" r="2" fill="#ef4444"/>
+              </svg>
+            </div>
+
+            <div className={styles.errorDetails}>
+              <h3 className={styles.errorMessage}>{error.message}</h3>
+              
+              {error.details && (
+                <div className={styles.errorDetailsBox}>
+                  {error.details.detectedIssue && (
+                    <div className={styles.errorDetailItem}>
+                      <strong>Issue Detected:</strong>
+                      <p>{error.details.detectedIssue}</p>
+                    </div>
+                  )}
+                  
+                  {error.details.expected && (
+                    <div className={styles.errorDetailItem}>
+                      <strong>Expected:</strong>
+                      <p>{error.details.expected}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <button 
+              className={styles.retryButton}
+              onClick={handleRetry}
+            >
+              Try Again
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,31 +2,37 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './SmartMatchmaking.module.scss';
 import { Toast } from '../../../../component';
-import { completeMatchmakingProfile } from '../../../../services/appServices/aiWowService';
+import { analyzeSmartMatchmaking } from '../../../../services/appServices/aiWowService';
 
 const SmartMatchmaking = () => {
   const navigate = useNavigate();
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
 
-  // Form state
-  const [formData, setFormData] = useState({
-    fullName: '',
-    age: '',
-    gender: 'Male',
-    city: '',
-    state: '',
-    country: 'India',
-    education: '',
-    profession: '',
-    bio: '',
-    hobbies: '',
-    values: '',
-    minAge: '',
-    maxAge: '',
-    preferredLocations: '',
-    educationPreference: ''
+  // Form state for User B (Partner)
+  const [partnerData, setPartnerData] = useState({
+    name: '',
+    gender: 'female',
+    day: '',
+    month: '',
+    year: '',
+    hour: '',
+    min: '',
+    place: '',
+    lat: '',
+    lon: '',
+    tzone: '5.5'
+  });
+
+  // Relationship goals state
+  const [relationshipGoals, setRelationshipGoals] = useState({
+    emotionalBonding: 5,
+    careerGrowth: 4,
+    familyHarmony: 3,
+    physicalCompatibility: 4,
+    financialStability: 5
   });
 
   useEffect(() => {
@@ -40,12 +46,6 @@ const SmartMatchmaking = () => {
     try {
       const profile = JSON.parse(profileData);
       setSelectedProfile(profile);
-      
-      // Pre-fill name from profile
-      setFormData(prev => ({
-        ...prev,
-        fullName: profile.name || ''
-      }));
     } catch (error) {
       console.error('Invalid profile data:', error);
       Toast.error('Invalid profile data. Please select again.');
@@ -54,10 +54,17 @@ const SmartMatchmaking = () => {
     }
   }, [navigate]);
 
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+  const handlePartnerChange = (field, value) => {
+    setPartnerData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleGoalChange = (goal, value) => {
+    setRelationshipGoals(prev => ({
+      ...prev,
+      [goal]: parseInt(value)
     }));
   };
 
@@ -65,96 +72,83 @@ const SmartMatchmaking = () => {
     e.preventDefault();
 
     // Validation
-    if (!formData.fullName.trim()) {
-      Toast.error('Please enter your full name');
+    if (!partnerData.name.trim()) {
+      Toast.error('Please enter partner name');
       return;
     }
-    if (!formData.age || formData.age < 18 || formData.age > 100) {
-      Toast.error('Please enter a valid age (18-100)');
+    if (!partnerData.day || !partnerData.month || !partnerData.year) {
+      Toast.error('Please enter complete birth date');
       return;
     }
-    if (!formData.city.trim()) {
-      Toast.error('Please enter your city');
+    if (!partnerData.place.trim()) {
+      Toast.error('Please enter birth place');
       return;
     }
 
     try {
       setIsLoading(true);
+      setError(null);
 
-      const profileData = {
-        basicInfo: {
-          fullName: formData.fullName.trim(),
-          age: parseInt(formData.age),
-          gender: formData.gender,
-          location: {
-            city: formData.city.trim(),
-            state: formData.state.trim() || 'Unknown',
-            country: formData.country
-          },
-          education: formData.education.trim() || 'Not specified',
-          profession: formData.profession.trim() || 'Not specified',
-          bio: formData.bio.trim() || 'Looking for a meaningful relationship.'
-        },
-        interests: {
-          hobbies: formData.hobbies.trim() 
-            ? formData.hobbies.split(',').map(h => h.trim()).filter(h => h)
-            : [],
-          values: formData.values.trim()
-            ? formData.values.split(',').map(v => v.trim()).filter(v => v)
-            : []
-        },
-        preferences: {
-          ageRange: {
-            min: formData.minAge ? parseInt(formData.minAge) : parseInt(formData.age) - 5,
-            max: formData.maxAge ? parseInt(formData.maxAge) : parseInt(formData.age) + 5
-          },
-          preferredLocations: formData.preferredLocations.trim()
-            ? formData.preferredLocations.split(',').map(l => l.trim()).filter(l => l)
-            : [formData.city.trim()],
-          educationPreference: formData.educationPreference.trim() || 'Any'
-        }
+      // Prepare User A data from selected profile
+      const userA = {
+        name: selectedProfile.name || 'User A',
+        gender: selectedProfile.identity?.toLowerCase() || 'male',
+        day: parseInt(selectedProfile.day),
+        month: parseInt(selectedProfile.month),
+        year: parseInt(selectedProfile.year),
+        hour: parseInt(selectedProfile.hour || 0),
+        min: parseInt(selectedProfile.minute || 0),
+        second: 0,
+        place: selectedProfile.place || '',
+        lat: String(selectedProfile.latitude || '0'),
+        lon: String(selectedProfile.longitude || '0'),
+        tzone: parseFloat(selectedProfile.timezone || 5.5)
       };
 
-      const apiResult = await completeMatchmakingProfile(profileData);
+      // Prepare User B data from form
+      const userB = {
+        name: partnerData.name.trim(),
+        gender: partnerData.gender,
+        day: parseInt(partnerData.day),
+        month: parseInt(partnerData.month),
+        year: parseInt(partnerData.year),
+        hour: parseInt(partnerData.hour || 0),
+        min: parseInt(partnerData.min || 0),
+        second: 0,
+        place: partnerData.place.trim(),
+        lat: String(partnerData.lat || '0'),
+        lon: String(partnerData.lon || '0'),
+        tzone: parseFloat(partnerData.tzone)
+      };
+
+      const apiResult = await analyzeSmartMatchmaking(userA, userB, relationshipGoals);
 
       if (apiResult.success) {
         setResult(apiResult.data);
+      } else {
+        setError(apiResult.error);
       }
     } catch (error) {
-      console.error('Failed to complete profile:', error);
+      console.error('Failed to analyze compatibility:', error);
+      setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleBack = () => {
-    if (result) {
+    if (result || error) {
       setResult(null);
+      setError(null);
     } else {
       localStorage.removeItem('selectedKundliProfile');
       navigate(-1);
     }
   };
 
-  const handleNewProfile = () => {
+  const handleRetry = () => {
+    setError(null);
     setResult(null);
-    setFormData({
-      fullName: selectedProfile?.name || '',
-      age: '',
-      gender: 'Male',
-      city: '',
-      state: '',
-      country: 'India',
-      education: '',
-      profession: '',
-      bio: '',
-      hobbies: '',
-      values: '',
-      minAge: '',
-      maxAge: '',
-      preferredLocations: '',
-      educationPreference: ''
-    });
   };
 
   return (
@@ -176,221 +170,211 @@ const SmartMatchmaking = () => {
 
       {/* Content */}
       <div className={styles.content}>
-        {!result ? (
+        {!result && !error ? (
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.introSection}>
               <div className={styles.introIcon}>💕</div>
-              <h2 className={styles.introTitle}>Find Your Perfect Match</h2>
+              <h2 className={styles.introTitle}>Compatibility Analysis</h2>
               <p className={styles.introText}>
-                Complete your profile to get AI-powered compatibility insights
+                Enter partner's birth details to analyze compatibility
               </p>
             </div>
 
-            {/* Basic Information */}
+            {/* Partner Birth Details */}
             <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Basic Information</h3>
+              <h3 className={styles.sectionTitle}>Partner's Birth Details</h3>
               
               <div className={styles.formGroup}>
                 <label className={styles.label}>
-                  Full Name <span className={styles.required}>*</span>
+                  Name <span className={styles.required}>*</span>
                 </label>
                 <input
                   type="text"
                   className={styles.input}
-                  value={formData.fullName}
-                  onChange={(e) => handleInputChange('fullName', e.target.value)}
-                  placeholder="Enter your full name"
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>
-                    Age <span className={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="number"
-                    className={styles.input}
-                    value={formData.age}
-                    onChange={(e) => handleInputChange('age', e.target.value)}
-                    placeholder="25"
-                    min="18"
-                    max="100"
-                    disabled={isLoading}
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>
-                    Gender <span className={styles.required}>*</span>
-                  </label>
-                  <select
-                    className={styles.select}
-                    value={formData.gender}
-                    onChange={(e) => handleInputChange('gender', e.target.value)}
-                    disabled={isLoading}
-                  >
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>
-                    City <span className={styles.required}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={formData.city}
-                    onChange={(e) => handleInputChange('city', e.target.value)}
-                    placeholder="Mumbai"
-                    disabled={isLoading}
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>State</label>
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={formData.state}
-                    onChange={(e) => handleInputChange('state', e.target.value)}
-                    placeholder="Maharashtra"
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Education</label>
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={formData.education}
-                    onChange={(e) => handleInputChange('education', e.target.value)}
-                    placeholder="Graduate, Post Graduate, etc."
-                    disabled={isLoading}
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label className={styles.label}>Profession</label>
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={formData.profession}
-                    onChange={(e) => handleInputChange('profession', e.target.value)}
-                    placeholder="Software Engineer"
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Bio</label>
-                <textarea
-                  className={styles.textarea}
-                  value={formData.bio}
-                  onChange={(e) => handleInputChange('bio', e.target.value)}
-                  placeholder="Tell us about yourself..."
-                  rows={3}
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-
-            {/* Interests */}
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Interests & Values</h3>
-              
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Hobbies</label>
-                <input
-                  type="text"
-                  className={styles.input}
-                  value={formData.hobbies}
-                  onChange={(e) => handleInputChange('hobbies', e.target.value)}
-                  placeholder="Reading, Travel, Music (comma separated)"
+                  value={partnerData.name}
+                  onChange={(e) => handlePartnerChange('name', e.target.value)}
+                  placeholder="Enter partner's name"
                   disabled={isLoading}
                 />
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.label}>Values</label>
-                <input
-                  type="text"
-                  className={styles.input}
-                  value={formData.values}
-                  onChange={(e) => handleInputChange('values', e.target.value)}
-                  placeholder="Family, Career, Honesty (comma separated)"
+                <label className={styles.label}>
+                  Gender <span className={styles.required}>*</span>
+                </label>
+                <select
+                  className={styles.select}
+                  value={partnerData.gender}
+                  onChange={(e) => handlePartnerChange('gender', e.target.value)}
                   disabled={isLoading}
-                />
+                >
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
-            </div>
 
-            {/* Preferences */}
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Partner Preferences</h3>
-              
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                  <label className={styles.label}>Min Age</label>
+                  <label className={styles.label}>
+                    Day <span className={styles.required}>*</span>
+                  </label>
                   <input
                     type="number"
                     className={styles.input}
-                    value={formData.minAge}
-                    onChange={(e) => handleInputChange('minAge', e.target.value)}
-                    placeholder="24"
-                    min="18"
-                    max="100"
+                    value={partnerData.day}
+                    onChange={(e) => handlePartnerChange('day', e.target.value)}
+                    placeholder="12"
+                    min="1"
+                    max="31"
                     disabled={isLoading}
                   />
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label className={styles.label}>Max Age</label>
+                  <label className={styles.label}>
+                    Month <span className={styles.required}>*</span>
+                  </label>
                   <input
                     type="number"
                     className={styles.input}
-                    value={formData.maxAge}
-                    onChange={(e) => handleInputChange('maxAge', e.target.value)}
+                    value={partnerData.month}
+                    onChange={(e) => handlePartnerChange('month', e.target.value)}
+                    placeholder="5"
+                    min="1"
+                    max="12"
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>
+                    Year <span className={styles.required}>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    className={styles.input}
+                    value={partnerData.year}
+                    onChange={(e) => handlePartnerChange('year', e.target.value)}
+                    placeholder="1994"
+                    min="1900"
+                    max={new Date().getFullYear()}
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Hour</label>
+                  <input
+                    type="number"
+                    className={styles.input}
+                    value={partnerData.hour}
+                    onChange={(e) => handlePartnerChange('hour', e.target.value)}
+                    placeholder="10"
+                    min="0"
+                    max="23"
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Minute</label>
+                  <input
+                    type="number"
+                    className={styles.input}
+                    value={partnerData.min}
+                    onChange={(e) => handlePartnerChange('min', e.target.value)}
                     placeholder="32"
-                    min="18"
-                    max="100"
+                    min="0"
+                    max="59"
                     disabled={isLoading}
                   />
                 </div>
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.label}>Preferred Locations</label>
+                <label className={styles.label}>
+                  Birth Place <span className={styles.required}>*</span>
+                </label>
                 <input
                   type="text"
                   className={styles.input}
-                  value={formData.preferredLocations}
-                  onChange={(e) => handleInputChange('preferredLocations', e.target.value)}
-                  placeholder="Mumbai, Pune (comma separated)"
+                  value={partnerData.place}
+                  onChange={(e) => handlePartnerChange('place', e.target.value)}
+                  placeholder="Mumbai"
                   disabled={isLoading}
                 />
               </div>
 
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Latitude</label>
+                  <input
+                    type="text"
+                    className={styles.input}
+                    value={partnerData.lat}
+                    onChange={(e) => handlePartnerChange('lat', e.target.value)}
+                    placeholder="19.0760"
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Longitude</label>
+                  <input
+                    type="text"
+                    className={styles.input}
+                    value={partnerData.lon}
+                    onChange={(e) => handlePartnerChange('lon', e.target.value)}
+                    placeholder="72.8777"
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+
               <div className={styles.formGroup}>
-                <label className={styles.label}>Education Preference</label>
+                <label className={styles.label}>Timezone</label>
                 <input
                   type="text"
                   className={styles.input}
-                  value={formData.educationPreference}
-                  onChange={(e) => handleInputChange('educationPreference', e.target.value)}
-                  placeholder="Graduate, Post Graduate, Any"
+                  value={partnerData.tzone}
+                  onChange={(e) => handlePartnerChange('tzone', e.target.value)}
+                  placeholder="5.5"
                   disabled={isLoading}
                 />
               </div>
+            </div>
+
+            {/* Relationship Goals */}
+            <div className={styles.section}>
+              <h3 className={styles.sectionTitle}>Relationship Priorities</h3>
+              <p className={styles.sectionDesc}>Rate each aspect from 1 (Low) to 5 (High)</p>
+              
+              {Object.entries(relationshipGoals).map(([key, value]) => (
+                <div key={key} className={styles.sliderGroup}>
+                  <div className={styles.sliderHeader}>
+                    <label className={styles.sliderLabel}>
+                      {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                    </label>
+                    <span className={styles.sliderValue}>{value}</span>
+                  </div>
+                  <input
+                    type="range"
+                    className={styles.slider}
+                    min="1"
+                    max="5"
+                    value={value}
+                    onChange={(e) => handleGoalChange(key, e.target.value)}
+                    disabled={isLoading}
+                  />
+                  <div className={styles.sliderLabels}>
+                    <span>Low</span>
+                    <span>High</span>
+                  </div>
+                </div>
+              ))}
             </div>
 
             <button 
@@ -401,172 +385,277 @@ const SmartMatchmaking = () => {
               {isLoading ? (
                 <>
                   <span className={styles.spinner}></span>
-                  Creating Profile...
+                  Analyzing Compatibility...
                 </>
               ) : (
-                'Complete Profile'
+                'Analyze Compatibility'
               )}
             </button>
           </form>
-        ) : (
-          <div className={styles.resultSection}>
-            <div className={styles.resultHeader}>
-              <div className={styles.resultIcon}>✨</div>
-              <h2 className={styles.resultTitle}>
-                {result.message || 'Profile Created Successfully!'}
-              </h2>
-              {result.matchCount && (
-                <p className={styles.matchCount}>
-                  {result.matchCount} {result.matchCount === 1 ? 'Match' : 'Matches'} Found
-                </p>
+        ) : error ? (
+          <div className={styles.errorSection}>
+            <div className={styles.errorIcon}>
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="32" r="30" stroke="#ef4444" strokeWidth="2" fill="none"/>
+                <path d="M32 20V36" stroke="#ef4444" strokeWidth="3" strokeLinecap="round"/>
+                <circle cx="32" cy="44" r="2" fill="#ef4444"/>
+              </svg>
+            </div>
+
+            <div className={styles.errorDetails}>
+              <h3 className={styles.errorMessage}>{error.message}</h3>
+              
+              {error.details && (
+                <div className={styles.errorDetailsBox}>
+                  {error.details.detectedIssue && (
+                    <div className={styles.errorDetailItem}>
+                      <strong>Issue Detected:</strong>
+                      <p>{error.details.detectedIssue}</p>
+                    </div>
+                  )}
+                  
+                  {error.details.expected && (
+                    <div className={styles.errorDetailItem}>
+                      <strong>Expected:</strong>
+                      <p>{error.details.expected}</p>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
-            {/* Profile Info */}
-            {result.profileId && (
-              <div className={styles.infoCard}>
-                <div className={styles.infoRow}>
-                  <span className={styles.infoLabel}>Profile ID:</span>
-                  <span className={styles.infoValue}>{result.profileId}</span>
+            <button 
+              className={styles.retryButton}
+              onClick={handleRetry}
+            >
+              Try Again
+            </button>
+          </div>
+        ) : (
+          <div className={styles.resultSection}>
+            {/* Overall Score Card */}
+            <div className={styles.scoreCard}>
+              <div className={styles.scoreCircle}>
+                <div className={styles.scoreValue}>{result.overallScore}</div>
+                <div className={styles.scoreMax}>/ 100</div>
+              </div>
+              <div className={styles.scoreInfo}>
+                <h2 className={styles.compatibilityLevel}>{result.compatibilityLevel}</h2>
+                <p className={styles.partnerNames}>
+                  {selectedProfile?.name} & {partnerData.name}
+                </p>
+              </div>
+            </div>
+
+            {/* Summary */}
+            <div className={styles.summaryCard}>
+              <h3 className={styles.cardTitle}>Summary</h3>
+              <p className={styles.summaryText}>{result.summary}</p>
+            </div>
+
+            {/* Category Scores */}
+            <div className={styles.categoryCard}>
+              <h3 className={styles.cardTitle}>Compatibility Breakdown</h3>
+              <div className={styles.categoryList}>
+                {Object.entries(result.categoryScores).map(([key, value]) => (
+                  <div key={key} className={styles.categoryItem}>
+                    <div className={styles.categoryHeader}>
+                      <span className={styles.categoryLabel}>
+                        {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                      </span>
+                      <span className={styles.categoryValue}>{value}%</span>
+                    </div>
+                    <div className={styles.categoryBar}>
+                      <div 
+                        className={styles.categoryBarFill} 
+                        style={{ width: `${value}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Astrology Insights */}
+            <div className={styles.insightsCard}>
+              <h3 className={styles.cardTitle}>Astrological Insights</h3>
+              <div className={styles.insightsGrid}>
+                <div className={styles.insightItem}>
+                  <div className={styles.insightIcon}>🌟</div>
+                  <div className={styles.insightContent}>
+                    <div className={styles.insightLabel}>Guna Milan</div>
+                    <div className={styles.insightValue}>{result.astrologyInsights.gunaMilan}/36</div>
+                  </div>
                 </div>
-                {result.completionPercentage && (
-                  <div className={styles.infoRow}>
-                    <span className={styles.infoLabel}>Completion:</span>
-                    <span className={styles.infoValue}>{result.completionPercentage}%</span>
+                <div className={styles.insightItem}>
+                  <div className={styles.insightIcon}>🔥</div>
+                  <div className={styles.insightContent}>
+                    <div className={styles.insightLabel}>Manglik Status</div>
+                    <div className={styles.insightValue}>{result.astrologyInsights.manglikStatus}</div>
+                  </div>
+                </div>
+                <div className={styles.insightItem}>
+                  <div className={styles.insightIcon}>⏰</div>
+                  <div className={styles.insightContent}>
+                    <div className={styles.insightLabel}>Dasha Alignment</div>
+                    <div className={styles.insightValue}>{result.astrologyInsights.dashaAlignment}</div>
+                  </div>
+                </div>
+                <div className={styles.insightItem}>
+                  <div className={styles.insightIcon}>🪐</div>
+                  <div className={styles.insightContent}>
+                    <div className={styles.insightLabel}>Dominant Planets</div>
+                    <div className={styles.insightValue}>
+                      {result.astrologyInsights.dominantPlanets.join(', ')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Personality Match */}
+            <div className={styles.personalityCard}>
+              <h3 className={styles.cardTitle}>Personality Match</h3>
+              
+              <div className={styles.personalityGrid}>
+                <div className={styles.personalityBox}>
+                  <div className={styles.personalityHeader}>
+                    <div className={styles.personalityAvatar}>
+                      {selectedProfile?.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div className={styles.personalityName}>{selectedProfile?.name}</div>
+                  </div>
+                  <div className={styles.traitsList}>
+                    {result.personalityMatch.userA.traits.map((trait, idx) => (
+                      <span key={idx} className={styles.traitTag}>{trait}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={styles.personalityBox}>
+                  <div className={styles.personalityHeader}>
+                    <div className={styles.personalityAvatar}>
+                      {partnerData.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div className={styles.personalityName}>{partnerData.name}</div>
+                  </div>
+                  <div className={styles.traitsList}>
+                    {result.personalityMatch.userB.traits.map((trait, idx) => (
+                      <span key={idx} className={styles.traitTag}>{trait}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.dynamicBox}>
+                <div className={styles.dynamicLabel}>Relationship Dynamic</div>
+                <p className={styles.dynamicText}>{result.personalityMatch.dynamic}</p>
+              </div>
+            </div>
+
+            {/* Conflict Prediction */}
+            <div className={styles.conflictCard}>
+              <h3 className={styles.cardTitle}>Potential Challenges</h3>
+              <div className={styles.conflictList}>
+                {result.conflictPrediction.map((conflict, idx) => (
+                  <div key={idx} className={styles.conflictItem}>
+                    <div className={styles.conflictHeader}>
+                      <span className={styles.conflictArea}>{conflict.area}</span>
+                      <span className={`${styles.riskBadge} ${styles[`risk${conflict.riskLevel}`]}`}>
+                        {conflict.riskLevel} Risk
+                      </span>
+                    </div>
+                    <p className={styles.conflictReason}>{conflict.reason}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Future Timeline */}
+            <div className={styles.timelineCard}>
+              <h3 className={styles.cardTitle}>Future Timeline</h3>
+              <div className={styles.timelineList}>
+                {result.futureTimeline.map((phase, idx) => (
+                  <div key={idx} className={styles.timelineItem}>
+                    <div className={styles.timelineDot} />
+                    <div className={styles.timelineContent}>
+                      <div className={styles.timelineHeader}>
+                        <span className={styles.timelinePeriod}>{phase.period}</span>
+                        <span className={`${styles.riskBadge} ${styles[`risk${phase.riskLevel}`]}`}>
+                          {phase.riskLevel} Risk
+                        </span>
+                      </div>
+                      <p className={styles.timelineTheme}>{phase.theme}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Marriage Recommendation */}
+            <div className={styles.marriageCard}>
+              <h3 className={styles.cardTitle}>Marriage Recommendation</h3>
+              <div className={styles.marriageContent}>
+                <div className={styles.marriageStatus}>
+                  <div className={styles.marriageIcon}>
+                    {result.marriageRecommendation.suitable ? '✅' : '⚠️'}
+                  </div>
+                  <div className={styles.marriageText}>
+                    <div className={styles.marriageLabel}>Suitable for Marriage</div>
+                    <div className={styles.marriageValue}>
+                      {result.marriageRecommendation.suitable ? 'Yes' : 'No'}
+                    </div>
+                  </div>
+                </div>
+                
+                {result.marriageRecommendation.bestMarriageWindow && 
+                 result.marriageRecommendation.bestMarriageWindow !== 'Not applicable due to age difference' && (
+                  <div className={styles.marriageInfo}>
+                    <div className={styles.marriageInfoLabel}>Best Marriage Window</div>
+                    <div className={styles.marriageInfoValue}>
+                      {result.marriageRecommendation.bestMarriageWindow}
+                    </div>
+                  </div>
+                )}
+                
+                {result.marriageRecommendation.riskIfDelayed && 
+                 result.marriageRecommendation.riskIfDelayed !== 'Not applicable due to age difference' && (
+                  <div className={styles.marriageInfo}>
+                    <div className={styles.marriageInfoLabel}>Risk if Delayed</div>
+                    <div className={styles.marriageInfoValue}>
+                      {result.marriageRecommendation.riskIfDelayed}
+                    </div>
                   </div>
                 )}
               </div>
-            )}
+            </div>
 
-            {/* Match Suggestions */}
-            {result.matches && result.matches.length > 0 && (
-              <div className={styles.matchesSection}>
-                <h3 className={styles.matchesTitle}>Your Match Suggestions</h3>
-                <div className={styles.matchesList}>
-                  {result.matches.map((match, index) => (
-                    <div key={match.matchId || index} className={styles.matchCard}>
-                      {/* Match Header */}
-                      <div className={styles.matchHeader}>
-                        <div className={styles.matchAvatar}>
-                          {match.profile?.basicInfo?.fullName?.charAt(0) || '?'}
-                        </div>
-                        <div className={styles.matchInfo}>
-                          <h4 className={styles.matchName}>
-                            {match.profile?.basicInfo?.fullName || 'Unknown'}
-                          </h4>
-                          <p className={styles.matchDetails}>
-                            {match.profile?.basicInfo?.age && `${match.profile.basicInfo.age} years`}
-                            {match.profile?.basicInfo?.profession && ` • ${match.profile.basicInfo.profession}`}
-                          </p>
-                          {match.profile?.basicInfo?.location?.city && (
-                            <p className={styles.matchLocation}>
-                              📍 {match.profile.basicInfo.location.city}
-                            </p>
-                          )}
-                        </div>
-                        {match.matchScore && (
-                          <div className={styles.matchScoreBadge}>
-                            {match.matchScore}%
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Bio */}
-                      {match.profile?.basicInfo?.bio && (
-                        <p className={styles.matchBio}>{match.profile.basicInfo.bio}</p>
-                      )}
-
-                      {/* Match Score Breakdown */}
-                      {match.matchScoreBreakdown && (
-                        <div className={styles.scoreBreakdown}>
-                          <h5 className={styles.breakdownTitle}>Compatibility Breakdown</h5>
-                          <div className={styles.scoreGrid}>
-                            {Object.entries(match.matchScoreBreakdown).map(([key, value]) => (
-                              key !== 'overall' && (
-                                <div key={key} className={styles.scoreItem}>
-                                  <span className={styles.scoreLabel}>
-                                    {key.charAt(0).toUpperCase() + key.slice(1)}
-                                  </span>
-                                  <div className={styles.scoreBar}>
-                                    <div 
-                                      className={styles.scoreBarFill}
-                                      style={{ width: `${value}%` }}
-                                    ></div>
-                                  </div>
-                                  <span className={styles.scoreValue}>{value}%</span>
-                                </div>
-                              )
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Compatibility */}
-                      {match.compatibility && (
-                        <div className={styles.compatibility}>
-                          {match.compatibility.strengths && match.compatibility.strengths.length > 0 && (
-                            <div className={styles.compatibilitySection}>
-                              <h5 className={styles.compatibilityTitle}>💚 Strengths</h5>
-                              <ul className={styles.compatibilityList}>
-                                {match.compatibility.strengths.map((strength, idx) => (
-                                  <li key={idx}>{strength}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {match.compatibility.challenges && match.compatibility.challenges.length > 0 && (
-                            <div className={styles.compatibilitySection}>
-                              <h5 className={styles.compatibilityTitle}>⚠️ Challenges</h5>
-                              <ul className={styles.compatibilityList}>
-                                {match.compatibility.challenges.map((challenge, idx) => (
-                                  <li key={idx}>{challenge}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Summary */}
-                      {match.summary && (
-                        <div className={styles.matchSummary}>
-                          <p>{match.summary}</p>
-                        </div>
-                      )}
-
-                      {/* Interests */}
-                      {match.profile?.interests && (
-                        <div className={styles.interests}>
-                          {match.profile.interests.hobbies && match.profile.interests.hobbies.length > 0 && (
-                            <div className={styles.interestGroup}>
-                              <span className={styles.interestLabel}>Hobbies:</span>
-                              <div className={styles.interestTags}>
-                                {match.profile.interests.hobbies.slice(0, 4).map((hobby, idx) => (
-                                  <span key={idx} className={styles.interestTag}>{hobby}</span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          {match.profile.interests.values && match.profile.interests.values.length > 0 && (
-                            <div className={styles.interestGroup}>
-                              <span className={styles.interestLabel}>Values:</span>
-                              <div className={styles.interestTags}>
-                                {match.profile.interests.values.slice(0, 4).map((value, idx) => (
-                                  <span key={idx} className={styles.interestTag}>{value}</span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
+            {/* Remedies */}
+            <div className={styles.remediesCard}>
+              <h3 className={styles.cardTitle}>Recommended Remedies</h3>
+              <div className={styles.remediesList}>
+                {result.remedies.map((remedy, idx) => (
+                  <div key={idx} className={styles.remedyItem}>
+                    <div className={styles.remedyHeader}>
+                      <span className={styles.remedyWho}>
+                        {remedy.who === 'userA' 
+                          ? selectedProfile?.name 
+                          : remedy.who === 'userB' 
+                          ? partnerData.name 
+                          : 'Both'}
+                      </span>
                     </div>
-                  ))}
-                </div>
+                    <p className={styles.remedyText}>{remedy.remedy}</p>
+                    <p className={styles.remedyPurpose}>
+                      <strong>Purpose:</strong> {remedy.purpose}
+                    </p>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
 
-            <button className={styles.newProfileButton} onClick={handleNewProfile}>
-              Create Another Profile
+            <button className={styles.newAnalysisButton} onClick={handleRetry}>
+              New Analysis
             </button>
           </div>
         )}

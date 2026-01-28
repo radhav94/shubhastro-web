@@ -193,7 +193,47 @@ const ClothColorResult = () => {
       {resultData.wardrobeAnalysis && (
         <div className={styles.wardrobeCard}>
           <h3 className={styles.cardTitle}>Wardrobe Analysis</h3>
-          <p className={styles.wardrobeText}>{String(resultData.wardrobeAnalysis)}</p>
+          
+          {resultData.wardrobeAnalysis.detectedColors && Array.isArray(resultData.wardrobeAnalysis.detectedColors) && resultData.wardrobeAnalysis.detectedColors.length > 0 && (
+            <div className={styles.detectedColorsSection}>
+              <h4 className={styles.subTitle}>Detected Colors in Your Wardrobe</h4>
+              {resultData.wardrobeAnalysis.detectedColors.map((color, idx) => (
+                <div key={idx} className={styles.detectedColorItem}>
+                  <div className={styles.detectedColorHeader}>
+                    <div className={styles.detectedColorInfo}>
+                      <div 
+                        className={styles.colorSwatch} 
+                        style={{ backgroundColor: color.hexCode || '#000' }}
+                      ></div>
+                      <span className={styles.detectedColorName}>{String(color.colorName || 'Unknown')}</span>
+                    </div>
+                    <div className={styles.detectedColorStats}>
+                      <span className={styles.percentage}>{color.percentage}%</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {resultData.wardrobeAnalysis.astrologicalMatches && Array.isArray(resultData.wardrobeAnalysis.astrologicalMatches) && resultData.wardrobeAnalysis.astrologicalMatches.length > 0 && (
+            <div className={styles.matchesSection}>
+              <h4 className={styles.subTitle}>Astrological Matches</h4>
+              {resultData.wardrobeAnalysis.astrologicalMatches.map((match, idx) => (
+                <div key={idx} className={styles.matchItem}>
+                  <div className={styles.matchHeader}>
+                    <span className={styles.matchLabel}>
+                      {String(match.detectedColor)} → {String(match.recommendedColor)}
+                    </span>
+                    <span className={styles.matchPercentage}>{match.matchPercentage}% match</span>
+                  </div>
+                  {match.suggestion && (
+                    <p className={styles.matchSuggestion}>{String(match.suggestion)}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

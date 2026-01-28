@@ -333,6 +333,127 @@
   margin: 0;
 }
 
+.detectedColorsSection {
+  margin-bottom: 20px;
+}
+
+.detectedColorItem {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.detectedColorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.detectedColorInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.detectedColorName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  text-transform: capitalize;
+}
+
+.detectedColorStats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.percentage {
+  font-size: 16px;
+  font-weight: 700;
+  color: #D43400;
+}
+
+.confidence {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.matchesSection {
+  margin-bottom: 20px;
+}
+
+.matchItem {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-left: 3px solid #D43400;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.matchHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+
+.matchLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  text-transform: capitalize;
+}
+
+.matchPercentage {
+  font-size: 13px;
+  font-weight: 700;
+  color: #D43400;
+  white-space: nowrap;
+}
+
+.matchSuggestion {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #4b5563;
+  margin: 0;
+}
+
+.confidenceSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 16px;
+}
+
+.confidenceLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.confidenceValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #D43400;
+}
+
 .avoidIntro {
   font-size: 14px;
   line-height: 1.6;

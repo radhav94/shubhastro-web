@@ -70,10 +70,6 @@ const GemstoneResult = () => {
           <span className={styles.label}>Natural:</span>
           <span className={styles.value}>{resultData.identification.isNatural ? 'Yes' : 'No'}</span>
         </div>
-        <div className={styles.scoreCard}>
-          <span className={styles.scoreLabel}>Confidence Score</span>
-          <span className={styles.scoreValue}>{resultData.identification.confidenceScore}%</span>
-        </div>
       </div>
 
       <div className={styles.summaryCard}>
