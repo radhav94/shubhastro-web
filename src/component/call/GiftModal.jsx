@@ -90,6 +90,10 @@ const GiftModal = ({ isOpen, onClose, astrologerId }) => {
       
       setSelected(null);
       refreshWallet();
+      
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new Event("walletBalanceUpdated"));
+      
       toast.success("Gift sent successfully");
       onClose();
     } catch (error) {
@@ -105,6 +109,9 @@ const GiftModal = ({ isOpen, onClose, astrologerId }) => {
   const handleWalletClose = () => {
     setIsWalletModalOpen(false);
     refreshWallet();
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event("walletBalanceUpdated"));
   };
 
   if (!isOpen) return null;

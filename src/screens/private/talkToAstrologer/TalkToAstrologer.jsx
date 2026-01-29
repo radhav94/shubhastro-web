@@ -521,8 +521,10 @@ const TalkToAstrologer = () => {
             kundliId,
             astrologerName: data?.astrologer?.firstName || "",
             astroID: data?.astrologer?.astrologer_ID,
+            experience: data?.astrologer?.experience
           },
         });
+        console.log('data :>> ', data);
       } catch (e) {
         Toast.error("Failed to start chat");
       }
