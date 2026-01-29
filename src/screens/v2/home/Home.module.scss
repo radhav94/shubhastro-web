@@ -834,6 +834,8 @@
   position: relative;
   width: 100%;
   height: 110px;
+  margin-top: 60px;
+  margin-bottom: -45px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -847,7 +849,7 @@
   border-radius: 999px;
 
   // background: linear-gradient(135deg, #f4d19b 0%, #e8c589 100%);
-  // background: #f5f5f5;
+  background: #f5f5f5;
   position: absolute;
   bottom: 18px;
   left: 50%;
@@ -870,12 +872,6 @@
 
 /* Mobile tighter */
 @media (max-width: 480px) {
-  .actionCard {
-    width: 100%;
-    height: 150px;
-    border-radius: 20px;
-    padding: 20px 12px 0;
-  }
 
   .actionTitle {
     font-size: 14px;
@@ -883,20 +879,6 @@
     padding: 0px 0px;
   }
 
-  .actionMedia {
-    height: 95px;
-  }
-
-  .actionCircle {
-    width: 70px;
-    height: 70px;
-    bottom: 14px;
-  }
-
-  .actionImg {
-    height: 90px;
-    bottom: -6px;
-  }
 }
 
 /* Pandit AI Section */
@@ -1158,7 +1140,7 @@
 }
 
 .astrologerCard {
-  min-width: 280px;
+  min-width: 220px;
   background: #ffffff;
   border-radius: 20px;
   display: flex;
@@ -1168,7 +1150,7 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   position: relative;
   @media screen and (width <= 767px) {
-    min-width: 200px;
+    min-width: 180px;
   }
 }
 
@@ -1185,8 +1167,8 @@
 }
 
 .astrologerImageWrapper {
-  width: 150px;
-  height: 150px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   overflow: hidden;
   margin-bottom: 16px;
@@ -1195,8 +1177,8 @@
   align-items: center;
   justify-content: center;
   @media screen and (width <= 767px) {
-    width: 25vw;
-    height: 25vw;
+    width: 90px;
+    height: 90px;
   }
 }
 
@@ -1208,13 +1190,14 @@
 
 .ratingBadge {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--cta-10, rgba(229, 99, 41, 0.1));
-  padding: 6px 14px;
-  border-radius: 20px;
-  margin-bottom: 12px;
-  width: fit-content;
+    align-items: center;
+    gap: 4px;
+    background: #fff8f0;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
   @media screen and (width <= 767px) {
     margin-bottom: 6px;
   }
@@ -1222,6 +1205,9 @@
 
 .star {
   font-size: 16px;
+  svg{
+    width: 14px;
+  }
 }
 
 .ratingText {
@@ -1233,14 +1219,14 @@
 
 .astrologerName {
   font-family: "Poppins", sans-serif;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
-  margin: 0 0 10px 0;
+  margin: 10px 0 10px 0;
   text-align: center;
   @include line-clamp(1);
   @media screen and (width <= 767px) {
-    font-size: 18px;
+    font-size: 14px;
     margin-bottom: 6px;
   }
 }
@@ -1254,12 +1240,13 @@
 .bookIcon {
   color: #f75801;
   flex-shrink: 0;
+  width: 14px;
 }
 
 .experienceText {
   font-family: "Poppins", sans-serif;
-  font-size: 14px;
-  color: #888;
+  font-size: 12px;
+  color: #666;
   @include line-clamp(1);
 }
 .bottomWrap {
@@ -1277,11 +1264,11 @@
   );
   color: #ffffff;
   border: none;
-  margin: 0 12px 8px;
-  padding: 10px 12px;
+  margin: 0 12px 16px;
+  padding: 10px 10px;
   border-radius: 50px;
   font-family: "Poppins", sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -1289,7 +1276,8 @@
     box-shadow 0.2s ease;
 
   @media screen and (width <= 767px) {
-    padding: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
   }
 }
 
@@ -1324,13 +1312,13 @@
     transform 0.2s,
     box-shadow 0.2s;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  min-height: 140px;
+  // min-height: 140px;
   position: relative;
-  width: 340px;
-  gap: 20px;
+  width: 300px;
+  gap: 16px;
   flex-shrink: 0;
   @media screen and (width <= 767px) {
-    width: 220px;
+    width: 200px;
   }
 }
 
@@ -1368,6 +1356,10 @@
   height: 60px;
   object-fit: contain;
   flex-shrink: 0;
+  @media (width <= 767px) {
+    width: 50px;
+    height: 50px;
+  }
 }
 
 /* My Sessions Section */
@@ -1891,7 +1883,7 @@
 
   .lifeAreaCard {
     padding: 16px 14px;
-    min-height: 130px;
+    // min-height: 130px;
   }
 
   .lifeAreaTitle {
@@ -2315,28 +2307,8 @@
     margin-bottom: 32px;
   }
 
-  .actionCard {
-    width: 100%;
-    height: 190px;
-    padding: 20px 18px 0;
-  }
-
   .actionTitle {
     font-size: 16px;
-  }
-
-  .actionMedia {
-    height: 120px;
-  }
-
-  .actionCircle {
-    width: 95px;
-    height: 95px;
-    bottom: 20px;
-  }
-
-  .actionImg {
-    height: 120px;
   }
 
   /* Pandit AI - Tablet */
@@ -2385,10 +2357,6 @@
   //   font-size: 22px;
   // }
 
-  .experienceText {
-    font-size: 15px;
-  }
-
   /* Life Area Section - Tablet */
   .lifeAreaSection {
     margin-bottom: 32px;
@@ -2400,7 +2368,7 @@
 
   .lifeAreaCard {
     padding: 28px 24px;
-    min-height: 160px;
+    // min-height: 160px;
     flex-direction: row;
     align-items: center;
   }
@@ -2549,28 +2517,9 @@
     margin-bottom: 40px;
   }
 
-  .actionCard {
-    width: 100%;
-    height: 210px;
-    padding: 22px 20px 0;
-  }
 
   .actionTitle {
     font-size: 17px;
-  }
-
-  .actionMedia {
-    height: 130px;
-  }
-
-  .actionCircle {
-    width: 105px;
-    height: 105px;
-    bottom: 22px;
-  }
-
-  .actionImg {
-    height: 130px;
   }
 
   /* Pandit AI - Desktop */
@@ -2601,7 +2550,7 @@
   /* Life Area Section - Desktop */
   .lifeAreaCard {
     padding: 32px 28px;
-    min-height: 160px;
+    // min-height: 160px;
   }
 
   .lifeAreaTitle {
@@ -2677,29 +2626,10 @@
     margin-bottom: 48px;
   }
 
-  .actionCard {
-    width: 100%;
-    height: 230px;
-    padding: 24px 22px 0;
-  }
-
   .actionTitle {
     font-size: 18px;
   }
 
-  .actionMedia {
-    height: 140px;
-  }
-
-  .actionCircle {
-    width: 115px;
-    height: 115px;
-    bottom: 24px;
-  }
-
-  .actionImg {
-    height: 140px;
-  }
 }
 
 /* Extra Large Desktop: 1920px+ */
@@ -2751,28 +2681,8 @@
     margin-bottom: 56px;
   }
 
-  .actionCard {
-    width: 100%;
-    height: 250px;
-    padding: 26px 24px 0;
-  }
-
   .actionTitle {
     font-size: 19px;
-  }
-
-  .actionMedia {
-    height: 150px;
-  }
-
-  .actionCircle {
-    width: 125px;
-    height: 125px;
-    bottom: 26px;
-  }
-
-  .actionImg {
-    height: 150px;
   }
 
   /* Pandit AI - XL Desktop */
@@ -2803,7 +2713,7 @@
   /* Life Area Section - XL Desktop */
   .lifeAreaCard {
     padding: 36px 32px;
-    min-height: 180px;
+    // min-height: 180px;
   }
 
   .lifeAreaTitle {
@@ -3067,11 +2977,14 @@
 
 .blogsGrid {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: 4px 4px 20px 4px;
+  @media (width <= 767px) {
+    gap: 16px;    
+  }
 }
 
 .blogsGrid::-webkit-scrollbar {
@@ -3079,10 +2992,10 @@
 }
 
 .blogCard {
-  flex: 0 0 280px;
-  min-width: 280px;
+  flex: 0 0 220px;
+  min-width: 220px;
   background: #ffffff;
-  border-radius: 24px;
+  border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   cursor: pointer;
@@ -3090,8 +3003,8 @@
     transform 0.2s,
     box-shadow 0.2s;
   @media screen and (width <= 767px) {
-    flex: 0 0 200px;
-    min-width: 200px;
+    flex: 0 0 170px;
+    min-width: 170px;
   }
 }
 
@@ -3102,7 +3015,7 @@
 
 .blogImageWrapper {
   width: 100%;
-  height: 170px;
+  height: 130px;
   overflow: hidden;
   background: #f5f5f5;
 }
@@ -3114,7 +3027,7 @@
 }
 
 .blogContent {
-  padding: 20px;
+  padding: 16px;
   background: #ffffff;
 }
 
@@ -3152,7 +3065,7 @@
   }
 
   .blogTitle {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .blogDate {
@@ -3180,10 +3093,6 @@
 
   .blogTitle {
     font-size: 16px;
-  }
-
-  .blogContent {
-    padding: 24px;
   }
 }
 
@@ -3221,8 +3130,9 @@
 /* News Section Specific Styles */
 .blogMeta {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 4px;
   margin-bottom: 8px;
 }
 
