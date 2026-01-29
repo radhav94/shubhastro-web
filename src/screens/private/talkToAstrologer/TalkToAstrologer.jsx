@@ -57,7 +57,6 @@ const TalkToAstrologer = () => {
 
   const location = useLocation(); //  get current URL
   // const isChatMode = location.pathname === "/chat-with-astrologers";
-  console.log("location location", location);
   const currentPath = location.pathname.split("/").pop();
 
   const showCTA = useRecommendTrigger(120, resetTrigger);
