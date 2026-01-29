@@ -1,5 +1,4 @@
 import React from "react";
-import { IoArrowForwardOutline } from "react-icons/io5";
 import Styles from "./BlogCard.module.scss";
 
 const BlogCard = ({ image, title, author, date, authorIcon }) => {
@@ -55,7 +54,6 @@ const BlogCard = ({ image, title, author, date, authorIcon }) => {
             {formatDate(date)}
             </span>
           </div>
-          <IoArrowForwardOutline className={Styles.arrowIcon} />
         </div>
       </div>
     </article>
