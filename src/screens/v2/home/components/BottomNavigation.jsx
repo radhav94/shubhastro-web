@@ -17,6 +17,11 @@ const BottomNavigation = () => {
         navigate("/shop");
     };
 
+    const handleProfileClick = () => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    token ? navigate("/profile") : navigate("/login?skip=welcome");
+  };
+
     return (
         <nav className={styles.bottomNav}>
             <button className={`${styles.navItem} ${styles.active}`}>
@@ -48,7 +53,7 @@ const BottomNavigation = () => {
                 <span className={styles.label}>Shop</span>
             </button>
 
-            <button className={styles.navItem}>
+            <button className={styles.navItem} onClick={handleProfileClick}>
                 <div className={styles.iconCircle}>
                     <UserRound size={22} />
                 </div>
