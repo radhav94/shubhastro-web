@@ -23,12 +23,22 @@ const AstrologersByCategorySection = ({ data, title, showMore }) => {
       <div className={styles.lifeAreaGrid}>
         {data.map((category, index) => (
           <div
-            key={category._id || index}
+            key={category.ID || category._id || index}
             className={styles.lifeAreaCard}
-            style={{ background: getCategoryColor(index) }}
+            style={{
+              background: category.secondary_colour || getCategoryColor(index)
+            }}
             onClick={() => handleCategoryClick(category)}
           >
             <h3 className={styles.lifeAreaTitle}>{category.title}</h3>
+
+            {category.image_url && (
+              <img
+                src={category.image_url}
+                alt={category.title}
+                className={styles.lifeAreaIconImg}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -45,18 +55,18 @@ const AstrologersByCategorySection = ({ data, title, showMore }) => {
   );
 };
 
-// Helper function to get category colors
+// Helper function to get category colors (fallback)
 const getCategoryColor = (index) => {
   const colors = [
-    "linear-gradient(135deg, #FFE4BA 0%, #FFD89B 100%)",
-    "linear-gradient(135deg, #FFE4E1 0%, #FFC0CB 100%)",
-    "linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 100%)",
-    "linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%)",
-    "linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%)",
-    "linear-gradient(135deg, #FFCCBC 0%, #FFAB91 100%)",
-    "linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%)",
-    "linear-gradient(135deg, #BBDEFB 0%, #90CAF9 100%)",
-    "linear-gradient(135deg, #F8BBD0 0%, #F48FB1 100%)",
+    "#FCE4EC",
+    "#E3F2FD",
+    "#E8F5E9",
+    "#FCE4EC",
+    "#E3F2FD",
+    "#E8F5E9",
+    "#FCE4EC",
+    "#E3F2FD",
+    "#E8F5E9",
   ];
   return colors[index % colors.length];
 };

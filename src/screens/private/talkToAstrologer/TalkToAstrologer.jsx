@@ -4,7 +4,7 @@ import {
   AstrologerCard,
   DetailsModal,
   PrimaryText,
-  RechargeAlertModel,
+  RechargeModal,
   Title,
   Toast,
 } from "../../../component";
@@ -376,17 +376,12 @@ const TalkToAstrologer = () => {
 
   // Custom handler for profile selection (doesn't close modal)
   const handleProfileSelect = (profile) => {
-    console.log("✅ TALK_TO_ASTROLOGER: Profile selected", profile);
     setLocalSelectedProfile(profile);
   };
 
   // Handler for Continue button (triggers socket emit)
   const handleContinueAfterKundliSelect = () => {
     if (localSelectedProfile) {
-      console.log(
-        "✅ TALK_TO_ASTROLOGER: Continue clicked with profile",
-        localSelectedProfile,
-      );
       hookHandleAfterKundliSelect(localSelectedProfile);
     }
   };
@@ -529,7 +524,6 @@ const TalkToAstrologer = () => {
           },
         });
       } catch (e) {
-        console.log("e", e);
         Toast.error("Failed to start chat");
       }
     };
@@ -548,8 +542,6 @@ const TalkToAstrologer = () => {
 
     /* ERROR */
     const handleSocketError = (err) => {
-      console.log("SOCKET ERROR:", err);
-
       if (err?.message === "Call has already ended") {
         // soft reset only
         resetCallState();
@@ -853,12 +845,23 @@ const TalkToAstrologer = () => {
         handleSubmit={handleSubmit}
       />
 
-      {/* <RechargeAlertModel
-        onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
+      {/* Recharge Modal */}
+      <RechargeModal
         isOpen={openModal.recharge}
-        handleSubmit={onRechargeNow}
+        onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
         astrologer={selectedAstrologer}
-      /> */}
+        connectionType="chat"
+      />
+
+      {/* Recharge modal from hook for popup flow */}
+      <RechargeModal
+        isOpen={hookOpenModal.recharge}
+        onClose={() =>
+          hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
+        }
+        astrologer={selectedAstrologer}
+        connectionType="chat"
+      />
 
       {/* Kundli modal - using ProfileModals like Home page */}
       <ProfileModals
@@ -887,66 +890,23 @@ const TalkToAstrologer = () => {
         onContinue={handleContinueAfterKundliSelect}
       />
 
-      {openModal.recharge && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContainer}>
-            <PrimaryText isCenter className=" pt-4">
-              Minimum balance of 5 minutes (₹{" "}
-              {(selectedAstrologer?.price?.chatRate?.amount || 1) * 5}) is
-              required to start chat with
-              {` ${selectedAstrologer?.firstName || "Astrologer"}`}.
-            </PrimaryText>
-
-            <div className={styles.modalButtons}>
-              <button
-                className={styles.rejectBtn}
-                onClick={() =>
-                  setOpenModal((prev) => ({ ...prev, recharge: false }))
-                }
-              >
-                Cancel
-              </button>
-              <button
-                className={styles.acceptBtn}
-                onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
-              >
-                Recharge
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Recharge Modal */}
+      <RechargeModal
+        isOpen={openModal.recharge}
+        onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
+        astrologer={selectedAstrologer}
+        connectionType="chat"
+      />
 
       {/* Recharge modal from hook for popup flow */}
-      {hookOpenModal.recharge && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContainer}>
-            <PrimaryText isCenter className=" pt-4">
-              Minimum balance of 5 minutes (₹{" "}
-              {(selectedAstrologer?.price?.chatRate?.amount || 1) * 5}) is
-              required to start chat with
-              {` ${selectedAstrologer?.firstName || "Astrologer"}`}.
-            </PrimaryText>
-
-            <div className={styles.modalButtons}>
-              <button
-                className={styles.rejectBtn}
-                onClick={() =>
-                  hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
-                }
-              >
-                Cancel
-              </button>
-              <button
-                className={styles.acceptBtn}
-                onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
-              >
-                Recharge
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <RechargeModal
+        isOpen={hookOpenModal.recharge}
+        onClose={() =>
+          hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
+        }
+        astrologer={selectedAstrologer}
+        connectionType="chat"
+      />
 
       {showCTA && showRecommend && !WaitingList && (
         <RecommendCTA
