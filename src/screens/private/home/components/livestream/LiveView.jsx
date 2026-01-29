@@ -480,7 +480,7 @@ const LiveView = (props) => {
                       <div className="message-avatar">
                         <img 
                           src={m.avatar || (m.role === "host" && astrologer?.profileImage ? astrologer?.profileImage : "/default-avatar.jpg")} 
-                          alt={astrologer.firstName}
+                          alt={astrologer?.firstName || "User"}
                           className="avatar-image"
                           onError={(e) => {
                             e.target.style.display = 'none';
