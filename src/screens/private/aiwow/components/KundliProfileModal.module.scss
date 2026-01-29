@@ -51,23 +51,27 @@
 }
 
 .sheetTitle {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 600;
   margin-bottom: 24px;
-  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  // background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  // -webkit-background-clip: text;
+  // -webkit-text-fill-color: transparent;
+  // background-clip: text;
+  @media (width <= 767px) {
+    font-size: 18px;
+  }
 }
 
 .closeBtn {
   position: absolute;
   top: 0;
   right: 24px;
-  background: transparent;
+  background: #f2f2f2;
+  border-radius: 50px;
   border: none;
   font-size: 28px;
-  color: #F75801;
+  color: #000000;
   cursor: pointer;
   padding: 0;
   width: 32px;

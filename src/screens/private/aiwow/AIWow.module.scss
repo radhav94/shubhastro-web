@@ -44,6 +44,11 @@
   height: 44px;
   box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
 
+  @media screen and (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
+
   &:hover {
     background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
     transform: translateY(-1px);
@@ -77,13 +82,18 @@
 .heroSection {
   margin-bottom: 1.5rem;
   padding: 0.75rem 0;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 16px;
   @media screen and (width <= 767px) {
     padding: 0rem 0;
     // display: flex;
     // flex-direction: column;
     // align-items: center;
-    text-align: center;
+    text-align: left;
     margin-bottom: 1rem;
+    border-radius: 16px;
+    background-color: transparent;
   }
 }
 
@@ -94,7 +104,8 @@
   line-height: 1.2;
   letter-spacing: -0.02em;
   @media screen and (width <= 767px){
-    font-size: 1.2rem;
+    font-size: 2rem;
+    margin: 0 0 0.3rem 0;
   }
   span{
     background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
@@ -130,27 +141,33 @@
 // Section Layout - matching AI Experiences Hub
 .section {
   margin-bottom: 3rem;
-
-  &:last-child {
-    margin-bottom: 0;
+  @media (width <= 767px) {
+    margin-bottom: 2rem;
   }
+  // &:last-child {
+  //   margin-bottom: 0;
+  // }
 }
 
 .sectionHeader {
   margin-bottom: 2rem;
+  @media (width <= 767px) {
+    margin-bottom: 1rem;
+  }
 }
 
 .sectionTitle {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
   background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0 0;
 
   @media (min-width: 768px) {
     font-size: 1.75rem;
+    margin: 0 0 0.5rem 0;
   }
 }
 
@@ -168,17 +185,17 @@
 // Feature Grid - matching AI Experiences Hub
 .featureGrid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
 
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
-  }
-
-  @media (min-width: 1024px) {
+  @media (width <= 1180px) {
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+  }
+
+  @media (width <= 768px) {
+    display: flex;
+    overflow: auto;
   }
 }
 
@@ -210,9 +227,5 @@
 
   .heroSection {
     margin-bottom: 3rem;
-  }
-
-  .section {
-    margin-bottom: 4rem;
   }
 }
