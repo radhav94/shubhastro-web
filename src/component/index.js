@@ -32,5 +32,6 @@ export { default as LiveModal } from "../component/UI/modal/liveModal/LiveModal"
 
 //profile
 export { default as AddProfileModal } from "../component/UI/Profile/AddProfileModal";
+export { default as EditProfileModal } from "../component/UI/Profile/EditProfileModal";
 export { default as ProfileListingModal } from "../component/UI/Profile/ProfileListingModal";
 export { default as DeleteConfirmationModal } from "../component/UI/modal/deleteModal/DeleteConfirmationModal";
