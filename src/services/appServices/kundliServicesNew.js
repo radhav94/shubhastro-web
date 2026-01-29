@@ -8,11 +8,15 @@ export const kundliApi = privateRequestNew.injectEndpoints({
 
     // GET ALL KUNDLIS
    getAllKundlis: builder.query({
-      query: () => ({
+      query: (userId) => ({
         url: "kundlis/all",
         method: "GET",
       }),
-      providesTags: ["Kundlis"],        // ⭐ Add this
+      providesTags: (result, error, userId) => [
+        { type: "Kundlis", id: userId || "LIST" }
+      ],
+      // Force refetch on mount or when userId changes
+      keepUnusedDataFor: 0, // Don't cache data after component unmounts
     }),
 
     // CREATE KUNDLI
@@ -26,7 +30,11 @@ export const kundliApi = privateRequestNew.injectEndpoints({
           'accept': 'application/json',
         },
       }),
-      invalidatesTags: ["Kundlis"],     // ⭐ Refetch GET after success
+      invalidatesTags: (result, error, arg) => [
+        { type: "Kundlis", id: "LIST" },
+        // Invalidate for all possible user IDs to be safe
+        "Kundlis"
+      ],
     }),
 
     // DELETE KUNDLI
@@ -40,7 +48,11 @@ export const kundliApi = privateRequestNew.injectEndpoints({
           'accept': 'application/json',
         },
       }),
-      invalidatesTags: ["Kundlis"],     // ⭐ Refetch on delete
+      invalidatesTags: (result, error, arg) => [
+        { type: "Kundlis", id: "LIST" },
+        // Invalidate for all possible user IDs to be safe
+        "Kundlis"
+      ],
     }),
 
 
@@ -53,3 +65,6 @@ export const {
   useCreateKundliMutation,
   useDeleteKundliMutation,
 } = kundliApi;
+
+// Export addKundli as an alias for createKundli for backward compatibility
+export const useAddKundliMutation = useCreateKundliMutation;
