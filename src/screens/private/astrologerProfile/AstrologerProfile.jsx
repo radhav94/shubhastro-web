@@ -64,6 +64,18 @@ const AstrologerProfile = () => {
     { skip: !data?.astrologer_ID },
   );
 
+  // Listen for review submission events (backup to cache invalidation)
+  useEffect(() => {
+    const handleReviewSubmitted = (event) => {
+      if (event.detail?.astrologerID === data?.astrologer_ID) {
+        refetchReviews();
+      }
+    };
+
+    window.addEventListener('reviewSubmitted', handleReviewSubmitted);
+    return () => window.removeEventListener('reviewSubmitted', handleReviewSubmitted);
+  }, [data?.astrologer_ID, refetchReviews]);
+
   const isInitiallyFollowing = astrologerData?.data?.isFollowing || false;
   const [isFollowing, setIsFollowing] = useState(isInitiallyFollowing);
   const [showFullAbout, setShowFullAbout] = useState(false);
