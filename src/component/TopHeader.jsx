@@ -39,8 +39,26 @@ const TopHeader = () => {
     token ? navigate("/profile") : navigate("/login?skip=welcome");
   };
 
-  const formatAmount = (amount) =>
-    amount >= 1000 ? `₹${(amount / 1000).toFixed(1)}k` : `₹${amount}`;
+  const formatAmount = (amount) => {
+    // Handle non-numeric values
+    if (typeof amount !== 'number') {
+      return `₹${amount}`;
+    }
+
+    // For amounts >= 1000, show in 'k' format
+    if (amount >= 1000) {
+      const kValue = amount / 1000;
+      // Check if the k value has decimals
+      return kValue % 1 === 0 
+        ? `₹${kValue}k` 
+        : `₹${kValue.toFixed(1)}k`;
+    }
+
+    // For amounts < 1000, check if it has decimals
+    return amount % 1 === 0 
+      ? `₹${amount}` 
+      : `₹${amount.toFixed(2)}`;
+  };
 
   const displayName = user
     ? user.firstName && user.lastName
