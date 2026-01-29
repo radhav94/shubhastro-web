@@ -25,11 +25,8 @@ import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import { useTalkToAstrologer } from "../talkToAstrologer/useTalkToAstrologer";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import KundliSelectModal from "../talkToAstrologer/kundliSelect/KundliSelectModal";
-import {
-  useAddAstrologerReviewMutation,
-  useGetAstrologerReviewsQuery,
-} from "../../../redux/api/review/reviewApi";
-import FeedbackModal from "../home/components/chats/FeedbackModal";
+import { useGetAstrologerReviewsQuery } from "../../../redux/api/review/reviewApi";
+import StickyReview from "../home/components/call/StickyReview";
 
 // Import custom SVG icons
 import ExperienceIcon from "../../../assets/icons/experience.svg";
@@ -67,10 +64,21 @@ const AstrologerProfile = () => {
     { skip: !data?.astrologer_ID },
   );
 
+  // Listen for review submission events (backup to cache invalidation)
+  useEffect(() => {
+    const handleReviewSubmitted = (event) => {
+      if (event.detail?.astrologerID === data?.astrologer_ID) {
+        refetchReviews();
+      }
+    };
+
+    window.addEventListener('reviewSubmitted', handleReviewSubmitted);
+    return () => window.removeEventListener('reviewSubmitted', handleReviewSubmitted);
+  }, [data?.astrologer_ID, refetchReviews]);
+
   const isInitiallyFollowing = astrologerData?.data?.isFollowing || false;
   const [isFollowing, setIsFollowing] = useState(isInitiallyFollowing);
   const [showFullAbout, setShowFullAbout] = useState(false);
-  const [openReviewModal, setOpenReviewModal] = useState(false);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
 
   const [followAstrologer, { isLoading: followLoading }] =
@@ -80,8 +88,6 @@ const AstrologerProfile = () => {
     useUnfollowAstrologerByIdMutation();
 
   const [createChatRoom] = useCreateChatRoomMutation();
-  const [addAstrologerReview, { isLoading: reviewLoading }] =
-    useAddAstrologerReviewMutation();
   const [setOpenModal] = useTalkToAstrologer();
 
   // State
@@ -89,7 +95,7 @@ const AstrologerProfile = () => {
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
   const [waitingPopup, setWaitingPopup] = useState(false);
 
-  const { activeCall, setActiveCall } = useCall();
+  const { activeCall, setActiveCall, setOpenReview, setReviewData } = useCall();
 
   const activeCallAstroRef = useRef(null);
   const kundliRef = useRef(null);
@@ -235,27 +241,12 @@ const AstrologerProfile = () => {
     initiateCall(astro, "video");
   };
 
-  const handleReviewSubmit = async ({ rating, review, anonymous }) => {
-    try {
-      const res = await addAstrologerReview({
-        astrologerID: data?.astrologer_ID,
-        rating,
-        review,
-        isAnonymous: anonymous,
-      }).unwrap();
-
-      if (res.success) {
-        toast.success(res.message || "Review submitted successfully!");
-        refetchReviews(); // Refresh reviews after submission
-      } else {
-        toast.error(res.message || "Failed to submit review");
-      }
-
-      setOpenReviewModal(false);
-    } catch (error) {
-      console.error("Review submission error:", error);
-      toast.error(error?.data?.message || "Failed to submit review");
-    }
+  const handleOpenReviewModal = () => {
+    setReviewData({
+      astrologerID: data?.astrologer_ID,
+      fullName: `${data?.firstName || ""} ${data?.lastName || ""}`.trim(),
+    });
+    setOpenReview(true);
   };
 
   useEffect(() => {
@@ -721,7 +712,7 @@ const AstrologerProfile = () => {
 
         <button
           className={styles.shareReviewBtn}
-          onClick={() => setOpenReviewModal(true)}
+          onClick={handleOpenReviewModal}
         >
           Share a Review
         </button>
@@ -784,14 +775,7 @@ const AstrologerProfile = () => {
         onSelect={handleChatAfterKundliSelect}
       />
 
-      <FeedbackModal
-        open={openReviewModal}
-        onClose={() => setOpenReviewModal(false)}
-        handleSubmit={handleReviewSubmit}
-        ratedUserName={displayData.firstName}
-        reviewerName={userIdLocal || "User"}
-        loading={reviewLoading}
-      />
+      <StickyReview />
 
       {waitingPopup && (
         <div className={styles.modalOverlay}>
