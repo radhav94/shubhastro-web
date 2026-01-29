@@ -20,6 +20,10 @@ export { default as ImageTextCard } from "../component/UI/cards/ImageTextCard";
 export { default as WorkInProgressCard } from "../component/UI/cards/WorkInProgressCard";
 export { default as LiveAstroCard } from "../component/UI/cards/LiveAstroCard";
 export { default as ContentCard } from "../component/UI/cards/ContentCard";
+export { default as MoreBlogsCarousel } from "../component/UI/cards/MoreBlogsCarousel";
+export { default as PopularBlogsSection } from "../component/UI/cards/PopularBlogsSection";
+export { default as RelationalBlogsSection } from "../component/UI/cards/RelationalBlogsSection";
+export { default as TrendingBlogsCarousel } from "../component/UI/cards/TrendingBlogsCarousel";
 
 //formic control
 export { default as Checkbox } from "../component/formikcontrols/checkbox/Checkbox";
@@ -28,9 +32,11 @@ export { default as Input } from "../component/formikcontrols/input/Input";
 //model
 export { default as DetailsModal } from "../component/UI/modal/detailsModal/DetailsModal";
 export { default as RechargeAlertModel } from "../component/UI/modal/rechargeAlertModel/ReachargeAlertModel";
+export { default as RechargeModal } from "../component/UI/modal/RechargeModal/RechargeModal";
 export { default as LiveModal } from "../component/UI/modal/liveModal/LiveModal";
 
 //profile
 export { default as AddProfileModal } from "../component/UI/Profile/AddProfileModal";
+export { default as EditProfileModal } from "../component/UI/Profile/EditProfileModal";
 export { default as ProfileListingModal } from "../component/UI/Profile/ProfileListingModal";
 export { default as DeleteConfirmationModal } from "../component/UI/modal/deleteModal/DeleteConfirmationModal";

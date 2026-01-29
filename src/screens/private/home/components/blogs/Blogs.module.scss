@@ -11,42 +11,25 @@
     DEFAULT GRID VIEW
 -------------------------*/
 .blogsContainer {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 16px;
-  overflow-x: auto;
   padding-bottom: 12px;
-  scroll-behavior: smooth;
-  scroll-snap-type: x mandatory;
 
-  & > * {
-    flex: 0 0 85%;
-    min-width: 85%;
-    scroll-snap-align: start;
-  }
-
-  &::-webkit-scrollbar {
-    display: none;
+  /* MOBILE - 2 columns */
+  @media (width <= 767px) {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   /* TABLET */
   @media (min-width: 600px) {
-    & > * {
-      flex: 0 0 45%;
-      min-width: 45%;
-    }
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
   }
 
   /* DESKTOP → GRID */
   @media (min-width: 992px) {
-    display: grid;
     grid-template-columns: repeat(3, 1fr);
-    overflow: visible;
-    scroll-snap-type: none;
-
-    & > * {
-      flex: unset;
-      min-width: unset;
-    }
   }
 
   @media (min-width: 1400px) {

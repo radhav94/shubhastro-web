@@ -7,11 +7,13 @@ import { getUserFromStorage } from "../utils/authStorage";
 import ShubhTalkLogo from "../assets/images/ShubhAstrologo.svg";
 import ShubhTalkLogoMobile from "../assets/images/mobile-shubh-astro-logo.svg";
 import { useWalletBalance } from "../screens/private/wallet/useWalletBalance";
+import { getToken } from "../utils/token";
 
 const TopHeader = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const token = getToken();
 
   const { balance, isFetching: isFetchingBalance } = useWalletBalance();
 
