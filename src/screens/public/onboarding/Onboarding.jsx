@@ -58,9 +58,16 @@ const Onboarding = () => {
   };
 
   const handleBack = () => {
+    // Prevent going back to WelcomeScreen (step 0) from LoginScreen (step 1)
+    // When on LoginScreen and user clicks back, navigate to home instead
+    if (currentStep === 1) {
+      navigate(PATH.privateRoutes.HOME.path || "/");
+      return;
+    }
     setCurrentStep((prev) => prev - 1);
   };
 
+  // console.log("currentstep",currentStep)
   const handleSkip = () => {
     // Skip to home
     navigate(PATH.privateRoutes.HOME.path || "/");

@@ -74,8 +74,8 @@ const TopHeader = () => {
   };
 
   const displayName = user
-    ? user.firstName && user.lastName
-      ? `${user.firstName} ${user.lastName}`
+    ? user.firstName
+      ? `${user.firstName}`
       : user.phoneNumber || "Guest"
     : "Guest";
 
