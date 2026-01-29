@@ -17,8 +17,6 @@ const MySessionsSection = ({ onConnectClick }) => {
   });
   const sessions = data?.data?.recentSessions || [];
 
-
-
   const handleCallAgain = (session) => {
     if (onConnectClick) {
       // If session has full astrologer object, use it
@@ -28,36 +26,34 @@ const MySessionsSection = ({ onConnectClick }) => {
         // Otherwise, construct astrologer object from session data
         const astrologer = {
           _id: session.astrologerId,
-          firstName: session.astrologerName?.split(' ')[0] || session.astrologerName || 'Astrologer',
-          lastName: session.astrologerName?.split(' ').slice(1).join(' ') || '',
+          firstName:
+            session.astrologerName?.split(" ")[0] ||
+            session.astrologerName ||
+            "Astrologer",
+          lastName: session.astrologerName?.split(" ").slice(1).join(" ") || "",
           imageUrl: session.astrologerImage,
         };
         onConnectClick(astrologer);
       } else {
-        console.error('Session data missing astrologer information:', session);
+        console.error("Session data missing astrologer information:", session);
       }
     }
   };
 
   // Don't render the section if user is not logged in
   if (!isLoggedIn) {
-    console.log("Hiding: Not logged in");
     return null;
   }
 
   // Don't render while loading
   if (isLoading) {
-    console.log("Hiding: Still loading");
     return null;
   }
 
   // Don't render if there are no sessions
   if (!sessions || sessions.length === 0) {
-    console.log("Hiding: No sessions");
     return null;
   }
-
-  console.log("Showing section with", sessions.length, "sessions");
 
   return (
     <section className={styles.sessionsSection}>
@@ -98,7 +94,7 @@ const MySessionsSection = ({ onConnectClick }) => {
             </div>
           </div>
         </div>
-        <button 
+        <button
           className={styles.viewAllLink}
           onClick={() => navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)}
         >

@@ -28,6 +28,7 @@ export { default as Input } from "../component/formikcontrols/input/Input";
 //model
 export { default as DetailsModal } from "../component/UI/modal/detailsModal/DetailsModal";
 export { default as RechargeAlertModel } from "../component/UI/modal/rechargeAlertModel/ReachargeAlertModel";
+export { default as RechargeModal } from "../component/UI/modal/RechargeModal/RechargeModal";
 export { default as LiveModal } from "../component/UI/modal/liveModal/LiveModal";
 
 //profile
