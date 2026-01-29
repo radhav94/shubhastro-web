@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Toast } from "../../../component";
+import { Toast, RechargeModal } from "../../../component";
 import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
@@ -176,6 +176,16 @@ const Home = () => {
           type={connectionType}
         />
       )}
+
+      {/* Recharge Modal */}
+      <RechargeModal
+        isOpen={hookOpenModal.recharge}
+        onClose={() =>
+          hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
+        }
+        astrologer={selectedAstrologer || hookSelectedAstrologer}
+        connectionType={connectionType}
+      />
     </div>
   );
 };

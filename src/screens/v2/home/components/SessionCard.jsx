@@ -1,4 +1,5 @@
 import { Calendar, Clock, Phone } from "lucide-react";
+import { Link } from "react-router-dom";
 import astrologerSquare from "../../../../assets/images/astrologer-square.svg";
 import styles from "../Home.module.scss";
 
@@ -28,8 +29,18 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
     return `${mins} Min ${secs} Secs`;
   };
 
+  const handleButtonClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onCallAgain();
+  };
+
   return (
-    <div className={styles.sessionCard}>
+    <Link
+      to={`/astrologer/${session.astrologerId}`}
+      className={styles.sessionCard}
+      style={{ textDecoration: "none", color: "inherit" }}
+    >
       <div className={styles.sessionImageWrapper}>
         <img
           src={session.astrologerImage || astrologerSquare}
@@ -61,14 +72,14 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
         </p>
         <button
           className={`${styles.callAgainBtn} ${isLoading ? styles.loading : ""}`}
-          onClick={onCallAgain}
+          onClick={handleButtonClick}
           disabled={isLoading}
         >
           <Phone size={18} />
           Connect now
         </button>
       </div>
-    </div>
+    </Link>
   );
 };
 

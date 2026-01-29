@@ -39,6 +39,11 @@ const MatchMaking = () => {
   
   const isLoggedIn = !!token;
 
+  // Get current user ID
+  const currentUserId = role === "ASTROLOGER"
+    ? localStorage.getItem("shubhtalk_astro_id")
+    : localStorage.getItem("shubhtalk_customer_id");
+
   /* -------------------- TEMPORARY PROFILES (NON-LOGGED-IN) -------------------- */
   const [tempProfiles, setTempProfiles] = useState([]);
 
@@ -63,7 +68,7 @@ const MatchMaking = () => {
   };
 
   /* -------------------- API -------------------- */
-  const { data, refetch } = useGetAllKundlisQuery(undefined, {
+  const { data, refetch, isFetching } = useGetAllKundlisQuery(undefined, {
     skip: !token,
   });
   const [createKundli, { isLoading: isCreating }] =
@@ -101,13 +106,34 @@ const MatchMaking = () => {
       }
     }
   }, [location.state, profiles]);
+  
   /* -------------------- AUTO SELECT -------------------- */
   useEffect(() => {
-    if (profiles.length && !primaryProfile) {
+    if (profiles.length && !primaryProfile && !isFetching) {
       setPrimaryProfile(profiles[0]);
       setSelectedProfile(profiles[0]);
     }
-  }, [profiles, primaryProfile]);
+  }, [profiles, primaryProfile, isFetching]);
+
+  // Clear selected profiles when user changes (on refresh after login)
+  useEffect(() => {
+    if (currentUserId && (primaryProfile || partnerProfile)) {
+      const primaryBelongsToCurrentUser = primaryProfile 
+        ? profiles.some(profile => profile._id === primaryProfile._id)
+        : true;
+      const partnerBelongsToCurrentUser = partnerProfile
+        ? profiles.some(profile => profile._id === partnerProfile._id)
+        : true;
+      
+      if (!primaryBelongsToCurrentUser) {
+        setPrimaryProfile(null);
+        setSelectedProfile(null);
+      }
+      if (!partnerBelongsToCurrentUser) {
+        setPartnerProfile(null);
+      }
+    }
+  }, [currentUserId, profiles]);
 
   /* -------------------- NUMEROLOGY -------------------- */
   useEffect(() => {

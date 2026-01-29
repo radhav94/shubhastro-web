@@ -51,6 +51,8 @@ export const clearFormAndCache = () => (dispatch) => {
   localStorage.removeItem("shani_sade_sati");
   localStorage.removeItem("sun_sign");
   localStorage.removeItem("vehicle_calculator");
+  localStorage.removeItem("selectedKundliProfile");
+  localStorage.removeItem("userData");
 
   // 2️⃣ Clear ALL RTK Query cache
   dispatch(baseApi.util.resetApiState());

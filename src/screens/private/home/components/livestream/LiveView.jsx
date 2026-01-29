@@ -479,8 +479,8 @@ const LiveView = (props) => {
                     <div key={m.id || index} className="chat-modal-message">
                       <div className="message-avatar">
                         <img 
-                          src={m.avatar || (m.role === "host" ? astrologer?.profileImage : "/default-avatar.jpg")} 
-                          alt="avatar"
+                          src={m.avatar || (m.role === "host" && astrologer?.profileImage ? astrologer?.profileImage : "/default-avatar.jpg")} 
+                          alt={astrologer.firstName}
                           className="avatar-image"
                           onError={(e) => {
                             e.target.style.display = 'none';
