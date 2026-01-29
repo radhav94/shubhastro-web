@@ -20,6 +20,7 @@ import { useGetTransactionsQuery } from "../../../services/appServices/transacti
 import {
   useGetAllKundlisQuery,
   useDeleteKundliMutation,
+  useCreateKundliMutation,
 } from "../../../services/appServices/kundliServicesNew";
 import { useGetCallHistoryQuery } from "../../../redux/api/callHistory/callHistory";
 import { useGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chatHistory";
@@ -28,6 +29,8 @@ import { getUserFromStorage } from "../../../utils/authStorage";
 import { logout } from "../../../redux/auth/authSlice";
 import styles from "./Profile.module.scss";
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
+import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
+import { Toast } from "../../../component/index";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -55,6 +58,9 @@ const Profile = () => {
   // Delete confirmation state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [kundliToDelete, setKundliToDelete] = useState(null);
+
+  // Add Profile Modal state
+  const [showAddProfileModal, setShowAddProfileModal] = useState(false);
 
   // Fetch call and chat history
   const {
@@ -158,12 +164,20 @@ const Profile = () => {
     data: kundliData,
     isLoading: isLoadingKundlis,
     refetch: refetchKundlis,
-  } = useGetAllKundlisQuery();
+  } = useGetAllKundlisQuery(userId, {
+    skip: !userId,
+    refetchOnMountOrArgChange: true, // Always refetch when component mounts or userId changes
+  });
   const savedKundlis = kundliData?.data || [];
+
+  console.log("savedKundlis::",savedKundlis)
 
   // Delete kundli mutation
   const [deleteKundli, { isLoading: isDeletingKundli }] =
     useDeleteKundliMutation();
+
+  // Add kundli mutation
+  const [addKundli, { isLoading: isAddingKundli }] = useCreateKundliMutation();
 
   // Fetch wallet balance
   const { balance, isFetching: isFetchingBalance } = useWalletBalance();
@@ -255,6 +269,72 @@ const Profile = () => {
   const handleDeleteCancel = () => {
     setShowDeleteConfirm(false);
     setKundliToDelete(null);
+  };
+
+  // Add Profile Modal handlers
+  const handleOpenAddProfileModal = () => {
+    setShowAddProfileModal(true);
+  };
+
+  const handleCloseAddProfileModal = () => {
+    setShowAddProfileModal(false);
+  };
+
+  const buildKundliPayload = (data) => {
+    const dateObj = new Date(data.birthDate);
+    const timeObj = data.birthTime ? data.birthTime.split(":") : ["0", "0"];
+
+    return {
+      name: data.name,
+      gender: data.identity.toLowerCase(),
+      day: dateObj.getDate(),
+      month: dateObj.getMonth() + 1,
+      year: dateObj.getFullYear(),
+      hour: data.unknownBirthTime ? 0 : parseInt(timeObj[0]),
+      min: data.unknownBirthTime ? 0 : parseInt(timeObj[1]),
+      second: 0,
+      place: data.birthPlace,
+      lat: data.latitude || 0,
+      lon: data.longitude || 0,
+      tzone: 5.5,
+    };
+  };
+
+  const isDuplicateKundli = (payload, list) =>
+    list.some(
+      (k) =>
+        k.name.trim().toLowerCase() === payload.name.trim().toLowerCase() &&
+        k.gender.toLowerCase() === payload.gender.toLowerCase() &&
+        Number(k.day) === Number(payload.day) &&
+        Number(k.month) === Number(payload.month) &&
+        Number(k.year) === Number(payload.year) &&
+        Number(k.hour) === Number(payload.hour) &&
+        Number(k.min) === Number(payload.min) &&
+        Math.abs(Number(k.lat) - Number(payload.lat)) < 0.0001 &&
+        Math.abs(Number(k.lon) - Number(payload.lon)) < 0.0001 &&
+        k.place.trim().toLowerCase() === payload.place.trim().toLowerCase()
+    );
+
+  const handleAddProfileSubmit = async (formData) => {
+    try {
+      const payload = buildKundliPayload(formData);
+
+      // Check for duplicate
+      if (isDuplicateKundli(payload, savedKundlis)) {
+        Toast.error("This profile already exists");
+        throw new Error("Duplicate profile");
+      }
+
+      const result = await addKundli(payload).unwrap();
+      Toast.success("Profile added successfully");
+      setShowAddProfileModal(false);
+    } catch (err) {
+      console.error(err);
+      const errorMessage =
+        err?.data?.message || err?.message || "Failed to add profile";
+      Toast.error(errorMessage);
+      throw err;
+    }
   };
 
   const handleLogout = () => {
@@ -475,7 +555,7 @@ const Profile = () => {
                 {/* Add Profile Button - now part of the list */}
                 <button
                   className={styles.addProfileButton}
-                  onClick={() => navigate("/profile/add")}
+                  onClick={handleOpenAddProfileModal}
                 >
                   Add Profile +
                 </button>
@@ -485,7 +565,7 @@ const Profile = () => {
                 <p>No profiles found</p>
                 <button
                   className={styles.addProfileButton}
-                  onClick={() => navigate("/profile/add")}
+                  onClick={handleOpenAddProfileModal}
                 >
                   Add Profile +
                 </button>
@@ -836,6 +916,15 @@ const Profile = () => {
           </div>
         </div>
       )}
+
+      {/* Add Profile Modal */}
+      <AddProfileModal
+        isOpen={showAddProfileModal}
+        onClose={()=>setShowAddProfileModal(false)}
+        onSubmit={handleAddProfileSubmit}
+        isLoading={isAddingKundli}
+        title="Add Profile"
+      />
     </div>
   );
 };

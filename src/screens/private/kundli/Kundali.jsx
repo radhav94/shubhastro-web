@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryTabs from "../../../component/UI/tabs/PrimaryTabs";
 import BasicContent from "./BasicContent/BasicContent";
@@ -38,6 +39,23 @@ import styles from "./components/ProfileModals.module.scss";
 const Kundali = () => {
   const contentRef = useRef(null);
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
+
+  // Get initial tab index from query params
+  const getInitialTabIndex = () => {
+    const tab = searchParams.get('tab');
+    const tabMap = {
+      'basic': 0,
+      'kundli': 1,
+      'kp': 2,
+      'ashtakvarga': 3,
+      'charts': 4,
+      'dasha': 5,
+      'free-report': 6,
+      '12-months': 7,
+    };
+    return tabMap[tab] || 0;
+  };
 
   const [
     dataIsFilled,
@@ -469,7 +487,7 @@ const Kundali = () => {
       {selectedProfile && (
         <div ref={contentRef} id="kundli-tabs">
           {planetLoading || isAstro ? (
-            <PrimaryTabs tabs={tabsData} />
+            <PrimaryTabs tabs={tabsData} initialActiveIndex={getInitialTabIndex()} />
           ) : (
             <HtmlContentCard sections={kundliInfoData} />
           )}
