@@ -7,9 +7,9 @@ import ServiceCards from "../../../screens/private/home/components/serviceCards/
 import ZodiacCarousel from "../../../screens/private/horoscope/zodiacCarousel/ZodiacCarousel";
 import { useParams } from "react-router-dom";
 
-const PrimaryTabs = ({ tabs = [] }) => {
+const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0 }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(
-    tabs.length > 0 ? 0 : -1
+    tabs.length > 0 ? initialActiveIndex : -1
   );
 
   if (activeTabIndex === -1) {
