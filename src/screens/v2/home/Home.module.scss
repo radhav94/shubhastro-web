@@ -2917,6 +2917,10 @@
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
   max-width: 70%;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
 }
 
 .discoverImage {

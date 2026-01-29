@@ -1,14 +1,19 @@
 .wrapper {
   padding: 20px 40px;
   @media (max-width: 629px) {
-    padding: 5px;
+    padding: 16px;
   }
 }
 
 .heading {
   font-size: 28px;
   margin-bottom: 20px;
+  margin-top: 100px;
   font-weight: 600;
+  @media (width <= 767px) {
+    margin-top: 68px;
+    font-size: 20px;
+  }
 }
 
 .grid {
@@ -17,9 +22,13 @@
   gap: 25px;
 
   /* 👇 FORCE 2 cards on small screens */
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
   @media (max-width: 629px) {
     grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
+    // gap: 14px;
   }
 }
 
@@ -53,23 +62,42 @@
     margin: 6px 0;
     font-size: 18px;
     font-weight: 600;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
+     @media (max-width: 767px) {
+      font-size: 16px;
+    }
   }
 
   p {
     font-size: 14px;
     color: #555;
-    height: 40px;
+    // height: 40px;
     overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
+    @media (max-width: 767px) {
+      font-size: 12px;
+    }
   }
 }
 
 .tag {
+  width: fit-content;
   background: #ffe8e8;
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
   color: #c00;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
 }
 
 .image {

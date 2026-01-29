@@ -4,9 +4,10 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: #F3F3F3;
+  background: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(10px);
+  max-width: 100%;
 }
 
 /* MOBILE PROFILE BAR */
@@ -15,18 +16,22 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: #F3F3F3;
+  background: #fff;
   position: sticky;
   top: 0;
   z-index: 100;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(10px);
+  @media (width <= 767px) {
+    padding: 6px 16px;
+  }
 }
 
 .backBtn {
-  background: white;
-  border: none;
+  background: #fdeeea;
+  border: 1px solid #f75801;
+  // border: none;
   cursor: pointer;
   padding: 10px;
   color: #333;
@@ -38,10 +43,18 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   width: 44px;
   height: 44px;
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
   
   svg {
     width: 20px;
     height: 20px;
+    path{
+      stroke: #f75801;
+    }
   }
   
   &:active {
@@ -64,6 +77,9 @@
   svg {
     width: 20px;
     height: 20px;
+    path{
+      stroke: #f75801;
+    }
   }
   
   &:active {
@@ -101,6 +117,9 @@
   font-size: 18px;
   font-weight: 600;
   color: #333;
+  @media (width <= 767px) {
+    font-size: 16px;
+  }
 }
 
 /* DESKTOP STYLES */
@@ -113,10 +132,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 20px 40px;
-    background: #F3F3F3;
+    background: #fff;
   }
 
   .profileSelector {

@@ -25,8 +25,8 @@
 }
 
 .backBtn {
-  background: white;
-  border: none;
+  background: #fdeeea;
+  border: 1px solid #f75801;
   cursor: pointer;
   padding: 10px;
   color: #333;
@@ -42,8 +42,10 @@
   svg {
     width: 20px;
     height: 20px;
+    path{
+      stroke: #f75801;
+    }
   }
-  
   &:active {
     transform: scale(0.95);
   }
@@ -717,7 +719,7 @@
 /* RESPONSIVE */
 @media (min-width: 769px) {
   .headerSection {
-    padding: 60px 40px;
+    padding: 40px;
   }
 
   .headerTitle {
