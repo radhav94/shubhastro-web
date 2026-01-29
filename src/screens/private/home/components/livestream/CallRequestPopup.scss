@@ -91,8 +91,8 @@
 }
 
 .waitlist-duration {
-  background: #333;
-  color: #fff;
+  border: 1px solid var(--border-50, #BDBDBD80);
+  color: #030303;
   padding: 8px 24px;
   border-radius: 25px;
   font-size: 14px;
@@ -123,6 +123,8 @@
 .wait-time {
   font-size: 15px;
   color: #666;
+  background:  #FFF4E3;
+  padding: 8px 16px;
 }
 
 .wait-time-value {

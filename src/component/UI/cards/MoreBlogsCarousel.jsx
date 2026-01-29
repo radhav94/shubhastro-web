@@ -51,7 +51,12 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId }) => {
     el.scrollTo({ left: cardWidth * index, behavior: "smooth" });
   };
 
-  const handleBlogClick = (blogId) => {
+  const handleBlogClick = (blog) => {
+    const blogId = blog.blogId || blog._id;
+    if (!blogId) {
+      console.error('Blog ID is missing:', blog);
+      return;
+    }
     navigate(PATH.privateRoutes.SINGLEBLOG.path.replace(":slug", blogId));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -79,7 +84,7 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId }) => {
               <div
                 key={blog._id || blog.blogId}
                 className={styles.relatedBlogCard}
-                onClick={() => handleBlogClick(blog.blogId)}
+                onClick={() => handleBlogClick(blog)}
               >
                 <div className={styles.imageWrapper}>
                   <img
@@ -128,7 +133,7 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId }) => {
               <div
                 key={blog._id || blog.blogId}
                 className={styles.blogCard}
-                onClick={() => handleBlogClick(blog.blogId)}
+                onClick={() => handleBlogClick(blog)}
               >
                 <div className={styles.imageWrapper}>
                   <img
