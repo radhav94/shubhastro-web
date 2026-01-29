@@ -21,6 +21,11 @@ const BlogHeader = () => {
     <section className={styles.blogSection}>
       <div className={styles.headerSection}>
         <h2 className={styles.headerTitle}>ALL BLOGS</h2>
+        <div className={styles.titleDivider}>
+          <div className={styles.dividerLine}></div>
+          <span className={styles.dividerMoon}>☾</span>
+          <div className={styles.dividerLine}></div>
+        </div>
       </div>
 
       {blogs.length > 0 ? (
