@@ -17,28 +17,30 @@
 }
 
 .title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
-  text-align: center;
+  text-align: left;
   color: #2A161B;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   margin-bottom: 16px;
 
   @media (max-width: 768px) {
     font-size: 24px;
     margin-bottom: 12px;
+    text-align: center;
   }
 }
 
 .titleDivider {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 12px;
   margin-top: 12px;
 
   @media (max-width: 768px) {
     gap: 8px;
+    justify-content: center;
   }
 }
 

@@ -10,29 +10,59 @@
   }
 }
 
-.title {
-  text-align: center;
-  font-size: 28px;
-  font-weight: 600;
-  margin-bottom: 20px;
-
-  @media (max-width: 768px) {
-    font-size: 20px;
-    margin-bottom: 16px;
-  }
-}
-
 .bannerImage {
   width: 100%;
   border-radius: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.title {
+  text-align: left;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+
+  @media (max-width: 768px) {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+}
+
+.metaInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 }
 
 .date {
   font-size: 14px;
   color: #666;
-  margin-bottom: 20px;
+  margin: 0;
   text-align: left;
+}
+
+.author {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  text-align: left;
+  
+  &::before {
+    content: "•";
+    margin-right: 16px;
+    
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
 }
 
 .blogBody {

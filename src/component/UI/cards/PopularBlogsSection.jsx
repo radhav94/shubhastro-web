@@ -52,7 +52,11 @@ const PopularBlogsSection = ({ blogs = [] }) => {
               <h3 className={styles.blogTitle}>{blog.title}</h3>
               <p className={styles.blogDate}>
                 {blog.publishDate || blog.createdAt || blog.date
-                  ? dayjs(blog.publishDate || blog.createdAt || blog.date).format("DD MMM YYYY")
+                  ? (() => {
+                      const dateValue = blog.publishDate || blog.createdAt || blog.date;
+                      const date = dayjs(dateValue);
+                      return date.isValid() ? date.format("DD MMM YYYY") : dateValue;
+                    })()
                   : ""}
               </p>
             </div>

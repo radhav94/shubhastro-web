@@ -72,34 +72,53 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId }) => {
       </div>
 
       {currentBlogId ? (
-        // Grid layout for Related Blogs
-        <div className={styles.blogsGrid}>
-          {filteredBlogs.slice(0, 6).map((blog) => (
-            <div
-              key={blog._id || blog.blogId}
-              className={styles.blogCard}
-              onClick={() => handleBlogClick(blog.blogId)}
-            >
-              <div className={styles.imageWrapper}>
-                <img
-                  src={blog.imageUrl || blog.img}
-                  alt={blog.title}
-                  className={styles.blogImage}
-                  onError={(e) => {
-                    e.target.src = "https://via.placeholder.com/400x300?text=Blog+Image";
-                  }}
-                />
+        // Carousel layout for Related Blogs
+        <div className={styles.carouselWrapper}>
+          <div className={styles.relatedBlogsCarousel} ref={scrollRef}>
+            {filteredBlogs.slice(0, 9).map((blog) => (
+              <div
+                key={blog._id || blog.blogId}
+                className={styles.relatedBlogCard}
+                onClick={() => handleBlogClick(blog.blogId)}
+              >
+                <div className={styles.imageWrapper}>
+                  <img
+                    src={blog.imageUrl || blog.img}
+                    alt={blog.title}
+                    className={styles.blogImage}
+                    onError={(e) => {
+                      e.target.src = "https://via.placeholder.com/400x300?text=Blog+Image";
+                    }}
+                  />
+                </div>
+                <div className={styles.content}>
+                  <h3 className={styles.blogTitle}>{blog.title}</h3>
+                  <p className={styles.blogDate}>
+                    {blog.publishDate
+                      ? (() => {
+                          const date = dayjs(blog.publishDate);
+                          return date.isValid() ? date.format("DD MMM YYYY") : blog.publishDate;
+                        })()
+                      : ""}
+                  </p>
+                </div>
               </div>
-              <div className={styles.content}>
-                <h3 className={styles.blogTitle}>{blog.title}</h3>
-                <p className={styles.blogDate}>
-                  {blog.publishDate
-                    ? dayjs(blog.publishDate).format("DD MMM YYYY")
-                    : ""}
-                </p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          {/* Navigation Dots */}
+          <div className={styles.dotsContainer}>
+            {filteredBlogs.slice(0, 9).map((_, index) => (
+              <button
+                key={index}
+                className={`${styles.dot} ${
+                  index === currentIndex ? styles.activeDot : ""
+                }`}
+                onClick={() => scrollToIndex(index)}
+                aria-label={`Go to blog ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
       ) : (
         // Carousel layout for More Blogs For You
