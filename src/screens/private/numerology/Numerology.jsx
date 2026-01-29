@@ -33,6 +33,11 @@ const NumerologyWeb = () => {
       ? localStorage.getItem("shubhtalk_astro_token")
       : localStorage.getItem("shubhtalk_customer_token");
 
+  // Get current user ID
+  const currentUserId = role === "ASTROLOGER"
+    ? localStorage.getItem("shubhtalk_astro_id")
+    : localStorage.getItem("shubhtalk_customer_id");
+
   // Check authentication on mount
   useEffect(() => {
     const authToken = getToken();
@@ -42,7 +47,7 @@ const NumerologyWeb = () => {
   }, [navigate]);
 
   // API Hooks
-  const { data, isLoading, refetch } = useGetAllKundlisQuery(undefined, {
+  const { data, isLoading, refetch, isFetching } = useGetAllKundlisQuery(undefined, {
     skip: !token,
   });
   const [createKundli, { isLoading: isCreating }] = useCreateKundliMutation();
@@ -56,12 +61,25 @@ const NumerologyWeb = () => {
   const profiles = data?.data || [];
   const numerologyResponse = numerologyData?.response || null;
 
-  // Auto-select first profile on load
+  // Auto-select first profile on load - only after data is fetched
   useEffect(() => {
-    if (profiles.length > 0 && !selectedProfile) {
+    if (profiles.length > 0 && !selectedProfile && !isFetching) {
       setSelectedProfile(profiles[0]);
     }
-  }, [profiles, selectedProfile]);
+  }, [profiles, selectedProfile, isFetching]);
+
+  // Clear selected profile when user changes (on refresh after login)
+  useEffect(() => {
+    if (currentUserId && selectedProfile) {
+      const profileBelongsToCurrentUser = profiles.some(
+        profile => profile._id === selectedProfile._id
+      );
+      
+      if (!profileBelongsToCurrentUser) {
+        setSelectedProfile(null);
+      }
+    }
+  }, [currentUserId, profiles]);
 
   // Fetch numerology data when profile is selected
   useEffect(() => {

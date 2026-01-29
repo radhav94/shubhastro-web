@@ -9,6 +9,7 @@ import {
   loginWithPhone,
 } from "../../../services/appServices/authService";
 import { loginSuccess } from "../../../redux/auth/authSlice";
+import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import onboardingBg from "../../../assets/images/onboarding.png";
 
 const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
@@ -99,6 +100,9 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
             "shubhtalk_user",
             JSON.stringify(userForStorage),
           );
+
+          // Clear RTK Query cache on login to prevent showing previous user's data
+          dispatch(privateRequestNew.util.resetApiState());
 
           // Dispatch login action to Redux
           dispatch(loginSuccess({ token: accessToken }));
