@@ -6,6 +6,9 @@ export const reviewApi = privateRequestNew.injectEndpoints({
       query: ({ astrologerID, rating, review, isAnonymous }) => ({
         url: "review/addAstrologerReview",
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: {
           astrologerID,
           rating,
