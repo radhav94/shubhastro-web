@@ -778,10 +778,10 @@ export const PATH = {
     },
 
     // tarot
-    TAROT: {
-      path: "/tarot",
-      element: Tarot,
-    },
+    // TAROT: {
+    //   path: "/tarot",
+    //   element: Tarot,
+    // },
     YES_NO_TAROT: {
       path: "tarot/yes-no-tarot",
       element: YesNoTarot,
@@ -839,7 +839,7 @@ export const PATH = {
       element: TarotResult,
     },
     TAROT_CARD_V2: {
-      path: "/v2/tarot-card",
+      path: "/tarot",
       element: TarotReadingPage,
     },
     TAROT_CARD_SELECTION: {

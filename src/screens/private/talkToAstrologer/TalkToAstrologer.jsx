@@ -28,7 +28,6 @@ import { useCall } from "../../../context/CallContext";
 import useRecommendTrigger from "../../../utils/hooks/useRecommendTrigger";
 import RecommendCTA from "../../../layouts/recommend/RecommendCTA";
 import RecommendModal from "../../../component/UI/modal/RecommendModal/RecommendModal";
-import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { useChat } from "../../../context/ChatContext";
 import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
 import ChatAstrologerCard from "../../../component/UI/cards/ChatAstrologerCard";
@@ -942,15 +941,6 @@ const TalkToAstrologer = () => {
         onChatStart={hookHandleChatStart}
         onCallStart={hookHandleCallStart}
       />
-
-      {/* Waiting Modal - shows for both chat and call */}
-      {(WaitingList || callWaitingList) && (
-        <WaitingModal
-          callRoomId={callRoomId || chatRoomId}
-          resetCallState={resetCallState}
-          connectionType={WaitingList ? "chat" : "audio"}
-        />
-      )}
     </div>
   );
 };

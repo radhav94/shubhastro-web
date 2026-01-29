@@ -23,8 +23,33 @@ import { logout } from "../redux/auth/authSlice";
 const quickLinks = [
   { href: "/talk-to-astrologers", text: "Talk to Astrologer" },
   { href: "/chat-with-astrologers", text: "Chat with Astrologer" },
-  { href: "/tarot/yes-no-tarot", text: "Yes/No Tarot" },
-  { href: "/tarot/love-triangle", text: "Love Traingle" },
+  { href: "/shop", text: "Astromall" },
+  { href: "/tarot", text: "Tarot" },
+  { href: "/blog", text: "Blog" },
+  {
+    href: "/tarot-card-selection",
+    text: "Yes/No Tarot",
+    state: {
+      reading: {
+        id: 2,
+        title: "Yes/ No Tarot",
+        type: "Free",
+        apiEndpoint: "yes-no",
+      },
+    },
+  },
+  // {
+  //   href: "/tarot-card-selection",
+  //   text: "Love Triangle",
+  //   state: {
+  //     reading: {
+  //       id: 3,
+  //       title: 'Love Triangle',
+  //       type: 'Paid',
+  //       apiEndpoint: 'love-triangle'
+  //     }
+  //   }
+  // },
 ];
 
 const usefulLinks = [
@@ -65,7 +90,7 @@ const Footer = () => {
   const handleLogout = () => {
     // Dispatch Redux logout action
     dispatch(logout());
-    
+
     const role = localStorage.getItem("shubhtalk_role");
 
     if (role === "ASTROLOGER") {
@@ -162,9 +187,11 @@ const Footer = () => {
           <div className={styles.footer_column}>
             <h3 className={styles.column_title}>Quick Links</h3>
             <ul>
-              {quickLinks.map((link) => (
-                <li key={link.href}>
-                  <Link to={link.href}>{link.text}</Link>
+              {quickLinks.map((link, index) => (
+                <li key={`${link.href}-${index}`}>
+                  <Link to={link.href} state={link.state}>
+                    {link.text}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -242,30 +269,35 @@ const Footer = () => {
       {/* New Bottom Navigation (Modern Design) - Hidden on home page */}
       {location.pathname !== "/" && (
         <nav className={styles.bottomNav}>
-          <button 
-            className={`${styles.navItem} ${location.pathname === "/" ? styles.active : ""}`} 
+          <button
+            className={`${styles.navItem} ${location.pathname === "/" ? styles.active : ""}`}
             onClick={() => navigate("/")}
           >
             <div className={styles.iconCircle}>
               <Home size={22} />
             </div>
             <span className={styles.label}>Home</span>
-            {location.pathname === "/" && <span className={styles.activeLine} />}
+            {location.pathname === "/" && (
+              <span className={styles.activeLine} />
+            )}
           </button>
 
-          <button 
-            className={`${styles.navItem} ${location.pathname.startsWith("/talk-to-astrologers") || location.pathname.startsWith("/chat-with-astrologers") ? styles.active : ""}`} 
+          <button
+            className={`${styles.navItem} ${location.pathname.startsWith("/talk-to-astrologers") || location.pathname.startsWith("/chat-with-astrologers") ? styles.active : ""}`}
             onClick={() => navigate("/talk-to-astrologers")}
           >
             <div className={styles.iconCircle}>
               <Compass size={22} />
             </div>
             <span className={styles.label}>Explore</span>
-            {(location.pathname.startsWith("/talk-to-astrologers") || location.pathname.startsWith("/chat-with-astrologers")) && <span className={styles.activeLine} />}
+            {(location.pathname.startsWith("/talk-to-astrologers") ||
+              location.pathname.startsWith("/chat-with-astrologers")) && (
+              <span className={styles.activeLine} />
+            )}
           </button>
 
-          <button 
-            className={styles.liveItem} 
+          <button
+            className={styles.liveItem}
             onClick={() => navigate("/live-landing")}
           >
             <div className={styles.liveCircle}>
@@ -274,26 +306,30 @@ const Footer = () => {
             <span className={styles.liveLabel}>LIVE</span>
           </button>
 
-          <button 
-            className={`${styles.navItem} ${location.pathname.startsWith("/shop") ? styles.active : ""}`} 
+          <button
+            className={`${styles.navItem} ${location.pathname.startsWith("/shop") ? styles.active : ""}`}
             onClick={() => navigate("/shop")}
           >
             <div className={styles.iconCircle}>
               <Store size={22} />
             </div>
             <span className={styles.label}>Shop</span>
-            {location.pathname.startsWith("/shop") && <span className={styles.activeLine} />}
+            {location.pathname.startsWith("/shop") && (
+              <span className={styles.activeLine} />
+            )}
           </button>
 
-          <button 
-            className={`${styles.navItem} ${location.pathname.startsWith("/profile") ? styles.active : ""}`} 
+          <button
+            className={`${styles.navItem} ${location.pathname.startsWith("/profile") ? styles.active : ""}`}
             onClick={() => navigate("/profile")}
           >
             <div className={styles.iconCircle}>
               <UserRound size={22} />
             </div>
             <span className={styles.label}>Profile</span>
-            {location.pathname.startsWith("/profile") && <span className={styles.activeLine} />}
+            {location.pathname.startsWith("/profile") && (
+              <span className={styles.activeLine} />
+            )}
           </button>
         </nav>
       )}
