@@ -14,7 +14,7 @@
 
 /* BOTTOM SHEET (Select Profile) */
 .bottomSheet {
-  background: white;
+  background: #f5f5f5;
   border-radius: 24px 24px 0 0;
   width: 100%;
   max-width: 500px;
@@ -103,27 +103,28 @@
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: #f5f5f5;
+  background: #fff;
   border-radius: 12px;
   cursor: pointer;
   transition: 0.2s ease;
+  border: 2px solid transparent;
 
   &:hover {
-    background: #ebebeb;
+    border: 2px solid rgba(247, 88, 1, 0.2);
   }
 }
 
 .profileAvatar {
   width: 56px;
   height: 56px;
-  background: #ccc;
+  background: linear-gradient(135deg, #F75801 0%, #D43400 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
   font-weight: 600;
-  color: #666;
+  color: #fff;
 }
 
 .profileInfo {
@@ -132,12 +133,13 @@
 
 .relationBadge {
   display: inline-block;
-  background: #e0e0e0;
+  background: linear-gradient(135deg, #FFE8D6 0%, #FFD4B3 100%);
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 11px;
-  color: #666;
+  color: #D43400;
   margin-bottom: 4px;
+  border: 1px solid rgba(247, 88, 1, 0.2);
 }
 
 .profileName {
@@ -160,19 +162,20 @@
 
 .radioBtn {
   font-size: 24px;
-  color: #333;
+  color: #F75801;
 }
 
 .addProfileBtn {
   width: 100%;
   padding: 16px;
-  background: white;
-  border: 2px solid #ddd;
-  border-radius: 12px;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  // border: 2px solid #ddd;
+  border-radius: 50px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: 0.2s ease;
+  color: #fff;
 
   &:hover {
     background: #f9f9f9;
@@ -831,16 +834,6 @@
       background: #1a1a1a;
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-  }
-
-  .profileItem {
-    padding: 20px;
-    transition: 0.2s ease;
-
-    &:hover {
-      background: #e8e8e8;
-      transform: translateX(4px);
     }
   }
 

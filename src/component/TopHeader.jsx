@@ -15,7 +15,10 @@ const TopHeader = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const token = getToken();
 
-  const { balance, isFetching: isFetchingBalance } = useWalletBalance();
+  const { balance, isFetching: isFetchingBalance, refreshWallet } = useWalletBalance();
+
+  // Track if user is logged in to properly display wallet balance
+  const isLoggedIn = !!user && !!token;
 
   /* lock body scroll when drawer open */
   useEffect(() => {
@@ -26,21 +29,49 @@ const TopHeader = () => {
   /* sync user */
   useEffect(() => {
     const syncUser = () => {
-      setUser(getUserFromStorage());
+      const currentUser = getUserFromStorage();
+      setUser(currentUser);
+      
+      // Clear wallet balance on logout (when user becomes null/undefined)
+      if (!currentUser) {
+        // Clear the cached wallet balance from localStorage
+        localStorage.removeItem("astro_wallet_balance");
+      }
+      
+      // Refresh wallet balance when user changes (login/logout)
+      refreshWallet();
     };
 
     syncUser();
     window.addEventListener("auth-change", syncUser);
     return () => window.removeEventListener("auth-change", syncUser);
-  }, []);
+  }, [refreshWallet]);
 
   const handleProfileClick = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     token ? navigate("/profile") : navigate("/login?skip=welcome");
   };
 
-  const formatAmount = (amount) =>
-    amount >= 1000 ? `₹${(amount / 1000).toFixed(1)}k` : `₹${amount}`;
+  const formatAmount = (amount) => {
+    // Handle non-numeric values
+    if (typeof amount !== 'number') {
+      return `₹${amount}`;
+    }
+
+    // For amounts >= 1000, show in 'k' format
+    if (amount >= 1000) {
+      const kValue = amount / 1000;
+      // Check if the k value has decimals
+      return kValue % 1 === 0 
+        ? `₹${kValue}k` 
+        : `₹${kValue.toFixed(1)}k`;
+    }
+
+    // For amounts < 1000, check if it has decimals
+    return amount % 1 === 0 
+      ? `₹${amount}` 
+      : `₹${amount.toFixed(2)}`;
+  };
 
   const displayName = user
     ? user.firstName && user.lastName
@@ -168,7 +199,7 @@ const TopHeader = () => {
           <div className={styles.walletBadge}>
             <div className={styles.coinIcon}></div>
             <span className={styles.walletAmount}>
-              {formatAmount(isFetchingBalance ? "..." : balance || 0)}
+              {formatAmount(isFetchingBalance ? "..." : (isLoggedIn ? (balance || 0) : 0))}
             </span>
           </div>
           <div className={styles.profileIcon} onClick={handleProfileClick}>

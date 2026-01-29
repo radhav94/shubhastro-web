@@ -29,9 +29,9 @@
   gap: 8px;
 
   .active {
-    background: #f4b545;
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
     color: white;
-    border-color: #f4b545;
+    border-color: #F75801;
   }
 }
 /* -------------------------

@@ -10,7 +10,10 @@
     "Segoe UI",
     sans-serif;
   // margin-top: 5rem;
-  margin-top: 100px;
+  margin-top: 99px;
+  @media screen and (width <= 1180px){
+    margin-top: 85px;
+  }
   @media screen and (width <= 767px){
     margin-top: 68px;
   }
@@ -27,44 +30,71 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  @media screen and (width <= 767px){
+    padding: 6px 16px;
+  }
 }
 
 .backButton {
-  width: 48px;
-  height: 48px;
-  border: 1px solid #e0e0e0;
+  background: #fdeeea;
+  border: 1px solid #f75801;
+  cursor: pointer;
+  padding: 10px;
+  color: #333;
   border-radius: 12px;
-  background: #fff;
+  transition: 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 44px;
+  height: 44px;
 
-  &:hover {
-    background: #f5f5f5;
+  @media screen and (width <= 767px){
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
+  
+  svg {
+    width: 20px;
+    height: 20px;
+    path{
+      stroke: #f75801;
+    }
+  }
+  &:active {
+    transform: scale(0.95);
   }
 }
 
 .profileSelector {
   flex: 1;
   margin: 0 16px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
 }
 
 .selectLabel {
   display: block;
   font-size: 14px;
   color: #999;
-  margin-bottom: 4px;
+  @media screen and (width <= 767px){
+    font-size: 12px;
+  }
 }
 
 .profileName {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
   color: #1a1a1a;
+  @media screen and (width <= 767px){
+    font-size: 16px;
+  }
 }
 
 .dropdownIcon {
@@ -311,13 +341,24 @@
 
 // Destiny Cards
 .destinyGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
   gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
   margin-bottom: 16px;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
 }
 
 .destinyCard {
+  flex: 0 0 280px;
+  min-width: 280px;
   aspect-ratio: 1.5;
   border-radius: 20px;
   padding: 24px;
@@ -328,9 +369,11 @@
   transition: transform 0.2s ease;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 
   &:hover {
     transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -342,13 +385,13 @@
 .destinyCardTitle {
   font-size: 22px;
   font-weight: 700;
-  color: #fff;
+  color: #1a1a1a;
   margin: 0 0 8px;
 }
 
 .destinyCardSubtitle {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.95);
+  color: #666;
   margin: 0;
   line-height: 1.5;
   max-width: 60%;
@@ -361,7 +404,8 @@
   width: 160px;
   height: 160px;
   object-fit: contain;
-  opacity: 0.5;
+  opacity: 0.3;
+  z-index: 1;
 }
 
 .numerologyNumbers {
@@ -430,23 +474,11 @@
   overflow-x: auto;
   padding-bottom: 8px;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 
   &::-webkit-scrollbar {
-    height: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 3px;
-
-    &:hover {
-      background: #999;
-    }
+    display: none; /* Chrome, Safari, Opera */
   }
 }
 
@@ -494,6 +526,13 @@
   color: #1a1a1a;
   margin: 0;
   line-height: 1.5;
+}
+
+.newsChannel {
+  font-size: 12px;
+  color: #999;
+  margin: 6px 0 0;
+  font-weight: 500;
 }
 
 // Desktop Responsive
@@ -548,14 +587,11 @@
   }
 
   .blogsScroll {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 24px;
-    overflow-x: visible;
   }
 
   .blogCard {
-    flex: none;
+    flex: 0 0 320px;
   }
 }
 
@@ -569,6 +605,210 @@
   }
 
   .destinyGrid {
-    max-width: 900px;
+    gap: 20px;
+  }
+}
+
+/* MODAL OVERLAY */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* BOTTOM SHEET (Select Profile) */
+.bottomSheet {
+  background: white;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.sheetHandle {
+  width: 40px;
+  height: 4px;
+  background: #ddd;
+  border-radius: 2px;
+  margin: 12px auto;
+}
+
+.sheetContent {
+  padding: 0 24px 24px;
+  position: relative;
+}
+
+.sheetTitle {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #000;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 0;
+  right: 24px;
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: 0.2s ease;
+
+  &:hover {
+    background: #f0f0f0;
+    color: #333;
+  }
+}
+
+/* PROFILE LIST */
+.profileList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.profileItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f5f5f5;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  &:hover {
+    background: #ebebeb;
+  }
+}
+
+.profileAvatar {
+  width: 56px;
+  height: 56px;
+  background: #ccc;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 600;
+  color: #666;
+}
+
+.profileInfo {
+  flex: 1;
+}
+
+.relationBadge {
+  display: inline-block;
+  background: #e0e0e0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.profileName {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 4px 0;
+  color: #000;
+}
+
+.profileDetails {
+  font-size: 13px;
+  color: #666;
+  margin: 2px 0;
+}
+
+.profileLocation {
+  font-size: 13px;
+  color: #999;
+}
+
+.radioBtn {
+  font-size: 24px;
+  color: #333;
+}
+
+.addProfileBtn {
+  width: 100%;
+  padding: 16px;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  &:hover {
+    background: #f9f9f9;
+    border-color: #bbb;
+  }
+}
+
+/* RESPONSIVE */
+@media (min-width: 769px) {
+  .modalOverlay {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bottomSheet {
+    border-radius: 12px !important;
+    width: 90%;
+    max-width: 450px;
+    max-height: 80vh;
+    animation: fadeIn 0.3s ease-out !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .closeBtn {
+    display: flex;
+  }
+
+  .sheetHandle {
+    display: none;
   }
 }

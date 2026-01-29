@@ -398,8 +398,8 @@
   padding: 14px 20px;
   border-radius: 50px;
   border: none;
-  background: #fff;
-  color: #1a1a1a;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: #fff;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
@@ -410,7 +410,7 @@
 .call-price-btn svg {
   width: 24px;
   height: 24px;
-  stroke: #1a1a1a;
+  stroke: #fff;
   stroke-width: 2.5;
   fill: none;
 }
@@ -603,7 +603,7 @@
   height: 48px;
   border-radius: 50%;
   border: none;
-  background: #000;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   color: #fff;
   display: flex;
   align-items: center;

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
   useGetAllKundlisQuery,
   useCreateKundliMutation,
@@ -12,6 +13,9 @@ export const useProfileManager = (dispatch) => {
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
+
+  // Get Redux form data
+  const reduxUserDetails = useSelector((state) => state?.form?.userDetails);
 
   // Get token
   const role = localStorage.getItem("shubhtalk_role");
@@ -59,9 +63,23 @@ export const useProfileManager = (dispatch) => {
     longitude: null,
   });
 
+  // Auto-select profile if Redux has data and profiles are loaded
+  useEffect(() => {
+    if (reduxUserDetails && profiles.length > 0 && !selectedProfile) {
+      // Try to find matching profile by name
+      const matchingProfile = profiles.find(
+        (profile) => profile.name === reduxUserDetails.name
+      );
+      
+      if (matchingProfile) {
+        setSelectedProfile(matchingProfile);
+      }
+    }
+  }, [reduxUserDetails, profiles, selectedProfile]);
+
   // Dispatch selected profile to Redux when profile is selected
   useEffect(() => {
-    if (selectedProfile) {
+    if (selectedProfile && dispatch) {
       const months = [
         "Jan",
         "Feb",
@@ -105,7 +123,7 @@ export const useProfileManager = (dispatch) => {
 
       dispatch(setForm(profilePayload));
     }
-  }, [selectedProfile, dispatch]);
+  }, [selectedProfile]);
 
   const handleSelectProfile = (profile) => {
     setSelectedProfile(profile);
