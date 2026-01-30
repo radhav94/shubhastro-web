@@ -280,7 +280,7 @@ const Explore = () => {
           // Render "all-about-you" section
           if (section.display_type === "all-about-you") {
             return (
-              <section key={index} className={styles.heroSection}>
+              <section key={index} className={styles.section}>
                 <h1 className={styles.mainTitle}>{section.title || "All About You"}</h1>
                 <p className={styles.subtitle}>
                   {section.description || "An ever growing library on the story of you"}
@@ -291,15 +291,15 @@ const Explore = () => {
                     <div
                       key={idx}
                       className={styles.topCard}
-                      style={{ backgroundColor: card.bg_color || "#FF5722" }}
+                      style={{ backgroundColor: card.bg_color || "#E56329" }}
                       onClick={() => handleCardClick(card)}
                     >
+                      <h3 className={styles.cardTitle}>{card.title}</h3>
                       <img
                         src={card.imageUrl || defaultImages.horoscope}
                         alt={card.title}
                         className={styles.cardIcon}
                       />
-                      <h3 className={styles.cardTitle}>{card.title}</h3>
                     </div>
                   ))}
                 </div>

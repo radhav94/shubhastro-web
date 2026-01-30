@@ -21,6 +21,80 @@
   justify-content: center;
   @media (width <= 767px) {
     margin-top: 68px;
+    flex-direction: column;
+  }
+}
+.matchMakingInputs{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.10);
+  @media (width <= 767px) {
+    flex-direction: column;
+    background: transparent;
+    box-shadow: none;
+    padding: 0px;
+  }
+}
+.matchInput{
+  flex-shrink: 0;
+  width: 270px;
+  @media (width <= 900px) {
+    width: 220px;
+  }
+  @media (width <= 767px) {
+    width: 100%;
+  }
+}
+.topTitles{
+  margin-block: 20px 40px;
+  text-align: center;
+  @media (width <= 767px) {
+    margin: -10px 0px 20px 0px;
+  }
+}
+.matchMakingBtn{
+  height: 50px;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  padding: 0px 32px;
+  color: #fff;
+  border-radius: 0.75rem;
+  margin-top: 32px;
+  @media (width <= 767px) {
+    width: 100%;
+    margin-top: 5px;
+    border-radius: 50rem;
+  }
+}
+.bottomImg{
+  width: 32vw;
+  height: auto;
+  margin: 50px auto 0px auto;
+  @media (width <= 767px) {
+    display: none;
+  }
+}
+.topImg{
+  display: none;
+   @media (width <= 767px) {
+    display: block;
+  }
+}
+.topTitles{
+  h2{
+    font-size: 38px;
+    margin-bottom: 5px;
+    @media (width <= 767px) {
+      font-size: 24px;
+    }
+  }
+  p{
+    @media (width <= 767px) {
+      font-size: 14px;
+    }
   }
 }
 .page {
