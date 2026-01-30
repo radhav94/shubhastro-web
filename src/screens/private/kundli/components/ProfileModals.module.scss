@@ -819,7 +819,8 @@
     font-size: 17px;
 
     &:hover {
-      background: #f5f5f5;
+      background: linear-gradient(90deg, #E64A19 0%, #C62400 100%);
+      // background: #f5f5f5;
       border-color: #999;
       transform: translateY(-1px);
     }
