@@ -15,7 +15,11 @@ const TopHeader = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const token = getToken();
 
-  const { balance, isFetching: isFetchingBalance, refreshWallet } = useWalletBalance();
+  const {
+    balance,
+    isFetching: isFetchingBalance,
+    refreshWallet,
+  } = useWalletBalance();
 
   // Track if user is logged in to properly display wallet balance
   const isLoggedIn = !!user && !!token;
@@ -31,13 +35,13 @@ const TopHeader = () => {
     const syncUser = () => {
       const currentUser = getUserFromStorage();
       setUser(currentUser);
-      
+
       // Clear wallet balance on logout (when user becomes null/undefined)
       if (!currentUser) {
         // Clear the cached wallet balance from localStorage
         localStorage.removeItem("astro_wallet_balance");
       }
-      
+
       // Refresh wallet balance when user changes (login/logout)
       refreshWallet();
     };
@@ -54,7 +58,7 @@ const TopHeader = () => {
 
   const formatAmount = (amount) => {
     // Handle non-numeric values
-    if (typeof amount !== 'number') {
+    if (typeof amount !== "number") {
       return `₹${amount}`;
     }
 
@@ -62,20 +66,16 @@ const TopHeader = () => {
     if (amount >= 1000) {
       const kValue = amount / 1000;
       // Check if the k value has decimals
-      return kValue % 1 === 0 
-        ? `₹${kValue}k` 
-        : `₹${kValue.toFixed(1)}k`;
+      return kValue % 1 === 0 ? `₹${kValue}k` : `₹${kValue.toFixed(1)}k`;
     }
 
     // For amounts < 1000, check if it has decimals
-    return amount % 1 === 0 
-      ? `₹${amount}` 
-      : `₹${amount.toFixed(2)}`;
+    return amount % 1 === 0 ? `₹${amount}` : `₹${amount.toFixed(2)}`;
   };
 
   const displayName = user
-    ? user.firstName && user.lastName
-      ? `${user.firstName} ${user.lastName}`
+    ? user.firstName
+      ? `${user.firstName}`
       : user.phoneNumber || "Guest"
     : "Guest";
 
@@ -105,13 +105,12 @@ const TopHeader = () => {
         {/* Desktop Navigation */}
         <nav className={styles.headerNavigation}>
           <NavLink
-            to="/"
+            to="/tarot"
             className={({ isActive }) =>
               `${styles.headerNavLink} ${isActive ? styles.active : ""}`
             }
-            end
           >
-            Home
+            Tarot
           </NavLink>
           <NavLink
             to="/chat-with-astrologers"
@@ -167,7 +166,7 @@ const TopHeader = () => {
               `${styles.headerNavLink} ${isActive ? styles.active : ""}`
             }
           >
-            Match Matching
+            Match Making
           </NavLink>
           <NavLink
             to="/numerology"
@@ -199,7 +198,9 @@ const TopHeader = () => {
           <div className={styles.walletBadge}>
             <div className={styles.coinIcon}></div>
             <span className={styles.walletAmount}>
-              {formatAmount(isFetchingBalance ? "..." : (isLoggedIn ? (balance || 0) : 0))}
+              {formatAmount(
+                isFetchingBalance ? "..." : isLoggedIn ? balance || 0 : 0,
+              )}
             </span>
           </div>
           <div className={styles.profileIcon} onClick={handleProfileClick}>

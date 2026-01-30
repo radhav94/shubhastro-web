@@ -6,7 +6,6 @@ import { useProfileManager } from "../../private/kundli/hooks/useProfileManager"
 import { useAstrologerConnection } from "./hooks/useAstrologerConnection";
 import ConnectAstrologerPopup from "../../private/v2/components/ui/ConnectAstrologerPopup";
 import ProfileModals from "../../private/kundli/components/ProfileModals";
-import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import BottomNavigation from "./components/BottomNavigation";
 import { renderSection, sortSectionsByOrder } from "./utils/sectionMapper";
 import styles from "./Home.module.scss";
@@ -166,16 +165,6 @@ const Home = () => {
         showContinueButton={true}
         onContinue={handleContinueAfterKundliSelect}
       />
-
-      {/* Waiting Modal */}
-      {(WaitingList || callWaitingList) && (
-        <WaitingModal
-          isOpen={WaitingList || callWaitingList}
-          onClose={resetCallState}
-          waitingTime={WaitingList || callWaitingList}
-          type={connectionType}
-        />
-      )}
 
       {/* Recharge Modal */}
       <RechargeModal

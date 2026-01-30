@@ -36,34 +36,37 @@ const MatchMaking = () => {
     role === "ASTROLOGER"
       ? localStorage.getItem("shubhtalk_astro_token")
       : localStorage.getItem("shubhtalk_customer_token");
-  
+
   const isLoggedIn = !!token;
 
   // Get current user ID
-  const currentUserId = role === "ASTROLOGER"
-    ? localStorage.getItem("shubhtalk_astro_id")
-    : localStorage.getItem("shubhtalk_customer_id");
+  const currentUserId =
+    role === "ASTROLOGER"
+      ? localStorage.getItem("shubhtalk_astro_id")
+      : localStorage.getItem("shubhtalk_customer_id");
 
   /* -------------------- TEMPORARY PROFILES (NON-LOGGED-IN) -------------------- */
   const [tempProfiles, setTempProfiles] = useState([]);
 
   /* -------------------- CURL GENERATOR -------------------- */
   const generateCurlCommand = (endpoint, _method, payload, token) => {
-    const baseUrl = import.meta.env.VITE_APP_API_BASE_URL || "https://devapi-shubhtalk.epicon.in";
+    const baseUrl =
+      import.meta.env.VITE_APP_API_BASE_URL ||
+      "https://devapi-shubhtalk.epicon.in";
     const url = `${baseUrl}/api/${endpoint}`;
-    
+
     let curl = `curl --location '${url}' \\\n`;
     curl += `  --header 'accept: application/json' \\\n`;
     curl += `  --header 'Content-Type: application/json' \\\n`;
-    
+
     if (token) {
       curl += `  --header 'Authorization: Bearer ${token}' \\\n`;
     }
-    
+
     if (payload) {
       curl += `  --data '${JSON.stringify(payload)}'`;
     }
-    
+
     return curl;
   };
 
@@ -71,34 +74,36 @@ const MatchMaking = () => {
   const { data, refetch, isFetching } = useGetAllKundlisQuery(undefined, {
     skip: !token,
   });
-  const [createKundli, { isLoading: isCreating }] =
-    useCreateKundliMutation();
+  const [createKundli, { isLoading: isCreating }] = useCreateKundliMutation();
   const [deleteKundli] = useDeleteKundliMutation();
 
-  const [getNumerologyPrediction] =
-    useLazyGetNumerologyPredictionQuery();
-  
+  const [getNumerologyPrediction] = useLazyGetNumerologyPredictionQuery();
+
   // Combine saved profiles (if logged in) with temporary profiles (if not logged in)
   const savedProfiles = data?.data || [];
   const profiles = isLoggedIn ? savedProfiles : tempProfiles;
-  
+
   const location = useLocation();
   useEffect(() => {
-    if (location.state?.boyData && location.state?.girlData && profiles.length) {
+    if (
+      location.state?.boyData &&
+      location.state?.girlData &&
+      profiles.length
+    ) {
       const { boyData, girlData } = location.state;
-  
+
       const findProfile = (data) =>
         profiles.find(
           (p) =>
             p.name === data.name &&
             p.place === data.place.address &&
             p.lat === data.place.lat &&
-            p.lon === data.place.lng
+            p.lon === data.place.lng,
         );
-  
+
       const boyProfile = findProfile(boyData);
       const girlProfile = findProfile(girlData);
-  
+
       if (boyProfile && girlProfile) {
         setPrimaryProfile(boyProfile);
         setPartnerProfile(girlProfile);
@@ -106,7 +111,7 @@ const MatchMaking = () => {
       }
     }
   }, [location.state, profiles]);
-  
+
   /* -------------------- AUTO SELECT -------------------- */
   useEffect(() => {
     if (profiles.length && !primaryProfile && !isFetching) {
@@ -118,13 +123,13 @@ const MatchMaking = () => {
   // Clear selected profiles when user changes (on refresh after login)
   useEffect(() => {
     if (currentUserId && (primaryProfile || partnerProfile)) {
-      const primaryBelongsToCurrentUser = primaryProfile 
-        ? profiles.some(profile => profile._id === primaryProfile._id)
+      const primaryBelongsToCurrentUser = primaryProfile
+        ? profiles.some((profile) => profile._id === primaryProfile._id)
         : true;
       const partnerBelongsToCurrentUser = partnerProfile
-        ? profiles.some(profile => profile._id === partnerProfile._id)
+        ? profiles.some((profile) => profile._id === partnerProfile._id)
         : true;
-      
+
       if (!primaryBelongsToCurrentUser) {
         setPrimaryProfile(null);
         setSelectedProfile(null);
@@ -139,7 +144,7 @@ const MatchMaking = () => {
   useEffect(() => {
     if (selectedProfile) {
       const date = `${String(selectedProfile.day).padStart(2, "0")}/${String(
-        selectedProfile.month
+        selectedProfile.month,
       ).padStart(2, "0")}/${selectedProfile.year}`;
       const name = selectedProfile.name.replaceAll(" ", "");
       getNumerologyPrediction({ date, name, lang: "en" });
@@ -160,7 +165,7 @@ const MatchMaking = () => {
         // Compare lat/lon with tolerance for floating point precision
         Math.abs(Number(k.lat) - Number(payload.lat)) < 0.0001 &&
         Math.abs(Number(k.lon) - Number(payload.lon)) < 0.0001 &&
-        k.place.trim().toLowerCase() === payload.place.trim().toLowerCase()
+        k.place.trim().toLowerCase() === payload.place.trim().toLowerCase(),
     );
 
   /* -------------------- FILTERED LIST -------------------- */
@@ -207,34 +212,36 @@ const MatchMaking = () => {
         // LOGGED IN: Delete from database
         console.log("=== DELETE KUNDLI ===");
         console.log("Deleting profile ID:", profileToDelete);
-        
+
         const deleteCurl = generateCurlCommand(
-          "kundlis/delete", 
-          "DELETE", 
-          { kundliId: profileToDelete }, 
-          token
+          "kundlis/delete",
+          "DELETE",
+          { kundliId: profileToDelete },
+          token,
         );
         console.log("\n📋 DELETE CURL Command:\n");
         console.log(deleteCurl);
         console.log("\n====================");
-        
+
         await deleteKundli(profileToDelete).unwrap();
         console.log("✅ Profile deleted successfully");
-        
+
         Toast.success("Profile deleted successfully");
-        
+
         // Refetch profiles
         await refetch();
       } else {
         // NOT LOGGED IN: Remove from temporary profiles
         console.log("=== DELETE TEMPORARY PROFILE ===");
         console.log("Deleting profile ID:", profileToDelete);
-        
-        setTempProfiles(prev => prev.filter(p => p._id !== profileToDelete));
+
+        setTempProfiles((prev) =>
+          prev.filter((p) => p._id !== profileToDelete),
+        );
         console.log("✅ Temporary profile deleted");
         Toast.success("Profile deleted");
       }
-      
+
       // Clear selections if deleted profile was selected
       if (primaryProfile?._id === profileToDelete) {
         setPrimaryProfile(null);
@@ -243,7 +250,7 @@ const MatchMaking = () => {
       if (partnerProfile?._id === profileToDelete) {
         setPartnerProfile(null);
       }
-      
+
       // Close modal
       setShowDeleteModal(false);
       setProfileToDelete(null);
@@ -252,12 +259,10 @@ const MatchMaking = () => {
       console.error("Error object:", err);
       console.error("Error data:", err?.data);
       console.error("===========================");
-      
-      const errorMessage = 
-        err?.data?.message || 
-        err?.message || 
-        "Failed to delete profile";
-      
+
+      const errorMessage =
+        err?.data?.message || err?.message || "Failed to delete profile";
+
       Toast.error(errorMessage);
       setShowDeleteModal(false);
       setProfileToDelete(null);
@@ -267,12 +272,12 @@ const MatchMaking = () => {
   /* -------------------- PROCEED -------------------- */
   const handleProceed = (e) => {
     e?.preventDefault();
-  
+
     if (!primaryProfile || !partnerProfile) {
       Toast.error("Please select both profiles");
       return;
     }
-  
+
     const isValidProfile = (p) =>
       p.name &&
       p.day &&
@@ -283,18 +288,18 @@ const MatchMaking = () => {
       p.place &&
       p.lat !== null &&
       p.lon !== null;
-  
+
     if (!isValidProfile(primaryProfile) || !isValidProfile(partnerProfile)) {
       Toast.error("Invalid profile details");
       return;
     }
-  
+
     const formatDate = (y, m, d) =>
       `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-  
+
     const formatTime = (h, min) =>
       `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
-  
+
     const mapProfile = (p) => ({
       name: p.name,
       dob: formatDate(p.year, p.month, p.day),
@@ -305,12 +310,12 @@ const MatchMaking = () => {
         lng: p.lon,
       },
     });
-  
+
     const primaryGender = primaryProfile.gender?.toLowerCase();
     const partnerGender = partnerProfile.gender?.toLowerCase();
-  
+
     let state;
-  
+
     // 🔹 Different gender → Male/Female mapping
     if (primaryGender !== partnerGender) {
       state =
@@ -330,15 +335,15 @@ const MatchMaking = () => {
         girlData: mapProfile(partnerProfile),
       };
     }
-  
+
     navigate(PATH.privateRoutes.MATCHMAKING_DETAILS.path, { state });
   };
-  
+
   /* -------------------- ADD PROFILE -------------------- */
   const handleSubmitProfile = async (formData) => {
     try {
       const payload = buildKundliPayload(formData);
-      
+
       // Check for duplicate
       if (isDuplicateKundli(payload, profiles)) {
         console.log("❌ Duplicate detected by frontend check");
@@ -352,9 +357,14 @@ const MatchMaking = () => {
         console.log("Form Data:", formData);
         console.log("Payload being sent:", JSON.stringify(payload, null, 2));
         console.log("Existing profiles count:", profiles.length);
-        
+
         // Generate and log curl command
-        const curlCommand = generateCurlCommand("kundlis/create", "POST", payload, token);
+        const curlCommand = generateCurlCommand(
+          "kundlis/create",
+          "POST",
+          payload,
+          token,
+        );
         console.log("\n📋 CURL Command:\n");
         console.log(curlCommand);
         console.log("\n==============================");
@@ -362,14 +372,14 @@ const MatchMaking = () => {
         const result = await createKundli(payload).unwrap();
         console.log("✅ API Response:", result);
         Toast.success("Profile added successfully");
-        
+
         // Refetch to get updated list
         await refetch();
-        
+
         // Auto-select the newly created profile based on selectingType
         if (result?.data) {
           const newProfile = result.data;
-          
+
           if (selectingType === "PRIMARY") {
             setPrimaryProfile(newProfile);
             setSelectedProfile(newProfile);
@@ -382,17 +392,17 @@ const MatchMaking = () => {
         console.log("=== ADD TEMPORARY PROFILE ===");
         console.log("Form Data:", formData);
         console.log("Payload:", JSON.stringify(payload, null, 2));
-        
+
         // Generate temporary ID
         const tempProfile = {
           ...payload,
           _id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         };
-        
-        setTempProfiles(prev => [...prev, tempProfile]);
+
+        setTempProfiles((prev) => [...prev, tempProfile]);
         console.log("✅ Temporary profile added");
         Toast.success("Profile added");
-        
+
         // Auto-select the newly created profile based on selectingType
         if (selectingType === "PRIMARY") {
           setPrimaryProfile(tempProfile);
@@ -401,7 +411,7 @@ const MatchMaking = () => {
           setPartnerProfile(tempProfile);
         }
       }
-      
+
       setShowAddProfile(false);
       setSelectingType(null);
     } catch (err) {
@@ -409,12 +419,10 @@ const MatchMaking = () => {
       console.error("Error object:", err);
       console.error("Error data:", err?.data);
       console.error("===========================");
-      
-      const errorMessage = 
-        err?.data?.message || 
-        err?.message || 
-        "Failed to add profile";
-      
+
+      const errorMessage =
+        err?.data?.message || err?.message || "Failed to add profile";
+
       Toast.error(errorMessage);
       throw err;
     }
@@ -488,14 +496,14 @@ const MatchMaking = () => {
       <div className="w-full max-w-md bg-white flex flex-col">
         {/* HEADER */}
         {/* <div className="bg-[#FFF4EA] px-4 py-4 flex items-center justify-between"> */}
-          {/* <button
+        {/* <button
             onClick={() => navigate(-1)}
             className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center"
           >
             <ChevronLeft className="text-orange-500 w-5 h-5" />
           </button> */}
 
-          {/* <div className="text-left flex-1">
+        {/* <div className="text-left flex-1">
             <p className="text-xs text-gray-500">Select Profile</p>
             <div className="flex items-center gap-1 font-semibold text-lg">
               {selectedProfile?.name || "Select Profile"}
@@ -503,7 +511,7 @@ const MatchMaking = () => {
             </div>
           </div> */}
 
-          {/* <button
+        {/* <button
             onClick={handleEditProfile}
             disabled={!selectedProfile}
             className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center"
@@ -513,7 +521,9 @@ const MatchMaking = () => {
         {/* </div> */}
 
         {/* CONTENT */}
-          <div className={styles.matchMakingTopImg}><img src={matchMakingImg} alt="img" /></div>
+        <div className={styles.matchMakingTopImg}>
+          <img src={matchMakingImg} alt="img" />
+        </div>
         <div className={styles.matchMakingCard}>
           <div className="bg-white border rounded-2xl p-6 text-center shadow-sm">
             {/* <div className="flex justify-center mb-4">
@@ -544,8 +554,8 @@ const MatchMaking = () => {
             </div>
           </div>
 
-          <div className="flex justify-center my-6">
-            <Heart className="text-orange-500 w-6 h-6" />
+          <div className="flex justify-center my-4">
+            {/* <Heart className="text-orange-500 w-6 h-6" /> */}
           </div>
 
           {/* PARTNER */}
@@ -594,7 +604,9 @@ const MatchMaking = () => {
             : partnerProfile?._id
         }
         onSelectProfile={handleSelectProfile}
-        onDeleteProfile={(profileId) => handleDeleteProfile({ stopPropagation: () => {} }, profileId)}
+        onDeleteProfile={(profileId) =>
+          handleDeleteProfile({ stopPropagation: () => {} }, profileId)
+        }
         onAddProfile={() => {
           setShowAddProfile(true);
           setShowSelectProfile(false);
@@ -606,9 +618,13 @@ const MatchMaking = () => {
         }
         showAddButton={true}
         showDeleteButton={true}
-        emptyMessage={isLoggedIn ? "No profiles found. Add a profile to get started." : "Add profiles to see match results."}
+        emptyMessage={
+          isLoggedIn
+            ? "No profiles found. Add a profile to get started."
+            : "Add profiles to see match results."
+        }
       />
-      
+
       {/* Add Profile Modal */}
       <AddProfileModal
         isOpen={showAddProfile}

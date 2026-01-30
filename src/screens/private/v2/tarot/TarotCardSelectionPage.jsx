@@ -3,10 +3,10 @@ import ChevronLeft from '../components/ui/ChevronLeft'
 import { Shuffle } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import styles from './TarotCardSelectionPage.module.css'
-import { 
-  useGetLoveTriangleTarotQuery, 
-  useGetRomanticBreakupQuery, 
-  useGetBusinessBreakupQuery 
+import {
+  useGetLoveTriangleTarotQuery,
+  useGetRomanticBreakupQuery,
+  useGetBusinessBreakupQuery
 } from '../../../../redux/api/tarot/tarotApi'
 import toast from 'react-hot-toast'
 
@@ -15,17 +15,25 @@ const TarotCardSelectionPage = () => {
   const location = useLocation()
   const reading = location.state?.reading || { title: 'Yes/ No Tarot' }
   const cardsData = location.state?.cards || []
-  
+
+  // Debug logging
+  console.log('🎴 TarotCardSelectionPage - location.state:', location.state)
+  console.log('🎴 TarotCardSelectionPage - reading:', reading)
+  console.log('🎴 TarotCardSelectionPage - cardsData:', cardsData)
+
   // Check if it's Love Triangle reading (3 cards) or Breakup readings (2 cards)
   const isLoveTriangle = reading.title === 'Love Triangle'
   const isRomanticBreakup = reading.title === 'Romantic Breakup'
   const isBusinessBreakup = reading.title === 'Business Breakup'
   const isMultiCardReading = isLoveTriangle || isRomanticBreakup || isBusinessBreakup
-  
+
+  console.log('🎴 isLoveTriangle:', isLoveTriangle)
+  console.log('🎴 isMultiCardReading:', isMultiCardReading)
+
   let maxCards = 1
   if (isLoveTriangle) maxCards = 3
   else if (isRomanticBreakup || isBusinessBreakup) maxCards = 2
-  
+
   const [selectedCards, setSelectedCards] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const containerRef = useRef(null)
@@ -34,28 +42,28 @@ const TarotCardSelectionPage = () => {
   const [skipQuery, setSkipQuery] = useState(true)
 
   // Use cards from API or fallback to default (10 cards)
-  const cards = cardsData.length > 0 
-    ? cardsData.map((card, index) => ({ 
-        id: index + 1, 
-        pattern: 'floral',
-        ...card 
-      }))
+  const cards = cardsData.length > 0
+    ? cardsData.map((card, index) => ({
+      id: index + 1,
+      pattern: 'floral',
+      ...card
+    }))
     : [
-        { id: 1, pattern: 'floral' },
-        { id: 2, pattern: 'floral' },
-        { id: 3, pattern: 'floral' },
-        { id: 4, pattern: 'floral' },
-        { id: 5, pattern: 'floral' },
-        { id: 6, pattern: 'floral' },
-        { id: 7, pattern: 'floral' },
-        { id: 8, pattern: 'floral' },
-        { id: 9, pattern: 'floral' },
-        { id: 10, pattern: 'floral' }
-      ]
+      { id: 1, name: 'the-fool', pattern: 'floral' },
+      { id: 2, name: 'the-magician', pattern: 'floral' },
+      { id: 3, name: 'the-high-priestess', pattern: 'floral' },
+      { id: 4, name: 'the-empress', pattern: 'floral' },
+      { id: 5, name: 'the-emperor', pattern: 'floral' },
+      { id: 6, name: 'the-hierophant', pattern: 'floral' },
+      { id: 7, name: 'the-lovers', pattern: 'floral' },
+      { id: 8, name: 'the-chariot', pattern: 'floral' },
+      { id: 9, name: 'strength', pattern: 'floral' },
+      { id: 10, name: 'the-hermit', pattern: 'floral' }
+    ]
 
   const handleCardClick = (card) => {
     console.log('Selected card:', card)
-    
+
     if (isMultiCardReading) {
       // For multi-card readings (Love Triangle, Romantic Breakup, Business Breakup)
       if (selectedCards.find(c => c.id === card.id)) {
@@ -101,7 +109,7 @@ const TarotCardSelectionPage = () => {
         // Breakup readings - fetch data and navigate
         const card1 = selectedCards[0]
         const card2 = selectedCards[1]
-        
+
         // Navigate to result page with selected cards
         // The TarotCardDetailPage will handle the API call
         navigate('/tarot-card', {
@@ -139,13 +147,13 @@ const TarotCardSelectionPage = () => {
         <h1 className={styles.title}>{reading.title}</h1>
         <p className={styles.subtitle}>
           {isMultiCardReading
-            ? `Choose ${maxCards} cards for your reading (${selectedCards.length}/${maxCards} selected)` 
+            ? `Choose ${maxCards} cards for your reading (${selectedCards.length}/${maxCards} selected)`
             : 'Choose a card to find out your tarot horoscope'}
         </p>
 
         <p className={styles.tapText}>Tap to pick</p>
 
-        <div 
+        <div
           className={styles.cardsContainer}
           ref={containerRef}
         >
@@ -154,19 +162,19 @@ const TarotCardSelectionPage = () => {
             const totalCards = cards.length
             const centerIndex = (totalCards - 1) / 2
             const offset = index - centerIndex
-            
+
             // Create normalized offset first (needed for calculations)
             const normalizedOffset = offset / centerIndex // -1 to 1
-            
+
             // Responsive spread values based on screen width
             const screenWidth = window.innerWidth
             const isMobile = screenWidth <= 480
             const isTablet = screenWidth > 480 && screenWidth <= 768
             const isLaptop = screenWidth > 768 && screenWidth <= 1024
-            
+
             // Fan layout - cards spread in proper semicircular arc with responsive spacing
             let angle, spread, curveHeight, selectedLift
-            
+
             if (isMobile) {
               angle = offset * 5
               spread = offset * 32
@@ -189,10 +197,10 @@ const TarotCardSelectionPage = () => {
               curveHeight = Math.pow(normalizedOffset, 2) * 80
               selectedLift = isSelected ? -40 : 0
             }
-            
+
             // Apply vertical lift for semicircular curve
             const verticalLift = curveHeight
-            
+
             const rotation = angle
             const zIndex = index // Keep same z-index for all cards
 
@@ -222,7 +230,7 @@ const TarotCardSelectionPage = () => {
         </div>
 
         {isMultiCardReading && (
-          <button 
+          <button
             className={`${styles.showReadingButton} ${selectedCards.length === maxCards ? '' : styles.disabled}`}
             disabled={selectedCards.length !== maxCards || isLoading}
             onClick={handleShowReading}

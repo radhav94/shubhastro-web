@@ -47,13 +47,10 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
   const [form, setForm] = useState(initialForm);
   const [creating, setCreating] = useState(false);
 
-  // Debug log
-  console.log("KundliSelectModal - data:", data);
-  console.log("KundliSelectModal - kundlis:", kundlis);
-
   const formatProfileDisplay = (profile) => {
-    if (!profile) return { initials: "?", birthDate: "", birthTime: "", relation: "Self" };
-    
+    if (!profile)
+      return { initials: "?", birthDate: "", birthTime: "", relation: "Self" };
+
     const initials = profile.name
       ? profile.name
           .split(" ")
@@ -63,17 +60,37 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
           .slice(0, 2)
       : "?";
 
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const birthDate = profile.day && profile.month && profile.year
-      ? `${String(profile.day).padStart(2, '0')} ${monthNames[profile.month - 1] || ""} ${profile.year}`
-      : "";
-    
-    const hour12 = profile.hour > 12 ? profile.hour - 12 : profile.hour === 0 ? 12 : profile.hour;
-    const meridiem = profile.hour >= 12 ? 'PM' : 'AM';
-    const birthTime = profile.hour !== undefined && profile.min !== undefined
-      ? `${String(hour12).padStart(2, '0')}:${String(profile.min).padStart(2, '0')} ${meridiem}`
-      : "";
-    
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const birthDate =
+      profile.day && profile.month && profile.year
+        ? `${String(profile.day).padStart(2, "0")} ${monthNames[profile.month - 1] || ""} ${profile.year}`
+        : "";
+
+    const hour12 =
+      profile.hour > 12
+        ? profile.hour - 12
+        : profile.hour === 0
+          ? 12
+          : profile.hour;
+    const meridiem = profile.hour >= 12 ? "PM" : "AM";
+    const birthTime =
+      profile.hour !== undefined && profile.min !== undefined
+        ? `${String(hour12).padStart(2, "0")}:${String(profile.min).padStart(2, "0")} ${meridiem}`
+        : "";
+
     const relation = profile.relation || "Self";
 
     return { initials, birthDate, birthTime, relation };
@@ -85,8 +102,8 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
 
   const buildKundliPayload = (data) => {
     const dateObj = new Date(data.birthDate);
-    const timeObj = data.birthTime ? data.birthTime.split(':') : ['12', '0'];
-    
+    const timeObj = data.birthTime ? data.birthTime.split(":") : ["12", "0"];
+
     return {
       name: data.name,
       gender: data.identity.toLowerCase(),
@@ -119,7 +136,7 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
     try {
       const payload = buildKundliPayload(form);
       const result = await createKundli(payload).unwrap();
-      
+
       Toast.success("Profile added successfully");
       setShowAddProfile(false);
       setForm(initialForm);
@@ -127,14 +144,37 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
 
       // Dispatch to Redux for kundli page compatibility
       if (result?.data) {
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const months = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ];
         const profileData = result.data;
         const meridiem = profileData.hour >= 12 ? "PM" : "AM";
-        const hour12 = profileData.hour > 12 ? profileData.hour - 12 : profileData.hour === 0 ? 12 : profileData.hour;
+        const hour12 =
+          profileData.hour > 12
+            ? profileData.hour - 12
+            : profileData.hour === 0
+              ? 12
+              : profileData.hour;
 
         const profilePayload = {
           name: profileData.name,
-          gender: profileData.gender === "male" ? "Male" : profileData.gender === "female" ? "Female" : "Others",
+          gender:
+            profileData.gender === "male"
+              ? "Male"
+              : profileData.gender === "female"
+                ? "Female"
+                : "Others",
           day: String(profileData.day),
           month: months[profileData.month - 1],
           year: String(profileData.year),
@@ -164,13 +204,36 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
 
     try {
       // Dispatch to Redux
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
       const meridiem = selectedKundli.hour >= 12 ? "PM" : "AM";
-      const hour12 = selectedKundli.hour > 12 ? selectedKundli.hour - 12 : selectedKundli.hour === 0 ? 12 : selectedKundli.hour;
+      const hour12 =
+        selectedKundli.hour > 12
+          ? selectedKundli.hour - 12
+          : selectedKundli.hour === 0
+            ? 12
+            : selectedKundli.hour;
 
       const profilePayload = {
         name: selectedKundli.name || "",
-        gender: selectedKundli.gender === "male" ? "Male" : selectedKundli.gender === "female" ? "Female" : "Others",
+        gender:
+          selectedKundli.gender === "male"
+            ? "Male"
+            : selectedKundli.gender === "female"
+              ? "Female"
+              : "Others",
         day: String(selectedKundli.day || 1),
         month: months[(selectedKundli.month || 1) - 1] || "Jan",
         year: String(selectedKundli.year || new Date().getFullYear()),
@@ -184,7 +247,7 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
 
       console.log("📤 Dispatching setForm with payload:", profilePayload);
       dispatch(setForm(profilePayload));
-      
+
       console.log("✅ Calling onSelect with kundli:", selectedKundli);
       onSelect(selectedKundli);
     } catch (error) {
@@ -199,7 +262,10 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
     <>
       {/* Select Profile Modal */}
       <div className={styles.modalOverlay} onClick={onClose}>
-        <div className={styles.bottomSheet} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={styles.bottomSheet}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className={styles.sheetHandle}></div>
 
           <div className={styles.sheetContent}>
@@ -219,7 +285,9 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                       <div
                         key={profile._id}
                         className={`${styles.profileItem} ${
-                          selectedKundli?._id === profile._id ? styles.selected : ""
+                          selectedKundli?._id === profile._id
+                            ? styles.selected
+                            : ""
                         }`}
                         onClick={() => setSelectedKundli(profile)}
                       >
@@ -234,7 +302,9 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                           <p className={styles.profileDetails}>
                             {formatted.birthDate} • {formatted.birthTime}
                           </p>
-                          <p className={styles.profileLocation}>{profile.place}</p>
+                          <p className={styles.profileLocation}>
+                            {profile.place}
+                          </p>
                         </div>
                         <div className={styles.radioBtn}>
                           {selectedKundli?._id === profile._id ? "●" : "○"}
@@ -244,7 +314,10 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                   })}
                 </div>
 
-                <button className={styles.addProfileBtn} onClick={handleAddProfile}>
+                <button
+                  className={styles.addProfileBtn}
+                  onClick={handleAddProfile}
+                >
                   + Add Profile
                 </button>
 
@@ -259,7 +332,10 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
             ) : (
               <div className={styles.emptyState}>
                 <p>No saved profiles found.</p>
-                <button className={styles.addProfileBtn} onClick={handleAddProfile}>
+                <button
+                  className={styles.addProfileBtn}
+                  onClick={handleAddProfile}
+                >
                   + Add Profile
                 </button>
               </div>
@@ -270,17 +346,29 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
 
       {/* Add Profile Side Sheet */}
       {showAddProfile && (
-        <div className={styles.modalOverlay} onClick={() => setShowAddProfile(false)}>
-          <div className={styles.sideSheet} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setShowAddProfile(false)}
+        >
+          <div
+            className={styles.sideSheet}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={styles.sheetHandle}></div>
 
             <div className={styles.sheetContent}>
-              <button className={styles.closeBtn} onClick={() => setShowAddProfile(false)}>
+              <button
+                className={styles.closeBtn}
+                onClick={() => setShowAddProfile(false)}
+              >
                 ×
               </button>
               <h2 className={styles.sheetTitle}>Add Profile</h2>
 
-              <form onSubmit={handleSubmitProfile} className={styles.profileForm}>
+              <form
+                onSubmit={handleSubmitProfile}
+                className={styles.profileForm}
+              >
                 <div className={styles.formGroup}>
                   <label>Name</label>
                   <input
@@ -304,14 +392,18 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                     </button>
                     <button
                       type="button"
-                      className={form.identity === "Female" ? styles.active : ""}
+                      className={
+                        form.identity === "Female" ? styles.active : ""
+                      }
                       onClick={() => setForm({ ...form, identity: "Female" })}
                     >
                       Female
                     </button>
                     <button
                       type="button"
-                      className={form.identity === "Others" ? styles.active : ""}
+                      className={
+                        form.identity === "Others" ? styles.active : ""
+                      }
                       onClick={() => setForm({ ...form, identity: "Others" })}
                     >
                       Others
@@ -323,7 +415,9 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                   <label>Relation</label>
                   <select
                     value={form.relation}
-                    onChange={(e) => setForm({ ...form, relation: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, relation: e.target.value })
+                    }
                     required
                   >
                     <option value="">Select relation</option>
@@ -341,7 +435,9 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                   <input
                     type="date"
                     value={form.birthDate}
-                    onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, birthDate: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -351,7 +447,9 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                   <input
                     type="time"
                     value={form.birthTime}
-                    onChange={(e) => setForm({ ...form, birthTime: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, birthTime: e.target.value })
+                    }
                     disabled={form.unknownBirthTime}
                   />
                   <label className={styles.checkboxLabel}>
@@ -370,7 +468,9 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                   <label>Place of Birth</label>
                   <LocationSearch
                     value={form.birthPlace}
-                    onChange={(e) => setForm({ ...form, birthPlace: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, birthPlace: e.target.value })
+                    }
                     onPlaceSelect={(place) =>
                       setForm({
                         ...form,
@@ -382,7 +482,11 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                   />
                 </div>
 
-                <button type="submit" className={styles.submitBtn} disabled={creating}>
+                <button
+                  type="submit"
+                  className={styles.submitBtn}
+                  disabled={creating}
+                >
                   {creating ? "Adding..." : "Add Profile"}
                 </button>
               </form>
@@ -391,7 +495,7 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
         </div>
       )}
     </>,
-    document.body
+    document.body,
   );
 };
 
