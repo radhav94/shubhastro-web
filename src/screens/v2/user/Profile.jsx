@@ -170,8 +170,6 @@ const Profile = () => {
   });
   const savedKundlis = kundliData?.data || [];
 
-  console.log("savedKundlis::",savedKundlis)
-
   // Delete kundli mutation
   const [deleteKundli, { isLoading: isDeletingKundli }] =
     useDeleteKundliMutation();
@@ -312,7 +310,7 @@ const Profile = () => {
         Number(k.min) === Number(payload.min) &&
         Math.abs(Number(k.lat) - Number(payload.lat)) < 0.0001 &&
         Math.abs(Number(k.lon) - Number(payload.lon)) < 0.0001 &&
-        k.place.trim().toLowerCase() === payload.place.trim().toLowerCase()
+        k.place.trim().toLowerCase() === payload.place.trim().toLowerCase(),
     );
 
   const handleAddProfileSubmit = async (formData) => {
@@ -920,7 +918,7 @@ const Profile = () => {
       {/* Add Profile Modal */}
       <AddProfileModal
         isOpen={showAddProfileModal}
-        onClose={()=>setShowAddProfileModal(false)}
+        onClose={() => setShowAddProfileModal(false)}
         onSubmit={handleAddProfileSubmit}
         isLoading={isAddingKundli}
         title="Add Profile"
