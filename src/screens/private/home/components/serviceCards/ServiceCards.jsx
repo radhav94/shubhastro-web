@@ -26,7 +26,7 @@ const ServiceCards = () => {
   const navigate = useNavigate();
 
   const bannerSection = data?.data?.list?.find(
-    (item) => item.display_type === "complementary-services"
+    (item) => item.display_type === "complementary-services",
   );
   const services = bannerSection?.content || [];
 
@@ -34,7 +34,7 @@ const ServiceCards = () => {
     "free-kundli": PATH.privateRoutes.KUNDLI.path,
     "kundli-matching": PATH.privateRoutes.MATCHMAKING.path,
     numerology: PATH.privateRoutes.NUMEROLOGY.path,
-    tarot: PATH.privateRoutes.TAROT.path,
+    // tarot: PATH.privateRoutes.TAROT.path,
   };
 
   const updateButtons = () => {
@@ -42,7 +42,7 @@ const ServiceCards = () => {
     if (!container) return;
     setDisableLeft(container.scrollLeft <= 5);
     setDisableRight(
-      container.scrollLeft + container.offsetWidth >= container.scrollWidth - 5
+      container.scrollLeft + container.offsetWidth >= container.scrollWidth - 5,
     );
   };
 

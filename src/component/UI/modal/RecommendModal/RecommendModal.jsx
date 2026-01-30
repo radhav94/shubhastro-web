@@ -10,7 +10,6 @@ import { getToken } from "../../../../utils/token";
 import { voiceSocket } from "../../../../services/voiceSocketServices";
 import { useCreateChatRoomMutation } from "../../../../redux/api/chatApi";
 import { useNavigate, useLocation } from "react-router-dom";
-import WaitingModal from "../waitingModal/WaitingModal";
 import KundliSelectModal from "../../../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
 import PrimaryLoader from "../../PrimaryLoader";
 import { useTalkToAstrologer } from "../../../../screens/private/talkToAstrologer/useTalkToAstrologer";
@@ -364,9 +363,6 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
 
   return (
     <>
-      {waitingPopup && (
-        <WaitingModal callRoomId={callRoomId} resetCallState={resetCallState} />
-      )}
       <KundliSelectModal
         isOpen={kundliModalOpen}
         onClose={() => setKundliModalOpen(false)}
