@@ -15,6 +15,7 @@ import {
   ProfileListingModal,
   DeleteConfirmationModal,
 } from "../../../component";
+import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { getToken } from "../../../utils/token";
 
@@ -22,8 +23,10 @@ const NumerologyWeb = () => {
   const navigate = useNavigate();
   const [showSelectProfile, setShowSelectProfile] = useState(false);
   const [showAddProfile, setShowAddProfile] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState(null);
+  const [profileToEdit, setProfileToEdit] = useState(null);
   const [selectedProfile, setSelectedProfile] = useState(null);
 
   // Get token
@@ -109,6 +112,12 @@ const NumerologyWeb = () => {
     setShowDeleteModal(true);
   };
 
+  const handleEditProfile = (profile) => {
+    setProfileToEdit(profile);
+    setShowSelectProfile(false);
+    setShowEditProfile(true);
+  };
+
   const confirmDeleteProfile = async () => {
     if (!profileToDelete) return;
 
@@ -130,6 +139,55 @@ const NumerologyWeb = () => {
       setShowDeleteModal(false);
       setProfileToDelete(null);
     }
+  };
+
+  const handleSubmitEditProfile = async (formData) => {
+    try {
+      if (!profileToEdit) return;
+
+      // Delete old profile
+      await deleteKundli(profileToEdit._id).unwrap();
+
+      // Create new profile with updated data
+      const payload = buildKundliPayload(formData);
+      const result = await createKundli(payload).unwrap();
+
+      Toast.success("Profile updated successfully");
+      await refetch();
+
+      // Update selection if edited profile was selected
+      if (result?.data && selectedProfile?._id === profileToEdit._id) {
+        setSelectedProfile(result.data);
+      }
+
+      setShowEditProfile(false);
+      setProfileToEdit(null);
+    } catch (err) {
+      console.error(err);
+      Toast.error(err?.data?.message || "Failed to update profile");
+      throw err;
+    }
+  };
+
+  const getEditInitialData = () => {
+    if (!profileToEdit) return null;
+
+    return {
+      name: profileToEdit.name,
+      identity:
+        profileToEdit.gender === "male"
+          ? "Male"
+          : profileToEdit.gender === "female"
+            ? "Female"
+            : "Others",
+      relation: "Self",
+      birthDate: `${profileToEdit.year}-${String(profileToEdit.month).padStart(2, "0")}-${String(profileToEdit.day).padStart(2, "0")}`,
+      birthTime: `${String(profileToEdit.hour).padStart(2, "0")}:${String(profileToEdit.min).padStart(2, "0")}`,
+      birthPlace: profileToEdit.place,
+      unknownBirthTime: false,
+      latitude: profileToEdit.lat,
+      longitude: profileToEdit.lon,
+    };
   };
 
   const buildKundliPayload = (data) => {
@@ -554,10 +612,12 @@ const NumerologyWeb = () => {
         selectedProfileId={selectedProfile?._id}
         onSelectProfile={handleSelectProfile}
         onDeleteProfile={handleDeleteProfile}
+        onEditProfile={handleEditProfile}
         onAddProfile={handleAddProfile}
         title="Select Profile"
         showAddButton={true}
         showDeleteButton={true}
+        showEditButton={true}
       />
 
       {/* Add Profile Modal */}
@@ -581,6 +641,19 @@ const NumerologyWeb = () => {
           onConfirm={confirmDeleteProfile}
         />
       )}
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={showEditProfile}
+        onClose={() => {
+          setShowEditProfile(false);
+          setProfileToEdit(null);
+        }}
+        onSubmit={handleSubmitEditProfile}
+        isLoading={isCreating}
+        title="Edit Profile"
+        initialData={getEditInitialData()}
+      />
     </div>
   );
 };

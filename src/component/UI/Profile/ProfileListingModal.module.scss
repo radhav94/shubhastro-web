@@ -190,6 +190,28 @@
   color: #F75801;
 }
 
+.editBtn {
+  background: transparent;
+  border: none;
+  color: #F75801;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s ease;
+  
+  &:hover {
+    background: rgba(247, 88, 1, 0.1);
+    color: #D43400;
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
 .deleteBtn {
   background: transparent;
   border: none;
