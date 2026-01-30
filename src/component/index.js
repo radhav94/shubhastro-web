@@ -34,6 +34,7 @@ export { default as DetailsModal } from "../component/UI/modal/detailsModal/Deta
 export { default as RechargeAlertModel } from "../component/UI/modal/rechargeAlertModel/ReachargeAlertModel";
 export { default as RechargeModal } from "../component/UI/modal/RechargeModal/RechargeModal";
 export { default as LiveModal } from "../component/UI/modal/liveModal/LiveModal";
+export { default as WheelDatePicker } from "../component/UI/WheelDatePicker/WheelDatePicker";
 
 //profile
 export { default as AddProfileModal } from "../component/UI/Profile/AddProfileModal";

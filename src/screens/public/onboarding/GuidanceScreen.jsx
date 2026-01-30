@@ -1,9 +1,12 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
 import { Heart, Rocket, DollarSign, Plus, User, HelpCircle } from "lucide-react";
+import { registerUser } from "../../../services/appServices/authService";
 
 const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData }) => {
   const [selected, setSelected] = useState(formData.guidance || []);
+  const [loading, setLoading] = useState(false);
 
   const options = [
     { id: "love", label: "Love & Relationships", icon: Heart, color: "#FFE5F0" },
@@ -20,9 +23,113 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData }) => {
     );
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    setLoading(true);
     updateFormData({ guidance: selected });
-    onNext();
+
+    try {
+      // Check if token exists
+      const token = localStorage.getItem("shubhtalk_customer_token");
+      if (!token) {
+        console.error("❌ No authentication token found");
+        toast.error("Please complete login and OTP verification first");
+        setLoading(false);
+        return;
+      }
+
+      // Get first and last name from formData
+      const firstName = formData.firstName || "";
+      const lastName = formData.lastName || "";
+      
+      // Format phone number with 91 prefix (without +)
+      let phoneNumber = formData.phoneNumber || "";
+      // Remove any existing +91 or 91 prefix to avoid duplication
+      phoneNumber = phoneNumber.replace(/^\+?91/, "");
+      // Add 91 prefix (without +)
+      phoneNumber = `91${phoneNumber}`;
+      
+      // Prepare registration payload with all fields
+      const payload = {
+        firstName: firstName,
+        lastName: lastName,
+        dateOfBirth: formData.birthDate || "",
+        place: formData.birthPlace || "",
+        phoneNumber: phoneNumber,
+        password: "TempPass@123", // Temporary password - backend requires non-empty
+        email: `${phoneNumber}@shubhtalk.com`, // Generate email from phone number
+        gender: formData.identity 
+          ? formData.identity.toLowerCase() === "others" 
+            ? "other" 
+            : formData.identity.toLowerCase()
+          : "female",
+        languagePreferences: ["en"],
+        role: "CUSTOMER",
+        lat: formData.latitude || 0,
+        lon: formData.longitude || 0,
+      };
+
+      console.log("📤 Registering user with payload:", payload);
+      console.log("🔑 Token:", token ? "Present" : "Missing");
+      const response = await registerUser(payload);
+
+      console.log("✅ Registration response:", response);
+      console.log("📊 Status code:", response?.data?.statusCode);
+
+      if (response?.data?.statusCode === 201 || response?.data?.success) {
+        toast.success("Registration successful!");
+        
+        // Update user data in localStorage
+        const currentUserData = localStorage.getItem("userData");
+        const parsedUserData = currentUserData ? JSON.parse(currentUserData) : {};
+        
+        const updatedUserData = {
+          ...parsedUserData,
+          isRegister: true,
+          firstName: firstName,
+          lastName: lastName,
+          place: formData.birthPlace,
+          dateOfBirth: formData.birthDate,
+          gender: formData.identity,
+        };
+        localStorage.setItem("userData", JSON.stringify(updatedUserData));
+        
+        // IMPORTANT: Also update shubhtalk_user for TopBar to show name
+        const currentUser = localStorage.getItem("shubhtalk_user");
+        const parsedUser = currentUser ? JSON.parse(currentUser) : {};
+        
+        const updatedUser = {
+          ...parsedUser,
+          firstName: firstName,
+          lastName: lastName,
+          place: formData.birthPlace,
+        };
+        localStorage.setItem("shubhtalk_user", JSON.stringify(updatedUser));
+        
+        // Dispatch event to notify TopBar to re-render
+        window.dispatchEvent(new Event("auth-change"));
+        
+        console.log("✅ User data updated in localStorage");
+        onNext();
+      } else {
+        console.warn("⚠️ Unexpected response:", response?.data);
+        toast.error(response?.data?.message || "Registration failed");
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("❌ Registration error:", error);
+      console.error("📋 Error response:", error.response?.data);
+      console.error("📋 Error status:", error.response?.status);
+      
+      // Check if it's an authorization error
+      if (error.response?.status === 401 || error.response?.data?.message?.includes("Authorization")) {
+        toast.error("Session expired. Please login again.");
+      } else {
+        toast.error(
+          error.response?.data?.message || "Failed to register. Please try again."
+        );
+      }
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,8 +172,12 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData }) => {
         </div>
       </div>
 
-      <button className={styles.otpprimaryBtn} onClick={handleNext}>
-        Next
+      <button 
+        className={styles.otpprimaryBtn} 
+        onClick={handleNext}
+        disabled={loading}
+      >
+        {loading ? "Saving..." : "Next"}
       </button>
     </div>
   );
