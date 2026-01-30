@@ -268,7 +268,7 @@ const VideoCalling = ({ callData }) => {
     } else {
       console.warn("⚠️ [MIC STATE] No mic track available");
     }
-    resumeRemoteAudio();
+    // resumeRemoteAudio();
   }, [micOn]);
 
   useEffect(() => {
