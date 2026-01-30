@@ -11,10 +11,12 @@ import { PATH } from "../../../utils/routes/Paths";
 import { useLazyGetNumerologyPredictionQuery } from "../../../services/appServices/numerologyServices";
 import { Toast } from "../../../component";
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
+import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
 import ProfileListingModal from "../../../component/UI/Profile/ProfileListingModal";
 import bondIcon from "../../../assets/icons/destiny-icon.svg";
 import matchMakingImg from "../../../assets/images/match-making-top-img.svg";
+import matchMakingImgBottom from "../../../assets/images/match-making-bottom-img.svg";
 
 const MatchMaking = () => {
   const navigate = useNavigate();
@@ -22,8 +24,10 @@ const MatchMaking = () => {
   /* -------------------- STATE -------------------- */
   const [showSelectProfile, setShowSelectProfile] = useState(false);
   const [showAddProfile, setShowAddProfile] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState(null);
+  const [profileToEdit, setProfileToEdit] = useState(null);
 
   const [selectedProfile, setSelectedProfile] = useState(null); // header display
   const [primaryProfile, setPrimaryProfile] = useState(null);
@@ -202,6 +206,69 @@ const MatchMaking = () => {
     e.stopPropagation(); // Prevent triggering profile selection
     setProfileToDelete(profileId);
     setShowDeleteModal(true);
+  };
+
+  /* -------------------- EDIT PROFILE -------------------- */
+  const handleEditProfile = (profile) => {
+    setProfileToEdit(profile);
+    setShowSelectProfile(false);
+    setShowEditProfile(true);
+  };
+
+  const handleSubmitEditProfile = async (formData) => {
+    try {
+      if (!profileToEdit) return;
+
+      // Delete old profile
+      await deleteKundli(profileToEdit._id).unwrap();
+
+      // Create new profile with updated data
+      const payload = buildKundliPayload(formData);
+      const result = await createKundli(payload).unwrap();
+
+      Toast.success("Profile updated successfully");
+      await refetch();
+
+      // Update selections if edited profile was selected
+      if (result?.data) {
+        if (primaryProfile?._id === profileToEdit._id) {
+          setPrimaryProfile(result.data);
+          setSelectedProfile(result.data);
+        }
+        if (partnerProfile?._id === profileToEdit._id) {
+          setPartnerProfile(result.data);
+        }
+      }
+
+      setShowEditProfile(false);
+      setProfileToEdit(null);
+    } catch (err) {
+      console.error("=== EDIT KUNDLI ERROR ===");
+      console.error(err);
+      Toast.error(err?.data?.message || "Failed to update profile");
+      throw err;
+    }
+  };
+
+  const getEditInitialData = () => {
+    if (!profileToEdit) return null;
+
+    return {
+      name: profileToEdit.name,
+      identity:
+        profileToEdit.gender === "male"
+          ? "Male"
+          : profileToEdit.gender === "female"
+            ? "Female"
+            : "Others",
+      relation: "Self",
+      birthDate: `${profileToEdit.year}-${String(profileToEdit.month).padStart(2, "0")}-${String(profileToEdit.day).padStart(2, "0")}`,
+      birthTime: `${String(profileToEdit.hour).padStart(2, "0")}:${String(profileToEdit.min).padStart(2, "0")}`,
+      birthPlace: profileToEdit.place,
+      unknownBirthTime: false,
+      latitude: profileToEdit.lat,
+      longitude: profileToEdit.lon,
+    };
   };
 
   const confirmDeleteProfile = async () => {
@@ -492,101 +559,61 @@ const MatchMaking = () => {
   };
   /* -------------------- UI -------------------- */
   return (
-    <div className={styles.matchMaking}>
-      <div className="w-full max-w-md bg-white flex flex-col">
-        {/* HEADER */}
-        {/* <div className="bg-[#FFF4EA] px-4 py-4 flex items-center justify-between"> */}
-        {/* <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center"
-          >
-            <ChevronLeft className="text-orange-500 w-5 h-5" />
-          </button> */}
-
-        {/* <div className="text-left flex-1">
-            <p className="text-xs text-gray-500">Select Profile</p>
-            <div className="flex items-center gap-1 font-semibold text-lg">
-              {selectedProfile?.name || "Select Profile"}
-              <ChevronDown className="w-4 h-4 text-orange-500" />
-            </div>
-          </div> */}
-
-        {/* <button
-            onClick={handleEditProfile}
-            disabled={!selectedProfile}
-            className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center"
-          >
-            <Edit2 className="text-orange-500 w-5 h-5" />
-          </button> */}
-        {/* </div> */}
-
-        {/* CONTENT */}
-        <div className={styles.matchMakingTopImg}>
-          <img src={matchMakingImg} alt="img" />
-        </div>
+    <div className={styles.matchMakingMain}>
+      <div className={styles.matchMaking}>
+          <img className={styles.topImg} src={matchMakingImg} alt="img" />
+          
         <div className={styles.matchMakingCard}>
-          <div className="bg-white border rounded-2xl p-6 text-center shadow-sm">
-            {/* <div className="flex justify-center mb-4">
-              <div className="w-14 h-14 rounded-full flex items-center justify-center">
-                <img src={bondIcon} alt="Shubh Talk Logo" />
+          <div className={styles.topTitles}>
+            <h2>Bonded by Destiny</h2>
+            <p>Matchmaking analyzes compatibility between two charts.</p>
+          </div>
+
+          <div className={styles.matchMakingInputs}>
+            <div className={styles.matchInput}>
+              <label className="block font-medium mb-2">
+                Select Primary Profile
+              </label>
+              <div
+                onClick={() => {
+                  setSelectingType("PRIMARY");
+                  setShowSelectProfile(true);
+                }}
+                className="flex items-center justify-between border rounded-xl px-4 py-3 bg-white"
+              >
+                <span>{primaryProfile?.name || "Select Profile"}</span>
+                <ChevronDown className="w-4 h-4 text-orange-500" />
               </div>
-            </div> */}
-            <h2 className="text-xl font-semibold mb-2">Bonded by Destiny</h2>
-            <p className="text-gray-500 text-sm">
-              Matchmaking analyzes compatibility between two charts.
-            </p>
-          </div>
-
-          {/* PRIMARY */}
-          <div className="mt-6">
-            <label className="block font-medium mb-2">
-              Select Primary Profile
-            </label>
-            <div
-              onClick={() => {
-                setSelectingType("PRIMARY");
-                setShowSelectProfile(true);
-              }}
-              className="flex items-center justify-between border rounded-xl px-4 py-3 bg-white"
-            >
-              <span>{primaryProfile?.name || "Select Profile"}</span>
-              <ChevronDown className="w-4 h-4 text-orange-500" />
             </div>
-          </div>
 
-          <div className="flex justify-center my-4">
-            {/* <Heart className="text-orange-500 w-6 h-6" /> */}
-          </div>
-
-          {/* PARTNER */}
-          <div>
-            <label className="block font-medium mb-2">
-              Select Partner’s Profile
-            </label>
-            <div
-              onClick={() => {
-                setSelectingType("PARTNER");
-                setShowSelectProfile(true);
-              }}
-              className="flex items-center justify-between border rounded-xl px-4 py-3 bg-white"
-            >
-              <span className={partnerProfile ? "" : "text-gray-400"}>
-                {partnerProfile?.name || "Add Profile"}
-              </span>
-              <ChevronDown className="w-4 h-4 text-orange-500" />
+            <div className={styles.matchInput}>
+              <label className="block font-medium mb-2">
+                Select Partner’s Profile
+              </label>
+              <div
+                onClick={() => {
+                  setSelectingType("PARTNER");
+                  setShowSelectProfile(true);
+                }}
+                className="flex items-center justify-between border rounded-xl px-4 py-3 bg-white"
+                >
+                <span className={partnerProfile ? "" : "text-gray-400"}>
+                  {partnerProfile?.name || "Add Profile"}
+                </span>
+                <ChevronDown className="w-4 h-4 text-orange-500" />
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* BUTTON */}
-        <div className="bg-white px-4 py-4 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] md:static md:shadow-none">
-          <button
-            onClick={handleProceed}
-            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold py-4 rounded-full flex items-center justify-center gap-2"
-          >
-            Proceed Ahead
-            <span className="text-xl">›</span>
-          </button>
+            <button className={styles.matchMakingBtn} onClick={handleProceed}>
+              Proceed Ahead 
+              <svg xmlns="http://www.w3.org/2000/svg" width="7" height="14" viewBox="0 0 7 14" fill="none">
+                <path d="M0.75 12.63L5.64 7.74C6.2175 7.1625 6.2175 6.2175 5.64 5.64L0.75 0.75" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <img className={styles.bottomImg} src={matchMakingImgBottom} alt="img" />
+
         </div>
       </div>
 
@@ -607,6 +634,7 @@ const MatchMaking = () => {
         onDeleteProfile={(profileId) =>
           handleDeleteProfile({ stopPropagation: () => {} }, profileId)
         }
+        onEditProfile={handleEditProfile}
         onAddProfile={() => {
           setShowAddProfile(true);
           setShowSelectProfile(false);
@@ -618,6 +646,7 @@ const MatchMaking = () => {
         }
         showAddButton={true}
         showDeleteButton={true}
+        showEditButton={true}
         emptyMessage={
           isLoggedIn
             ? "No profiles found. Add a profile to get started."
@@ -667,6 +696,19 @@ const MatchMaking = () => {
           onConfirm={confirmDeleteProfile}
         />
       )}
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={showEditProfile}
+        onClose={() => {
+          setShowEditProfile(false);
+          setProfileToEdit(null);
+        }}
+        onSubmit={handleSubmitEditProfile}
+        isLoading={isCreating}
+        title="Edit Profile"
+        initialData={getEditInitialData()}
+      />
     </div>
   );
 };

@@ -153,7 +153,7 @@ const MatchDetailsV2 = () => {
           />
       </div>
       {/* CTA Button */}
-      <button className="w-full max-w-md bg-[#FF6A3D] text-white font-bold py-3 rounded-full shadow-lg hover:bg-[#FF5A2D] transition">
+      <button className={styles.talkBtn}>
         Talk to a Matchmaking Expert
       </button>
     </div>

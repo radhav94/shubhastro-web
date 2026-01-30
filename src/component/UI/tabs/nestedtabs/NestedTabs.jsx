@@ -66,17 +66,16 @@ const NestedTabs = ({ tabs = [] }) => {
         </div>
       )}
 
-      {/* CONTENT AREA */}
+      {/* CASE 2: No children but parent has component → Render parent component (buttons outside innerTabContent) */}
+      {innerTabs.length === 0 && outerTab?.component && (
+        <outerTab.component />
+      )}
+
       {/* CONTENT AREA */}
       <div className={styles.innerTabContent}>
         {/* CASE 1: Has children → Render inner component */}
         {innerTabs.length > 0 && activeInnerTab?.component && (
           <activeInnerTab.component />
-        )}
-
-        {/* CASE 2: No children but parent has component → Render parent component */}
-        {innerTabs.length === 0 && outerTab?.component && (
-          <outerTab.component />
         )}
 
         {/* CASE 3: Nothing to show */}
