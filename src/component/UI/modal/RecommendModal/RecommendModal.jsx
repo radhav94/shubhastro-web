@@ -65,6 +65,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
   const [localSelectedProfile, setLocalSelectedProfile] = useState(null);
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
+  const [hasStartedFlow, setHasStartedFlow] = useState(false); // Track if user started connect flow
 
   const {
     activeCall,
@@ -134,6 +135,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
     setSelectedAstrologer(astro);
     setIsConnectPopupOpen(true);
     activeCallAstroRef.current = astro;
+    setHasStartedFlow(true); // Mark that user has started the connect flow
   };
 
   /* ------------------- SOCKET CALL FLOW (ADDED ONLY) ------------------- */
@@ -360,36 +362,39 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
         onCallStart={hookHandleCallStart}
       />
 
-      <div className={styles.overlay}>
-        <div className={styles.modal}>
-          <PrimaryLoader isLoading={isLoading} />
+      {/* Only show RecommendModal when kundli modal is NOT open AND user hasn't started flow */}
+      {!hookOpenModal.kundli && !hasStartedFlow && (
+        <div className={styles.overlay}>
+          <div className={styles.modal}>
+            <PrimaryLoader isLoading={isLoading} />
 
-          {/* HEADER */}
-          <div className={styles.modalHeader}>
-            <h3>Recommended Astrologers</h3>
-            <button className={styles.close} onClick={onClose}>
-              <IoClose size={22} />
-            </button>
-          </div>
+            {/* HEADER */}
+            <div className={styles.modalHeader}>
+              <h3>Recommended Astrologers</h3>
+              <button className={styles.close} onClick={onClose}>
+                <IoClose size={22} />
+              </button>
+            </div>
 
-          {/* BODY */}
-          <div className={styles.modalBody}>
-            <div className={styles.grid}>
-              {recommendedAstros?.data?.map((astro) => (
-                <RecommendedCard
-                  isActiveType={activeType}
-                  key={astro._id}
-                  astro={astro}
-                  mode={mode}
-                  onChat={() => handleConnectClick(astro)}
-                  onAudioCall={() => handleConnectClick(astro)}
-                  onVideoCall={() => handleConnectClick(astro)}
-                />
-              ))}
+            {/* BODY */}
+            <div className={styles.modalBody}>
+              <div className={styles.grid}>
+                {recommendedAstros?.data?.map((astro) => (
+                  <RecommendedCard
+                    isActiveType={activeType}
+                    key={astro._id}
+                    astro={astro}
+                    mode={mode}
+                    onChat={() => handleConnectClick(astro)}
+                    onAudioCall={() => handleConnectClick(astro)}
+                    onVideoCall={() => handleConnectClick(astro)}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 };
