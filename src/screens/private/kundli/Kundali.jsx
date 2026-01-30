@@ -395,6 +395,12 @@ const Kundali = () => {
     }
   };
 
+  const handleEditProfileFromListing = (profile) => {
+    setSelectedProfile(profile);
+    setShowSelectProfile(false);
+    setShowEditProfile(true);
+  };
+
   const handleEditProfile = () => {
     if (selectedProfile) {
       setShowEditProfile(true);
@@ -502,6 +508,7 @@ const Kundali = () => {
         selectedProfileId={selectedProfile?._id}
         onSelectProfile={handleSelectProfile}
         onDeleteProfile={(profileId) => handleDeleteProfile(null, profileId)}
+        onEditProfile={handleEditProfileFromListing}
         onAddProfile={() => {
           setShowAddProfile(true);
           setShowSelectProfile(false);
@@ -509,6 +516,7 @@ const Kundali = () => {
         title="Select Profile"
         showAddButton={true}
         showDeleteButton={true}
+        showEditButton={true}
         emptyMessage={isLoggedIn ? "No profiles found. Add a profile to get started." : "Add profiles to see your kundli."}
       />
       
