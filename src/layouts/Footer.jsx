@@ -120,28 +120,7 @@ const Footer = () => {
     return () => window.removeEventListener("storage", checkToken);
   }, []);
 
-  // -------------------------------
-  // Mobile Bottom Nav (Old version - kept for backward compatibility)
-  // -------------------------------
-  const mobileNavLinks = [
-    { href: "/", icon: <IoHomeOutline />, text: "Home" },
-    { href: "/talk-to-astrologers", icon: <IoCallOutline />, text: "Talk" },
-    { href: "/shop", icon: <IoStorefrontOutline />, text: "Mall", new: true },
-    { href: "/live-landing", icon: <IoPlayCircleOutline />, text: "Live" },
-    token
-      ? {
-          href: "#",
-          icon: <TbLogout />,
-          text: "Logout",
-          onClick: handleLogout,
-        }
-      : {
-          href: "/login",
-          icon: <IoPersonCircleOutline />,
-          text: "Login",
-        },
-  ];
-
+  
   return (
     <footer className={styles.footer}>
       <div className={styles.container}>
@@ -238,33 +217,6 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Sticky PWA Footer Navigation (Old version) */}
-      <div className={styles.pwa_footer}>
-        <nav>
-          <ul>
-            {mobileNavLinks.map((link) => (
-              <li key={link.text}>
-                <a
-                  href={link.href}
-                  className={link.active ? styles.active : ""}
-                  onClick={(e) => {
-                    if (link.onClick) {
-                      e.preventDefault(); // stop page reload
-                      link.onClick();
-                    }
-                  }}
-                >
-                  <div className={styles.nav_icon}>
-                    {link.icon}
-                    {link.new && <span className={styles.new_badge}>New</span>}
-                  </div>
-                  <span className={styles.nav_text}>{link.text}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
 
       {/* New Bottom Navigation (Modern Design) - Hidden on home page */}
       {location.pathname !== "/" && (
