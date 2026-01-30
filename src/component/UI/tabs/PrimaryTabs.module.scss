@@ -3,17 +3,36 @@
 .tabsContainer {
   width: 100%;
   font-family: "Poppins", sans-serif;
-  border-radius: 12px;
-  overflow: hidden; // ensures border radius applies to children
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    padding: 0;
+  }
 }
 
 .tabNav {
   display: flex;
-  border-bottom: 1px solid #e0e0e0;
-  background-color: #ffffff;
+  gap: 10px;
+  padding: 20px 15px;
+  background-color: #f5f5f5;
+  flex-wrap: wrap;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  padding-left: calc(50vw - 50% + 15px);
+  padding-right: calc(50vw - 50% + 15px);
+
+  @media (max-width: 1024px) {
+    gap: 10px;
+  }
 
   @media (max-width: 768px) {
     overflow-x: auto;
+    flex-wrap: nowrap;
+    gap: 10px;
+    padding: 20px 15px 20px 15px;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    justify-content: flex-start;
 
     &::-webkit-scrollbar {
       display: none;
@@ -24,37 +43,52 @@
 }
 
 .tabButton {
-  padding: 14px 30px;
+  padding: 8px 22px;
+  border-radius: 30px;
+  border: 1px solid #ff6b35;
+  background: #ffffff;
+  color: #1a1a1a;
   cursor: pointer;
-  background: none;
-  border: none;
-  font-family: inherit;
+  font-weight: 400;
   font-size: 15px;
-  font-weight: 600;
-  color: #555555;
-  position: relative;
-  white-space: nowrap; // Prevent wrapping on mobile
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 
-  &:hover {
-    color: #1a1a1a;
+  @media (max-width: 1024px) {
+    font-size: 14px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px 20px;
+    font-size: 13px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 8px 16px;
+    font-size: 12px;
   }
 
   &.active {
-    color: #1a1a1a;
+    background-color: #ff6b35;
+    color: #ffffff;
+    font-weight: 500;
   }
-}
-
-.activePill {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: black;
-  border-radius: 2px 2px 0 0;
 }
 
 .tabContent {
   padding: 24px;
+
+  @media (max-width: 1024px) {
+    padding: 20px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
 }
+

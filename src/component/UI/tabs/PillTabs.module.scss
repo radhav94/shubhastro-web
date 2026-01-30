@@ -1,0 +1,112 @@
+/* --- PILL TABS COMPONENT STYLES --- */
+
+.tabsContainer {
+  width: 100%;
+  font-family: "Poppins", sans-serif;
+}
+
+.tabNav {
+  display: flex;
+  gap: 12px;
+  padding: 16px 0;
+  background-color: transparent;
+  flex-wrap: wrap;
+
+  @media (max-width: 1024px) {
+    gap: 10px;
+  }
+
+  @media (max-width: 768px) {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 12px 0;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+.tabButton {
+  padding: 14px 32px;
+  cursor: pointer;
+  background: transparent;
+  border: 2px solid #ff6b35;
+  border-radius: 50px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1a1a1a;
+  position: relative;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  @media (max-width: 1024px) {
+    padding: 12px 28px;
+    font-size: 15px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px 24px;
+    font-size: 14px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 8px 20px;
+    font-size: 13px;
+  }
+
+  &:hover {
+    border-color: #ff5722;
+    transform: translateY(-1px);
+
+    @media (max-width: 768px) {
+      transform: none;
+    }
+  }
+
+  &.active {
+    color: #ffffff;
+    border-color: #ff6b35;
+    font-weight: 600;
+  }
+}
+
+.activePill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #ff6b35;
+  border-radius: 50px;
+  z-index: -1;
+}
+
+.labelText {
+  position: relative;
+  z-index: 1;
+}
+
+.tabContent {
+  padding: 24px 0;
+
+  @media (max-width: 1024px) {
+    padding: 20px 0;
+  }
+
+  @media (max-width: 768px) {
+    padding: 16px 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 12px 0;
+  }
+}
