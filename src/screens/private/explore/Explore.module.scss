@@ -114,19 +114,20 @@
   cursor: pointer;
 }
 
-// Content
 .content {
-  padding: 0 0 40px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-bottom: 50px;
 }
 
 // Hero Section
-.heroSection {
-  padding: 32px 16px;
-  background: #fff;
-  @media screen and (width <= 767px) {
-    padding: 16px 16px;
-  }
-}
+// .heroSection {
+//   padding: 32px 16px;
+//   // background: #fff;
+//   @media screen and (width <= 767px) {
+//     padding: 16px 16px;
+//   }
+// }
 
 .mainTitle {
   font-size: 36px;
@@ -428,6 +429,7 @@
 // Gemstones Banner
 .gemstonesBanner {
   padding: 24px 28px;
+  margin-block: 32px;
   background: #ff5722;
   border-radius: 20px;
   display: flex;
@@ -537,15 +539,15 @@
 
 // Desktop Responsive
 @media (min-width: 768px) {
-  .content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 40px 60px;
-  }
+  // .content {
+  //   max-width: 1200px;
+  //   margin: 0 auto;
+  //   padding-bottom: 50px;
+  // }
 
-  .heroSection {
-    padding: 48px 40px;
-  }
+  // .heroSection {
+  //   padding: 48px 40px;
+  // }
 
   .mainTitle {
     font-size: 48px;
@@ -574,14 +576,13 @@
     max-width: 100%;
   }
 
-  .destinyGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    max-width: 800px;
-  }
+  // .destinyGrid {
+  //   grid-template-columns: repeat(2, 1fr);
+  //   gap: 20px;
+  //   // max-width: 800px;
+  // }
 
-  .matchmakingBanner,
-  .gemstonesBanner {
+  .matchmakingBanner{
     margin: 32px 40px;
     max-width: 800px;
   }
