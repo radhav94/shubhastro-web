@@ -2,10 +2,42 @@
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
-  width: 50%;
-  margin: 0 auto; // 👈 centers it
+  width: 240px;
+  margin: 0px auto 20px auto; // 👈 centers it
 }
-
+.topScoreBox{
+  padding: 20px;
+  border-radius: var(--Radius-5, 16px);
+  border: 1px solid var(--primary-300, #FFC063);
+  background: var(--Colors-Primary-Yellow-100, #FDEFD8);
+}
+.goodMatch{
+  font-size: 40px;
+  font-weight: 600;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.totalScoreText{
+  font-size: 18px;
+  font-weight: 600;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.goodMatchText{
+  width: fit-content;
+  display: flex;
+  padding: 6px 12px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 90px;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  color: #fff;
+  margin: 10px auto 0 auto;
+}
 .header {
   background: #f4d24b;
   display: flex;
@@ -70,7 +102,7 @@
 @media (max-width: 600px) {
   .summaryContainer {
     max-width: 100%;
-    width: 100%;
+    width: fit-content;
     // margin: 10px;
   }
 
