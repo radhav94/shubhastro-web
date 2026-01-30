@@ -47,6 +47,7 @@
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 1;
 }
 
 .remoteVideoArea video {
@@ -70,6 +71,97 @@
   object-fit: cover !important;
   width: 100% !important;
   height: 100% !important;
+}
+
+/* ===============================
+   👤 AVATAR OVERLAYS
+   =============================== */
+
+.avatarOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.avatarImage {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  margin-bottom: 16px;
+}
+
+.avatarName {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+.avatarStatus {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.6);
+  margin: 0;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+}
+
+.avatarOverlayLocal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.avatarImageLocal {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.avatarOverlayMini {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+  z-index: 2;
+}
+
+.avatarImageMini {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .remoteUserVideo {
@@ -398,6 +490,7 @@
   height: calc(100% - 76px);
   background: #000;
   overflow: hidden;
+  position: relative;
 }
 
 .miniVideo > div {
@@ -457,6 +550,31 @@
 
   body {
     overflow: hidden;
+  }
+
+  .avatarImage {
+    width: 160px;
+    height: 160px;
+    border-width: 3px;
+    margin-bottom: 12px;
+  }
+
+  .avatarName {
+    font-size: 20px;
+  }
+
+  .avatarStatus {
+    font-size: 13px;
+  }
+
+  .avatarImageLocal {
+    width: 50px;
+    height: 50px;
+  }
+
+  .avatarImageMini {
+    width: 45px;
+    height: 45px;
   }
 
   .header {
@@ -539,6 +657,31 @@
    =============================== */
 
 @media (max-width: 480px) {
+
+  .avatarImage {
+    width: 140px;
+    height: 140px;
+    border-width: 2px;
+    margin-bottom: 10px;
+  }
+
+  .avatarName {
+    font-size: 18px;
+  }
+
+  .avatarStatus {
+    font-size: 12px;
+  }
+
+  .avatarImageLocal {
+    width: 40px;
+    height: 40px;
+  }
+
+  .avatarImageMini {
+    width: 40px;
+    height: 40px;
+  }
 
   .header {
     padding: 8px 10px;
@@ -658,6 +801,31 @@
 @media (min-width: 769px) {
   .videoContainer {
     max-width: 100vw;
+  }
+
+  .avatarImage {
+    width: 240px;
+    height: 240px;
+    border-width: 5px;
+    margin-bottom: 20px;
+  }
+
+  .avatarName {
+    font-size: 26px;
+  }
+
+  .avatarStatus {
+    font-size: 15px;
+  }
+
+  .avatarImageLocal {
+    width: 70px;
+    height: 70px;
+  }
+
+  .avatarImageMini {
+    width: 55px;
+    height: 55px;
   }
 
   .header {

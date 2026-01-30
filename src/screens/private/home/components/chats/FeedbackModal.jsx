@@ -4,7 +4,7 @@ import styles from "./Feedback.module.scss";
 const FeedbackModal = ({ open, onClose, handleSubmit, ratedUserName, reviewerName, loading }) => {
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
-  const [anonymous, setAnonymous] = useState(false);
+  const [isAnonymous, setAnonymous] = useState(false);
   const maxLength = 160;
 
   if (!open) return null;
@@ -13,7 +13,7 @@ const FeedbackModal = ({ open, onClose, handleSubmit, ratedUserName, reviewerNam
     await handleSubmit({
       rating,
       review,
-      anonymous,
+      isAnonymous,
     });
 
     resetForm();
@@ -53,7 +53,7 @@ const FeedbackModal = ({ open, onClose, handleSubmit, ratedUserName, reviewerNam
         </div>
 
         <label className={styles.checkbox}>
-          <input type="checkbox" value={anonymous} checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} /> Hide my name from all public reviews
+          <input type="checkbox" value={isAnonymous} checked={isAnonymous} onChange={(e) => setAnonymous(e.target.checked)} /> Hide my name from all public reviews
         </label>
 
         <div className={styles.stars}>
