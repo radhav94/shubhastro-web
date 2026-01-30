@@ -1,5 +1,5 @@
 // src/components/common/SwitchTabs.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import styles from "./Switchtabs.module.scss";
 
 /**
@@ -17,8 +17,8 @@ const SwitchTabs = ({ tabs = [], defaultTab }) => {
   const ActiveComponent = tabs.find((tab) => tab.value === activeTab)?.component;
 
   return (
-    <div className={styles.switchTabsContainer}>
-      {/* Buttons */}
+    <>
+      {/* Buttons - Outside any container */}
       <div className={styles.buttonGroup}>
         {tabs.map((tab) => (
           <button
@@ -33,11 +33,11 @@ const SwitchTabs = ({ tabs = [], defaultTab }) => {
         ))}
       </div>
 
-      {/* Active Tab Content */}
+      {/* Active Tab Content - Separate container */}
       <div className={styles.tabContent}>
         {ActiveComponent ? <ActiveComponent /> : <p>No content found</p>}
       </div>
-    </div>
+    </>
   );
 };
 

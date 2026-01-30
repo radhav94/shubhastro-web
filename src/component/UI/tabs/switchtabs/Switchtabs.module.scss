@@ -13,39 +13,76 @@ $font-primary: "Poppins", sans-serif;
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    padding: 0;
+  }
 }
 
 .buttonGroup {
   display: flex;
-  justify-content: center;
-  gap: 16px;
+  gap: 10px;
+  padding: 20px 15px;
+  background-color: #f5f5f5;
   flex-wrap: wrap;
-  margin-bottom: 24px;
-  padding: 20px;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  padding-left: calc(50vw - 50% + 15px);
+  padding-right: calc(50vw - 50% + 15px);
+
+  @media (max-width: 1024px) {
+    gap: 10px;
+  }
+
+  @media (max-width: 768px) {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    gap: 10px;
+    padding: 20px 15px 20px 15px;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    justify-content: flex-start;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 .toggleButton {
-  padding: 10px 28px;
-  border: 1px solid $color-grey-light;
-  border-radius: 40px;
-  // background-color: $color-grey-light;
+  padding: 8px 22px;
+  border-radius: 30px;
+  border: 1px solid #ff6b35;
+  background: $color-white;
   color: $color-black;
-  font-weight: 500;
   cursor: pointer;
+  font-weight: 400;
+  font-size: 15px;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
+  flex-shrink: 0;
 
-  &:hover {
-    background-color: $color-grey-light;
-    color: $color-black;
-    font-weight: bold;
+  @media (max-width: 1024px) {
+    font-size: 14px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px 20px;
+    font-size: 13px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 8px 16px;
+    font-size: 12px;
   }
 
   &.active {
-    background-color: $color-grey-light;
-    border-color: $color-grey-light;
-    color: $color-black;
-    font-weight: bold;
+    background-color: #ff6b35;
+    color: #ffffff;
+    font-weight: 500;
   }
 }
 
@@ -55,23 +92,28 @@ $font-primary: "Poppins", sans-serif;
   justify-content: flex-start;
   align-items: flex-start;
   text-align: left;
+  border: 1px solid $color-grey-light;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+
+  @media (max-width: 768px) {
+    padding: 0;
+    border-radius: 6px;
+  }
+
+  @media (max-width: 480px) {
+    border-radius: 4px;
+  }
 }
 
 @media (max-width: 768px) {
-  .toggleButton {
-    padding: 8px 18px;
-    font-size: 14px;
-  }
-
-  .buttonGroup {
-    gap: 12px;
+  .switchTabsContainer {
+    width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .toggleButton {
+  .switchTabsContainer {
     width: 100%;
-    max-width: 200px;
-    text-align: center;
   }
 }
