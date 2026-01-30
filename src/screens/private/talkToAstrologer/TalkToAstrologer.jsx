@@ -207,7 +207,13 @@ const TalkToAstrologer = () => {
   useEffect(() => {
     setActiveType(getTypeFromURL());
     if (!location.state?.rejoinAstro) return;
-    handleChatStart(location.state.rejoinAstro);
+
+    // Handle rejoin flow - open connect popup
+    const astro = location.state.rejoinAstro;
+    setSelectedAstrologer(astro);
+    setIsConnectPopupOpen(true);
+    activeCallAstroRef.current = astro;
+
     navigate(".", { replace: true, state: null });
   }, [location]);
 
@@ -520,10 +526,9 @@ const TalkToAstrologer = () => {
             kundliId,
             astrologerName: data?.astrologer?.firstName || "",
             astroID: data?.astrologer?.astrologer_ID,
-            experience: data?.astrologer?.experience
+            experience: data?.astrologer?.experience,
           },
         });
-        console.log('data :>> ', data);
       } catch (e) {
         Toast.error("Failed to start chat");
       }
@@ -832,7 +837,11 @@ const TalkToAstrologer = () => {
                 <div key={astro._id} className={styles.notSureCard}>
                   <RecommendedAstrologerCard
                     data={astro}
-                    onConnect={() => handleChatStart(astro)}
+                    onConnect={() => {
+                      setSelectedAstrologer(astro);
+                      setIsConnectPopupOpen(true);
+                      activeCallAstroRef.current = astro;
+                    }}
                   />
                 </div>
               ))}

@@ -1,4 +1,4 @@
-@import "../../../assets/variables/variables";
+// @import "../../../assets/variables/variables";
 
 .topAstrologerCard {
   background: #ffffff;
@@ -76,7 +76,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 1;
+  // -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
 
   @media (max-width: 768px) {
@@ -115,7 +115,10 @@
 
 .connectButton {
   width: 100%;
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
   color: white;
   border: none;
   border-radius: 20px;
