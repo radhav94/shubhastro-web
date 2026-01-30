@@ -10,6 +10,7 @@ import {
   IoVolumeHigh,
   IoAttach,
   IoTime,
+  IoCallSharp,
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import styles from "./VoiceCall.module.scss";
@@ -17,6 +18,10 @@ import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
 import { PATH } from "../../utils/routes/Paths";
 import GiftModal from "./GiftModal";
+
+// Import SVG icons from chat assets
+import VideocamIcon from "../../assets/chat/Videocam.svg";
+import CallIcon from "../../assets/chat/Call.svg";
 
 const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 
@@ -33,6 +38,7 @@ const AgoraVoiceCalling = ({ callData }) => {
   const micTrackRef = useRef(null);
   const cleanupRef = useRef(false);
   const videoTrackRef = useRef(null);
+  const remoteUserRef = useRef(null);
 
   /* ================= STATE ================= */
   const [micOn, setMicOn] = useState(true);
@@ -59,9 +65,12 @@ const AgoraVoiceCalling = ({ callData }) => {
         }
 
         if (mediaType === "video") {
+          remoteUserRef.current = user;
           setIsRemoteVideo(true);
           const container = document.getElementById("remote-video");
-          user.videoTrack?.play(container);
+          if (container) {
+            user.videoTrack?.play(container);
+          }
         }
 
       });
@@ -210,6 +219,28 @@ const AgoraVoiceCalling = ({ callData }) => {
     }
   }, [isVideo]);
 
+  // Re-attach video when maximizing
+  useEffect(() => {
+    if (!isMinimized && isVideo && videoTrackRef.current) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        videoTrackRef.current.play("local-video");
+      }, 100);
+    }
+  }, [isMinimized, isVideo]);
+
+  // Re-attach remote video when maximizing
+  useEffect(() => {
+    if (!isMinimized && isRemoteVideo && remoteUserRef.current) {
+      setTimeout(() => {
+        const container = document.getElementById("remote-video");
+        if (container && remoteUserRef.current.videoTrack) {
+          remoteUserRef.current.videoTrack.play(container);
+        }
+      }, 100);
+    }
+  }, [isMinimized, isRemoteVideo]);
+
   /* ================= UI ================= */
   return (
     <>
@@ -224,6 +255,7 @@ const AgoraVoiceCalling = ({ callData }) => {
           <div className={styles.miniHeader}>
             <span>
               {callerName} • {joined ? formatTime(callSeconds) : "Calling…"}
+              {isVideo && " • 📹"}
             </span>
             <button onClick={() => setIsMinimized(false)}>⤢</button>
           </div>
@@ -307,6 +339,18 @@ const AgoraVoiceCalling = ({ callData }) => {
             </div>
           )}
 
+          {/* Floating Sparkle Button */}
+          <button 
+            className={styles.floatingSparkleBtn}
+            onClick={() => {
+              setIsMinimized(true);
+              navigate(PATH.privateRoutes.AI_WOW.path);
+            }}
+            aria-label="AI Wow"
+          >
+            <IoSparkles size={32} />
+          </button>
+
           {/* Bottom Controls */}
           <div className={styles.bottomControls}>
             {/* Control Buttons Grid */}
@@ -319,10 +363,19 @@ const AgoraVoiceCalling = ({ callData }) => {
               </div>
 
               <div className={styles.controlItem}>
-                <button className={styles.controlBtn}>
-                  <IoSparkles size={24} />
+                <button 
+                  className={styles.controlBtn}
+                  onClick={toggleCamera}
+                >
+                  <img 
+                    src={isVideo ? CallIcon : VideocamIcon} 
+                    alt={isVideo ? "audio" : "video"} 
+                    className={styles.videoIcon}
+                  />
                 </button>
-                <span className={styles.controlLabel}>AI Wow</span>
+                <span className={styles.controlLabel}>
+                  {isVideo ? "Audio Call" : "Video Call"}
+                </span>
               </div>
 
               <div className={styles.controlItem}>
@@ -352,9 +405,7 @@ const AgoraVoiceCalling = ({ callData }) => {
                   className={`${styles.controlBtn} ${styles.endCallBtn}`}
                   onClick={endCall}
                 >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M19.23 15.26L16.69 14.97C16.08 14.9 15.48 15.11 15.05 15.54L13.21 17.38C10.38 15.94 8.06004 13.63 6.62004 10.79L8.47004 8.94001C8.90004 8.51001 9.11004 7.91001 9.04004 7.30001L8.75004 4.78001C8.63004 3.77001 7.78004 3.01001 6.76004 3.01001H5.03004C3.90004 3.01001 2.96004 3.95001 3.03004 5.08001C3.56004 13.62 10.39 20.44 18.92 20.97C20.05 21.04 20.99 20.1 20.99 18.97V17.24C21 16.23 20.24 15.38 19.23 15.26Z" fill="currentColor"/>
-                  </svg>
+                  <IoCallSharp size={24} />
                 </button>
                 <span className={styles.controlLabel}>End Call</span>
               </div>

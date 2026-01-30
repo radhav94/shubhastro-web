@@ -2,6 +2,7 @@ import { useState } from "react";
 import styles from "./Onboarding.module.scss";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
+import WheelDatePicker from "../../../component/UI/WheelDatePicker/WheelDatePicker";
 
 const BirthDetailsScreen = ({
   onNext,
@@ -25,6 +26,13 @@ const BirthDetailsScreen = ({
     onNext();
   };
 
+  // Format date for display (DD/MM/YYYY)
+  const formatDateDisplay = (dateStr) => {
+    if (!dateStr) return "DD/MM/YYYY";
+    const [year, month, day] = dateStr.split("-");
+    return `${day}/${month}/${year}`;
+  };
+
   return (
     <div className={styles.birthDetailsScreen}>
       <div className={styles.header}>
@@ -45,15 +53,16 @@ const BirthDetailsScreen = ({
 
         <div className={styles.formGroup}>
           <label>Birth Date</label>
-          <div className={styles.inputWrapper}>
+          <div 
+            className={styles.inputWrapper}
+            onClick={() => setShowDatePicker(true)}
+          >
             <input
-              type="date"
-              value={localData.birthDate}
-              onClick={(e) => e.target.showPicker?.()}
-              onChange={(e) =>
-                setLocalData({ ...localData, birthDate: e.target.value })
-              }
+              type="text"
+              value={formatDateDisplay(localData.birthDate)}
+              readOnly
               className={styles.input}
+              placeholder="DD/MM/YYYY"
             />
             <Calendar className={styles.inputIcon} size={20} />
           </div>
@@ -116,6 +125,14 @@ const BirthDetailsScreen = ({
       <button className={styles.otpprimaryBtn} onClick={handleNext}>
         Next
       </button>
+
+      {showDatePicker && (
+        <WheelDatePicker
+          value={localData.birthDate}
+          onChange={(date) => setLocalData({ ...localData, birthDate: date })}
+          onClose={() => setShowDatePicker(false)}
+        />
+      )}
     </div>
   );
 };

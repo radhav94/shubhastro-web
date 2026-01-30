@@ -157,6 +157,28 @@ export const useProfileManager = (dispatch) => {
     setShowEditProfile(true);
   };
 
+  const handleEditProfileFromListing = (profile) => {
+    setEditFormData({
+      name: profile.name,
+      identity:
+        profile.gender === "male"
+          ? "Male"
+          : profile.gender === "female"
+            ? "Female"
+            : "Others",
+      relation: "Self",
+      birthDate: `${profile.year}-${String(profile.month).padStart(2, "0")}-${String(profile.day).padStart(2, "0")}`,
+      birthTime: `${String(profile.hour).padStart(2, "0")}:${String(profile.min).padStart(2, "0")}`,
+      birthPlace: profile.place,
+      unknownBirthTime: false,
+      latitude: profile.lat,
+      longitude: profile.lon,
+    });
+    setSelectedProfile(profile);
+    setShowSelectProfile(false);
+    setShowEditProfile(true);
+  };
+
   const buildKundliPayload = (data) => {
     const dateObj = new Date(data.birthDate);
     const timeObj = data.birthTime ? data.birthTime.split(":") : ["0", "0"];
@@ -332,6 +354,7 @@ export const useProfileManager = (dispatch) => {
     handleSelectProfile,
     handleAddProfile,
     handleEditProfile,
+    handleEditProfileFromListing,
     handleSubmitProfile,
     handleSubmitEditProfile,
     formatProfileDisplay,

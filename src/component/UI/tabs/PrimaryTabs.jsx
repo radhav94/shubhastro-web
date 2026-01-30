@@ -1,7 +1,6 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import styles from "./PrimaryTabs.module.scss";
-import PrimaryText from "../../PrimaryText";
 import ConnectCard from "../cards/connectCard/ConnectCard";
 import ServiceCards from "../../../screens/private/home/components/serviceCards/ServiceCards";
 import ZodiacCarousel from "../../../screens/private/horoscope/zodiacCarousel/ZodiacCarousel";
@@ -33,23 +32,7 @@ const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0 }) => {
             }`}
             onClick={() => setActiveTabIndex(index)}
           >
-            {/* The active tab gets a sliding pill background */}
-            {activeTabIndex === index && (
-              <motion.div
-                className={styles.activePill}
-                layoutId="activeTabPill"
-              />
-            )}
-
-            <span className={styles.labelText}>
-              <PrimaryText
-                isSemiBold
-                size_16
-                color={activeTabIndex === index ? "#1a1a1a" : "#555555"}
-              >
-                {tab.label}
-              </PrimaryText>
-            </span>
+            {tab.label}
           </button>
         ))}
       </nav>

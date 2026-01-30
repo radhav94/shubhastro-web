@@ -11,6 +11,7 @@ import { PATH } from "../../../utils/routes/Paths";
 import { useLazyGetNumerologyPredictionQuery } from "../../../services/appServices/numerologyServices";
 import { Toast } from "../../../component";
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
+import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
 import ProfileListingModal from "../../../component/UI/Profile/ProfileListingModal";
 import bondIcon from "../../../assets/icons/destiny-icon.svg";
@@ -23,8 +24,10 @@ const MatchMaking = () => {
   /* -------------------- STATE -------------------- */
   const [showSelectProfile, setShowSelectProfile] = useState(false);
   const [showAddProfile, setShowAddProfile] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState(null);
+  const [profileToEdit, setProfileToEdit] = useState(null);
 
   const [selectedProfile, setSelectedProfile] = useState(null); // header display
   const [primaryProfile, setPrimaryProfile] = useState(null);
@@ -203,6 +206,69 @@ const MatchMaking = () => {
     e.stopPropagation(); // Prevent triggering profile selection
     setProfileToDelete(profileId);
     setShowDeleteModal(true);
+  };
+
+  /* -------------------- EDIT PROFILE -------------------- */
+  const handleEditProfile = (profile) => {
+    setProfileToEdit(profile);
+    setShowSelectProfile(false);
+    setShowEditProfile(true);
+  };
+
+  const handleSubmitEditProfile = async (formData) => {
+    try {
+      if (!profileToEdit) return;
+
+      // Delete old profile
+      await deleteKundli(profileToEdit._id).unwrap();
+
+      // Create new profile with updated data
+      const payload = buildKundliPayload(formData);
+      const result = await createKundli(payload).unwrap();
+
+      Toast.success("Profile updated successfully");
+      await refetch();
+
+      // Update selections if edited profile was selected
+      if (result?.data) {
+        if (primaryProfile?._id === profileToEdit._id) {
+          setPrimaryProfile(result.data);
+          setSelectedProfile(result.data);
+        }
+        if (partnerProfile?._id === profileToEdit._id) {
+          setPartnerProfile(result.data);
+        }
+      }
+
+      setShowEditProfile(false);
+      setProfileToEdit(null);
+    } catch (err) {
+      console.error("=== EDIT KUNDLI ERROR ===");
+      console.error(err);
+      Toast.error(err?.data?.message || "Failed to update profile");
+      throw err;
+    }
+  };
+
+  const getEditInitialData = () => {
+    if (!profileToEdit) return null;
+
+    return {
+      name: profileToEdit.name,
+      identity:
+        profileToEdit.gender === "male"
+          ? "Male"
+          : profileToEdit.gender === "female"
+            ? "Female"
+            : "Others",
+      relation: "Self",
+      birthDate: `${profileToEdit.year}-${String(profileToEdit.month).padStart(2, "0")}-${String(profileToEdit.day).padStart(2, "0")}`,
+      birthTime: `${String(profileToEdit.hour).padStart(2, "0")}:${String(profileToEdit.min).padStart(2, "0")}`,
+      birthPlace: profileToEdit.place,
+      unknownBirthTime: false,
+      latitude: profileToEdit.lat,
+      longitude: profileToEdit.lon,
+    };
   };
 
   const confirmDeleteProfile = async () => {
@@ -568,6 +634,7 @@ const MatchMaking = () => {
         onDeleteProfile={(profileId) =>
           handleDeleteProfile({ stopPropagation: () => {} }, profileId)
         }
+        onEditProfile={handleEditProfile}
         onAddProfile={() => {
           setShowAddProfile(true);
           setShowSelectProfile(false);
@@ -579,6 +646,7 @@ const MatchMaking = () => {
         }
         showAddButton={true}
         showDeleteButton={true}
+        showEditButton={true}
         emptyMessage={
           isLoggedIn
             ? "No profiles found. Add a profile to get started."
@@ -628,6 +696,19 @@ const MatchMaking = () => {
           onConfirm={confirmDeleteProfile}
         />
       )}
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={showEditProfile}
+        onClose={() => {
+          setShowEditProfile(false);
+          setProfileToEdit(null);
+        }}
+        onSubmit={handleSubmitEditProfile}
+        isLoading={isCreating}
+        title="Edit Profile"
+        initialData={getEditInitialData()}
+      />
     </div>
   );
 };
