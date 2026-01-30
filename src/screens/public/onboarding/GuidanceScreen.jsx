@@ -37,9 +37,11 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData }) => {
         return;
       }
 
-      // Get first and last name from formData
-      const firstName = formData.firstName || "";
-      const lastName = formData.lastName || "";
+      // Get name from formData and split into first/last name
+      const fullName = formData.name || "";
+      const nameParts = fullName.trim().split(/\s+/);
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || firstName; // Use firstName as lastName if no last name provided
       
       // Format phone number with 91 prefix (without +)
       let phoneNumber = formData.phoneNumber || "";
