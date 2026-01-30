@@ -3,12 +3,13 @@ import styles from "./Onboarding.module.scss";
 
 const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData }) => {
   const [localData, setLocalData] = useState({
-    name: formData.name || "",
+    firstName: formData.firstName || "",
+    lastName: formData.lastName || "",
     identity: formData.identity || "Female",
   });
 
   const handleNext = () => {
-    if (!localData.name.trim()) return;
+    if (!localData.firstName.trim() || !localData.lastName.trim()) return;
     updateFormData(localData);
     onNext();
   };
@@ -30,13 +31,24 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData })
         <h1 className={styles.title}>Let's personalize your journey together.</h1>
 
         <div className={styles.formGroup}>
-          <label>Name</label>
+          <label>First Name</label>
           <input
             type="text"
-            value={localData.name}
-            onChange={(e) => setLocalData({ ...localData, name: e.target.value })}
+            value={localData.firstName}
+            onChange={(e) => setLocalData({ ...localData, firstName: e.target.value })}
             className={styles.input}
-            placeholder="Enter here"
+            placeholder="first name"
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Last Name</label>
+          <input
+            type="text"
+            value={localData.lastName}
+            onChange={(e) => setLocalData({ ...localData, lastName: e.target.value })}
+            className={styles.input}
+            placeholder="last name"
           />
         </div>
 
@@ -83,7 +95,7 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData })
       <button
         className={styles.otpprimaryBtn}
         onClick={handleNext}
-        disabled={!localData.name.trim()}
+        disabled={!localData.firstName.trim() || !localData.lastName.trim()}
       >
         Next
       </button>
