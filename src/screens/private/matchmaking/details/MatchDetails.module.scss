@@ -94,3 +94,19 @@
     width: 100%;
   }
 }
+.talkBtn{
+  display: flex;
+  width: 450px;
+  height: 52px;
+  padding: 0 var(--Spacing-3, 12px);
+  justify-content: center;
+  align-items: center;
+  gap: var(--Spacing-1, 4px);
+  flex-shrink: 0;
+  color: #fff;
+  border-radius: var(--Radius-full, 999px);
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  @media (max-width: 767px) {
+    width: 100%;
+  }
+}
