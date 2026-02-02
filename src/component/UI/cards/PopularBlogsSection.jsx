@@ -18,8 +18,8 @@ const PopularBlogsSection = ({ blogs = [], title, subtitle }) => {
 
   if (!blogs || blogs.length === 0) return null;
 
-  // Show first 6 blogs
-  const displayBlogs = blogs.slice(0, 6);
+  // Show first 8 blogs to ensure scrolling
+  const displayBlogs = blogs.slice(0, 8);
 
   return (
     <div className={styles.popularBlogsSection}>

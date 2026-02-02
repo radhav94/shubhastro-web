@@ -1,6 +1,8 @@
 .relationalBlogsSection {
   max-width: 1600px;
   padding: 0 48px;
+  width: 100%;
+  overflow: hidden;
 
   @media (max-width: 768px) {
     margin: 32px auto 40px;
@@ -65,32 +67,27 @@
 }
 
 .blogsGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
   gap: 24px;
+  padding-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
 
-  @media (max-width: 1024px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  &::-webkit-scrollbar {
+    display: none;
   }
 
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
   @media (max-width: 768px) {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
     gap: 16px;
-    padding-bottom: 12px;
-    -webkit-overflow-scrolling: touch;
-
-    /* Hide scrollbar for Chrome, Safari and Opera */
-    &::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* Hide scrollbar for IE, Edge and Firefox */
-    -ms-overflow-style: none;
-    scrollbar-width: none;
   }
 }
 
@@ -101,16 +98,26 @@
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex: 0 0 320px;
+  min-width: 320px;
+  max-width: 320px;
+  scroll-snap-align: start;
 
   &:hover {
     transform: translateY(-8px);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
   }
 
+  @media (max-width: 1024px) and (min-width: 769px) {
+    flex: 0 0 calc(50% - 12px);
+    min-width: calc(50% - 12px);
+    max-width: calc(50% - 12px);
+  }
+
   @media (max-width: 768px) {
-    flex: 0 0 280px;
-    min-width: 280px;
-    scroll-snap-align: start;
+    flex: 0 0 calc(50% - 8px);
+    min-width: calc(50% - 8px);
+    max-width: calc(50% - 8px);
     border-radius: 12px;
   }
 }
