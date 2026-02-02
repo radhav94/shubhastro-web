@@ -12,6 +12,7 @@ import PrimaryLoader from '../../../component/UI/PrimaryLoader';
 import { formatted } from '../../../utils/dateFormat/date';
 import { zodiac } from './zodiac';
 import './Horoscope.css';
+import overViewImg from '../../../assets/images/overview-img.png';
 
 const HoroscopeNew = () => {
   const navigate = useNavigate();
@@ -357,8 +358,11 @@ const HoroscopeNew = () => {
                 <button
                   className={`category-card ${activeCategory === category.id ? 'active' : ''}`}
                   onClick={() => setActiveCategory(category.id)}
-                ></button>
-                <span className="category-label">{category.label}</span>
+                >
+                  <span className="category-label">{category.label}</span>
+                  <img className="categoryImages" src={overViewImg} alt="icons" />
+                  {/* <span className="roundedShadowBottom"></span> */}
+                </button>
               </div>
             ))}
           </div>
