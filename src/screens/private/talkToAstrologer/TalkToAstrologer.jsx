@@ -4,14 +4,17 @@ import {
   AstrologerCard,
   DetailsModal,
   PrimaryText,
-  RechargeAlertModel,
+  RechargeModal,
   Title,
   Toast,
 } from "../../../component";
 import styles from "./TalkToAstrologer.module.scss";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTalkToAstrologer } from "./useTalkToAstrologer";
-import { useGetAstrologersQuery, useGetRecommendedAstrologersQuery } from "../../../redux/api/astrologer/astrologerApi";
+import {
+  useGetAstrologersQuery,
+  useGetRecommendedAstrologersQuery,
+} from "../../../redux/api/astrologer/astrologerApi";
 import FilterChips from "../../../component/UI/chips/astrologer/FilterChips";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import ProfileModals from "../kundli/components/ProfileModals";
@@ -25,13 +28,13 @@ import { useCall } from "../../../context/CallContext";
 import useRecommendTrigger from "../../../utils/hooks/useRecommendTrigger";
 import RecommendCTA from "../../../layouts/recommend/RecommendCTA";
 import RecommendModal from "../../../component/UI/modal/RecommendModal/RecommendModal";
-import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { useChat } from "../../../context/ChatContext";
 import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
 import ChatAstrologerCard from "../../../component/UI/cards/ChatAstrologerCard";
 import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import RecommendedAstrologerCard from "../../../component/UI/cards/RecommendedAstrologerCard";
+import TopAstrologerCard from "../../../component/UI/cards/TopAstrologerCard";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -82,7 +85,7 @@ const TalkToAstrologer = () => {
   };
 
   const [{ isActiveOnline, isActiveType }, setActiveConfig] = useState(
-    getActiveConfigFromURL()
+    getActiveConfigFromURL(),
   );
 
   useEffect(() => {
@@ -173,6 +176,7 @@ const TalkToAstrologer = () => {
 
   const [page, setPage] = useState(1);
   const [specialty, setSpecialty] = useState("");
+  const [topTenAstrologers, setTopTenAstrologers] = useState([]);
   const [allAstrologers, setAllAstrologers] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [callRoomId, setCallRoomId] = useState(null);
@@ -181,7 +185,7 @@ const TalkToAstrologer = () => {
 
   const limit = 9;
 
-  const [createChatRoom] = useCreateChatRoomMutation();
+  // const [createChatRoom] = useCreateChatRoomMutation();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
   // last part of URL
 
@@ -203,40 +207,64 @@ const TalkToAstrologer = () => {
   useEffect(() => {
     setActiveType(getTypeFromURL());
     if (!location.state?.rejoinAstro) return;
-    handleChatStart(location.state.rejoinAstro);
+
+    // Handle rejoin flow - open connect popup
+    const astro = location.state.rejoinAstro;
+    setSelectedAstrologer(astro);
+    setIsConnectPopupOpen(true);
+    activeCallAstroRef.current = astro;
+
     navigate(".", { replace: true, state: null });
   }, [location]);
 
-  const { data: astrodata, isFetching } = useGetAstrologersQuery({
-    page,
-    limit,
-    specialties: specialty || "",
-    isActiveType,
-    ...(isActiveOnline === true && { isActive: true }),
-  });
+  const { data: astrodata, isFetching } = useGetAstrologersQuery(
+    {
+      page,
+      limit,
+      specialties: specialty || "",
+      isActiveType,
+      ...(isActiveOnline === true && { isActive: true }),
+    },
+    {
+      skip: isFiltered, // Skip normal API when in filtered mode
+    },
+  );
 
-  const { data: recommendedData, isLoading: isLoadingRecommended } = useGetRecommendedAstrologersQuery();
+  const { data: recommendedData, isLoading: isLoadingRecommended } =
+    useGetRecommendedAstrologersQuery();
 
-  const data = astrodata?.data || [];
+  const data = astrodata?.data?.result || [];
   const recommendedAstrologers = recommendedData?.data || [];
   const token = getToken();
   const { balance } = useWalletBalance();
   const [getBalance] = useGetBalanceMutation();
 
   useEffect(() => {
+    const incomingTopTen = astrodata?.data?.topTenAstrologer;
+
+    if (
+      incomingTopTen &&
+      incomingTopTen.length > 0 &&
+      topTenAstrologers.length === 0
+    ) {
+      setTopTenAstrologers(incomingTopTen);
+    }
+  }, [astrodata?.data?.topTenAstrologer]);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
     setPage(1);
     setAllAstrologers([]);
     setHasMore(true);
+    setIsFiltered(false);
   }, []);
 
-  // MERGE API DATA
+  // MERGE API DATA - only for normal (non-filtered) mode
   useEffect(() => {
-    if (!data) return;
+    if (isFiltered) return; // Don't process normal API data when in filtered mode
+    if (!data || data.length === 0) return;
 
-    // If same data count as current list → stop update → stop loop
     if (page === 1) {
-      if (allAstrologers.length === data.length) return;
       setAllAstrologers(data);
     } else {
       setAllAstrologers((prev) => {
@@ -248,44 +276,48 @@ const TalkToAstrologer = () => {
     }
 
     setHasMore(data.length >= limit);
-  }, [data, page, activeType]);
+  }, [data, page, isFiltered]);
 
   const hasMoreRef = useRef(hasMore);
   const isFetchingRef = useRef(isFetching);
+  const isFilteredRef = useRef(isFiltered);
   const loadMoreRef = useRef(null);
+  const initialLoadComplete = useRef(false);
 
   // Keep refs updated
   useEffect(() => {
     hasMoreRef.current = hasMore;
     isFetchingRef.current = isFetching;
-  }, [hasMore, isFetching]);
+    isFilteredRef.current = isFiltered;
+  }, [hasMore, isFetching, isFiltered]);
 
-  // Auto-load if no scrollbar exists (important!)
+  // Mark when initial data is loaded
   useEffect(() => {
-    if (isFiltered) return;
-
-    if (
-      document.documentElement.scrollHeight <= window.innerHeight &&
-      hasMoreRef.current &&
-      !isFetchingRef.current
-    ) {
-      setPage((prev) => prev + 1);
+    if (allAstrologers.length > 0 && page === 1 && !isFiltered) {
+      initialLoadComplete.current = true;
     }
-  }, [allAstrologers, isFiltered]);
+  }, [allAstrologers.length, page, isFiltered]);
 
+  // Intersection Observer for infinite scroll - only in normal mode
   useEffect(() => {
-    if (isFiltered || !hasMore || isFetching) return;
+    // Don't set up observer until initial data is loaded
+    if (isFiltered || !hasMore || isFetching || !initialLoadComplete.current)
+      return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (
+          entries[0].isIntersecting &&
+          !isFilteredRef.current &&
+          !isFetchingRef.current
+        ) {
           setPage((prev) => prev + 1);
         }
       },
-      { 
+      {
         threshold: 0.1,
-        rootMargin: '100px'
-      }
+        rootMargin: "50px",
+      },
     );
 
     const currentRef = loadMoreRef.current;
@@ -298,7 +330,7 @@ const TalkToAstrologer = () => {
         observer.unobserve(currentRef);
       }
     };
-  }, [isFetching, hasMore, isFiltered, allAstrologers, page]);
+  }, [isFetching, hasMore, isFiltered, allAstrologers.length]);
 
   // Filter handlers
   const resetFilters = () => {
@@ -311,6 +343,7 @@ const TalkToAstrologer = () => {
 
   const handleSelect = (category) => {
     if (!category) {
+      // Reset to normal pagination mode
       resetFilters();
     } else {
       setSpecialty(category);
@@ -321,44 +354,39 @@ const TalkToAstrologer = () => {
     }
   };
 
-  // const handleApplyFilters = (payload) => {
-  //   setIsFiltered(true);
-  //   setPage(1);
-  //   setAllAstrologers(payload.result || []);
-  //   setHasMore(false); // stop infinite scroll
-  // };
-
   const handleApplyFilters = (payload) => {
-    const { result = [], append = false } = payload || {};
+    const {
+      result: { result: filteredData },
+      append = false,
+    } = payload || {};
 
     setIsFiltered(true);
 
     if (!append) {
-      // 🔹 first page OR new filter → reset list
-      setPage(1);
-      setAllAstrologers(result);
+      // First page OR new filter → reset list
+      setAllAstrologers(filteredData || []);
     } else {
-      // 🔹 scroll load → append only new items
+      // Scroll load → append only new items
       setAllAstrologers((prev) => {
         const existingIds = new Set(prev.map((i) => i._id));
-        const newOnes = result.filter((i) => !existingIds.has(i._id));
+        const newOnes = (filteredData || []).filter(
+          (i) => !existingIds.has(i._id),
+        );
         return [...prev, ...newOnes];
       });
     }
 
-    setHasMore(result.length >= limit);
+    setHasMore((filteredData || []).length >= limit);
   };
 
   // Custom handler for profile selection (doesn't close modal)
   const handleProfileSelect = (profile) => {
-    console.log("✅ TALK_TO_ASTROLOGER: Profile selected", profile);
     setLocalSelectedProfile(profile);
   };
 
   // Handler for Continue button (triggers socket emit)
   const handleContinueAfterKundliSelect = () => {
     if (localSelectedProfile) {
-      console.log("✅ TALK_TO_ASTROLOGER: Continue clicked with profile", localSelectedProfile);
       hookHandleAfterKundliSelect(localSelectedProfile);
     }
   };
@@ -425,19 +453,24 @@ const TalkToAstrologer = () => {
       setCallWaitingList(data?.waitingTime || 5);
     };
 
-    const handleCallAccepted = async ({ roomId, token, type, remainingTime }) => {
+    const handleCallAccepted = async ({
+      roomId,
+      token,
+      type,
+      remainingTime,
+    }) => {
       resetCallFlow();
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
 
       try {
-        const res = await createChatRoom({
-          userId: userIdLocal,
-          astrologerId: astro._id,
-        });
+        // const res = await createChatRoom({
+        //   userId: userIdLocal,
+        //   astrologerId: astro._id,
+        // });
 
-        const chatRoomId = res?.data?.data;
-        if (!chatRoomId) throw new Error();
+        // const chatRoomId = res?.data?.data;
+        // if (!chatRoomId) throw new Error();
 
         setActiveCall({
           roomId,
@@ -450,7 +483,7 @@ const TalkToAstrologer = () => {
           astrologerId: astro._id,
           kundliId,
           astrologerID: astro?.astrologer_ID,
-          remainingTime
+          remainingTime,
         });
       } catch {
         Toast.error("Failed to start call");
@@ -493,17 +526,18 @@ const TalkToAstrologer = () => {
             kundliId,
             astrologerName: data?.astrologer?.firstName || "",
             astroID: data?.astrologer?.astrologer_ID,
+            experience: data?.astrologer?.experience,
           },
         });
       } catch (e) {
-        console.log("e", e);
         Toast.error("Failed to start chat");
       }
     };
     /* REJECTED */
     const handleCallRejected = (data) => {
       const errorMsg =
-        data?.sessionData?.sessionEndReason === "rejected" && data?.type === "chat"
+        data?.sessionData?.sessionEndReason === "rejected" &&
+        data?.type === "chat"
           ? "Astrologer has rejected the chat request"
           : "Astrologer has rejected the call request";
       Toast.error(errorMsg);
@@ -514,8 +548,6 @@ const TalkToAstrologer = () => {
 
     /* ERROR */
     const handleSocketError = (err) => {
-      console.log("SOCKET ERROR:", err);
-
       if (err?.message === "Call has already ended") {
         // soft reset only
         resetCallState();
@@ -560,7 +592,8 @@ const TalkToAstrologer = () => {
     <div className={styles.mainContainer}>
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>
-          Chat With Best <span className={styles.highlight}>Astrologers</span> Online
+          Chat With Best <span className={styles.highlight}>Astrologers</span>{" "}
+          Online
         </h1>
       </div>
 
@@ -569,17 +602,128 @@ const TalkToAstrologer = () => {
         isActiveType={activeType}
         onApplyFilters={handleApplyFilters}
         isOnlineFromURL={isOnlineFromURL}
+        selectedType={location.state?.selectedType}
       />
 
+      {/* Top Astrologers Section - New Design */}
+      {topTenAstrologers.length > 0 && (
+        <>
+          <div className={styles.sectionDivider}>
+            <h2 className={styles.sectionTitle}>TOP ASTROLOGERS FOR YOU</h2>
+            <div className={styles.dividerContainer}>
+              <div className={styles.dividerLine}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="104"
+                  height="1"
+                  viewBox="0 0 104 1"
+                  fill="none"
+                >
+                  <path
+                    d="M103.803 0.406393C103.803 0.630933 101.504 0.812789 98.669 0.812789C95.8336 0.812789 0 0.630933 0 0.406393C0 0.181853 95.8342 0 98.669 0C101.504 0 103.803 0.181853 103.803 0.406393Z"
+                    fill="#030303"
+                  />
+                </svg>
+              </div>
+              <span className={styles.dividerMoon}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="16"
+                  viewBox="0 0 4 5"
+                  fill="none"
+                >
+                  <path
+                    d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z"
+                    fill="#030303"
+                  />
+                </svg>
+              </span>
+              <div className={styles.dividerLine}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="104"
+                  height="1"
+                  viewBox="0 0 104 1"
+                  fill="none"
+                >
+                  <path
+                    d="M-4.48009e-06 0.406393C-4.48009e-06 0.630933 2.29856 0.812789 5.13401 0.812789C7.96946 0.812789 103.803 0.630933 103.803 0.406393C103.803 0.181853 7.96885 0 5.13401 0C2.29856 0 -4.48009e-06 0.181853 -4.48009e-06 0.406393Z"
+                    fill="#030303"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.topAstrologersGrid}>
+            {topTenAstrologers.map((astro) => (
+              <TopAstrologerCard
+                key={astro._id}
+                data={astro}
+                onConnect={() => {
+                  setSelectedAstrologer(astro);
+                  setIsConnectPopupOpen(true);
+                  activeCallAstroRef.current = astro;
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Explore Astrologers Section - Original Design */}
+
       <div className={styles.sectionDivider}>
-        <h2 className={styles.sectionTitle}>TOP ASTROLOGERS FOR YOU</h2>
-        <div className={styles.dividerLine}>
-          <span className={styles.dividerDot}>☾</span>
+        <h2 className={styles.sectionTitle}>EXPLORE ASTROLOGERS</h2>
+        <div className={styles.dividerContainer}>
+          <div className={styles.dividerLine}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="104"
+              height="1"
+              viewBox="0 0 104 1"
+              fill="none"
+            >
+              <path
+                d="M103.803 0.406393C103.803 0.630933 101.504 0.812789 98.669 0.812789C95.8336 0.812789 0 0.630933 0 0.406393C0 0.181853 95.8342 0 98.669 0C101.504 0 103.803 0.181853 103.803 0.406393Z"
+                fill="#030303"
+              />
+            </svg>
+          </div>
+          <span className={styles.dividerMoon}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="15"
+              height="16"
+              viewBox="0 0 4 5"
+              fill="none"
+            >
+              <path
+                d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z"
+                fill="#030303"
+              />
+            </svg>
+          </span>
+          <div className={styles.dividerLine}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="104"
+              height="1"
+              viewBox="0 0 104 1"
+              fill="none"
+            >
+              <path
+                d="M-4.48009e-06 0.406393C-4.48009e-06 0.630933 2.29856 0.812789 5.13401 0.812789C7.96946 0.812789 103.803 0.630933 103.803 0.406393C103.803 0.181853 7.96885 0 5.13401 0C2.29856 0 -4.48009e-06 0.181853 -4.48009e-06 0.406393Z"
+                fill="#030303"
+              />
+            </svg>
+          </div>
         </div>
       </div>
 
       <div className={styles.cardsContainer}>
-        {allAstrologers.map((astro, index) => (
+        {allAstrologers?.map((astro, index) => (
           <div key={astro._id} className={styles.cardWrapper}>
             {isChatMode ? (
               <ChatAstrologerCard
@@ -634,11 +778,53 @@ const TalkToAstrologer = () => {
       {!hasMore && allAstrologers.length > 0 && (
         <div className={styles.matchSection}>
           <h2 className={styles.matchTitle}>
-            NOT SURE?<br />
+            NOT SURE?
+            <br />
             LET US MATCH YOU.
           </h2>
-          <div className={styles.dividerLine}>
-            <span className={styles.dividerDot}>☾</span>
+          <div className={styles.dividerContainer}>
+            <div className={styles.dividerLine}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="104"
+                height="1"
+                viewBox="0 0 104 1"
+                fill="none"
+              >
+                <path
+                  d="M103.803 0.406393C103.803 0.630933 101.504 0.812789 98.669 0.812789C95.8336 0.812789 0 0.630933 0 0.406393C0 0.181853 95.8342 0 98.669 0C101.504 0 103.803 0.181853 103.803 0.406393Z"
+                  fill="#030303"
+                />
+              </svg>
+            </div>
+            <span className={styles.dividerMoon}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="16"
+                viewBox="0 0 4 5"
+                fill="none"
+              >
+                <path
+                  d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z"
+                  fill="#030303"
+                />
+              </svg>
+            </span>
+            <div className={styles.dividerLine}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="104"
+                height="1"
+                viewBox="0 0 104 1"
+                fill="none"
+              >
+                <path
+                  d="M-4.48009e-06 0.406393C-4.48009e-06 0.630933 2.29856 0.812789 5.13401 0.812789C7.96946 0.812789 103.803 0.630933 103.803 0.406393C103.803 0.181853 7.96885 0 5.13401 0C2.29856 0 -4.48009e-06 0.181853 -4.48009e-06 0.406393Z"
+                  fill="#030303"
+                />
+              </svg>
+            </div>
           </div>
 
           {isLoadingRecommended ? (
@@ -648,10 +834,14 @@ const TalkToAstrologer = () => {
           ) : (
             <div className={styles.recommendedGrid}>
               {recommendedAstrologers.map((astro) => (
-                <div key={astro._id} className={styles.cardWrapper}>
+                <div key={astro._id} className={styles.notSureCard}>
                   <RecommendedAstrologerCard
                     data={astro}
-                    onConnect={() => handleChatStart(astro)}
+                    onConnect={() => {
+                      setSelectedAstrologer(astro);
+                      setIsConnectPopupOpen(true);
+                      activeCallAstroRef.current = astro;
+                    }}
                   />
                 </div>
               ))}
@@ -665,12 +855,23 @@ const TalkToAstrologer = () => {
         handleSubmit={handleSubmit}
       />
 
-      {/* <RechargeAlertModel
-        onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
+      {/* Recharge Modal */}
+      <RechargeModal
         isOpen={openModal.recharge}
-        handleSubmit={onRechargeNow}
+        onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
         astrologer={selectedAstrologer}
-      /> */}
+        connectionType="chat"
+      />
+
+      {/* Recharge modal from hook for popup flow */}
+      <RechargeModal
+        isOpen={hookOpenModal.recharge}
+        onClose={() =>
+          hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
+        }
+        astrologer={selectedAstrologer}
+        connectionType="chat"
+      />
 
       {/* Kundli modal - using ProfileModals like Home page */}
       <ProfileModals
@@ -699,66 +900,23 @@ const TalkToAstrologer = () => {
         onContinue={handleContinueAfterKundliSelect}
       />
 
-      {openModal.recharge && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContainer}>
-            <PrimaryText isCenter className=" pt-4">
-              Minimum balance of 5 minutes (₹{" "}
-              {(selectedAstrologer?.price?.chatRate?.amount || 1) * 5}) is
-              required to start chat with
-              {` ${selectedAstrologer?.firstName || "Astrologer"}`}.
-            </PrimaryText>
-
-            <div className={styles.modalButtons}>
-              <button
-                className={styles.rejectBtn}
-                onClick={() =>
-                  setOpenModal((prev) => ({ ...prev, recharge: false }))
-                }
-              >
-                Cancel
-              </button>
-              <button
-                className={styles.acceptBtn}
-                onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
-              >
-                Recharge
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Recharge Modal */}
+      <RechargeModal
+        isOpen={openModal.recharge}
+        onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
+        astrologer={selectedAstrologer}
+        connectionType="chat"
+      />
 
       {/* Recharge modal from hook for popup flow */}
-      {hookOpenModal.recharge && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContainer}>
-            <PrimaryText isCenter className=" pt-4">
-              Minimum balance of 5 minutes (₹{" "}
-              {(selectedAstrologer?.price?.chatRate?.amount || 1) * 5}) is
-              required to start chat with
-              {` ${selectedAstrologer?.firstName || "Astrologer"}`}.
-            </PrimaryText>
-
-            <div className={styles.modalButtons}>
-              <button
-                className={styles.rejectBtn}
-                onClick={() =>
-                  hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
-                }
-              >
-                Cancel
-              </button>
-              <button
-                className={styles.acceptBtn}
-                onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
-              >
-                Recharge
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <RechargeModal
+        isOpen={hookOpenModal.recharge}
+        onClose={() =>
+          hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
+        }
+        astrologer={selectedAstrologer}
+        connectionType="chat"
+      />
 
       {showCTA && showRecommend && !WaitingList && (
         <RecommendCTA
@@ -794,15 +952,6 @@ const TalkToAstrologer = () => {
         onChatStart={hookHandleChatStart}
         onCallStart={hookHandleCallStart}
       />
-
-      {/* Waiting Modal - shows for both chat and call */}
-      {(WaitingList || callWaitingList) && (
-        <WaitingModal
-          callRoomId={callRoomId || chatRoomId}
-          resetCallState={resetCallState}
-          connectionType={WaitingList ? 'chat' : 'audio'}
-        />
-      )}
     </div>
   );
 };

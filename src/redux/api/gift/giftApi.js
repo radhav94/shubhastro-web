@@ -11,6 +11,9 @@ export const giftApi = privateRequestNew.injectEndpoints({
     sendGift: builder.mutation({
       query: ({ giftId, astrologerId }) => ({
         url: "gifts/send",
+        headers: {
+          "Content-Type": "application/json",
+        },
         method: "POST",
         body: {giftId, astrologerId}
       }),

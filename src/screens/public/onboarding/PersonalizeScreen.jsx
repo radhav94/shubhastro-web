@@ -36,7 +36,7 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData })
             value={localData.name}
             onChange={(e) => setLocalData({ ...localData, name: e.target.value })}
             className={styles.input}
-            placeholder="Enter here"
+            placeholder="Enter your name"
           />
         </div>
 

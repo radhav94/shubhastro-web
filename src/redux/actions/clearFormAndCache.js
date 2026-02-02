@@ -11,10 +11,15 @@ import { vedicApi } from "../api/baseApi/vedicApi";
 import { geoApi } from "../api/geoApi";
 import { astroTarotApi } from "../api/tarot/astroTarotApi";
 import { clearForm } from "../kundliform/formSlice";
+import { logout } from "../auth/authSlice";
 
 export const clearFormAndCache = () => (dispatch) => {
   // 1️⃣ Clear form slice
   dispatch(clearForm());
+  
+  // 2️⃣ Dispatch logout action to update auth state
+  dispatch(logout());
+  
   const role = localStorage.getItem("shubhtalk_role");
 
   if (role === "ASTROLOGER") {
@@ -46,6 +51,8 @@ export const clearFormAndCache = () => (dispatch) => {
   localStorage.removeItem("shani_sade_sati");
   localStorage.removeItem("sun_sign");
   localStorage.removeItem("vehicle_calculator");
+  localStorage.removeItem("selectedKundliProfile");
+  localStorage.removeItem("userData");
 
   // 2️⃣ Clear ALL RTK Query cache
   dispatch(baseApi.util.resetApiState());

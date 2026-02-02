@@ -1,22 +1,171 @@
 /* TopHeader Component Styles */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+@mixin line-clamp($lines: 3) {
+  @if $lines != null {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Ensures ellipsis is shown if needed */
+  } @else {
+    /* Fallback for cases where $lines is not specified, if necessary */
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    display: block;
+  }
+}
+
+.mainLeftMain{
+  display: flex;
+}
+
+.logoHeader img {
+  height: 40px;
+}
+
+// .logoHeaderMobile {
+//   display: none;
+// }
+
+.headerNavigation {
+  display: flex;
+  flex-direction: row;
+  // margin-left: auto;
+
+  a {
+    text-decoration: none;
+    color: #000;
+    font-size: 14px;
+    padding: 6px 15px;
+    border-radius: 5px;
+  }
+}
+
+.active{
+  background-color: #000;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 16px;
+}
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  font-size: 26px;
+  cursor: pointer;
+  margin-right: 10px;
+  @media screen and (width <= 1180px) {
+    display: block;
+  }
+}
+
+/* Drawer Overlay */
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 99;
+}
+
+/* Drawer */
+.mobileDrawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 80%;
+  max-width: 320px;
+  height: 100%;
+  background: #fff;
+  z-index: 100;
+  padding: 20px;
+  animation: slideIn 0.3s ease forwards;
+
+  a {
+    display: block;
+    padding: 14px;
+    font-size: 16px;
+    color: #000;
+    text-decoration: none;
+  }
+}
+
+.drawerClose {
+  font-size: 22px;
+  background: none;
+  border: none;
+  margin-bottom: 20px;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* 📱 Mobile */
+@media (max-width: 768px) {
+  // .hamburger {
+  //   display: block;
+  // }
+
+  // .logoHeader {
+  //   display: none;
+  // }
+
+  // .logoHeaderMobile {
+  //   display: block;
+  // }
+}
 
 .topHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 3rem;
-  background: #fff;
+  padding: 16px 16px;
+  background: #FFF5EC;
+  position: relative;
   font-family:
     "Poppins",
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
   z-index: 100;
+  border-bottom: 1px solid rgba(247 88 1 / 30%);
+}
+.logoHeader{
+  width: fit-content;
+  height: auto;
+  cursor: pointer;
+  @media screen and (width <= 767px) {
+    display: none;    
+  }
+  img{
+    width: 100%;
+  }
+}
+.logoHeaderMobile{
+  width: 44px;
+  height: 44px;
+  display: none;
+  cursor: pointer;
+  @media screen and (width <= 767px) {
+    display: block;    
+  }
+  img{
+    width: 100%;
+  }
 }
 
 .userGreeting {
@@ -53,15 +202,22 @@
   font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
+  @include line-clamp(1);
 }
 
 .headerNavigation {
-  display: none;
-  flex-direction: column;
-  gap: 0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0px;
   flex: 1;
   align-items: center;
   padding: 0 1rem;
+  max-width: 600px;
+  justify-content: center;
+  @media screen and (width <= 1180px) {
+      display: none!important;
+  }
 }
 
 .navRow {
@@ -94,10 +250,82 @@
   font-weight: 600;
 }
 
+.liveNavLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #ff2b6a, #ff6a88);
+  color: #fff !important;
+  font-weight: 600;
+  padding: 0.4rem 1rem;
+}
+
+.liveNavLink:hover {
+  background: linear-gradient(135deg, #ff1e5e, #ff5a7c);
+  color: #fff !important;
+}
+
+.liveNavLink.active {
+  background: linear-gradient(135deg, #ff1e5e, #ff5a7c);
+  color: #fff !important;
+}
+
+.liveDotNav {
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
 .headerActions {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.liveButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ff2b6a, #ff6a88);
+  border: none;
+  padding: 10px 18px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(255, 43, 106, 0.3);
+}
+
+.liveButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 43, 106, 0.4);
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
+}
+
+.liveText {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .walletBadge {
@@ -118,23 +346,31 @@
 .walletBadge::before {
   content: "";
   position: absolute;
-  top: -10px;
+  top: -17px;
   left: 28%;
   width: 22px;
-  height: 16px;
-  background: #fff;
+  height: 22px;
+  background: #fff4ec;
   border-radius: 50%;
+  @media screen and (width <= 767px) {
+    height: 16px;
+    top: -10px;
+  }
 }
 
 .walletBadge::after {
   content: "";
   position: absolute;
-  bottom: -10px;
+  bottom: -17px;
   left: 28%;
   width: 22px;
-  height: 16px;
-  background: #fff;
+  height: 22px;
+  background: #fff4ec;
   border-radius: 50%;
+  @media screen and (width <= 767px) {
+    height: 16px;
+    bottom: -10px;
+  }
 }
 
 .coinIcon {
@@ -202,12 +438,6 @@
   transform: translateY(-1px);
 }
 
-/* Show navigation on tablet and desktop */
-@media (min-width: 768px) {
-  .headerNavigation {
-    display: flex;
-  }
-}
 
 /* Mobile responsive for Header - 375px */
 @media (max-width: 480px) {
@@ -223,6 +453,7 @@
 
   .greetingText {
     gap: 2px;
+    max-width: 27vw;
   }
 
   .namaste {
@@ -231,6 +462,20 @@
 
   .userName {
     font-size: 16px;
+  }
+
+  .liveButton {
+    padding: 8px 14px;
+    gap: 6px;
+  }
+
+  .liveDot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .liveText {
+    font-size: 12px;
   }
 
   .walletBadge {

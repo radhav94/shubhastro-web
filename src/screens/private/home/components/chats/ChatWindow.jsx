@@ -12,7 +12,6 @@ import ChatHeader from "./ChatHeader";
 import ChatMessages from "./ChatMessages";
 import ChatInput from "./ChatInput";
 import ChatFooter from "./ChatFooter";
-import WaitingPopup from "./WaitingPopup";
 import FloatingActions from "./FloatingActions";
 import useChatSocket from "./useChatSocket";
 import Feedback from "./Feedback";
@@ -22,11 +21,19 @@ import { Toast } from "../../../../../component";
 import dayjs from "dayjs";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
+// Import SVG icons
+import CallIcon from "../../../../../assets/chat/Call.svg";
+import VideocamIcon from "../../../../../assets/chat/Videocam.svg";
+
 const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 const MIN_CHAT_SECONDS = 60;
 
 import { useGetS3SignedUrlMutation } from "../../../../../redux/api/s3SignedApi";
 import { useWalletBalance } from "../../../wallet/useWalletBalance";
+import { PATH } from "../../../../../utils/routes/Paths";
+import ProfileListingModal from "../../../../../component/UI/Profile/ProfileListingModal";
+import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
+import GiftModal from "../../../../../component/call/GiftModal";
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
@@ -42,13 +49,30 @@ const ChatWindow = () => {
     astrologerName,
     refreshKey,
     astroID,
+    experience
   } = state || {};
 
   const { activeCall } = useCall();
   const [openFeedback, setOpenFeedback] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showGiftModal, setShowGiftModal] = useState(false);
   
   // Get wallet balance
-  const { balance } = useWalletBalance();
+  const { balance, refreshWallet } = useWalletBalance();
+  
+  // Fetch kundli profiles
+  const { data: profilesData } = useGetAllKundlisQuery();
+  const profiles = profilesData?.data || [];
+
+  // Listen for wallet balance updates
+  useLayoutEffect(() => {
+    const handleBalanceUpdate = () => {
+      refreshWallet();
+    };
+
+    window.addEventListener("walletBalanceUpdated", handleBalanceUpdate);
+    return () => window.removeEventListener("walletBalanceUpdated", handleBalanceUpdate);
+  }, [refreshWallet]);
 
   const {
     messages,
@@ -74,15 +98,23 @@ const ChatWindow = () => {
 
   const [message, setMessage] = useState("");
 
-  const { waitingPopup, handleAudioCall, handleVideoCall, handleCancelCall } =
-    useChatSocket({
-      userId,
-      astrologerId,
-      fullName,
-      kundliId,
-      roomId,
-      isUserSide,
-    });
+  const { 
+    waitingPopup: localWaitingPopup, 
+    handleAudioCall, 
+    handleVideoCall, 
+    handleCancelCall 
+  } = useChatSocket({
+    userId,
+    astrologerId,
+    fullName,
+    kundliId,
+    roomId,
+    isUserSide,
+  });
+
+  // Use global waiting list from CallContext
+  const { waitingList: globalWaitingList } = useCall();
+  const waitingPopup = localWaitingPopup || globalWaitingList;
 
   const { data } = useGetChatHistoryQuery(
     { userId: astrologerId },
@@ -246,95 +278,144 @@ const ChatWindow = () => {
   };
 
   // Floating action handlers
-  const handleShuffle = () => {
-    console.log("Shuffle action");
-    // Add your shuffle logic here
+  const handleSwitchProfile = () => {
+    setShowProfileModal(true);
   };
 
   const handleSparkles = () => {
-    console.log("Sparkles action");
-    // Add your sparkles logic here
+    navigate(PATH.privateRoutes.AI_WOW.path);
   };
 
   const handleGift = () => {
-    navigate(`/astrologer/${astrologerId}`);
+    setShowGiftModal(true);
   };
 
   const handleRecharge = () => {
-    console.log("Recharge action");
     navigate('/recharge');
-    // Navigate to recharge page or open recharge modal
+  };
+
+  const handleSelectProfile = (profile) => {
+    // Send the selected kundli profile
+    handleSend(profile);
+    setShowProfileModal(false);
   };
 
   return (
-    <div className={styles.chatPage}>
-      <div className={styles.chatWindow}>
-        <ChatHeader
-          fullName={fullName}
-          isTyping={isTyping}
-          onBack={() => navigate(-1)}
-          onAudioCall={handleAudioCall}
-          onVideoCall={handleVideoCall}
-          disabled={!!activeCall}
-          walletBalance={balance || 0}
-        />
-
-        <div className={styles.messagesContainer}>
-          <ChatMessages
-            messages={finalMsgs}
+    <>
+      <div className={styles.chatPage}>
+        <div className={styles.chatWindow}>
+          <ChatHeader
+            fullName={fullName}
             isTyping={isTyping}
-            error={error}
-            messagesRef={messagesRef}
+            onBack={() => navigate(-1)}
+            onAudioCall={handleAudioCall}
+            onVideoCall={handleVideoCall}
+            disabled={!!activeCall}
+            walletBalance={balance || 0}
+            experience={experience}
           />
 
-          <FloatingActions
-            onShuffle={handleShuffle}
-            onSparkles={handleSparkles}
-            onGift={handleGift}
+          {/* Call Buttons Below Header */}
+          <div className={styles.callButtonsContainer}>
+            <button 
+              className={styles.voiceCallButton} 
+              onClick={handleAudioCall}
+              disabled={!!activeCall}
+            >
+              <img src={CallIcon} alt="Voice Call" width="20" height="20" />
+              Voice Call
+            </button>
+            
+            <button 
+              className={styles.videoCallButton} 
+              onClick={handleVideoCall}
+              disabled={!!activeCall}
+            >
+              <img src={VideocamIcon} alt="Video Call" width="20" height="20" />
+              Video Call
+            </button>
+          </div>
+
+          <div className={styles.messagesContainer}>
+            <ChatMessages
+              messages={finalMsgs}
+              isTyping={isTyping}
+              error={error}
+              messagesRef={messagesRef}
+            />
+
+            <FloatingActions
+              onShuffle={handleSwitchProfile}
+              onSparkles={handleSparkles}
+              onGift={handleGift}
+            />
+          </div>
+
+          {!isMessageDisabled && (
+            <ChatInput
+              value={message}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                sendTyping();
+              }}
+              onSend={handleSend}
+              isMessageDisabled={isMessageDisabled}
+              onChatEnd={handleChatEnd}
+              setOpen={setOpenFeedback}
+              sendVoiceMessage={sendVoiceMessage}
+              sendFiles={sendFiles}
+            />
+          )}
+
+          <ChatFooter 
+            remainingTime={chatSeconds > 0 ? chatSeconds : 0}
+            onRecharge={handleRecharge}
+          />
+
+          {/* {waitingPopup && (
+            <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
+          )} */}
+
+          {!isMessageDisabled && <InactivityModal
+            isOpen={isInactive}
+            onDisconnect={handleChatEnd}
+            onContinue={resetTimer}
+          />}
+
+          <Feedback
+            open={openFeedback}
+            onClose={() => setOpenFeedback(false)}
+            handleSubmit={handleReviewSubmit}
+            ratedUserName={fullName}
+            reviewerName={user?.firstName || "User"}
+            loading={isLoading}
           />
         </div>
-
-        {!isMessageDisabled && (
-          <ChatInput
-            value={message}
-            onChange={(e) => {
-              setMessage(e.target.value);
-              sendTyping();
-            }}
-            onSend={handleSend}
-            isMessageDisabled={isMessageDisabled}
-            onChatEnd={handleChatEnd}
-            setOpen={setOpenFeedback}
-            sendVoiceMessage={sendVoiceMessage}
-            sendFiles={sendFiles}
-          />
-        )}
-
-        <ChatFooter 
-          remainingTime={chatSeconds > 0 ? chatSeconds : 0}
-          onRecharge={handleRecharge}
-        />
-
-        {waitingPopup && (
-          <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
-        )}
-
-        {!isMessageDisabled && <InactivityModal
-          isOpen={isInactive}
-          onDisconnect={handleChatEnd}
-          onContinue={resetTimer}
-        />}
-
-        <Feedback
-          open={openFeedback}
-          onClose={() => setOpenFeedback(false)}
-          handleSubmit={handleReviewSubmit}
-          ratedUserName={fullName}
-          reviewerName={user?.firstName || "User"}
-          loading={isLoading}
-        />
       </div>
-    </div>
+
+      {/* Render modal outside overflow containers */}
+      <ProfileListingModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        profiles={profiles}
+        selectedProfileId={kundliId}
+        onSelectProfile={handleSelectProfile}
+        title="Select Kundli Profile"
+        showAddButton={false}
+        showDeleteButton={false}
+      />
+
+      {/* Gift Modal */}
+      <GiftModal
+        isOpen={showGiftModal}
+        onClose={() => {
+          setShowGiftModal(false);
+          // Refresh wallet balance when modal closes
+          refreshWallet();
+        }}
+        astrologerId={astrologerId}
+      />
+    </>
   );
 };
 

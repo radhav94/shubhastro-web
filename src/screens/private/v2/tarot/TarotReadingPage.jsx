@@ -61,23 +61,13 @@ const TarotReadingPage = () => {
     console.log('Begin reading for:', selectedReading)
     console.log('Cards data:', cardsData)
     
-    // Check if it's Love Triangle - route to special page
-    if (selectedReading?.title === 'Love Triangle') {
-      navigate('/love-triangle-selection', { 
-        state: { 
-          reading: selectedReading,
-          cards: cardsData 
-        } 
-      })
-    } else {
-      // Navigate to regular card selection page
-      navigate('/tarot-card-selection', { 
-        state: { 
-          reading: selectedReading,
-          cards: cardsData 
-        } 
-      })
-    }
+    // Navigate to regular card selection page for all readings including Love Triangle
+    navigate('/tarot-card-selection', { 
+      state: { 
+        reading: selectedReading,
+        cards: cardsData 
+      } 
+    })
     
     setIsPopupOpen(false)
   }
@@ -218,7 +208,9 @@ const TarotReadingPage = () => {
         <div ref={observerRef} className={styles.loadingTrigger} />
       )}
 
-      <button className={styles.proceedAheadButton}>Proceed Ahead</button>
+      <div className={styles.proceedAheadBtn}>
+        <button className={styles.proceedAheadButton}>Proceed Ahead</button>
+      </div>
 
       <TarotPopup 
         isOpen={isPopupOpen}

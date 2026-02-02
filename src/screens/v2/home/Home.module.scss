@@ -21,7 +21,7 @@
   min-height: 100vh;
   // background: linear-gradient(180deg, #f5e6d3 0%, #fff9f0 50%, #ffffff 100%);
   // background: #fff;
-  padding-bottom: 90px;
+  // padding-bottom: 90px;
   padding-top: 15px;
   font-family:
     "Poppins",
@@ -30,9 +30,10 @@
     "Segoe UI",
     sans-serif;
 
-    @media screen and (width <= 767px) {
-      padding-top: 0px;
-    }
+  @media screen and (width <= 767px) {
+    padding-top: 0px;
+    padding-bottom: 0px;
+  }
 }
 /* Header Styles */
 .header {
@@ -92,7 +93,11 @@
   align-items: center;
   gap: 8px;
   // background: linear-gradient(135deg, #8b6f47 0%, #6b4423 50%, #3e2415 100%);
-  background: linear-gradient(135deg, rgba(245, 138, 34, 1) 0%, rgba(16, 10, 6, 1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(245, 138, 34, 1) 0%,
+    rgba(16, 10, 6, 1) 100%
+  );
   padding: 8px 24px 8px 10px;
   border-radius: 50px;
   color: #fff;
@@ -222,7 +227,14 @@
   background: rgba(139, 115, 85, 0.15);
   font-weight: 600;
 }
-
+.lifeAreaCardMain {
+  background:
+    linear-gradient(136deg, #e9fae3 37.95%, #c5ffb1 180.73%),
+    linear-gradient(0deg, #fcebf3 0%, #fcebf3 100%), #fff;
+}
+.wealthFinance {
+  background: linear-gradient(180deg, #30d14d 0%, #84f237 100%);
+}
 /* Show navigation on tablet and desktop */
 @media (min-width: 768px) {
   .headerNavigation {
@@ -309,7 +321,10 @@
 /* Today's Horoscope Section */
 .horoscopeSection {
   margin-bottom: 24px;
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
   border-radius: 24px;
   border: 1px solid #f0d07f;
   display: flex;
@@ -318,7 +333,12 @@
   position: relative;
   overflow: visible;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition:transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  @media screen and (width <= 767px) {
+    border-radius: 18px;
+  }
 }
 
 .horoscopeCard {
@@ -395,7 +415,7 @@
 .horoscopeHeading {
   font-family: "Poppins", sans-serif;
   font-size: clamp(16px, 4.5vw, 20px);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.4px;
   color: #fff;
@@ -480,6 +500,9 @@
   -ms-overflow-style: none;
   padding: 0 0 16px;
   flex-wrap: nowrap;
+  @media screen and (width <= 767px) {
+    gap: 12px;
+  }
 }
 
 .carouselContainer::-webkit-scrollbar {
@@ -496,7 +519,7 @@
   min-height: auto;
 
   // background: linear-gradient(151.72deg, #ffecf0 10.17%, #f2eaff 101.97%);
-  background-color: #FFE4BA;
+  background-color: #ffe4ba;
   border-radius: 20px;
   box-shadow: 0px 4px 12px rgba(127, 74, 87, 0.08);
 
@@ -560,7 +583,10 @@
 
   width: fit-content;
   // background: #2a1c06;
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
   color: #fff;
   border: none;
 
@@ -644,7 +670,7 @@
 
 .dot.active {
   background: #fff;
-  box-shadow: inset 6px 0 0 0 #D43400;
+  box-shadow: inset 6px 0 0 0 #d43400;
   transform: scale(1.1);
 }
 
@@ -665,7 +691,7 @@
   }
 
   .slideTitle {
-    font-size: 32px;
+    font-size: 22px;
   }
 
   .slideSubtitle {
@@ -684,7 +710,7 @@
   }
 
   .slideTitle {
-    font-size: 36px;
+    font-size: 26px;
   }
 
   .slideSubtitle {
@@ -723,7 +749,7 @@
   }
 
   .slideTitle {
-    font-size: 22px;
+    font-size: 18px;
     line-height: 1.2;
   }
 
@@ -756,6 +782,9 @@
   gap: 14px;
   margin-bottom: 24px;
   // padding: 4px;
+  @media screen and (width <= 767px) {
+    gap: 10px;
+  }
 }
 
 .quickActions::-webkit-scrollbar {
@@ -776,7 +805,7 @@
   // border-radius: 26px;
 
   border-radius: 16px;
-  border: 1px solid rgba(189, 189, 189, 0.40);
+  border: 1px solid rgba(189, 189, 189, 0.4);
   background: var(--card, #ffffff);
   padding: 18px 16px 0px;
   cursor: pointer;
@@ -805,6 +834,8 @@
   position: relative;
   width: 100%;
   height: 110px;
+  margin-top: 60px;
+  margin-bottom: -45px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -831,6 +862,7 @@
   position: absolute;
   bottom: -8px;
   left: 50%;
+  top: -40%;
   transform: translateX(-50%);
   height: 110px;
   width: auto;
@@ -840,33 +872,13 @@
 
 /* Mobile tighter */
 @media (max-width: 480px) {
-  .actionCard {
-    width: 100%;
-    height: 150px;
-    border-radius: 20px;
-    padding: 20px 12px 0;
-  }
 
   .actionTitle {
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1.2;
-    padding: 0 30px;
+    padding: 0px 0px;
   }
 
-  .actionMedia {
-    height: 95px;
-  }
-
-  .actionCircle {
-    width: 70px;
-    height: 70px;
-    bottom: 14px;
-  }
-
-  .actionImg {
-    height: 90px;
-    bottom: -6px;
-  }
 }
 
 /* Pandit AI Section */
@@ -881,11 +893,17 @@
 
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.02);
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
   border-radius: 24px;
   padding: 20px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
-  margin-bottom: 24px;
+  margin-bottom: 40px;
+  @media (width <= 767px) {
+    margin-bottom: 24px;
+  }
 }
 
 .panditAICard {
@@ -940,7 +958,7 @@
 
 .freeQuestionBtn {
   background: #fff;
-  color: #E56329;
+  color: #e56329;
   border: none;
   padding: 12px 20px;
   border-radius: 24px;
@@ -961,6 +979,7 @@
 @media (max-width: 480px) {
   .panditAISection {
     padding: 16px;
+    border-radius: 20px;
   }
 
   .panditAICard {
@@ -1037,7 +1056,10 @@
   width: 40px;
   height: 40px;
   // background: #2c1b0e;
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
   border: none;
   border-radius: 8px;
   display: flex;
@@ -1059,11 +1081,17 @@
 /* Top Rated Astrologers Section */
 .astrologersSection {
   margin-bottom: 24px;
+  @media screen and (width <= 767px) {
+    margin-bottom: 12px;
+  }
 }
 
 .sectionHeader {
   text-align: center;
   margin-bottom: 24px;
+  @media screen and (width <= 767px) {
+    margin-bottom: 12px;
+  }
 }
 
 .sectionTitle {
@@ -1072,7 +1100,7 @@
   font-weight: 600;
   letter-spacing: 0.5px;
   color: #160115;
-  margin: 0 0 12px 0;
+  // margin: 0 0 12px 0;
 }
 
 .titleDivider {
@@ -1102,6 +1130,9 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: 4px 4px 20px 4px;
+  @media screen and (width <= 767px) {
+    padding: 4px 4px 20px 0px;
+  }
 }
 
 .astrologersGrid::-webkit-scrollbar {
@@ -1109,10 +1140,9 @@
 }
 
 .astrologerCard {
-  min-width: 280px;
+  min-width: 220px;
   background: #ffffff;
   border-radius: 20px;
-  padding: 16px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1120,13 +1150,25 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   position: relative;
   @media screen and (width <= 767px) {
-      min-width: 230px;
+    min-width: 180px;
   }
 }
 
+.cardLink {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 16px;
+  cursor: pointer;
+  // padding: 16px 0;
+  // gap: 10px;
+}
+
 .astrologerImageWrapper {
-  width: 24vh;
-  height: 24vh;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   overflow: hidden;
   margin-bottom: 16px;
@@ -1135,8 +1177,8 @@
   align-items: center;
   justify-content: center;
   @media screen and (width <= 767px) {
-      width: 30vw;
-      height: 30vw;
+    width: 90px;
+    height: 90px;
   }
 }
 
@@ -1148,17 +1190,24 @@
 
 .ratingBadge {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--cta-10, rgba(229, 99, 41, 0.10));
-  padding: 6px 14px;
-  border-radius: 20px;
-  margin-bottom: 12px;
-  width: fit-content;
+    align-items: center;
+    gap: 4px;
+    background: #fff8f0;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+  @media screen and (width <= 767px) {
+    margin-bottom: 6px;
+  }
 }
 
 .star {
   font-size: 16px;
+  svg{
+    width: 14px;
+  }
 }
 
 .ratingText {
@@ -1170,56 +1219,66 @@
 
 .astrologerName {
   font-family: "Poppins", sans-serif;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
-  margin: 0 0 10px 0;
+  margin: 10px 0 10px 0;
   text-align: center;
   @include line-clamp(1);
+  @media screen and (width <= 767px) {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
 }
 
 .experienceRow {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 20px;
 }
 
 .bookIcon {
-  color: #F75801;
+  color: #f75801;
   flex-shrink: 0;
+  width: 14px;
 }
 
 .experienceText {
   font-family: "Poppins", sans-serif;
-  font-size: 14px;
-  color: #888;
+  font-size: 12px;
+  color: #666;
   @include line-clamp(1);
 }
-.bottomWrap{
+.bottomWrap {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 .connectBtn {
-  width: 100%;
+  width: 80%;
   // background: #2c1b0e;
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
   color: #ffffff;
   border: none;
-  padding: 12px;
+  margin: 0 12px 16px;
+  padding: 10px 10px;
   border-radius: 50px;
   font-family: "Poppins", sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition:
-    transform 0.2s ease, box-shadow 0.2s ease;
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 
-    @media screen and (width <= 767px) {
-      padding: 8px;
-    }
+  @media screen and (width <= 767px) {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
 }
 
 .connectBtn:hover {
@@ -1234,25 +1293,39 @@
 }
 
 .lifeAreaGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  overflow: auto;
+  // grid-template-columns: 1fr 1fr;
   gap: 12px;
+  padding-bottom: 10px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.lifeAreaGrid::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .lifeAreaCard {
   border-radius: 20px;
   padding: 18px 16px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   cursor: pointer;
   transition:
     transform 0.2s,
     box-shadow 0.2s;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  min-height: 140px;
+  // min-height: 140px;
   position: relative;
+  width: 300px;
+  gap: 16px;
+  flex-shrink: 0;
+  @media screen and (width <= 767px) {
+    width: 200px;
+  }
 }
 
 .lifeAreaCard:hover {
@@ -1267,7 +1340,7 @@
   line-height: 1.3;
   color: #1a1a1a;
   margin: 0;
-  max-width: 70%;
+  flex: 1;
 }
 
 .lifeAreaIcon {
@@ -1284,6 +1357,17 @@
   right: 16px;
 }
 
+.lifeAreaIconImg {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  flex-shrink: 0;
+  @media (width <= 767px) {
+    width: 50px;
+    height: 50px;
+  }
+}
+
 /* My Sessions Section */
 .sessionsSection {
   margin-bottom: 24px;
@@ -1295,6 +1379,9 @@
   justify-content: space-between;
   margin-bottom: 24px;
   gap: 16px;
+  @media screen and (width <= 767px) {
+    margin-bottom: 12px;
+  }
 }
 
 .sessionsHeaderLeft {
@@ -1310,7 +1397,7 @@
   font-weight: 700;
   letter-spacing: 0.5px;
   color: #2c2c2c;
-  margin: 0 0 12px 0;
+  // margin: 0 0 12px 0;
   text-align: left;
 }
 
@@ -1368,7 +1455,7 @@
 }
 
 .sessionCard {
-  min-width: 440px;
+  min-width: 430px;
   background: #ffffff;
   border-radius: 20px;
   padding: 0;
@@ -1382,7 +1469,7 @@
   overflow: hidden;
   min-height: 180px;
 
-  @media screen and (width <= 767px){
+  @media screen and (width <= 767px) {
     min-width: 300px;
   }
 }
@@ -1441,7 +1528,7 @@
 }
 
 .sessionIconSvg {
-  color: #F75801;
+  color: #f75801;
   flex-shrink: 0;
 }
 
@@ -1462,7 +1549,10 @@
 
 .callAgainBtn {
   width: 100%;
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
   color: #ffffff;
   border: none;
   padding: 12px 20px;
@@ -1475,11 +1565,20 @@
     transform 0.2s,
     background 0.2s;
   margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .callAgainBtn:hover {
   transform: translateY(-1px);
   // background: #1a1108;
+}
+
+.callAgainBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Mobile responsive for Sessions */
@@ -1533,7 +1632,10 @@
   // background:
   //   linear-gradient(110.07deg, rgba(166, 97, 218, 0) -19.59%, #a661da 72.06%),
   //   linear-gradient(180deg, #f48a21 -12.17%, #522e0a 143.73%);
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
   border-radius: 24px;
   padding: 24px 20px;
   display: flex;
@@ -1541,7 +1643,7 @@
   align-items: center;
   position: relative;
   overflow: hidden;
-  min-height: 220px;
+  // min-height: 220px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
@@ -1637,7 +1739,7 @@
 
 .panchangTab {
   flex: 1;
-  padding: 12px 12px;
+  padding: 12px 24px;
   border: 2px solid #e5e5e5;
   border-radius: 50px;
   background: #ffffff;
@@ -1647,10 +1749,17 @@
   color: #101010;
   cursor: pointer;
   transition: all 0.2s;
+  @media screen and (width <= 767px) {
+    padding: 6px 12px;
+  }
 }
 
-.panchangTab.active,.panchangTab:hover {
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+.panchangTab.active,
+.panchangTab:hover {
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
   // border-color: #ff9800;
   color: #ffffff;
 }
@@ -1661,7 +1770,7 @@
   padding: 24px 20px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
   margin-bottom: 16px;
-  border: 1px solid rgba(189, 189, 189, 0.30);
+  border: 1px solid rgba(189, 189, 189, 0.3);
 }
 
 .panchangHeader {
@@ -1678,9 +1787,10 @@
 
 .timingsCard {
   flex: 1;
+  width: 50%;
   border-radius: 20px;
   padding: 15px 15px;
-  border: 1px solid rgba(189, 189, 189, 0.30);
+  border: 1px solid rgba(189, 189, 189, 0.3);
   background: var(--card, #ffffff);
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
 }
@@ -1779,7 +1889,7 @@
 
   .lifeAreaCard {
     padding: 16px 14px;
-    min-height: 130px;
+    // min-height: 130px;
   }
 
   .lifeAreaTitle {
@@ -1798,7 +1908,7 @@
 
   .cosmicInsightCard {
     padding: 20px 18px;
-    min-height: 200px;
+    // min-height: 200px;
   }
 
   .cosmicContent {
@@ -1834,7 +1944,7 @@
 
   padding: 10px 14px 14px;
   // box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
-  z-index: 999;
+  z-index: 1000;
 
   /* ✅ important */
   overflow: visible;
@@ -1924,7 +2034,10 @@
 }
 
 .active .iconCircle {
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
   color: #ffffff;
 }
 
@@ -1937,7 +2050,10 @@
   width: 60px;
   height: 5px;
 
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
   border-radius: 0 0 4px 4px;
 
   /* Trapezoid effect - wider at top */
@@ -1978,7 +2094,10 @@
   height: 76px;
   border-radius: 50%;
 
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
   border: 5px solid #ffffff;
 
   display: flex;
@@ -2163,7 +2282,7 @@
   }
 
   .carouselContainer {
-    gap: 20px;
+    gap: 12px;
     padding: 0 20px 18px;
   }
 
@@ -2175,7 +2294,7 @@
   }
 
   .slideTitle {
-    font-size: 28px;
+    font-size: 22px;
   }
 
   .slideSubtitle {
@@ -2194,34 +2313,14 @@
     margin-bottom: 32px;
   }
 
-  .actionCard {
-    width: 100%;
-    height: 190px;
-    padding: 20px 18px 0;
-  }
-
   .actionTitle {
     font-size: 16px;
-  }
-
-  .actionMedia {
-    height: 120px;
-  }
-
-  .actionCircle {
-    width: 95px;
-    height: 95px;
-    bottom: 20px;
-  }
-
-  .actionImg {
-    height: 120px;
   }
 
   /* Pandit AI - Tablet */
   .panditAISection {
     padding: 24px;
-    margin-bottom: 32px;
+    // margin-bottom: 32px;
   }
 
   .panditAvatar {
@@ -2264,15 +2363,6 @@
   //   font-size: 22px;
   // }
 
-  .experienceText {
-    font-size: 15px;
-  }
-
-  .connectBtn {
-    font-size: 17px;
-    padding: 12px;
-  }
-
   /* Life Area Section - Tablet */
   .lifeAreaSection {
     margin-bottom: 32px;
@@ -2284,7 +2374,7 @@
 
   .lifeAreaCard {
     padding: 28px 24px;
-    min-height: 160px;
+    // min-height: 160px;
     flex-direction: row;
     align-items: center;
   }
@@ -2339,7 +2429,7 @@
 
   .cosmicInsightCard {
     padding: 32px 28px;
-    min-height: 240px;
+    // min-height: 240px;
     flex-direction: row;
   }
 
@@ -2414,7 +2504,7 @@
   }
 
   .slideTitle {
-    font-size: 32px;
+    font-size: 22px;
   }
 
   .slideSubtitle {
@@ -2433,28 +2523,9 @@
     margin-bottom: 40px;
   }
 
-  .actionCard {
-    width: 100%;
-    height: 210px;
-    padding: 22px 20px 0;
-  }
 
   .actionTitle {
     font-size: 17px;
-  }
-
-  .actionMedia {
-    height: 130px;
-  }
-
-  .actionCircle {
-    width: 105px;
-    height: 105px;
-    bottom: 22px;
-  }
-
-  .actionImg {
-    height: 130px;
   }
 
   /* Pandit AI - Desktop */
@@ -2485,7 +2556,7 @@
   /* Life Area Section - Desktop */
   .lifeAreaCard {
     padding: 32px 28px;
-    min-height: 160px;
+    // min-height: 160px;
   }
 
   .lifeAreaTitle {
@@ -2500,7 +2571,7 @@
   /* Cosmic Insight - Desktop */
   .cosmicInsightCard {
     padding: 36px 32px;
-    min-height: 260px;
+    // min-height: 260px;
   }
 
   .cosmicTitle {
@@ -2547,7 +2618,7 @@
   }
 
   .slideTitle {
-    font-size: 32px;
+    font-size: 22px;
   }
 
   .slideSubtitle {
@@ -2561,29 +2632,10 @@
     margin-bottom: 48px;
   }
 
-  .actionCard {
-    width: 100%;
-    height: 230px;
-    padding: 24px 22px 0;
-  }
-
   .actionTitle {
     font-size: 18px;
   }
 
-  .actionMedia {
-    height: 140px;
-  }
-
-  .actionCircle {
-    width: 115px;
-    height: 115px;
-    bottom: 24px;
-  }
-
-  .actionImg {
-    height: 140px;
-  }
 }
 
 /* Extra Large Desktop: 1920px+ */
@@ -2621,7 +2673,7 @@
   }
 
   .slideTitle {
-    font-size: 36px;
+    font-size: 26px;
   }
 
   .slideSubtitle {
@@ -2635,28 +2687,8 @@
     margin-bottom: 56px;
   }
 
-  .actionCard {
-    width: 100%;
-    height: 250px;
-    padding: 26px 24px 0;
-  }
-
   .actionTitle {
     font-size: 19px;
-  }
-
-  .actionMedia {
-    height: 150px;
-  }
-
-  .actionCircle {
-    width: 125px;
-    height: 125px;
-    bottom: 26px;
-  }
-
-  .actionImg {
-    height: 150px;
   }
 
   /* Pandit AI - XL Desktop */
@@ -2684,15 +2716,10 @@
   //   font-size: 24px;
   // }
 
-  .connectBtn {
-    font-size: 18px;
-    // padding: 16px 32px;
-  }
-
   /* Life Area Section - XL Desktop */
   .lifeAreaCard {
     padding: 36px 32px;
-    min-height: 180px;
+    // min-height: 180px;
   }
 
   .lifeAreaTitle {
@@ -2707,7 +2734,7 @@
   /* Cosmic Insight - XL Desktop */
   .cosmicInsightCard {
     padding: 40px 36px;
-    min-height: 280px;
+    // min-height: 280px;
   }
 
   .cosmicTitle {
@@ -2721,7 +2748,7 @@
 
 /* Discover More Section - Fixed Grid Layout */
 .discoverSection {
-  margin-bottom: 24px;
+  margin-bottom: 40px;
 }
 
 .discoverHeader {
@@ -2771,7 +2798,7 @@
 
 .discoverCard {
   border-radius: 20px;
-  padding: 24px 20px;
+  padding: 24px 12px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -2801,6 +2828,7 @@
   position: absolute;
   z-index: 2;
   bottom: 20px;
+  width: calc(100% - 24px);
 }
 
 .discoverTitle {
@@ -2820,6 +2848,10 @@
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
   max-width: 70%;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
 }
 
 .discoverImage {
@@ -2842,10 +2874,13 @@
 }
 
 .discoverCard:nth-child(3) .discoverImage {
-  width: auto;
+  // width: auto;
   max-height: 100%;
   top: 0;
   right: 0;
+  @media screen and (width <= 767px) {
+    width: 80%;
+  }
 }
 
 .discoverCard:nth-child(4) .discoverImage {
@@ -2866,24 +2901,24 @@
 @media (max-width: 480px) {
   .discoverGrid {
     gap: 12px;
-    grid-auto-rows: 160px;
+    grid-auto-rows: 130px;
   }
 
-  .discoverCard {
-    padding: 20px 16px;
-  }
+  // .discoverCard {
+  //   padding: 20px 16px;
+  // }
 
   .discoverTitle {
-    font-size: 20px;
+    font-size: 16px;
   }
 
   .discoverText {
     font-size: 13px;
-    max-width: 65%;
+    max-width: 100%;
   }
 
   .discoverImage {
-    width: 45%;
+    width: 80%;
     max-height: 65%;
   }
 }
@@ -2899,6 +2934,9 @@
   justify-content: space-between;
   margin-bottom: 24px;
   gap: 16px;
+  @media screen and (width <= 767px) {
+    margin-bottom: 12px;
+  }
 }
 
 .blogsHeaderLeft {
@@ -2914,7 +2952,7 @@
   font-weight: 700;
   letter-spacing: 0.5px;
   color: #2c2c2c;
-  margin: 0 0 12px 0;
+  // margin: 0 0 12px 0;
   text-align: left;
 }
 
@@ -2945,11 +2983,14 @@
 
 .blogsGrid {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: 4px 4px 20px 4px;
+  @media (width <= 767px) {
+    gap: 16px;    
+  }
 }
 
 .blogsGrid::-webkit-scrollbar {
@@ -2957,16 +2998,20 @@
 }
 
 .blogCard {
-  flex: 0 0 280px;
-  min-width: 280px;
+  flex: 0 0 220px;
+  min-width: 220px;
   background: #ffffff;
-  border-radius: 24px;
+  border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition:
     transform 0.2s,
     box-shadow 0.2s;
+  @media screen and (width <= 767px) {
+    flex: 0 0 170px;
+    min-width: 170px;
+  }
 }
 
 .blogCard:hover {
@@ -2976,7 +3021,7 @@
 
 .blogImageWrapper {
   width: 100%;
-  height: 240px;
+  height: 130px;
   overflow: hidden;
   background: #f5f5f5;
 }
@@ -2988,17 +3033,18 @@
 }
 
 .blogContent {
-  padding: 20px;
+  padding: 16px;
   background: #ffffff;
 }
 
 .blogTitle {
   font-family: "Poppins", sans-serif;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0 0 10px 0;
   line-height: 1.3;
+  @include line-clamp(2);
 }
 
 .blogDate {
@@ -3016,20 +3062,16 @@
   }
 
   .blogsHeader .titleDivider {
-    max-width: 240px;
-  }
-
-  .blogCard {
-    flex: 0 0 260px;
-    min-width: 260px;
+    max-width: auto;
+    width: auto;
   }
 
   .blogImageWrapper {
-    height: 220px;
+    height: 130px;
   }
 
   .blogTitle {
-    font-size: 18px;
+    font-size: 14px;
   }
 
   .blogDate {
@@ -3051,21 +3093,12 @@
     max-width: 320px;
   }
 
-  .blogCard {
-    flex: 0 0 320px;
-    min-width: 320px;
-  }
-
-  .blogImageWrapper {
-    height: 260px;
-  }
+  // .blogImageWrapper {
+  //   height: 260px;
+  // }
 
   .blogTitle {
-    font-size: 22px;
-  }
-
-  .blogContent {
-    padding: 24px;
+    font-size: 16px;
   }
 }
 
@@ -3079,12 +3112,62 @@
     max-width: 360px;
   }
 
-  .blogCard {
-    flex: 0 0 340px;
-    min-width: 340px;
-  }
+  // .blogImageWrapper {
+  //   height: 280px;
+  // }
+}
 
-  .blogImageWrapper {
-    height: 280px;
+/* Empty State */
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  padding: 40px 20px;
+
+  p {
+    font-family: "Poppins", sans-serif;
+    font-size: 16px;
+    color: #888;
+    text-align: center;
+  }
+}
+
+/* News Section Specific Styles */
+.blogMeta {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.blogChannel {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f75801;
+  text-transform: uppercase;
+}
+
+.blogDate {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  color: #888;
+}
+
+.blogLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #f75801;
+
+  svg {
+    width: 16px;
+    height: 16px;
   }
 }

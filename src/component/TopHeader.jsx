@@ -1,97 +1,264 @@
 import { useEffect, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import styles from "./TopHeader.module.scss";
 import { PATH } from "../utils/routes/Paths";
 import { User } from "lucide-react";
 import { getUserFromStorage } from "../utils/authStorage";
+import ShubhTalkLogo from "../assets/images/ShubhAstrologo.svg";
+import ShubhTalkLogoMobile from "../assets/images/mobile-shubh-astro-logo.svg";
+import { useWalletBalance } from "../screens/private/wallet/useWalletBalance";
+import { getToken } from "../utils/token";
 
 const TopHeader = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const token = getToken();
 
+  const {
+    balance,
+    isFetching: isFetchingBalance,
+    refreshWallet,
+  } = useWalletBalance();
+
+  // Track if user is logged in to properly display wallet balance
+  const isLoggedIn = !!user && !!token;
+
+  /* lock body scroll when drawer open */
   useEffect(() => {
-    // Get user data on mount and when localStorage changes
-    const userData = getUserFromStorage();
-    setUser(userData);
-  }, []);
+    document.body.style.overflow = isDrawerOpen ? "hidden" : "auto";
+    return () => (document.body.style.overflow = "auto");
+  }, [isDrawerOpen]);
+
+  /* sync user */
+  useEffect(() => {
+    const syncUser = () => {
+      const currentUser = getUserFromStorage();
+      setUser(currentUser);
+
+      // Clear wallet balance on logout (when user becomes null/undefined)
+      if (!currentUser) {
+        // Clear the cached wallet balance from localStorage
+        localStorage.removeItem("astro_wallet_balance");
+      }
+
+      // Refresh wallet balance when user changes (login/logout)
+      refreshWallet();
+    };
+
+    syncUser();
+    window.addEventListener("auth-change", syncUser);
+    return () => window.removeEventListener("auth-change", syncUser);
+  }, [refreshWallet]);
 
   const handleProfileClick = () => {
-    const userData = getUserFromStorage();
-    const accessToken = localStorage.getItem("shubhtalk_customer_token");
-    if (userData && accessToken) {
-      navigate("/profile");
-    } else {
-      // User is not logged in, redirect to onboarding
-      navigate("/login?skip=welcome");
-    }
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    token ? navigate("/profile") : navigate("/login?skip=welcome");
   };
 
-  // formate amount for wallet start
   const formatAmount = (amount) => {
-    if (amount >= 1000) {
-      const value = amount / 1000;
-      return `₹${value % 1 === 0 ? value : value.toFixed(1)}k`;
+    // Handle non-numeric values
+    if (typeof amount !== "number") {
+      return `₹${amount}`;
     }
-    return `₹${amount}`;
-  };
-  // formate amount for wallet end
 
-  const displayName = user ? `${user.firstName} ${user.lastName}` : "Guest";
+    // For amounts >= 1000, show in 'k' format
+    if (amount >= 1000) {
+      const kValue = amount / 1000;
+      // Check if the k value has decimals
+      return kValue % 1 === 0 ? `₹${kValue}k` : `₹${kValue.toFixed(1)}k`;
+    }
+
+    // For amounts < 1000, check if it has decimals
+    return amount % 1 === 0 ? `₹${amount}` : `₹${amount.toFixed(2)}`;
+  };
+
+  const displayName = user
+    ? user.firstName
+      ? user.firstName
+      : user.phoneNumber || "Guest"
+    : "Guest";
 
   return (
-    <header className={styles.topHeader}>
-      <div className={styles.userGreeting}>
-        <div className={styles.userAvatar}>
-          <span>🐏</span>
-        </div>
-        <div className={styles.greetingText}>
-          <span className={styles.namaste}>नमस्ते</span>
-          <span className={styles.userName}>{displayName}</span>
-        </div>
-      </div>
+    <>
+      <header className={styles.topHeader}>
+        <div className={styles.mainLeftMain}>
+          <div
+            className={styles.hamburger}
+            onClick={() => setIsDrawerOpen(true)}
+          >
+            ☰
+          </div>
 
+          <div className={styles.logoHeader} onClick={() => navigate("/")}>
+            <img src={ShubhTalkLogo} alt="Shubh Talk Logo" />
+          </div>
+
+          <div
+            className={styles.logoHeaderMobile}
+            onClick={() => navigate("/")}
+          >
+            <img src={ShubhTalkLogoMobile} alt="Shubh Talk Logo" />
+          </div>
+        </div>
+
+        {/* Desktop Navigation */}
         <nav className={styles.headerNavigation}>
-          {/* First Row */}
-          <div className={styles.navRow}>
+          <NavLink
+            to="/tarot"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Tarot
+          </NavLink>
+          <NavLink
+            to="/chat-with-astrologers"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Astrologers
+          </NavLink>
+          <NavLink
+            to="/aiwow"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            AI WOW
+          </NavLink>
+          <NavLink
+            to="/blog"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Blogs
+          </NavLink>
+          <NavLink
+            to="/explore"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Explore
+          </NavLink>
+          <NavLink
+            to="/shop"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Astromall
+          </NavLink>
+          <NavLink
+            to={PATH.privateRoutes.KUNDLI.path}
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Kundli
+          </NavLink>
+          <NavLink
+            to="/matchmaking"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Match Making
+          </NavLink>
+          <NavLink
+            to="/numerology"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Numerology
+          </NavLink>
+          <NavLink
+            to="/horoscopes/daily-horoscope"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Horoscopes
+          </NavLink>
+          <NavLink
+            to="/live-landing"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Live
+          </NavLink>
+        </nav>
+
+        <div className={styles.headerActions}>
+          <div className={styles.walletBadge}>
+            <div className={styles.coinIcon}></div>
+            <span className={styles.walletAmount}>
+              {formatAmount(
+                isFetchingBalance ? "..." : isLoggedIn ? balance || 0 : 0,
+              )}
+            </span>
+          </div>
+          <div className={styles.profileIcon} onClick={handleProfileClick}>
+            <User size={24} strokeWidth={0} fill="#d53400" />
+          </div>
+          <div className={styles.greetingText}>
+            <span className={styles.namaste}>नमस्ते</span>
+            <span className={styles.userName}>{displayName}</span>
+          </div>
+        </div>
+      </header>
+
+      {/* 📱 Mobile Drawer */}
+      {isDrawerOpen && (
+        <>
+          <div
+            className={styles.drawerOverlay}
+            onClick={() => setIsDrawerOpen(false)}
+          />
+
+          <div className={styles.mobileDrawer}>
+            <button
+              className={styles.drawerClose}
+              onClick={() => setIsDrawerOpen(false)}
+            >
+              ✕
+            </button>
+
             <NavLink
               to="/"
+              onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
-              end
             >
               Home
             </NavLink>
-
             <NavLink
               to="/chat-with-astrologers"
+              onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
               Astrologers
             </NavLink>
-
-            {/* <NavLink
-              to="/services"
-              className={({ isActive }) =>
-                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-              }
-            >
-              Services
-            </NavLink> */}
-
             <NavLink
               to="/aiwow"
+              onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
               AI WOW
             </NavLink>
-
             <NavLink
-              to="/blogs"
+              to="/blog"
+              onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -100,18 +267,16 @@ const TopHeader = () => {
             </NavLink>
             <NavLink
               to="/explore"
+              onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
               Explore
             </NavLink>
-          </div>
-
-          {/* Second Row */}
-          <div className={styles.navRow}>
             <NavLink
               to={PATH.privateRoutes.KUNDLI.path}
+              onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -120,42 +285,44 @@ const TopHeader = () => {
             </NavLink>
             <NavLink
               to="/matchmaking"
+              onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
               Match Matching
             </NavLink>
-
             <NavLink
               to="/numerology"
+              onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
               Numerology
             </NavLink>
-
             <NavLink
               to="/horoscopes/daily-horoscope"
+              onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
               Horoscopes
             </NavLink>
+            <NavLink
+              to="/live-landing"
+              onClick={() => setIsDrawerOpen(false)}
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Live
+            </NavLink>
           </div>
-        </nav>
-      <div className={styles.headerActions}>
-        <div className={styles.walletBadge}>
-          <div className={styles.coinIcon}></div>
-          <span className={styles.walletAmount}>{formatAmount(1240)}</span>
-        </div>
-        <div className={styles.profileIcon} onClick={handleProfileClick}>
-          <User size={24} strokeWidth={0} fill="#d53400" />
-        </div>
-      </div>
-    </header>
+        </>
+      )}
+    </>
   );
 };
 

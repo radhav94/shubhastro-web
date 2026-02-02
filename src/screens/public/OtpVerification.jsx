@@ -113,12 +113,18 @@ const handleVerifyOtp = async (event) => {
         localStorage.setItem("shubhtalk_role", "CUSTOMER");
         localStorage.setItem("shubhtalk_customer_id", _id);
         localStorage.setItem("shubhtalk_customer_token", accessToken);
+        
+        // Clear any cached profile data from previous user
+        localStorage.removeItem("selectedKundliProfile");
       }
 
       if (type === "ASTROLOGER") {
         localStorage.setItem("shubhtalk_role", "ASTROLOGER");
         localStorage.setItem("shubhtalk_astro_id", _id);
         localStorage.setItem("shubhtalk_astro_token", accessToken);
+        
+        // Clear any cached profile data from previous user
+        localStorage.removeItem("selectedKundliProfile");
       }
 
       Toast.success("OTP verified successfully");

@@ -17,7 +17,7 @@ import { clearFormAndCache } from "../../redux/actions/clearFormAndCache";
 
 const TopBar = () => {
   const navigate = useNavigate();
-  const user = getUserFromStorage();
+  const [user, setUser] = useState(getUserFromStorage());
   const dispatch = useDispatch();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -169,8 +169,7 @@ const TopBar = () => {
               </div>
               <div className={styles.userDetails}>
                 <PrimaryText size_14 isBold isCenter>
-                  {user?.firstName &&
-                    user.firstName[0].toUpperCase() + user.firstName.slice(1)}
+                  {user?.firstName || user?.phoneNumber}
                 </PrimaryText>
                 <PrimaryText size_12 isBold color="#466590" isCenter={true}>
                   {user?.phoneNumber}
@@ -314,6 +313,13 @@ const TopBar = () => {
         updateWalletFromStorage();
       }
     };
+    
+    // Listen for auth changes (login, logout, registration)
+    const handleAuthChange = () => {
+      const updatedUser = getUserFromStorage();
+      setUser(updatedUser);
+    };
+    
     //Translate if hindi lang is selected
     const savedLang = localStorage.getItem("selectedLanguage");
 
@@ -329,9 +335,11 @@ const TopBar = () => {
     }, 500);
 
     window.addEventListener("wallet-updated", handleWalletUpdated);
+    window.addEventListener("auth-change", handleAuthChange);
 
     return () => {
       window.removeEventListener("wallet-updated", handleWalletUpdated);
+      window.removeEventListener("auth-change", handleAuthChange);
       clearInterval(interval);
     };
   }, []); //  IMPORTANT: empty dependency array

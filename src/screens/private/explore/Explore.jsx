@@ -1,9 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { ChevronLeft, Edit, ChevronRight } from "lucide-react";
 import styles from "./Explore.module.scss";
+import ProfileListingModal from "../../../component/UI/Profile/ProfileListingModal";
+import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
+import { 
+  useGetAllKundlisQuery,
+  useCreateKundliMutation 
+} from "../../../services/appServices/kundliServicesNew";
+import { useGetExplorePageDataQuery } from "../../../redux/api/explore/exploreApi";
+import { setForm } from "../../../redux/kundliform/formSlice";
+import { Toast } from "../../../component";
+import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 
-// Import images
+// Import default images as fallback
 import horoscopeImg from "../../../assets/explore/horoscope.png";
 import kundliReportsImg from "../../../assets/icons/kundali.png";
 import remediesImg from "../../../assets/explore/remedies.png";
@@ -18,167 +29,167 @@ import numerology from "../../../assets/images/numerology.svg";
 
 const Explore = () => {
   const navigate = useNavigate();
-  const [selectedProfile, setSelectedProfile] = useState("Priya Gupta");
+  const dispatch = useDispatch();
+  const [selectedProfile, setSelectedProfile] = useState(null);
+  const [showSelectProfile, setShowSelectProfile] = useState(false);
+  const [showAddProfile, setShowAddProfile] = useState(false);
 
-  const topCards = [
-    {
-      id: 1,
-      title: "Explore Your Horoscope",
-      image: horoscopeImg,
-      bgColor: "#FF5722",
-      link: "/horoscopes/daily-horoscope",
-    },
-    {
-      id: 2,
-      title: "Kundli Reports",
-      image: kundliReportsImg,
-      bgColor: "#FF5722",
-      link: "/kundli",
-    },
-    {
-      id: 3,
-      title: "Remedies For You",
-      image: remediesImg,
-      bgColor: "#FF5722",
-      link: "/remedies",
-    },
-  ];
+  // Get token
+  const role = localStorage.getItem("shubhtalk_role");
+  const token =
+    role === "ASTROLOGER"
+      ? localStorage.getItem("shubhtalk_astro_token")
+      : localStorage.getItem("shubhtalk_customer_token");
 
-  const kundliCards = [
-    {
-      id: 1,
-      title: "Vedic Kundli",
-      image: vedicImg,
-      link: "/kundli",
-    },
-    {
-      id: 2,
-      title: "Dasha",
-      image: dashaImg,
-      link: "/kundli/dasha",
-    },
-    {
-      id: 3,
-      title: "KP Chart",
-      image: kpImg,
-      link: "/kundli/kp",
-    },
-    {
-      id: 4,
-      title: "Ashtakvarga Chart",
-      image: ashtakvargaImg,
-      link: "/kundli/ashtakvarga",
-    },
-  ];
+  // API Hooks
+  const { data, isLoading, refetch } = useGetAllKundlisQuery(undefined, {
+    skip: !token,
+  });
+  const [createKundli, { isLoading: isCreating }] = useCreateKundliMutation();
+  
+  // Fetch Explore Page Data
+  const { data: exploreData, isLoading: isLoadingExplore } = useGetExplorePageDataQuery();
 
-  const destinyCards = [
-    {
-      id: 1,
-      title: "Tarot",
-      subtitle: "Unveil the unseen. Gain clarity.",
-      bgColor: "#2196F3",
-      image: tarotImg,
-      link: "/tarot",
-    },
-    {
-      id: 2,
-      title: "Numerology",
-      subtitle: "Decode the power of numbers",
-      bgColor: "#8B4513",
-      image: numerology,
-      link: "/numerology",
-    },
-  ];
+  // Get profiles from API
+  const profiles = data?.data || [];
+  
+  // Get explore page sections
+  const exploreSections = exploreData?.data?.list || [];
 
-  const blogs = [
-    {
-      id: 1,
-      date: "Aug 2, 2024",
-      title: "Vedic Astrology: Unveiling Cosmic In...",
-      image: newsImg,
-      link: "/blogs/1",
-    },
-    {
-      id: 2,
-      date: "Jul 28, 2024",
-      title: "Daily Horoscopes: Your Guide to the St...",
-      image: newsImg,
-      link: "/blogs/2",
-    },
-    {
-      id: 3,
-      date: "Jul 25, 2024",
-      title: "Astrology Predictions: Per...",
-      image: newsImg,
-      link: "/blogs/3",
-    },
-  ];
+  // Auto-select first profile on load
+  useEffect(() => {
+    if (profiles.length > 0 && !selectedProfile) {
+      setSelectedProfile(profiles[0]);
+    }
+  }, [profiles, selectedProfile]);
 
-  return (
-    <div className={styles.explorePage}>
-      {/* Header */}
-      <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
-          <ChevronLeft size={24} />
-        </button>
-        <div className={styles.profileSelector}>
-          <span className={styles.selectLabel}>Select Profile</span>
-          <div className={styles.profileName}>
-            {selectedProfile}
-            <ChevronRight size={20} className={styles.dropdownIcon} />
-          </div>
-        </div>
-        <button className={styles.editButton}>
-          <Edit size={20} />
-        </button>
-      </div>
+  const handleSelectProfile = (profile) => {
+    setSelectedProfile(profile);
+    setShowSelectProfile(false);
+  };
 
-      {/* Main Content */}
-      <div className={styles.content}>
-        {/* Hero Section */}
-        <section className={styles.heroSection}>
-          <h1 className={styles.mainTitle}>All About You</h1>
+  const handleAddProfile = () => {
+    setShowSelectProfile(false);
+    setShowAddProfile(true);
+  };
+
+  const handleSubmitProfile = async (formData) => {
+    try {
+      const dateObj = new Date(formData.birthDate);
+      const timeObj = formData.birthTime ? formData.birthTime.split(":") : ["12", "0"];
+
+      const payload = {
+        name: formData.name,
+        gender: formData.identity.toLowerCase(),
+        relation: formData.relation,
+        day: dateObj.getDate(),
+        month: dateObj.getMonth() + 1,
+        year: dateObj.getFullYear(),
+        hour: formData.unknownBirthTime ? 12 : parseInt(timeObj[0]),
+        min: formData.unknownBirthTime ? 0 : parseInt(timeObj[1]),
+        second: 0,
+        place: formData.birthPlace,
+        lat: parseFloat(formData.latitude) || 0,
+        lon: parseFloat(formData.longitude) || 0,
+        tzone: 5.5,
+      };
+
+      const result = await createKundli(payload).unwrap();
+      Toast.success("Profile added successfully");
+      setShowAddProfile(false);
+      refetch();
+
+      // Select the newly created profile
+      if (result?.data) {
+        setSelectedProfile(result.data);
+      }
+    } catch (err) {
+      console.error("Error creating profile:", err);
+      Toast.error(err?.data?.message || "Failed to add profile");
+    }
+  };
+
+  // Helper function to format date
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  // Helper function to get destiny card colors (same as home page category colors)
+  const getDestinyCardColor = (index) => {
+    const colors = [
+      "linear-gradient(135deg, #FFE4BA 0%, #FFD89B 100%)",
+      "linear-gradient(135deg, #FFE4E1 0%, #FFC0CB 100%)",
+      "linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 100%)",
+      "linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%)",
+      "linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%)",
+      "linear-gradient(135deg, #FFCCBC 0%, #FFAB91 100%)",
+      "linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%)",
+      "linear-gradient(135deg, #BBDEFB 0%, #90CAF9 100%)",
+      "linear-gradient(135deg, #F8BBD0 0%, #F48FB1 100%)",
+    ];
+    return colors[index % colors.length];
+  };
+
+  // Render section based on display_type and slug
+  const renderSection = (section, index) => {
+    const sectionContent = Array.isArray(section.content) ? section.content : [];
+    const displayType = section.display_type;
+    const slug = section.slug;
+
+    // All About You - Hero cards
+    if (displayType === "all-about-you") {
+      return (
+        <section key={index} className={styles.section}>
+          <h1 className={styles.mainTitle}>{section.display_title || section.title || "All About You"}</h1>
           <p className={styles.subtitle}>
-            An ever growing library on the story of you
+            {section.description || "An ever growing library on the story of you"}
           </p>
 
           <div className={styles.topCardsGrid}>
-            {topCards.map((card) => (
+            {sectionContent.slice(0, 3).map((card, idx) => (
               <div
-                key={card.id}
+                key={idx}
                 className={styles.topCard}
-                style={{ backgroundColor: card.bgColor }}
-                onClick={() => navigate(card.link)}
+                style={{ backgroundColor: card.bg_color || "#E56329" }}
+                onClick={() => handleCardClick(card)}
               >
+                <h3 className={styles.cardTitle}>{card.title}</h3>
                 <img
-                  src={card.image}
+                  src={card.imageUrl || defaultImages.horoscope}
                   alt={card.title}
                   className={styles.cardIcon}
                 />
-                <h3 className={styles.cardTitle}>{card.title}</h3>
               </div>
             ))}
           </div>
         </section>
+      );
+    }
 
-        {/* Discover Your Kundli */}
-        <section className={styles.section}>
+    // Discover More - Grid layout (for Kundli section)
+    if (displayType === "discover-more" && slug === "discover-your-kundli") {
+      return (
+        <section key={index} className={styles.section}>
           <div className={styles.kundliSection}>
             <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>DISCOVER YOUR KUNDLI</h2>
+              <h2 className={styles.sectionTitle}>
+                {(section.display_title || section.title || "").toUpperCase()}
+              </h2>
               <ChevronRight size={24} className={styles.sectionArrow} />
             </div>
 
             <div className={styles.kundliGrid}>
-              {kundliCards.map((card) => (
+              {sectionContent.slice(0, 4).map((card, idx) => (
                 <div
-                  key={card.id}
+                  key={idx}
                   className={styles.kundliCard}
-                  onClick={() => navigate(card.link)}
+                  onClick={() => handleCardClick(card)}
                 >
                   <div className={styles.kundliCardImage}>
                     <img
-                      src={card.image}
+                      src={card.imageUrl || defaultImages.vedic}
                       alt={card.title}
                       className={styles.chartImage}
                     />
@@ -192,44 +203,35 @@ const Explore = () => {
             </div>
           </div>
         </section>
+      );
+    }
 
-        {/* Matchmaking Banner */}
-        <div className={styles.matchmakingBanner}>
-          <div className={styles.matchmakingContent}>
-            <h3 className={styles.matchmakingTitle}>Matchmaking</h3>
-            <p className={styles.matchmakingText}>
-              Measures emotional alignment and long-term compatibility
-            </p>
-          </div>
-          <img
-            src={matchmakingImg}
-            alt="Matchmaking"
-            className={styles.matchmakingIcon}
-          />
-        </div>
-
-        {/* Explore Your Destiny */}
-        <section className={styles.section}>
+    // Discover More - Scrollable cards (for Destiny and other sections)
+    if (displayType === "discover-more") {
+      return (
+        <section key={index} className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>EXPLORE YOUR DESTINY</h2>
+            <h2 className={styles.sectionTitle}>
+              {(section.display_title || section.title || "").toUpperCase()}
+            </h2>
             <ChevronRight size={24} className={styles.sectionArrow} />
           </div>
 
           <div className={styles.destinyGrid}>
-            {destinyCards.map((card) => (
+            {sectionContent.map((card, idx) => (
               <div
-                key={card.id}
+                key={idx}
                 className={styles.destinyCard}
-                style={{ backgroundColor: card.bgColor }}
-                onClick={() => navigate(card.link)}
+                style={{ background: getDestinyCardColor(idx) }}
+                onClick={() => handleCardClick(card)}
               >
                 <div className={styles.destinyCardContent}>
                   <h3 className={styles.destinyCardTitle}>{card.title}</h3>
-                  <p className={styles.destinyCardSubtitle}>{card.subtitle}</p>
+                  <p className={styles.destinyCardSubtitle}>{card.description}</p>
                 </div>
-                {card.image && (
+                {card.imageUrl && (
                   <img
-                    src={card.image}
+                    src={card.imageUrl}
                     alt={card.title}
                     className={styles.destinyCardImage}
                   />
@@ -237,53 +239,320 @@ const Explore = () => {
               </div>
             ))}
           </div>
-
-          {/* Gemstones Banner */}
-          <div className={styles.gemstonesBanner}>
-            <div className={styles.gemstonesContent}>
-              <h3 className={styles.gemstonesTitle}>Gemstones</h3>
-              <p className={styles.gemstonesText}>
-                Smart recommendations aligned with your birth chart
-              </p>
-            </div>
-            <img
-              src={remediesImg}
-              alt="Gemstones"
-              className={styles.gemstonesIcon}
-            />
-          </div>
         </section>
+      );
+    }
 
-        {/* Explore Blogs */}
-        <section className={styles.section}>
+    // Blog section
+    if (displayType === "blog" && slug === "blog") {
+      return (
+        <section key={index} className={styles.section}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>
-              EXPLORE BLOGS AND IN THE NEWS
+              {(section.display_title || section.title || "EXPLORE BLOGS").toUpperCase()}
             </h2>
             <ChevronRight size={24} className={styles.sectionArrow} />
           </div>
 
           <div className={styles.blogsScroll}>
-            {blogs.map((blog) => (
+            {sectionContent.map((blog, idx) => (
               <div
-                key={blog.id}
+                key={idx}
                 className={styles.blogCard}
-                onClick={() => navigate(blog.link)}
+                onClick={() => {
+                  // Use blogId or ID field for navigation
+                  const blogId = blog.blogId || blog.ID || blog.id || blog._id;
+                  if (blogId) {
+                    navigate(`/blog/${blogId}`);
+                  }
+                }}
               >
                 <div className={styles.blogImage}>
                   <img
-                    src={blog.image}
+                    src={blog.imageUrl || defaultImages.news}
                     alt={blog.title}
                     className={styles.blogBgImage}
                   />
-                  <span className={styles.blogDate}>{blog.date}</span>
+                  <span className={styles.blogDate}>
+                    {formatDate(blog.publishDate || blog.date)}
+                  </span>
                 </div>
                 <h4 className={styles.blogTitle}>{blog.title}</h4>
               </div>
             ))}
           </div>
         </section>
+      );
+    }
+
+    // News section (display_type: "blog" with slug: "news")
+    if (displayType === "blog" && slug === "news") {
+      return (
+        <section key={index} className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
+              {(section.display_title || section.title || "IN THE NEWS").toUpperCase()}
+            </h2>
+            <ChevronRight size={24} className={styles.sectionArrow} />
+          </div>
+
+          <div className={styles.blogsScroll}>
+            {sectionContent.map((news, idx) => (
+              <div
+                key={idx}
+                className={styles.blogCard}
+                onClick={() => {
+                  if (news.redirect_url) {
+                    window.open(news.redirect_url, '_blank');
+                  }
+                }}
+              >
+                <div className={styles.blogImage}>
+                  <img
+                    src={news.imageUrl || defaultImages.news}
+                    alt={news.title}
+                    className={styles.blogBgImage}
+                  />
+                  <span className={styles.blogDate}>
+                    {formatDate(news.date)}
+                  </span>
+                </div>
+                <h4 className={styles.blogTitle}>{news.title}</h4>
+                {news.news_channel && (
+                  <p className={styles.newsChannel}>{news.news_channel}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    // Matchmaking banner
+    if (displayType === "matchmaking") {
+      const matchmakingData = sectionContent[0];
+      return (
+        <div key={index} className={styles.matchmakingBanner}>
+          <div className={styles.matchmakingContent}>
+            <h3 className={styles.matchmakingTitle}>
+              {matchmakingData?.title || section.title || "Matchmaking"}
+            </h3>
+            <p className={styles.matchmakingText}>
+              {matchmakingData?.description || section.description || "Measures emotional alignment and long-term compatibility"}
+            </p>
+          </div>
+          <img
+            src={matchmakingData?.imageUrl || matchmakingImg}
+            alt="Matchmaking"
+            className={styles.matchmakingIcon}
+          />
+        </div>
+      );
+    }
+
+    // Default fallback - render as scrollable cards
+    return (
+      <section key={index} className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>
+            {(section.display_title || section.title || "").toUpperCase()}
+          </h2>
+          <ChevronRight size={24} className={styles.sectionArrow} />
+        </div>
+
+        <div className={styles.destinyGrid}>
+          {sectionContent.map((card, idx) => (
+            <div
+              key={idx}
+              className={styles.destinyCard}
+              style={{ background: getDestinyCardColor(idx) }}
+              onClick={() => handleCardClick(card)}
+            >
+              <div className={styles.destinyCardContent}>
+                <h3 className={styles.destinyCardTitle}>{card.title}</h3>
+                {card.description && (
+                  <p className={styles.destinyCardSubtitle}>{card.description}</p>
+                )}
+              </div>
+              {card.imageUrl && (
+                <img
+                  src={card.imageUrl}
+                  alt={card.title}
+                  className={styles.destinyCardImage}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  };
+
+  // Fallback data for default images
+  const defaultImages = {
+    horoscope: horoscopeImg,
+    kundli: kundliReportsImg,
+    remedies: remediesImg,
+    vedic: vedicImg,
+    dasha: dashaImg,
+    kp: kpImg,
+    ashtakvarga: ashtakvargaImg,
+    matchmaking: matchmakingImg,
+    tarot: tarotImg,
+    numerology: numerology,
+    news: newsImg,
+  };
+
+  const handleCardClick = (card) => {
+    // Since API doesn't return redirect_url, we'll use title to determine navigation
+    // Map card titles to their routes
+    const titleToRouteMap = {
+      // All About You section
+      "Explore Your Horoscope": "/horoscopes/daily-horoscope",
+      "Explore Your Kundli": "/kundli",
+      "Kundli Reports": "/kundli?tab=free-report",
+      "Remedies For You": "/remedies",
+      "Remedies": "/remedies",
+      
+      // Discover Your Kundli section
+      "Vedic Kundli": "/kundli?tab=kundli",
+      "Vedic Kundali": "/kundli?tab=kundli",
+      "KP Chart": "/kundli?tab=kp",
+      "KP": "/kundli?tab=kp",
+      "Dasha": "/kundli?tab=dasha",
+      "Ashtakvarga Chart": "/kundli?tab=ashtakvarga",
+      "Ashtakvarga": "/kundli?tab=ashtakvarga",
+      
+      // Explore Your Destiny section
+      "Tarot": "/tarot",
+      "Numerology": "/numerology",
+      "Gemstones": "/gemstones",
+      "Gemstone": "/gemstones",
+    };
+    
+    const redirectUrl = titleToRouteMap[card.title] || card.redirect_url || card.redirectUrl || card.url || card.link;
+    
+    // Special handling for Kundli card - pass selected profile
+    if (redirectUrl?.includes('/kundli') && selectedProfile) {
+      // Convert profile data to the format expected by formSlice
+      const months = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      ];
+      
+      const meridiem = selectedProfile.hour >= 12 ? "PM" : "AM";
+      const hour12 =
+        selectedProfile.hour > 12
+          ? selectedProfile.hour - 12
+          : selectedProfile.hour === 0
+            ? 12
+            : selectedProfile.hour;
+
+      const profilePayload = {
+        name: selectedProfile.name,
+        gender:
+          selectedProfile.gender === "male"
+            ? "Male"
+            : selectedProfile.gender === "female"
+              ? "Female"
+              : "Others",
+        day: String(selectedProfile.day),
+        month: months[selectedProfile.month - 1],
+        year: String(selectedProfile.year),
+        hour: String(hour12),
+        minute: String(selectedProfile.min),
+        meridiem,
+        birthPlace: selectedProfile.place,
+        latitude: selectedProfile.lat,
+        longitude: selectedProfile.lon,
+      };
+      
+      // Dispatch setForm action
+      dispatch(setForm(profilePayload));
+    }
+    
+    // Navigate to the URL
+    if (redirectUrl) {
+      navigate(redirectUrl);
+    }
+  };
+
+  // Show loading state
+  if (isLoadingExplore) {
+    return (
+      <div className={styles.explorePage}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={() => navigate(-1)}>
+            <ChevronLeft size={24} />
+          </button>
+          <div className={styles.profileSelector}>
+            <span className={styles.selectLabel}>Select Profile</span>
+            <div className={styles.profileName}>
+              {selectedProfile ? selectedProfile.name : "Select Profile"}
+            </div>
+          </div>
+          <button className={styles.editButton}>
+            <Edit size={20} />
+          </button>
+        </div>
+        <PrimaryLoader />
       </div>
+    );
+  }
+
+  return (
+    <div className={styles.explorePage}>
+      {/* Header */}
+      <div className={styles.header}>
+        <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <ChevronLeft size={24} />
+        </button>
+        <div 
+          className={styles.profileSelector}
+          onClick={() => setShowSelectProfile(true)}
+        >
+          <span className={styles.selectLabel}>Select Profile</span>
+          <div className={styles.profileName}>
+            {selectedProfile ? selectedProfile.name : "Select Profile"}
+            <ChevronRight size={20} className={styles.dropdownIcon} />
+          </div>
+        </div>
+        <button className={styles.editButton}>
+          <Edit size={20} />
+        </button>
+      </div>
+
+      {/* Main Content */}
+      <div className={styles.content}>
+        {/* Render sections dynamically based on API data */}
+        {Array.isArray(exploreSections) && exploreSections.map((section, index) => {
+          return renderSection(section, index);
+        })}
+      </div>
+
+      {/* Select Profile Modal */}
+      <ProfileListingModal
+        isOpen={showSelectProfile}
+        onClose={() => setShowSelectProfile(false)}
+        profiles={profiles}
+        selectedProfileId={selectedProfile?._id}
+        onSelectProfile={handleSelectProfile}
+        onAddProfile={handleAddProfile}
+        title="Select Profile"
+        showAddButton={true}
+        showDeleteButton={false}
+        emptyMessage="No profiles found. Add a profile to get started."
+      />
+
+      {/* Add Profile Modal */}
+      <AddProfileModal
+        isOpen={showAddProfile}
+        onClose={() => setShowAddProfile(false)}
+        onSubmit={handleSubmitProfile}
+        isLoading={isCreating}
+        title="Add Profile"
+        showProfileListing={false}
+      />
     </div>
   );
 };

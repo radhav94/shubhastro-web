@@ -13,6 +13,7 @@ const FaceReadingCamera = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
+  const [videoActive, setVideoActive] = useState(true); // ⭐ NEW - Controls video element mounting
 
   const {
     modelsLoaded,
@@ -20,6 +21,20 @@ const FaceReadingCamera = () => {
     startDetection,
     stopDetection
   } = useFaceDetection({ videoRef, canvasRef: detectionCanvasRef });
+
+  // Safety net cleanup on unmount
+  useEffect(() => {
+    return () => {
+      console.log('Component unmounting - final cleanup');
+      stopDetection();
+      
+      if (videoRef.current?.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach(track => {
+          track.stop();
+        });
+      }
+    };
+  }, []);
 
   // Start detection when models are loaded and video is ready
   useEffect(() => {
@@ -135,8 +150,14 @@ const FaceReadingCamera = () => {
   };
 
   const switchCamera = () => {
+    // Stop current camera completely before switching
+    stopCamera();
+    
+    // Switch facing mode
     const nextMode = facingMode === 'user' ? 'environment' : 'user';
     setFacingMode(nextMode);
+    
+    // Start camera with new mode will be handled by useEffect
   };
 
   const captureImage = () => {
@@ -169,7 +190,24 @@ const FaceReadingCamera = () => {
   };
 
   const handleBack = () => {
-    stopCamera();
+    console.log('Back button clicked - HARD STOP');
+    
+    // 1️⃣ Stop detection loop immediately
+    stopDetection();
+    
+    // 2️⃣ Stop ALL media tracks
+    if (videoRef.current?.srcObject) {
+      videoRef.current.srcObject.getTracks().forEach(track => {
+        console.log('Stopping track:', track.kind);
+        track.stop();
+      });
+      videoRef.current.srcObject = null;
+    }
+    
+    // 3️⃣ REMOVE video element from DOM (forces camera LED off)
+    setVideoActive(false);
+    
+    // 4️⃣ Navigate immediately
     navigate(-1);
   };
 
@@ -225,12 +263,15 @@ const FaceReadingCamera = () => {
       <div className={styles.cameraWrapper}>
         {!capturedImage ? (
           <>
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className={styles.video}
-            />
+            {videoActive && (
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className={styles.video}
+              />
+            )}
             <canvas
               ref={detectionCanvasRef}
               className={styles.detectionCanvas}

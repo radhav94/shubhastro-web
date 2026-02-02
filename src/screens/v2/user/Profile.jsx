@@ -13,13 +13,14 @@ import {
 import { TiUserDelete } from "react-icons/ti";
 import { LuPencilLine } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
-import { useState, useRef, useEffect } from "react";
 import { useDispatch } from "react-redux";
+import { useState, useRef, useEffect } from "react";
 import dayjs from "dayjs";
 import { useGetTransactionsQuery } from "../../../services/appServices/transactionService";
 import {
   useGetAllKundlisQuery,
   useDeleteKundliMutation,
+  useCreateKundliMutation,
 } from "../../../services/appServices/kundliServicesNew";
 import { useGetCallHistoryQuery } from "../../../redux/api/callHistory/callHistory";
 import { useGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chatHistory";
@@ -28,7 +29,6 @@ import { getUserFromStorage } from "../../../utils/authStorage";
 import { useChat } from "../../../context/ChatContext";
 import { useCall } from "../../../context/CallContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
-import { Toast } from "../../../component";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import ConnectAstrologerPopup from "../../private/v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
@@ -36,18 +36,25 @@ import ProfileModals from "../../private/kundli/components/ProfileModals";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { PATH } from "../../../utils/routes/Paths";
+import { logout } from "../../../redux/auth/authSlice";
 import styles from "./Profile.module.scss";
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
+import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
+import { Toast } from "../../../component/index";
 
 const Profile = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Profile");
   const [orderHistoryTab, setOrderHistoryTab] = useState("call"); // Sub-tab for order history
   const transactionListRef = useRef(null);
   const orderListRef = useRef(null); // Ref for order history scroll
   const user = getUserFromStorage();
-  const userName = user ? `${user.firstName} ${user.lastName}` : "Guest User";
+  const userName = user
+    ? user.firstName && user.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user.phoneNumber || "Guest User"
+    : "Guest User";
   const userId = localStorage.getItem("shubhtalk_customer_id");
 
   // Connect popup state
@@ -122,6 +129,9 @@ const Profile = () => {
   // Delete confirmation state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [kundliToDelete, setKundliToDelete] = useState(null);
+
+  // Add Profile Modal state
+  const [showAddProfileModal, setShowAddProfileModal] = useState(false);
 
   // Fetch call and chat history
   const {
@@ -233,12 +243,18 @@ const Profile = () => {
     data: kundliData,
     isLoading: isLoadingKundlis,
     refetch: refetchKundlis,
-  } = useGetAllKundlisQuery();
+  } = useGetAllKundlisQuery(userId, {
+    skip: !userId,
+    refetchOnMountOrArgChange: true, // Always refetch when component mounts or userId changes
+  });
   const savedKundlis = kundliData?.data || [];
 
   // Delete kundli mutation
   const [deleteKundli, { isLoading: isDeletingKundli }] =
     useDeleteKundliMutation();
+
+  // Add kundli mutation
+  const [addKundli, { isLoading: isAddingKundli }] = useCreateKundliMutation();
 
   // Fetch wallet balance
   const { balance, isFetching: isFetchingBalance } = useWalletBalance();
@@ -626,7 +642,76 @@ const Profile = () => {
     setKundliToDelete(null);
   };
 
+  // Add Profile Modal handlers
+  const handleOpenAddProfileModal = () => {
+    setShowAddProfileModal(true);
+  };
+
+  const handleCloseAddProfileModal = () => {
+    setShowAddProfileModal(false);
+  };
+
+  const buildKundliPayload = (data) => {
+    const dateObj = new Date(data.birthDate);
+    const timeObj = data.birthTime ? data.birthTime.split(":") : ["0", "0"];
+
+    return {
+      name: data.name,
+      gender: data.identity.toLowerCase(),
+      day: dateObj.getDate(),
+      month: dateObj.getMonth() + 1,
+      year: dateObj.getFullYear(),
+      hour: data.unknownBirthTime ? 0 : parseInt(timeObj[0]),
+      min: data.unknownBirthTime ? 0 : parseInt(timeObj[1]),
+      second: 0,
+      place: data.birthPlace,
+      lat: data.latitude || 0,
+      lon: data.longitude || 0,
+      tzone: 5.5,
+    };
+  };
+
+  const isDuplicateKundli = (payload, list) =>
+    list.some(
+      (k) =>
+        k.name.trim().toLowerCase() === payload.name.trim().toLowerCase() &&
+        k.gender.toLowerCase() === payload.gender.toLowerCase() &&
+        Number(k.day) === Number(payload.day) &&
+        Number(k.month) === Number(payload.month) &&
+        Number(k.year) === Number(payload.year) &&
+        Number(k.hour) === Number(payload.hour) &&
+        Number(k.min) === Number(payload.min) &&
+        Math.abs(Number(k.lat) - Number(payload.lat)) < 0.0001 &&
+        Math.abs(Number(k.lon) - Number(payload.lon)) < 0.0001 &&
+        k.place.trim().toLowerCase() === payload.place.trim().toLowerCase(),
+    );
+
+  const handleAddProfileSubmit = async (formData) => {
+    try {
+      const payload = buildKundliPayload(formData);
+
+      // Check for duplicate
+      if (isDuplicateKundli(payload, savedKundlis)) {
+        Toast.error("This profile already exists");
+        throw new Error("Duplicate profile");
+      }
+
+      const result = await addKundli(payload).unwrap();
+      Toast.success("Profile added successfully");
+      setShowAddProfileModal(false);
+    } catch (err) {
+      console.error(err);
+      const errorMessage =
+        err?.data?.message || err?.message || "Failed to add profile";
+      Toast.error(errorMessage);
+      throw err;
+    }
+  };
+
   const handleLogout = () => {
+    // Dispatch Redux logout action
+    dispatch(logout());
+
     // Clear all authentication related data from localStorage
     localStorage.removeItem("shubhtalk_customer_token");
     localStorage.removeItem("shubhtalk_role");
@@ -635,6 +720,8 @@ const Profile = () => {
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("userData");
     localStorage.removeItem("astro_wallet_balance");
+
+    window.dispatchEvent(new Event("auth-change"));
 
     // Navigate to home page
     navigate("/");
@@ -669,7 +756,7 @@ const Profile = () => {
             <p className={styles.profileDetails}>
               {savedKundlis[0]
                 ? `${dayjs(`${savedKundlis[0].year}-${savedKundlis[0].month}-${savedKundlis[0].day}`).format("MMM DD, YYYY")} • ${String(savedKundlis[0].hour).padStart(2, "0")}:${String(savedKundlis[0].min).padStart(2, "0")}`
-                : "Jan 01, 2002 • 18:00"}
+                : " "}
             </p>
           </div>
         </div>
@@ -755,7 +842,7 @@ const Profile = () => {
             <span className={styles.balanceLabel}>Balance</span>
           </div>
           <div className={styles.balanceAmount}>
-            ₹{isFetchingBalance ? "..." : balance || 100}
+            ₹{isFetchingBalance ? "..." : balance || 0}
           </div>
         </div>
 
@@ -829,15 +916,17 @@ const Profile = () => {
                         • {String(kundli.hour).padStart(2, "0")}:
                         {String(kundli.min).padStart(2, "0")} PM
                       </p>
-                      <p className={styles.profileCardLocation}>{kundli.place}</p>
+                      <p className={styles.profileCardLocation}>
+                        {kundli.place}
+                      </p>
                     </div>
                   </div>
                 ))}
-                
+
                 {/* Add Profile Button - now part of the list */}
                 <button
                   className={styles.addProfileButton}
-                  onClick={() => navigate("/profile/add")}
+                  onClick={handleOpenAddProfileModal}
                 >
                   Add Profile +
                 </button>
@@ -847,7 +936,7 @@ const Profile = () => {
                 <p>No profiles found</p>
                 <button
                   className={styles.addProfileButton}
-                  onClick={() => navigate("/profile/add")}
+                  onClick={handleOpenAddProfileModal}
                 >
                   Add Profile +
                 </button>
@@ -1313,6 +1402,14 @@ const Profile = () => {
           connectionType={connectionType}
         />
       )}
+      {/* Add Profile Modal */}
+      <AddProfileModal
+        isOpen={showAddProfileModal}
+        onClose={() => setShowAddProfileModal(false)}
+        onSubmit={handleAddProfileSubmit}
+        isLoading={isAddingKundli}
+        title="Add Profile"
+      />
     </div>
   );
 };

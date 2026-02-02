@@ -1,0 +1,137 @@
+.summaryContainer {
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+  margin: 0px auto 20px auto; // 👈 centers it
+  background-image: url(/src/assets/images/match-making-star.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: bottom;
+}
+.topScoreBox{
+  width: 240px;
+  padding: 20px;
+  border-radius: var(--Radius-5, 16px);
+  border: 1px solid var(--primary-300, #FFC063);
+  background: var(--Colors-Primary-Yellow-100, #FDEFD8);
+  margin: 0 auto;
+}
+.goodMatch{
+  font-size: 40px;
+  font-weight: 600;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.totalScoreText{
+  font-size: 18px;
+  font-weight: 600;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.goodMatchText{
+  width: fit-content;
+  display: flex;
+  padding: 6px 12px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 90px;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  color: #fff;
+  margin: 10px auto 0 auto;
+}
+.roundedHeart{
+  width: 75px;
+  height: 75px;
+  border-radius: 55px;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px auto;
+  @media (width <= 767) {
+    width: 55px;
+    height: 55px;
+  }
+}
+.header {
+  background: #f4d24b;
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+
+  .icon {
+    color: #059669;
+    font-size: 18px;
+    margin-right: 8px;
+  }
+
+  .title {
+    font-weight: 600;
+    color: #000;
+  }
+}
+
+.content {
+  text-align: center;
+  padding: 20px;
+
+  .scoreText {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 25px;
+  }
+
+  .chartWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(#ffa500 0deg, #fdeac9 0deg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.5s ease-in-out;
+
+    .innerCircle {
+      width: 85px;
+      height: 85px;
+      background: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: #333;
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .summaryContainer {
+   background-position: center;
+  }
+
+  .circle {
+    width: 100px;
+    height: 100px;
+
+    .innerCircle {
+      width: 70px;
+      height: 70px;
+    }
+  }
+}

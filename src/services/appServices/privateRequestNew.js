@@ -76,14 +76,20 @@ export const privateRequestNew = createApi({
   baseQuery: async (args, api, extraOptions) => {
     const rawBaseQuery = fetchBaseQuery({
       baseUrl: `${BASE_URL}/api/`,
-      prepareHeaders: (headers) => {
+      prepareHeaders: (headers, { endpoint }) => {
         const role = localStorage.getItem("shubhtalk_role");
-        const token =
-          role === "ASTROLOGER"
-            ? localStorage.getItem("shubhtalk_astro_token")
-            : localStorage.getItem("shubhtalk_customer_token");
+        let token = null;
 
-        headers.set("Content-Type", "application/json");
+        if (role === "ASTROLOGER") {
+          token = localStorage.getItem("shubhtalk_astro_token");
+        } else if (role === "CUSTOMER") {
+          token = localStorage.getItem("shubhtalk_customer_token");
+        }
+
+        // ✅ Only set text/plain if not already set by endpoint
+        if (!headers.has("Content-Type")) {
+          headers.set("Content-Type", "text/plain");
+        }
 
         if (token) {
           headers.set("Authorization", `Bearer ${token}`);

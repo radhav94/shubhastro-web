@@ -150,7 +150,7 @@
   right: 20px;
   max-width: 560px;
   margin: 0 auto;
-  background: #999;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: white;
   border: none;
   padding: 18px;
@@ -159,6 +159,7 @@
   font-weight: 600;
   cursor: not-allowed;
   transition: all 0.3s;
+  z-index: 99;
 }
 
 .showReadingButton:not(.disabled) {

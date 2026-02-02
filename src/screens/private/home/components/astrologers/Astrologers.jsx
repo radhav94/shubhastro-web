@@ -1,31 +1,35 @@
 // Astrologers.jsx
 import { useCallback, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import styles from "./Astrologers.module.scss";
 import {
   AstrologerCard,
-  RechargeAlertModel,
+  RechargeModal,
   Title,
   Toast,
 } from "../../../../../component";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
-import KundliSelectModal from "../../../talkToAstrologer/kundliSelect/KundliSelectModal";
 import { useGetAstrologersQuery } from "../../../../../redux/api/astrologer/astrologerApi";
 import { getToken } from "../../../../../utils/token";
 import { PATH } from "../../../../../utils/routes/Paths";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import { useCall } from "../../../../../context/CallContext";
-import WaitingPopup from "../../components/chats/WaitingPopup";
 import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
 import { useChat } from "../../../../../context/ChatContext";
+import { useAstrologerConnect } from "../../../../../utils/hooks/useAstrologerConnect";
+import ConnectAstrologerPopup from "../../../v2/components/ui/ConnectAstrologerPopup";
+import ProfileModals from "../../../kundli/components/ProfileModals";
+import { useProfileManager } from "../../../kundli/hooks/useProfileManager";
 
 const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [callType, setCallType] = useState(null); // audio | video
-  const [isChatMode, setIsChatMode] = useState(true);
+
   const {
     activeCall,
     setActiveCall,
+    waitingList: callWaitingList,
     setWaitingList: setCallWaitingList,
     setActiveCallRoomId,
     resetCallFlow,
@@ -34,7 +38,18 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
     setLastRequestedAstro: setLastRequestedCallAstro,
     setCallSeconds
   } = useCall();
-  const { setActiveChat, setWaitingList, WaitingList, resetChatFlow, activeChatRoomId, setActiveChatRoomId, setLastRequestedAstro, lastRequestedAstro, setChatSeconds } = useChat();
+
+  const {
+    setActiveChat,
+    setWaitingList,
+    WaitingList,
+    resetChatFlow,
+    activeChatRoomId,
+    setActiveChatRoomId,
+    setLastRequestedAstro,
+    lastRequestedAstro,
+    setChatSeconds
+  } = useChat();
 
   const page = 1;
   const limit = 3;
@@ -51,14 +66,44 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
   const astrologerList =
     astrologers.length > 0
       ? astrologers
-      : apiResponse?.data || [];
+      : apiResponse?.data?.result || [];
 
-  const [kundliModalOpen, setKundliModalOpen] = useState(false);
-  const [openModal, setOpenModal] = useState({ recharge: false });
+  // Use the astrologer connect hook (same as TalkToAstrologer)
+  const {
+    handleChatStart: hookHandleChatStart,
+    handleCallStart: hookHandleCallStart,
+    handleAfterKundliSelect: hookHandleAfterKundliSelect,
+    openModal: hookOpenModal,
+    setOpenModal: hookSetOpenModal,
+  } = useAstrologerConnect();
 
-  const [selectedAstro, setSelectedAstro] = useState(null);
-  const [waitingPopup, setWaitingPopup] = useState(false);
-  const [callRoomId, setCallRoomId] = useState(null);
+  // Use profile manager hook (same as TalkToAstrologer)
+  const {
+    selectedProfile: profileManagerSelectedProfile,
+    profiles,
+    profilesLoading,
+    isCreating,
+    showSelectProfile,
+    showAddProfile,
+    showEditProfile,
+    formData,
+    editFormData,
+    setShowSelectProfile,
+    setShowAddProfile,
+    setShowEditProfile,
+    setFormData,
+    setEditFormData,
+    handleAddProfile,
+    handleEditProfile,
+    handleSubmitProfile,
+    handleSubmitEditProfile,
+    formatProfileDisplay,
+  } = useProfileManager(dispatch);
+
+  // Local state for selected profile (to avoid closing modal)
+  const [localSelectedProfile, setLocalSelectedProfile] = useState(null);
+  const [selectedAstrologer, setSelectedAstrologer] = useState(null);
+  const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
 
   // 🔹 ADDED: arrow disable states
   const [isAtStart, setIsAtStart] = useState(true);
@@ -71,11 +116,11 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
 
   const token = getToken();
 
-  //  track which astrologer user is calling
-  const [activeCallAstro, setActiveCallAstro] = useState(null);
   //  keep astro in ref (important)
   const activeCallAstroRef = useRef(null);
   const kundliRef = useRef(null);
+  const [callRoomId, setCallRoomId] = useState(null);
+  const [chatRoomId, setChatRoomId] = useState(null);
 
   // ---------------- SCROLL LOGIC (ADDED ONLY) ----------------
 
@@ -99,199 +144,23 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
     return () => el.removeEventListener("scroll", checkScrollPosition);
   }, []);
 
-  // ---------------- CHAT FLOW ----------------
-
-  const openKundliPopup = () => {
-    if (token) setKundliModalOpen(true);
-    else navigate("/login");
+  // Custom handler for profile selection (doesn't close modal)
+  const handleProfileSelect = (profile) => {
+    setLocalSelectedProfile(profile);
   };
 
-  async function handleChatStart(astro) {
-    setSelectedAstro(astro);
-    setLastRequestedAstro(astro);
-
-    const result = await getBalance({ astrologerId: astro?._id });
-    if (result.data.data.status === false) {
-      setOpenModal((prev) => ({ ...prev, recharge: true }));
-      return;
-    }
-
-    openKundliPopup();
-  }
-
-  const handleChatAfterKundliSelect = async (kundli) => {
-    setKundliModalOpen(false);
-
-    if (!kundli?._id) return Toast.error("Kundli not selected properly");
-    kundliRef.current = kundli._id;
-    setLastSelectedKundli(kundli); // Store the selected Kundli in context
-    if (!selectedAstro?._id) return Toast.error("Astrologer not selected");
-    if (!userIdLocal) return Toast.error("User ID Missing");
-
-    const astro = selectedAstro;
-    localStorage.setItem("selectedAstroId", astro._id);
-
-    try {
-      // 🔐 Auth check
-      if (!token) {
-        navigate("/login", { state: { from: location.pathname } });
-        return;
-      }
-      if (!isChatMode) return initiateCall(astro, callType);
-      // ✅ Store active call info
-      activeCallAstroRef.current = astro;
-      setWaitingPopup(true);
-      kundliRef.current = kundli?._id;
-
-      // 🚀 Create call room
-      voiceSocket.emit("chat:initiate", {
-        userId: userIdLocal,
-        astrologerId: astro._id,
-      });
-    } catch (error) {
-      console.error(error);
+  // Handler for Continue button (triggers socket emit)
+  const handleContinueAfterKundliSelect = () => {
+    if (localSelectedProfile) {
+      hookHandleAfterKundliSelect(localSelectedProfile);
     }
   };
 
-  const initiateCall = async (astro, type) => {
-    // 🔐 Auth check
-    if (!token) {
-      navigate("/login", { state: { from: location.pathname } });
-      return;
-    }
-
-    // ❌ Validations
-    if (!astro) return Toast.error("Astrologer missing");
-    if (!userIdLocal) return Toast.error("User ID missing");
-
-    // 💰 Balance check
-    const res = await getBalance({ astrologerId: astro._id, type: "call" });
-    if (
-      !res?.data?.data?.status ||
-      res?.data?.data?.availableAmount < res?.data?.data?.requiredAmount
-    ) {
-      setSelectedAstrologer(astro);
-      setOpenModal((prev) => ({ ...prev, recharge: true }));
-      return;
-    }
-
-    // 📞 Already on call
-    if (activeCall) {
-      return Toast.error("You are already on a call");
-    }
-
-    // ✅ Store active call info
+  // Handle connect button click - open popup
+  const handleConnectClick = (astro) => {
+    setSelectedAstrologer(astro);
+    setIsConnectPopupOpen(true);
     activeCallAstroRef.current = astro;
-    setActiveCallAstro(astro);
-    setCallType(type);
-    setLastCallType(type); // Store the call type in context
-    setCallWaitingList(5); // Show waiting for call
-
-    // 🔌 Ensure socket connection
-    // connectSocket();
-
-    // 🚀 Create call room
-    voiceSocket.emit("call:initiate", {
-      userId: userIdLocal,
-      astrologerId: astro._id,
-      type, // "audio" | "video"
-    });
-  };
-
-  async function handleChatStart(astro) {
-    setSelectedAstro(astro);
-    setLastRequestedAstro(astro);
-    //Check if user has minimum required balance
-    const result = await getBalance({ astrologerId: astro?._id });
-    if (result.data.data.status === false) {
-      setOpenModal((prev) => ({ ...prev, recharge: true }));
-      return;
-    }
-
-    openKundliPopup();
-  }
-
-
-  // ---------------- AUDIO CALL ----------------
-
-  //  AUDIO CALL – same pattern as TalkToAstrologer / ChatWindow
-  const handleAudioCall = (astro) => {
-    if (activeCall) {
-      return Toast.error("You are already on a call");
-    }
-
-    if (!astro) return;
-    if (!token) return navigate("/login");
-    if (!userIdLocal) return;
-
-    setActiveCallAstro(astro);
-    setWaitingPopup(true); //  Show popup
-    activeCallAstroRef.current = astro;
-    setWaitingPopup(true);
-
-    voiceSocket.emit("create_call_room", {
-      userId: userIdLocal,
-      astrologerId: astro._id,
-      type: "audio",
-    });
-  };
-
-  const handleVideoCall = (astro) => {
-    if (activeCall) {
-      return Toast.error("You are already on a call");
-    }
-
-    if (!astro) return;
-    if (!token) return navigate("/login");
-    if (!userIdLocal) return;
-
-    activeCallAstroRef.current = astro;
-    setWaitingPopup(true);
-
-    voiceSocket.emit("create_call_room", {
-      userId: userIdLocal,
-      astrologerId: astro._id,
-      type: "video",
-    });
-  };
-
-  const handleCallStart = async (astro, type) => {
-    setSelectedAstro(astro);
-    setLastRequestedCallAstro(astro);
-    //Check if user has minimum required balance
-    // 💰 Balance check
-    const result = await getBalance({ astrologerId: astro?._id, type: "call" });
-    if (result.data.data.status === false) {
-      setOpenModal((prev) => ({ ...prev, recharge: true }));
-      return;
-    }
-
-    //Check if astro is online
-    if (!astro?.isActive) {
-      Toast.error("Astrologer is not online");
-      return;
-    }
-
-    setCallType(type);
-    openKundliPopup();
-    setIsChatMode(false);
-  };
-
-  const cancelCall = () => {
-    const astro = activeCallAstroRef.current;
-
-    setWaitingPopup(false);
-    setCallRoomId(null);
-    activeCallAstroRef.current = null;
-
-    setActiveCall(null);
-
-    if (astro?._id) {
-      voiceSocket.emit("cancel_call", {
-        userId: userIdLocal,
-        astrologerId: astro._id,
-      });
-    }
   };
 
   // ---------------- SOCKET LISTENERS ----------------
@@ -300,13 +169,13 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
     if (!userIdLocal) return;
 
     const handleReturnRoom = ({ roomId }) => {
-      if (!roomId) return;
-      setWaitingPopup(true);
+      setCallRoomId(roomId);
+      setCallWaitingList(5); // Show waiting for call
     };
 
     const handleChatRoom = (data) => {
+      setChatRoomId(data?.roomId);
       setActiveChatRoomId(data?.roomId);
-      setWaitingPopup(false);
       setWaitingList(data?.waitingTime || 2);
     };
 
@@ -317,22 +186,11 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
     };
 
     const handleCallAccepted = async ({ roomId, token, type, remainingTime }) => {
-      setWaitingPopup(false);
       resetCallFlow();
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
-      if (!astro) return;
 
-      //  START CALL GLOBALLY (NO NAVIGATION)
       try {
-        const res = await createChatRoom({
-          userId: userIdLocal,
-          astrologerId: astro._id,
-        });
-
-        const chatRoomId = res?.data?.data;
-        if (!chatRoomId) throw new Error();
-
         setActiveCall({
           roomId,
           chatRoomId,
@@ -344,7 +202,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           astrologerId: astro._id,
           kundliId,
           astrologerID: astro?.astrologer_ID,
-          remainingTime
+          remainingTime,
         });
         setCallSeconds(Number(remainingTime) * 60);
       } catch {
@@ -359,6 +217,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       ...data
     }) => {
       setWaitingList(false);
+      const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
 
       try {
@@ -366,14 +225,14 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
 
         setActiveChat({
           roomId,
-          activeChatRoomId,
-          callerName: data?.astrologer?.firstName,
+          chatRoomId,
+          callerName: astro.firstName,
           isUserSide: true,
           userId: userIdLocal,
           astrologerId: astrologerId,
           kundliId,
           astrologerName: data?.astrologer?.firstName || "",
-          remainingTime: data?.remainingTime
+          remainingTime: data?.remainingTime,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 
@@ -381,34 +240,39 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           state: {
             userId: userId,
             astrologerId,
-            fullName: data?.astrologer?.firstName,
+            fullName: astro.firstName,
             roomId,
             isUserSide: true,
             kundliId,
             astrologerName: data?.astrologer?.firstName || "",
-            astroID: data?.astrologer?.astrologer_ID
+            astroID: data?.astrologer?.astrologer_ID,
+            experience: data?.astrologer?.experience
           },
         });
       } catch (e) {
-        console.log('e', e)
         Toast.error("Failed to start chat");
       }
     };
 
     const handleCallRejected = (data) => {
-      if (activeCallAstroRef.current === null) return;
       const errorMsg =
-        data?.sessionData?.sessionEndReason === "rejected"
+        data?.sessionData?.sessionEndReason === "rejected" &&
+          data?.type === "chat"
           ? "Astrologer has rejected the chat request"
-          : "Call rejected";
+          : "Astrologer has rejected the call request";
       Toast.error(errorMsg);
-      setWaitingPopup(false);
-      activeCallAstroRef.current = null;
+      resetCallFlow();
       resetChatFlow();
     };
 
+    const handleSocketError = (err) => {
+      if (err?.message === "Call has already ended") {
+        return;
+      }
+      Toast.error(err?.message || "Connection error");
+    };
+
     const handleCallEnded = () => {
-      setWaitingPopup(false);
       activeCallAstroRef.current = null;
     };
 
@@ -419,6 +283,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
     voiceSocket.on("chat:accepted", handleChatAccepted);
     voiceSocket.on("chat:rejected", handleCallRejected);
     voiceSocket.on("call:rejected", handleCallRejected);
+    voiceSocket.on("error", handleSocketError);
     voiceSocket.on("call:ended", handleCallEnded);
 
     return () => {
@@ -429,6 +294,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       voiceSocket.off("chat:accepted", handleChatAccepted);
       voiceSocket.off("chat:rejected", handleCallRejected);
       voiceSocket.off("call:rejected", handleCallRejected);
+      voiceSocket.off("error", handleSocketError);
       voiceSocket.off("call:ended", handleCallEnded);
     };
   }, [userIdLocal, setActiveCall]);
@@ -440,6 +306,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
   const scrollRight = () => {
     scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
   };
+
   // ---------------- UI ----------------
 
   return (
@@ -451,13 +318,6 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
         buttonTitle="View All"
         onButtonClick={onClickView}
       />
-
-      {waitingPopup && (
-        <WaitingPopup
-          callRoomId={callRoomId}
-          onCancel={cancelCall}
-        />
-      )}
 
       {astrologerList?.length > 3 && (
         <button
@@ -472,18 +332,20 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           &lt;
         </button>
       )}
-      <div className={`${styles.cardsContainer} ${astrologers?.length > 3 ? styles.scrollMode : ""
-        }`}
-        ref={scrollRef}>
-        {astrologers?.map((astrologer) => (
+
+      <div
+        className={`${styles.cardsContainer} ${astrologerList?.length > 3 ? styles.scrollMode : ""}`}
+        ref={scrollRef}
+      >
+        {astrologerList?.map((astrologer) => (
           <div key={astrologer._id} className={styles.cardWrapper}>
             <AstrologerCard
               data={astrologer}
-              onChat={() => handleChatStart(astrologer)}
+              onChat={() => handleConnectClick(astrologer)}
               onProfile={() => onProfile(astrologer)}
-              onAudioCall={() => handleCallStart(astrologer, "audio")}
-              onVideoCall={() => handleCallStart(astrologer, "video")}
-              disabled={!!activeCall} //  optional UX improvement
+              onAudioCall={() => handleConnectClick(astrologer)}
+              onVideoCall={() => handleConnectClick(astrologer)}
+              disabled={!!activeCall}
               isLayoutClassic={false}
               isActiveType={astrologer?.isActiveType}
             />
@@ -504,17 +366,51 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           &gt;
         </button>
       )}
-      <KundliSelectModal
-        isOpen={kundliModalOpen}
-        onClose={() => setKundliModalOpen(false)}
-        onSelect={handleChatAfterKundliSelect}
+
+      {/* Profile Modals - using ProfileModals like TalkToAstrologer */}
+      <ProfileModals
+        showSelectProfile={hookOpenModal.kundli}
+        showAddProfile={showAddProfile}
+        showEditProfile={showEditProfile}
+        profiles={profiles}
+        selectedProfile={localSelectedProfile}
+        formData={formData}
+        editFormData={editFormData}
+        isCreating={isCreating}
+        onCloseSelect={() => {
+          hookSetOpenModal((prev) => ({ ...prev, kundli: false }));
+          setLocalSelectedProfile(null);
+        }}
+        onCloseAdd={() => setShowAddProfile(false)}
+        onCloseEdit={() => setShowEditProfile(false)}
+        onSelectProfile={handleProfileSelect}
+        onAddProfile={handleAddProfile}
+        onSubmitProfile={handleSubmitProfile}
+        onSubmitEditProfile={handleSubmitEditProfile}
+        setFormData={setFormData}
+        setEditFormData={setEditFormData}
+        formatProfileDisplay={formatProfileDisplay}
+        showContinueButton={true}
+        onContinue={handleContinueAfterKundliSelect}
       />
 
-      <RechargeAlertModel
-        onClose={() => setOpenModal({ recharge: false })}
-        isOpen={openModal.recharge}
-        handleSubmit={() => navigate(PATH.privateRoutes.RECHARGE.path)}
-        astrologer={selectedAstro}
+      {/* Recharge modal from hook for popup flow */}
+      <RechargeModal
+        isOpen={hookOpenModal.recharge}
+        onClose={() =>
+          hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
+        }
+        astrologer={selectedAstrologer}
+        connectionType="chat"
+      />
+
+      {/* Connect Astrologer Popup */}
+      <ConnectAstrologerPopup
+        isOpen={isConnectPopupOpen}
+        onClose={() => setIsConnectPopupOpen(false)}
+        astrologer={selectedAstrologer}
+        onChatStart={hookHandleChatStart}
+        onCallStart={hookHandleCallStart}
       />
     </div>
   );

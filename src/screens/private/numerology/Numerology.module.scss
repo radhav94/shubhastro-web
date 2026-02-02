@@ -3,6 +3,13 @@
   min-height: 100vh;
   padding-bottom: 80px;
   position: relative;
+  margin-top: 98px;
+  @media screen and (width <= 1180px) {
+    margin-top: 86px;
+  }
+  @media screen and (width <= 767px) {
+    margin-top: 68px;
+  }
 }
 
 /* HERO */
@@ -10,6 +17,9 @@
   text-align: center;
   position: relative;
   padding: 40px 20px;
+  @media (width <= 767px){
+    padding: 20px 20px;
+  }
 }
 
 .heroGlow {
@@ -32,6 +42,16 @@
   margin-bottom: 10px;
   position: relative;
   z-index: 1;
+  font-weight: 500;
+  font-size: clamp(2rem, 5vw, 2.5rem);
+  line-height: 1.3;
+  @media (width <= 767px) {
+    text-align: left;
+    font-size: 32px;
+  }
+  @media (width <= 390px) {
+    font-size: 22px;
+  }
 }
 
 .heroSubtitle {
@@ -39,6 +59,12 @@
   margin: 0 auto 32px;
   position: relative;
   z-index: 1;
+  font-weight: 400;
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  margin-bottom: 0px;
+  @media (width <= 767px) {
+    text-align: left;
+  }
 }
 
 .primaryBtn {
@@ -179,9 +205,10 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: #F3F3F3;
+  background: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(10px);
+  margin-top: 100px;
 }
 
 /* MOBILE PROFILE BAR */
@@ -190,18 +217,21 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: #F3F3F3;
+  background: #fff;
   position: sticky;
   top: 0;
   z-index: 100;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(10px);
+  @media (width <= 767px) {
+    padding: 6px 16px;
+  }
 }
 
 .backBtn {
-  background: white;
-  border: none;
+  background: #fdeeea;
+  border: 1px solid #f75801;
   cursor: pointer;
   padding: 10px;
   color: #333;
@@ -213,12 +243,20 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   width: 44px;
   height: 44px;
-  
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
+
   svg {
     width: 20px;
     height: 20px;
+    path{
+      stroke:#f75801;
+    }
   }
-  
+
   &:active {
     transform: scale(0.95);
   }
@@ -238,12 +276,12 @@
   // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   width: 44px;
   height: 44px;
-  
+
   svg {
     width: 20px;
     height: 20px;
   }
-  
+
   &:active {
     transform: scale(0.95);
   }
@@ -262,7 +300,7 @@
   padding: 4px 12px;
   border-radius: 8px;
   transition: 0.2s ease;
-  
+
   &:active {
     transform: scale(0.98);
   }
@@ -591,9 +629,9 @@
 
 /* DESKTOP STYLES */
 @media (min-width: 769px) {
-  .page {
-    padding-bottom: 40px;
-  }
+  // .page {
+  //   padding-bottom: 40px;
+  // }
 
   /* Hide Mobile Profile Bar on Desktop */
   .mobileProfileBar {
@@ -605,10 +643,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 20px 40px;
-    background: #F3F3F3;
+    background: #fff;
   }
 
   .profileSelector {
@@ -655,18 +693,6 @@
   }
 
   /* Desktop Hero Section */
-  .hero {
-    padding: 60px 40px;
-  }
-
-  .heroTitle {
-    font-size: 48px;
-  }
-
-  .heroSubtitle {
-    font-size: 20px;
-    max-width: 700px;
-  }
 
   /* Desktop Features */
   .features {
@@ -899,11 +925,10 @@
   }
 }
 
-
 /* NUMEROLOGY SECTION */
 .numerologySection {
   max-width: 480px;
-  margin: 40px auto;
+  margin: 0px auto 40px auto;
   padding: 0 20px;
   display: flex;
   flex-direction: column;
@@ -911,13 +936,15 @@
 }
 
 .numerologyCard {
-  background: #d9d9d9;
   border-radius: 16px;
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 16px;
   transition: 0.2s ease;
+  border-radius: 15px;
+  border: 1px solid rgba(189, 189, 189, 0.30);
+  background: var(--surface, #FEFEFE);
 
   &:hover {
     transform: translateY(-2px);
@@ -955,14 +982,14 @@
 
 .cardNumber {
   font-size: 64px;
-  font-weight: 700;
-  color: #484848;
+  font-weight: 500;
+  color: #E56329;
   min-width: 100px;
   text-align: center;
-  background: #bcbcbc;
   border-radius: 12px;
   padding: 16px;
   line-height: 1;
+  background: var(--card-2, #FFF5EC);
 }
 
 .loadingContainer {
@@ -976,7 +1003,7 @@
 @media (min-width: 769px) {
   .numerologySection {
     max-width: 900px;
-    margin: 60px auto;
+    margin: 0px auto 60px auto;
     padding: 0 40px;
   }
 
@@ -1013,12 +1040,16 @@
 }
 
 .expertCard {
-  background: #f4f4f4;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   border-radius: 16px;
   padding: 24px;
   display: flex;
   align-items: center;
   gap: 20px;
+  @media (width <= 767px) {
+    border-radius: 12px;
+    padding: 16px;
+  }
 }
 
 .expertContent {
@@ -1026,36 +1057,42 @@
 }
 
 .expertTitle {
-  font-size: 20px;
-  font-weight: 700;
-  color: #000;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 500;
+  color: #fff;
   margin: 0 0 16px 0;
   line-height: 1.3;
 }
 
 .consultBtn {
-  background: #000;
-  color: white;
+  background: #fff;
+  color: #D43400;
   border: none;
   padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 15px;
+  border-radius: 50px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: 0.2s ease;
-
+  leading-trim: both;
+  text-edge: cap;
+  @media (width <= 767px) {
+    padding: 6px 12px;
+  }
   &:hover {
-    background: #333;
     transform: translateY(-1px);
   }
 }
 
 .expertImage {
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 146px;
   background: #d9d9d9;
   border-radius: 12px;
   flex-shrink: 0;
+  @media (width <= 767px) {
+    width: 100px;
+  }
 }
 
 /* CYCLE SECTION */
@@ -1067,52 +1104,76 @@
 
 .cycleCard {
   background: #d9d9d9;
-  border-radius: 20px;
-  padding: 32px 24px;
   text-align: center;
+  border-radius: 20px;
+  border: 1px solid var(--cta-border-50, rgba(229, 99, 41, 0.50));
+  background: var(--card-2, #FFF5EC);
+  padding: 48px;
+  @media (width <= 768px) {
+    padding: 16px;
+  }
 }
 
 .cycleBadge {
   display: inline-block;
   background: #606060;
-  color: white;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 13px;
+  color: #030303;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 24px;
   font-weight: 600;
   margin-bottom: 16px;
+  background: var(--primary-100, #FFE4BA);
+  @media (width <= 767px) {
+    font-size: 16px;
+  }
 }
 
 .cycleTitle {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 600;
   color: #000;
   margin: 0 0 24px 0;
+  @media (width <= 767px) {
+    font-size: 16px;
+  }
 }
 
 .cycleNumberBox {
-  width: 120px;
-  height: 120px;
-  background: #bcbcbc;
+  width: 170px;
+  height: 170px;
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 24px;
+  border-radius: 20px;
+  background: var(--cta-10, rgba(229, 99, 41, 0.10));
+  @media (width <= 768px) {
+    width: 120px;
+    height: 120px;
+  }
 }
 
 .cycleNumber {
-  font-size: 72px;
-  font-weight: 700;
-  color: #555;
+  font-size: 94px;
+  font-weight: 500;
+  color: #E56329;
   line-height: 1;
+  @media (width <= 768px) {
+    font-size: 72px;
+  }
 }
 
 .cycleSubtitle {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 34px;
+  font-weight: 600;
   color: #000;
   margin: 0 0 12px 0;
+  line-height: 1.2;
+  @media (width <= 768px) {
+    font-size: 29px;
+  }
 }
 
 .cycleDescription {
@@ -1132,58 +1193,10 @@
     margin: 40px auto;
   }
 
-  .expertCard {
-    padding: 32px;
-    gap: 32px;
-  }
-
-  .expertTitle {
-    font-size: 24px;
-  }
-
-  .consultBtn {
-    padding: 14px 28px;
-    font-size: 16px;
-  }
-
-  .expertImage {
-    width: 140px;
-    height: 140px;
-  }
-
   .cycleSection {
     max-width: 900px;
     padding: 0 40px;
     margin: 40px auto;
-  }
-
-  .cycleCard {
-    padding: 48px 40px;
-  }
-
-  .cycleBadge {
-    font-size: 14px;
-    padding: 8px 20px;
-  }
-
-  .cycleTitle {
-    font-size: 24px;
-    margin-bottom: 32px;
-  }
-
-  .cycleNumberBox {
-    width: 140px;
-    height: 140px;
-    margin-bottom: 32px;
-  }
-
-  .cycleNumber {
-    font-size: 84px;
-  }
-
-  .cycleSubtitle {
-    font-size: 26px;
-    margin-bottom: 16px;
   }
 
   .cycleDescription {
@@ -1193,27 +1206,44 @@
 }
 
 /* FULL WIDTH EXPERT BUTTON */
+// .fullWidthExpertSection {
+//   max-width: 480px;
+//   margin: 24px auto;
+//   padding: 0 20px;
+// }
+
 .fullWidthExpertSection {
-  max-width: 480px;
-  margin: 24px auto;
-  padding: 0 20px;
-}
+    max-width: 900px;
+    padding: 0 40px;
+    margin: 0px auto;
+    a{
+      display: flex;
+    }
+    @media (width <= 767px){
+      padding: 0 20px;
+    }
+  }
 
 .fullWidthExpertBtn {
-  width: 100%;
-  background: #000;
+  width: 50%;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: white;
   border: none;
-  padding: 18px 24px;
-  border-radius: 12px;
+  border-radius: 50px;
   font-size: 16px;
   font-weight: 600;
+  padding: 14px 28px;
   cursor: pointer;
   transition: 0.2s ease;
+  margin: 0 auto;
+  @media (width <= 767px){
+    width: 100%;
+    padding: 12px 24px;
+  }
 
   &:hover {
-    background: #333;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -1286,17 +1316,6 @@
 
 /* RESPONSIVE */
 @media (min-width: 769px) {
-  .fullWidthExpertSection {
-    max-width: 900px;
-    padding: 0 40px;
-    margin: 40px auto;
-  }
-
-  .fullWidthExpertBtn {
-    padding: 20px 32px;
-    font-size: 18px;
-  }
-
   .meansSection {
     max-width: 900px;
     padding: 0 40px;

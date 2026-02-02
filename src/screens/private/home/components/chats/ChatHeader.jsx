@@ -7,9 +7,6 @@ const ChatHeader = ({
   fullName,
   isTyping,
   onBack,
-  onAudioCall,
-  onVideoCall,
-  disabled,
   experience = "20 Years",
   walletBalance = 0
 }) => {
@@ -29,7 +26,7 @@ const ChatHeader = ({
             {fullName || "Chat User"}
           </PrimaryText>
           <span className={styles.experienceText}>
-            Exp. {experience}
+            Exp. {experience} {experience > 1 ? "years" : "year"}
           </span>
         </div>
       </div>

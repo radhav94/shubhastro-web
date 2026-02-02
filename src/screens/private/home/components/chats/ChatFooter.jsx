@@ -1,4 +1,5 @@
 import styles from "./ChatWindow.module.scss";
+import ArrowRightIcon from "../../../../../assets/chat/arrow-right.svg";
 
 const ChatFooter = ({ remainingTime, onRecharge }) => {
   // Format time as MM:SS
@@ -15,6 +16,7 @@ const ChatFooter = ({ remainingTime, onRecharge }) => {
       </div>
       <button className={styles.rechargeButton} onClick={onRecharge}>
         Recharge Now
+        <img src={ArrowRightIcon} alt="Arrow" width="18" height="18" />
       </button>
     </div>
   );
