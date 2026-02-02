@@ -67,14 +67,10 @@
   transform: scale(0.95);
 }
 
-@media screen and (max-width:768px) {
+@media screen and (max-width:1180px) {
   .category-cards {
     display: flex!important;
     overflow: auto;
-  }
-  .category-item{
-    flex-shrink: 0;
-    width: 70px;
   }
 }
 
@@ -163,7 +159,6 @@
   background-repeat: no-repeat;
   background-position: right;
 }
-
 .zodiac-info {
   display: flex;
   flex-direction: column;
@@ -171,11 +166,11 @@
 }
 
 .zodiac-name {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 36px;
+  font-weight: 600;
   color: #fff;
   line-height: 1;
-  margin: 0;
+  margin-bottom: 5px;
 }
 
 .zodiac-date-range {
@@ -252,14 +247,12 @@
   grid-template-columns: repeat(11, 1fr);
   gap: 12px;
   padding: 16px 0;
-  /* background: #ffffff; */
+  overflow: auto;
 }
-
 .category-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
+  height: 120px;
+  width: 120px;
+  flex-shrink: 0;
 }
 
 .category-card {
@@ -268,20 +261,48 @@
   background: var(--primary-50, #FFF4E3);
   padding: 0;
   width: 100%;
-  height: 68px;
+  height: 100%;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 5px;
+  overflow: hidden;
+}
+.category-card::after{
+  content: "";
+  width: 80px;
+  height: 80px;
+  border-radius: 100px;
+  background-color: #FFD28E;
+  display: flex;
+  position: absolute;
+  bottom: -24px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
 }
 
 .category-card.active {
   border: 1px solid var(--border-50, rgba(247, 88, 1, 100%));
 }
-
+.categoryImages{
+  width: 75px;
+  height: auto;
+  position: relative;
+  z-index: 9;
+  margin: 0 auto;
+}
 .category-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  color: #666666;
+  color: #030303;
   text-align: center;
+  height: fit-content;
+  width: 100%;
+  display: block;
 }
 
 .category-item:has(.category-card.active) .category-label {
@@ -522,6 +543,24 @@
 }
 
 @media screen and (width <= 767px) {
+  .categoryImages{
+    width: 45px;
+  }
+  /* .category-card {
+    height: 80px;
+    width: 80px;
+  } */
+   .category-item {
+    height: 80px;
+    width: 80px;
+  }
+  .category-card::after{
+    height: 50px;
+    width: 50px;
+  }
+  .zodiac-name{
+    font-size: 24px;
+  }
   /* .time-tabs-wrapper{
     padding: 16px 0px 0px;
   } */
@@ -585,12 +624,13 @@
     gap: 4px;
   }
 
-  .category-card {
+  /* .category-card {
     height: 75px;
-  }
+  } */
 
   .category-label {
     font-size: 13.5px;
+    height: fit-content;
   }
 
   .content-text {
@@ -652,10 +692,10 @@
     height: 100px;
   }
 
-  .category-card {
+  /* .category-card {
     font-size: 12px;
     padding: 18px 6px 10px;
-  }
+  } */
 }
 
 @media (max-width: 360px) {
@@ -676,22 +716,17 @@
     height: 110px;
   } */
 
-  .category-card {
+  /* .category-card {
     font-size: 11px;
     padding: 16px 4px 8px;
-  }
+  } */
 }
 
 /* Touch Optimizations */
 @media (hover: none) and (pointer: coarse) {
   .profile-selector,
-  .category-card,
   .zodiac-item {
     -webkit-tap-highlight-color: transparent;
-  }
-
-  .category-card {
-    min-height: 68px;
   }
 
   .zodiac-item {
@@ -787,24 +822,10 @@
   }
 
   /* Desktop Category Cards */
-  .category-card {
-    height: 80px;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-  }
-
-  .category-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .category-card.active:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
 
   .category-label {
     font-size: 14px;
+    height: fit-content;
   }
 
   /* Desktop Content */
@@ -937,10 +958,6 @@
     width: 180px;
     height: 180px;
   } */
-
-  .category-card {
-    height: 90px;
-  }
 
   .content-text,
   .lucky-details,
