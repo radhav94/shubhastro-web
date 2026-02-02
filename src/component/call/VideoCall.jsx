@@ -6,12 +6,12 @@ import {
   IoVideocam,
   IoVideocamOff,
   IoArrowBack,
-  IoCamera,
   IoGift,
   IoSwapHorizontal,
   IoSparkles,
   IoAttach,
   IoTime,
+  IoDocumentAttach,
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import styles from "./VideoCalling.module.scss";
@@ -181,8 +181,6 @@ const VideoCalling = ({ callData }) => {
       }
     });
   };
-
-  const resumeRemoteAudio = resumeRemoteTracks;
 
   /* ================= START CALL ================= */
   useEffect(() => {
@@ -519,24 +517,6 @@ const VideoCalling = ({ callData }) => {
   const handleRechargeNow = () => {
     setIsMinimized(true);
     navigate("recharge");
-  }
-  
-  const openChatWithMinimize = () => {
-    setIsMinimized(true);
-    setTimeout(() => {
-      if (isUserSide) {
-        navigate(`/chat-with-astrologers/${activeCall.astrologerId}`, {
-          state: {
-            roomId: activeCall.chatRoomId,
-            userId: activeCall.userId,
-            astrologerId: activeCall.astrologerId,
-            kundliId: activeCall.kundliId,
-            fullName: activeCall.callerName,
-            isUserSide: true,
-          },
-        });
-      }
-    }, 50);
   };
 
   const formatTime = (s) =>
@@ -710,7 +690,6 @@ const VideoCalling = ({ callData }) => {
                 <div className={styles.controlItem}>
                   <button
                     className={styles.controlBtn}
-                    onClick={toggleChat}
                   >
                     <IoSparkles size={24} />
                   </button>
@@ -735,7 +714,7 @@ const VideoCalling = ({ callData }) => {
                     {micOn ? <IoMic size={24} /> : <IoMicOff size={24} />}
                   </button>
                   <span className={styles.controlLabel}>
-                    {micOn ? "Unmute Audio" : "Mute Audio"}
+                    {micOn ? "Mute Audio" : "Unmute Audio"}
                   </span>
                 </div>
 
@@ -753,12 +732,21 @@ const VideoCalling = ({ callData }) => {
 
                 <div className={styles.controlItem}>
                   <button
-                    className={styles.controlBtn}
+                    className={`${styles.controlBtn} ${!cameraOn ? styles.muted : ''}`}
                     onClick={() => setCameraOn((p) => !p)}
                   >
-                    {cameraOn ? <IoCamera size={24} /> : <IoVideocamOff size={24} />}
+                    {cameraOn ? <IoVideocam size={24} /> : <IoVideocamOff size={24} />}
                   </button>
-                  <span className={styles.controlLabel}>Switch Camera</span>
+                  <span className={styles.controlLabel}>Switch Video</span>
+                </div>
+                <div className={styles.controlItem}>
+                  <button
+                    className={`${styles.controlBtn} ${isChatOpen ? styles.active : ''}`}
+                    onClick={toggleChat}
+                  >
+                    <IoDocumentAttach size={24} />
+                  </button>
+                  <span className={styles.controlLabel}>Attachment</span>
                 </div>
               </div>
 
