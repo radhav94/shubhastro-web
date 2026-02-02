@@ -155,7 +155,7 @@ const AIWow = () => {
       title: 'Smart Matchmaking',
       description: 'AI-enhanced compatibility analysis for relationships',
       icon: 'heart',
-      onClick: () => handleFeatureClick('/aiwow/smart-matchmaking')
+      onClick: () => navigate('/aiwow/smart-matchmaking')
     },
     {
       id: 'agentic-calendar',
