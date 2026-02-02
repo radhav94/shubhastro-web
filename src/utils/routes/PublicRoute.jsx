@@ -1,10 +1,10 @@
 import { Navigate } from "react-router-dom";
+import { getToken } from "../token";
 
 const PublicRoute = ({ component: Component }) => {
-  return (
-    // !getToken() ? <Component /> : <Navigate to="/" />
-    true ? <Component /> : <Navigate to="/" />
-  );
+  const token = getToken();
+
+  return !token ? <Component /> : <Navigate to="/" replace />;
 };
 
 export default PublicRoute;
