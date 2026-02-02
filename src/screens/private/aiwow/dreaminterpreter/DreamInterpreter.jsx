@@ -13,6 +13,7 @@ const DreamInterpreter = () => {
   const [challenges, setChallenges] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [interpretation, setInterpretation] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const profileData = localStorage.getItem('selectedKundliProfile');
@@ -86,17 +87,25 @@ const DreamInterpreter = () => {
       if (result.success) {
         // API returns data.dream object
         setInterpretation(result.data?.dream || result.data);
+        setError(null);
+      } else {
+        // Set error state to show error UI
+        setError(result.error || 'Failed to interpret dream');
+        setInterpretation(null);
       }
     } catch (error) {
       console.error('Failed to interpret dream:', error);
+      setError('An unexpected error occurred. Please try again.');
+      setInterpretation(null);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleBack = () => {
-    if (interpretation) {
+    if (interpretation || error) {
       setInterpretation(null);
+      setError(null);
       setDreamDescription('');
       setTags('');
       setLifePhase('');
@@ -105,6 +114,11 @@ const DreamInterpreter = () => {
       localStorage.removeItem('selectedKundliProfile');
       navigate(-1);
     }
+  };
+
+  const handleTryAgain = () => {
+    setError(null);
+    setInterpretation(null);
   };
 
   const handleNewDream = () => {
@@ -134,7 +148,27 @@ const DreamInterpreter = () => {
 
       {/* Content */}
       <div className={styles.content}>
-        {!interpretation ? (
+        {error ? (
+          <div className={styles.errorSection}>
+            <div className={styles.errorIcon}>
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="32" r="30" stroke="#ef4444" strokeWidth="2" fill="none"/>
+                <path d="M32 20V36" stroke="#ef4444" strokeWidth="3" strokeLinecap="round"/>
+                <circle cx="32" cy="44" r="2" fill="#ef4444"/>
+              </svg>
+            </div>
+            <div className={styles.errorMessage}>
+              <h3>{error}</h3>
+              <p>Please provide a clear and detailed description of your actual dream.</p>
+            </div>
+            <button 
+              className={styles.tryAgainButton}
+              onClick={handleTryAgain}
+            >
+              Try Again
+            </button>
+          </div>
+        ) : !interpretation ? (
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.introSection}>
               <div className={styles.introIcon}>🌙</div>
