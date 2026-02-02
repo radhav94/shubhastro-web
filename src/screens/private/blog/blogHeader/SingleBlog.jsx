@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { useGetSingleBlogQuery, useGetBlogQuery } from "../../../../services/appServices/blogService";
+import { useGetSingleBlogQuery, useGetBlogPageDataQuery } from "../../../../services/appServices/blogService";
 import styles from "./SingleBlogDetails.module.scss";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import MoreBlogsCarousel from "../../../../component/UI/cards/MoreBlogsCarousel";
@@ -8,10 +8,16 @@ import MoreBlogsCarousel from "../../../../component/UI/cards/MoreBlogsCarousel"
 const SingleBlogDetails = () => {
   const { slug } = useParams();
   const { data, isLoading, isError } = useGetSingleBlogQuery(slug);
-  const { data: blogsData, isLoading: blogsLoading } = useGetBlogQuery({ page: 1, limit: 10 });
+  const { data: blogPageData, isLoading: blogsLoading } = useGetBlogPageDataQuery({ page: 1, limit: 10 });
   
   const singleBLogData = data?.data;
-  const allBlogs = blogsData?.data?.blogs || blogsData?.data || [];
+  
+  // Extract related blogs from blog page API
+  const blogList = blogPageData?.data?.list || [];
+  const relatedSection = blogList.find(item => item.slug === "related_blogs");
+  const relatedBlogs = relatedSection?.content || [];
+  const relatedTitle = relatedSection?.title;
+  const relatedSubtitle = relatedSection?.sub_title || relatedSection?.subtitle;
   
   if (isLoading) return <p style={{ textAlign: "center" }}>Loading...</p>;
   if (!singleBLogData) return <p style={{ textAlign: "center" }}>No blog found</p>;
@@ -44,8 +50,15 @@ const SingleBlogDetails = () => {
         ></div>
       </div>
 
-      {/* More Blogs Carousel */}
-      {!blogsLoading && <MoreBlogsCarousel blogs={allBlogs} currentBlogId={slug} />}
+      {/* Related Blogs Carousel */}
+      {!blogsLoading && relatedBlogs.length > 0 && (
+        <MoreBlogsCarousel 
+          blogs={relatedBlogs} 
+          currentBlogId={slug}
+          title={relatedTitle}
+          subtitle={relatedSubtitle}
+        />
+      )}
     </>
   );
 };

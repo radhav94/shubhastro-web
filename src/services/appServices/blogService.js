@@ -2,6 +2,18 @@ import { privateRequestNew } from "./privateRequestNew";
 
 export const blogApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
+    // Get Blog Page Data from Homepage API
+    getBlogPageData: builder.query({
+      query: ({ page = 1, limit = 10 } = {}) => ({
+        url: `homepage/?slug=blogPage&page=${page}&limit=${limit}`,
+        method: "GET",
+        headers: {
+          "accept": "application/json",
+        },
+      }),
+      providesTags: ["Blogs"],
+    }),
+
     // Get Paginated Blogs
     getBlog: builder.query({
       query: ({ page = 1, limit = 10 } = {}) => ({
@@ -22,4 +34,4 @@ export const blogApi = privateRequestNew.injectEndpoints({
   }),
 });
 
-export const { useGetBlogQuery, useGetSingleBlogQuery } = blogApi;
+export const { useGetBlogPageDataQuery, useGetBlogQuery, useGetSingleBlogQuery } = blogApi;

@@ -196,6 +196,39 @@
 }
 
 /* ===============================
+   ✨ FLOATING SPARKLE BUTTON
+   =============================== */
+
+.floatingSparkleBtn {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+  z-index: 200;
+}
+
+.floatingSparkleBtn:hover {
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.floatingSparkleBtn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* ===============================
    🎛 BOTTOM CONTROLS
    =============================== */
 
@@ -249,13 +282,32 @@
   color: #ff3b30;
 }
 
+.videoIcon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  /* Convert orange gradient to black */
+  filter: brightness(0) saturate(100%);
+}
+
 .endCallBtn {
-  background: #ff3b30 !important;
+  background: #E4342F !important;
   color: #fff !important;
+  box-shadow: 0 2px 8px rgba(229, 57, 53, 0.3);
+  transform: rotate(135deg);
 }
 
 .endCallBtn:hover {
-  background: #e5342a !important;
+  background: #d32f2f !important;
+}
+
+// .endCallBtn:active {
+//   transform: rotate(135deg) scale(0.95) !important;
+// }
+
+.endCallBtn svg {
+  width: 30px;
+  height: 30px;
 }
 
 .controlLabel {
@@ -479,6 +531,27 @@
 
   .miniCall {
     width: 200px;
+  }
+
+  .floatingSparkleBtn {
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 56px;
+    height: 56px;
+  }
+
+  .floatingSparkleBtn:hover {
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  .floatingSparkleBtn:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+
+  .floatingSparkleBtn svg {
+    width: 28px;
+    height: 28px;
   }
 }
 

@@ -17,9 +17,9 @@
 }
 
 .backButton {
-  background: #f0f0f0;
+  background: rgb(255 244 236);
   border: none;
-  color: #333;
+  color: #D43400;
   cursor: pointer;
   padding: 8px;
   display: flex;
@@ -28,6 +28,7 @@
   border-radius: 8px;
   width: 40px;
   height: 40px;
+  border: 1px solid #D43400;
 }
 
 .tarotTitle {
@@ -214,6 +215,13 @@ background-clip: text;
 @media (width <= 768px) {
   .tarotGrid {
       grid-template-columns: repeat(3, 1fr);
+  }
+  .tarotHeader{
+    padding: 6px 12px;
+  }
+  .backButton{
+    width: 36px;
+    height: 36px;
   }
 }
 /* Laptop/Desktop - 3 cards per row (1025px and above) */

@@ -110,3 +110,22 @@
     width: 100%;
   }
 }
+.compatibilityTitle{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-block: 0px;
+  font-size: 22px;
+  font-weight: 600;
+  text-transform: uppercase;
+  @media (max-width: 767px) {
+    font-size: 16px;
+  }
+  .titleLine{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-block: 5px 15px;
+  }
+}

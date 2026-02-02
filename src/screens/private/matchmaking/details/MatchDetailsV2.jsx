@@ -147,15 +147,42 @@ const MatchDetailsV2 = () => {
         </div>
       </div>
       {/* Mutual Influence Cards */}
-      <div className="w-full max-w-md grid grid-cols-2 gap-4 mb-6">
-        <DynamicTable
-            data={response}
-          />
+      <div>
+
+        <div className={styles.compatibilityTitle}>
+          <h1>Compatibility Breakdown</h1>
+          <div className={styles.titleLine}>
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="107" height="1" viewBox="0 0 107 1" fill="none">
+                <path d="M106.303 0.406393C106.303 0.630933 103.949 0.812789 101.045 0.812789C98.1416 0.812789 0 0.630933 0 0.406393C0 0.181853 98.1423 0 101.045 0C103.949 0 106.303 0.181853 106.303 0.406393Z" fill="#030303"/>
+              </svg>
+            </span>
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="4" height="5" viewBox="0 0 4 5" fill="none">
+                <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
+              </svg>
+            </span>
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="107" height="1" viewBox="0 0 107 1" fill="none">
+                <path d="M-4.3613e-07 0.406393C-4.3613e-07 0.630933 2.35392 0.812789 5.25766 0.812789C8.1614 0.812789 106.303 0.630933 106.303 0.406393C106.303 0.181853 8.16078 0 5.25766 0C2.35392 0 -4.3613e-07 0.181853 -4.3613e-07 0.406393Z" fill="#030303"/>
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <div className="w-full max-w-md grid grid-cols-2 gap-4 mb-6">
+          <DynamicTable
+              data={response}
+            />
+        </div>
+
+        {/* CTA Button */}
+        <button className={styles.talkBtn}>
+          Talk to a Matchmaking Expert
+        </button>
+
       </div>
-      {/* CTA Button */}
-      <button className={styles.talkBtn}>
-        Talk to a Matchmaking Expert
-      </button>
+
     </div>
   );
 };
