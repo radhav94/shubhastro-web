@@ -1,10 +1,9 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { PATH } from "../../../utils/routes/Paths";
 import styles from "./PopularBlogsSection.module.scss";
 
-const PopularBlogsSection = ({ blogs = [] }) => {
+const PopularBlogsSection = ({ blogs = [], title, subtitle }) => {
   const navigate = useNavigate();
 
   const handleBlogClick = (blog) => {
@@ -21,14 +20,12 @@ const PopularBlogsSection = ({ blogs = [] }) => {
 
   // Show first 6 blogs
   const displayBlogs = blogs.slice(0, 6);
-  
-  console.log('PopularBlogsSection - blogs:', blogs.length);
-  console.log('PopularBlogsSection - displayBlogs:', displayBlogs);
 
   return (
     <div className={styles.popularBlogsSection}>
       <div className={styles.header}>
-        <h2 className={styles.title}>POPULAR BLOGS</h2>
+        <h2 className={styles.title}>{title}</h2>
+        {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
         <div className={styles.titleDivider}>
           <div className={styles.dividerLine}></div>
           <span className={styles.dividerMoon}>☾</span>

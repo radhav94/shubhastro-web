@@ -1,10 +1,10 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { PATH } from "../../../utils/routes/Paths";
 import styles from "./MoreBlogsCarousel.module.scss";
 
-const MoreBlogsCarousel = ({ blogs = [], currentBlogId }) => {
+const MoreBlogsCarousel = ({ blogs = [], currentBlogId, title, subtitle }) => {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -66,9 +66,8 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId }) => {
   return (
     <div className={styles.moreBlogsSection}>
       <div className={styles.header}>
-        <h2 className={styles.title}>
-          {currentBlogId ? "RELATED BLOGS" : "MORE BLOGS FOR YOU"}
-        </h2>
+        {title && <h2 className={styles.title}>{title}</h2>}
+        {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
         <div className={styles.titleDivider}>
           <div className={styles.dividerLine}></div>
           <span className={styles.dividerMoon}>☾</span>

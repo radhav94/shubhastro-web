@@ -1,9 +1,9 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../utils/routes/Paths";
 import styles from "./TrendingBlogsCarousel.module.scss";
 
-const TrendingBlogsCarousel = ({ blogs = [] }) => {
+const TrendingBlogsCarousel = ({ blogs = [], title, subtitle }) => {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -54,8 +54,8 @@ const TrendingBlogsCarousel = ({ blogs = [] }) => {
   return (
     <div className={styles.trendingSection}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Trending</h2>
-        <p className={styles.subtitle}>Discover insights into love, career and life.</p>
+        <h2 className={styles.title}>{title}</h2>
+        {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
       </div>
 
       <div className={styles.carouselWrapper}>

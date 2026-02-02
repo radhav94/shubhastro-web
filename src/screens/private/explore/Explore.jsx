@@ -109,11 +109,6 @@ const Explore = () => {
     }
   };
 
-  // Helper function to get section data by display_type
-  const getSectionByType = (type) => {
-    return exploreSections.find(section => section.display_type === type);
-  };
-
   // Helper function to format date
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -135,6 +130,262 @@ const Explore = () => {
       "linear-gradient(135deg, #F8BBD0 0%, #F48FB1 100%)",
     ];
     return colors[index % colors.length];
+  };
+
+  // Render section based on display_type and slug
+  const renderSection = (section, index) => {
+    const sectionContent = Array.isArray(section.content) ? section.content : [];
+    const displayType = section.display_type;
+    const slug = section.slug;
+
+    // All About You - Hero cards
+    if (displayType === "all-about-you") {
+      return (
+        <section key={index} className={styles.section}>
+          <h1 className={styles.mainTitle}>{section.display_title || section.title || "All About You"}</h1>
+          <p className={styles.subtitle}>
+            {section.description || "An ever growing library on the story of you"}
+          </p>
+
+          <div className={styles.topCardsGrid}>
+            {sectionContent.slice(0, 3).map((card, idx) => (
+              <div
+                key={idx}
+                className={styles.topCard}
+                style={{ backgroundColor: card.bg_color || "#E56329" }}
+                onClick={() => handleCardClick(card)}
+              >
+                <h3 className={styles.cardTitle}>{card.title}</h3>
+                <img
+                  src={card.imageUrl || defaultImages.horoscope}
+                  alt={card.title}
+                  className={styles.cardIcon}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    // Discover More - Grid layout (for Kundli section)
+    if (displayType === "discover-more" && slug === "discover-your-kundli") {
+      return (
+        <section key={index} className={styles.section}>
+          <div className={styles.kundliSection}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>
+                {(section.display_title || section.title || "").toUpperCase()}
+              </h2>
+              <ChevronRight size={24} className={styles.sectionArrow} />
+            </div>
+
+            <div className={styles.kundliGrid}>
+              {sectionContent.slice(0, 4).map((card, idx) => (
+                <div
+                  key={idx}
+                  className={styles.kundliCard}
+                  onClick={() => handleCardClick(card)}
+                >
+                  <div className={styles.kundliCardImage}>
+                    <img
+                      src={card.imageUrl || defaultImages.vedic}
+                      alt={card.title}
+                      className={styles.chartImage}
+                    />
+                  </div>
+                  <div className={styles.kundliCardContent}>
+                    <h3 className={styles.kundliCardTitle}>{card.title}</h3>
+                    <ChevronRight size={20} className={styles.cardArrow} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // Discover More - Scrollable cards (for Destiny and other sections)
+    if (displayType === "discover-more") {
+      return (
+        <section key={index} className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
+              {(section.display_title || section.title || "").toUpperCase()}
+            </h2>
+            <ChevronRight size={24} className={styles.sectionArrow} />
+          </div>
+
+          <div className={styles.destinyGrid}>
+            {sectionContent.map((card, idx) => (
+              <div
+                key={idx}
+                className={styles.destinyCard}
+                style={{ background: getDestinyCardColor(idx) }}
+                onClick={() => handleCardClick(card)}
+              >
+                <div className={styles.destinyCardContent}>
+                  <h3 className={styles.destinyCardTitle}>{card.title}</h3>
+                  <p className={styles.destinyCardSubtitle}>{card.description}</p>
+                </div>
+                {card.imageUrl && (
+                  <img
+                    src={card.imageUrl}
+                    alt={card.title}
+                    className={styles.destinyCardImage}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    // Blog section
+    if (displayType === "blog" && slug === "blog") {
+      return (
+        <section key={index} className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
+              {(section.display_title || section.title || "EXPLORE BLOGS").toUpperCase()}
+            </h2>
+            <ChevronRight size={24} className={styles.sectionArrow} />
+          </div>
+
+          <div className={styles.blogsScroll}>
+            {sectionContent.map((blog, idx) => (
+              <div
+                key={idx}
+                className={styles.blogCard}
+                onClick={() => {
+                  // Use blogId or ID field for navigation
+                  const blogId = blog.blogId || blog.ID || blog.id || blog._id;
+                  if (blogId) {
+                    navigate(`/blog/${blogId}`);
+                  }
+                }}
+              >
+                <div className={styles.blogImage}>
+                  <img
+                    src={blog.imageUrl || defaultImages.news}
+                    alt={blog.title}
+                    className={styles.blogBgImage}
+                  />
+                  <span className={styles.blogDate}>
+                    {formatDate(blog.publishDate || blog.date)}
+                  </span>
+                </div>
+                <h4 className={styles.blogTitle}>{blog.title}</h4>
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    // News section (display_type: "blog" with slug: "news")
+    if (displayType === "blog" && slug === "news") {
+      return (
+        <section key={index} className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
+              {(section.display_title || section.title || "IN THE NEWS").toUpperCase()}
+            </h2>
+            <ChevronRight size={24} className={styles.sectionArrow} />
+          </div>
+
+          <div className={styles.blogsScroll}>
+            {sectionContent.map((news, idx) => (
+              <div
+                key={idx}
+                className={styles.blogCard}
+                onClick={() => {
+                  if (news.redirect_url) {
+                    window.open(news.redirect_url, '_blank');
+                  }
+                }}
+              >
+                <div className={styles.blogImage}>
+                  <img
+                    src={news.imageUrl || defaultImages.news}
+                    alt={news.title}
+                    className={styles.blogBgImage}
+                  />
+                  <span className={styles.blogDate}>
+                    {formatDate(news.date)}
+                  </span>
+                </div>
+                <h4 className={styles.blogTitle}>{news.title}</h4>
+                {news.news_channel && (
+                  <p className={styles.newsChannel}>{news.news_channel}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    // Matchmaking banner
+    if (displayType === "matchmaking") {
+      const matchmakingData = sectionContent[0];
+      return (
+        <div key={index} className={styles.matchmakingBanner}>
+          <div className={styles.matchmakingContent}>
+            <h3 className={styles.matchmakingTitle}>
+              {matchmakingData?.title || section.title || "Matchmaking"}
+            </h3>
+            <p className={styles.matchmakingText}>
+              {matchmakingData?.description || section.description || "Measures emotional alignment and long-term compatibility"}
+            </p>
+          </div>
+          <img
+            src={matchmakingData?.imageUrl || matchmakingImg}
+            alt="Matchmaking"
+            className={styles.matchmakingIcon}
+          />
+        </div>
+      );
+    }
+
+    // Default fallback - render as scrollable cards
+    return (
+      <section key={index} className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>
+            {(section.display_title || section.title || "").toUpperCase()}
+          </h2>
+          <ChevronRight size={24} className={styles.sectionArrow} />
+        </div>
+
+        <div className={styles.destinyGrid}>
+          {sectionContent.map((card, idx) => (
+            <div
+              key={idx}
+              className={styles.destinyCard}
+              style={{ background: getDestinyCardColor(idx) }}
+              onClick={() => handleCardClick(card)}
+            >
+              <div className={styles.destinyCardContent}>
+                <h3 className={styles.destinyCardTitle}>{card.title}</h3>
+                {card.description && (
+                  <p className={styles.destinyCardSubtitle}>{card.description}</p>
+                )}
+              </div>
+              {card.imageUrl && (
+                <img
+                  src={card.imageUrl}
+                  alt={card.title}
+                  className={styles.destinyCardImage}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+    );
   };
 
   // Fallback data for default images
@@ -275,238 +526,7 @@ const Explore = () => {
       <div className={styles.content}>
         {/* Render sections dynamically based on API data */}
         {Array.isArray(exploreSections) && exploreSections.map((section, index) => {
-          const sectionContent = Array.isArray(section.content) ? section.content : [];
-
-          // Render "all-about-you" section
-          if (section.display_type === "all-about-you") {
-            return (
-              <section key={index} className={styles.section}>
-                <h1 className={styles.mainTitle}>{section.title || "All About You"}</h1>
-                <p className={styles.subtitle}>
-                  {section.description || "An ever growing library on the story of you"}
-                </p>
-
-                <div className={styles.topCardsGrid}>
-                  {sectionContent.slice(0, 3).map((card, idx) => (
-                    <div
-                      key={idx}
-                      className={styles.topCard}
-                      style={{ backgroundColor: card.bg_color || "#E56329" }}
-                      onClick={() => handleCardClick(card)}
-                    >
-                      <h3 className={styles.cardTitle}>{card.title}</h3>
-                      <img
-                        src={card.imageUrl || defaultImages.horoscope}
-                        alt={card.title}
-                        className={styles.cardIcon}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            );
-          }
-
-          // Render "discover-your-kundli" section
-          if (section.display_type === "discover-your-kundli") {
-            return (
-              <section key={index} className={styles.section}>
-                <div className={styles.kundliSection}>
-                  <div className={styles.sectionHeader}>
-                    <h2 className={styles.sectionTitle}>
-                      {section.title?.toUpperCase() || "DISCOVER YOUR KUNDLI"}
-                    </h2>
-                    <ChevronRight size={24} className={styles.sectionArrow} />
-                  </div>
-
-                  <div className={styles.kundliGrid}>
-                    {sectionContent.slice(0, 4).map((card, idx) => (
-                      <div
-                        key={idx}
-                        className={styles.kundliCard}
-                        onClick={() => handleCardClick(card)}
-                      >
-                        <div className={styles.kundliCardImage}>
-                          <img
-                            src={card.imageUrl || defaultImages.vedic}
-                            alt={card.title}
-                            className={styles.chartImage}
-                          />
-                        </div>
-                        <div className={styles.kundliCardContent}>
-                          <h3 className={styles.kundliCardTitle}>{card.title}</h3>
-                          <ChevronRight size={20} className={styles.cardArrow} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </section>
-            );
-          }
-
-          // Render "explore-your-destiny" section
-          if (section.display_type === "explore-your-destiny") {
-            return (
-              <section key={index} className={styles.section}>
-                <div className={styles.sectionHeader}>
-                  <h2 className={styles.sectionTitle}>
-                    {section.title?.toUpperCase() || "EXPLORE YOUR DESTINY"}
-                  </h2>
-                  <ChevronRight size={24} className={styles.sectionArrow} />
-                </div>
-
-                <div className={styles.destinyGrid}>
-                  {sectionContent.map((card, idx) => (
-                    <div
-                      key={idx}
-                      className={styles.destinyCard}
-                      style={{ background: getDestinyCardColor(idx) }}
-                      onClick={() => handleCardClick(card)}
-                    >
-                      <div className={styles.destinyCardContent}>
-                        <h3 className={styles.destinyCardTitle}>{card.title}</h3>
-                        <p className={styles.destinyCardSubtitle}>{card.description}</p>
-                      </div>
-                      {card.imageUrl && (
-                        <img
-                          src={card.imageUrl}
-                          alt={card.title}
-                          className={styles.destinyCardImage}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Gemstones Banner - if exists in content */}
-                {sectionContent.find(c => c.title?.toLowerCase().includes('gemstone')) && (
-                  <div className={styles.gemstonesBanner}>
-                    <div className={styles.gemstonesContent}>
-                      <h3 className={styles.gemstonesTitle}>Gemstones</h3>
-                      <p className={styles.gemstonesText}>
-                        Smart recommendations aligned with your birth chart
-                      </p>
-                    </div>
-                    <img
-                      src={remediesImg}
-                      alt="Gemstones"
-                      className={styles.gemstonesIcon}
-                    />
-                  </div>
-                )}
-              </section>
-            );
-          }
-
-          // Render "blog" section
-          if (section.display_type === "blog") {
-            return (
-              <section key={index} className={styles.section}>
-                <div className={styles.sectionHeader}>
-                  <h2 className={styles.sectionTitle}>
-                    {section.title?.toUpperCase() || "EXPLORE BLOGS"}
-                  </h2>
-                  <ChevronRight size={24} className={styles.sectionArrow} />
-                </div>
-
-                <div className={styles.blogsScroll}>
-                  {sectionContent.map((blog, idx) => (
-                    <div
-                      key={idx}
-                      className={styles.blogCard}
-                      onClick={() => {
-                        // Use blogId or ID field for navigation
-                        const blogId = blog.blogId || blog.ID || blog.id || blog._id;
-                        if (blogId) {
-                          navigate(`/blog/${blogId}`);
-                        }
-                      }}
-                    >
-                      <div className={styles.blogImage}>
-                        <img
-                          src={blog.imageUrl || defaultImages.news}
-                          alt={blog.title}
-                          className={styles.blogBgImage}
-                        />
-                        <span className={styles.blogDate}>
-                          {formatDate(blog.publishDate || blog.date)}
-                        </span>
-                      </div>
-                      <h4 className={styles.blogTitle}>{blog.title}</h4>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            );
-          }
-
-          // Render "news" section
-          if (section.display_type === "news") {
-            return (
-              <section key={index} className={styles.section}>
-                <div className={styles.sectionHeader}>
-                  <h2 className={styles.sectionTitle}>
-                    {section.title?.toUpperCase() || "IN THE NEWS"}
-                  </h2>
-                  <ChevronRight size={24} className={styles.sectionArrow} />
-                </div>
-
-                <div className={styles.blogsScroll}>
-                  {sectionContent.map((news, idx) => (
-                    <div
-                      key={idx}
-                      className={styles.blogCard}
-                      onClick={() => {
-                        if (news.redirect_url) {
-                          window.open(news.redirect_url, '_blank');
-                        }
-                      }}
-                    >
-                      <div className={styles.blogImage}>
-                        <img
-                          src={news.imageUrl || defaultImages.news}
-                          alt={news.title}
-                          className={styles.blogBgImage}
-                        />
-                        <span className={styles.blogDate}>
-                          {formatDate(news.date)}
-                        </span>
-                      </div>
-                      <h4 className={styles.blogTitle}>{news.title}</h4>
-                      {news.news_channel && (
-                        <p className={styles.newsChannel}>{news.news_channel}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </section>
-            );
-          }
-
-          // Render matchmaking banner if exists
-          if (section.display_type === "matchmaking") {
-            const matchmakingData = sectionContent[0];
-            return (
-              <div key={index} className={styles.matchmakingBanner}>
-                <div className={styles.matchmakingContent}>
-                  <h3 className={styles.matchmakingTitle}>
-                    {matchmakingData?.title || "Matchmaking"}
-                  </h3>
-                  <p className={styles.matchmakingText}>
-                    {matchmakingData?.description || "Measures emotional alignment and long-term compatibility"}
-                  </p>
-                </div>
-                <img
-                  src={matchmakingData?.imageUrl || matchmakingImg}
-                  alt="Matchmaking"
-                  className={styles.matchmakingIcon}
-                />
-              </div>
-            );
-          }
-
-          return null;
+          return renderSection(section, index);
         })}
       </div>
 
