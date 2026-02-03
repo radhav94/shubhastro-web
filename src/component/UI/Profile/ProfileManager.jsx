@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProfileListingModal from "./ProfileListingModal";
 import AddProfileModal from "./AddProfileModal";
 import EditProfileModal from "./EditProfileModal";
@@ -14,14 +14,14 @@ import { getToken } from "../../../utils/token";
 
 /**
  * ProfileManager - Centralized component for managing profile operations
- * 
+ *
  * Handles all profile-related functionality including:
  * - Fetching profiles from API
  * - Adding new profiles
  * - Editing existing profiles
  * - Deleting profiles
  * - Profile selection
- * 
+ *
  * @param {Object} props - Component props
  * @param {boolean} props.isOpen - Whether the profile manager is open
  * @param {Function} props.onClose - Callback when profile manager closes
@@ -33,6 +33,11 @@ import { getToken } from "../../../utils/token";
  * @param {boolean} props.enabledOperations.add - Enable add profile (default: true)
  * @param {boolean} props.enabledOperations.edit - Enable edit profile (default: true)
  * @param {boolean} props.enabledOperations.delete - Enable delete profile (default: true)
+ * @param {boolean} props.autoOpenAdd - Auto-open Add Profile modal when isOpen is true
+ * @param {boolean} props.autoOpenEdit - Auto-open Edit Profile modal when isOpen is true
+ * @param {boolean} props.autoOpenDelete - Auto-open Delete Confirmation modal when isOpen is true
+ * @param {Object} props.profileToEdit - Profile object to edit (must include kundli_ID)
+ * @param {string} props.profileToDelete - Profile kundli_ID to delete
  */
 const ProfileManager = ({
   isOpen = false,
@@ -46,6 +51,11 @@ const ProfileManager = ({
     edit: true,
     delete: true,
   },
+  autoOpenAdd = false,
+  autoOpenEdit = false,
+  autoOpenDelete = false,
+  profileToEdit: parentProfileToEdit = null,
+  profileToDelete: parentProfileToDelete = null,
 }) => {
   // Merge with defaults to ensure backward compatibility
   const operations = {
@@ -75,6 +85,72 @@ const ProfileManager = ({
   });
 
   const profiles = data?.data || [];
+
+  // Extract stable identifiers for dependency tracking
+  const editProfileId = parentProfileToEdit?.kundli_ID || parentProfileToEdit?._id || null;
+  const deleteProfileId = parentProfileToDelete;
+
+  // Single useEffect to handle all modal state management
+  useEffect(() => {
+    if (!isOpen) {
+      // Reset all states when ProfileManager closes
+      setShowAddProfile(false);
+      setShowEditProfile(false);
+      setShowDeleteModal(false);
+      setProfileToDelete(null);
+      setProfileToEdit(null);
+      return;
+    }
+
+    // When opening, first reset all states to ensure clean slate
+    setShowAddProfile(false);
+    setShowEditProfile(false);
+    setShowDeleteModal(false);
+    setProfileToDelete(null);
+    setProfileToEdit(null);
+
+    // Use setTimeout to ensure state reset completes before opening new modal
+    // This forces React to recognize the state change even with same values
+    const timer = setTimeout(() => {
+      // ADD MODE
+      if (autoOpenAdd && operations.add) {
+        setShowAddProfile(true);
+      }
+      // EDIT MODE
+      else if (autoOpenEdit && operations.edit && parentProfileToEdit) {
+        setProfileToEdit(parentProfileToEdit);
+        setShowEditProfile(true);
+      }
+      // DELETE MODE
+      else if (autoOpenDelete && operations.delete && parentProfileToDelete) {
+        setProfileToDelete(parentProfileToDelete);
+        setShowDeleteModal(true);
+      }
+      // Direct mode (when list is disabled)
+      else if (!operations.list) {
+        if (parentProfileToEdit && operations.edit) {
+          setProfileToEdit(parentProfileToEdit);
+          setShowEditProfile(true);
+        } else if (parentProfileToDelete && operations.delete) {
+          setProfileToDelete(parentProfileToDelete);
+          setShowDeleteModal(true);
+        }
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [
+    isOpen,
+    autoOpenAdd,
+    autoOpenEdit,
+    autoOpenDelete,
+    operations.add,
+    operations.edit,
+    operations.delete,
+    operations.list,
+    editProfileId, // Use stable ID instead of object reference
+    deleteProfileId, // Use stable ID instead of object reference
+  ]);
 
   // Helper function to build kundli payload
   const buildKundliPayload = (data) => {
@@ -145,13 +221,14 @@ const ProfileManager = ({
         throw new Error("Duplicate profile");
       }
 
-      const result = await createKundli(payload).unwrap();
+      await createKundli(payload).unwrap();
       Toast.success("Profile added successfully");
-
       setShowAddProfile(false);
-    } catch (err) {
+      onClose();
+    } catch (err) { 
       console.error("Add profile error:", err);
       setShowAddProfile(false);
+      onClose();
       // Only show custom toast for duplicate error (already shown above)
       // For API errors, global handler in privateRequestNew.js will show the toast
       if (err.message !== "Duplicate profile") {
@@ -210,6 +287,7 @@ const ProfileManager = ({
   // Handler: Close add profile modal
   const handleCloseAddProfile = () => {
     setShowAddProfile(false);
+    onClose();
   };
 
   // Handler: Close edit profile modal

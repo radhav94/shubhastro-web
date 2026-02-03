@@ -17,6 +17,7 @@ import ProfileListingModal from "../../../component/UI/Profile/ProfileListingMod
 import bondIcon from "../../../assets/icons/destiny-icon.svg";
 import matchMakingImg from "../../../assets/images/match-making-top-img.svg";
 import matchMakingImgBottom from "../../../assets/images/match-making-bottom-img.svg";
+import { ProfileManager } from "../../../component/UI/Profile";
 
 const MatchMaking = () => {
   const navigate = useNavigate();
@@ -617,12 +618,31 @@ const MatchMaking = () => {
         </div>
       </div>
 
+      {/* Profile Manager - Handles all profile operations */}
+      <ProfileManager
+        isOpen={showSelectProfile}
+        onClose={() => {setShowSelectProfile(false);setSelectingType(null);}}
+        onProfileSelect={handleSelectProfile}
+        selectedProfileId={
+          selectingType === "PRIMARY"
+            ? primaryProfile?._id
+            : partnerProfile?._id
+        }
+        title="Select Profile"
+        enabledOperations={{
+          list: true,
+          add: true,
+          edit: true,
+          delete: true,
+        }}
+      />
+
       {/* SELECT PROFILE POPUP */}
-      <ProfileListingModal
+      {/* <ProfileListingModal
         isOpen={showSelectProfile}
         onClose={() => {
           setShowSelectProfile(false);
-          setSelectingType(null);
+          
         }}
         profiles={filteredProfiles}
         selectedProfileId={
@@ -652,10 +672,10 @@ const MatchMaking = () => {
             ? "No profiles found. Add a profile to get started."
             : "Add profiles to see match results."
         }
-      />
+      /> */}
 
       {/* Add Profile Modal */}
-      <AddProfileModal
+      {/* <AddProfileModal
         isOpen={showAddProfile}
         onClose={() => {
           setShowAddProfile(false);
@@ -683,9 +703,9 @@ const MatchMaking = () => {
           setProfileToDelete(profileId);
           setShowDeleteModal(true);
         }}
-      />
+      /> */}
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
+      {/* {showDeleteModal && (
         <DeleteConfirmationModal
           title="Delete Profile"
           message="Are you sure you want to delete this profile? This action cannot be undone."
@@ -695,10 +715,10 @@ const MatchMaking = () => {
           }}
           onConfirm={confirmDeleteProfile}
         />
-      )}
+      )} */}
 
       {/* Edit Profile Modal */}
-      <EditProfileModal
+      {/* <EditProfileModal
         isOpen={showEditProfile}
         onClose={() => {
           setShowEditProfile(false);
@@ -708,7 +728,7 @@ const MatchMaking = () => {
         isLoading={isCreating}
         title="Edit Profile"
         initialData={getEditInitialData()}
-      />
+      /> */}
     </div>
   );
 };

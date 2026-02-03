@@ -17,6 +17,7 @@ import {
 } from "../../../component";
 import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
+import { ProfileManager } from "../../../component/UI/Profile";
 
 const NumerologyWeb = () => {
   const navigate = useNavigate();
@@ -599,8 +600,24 @@ const NumerologyWeb = () => {
         <button className={styles.primaryBtnLarge}>Calculate My Numbers</button>
       </section> */}
 
+      
+      {/* Profile Manager - Handles all profile operations */}
+      <ProfileManager
+        isOpen={showSelectProfile}
+        onClose={() => setShowSelectProfile(false)}
+        onProfileSelect={handleSelectProfile}
+        selectedProfileId={selectedProfile?._id}
+        title="Select Profile"
+        enabledOperations={{
+          list: true,
+          add: true,
+          edit: true,
+          delete: true,
+        }}
+      />
+
       {/* Profile Listing Modal */}
-      <ProfileListingModal
+      {/* <ProfileListingModal
         isOpen={showSelectProfile}
         onClose={() => setShowSelectProfile(false)}
         profiles={profiles}
@@ -613,19 +630,19 @@ const NumerologyWeb = () => {
         showAddButton={true}
         showDeleteButton={true}
         showEditButton={true}
-      />
+      /> */}
 
       {/* Add Profile Modal */}
-      <AddProfileModal
+      {/* <AddProfileModal
         isOpen={showAddProfile}
         onClose={() => setShowAddProfile(false)}
         onSubmit={handleSubmitProfile}
         isLoading={isCreating}
         title="Add Profile"
-      />
+      /> */}
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
+      {/* {showDeleteModal && (
         <DeleteConfirmationModal
           title="Delete Profile"
           message="Are you sure you want to delete this profile? This action cannot be undone."
@@ -635,10 +652,10 @@ const NumerologyWeb = () => {
           }}
           onConfirm={confirmDeleteProfile}
         />
-      )}
+      )} */}
 
       {/* Edit Profile Modal */}
-      <EditProfileModal
+      {/* <EditProfileModal
         isOpen={showEditProfile}
         onClose={() => {
           setShowEditProfile(false);
@@ -648,7 +665,7 @@ const NumerologyWeb = () => {
         isLoading={isCreating}
         title="Edit Profile"
         initialData={getEditInitialData()}
-      />
+      /> */}
     </div>
   );
 };
