@@ -81,13 +81,20 @@ export default function useChat({
       toast.warning(msg.message);
     }
 
+    const handleTyping = (isTyping) => {
+     console.log('Typing event received:', isTyping);
+     setIsTyping(isTyping === true);
+   }
+
     voiceSocket.on("message:recieved", handleAddMessage);
     voiceSocket.on("warning", handleWarning);
+    voiceSocket.on("typing", handleTyping);
     voiceSocket.on("chat:ended", handleChatEndedFromServer);
 
     return () => {
       voiceSocket.off("message:recieved", handleAddMessage);
       voiceSocket.off("warning", handleWarning);
+      voiceSocket.off("typing", handleTyping);
       voiceSocket.off("chat:ended", handleChatEndedFromServer);
     };
   }, [roomId, activeChat]);
