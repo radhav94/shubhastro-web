@@ -14,8 +14,8 @@
 }
 
 .backButton {
-  background: #f0f0f0;
-  border: none;
+  background: #fff4ec;
+  border: 1px solid #ff5722;
   color: #333;
   cursor: pointer;
   padding: 12px;
@@ -25,6 +25,9 @@
   border-radius: 8px;
   width: 48px;
   height: 48px;
+}
+.backButton svg path{
+  stroke:#dc2626;
 }
 
 .title {
@@ -48,6 +51,10 @@
   max-width: 320px;
   display: flex;
   justify-content: center;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1.07px solid #D9D9D9;
 }
 
 .tarotCard {
@@ -87,6 +94,18 @@
 }
 
 @media (max-width: 768px) {
+  .title {
+    font-size: 18px;
+  }
+
+  .backButton {
+    width: 36px;
+    height: 36px;
+    padding: 10px;
+  }
+  .header {
+    padding: 6px 16px;
+  }
   .content {
     padding: 24px 16px;
   }
@@ -111,6 +130,7 @@
 @media (max-width: 480px) {
   .cardDisplay {
     max-width: 240px;
+    border-radius: 10px;
   }
 
   .answer {
@@ -132,7 +152,7 @@
 
 .cardName {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 600;
   color: #000;
   margin: 0;
   text-align: center;
@@ -229,14 +249,15 @@
 }
 
 .dailySection {
-  background: #f0f0f0;
+  background: #FEFEFE;
   border-radius: 16px;
   padding: 20px;
+  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
 }
 
 .dailySectionTitle {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 600;
   color: #000;
   margin: 0 0 12px 0;
   display: flex;

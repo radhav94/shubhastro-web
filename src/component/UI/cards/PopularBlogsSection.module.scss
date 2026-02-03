@@ -12,6 +12,7 @@
 
 .header {
   margin-bottom: 32px;
+  margin-top: 15px;
 
   @media (max-width: 768px) {
     margin-bottom: 24px;
@@ -19,17 +20,18 @@
 }
 
 .title {
-  font-size: 28px;
-  font-weight: 700;
+  color: var(--title, #030303);
   text-align: left;
-  color: #2A161B;
-  letter-spacing: 0.5px;
-  margin-bottom: 16px;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px;
+  text-transform: uppercase;
 
   @media (max-width: 768px) {
-    font-size: 24px;
+    font-size: 16px;
     margin-bottom: 12px;
-    text-align: center;
+    // text-align: center;
   }
 }
 
@@ -42,18 +44,18 @@
 
   @media (max-width: 768px) {
     gap: 8px;
-    justify-content: center;
+    // justify-content: center;
   }
 }
 
 .dividerLine {
-  width: 80px;
+  // width: 80px;
   height: 1px;
   background: rgba(42, 22, 27, 0.2);
 
-  @media (max-width: 768px) {
-    width: 50px;
-  }
+  // @media (max-width: 768px) {
+  //   width: 50px;
+  // }
 }
 
 .dividerMoon {
