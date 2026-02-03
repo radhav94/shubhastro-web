@@ -413,7 +413,7 @@
 
 // Sticky Add Profile Button
 .stickyButtonContainer {
-  position: sticky;
+  position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
@@ -421,8 +421,6 @@
   // background: #F9F4EF;
   z-index: 10;
   // box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  // background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-  // color: #fff;
 }
 
 
@@ -1252,10 +1250,17 @@
   gap: 0.5rem;
   transition: all 0.2s;
   color: #ffffff;
+  position: fixed;
+  z-index: 999;
+  bottom: 50px;
   margin: 0 auto;
+  left: 0;
+  right: 0;
   @media (width <= 767px) {
-    padding: 0.8rem 0.5rem;
+    padding: 0.8rem 1rem;
+    // bottom: 150px;
     width: 100%;
+    position: sticky;
   }
 
   &:hover {
