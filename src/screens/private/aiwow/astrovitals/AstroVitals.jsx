@@ -36,6 +36,27 @@ const AstroVitals = () => {
     }
   }, [navigate]);
 
+  const validateAndSetValue = (value, setter, min, max) => {
+    // Remove non-numeric characters except for leading digits
+    const numericValue = value.replace(/[^\d]/g, '');
+    
+    if (numericValue === '') {
+      setter('');
+      return;
+    }
+
+    const num = parseInt(numericValue);
+    
+    // Prevent values outside range
+    if (num > max) {
+      setter(String(max));
+    } else if (num < min && numericValue.length >= String(min).length) {
+      setter(String(min));
+    } else {
+      setter(numericValue);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -47,14 +68,39 @@ const AstroVitals = () => {
     const hr = parseInt(heartRate);
     const stress = parseInt(stressLevel);
 
-    if (hr < 40 || hr > 200) {
+    if (isNaN(hr) || hr < 40 || hr > 200) {
       Toast.error('Heart rate should be between 40-200 bpm');
       return;
     }
 
-    if (stress < 0 || stress > 100) {
+    if (isNaN(stress) || stress < 0 || stress > 100) {
       Toast.error('Stress level should be between 0-100');
       return;
+    }
+
+    // Validate optional fields if provided
+    if (systolic) {
+      const sys = parseInt(systolic);
+      if (isNaN(sys) || sys < 70 || sys > 200) {
+        Toast.error('Systolic BP should be between 70-200 mmHg');
+        return;
+      }
+    }
+
+    if (diastolic) {
+      const dia = parseInt(diastolic);
+      if (isNaN(dia) || dia < 40 || dia > 130) {
+        Toast.error('Diastolic BP should be between 40-130 mmHg');
+        return;
+      }
+    }
+
+    if (sleepQuality) {
+      const sleep = parseInt(sleepQuality);
+      if (isNaN(sleep) || sleep < 1 || sleep > 10) {
+        Toast.error('Sleep quality should be between 1-10');
+        return;
+      }
     }
 
     try {
@@ -185,14 +231,15 @@ const AstroVitals = () => {
                 Heart Rate (bpm) <span className={styles.required}>*</span>
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 className={styles.input}
                 placeholder="e.g., 75"
                 value={heartRate}
-                onChange={(e) => setHeartRate(e.target.value)}
-                min="40"
-                max="200"
+                onChange={(e) => validateAndSetValue(e.target.value, setHeartRate, 40, 200)}
                 disabled={isLoading}
+                maxLength="3"
               />
               <span className={styles.hint}>Normal range: 60-100 bpm</span>
             </div>
@@ -202,14 +249,15 @@ const AstroVitals = () => {
                 Stress Level (0-100) <span className={styles.required}>*</span>
               </label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 className={styles.input}
                 placeholder="e.g., 45"
                 value={stressLevel}
-                onChange={(e) => setStressLevel(e.target.value)}
-                min="0"
-                max="100"
+                onChange={(e) => validateAndSetValue(e.target.value, setStressLevel, 0, 100)}
                 disabled={isLoading}
+                maxLength="3"
               />
               <div className={styles.stressScale}>
                 <span>Low (0-30)</span>
@@ -227,28 +275,30 @@ const AstroVitals = () => {
               <div className={styles.formGroup}>
                 <label className={styles.label}>Systolic BP</label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   className={styles.input}
                   placeholder="e.g., 120"
                   value={systolic}
-                  onChange={(e) => setSystolic(e.target.value)}
-                  min="70"
-                  max="200"
+                  onChange={(e) => validateAndSetValue(e.target.value, setSystolic, 70, 200)}
                   disabled={isLoading}
+                  maxLength="3"
                 />
               </div>
 
               <div className={styles.formGroup}>
                 <label className={styles.label}>Diastolic BP</label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   className={styles.input}
                   placeholder="e.g., 80"
                   value={diastolic}
-                  onChange={(e) => setDiastolic(e.target.value)}
-                  min="40"
-                  max="130"
+                  onChange={(e) => validateAndSetValue(e.target.value, setDiastolic, 40, 130)}
                   disabled={isLoading}
+                  maxLength="3"
                 />
               </div>
             </div>
@@ -256,14 +306,15 @@ const AstroVitals = () => {
             <div className={styles.formGroup}>
               <label className={styles.label}>Sleep Quality (1-10)</label>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 className={styles.input}
                 placeholder="e.g., 7"
                 value={sleepQuality}
-                onChange={(e) => setSleepQuality(e.target.value)}
-                min="1"
-                max="10"
+                onChange={(e) => validateAndSetValue(e.target.value, setSleepQuality, 1, 10)}
                 disabled={isLoading}
+                maxLength="2"
               />
               <span className={styles.hint}>1 = Poor, 10 = Excellent</span>
             </div>

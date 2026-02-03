@@ -40,9 +40,17 @@ const KarmicDebtTracker = () => {
 
       const data = {
         name: selectedProfile.name,
+        gender: selectedProfile.identity?.toLowerCase() || 'male',
         day: selectedProfile.day,
         month: selectedProfile.month,
-        year: selectedProfile.year
+        year: selectedProfile.year,
+        hour: selectedProfile.hour || 0,
+        min: selectedProfile.minute || 0,
+        second: 0,
+        place: selectedProfile.place || '',
+        lat: selectedProfile.lat || 0,
+        lon: selectedProfile.lon || 0,
+        tzone: selectedProfile.timezone || 5.5
       };
 
       const result = await analyzeKarmicDebt(data);
@@ -137,7 +145,7 @@ const KarmicDebtTracker = () => {
         ) : (
           <div className={styles.resultSection}>
             <div className={styles.resultHeader}>
-              <div className={styles.resultIcon}>✨</div>
+              {/* <div className={styles.resultIcon}>✨</div> */}
               <h2 className={styles.resultTitle}>Your Karmic Analysis</h2>
             </div>
 
