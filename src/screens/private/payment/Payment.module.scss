@@ -11,6 +11,10 @@
     align-items: center;
     width: 100%;
     max-width: 1100px;
+    padding: 24px;
+    @media (width <= 767px) {
+      padding: 16px;
+    }
 
     .walletBalance {
       display: flex;
