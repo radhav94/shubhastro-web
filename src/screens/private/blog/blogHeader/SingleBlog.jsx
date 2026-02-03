@@ -26,21 +26,23 @@ const SingleBlogDetails = () => {
     <>
       <div className={styles.singleBlogWrapper}>
         {/* Banner Image */}
-        <img
-          src={singleBLogData.img}
-          alt={singleBLogData.title}
-          className={styles.bannerImage}
-        />
+        <div>
+          <img
+            src={singleBLogData.img}
+            alt={singleBLogData.title}
+            className={styles.bannerImage}
+          />
 
-        {/* Title */}
-        <h1 className={styles.title}>{singleBLogData.title}</h1>
+          {/* Title */}
+          <h1 className={styles.title}>{singleBLogData.title}</h1>
 
-        {/* Publish Date and Author */}
-        <div className={styles.metaInfo}>
-          <p className={styles.date}>Published on: {singleBLogData.publishDate}</p>
-          {singleBLogData.author && (
-            <p className={styles.author}>By {singleBLogData.author}</p>
-          )}
+          {/* Publish Date and Author */}
+          <div className={styles.metaInfo}>
+            <p className={styles.date}>Published on: {singleBLogData.publishDate}</p>
+            {singleBLogData.author && (
+              <p className={styles.author}>By {singleBLogData.author}</p>
+            )}
+          </div>
         </div>
 
         {/* Blog Body - Render HTML */}
