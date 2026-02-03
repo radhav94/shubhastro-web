@@ -126,11 +126,12 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
   margin: 0 12px 4px;
 
   &:hover {
-    background: #e55a2b;
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   }
 
   &:active {

@@ -115,13 +115,34 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
           // Check if user is already registered
           if (userData.isRegister) {
-            // User is already registered, redirect to home
-            toast.success("Welcome back!");
-            setTimeout(() => {
-              navigate(PATH.privateRoutes.HOME.path || "/");
-            }, 500);
+            // User is already registered, check for redirect path
+            const redirectPath = localStorage.getItem("shubhtalk_redirect_after_login");
+            console.log("🔍 OTPScreen - Checking redirect path after login");
+            console.log("📍 Redirect path from localStorage:", redirectPath);
+            console.log("📍 Current window location:", window.location.pathname);
+
+            if (redirectPath && redirectPath !== "/login") {
+              // Clear the redirect path
+              localStorage.removeItem("shubhtalk_redirect_after_login");
+              console.log("✅ Redirecting to saved path:", redirectPath);
+              toast.success("Welcome back!");
+              setTimeout(() => {
+                console.log("🚀 Executing navigate to:", redirectPath);
+                navigate(redirectPath);
+              }, 500);
+            } else {
+              // No redirect path, go to home
+              console.log("ℹ️ No valid redirect path, going to home");
+              console.log("📍 redirectPath value:", redirectPath);
+              toast.success("Welcome back!");
+              setTimeout(() => {
+                console.log("🚀 Executing navigate to home");
+                navigate(PATH.privateRoutes.HOME.path || "/");
+              }, 500);
+            }
           } else {
             // New user, proceed to personalization
+            console.log("👤 New user, proceeding to personalization");
             onNext();
           }
         } else {
@@ -131,7 +152,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         console.error("OTP verification error:", error);
         toast.error(
           error.response?.data?.message ||
-            "Failed to verify OTP. Please try again.",
+          "Failed to verify OTP. Please try again.",
         );
       } finally {
         setLoading(false);
@@ -161,7 +182,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         console.error("Resend OTP error:", error);
         toast.error(
           error.response?.data?.message ||
-            "Failed to resend OTP. Please try again.",
+          "Failed to resend OTP. Please try again.",
         );
       }
     }

@@ -15,9 +15,9 @@
 
 .backButton,
 .shuffleButton {
-  background: #f0f0f0;
-  border: none;
-  color: #333;
+  background: #fff4ec;
+  /* border: none; */
+  color: #F75801;
   cursor: pointer;
   padding: 12px;
   display: flex;
@@ -26,10 +26,11 @@
   border-radius: 8px;
   width: 48px;
   height: 48px;
+  border: 1px solid #F75801;
 }
 
 .shuffleButton {
-  background: #000;
+  background: #F75801;
   color: white;
 }
 
@@ -44,7 +45,7 @@
 
 .title {
   font-size: 32px;
-  font-weight: 700;
+  font-weight: 600;
   color: #000;
   margin: 0 0 8px 0;
   text-align: center;
@@ -58,9 +59,14 @@
 }
 
 .tapText {
-  font-size: 14px;
-  color: #999;
-  margin: 0 0 24px 0;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .cardsContainer {
@@ -141,17 +147,26 @@
 }
 
 @media (max-width: 768px) {
+  .header {
+    padding: 6px 16px;
+  }
+  .backButton,
+  .shuffleButton {
+    width: 36px;
+    height: 36px;
+    padding: 10px;
+  }
   .title {
     font-size: 22px;
+    text-align: start;
+    width: 100%;
   }
 
   .subtitle {
     font-size: 13px;
-    padding: 0 16px;
-  }
-
-  .tapText {
-    font-size: 12px;
+    padding: 0px 16px 0px 0px;
+    text-align: start;
+    width: 100%;
   }
 
   .cardsContainer {
@@ -168,17 +183,8 @@
 }
 
 @media (max-width: 480px) {
-  .title {
-    font-size: 20px;
-  }
-
   .subtitle {
     font-size: 12px;
-  }
-
-  .tapText {
-    font-size: 11px;
-    margin-bottom: 16px;
   }
 
   .cardsContainer {
