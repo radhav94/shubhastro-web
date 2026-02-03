@@ -1,6 +1,7 @@
 .popularBlogsSection {
   max-width: 1600px;
   padding: 0 48px;
+  margin: 32px auto 40px;
 
   @media (max-width: 768px) {
     margin: 32px auto 40px;
@@ -17,17 +18,18 @@
 }
 
 .title {
-  font-size: 28px;
-  font-weight: 700;
+  color: var(--title, #030303);
   text-align: left;
-  color: #2A161B;
-  letter-spacing: 0.5px;
-  margin-bottom: 16px;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px;
+  text-transform: uppercase;
 
   @media (max-width: 768px) {
-    font-size: 24px;
+    font-size: 16px;
     margin-bottom: 12px;
-    text-align: center;
+    // text-align: center;
   }
 }
 
@@ -40,18 +42,18 @@
 
   @media (max-width: 768px) {
     gap: 8px;
-    justify-content: center;
+    // justify-content: center;
   }
 }
 
 .dividerLine {
-  width: 80px;
+  // width: 80px;
   height: 1px;
   background: rgba(42, 22, 27, 0.2);
 
-  @media (max-width: 768px) {
-    width: 50px;
-  }
+  // @media (max-width: 768px) {
+  //   width: 50px;
+  // }
 }
 
 .dividerMoon {
@@ -64,14 +66,35 @@
   }
 }
 
-.blogsGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+.blogCard {
+  width: 320px;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
 
-  @media (max-width: 1024px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+  @media (max-width: 768px) {
+    flex: 0 0 280px;
+    min-width: 280px;
+    scroll-snap-align: start;
+    border-radius: 12px;
+  }
+}
+
+.blogsGrid {
+  display: flex;
+  gap: 20px;
+  overflow: auto;
+  padding-block: 10px;
+  @media (max-width: 767px) {
+    gap: 16px;
   }
 
   @media (max-width: 768px) {
@@ -91,27 +114,6 @@
     /* Hide scrollbar for IE, Edge and Firefox */
     -ms-overflow-style: none;
     scrollbar-width: none;
-  }
-}
-
-.blogCard {
-  background: #fff;
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-  }
-
-  @media (max-width: 768px) {
-    flex: 0 0 280px;
-    min-width: 280px;
-    scroll-snap-align: start;
-    border-radius: 12px;
   }
 }
 
