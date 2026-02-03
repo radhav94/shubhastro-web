@@ -300,6 +300,14 @@ const ChatWindow = () => {
     setShowProfileModal(false);
   };
 
+   // Auto-end chat when timer reaches 0
+  useLayoutEffect(() => {
+    if (chatSeconds === 0 && remainingTime > 0) {
+      // Timer has reached 0, automatically end the chat
+      handleDisconnect();
+    }
+  }, [chatSeconds, remainingTime]);
+
   return (
     <>
       <div className={styles.chatPage}>
