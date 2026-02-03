@@ -41,6 +41,7 @@ import styles from "./Profile.module.scss";
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
 import { Toast } from "../../../component/index";
+import StickyReview from "../../private/home/components/call/StickyReview";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -80,6 +81,8 @@ const Profile = () => {
     resetCallFlow,
     setActiveCallRoomId,
     setActiveCall,
+    setOpenReview,
+    setReviewData,
   } = useCall();
 
   const [createChatRoom] = useCreateChatRoomMutation();
@@ -613,6 +616,15 @@ const Profile = () => {
     setIsConnectPopupOpen(true);
   };
 
+  // Handle rate consultation button click
+  const handleRateConsultation = (astrologer) => {
+    setReviewData({
+      astrologerID: astrologer.astrologer_ID,
+      fullName: `${astrologer.firstName} ${astrologer.lastName || ""}`.trim(),
+    });
+    setOpenReview(true);
+  };
+
   const handleClosePopup = () => {
     setIsConnectPopupOpen(false);
     setSelectedAstrologer(null);
@@ -1022,7 +1034,10 @@ const Profile = () => {
                           </div>
 
                           <div className={styles.orderCardBottom}>
-                            <button className={styles.rateButton}>
+                            <button 
+                              className={styles.rateButton}
+                              onClick={() => handleRateConsultation(order.astrologer)}
+                            >
                               Rate Consultation
                             </button>
                             <div className={styles.buttonSeparator}></div>
@@ -1410,6 +1425,9 @@ const Profile = () => {
         isLoading={isAddingKundli}
         title="Add Profile"
       />
+
+      {/* Sticky Review Modal */}
+      <StickyReview />
     </div>
   );
 };
