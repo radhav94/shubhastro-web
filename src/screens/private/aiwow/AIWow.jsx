@@ -1,22 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import styles from "./AIWow.module.scss";
 import { useNavigate, useLocation } from "react-router-dom";
 import FeatureCard from "./components/FeatureCard";
 import ComingSoonCard from "./components/ComingSoonCard";
 import MobileAppModal from "./components/MobileAppModal";
-import {
-  AddProfileModal,
-  DeleteConfirmationModal,
-  EditProfileModal,
-  Toast,
-} from "../../../component";
-import ProfileListingModal from "../../../component/UI/Profile/ProfileListingModal";
-import {
-  useCreateKundliMutation,
-  useGetAllKundlisQuery,
-  useDeleteKundliMutation,
-  useEditKundliMutation,
-} from "../../../services/appServices/kundliServicesNew";
+import { ProfileManager } from "../../../component/UI/Profile";
 
 const AIWow = () => {
   const navigate = useNavigate();
@@ -24,34 +12,7 @@ const AIWow = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
   const [targetRoute, setTargetRoute] = useState("");
-  const [showAddProfile, setShowAddProfile] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
-  const [showEditProfile, setShowEditProfile] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [profileToDelete, setProfileToDelete] = useState(null);
-  const [profileToEdit, setProfileToEdit] = useState(null);
-
-  const [createKundli, { isLoading: isCreating }] = useCreateKundliMutation();
-  const [deleteKundli] = useDeleteKundliMutation();
-  const [editKundli] = useEditKundliMutation();
-
-  // Get token
-  const role = localStorage.getItem("shubhtalk_role");
-  const token =
-    role === "ASTROLOGER"
-      ? localStorage.getItem("shubhtalk_astro_token")
-      : localStorage.getItem("shubhtalk_customer_token");
-
-  // Fetch profiles
-  const {
-    data,
-    isLoading: isLoadingProfiles,
-    refetch,
-  } = useGetAllKundlisQuery(undefined, {
-    skip: !token || !showProfileModal,
-  });
-
-  const profiles = data?.data || [];
 
   // Scroll to section if hash is present in URL
   useEffect(() => {
@@ -88,6 +49,11 @@ const AIWow = () => {
 
     // Close modal after selection
     setShowProfileModal(false);
+  };
+
+  const handleCloseProfileModal = () => {
+    setShowProfileModal(false);
+    setTargetRoute("");
   };
 
   // WOW Suite - Visual & Immersive Experiences
@@ -246,167 +212,6 @@ const AIWow = () => {
     },
   ];
 
-  const handleAddProfile = () => {
-    setShowProfileModal(false);
-    setShowAddProfile(true);
-  };
-
-  const handleDeleteProfile = (profileId) => {
-    setProfileToDelete(profileId);
-    setShowDeleteModal(true);
-  };
-
-  const handleEditProfile = (profile) => {
-    setProfileToEdit(profile);
-    setShowProfileModal(false);
-    setShowEditProfile(true);
-  };
-
-  const confirmDeleteProfile = async () => {
-    if (!profileToDelete) return;
-
-    try {
-      await deleteKundli(profileToDelete).unwrap();
-      Toast.success("Profile deleted successfully");
-
-      // Clear selection if deleted profile was selected
-      if (selectedProfile?._id === profileToDelete) {
-        setSelectedProfile(null);
-      }
-
-      setShowDeleteModal(false);
-      setProfileToDelete(null);
-      setShowProfileModal(false);
-    } catch (err) {
-      // Error toast is already handled by global error handler in privateRequestNew.js
-      // Only log the error for debugging
-      console.error("Delete profile error:", err);
-
-      setShowDeleteModal(false);
-      setProfileToDelete(null);
-    }
-  };
-
-  const handleSubmitEditProfile = async (formData) => {
-    try {
-      if (!profileToEdit) return;
-
-      // Build payload with updated data
-      const payload = buildKundliPayload(formData);
-
-      // Call editKundli with id and payload
-      const result = await editKundli({
-        id: profileToEdit.kundli_ID,
-        ...payload,
-      }).unwrap();
-
-      Toast.success("Profile updated successfully");
-
-      // Update selection if edited profile was selected
-      if (result?.data && selectedProfile?._id === profileToEdit._id) {
-        setSelectedProfile(result.data);
-      }
-
-      setShowEditProfile(false);
-      setProfileToEdit(null);
-
-      // Reopen profile listing modal after edit
-      setShowProfileModal(true);
-    } catch (err) {
-      // Error toast is already handled by global error handler in privateRequestNew.js
-      console.error("Edit profile error:", err);
-      throw err;
-    }
-  };
-
-  const getEditInitialData = () => {
-    if (!profileToEdit) return null;
-
-    return {
-      name: profileToEdit.name,
-      identity:
-        profileToEdit.gender === "male"
-          ? "Male"
-          : profileToEdit.gender === "female"
-            ? "Female"
-            : "Others",
-      relation: profileToEdit.relation || "Self",
-      birthDate: `${profileToEdit.year}-${String(profileToEdit.month).padStart(2, "0")}-${String(profileToEdit.day).padStart(2, "0")}`,
-      birthTime: `${String(profileToEdit.hour).padStart(2, "0")}:${String(profileToEdit.min).padStart(2, "0")}`,
-      birthPlace: profileToEdit.place,
-      unknownBirthTime: false,
-      latitude: profileToEdit.lat,
-      longitude: profileToEdit.lon,
-    };
-  };
-
-  const buildKundliPayload = (data) => {
-    const dateObj = new Date(data.birthDate);
-    const timeObj = data.birthTime ? data.birthTime.split(":") : ["0", "0"];
-
-    return {
-      name: data.name,
-      gender: data.identity.toLowerCase(),
-      relation: data.relation || "Self",
-      day: dateObj.getDate(),
-      month: dateObj.getMonth() + 1,
-      year: dateObj.getFullYear(),
-      hour: data.unknownBirthTime ? 0 : parseInt(timeObj[0]),
-      min: data.unknownBirthTime ? 0 : parseInt(timeObj[1]),
-      second: 0,
-      place: data.birthPlace,
-      lat: data.latitude || 0,
-      lon: data.longitude || 0,
-      tzone: 5.5,
-    };
-  };
-
-  const isDuplicateKundli = (payload, list) =>
-    list.some(
-      (k) =>
-        k.name.trim().toLowerCase() === payload.name.trim().toLowerCase() &&
-        k.gender.toLowerCase() === payload.gender.toLowerCase() &&
-        Number(k.day) === Number(payload.day) &&
-        Number(k.month) === Number(payload.month) &&
-        Number(k.year) === Number(payload.year) &&
-        Number(k.hour) === Number(payload.hour) &&
-        Number(k.min) === Number(payload.min) &&
-        Math.abs(Number(k.lat) - Number(payload.lat)) < 0.0001 &&
-        Math.abs(Number(k.lon) - Number(payload.lon)) < 0.0001 &&
-        k.place.trim().toLowerCase() === payload.place.trim().toLowerCase(),
-    );
-
-  const handleSubmitProfile = async (formData) => {
-    try {
-      const payload = buildKundliPayload(formData);
-
-      // Check for duplicate
-      if (isDuplicateKundli(payload, profiles)) {
-        Toast.error("This profile already exists");
-        throw new Error("Duplicate profile");
-      }
-
-      const result = await createKundli(payload).unwrap();
-      Toast.success("Profile added successfully");
-
-      // Auto-select the newly created profile
-      if (result?.data) {
-        setSelectedProfile(result.data);
-      }
-
-      setShowAddProfile(false);
-    } catch (err) {
-      console.error("Add profile error:", err);
-
-      // Only show custom toast for duplicate error (already shown above)
-      // For API errors, global handler in privateRequestNew.js will show the toast
-      if (err.message !== "Duplicate profile") {
-        // Global error handler already showed the toast, just rethrow
-        throw err;
-      }
-    }
-  };
-
   // Coming Soon Features - Empty array since Aura Photography is now unlocked
   const comingSoonFeatures = [];
 
@@ -502,56 +307,19 @@ const AIWow = () => {
         )}
       </div>
 
-      {/* Profile Listing Modal */}
-      <ProfileListingModal
+      {/* Profile Manager - Handles all profile operations */}
+      <ProfileManager
         isOpen={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
-        profiles={profiles}
+        onClose={handleCloseProfileModal}
+        onProfileSelect={handleProfileSelect}
         selectedProfileId={selectedProfile?._id}
-        onSelectProfile={handleProfileSelect}
-        onDeleteProfile={handleDeleteProfile}
-        onEditProfile={handleEditProfile}
-        onAddProfile={handleAddProfile}
         title="Select Profile"
-        showAddButton={true}
-        showDeleteButton={true}
-        showEditButton={true}
-      />
-
-      {/* Add Profile Modal */}
-      <AddProfileModal
-        isOpen={showAddProfile}
-        onClose={() => setShowAddProfile(false)}
-        onSubmit={handleSubmitProfile}
-        isLoading={isCreating}
-        title="Add Profile"
-        showProfileListing={false}
-      />
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <DeleteConfirmationModal
-          title="Delete Profile"
-          message="Are you sure you want to delete this profile? This action cannot be undone."
-          onCancel={() => {
-            setShowDeleteModal(false);
-            setProfileToDelete(null);
-          }}
-          onConfirm={confirmDeleteProfile}
-        />
-      )}
-
-      {/* Edit Profile Modal */}
-      <EditProfileModal
-        isOpen={showEditProfile}
-        onClose={() => {
-          setShowEditProfile(false);
-          setProfileToEdit(null);
+        enabledOperations={{
+          list: true,
+          add: true,
+          edit: true,
+          delete: true,
         }}
-        onSubmit={handleSubmitEditProfile}
-        isLoading={isCreating}
-        title="Edit Profile"
-        initialData={getEditInitialData()}
       />
 
       {/* Mobile App Download Modal */}

@@ -14,6 +14,7 @@ const ProfileListingModal = ({
   showAddButton = true,
   showDeleteButton = true,
   showEditButton = true,
+  hasNestedModal = false, // New prop to indicate if nested modal is open
 }) => {
   if (!isOpen) return null;
 
@@ -75,8 +76,18 @@ const ProfileListingModal = ({
     }
   };
 
+  // Prevent closing when nested modal is open
+  const handleOverlayClick = () => {
+    if (!hasNestedModal) {
+      onClose();
+    }
+  };
+
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
+    <div 
+      className={`${styles.modalOverlay} ${hasNestedModal ? styles.dimmed : ''}`} 
+      onClick={handleOverlayClick}
+    >
       <div className={styles.bottomSheet} onClick={(e) => e.stopPropagation()}>
         <div className={styles.sheetHandle}></div>
         <div className={styles.sheetContent}>

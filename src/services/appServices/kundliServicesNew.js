@@ -49,11 +49,11 @@ export const kundliApi = privateRequestNew.injectEndpoints({
           accept: "application/json",
         },
       }),
-      // invalidatesTags: (result, error, arg) => [
-      //   { type: "Kundlis", id: "LIST" },
-      //   // Invalidate for all possible user IDs to be safe
-      //   "Kundlis",
-      // ],
+      invalidatesTags: (result, error, arg) => [
+        { type: "Kundlis", id: "LIST" },
+        // Invalidate for all possible user IDs to be safe
+        "Kundlis",
+      ],
     }),
 
     // EDIT KUNDLI
