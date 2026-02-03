@@ -3,6 +3,9 @@
   margin-top: 6rem;
   // background: #F9F4EF;
   // padding-bottom: 2rem;
+  @media (width <= 767px) {
+    margin-top: 4rem;
+  }
 }
 
 // Header
@@ -27,6 +30,10 @@
   flex-shrink: 0;
   transition: all 0.2s;
   color: #D43400;
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
 
   &:hover {
     background: #f5f5f5;
@@ -51,6 +58,10 @@
   justify-content: center;
   font-size: 24px;
   flex-shrink: 0;
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 .headerInfo {
@@ -63,12 +74,18 @@
   color: #000;
   margin: 0;
   line-height: 1.2;
+  @media (width <= 767px) {
+   font-size: 1rem;
+  }
 }
 
 .profileDetails {
   font-size: 0.875rem;
   color: #999;
   margin: 0.25rem 0 0 0;
+  @media (width <= 767px) {
+   font-size: 0.7rem;
+  }
 }
 
 .logoutButton {
@@ -83,6 +100,10 @@
   cursor: pointer;
   color: #ff4444;
   flex-shrink: 0;
+  @media (width <= 767px) {
+   width: 36px;
+  height: 36px;
+  }
 }
 
 // Zodiac Section
@@ -216,7 +237,7 @@
   display: flex;
   gap: 0.5rem;
   padding: 0 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 
@@ -236,6 +257,10 @@
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s;
+  @media (width <= 767px) {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
 
   &.active {
     background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
@@ -260,7 +285,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding: 16px 0 80px 0;
+  padding: 0px 0 20px 0;
   /* Added bottom padding for fixed button */
 }
 
@@ -271,7 +296,11 @@
   display: flex;
   // align-items: center;
   gap: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  @media (width <= 767px) {
+      border-radius: 12px;
+  }
+
 }
 
 .avatarCircle {
@@ -287,6 +316,11 @@
   font-weight: 700;
   color: #2a1c06;
   flex-shrink: 0;
+  @media (width <= 767px) {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+  }
 }
 
 .profileCardContent {
@@ -349,18 +383,14 @@
   line-height: 1.2;
 }
 
-.profileCardDate {
+.profileCardDate,.profileCardLocation {
   font-size: 1rem;
   color: #999;
   margin: 0;
   line-height: 1.4;
-}
-
-.profileCardLocation {
-  font-size: 1rem;
-  color: #999;
-  margin: 0;
-  line-height: 1.4;
+  @media (width <= 767px) {
+    font-size: 0.8rem;
+  }
 }
 
 // Empty/Loading States
@@ -1160,7 +1190,8 @@
   }
 
   .zodiacCard {
-    padding: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 12px;
   }
 
   .zodiacIcon {
@@ -1178,15 +1209,18 @@
   .balanceCard {
     flex-direction: column;
     align-items: flex-start;
+    padding: 1rem;
+    border-radius: 12px;
   }
 
   .addMinutesButton {
     width: 100%;
     justify-content: center;
+    padding: 0.8rem 1rem;
   }
 
   .profileCardName {
-    font-size: 1.25rem;
+    font-size: 1rem;
   }
 }
 
@@ -1203,6 +1237,9 @@
   gap: 0.5rem;
   transition: all 0.2s;
   color: #ffffff;
+  @media (width <= 767px) {
+    padding: 0.8rem 1rem;
+  }
 
   &:hover {
     background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
