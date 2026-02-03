@@ -15,7 +15,7 @@ const Onboarding = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  
+
   // Start directly at LoginScreen (skip WelcomeScreen)
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -33,22 +33,30 @@ const Onboarding = () => {
   });
 
   // Redirect to home if user is already logged in (only on initial mount)
+  // DISABLED: This was interfering with the redirect-after-login flow
+  // The redirect logic is now handled in OTPScreen and LoadingScreen
   useEffect(() => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     const userData = localStorage.getItem("userData");
-    
+    const redirectPath = localStorage.getItem("shubhtalk_redirect_after_login");
+
+    console.log("🔍 Onboarding mount check - token:", !!token, "userData:", !!userData, "redirectPath:", redirectPath);
+
     // Only redirect if user was already logged in before coming to this page
-    if (token && userData) {
+    // AND there's no redirect path (meaning they came here directly, not from a 401 error)
+    if (token && userData && !redirectPath) {
       try {
         const parsedUserData = JSON.parse(userData);
         // Only redirect if user is already registered
         if (parsedUserData.isRegister) {
+          console.log("✅ User already logged in (no redirect path), redirecting to home");
           navigate(PATH.privateRoutes.HOME.path || "/");
         }
       } catch (error) {
         console.error("Error parsing user data:", error);
       }
     }
+    // If there IS a redirect path, let the OTPScreen handle it after login
   }, []); // Run only once on mount
 
   const isLoadingScreen = currentStep === 6;
@@ -116,7 +124,19 @@ const Onboarding = () => {
       formData={formData}
       updateFormData={updateFormData}
     />,
-    <LoadingScreen key="loading" onComplete={() => navigate(PATH.privateRoutes.HOME.path || "/")} />,
+    <LoadingScreen key="loading" onComplete={() => {
+      // Check for redirect path after registration completion
+      const redirectPath = localStorage.getItem("shubhtalk_redirect_after_login");
+
+      if (redirectPath && redirectPath !== "/login") {
+        // Clear the redirect path
+        localStorage.removeItem("shubhtalk_redirect_after_login");
+        navigate(redirectPath);
+      } else {
+        // No redirect path, go to home
+        navigate(PATH.privateRoutes.HOME.path || "/");
+      }
+    }} />,
   ];
 
   return (

@@ -4,7 +4,7 @@ import styles from './KundliProfileModal.module.scss';
 import { useGetAllKundlisQuery } from '../../../../services/appServices/kundliServicesNew';
 import { Toast } from '../../../../component';
 
-const KundliProfileModal = ({ isOpen, onClose, onSelectProfile, targetRoute }) => {
+const KundliProfileModal = ({ isOpen, onClose, onSelectProfile,setShowAddProfile, targetRoute }) => {
   const navigate = useNavigate();
   const [selectedProfile, setSelectedProfile] = useState(null);
 
@@ -73,9 +73,8 @@ const KundliProfileModal = ({ isOpen, onClose, onSelectProfile, targetRoute }) =
   };
 
   const handleAddProfile = () => {
-    // Navigate to kundli page to add profile
-    navigate('/kundli');
-    onClose();
+    // Open AddProfileModal without closing KundliProfileModal
+    setShowAddProfile(true);
   };
 
   if (!isOpen) return null;

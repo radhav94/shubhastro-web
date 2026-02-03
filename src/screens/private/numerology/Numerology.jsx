@@ -17,7 +17,6 @@ import {
 } from "../../../component";
 import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
-import { getToken } from "../../../utils/token";
 
 const NumerologyWeb = () => {
   const navigate = useNavigate();
@@ -37,22 +36,18 @@ const NumerologyWeb = () => {
       : localStorage.getItem("shubhtalk_customer_token");
 
   // Get current user ID
-  const currentUserId = role === "ASTROLOGER"
-    ? localStorage.getItem("shubhtalk_astro_id")
-    : localStorage.getItem("shubhtalk_customer_id");
-
-  // Check authentication on mount
-  useEffect(() => {
-    const authToken = getToken();
-    if (!authToken) {
-      navigate("/login?skip=welcome");
-    }
-  }, [navigate]);
+  const currentUserId =
+    role === "ASTROLOGER"
+      ? localStorage.getItem("shubhtalk_astro_id")
+      : localStorage.getItem("shubhtalk_customer_id");
 
   // API Hooks
-  const { data, isLoading, refetch, isFetching } = useGetAllKundlisQuery(undefined, {
-    skip: !token,
-  });
+  const { data, isLoading, refetch, isFetching } = useGetAllKundlisQuery(
+    undefined,
+    {
+      skip: !token,
+    },
+  );
   const [createKundli, { isLoading: isCreating }] = useCreateKundliMutation();
   const [deleteKundli] = useDeleteKundliMutation();
   const [
@@ -75,9 +70,9 @@ const NumerologyWeb = () => {
   useEffect(() => {
     if (currentUserId && selectedProfile) {
       const profileBelongsToCurrentUser = profiles.some(
-        profile => profile._id === selectedProfile._id
+        (profile) => profile._id === selectedProfile._id,
       );
-      
+
       if (!profileBelongsToCurrentUser) {
         setSelectedProfile(null);
       }
@@ -222,7 +217,7 @@ const NumerologyWeb = () => {
         Number(k.min) === Number(payload.min) &&
         Math.abs(Number(k.lat) - Number(payload.lat)) < 0.0001 &&
         Math.abs(Number(k.lon) - Number(payload.lon)) < 0.0001 &&
-        k.place.trim().toLowerCase() === payload.place.trim().toLowerCase()
+        k.place.trim().toLowerCase() === payload.place.trim().toLowerCase(),
     );
 
   const handleSubmitProfile = async (formData) => {
@@ -363,9 +358,7 @@ const NumerologyWeb = () => {
       <section className={styles.hero}>
         {/* <div className={styles.heroGlow}></div> */}
 
-        <h1 className={styles.heroTitle}>
-          Let the Numbers Guide You
-        </h1>
+        <h1 className={styles.heroTitle}>Let the Numbers Guide You</h1>
 
         <p className={styles.heroSubtitle}>
           Based on your name and birth date, your numerology chart highlights
@@ -439,7 +432,9 @@ const NumerologyWeb = () => {
       <section className={styles.expertSection}>
         <div className={styles.expertCard}>
           <div className={styles.expertContent}>
-            <h3 className={styles.expertTitle}>Talk to a <br/> Numerology Expert</h3>
+            <h3 className={styles.expertTitle}>
+              Talk to a <br /> Numerology Expert
+            </h3>
             <Link
               to={PATH.privateRoutes.Chat_With_ASTROLOGER.path}
               state={{

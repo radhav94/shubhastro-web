@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Toast } from "../component";
 import { getToken } from "../utils/utlis";
+import { navigateToLogin } from "../utils/navigationHelper";
 
 let unAuthorizedCount = 0;
 const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
@@ -70,12 +71,16 @@ const responseErrorHandler = (error) => {
       case 401:
         if (!unAuthorizedCount) {
           unAuthorizedCount++;
-          clearToken();
-          Toast.error("Session expired, please login again!");
+          
+          // Get current path for redirect after login
+          const currentPath = window.location.pathname + window.location.search;
+          
+          // Use navigation helper (no page refresh)
+          navigateToLogin(currentPath);
+          
           setTimeout(() => {
             unAuthorizedCount = 0;
-            window.location.href = "/";
-          }, 300);
+          }, 100);
         }
         break;
       case 400:
