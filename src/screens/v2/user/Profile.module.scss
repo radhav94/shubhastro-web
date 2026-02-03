@@ -1258,9 +1258,9 @@
   right: 0;
   @media (width <= 767px) {
     padding: 0.8rem 1rem;
-    // bottom: 150px;
-    width: 100%;
-    position: sticky;
+    width: 94%;
+    position: fixed;
+    bottom: 136px;
   }
 
   &:hover {
