@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-// import { getToken } from "../utils/utlis";
 import Toast from "../../component/toast";
 import { getToken } from "../../utils/utlis";
+import { navigateToLogin } from "../../utils/navigationHelper";
 
 let unAuthorizedCount = 0;
 const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
@@ -17,29 +17,15 @@ const handleApiError = (error) => {
       if (!unAuthorizedCount) {
         unAuthorizedCount++;
 
-        const role = localStorage.getItem("shubhtalk_role");
-
-        // 🔹 Clear tokens correctly based on role
-        if (role === "ASTROLOGER") {
-          localStorage.removeItem("shubhtalk_astro_token");
-          localStorage.removeItem("shubhtalk_astro_id");
-        }
-
-        if (role === "CUSTOMER") {
-          localStorage.removeItem("shubhtalk_customer_token");
-          localStorage.removeItem("shubhtalk_customer_id");
-          localStorage.removeItem("shubhtalk_customer_wallet");
-        }
-
-        // 🔹 Clear role (very important)
-        localStorage.removeItem("shubhtalk_role");
-
-        Toast.error(message);
-
+        // Get current path for redirect after login
+        const currentPath = window.location.pathname + window.location.search;
+        
+        // Use navigation helper (no page refresh)
+        navigateToLogin(currentPath);
+        
         setTimeout(() => {
           unAuthorizedCount = 0;
-          window.location.href = "/login";
-        }, 300);
+        }, 100);
       }
       break;
 
@@ -47,9 +33,6 @@ const handleApiError = (error) => {
       Toast.error(message || "Invalid Value / Bad Request");
       break;
     case 403:
-      Toast.error(message || "Access Denied / Forbidden");
-      break;
-    case 401:
       Toast.error(message || "Access Denied / Forbidden");
       break;
     case 404:

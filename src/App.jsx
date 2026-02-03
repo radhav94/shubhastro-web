@@ -2,6 +2,7 @@ import classes from "./App.module.scss";
 
 import { PATH } from "./utils/routes/Paths";
 import HomeLayout from "./layouts/HomeLayout";
+import NavigationSetup from "./layouts/NavigationSetup";
 import {
   createBrowserRouter,
   Navigate,
@@ -9,6 +10,7 @@ import {
 } from "react-router-dom";
 import PublicRoute from "./utils/routes/PublicRoute";
 import PrivateRoute from "./utils/routes/PrivateRoute";
+import MixedRoute from "./utils/routes/MixedRoute";
 import { useEffect } from "react";
 import { CallProvider } from "./context/CallContext";
 import { ChatProvider } from "./context/ChatContext";
@@ -49,18 +51,42 @@ function App() {
   const roleWiseRouting = createBrowserRouter([
     ...Object.values(PATH.publicRoutes).map((route) => ({
       path: route.path,
-      element: <PublicRoute component={route.element} />,
+      element: (
+        <NavigationSetup>
+          <PublicRoute component={route.element} />
+        </NavigationSetup>
+      ),
     })),
 
     {
       path: "/",
-      element: <PrivateRoute component={HomeLayout} />,
+      element: (
+        <NavigationSetup>
+          <MixedRoute component={HomeLayout} />
+        </NavigationSetup>
+      ),
       children: [
-        ...flattenRoutes(PATH.privateRoutes).map((child) => ({
-          path: child.path,
-          element: <child.element />,
-          handle: { header: child.header ?? true, footer: child.footer ?? true },
-        })),
+        ...flattenRoutes(PATH.privateRoutes).map((child) => {
+          // Numerology and ProductDetail routes require authentication
+          if (
+            child.path === "/numerology" ||
+            child.path === PATH.privateRoutes.NUMEROLOGY?.path ||
+            child.path === "/shop/:slug/:productSlug" ||
+            child.path === PATH.privateRoutes.PRODUCT_DETAIL?.path
+          ) {
+            return {
+              path: child.path,
+              element: <PrivateRoute component={child.element} />,
+              handle: { header: child.header ?? true, footer: child.footer ?? true },
+            };
+          }
+          // All other routes are accessible to everyone
+          return {
+            path: child.path,
+            element: <child.element />,
+            handle: { header: child.header ?? true, footer: child.footer ?? true },
+          };
+        }),
         { path: "/", element: <Navigate to={PATH.privateRoutes.HOME.path} /> },
         { path: "*", element: <Navigate to={PATH.privateRoutes.HOME.path} /> },
       ],
