@@ -5,15 +5,14 @@ import { privateRequestNew } from "./privateRequestNew";
 
 export const kundliApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
-
     // GET ALL KUNDLIS
-   getAllKundlis: builder.query({
+    getAllKundlis: builder.query({
       query: (userId) => ({
         url: "kundlis/all",
         method: "GET",
       }),
       providesTags: (result, error, userId) => [
-        { type: "Kundlis", id: userId || "LIST" }
+        { type: "Kundlis", id: userId || "LIST" },
       ],
       // Force refetch on mount or when userId changes
       keepUnusedDataFor: 0, // Don't cache data after component unmounts
@@ -26,36 +25,54 @@ export const kundliApi = privateRequestNew.injectEndpoints({
         method: "POST",
         body,
         headers: {
-          'Content-Type': 'application/json',
-          'accept': 'application/json',
+          "Content-Type": "application/json",
+          accept: "application/json",
         },
       }),
       invalidatesTags: (result, error, arg) => [
         { type: "Kundlis", id: "LIST" },
         // Invalidate for all possible user IDs to be safe
-        "Kundlis"
+        "Kundlis",
       ],
     }),
 
+    
+
     // DELETE KUNDLI
-   deleteKundli: builder.mutation({
+    deleteKundli: builder.mutation({
       query: (id) => ({
         url: "kundlis/delete",
         method: "DELETE",
         body: { kundliId: id },
         headers: {
-          'Content-Type': 'application/json',
-          'accept': 'application/json',
+          "Content-Type": "application/json",
+          accept: "application/json",
         },
       }),
       invalidatesTags: (result, error, arg) => [
         { type: "Kundlis", id: "LIST" },
         // Invalidate for all possible user IDs to be safe
-        "Kundlis"
+        "Kundlis",
       ],
     }),
 
-
+    // EDIT KUNDLI
+    editKundli: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `kundlis/editkundli/${id}`,
+        method: "PUT",
+        body,
+        headers: {
+          "Content-Type": "application/json",
+          accept: "application/json",
+        },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Kundlis", id: "LIST" },
+        // Invalidate for all possible user IDs to be safe
+        "Kundlis",
+      ],
+    }),
   }),
 });
 
@@ -64,6 +81,7 @@ export const {
   useGetAllKundlisQuery,
   useCreateKundliMutation,
   useDeleteKundliMutation,
+  useEditKundliMutation,
 } = kundliApi;
 
 // Export addKundli as an alias for createKundli for backward compatibility

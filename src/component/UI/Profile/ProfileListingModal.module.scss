@@ -10,6 +10,12 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  
+  /* When nested modal is open, dim this overlay more */
+  &.dimmed {
+    background: rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+  }
 }
 
 /* BOTTOM SHEET */
