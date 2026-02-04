@@ -42,11 +42,11 @@ const Vimshottari = () => {
             {dasha.dasha_start_year} - {dasha.dasha_end_year}
           </div>
           <div className={styles.dashaName}>{dasha.dasha}</div>
-          <div className="text-left text-gray-400 ">
+          <div className={styles.textGray}>
             <span className={styles.desc}>Prediction : </span>{" "}
             {dasha.prediction}
           </div>
-          <div className="text-left text-gray-400 ">
+          <div className={styles.textGray}>
             <span className={styles.desc}>Planet in Zodiac : </span>{" "}
             {dasha.planet_in_zodiac}
           </div>

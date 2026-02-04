@@ -19,7 +19,14 @@ export const ChatProvider = ({ children }) => {
   const startTimer = () => {
     if (timerRef.current) return;
     timerRef.current = setInterval(() => {
-      setChatSeconds((s) => s - 1);
+      setChatSeconds((s) => {
+        // Stop timer if already 0 or less
+        if (s <= 0) {
+          stopTimer();
+          return 0;
+        }
+        return s - 1;
+      });
     }, 1000);
   };
 

@@ -27,6 +27,7 @@ import matchmakingImg from "../../../assets/explore/matchmaking.png";
 import tarotImg from "../../../assets/explore/tarot.png";
 import newsImg from "../../../assets/explore/news.png";
 import numerology from "../../../assets/images/numerology.svg";
+import { ProfileManager } from "../../../component/UI/Profile";
 
 // Reusable Section Title with Divider Component
 const SectionTitleWithDivider = ({ title }) => (
@@ -576,8 +577,23 @@ const Explore = () => {
         })}
       </div>
 
+      {/* Profile Manager - Handles all profile operations */}
+      <ProfileManager
+        isOpen={showSelectProfile}
+        onClose={() => setShowSelectProfile(false)}
+        onProfileSelect={handleSelectProfile}
+        selectedProfileId={selectedProfile?._id}
+        title="Select Profile"
+        enabledOperations={{
+          list: true,
+          add: true,
+          edit: true,
+          delete: true,
+        }}
+      />
+
       {/* Select Profile Modal */}
-      <ProfileListingModal
+      {/* <ProfileListingModal
         isOpen={showSelectProfile}
         onClose={() => setShowSelectProfile(false)}
         profiles={profiles}
@@ -588,17 +604,17 @@ const Explore = () => {
         showAddButton={true}
         showDeleteButton={false}
         emptyMessage="No profiles found. Add a profile to get started."
-      />
+      /> */}
 
       {/* Add Profile Modal */}
-      <AddProfileModal
+      {/* <AddProfileModal
         isOpen={showAddProfile}
         onClose={() => setShowAddProfile(false)}
         onSubmit={handleSubmitProfile}
         isLoading={isCreating}
         title="Add Profile"
         showProfileListing={false}
-      />
+      /> */}
     </div>
   );
 };

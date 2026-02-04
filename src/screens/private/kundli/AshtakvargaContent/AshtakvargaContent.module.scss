@@ -31,6 +31,12 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
 }
 .textContainer {
   margin-bottom: 24px;
+  p{
+    font-size: 16px;
+    @media (max-width: 768px) {
+      font-size: 14px;
+    } 
+  }
 }
 .leftColumn,
 .rightColumn {
@@ -49,13 +55,16 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
 
 .cardTitle {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 500;
   color: $color-black;
   display: flex;
   align-self: flex-start;
-  margin: 7px;
+  margin: 8px 0;
   border-bottom: 1px solid $color-grey-light;
   padding-bottom: 12px;
+  @media (width<=767px) {
+    font-size: 16px;
+  }
 }
 
 .tableContainer {

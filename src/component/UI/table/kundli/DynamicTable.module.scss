@@ -37,12 +37,12 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   border-radius: 16px;
   padding: 24px;
   border: 1px solid $color-grey-light;
-  box-shadow: $shadow-4;
+  // box-shadow: $shadow-4;
 }
 
 .cardTitle {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 600;
   color: $color-black;
   display: flex;
   align-self: flex-start;

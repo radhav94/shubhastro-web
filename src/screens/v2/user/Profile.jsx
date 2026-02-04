@@ -17,20 +17,29 @@ import { useDispatch } from "react-redux";
 import { useState, useRef, useEffect } from "react";
 import dayjs from "dayjs";
 import { useGetTransactionsQuery } from "../../../services/appServices/transactionService";
-import {
-  useGetAllKundlisQuery,
-  useDeleteKundliMutation,
-  useCreateKundliMutation,
-} from "../../../services/appServices/kundliServicesNew";
+import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
 import { useGetCallHistoryQuery } from "../../../redux/api/callHistory/callHistory";
 import { useGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chatHistory";
 import { useWalletBalance } from "../../private/wallet/useWalletBalance";
 import { getUserFromStorage } from "../../../utils/authStorage";
+import { useChat } from "../../../context/ChatContext";
+import { useCall } from "../../../context/CallContext";
+import { voiceSocket } from "../../../services/voiceSocketServices";
+import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
+import ConnectAstrologerPopup from "../../private/v2/components/ui/ConnectAstrologerPopup";
+import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
+import ProfileModals from "../../private/kundli/components/ProfileModals";
+import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
+import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
+import { PATH } from "../../../utils/routes/Paths";
 import { logout } from "../../../redux/auth/authSlice";
 import styles from "./Profile.module.scss";
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
+
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
 import { Toast } from "../../../component/index";
+import StickyReview from "../../private/home/components/call/StickyReview";
+import { ProfileManager } from "../../../component/UI/Profile";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -47,6 +56,69 @@ const Profile = () => {
     : "Guest User";
   const userId = localStorage.getItem("shubhtalk_customer_id");
 
+  // Connect popup state
+  const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
+  const [selectedAstrologer, setSelectedAstrologer] = useState(null);
+  const [callRoomId, setCallRoomId] = useState(null);
+  const [chatRoomId, setChatRoomId] = useState(null);
+  const [connectionType, setConnectionType] = useState(null);
+  const activeAstroRef = useRef(null);
+
+  // Get contexts
+  const {
+    waitingList: WaitingList,
+    setWaitingList,
+    resetChatFlow,
+    setActiveChatRoomId,
+    setActiveChat,
+    setChatSeconds,
+  } = useChat();
+  const {
+    waitingList: callWaitingList,
+    setWaitingList: setCallWaitingList,
+    resetCallFlow,
+    setActiveCallRoomId,
+    setActiveCall,
+    setOpenReview,
+    setReviewData,
+  } = useCall();
+
+  const [createChatRoom] = useCreateChatRoomMutation();
+
+  // Use profile manager hook
+  const {
+    selectedProfile,
+    profiles,
+    profilesLoading,
+    isCreating,
+    showSelectProfile,
+    showAddProfile,
+    showEditProfile,
+    formData,
+    editFormData,
+    setShowSelectProfile,
+    setShowAddProfile,
+    setShowEditProfile,
+    setFormData,
+    setEditFormData,
+    handleAddProfile,
+    handleEditProfile,
+    handleSubmitProfile,
+    handleSubmitEditProfile,
+    formatProfileDisplay,
+  } = useProfileManager(dispatch);
+
+  const [localSelectedProfile, setLocalSelectedProfile] = useState(null);
+
+  // Use the astrologer connect hook
+  const {
+    handleChatStart,
+    handleCallStart,
+    handleAfterKundliSelect: hookHandleAfterKundliSelect,
+    openModal: hookOpenModal,
+    setOpenModal: hookSetOpenModal,
+  } = useAstrologerConnect();
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [allLoadedTransactions, setAllLoadedTransactions] = useState([]);
@@ -55,12 +127,11 @@ const Profile = () => {
   const [callHistoryPage, setCallHistoryPage] = useState(1);
   const [allLoadedCallOrders, setAllLoadedCallOrders] = useState([]);
 
-  // Delete confirmation state
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [kundliToDelete, setKundliToDelete] = useState(null);
-
-  // Add Profile Modal state
-  const [showAddProfileModal, setShowAddProfileModal] = useState(false);
+  // ProfileManager state - Single instance with mode-based control
+  const [showProfileManager, setShowProfileManager] = useState(false);
+  const [profileManagerMode, setProfileManagerMode] = useState(null); // 'add' | 'edit' | 'delete'
+  const [selectedKundli, setSelectedKundli] = useState(null);
+  const [kundliIdToDelete, setKundliIdToDelete] = useState(null);
 
   // Fetch call and chat history
   const {
@@ -91,6 +162,10 @@ const Profile = () => {
           astrologer: {
             name: item?.receiverName || "Unknown",
             image: "https://i.pravatar.cc/100",
+            _id: item?.receiverId,
+            firstName: item?.receiverName?.split(" ")[0] || "Unknown",
+            lastName: item?.receiverName?.split(" ").slice(1).join(" ") || "",
+            isActive: true,
           },
           date: item?.timestamp || new Date(),
           duration: `${item?.duration || 0} Min`,
@@ -130,6 +205,10 @@ const Profile = () => {
               ? `${room.astrologerFirstName} ${room.astrologerLastName || ""}`
               : "Unknown",
             image: "https://i.pravatar.cc/150",
+            _id: room.astrologerId,
+            firstName: room.astrologerFirstName || "Unknown",
+            lastName: room.astrologerLastName || "",
+            isActive: true,
           },
           date: lastChat?.createdAt || new Date(),
           duration: `${room.chatHistory?.length || 0} Messages`,
@@ -170,12 +249,7 @@ const Profile = () => {
   });
   const savedKundlis = kundliData?.data || [];
 
-  // Delete kundli mutation
-  const [deleteKundli, { isLoading: isDeletingKundli }] =
-    useDeleteKundliMutation();
-
-  // Add kundli mutation
-  const [addKundli, { isLoading: isAddingKundli }] = useCreateKundliMutation();
+  // Delete kundli mutation - removed, now using ProfileManager
 
   // Fetch wallet balance
   const { balance, isFetching: isFetchingBalance } = useWalletBalance();
@@ -245,93 +319,363 @@ const Profile = () => {
     }
   }, [orderHistoryTab]);
 
-  // Delete kundli handlers
-  const handleDeleteClick = (kundliId) => {
-    setKundliToDelete(kundliId);
-    setShowDeleteConfirm(true);
+  // Custom handler for profile selection (doesn't close modal)
+  const handleProfileSelect = (profile) => {
+    setLocalSelectedProfile(profile);
   };
 
-  const handleDeleteConfirm = async () => {
-    if (kundliToDelete) {
+  // Handler for Continue button (triggers socket emit)
+  const handleContinueAfterKundliSelect = () => {
+    if (localSelectedProfile) {
+      hookHandleAfterKundliSelect(localSelectedProfile);
+    }
+  };
+
+  // Restore waiting state from localStorage on mount
+  useEffect(() => {
+    const savedWaitingState = localStorage.getItem("waitingState");
+    if (savedWaitingState) {
       try {
-        await deleteKundli(kundliToDelete).unwrap();
-        refetchKundlis();
+        const { roomId, type, timestamp } = JSON.parse(savedWaitingState);
+
+        // Check if waiting state is not too old (max 30 minutes)
+        const now = Date.now();
+        const maxAge = 30 * 60 * 1000; // 30 minutes
+
+        if (now - timestamp < maxAge) {
+          // Restore state
+          setConnectionType(type);
+          if (type === "chat") {
+            setChatRoomId(roomId);
+            setWaitingList(2);
+          } else {
+            setCallRoomId(roomId);
+            setCallWaitingList(5);
+          }
+
+          // Reconnect socket if needed
+          if (!voiceSocket.connected && userId) {
+            voiceSocket.io.opts.query = {
+              userId: userId,
+              role: "CUSTOMER",
+            };
+            voiceSocket.connect();
+          }
+        } else {
+          // Clear old waiting state
+          localStorage.removeItem("waitingState");
+        }
       } catch (error) {
-        console.error("Failed to delete profile:", error);
+        console.error("Error restoring waiting state:", error);
+        localStorage.removeItem("waitingState");
       }
     }
-    setShowDeleteConfirm(false);
-    setKundliToDelete(null);
-  };
+  }, [userId, setWaitingList, setCallWaitingList]);
 
-  const handleDeleteCancel = () => {
-    setShowDeleteConfirm(false);
-    setKundliToDelete(null);
-  };
+  // Socket event listeners for waiting modal
+  useEffect(() => {
+    if (!userId) return;
 
-  // Add Profile Modal handlers
-  const handleOpenAddProfileModal = () => {
-    setShowAddProfileModal(true);
-  };
+    const handleChatRoom = (data) => {
+      setChatRoomId(data?.roomId);
+      setActiveChatRoomId(data?.roomId);
+      setWaitingList(data?.waitingTime || 2);
+      setConnectionType("chat");
 
-  const handleCloseAddProfileModal = () => {
-    setShowAddProfileModal(false);
-  };
-
-  const buildKundliPayload = (data) => {
-    const dateObj = new Date(data.birthDate);
-    const timeObj = data.birthTime ? data.birthTime.split(":") : ["0", "0"];
-
-    return {
-      name: data.name,
-      gender: data.identity.toLowerCase(),
-      day: dateObj.getDate(),
-      month: dateObj.getMonth() + 1,
-      year: dateObj.getFullYear(),
-      hour: data.unknownBirthTime ? 0 : parseInt(timeObj[0]),
-      min: data.unknownBirthTime ? 0 : parseInt(timeObj[1]),
-      second: 0,
-      place: data.birthPlace,
-      lat: data.latitude || 0,
-      lon: data.longitude || 0,
-      tzone: 5.5,
+      // Save to localStorage
+      localStorage.setItem(
+        "waitingState",
+        JSON.stringify({
+          roomId: data?.roomId,
+          type: "chat",
+          timestamp: Date.now(),
+        }),
+      );
     };
+
+    const handleCallRoom = (data) => {
+      setCallRoomId(data?.roomId);
+      setActiveCallRoomId(data?.roomId);
+      setCallWaitingList(data?.waitingTime || 5);
+      setConnectionType(data?.type || "audio");
+
+      // Save to localStorage
+      localStorage.setItem(
+        "waitingState",
+        JSON.stringify({
+          roomId: data?.roomId,
+          type: data?.type || "audio",
+          timestamp: Date.now(),
+        }),
+      );
+    };
+
+    const handleChatAccepted = async ({
+      roomId,
+      astrologerId,
+      userId,
+      ...data
+    }) => {
+      setWaitingList(false);
+
+      // Clear localStorage
+      localStorage.removeItem("waitingState");
+
+      const astro = activeAstroRef.current;
+      const kundliId = localSelectedProfile?._id;
+
+      try {
+        if (!roomId) throw new Error("Room ID missing");
+
+        setActiveChat({
+          roomId,
+          chatRoomId: roomId,
+          callerName: astro?.firstName || "",
+          isUserSide: true,
+          userId: userId,
+          astrologerId: astrologerId,
+          kundliId,
+          astrologerName: data?.astrologer?.firstName || "",
+          remainingTime: data?.remainingTime,
+        });
+        setChatSeconds(Number(data?.remainingTime) * 60);
+
+        // Navigate to chat page
+        navigate(`/chat-with-astrologers/${astrologerId}`, {
+          state: {
+            userId: userId,
+            astrologerId,
+            fullName: astro?.firstName || "",
+            roomId,
+            isUserSide: true,
+            kundliId,
+            astrologerName: data?.astrologer?.firstName || "",
+            astroID: data?.astrologer?.astrologer_ID,
+          },
+        });
+      } catch (e) {
+        console.error("Chat accepted error:", e);
+        Toast.error("Failed to start chat");
+      }
+    };
+
+    const handleCallAccepted = async ({
+      roomId,
+      token,
+      type,
+      remainingTime,
+    }) => {
+      resetCallFlow();
+
+      // Clear localStorage
+      localStorage.removeItem("waitingState");
+
+      const astro = activeAstroRef.current;
+      const kundliId = localSelectedProfile?._id;
+
+      try {
+        if (!astro) {
+          console.error("❌ Astrologer data missing in ref");
+          Toast.error("Astrologer data missing");
+          return;
+        }
+
+        const res = await createChatRoom({
+          userId: userId,
+          astrologerId: astro._id,
+        });
+
+        const chatRoomId = res?.data?.data;
+        if (!chatRoomId) throw new Error("Failed to create chat room");
+
+        setActiveCall({
+          roomId,
+          chatRoomId,
+          agoraToken: token,
+          callerName: astro?.firstName || "",
+          isUserSide: true,
+          callType: type,
+          userId: userId,
+          astrologerId: astro._id,
+          kundliId,
+          astrologerID: astro?.astrologer_ID,
+          remainingTime,
+        });
+      } catch (error) {
+        console.error("Call accepted error:", error);
+        Toast.error("Failed to start call");
+      }
+    };
+
+    const handleRejected = (data) => {
+      const errorMsg =
+        data?.sessionData?.sessionEndReason === "rejected" &&
+        data?.type === "chat"
+          ? "Astrologer has rejected the chat request"
+          : "Astrologer has rejected the call request";
+      Toast.error(errorMsg);
+
+      // Clear localStorage
+      localStorage.removeItem("waitingState");
+
+      resetChatFlow();
+      resetCallFlow();
+      setConnectionType(null);
+    };
+
+    const handleSocketError = (err) => {
+      Toast.error(err?.message || "Connection error");
+
+      // Clear localStorage
+      localStorage.removeItem("waitingState");
+
+      resetChatFlow();
+      resetCallFlow();
+      setConnectionType(null);
+    };
+
+    // Attach events
+    voiceSocket.on("chat:room", handleChatRoom);
+    voiceSocket.on("call:room", handleCallRoom);
+    voiceSocket.on("chat:accepted", handleChatAccepted);
+    voiceSocket.on("call:accepted", handleCallAccepted);
+    voiceSocket.on("chat:rejected", handleRejected);
+    voiceSocket.on("call:rejected", handleRejected);
+    voiceSocket.on("error", handleSocketError);
+
+    return () => {
+      voiceSocket.off("chat:room", handleChatRoom);
+      voiceSocket.off("call:room", handleCallRoom);
+      voiceSocket.off("chat:accepted", handleChatAccepted);
+      voiceSocket.off("call:accepted", handleCallAccepted);
+      voiceSocket.off("chat:rejected", handleRejected);
+      voiceSocket.off("call:rejected", handleRejected);
+      voiceSocket.off("error", handleSocketError);
+    };
+  }, [
+    userId,
+    navigate,
+    resetChatFlow,
+    resetCallFlow,
+    setWaitingList,
+    setCallWaitingList,
+    setActiveChatRoomId,
+    setActiveCallRoomId,
+  ]);
+
+  // Reset waiting state function
+  const resetCallState = () => {
+    // Cancel the active room on server based on connection type
+    if (connectionType === "chat" && chatRoomId) {
+      voiceSocket.emit("chat:cancel", { roomId: chatRoomId });
+    } else if (
+      (connectionType === "audio" || connectionType === "video") &&
+      callRoomId
+    ) {
+      voiceSocket.emit("call:cancel", { roomId: callRoomId });
+    }
+
+    // Explicitly reset waiting states to false
+    setWaitingList(false);
+    setCallWaitingList(false);
+
+    // Reset local state
+    setCallRoomId(null);
+    setChatRoomId(null);
+    setConnectionType(null);
+
+    // Clear localStorage
+    localStorage.removeItem("waitingState");
+
+    // Reset context flows
+    resetChatFlow();
+    resetCallFlow();
   };
 
-  const isDuplicateKundli = (payload, list) =>
-    list.some(
-      (k) =>
-        k.name.trim().toLowerCase() === payload.name.trim().toLowerCase() &&
-        k.gender.toLowerCase() === payload.gender.toLowerCase() &&
-        Number(k.day) === Number(payload.day) &&
-        Number(k.month) === Number(payload.month) &&
-        Number(k.year) === Number(payload.year) &&
-        Number(k.hour) === Number(payload.hour) &&
-        Number(k.min) === Number(payload.min) &&
-        Math.abs(Number(k.lat) - Number(payload.lat)) < 0.0001 &&
-        Math.abs(Number(k.lon) - Number(payload.lon)) < 0.0001 &&
-        k.place.trim().toLowerCase() === payload.place.trim().toLowerCase(),
-    );
+  // Handle connect button click
+  const handleConnectClick = (astrologer) => {
+    console.log("astrologer", astrologer);
+    // Check if already in waiting state
+    if (WaitingList || callWaitingList) {
+      Toast.error(
+        "You are already waiting for an astrologer. Please cancel the current request first.",
+      );
+      return;
+    }
 
-  const handleAddProfileSubmit = async (formData) => {
-    try {
-      const payload = buildKundliPayload(formData);
+    setSelectedAstrologer(astrologer);
+    activeAstroRef.current = astrologer;
+    setIsConnectPopupOpen(true);
+  };
 
-      // Check for duplicate
-      if (isDuplicateKundli(payload, savedKundlis)) {
-        Toast.error("This profile already exists");
-        throw new Error("Duplicate profile");
-      }
+  // Handle rate consultation button click
+  const handleRateConsultation = (astrologer) => {
+    setReviewData({
+      astrologerID: astrologer.astrologer_ID,
+      fullName: `${astrologer.firstName} ${astrologer.lastName || ""}`.trim(),
+    });
+    setOpenReview(true);
+  };
 
-      const result = await addKundli(payload).unwrap();
-      Toast.success("Profile added successfully");
-      setShowAddProfileModal(false);
-    } catch (err) {
-      console.error(err);
-      const errorMessage =
-        err?.data?.message || err?.message || "Failed to add profile";
-      Toast.error(errorMessage);
-      throw err;
+  const handleClosePopup = () => {
+    setIsConnectPopupOpen(false);
+    setSelectedAstrologer(null);
+  };
+
+  // Delete kundli handlers - removed, now using ProfileManager
+
+  // ProfileManager handlers - Single instance with mode-based control
+  const handleOpenAddProfileModal = () => {
+    setProfileManagerMode("add");
+    setShowProfileManager(true);
+  };
+
+  const handleEditClick = (kundli) => {
+    // Force close-then-open cycle to ensure modal reopens even for same profile
+    setShowProfileManager(false);
+    setSelectedKundli(null);
+    setProfileManagerMode(null);
+    
+    // Use setTimeout to ensure state reset completes before reopening
+    setTimeout(() => {
+      setSelectedKundli(kundli);
+      setProfileManagerMode("edit");
+      setShowProfileManager(true);
+    }, 0);
+  };
+
+  const handleDeleteClick = (kundli) => {
+    // Force close-then-open cycle to ensure modal reopens even for same profile
+    setShowProfileManager(false);
+    setKundliIdToDelete(null);
+    setProfileManagerMode(null);
+    
+    // Use setTimeout to ensure state reset completes before reopening
+    setTimeout(() => {
+      setKundliIdToDelete(kundli._id);
+      setProfileManagerMode("delete");
+      setShowProfileManager(true);
+    }, 0);
+  };
+
+  const handleCloseProfileManager = () => {
+    setShowProfileManager(false);
+    setProfileManagerMode(null);
+    setSelectedKundli(null);
+    setKundliIdToDelete(null);
+  };
+
+  // Get enabled operations based on mode
+  const getEnabledOperations = () => {
+    switch (profileManagerMode) {
+      case "add":
+        return { list: false, add: true, edit: false, delete: false };
+      case "edit":
+        return { list: false, add: false, edit: true, delete: false };
+      case "delete":
+        return { list: false, add: false, edit: false, delete: true };
+      default:
+        return { list: false, add: false, edit: false, delete: false };
     }
   };
 
@@ -519,16 +863,13 @@ const Profile = () => {
                         <div className={styles.profileActions}>
                           <button
                             className={styles.iconButton}
-                            onClick={() =>
-                              navigate(`/profile/edit/${kundli._id}`)
-                            }
+                            onClick={() => handleEditClick(kundli)}
                           >
                             <LuPencilLine size={18} />
                           </button>
                           <button
                             className={styles.iconButton}
-                            onClick={() => handleDeleteClick(kundli._id)}
-                            disabled={isDeletingKundli}
+                            onClick={() => handleDeleteClick(kundli)}
                           >
                             <TiUserDelete size={18} />
                           </button>
@@ -649,11 +990,19 @@ const Profile = () => {
                           </div>
 
                           <div className={styles.orderCardBottom}>
-                            <button className={styles.rateButton}>
+                            <button 
+                              className={styles.rateButton}
+                              onClick={() => handleRateConsultation(order.astrologer)}
+                            >
                               Rate Consultation
                             </button>
                             <div className={styles.buttonSeparator}></div>
-                            <button className={styles.consultAgainButton}>
+                            <button
+                              className={styles.consultAgainButton}
+                              onClick={() =>
+                                handleConnectClick(order.astrologer)
+                              }
+                            >
                               Consult Again
                             </button>
                           </div>
@@ -676,7 +1025,7 @@ const Profile = () => {
                 </p>
                 <button
                   className={styles.exploreButton}
-                  onClick={() => navigate("/astrologers")}
+                  onClick={() => navigate("/chat-with-astrologers")}
                 >
                   Explore Astrologers
                 </button>
@@ -884,45 +1233,134 @@ const Profile = () => {
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className={styles.modalOverlay} onClick={handleDeleteCancel}>
+      {/* Connect Astrologer Popup */}
+      <ConnectAstrologerPopup
+        isOpen={isConnectPopupOpen}
+        onClose={handleClosePopup}
+        astrologer={selectedAstrologer}
+        onChatStart={handleChatStart}
+        onCallStart={handleCallStart}
+      />
+
+      {/* Kundli Profile Selection Modal */}
+      {/* <ProfileModals
+        showSelectProfile={hookOpenModal.kundli}
+        showAddProfile={showAddProfile}
+        showEditProfile={showEditProfile}
+        profiles={profiles}
+        selectedProfile={localSelectedProfile}
+        formData={formData}
+        editFormData={editFormData}
+        isCreating={isCreating}
+        onCloseSelect={() => {
+          hookSetOpenModal((prev) => ({ ...prev, kundli: false }));
+          setLocalSelectedProfile(null);
+        }}
+        onCloseAdd={() => setShowAddProfile(false)}
+        onCloseEdit={() => setShowEditProfile(false)}
+        onSelectProfile={handleProfileSelect}
+        onAddProfile={handleAddProfile}
+        onSubmitProfile={handleSubmitProfile}
+        onSubmitEditProfile={handleSubmitEditProfile}
+        setFormData={setFormData}
+        setEditFormData={setEditFormData}
+        formatProfileDisplay={formatProfileDisplay}
+        showContinueButton={true}
+        onContinue={handleContinueAfterKundliSelect}
+      /> */}
+
+      {/* Recharge modal */}
+      {hookOpenModal.recharge && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
           <div
-            className={styles.modalContent}
-            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: "white",
+              padding: "24px",
+              borderRadius: "12px",
+              maxWidth: "400px",
+              width: "90%",
+            }}
           >
-            <h3 className={styles.modalTitle}>Delete Profile</h3>
-            <p className={styles.modalMessage}>
-              Are you sure you want to delete this profile? This action cannot
-              be undone.
+            <p style={{ textAlign: "center", marginBottom: "20px" }}>
+              Minimum balance of 5 minutes (₹{" "}
+              {(selectedAstrologer?.price?.chatRate?.amount || 1) * 5}) is
+              required to start chat with
+              {` ${selectedAstrologer?.firstName || "Astrologer"}`}.
             </p>
-            <div className={styles.modalActions}>
+
+            <div
+              style={{ display: "flex", gap: "12px", justifyContent: "center" }}
+            >
               <button
-                className={`${styles.modalBtn} ${styles.cancelBtn}`}
-                onClick={handleDeleteCancel}
+                style={{
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  border: "1px solid #ccc",
+                  backgroundColor: "white",
+                  cursor: "pointer",
+                }}
+                onClick={() =>
+                  hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
+                }
               >
                 Cancel
               </button>
               <button
-                className={`${styles.modalBtn} ${styles.deleteBtn}`}
-                onClick={handleDeleteConfirm}
-                disabled={isDeletingKundli}
+                style={{
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  border: "none",
+                  backgroundColor: "#FF6B35",
+                  color: "white",
+                  cursor: "pointer",
+                }}
+                onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
               >
-                {isDeletingKundli ? "Deleting..." : "Delete"}
+                Recharge
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Add Profile Modal */}
-      <AddProfileModal
-        isOpen={showAddProfileModal}
-        onClose={() => setShowAddProfileModal(false)}
-        onSubmit={handleAddProfileSubmit}
-        isLoading={isAddingKundli}
-        title="Add Profile"
+      {/* Waiting Modal - shows for both chat and call */}
+      {(WaitingList || callWaitingList) && connectionType && (
+        <WaitingModal
+          callRoomId={callRoomId || chatRoomId}
+          resetCallState={resetCallState}
+          connectionType={connectionType}
+        />
+      )}
+
+      {/* ProfileManager - Single instance with mode-based control */}
+      <ProfileManager
+        isOpen={showProfileManager}
+        onClose={handleCloseProfileManager}
+        autoOpenAdd={profileManagerMode === "add"}
+        autoOpenEdit={profileManagerMode === "edit"}
+        autoOpenDelete={profileManagerMode === "delete"}
+        profileToEdit={profileManagerMode === "edit" ? selectedKundli : null}
+        profileToDelete={
+          profileManagerMode === "delete" ? kundliIdToDelete : null
+        }
+        enabledOperations={getEnabledOperations()}
       />
+
+      {/* Sticky Review Modal */}
+      <StickyReview />
     </div>
   );
 };

@@ -86,7 +86,7 @@ const TrendingBlogsCarousel = ({ blogs = [], title, subtitle }) => {
                       />
                     )}
                     <span className={styles.authorName}>
-                      By {blog.author || "Pandit Haridas"}
+                      {blog.author || subtitle}
                     </span>
                   </div>
                 </div>

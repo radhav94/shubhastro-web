@@ -35,6 +35,7 @@ import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/Del
 import ProfileListingModal from "../../../component/UI/Profile/ProfileListingModal";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import styles from "./components/ProfileModals.module.scss";
+import { ProfileManager } from "../../../component/UI/Profile";
 
 const Kundali = () => {
   const contentRef = useRef(null);
@@ -500,8 +501,24 @@ const Kundali = () => {
         </div>
       )}
 
+
+      {/* Profile Manager - Handles all profile operations */}
+      <ProfileManager
+        isOpen={showSelectProfile}
+        onClose={() => setShowSelectProfile(false)}
+        onProfileSelect={handleSelectProfile}
+        selectedProfileId={selectedProfile?._id}
+        title="Select Profile"
+        enabledOperations={{
+          list: true,
+          add: true,
+          edit: true,
+          delete: true,
+        }}
+      />
+
       {/* Profile Listing Modal */}
-      <ProfileListingModal
+      {/* <ProfileListingModal
         isOpen={showSelectProfile}
         onClose={() => setShowSelectProfile(false)}
         profiles={profiles}
@@ -518,10 +535,10 @@ const Kundali = () => {
         showDeleteButton={true}
         showEditButton={true}
         emptyMessage={isLoggedIn ? "No profiles found. Add a profile to get started." : "Add profiles to see your kundli."}
-      />
+      /> */}
       
       {/* Add Profile Modal */}
-      <AddProfileModal
+      {/* <AddProfileModal
         isOpen={showAddProfile}
         onClose={() => setShowAddProfile(false)}
         onSubmit={handleSubmitProfile}
@@ -535,10 +552,10 @@ const Kundali = () => {
           setProfileToDelete(profileId);
           setShowDeleteModal(true);
         }}
-      />
+      /> */}
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
+      {/* {showDeleteModal && (
         <DeleteConfirmationModal
           title="Delete Profile"
           message="Are you sure you want to delete this profile? This action cannot be undone."
@@ -548,17 +565,17 @@ const Kundali = () => {
           }}
           onConfirm={confirmDeleteProfile}
         />
-      )}
+      )} */}
 
       {/* Edit Profile Modal */}
-      <EditProfileModal
+      {/* <EditProfileModal
         isOpen={showEditProfile}
         onClose={() => setShowEditProfile(false)}
         onSubmit={handleSubmitEditProfile}
         isLoading={isCreating}
         title="Edit Profile"
         initialData={getEditInitialData()}
-      />
+      /> */}
     </div>
   );
 };

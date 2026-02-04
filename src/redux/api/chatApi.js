@@ -7,6 +7,9 @@ export const chatApi = privateRequestNew.injectEndpoints({
       query: ({ userId, astrologerId }) => ({
         url: "chat/room/create",
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: {
           userId,
           astrologerId,

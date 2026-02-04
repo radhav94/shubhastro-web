@@ -15,15 +15,15 @@ const RudrakshaCard = ({ data }) => {
 
   return (
     <div className={styles.wrapper}>
-      <PrimaryText className={styles.title}>{name}</PrimaryText>
+      <h1 className={styles.title}>{name}</h1>
 
       <div className={styles.section}>
-        <PrimaryText className={styles.label}>Description:</PrimaryText>
-        <PrimaryText className={styles.value}>{mukhi_description}</PrimaryText>
+        <h2 className={styles.label}>Description:</h2>
+        <p className={styles.value}>{mukhi_description}</p>
       </div>
 
       <div className={styles.section}>
-        <PrimaryText className={styles.label}>For Disease Cure:</PrimaryText>
+        <h2 className={styles.label}>For Disease Cure:</h2>
         <div className={styles.valueBadges}>
           {mukhi_for_disease_cure?.map((num, index) => (
             <PrimaryText key={index} className={styles.badgeRed}>
@@ -34,9 +34,9 @@ const RudrakshaCard = ({ data }) => {
       </div>
 
       <div className={styles.section}>
-        <PrimaryText className={styles.label}>
+        <h2 className={styles.label}>
           For Money & Prosperity:
-        </PrimaryText>
+        </h2>
         <div className={styles.valueBadges}>
           {mukhi_for_money?.map((num, index) => (
             <PrimaryText key={index} className={styles.badgeGreen}>
@@ -47,12 +47,12 @@ const RudrakshaCard = ({ data }) => {
       </div>
 
       <div className={styles.section}>
-        <PrimaryText className={styles.label}>
+        <h2 className={styles.label}>
           AI Recommendation:
-        </PrimaryText>
-        <PrimaryText className={styles.botResponse}>
+        </h2>
+        <p className={styles.botResponse}>
           {bot_response}
-        </PrimaryText>
+        </p>
       </div>
     </div>
   );

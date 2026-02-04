@@ -1,3 +1,63 @@
+// Header with back button
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #FFF5EB 0%, #FFE8D6 100%);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.08);
+  
+  @media screen and (width <= 767px) {
+    padding: 0.5rem 1.25rem;
+  }
+}
+
+.backButton {
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  border: none;
+  cursor: pointer;
+  padding: 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: all 0.2s;
+  border-radius: 0.5rem;
+  width: 44px;
+  height: 44px;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
+
+  @media screen and (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
+
+  &:hover {
+    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.headerTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
 .singleBlogWrapper {
   max-width: 1600px;   // 👈 increased width
   // margin: 40px auto;
@@ -12,19 +72,21 @@
 
 .bannerImage {
   width: 100%;
+  max-height: 60vh;
   border-radius: 12px;
-  margin-bottom: 20px;
+  margin-block: 20px;
+  object-fit: cover;
 }
 
 .title {
   text-align: left;
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 500;
   margin-bottom: 16px;
 
   @media (max-width: 768px) {
-    font-size: 18px;
-    margin-bottom: 12px;
+    font-size: 16px;
+    margin-bottom: 6px;
   }
 }
 
@@ -66,7 +128,7 @@
 }
 
 .blogBody {
-  font-size: 18px;
+  font-size: 16px;
   color: #222;
   text-align: left;
   background: #fff;
@@ -76,24 +138,24 @@
   padding: 0px 16px 16px 16px;
 
   @media (max-width: 768px) {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   p {
     margin-bottom: 18px;
-    font-size: 16px;
+    // font-size: 16px;
   }
 
   strong {
-    font-size: 18px;
+    // font-size: 18px;
     margin-top: 24px;
     display: block;
     color: #000;
     font-weight: 500;
 
-    @media (min-width: 768px) {
-      font-size: 20px;
-    }
+    // @media (min-width: 768px) {
+    //   font-size: 20px;
+    // }
   }
 
   ul,

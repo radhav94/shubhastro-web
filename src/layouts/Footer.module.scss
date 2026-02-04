@@ -10,7 +10,7 @@ body {
 $color-dark-blue: #0f0c29;
 $color-deep-purple: #302b63;
 $color-night-sky: #24243e;
-$color-gold: #f9d423;
+$color-gold: #e74c3c;
 $color-light-text: #e0e0e0;
 $color-grey-text: #a0a0b0;
 $font-primary: "Poppins", sans-serif;
@@ -25,20 +25,31 @@ $font-primary: "Poppins", sans-serif;
 
 // --- Main Footer Styling ---
 .footer {
-  background: #2d0b00;
+  background: #030303;
   color: $color-light-text;
   font-family: $font-primary;
-  padding: 20px 0;
-  padding-bottom: 20px;
+  padding: 40px 0 0 0;
   width: 100%;
   position: relative;
   font-size: 14px;
 }
 
 .container {
-  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 16px 16px 0;
+  @media (min-width: 768px) {
+    padding: 0 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  @media (min-width: 1024px) {
+    padding: 0 48px;
+    max-width: 1600px;
+  }
+  @media (min-width: 1400px) {
+    padding: 0 64px;
+    max-width: 1800px;
+  }
 }
 
 .footer_main {
@@ -51,8 +62,8 @@ $font-primary: "Poppins", sans-serif;
 
 .footer_column {
   h3.column_title {
-    color: $color-gold;
-    font-size: 18px;
+    color: #FEFEFE;
+    font-size: 16px;
     margin-bottom: 15px;
     font-weight: 600;
   }
@@ -63,15 +74,20 @@ $font-primary: "Poppins", sans-serif;
     margin: 0;
 
     li {
-      margin-bottom: 10px;
+      padding-block: 10px;
+      @media (width <= 767px) {
+        padding-block: 5px;
+      }
 
       a {
-        color: $color-grey-text;
+        color: #fff;
         text-decoration: none;
         transition: color 0.3s ease, padding-left 0.3s ease;
+        font-size: 14px;
+        font-weight: 400;
 
         &:hover {
-          color: $color-gold;
+          color: #FEFEFE;
           padding-left: 5px;
         }
       }
@@ -100,7 +116,7 @@ $font-primary: "Poppins", sans-serif;
   width: 220px;
   margin: 0 0 15px 0;
   @media screen and (width <= 767px) {
-    margin: 0 auto 15px auto;
+    margin: 0 auto 30px auto;
   }
 }
 
@@ -112,17 +128,17 @@ $font-primary: "Poppins", sans-serif;
 
 .footer_tagline,
 .footer_column p {
-  color: $color-grey-text;
+  color: #fff;
   line-height: 1.6;
   margin-bottom: 20px;
 }
 
 .support_link {
-  color: $color-light-text;
+  color: #fff;
   text-decoration: none;
 
   &:hover {
-    color: $color-gold;
+    color: #FEFEFE;
   }
 }
 
@@ -131,12 +147,12 @@ $font-primary: "Poppins", sans-serif;
   gap: 15px;
 
   a {
-    color: $color-grey-text;
+    color: #fff;
     font-size: 22px;
     transition: color 0.3s ease, transform 0.3s ease;
 
     &:hover {
-      color: $color-gold;
+      color: #FEFEFE;
       transform: translateY(-3px);
     }
   }
@@ -144,8 +160,9 @@ $font-primary: "Poppins", sans-serif;
 
 // --- Footer Bottom Bar ---
 .footer_bottom {
+  background-color: #1E2939;
   border-top: 1px solid rgba($color-night-sky, 0.5);
-  padding-top: 20px;
+  padding: 16px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -153,6 +170,20 @@ $font-primary: "Poppins", sans-serif;
   gap: 15px;
   font-size: 13px;
   color: $color-grey-text;
+
+  @media (min-width: 768px) {
+    padding: 16px 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  @media (min-width: 1024px) {
+    padding: 16px 48px;
+    max-width: 1600px;
+  }
+  @media (min-width: 1400px) {
+    padding: 16px 64px;
+    max-width: 1800px;
+  }
 
   ul {
     display: flex;

@@ -202,6 +202,7 @@ const Footer = () => {
             </a>
           </div>
         </div>
+      </div>
 
         {/* Bottom Bar */}
         <div className={styles.footer_bottom}>
@@ -215,8 +216,6 @@ const Footer = () => {
             </li>
           </ul>
         </div>
-      </div>
-
 
       {/* New Bottom Navigation (Modern Design) - Hidden on home page */}
       {location.pathname !== "/" && (

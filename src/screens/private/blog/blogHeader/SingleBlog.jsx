@@ -1,13 +1,12 @@
-import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useGetSingleBlogQuery, useGetBlogPageDataQuery } from "../../../../services/appServices/blogService";
 import styles from "./SingleBlogDetails.module.scss";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import MoreBlogsCarousel from "../../../../component/UI/cards/MoreBlogsCarousel";
 
 const SingleBlogDetails = () => {
   const { slug } = useParams();
-  const { data, isLoading, isError } = useGetSingleBlogQuery(slug);
+  const navigate = useNavigate();
+  const { data, isLoading } = useGetSingleBlogQuery(slug);
   const { data: blogPageData, isLoading: blogsLoading } = useGetBlogPageDataQuery({ page: 1, limit: 10 });
   
   const singleBLogData = data?.data;
@@ -24,23 +23,34 @@ const SingleBlogDetails = () => {
 
   return (
     <>
+      <header className={styles.header}>
+        <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <h1 className={styles.headerTitle}>{data?.title || "Blogs"}</h1>
+      </header>
+
       <div className={styles.singleBlogWrapper}>
         {/* Banner Image */}
-        <img
-          src={singleBLogData.img}
-          alt={singleBLogData.title}
-          className={styles.bannerImage}
-        />
+        <div>
+          <img
+            src={singleBLogData.img}
+            alt={singleBLogData.title}
+            className={styles.bannerImage}
+          />
 
-        {/* Title */}
-        <h1 className={styles.title}>{singleBLogData.title}</h1>
+          {/* Title */}
+          <h1 className={styles.title}>{singleBLogData.title}</h1>
 
-        {/* Publish Date and Author */}
-        <div className={styles.metaInfo}>
-          <p className={styles.date}>Published on: {singleBLogData.publishDate}</p>
-          {singleBLogData.author && (
-            <p className={styles.author}>By {singleBLogData.author}</p>
-          )}
+          {/* Publish Date and Author */}
+          <div className={styles.metaInfo}>
+            <p className={styles.date}>Published on: {singleBLogData.publishDate}</p>
+            {singleBLogData.author && (
+              <p className={styles.author}>By {singleBLogData.author}</p>
+            )}
+          </div>
         </div>
 
         {/* Blog Body - Render HTML */}

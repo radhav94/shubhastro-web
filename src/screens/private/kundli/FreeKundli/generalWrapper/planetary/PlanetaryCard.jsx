@@ -20,144 +20,142 @@ const PlanetaryCard = ({ planet }) => {
     <div className={styles.card}>
       {/* Title */}
       <div className={styles.cardHeader}>
-        <PrimaryText isBold size_20 className={styles.cardTitle}>
+        <h2 className={styles.cardTitle}>
           {safe(planet.planet_considered)} Consideration
-        </PrimaryText>
+        </h2>
       </div>
 
       {/* Planet Definition */}
       <div className={styles.section}>
-        <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
+        <h2 className={styles.sectionTitle}>
           Definition
-        </PrimaryText>
-        <PrimaryText size_16 color="#555" className={styles.sectionContent}>
+        </h2>
+        <p size_16 color="#555" className={styles.sectionContent}>
           {safe(planet.planet_definitions)}
-        </PrimaryText>
+        </p>
       </div>
       {/* Affliction */}
       <div className={styles.section}>
-        <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
+        <h2 className={styles.sectionTitle}>
           Affliction
-        </PrimaryText>
-        <PrimaryText size_16 color="#555" className={styles.sectionContent}>
+        </h2>
+        <p color="#555" className={styles.sectionContent}>
           {safe(planet.affliction)}
-        </PrimaryText>
+        </p>
       </div>
 
       {/* Mantra */}
       <div className={styles.section}>
-        <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
+        <h2 className={styles.sectionTitle}>
           Gayatri Mantra
-        </PrimaryText>
-        <PrimaryText size_16 color="#555" className={styles.sectionContent}>
+        </h2>
+        <p color="#555" className={styles.sectionContent}>
           {safe(planet.gayatri_mantra)}
-        </PrimaryText>
+        </p>
       </div>
 
       {/* General Prediction */}
       <div className={styles.section}>
-        <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
+        <h2 className={styles.sectionTitle}>
           General Prediction
-        </PrimaryText>
-        <PrimaryText size_16 color="#555" className={styles.sectionContent}>
+        </h2>
+        <p color="#555" className={styles.sectionContent}>
           {safe(planet.general_prediction)}
-        </PrimaryText>
+        </p>
       </div>
 
       {/* Zodiac Prediction */}
       <div className={styles.section}>
-        <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
+        <h2 className={styles.sectionTitle}>
           Planet Zodiac Prediction
-        </PrimaryText>
-        <PrimaryText size_16 color="#555" className={styles.sectionContent}>
+        </h2>
+        <p color="#555" className={styles.sectionContent}>
           {safe(planet.planet_zodiac_prediction)}
-        </PrimaryText>
+        </p>
       </div>
 
       {/* Personalised Prediction */}
       <div className={styles.section}>
-        <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
+        <h2 className={styles.sectionTitle}>
           Personalised Prediction
-        </PrimaryText>
-        <PrimaryText size_16 color="#555" className={styles.sectionContent}>
+        </h2>
+        <p color="#555" className={styles.sectionContent}>
           {safe(planet.personalised_prediction)}
-        </PrimaryText>
+        </p>
       </div>
 
       {/* Long Qualities */}
       <div className={styles.section}>
-        <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
+        <h2 className={styles.sectionTitle}>
           Long Qualities
-        </PrimaryText>
-        <PrimaryText size_16 color="#555" className={styles.sectionContent}>
+        </h2>
+        <p color="#555" className={styles.sectionContent}>
           {safe(planet.qualities_long)}
-        </PrimaryText>
+        </p>
       </div>
       {/*Short  Qualities */}
       <div className={styles.section}>
-        <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
+        <h2 className={styles.sectionTitle}>
           short Qualities
-        </PrimaryText>
-        <PrimaryText size_16 color="#555" className={styles.sectionContent}>
+        </h2>
+        <p color="#555" className={styles.sectionContent}>
           {safe(planet.qualities_short)}
-        </PrimaryText>
+        </p>
       </div>
 
       {/* Verbal Location */}
       <div className={styles.section}>
-        <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
+        <h2 className={styles.sectionTitle}>
           Verbal Location
-        </PrimaryText>
-        <PrimaryText size_16 color="#555" className={styles.sectionContent}>
+        </h2>
+        <p color="#555" className={styles.sectionContent}>
           {safe(planet.verbal_location)}
-        </PrimaryText>
+        </p>
       </div>
 
       {/* Zodiac Lord Location */}
       <div className={styles.section}>
-        <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
+        <h2 className={styles.sectionTitle}>
           Zodiac Lord Location
-        </PrimaryText>
-        <PrimaryText size_16 color="#555" className={styles.sectionContent}>
+        </h2>
+        <p color="#555" className={styles.sectionContent}>
           {safe(planet.zodiac_lord_location)}
-        </PrimaryText>
+        </p>
       </div>
 
       {/* Zodiac Lord Strength */}
       <div className={styles.section}>
-        <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
+        <h2 className={styles.sectionTitle}>
           Zodiac Lord Strength
-        </PrimaryText>
-        <PrimaryText size_16 color="#555" className={styles.sectionContent}>
+        </h2>
+        <p color="#555" className={styles.sectionContent}>
           {safe(planet.zodiac_lord_strength)}
-        </PrimaryText>
+        </p>
       </div>
 
       {/* Tags */}
       <div className={styles.section}>
-        <PrimaryText size_14 isSemiBold className={styles.sectionTitle}>
+        <h2 className={styles.sectionTitle}>
           Character Traits
-        </PrimaryText>
+        </h2>
 
         <div className={styles.tagContainer}>
           {(planet.character_keywords_positive ?? [])?.map((k, idx) => (
-            <PrimaryText
+            <span
               key={`pos-${idx}`}
-              size_13
               className={`${styles.tag} ${styles.tagPositive}`}
             >
               {k ?? "—"}
-            </PrimaryText>
+            </span>
           ))}
 
           {(planet.character_keywords_negative ?? [])?.map((k, idx) => (
-            <PrimaryText
+            <span
               key={`neg-${idx}`}
-              size_13
               className={`${styles.tag} ${styles.tagNegative}`}
             >
               {k ?? "—"}
-            </PrimaryText>
+            </span>
           ))}
         </div>
       </div>
