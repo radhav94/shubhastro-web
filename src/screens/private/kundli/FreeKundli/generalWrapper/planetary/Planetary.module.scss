@@ -16,7 +16,7 @@
 
 /* Header */
 .cardHeader {
-  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   padding: 1.25rem;
   margin: -1.5rem -1.5rem 1.5rem -1.5rem;
   border-radius: 12px 12px 0 0;
@@ -40,7 +40,7 @@
 }
 
 .sectionTitle {
-  color: #ff6b35;
+  color: #2d2d2d;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.5rem;
@@ -56,7 +56,7 @@
   line-height: 1.6;
   font-size: 0.9375rem;
   background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-  border-left: 4px solid #ff6b35;
+  border-left: 4px solid #F75801;
   padding: 0.875rem 1rem;
   border-radius: 8px;
 }

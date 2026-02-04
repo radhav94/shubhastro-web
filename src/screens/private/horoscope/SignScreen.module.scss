@@ -1,8 +1,16 @@
 // Daily.module.scss
+.title{
+  font-size: 32px;
+  font-weight: 600;
+  text-align: center;
+  @media (width <= 768px) {
+    font-size: 22px;
+  }
+}
 .dailyContainer {
   max-width: 1200px;
   margin: 0 auto 1rem;
-  // padding: 20px;
+  padding: 20px;
 }
 
 .cardsContainer {
