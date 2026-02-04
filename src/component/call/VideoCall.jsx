@@ -604,7 +604,7 @@ const VideoCalling = ({ callData }) => {
     kundliId: activeCall?.kundliId,
     isUserSide: activeCall?.isUserSide,
     astrologerName: astrologerName
-  }), [activeCall?.userId, activeCall?.astrologerId, activeCall?.roomId, activeCall?.kundliId, activeCall?.isUserSide, astrologerName]);
+  }), [activeCall?.userId, activeCall?.astrologerId, activeCall?.chatRoomId, activeCall?.kundliId, activeCall?.isUserSide, astrologerName]);
 
   return (
     <>
@@ -699,7 +699,7 @@ const VideoCalling = ({ callData }) => {
                 <IoSparkles size={16} />
                 <span>Suggested Remedy</span>
               </button>
-              <button 
+              <button
                 className={styles.actionBtn}
                 onClick={() => {
                   setIsMinimized(true);
@@ -775,17 +775,6 @@ const VideoCalling = ({ callData }) => {
                   </button>
                   <span className={styles.controlLabel}>AI Wow</span>
                 </div>
-
-                <div className={styles.controlItem}>
-                  <button
-                    className={styles.controlBtn}
-                    onClick={() => handleRedirection(`chat-with-astrologers/${activeCall.astrologerId}`)}
-                  >
-                    <IoChatbubbleEllipses size={24} />
-                  </button>
-                  <span className={styles.controlLabel}>Chat</span>
-                </div>
-
                 <div className={styles.controlItem}>
                   <button
                     className={styles.controlBtn}
@@ -831,7 +820,34 @@ const VideoCalling = ({ callData }) => {
                     {cameraOn ? "Switch to Audio" : "Switch to Video"}
                   </span>
                 </div>
+                <div className={styles.controlItem}>
+                  <button
+                    className={styles.controlBtn}
+                    onClick={() => {
+                      if (!activeCall?.astrologerId || !activeCall?.roomId) {
+                        console.error("Missing required chat data");
+                        return;
+                      }
 
+                      setIsMinimized(true);
+                      navigate(`/chat-with-astrologers/${activeCall.astrologerId}`, {
+                        state: {
+                          userId: activeCall.userId,
+                          astrologerId: activeCall.astrologerId,
+                          roomId: activeCall.chatRoomId || activeCall.roomId,
+                          fullName: callerName,
+                          isUserSide: activeCall.isUserSide,
+                          kundliId: activeCall.kundliId,
+                          astrologerName: callerName,
+                          astroID: activeCall.astrologerID,
+                        }
+                      });
+                    }}
+                  >
+                    <IoChatbubbleEllipses size={24} />
+                  </button>
+                  <span className={styles.controlLabel}>Chat</span>
+                </div>
                 <div className={styles.controlItem}>
                   <button
                     className={`${styles.controlBtn} ${!speakerOn ? styles.muted : ''}`}
