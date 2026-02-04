@@ -1067,7 +1067,7 @@ const Profile = () => {
                 </p>
                 <button
                   className={styles.exploreButton}
-                  onClick={() => navigate("/astrologers")}
+                  onClick={() => navigate("/chat-with-astrologers")}
                 >
                   Explore Astrologers
                 </button>
