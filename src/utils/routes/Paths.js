@@ -358,7 +358,7 @@ export const PATH = {
       path: "/kundli/:kundliId",
       element: Kundli,
       header: true,
-      footer: true,
+      footer: false,
     },
 
     // SADESATI: {

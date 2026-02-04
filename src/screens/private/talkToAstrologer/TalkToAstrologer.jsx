@@ -118,6 +118,7 @@ const TalkToAstrologer = () => {
     handleAfterKundliSelect: hookHandleAfterKundliSelect,
     openModal: hookOpenModal,
     setOpenModal: hookSetOpenModal,
+    kundliRef
   } = useAstrologerConnect();
 
   // Use profile manager hook (same as Home page)
@@ -172,7 +173,6 @@ const TalkToAstrologer = () => {
 
   // ✅ Ref for current calling astrologer (no re-render)
   const activeCallAstroRef = useRef(null);
-  const kundliRef = useRef(null); // selected kundliId
 
   const [page, setPage] = useState(1);
   const [specialty, setSpecialty] = useState("");
