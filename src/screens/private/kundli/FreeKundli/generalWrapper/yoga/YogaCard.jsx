@@ -8,22 +8,18 @@ const YogaCard = ({ yoga }) => {
   return (
     <div className={styles.wrapper}>
       {/* Title */}
-      <PrimaryText
+      <h2
         as="h2"
-        size_20
-        isBold
-        color="#2a2a2a"
         className={styles.title}
       >
         {yoga.yoga}
-      </PrimaryText>
+      </h2>
 
       {/* Meaning */}
       <div className={styles.section}>
         <PrimaryText
           size_14
-          isBold
-          color="#5a49e8"
+          isSemiBold
           className={styles.sectionTitle}
         >
           Meaning

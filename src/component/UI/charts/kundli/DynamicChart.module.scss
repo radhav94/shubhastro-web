@@ -34,7 +34,7 @@ $font-primary: "Poppins", sans-serif;
 // --- Title ---
 .cardTitle {
   font-size: clamp(14px, 2.5vw, 16px); // Responsive font size
-  font-weight: 700;
+  font-weight: 600;
   color: $color-black;
   margin-bottom: 12px;
   text-align: center;
@@ -110,7 +110,7 @@ $font-primary: "Poppins", sans-serif;
 
   .chartPlaceholder {
     min-height: 240px;
-    padding: 24px;
+    padding: 10px;
   }
 }
 
@@ -119,10 +119,5 @@ $font-primary: "Poppins", sans-serif;
   .mainContainer {
     padding: 12px;
     gap: 20px;
-  }
-
-  .chartPlaceholder {
-    min-height: 200px;
-    padding: 16px;
   }
 }
