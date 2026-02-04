@@ -11,7 +11,10 @@ import {
   IoSparkles,
   IoAttach,
   IoTime,
-  IoDocumentAttach,
+  IoVolumeHigh,
+  IoVolumeMute,
+  IoChatbubbleEllipses,
+  IoCall,
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import styles from "./VideoCalling.module.scss";
@@ -47,6 +50,7 @@ const VideoCalling = ({ callData }) => {
   const [joined, setJoined] = useState(false);
   const [micOn, setMicOn] = useState(true);
   const [cameraOn, setCameraOn] = useState(true);
+  const [speakerOn, setSpeakerOn] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isChatOpen, setIsChatOpen] = useState(false); // Chat panel state
@@ -73,7 +77,7 @@ const VideoCalling = ({ callData }) => {
 
     console.log("🧹 [playLocalVideo] Clearing container");
     container.innerHTML = "";
-    
+
     console.log("▶️ [playLocalVideo] Playing camera track");
     camTrackRef.current.play(container);
   };
@@ -100,11 +104,11 @@ const VideoCalling = ({ callData }) => {
   // };
 
   const safePlayRemoteVideo = (track) => {
-    console.log("🌐 [safePlayRemoteVideo] Called", { 
-      hasTrack: !!track, 
-      isLocalBig 
+    console.log("🌐 [safePlayRemoteVideo] Called", {
+      hasTrack: !!track,
+      isLocalBig
     });
-    
+
     if (!track) {
       console.warn("⚠️ [safePlayRemoteVideo] No track provided");
       return;
@@ -114,9 +118,9 @@ const VideoCalling = ({ callData }) => {
       ? localVideoFullRef.current
       : remoteVideoRef.current;
 
-    console.log("📦 [safePlayRemoteVideo] Container selected", { 
-      isLocalBig, 
-      hasContainer: !!container 
+    console.log("📦 [safePlayRemoteVideo] Container selected", {
+      isLocalBig,
+      hasContainer: !!container
     });
 
     if (!container) {
@@ -146,8 +150,12 @@ const VideoCalling = ({ callData }) => {
       } catch (err) {
         console.warn("⚠️ [safePlayRemoteVideo] Retry remote video play", err);
         setTimeout(() => {
-          console.log("🔄 [safePlayRemoteVideo] Second attempt to play");
-          track.play(div);
+          try {
+            console.log("🔄 [safePlayRemoteVideo] Second attempt to play");
+            track.play(div);
+          } catch (retryErr) {
+            console.error("❌ [safePlayRemoteVideo] Failed to play after retry:", retryErr);
+          }
         }, 300);
       }
     }, 100);
@@ -157,27 +165,37 @@ const VideoCalling = ({ callData }) => {
   /* ================= RESUME REMOTE AUDIO ================= */
   const resumeRemoteTracks = () => {
     console.log("🔊 [resumeRemoteTracks] Called");
-    
+
     if (!clientRef.current) {
       console.warn("⚠️ [resumeRemoteTracks] No client available");
       return;
     }
 
     console.log("👥 [resumeRemoteTracks] Remote users count:", clientRef.current.remoteUsers.length);
-    
+
     clientRef.current.remoteUsers.forEach((user, index) => {
       console.log(`👤 [resumeRemoteTracks] Processing user ${index}:`, {
         hasAudio: !!user.audioTrack,
         hasVideo: !!user.videoTrack
       });
-      
+
       if (user.audioTrack) {
-        console.log(`🔊 [resumeRemoteTracks] Playing audio for user ${index}`);
-        user.audioTrack.play();
+        try {
+          console.log(`🔊 [resumeRemoteTracks] Playing audio for user ${index}`);
+          user.audioTrack.play();
+          // Set volume based on speaker state
+          user.audioTrack.setVolume(speakerOn ? 100 : 0);
+        } catch (err) {
+          console.error(`❌ [resumeRemoteTracks] Error playing audio for user ${index}:`, err);
+        }
       }
       if (user.videoTrack && remoteVideoRef.current) {
-        console.log(`📹 [resumeRemoteTracks] Playing video for user ${index}`);
-        safePlayRemoteVideo(user.videoTrack);
+        try {
+          console.log(`📹 [resumeRemoteTracks] Playing video for user ${index}`);
+          safePlayRemoteVideo(user.videoTrack);
+        } catch (err) {
+          console.error(`❌ [resumeRemoteTracks] Error playing video for user ${index}:`, err);
+        }
       }
     });
   };
@@ -190,7 +208,7 @@ const VideoCalling = ({ callData }) => {
     const start = async () => {
       try {
         console.log("🔧 [START CALL] Initializing call");
-        
+
         if (clientRef.current) {
           await clientRef.current.leave();
           clientRef.current.removeAllListeners();
@@ -201,16 +219,22 @@ const VideoCalling = ({ callData }) => {
         clientRef.current = client;
 
         client.on("user-published", async (user, mediaType) => {
-          await client.subscribe(user, mediaType);
+          try {
+            await client.subscribe(user, mediaType);
 
-          if (mediaType === "video" && user.videoTrack) {
-            setRemoteVideoEnabled(true);
-            safePlayRemoteVideo(user.videoTrack);
-          }
+            if (mediaType === "video" && user.videoTrack) {
+              setRemoteVideoEnabled(true);
+              safePlayRemoteVideo(user.videoTrack);
+            }
 
-          if (mediaType === "audio" && user.audioTrack) {
-            // ✅ REQUIRED FOR CROSS DEVICE
-            user.audioTrack.play();
+            if (mediaType === "audio" && user.audioTrack) {
+              // ✅ REQUIRED FOR CROSS DEVICE
+              user.audioTrack.play();
+              // Set volume based on speaker state
+              user.audioTrack.setVolume(speakerOn ? 100 : 0);
+            }
+          } catch (err) {
+            console.error("❌ [user-published] Error handling published media:", err);
           }
         });
 
@@ -270,6 +294,7 @@ const VideoCalling = ({ callData }) => {
   useEffect(() => {
     if (!clientRef.current) return;
     resumeRemoteTracks();
+    // eslint-disable-next-line
   }, [isLocalBig]);
 
 
@@ -290,6 +315,24 @@ const VideoCalling = ({ callData }) => {
     }
   }, [cameraOn]);
 
+  /* ================= SPEAKER CONTROL ================= */
+  useEffect(() => {
+    if (!clientRef.current) return;
+
+    console.log("🔊 [SPEAKER STATE] Updating speaker state:", speakerOn);
+
+    try {
+      clientRef.current.remoteUsers.forEach((user) => {
+        if (user.audioTrack) {
+          user.audioTrack.setVolume(speakerOn ? 100 : 0);
+          console.log(`🔊 [SPEAKER STATE] Set volume to ${speakerOn ? 100 : 0} for user`);
+        }
+      });
+    } catch (err) {
+      console.error("❌ [SPEAKER STATE] Error updating speaker state:", err);
+    }
+  }, [speakerOn]);
+
   /* ================= REMOTE VIDEO SAFETY REPLAY ================= */
   useEffect(() => {
     if (!joined || !clientRef.current) {
@@ -302,12 +345,13 @@ const VideoCalling = ({ callData }) => {
         safePlayRemoteVideo(user.videoTrack);
       }
     });
+    // eslint-disable-next-line
   }, [joined]);
 
   /* ================= CLEANUP ================= */
   const cleanup = async () => {
     console.log("🧹 [CLEANUP] Called", { alreadyCleaning: cleanupRef.current });
-    
+
     if (cleanupRef.current) {
       console.log("⚠️ [CLEANUP] Already cleaning up, skipping");
       return;
@@ -315,12 +359,12 @@ const VideoCalling = ({ callData }) => {
     cleanupRef.current = true;
 
     try {
-      
+
       if (micTrackRef.current) {
         micTrackRef.current.stop();
         micTrackRef.current.close();
       }
-      
+
       if (camTrackRef.current) {
         camTrackRef.current.stop();
         camTrackRef.current.close();
@@ -369,15 +413,34 @@ const VideoCalling = ({ callData }) => {
 
   /* ================= SOCKET ================= */
   useEffect(() => {
-    voiceSocket.on("call:ended", safeEndCall);
-    voiceSocket.on("force_call_end", safeEndCall);
-    voiceSocket.on("disconnect", safeEndCall);
+    const handleCallEnded = () => {
+      if (!endCallRef.current) {
+        safeEndCall();
+      }
+    };
+
+    const handleForceCallEnd = () => {
+      if (!endCallRef.current) {
+        safeEndCall();
+      }
+    };
+
+    const handleDisconnect = () => {
+      if (!endCallRef.current) {
+        safeEndCall();
+      }
+    };
+
+    voiceSocket.on("call:ended", handleCallEnded);
+    voiceSocket.on("force_call_end", handleForceCallEnd);
+    voiceSocket.on("disconnect", handleDisconnect);
 
     return () => {
-      voiceSocket.off("call:ended", safeEndCall);
-      voiceSocket.off("force_call_end", safeEndCall);
-      voiceSocket.off("disconnect", safeEndCall);
+      voiceSocket.off("call:ended", handleCallEnded);
+      voiceSocket.off("force_call_end", handleForceCallEnd);
+      voiceSocket.off("disconnect", handleDisconnect);
     };
+    // eslint-disable-next-line
   }, []);
 
   /* ================= BALANCE CHECK ================= */
@@ -386,13 +449,13 @@ const VideoCalling = ({ callData }) => {
       if (!activeCall?.astrologerId) return;
 
       try {
-        const res = await getBalance({ 
-          astrologerId: activeCall.astrologerId, 
-          type: "call" 
+        const res = await getBalance({
+          astrologerId: activeCall.astrologerId,
+          type: "call"
         });
 
         const balanceData = res?.data?.data;
-        
+
         if (!balanceData) return;
 
         // Store initial balance when call starts (only once)
@@ -405,7 +468,7 @@ const VideoCalling = ({ callData }) => {
         if (initialBalance !== null) {
           const halfOfInitial = initialBalance / 2;
           const shouldShowButton = balanceData.availableAmount <= halfOfInitial;
-          
+
           console.log("💰 [BALANCE CHECK]", {
             initial: initialBalance,
             current: balanceData.availableAmount,
@@ -421,10 +484,10 @@ const VideoCalling = ({ callData }) => {
     };
 
     checkBalance();
-    
+
     // Check balance every 30 seconds during the call
     const intervalId = setInterval(checkBalance, 30000);
-    
+
     return () => clearInterval(intervalId);
   }, [activeCall?.astrologerId, getBalance, initialBalance]);
 
@@ -440,13 +503,13 @@ const VideoCalling = ({ callData }) => {
       // Re-check balance after wallet update
       if (activeCall?.astrologerId && initialBalance !== null) {
         try {
-          const res = await getBalance({ 
-            astrologerId: activeCall.astrologerId, 
-            type: "call" 
+          const res = await getBalance({
+            astrologerId: activeCall.astrologerId,
+            type: "call"
           });
 
           const balanceData = res?.data?.data;
-          
+
           if (!balanceData) return;
 
           // Update initial balance if user recharged (balance increased)
@@ -458,7 +521,7 @@ const VideoCalling = ({ callData }) => {
           // Show recharge button if current balance is half or less than initial balance
           const halfOfInitial = initialBalance / 2;
           const shouldShowButton = balanceData.availableAmount <= halfOfInitial;
-          
+
           console.log("💰 [WALLET UPDATE] Balance check", {
             initial: initialBalance,
             current: balanceData.availableAmount,
@@ -514,9 +577,13 @@ const VideoCalling = ({ callData }) => {
     setIsChatOpen((prev) => !prev);
   };
 
-  const handleRechargeNow = () => {
-    setIsMinimized(true);
-    navigate("recharge");
+  const handleRedirection = (path) => {
+    try {
+      setIsMinimized(true);
+      navigate(path);
+    } catch (err) {
+      console.error("❌ [handleRedirection] Navigation error:", err);
+    }
   };
 
   const formatTime = (s) =>
@@ -524,17 +591,20 @@ const VideoCalling = ({ callData }) => {
       2,
       "0"
     )}`;
-
   // Memoize chat data to prevent unnecessary re-renders
-  const astrologerName = lastRequestedAstro?.firstName + " " + lastRequestedAstro?.lastName;
+  const astrologerName = useMemo(() => {
+    if (!lastRequestedAstro) return "";
+    return `${lastRequestedAstro.firstName || ""} ${lastRequestedAstro.lastName || ""}`.trim();
+  }, [lastRequestedAstro]);
+
   const chatData = useMemo(() => ({
-    userId: activeCall.userId,
-    astrologerId: activeCall.astrologerId,
-    chatRoomId: activeCall.roomId,
-    kundliId: activeCall.kundliId,
-    isUserSide: activeCall.isUserSide,
+    userId: activeCall?.userId,
+    astrologerId: activeCall?.astrologerId,
+    chatRoomId: activeCall?.roomId,
+    kundliId: activeCall?.kundliId,
+    isUserSide: activeCall?.isUserSide,
     astrologerName: astrologerName
-  }), [activeCall.userId, activeCall.astrologerId, activeCall.chatRoomId, activeCall.kundliId, activeCall.isUserSide, astrologerName]);
+  }), [activeCall?.userId, activeCall?.astrologerId, activeCall?.roomId, activeCall?.kundliId, activeCall?.isUserSide, astrologerName]);
 
   return (
     <>
@@ -565,8 +635,8 @@ const VideoCalling = ({ callData }) => {
           {/* Avatar Overlay - Separate layer */}
           {!cameraOn && (
             <div className={styles.avatarOverlayMini}>
-              <img 
-                src={DEFAULT_AVATAR} 
+              <img
+                src={DEFAULT_AVATAR}
                 alt="You"
                 className={styles.avatarImageMini}
               />
@@ -580,6 +650,9 @@ const VideoCalling = ({ callData }) => {
           </button>
           <button onClick={() => setCameraOn((p) => !p)}>
             {cameraOn ? <IoVideocam size={18} /> : <IoVideocamOff size={18} />}
+          </button>
+          <button onClick={() => setSpeakerOn((p) => !p)}>
+            {speakerOn ? <IoVolumeHigh size={18} /> : <IoVolumeMute size={18} />}
           </button>
           <button className={styles.endBtnMini} onClick={safeEndCall}>
             ✕
@@ -604,7 +677,7 @@ const VideoCalling = ({ callData }) => {
               >
                 <IoArrowBack size={24} />
               </button>
-              
+
               <div className={styles.astrologerInfo}>
                 <h3 className={styles.astrologerName}>{callerName}</h3>
                 <p className={styles.astrologerExp}>Exp. 20 Years</p>
@@ -618,7 +691,7 @@ const VideoCalling = ({ callData }) => {
 
             {/* Action Buttons */}
             <div className={styles.actionButtons}>
-              <button className={styles.actionBtn}>
+              <button className={styles.actionBtn} onClick={toggleChat}>
                 <IoAttach size={16} />
                 <span>Attach File</span>
               </button>
@@ -626,7 +699,13 @@ const VideoCalling = ({ callData }) => {
                 <IoSparkles size={16} />
                 <span>Suggested Remedy</span>
               </button>
-              <button className={styles.actionBtn}>
+              <button 
+                className={styles.actionBtn}
+                onClick={() => {
+                  setIsMinimized(true);
+                  navigate("/profile", { state: { activeTab: "Order History", orderHistoryTab: "call" } });
+                }}
+              >
                 <IoTime size={16} />
                 <span>View History</span>
               </button>
@@ -636,12 +715,12 @@ const VideoCalling = ({ callData }) => {
             <div className={styles.videoWrapper}>
               {/* Remote Video Container - Always rendered */}
               <div ref={remoteVideoRef} className={styles.remoteVideoArea} />
-              
+
               {/* Avatar Overlay - Separate layer */}
               {!remoteVideoEnabled && (
                 <div className={styles.avatarOverlay}>
-                  <img 
-                    src={DEFAULT_AVATAR} 
+                  <img
+                    src={DEFAULT_AVATAR}
                     alt={callerName}
                     className={styles.avatarImage}
                   />
@@ -663,8 +742,8 @@ const VideoCalling = ({ callData }) => {
                 {/* Avatar Overlay - Separate layer */}
                 {!cameraOn && (
                   <div className={styles.avatarOverlayLocal}>
-                    <img 
-                      src={DEFAULT_AVATAR} 
+                    <img
+                      src={DEFAULT_AVATAR}
                       alt="You"
                       className={styles.avatarImageLocal}
                     />
@@ -690,10 +769,21 @@ const VideoCalling = ({ callData }) => {
                 <div className={styles.controlItem}>
                   <button
                     className={styles.controlBtn}
+                    onClick={() => handleRedirection("aiwow")}
                   >
                     <IoSparkles size={24} />
                   </button>
                   <span className={styles.controlLabel}>AI Wow</span>
+                </div>
+
+                <div className={styles.controlItem}>
+                  <button
+                    className={styles.controlBtn}
+                    onClick={() => handleRedirection(`chat-with-astrologers/${activeCall.astrologerId}`)}
+                  >
+                    <IoChatbubbleEllipses size={24} />
+                  </button>
+                  <span className={styles.controlLabel}>Chat</span>
                 </div>
 
                 <div className={styles.controlItem}>
@@ -724,7 +814,7 @@ const VideoCalling = ({ callData }) => {
                     onClick={safeEndCall}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <path d="M19.23 15.26L16.69 14.97C16.08 14.9 15.48 15.11 15.05 15.54L13.21 17.38C10.38 15.94 8.06004 13.63 6.62004 10.79L8.47004 8.94001C8.90004 8.51001 9.11004 7.91001 9.04004 7.30001L8.75004 4.78001C8.63004 3.77001 7.78004 3.01001 6.76004 3.01001H5.03004C3.90004 3.01001 2.96004 3.95001 3.03004 5.08001C3.56004 13.62 10.39 20.44 18.92 20.97C20.05 21.04 20.99 20.1 20.99 18.97V17.24C21 16.23 20.24 15.38 19.23 15.26Z" fill="currentColor"/>
+                      <path d="M19.23 15.26L16.69 14.97C16.08 14.9 15.48 15.11 15.05 15.54L13.21 17.38C10.38 15.94 8.06004 13.63 6.62004 10.79L8.47004 8.94001C8.90004 8.51001 9.11004 7.91001 9.04004 7.30001L8.75004 4.78001C8.63004 3.77001 7.78004 3.01001 6.76004 3.01001H5.03004C3.90004 3.01001 2.96004 3.95001 3.03004 5.08001C3.56004 13.62 10.39 20.44 18.92 20.97C20.05 21.04 20.99 20.1 20.99 18.97V17.24C21 16.23 20.24 15.38 19.23 15.26Z" fill="currentColor" />
                     </svg>
                   </button>
                   <span className={styles.controlLabel}>End Call</span>
@@ -732,21 +822,26 @@ const VideoCalling = ({ callData }) => {
 
                 <div className={styles.controlItem}>
                   <button
-                    className={`${styles.controlBtn} ${!cameraOn ? styles.muted : ''}`}
+                    className={styles.controlBtn}
                     onClick={() => setCameraOn((p) => !p)}
                   >
-                    {cameraOn ? <IoVideocam size={24} /> : <IoVideocamOff size={24} />}
+                    {cameraOn ? <IoCall size={24} /> : <IoVideocam size={24} />}
                   </button>
-                  <span className={styles.controlLabel}>Switch Video</span>
+                  <span className={styles.controlLabel}>
+                    {cameraOn ? "Switch to Audio" : "Switch to Video"}
+                  </span>
                 </div>
+
                 <div className={styles.controlItem}>
                   <button
-                    className={`${styles.controlBtn} ${isChatOpen ? styles.active : ''}`}
-                    onClick={toggleChat}
+                    className={`${styles.controlBtn} ${!speakerOn ? styles.muted : ''}`}
+                    onClick={() => setSpeakerOn((p) => !p)}
                   >
-                    <IoDocumentAttach size={24} />
+                    {speakerOn ? <IoVolumeHigh size={24} /> : <IoVolumeMute size={24} />}
                   </button>
-                  <span className={styles.controlLabel}>Attachment</span>
+                  <span className={styles.controlLabel}>
+                    {speakerOn ? "Mute Speaker" : "Unmute Speaker"}
+                  </span>
                 </div>
               </div>
 
@@ -756,7 +851,7 @@ const VideoCalling = ({ callData }) => {
                   Call Ends in <span className={styles.timerRed}>{formatTime(callSeconds)}</span>
                 </div>
                 {showRechargeButton && (
-                  <button className={styles.rechargeBtn} onClick={handleRechargeNow}>Recharge Now</button>
+                  <button className={styles.rechargeBtn} onClick={handleRedirection("recharge")}>Recharge Now</button>
                 )}
               </div>
             </div>
