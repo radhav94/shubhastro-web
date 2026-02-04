@@ -157,18 +157,20 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId, title, subtitle }) => {
                   />
                   <div className={styles.overlay}>
                     <h3 className={styles.blogTitle}>{blog.title}</h3>
-                    <div className={styles.authorInfo}>
-                      {blog.authorIcon && (
-                        <img
-                          src={blog.authorIcon}
-                          alt={blog.author}
-                          className={styles.authorIcon}
-                        />
-                      )}
-                      <span className={styles.authorName}>
-                        By {blog.author || "Pandit Haridas"}
-                      </span>
-                    </div>
+                    {(blog.author || blog.authorIcon || subtitle) && (
+                      <div className={styles.authorInfo}>
+                        {blog.authorIcon && (
+                          <img
+                            src={blog.authorIcon}
+                            alt={blog.author || subtitle}
+                            className={styles.authorIcon}
+                          />
+                        )}
+                        <span className={styles.authorName}>
+                          {blog.author || subtitle}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
