@@ -240,16 +240,29 @@
   color: #1a1a1a;
   letter-spacing: 0.8px;
   position: relative;
-  padding-bottom: 12px;
+  padding-bottom: 0;
+  margin-bottom: 20px;
+  display: block;
+  text-align: left;
+}
 
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 80px;
-    height: 3px;
-    background: linear-gradient(90deg, #ff5722 0%, transparent 100%);
+.dividerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.dividerLine {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  
+  svg {
+    width: 100%;
+    height: 1px;
   }
 }
 
@@ -258,62 +271,141 @@
   cursor: pointer;
 }
 
-// Kundli Cards
+// Kundli Cards - Masonry Layout (Fixed, not scrollable)
 .kundliGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  padding: 24px;
+  grid-auto-rows: minmax(200px, auto);
+  gap: 12px;
+  padding: 20px;
   background: #fff;
+  overflow: visible;
+
+  @media (min-width: 768px) {
+    gap: 20px;
+  }
+
+  @media (min-width: 1024px) {
+    gap: 24px;
+  }
 }
 
 .kundliCard {
-  background: linear-gradient(135deg, #fff9f0 0%, #fff4e6 100%);
-  border-radius: 18px;
+  border-radius: 24px;
   overflow: hidden;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease;
-}
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px;
+  position: relative;
+  color: white;
+  min-height: 200px;
 
-.kundliCard:hover {
-  transform: translateY(-3px);
+  @media (max-width: 767px) {
+    border-radius: 24px;
+    padding: 20px;
+    min-height: 200px;
+  }
+
+  // First card - Vedic Kundli (Tall - spans 2 rows) ✓ Perfect
+  &:nth-child(1) {
+    grid-row: span 2;
+    background: linear-gradient(135deg, #AF6115 0%, #C87A2F 100%);
+  }
+
+  // Second card - Dasha (Single row) ✓ Perfect
+  &:nth-child(2) {
+    background: linear-gradient(135deg, #752B29 0%, #8B3A38 100%);
+  }
+
+  // Third card - KP Chart (Tall - spans 2 rows, same as Vedic Kundli)
+  &:nth-child(3) {
+    grid-row: span 2;
+    background: linear-gradient(135deg, #3E93C9 0%, #5AA5D6 100%);
+  }
+
+  // Fourth card - Ashtakvarga (Single row, same as Dasha)
+  &:nth-child(4) {
+    background: linear-gradient(135deg, #A560CA 0%, #B87AD6 100%);
+  }
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  }
 }
 
 .kundliCardImage {
-  height: 140px;
-  background: linear-gradient(135deg, #fff9f0 0%, #fff4e6 100%);
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 120px;
+  height: 120px;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
-  position: relative;
+  opacity: 1;
+  z-index: 1;
+
+  @media (max-width: 767px) {
+    width: 110px;
+    height: 110px;
+    top: 16px;
+    right: 16px;
+  }
 }
 
 .chartImage {
-  width: 90px;
-  height: 90px;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  filter: none;
+  opacity: 1;
 }
 
 .kundliCardContent {
-  padding: 16px 18px;
+  position: relative;
+  z-index: 2;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #fef8f0;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0;
+  background: transparent;
+  margin-top: auto;
 }
 
 .kundliCardTitle {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
   margin: 0;
+  line-height: 1.2;
+  max-width: 50%;
+
+  @media (max-width: 767px) {
+    font-size: 20px;
+    max-width: 48%;
+  }
+}
+
+.kundliCardDescription {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.4;
+  max-width: 60%;
+
+  @media (max-width: 767px) {
+    font-size: 13px;
+    max-width: 58%;
+  }
 }
 
 .cardArrow {
-  color: #ff5722;
-  flex-shrink: 0;
+  display: none;
 }
 
 // Matchmaking Banner
@@ -559,16 +651,6 @@
 
 // Desktop Responsive
 @media (min-width: 768px) {
-  // .content {
-  //   max-width: 1200px;
-  //   margin: 0 auto;
-  //   padding-bottom: 50px;
-  // }
-
-  // .heroSection {
-  //   padding: 48px 40px;
-  // }
-
   .subtitle {
     font-size: 18px;
   }
@@ -578,19 +660,44 @@
   }
 
   .kundliGrid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: minmax(240px, auto);
+    gap: 16px;
+    padding: 28px;
   }
 
   .kundliSection {
     max-width: 100%;
   }
 
-  // .destinyGrid {
-  //   grid-template-columns: repeat(2, 1fr);
-  //   gap: 20px;
-  //   // max-width: 800px;
-  // }
+  .kundliCard {
+    padding: 24px;
+    min-height: 240px;
+    border-radius: 24px;
+
+    &:nth-child(1) {
+      grid-row: span 2;
+    }
+
+    &:nth-child(3) {
+      grid-row: span 2;
+    }
+  }
+
+  .kundliCardImage {
+    width: 130px;
+    height: 130px;
+    top: 20px;
+    right: 20px;
+  }
+
+  .kundliCardTitle {
+    font-size: 24px;
+  }
+
+  .kundliCardDescription {
+    font-size: 15px;
+  }
 
   .matchmakingBanner{
     margin: 32px 40px;
@@ -608,7 +715,29 @@
 
 @media (min-width: 1024px) {
   .kundliGrid {
-    gap: 24px;
+    gap: 20px;
+    padding: 32px;
+    grid-auto-rows: minmax(260px, auto);
+  }
+
+  .kundliCard {
+    padding: 28px;
+    min-height: 260px;
+  }
+
+  .kundliCardImage {
+    width: 150px;
+    height: 150px;
+    top: 24px;
+    right: 24px;
+  }
+
+  .kundliCardTitle {
+    font-size: 26px;
+  }
+
+  .kundliCardDescription {
+    font-size: 16px;
   }
 
   .destinyGrid {
