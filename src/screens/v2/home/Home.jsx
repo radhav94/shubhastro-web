@@ -9,6 +9,7 @@ import ProfileModals from "../../private/kundli/components/ProfileModals";
 import BottomNavigation from "./components/BottomNavigation";
 import { renderSection, sortSectionsByOrder } from "./utils/sectionMapper";
 import styles from "./Home.module.scss";
+import {ProfileManager} from "../../../component/UI/Profile";
 
 const Home = () => {
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
@@ -75,6 +76,11 @@ const Home = () => {
     }
   };
 
+  // Handler for ProfileManager startCallMode - receives selected profile and triggers connection
+  const handleProfileManagerStartCall = (selectedProfile) => {
+    hookHandleAfterKundliSelect(selectedProfile);
+  };
+
   // Handle connect button click
   const handleConnectClick = (astrologer) => {
     if (WaitingList || callWaitingList) {
@@ -139,8 +145,22 @@ const Home = () => {
         />
       )}
 
+      <ProfileManager
+        isOpen={hookOpenModal.kundli}
+        onClose={() => hookSetOpenModal((prev) => ({ ...prev, kundli: false }))}
+        startCallMode={true}
+        onStartCall={handleProfileManagerStartCall}
+        title="Select Profile to Continue"
+        enabledOperations={{
+          list: true,
+          add: true,
+          edit: true,
+          delete: true,
+        }}
+      />
+
       {/* Profile Modals */}
-      <ProfileModals
+      {/* <ProfileModals
         showSelectProfile={hookOpenModal.kundli}
         showAddProfile={showAddProfile}
         showEditProfile={showEditProfile}
@@ -164,7 +184,7 @@ const Home = () => {
         formatProfileDisplay={formatProfileDisplay}
         showContinueButton={true}
         onContinue={handleContinueAfterKundliSelect}
-      />
+      /> */}
 
       {/* Recharge Modal */}
       <RechargeModal
