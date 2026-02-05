@@ -1,54 +1,66 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
 import { useGetMatchMakingQuery } from "../../../../redux/api/kundli/dashaApi";
-import { FaMale, FaFemale } from "react-icons/fa";
+import { PATH } from "../../../../utils/routes/Paths";
 import styles from "./MatchDetails.module.scss";
-import RenderCard from "../../../../component/UI/table/matching/RenderCard";
-import { PrimaryText } from "../../../../component";
-import { AppImages } from "../../../../utils/appImages";
+// import RenderCard from "../../../../component/UI/table/matching/RenderCard";
+// import { PrimaryText } from "../../../../component";
+// import { AppImages } from "../../../../utils/appImages";
 import KundliSummary from "../../../../component/UI/circular/KundliSummaryV2";
 import DynamicTable from "../../../../component/UI/table/matching/DynamicTableV2";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
-import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
-import ServiceCards from "../../home/components/serviceCards/ServiceCards";
-import ZodiacCarousel from "../../horoscope/zodiacCarousel/ZodiacCarousel";
+// import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+// import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
+// import ServiceCards from "../../home/components/serviceCards/ServiceCards";
+// import ZodiacCarousel from "../../horoscope/zodiacCarousel/ZodiacCarousel";
 
-const scores = [
-  { type: "Vashya", score: "2/2" },
-  { type: "Vashya", score: "1/1" },
-  { type: "Vashya", score: "3/4" },
-  { type: "Vashya", score: "0/8" },
-  { type: "Vashya", score: "2/2" },
-  { type: "Vashya", score: "9/9" },
-  { type: "Vashya", score: "1/7" },
-  { type: "Vashya", score: "10/10" },
-];
+// const scores = [
+//   { type: "Vashya", score: "2/2" },
+//   { type: "Vashya", score: "1/1" },
+//   { type: "Vashya", score: "3/4" },
+//   { type: "Vashya", score: "0/8" },
+//   { type: "Vashya", score: "2/2" },
+//   { type: "Vashya", score: "9/9" },
+//   { type: "Vashya", score: "1/7" },
+//   { type: "Vashya", score: "10/10" },
+// ];
 
 const MatchDetailsV2 = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const formData = location.state;
   if (!formData) return;
+
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  const handleTalkToExpert = () => {
+    navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path, {
+      state: { selectedType: "Marriage" }
+    });
+  };
 
   const { boyData, girlData } = formData;
 
   // Call your matchmaking API (pass full payload)
-  const { data, isLoading } = useGetMatchMakingQuery({ formData });
+  const { data } = useGetMatchMakingQuery({ formData });
 
   const matchingDetails = data?.response;
 
-  const boyCard = {
-    Name: boyData.name,
-    ["Birth Date"]: boyData.dob,
-    ["Birth Time"]: boyData.tob,
-    ["Birth Place"]: boyData.place,
-    ["Janam Rashi"]: matchingDetails?.bhakoot?.boy_rasi_name,
-  };
-  const girlCard = {
-    Name: girlData.name,
-    ["Birth Date"]: girlData.dob,
-    ["Birth Time"]: girlData.tob,
-    ["Birth Place"]: girlData.place,
-    ["Janam Rashi"]: matchingDetails?.bhakoot?.girl_rasi_name,
-  };
+  // const boyCard = {
+  //   Name: boyData.name,
+  //   ["Birth Date"]: boyData.dob,
+  //   ["Birth Time"]: boyData.tob,
+  //   ["Birth Place"]: boyData.place,
+  //   ["Janam Rashi"]: matchingDetails?.bhakoot?.boy_rasi_name,
+  // };
+  // const girlCard = {
+  //   Name: girlData.name,
+  //   ["Birth Date"]: girlData.dob,
+  //   ["Birth Time"]: girlData.tob,
+  //   ["Birth Place"]: girlData.place,
+  //   ["Janam Rashi"]: matchingDetails?.bhakoot?.girl_rasi_name,
+  // };
 
   const response = {
     varna: {
@@ -117,28 +129,34 @@ const MatchDetailsV2 = () => {
     },
   };
 
-  const headers = [
-    { key: "name", label: "Attribute" },
-    { key: "boy_varna", label: "Male" },
-    { key: "girl_varna", label: "Female" },
-    { key: "varna", label: "Received" },
-    { key: "full_score", label: "Out of" },
-    { key: "description", label: "Description" },
-  ];
+  // const headers = [
+  //   { key: "name", label: "Attribute" },
+  //   { key: "boy_varna", label: "Male" },
+  //   { key: "girl_varna", label: "Female" },
+  //   { key: "varna", label: "Received" },
+  //   { key: "full_score", label: "Out of" },
+  //   { key: "description", label: "Description" },
+  // ];
   return (
-    <div className="bg-[#F7F7F7] min-h-screen p-4 flex flex-col items-center font-sans">
-      {/* Header */}
-      {/* <div className="w-full flex items-center justify-between mb-4">
-        <button className="text-[#FF6A3D] text-xl font-semibold">&larr;</button>
-        <div className="flex flex-col items-center text-sm font-medium text-gray-800">
-          <span>Select Profile</span>
-          <span className="font-bold text-base">Priya Gupta &#9662;</span>
+    <div className="bg-[#F7F7F7] min-h-screen flex flex-col items-center font-sans">
+      {/* Header with Back Button and Title */}
+      <div className="w-full bg-white sticky top-0 z-50 shadow-sm">
+        <div className="w-full px-4 py-3 md:py-4">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={handleBack}
+              className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 hover:shadow-md transition-shadow"
+              aria-label="Go back"
+            >
+              <ChevronLeft size={24} className="text-[#FF6A3D]" />
+            </button>
+            <h1 className="text-lg md:text-xl font-semibold text-gray-800">Match Making</h1>
+          </div>
         </div>
-        <button className="text-[#FF6A3D] text-xl font-semibold">&#9998;</button>
-      </div> */}
+      </div>
 
-      {/* Total Score Card */}
-      <div className="bg-white w-full  max-w-md mx-auto rounded-xl shadow-md p-6 mb-4 text-center">
+      <div className="w-full p-4">{/* Total Score Card */}
+      <div className="bg-white w-full md:max-w-6xl mx-auto rounded-xl shadow-md p-6 mb-4 text-center">
         {/* Score Box */}
         <KundliSummary score={matchingDetails?.score} total={36} />
         {/* Description */}
@@ -147,7 +165,7 @@ const MatchDetailsV2 = () => {
         </div>
       </div>
       {/* Mutual Influence Cards */}
-      <div>
+      <div className="w-full p-6 flex flex-col items-center">
 
         <div className={styles.compatibilityTitle}>
           <h1>Compatibility Breakdown</h1>
@@ -170,19 +188,19 @@ const MatchDetailsV2 = () => {
           </div>
         </div>
 
-        <div className="w-full max-w-md grid grid-cols-2 gap-4 mb-6">
+        <div className="w-full md:max-w-8xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <DynamicTable
               data={response}
             />
         </div>
 
         {/* CTA Button */}
-        <button className={styles.talkBtn}>
+        <button className={styles.talkBtn} onClick={handleTalkToExpert}>
           Talk to a Matchmaking Expert
         </button>
 
       </div>
-
+      </div>
     </div>
   );
 };
