@@ -1,10 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import styles from "./FinalPay.module.scss";
 import { Toast } from "../../../component";
 import { FaCcMastercard } from "react-icons/fa";
 import { LuBadgeIndianRupee } from "react-icons/lu";
 import { useGetPlanByIdQuery } from "../../../redux/api/plansApi/plansApi";
+import { useWalletBalance } from "../wallet/useWalletBalance";
 
 const FinalPay = () => {
   const location = useLocation();
@@ -19,28 +20,35 @@ const FinalPay = () => {
   const gst = +(amount * 0.18).toFixed(2);
   const totalAmount = +(amount + gst).toFixed(2);
 
-  const [walletBalance, setWalletBalance] = useState(0);
+  // Use wallet balance hook
+  const { balance, refreshWallet } = useWalletBalance();
 
+  // Refresh wallet balance on mount
   useEffect(() => {
-    const storedWallet = JSON.parse(localStorage.getItem("wallet")) || {
-      amount: 0,
-    };
-    setWalletBalance(Number(storedWallet.amount));
-  }, []);
+    refreshWallet();
+  }, [refreshWallet]);
 
   const handlePayment = (method) => {
-    const newBalance = walletBalance + amount + extra;
+    const newBalance = (balance || 0) + amount + extra;
 
-    localStorage.setItem("wallet", JSON.stringify({ amount: newBalance }));
-    setWalletBalance(newBalance);
+    // Update localStorage with the new balance
+    localStorage.setItem("astro_wallet_balance", newBalance.toString());
 
-    // 🔔 tell the rest of the app that wallet changed
+    // Dispatch wallet update events for other components
     window.dispatchEvent(
       new CustomEvent("wallet-updated", { detail: { amount: newBalance } })
     );
+    window.dispatchEvent(new Event("walletBalanceUpdated"));
 
     Toast.success(`Recharge successful via ${method}!`);
-    navigate("/");
+    
+    // Refresh wallet balance before navigating
+    refreshWallet();
+    
+    // Navigate after a short delay to ensure state updates
+    setTimeout(() => {
+      navigate("/");
+    }, 500);
   };
 
   return (

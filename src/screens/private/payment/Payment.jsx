@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import styles from "./Payment.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { useGetAllPlansQuery } from "../../../redux/api/plansApi/plansApi";
 import { getToken } from "../../../utils/token";
+import { useWalletBalance } from "../wallet/useWalletBalance";
 
 const RechargePack = ({ actualPrice, discountedPrice, Active }) => (
   <div className={styles.rechargeAmountWrapper}>
@@ -19,19 +20,20 @@ const Payment = () => {
 
   useEffect(() => {
     if (!token) navigate("/login");
-  }, [token]);
+  }, [token, navigate]);
 
-  const [walletBalance, setWalletBalance] = useState(0);
+  // Use the wallet balance hook
+  const { balance, isFetching, refreshWallet } = useWalletBalance();
 
   const { data } = useGetAllPlansQuery();
   const allPlans = data?.data.filter((plan) =>
     Object.keys(plan).includes("plan_id")
   );
 
+  // Refresh wallet balance when component mounts
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("wallet")) || { amount: 0 };
-    setWalletBalance(Number(stored.amount));
-  }, []);
+    refreshWallet();
+  }, [refreshWallet]);
 
   return (
     <div className={styles.rechargeTop}>
@@ -45,7 +47,7 @@ const Payment = () => {
           />
           Wallet Balance
           <span className={styles.dangerColor}>
-            ₹ {walletBalance.toFixed(2)}
+            {isFetching ? "..." : balance !== null ? `₹ ${balance.toFixed(2)}` : "₹ 0.00"}
           </span>
         </div>
 
