@@ -1,1 +1,1 @@
-.dailyContainer{max-width:1200px;margin:0 auto 1rem}.cardsContainer{display:grid;gap:20px;margin-top:24px;grid-template-columns:1fr}@media(min-width: 768px){.cardsContainer{grid-template-columns:repeat(2, 1fr)}}
+.title{font-size:32px;font-weight:600;text-align:center}@media(width <= 768px){.title{font-size:22px}}.dailyContainer{max-width:1200px;margin:0 auto 1rem;padding:20px}.cardsContainer{display:grid;gap:20px;margin-top:24px;grid-template-columns:1fr}@media(min-width: 768px){.cardsContainer{grid-template-columns:repeat(2, 1fr)}}
