@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useParams } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryTabs from "../../../component/UI/tabs/PrimaryTabs";
 import BasicContent from "./BasicContent/BasicContent";
@@ -41,6 +41,7 @@ const Kundali = () => {
   const contentRef = useRef(null);
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
+  const { kundliId } = useParams();
 
   // Get initial tab index from query params
   const getInitialTabIndex = () => {
@@ -113,16 +114,26 @@ const Kundali = () => {
   const savedProfiles = kundliData?.data || [];
   const profiles = isLoggedIn ? savedProfiles : tempProfiles;
 
-  // Auto-select first profile if available - only after data is fetched
+  // Check if we're in direct kundli view mode (with ID in URL)
+  const isDirectKundliView = !!kundliId;
+
+  // Auto-select profile based on kundliId or first profile
   useEffect(() => {
-    // Only auto-select if:
-    // 1. We have profiles
-    // 2. No profile is currently selected
-    // 3. Data is not currently being fetched (to avoid selecting stale data)
-    if (profiles.length && !selectedProfile && !isFetching) {
+    // If kundliId is present in URL, try to find and select that profile
+    if (kundliId && profiles.length && !isFetching) {
+      const matchedProfile = profiles.find(p => p._id === kundliId);
+      if (matchedProfile && selectedProfile?._id !== matchedProfile._id) {
+        setSelectedProfile(matchedProfile);
+      } else if (!matchedProfile && !selectedProfile) {
+        // Profile not found - show error via toast
+        Toast.error("Kundli profile not found");
+      }
+    } 
+    // Otherwise, auto-select first profile if available
+    else if (!kundliId && profiles.length && !selectedProfile && !isFetching) {
       setSelectedProfile(profiles[0]);
     }
-  }, [profiles, selectedProfile, isFetching]);
+  }, [kundliId, profiles, selectedProfile, isFetching]);
 
   // Clear selected profile when user changes (on refresh after login)
   useEffect(() => {
@@ -474,19 +485,21 @@ const Kundali = () => {
   };
 
   return (
-    <div className="mt-10">
-      {/* Free Kundli Online Title - Always visible, above profile selector */}
-      <KundliHeader />
+    <div className={isDirectKundliView ? "" : "mt-10"}>
+      {/* Free Kundli Online Title - Hidden in direct kundli view */}
+      {!isDirectKundliView && <KundliHeader />}
 
-      {/* Profile Selector - Always visible */}
-      <ProfileSelector
-        selectedProfile={selectedProfile}
-        onSelectClick={() => setShowSelectProfile(true)}
-        onEditClick={handleEditProfile}
-      />
+      {/* Profile Selector - Hidden in direct kundli view */}
+      {!isDirectKundliView && (
+        <ProfileSelector
+          selectedProfile={selectedProfile}
+          onSelectClick={() => setShowSelectProfile(true)}
+          onEditClick={handleEditProfile}
+        />
+      )}
 
-      {/* Show informational content only when no profile is selected */}
-      {!selectedProfile && <KundliInfoContent />}
+      {/* Show informational content only when no profile is selected and not in direct view */}
+      {!selectedProfile && !isDirectKundliView && <KundliInfoContent />}
 
       <PrimaryLoader isLoading={planetLoading || astroLoading} />
 

@@ -6,6 +6,9 @@ import { IoClose } from "react-icons/io5";
 const IframeModal = ({ open, src, onClose, loading }) => {
   if (!open) return null;
 
+  // Add iframe=true query parameter to hide TopHeader
+  const iframeSrc = src ? `${src}${src.includes('?') ? '&' : '?'}iframe=true` : '';
+
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
@@ -13,7 +16,7 @@ const IframeModal = ({ open, src, onClose, loading }) => {
           <IoClose size={22} />
         </button>
         <PrimaryLoader isLoading={loading} />
-        <iframe src={src} title="Kundli" className={styles.iframe} />
+        <iframe src={iframeSrc} title="Kundli" className={styles.iframe} />
       </div>
     </div>
   );
