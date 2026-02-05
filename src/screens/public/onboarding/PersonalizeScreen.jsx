@@ -8,7 +8,7 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData })
   });
 
   const handleNext = () => {
-    if (!localData.name.trim()) return;
+    if (!localData.name.trim() || localData.name.trim().length < 3) return;
     updateFormData(localData);
     onNext();
   };
@@ -21,9 +21,9 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData })
           <span className={styles.dotInactive}></span>
           <span className={styles.dotInactive}></span>
         </div>
-        <button className={styles.skipBtn} onClick={onSkip}>
+        {/* <button className={styles.skipBtn} onClick={onSkip}>
           Skip for Now
-        </button>
+        </button> */}
       </div>
 
       <div className={styles.content}>
@@ -36,8 +36,12 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData })
             value={localData.name}
             onChange={(e) => setLocalData({ ...localData, name: e.target.value })}
             className={styles.input}
-            placeholder="Enter your name"
+            placeholder="Enter your name (min 3 characters)"
+            minLength={3}
           />
+          {localData.name.length > 0 && localData.name.trim().length < 3 && (
+            <span className={styles.validationError}>Name must be at least 3 characters</span>
+          )}
         </div>
 
         <div className={styles.formGroup}>
@@ -83,7 +87,7 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData })
       <button
         className={styles.otpprimaryBtn}
         onClick={handleNext}
-        disabled={!localData.name.trim()}
+        disabled={!localData.name.trim() || localData.name.trim().length < 3}
       >
         Next
       </button>

@@ -517,6 +517,14 @@
   }
 }
 
+.validationError {
+  color: #e53e3e;
+  font-size: 13px;
+  margin-top: 6px;
+  display: block;
+  font-weight: 500;
+}
+
 .inputWrapper {
   position: relative;
 }

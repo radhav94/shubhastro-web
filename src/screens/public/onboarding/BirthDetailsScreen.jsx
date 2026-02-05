@@ -41,9 +41,9 @@ const BirthDetailsScreen = ({
           <span className={styles.dotActive}></span>
           <span className={styles.dotInactive}></span>
         </div>
-        <button className={styles.skipBtn} onClick={onSkip}>
+        {/* <button className={styles.skipBtn} onClick={onSkip}>
           Skip for Now
-        </button>
+        </button> */}
       </div>
 
       <div className={styles.content}>

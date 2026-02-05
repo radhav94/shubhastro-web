@@ -8,6 +8,9 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
       query: ({ astrologerId }) => ({
         url: "follows/follow", 
         method: "POST",
+         headers: {
+            'Content-Type': 'application/json',            
+          },
         body: {
           astrologerId
         },
@@ -19,6 +22,9 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
       query: ({ astrologerId }) => ({
         url: "follows/unfollow", 
         method: "POST",
+        headers: {
+            'Content-Type': 'application/json',            
+          },
         body: {
           astrologerId
         },
