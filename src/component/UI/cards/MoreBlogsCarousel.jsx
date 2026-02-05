@@ -19,6 +19,9 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId, title, subtitle }) => {
       })
     : blogs;
 
+ // Show all blogs without filtering
+  // const filteredBlogs = blogs;
+
   // Check scroll position
   const checkScrollPosition = () => {
     const el = scrollRef.current;
@@ -119,20 +122,6 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId, title, subtitle }) => {
                   </p>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Navigation Dots */}
-          <div className={styles.dotsContainer}>
-            {filteredBlogs.slice(0, 9).map((_, index) => (
-              <button
-                key={index}
-                className={`${styles.dot} ${
-                  index === currentIndex ? styles.activeDot : ""
-                }`}
-                onClick={() => scrollToIndex(index)}
-                aria-label={`Go to blog ${index + 1}`}
-              />
             ))}
           </div>
         </div>

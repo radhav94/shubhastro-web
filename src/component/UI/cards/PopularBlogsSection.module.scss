@@ -3,7 +3,6 @@
   padding: 0 48px;
   width: 100%;
   margin: 32px auto 40px;
-
   @media (max-width: 768px) {
     margin: 32px auto 0px;
     padding: 0 16px;
@@ -88,10 +87,6 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 
-  @media (max-width: 1200px) {
-    gap: 18px;
-  }
-
   @media (max-width: 768px) {
     gap: 16px;
   }
@@ -102,30 +97,39 @@
 }
 
 .blogCard {
-  width: 320px;
   background: #fff;
   border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
+  
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
   }
 
-  @media (max-width: 1200px) {
-    flex: 0 0 calc(33.333% - 12px);
-    min-width: calc(33.333% - 12px);
-    max-width: calc(33.333% - 12px);
+  // Calculate width to match grid: (container - gaps) / columns
+  // For 3 columns: (100% - 40px) / 3 ≈ 31.5%
+  // For 4 columns: (100% - 60px) / 4 ≈ 23%
+  width: calc((100vw - 80px) / 3);
+  max-width: 360px;
+
+  @media (min-width: 1400px) {
+    width: calc((100vw - 120px) / 4);
+    max-width: 360px;
+  }
+
+  @media (max-width: 991px) {
+    width: 280px;
   }
 
   @media (max-width: 768px) {
-    flex: 0 0 170px;
-    min-width: 170px;
-    scroll-snap-align: start;
-    border-radius: 12px;
+    width: 240px;
+  }
+
+  @media (max-width: 576px) {
+    width: 170px;
   }
 }
 
