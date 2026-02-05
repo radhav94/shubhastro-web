@@ -32,6 +32,7 @@ const MySessionsSection = ({ onConnectClick }) => {
             "Astrologer",
           lastName: session.astrologerName?.split(" ").slice(1).join(" ") || "",
           imageUrl: session.astrologerImage,
+          isActive:session.isActive,
         };
         onConnectClick(astrologer);
       } else {

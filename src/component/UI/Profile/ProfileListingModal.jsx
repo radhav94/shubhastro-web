@@ -17,6 +17,7 @@ const ProfileListingModal = ({
   showDeleteButton = true,
   showEditButton = true,
   hasNestedModal = false, // New prop to indicate if nested modal is open
+  callModeBtnTitle,
 }) => {
   if (!isOpen) return null;
 
@@ -198,7 +199,7 @@ const ProfileListingModal = ({
                 onClick={onStartCall}
                 disabled={!selectedProfileId}
               >
-                Start Call
+            {callModeBtnTitle}
               </button>
             )}
           </div>

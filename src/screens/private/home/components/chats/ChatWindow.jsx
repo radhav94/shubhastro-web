@@ -34,6 +34,7 @@ import { PATH } from "../../../../../utils/routes/Paths";
 import ProfileListingModal from "../../../../../component/UI/Profile/ProfileListingModal";
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
 import GiftModal from "../../../../../component/call/GiftModal";
+import {ProfileManager} from "../../../../../component/UI/Profile";
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
@@ -55,6 +56,7 @@ const ChatWindow = () => {
   const { activeCall } = useCall();
   const [openFeedback, setOpenFeedback] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showProfileManagerModal, setShowProfileManagerModal] = useState(false);
   const [showGiftModal, setShowGiftModal] = useState(false);
   
   // Check if there's an active video call
@@ -282,7 +284,7 @@ const ChatWindow = () => {
 
   // Floating action handlers
   const handleSwitchProfile = () => {
-    setShowProfileModal(true);
+    setShowProfileManagerModal(true);
   };
 
   const handleSparkles = () => {
@@ -301,6 +303,12 @@ const ChatWindow = () => {
     // Send the selected kundli profile
     handleSend(profile);
     setShowProfileModal(false);
+  };
+
+  const handleProfileManagerStartCall = (selectedProfile) => {
+    // Send the selected kundli profile
+    handleSend(selectedProfile);
+    setShowProfileManagerModal(false);
   };
 
    // Auto-end chat when timer reaches 0
@@ -407,7 +415,7 @@ const ChatWindow = () => {
       </div>
 
       {/* Render modal outside overflow containers */}
-      <ProfileListingModal
+      {/* <ProfileListingModal
         isOpen={showProfileModal}
         onClose={() => setShowProfileModal(false)}
         profiles={profiles}
@@ -416,6 +424,21 @@ const ChatWindow = () => {
         title="Select Kundli Profile"
         showAddButton={false}
         showDeleteButton={false}
+      /> */}
+
+      <ProfileManager
+        isOpen={showProfileManagerModal}
+        onClose={() => setShowProfileManagerModal(false)}
+        startCallMode={true}
+        onStartCall={handleProfileManagerStartCall}
+        title="Select Profile"
+        callModeBtnTitle="Continue"
+        enabledOperations={{
+          list: true,
+          add: true,
+          edit: true,
+          delete: true,
+        }}
       />
 
       {/* Gift Modal */}

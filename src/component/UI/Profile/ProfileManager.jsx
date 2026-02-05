@@ -40,6 +40,7 @@ const ProfileManager = ({
   selectedProfileId = null,
   title = "Select Profile",
   startCallMode = false,
+  callModeBtnTitle = "Start Call",
   onStartCall = () => {},
   enabledOperations = {
     list: true,
@@ -282,6 +283,7 @@ const ProfileManager = ({
         onAddProfile={handleAddProfile}
         onStartCall={handleStartCall}
         title={title}
+        callModeBtnTitle={callModeBtnTitle}
         showAddButton={enabledOperations.add}
         showDeleteButton={enabledOperations.delete}
         showEditButton={enabledOperations.edit}
