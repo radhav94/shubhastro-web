@@ -192,9 +192,9 @@ const Profile = () => {
   // Use accumulated call orders
   const callOrders = allLoadedCallOrders;
 
-  const chatOrders = Array.isArray(chatHistoryData?.data)
-    ? chatHistoryData.data.map((room, index) => {
-        const lastChat = room.chatHistory?.[room.chatHistory.length - 1];
+  const chatOrders = Array.isArray(chatHistoryData?.data?.chatHistory)
+    ? chatHistoryData.data.chatHistory.map((room, index) => {
+        const lastChat = room?.[room.length - 1];
         return {
           id: `chat-${index}`,
           type: "chat",

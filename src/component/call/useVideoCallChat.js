@@ -1,13 +1,11 @@
-import { useEffect, useState } from "react";
-import socketService from "../../services/socketService";
+import { useEffect, useState, useRef } from "react";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { Toast } from "../index";
 
-export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, isActive, astrologerName }) => {
+export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astrologerName }) => {
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
-  const [hasInitialized, setHasInitialized] = useState(false);
-  // const [isTyping, setIsTyping] = useState(false);
+  const hasInitializedRef = useRef(false);
 
   const formatTime = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -16,52 +14,64 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, isAct
     setMessages((prev) => [...prev, msg]);
   };
 
-  // Initialize socket connection only once
+  // Send message via voiceSocket
+  const sendViaSocket = (message, type = "message") => {
+    if (!voiceSocket.connected) {
+      Toast.error("Socket not connected");
+      return { error: "Socket not connected" };
+    }
+
+    try {
+      voiceSocket.emit("chat:message", {
+        sender: "user",
+        kundliId,
+        roomId,
+        userId,
+        astrologerId,
+        message,
+        type
+      });
+      return { success: true };
+    } catch (err) {
+      console.error("Error sending message:", err);
+      return { error: err.message };
+    }
+  };
+
+  // Initialize socket listeners and send initial messages
   useEffect(() => {
     if (!roomId || !userId || !astrologerId) return;
 
-    socketService.connect({
-      onConnected: () => {
-        console.log("Video call chat connected");
-        
-        // Send initial messages only once when chat connects
-        if (!hasInitialized && kundliId) {
-          setHasInitialized(true);
-          
-          // Send greeting message
-          setTimeout(() => {
-            socketService.sendMessage({
-              message: `Hi ${astrologerName || ""}`,
-              roomId,
-              userId,
-              astrologerId,
-              kundliId
-            });
-          }, 500);
+    // Function to send initial messages
+    const sendInitialMessages = () => {
+      if (hasInitializedRef.current) return;
+      if (!kundliId) return;
+      if (!voiceSocket.connected) return;
 
-          // Send Kundli link
-          setTimeout(() => {
-            const baseUrl = window.location.origin;
-            const kundliLink = `${baseUrl}/kundli/${kundliId}`;
-            socketService.sendMessage({
-              message: kundliLink,
-              roomId,
-              userId,
-              astrologerId,
-              kundliId,
-              type: "kundli"
-            });
-          }, 1000);
-        }
-      },
-      onError: (errMsg) => {
-        Toast.error(errMsg || "Something went wrong");
-        setError(errMsg);
-      },
-      onWarn: (msg) => {
-        Toast.warning(msg || "Something went wrong");
-      },
-    });
+      hasInitializedRef.current = true;
+      
+      // Send greeting message
+      setTimeout(() => {
+        sendViaSocket(`Hi ${astrologerName || ""}`, "message");
+      }, 500);
+
+      // Send Kundli link
+      setTimeout(() => {
+        const baseUrl = window.location.origin;
+        const kundliLink = `${baseUrl}/kundli/${kundliId}`;
+        sendViaSocket(kundliLink, "kundli");
+      }, 1000);
+    };
+
+    // Try to send immediately if already connected
+    if (voiceSocket.connected) {
+      sendInitialMessages();
+    }
+
+    // Also listen for connect event in case it connects later
+    const handleConnect = () => {
+      sendInitialMessages();
+    };
 
     const handleAddMessage = (data) => {
       const isSenderUser = data.sender === "user";
@@ -74,38 +84,31 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, isAct
       });
     };
 
-    // const handleTyping = (data) => {
-    //   if (data.sender !== userId) {
-    //     setIsTyping(true);
-    //     setTimeout(() => setIsTyping(false), 3000);
-    //   }
-    // };
-
     const handleWarning = (msg) => {
       Toast.warning(msg.message);
     };
 
+    const handleError = (err) => {
+      Toast.error(err.message || "Something went wrong");
+      setError(err.message);
+    };
+
+    voiceSocket.on("connect", handleConnect);
     voiceSocket.on("message:recieved", handleAddMessage);
-    // voiceSocket.on("typing", handleTyping);
     voiceSocket.on("warning", handleWarning);
+    voiceSocket.on("error", handleError);
 
     return () => {
+      voiceSocket.off("connect", handleConnect);
       voiceSocket.off("message:recieved", handleAddMessage);
-      // voiceSocket.off("typing", handleTyping);
       voiceSocket.off("warning", handleWarning);
+      voiceSocket.off("error", handleError);
     };
-  }, [roomId, userId, astrologerId, kundliId, astrologerName]); // Removed isActive from dependencies
+  }, [roomId, userId, astrologerId, kundliId, astrologerName]);
 
  
   const sendMessage = (text, type) => {
-    const res = socketService.sendMessage({
-      roomId,
-      userId,
-      astrologerId,
-      message: text,
-      kundliId,
-      type
-    });
+    const res = sendViaSocket(text, type);
 
     if (res?.error) {
       setError(res.error);
@@ -114,15 +117,9 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, isAct
     }
   };
 
-  // const sendTyping = () => {
-  //   socketService.sendTyping({ roomId, sender: userId });
-  // };
-
   return {
     messages,
     error,
-    // isTyping,
     sendMessage,
-    // sendTyping,
   };
 };

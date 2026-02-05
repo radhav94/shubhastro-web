@@ -15,7 +15,8 @@ const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 const VideoCallChat = ({
   isOpen,
   onClose,
-  videoCallData
+  videoCallData,
+  sendMessageRef
 }) => {
   const messagesRef = useRef(null);
   const [iframeSrc, setIframeSrc] = useState(null);
@@ -31,6 +32,13 @@ const VideoCallChat = ({
     isActive: isOpen,
     astrologerName
   });
+
+  // Expose sendMessage function via ref
+  useLayoutEffect(() => {
+    if (sendMessageRef) {
+      sendMessageRef.current = sendChatMessage;
+    }
+  }, [sendChatMessage, sendMessageRef]);
 
   const [getS3SignedUrl] = useGetS3SignedUrlMutation();
   const { openFileSelector } = useFileSelector();
