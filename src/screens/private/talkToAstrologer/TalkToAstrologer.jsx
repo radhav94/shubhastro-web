@@ -19,6 +19,7 @@ import FilterChips from "../../../component/UI/chips/astrologer/FilterChips";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import ProfileModals from "../kundli/components/ProfileModals";
 import { useProfileManager } from "../kundli/hooks/useProfileManager";
+import { ProfileManager } from "../../../component/UI/Profile";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { PATH } from "../../../utils/routes/Paths";
 import { getToken } from "../../../utils/token";
@@ -389,6 +390,11 @@ const TalkToAstrologer = () => {
     if (localSelectedProfile) {
       hookHandleAfterKundliSelect(localSelectedProfile);
     }
+  };
+
+  // Handler for ProfileManager startCallMode - receives selected profile and triggers connection
+  const handleProfileManagerStartCall = (selectedProfile) => {
+    hookHandleAfterKundliSelect(selectedProfile);
   };
 
   /* ------------------- SOCKET CALL FLOW (ADDED ONLY) ------------------- */
@@ -874,7 +880,7 @@ const TalkToAstrologer = () => {
       />
 
       {/* Kundli modal - using ProfileModals like Home page */}
-      <ProfileModals
+      {/* <ProfileModals
         showSelectProfile={hookOpenModal.kundli}
         showAddProfile={showAddProfile}
         showEditProfile={showEditProfile}
@@ -898,6 +904,21 @@ const TalkToAstrologer = () => {
         formatProfileDisplay={formatProfileDisplay}
         showContinueButton={true}
         onContinue={handleContinueAfterKundliSelect}
+      /> */}
+
+      {/* Profile Manager - using startCallMode for profile selection */}
+      <ProfileManager
+        isOpen={hookOpenModal.kundli}
+        onClose={() => hookSetOpenModal((prev) => ({ ...prev, kundli: false }))}
+        startCallMode={true}
+        onStartCall={handleProfileManagerStartCall}
+        title="Select Profile to Continue"
+        enabledOperations={{
+          list: true,
+          add: true,
+          edit: true,
+          delete: true,
+        }}
       />
 
       {/* Recharge Modal */}
