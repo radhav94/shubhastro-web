@@ -31,18 +31,23 @@ const HomeLayout = () => {
   // Hide TopHeader on onboarding page or when header is disabled
 
   const isOnboardingPage = location.pathname === "/login";
-  const showTopHeader = !isOnboardingPage && showHeader;
+  
+  // Check if page is loaded in iframe via query parameter
+  const searchParams = new URLSearchParams(location.search);
+  const isInIframe = searchParams.get('iframe') === 'true';
+  
+  const showTopHeader = !isOnboardingPage && !isInIframe;
 
   return (
     <div className={styles.layout}>
       <ScrollToTop />
 
-      {/* NEW TOP HEADER - Hidden on onboarding or when header is disabled */}
-      {
+      {/* NEW TOP HEADER - Hidden on onboarding, iframe, or when header is disabled */}
+      {showTopHeader && (
         <div className={styles.fixedTopHeader}>
           <TopHeader />
         </div>
-      }
+      )}
 
       {/* FIXED TOPBAR */}
       {/* {showHeader && (

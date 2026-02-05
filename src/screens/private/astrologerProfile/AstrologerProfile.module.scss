@@ -33,7 +33,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  border: 1.5px solid #B89968;
+  border: 1.5px solid #F75801;
   background: transparent;
   display: flex;
   align-items: center;
@@ -43,6 +43,13 @@
   font-size: 24px;
   transition: all 0.2s;
   flex-shrink: 0;
+  svg path{
+    stroke : #F75801;
+  }
+  @media (width <= 767px) {
+    width: 40px;
+    height: 40px;
+  }
 
   &:hover {
     background: rgba(255, 255, 255, 0.3);
@@ -59,6 +66,9 @@
   color: #2C2C2C;
   margin: 0;
   font-family: "Poppins", sans-serif;
+  @media (width <= 767px) {
+    font-size: 24px0
+  }
 }
 
 .headerActions {
@@ -71,7 +81,7 @@
 .followBtn {
   padding: 14px 40px;
   border-radius: 32px;
-  background: #3D2817;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: #FFFFFF;
   border: none;
   font-size: 16px;
@@ -80,13 +90,19 @@
   transition: all 0.2s;
   white-space: nowrap;
   font-family: "Poppins", sans-serif;
+  @media (width <= 767px) {
+    padding: 10px 20px;
+    font-size: 12px;
+  }
 
   &:hover {
-    background: #2D1F10;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 
   &:active {
-    transform: scale(0.98);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 
   &.following {
@@ -115,6 +131,10 @@
   transition: all 0.2s;
   flex-shrink: 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  @media (width <= 767px) {
+    width: 40px;
+    height: 40px;
+  }
 
   .shareIcon {
     width: 22px;
@@ -156,11 +176,15 @@
 
 .profileImage {
   width: 140px;
-  height: 160px;
+  height: 140px;
   border-radius: 20px;
   object-fit: cover;
   border: none;
   display: block;
+  @media (width <= 767px) {
+    width: 86px;
+    height: 86px;
+  }
 }
 
 .profileInfo {
@@ -170,11 +194,17 @@
 }
 
 .astrologerName {
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 600;
   color: #1A1A1A;
   margin: 0 0 12px 0;
   line-height: 1.2;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  @media (width <= 767px) {
+    font-size: 18px;
+  }
 }
 
 .skills {
@@ -198,11 +228,11 @@
 }
 
 .languageTag {
-  padding: 7px 18px;
-  background: #FFF5E6;
+  padding: 6px 12px;
+  background: #FFF5EC;
   border-radius: 16px;
   font-size: 13px;
-  color: #D4A574;
+  color: #E56329;
   font-weight: 400;
 }
 

@@ -31,9 +31,9 @@ const SignScreen = () => {
 
   return (
     <div className={styles.dailyContainer}>
-      <PrimaryText isCenter isBold size_32>
+      <h1 className={styles.title}>
         {horoscopeType} Horoscope
-      </PrimaryText>
+      </h1>
       <PrimaryText
         marginBottom="6px"
         isCenter

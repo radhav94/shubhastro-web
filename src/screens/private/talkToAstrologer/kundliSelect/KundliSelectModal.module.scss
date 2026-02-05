@@ -16,11 +16,11 @@
 
 /* BOTTOM SHEET (Select Profile) */
 .bottomSheet {
-  background: white;
+  background: #f5f5f5;
   border-radius: 24px 24px 0 0;
   width: 100%;
   max-width: 500px;
-  max-height: 80vh;
+  max-height: 88vh;
   overflow-y: auto;
   animation: slideUp 0.3s ease-out;
 }
@@ -54,12 +54,12 @@
 }
 
 .sheetContent {
-  padding: 0 24px 24px;
+  padding: 24px;
   position: relative;
 }
 
 .sheetTitle {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   margin-bottom: 24px;
   color: #000;
@@ -95,6 +95,8 @@
   flex-direction: column;
   gap: 16px;
   margin-bottom: 24px;
+  height: 300px;
+  overflow: auto;
 }
 
 .profileItem {
@@ -102,32 +104,33 @@
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: #f5f5f5;
+  background: #fff;
   border-radius: 12px;
   cursor: pointer;
   transition: 0.2s ease;
+  border: 2px solid transparent;
 
   &:hover {
-    background: #ebebeb;
+    border-color: #F75801;
   }
 
   &.selected {
-    background: #e8f5e9;
-    border: 2px solid #4caf50;
+    background: #fff;
+    border-color: #F75801;
   }
 }
 
 .profileAvatar {
   width: 56px;
   height: 56px;
-  background: #ccc;
+  background: linear-gradient(135deg, #F75801 0%, #D43400 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
   font-weight: 600;
-  color: #666;
+  color: #fff;
 }
 
 .profileInfo {
@@ -136,12 +139,13 @@
 
 .relationBadge {
   display: inline-block;
-  background: #e0e0e0;
+  background: linear-gradient(135deg, #FFE8D6 0%, #FFD4B3 100%);
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 11px;
-  color: #666;
+  color: #D43400;
   margin-bottom: 4px;
+  border: 1px solid rgba(247, 88, 1, 0.2);
 }
 
 .profileName {
@@ -164,41 +168,45 @@
 
 .radioBtn {
   font-size: 24px;
-  color: #333;
+  color: #D43400;
 }
 
 .addProfileBtn {
   width: 100%;
   padding: 16px;
   background: white;
-  border: 2px solid #ddd;
-  border-radius: 12px;
+  border: 2px solid #F75801;
+  border-radius: 50px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: 0.2s ease;
   margin-bottom: 12px;
+  color: #F75801;
 
   &:hover {
     background: #f9f9f9;
-    border-color: #bbb;
+    border-color: #F75801;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
   }
 }
 
 .continueBtn {
   width: 100%;
   padding: 16px;
-  background: #000;
+  background: linear-gradient(135deg, #F75801 0%, #D43400 100%);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 50px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: #333;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
   }
 
   &:disabled {
@@ -486,19 +494,19 @@
     }
   }
 
-  .profileItem {
-    padding: 20px;
-    transition: 0.2s ease;
+  // .profileItem {
+  //   padding: 20px;
+  //   transition: 0.2s ease;
 
-    &:hover {
-      background: #e8e8e8;
-      transform: translateX(4px);
-    }
+  //   &:hover {
+  //     background: #e8e8e8;
+  //     transform: translateY(4px);
+  //   }
 
-    &.selected {
-      transform: translateX(4px);
-    }
-  }
+  //   &.selected {
+  //     transform: translateY(4px);
+  //   }
+  // }
 
   .profileAvatar {
     width: 64px;
@@ -507,15 +515,15 @@
   }
 
   .sheetContent {
-    padding: 32px 40px 40px;
+    padding: 32px;
   }
 
-  .sheetTitle {
-    font-size: 28px;
-    margin-bottom: 28px;
-    font-weight: 700;
-    color: #000;
-  }
+  // .sheetTitle {
+  //   font-size: 20px;
+  //   margin-bottom: 28px;
+  //   font-weight: 700;
+  //   color: #000;
+  // }
 
   .closeBtn {
     display: flex;

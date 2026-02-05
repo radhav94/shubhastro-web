@@ -80,7 +80,7 @@ $font-primary: "Poppins", sans-serif;
   }
 
   &.active {
-    background-color: #ff6b35;
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
     color: #ffffff;
     font-weight: 500;
   }
@@ -99,6 +99,7 @@ $font-primary: "Poppins", sans-serif;
   @media (max-width: 768px) {
     padding: 0;
     border-radius: 6px;
+    border: none;
   }
 
   @media (max-width: 480px) {

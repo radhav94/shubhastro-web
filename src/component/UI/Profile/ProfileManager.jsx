@@ -13,14 +13,15 @@ import {
 import { getToken } from "../../../utils/token";
 
 /**
- * ProfileManager - Centralized component for managing profile operations
+ * ProfileManager - Complete profile management flow component
  *
- * Handles all profile-related functionality including:
- * - Fetching profiles from API
+ * Handles the full profile lifecycle:
+ * - Profile listing
  * - Adding new profiles
  * - Editing existing profiles
- * - Deleting profiles
+ * - Deleting profiles with confirmation
  * - Profile selection
+ * - Start Call mode for profile selection
  *
  * @param {Object} props - Component props
  * @param {boolean} props.isOpen - Whether the profile manager is open
@@ -28,16 +29,9 @@ import { getToken } from "../../../utils/token";
  * @param {Function} props.onProfileSelect - Callback when a profile is selected
  * @param {string} props.selectedProfileId - Currently selected profile ID
  * @param {string} props.title - Title for the profile listing modal
- * @param {Object} props.enabledOperations - Control which operations are enabled
- * @param {boolean} props.enabledOperations.list - Enable profile listing (default: true)
- * @param {boolean} props.enabledOperations.add - Enable add profile (default: true)
- * @param {boolean} props.enabledOperations.edit - Enable edit profile (default: true)
- * @param {boolean} props.enabledOperations.delete - Enable delete profile (default: true)
- * @param {boolean} props.autoOpenAdd - Auto-open Add Profile modal when isOpen is true
- * @param {boolean} props.autoOpenEdit - Auto-open Edit Profile modal when isOpen is true
- * @param {boolean} props.autoOpenDelete - Auto-open Delete Confirmation modal when isOpen is true
- * @param {Object} props.profileToEdit - Profile object to edit (must include kundli_ID)
- * @param {string} props.profileToDelete - Profile kundli_ID to delete
+ * @param {boolean} props.startCallMode - Enable Start Call selection flow
+ * @param {Function} props.onStartCall - Callback when Start Call button is clicked (receives selected profile)
+ * @param {Object} props.enabledOperations - Control which operations are enabled (list, add, edit, delete)
  */
 const ProfileManager = ({
   isOpen = false,
@@ -45,31 +39,24 @@ const ProfileManager = ({
   onProfileSelect = () => {},
   selectedProfileId = null,
   title = "Select Profile",
+  startCallMode = false,
+  onStartCall = () => {},
   enabledOperations = {
     list: true,
     add: true,
     edit: true,
     delete: true,
   },
-  autoOpenAdd = false,
-  autoOpenEdit = false,
-  autoOpenDelete = false,
-  profileToEdit: parentProfileToEdit = null,
-  profileToDelete: parentProfileToDelete = null,
 }) => {
-  // Merge with defaults to ensure backward compatibility
-  const operations = {
-    list: enabledOperations.list !== false,
-    add: enabledOperations.add !== false,
-    edit: enabledOperations.edit !== false,
-    delete: enabledOperations.delete !== false,
-  };
   // Local state for modal visibility
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState(null);
   const [profileToEdit, setProfileToEdit] = useState(null);
+
+  // State for Start Call mode
+  const [selectedProfileForCall, setSelectedProfileForCall] = useState(null);
 
   // RTK Query hooks
   const [createKundli, { isLoading: isCreating }] = useCreateKundliMutation();
@@ -86,71 +73,17 @@ const ProfileManager = ({
 
   const profiles = data?.data || [];
 
-  // Extract stable identifiers for dependency tracking
-  const editProfileId = parentProfileToEdit?.kundli_ID || parentProfileToEdit?._id || null;
-  const deleteProfileId = parentProfileToDelete;
-
-  // Single useEffect to handle all modal state management
+  // Reset all modal states when ProfileManager closes
   useEffect(() => {
     if (!isOpen) {
-      // Reset all states when ProfileManager closes
       setShowAddProfile(false);
       setShowEditProfile(false);
       setShowDeleteModal(false);
       setProfileToDelete(null);
       setProfileToEdit(null);
-      return;
+      setSelectedProfileForCall(null);
     }
-
-    // When opening, first reset all states to ensure clean slate
-    setShowAddProfile(false);
-    setShowEditProfile(false);
-    setShowDeleteModal(false);
-    setProfileToDelete(null);
-    setProfileToEdit(null);
-
-    // Use setTimeout to ensure state reset completes before opening new modal
-    // This forces React to recognize the state change even with same values
-    const timer = setTimeout(() => {
-      // ADD MODE
-      if (autoOpenAdd && operations.add) {
-        setShowAddProfile(true);
-      }
-      // EDIT MODE
-      else if (autoOpenEdit && operations.edit && parentProfileToEdit) {
-        setProfileToEdit(parentProfileToEdit);
-        setShowEditProfile(true);
-      }
-      // DELETE MODE
-      else if (autoOpenDelete && operations.delete && parentProfileToDelete) {
-        setProfileToDelete(parentProfileToDelete);
-        setShowDeleteModal(true);
-      }
-      // Direct mode (when list is disabled)
-      else if (!operations.list) {
-        if (parentProfileToEdit && operations.edit) {
-          setProfileToEdit(parentProfileToEdit);
-          setShowEditProfile(true);
-        } else if (parentProfileToDelete && operations.delete) {
-          setProfileToDelete(parentProfileToDelete);
-          setShowDeleteModal(true);
-        }
-      }
-    }, 0);
-
-    return () => clearTimeout(timer);
-  }, [
-    isOpen,
-    autoOpenAdd,
-    autoOpenEdit,
-    autoOpenDelete,
-    operations.add,
-    operations.edit,
-    operations.delete,
-    operations.list,
-    editProfileId, // Use stable ID instead of object reference
-    deleteProfileId, // Use stable ID instead of object reference
-  ]);
+  }, [isOpen]);
 
   // Helper function to build kundli payload
   const buildKundliPayload = (data) => {
@@ -192,22 +125,38 @@ const ProfileManager = ({
 
   // Handler: Open add profile modal
   const handleAddProfile = () => {
-    if (!operations.add) return;
     setShowAddProfile(true);
   };
 
   // Handler: Open edit profile modal
   const handleEditProfile = (profile) => {
-    if (!operations.edit) return;
     setProfileToEdit(profile);
     setShowEditProfile(true);
   };
 
   // Handler: Open delete confirmation modal
   const handleDeleteProfile = (profileId) => {
-    if (!operations.delete) return;
     setProfileToDelete(profileId);
     setShowDeleteModal(true);
+  };
+
+  // Handler: Profile selection in Start Call mode
+  const handleProfileSelectForCall = (profile) => {
+    if (startCallMode) {
+      setSelectedProfileForCall(profile);
+    }
+    // Also call the original onProfileSelect if provided
+    if (onProfileSelect) {
+      onProfileSelect(profile);
+    }
+  };
+
+  // Handler: Start Call button click
+  const handleStartCall = () => {
+    if (selectedProfileForCall && onStartCall) {
+      onStartCall(selectedProfileForCall);
+      onClose();
+    }
   };
 
   // Handler: Submit new profile
@@ -225,7 +174,7 @@ const ProfileManager = ({
       Toast.success("Profile added successfully");
       setShowAddProfile(false);
       onClose();
-    } catch (err) { 
+    } catch (err) {
       console.error("Add profile error:", err);
       setShowAddProfile(false);
       onClose();
@@ -287,7 +236,7 @@ const ProfileManager = ({
   // Handler: Close add profile modal
   const handleCloseAddProfile = () => {
     setShowAddProfile(false);
-    onClose();
+    // onClose();
   };
 
   // Handler: Close edit profile modal
@@ -320,51 +269,47 @@ const ProfileManager = ({
 
   return (
     <>
-      {/* Profile Listing Modal - Only render if list operation is enabled */}
-      {operations.list && (
-        <ProfileListingModal
-          isOpen={isOpen}
-          onClose={onClose}
-          profiles={profiles}
-          selectedProfileId={selectedProfileId}
-          onSelectProfile={onProfileSelect}
-          onDeleteProfile={operations.delete ? handleDeleteProfile : undefined}
-          onEditProfile={operations.edit ? handleEditProfile : undefined}
-          onAddProfile={operations.add ? handleAddProfile : undefined}
-          title={title}
-          showAddButton={operations.add}
-          showDeleteButton={operations.delete}
-          showEditButton={operations.edit}
-          hasNestedModal={showAddProfile || showEditProfile || showDeleteModal}
-        />
-      )}
+      {/* Profile Listing Modal */}
+      <ProfileListingModal
+        isOpen={isOpen}
+        onClose={onClose}
+        startCallMode={startCallMode}
+        profiles={profiles}
+        selectedProfileId={startCallMode ? selectedProfileForCall?._id : selectedProfileId}
+        onSelectProfile={startCallMode ? handleProfileSelectForCall : onProfileSelect}
+        onDeleteProfile={handleDeleteProfile}
+        onEditProfile={handleEditProfile}
+        onAddProfile={handleAddProfile}
+        onStartCall={handleStartCall}
+        title={title}
+        showAddButton={enabledOperations.add}
+        showDeleteButton={enabledOperations.delete}
+        showEditButton={enabledOperations.edit}
+        hasNestedModal={showAddProfile || showEditProfile || showDeleteModal}
+      />
 
-      {/* Add Profile Modal - Only render if add operation is enabled */}
-      {operations.add && (
-        <AddProfileModal
-          isOpen={showAddProfile}
-          onClose={handleCloseAddProfile}
-          onSubmit={handleSubmitProfile}
-          isLoading={isCreating}
-          title="Add Profile"
-          showProfileListing={false}
-        />
-      )}
+      {/* Add Profile Modal */}
+      <AddProfileModal
+        isOpen={showAddProfile}
+        onClose={handleCloseAddProfile}
+        onSubmit={handleSubmitProfile}
+        isLoading={isCreating}
+        title="Add Profile"
+        showProfileListing={false}
+      />
 
-      {/* Edit Profile Modal - Only render if edit operation is enabled */}
-      {operations.edit && (
-        <EditProfileModal
-          isOpen={showEditProfile}
-          onClose={handleCloseEditProfile}
-          onSubmit={handleSubmitEditProfile}
-          isLoading={isCreating}
-          title="Edit Profile"
-          initialData={getEditInitialData()}
-        />
-      )}
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={showEditProfile}
+        onClose={handleCloseEditProfile}
+        onSubmit={handleSubmitEditProfile}
+        isLoading={isCreating}
+        title="Edit Profile"
+        initialData={getEditInitialData()}
+      />
 
-      {/* Delete Confirmation Modal - Only render if delete operation is enabled */}
-      {operations.delete && showDeleteModal && (
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
         <DeleteConfirmationModal
           title="Delete Profile"
           message="Are you sure you want to delete this profile? This action cannot be undone."

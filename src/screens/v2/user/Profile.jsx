@@ -28,17 +28,22 @@ import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import ConnectAstrologerPopup from "../../private/v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
-import ProfileModals from "../../private/kundli/components/ProfileModals";
+import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
+import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
+import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { PATH } from "../../../utils/routes/Paths";
 import { logout } from "../../../redux/auth/authSlice";
 import styles from "./Profile.module.scss";
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
-
-import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
 import { Toast } from "../../../component/index";
 import StickyReview from "../../private/home/components/call/StickyReview";
+import {
+  useCreateKundliMutation,
+  useDeleteKundliMutation,
+  useEditKundliMutation,
+} from "../../../services/appServices/kundliServicesNew";
 import { ProfileManager } from "../../../component/UI/Profile";
 
 const Profile = () => {
@@ -96,24 +101,19 @@ const Profile = () => {
     profiles,
     profilesLoading,
     isCreating,
-    showSelectProfile,
-    showAddProfile,
-    showEditProfile,
-    formData,
-    editFormData,
-    setShowSelectProfile,
-    setShowAddProfile,
-    setShowEditProfile,
-    setFormData,
-    setEditFormData,
-    handleAddProfile,
-    handleEditProfile,
-    handleSubmitProfile,
-    handleSubmitEditProfile,
-    formatProfileDisplay,
   } = useProfileManager(dispatch);
 
-  const [localSelectedProfile, setLocalSelectedProfile] = useState(null);
+  // Profile modal state
+  const [showAddProfileModal, setShowAddProfileModal] = useState(false);
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [profileToEdit, setProfileToEdit] = useState(null);
+  const [profileToDelete, setProfileToDelete] = useState(null);
+
+  // RTK Query hooks for profile operations
+  const [createKundli, { isLoading: isCreatingProfile }] = useCreateKundliMutation();
+  const [deleteKundli] = useDeleteKundliMutation();
+  const [editKundli] = useEditKundliMutation();
 
   // Use the astrologer connect hook
   const {
@@ -131,12 +131,6 @@ const Profile = () => {
   // Call history pagination state
   const [callHistoryPage, setCallHistoryPage] = useState(1);
   const [allLoadedCallOrders, setAllLoadedCallOrders] = useState([]);
-
-  // ProfileManager state - Single instance with mode-based control
-  const [showProfileManager, setShowProfileManager] = useState(false);
-  const [profileManagerMode, setProfileManagerMode] = useState(null); // 'add' | 'edit' | 'delete'
-  const [selectedKundli, setSelectedKundli] = useState(null);
-  const [kundliIdToDelete, setKundliIdToDelete] = useState(null);
 
   // Fetch call and chat history
   const {
@@ -324,18 +318,6 @@ const Profile = () => {
     }
   }, [orderHistoryTab]);
 
-  // Custom handler for profile selection (doesn't close modal)
-  const handleProfileSelect = (profile) => {
-    setLocalSelectedProfile(profile);
-  };
-
-  // Handler for Continue button (triggers socket emit)
-  const handleContinueAfterKundliSelect = () => {
-    if (localSelectedProfile) {
-      hookHandleAfterKundliSelect(localSelectedProfile);
-    }
-  };
-
   // Restore waiting state from localStorage on mount
   useEffect(() => {
     const savedWaitingState = localStorage.getItem("waitingState");
@@ -427,7 +409,7 @@ const Profile = () => {
       localStorage.removeItem("waitingState");
 
       const astro = activeAstroRef.current;
-      const kundliId = localSelectedProfile?._id;
+      const kundliId = selectedProfile?._id;
 
       try {
         if (!roomId) throw new Error("Room ID missing");
@@ -476,7 +458,7 @@ const Profile = () => {
       localStorage.removeItem("waitingState");
 
       const astro = activeAstroRef.current;
-      const kundliId = localSelectedProfile?._id;
+      const kundliId = selectedProfile?._id;
 
       try {
         if (!astro) {
@@ -627,60 +609,162 @@ const Profile = () => {
     setSelectedAstrologer(null);
   };
 
-  // Delete kundli handlers - removed, now using ProfileManager
+  // Handler for ProfileManager startCallMode - receives selected profile and triggers connection
+  const handleProfileManagerStartCall = (selectedProfile) => {
+    hookHandleAfterKundliSelect(selectedProfile);
+  };
 
-  // ProfileManager handlers - Single instance with mode-based control
+  // Delete kundli handlers - now using direct modals
   const handleOpenAddProfileModal = () => {
-    setProfileManagerMode("add");
-    setShowProfileManager(true);
+    setShowAddProfileModal(true);
   };
 
   const handleEditClick = (kundli) => {
-    // Force close-then-open cycle to ensure modal reopens even for same profile
-    setShowProfileManager(false);
-    setSelectedKundli(null);
-    setProfileManagerMode(null);
-    
-    // Use setTimeout to ensure state reset completes before reopening
-    setTimeout(() => {
-      setSelectedKundli(kundli);
-      setProfileManagerMode("edit");
-      setShowProfileManager(true);
-    }, 0);
+    setProfileToEdit(kundli);
+    setShowEditProfileModal(true);
   };
 
   const handleDeleteClick = (kundli) => {
-    // Force close-then-open cycle to ensure modal reopens even for same profile
-    setShowProfileManager(false);
-    setKundliIdToDelete(null);
-    setProfileManagerMode(null);
-    
-    // Use setTimeout to ensure state reset completes before reopening
-    setTimeout(() => {
-      setKundliIdToDelete(kundli._id);
-      setProfileManagerMode("delete");
-      setShowProfileManager(true);
-    }, 0);
+    setProfileToDelete(kundli._id);
+    setShowDeleteModal(true);
   };
 
-  const handleCloseProfileManager = () => {
-    setShowProfileManager(false);
-    setProfileManagerMode(null);
-    setSelectedKundli(null);
-    setKundliIdToDelete(null);
+  const handleCloseAddProfile = () => {
+    setShowAddProfileModal(false);
   };
 
-  // Get enabled operations based on mode
-  const getEnabledOperations = () => {
-    switch (profileManagerMode) {
-      case "add":
-        return { list: false, add: true, edit: false, delete: false };
-      case "edit":
-        return { list: false, add: false, edit: true, delete: false };
-      case "delete":
-        return { list: false, add: false, edit: false, delete: true };
-      default:
-        return { list: false, add: false, edit: false, delete: false };
+  const handleCloseEditProfile = () => {
+    setShowEditProfileModal(false);
+    setProfileToEdit(null);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setProfileToDelete(null);
+  };
+
+  // Helper function to build kundli payload
+  const buildKundliPayload = (data) => {
+    const dateObj = new Date(data.birthDate);
+    const timeObj = data.birthTime ? data.birthTime.split(":") : ["0", "0"];
+
+    return {
+      name: data.name,
+      gender: data.identity.toLowerCase(),
+      relation: data.relation || "Self",
+      day: dateObj.getDate(),
+      month: dateObj.getMonth() + 1,
+      year: dateObj.getFullYear(),
+      hour: data.unknownBirthTime ? 0 : parseInt(timeObj[0]),
+      min: data.unknownBirthTime ? 0 : parseInt(timeObj[1]),
+      second: 0,
+      place: data.birthPlace,
+      lat: data.latitude || 0,
+      lon: data.longitude || 0,
+      tzone: 5.5,
+    };
+  };
+
+  // Helper function to check for duplicate kundli
+  const isDuplicateKundli = (payload, list) =>
+    list.some(
+      (k) =>
+        k.name.trim().toLowerCase() === payload.name.trim().toLowerCase() &&
+        k.gender.toLowerCase() === payload.gender.toLowerCase() &&
+        Number(k.day) === Number(payload.day) &&
+        Number(k.month) === Number(payload.month) &&
+        Number(k.year) === Number(payload.year) &&
+        Number(k.hour) === Number(payload.hour) &&
+        Number(k.min) === Number(payload.min) &&
+        Math.abs(Number(k.lat) - Number(payload.lat)) < 0.0001 &&
+        Math.abs(Number(k.lon) - Number(payload.lon)) < 0.0001 &&
+        k.place.trim().toLowerCase() === payload.place.trim().toLowerCase(),
+    );
+
+  // Get initial data for edit modal
+  const getEditInitialData = () => {
+    if (!profileToEdit) return null;
+
+    return {
+      name: profileToEdit.name,
+      identity:
+        profileToEdit.gender === "male"
+          ? "Male"
+          : profileToEdit.gender === "female"
+            ? "Female"
+            : "Others",
+      relation: profileToEdit.relation || "Self",
+      birthDate: `${profileToEdit.year}-${String(profileToEdit.month).padStart(2, "0")}-${String(profileToEdit.day).padStart(2, "0")}`,
+      birthTime: `${String(profileToEdit.hour).padStart(2, "0")}:${String(profileToEdit.min).padStart(2, "0")}`,
+      birthPlace: profileToEdit.place,
+      unknownBirthTime: false,
+      latitude: profileToEdit.lat,
+      longitude: profileToEdit.lon,
+    };
+  };
+
+  const handleSubmitProfile = async (formData) => {
+    try {
+      const payload = buildKundliPayload(formData);
+
+      // Check for duplicate
+      if (isDuplicateKundli(payload, savedKundlis)) {
+        Toast.error("This profile already exists");
+        throw new Error("Duplicate profile");
+      }
+
+      await createKundli(payload).unwrap();
+      Toast.success("Profile added successfully");
+      setShowAddProfileModal(false);
+    } catch (err) {
+      console.error("Add profile error:", err);
+      setShowAddProfileModal(false);
+      // Only show custom toast for duplicate error (already shown above)
+      // For API errors, global handler in privateRequestNew.js will show the toast
+      if (err.message !== "Duplicate profile") {
+        throw err;
+      }
+    }
+  };
+
+  // Handler: Submit edited profile
+  const handleSubmitEditProfile = async (formData) => {
+    try {
+      if (!profileToEdit) return;
+
+      // Build payload with updated data
+      const payload = buildKundliPayload(formData);
+
+      // Call editKundli with id and payload
+      await editKundli({
+        id: profileToEdit.kundli_ID,
+        ...payload,
+      }).unwrap();
+
+      Toast.success("Profile updated successfully");
+
+      setShowEditProfileModal(false);
+      setProfileToEdit(null);
+    } catch (err) {
+      console.error("Edit profile error:", err);
+      throw err;
+    }
+  };
+
+  // Handler: Confirm delete profile
+  const confirmDeleteProfile = async () => {
+    if (!profileToDelete) return;
+
+    try {
+      await deleteKundli(profileToDelete).unwrap();
+      Toast.success("Profile deleted successfully");
+
+      setShowDeleteModal(false);
+      setProfileToDelete(null);
+    } catch (err) {
+      console.error("Delete profile error:", err);
+      setShowDeleteModal(false);
+      setProfileToDelete(null);
     }
   };
 
@@ -1238,6 +1322,20 @@ const Profile = () => {
         )}
       </div>
 
+      <ProfileManager
+        isOpen={hookOpenModal.kundli}
+        onClose={() => hookSetOpenModal((prev) => ({ ...prev, kundli: false }))}
+        startCallMode={true}
+        onStartCall={handleProfileManagerStartCall}
+        title="Select Profile to Continue"
+        enabledOperations={{
+          list: true,
+          add: true,
+          edit: true,
+          delete: true,
+        }}
+      />
+
       {/* Connect Astrologer Popup */}
       <ConnectAstrologerPopup
         isOpen={isConnectPopupOpen}
@@ -1246,100 +1344,6 @@ const Profile = () => {
         onChatStart={handleChatStart}
         onCallStart={handleCallStart}
       />
-
-      {/* Kundli Profile Selection Modal */}
-      {/* <ProfileModals
-        showSelectProfile={hookOpenModal.kundli}
-        showAddProfile={showAddProfile}
-        showEditProfile={showEditProfile}
-        profiles={profiles}
-        selectedProfile={localSelectedProfile}
-        formData={formData}
-        editFormData={editFormData}
-        isCreating={isCreating}
-        onCloseSelect={() => {
-          hookSetOpenModal((prev) => ({ ...prev, kundli: false }));
-          setLocalSelectedProfile(null);
-        }}
-        onCloseAdd={() => setShowAddProfile(false)}
-        onCloseEdit={() => setShowEditProfile(false)}
-        onSelectProfile={handleProfileSelect}
-        onAddProfile={handleAddProfile}
-        onSubmitProfile={handleSubmitProfile}
-        onSubmitEditProfile={handleSubmitEditProfile}
-        setFormData={setFormData}
-        setEditFormData={setEditFormData}
-        formatProfileDisplay={formatProfileDisplay}
-        showContinueButton={true}
-        onContinue={handleContinueAfterKundliSelect}
-      /> */}
-
-      {/* Recharge modal */}
-      {hookOpenModal.recharge && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              padding: "24px",
-              borderRadius: "12px",
-              maxWidth: "400px",
-              width: "90%",
-            }}
-          >
-            <p style={{ textAlign: "center", marginBottom: "20px" }}>
-              Minimum balance of 5 minutes (₹{" "}
-              {(selectedAstrologer?.price?.chatRate?.amount || 1) * 5}) is
-              required to start chat with
-              {` ${selectedAstrologer?.firstName || "Astrologer"}`}.
-            </p>
-
-            <div
-              style={{ display: "flex", gap: "12px", justifyContent: "center" }}
-            >
-              <button
-                style={{
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  border: "1px solid #ccc",
-                  backgroundColor: "white",
-                  cursor: "pointer",
-                }}
-                onClick={() =>
-                  hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
-                }
-              >
-                Cancel
-              </button>
-              <button
-                style={{
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  border: "none",
-                  backgroundColor: "#FF6B35",
-                  color: "white",
-                  cursor: "pointer",
-                }}
-                onClick={() => navigate(PATH.privateRoutes.RECHARGE.path)}
-              >
-                Recharge
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Waiting Modal - shows for both chat and call */}
       {(WaitingList || callWaitingList) && connectionType && (
@@ -1350,19 +1354,35 @@ const Profile = () => {
         />
       )}
 
-      {/* ProfileManager - Single instance with mode-based control */}
-      <ProfileManager
-        isOpen={showProfileManager}
-        onClose={handleCloseProfileManager}
-        autoOpenAdd={profileManagerMode === "add"}
-        autoOpenEdit={profileManagerMode === "edit"}
-        autoOpenDelete={profileManagerMode === "delete"}
-        profileToEdit={profileManagerMode === "edit" ? selectedKundli : null}
-        profileToDelete={
-          profileManagerMode === "delete" ? kundliIdToDelete : null
-        }
-        enabledOperations={getEnabledOperations()}
+      {/* Add Profile Modal */}
+      <AddProfileModal
+        isOpen={showAddProfileModal}
+        onClose={handleCloseAddProfile}
+        onSubmit={handleSubmitProfile}
+        isLoading={isCreatingProfile}
+        title="Add Profile"
+        showProfileListing={false}
       />
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={showEditProfileModal}
+        onClose={handleCloseEditProfile}
+        onSubmit={handleSubmitEditProfile}
+        isLoading={isCreatingProfile}
+        title="Edit Profile"
+        initialData={getEditInitialData()}
+      />
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          title="Delete Profile"
+          message="Are you sure you want to delete this profile? This action cannot be undone."
+          onCancel={handleCancelDelete}
+          onConfirm={confirmDeleteProfile}
+        />
+      )}
 
       {/* Sticky Review Modal */}
       <StickyReview />
