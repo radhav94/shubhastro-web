@@ -23,11 +23,13 @@ import { useCall } from "../../context/CallContext";
 import VideoCallChat from "./VideoCallChat";
 import GiftModal from "./GiftModal";
 import { useGetBalanceMutation } from "../../redux/api/wallet/walletApi";
+import ProfileManager from "../UI/Profile/ProfileManager";
+import { useGetAllKundlisQuery } from "../../services/appServices/kundliServicesNew";
 
 const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 
 const VideoCalling = ({ callData }) => {
-  const { activeCall, setActiveCall, lastRequestedAstro, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer } = useCall();
+  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer } = useCall();
   const navigate = useNavigate();
 
   if (!activeCall || activeCall.callType !== "video") return null;
@@ -53,13 +55,18 @@ const VideoCalling = ({ callData }) => {
   const [speakerOn, setSpeakerOn] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: 20 });
-  const [isChatOpen, setIsChatOpen] = useState(false); // Chat panel state
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [showRechargeButton, setShowRechargeButton] = useState(false);
   const [remoteVideoEnabled, setRemoteVideoEnabled] = useState(true);
   const [initialBalance, setInitialBalance] = useState(null);
+  const [selectedProfile, setSelectedProfile] = useState(null);
 
   const [getBalance] = useGetBalanceMutation();
+  // Fetch kundli profiles
+  const { data: profilesData } = useGetAllKundlisQuery();
+  const profiles = profilesData?.data || [];
 
   // Default avatar URL
   const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
@@ -69,16 +76,12 @@ const VideoCalling = ({ callData }) => {
     if (!camTrackRef.current || !container) return;
 
     try {
-      console.log("🛑 [playLocalVideo] Stopping camera track");
-      camTrackRef.current.stop(); // 🔥 IMPORTANT
+      camTrackRef.current.stop();
     } catch (e) {
-      console.error("❌ [playLocalVideo] Error stopping track:", e);
+      console.error("Error stopping camera track:", e);
     }
 
-    console.log("🧹 [playLocalVideo] Clearing container");
     container.innerHTML = "";
-
-    console.log("▶️ [playLocalVideo] Playing camera track");
     camTrackRef.current.play(container);
   };
 
@@ -104,38 +107,20 @@ const VideoCalling = ({ callData }) => {
   // };
 
   const safePlayRemoteVideo = (track) => {
-    console.log("🌐 [safePlayRemoteVideo] Called", {
-      hasTrack: !!track,
-      isLocalBig
-    });
-
-    if (!track) {
-      console.warn("⚠️ [safePlayRemoteVideo] No track provided");
-      return;
-    }
+    if (!track) return;
 
     const container = isLocalBig
       ? localVideoFullRef.current
       : remoteVideoRef.current;
 
-    console.log("📦 [safePlayRemoteVideo] Container selected", {
-      isLocalBig,
-      hasContainer: !!container
-    });
-
-    if (!container) {
-      console.warn("⚠️ [safePlayRemoteVideo] No container available");
-      return;
-    }
+    if (!container) return;
 
     try {
-      console.log("🛑 [safePlayRemoteVideo] Stopping remote track");
-      track.stop(); // 🔥 VERY IMPORTANT
+      track.stop();
     } catch (e) {
-      console.error("❌ [safePlayRemoteVideo] Error stopping track:", e);
+      console.error("Error stopping remote track:", e);
     }
 
-    console.log("🧹 [safePlayRemoteVideo] Clearing container");
     container.innerHTML = "";
 
     const div = document.createElement("div");
@@ -145,16 +130,13 @@ const VideoCalling = ({ callData }) => {
 
     setTimeout(() => {
       try {
-        console.log("▶️ [safePlayRemoteVideo] Playing remote track");
         track.play(div);
       } catch (err) {
-        console.warn("⚠️ [safePlayRemoteVideo] Retry remote video play", err);
         setTimeout(() => {
           try {
-            console.log("🔄 [safePlayRemoteVideo] Second attempt to play");
             track.play(div);
           } catch (retryErr) {
-            console.error("❌ [safePlayRemoteVideo] Failed to play after retry:", retryErr);
+            console.error("Failed to play remote video after retry:", retryErr);
           }
         }, 300);
       }
@@ -164,37 +146,22 @@ const VideoCalling = ({ callData }) => {
 
   /* ================= RESUME REMOTE AUDIO ================= */
   const resumeRemoteTracks = () => {
-    console.log("🔊 [resumeRemoteTracks] Called");
+    if (!clientRef.current) return;
 
-    if (!clientRef.current) {
-      console.warn("⚠️ [resumeRemoteTracks] No client available");
-      return;
-    }
-
-    console.log("👥 [resumeRemoteTracks] Remote users count:", clientRef.current.remoteUsers.length);
-
-    clientRef.current.remoteUsers.forEach((user, index) => {
-      console.log(`👤 [resumeRemoteTracks] Processing user ${index}:`, {
-        hasAudio: !!user.audioTrack,
-        hasVideo: !!user.videoTrack
-      });
-
+    clientRef.current.remoteUsers.forEach((user) => {
       if (user.audioTrack) {
         try {
-          console.log(`🔊 [resumeRemoteTracks] Playing audio for user ${index}`);
           user.audioTrack.play();
-          // Set volume based on speaker state
           user.audioTrack.setVolume(speakerOn ? 100 : 0);
         } catch (err) {
-          console.error(`❌ [resumeRemoteTracks] Error playing audio for user ${index}:`, err);
+          console.error("Error playing audio:", err);
         }
       }
       if (user.videoTrack && remoteVideoRef.current) {
         try {
-          console.log(`📹 [resumeRemoteTracks] Playing video for user ${index}`);
           safePlayRemoteVideo(user.videoTrack);
         } catch (err) {
-          console.error(`❌ [resumeRemoteTracks] Error playing video for user ${index}:`, err);
+          console.error("Error playing video:", err);
         }
       }
     });
@@ -207,8 +174,6 @@ const VideoCalling = ({ callData }) => {
 
     const start = async () => {
       try {
-        console.log("🔧 [START CALL] Initializing call");
-
         if (clientRef.current) {
           await clientRef.current.leave();
           clientRef.current.removeAllListeners();
@@ -228,24 +193,17 @@ const VideoCalling = ({ callData }) => {
             }
 
             if (mediaType === "audio" && user.audioTrack) {
-              // ✅ REQUIRED FOR CROSS DEVICE
               user.audioTrack.play();
-              // Set volume based on speaker state
               user.audioTrack.setVolume(speakerOn ? 100 : 0);
             }
           } catch (err) {
-            console.error("❌ [user-published] Error handling published media:", err);
+            console.error("Error handling published media:", err);
           }
         });
 
         client.on("user-unpublished", (user, mediaType) => {
-          console.log("📢 [user-unpublished] Event fired", { userId: user.uid, mediaType });
           if (mediaType === "video") {
             setRemoteVideoEnabled(false);
-          }
-          if (remoteVideoRef.current) {
-            console.log("🧹 [user-unpublished] Clearing remote video");
-            // remoteVideoRef.current.innerHTML = "";
           }
         });
 
@@ -263,14 +221,13 @@ const VideoCalling = ({ callData }) => {
         setCallSeconds(seconds);
         startTimer();
       } catch (err) {
-        console.error("CALL START ERROR", err);
+        console.error("Call start error:", err);
         safeEndCall();
       }
     };
 
     start();
     return () => {
-      console.log("🧹 [START CALL] useEffect cleanup");
       cleanup();
     };
     // eslint-disable-next-line
@@ -301,17 +258,12 @@ const VideoCalling = ({ callData }) => {
   useEffect(() => {
     if (micTrackRef.current) {
       micTrackRef.current.setEnabled(micOn);
-    } else {
-      console.warn("⚠️ [MIC STATE] No mic track available");
     }
-    // resumeRemoteAudio();
   }, [micOn]);
 
   useEffect(() => {
     if (camTrackRef.current) {
       camTrackRef.current.setEnabled(cameraOn);
-    } else {
-      console.warn("⚠️ [CAMERA STATE] No camera track available");
     }
   }, [cameraOn]);
 
@@ -319,26 +271,20 @@ const VideoCalling = ({ callData }) => {
   useEffect(() => {
     if (!clientRef.current) return;
 
-    console.log("🔊 [SPEAKER STATE] Updating speaker state:", speakerOn);
-
     try {
       clientRef.current.remoteUsers.forEach((user) => {
         if (user.audioTrack) {
           user.audioTrack.setVolume(speakerOn ? 100 : 0);
-          console.log(`🔊 [SPEAKER STATE] Set volume to ${speakerOn ? 100 : 0} for user`);
         }
       });
     } catch (err) {
-      console.error("❌ [SPEAKER STATE] Error updating speaker state:", err);
+      console.error("Error updating speaker state:", err);
     }
   }, [speakerOn]);
 
   /* ================= REMOTE VIDEO SAFETY REPLAY ================= */
   useEffect(() => {
-    if (!joined || !clientRef.current) {
-      console.log("⚠️ [REMOTE VIDEO SAFETY] Not ready, skipping");
-      return;
-    }
+    if (!joined || !clientRef.current) return;
 
     clientRef.current.remoteUsers.forEach((user) => {
       if (user.videoTrack) {
@@ -350,16 +296,10 @@ const VideoCalling = ({ callData }) => {
 
   /* ================= CLEANUP ================= */
   const cleanup = async () => {
-    console.log("🧹 [CLEANUP] Called", { alreadyCleaning: cleanupRef.current });
-
-    if (cleanupRef.current) {
-      console.log("⚠️ [CLEANUP] Already cleaning up, skipping");
-      return;
-    }
+    if (cleanupRef.current) return;
     cleanupRef.current = true;
 
     try {
-
       if (micTrackRef.current) {
         micTrackRef.current.stop();
         micTrackRef.current.close();
@@ -375,9 +315,8 @@ const VideoCalling = ({ callData }) => {
         clientRef.current.removeAllListeners();
       }
     } catch (e) {
-      console.error("❌ [CLEANUP] Error during cleanup:", e);
+      console.error("Error during cleanup:", e);
     } finally {
-
       micTrackRef.current = null;
       camTrackRef.current = null;
       clientRef.current = null;
@@ -455,37 +394,23 @@ const VideoCalling = ({ callData }) => {
         });
 
         const balanceData = res?.data?.data;
-
         if (!balanceData) return;
 
-        // Store initial balance when call starts (only once)
         if (initialBalance === null && balanceData.availableAmount) {
           setInitialBalance(balanceData.availableAmount);
-          console.log("💰 [INITIAL BALANCE] Set to:", balanceData.availableAmount);
         }
 
-        // Show recharge button if current balance is half or less than initial balance
         if (initialBalance !== null) {
           const halfOfInitial = initialBalance / 2;
           const shouldShowButton = balanceData.availableAmount <= halfOfInitial;
-
-          console.log("💰 [BALANCE CHECK]", {
-            initial: initialBalance,
-            current: balanceData.availableAmount,
-            halfOfInitial,
-            shouldShowButton
-          });
-
           setShowRechargeButton(shouldShowButton);
         }
       } catch (error) {
-        console.error("❌ [BALANCE CHECK] Error:", error);
+        console.error("Balance check error:", error);
       }
     };
 
     checkBalance();
-
-    // Check balance every 30 seconds during the call
     const intervalId = setInterval(checkBalance, 30000);
 
     return () => clearInterval(intervalId);
@@ -494,13 +419,10 @@ const VideoCalling = ({ callData }) => {
   /* ================= WALLET UPDATE LISTENER ================= */
   useEffect(() => {
     const handleWalletUpdate = async () => {
-      // Only maximize if video call is ongoing and minimized
       if (activeCall && activeCall.callType === "video" && isMinimized) {
-        console.log("💰 [WALLET UPDATE] Balance updated, maximizing video call");
         setIsMinimized(false);
       }
 
-      // Re-check balance after wallet update
       if (activeCall?.astrologerId && initialBalance !== null) {
         try {
           const res = await getBalance({
@@ -509,34 +431,21 @@ const VideoCalling = ({ callData }) => {
           });
 
           const balanceData = res?.data?.data;
-
           if (!balanceData) return;
 
-          // Update initial balance if user recharged (balance increased)
           if (balanceData.availableAmount > initialBalance) {
-            console.log("💰 [WALLET UPDATE] Balance increased, updating initial balance");
             setInitialBalance(balanceData.availableAmount);
           }
 
-          // Show recharge button if current balance is half or less than initial balance
           const halfOfInitial = initialBalance / 2;
           const shouldShowButton = balanceData.availableAmount <= halfOfInitial;
-
-          console.log("💰 [WALLET UPDATE] Balance check", {
-            initial: initialBalance,
-            current: balanceData.availableAmount,
-            halfOfInitial,
-            shouldShowButton
-          });
-
           setShowRechargeButton(shouldShowButton);
         } catch (error) {
-          console.error("❌ [WALLET UPDATE] Balance check error:", error);
+          console.error("Wallet update balance check error:", error);
         }
       }
     };
 
-    // Listen to both wallet update events
     window.addEventListener("wallet-updated", handleWalletUpdate);
     window.addEventListener("walletBalanceUpdated", handleWalletUpdate);
 
@@ -586,6 +495,37 @@ const VideoCalling = ({ callData }) => {
     }
   };
 
+  const handleSwitchProfile = () => {
+    setShowProfileModal(true);
+  };
+
+  const handleCloseProfileModal = () => {
+    setShowProfileModal(false);
+  };
+
+  const handleProfileSelect = (profile) => {
+    // Send the selected kundli profile as a link
+    if (!profile?._id) {
+      console.error("Invalid profile selected");
+      return;
+    }
+
+    setSelectedProfile(profile);
+
+    const baseUrl = window.location.origin;
+    const kundliLink = `${baseUrl}/kundli/${profile._id}`;
+
+    // Send via chat using the sendMessage function from VideoCallChat
+    if (sendChatMessageRef.current) {
+      sendChatMessageRef.current(kundliLink, "kundli");
+    }
+
+    setShowProfileModal(false);
+
+    // Open chat panel to show the sent kundli
+    setIsChatOpen(true);
+  };
+
   const formatTime = (s) =>
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(
       2,
@@ -597,14 +537,26 @@ const VideoCalling = ({ callData }) => {
     return `${lastRequestedAstro.firstName || ""} ${lastRequestedAstro.lastName || ""}`.trim();
   }, [lastRequestedAstro]);
 
+  // Get kundliId with fallback logic
+  const effectiveKundliId = useMemo(() => {
+    // Priority: activeCall.kundliId > lastSelectedKundli > first profile
+    if (activeCall?.kundliId) return activeCall.kundliId;
+    if (lastSelectedKundli?._id) return lastSelectedKundli._id;
+    if (profiles && profiles.length > 0) return profiles[0]._id;
+    return null;
+  }, [activeCall?.kundliId, lastSelectedKundli, profiles]);
+
   const chatData = useMemo(() => ({
     userId: activeCall?.userId,
     astrologerId: activeCall?.astrologerId,
     chatRoomId: activeCall?.roomId,
-    kundliId: activeCall?.kundliId,
+    kundliId: effectiveKundliId,
     isUserSide: activeCall?.isUserSide,
     astrologerName: astrologerName
-  }), [activeCall?.userId, activeCall?.astrologerId, activeCall?.chatRoomId, activeCall?.kundliId, activeCall?.isUserSide, astrologerName]);
+  }), [activeCall?.userId, activeCall?.astrologerId, activeCall?.chatRoomId, effectiveKundliId, activeCall?.isUserSide, astrologerName]);
+
+  // Ref to store sendMessage function from VideoCallChat
+  const sendChatMessageRef = useRef(null);
 
   return (
     <>
@@ -759,7 +711,7 @@ const VideoCalling = ({ callData }) => {
                 <div className={styles.controlItem}>
                   <button
                     className={styles.controlBtn}
-                    onClick={() => setIsLocalBig((p) => !p)}
+                    onClick={handleSwitchProfile}
                   >
                     <IoSwapHorizontal size={24} />
                   </button>
@@ -879,6 +831,7 @@ const VideoCalling = ({ callData }) => {
           isOpen={isChatOpen}
           onClose={() => setIsChatOpen(false)}
           videoCallData={chatData}
+          sendMessageRef={sendChatMessageRef}
         />
 
         {/* Gift Modal */}
@@ -887,6 +840,21 @@ const VideoCalling = ({ callData }) => {
           onClose={() => setIsGiftModalOpen(false)}
           astrologerId={activeCall?.astrologerId}
           astrologerName={callerName}
+        />
+
+        {/* Profile Listing Modal */}
+        <ProfileManager
+          isOpen={showProfileModal}
+          onClose={handleCloseProfileModal}
+          onProfileSelect={handleProfileSelect}
+          selectedProfileId={selectedProfile?._id}
+          title="Select Profile"
+          enabledOperations={{
+            list: true,
+            add: true,
+            edit: true,
+            delete: true,
+          }}
         />
       </div>
     </>
