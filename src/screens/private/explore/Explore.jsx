@@ -13,6 +13,7 @@ import { useGetExplorePageDataQuery } from "../../../redux/api/explore/exploreAp
 import { setForm } from "../../../redux/kundliform/formSlice";
 import { Toast } from "../../../component";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
+import { getRouteFromSlug, requiresProfileData } from "../../../utils/constanats/exploreRouteConfig";
 
 // Import default images as fallback
 import horoscopeImg from "../../../assets/explore/horoscope.png";
@@ -27,6 +28,30 @@ import tarotImg from "../../../assets/explore/tarot.png";
 import newsImg from "../../../assets/explore/news.png";
 import numerology from "../../../assets/images/numerology.svg";
 import { ProfileManager } from "../../../component/UI/Profile";
+
+// Reusable Section Title with Divider Component
+const SectionTitleWithDivider = ({ title }) => (
+  <div>
+    <h2 className={styles.sectionTitle}>{title}</h2>
+    <div className={styles.dividerContainer}>
+      <div className={styles.dividerLine}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="104" height="1" viewBox="0 0 104 1" fill="none">
+          <path d="M103.803 0.406393C103.803 0.630933 101.504 0.812789 98.669 0.812789C95.8336 0.812789 0 0.630933 0 0.406393C0 0.181853 95.8342 0 98.669 0C101.504 0 103.803 0.181853 103.803 0.406393Z" fill="#030303"></path>
+        </svg>
+      </div>
+      <span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 4 5" fill="none">
+          <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"></path>
+        </svg>
+      </span>
+      <div className={styles.dividerLine}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="104" height="1" viewBox="0 0 104 1" fill="none">
+          <path d="M-4.48009e-06 0.406393C-4.48009e-06 0.630933 2.29856 0.812789 5.13401 0.812789C7.96946 0.812789 103.803 0.630933 103.803 0.406393C103.803 0.181853 7.96885 0 5.13401 0C2.29856 0 -4.48009e-06 0.181853 -4.48009e-06 0.406393Z" fill="#030303"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+);
 
 const Explore = () => {
   const navigate = useNavigate();
@@ -139,6 +164,11 @@ const Explore = () => {
     const displayType = section.display_type;
     const slug = section.slug;
 
+    // Don't render section if there's no content
+    if (!sectionContent || sectionContent.length === 0) {
+      return null;
+    }
+
     // All About You - Hero cards
     if (displayType === "all-about-you") {
       return (
@@ -154,7 +184,7 @@ const Explore = () => {
                 key={idx}
                 className={styles.topCard}
                 style={{ backgroundColor: card.bg_color || "#E56329" }}
-                onClick={() => handleCardClick(card)}
+                onClick={() => handleCardClick(card, "all-about-you")}
               >
                 <h3 className={styles.cardTitle}>{card.title}</h3>
                 <img
@@ -175,9 +205,9 @@ const Explore = () => {
         <section key={index} className={styles.section}>
           <div className={styles.kundliSection}>
             <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>
-                {(section.display_title || section.title || "").toUpperCase()}
-              </h2>
+              <SectionTitleWithDivider 
+                title={(section.display_title || section.title || "").toUpperCase()} 
+              />
               <ChevronRight size={24} className={styles.sectionArrow} />
             </div>
 
@@ -197,7 +227,9 @@ const Explore = () => {
                   </div>
                   <div className={styles.kundliCardContent}>
                     <h3 className={styles.kundliCardTitle}>{card.title}</h3>
-                    <ChevronRight size={20} className={styles.cardArrow} />
+                    {card.description && (
+                      <p className={styles.kundliCardDescription}>{card.description}</p>
+                    )}
                   </div>
                 </div>
               ))}
@@ -212,9 +244,9 @@ const Explore = () => {
       return (
         <section key={index} className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>
-              {(section.display_title || section.title || "").toUpperCase()}
-            </h2>
+            <SectionTitleWithDivider 
+              title={(section.display_title || section.title || "").toUpperCase()} 
+            />
             <ChevronRight size={24} className={styles.sectionArrow} />
           </div>
 
@@ -249,9 +281,9 @@ const Explore = () => {
       return (
         <section key={index} className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>
-              {(section.display_title || section.title || "EXPLORE BLOGS").toUpperCase()}
-            </h2>
+            <SectionTitleWithDivider 
+              title={(section.display_title || section.title || "EXPLORE BLOGS").toUpperCase()} 
+            />
             <ChevronRight size={24} className={styles.sectionArrow} />
           </div>
 
@@ -291,9 +323,9 @@ const Explore = () => {
       return (
         <section key={index} className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>
-              {(section.display_title || section.title || "IN THE NEWS").toUpperCase()}
-            </h2>
+            <SectionTitleWithDivider 
+              title={(section.display_title || section.title || "IN THE NEWS").toUpperCase()} 
+            />
             <ChevronRight size={24} className={styles.sectionArrow} />
           </div>
 
@@ -404,37 +436,49 @@ const Explore = () => {
     news: newsImg,
   };
 
-  const handleCardClick = (card) => {
-    // Since API doesn't return redirect_url, we'll use title to determine navigation
-    // Map card titles to their routes
-    const titleToRouteMap = {
-      // All About You section
-      "Explore Your Horoscope": "/horoscopes/daily-horoscope",
-      "Explore Your Kundli": "/kundli",
-      "Kundli Reports": "/kundli?tab=free-report",
-      "Remedies For You": "/remedies",
-      "Remedies": "/remedies",
-      
-      // Discover Your Kundli section
-      "Vedic Kundli": "/kundli?tab=kundli",
-      "Vedic Kundali": "/kundli?tab=kundli",
-      "KP Chart": "/kundli?tab=kp",
-      "KP": "/kundli?tab=kp",
-      "Dasha": "/kundli?tab=dasha",
-      "Ashtakvarga Chart": "/kundli?tab=ashtakvarga",
-      "Ashtakvarga": "/kundli?tab=ashtakvarga",
-      
-      // Explore Your Destiny section
-      "Tarot": "/tarot",
-      "Numerology": "/numerology",
-      "Gemstones": "/gemstones",
-      "Gemstone": "/gemstones",
-    };
+  const handleCardClick = (card, sectionType = null) => {
+    let redirectUrl = null;
     
-    const redirectUrl = titleToRouteMap[card.title] || card.redirect_url || card.redirectUrl || card.url || card.link;
+    // Use slug-based routing ONLY for "All About You" section
+    if (sectionType === "all-about-you" && card.slug) {
+      redirectUrl = getRouteFromSlug(card.slug);
+    }
     
-    // Special handling for Kundli card - pass selected profile
-    if (redirectUrl?.includes('/kundli') && selectedProfile) {
+    // For all other sections, use title-based mapping or direct URL
+    if (!redirectUrl) {
+      const titleToRouteMap = {
+        // All About You section
+        "Explore Your Horoscope": "/horoscopes/daily-horoscope",
+        "Explore Your Kundli": "/kundli",
+        "Kundli Reports": "/kundli?tab=free-report",
+        "Remedies For You": "/remedies",
+        "Remedies": "/remedies",
+        
+        // Discover Your Kundli section
+        "Vedic Kundli": "/kundli?tab=kundli",
+        "Vedic Kundali": "/kundli?tab=kundli",
+        "KP Chart": "/kundli?tab=kp",
+        "KP": "/kundli?tab=kp",
+        "Dasha": "/kundli?tab=dasha",
+        "Ashtakvarga Chart": "/kundli?tab=ashtakvarga",
+        "Ashtakvarga": "/kundli?tab=ashtakvarga",
+        
+        // Explore Your Destiny section
+        "Tarot": "/tarot",
+        "Numerology": "/numerology",
+        "Gemstones": "/gemstones",
+        "Gemstone": "/gemstones",
+      };
+      
+      redirectUrl = titleToRouteMap[card.title] || card.redirect_url || card.redirectUrl || card.url || card.link;
+    }
+    
+    // Special handling for Kundli card - pass selected profile if needed
+    const needsProfile = (sectionType === "all-about-you" && card.slug) 
+      ? requiresProfileData(card.slug) 
+      : redirectUrl?.includes('/kundli');
+    
+    if (needsProfile && selectedProfile) {
       // Convert profile data to the format expected by formSlice
       const months = [
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -475,6 +519,8 @@ const Explore = () => {
     // Navigate to the URL
     if (redirectUrl) {
       navigate(redirectUrl);
+    } else {
+      console.warn(`No route found for card:`, card);
     }
   };
 
