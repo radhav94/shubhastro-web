@@ -8,6 +8,7 @@ import {
   IoSparkles,
   IoGift,
   IoVolumeHigh,
+  IoVolumeMute,
   IoAttach,
   IoTime,
   IoCallSharp,
@@ -18,6 +19,7 @@ import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
 import { PATH } from "../../utils/routes/Paths";
 import GiftModal from "./GiftModal";
+import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance";
 
 // Import SVG icons from chat assets
 import VideocamIcon from "../../assets/chat/Videocam.svg";
@@ -31,7 +33,7 @@ const AgoraVoiceCalling = ({ callData }) => {
 
   if (!activeCall || activeCall.callType !== "audio") return null;
 
-  const { roomId, agoraToken, callerName, isUserSide } = callData;
+  const { roomId, agoraToken, callerName, isUserSide, experience } = callData;
 
   /* ================= REFS ================= */
   const clientRef = useRef(null);
@@ -49,6 +51,10 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [isVideo, setIsVideo] = useState(false);
   const [isRemoteVideo, setIsRemoteVideo] = useState(false);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
+  const [speakerOn, setSpeakerOn] = useState(true);
+
+  /* ================= WALLET BALANCE ================= */
+  const { balance, isFetching } = useWalletBalance();
 
   /* ================= START CALL ================= */
   useEffect(() => {
@@ -61,6 +67,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       client.on("user-published", async (user, mediaType) => {
         await client.subscribe(user, mediaType);
         if (mediaType === "audio") {
+          user.audioTrack?.setVolume(speakerOn ? 100 : 0);
           user.audioTrack?.play();
         }
 
@@ -111,6 +118,19 @@ const AgoraVoiceCalling = ({ callData }) => {
   useEffect(() => {
     micTrackRef.current?.setEnabled(micOn);
   }, [micOn]);
+
+  /* ================= SPEAKER TOGGLE ================= */
+  useEffect(() => {
+    const client = clientRef.current;
+    if (!client) return;
+
+    // Update volume for all remote users
+    client.remoteUsers.forEach((user) => {
+      if (user.audioTrack) {
+        user.audioTrack.setVolume(speakerOn ? 100 : 0);
+      }
+    });
+  }, [speakerOn]);
 
   /* ================= CLEANUP ================= */
   const cleanup = async () => {
@@ -298,12 +318,14 @@ const AgoraVoiceCalling = ({ callData }) => {
             
             <div className={styles.astrologerInfo}>
               <h3 className={styles.astrologerName}>{callerName}</h3>
-              <p className={styles.astrologerExp}>Exp. 20 Years</p>
+              <p className={styles.astrologerExp}> {experience} Years</p>
             </div>
 
             <div className={styles.walletBadge}>
               <span className={styles.walletIcon}>💰</span>
-              <span className={styles.walletAmount}>₹20</span>
+              <span className={styles.walletAmount}>
+                {isFetching ? "..." : balance !== null ? `₹${balance}` : "₹0"}
+              </span>
             </div>
           </div>
 
@@ -411,10 +433,15 @@ const AgoraVoiceCalling = ({ callData }) => {
               </div>
 
               <div className={styles.controlItem}>
-                <button className={styles.controlBtn}>
-                  <IoVolumeHigh size={24} />
+                <button 
+                  className={`${styles.controlBtn} ${!speakerOn ? styles.muted : ''}`}
+                  onClick={() => setSpeakerOn((s) => !s)}
+                >
+                  {speakerOn ? <IoVolumeHigh size={24} /> : <IoVolumeMute size={24} />}
                 </button>
-                <span className={styles.controlLabel}>Speaker</span>
+                <span className={styles.controlLabel}>
+                  {speakerOn ? "Speaker On" : "Speaker Off"}
+                </span>
               </div>
             </div>
 
