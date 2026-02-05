@@ -12,12 +12,69 @@ import PrimaryLoader from '../../../component/UI/PrimaryLoader';
 import { formatted } from '../../../utils/dateFormat/date';
 import { zodiac } from './zodiac';
 import './Horoscope.css';
-import overViewImg from '../../../assets/images/overview-img.png';
+import overViewImg from "../../../assets/images/overall-Image.png";
+import financeImg from "../../../assets/images/finance.png";
+import scoreImg from "../../../assets/images/score.png";
+import healthImg from "../../../assets/images/health.png";
+import friendsImg from "../../../assets/images/friends.png";
+import familyImg from "../../../assets/images/family.png";
+import travelImg from "../../../assets/images/travel.png";
+import careerImg from "../../../assets/images/career.png";
+import relationImg from "../../../assets/images/relation.png";
+import statusImg from "../../../assets/images/status.png";
+import physiqueImg from "../../../assets/images/physique.png";
 
 const HoroscopeNew = () => {
   const navigate = useNavigate();
   const { sign } = useParams();
   const { pathname } = useLocation();
+  
+  // Category image mapping
+  const categoryImages = {
+    overview: overViewImg,
+    finances: financeImg,
+    relationship: relationImg,
+    total_score: scoreImg,
+    health: healthImg,
+    friends: friendsImg,
+    family: familyImg,
+    travel: travelImg,
+    career: careerImg,
+    status: statusImg,
+    physique: physiqueImg,
+
+    // Names are Not coming from the API So commented
+    // totalscore: scoreImg,
+    // relation: relationImg,
+    // finance: financeImg,
+    // score: scoreImg,
+    // carrer: careerImg,
+    // Add alternative spellings/variations
+    // emotions: scoreImg,
+    // personal_life: relationImg,
+    // profession: careerImg,
+    // luck: scoreImg,
+    // travel_and_health: travelImg
+  };
+
+  // Function to get category image
+  const getCategoryImage = (categoryId) => {
+    const id = categoryId.toLowerCase().replace(/\s+/g, '_');
+    // Try exact match first
+    if (categoryImages[categoryId.toLowerCase()]) {
+      return categoryImages[categoryId.toLowerCase()];
+    }
+    // Try with underscores
+    if (categoryImages[id]) {
+      return categoryImages[id];
+    }
+    // Try without spaces
+    const noSpaces = categoryId.toLowerCase().replace(/\s+/g, '');
+    if (categoryImages[noSpaces]) {
+      return categoryImages[noSpaces];
+    }
+    return overViewImg; // Default to overview image
+  };
   
   // Get zodiac signs from zodiac.js (same as old implementation)
   const [zodiacData] = zodiac();
@@ -109,6 +166,7 @@ const HoroscopeNew = () => {
             ).join(' ')
           }));
         newCategories = [...newCategories, ...yearlyCategories];
+        console.log('Yearly Category IDs:', yearlyCategories.map(c => c.id));
       }
     } else if (((activeTab === 'Today' || activeTab === 'Daily') && dailyData?.response?.bot_response) || 
                (activeTab === 'This Week' && weeklyData?.response?.bot_response)) {
@@ -121,6 +179,7 @@ const HoroscopeNew = () => {
         ).join(' ')
       }));
       newCategories = [...newCategories, ...dailyWeeklyCategories];
+      console.log('Daily/Weekly Category IDs:', dailyWeeklyCategories.map(c => c.id));
     }
     
     setCategories(newCategories);
@@ -360,7 +419,7 @@ const HoroscopeNew = () => {
                   onClick={() => setActiveCategory(category.id)}
                 >
                   <span className="category-label">{category.label}</span>
-                  <img className="categoryImages" src={overViewImg} alt="icons" />
+                  <img className="categoryImages" src={getCategoryImage(category.id)} alt={category.label} />
                   {/* <span className="roundedShadowBottom"></span> */}
                 </button>
               </div>

@@ -57,6 +57,9 @@ const ChatWindow = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showGiftModal, setShowGiftModal] = useState(false);
   
+  // Check if there's an active video call
+  const isVideoCallActive = activeCall && activeCall.callType === "video";
+  
   // Get wallet balance
   const { balance, refreshWallet } = useWalletBalance();
   
@@ -359,7 +362,7 @@ const ChatWindow = () => {
             />
           </div>
 
-          {!isMessageDisabled && (
+          {(!isMessageDisabled || isVideoCallActive) && (
             <ChatInput
               value={message}
               onChange={(e) => {
@@ -367,7 +370,7 @@ const ChatWindow = () => {
                 sendTyping();
               }}
               onSend={handleSend}
-              isMessageDisabled={isMessageDisabled}
+              isMessageDisabled={isMessageDisabled && !isVideoCallActive}
               onChatEnd={handleChatEnd}
               setOpen={setOpenFeedback}
               sendVoiceMessage={sendVoiceMessage}
@@ -375,10 +378,12 @@ const ChatWindow = () => {
             />
           )}
 
-          <ChatFooter 
-            remainingTime={chatSeconds > 0 ? chatSeconds : 0}
-            onRecharge={handleRecharge}
-          />
+          {!isVideoCallActive && (
+            <ChatFooter 
+              remainingTime={chatSeconds > 0 ? chatSeconds : 0}
+              onRecharge={handleRecharge}
+            />
+          )}
 
           {/* {waitingPopup && (
             <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />

@@ -1239,36 +1239,54 @@
 
 // Override addProfileButton to match sticky button style
 .addProfileButton {
-  width: 30vw;
-  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
-  border-radius: 50px;
-  padding: 1rem 1.5rem;
-  font-size: 1.125rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.2s;
-  color: #ffffff;
-  position: fixed;
-  z-index: 999;
-  bottom: 50px;
-  margin: 0 auto;
-  left: 0;
-  right: 0;
-  @media (width <= 767px) {
-    padding: 0.8rem 1rem;
-    width: 94%;
-    position: fixed;
-    bottom: 136px;
-  }
-
-  &:hover {
+    width: 100%;
     background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
-    transform: translateY(-2px);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
+    border-radius: 50px;
+    padding: 1rem 1.5rem;
+    font-size: 1.125rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    transition: all .2s;
+    color: #fff
 }
+
+.addProfileButton:hover {
+    background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+    transform: translateY(-2px)
+}
+// .addProfileButton {
+//   width: 30vw;
+//   background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+//   border-radius: 50px;
+//   padding: 1rem 1.5rem;
+//   font-size: 1.125rem;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   gap: 0.5rem;
+//   transition: all 0.2s;
+//   color: #ffffff;
+//   position: fixed;
+//   z-index: 999;
+//   bottom: 50px;
+//   margin: 0 auto;
+//   left: 0;
+//   right: 0;
+//   @media (width <= 767px) {
+//     padding: 0.8rem 1rem;
+//     width: 94%;
+//     position: fixed;
+//     bottom: 136px;
+//   }
+
+//   &:hover {
+//     background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+//     transform: translateY(-2px);
+//   }
+
+//   &:active {
+//     transform: translateY(0);
+//   }
+// }

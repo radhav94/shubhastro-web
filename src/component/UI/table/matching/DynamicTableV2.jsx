@@ -13,29 +13,29 @@ const DynamicTable = ({data}) => {
         {rows.map((item, index) => (
           <div
           key={index}
-          className="bg-white rounded-xl shadow p-4 text-center"
+          className="bg-white rounded-xl shadow p-4 md:p-8 text-center "
         >
           {/* HEADER SECTION */}
           <div className="border-b border-gray-300 pb-2 mb-2">
-            <div className="text-m text-black-900 mb-1">
+            <div className="text-m md:text-xl text-black-900 mb-1">
               {item.name}
             </div>
         
-            <div className="text-xl font-bold text-[#FF6A3D]">
+            <div className="text-xl md:text-4xl font-bold text-[#FF6A3D]">
               {(item?.varna ?? "-")}/{(item?.full_score ?? "-")}
             </div>
           </div>
         
           {/* DETAILS */}
-          <div className="text-xs text-gray-400 text-left space-y-1">
+          <div className="text-xs text-gray-700 md:text-base  md:text-gray-700 text-left space-y-1 md:space-y-2 md:leading-relaxed">
             <div>
-              <strong>Male :</strong> {item?.boy_varna}
+              <strong className="md:font-semibold">Male :</strong> {item?.boy_varna}
             </div>
             <div>
-              <strong>Female :</strong> {item?.girl_varna}
+              <strong className="md:font-semibold">Female :</strong> {item?.girl_varna}
             </div>
             <div>
-              <strong>Description :</strong> {item?.description}
+              <strong className="md:font-semibold">Description :</strong> {item?.description}
             </div>
           </div>
         </div>

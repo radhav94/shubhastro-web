@@ -18,6 +18,7 @@ import ConnectAstrologerPopup from "../../../../screens/private/v2/components/ui
 import ProfileModals from "../../../../screens/private/kundli/components/ProfileModals";
 import { useProfileManager } from "../../../../screens/private/kundli/hooks/useProfileManager";
 import { useDispatch } from "react-redux";
+import ProfileManager from "../../Profile/ProfileManager";
 
 const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
   const dispatch = useDispatch();
@@ -128,6 +129,11 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
     if (localSelectedProfile) {
       hookHandleAfterKundliSelect(localSelectedProfile);
     }
+  };
+
+  // Handler for ProfileManager startCallMode - receives selected profile and triggers connection
+  const handleProfileManagerStartCall = (selectedProfile) => {
+    hookHandleAfterKundliSelect(selectedProfile);
   };
 
   // Handle connect button click - open popup
@@ -317,7 +323,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
   return (
     <>
       {/* Profile Modals - using ProfileModals like TalkToAstrologer */}
-      <ProfileModals
+      {/* <ProfileModals
         showSelectProfile={hookOpenModal.kundli}
         showAddProfile={showAddProfile}
         showEditProfile={showEditProfile}
@@ -341,6 +347,20 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
         formatProfileDisplay={formatProfileDisplay}
         showContinueButton={true}
         onContinue={handleContinueAfterKundliSelect}
+      /> */}
+
+      <ProfileManager
+        isOpen={hookOpenModal.kundli}
+        onClose={() => hookSetOpenModal((prev) => ({ ...prev, kundli: false }))}
+        startCallMode={true}
+        onStartCall={handleProfileManagerStartCall}
+        title="Select Profile to Continue"
+        enabledOperations={{
+          list: true,
+          add: true,
+          edit: true,
+          delete: true,
+        }}
       />
 
       {/* Recharge modal from hook for popup flow */}

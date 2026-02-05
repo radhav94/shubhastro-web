@@ -25,7 +25,7 @@ const MySessionsSection = ({ onConnectClick }) => {
       } else if (session.astrologerId || session.astrologerName) {
         // Otherwise, construct astrologer object from session data
         const astrologer = {
-          _id: session.astrologerId,
+          _id: session._id,
           firstName:
             session.astrologerName?.split(" ")[0] ||
             session.astrologerName ||
