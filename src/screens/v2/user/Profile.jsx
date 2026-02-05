@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { TiUserDelete } from "react-icons/ti";
 import { LuPencilLine } from "react-icons/lu";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useState, useRef, useEffect } from "react";
 import dayjs from "dayjs";
@@ -44,8 +44,13 @@ import { ProfileManager } from "../../../component/UI/Profile";
 const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("Profile");
-  const [orderHistoryTab, setOrderHistoryTab] = useState("call"); // Sub-tab for order history
+  const location = useLocation();
+  
+  // Get state from navigation
+  const navigationState = location.state || {};
+  
+  const [activeTab, setActiveTab] = useState(navigationState.activeTab || "Profile");
+  const [orderHistoryTab, setOrderHistoryTab] = useState(navigationState.orderHistoryTab || "call"); // Sub-tab for order history
   const transactionListRef = useRef(null);
   const orderListRef = useRef(null); // Ref for order history scroll
   const user = getUserFromStorage();
