@@ -3,6 +3,7 @@ import socketService from "../../../../../services/socketService";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import toast from "../../../../../component/toast";
 import {useChat as useChatContext} from "../../../../../context/ChatContext"
+import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
 
 export default function useChat({
   userId,
@@ -19,6 +20,10 @@ export default function useChat({
   const [error, setError] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
   const [isMessageDisabled, setIsMessageDisabled] = useState(false);
+  
+  // Fetch kundli profiles to get the "Self" profile
+  const { data: profilesData } = useGetAllKundlisQuery();
+  const profiles = profilesData?.data || [];
 
   const formatTime = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -44,9 +49,24 @@ export default function useChat({
           setIsMessageDisabled(false);
           //Send msg first time only 
           if(!refreshKey) {
-            sendMessage(`Hi ${astrologerName || ""}`); 
+            // Check if there's an AI initial query stored
+            const aiInitialQuery = localStorage.getItem("aiInitialQuery");
+            
+            if (aiInitialQuery) {
+              // Send the AI query directly
+              sendMessage(aiInitialQuery);
+              localStorage.removeItem("aiInitialQuery");
+            } else {
+              // Regular greeting message
+              sendMessage(`Hi ${astrologerName || ""}`); 
+            }
+            
+            // Find the kundli profile with relation "Self"
+            const selfProfile = profiles.find(profile => profile.relation === "Self");
+            const profileIdToUse = selfProfile?._id || kundliId;
+            
             const baseUrl = window.location.origin;
-            const kundliLink = `${baseUrl}/kundli/${kundliId}`;
+            const kundliLink = `${baseUrl}/kundli/${profileIdToUse}`;
             setTimeout(() => sendMessage(kundliLink,'kundli'), 300);
           }
         }
