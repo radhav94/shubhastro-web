@@ -8,6 +8,7 @@ const FilterChips = ({
   onApplyFilters,
   isActiveType,
   isOnlineFromURL,
+  setShowFilterAstrologer,
   selectedType = "All",
 }) => {
   const [triggerFilter, { isLoading }] = useLazyFilterAstrologersQuery();
@@ -202,6 +203,9 @@ const FilterChips = ({
       pageRef.current = pageNo;
       setHasMore((response?.data?.result || []).length >= 9);
       setFilterModalOpen(false);
+      
+      // Set showFilterAstrologer to true when filters are applied (not "All")
+      setShowFilterAstrologer(true);
     } catch (error) {
       console.error(error);
     } finally {
@@ -297,6 +301,7 @@ const FilterChips = ({
 
     if (item === "All") {
       isFilterActiveRef.current = false;
+      setShowFilterAstrologer(false); // Show TOP ASTROLOGERS when "All" is selected
       onSelect?.(null);
       return;
     }
@@ -359,7 +364,7 @@ const FilterChips = ({
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-            </svg>{" "}
+            </svg>
             Filter
           </button>
         </div>
