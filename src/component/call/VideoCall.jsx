@@ -25,6 +25,7 @@ import GiftModal from "./GiftModal";
 import { useGetBalanceMutation } from "../../redux/api/wallet/walletApi";
 import ProfileManager from "../UI/Profile/ProfileManager";
 import { useGetAllKundlisQuery } from "../../services/appServices/kundliServicesNew";
+import { Toast } from "../index";
 
 const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 
@@ -60,7 +61,6 @@ const VideoCalling = ({ callData }) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showRechargeButton, setShowRechargeButton] = useState(false);
   const [remoteVideoEnabled, setRemoteVideoEnabled] = useState(true);
-  const [initialBalance, setInitialBalance] = useState(null);
   const [selectedProfile, setSelectedProfile] = useState(null);
 
   const [getBalance] = useGetBalanceMutation();
@@ -370,51 +370,63 @@ const VideoCalling = ({ callData }) => {
       }
     };
 
+    const handleWarning = (msg) => {
+      if (msg?.message.includes("Low balance alert! Remaining time:")) {
+        setShowRechargeButton(true);
+      }
+      Toast.warning(msg.message);
+    };
+
     voiceSocket.on("call:ended", handleCallEnded);
     voiceSocket.on("force_call_end", handleForceCallEnd);
     voiceSocket.on("disconnect", handleDisconnect);
+    voiceSocket.on("warning", handleWarning);
 
     return () => {
       voiceSocket.off("call:ended", handleCallEnded);
       voiceSocket.off("force_call_end", handleForceCallEnd);
       voiceSocket.off("disconnect", handleDisconnect);
+      voiceSocket.off("warning", handleWarning);
     };
     // eslint-disable-next-line
   }, []);
 
   /* ================= BALANCE CHECK ================= */
-  useEffect(() => {
-    const checkBalance = async () => {
-      if (!activeCall?.astrologerId) return;
+  // useEffect(async() => {
+  //     console.log("halfTalkTimeBalance initialBalance", initialBalance);
+  //     if (!activeCall?.astrologerId) return;
 
-      try {
-        const res = await getBalance({
-          astrologerId: activeCall.astrologerId,
-          type: "call"
-        });
+  //     try {
+  //       const res = await getBalance({
+  //         astrologerId: activeCall.astrologerId,
+  //         type: "call"
+  //       });
 
-        const balanceData = res?.data?.data;
-        if (!balanceData) return;
+  //       const balanceData = res?.data?.data;
+  //       if (!balanceData) return;
 
-        if (initialBalance === null && balanceData.availableAmount) {
-          setInitialBalance(balanceData.availableAmount);
-        }
+  //       if (initialBalance === null && balanceData?.availableAmount) {
+  //         setInitialBalance(balanceData.availableAmount);
+  //       }
 
-        if (initialBalance !== null) {
-          const halfOfInitial = initialBalance / 2;
-          const shouldShowButton = balanceData.availableAmount <= halfOfInitial;
-          setShowRechargeButton(shouldShowButton);
-        }
-      } catch (error) {
-        console.error("Balance check error:", error);
-      }
-    };
+  //       if (initialBalance !== null && balanceData?.pricePerMinute) {
+  //         // Calculate based on astrologer's rate per minute
+  //         const ratePerMinute = balanceData.pricePerMinute;
+  //         const totalTalkTimeMinutes = initialBalance / ratePerMinute;
+  //         const halfTalkTimeMinutes = totalTalkTimeMinutes * 0.5;
+  //         const halfTalkTimeBalance = halfTalkTimeMinutes * ratePerMinute;
+  //         // Show recharge button when current balance <= 50% of initial talk time balance
+  //         const shouldShowButton = balanceData.availableAmount <= halfTalkTimeBalance;
+  //         setShowRechargeButton(shouldShowButton);
+  //       }
+  //     } catch (error) {
+  //       console.error("Balance check error:", error);
+  //     }
 
-    checkBalance();
-    const intervalId = setInterval(checkBalance, 30000);
+  //   return () => {
 
-    return () => clearInterval(intervalId);
-  }, [activeCall?.astrologerId, getBalance, initialBalance]);
+  //   }
+  // }, [activeCall?.astrologerId, getBalance, initialBalance]);
 
   /* ================= WALLET UPDATE LISTENER ================= */
   useEffect(() => {
@@ -423,7 +435,7 @@ const VideoCalling = ({ callData }) => {
         setIsMinimized(false);
       }
 
-      if (activeCall?.astrologerId && initialBalance !== null) {
+      if (activeCall?.astrologerId) {
         try {
           const res = await getBalance({
             astrologerId: activeCall.astrologerId,
@@ -433,12 +445,14 @@ const VideoCalling = ({ callData }) => {
           const balanceData = res?.data?.data;
           if (!balanceData) return;
 
-          if (balanceData.availableAmount > initialBalance) {
-            setInitialBalance(balanceData.availableAmount);
-          }
+          // Calculate based on astrologer's rate per minute
+          const ratePerMinute = balanceData.pricePerMinute;
+          const totalTalkTimeMinutes = balanceData.availableAmount / ratePerMinute;
+          const halfTalkTimeMinutes = totalTalkTimeMinutes * 0.5;
+          const halfTalkTimeBalance = halfTalkTimeMinutes * ratePerMinute;
 
-          const halfOfInitial = initialBalance / 2;
-          const shouldShowButton = balanceData.availableAmount <= halfOfInitial;
+          // Show recharge button when current balance <= 50% of initial talk time balance
+          const shouldShowButton = balanceData.availableAmount <= halfTalkTimeBalance;
           setShowRechargeButton(shouldShowButton);
         } catch (error) {
           console.error("Wallet update balance check error:", error);
@@ -453,7 +467,7 @@ const VideoCalling = ({ callData }) => {
       window.removeEventListener("wallet-updated", handleWalletUpdate);
       window.removeEventListener("walletBalanceUpdated", handleWalletUpdate);
     };
-  }, [activeCall, isMinimized, getBalance, initialBalance]);
+  }, [activeCall, isMinimized, getBalance]);
 
   /* ================= DRAG ================= */
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -721,7 +735,7 @@ const VideoCalling = ({ callData }) => {
                 <div className={styles.controlItem}>
                   <button
                     className={styles.controlBtn}
-                    onClick={() => handleRedirection("aiwow")}
+                    onClick={() => handleRedirection("/aiwow")}
                   >
                     <IoSparkles size={24} />
                   </button>
@@ -819,7 +833,7 @@ const VideoCalling = ({ callData }) => {
                   Call Ends in <span className={styles.timerRed}>{formatTime(callSeconds)}</span>
                 </div>
                 {showRechargeButton && (
-                  <button className={styles.rechargeBtn} onClick={handleRedirection("recharge")}>Recharge Now</button>
+                  <button className={styles.rechargeBtn} onClick={() => handleRedirection("/recharge")}>Recharge Now</button>
                 )}
               </div>
             </div>
