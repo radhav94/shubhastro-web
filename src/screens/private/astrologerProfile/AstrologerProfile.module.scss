@@ -173,6 +173,7 @@
   }
   @media (width <= 767px) {
     border-radius: 12px;
+    padding: 12px 12px;
   }
 }
 
@@ -210,8 +211,9 @@
   overflow: hidden;
   white-space: nowrap;
   @media (width <= 767px) {
-    font-size: 20px;
+    font-size: 16px;
     margin: 0 0 5px 0;
+    font-weight: 500
   }
 }
 
@@ -297,15 +299,17 @@
   line-height: 1;
   letter-spacing: -0.5px;
   @media (width <= 767px) {
-    font-size: 22px;
+    font-size: 14px;
+    font-weight: 500;
   }
 }
 
 .statLabel {
   font-size: 14px;
-  color: #A8A8A8;
+  color: #101010;
   font-weight: 400;
   margin-top: 4px;
+  opacity: 0.6;
   @media (width <= 460px) {
     font-size: 12px;
     margin-top: 0;
@@ -391,6 +395,9 @@
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  @media (width <= 767px) {
+    padding: 8px 16px;
+  }
 
   .notificationIcon {
     width: 16px;
@@ -450,16 +457,18 @@
   line-height: 1;
   letter-spacing: -0.5px;
   @media (width <= 767px) {
-    font-size: 22px;
+    font-size: 14px;
+    font-weight: 500;
   }
 }
 
 .minuteLabel {
   font-size: 14px;
-  color: #A8A8A8;
+  color: #101010;
   text-align: center;
   font-weight: 400;
   margin-top: 4px;
+  opacity: 0.6;
   @media (width <= 460px) {
     font-size: 12px;
     margin-top: 0;
@@ -490,10 +499,13 @@
 .aboutTitle {
   font-size: 24px;
   font-weight: 600;
-  color: #4A4A4A;
+  color: #101010;
   margin: 0 0 6px 0;
   letter-spacing: -0.3px;
   text-align: left;
+  @media (width <= 767px) {
+    font-weight: 500;
+  }
 }
 
 .aboutText {
@@ -606,6 +618,7 @@
   overflow: visible;
   gap: 20px;
   min-height: 180px;
+  overflow: hidden;
   @media (width <= 768px) {
     margin: 0 16px 12px;
     flex-direction: row;
@@ -628,13 +641,13 @@
     max-width: 55%;
   }
   @media (width <= 767px) {
-    max-width: 100%;
+    max-width: 60%;
   }
 }
 
 .giftTitle {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 500;
   color: #3D3D3D;
   margin: 0 0 10px 0;
   letter-spacing: -0.3px;
@@ -665,7 +678,7 @@
   display: inline-block;
   letter-spacing: 0.2px;
   @media (width <= 767px) {
-    padding: 12px 24px;
+    padding: 8px 40px;
     font-size: 14px;
   }
 
@@ -692,10 +705,14 @@
       height: 180px;
   }
   @media (width <= 767px) {
-    width: 200px;
-    height: 120px;
+    width: auto;
+    height: 200px;
     position: absolute;
-    right: 10px;
+    right: -22px;
+    bottom: 0;
+  }
+  @media (width <= 475px) {
+    right: -50px;
     bottom: 0;
   }
 
@@ -715,10 +732,11 @@
   background: transparent;
   border-radius: 0;
   padding: 0 20px;
-  margin: 0 16px 32px;
+  margin: 0 16px 32px 16px;
   box-shadow: none;
   @media (width <= 767px) {
     padding: 0px;
+    margin: 32px 16px 32px 16px;
   }
 }
 
@@ -746,20 +764,20 @@
   margin-bottom: 16px;
 }
 
-.starFilled {
+.starFilled,.starHalf,.starEmpty  {
   color: #F75801;
   font-size: 48px;
+  @media (width <= 767px) {
+    font-size: 32px;
+  }
 }
 
 .starHalf {
-  color: #F75801;
-  font-size: 48px;
   opacity: 0.5;
 }
 
 .starEmpty {
   color: #E0E0E0;
-  font-size: 48px;
 }
 
 .reviewsCount {
@@ -1145,6 +1163,13 @@
   font-size: 18px;
   color: #666666;
 }
+.titleDivider{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-block: 10px;
+  gap: 10px;
+}
 
 /* ===========================
    RESPONSIVE
@@ -1161,7 +1186,6 @@
   .consultationHours,
   .minutesSection,
   .aboutSection,
-  .reviewsSection,
   .shopSection {
     margin: 0 16px 12px;
     border-radius: 12px;
