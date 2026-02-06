@@ -33,6 +33,8 @@ import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
+import { useGetAstroDetailsQuery } from "../../../redux/api/kundli/kundliApi";
+import { buildVedicParam } from "../../../utils/VedicParams.js/vedicParams";
 import { PATH } from "../../../utils/routes/Paths";
 import { logout } from "../../../redux/auth/authSlice";
 import styles from "./Profile.module.scss";
@@ -247,6 +249,45 @@ const Profile = () => {
     refetchOnMountOrArgChange: true, // Always refetch when component mounts or userId changes
   });
   const savedKundlis = kundliData?.data || [];
+
+    // Build params for Kundali API from first profile
+  const firstProfile = savedKundlis[0];
+  const kundliParams = firstProfile
+    ? buildVedicParam({
+        name: firstProfile.name,
+        gender:
+          firstProfile.gender === "male"
+            ? "Male"
+            : firstProfile.gender === "female"
+              ? "Female"
+              : "Others",
+        day: firstProfile.day,
+        month: firstProfile.month,
+        year: firstProfile.year,
+        hour: firstProfile.hour > 12
+            ? firstProfile.hour - 12
+            : firstProfile.hour === 0
+              ? 12
+              : firstProfile.hour,
+        min: firstProfile.min,
+        meridiem: firstProfile.hour >= 12 ? "PM" : "AM",
+        birthPlace: firstProfile.place,
+        lat: firstProfile.lat,
+        lon: firstProfile.lon,
+        tzone: 5.5,
+      })
+    : null;
+
+  // Fetch astrological details
+  const {
+    data: astroData,
+    isLoading: isLoadingAstro,
+    isError: isAstroError,
+  } = useGetAstroDetailsQuery(kundliParams, {
+    skip: !kundliParams,
+  });
+
+  const astroDetails = astroData?.response;
 
   // Delete kundli mutation - removed, now using ProfileManager
 
@@ -836,7 +877,13 @@ const Profile = () => {
             <Sun size={32} fill="#49196D" />
           </div>
           <div className={styles.zodiacInfo}>
-            <span className={styles.zodiacLabel}>Pisces</span>
+            <span className={styles.zodiacLabel}>
+              {isLoadingAstro
+                ? "Loading..."
+                : isAstroError || !astroDetails?.sun_sign
+                  ? "-"
+                  : astroDetails.sun_sign}
+            </span>
             <span className={styles.zodiacValue}>Sun Sign</span>
           </div>
         </div>
@@ -849,7 +896,13 @@ const Profile = () => {
             <Moon size={32} fill="#1C4863" />
           </div>
           <div className={styles.zodiacInfo}>
-            <span className={styles.zodiacLabel}>Gemini</span>
+            <span className={styles.zodiacLabel}>
+              {isLoadingAstro
+                ? "Loading..."
+                : isAstroError || !astroDetails?.rasi
+                  ? "-"
+                  : astroDetails.rasi}
+            </span>
             <span className={styles.zodiacValue}>Moon Sign</span>
           </div>
         </div>
@@ -862,7 +915,13 @@ const Profile = () => {
             <Moon size={32} fill="#271C50" />
           </div>
           <div className={styles.zodiacInfo}>
-            <span className={styles.zodiacLabel}>Gemini</span>
+            <span className={styles.zodiacLabel}>
+              {isLoadingAstro
+                ? "Loading..."
+                : isAstroError || !astroDetails?.ascendant_sign
+                  ? "-"
+                  : astroDetails.ascendant_sign}
+            </span>
             <span className={styles.zodiacValue}>Ascendant Sign</span>
           </div>
         </div>

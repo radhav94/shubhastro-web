@@ -3,10 +3,12 @@ import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
 import { Heart, Rocket, DollarSign, Plus, User, HelpCircle } from "lucide-react";
 import { registerUser } from "../../../services/appServices/authService";
+import { useCreateKundliMutation } from "../../../services/appServices/kundliServicesNew";
 
 const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData }) => {
   const [selected, setSelected] = useState(formData.guidance || []);
   const [loading, setLoading] = useState(false);
+  const [createKundli] = useCreateKundliMutation();
 
   const options = [
     { id: "love", label: "Love & Relationships", icon: Heart, color: "#FFE5F0" },
@@ -111,6 +113,43 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData }) => {
         window.dispatchEvent(new Event("auth-change"));
         
         console.log("✅ User data updated in localStorage");
+
+        // Create Kundali profile if birth details are provided
+        if (formData.birthDate && formData.birthPlace && formData.latitude && formData.longitude) {
+          try {
+            console.log("📤 Creating Kundali profile...");
+            
+            // Parse birth date and time
+            const dateObj = new Date(formData.birthDate);
+            const timeObj = formData.birthTime ? formData.birthTime.split(":") : ["0", "0"];
+            
+            const kundliPayload = {
+              name: fullName || firstName,
+              gender: formData.identity ? formData.identity.toLowerCase() : "female",
+              relation: "Self",
+              day: dateObj.getDate(),
+              month: dateObj.getMonth() + 1,
+              year: dateObj.getFullYear(),
+              hour: formData.unknownBirthTime ? 0 : parseInt(timeObj[0]),
+              min: formData.unknownBirthTime ? 0 : parseInt(timeObj[1]),
+              second: 0,
+              place: formData.birthPlace,
+              lat: formData.latitude,
+              lon: formData.longitude,
+              tzone: 5.5,
+            };
+
+            console.log("📤 Kundali payload:", kundliPayload);
+            const kundliResponse = await createKundli(kundliPayload).unwrap();
+            console.log("✅ Kundali profile created:", kundliResponse);
+            toast.success("Birth chart created successfully!");
+          } catch (kundliError) {
+            console.error("❌ Failed to create Kundali profile:", kundliError);
+            // Don't block the flow if Kundali creation fails
+            toast.error("Birth chart creation failed, but you can add it later from your profile");
+          }
+        }
+        
         onNext();
       } else {
         console.warn("⚠️ Unexpected response:", response?.data);
@@ -142,9 +181,9 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData }) => {
           <span className={styles.dotInactive}></span>
           <span className={styles.dotActive}></span>
         </div>
-        <button className={styles.skipBtn} onClick={onSkip}>
+        {/* <button className={styles.skipBtn} onClick={onSkip}>
           Skip for Now
-        </button>
+        </button> */}
       </div>
 
       <div className={styles.content}>

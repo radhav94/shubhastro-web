@@ -100,6 +100,19 @@ const Home = () => {
     setSelectedAstrologer(null);
   };
 
+  // Handler for AI chat start with initial query
+  const handleAIChatStart = async (astrologer, initialQuery) => {
+    console.log("🤖 AI Chat Start - Astrologer:", astrologer, "Query:", initialQuery);
+    
+    // Store the initial query in localStorage to send after chat room is created
+    if (initialQuery) {
+      localStorage.setItem("aiInitialQuery", initialQuery);
+    }
+    
+    // Use the regular chat start flow - skip balance check for Pandit AI
+    await handleChatStart(astrologer, false);
+  };
+
   if (isLoading) {
     return (
       <div className={styles.home}>
@@ -123,6 +136,7 @@ const Home = () => {
             // Render section based on display_type
             return renderSection(section.display_type, section, {
               onConnect: handleConnectClick,
+              onChatStart: handleAIChatStart,
             });
           })
         ) : (

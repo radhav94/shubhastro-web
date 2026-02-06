@@ -13,6 +13,7 @@ const TopHeader = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedLang, setSelectedLang] = useState('en');
   const token = getToken();
 
   const {
@@ -24,11 +25,53 @@ const TopHeader = () => {
   // Track if user is logged in to properly display wallet balance
   const isLoggedIn = !!user && !!token;
 
+  // Fixed list of supported languages with English labels
+  const supportedLanguages = [
+    { code: 'en', name: 'English' },
+    { code: 'hi', name: 'Hindi' },
+    { code: 'kn', name: 'Kannada' },
+    { code: 'bn', name: 'Bengali' },
+    { code: 'ta', name: 'Tamil' },
+    { code: 'te', name: 'Telugu' },
+    { code: 'ml', name: 'Malayalam' },
+    { code: 'ar', name: 'Arabic' },
+    { code: 'cs', name: 'Czech' },
+    { code: 'da', name: 'Danish' },
+    { code: 'fr', name: 'French' },
+    { code: 'de', name: 'German' },
+    { code: 'id', name: 'Indonesian' },
+    { code: 'it', name: 'Italian' },
+    { code: 'ms', name: 'Malay' },
+    { code: 'my', name: 'Myanmar (Burmese)' },
+    { code: 'pl', name: 'Polish' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'sv', name: 'Swedish' },
+    { code: 'th', name: 'Thai' },
+    { code: 'tr', name: 'Turkish' },
+  ];
+
   /* lock body scroll when drawer open */
   useEffect(() => {
     document.body.style.overflow = isDrawerOpen ? "hidden" : "auto";
     return () => (document.body.style.overflow = "auto");
   }, [isDrawerOpen]);
+
+  /* Sync selected language with Google Translate cookie */
+  useEffect(() => {
+    const getCurrentLang = () => {
+      const cookie = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("googtrans="));
+      if (cookie) {
+        const value = decodeURIComponent(cookie.split("=")[1]);
+        const parts = value.split("/");
+        return parts[2] || "en";
+      }
+      return "en";
+    };
+
+    setSelectedLang(getCurrentLang());
+  }, []);
 
   /* sync user */
   useEffect(() => {
@@ -78,6 +121,61 @@ const TopHeader = () => {
       ? user.firstName
       : user.phoneNumber || "Guest"
     : "Guest";
+
+  // Handle language change with Google Translate
+  const handleLanguageChange = (targetLang) => {
+    // Get current language from cookie
+    const getCurrentLang = () => {
+      const cookie = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("googtrans="));
+      if (cookie) {
+        const value = decodeURIComponent(cookie.split("=")[1]);
+        const parts = value.split("/");
+        return parts[2] || "en";
+      }
+      return "en";
+    };
+
+    // Set Google Translate cookie
+    const setCookie = (lang) => {
+      const domain = window.location.hostname;
+      const cookieValue = `/en/${lang}`;
+
+      // Set cookie for all domain variations
+      document.cookie = `googtrans=${cookieValue}; path=/;`;
+      document.cookie = `googtrans=${cookieValue}; path=/; domain=${domain}`;
+      if (domain.split(".").length > 1) {
+        document.cookie = `googtrans=${cookieValue}; path=/; domain=.${domain}`;
+      }
+    };
+
+    const currentLang = getCurrentLang();
+    
+    // Update selected language state
+    setSelectedLang(targetLang);
+
+    // If re-selecting the same language, we need to force a refresh
+    if (currentLang === targetLang) {
+      // Set the cookie and reload the page to re-apply translation
+      setCookie(targetLang);
+      window.location.reload();
+    } else {
+      // Different language - set cookie and trigger widget
+      setCookie(targetLang);
+
+      const selectElement = document.querySelector(".goog-te-combo");
+      if (selectElement) {
+        selectElement.value = targetLang;
+        selectElement.dispatchEvent(
+          new Event("change", { bubbles: true, cancelable: true }),
+        );
+      } else {
+        // If widget not found, reload to apply
+        window.location.reload();
+      }
+    }
+  };
 
   return (
     <>
@@ -195,6 +293,18 @@ const TopHeader = () => {
         </nav>
 
         <div className={styles.headerActions}>
+          <select
+            className={`${styles.languageDropdown} notranslate`}
+            onChange={(e) => handleLanguageChange(e.target.value)}
+            value={selectedLang}
+            translate="no"
+          >
+            {supportedLanguages.map((lang) => (
+              <option key={lang.code} value={lang.code} className="notranslate">
+                {lang.name}
+              </option>
+            ))}
+          </select>
           <div className={styles.walletBadge}>
             <div className={styles.coinIcon}></div>
             <span className={styles.walletAmount}>

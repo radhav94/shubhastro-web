@@ -54,6 +54,7 @@ const TalkToAstrologer = () => {
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showRecommend, setShowRecommend] = useState(true);
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
+  const [showFilterAstrologer,setShowFilterAstrologer] = useState(false)
 
   const location = useLocation(); //  get current URL
   // const isChatMode = location.pathname === "/chat-with-astrologers";
@@ -594,6 +595,7 @@ const TalkToAstrologer = () => {
     };
   }, [userIdLocal, isRecommendModalOpen]);
 
+  
   //JSX
   return (
     <div className={styles.mainContainer}>
@@ -609,11 +611,12 @@ const TalkToAstrologer = () => {
         isActiveType={activeType}
         onApplyFilters={handleApplyFilters}
         isOnlineFromURL={isOnlineFromURL}
+        setShowFilterAstrologer={setShowFilterAstrologer}
         selectedType={location.state?.selectedType}
       />
 
       {/* Top Astrologers Section - New Design */}
-      {topTenAstrologers.length > 0 && (
+      {!showFilterAstrologer && topTenAstrologers.length > 0 && (
         <>
           <div className={styles.sectionDivider}>
             <h2 className={styles.sectionTitle}>TOP ASTROLOGERS FOR YOU</h2>
