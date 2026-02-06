@@ -881,7 +881,7 @@ const Profile = () => {
               {isLoadingAstro
                 ? "Loading..."
                 : isAstroError || !astroDetails?.sun_sign
-                  ? "N/A"
+                  ? "-"
                   : astroDetails.sun_sign}
             </span>
             <span className={styles.zodiacValue}>Sun Sign</span>
@@ -900,7 +900,7 @@ const Profile = () => {
               {isLoadingAstro
                 ? "Loading..."
                 : isAstroError || !astroDetails?.rasi
-                  ? "N/A"
+                  ? "-"
                   : astroDetails.rasi}
             </span>
             <span className={styles.zodiacValue}>Moon Sign</span>
@@ -919,7 +919,7 @@ const Profile = () => {
               {isLoadingAstro
                 ? "Loading..."
                 : isAstroError || !astroDetails?.ascendant_sign
-                  ? "N/A"
+                  ? "-"
                   : astroDetails.ascendant_sign}
             </span>
             <span className={styles.zodiacValue}>Ascendant Sign</span>

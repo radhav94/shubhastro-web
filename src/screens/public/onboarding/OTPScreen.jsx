@@ -154,6 +154,10 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           error.response?.data?.message ||
           "Failed to verify OTP. Please try again.",
         );
+        // Clear OTP input on error
+        setOtp(["", "", "", "", "", ""]);
+        // Focus back to first input
+        inputRefs[0].current?.focus();
       } finally {
         setLoading(false);
       }
