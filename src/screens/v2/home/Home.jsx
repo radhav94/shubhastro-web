@@ -109,8 +109,8 @@ const Home = () => {
       localStorage.setItem("aiInitialQuery", initialQuery);
     }
     
-    // Use the regular chat start flow
-    await handleChatStart(astrologer);
+    // Use the regular chat start flow - skip balance check for Pandit AI
+    await handleChatStart(astrologer, false);
   };
 
   if (isLoading) {
