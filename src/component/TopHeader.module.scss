@@ -284,6 +284,35 @@
   gap: 12px;
 }
 
+.languageDropdown {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(247, 88, 1, 0.3);
+  background: #fff;
+  color: #2c1b0e;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: "Poppins", sans-serif;
+  outline: none;
+
+  &:hover {
+    border-color: #f75801;
+    box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
+  }
+
+  &:focus {
+    border-color: #f75801;
+    box-shadow: 0 0 0 3px rgba(247, 88, 1, 0.1);
+  }
+
+  @media screen and (width <= 480px) {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+}
+
 .liveButton {
   display: flex;
   align-items: center;
