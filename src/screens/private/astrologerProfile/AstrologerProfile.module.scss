@@ -2,7 +2,7 @@
 
 .profilePage {
   min-height: 100vh;
-  background: linear-gradient(to bottom, #fff4ec 0%, #F9F4EF 20%, #F9F4EF 100%);
+  // background: linear-gradient(to bottom, #fff4ec 0%, #F9F4EF 20%, #F9F4EF 100%);
   font-family: "Poppins", sans-serif;
   // padding-bottom: 80px;
 }
@@ -15,7 +15,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  background: transparent;
+  background: #fff4ec;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -47,8 +47,8 @@
     stroke : #F75801;
   }
   @media (width <= 767px) {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
   }
 
   &:hover {
@@ -65,9 +65,9 @@
   font-weight: 400;
   color: #2C2C2C;
   margin: 0;
-  font-family: "Poppins", sans-serif;
+  letter-spacing: -0.32px;
   @media (width <= 767px) {
-    font-size: 24px0
+    font-size: 20px
   }
 }
 
@@ -202,8 +202,8 @@
 }
 
 .astrologerName {
-  font-size: 28px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 500;
   color: #1A1A1A;
   margin: 0 0 15px 0;
   line-height: 1.2;
@@ -253,7 +253,7 @@
    STATS SECTION
 =========================== */
 .statsSection {
-  background: linear-gradient(168.18deg, rgba(247, 88, 1, 0.2) -7.79%, #FFFDF6 48.58%, rgba(247, 88, 1, 0.2) 104.96%);
+  background: #fff;
   border-radius: 16px;
   border: 1px solid rgba(0, 0, 0, 0.02);
   padding: 32px 16px;
@@ -327,7 +327,7 @@
    CONSULTATION HOURS
 =========================== */
 .consultationHours {
-  background: #FFFFFF;
+  background: #FFF5EC;
   border-radius: 20px;
   padding: 24px 20px;
   margin: 0 16px 32px;
@@ -417,7 +417,7 @@
    MINUTES SECTION
 =========================== */
 .minutesSection {
-  background: #FCECCF;
+  background: #fff;
   border-radius: 20px;
   padding: 32px 16px;
   margin: 0 16px 32px;
@@ -605,7 +605,7 @@
    GIFT SECTION
 =========================== */
 .giftSection {
-  background: linear-gradient(to bottom, #FFF5E6 0%, #FFF5E6 50%, #FEEAC4 100%);
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   border-radius: 24px;
   padding: 12px 24px;
   margin: 0 16px 48px;
@@ -648,7 +648,7 @@
 .giftTitle {
   font-size: 28px;
   font-weight: 500;
-  color: #3D3D3D;
+  color: #FEFEFE;
   margin: 0 0 10px 0;
   letter-spacing: -0.3px;
   line-height: 1.3;
@@ -659,7 +659,7 @@
 
 .giftSubtitle {
   font-size: 15px;
-  color: #999999;
+  color: #FEFEFE;
   margin: 0 0 22px 0;
   line-height: 1.6;
   font-weight: 400;
@@ -667,8 +667,8 @@
 
 .sendNowBtn {
   padding: 14px 44px;
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-  color: #FFFFFF;
+  background: var(--surface, #FEFEFE);
+  color: #E56329;
   border: none;
   border-radius: 30px;
   font-size: 16px;
@@ -748,8 +748,8 @@
 
 .sectionTitle {
   font-size: 16px;
-  font-weight: 600;
-  color: #666666;
+  font-weight: 500;
+  color: #030303;
   margin: 0;
   letter-spacing: 0.3px;
   text-align: center;
@@ -920,7 +920,7 @@
 }
 
 .chevronIcon {
-  color: #D4A574;
+  color: #F75801;
   font-size: 24px;
 }
 
