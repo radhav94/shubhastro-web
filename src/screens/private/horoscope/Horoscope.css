@@ -275,8 +275,8 @@
   content: "";
   width: 80px;
   height: 80px;
-  border-radius: 100px;
-  background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.4) 39.9%, #FFE5A4 100%);
+  border-radius: 100%;
+  background: #00000021;
   display: flex;
   position: absolute;
   bottom: 5px;
@@ -290,11 +290,11 @@
   border: 1px solid var(--border-50, rgba(247, 88, 1, 100%));
 }
 .categoryImages{
-  width: 65px;
-  height: auto;
+  width: auto;
+  height: 50px;
   position: relative;
   z-index: 9;
-  margin: 0 auto;
+  margin: 10px auto;
 }
 .category-label {
   font-size: 12px;
@@ -545,7 +545,8 @@
 
 @media screen and (width <= 767px) {
   .categoryImages{
-    width: 45px;
+    width: auto;
+    height: 34px;
   }
   /* .category-card {
     height: 80px;
@@ -558,7 +559,7 @@
   .category-card::after{
     height: 5px;
     width: 40px;
-    bottom: 0;
+    bottom: 5px;
   }
   .zodiac-name{
     font-size: 24px;
@@ -638,7 +639,7 @@
   .category-card::after {
     width: 50px;
     height: 5px;
-    bottom: 0px;
+    bottom: 5px;
   }
 
   .content-text {
@@ -839,11 +840,7 @@
   .category-card::after {
     width: 50px;
     height: 5px;
-    bottom: 0px;
-  }
-
-  .categoryImages {
-    width: 65px;
+    bottom: 5px;
   }
 
   /* Desktop Content */
@@ -986,10 +983,6 @@
   .category-card::after {
     width: 50px;
     height: 5px;
-    bottom: 0px;
-  }
-
-  .categoryImages {
-    width: 65px;
+    bottom: 5px;
   }
 }
