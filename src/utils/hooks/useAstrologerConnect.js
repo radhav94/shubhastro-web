@@ -60,11 +60,11 @@ export const useAstrologerConnect = () => {
     console.log("💬 Call type reset to null for chat");
 
     // Check balance
-    const result = await getBalance({ astrologerId: astro?._id });
-    if (result.data.data.status === false) {
-      setOpenModal((prev) => ({ ...prev, recharge: true }));
-      return false;
-    }
+    // const result = await getBalance({ astrologerId: astro?._id });
+    // if (result.data.data.status === false) {
+    //   setOpenModal((prev) => ({ ...prev, recharge: true }));
+    //   return false;
+    // }
 
     // Check if online
     if (!astro?.isActive) {
