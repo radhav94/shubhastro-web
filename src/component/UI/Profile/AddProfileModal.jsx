@@ -217,6 +217,7 @@ const AddProfileModal = ({
               <input
                 type="date"
                 value={formData.birthDate}
+                max={new Date().toISOString().split('T')[0]}
                 onChange={(e) =>
                   setFormData({ ...formData, birthDate: e.target.value })
                 }

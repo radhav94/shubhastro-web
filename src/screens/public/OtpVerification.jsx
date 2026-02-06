@@ -153,6 +153,8 @@ const handleVerifyOtp = async (event) => {
     }
   } catch (error) {
     Toast.error(error?.response?.data?.message || "OTP verification failed");
+    // Clear OTP input on error
+    setOtp("");
   }
 };
 
