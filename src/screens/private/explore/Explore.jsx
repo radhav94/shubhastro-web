@@ -161,7 +161,7 @@ const Explore = () => {
               <SectionTitleWithDivider 
                 title={(section.display_title || section.title || "").toUpperCase()} 
               />
-              <ChevronRight size={24} className={styles.sectionArrow} />
+              {/* <ChevronRight size={24} className={styles.sectionArrow} /> */}
             </div>
 
             <div className={styles.kundliGrid}>
