@@ -84,9 +84,6 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astro
       });
     };
 
-    const handleWarning = (msg) => {
-      Toast.warning(msg.message);
-    };
 
     const handleError = (err) => {
       Toast.error(err.message || "Something went wrong");
@@ -95,13 +92,11 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astro
 
     voiceSocket.on("connect", handleConnect);
     voiceSocket.on("message:recieved", handleAddMessage);
-    voiceSocket.on("warning", handleWarning);
     voiceSocket.on("error", handleError);
 
     return () => {
       voiceSocket.off("connect", handleConnect);
       voiceSocket.off("message:recieved", handleAddMessage);
-      voiceSocket.off("warning", handleWarning);
       voiceSocket.off("error", handleError);
     };
   }, [roomId, userId, astrologerId, kundliId, astrologerName]);

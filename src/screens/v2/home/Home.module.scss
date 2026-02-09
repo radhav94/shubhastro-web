@@ -1296,7 +1296,6 @@
   overflow: auto;
   // grid-template-columns: 1fr 1fr;
   gap: 12px;
-  padding-bottom: 10px;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
 }
@@ -2369,6 +2368,7 @@
 
   .lifeAreaGrid {
     gap: 20px;
+    padding-block: 10px;
   }
 
   .lifeAreaCard {

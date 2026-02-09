@@ -18,11 +18,11 @@ import ConnectAgainSection from "../components/ConnectAgainSection";
  * Maps display_type to corresponding React component
  * @param {string} displayType - The display_type from API response
  * @param {object} sectionData - The section data from API
- * @param {object} handlers - Event handlers (onConnect, etc.)
+ * @param {object} handlers - Event handlers (onConnect, onChatStart, etc.)
  * @returns {JSX.Element|null} - The corresponding component or null
  */
 export const renderSection = (displayType, sectionData, handlers = {}) => {
-  const { onConnect } = handlers;
+  const { onConnect, onChatStart } = handlers;
 
   switch (displayType) {
     case "todays-horoscope":
@@ -51,7 +51,8 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
         <PanditAISection
           key={sectionData._id}
           data={sectionData.content?.[0]}
-          title={sectionData.display_title}
+          astrologerId={sectionData.content?.[0]?.astrologer_id}
+          onChatStart={onChatStart}
         />
       );
 

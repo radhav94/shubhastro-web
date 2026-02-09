@@ -50,7 +50,7 @@ export const useAstrologerConnect = () => {
   const [createChatRoom] = useCreateChatRoomMutation();
 
   // Chat handler
-  const handleChatStart = useCallback(async (astro) => {
+  const handleChatStart = useCallback(async (astro, checkBalance = true) => {
     console.log("🚀 Chat Start - Astrologer:", astro);
     setSelectedAstrologer(astro);
     setLastRequestedAstro(astro);
@@ -59,11 +59,13 @@ export const useAstrologerConnect = () => {
     console.log("📝 Stored in activeCallAstroRef:", activeCallAstroRef.current);
     console.log("💬 Call type reset to null for chat");
 
-    // Check balance
-    const result = await getBalance({ astrologerId: astro?._id });
-    if (result.data.data.status === false) {
-      setOpenModal((prev) => ({ ...prev, recharge: true }));
-      return false;
+    // Check balance conditionally
+    if (checkBalance) {
+      const result = await getBalance({ astrologerId: astro?._id });
+      if (result.data.data.status === false) {
+        setOpenModal((prev) => ({ ...prev, recharge: true }));
+        return false;
+      }
     }
 
     // Check if online

@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 const ChatAstrologerCard = ({ data, onConnect }) => {
   const navigate = useNavigate();
   // Handle rating - use rating field or default to 4.5
-  const rating = data?.rating || 4.5;
+  const rating = data?.rating;
 
   // Handle experience - convert to number if string
   const experience = parseInt(data?.experience) || 0;
@@ -62,10 +62,10 @@ const ChatAstrologerCard = ({ data, onConnect }) => {
             e.target.src = astrologerImage;
           }}
         />
-        <div className={styles.ratingBadge}>
+        {rating && <div className={styles.ratingBadge}>
           <FaStar className={styles.starIcon} />
-          <span>{rating.toFixed(1)}</span>
-        </div>
+          <span>{rating?.toFixed(1)}</span>
+        </div>}
       </div>
 
       <div className={styles.infoSection}>

@@ -31,12 +31,13 @@ const HomeLayout = () => {
   // Hide TopHeader on onboarding page or when header is disabled
 
   const isOnboardingPage = location.pathname === "/login";
+  const isLivePage = location.pathname === "/live";
   
   // Check if page is loaded in iframe via query parameter
   const searchParams = new URLSearchParams(location.search);
   const isInIframe = searchParams.get('iframe') === 'true';
   
-  const showTopHeader = !isOnboardingPage && !isInIframe;
+  const showTopHeader = !isOnboardingPage && !isInIframe && !isLivePage;
 
   return (
     <div className={styles.layout}>
