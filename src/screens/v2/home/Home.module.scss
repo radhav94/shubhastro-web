@@ -966,8 +966,8 @@
   cursor: pointer;
   transition: transform 0.2s;
   box-shadow: 0 2px 8px rgba(247, 147, 30, 0.3);
-  white-space: nowrap;
-  flex-shrink: 0;
+  // white-space: nowrap;
+  // flex-shrink: 0;
 }
 
 .freeQuestionBtn:hover {
@@ -1029,6 +1029,12 @@
   gap: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   flex-wrap: nowrap;
+  svg path{
+    stroke: #f75801;
+  }
+  svg circle{
+    stroke: #f75801;
+  }
 }
 
 .searchIcon {
@@ -1070,6 +1076,9 @@
     transform 0.2s,
     background 0.2s;
   flex-shrink: 0;
+  svg path {
+    stroke: #fff;
+  }
 }
 
 .searchSubmit:hover {

@@ -40,9 +40,9 @@
   border-color: #007bff;
 }
 
-.dropdownContainer {
-  margin-bottom: 15px;
-}
+// .dropdownContainer {
+//   margin-bottom: 15px;
+// }
 
 h2 {
   margin-bottom: 10px;
@@ -54,14 +54,19 @@ h2 {
 
 .horoscopes {
   text-align: start;
-  margin: 20px 0;
+  margin: 0;
+  border-radius: 5px;
+  overflow: hidden;
 }
 
 .horoscopes li {
-  padding: 10px 0;
+  padding: 10px 16px;
   color: #555;
   font-size: 16px;
   font-weight: 500;
+  background: #fff4ec;
+  margin: 0px 0;
+  border-bottom: 1px solid #fec7ae;
 }
 .horoscopes li:hover {
   color: #000;

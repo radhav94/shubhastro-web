@@ -2,6 +2,9 @@
   display: flex;
   justify-content: center;
   padding: 25px;
+  @media (width <= 767px) {
+      padding: 16px;
+    }
 
   .leftSide {
     background: #fff;
@@ -24,13 +27,13 @@
       font-size: 18px;
 
       .dangerColor {
-        color: #ff4d4f;
+        color: #F75801;
       }
     }
 
     .rechargeHeader {
       margin: 18px 0 20px;
-      font-weight: 700;
+      font-weight: 500;
       font-size: 20px;
     }
 
@@ -55,19 +58,19 @@
 
     /*  Wider & Premium Card */
     .rechargeAmount {
-      background: linear-gradient(135deg, #f5faff 0%, #edeff1 100%);
+      border: 1px solid var(--cta-border-50, rgba(229, 99, 41, 0.50));
+      background: var(--card-2, #FFF5EC);
       border-radius: 14px;
       padding: 16px 10px;
       text-align: center;
       cursor: pointer;
       transition: 0.25s ease;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-      border: 1px solid rgba(0, 129, 255, 0.1);
 
       .price {
         font-size: 22px;
-        font-weight: 700;
-        color: #002b5b;
+        font-weight: 600;
+        color: #030303;
       }
 
       .extra {
@@ -75,17 +78,14 @@
         margin-top: 6px;
         font-size: 14px;
         font-weight: 600;
-        color: #00a043;
+        color: #F75801;
       }
 
       &:hover {
         transform: translateY(-5px);
-        background: linear-gradient(135deg, #e9f4ff 0%, #d9eeff 100%);
       }
 
       &.active {
-        background: linear-gradient(135deg, #d2e9ff 0%, #b9ddff 100%);
-        border: 1px solid #4096ff;
         box-shadow: 0 14px 30px rgba(64, 150, 255, 0.25);
       }
     }

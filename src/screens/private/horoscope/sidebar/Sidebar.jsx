@@ -54,9 +54,9 @@ const Sidebar = () => {
           </select>
         </div>
         <div className={styles.dropdownContainer}>
-          <h3 className={styles.sideTitle}>
+          {/* <h3 className={styles.sideTitle}>
             Horoscopes
-          </h3>
+          </h3> */}
           <ul id="horoscope-type" className={styles.horoscopes}>
             <Link to={`/horoscopes/daily-horoscope/${paramSign}`}>
               <li
