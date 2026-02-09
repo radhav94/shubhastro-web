@@ -111,6 +111,18 @@
   transform: translateY(-2px);
 }
 
+.optionCard.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.optionCard.disabled:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+
 .iconCircle {
   width: 64px;
   height: 64px;
