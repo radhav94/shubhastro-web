@@ -56,11 +56,22 @@ const ClothColorAnalysis = () => {
           navigate('/aiwow/cloth-color/result');
         }, 1000);
       } else {
+        // Clear old cloth color data from localStorage on failure
+        localStorage.removeItem('clothColorResult');
+        localStorage.removeItem('clothColorImage');
+        localStorage.removeItem('clothColorFormData');
+        
         setProgress(0);
         setError(result.error || { message: 'Analysis failed. Please try again.' });
       }
     } catch (error) {
       console.error('Analysis error:', error);
+      
+      // Clear old cloth color data from localStorage on error
+      localStorage.removeItem('clothColorResult');
+      localStorage.removeItem('clothColorImage');
+      localStorage.removeItem('clothColorFormData');
+      
       setProgress(0);
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {

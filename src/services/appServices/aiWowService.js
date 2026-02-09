@@ -17,11 +17,11 @@ export const getProfileData = () => {
       month: String(profile.month || ''),
       year: String(profile.year || ''),
       hour: String(profile.hour || '0'),
-      min: String(profile.minute || '0'),
-      second: '0',
+      min: String(profile.min || '0'),
+      second: String(profile.second || '0'),
       place: profile.place || '',
-      lat: String(profile.latitude || '0'),
-      lon: String(profile.longitude || '0'),
+      lat: String(profile.lat || '0'),
+      lon: String(profile.lon || '0'),
       tzone: String(profile.timezone || '5.5'),
     };
   } catch (error) {
@@ -1258,4 +1258,135 @@ export const validateImageFile = (file) => {
   }
   
   return { valid: true };
+};
+
+
+// ============================================================================
+// GET RESULT APIs - Fetch stored analysis results from backend
+// ============================================================================
+
+/**
+ * Get Palmistry Analysis Result by ID
+ * @param {string} resultId - Result ID from analysis
+ * @returns {Promise} API response with palmistry result
+ */
+export const getPalmistryResult = async (resultId) => {
+  try {
+    const response = await privateGet(`wow-suite/palmistry/result/${resultId}`);
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Get palmistry result error:', error);
+    return {
+      success: false,
+      error: error.response?.data?.message || 'Failed to fetch result',
+    };
+  }
+};
+
+/**
+ * Get Face Reading Analysis Result by ID
+ * @param {string} resultId - Result ID from analysis
+ * @returns {Promise} API response with face reading result
+ */
+export const getFaceReadingResult = async (resultId) => {
+  try {
+    const response = await privateGet(`wow-suite/face-analysis/result/${resultId}`);
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Get face reading result error:', error);
+    return {
+      success: false,
+      error: error.response?.data?.message || 'Failed to fetch result',
+    };
+  }
+};
+
+/**
+ * Get Signature Analysis Result by ID
+ * @param {string} resultId - Result ID from analysis
+ * @returns {Promise} API response with signature result
+ */
+export const getSignatureResult = async (resultId) => {
+  try {
+    const response = await privateGet(`wow-suite/signature/result/${resultId}`);
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Get signature result error:', error);
+    return {
+      success: false,
+      error: error.response?.data?.message || 'Failed to fetch result',
+    };
+  }
+};
+
+/**
+ * Get Cloth Color Analysis Result by ID
+ * @param {string} resultId - Result ID from analysis
+ * @returns {Promise} API response with cloth color result
+ */
+export const getClothColorResult = async (resultId) => {
+  try {
+    const response = await privateGet(`wow-suite/clothes-color/result/${resultId}`);
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Get cloth color result error:', error);
+    return {
+      success: false,
+      error: error.response?.data?.message || 'Failed to fetch result',
+    };
+  }
+};
+
+/**
+ * Get Aura Analysis Result by ID
+ * @param {string} resultId - Result ID from analysis
+ * @returns {Promise} API response with aura result
+ */
+export const getAuraResult = async (resultId) => {
+  try {
+    const response = await privateGet(`wow-suite/aura/result/${resultId}`);
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Get aura result error:', error);
+    return {
+      success: false,
+      error: error.response?.data?.message || 'Failed to fetch result',
+    };
+  }
+};
+
+/**
+ * Get Gemstone Analysis Result by ID
+ * @param {string} resultId - Result ID from analysis
+ * @returns {Promise} API response with gemstone result
+ */
+export const getGemstoneResult = async (resultId) => {
+  try {
+    const response = await privateGet(`wow-suite/gemstone-scanner/result/${resultId}`);
+    return {
+      success: true,
+      data: response.data?.data || response.data,
+    };
+  } catch (error) {
+    console.error('Get gemstone result error:', error);
+    return {
+      success: false,
+      error: error.response?.data?.message || 'Failed to fetch result',
+    };
+  }
 };

@@ -1,32 +1,96 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styles from './PalmistryResult.module.scss';
+import { getPalmistryResult } from '../../../../services/appServices/aiWowService';
+import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 
 const PalmistryResult = () => {
   const navigate = useNavigate();
+  const { resultId } = useParams();
   const [activeTab, setActiveTab] = useState('overview');
   const [resultData, setResultData] = useState(null);
   const [palmImage, setPalmImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Get result data from localStorage
-    const storedResult = localStorage.getItem('palmistryResult');
-    const storedImage = localStorage.getItem('palmistryImage');
-    
-    if (storedResult) {
-      try {
-        const parsed = JSON.parse(storedResult);
-        // Extract data from API response structure
-        const data = parsed.data || parsed;
-        setResultData(data);
-      } catch (error) {
-        console.error('Error parsing palmistry result:', error);
+    const loadResult = async () => {
+      // Try sessionStorage first (for immediate navigation after analysis)
+      const cachedResult = sessionStorage.getItem('palmistryResult');
+      const cachedImage = sessionStorage.getItem('palmistryImage') || localStorage.getItem('palmistryImage');
+      
+      if (cachedResult) {
+        try {
+          const parsed = JSON.parse(cachedResult);
+          const data = parsed.data || parsed;
+          setResultData(data);
+          if (cachedImage) setPalmImage(cachedImage);
+          
+          // If we have resultId, fetch from backend in background to ensure fresh data
+          if (resultId) {
+            fetchFromBackend(resultId, cachedImage);
+          }
+          return;
+        } catch (error) {
+          console.error('Error parsing cached result:', error);
+        }
       }
+      
+      // If no cache and we have resultId, fetch from backend
+      if (resultId) {
+        setIsLoading(true);
+        await fetchFromBackend(resultId, cachedImage);
+      } else {
+        // Fallback: Try localStorage (old behavior for backward compatibility)
+        const storedResult = localStorage.getItem('palmistryResult');
+        const storedImage = localStorage.getItem('palmistryImage');
+        
+        if (storedResult) {
+          try {
+            const parsed = JSON.parse(storedResult);
+            const data = parsed.data || parsed;
+            setResultData(data);
+            if (storedImage) setPalmImage(storedImage);
+          } catch (error) {
+            console.error('Error parsing stored result:', error);
+            setError('Failed to load result');
+          }
+        } else {
+          setError('No result found');
+        }
+      }
+    };
+    
+    loadResult();
+  }, [resultId]);
+  
+  const fetchFromBackend = async (id, cachedImage) => {
+    try {
+      const result = await getPalmistryResult(id);
+      
+      if (result.success) {
+        const data = result.data?.data || result.data;
+        setResultData(data);
+        
+        // Update cache with fresh data
+        sessionStorage.setItem('palmistryResult', JSON.stringify(data));
+        
+        // Set image if available
+        if (cachedImage) {
+          setPalmImage(cachedImage);
+        } else if (data.palmImage) {
+          setPalmImage(data.palmImage);
+        }
+      } else {
+        setError(result.error || 'Failed to load result');
+      }
+    } catch (err) {
+      console.error('Error fetching result:', err);
+      setError('Failed to load result from server');
+    } finally {
+      setIsLoading(false);
     }
-    if (storedImage) {
-      setPalmImage(storedImage);
-    }
-  }, []);
+  };
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
@@ -36,10 +100,43 @@ const PalmistryResult = () => {
     { id: 'insights', label: 'Insights' },
   ];
 
-  if (!resultData) {
+  // Show loader while fetching
+  if (isLoading && !resultData) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Loading results...</div>
+        <header className={styles.header}>
+          <button className={styles.backButton} onClick={() => navigate('/aiwow')}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <h1 className={styles.title}>Palmistry Analysis</h1>
+        </header>
+        <PrimaryLoader />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error || !resultData) {
+    return (
+      <div className={styles.container}>
+        <header className={styles.header}>
+          <button className={styles.backButton} onClick={() => navigate('/aiwow')}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <h1 className={styles.title}>Palmistry Analysis</h1>
+        </header>
+        <div className={styles.errorContainer}>
+          <p className={styles.errorText}>
+            {error || 'Unable to load analysis results. Please try again.'}
+          </p>
+          <button className={styles.retryButton} onClick={() => navigate('/aiwow/palmistry')}>
+            Start New Analysis
+          </button>
+        </div>
       </div>
     );
   }

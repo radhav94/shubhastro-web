@@ -234,15 +234,14 @@ const Footer = () => {
           </button>
 
           <button
-            className={`${styles.navItem} ${location.pathname.startsWith("/talk-to-astrologers") || location.pathname.startsWith("/chat-with-astrologers") ? styles.active : ""}`}
-            onClick={() => navigate("/talk-to-astrologers")}
+            className={`${styles.navItem} ${location.pathname === "/explore" ? styles.active : ""}`}
+            onClick={() => navigate("/explore")}
           >
             <div className={styles.iconCircle}>
               <Compass size={22} />
             </div>
             <span className={styles.label}>Explore</span>
-            {(location.pathname.startsWith("/talk-to-astrologers") ||
-              location.pathname.startsWith("/chat-with-astrologers")) && (
+            {location.pathname === "/explore" && (
               <span className={styles.activeLine} />
             )}
           </button>
