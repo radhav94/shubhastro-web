@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
 import LoadingScreen from "./LoadingScreen";
@@ -61,6 +62,26 @@ const Onboarding = () => {
 
   const isLoadingScreen = currentStep === 6;
 
+  const handleStepChange = (step) => {
+    // Validate previous steps before allowing navigation
+    if (step > 0 && (!formData.name || formData.name.trim().length < 3)) {
+      toast.error("Please complete your name in the first step");
+      return;
+    }
+    
+    if (step > 1 && !formData.birthDate) {
+      toast.error("Please complete your birth date in the second step");
+      return;
+    }
+    
+    // Map the step index to the actual screen index
+    // PersonalizeScreen = step 0 -> screen 3
+    // BirthDetailsScreen = step 1 -> screen 4
+    // GuidanceScreen = step 2 -> screen 5
+    const screenIndex = step + 3;
+    setCurrentStep(screenIndex);
+  };
+
   const handleNext = () => {
     setCurrentStep((prev) => prev + 1);
   };
@@ -108,6 +129,9 @@ const Onboarding = () => {
       onSkip={handleSkip}
       formData={formData}
       updateFormData={updateFormData}
+      currentStep={0}
+      totalSteps={3}
+      onStepChange={handleStepChange}
     />,
     <BirthDetailsScreen
       key="birth"
@@ -116,6 +140,9 @@ const Onboarding = () => {
       onSkip={handleSkip}
       formData={formData}
       updateFormData={updateFormData}
+      currentStep={1}
+      totalSteps={3}
+      onStepChange={handleStepChange}
     />,
     <GuidanceScreen
       key="guidance"
@@ -123,6 +150,9 @@ const Onboarding = () => {
       onSkip={handleSkip}
       formData={formData}
       updateFormData={updateFormData}
+      currentStep={2}
+      totalSteps={3}
+      onStepChange={handleStepChange}
     />,
     <LoadingScreen key="loading" onComplete={() => {
       // Check for redirect path after registration completion
