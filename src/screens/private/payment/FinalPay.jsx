@@ -1,11 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import styles from "./FinalPay.module.scss";
 import { Toast } from "../../../component";
 import { FaCcMastercard } from "react-icons/fa";
 import { LuBadgeIndianRupee } from "react-icons/lu";
 import { useGetPlanByIdQuery } from "../../../redux/api/plansApi/plansApi";
 import { useWalletBalance } from "../wallet/useWalletBalance";
+import { useCreditWalletMutation } from "../../../redux/api/wallet/walletApi";
 
 const FinalPay = () => {
   const location = useLocation();
@@ -21,34 +22,54 @@ const FinalPay = () => {
   const totalAmount = +(amount + gst).toFixed(2);
 
   // Use wallet balance hook
-  const { balance, refreshWallet } = useWalletBalance();
+  const { refreshWallet } = useWalletBalance();
+  
+  // Credit wallet mutation
+  const [creditWallet] = useCreditWalletMutation();
+  
+  // Loading state for payment
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Refresh wallet balance on mount
   useEffect(() => {
     refreshWallet();
   }, [refreshWallet]);
 
-  const handlePayment = (method) => {
-    const newBalance = (balance || 0) + amount + extra;
+  const handlePayment = async (method) => {
+    try {
+      setIsProcessing(true);
+      
+      // Prepare payload for wallet credit API
+      const payload = {
+        message: `Wallet recharge via ${method}`,
+        amount: amount + extra, // Total coins to credit (actual price + bonus)
+        action: "credit",
+        type: "coin",
+        reason: "purchase",
+        plan_id: planId || 0,
+      };
+      // Call the credit wallet API
+      const response = await creditWallet(payload).unwrap();
 
-    // Update localStorage with the new balance
-    localStorage.setItem("astro_wallet_balance", newBalance.toString());
+      // Refresh wallet balance to get updated balance
+      refreshWallet();
 
-    // Dispatch wallet update events for other components
-    window.dispatchEvent(
-      new CustomEvent("wallet-updated", { detail: { amount: newBalance } })
-    );
-    window.dispatchEvent(new Event("walletBalanceUpdated"));
+      // Dispatch wallet update events for other components
+      window.dispatchEvent(new Event("wallet-updated"));
+      window.dispatchEvent(new Event("walletBalanceUpdated"));
 
-    Toast.success(`Recharge successful via ${method}!`);
-    
-    // Refresh wallet balance before navigating
-    refreshWallet();
-    
-    // Navigate after a short delay to ensure state updates
-    setTimeout(() => {
-      navigate("/");
-    }, 500);
+      Toast.success(`Recharge successful via ${method}!`);
+      
+      // Navigate after a short delay to ensure state updates
+      setTimeout(() => {
+        navigate("/");
+      }, 500);
+    } catch (error) {
+      console.error("Wallet credit error:", error);
+      Toast.error(error?.data?.message || "Payment failed. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -85,24 +106,23 @@ const FinalPay = () => {
       <p className={styles.chooseText}>Choose Payment Method</p>
 
       <div className={styles.payGrid}>
-        <button onClick={() => handlePayment("Card")}>
+        <button onClick={() => handlePayment("Card")} disabled={isProcessing}>
           <FaCcMastercard size={36} />
-
-          <span>Credit/Debit Card</span>
+          <span>{isProcessing ? "Processing..." : "Credit/Debit Card"}</span>
         </button>
-        <button onClick={() => handlePayment("UPI")}>
+        <button onClick={() => handlePayment("UPI")} disabled={isProcessing}>
           <LuBadgeIndianRupee size={36} />
-          <span>UPI</span>
+          <span>{isProcessing ? "Processing..." : "UPI"}</span>
         </button>
 
-        <button onClick={() => handlePayment("NetBanking")}>
+        <button onClick={() => handlePayment("NetBanking")} disabled={isProcessing}>
           <img src="https://img.icons8.com/ios/50/bank.png" alt="NetBanking" />
-          Net Banking
+          {isProcessing ? "Processing..." : "Net Banking"}
         </button>
 
-        <button onClick={() => handlePayment("Wallet")}>
+        <button onClick={() => handlePayment("Wallet")} disabled={isProcessing}>
           <img src="https://img.icons8.com/ios/50/wallet.png" alt="Wallet" />
-          Other Wallets
+          {isProcessing ? "Processing..." : "Other Wallets"}
         </button>
       </div>
     </div>

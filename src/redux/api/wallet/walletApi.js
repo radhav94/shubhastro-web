@@ -11,8 +11,22 @@ export const walletApi = privateRequestNew.injectEndpoints({
         params: { astrologerId, type }, 
       }),
     }),
+    creditWallet: builder.mutation({
+      query: (payload) => ({
+        url: "wallets/credit",
+        method: "POST",
+        body: payload,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    }),
   }),
 });
 
 // HOOKS
-export const { useLazyGetWalletBalanceQuery, useGetBalanceMutation } = walletApi;
+export const { 
+  useLazyGetWalletBalanceQuery, 
+  useGetBalanceMutation,
+  useCreditWalletMutation 
+} = walletApi;
