@@ -55,11 +55,20 @@ const GemstoneAnalysis = () => {
           navigate('/aiwow/gemstone/result');
         }, 1000);
       } else {
+        // Clear old gemstone data from localStorage on failure
+        localStorage.removeItem('gemstoneResult');
+        localStorage.removeItem('gemstoneImage');
+        
         setProgress(0);
         setError(result.error || { message: 'Analysis failed. Please try again.' });
       }
     } catch (error) {
       console.error('Analysis error:', error);
+      
+      // Clear old gemstone data from localStorage on error
+      localStorage.removeItem('gemstoneResult');
+      localStorage.removeItem('gemstoneImage');
+      
       setProgress(0);
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {

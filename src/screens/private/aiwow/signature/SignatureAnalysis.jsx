@@ -55,11 +55,20 @@ const SignatureAnalysis = () => {
           navigate('/aiwow/signature/result');
         }, 1000);
       } else {
+        // Clear old signature data from localStorage on failure
+        localStorage.removeItem('signatureResult');
+        localStorage.removeItem('signatureImage');
+        
         setProgress(0);
         setError(result.error || { message: 'Analysis failed. Please try again.' });
       }
     } catch (error) {
       console.error('Analysis error:', error);
+      
+      // Clear old signature data from localStorage on error
+      localStorage.removeItem('signatureResult');
+      localStorage.removeItem('signatureImage');
+      
       setProgress(0);
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {

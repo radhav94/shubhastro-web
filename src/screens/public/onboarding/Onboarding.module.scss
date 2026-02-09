@@ -325,6 +325,12 @@
   height: 12px;
   border-radius: 50%;
   transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
 }
 
 .dotActive {
@@ -335,6 +341,10 @@
 
 .dotInactive {
   background: #e0e0e0;
+
+  &:hover {
+    background: #d0d0d0;
+  }
 }
 
 .skipBtn {
@@ -514,6 +524,25 @@
     font-weight: 500;
     color: #2c2c2c;
     margin-bottom: 8px;
+  }
+}
+
+.required {
+  color: #e53e3e;
+  margin-left: 4px;
+}
+
+.errorText {
+  color: #e53e3e;
+  font-size: 13px;
+  margin-top: 6px;
+  display: block;
+  font-weight: 500;
+}
+
+.inputWrapper.error {
+  .input {
+    border-color: #e53e3e;
   }
 }
 

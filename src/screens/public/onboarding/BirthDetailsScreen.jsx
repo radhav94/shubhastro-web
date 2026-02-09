@@ -10,6 +10,9 @@ const BirthDetailsScreen = ({
   onSkip,
   formData,
   updateFormData,
+  currentStep = 1,
+  totalSteps = 3,
+  onStepChange,
 }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [localData, setLocalData] = useState({
@@ -21,9 +24,34 @@ const BirthDetailsScreen = ({
     longitude: formData.longitude || null,
   });
 
+  const [errors, setErrors] = useState({
+    birthDate: "",
+    birthPlace: "",
+  });
+
+  const validateForm = () => {
+    const newErrors = {
+      birthDate: "",
+      birthPlace: "",
+    };
+
+    if (!localData.birthDate) {
+      newErrors.birthDate = "Birth date is required";
+    }
+
+    if (!localData.birthPlace) {
+      newErrors.birthPlace = "Place of birth is required";
+    }
+
+    setErrors(newErrors);
+    return !newErrors.birthDate && !newErrors.birthPlace;
+  };
+
   const handleNext = () => {
-    updateFormData(localData);
-    onNext();
+    if (validateForm()) {
+      updateFormData(localData);
+      onNext();
+    }
   };
 
   // Format date for display (DD/MM/YYYY)
@@ -37,9 +65,16 @@ const BirthDetailsScreen = ({
     <div className={styles.birthDetailsScreen}>
       <div className={styles.header}>
         <div className={styles.progressDots}>
-          <span className={styles.dotInactive}></span>
-          <span className={styles.dotActive}></span>
-          <span className={styles.dotInactive}></span>
+          {Array.from({ length: totalSteps }).map((_, index) => (
+            <span
+              key={index}
+              className={
+                index === currentStep ? styles.dotActive : styles.dotInactive
+              }
+              onClick={() => onStepChange && onStepChange(index)}
+              style={{ cursor: onStepChange ? 'pointer' : 'default' }}
+            ></span>
+          ))}
         </div>
         {/* <button className={styles.skipBtn} onClick={onSkip}>
           Skip for Now
@@ -52,9 +87,9 @@ const BirthDetailsScreen = ({
         </h1>
 
         <div className={styles.formGroup}>
-          <label>Birth Date</label>
+          <label>Birth Date<span className={styles.required}>*</span></label>
           <div 
-            className={styles.inputWrapper}
+            className={`${styles.inputWrapper} ${errors.birthDate ? styles.error : ""}`}
             onClick={() => setShowDatePicker(true)}
           >
             <input
@@ -66,6 +101,9 @@ const BirthDetailsScreen = ({
             />
             <Calendar className={styles.inputIcon} size={20} />
           </div>
+          {errors.birthDate && (
+            <span className={styles.errorText}>{errors.birthDate}</span>
+          )}
         </div>
 
         <div className={styles.formGroup}>
@@ -100,8 +138,8 @@ const BirthDetailsScreen = ({
         </div>
 
         <div className={styles.formGroup}>
-          <label>Place of Birth</label>
-          <div className={styles.inputWrapper}>
+          <label>Place of Birth<span className={styles.required}>*</span></label>
+          <div className={`${styles.inputWrapper} ${errors.birthPlace ? styles.error : ""}`}>
             <LocationSearch
               value={localData.birthPlace}
               onChange={(e) =>
@@ -119,6 +157,9 @@ const BirthDetailsScreen = ({
             />
             <MapPin className={styles.inputIcon} size={20} />
           </div>
+          {errors.birthPlace && (
+            <span className={styles.errorText}>{errors.birthPlace}</span>
+          )}
         </div>
       </div>
 

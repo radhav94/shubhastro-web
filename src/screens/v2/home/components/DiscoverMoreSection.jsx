@@ -85,14 +85,14 @@ const DiscoverMoreSection = ({ data = [], title, showMore }) => {
     <section className={styles.discoverSection}>
       <div className={styles.discoverHeader}>
         <SectionHeader title={title || "DISCOVER MORE"} />
-        {showMore && (
+        {/* {showMore && (
           <button
             className={styles.viewAllBtn}
             onClick={() => navigate("/explore")}
           >
             <ChevronRight size={24} />
           </button>
-        )}
+        )} */}
       </div>
 
       <div className={styles.discoverGrid}>

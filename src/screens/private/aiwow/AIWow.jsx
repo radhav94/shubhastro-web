@@ -5,14 +5,58 @@ import FeatureCard from "./components/FeatureCard";
 import ComingSoonCard from "./components/ComingSoonCard";
 import MobileAppModal from "./components/MobileAppModal";
 import { ProfileManager } from "../../../component/UI/Profile";
+import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
+import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 
 const AIWow = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
-  const [targetRoute, setTargetRoute] = useState("");
   const [selectedProfile, setSelectedProfile] = useState(null);
+
+  // Get token
+  const role = localStorage.getItem("shubhtalk_role");
+  const token =
+    role === "ASTROLOGER"
+      ? localStorage.getItem("shubhtalk_astro_token")
+      : localStorage.getItem("shubhtalk_customer_token");
+
+  // Get current user ID
+  const currentUserId =
+    role === "ASTROLOGER"
+      ? localStorage.getItem("shubhtalk_astro_id")
+      : localStorage.getItem("shubhtalk_customer_id");
+
+  // API Hooks
+  const { data, isLoading, isFetching } = useGetAllKundlisQuery(undefined, {
+    skip: !token,
+  });
+
+  // Get profiles from API
+  const profiles = data?.data || [];
+
+  // Auto-select first profile on load - only after data is fetched
+  useEffect(() => {
+    if (profiles.length > 0 && !selectedProfile && !isFetching) {
+      setSelectedProfile(profiles[0]);
+      // Store selected profile
+      localStorage.setItem("selectedKundliProfile", JSON.stringify(profiles[0]));
+    }
+  }, [profiles, selectedProfile, isFetching]);
+
+  // Clear selected profile when user changes (on refresh after login)
+  useEffect(() => {
+    if (currentUserId && selectedProfile) {
+      const profileBelongsToCurrentUser = profiles.some(
+        (profile) => profile._id === selectedProfile._id,
+      );
+
+      if (!profileBelongsToCurrentUser) {
+        setSelectedProfile(null);
+      }
+    }
+  }, [currentUserId, profiles]);
 
   // Scroll to section if hash is present in URL
   useEffect(() => {
@@ -32,28 +76,24 @@ const AIWow = () => {
   };
 
   const handleFeatureClick = (route) => {
-    setTargetRoute(route);
-    setShowProfileModal(true);
+    // Navigate directly with selected profile already stored
+    if (selectedProfile) {
+      navigate(route);
+    } else {
+      // If no profile selected, open profile selector
+      setShowProfileModal(true);
+    }
   };
 
   const handleProfileSelect = (profile) => {
     setSelectedProfile(profile);
-
     // Store selected profile
     localStorage.setItem("selectedKundliProfile", JSON.stringify(profile));
-
-    // Navigate to target route immediately
-    if (targetRoute) {
-      navigate(targetRoute);
-    }
-
-    // Close modal after selection
     setShowProfileModal(false);
   };
 
   const handleCloseProfileModal = () => {
     setShowProfileModal(false);
-    setTargetRoute("");
   };
 
   // WOW Suite - Visual & Immersive Experiences
@@ -243,6 +283,8 @@ const AIWow = () => {
 
   return (
     <div className={styles.container}>
+      {isLoading && <PrimaryLoader />}
+
       <header className={styles.header}>
         <button className={styles.backButton} onClick={() => navigate(-1)}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -256,6 +298,35 @@ const AIWow = () => {
           </svg>
         </button>
         <h1 className={styles.title}>AI WOW</h1>
+        <div
+          className={styles.profileSelector}
+          onClick={() => setShowProfileModal(true)}
+        >
+          <span className={styles.selectLabel}>Select Profile</span>
+          <span className={styles.profileName}>
+            {selectedProfile ? selectedProfile.name : "Select Profile"}
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{
+                display: "inline-block",
+                marginLeft: "4px",
+                verticalAlign: "middle",
+              }}
+            >
+              <path
+                d="M4 6L8 10L12 6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+        </div>
       </header>
 
       <div className={styles.content}>
