@@ -15,6 +15,7 @@ import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
 
 export const planetaryHeaders = [
+  { label: "House", key: "house" },
   { label: "Planet", key: "name" },
   { label: "Sign", key: "zodiac" },
   { label: "Sign Lord", key: "zodiac_lord" },
@@ -34,17 +35,17 @@ export const planetaryHeaders = [
     key: "local_degree",
     render: (row) => row.local_degree || "--",
   },
-  {
-    label: "Global Degree",
-    key: "global_degree",
-    render: (row) => row.global_degree || "--",
-  },
+  // {
+  //   label: "Global Degree",
+  //   key: "global_degree",
+  //   render: (row) => row.global_degree || "--",
+  // },
 
-  {
-    label: "Progress %",
-    key: "progress_percentage",
-    render: (row) => row.progress_percentage || "--",
-  },
+  // {
+  //   label: "Progress %",
+  //   key: "progress_percentage",
+  //   render: (row) => row.progress_percentage || "--",
+  // },
 
   // Motion
   {
@@ -54,22 +55,21 @@ export const planetaryHeaders = [
   },
 
   // Combust / Planet set
-  {
-    label: "Combust",
-    key: "is_combust",
-    render: (row) => (row.is_combust === "Yes" ? "Yes" : "No"),
-  },
+  // {
+  //   label: "Combust",
+  //   key: "is_combust",
+  //   render: (row) => (row.is_combust === "Yes" ? "Yes" : "No"),
+  // },
 
-  {
-    label: "Planet Set",
-    key: "is_planet_set",
-    render: (row) => (row.is_planet_set === "Yes" ? "Yes" : "No"),
-  },
+  // {
+  //   label: "Planet Set",
+  //   key: "is_planet_set",
+  //   render: (row) => (row.is_planet_set === "Yes" ? "Yes" : "No"),
+  // },
 
   // Additional details
   { label: "Avastha", key: "avastha" },
   { label: "Lord Status", key: "lord_status" },
-  { label: "House", key: "house" },
 ];
 
 const NorthIndian = () => {
