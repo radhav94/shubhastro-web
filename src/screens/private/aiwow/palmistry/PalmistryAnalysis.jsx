@@ -50,20 +50,47 @@ const PalmistryAnalysis = () => {
       clearInterval(progressInterval);
 
       if (result.success) {
-        localStorage.setItem('palmistryResult', JSON.stringify(result.data));
+        const resultId = result.data?.id || result.data?._id;
         
-        setProgress(100);
-        setAnalysisComplete(true);
-        
-        setTimeout(() => {
-          navigate('/aiwow/palmistry/result');
-        }, 1000);
+        if (resultId) {
+          // Cache result temporarily for immediate navigation (fast UX)
+          sessionStorage.setItem('palmistryResult', JSON.stringify(result.data));
+          sessionStorage.setItem('palmistryResultId', resultId);
+          
+          setProgress(100);
+          setAnalysisComplete(true);
+          
+          setTimeout(() => {
+            navigate(`/aiwow/palmistry/result/${resultId}`);
+          }, 1000);
+        } else {
+          // Fallback: If no ID, use localStorage (old behavior)
+          localStorage.setItem('palmistryResult', JSON.stringify(result.data));
+          
+          setProgress(100);
+          setAnalysisComplete(true);
+          
+          setTimeout(() => {
+            navigate('/aiwow/palmistry/result');
+          }, 1000);
+        }
       } else {
+        // Clear old palmistry data from localStorage on failure
+        localStorage.removeItem('palmistryResult');
+        localStorage.removeItem('palmistryImage');
+        localStorage.removeItem('selectedHand');
+        
         setProgress(0);
         setError(result.error || { message: 'Analysis failed. Please try again.' });
       }
     } catch (error) {
       console.error('Analysis error:', error);
+      
+      // Clear old palmistry data from localStorage on error
+      localStorage.removeItem('palmistryResult');
+      localStorage.removeItem('palmistryImage');
+      localStorage.removeItem('selectedHand');
+      
       setProgress(0);
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {
