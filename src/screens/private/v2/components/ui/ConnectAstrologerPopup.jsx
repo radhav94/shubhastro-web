@@ -10,7 +10,6 @@ const ConnectAstrologerPopup = ({
 }) => {
 
   if (!isOpen) return null;
-console.log(astrologer,"ertytrertyu")
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
