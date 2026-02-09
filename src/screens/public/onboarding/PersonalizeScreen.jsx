@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styles from "./Onboarding.module.scss";
 
-const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData }) => {
+const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData, currentStep = 0, totalSteps = 3, onStepChange }) => {
   const [localData, setLocalData] = useState({
     name: formData.name || "",
     identity: formData.identity || "Female",
@@ -17,9 +17,16 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData })
     <div className={styles.personalizeScreen}>
       <div className={styles.header}>
         <div className={styles.progressDots}>
-          <span className={styles.dotActive}></span>
-          <span className={styles.dotInactive}></span>
-          <span className={styles.dotInactive}></span>
+          {Array.from({ length: totalSteps }).map((_, index) => (
+            <span
+              key={index}
+              className={
+                index === currentStep ? styles.dotActive : styles.dotInactive
+              }
+              onClick={() => onStepChange && onStepChange(index)}
+              style={{ cursor: onStepChange ? 'pointer' : 'default' }}
+            ></span>
+          ))}
         </div>
         {/* <button className={styles.skipBtn} onClick={onSkip}>
           Skip for Now
