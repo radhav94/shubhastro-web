@@ -149,7 +149,7 @@ const EditProfileModal = ({
                 required
               >
                 <option value="">Select relation</option>
-                <option value="Self">Self</option>
+                {/* <option value="Self">Self</option> */}
                 <option value="Brother">Brother</option>
                 <option value="Sister">Sister</option>
                 <option value="Mother">Mother</option>
