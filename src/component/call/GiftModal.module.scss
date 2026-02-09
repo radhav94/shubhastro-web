@@ -309,7 +309,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 0px;
 }
 
 .currentPrice {
@@ -331,7 +331,7 @@
   padding: 16px;
   border: none;
   border-radius: 50px;
-  background: #3d2817;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: #fff;
   font-size: 16px;
   font-weight: 600;
@@ -341,6 +341,9 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  @media (width <= 767px) {
+    padding: 8px 16px;
+  }
 }
 
 .comboAddBtn:hover {
@@ -382,7 +385,7 @@
   padding: 16px;
   border: none;
   border-radius: 50px;
-  background: #e8e8e8;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   color: #fff;
   font-size: 16px;
   font-weight: 600;
@@ -395,16 +398,16 @@
 }
 
 .sendBtn:not(:disabled) {
-  background: #3d2817;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
 }
 
 .sendBtn:not(:disabled):hover {
-  background: #2d1f10;
+  transform: translateY(-2px);
 }
 
 .sendBtn:disabled {
-  background: #e8e8e8;
-  color: #b3b3b3;
+  opacity: 0.5;
+  color: #fff;
   cursor: not-allowed;
 }
 

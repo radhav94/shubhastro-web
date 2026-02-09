@@ -567,6 +567,9 @@
   overflow: hidden;
   flex-shrink: 0;
   background: #E8E8E8;
+  @media (width <= 767px) {
+    border-radius: 12px;
+  }
 
   img {
     width: 100%;
