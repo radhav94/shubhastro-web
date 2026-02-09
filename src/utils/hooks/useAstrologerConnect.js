@@ -75,7 +75,8 @@ export const useAstrologerConnect = () => {
     }
 
     // Open kundli selection
-    setOpenModal((prev) => ({ ...prev, kundli: true }));
+    // setOpenModal((prev) => ({ ...prev, kundli: true }));
+    handleAfterKundliSelect(astro)
     return true;
   }, [getBalance, setLastRequestedAstro]);
 
@@ -102,17 +103,18 @@ export const useAstrologerConnect = () => {
     }
 
     setCallType(type);
-    setOpenModal((prev) => ({ ...prev, kundli: true }));
+    // setOpenModal((prev) => ({ ...prev, kundli: true }));
+    handleAfterKundliSelect(astro)
     return true;
   }, [getBalance, setLastRequestedCallAstro]);
 
   // After kundli selection
-  const handleAfterKundliSelect = useCallback(async (kundli) => {
-    setOpenModal((prev) => ({ ...prev, kundli: false }));
+  const handleAfterKundliSelect = useCallback(async (selectedAstrologer) => {
+    // setOpenModal((prev) => ({ ...prev, kundli: false }));
 
-    if (!kundli?._id) return Toast.error("Kundli not selected properly");
-    kundliRef.current = kundli._id;
-    setLastSelectedKundli(kundli);
+    // if (!kundli?._id) return Toast.error("Kundli not selected properly");
+    // kundliRef.current = kundli._id;
+    // setLastSelectedKundli(kundli);
 
     if (!selectedAstrologer?._id) return Toast.error("Astrologer not selected");
     if (!userIdLocal) return Toast.error("User ID Missing");

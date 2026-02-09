@@ -130,85 +130,93 @@ const ProductList = () => {
 
   return (
     <div className={styles.wrapper}>
-      <h2 className={styles.heading}>{location.state?.name}</h2>
+      {products.length === 0 && !isLoading && !isFetching && !oldFetching ? (
+        <div className={styles.emptyState}>
+          <p>No data found</p>
+        </div>
+      ) : (
+        <>
+          <h2 className={styles.heading}>{location.state?.name}</h2>
 
-      <div className={styles.grid}>
-        {products.map((product) => (
-          <div
-            key={product._id}
-            className={styles.card}
-            onClick={() =>
-              navigate(`/shop/${slug}/${getProductRouteId(product)}`, {
-                state: product,
-              })
-            }
-          >
-            <div className={styles.imageWrapper}>
-              <img
-                src={
-                  product.defaultImage ||
-                  product.image ||
-                  "https://images.unsplash.com/photo-1625072290979-cac544181be8"
+          <div className={styles.grid}>
+            {products.map((product) => (
+              <div
+                key={product._id}
+                className={styles.card}
+                onClick={() =>
+                  navigate(`/shop/${slug}/${getProductRouteId(product)}`, {
+                    state: product,
+                  })
                 }
-                alt={product.title || product.name}
-              />
+              >
+                <div className={styles.imageWrapper}>
+                  <img
+                    src={
+                      product.defaultImage ||
+                      product.image ||
+                      "https://images.unsplash.com/photo-1625072290979-cac544181be8"
+                    }
+                    alt={product.title || product.name}
+                  />
 
-              {isLiveDarshan && (
-                <div className={styles.liveTicker}>
-                  <FaCircle className={styles.liveIcon} /> Live
+                  {isLiveDarshan && (
+                    <div className={styles.liveTicker}>
+                      <FaCircle className={styles.liveIcon} /> Live
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {!isLiveDarshan && (
-              <div className={styles.actions}>
-                <button
-                  className={styles.bookBtn}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(
-                      `/shop/${slug}/${getProductRouteId(product)}`,
-                      { state: product }
-                    );
-                  }}
-                >
-                  Book
-                </button>
-              </div>
-            )}
+                {!isLiveDarshan && (
+                  <div className={styles.actions}>
+                    <button
+                      className={styles.bookBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(
+                          `/shop/${slug}/${getProductRouteId(product)}`,
+                          { state: product }
+                        );
+                      }}
+                    >
+                      Book
+                    </button>
+                  </div>
+                )}
 
-            <div className={styles.content}>
-              <div className={styles.titleRow}>
-                <h3>{product.title || product.name}</h3>
-                <div className={styles.views}>
-                  <FaEye />
-                  <span>{product.views || 0}</span>
+                <div className={styles.content}>
+                  <div className={styles.titleRow}>
+                    <h3>{product.title || product.name}</h3>
+                    <div className={styles.views}>
+                      <FaEye />
+                      <span>{product.views || 0}</span>
+                    </div>
+                  </div>
+
+                  {product?.district && (
+                    <p className={styles.place}>
+                      {product.district}, {product.state}
+                    </p>
+                  )}
+
+                  <p>
+                    {product.description
+                      ? product.description.slice(0, 30) + "..."
+                      : "--"}
+                  </p>
                 </div>
               </div>
+            ))}
 
-              {product?.district && (
-                <p className={styles.place}>
-                  {product.district}, {product.state}
-                </p>
-              )}
-
-              <p>
-                {product.description
-                  ? product.description.slice(0, 30) + "..."
-                  : "--"}
-              </p>
-            </div>
+            {/* ===== SKELETON ===== */}
+            {(isFetching || oldFetching) &&
+              Array.from({ length: 2 }).map((_, i) => (
+                <SkeletonCard key={`skeleton-${i}`} />
+              ))}
           </div>
-        ))}
 
-        {/* ===== SKELETON ===== */}
-        {(isFetching || oldFetching) &&
-          Array.from({ length: 2 }).map((_, i) => (
-            <SkeletonCard key={`skeleton-${i}`} />
-          ))}
-      </div>
-
-      {hasMore && <div ref={loadMoreRef} style={{ height: 40 }} />}
+          {hasMore && <div ref={loadMoreRef} style={{ height: 40 }} />}
+        </>
+      )}
 
       <PrimaryLoader isLoading={isLoading || oldFetching} />
     </div>

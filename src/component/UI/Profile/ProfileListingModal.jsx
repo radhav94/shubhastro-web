@@ -61,7 +61,7 @@ const ProfileListingModal = ({
       initials,
       birthDate,
       birthTime,
-      relation: profile.relation || "Self",
+      relation: profile.relation,
     };
   };
 
@@ -164,7 +164,7 @@ const ProfileListingModal = ({
                           </svg>
                         </button>
                       )}
-                      {showDeleteButton && (
+                      {showDeleteButton && formatted.relation !== "Self" && (
                         <button
                           className={styles.deleteBtn}
                           onClick={(e) => handleDeleteClick(e, profile._id)}
@@ -180,7 +180,7 @@ const ProfileListingModal = ({
             )}
           </div>
 
-          <div className={styles.startCallBtnContainer}> 
+          <div className={styles.startCallBtnContainer}>
             {showAddButton && (
               <button
                 className={styles.addProfileBtn}
@@ -194,12 +194,12 @@ const ProfileListingModal = ({
               </button>
             )}
             {startCallMode && (
-              <button 
-                className={`${styles.startCallBtn} ${!selectedProfileId ? styles.disabled : ''}`}
+              <button
+                className={`${styles.startCallBtn} ${!selectedProfileId ? styles.disabled : ""}`}
                 onClick={onStartCall}
                 disabled={!selectedProfileId}
               >
-            {callModeBtnTitle}
+                {callModeBtnTitle}
               </button>
             )}
           </div>
