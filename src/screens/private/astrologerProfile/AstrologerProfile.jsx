@@ -249,6 +249,61 @@ const AstrologerProfile = () => {
     setOpenReview(true);
   };
 
+  const handleSetReminder = () => {
+    try {
+      const astrologerName = `${displayData.firstName} ${displayData.lastName}`.trim();
+      const availability = displayData.availability[0]; // Get first available slot
+      
+      // Parse the time slot (e.g., "11 AM - 4 PM")
+      const timeSlot = availability.time.split(' - ')[0]; // Get start time
+      
+      // Get today's date
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      
+      // Parse time and convert to 24-hour format
+      const parseTime = (timeStr) => {
+        const [time, period] = timeStr.split(' ');
+        let [hours, minutes = '00'] = time.split(':');
+        hours = parseInt(hours);
+        
+        if (period === 'PM' && hours !== 12) {
+          hours += 12;
+        } else if (period === 'AM' && hours === 12) {
+          hours = 0;
+        }
+        
+        return `${String(hours).padStart(2, '0')}${minutes.padStart(2, '0')}`;
+      };
+      
+      const startTime = parseTime(timeSlot);
+      
+      // Create Google Calendar URL
+      const eventTitle = encodeURIComponent(`Consultation with ${astrologerName}`);
+      const eventDetails = encodeURIComponent(
+        `Reminder for consultation with ${astrologerName}\n\nSpecialties: ${displayData.specialities.join(', ')}\nLanguages: ${displayData.languagePreference.join(', ')}`
+      );
+      const eventLocation = encodeURIComponent('ShubhTalk - Online Consultation');
+      
+      // Format: YYYYMMDDTHHmmss
+      const startDateTime = `${year}${month}${day}T${startTime}00`;
+      // Add 1 hour duration
+      const endHours = String((parseInt(startTime.substring(0, 2)) + 1) % 24).padStart(2, '0');
+      const endDateTime = `${year}${month}${day}T${endHours}${startTime.substring(2, 4)}00`;
+      
+      const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${startDateTime}/${endDateTime}&details=${eventDetails}&location=${eventLocation}&sf=true&output=xml`;
+      
+      // Open Google Calendar in new tab
+      window.open(googleCalendarUrl, '_blank');
+      toast.success('Opening Google Calendar...');
+    } catch (error) {
+      console.error('Error creating calendar reminder:', error);
+      toast.error('Failed to create reminder. Please try again.');
+    }
+  };
+
   useEffect(() => {
     if (!userIdLocal) return;
 
@@ -584,7 +639,7 @@ const AstrologerProfile = () => {
               </div>
             ))}
           </div>
-          <button className={styles.reminderBtn}>
+          <button className={styles.reminderBtn} onClick={handleSetReminder}>
             <img
               src={NotificationIcon}
               alt="Notification"
