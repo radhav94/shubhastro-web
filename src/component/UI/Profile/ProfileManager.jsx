@@ -32,6 +32,7 @@ import { getToken } from "../../../utils/token";
  * @param {boolean} props.startCallMode - Enable Start Call selection flow
  * @param {Function} props.onStartCall - Callback when Start Call button is clicked (receives selected profile)
  * @param {Object} props.enabledOperations - Control which operations are enabled (list, add, edit, delete)
+ * @param {string[]} props.excludedProfileIds - Array of profile IDs to exclude from the list
  */
 const ProfileManager = ({
   isOpen = false,
@@ -48,6 +49,7 @@ const ProfileManager = ({
     edit: true,
     delete: true,
   },
+  excludedProfileIds = [],
 }) => {
   // Local state for modal visibility
   const [showAddProfile, setShowAddProfile] = useState(false);
@@ -73,6 +75,13 @@ const ProfileManager = ({
   });
 
   const profiles = data?.data || [];
+
+  console.log(excludedProfileIds)
+
+  // Filter out excluded profiles
+  const filteredProfiles = profiles.filter(
+    (profile) => !excludedProfileIds.includes(profile._id)
+  );
 
   // Reset all modal states when ProfileManager closes
   useEffect(() => {
@@ -275,7 +284,7 @@ const ProfileManager = ({
         isOpen={isOpen}
         onClose={onClose}
         startCallMode={startCallMode}
-        profiles={profiles}
+        profiles={filteredProfiles}
         selectedProfileId={startCallMode ? selectedProfileForCall?._id : selectedProfileId}
         onSelectProfile={startCallMode ? handleProfileSelectForCall : onProfileSelect}
         onDeleteProfile={handleDeleteProfile}
