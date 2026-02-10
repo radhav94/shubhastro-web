@@ -159,6 +159,33 @@
   @media (width <= 767px) {
     grid-template-columns: repeat(3, 1fr);
   }
+  
+  // Scrollable mode when more than 3 cards
+  &.scrollable {
+    display: flex;
+    grid-template-columns: unset;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    
+    &::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    
+    .topCard {
+      flex: 0 0 calc(33.333% - 8px); /* 3 cards visible on all screens */
+      min-width: 200px;
+      max-width: 350px;
+      
+      @media (width <= 767px) {
+        flex: 0 0 calc(33.333% - 8px);
+        min-width: 100px;
+        max-width: 150px;
+      }
+    }
+  }
 }
 
 .topCard {
