@@ -365,8 +365,6 @@ const SmartMatchmaking = () => {
                       <ChevronDown className="w-4 h-4 text-orange-500" />
                     </div>
                   </div>
-                </div>
-
                 <button 
                   type="submit"
                   className={styles.matchMakingBtn} 
@@ -386,6 +384,8 @@ const SmartMatchmaking = () => {
                     </>
                   )}
                 </button>
+                </div>
+
               </form>
 
               <img className={styles.bottomImg} src={matchMakingImgBottom} alt="img" />

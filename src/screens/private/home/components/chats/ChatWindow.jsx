@@ -342,7 +342,7 @@ const ChatWindow = () => {
               disabled={!!activeCall}
             >
               <img src={CallIcon} alt="Voice Call" width="20" height="20" />
-              Voice Call
+              {/* Voice Call */}
             </button>
             
             <button 
@@ -351,7 +351,7 @@ const ChatWindow = () => {
               disabled={!!activeCall}
             >
               <img src={VideocamIcon} alt="Video Call" width="20" height="20" />
-              Video Call
+              {/* Video Call */}
             </button>
           </div>
 

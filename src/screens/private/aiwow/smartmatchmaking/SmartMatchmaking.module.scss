@@ -65,12 +65,15 @@
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.10);
+  width: fit-content;
+  margin: 0 auto;
   
   @media (width <= 767px) {
     flex-direction: column;
     background: transparent;
     box-shadow: none;
     padding: 0px;
+    width: 100%;
   }
 }
 

@@ -3,9 +3,15 @@
 .container {
   position: relative;
   min-height: 100vh;
-  padding-top: 120px;
+  // padding-top: 120px;
   background: #f5f5f5;
-  padding-bottom: 2rem;
+  padding-top: 100px;
+  @media (width <= 1180px) {
+    padding-top: 100px;
+  }
+  @media (width <= 767px) {
+    padding-top: 68px;
+  }
 }
 
 .header {
@@ -20,19 +26,22 @@
 }
 
 .backButton {
-  background: #f3f4f6;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   border: none;
   cursor: pointer;
   padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1f2937;
+  color: #fff;
   border-radius: 0.5rem;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
 
   &:hover {
-    background: #fff;
+    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
   }
 }
 
