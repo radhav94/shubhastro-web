@@ -6,6 +6,8 @@ import { GrReactjs } from "react-icons/gr";
 import IframeModal from "./IframeModal";
 import { IoCheckmark, IoCheckmarkDone } from "react-icons/io5";
 import dayjs from "dayjs";
+import LinkPreview from "./LinkPreview";
+import { detectURL } from "../../../../../utils/helper/linkPreview";
 
 const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
   const [iframeSrc, setIframeSrc] = useState(null);
@@ -109,6 +111,25 @@ const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
                                 <GrReactjs />
                                 View Kundli
                               </div>
+                            );
+                          }
+
+                          // Check if message contains a URL (but not kundli type)
+                          const detectedURL = detectURL(msg.text);
+                          if (detectedURL && msg.type !== "kundli") {
+                            return (
+                              <>
+                                {/* Show the text if it's more than just the URL */}
+                                {msg.text !== detectedURL && (
+                                  <div style={{ marginBottom: 8 }}>
+                                    {msg.text}
+                                  </div>
+                                )}
+                                <LinkPreview 
+                                  url={detectedURL} 
+                                  isSender={msg.isSender}
+                                />
+                              </>
                             );
                           }
                         }
