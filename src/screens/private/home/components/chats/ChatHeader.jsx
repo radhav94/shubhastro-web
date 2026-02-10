@@ -1,14 +1,18 @@
 import styles from "./ChatWindow.module.scss";
 import { IoArrowBack } from "react-icons/io5";
-import { FaWallet } from "react-icons/fa";
+// import { FaWallet } from "react-icons/fa";
 import { PrimaryText } from "../../../../../component";
+import ChatFooter from "./ChatFooter";
 
 const ChatHeader = ({
   fullName,
   isTyping,
   onBack,
   experience = "20 Years",
-  walletBalance = 0
+  walletBalance = 0,
+  remainingTime = 0,
+  onRecharge,
+  isVideoCallActive
 }) => {
   return (
     <div className={styles.header}>
@@ -32,10 +36,11 @@ const ChatHeader = ({
       </div>
 
       <div className={styles.headerRight}>
-        <div className={styles.walletBadge}>
+     {!isVideoCallActive && <ChatFooter remainingTime={remainingTime} onRecharge={onRecharge} walletBalance={walletBalance} />}
+        {/* <div className={styles.walletBadge}>
           <FaWallet className={styles.walletIcon} />
           <span className={styles.walletAmount}>₹{walletBalance}</span>
-        </div>
+        </div> */}
       </div>
     </div>
   );
