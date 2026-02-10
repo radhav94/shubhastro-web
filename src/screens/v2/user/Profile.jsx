@@ -9,6 +9,7 @@ import {
   Phone,
   MessageCircle,
   Star,
+  Trash2,
 } from "lucide-react";
 import { TiUserDelete } from "react-icons/ti";
 import { LuPencilLine } from "react-icons/lu";
@@ -1020,7 +1021,7 @@ const Profile = () => {
                               className={styles.iconButton}
                               onClick={() => handleDeleteClick(kundli)}
                             >
-                              <TiUserDelete size={18} />
+                              <Trash2 size={18} />
                             </button>
                           )}
                         </div>
@@ -1424,6 +1425,7 @@ const Profile = () => {
         onSubmit={handleSubmitProfile}
         isLoading={isCreatingProfile}
         title="Add Profile"
+        savedKundlis={savedKundlis}
         showProfileListing={false}
       />
 
@@ -1434,6 +1436,7 @@ const Profile = () => {
         onSubmit={handleSubmitEditProfile}
         isLoading={isCreatingProfile}
         title="Edit Profile"
+        savedKundlis={savedKundlis}
         initialData={getEditInitialData()}
       />
 
