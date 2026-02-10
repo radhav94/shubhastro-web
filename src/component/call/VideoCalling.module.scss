@@ -200,6 +200,30 @@
   height: 100% !important;
 }
 
+.localVideoLabel {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.localVideoName {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.localVideoRole {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.3px;
+}
+
 .waitingText {
   color: white;
   font-size: 18px;
