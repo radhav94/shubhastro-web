@@ -152,6 +152,38 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
                         );
                       }
 
+                      // Gift messages (detected by presence of giftData)
+                      if (msg?.giftData) {
+                        // Parse the message to insert gift image
+                        const giftText = msg?.text || "";
+                        const parts = giftText.split("a gift");
+                        
+                        return (
+                          <div className={styles.giftMessage}>
+                            <div className={styles.giftTextWithImage}>
+                              <span>You have sent a gift</span>
+                              <span>{parts[1]}</span>
+                            </div>
+                            {/* Gift preview image below text */}
+                            {msg.giftData?.giftImg && (
+                              <div className={styles.giftPreviewContainer}>
+                                <img 
+                                  src={msg.giftData.giftImg} 
+                                  alt={msg.giftData?.giftName || "Gift"}
+                                  className={styles.giftPreviewImg}
+                                  onError={(e) => console.error("❌ Gift preview image failed to load:", msg.giftData.giftImg)}
+                                />
+                                {msg.giftData?.giftName && (
+                                  <div className={styles.giftPreviewName}>
+                                    {msg.giftData.giftName}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+
                       // Kundli messages
                       if (msg?.type === "kundli") {
                         return (

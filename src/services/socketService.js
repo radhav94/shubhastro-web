@@ -60,7 +60,7 @@ class SocketService {
       if (!this.socket?.connected)
         throw new Error("Socket not connected, try again.");
 
-      this.socket.emit("chat:message", {
+      const payload = {
         sender: "user",
         kundliId,
         roomId,
@@ -68,7 +68,9 @@ class SocketService {
         astrologerId,
         message,
         type
-      });
+      };
+
+      this.socket.emit("chat:message", payload);
 
       return { success: true };
     } catch (error) {

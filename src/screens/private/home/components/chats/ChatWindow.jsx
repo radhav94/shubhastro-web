@@ -128,18 +128,37 @@ const ChatWindow = () => {
   const history = data?.data || [];
 
   const finalMsgs = useMemo(() => {
-    const historyMsgs = history.map((item) => ({
-      text: item.message || "",
-      type: item?.type,
-      isSender: isUserSide
-        ? item.sender === "user"
-        : item.sender === "astrologer",
-      time: new Date(item.createdAt).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      dateTime: item.createdAt,
-    }));
+    const historyMsgs = history.map((item) => {
+      // Parse gift messages from history (detect by __GIFT__ prefix)
+      let messageText = item.message || "";
+      let giftData = null;
+      
+      if (messageText.startsWith("__GIFT__")) {
+        try {
+          const jsonString = messageText.substring(8); // Remove __GIFT__ prefix
+          const parsed = JSON.parse(jsonString);
+          messageText = parsed.text;
+          giftData = parsed.giftData;
+        } catch (e) {
+          console.error("Failed to parse gift message from history:", e);
+        }
+      }
+      
+      return {
+        text: messageText,
+        type: item?.type,
+        isSender: isUserSide
+          ? item.sender === "user"
+          : item.sender === "astrologer",
+        time: new Date(item.createdAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        dateTime: item.createdAt,
+        giftData: giftData,
+      };
+    });
+
 
     const socket = messages.map((msg, idx) => ({
       id: `socket-${idx}-${msg.time}`,
@@ -149,7 +168,9 @@ const ChatWindow = () => {
       type: msg?.type,
       date: msg.date || formatDate(new Date()),
       dateTime: msg.dateTime || new Date().toISOString(),
+      giftData: msg?.giftData, // Include gift data from socket messages
     }));
+
 
     return [...historyMsgs, ...socket].sort(
       (a, b) => new Date(a.dateTime) - new Date(b.dateTime)
@@ -469,6 +490,9 @@ const ChatWindow = () => {
           refreshWallet();
         }}
         astrologerId={astrologerId}
+        astrologerName={fullName}
+        roomId={roomId}
+        userId={userId}
       />
     </>
   );

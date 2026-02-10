@@ -131,8 +131,8 @@ const Explore = () => {
             {section.description || "An ever growing library on the story of you"}
           </p>
 
-          <div className={styles.topCardsGrid}>
-            {sectionContent.slice(0, 3).map((card, idx) => (
+          <div className={`${styles.topCardsGrid} ${sectionContent.length > 3 ? styles.scrollable : ''}`}>
+            {sectionContent.map((card, idx) => (
               <div
                 key={idx}
                 className={styles.topCard}
