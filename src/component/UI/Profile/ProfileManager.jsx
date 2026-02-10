@@ -307,6 +307,7 @@ const ProfileManager = ({
         isLoading={isCreating}
         title="Add Profile"
         showProfileListing={false}
+        savedKundlis={filteredProfiles}
       />
 
       {/* Edit Profile Modal */}
@@ -317,6 +318,7 @@ const ProfileManager = ({
         isLoading={isCreating}
         title="Edit Profile"
         initialData={getEditInitialData()}
+        savedKundlis={filteredProfiles}
       />
 
       {/* Delete Confirmation Modal */}

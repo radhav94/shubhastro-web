@@ -44,10 +44,14 @@ createRoot(document.getElementById("root")).render(
       <Toaster
         position="top-right"
         reverseOrder={false}
+        containerStyle={{
+          zIndex: 10000000,
+        }}
         toastOptions={{
           style: {
             fontFamily: "Poppins",
             fontSize: "14px",
+            zIndex: 10000000,
           },
         }}
       />

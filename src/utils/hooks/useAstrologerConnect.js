@@ -20,7 +20,6 @@ export const useAstrologerConnect = () => {
     kundli: false,
   });
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
-  const [callType, setCallType] = useState(null);
   const [chatRoomId, setChatRoomId] = useState(null);
 
   const {
@@ -55,9 +54,7 @@ export const useAstrologerConnect = () => {
     setSelectedAstrologer(astro);
     setLastRequestedAstro(astro);
     activeCallAstroRef.current = astro; // Store in ref immediately
-    setCallType(null); // Reset call type for chat
     console.log("📝 Stored in activeCallAstroRef:", activeCallAstroRef.current);
-    console.log("💬 Call type reset to null for chat");
 
     // Check balance conditionally
     if (checkBalance) {
@@ -76,7 +73,7 @@ export const useAstrologerConnect = () => {
 
     // Open kundli selection
     // setOpenModal((prev) => ({ ...prev, kundli: true }));
-    handleAfterKundliSelect(astro)
+    handleAfterKundliSelect(astro, null) // Pass null for chat
     return true;
   }, [getBalance, setLastRequestedAstro]);
 
@@ -102,14 +99,13 @@ export const useAstrologerConnect = () => {
       return false;
     }
 
-    setCallType(type);
     // setOpenModal((prev) => ({ ...prev, kundli: true }));
-    handleAfterKundliSelect(astro)
+    handleAfterKundliSelect(astro, type) // Pass type directly
     return true;
   }, [getBalance, setLastRequestedCallAstro]);
 
   // After kundli selection
-  const handleAfterKundliSelect = useCallback(async (selectedAstrologer) => {
+  const handleAfterKundliSelect = useCallback(async (selectedAstrologer, connectionType = null) => {
     // setOpenModal((prev) => ({ ...prev, kundli: false }));
 
     // if (!kundli?._id) return Toast.error("Kundli not selected properly");
@@ -130,26 +126,23 @@ export const useAstrologerConnect = () => {
 
       activeCallAstroRef.current = astro;
 
-      console.log("🎯 Initiating connection - Call Type:", callType);
+      console.log("🎯 Initiating connection - Connection Type:", connectionType);
 
-      // If call type exists, initiate call, otherwise chat
-      if (callType) {
+      // If connection type exists, initiate call, otherwise chat
+      if (connectionType) {
         // Initiate call
         if (activeCall) {
           return Toast.error("You are already on a call");
         }
 
-        console.log("📞 Emitting call:initiate with type:", callType);
-        setLastCallType(callType);
+        console.log("📞 Emitting call:initiate with type:", connectionType);
+        setLastCallType(connectionType);
 
         voiceSocket.emit("call:initiate", {
           userId: userIdLocal,
           astrologerId: astro._id,
-          type: callType,
+          type: connectionType,
         });
-        
-        // Reset call type after emitting
-        setCallType(null);
       } else {
         // Initiate chat
         console.log("💬 Emitting chat:initiate");
@@ -161,7 +154,7 @@ export const useAstrologerConnect = () => {
     } catch (error) {
       console.error(error);
     }
-  }, [selectedAstrologer, callType, token, userIdLocal, activeCall, navigate, location, setLastSelectedKundli, setLastCallType, setCallWaitingList]);
+  }, [token, userIdLocal, activeCall, navigate, location, setLastSelectedKundli, setLastCallType, setCallWaitingList]);
 
   const handleRechargeNow = useCallback(() => {
     setOpenModal((prev) => ({ ...prev, recharge: false }));
