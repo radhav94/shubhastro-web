@@ -1,175 +1,185 @@
-import VideoCalling from "../../component/call/VideoCall";
-import AgoraVoiceCalling from "../../component/call/VoiceCall";
-import Onboarding from "../../screens/public/onboarding/Onboarding";
-import {
-  Login,
-  Register,
-  ForgotPassword,
-  OtpVerification,
-  VerifyPassword,
-  // Home,
-  Horoscope,
-  Kundli,
-  Numerology,
-  Tarot,
-  FreeReadings,
-  AstroLive,
-  Video,
-  Blog,
-  SessionDetails,
-  Shop,
-  Profile,
-  TalkToAstrologer,
-  Payment,
-  Astrologers,
-  Streaming,
-  DetailHoroscope,
-  TodayPanchang,
-  Vaar,
-  Tithi,
-  OneCardTarot,
-  ThreeCardTarot,
-  WellNessTarot,
-  TarotResult,
-  Daily,
-  SignScreen,
-  Monthly,
-  Yesterday,
-  Tomorrow,
-  MatchMaking,
-  // Sadesati,
-  MatchDetails,
-  About,
-  Disclaimer,
-  PricingPolicy,
-  PrivacyPolicy,
-  RefundPolicy,
-  TermsConditions,
-  Notification,
-  WalletTranscations,
-  AstrologerProfile,
-} from "../../screens";
-import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
-import AgeCalc from "../../screens/private/calculator/ageCalculator/AgeCalc";
-import AgeReport from "../../screens/private/calculator/ageCalculator/AgeReport";
-import AtmakarakaCalculator from "../../screens/private/calculator/Atmakaraka/AtmakarakaCalculator";
-import AtmakarakaReport from "../../screens/private/calculator/Atmakaraka/Report";
-import BirthCalc from "../../screens/private/calculator/birthCalc/BirthCalc";
-import BirthReport from "../../screens/private/calculator/birthCalc/BirthReport";
-import DashaCalc from "../../screens/private/calculator/dasha/DashaCalc";
-import DashaReport from "../../screens/private/calculator/dasha/DashaReport";
-import DestinyCalc from "../../screens/private/calculator/destiny/DestinyCalc";
-import DestinyReport from "../../screens/private/calculator/destiny/DestinyReport";
-import FlamesCalc from "../../screens/private/calculator/flames/FlamesCalc";
-import FlamesReport from "../../screens/private/calculator/flames/FlamesReport";
-import Friendship from "../../screens/private/calculator/friendship/Friendship";
-import FriendshipReport from "../../screens/private/calculator/friendship/FriendshipReport";
-import KaalSarpCalc from "../../screens/private/calculator/kaalsarp/KaalSarpCalc";
-import KaalSarpReport from "../../screens/private/calculator/kaalsarp/KaalSarpReport";
-import LoveCalc from "../../screens/private/calculator/love/LoveCalc";
-import LoveReport from "../../screens/private/calculator/love/LoveReport";
-import MangalDosha from "../../screens/private/calculator/mangaldosha/MangalDosha";
-import MangalReport from "../../screens/private/calculator/mangaldosha/MangalReport";
-import MobileCalc from "../../screens/private/calculator/mobileNumber/MobileCalc";
-import MobileReport from "../../screens/private/calculator/mobileNumber/MobileReport";
-import NumerologyCalc from "../../screens/private/calculator/numerology/NumerologyCalc";
-import NumerologyReport from "../../screens/private/calculator/numerology/NumerologyReport";
-import RashiCalc from "../../screens/private/calculator/rashi/RashiCalc";
-import RashiReport from "../../screens/private/calculator/rashi/RashiReport";
-import RisingSign from "../../screens/private/calculator/risingsign/RisingSign";
-import RisingSignReport from "../../screens/private/calculator/risingsign/RisingSignReport";
-import ShaniReport from "../../screens/private/calculator/shanisadesati/ShaniReport";
-import ShaniSadeSati from "../../screens/private/calculator/shanisadesati/ShaniSadeSati";
-import SunSignCalc from "../../screens/private/calculator/sunsign/SunSignCalc";
-import SunSignReport from "../../screens/private/calculator/sunsign/SunSignReport";
-import VehicleCalc from "../../screens/private/calculator/vehicleNumber/VehicleCalc";
-import VehicleReport from "../../screens/private/calculator/vehicleNumber/VehicleReport";
-import CompatibilityLanding from "../../screens/private/compatibility/CompatibilityLanding";
-import CompatibilityResult from "../../screens/private/compatibility/CompatibilityResult";
-import SelectPartner from "../../screens/private/compatibility/SelectPartner";
-// import AstrologerIncomingCall from "../../screens/private/home/components/astrologers/AstrologerIncomingCall";
-import AstrologersDashboard from "../../screens/private/home/components/astrologers/AstrologersDashboard";
-import ChatList from "../../screens/private/home/components/astrologers/atrologerchat/ChatList";
-import ChatWindow from "../../screens/private/home/components/chats/ChatWindow";
-import InteractiveLiveStreaming from "../../screens/private/home/components/livestream/InteractiveLiveStreaming";
-import LivePlayerPage from "../../screens/private/home/components/livestream/LivePlayerPage";
-// import LivePlayerPage from "../../screens/private/home/components/livestream/LivePlayerPage";
-import Weekly from "../../screens/private/horoscope/weeklyHoroscope/Weekly";
-import Yearly from "../../screens/private/horoscope/yearlyHoroscope/Yearly";
-import HoroscopeNew from "../../screens/private/horoscope/Horoscope";
-import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
-import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
-import AIWow from "../../screens/private/aiwow/AIWow";
-import PalmistryLanding from "../../screens/private/aiwow/palmistry/PalmistryLanding";
-import PalmistryHandSelection from "../../screens/private/aiwow/palmistry/PalmistryHandSelection";
-import PalmistryInstructions from "../../screens/private/aiwow/palmistry/PalmistryInstructions";
-import PalmistryCamera from "../../screens/private/aiwow/palmistry/PalmistryCamera";
-import PalmistryAnalysis from "../../screens/private/aiwow/palmistry/PalmistryAnalysis";
-import PalmistryResult from "../../screens/private/aiwow/palmistry/PalmistryResult";
-import FaceReadingLanding from "../../screens/private/aiwow/facereading/FaceReadingLanding";
-import FaceReadingInstructions from "../../screens/private/aiwow/facereading/FaceReadingInstructions";
-import FaceReadingCamera from "../../screens/private/aiwow/facereading/FaceReadingCamera";
-import FaceReadingAnalysis from "../../screens/private/aiwow/facereading/FaceReadingAnalysis";
-import FaceReadingResult from "../../screens/private/aiwow/facereading/FaceReadingResult";
-import SignatureLanding from "../../screens/private/aiwow/signature/SignatureLanding";
-import SignatureInstructions from "../../screens/private/aiwow/signature/SignatureInstructions";
-import SignatureCamera from "../../screens/private/aiwow/signature/SignatureCamera";
-import SignatureAnalysis from "../../screens/private/aiwow/signature/SignatureAnalysis";
-import SignatureResult from "../../screens/private/aiwow/signature/SignatureResult";
-import GemstoneLanding from "../../screens/private/aiwow/gemstone/GemstoneLanding";
-import GemstoneInstructions from "../../screens/private/aiwow/gemstone/GemstoneInstructions";
-import GemstoneCamera from "../../screens/private/aiwow/gemstone/GemstoneCamera";
-import GemstoneAnalysis from "../../screens/private/aiwow/gemstone/GemstoneAnalysis";
-import GemstoneResult from "../../screens/private/aiwow/gemstone/GemstoneResult";
-import ClothColorLanding from "../../screens/private/aiwow/clothcolor/ClothColorLanding";
-import ClothColorForm from "../../screens/private/aiwow/clothcolor/ClothColorForm";
-import ClothColorInstructions from "../../screens/private/aiwow/clothcolor/ClothColorInstructions";
-import ClothColorCamera from "../../screens/private/aiwow/clothcolor/ClothColorCamera";
-import ClothColorAnalysis from "../../screens/private/aiwow/clothcolor/ClothColorAnalysis";
-import ClothColorResult from "../../screens/private/aiwow/clothcolor/ClothColorResult";
-import TalkToKundliChat from "../../screens/private/aiwow/talktokundli/TalkToKundliChat";
-import CosmicChat from "../../screens/private/aiwow/cosmicchat/CosmicChat";
-import DailyCosmicBriefing from "../../screens/private/aiwow/dailycosmicbriefing/DailyCosmicBriefing";
-import DreamInterpreter from "../../screens/private/aiwow/dreaminterpreter/DreamInterpreter";
-import AgenticCalendar from "../../screens/private/aiwow/agenticcalendar/AgenticCalendar";
-import SmartMatchmaking from "../../screens/private/aiwow/smartmatchmaking/SmartMatchmaking";
-import KarmicDebtTracker from "../../screens/private/aiwow/karmicdebt/KarmicDebtTracker";
-import AstroVitals from "../../screens/private/aiwow/astrovitals/AstroVitals";
-import AuraLanding from "../../screens/private/aiwow/aura/AuraLanding";
-import AuraInstructions from "../../screens/private/aiwow/aura/AuraInstructions";
-import AuraCamera from "../../screens/private/aiwow/aura/AuraCamera";
-import AuraAnalysis from "../../screens/private/aiwow/aura/AuraAnalysis";
-import AuraResult from "../../screens/private/aiwow/aura/AuraResult";
-import SingleCallHistory from "../../screens/private/orderHistory/components/Call/SingleCallHistory";
-import SingleChatHistory from "../../screens/private/orderHistory/components/Chat/SingleChatHistory";
-import OrderHistory from "../../screens/private/orderHistory/OrderHistory";
-import FinalPay from "../../screens/private/payment/FinalPay";
-import ConsultantList from "../../screens/private/shop/consultant/ConsultantList";
-import PaymentScreen from "../../screens/private/shop/consultant/PaymentScreen";
-import PlayScreen from "../../screens/private/shop/detail/playscreen/PlayScreen";
-import ProductDetail from "../../screens/private/shop/detail/ProductDetail";
-import ProductList from "../../screens/private/shop/product/ProductList";
-import BuisnessBreakupTarot from "../../screens/private/tarot/buisnessBreakupTarot/BuisnessBreakupTarot";
-import CareerSelectTarot from "../../screens/private/tarot/careerSelectTarot/CareerSelectTarot";
-import DailyTarot from "../../screens/private/tarot/dailyTarot/DailyTarot";
-import EroticLove from "../../screens/private/tarot/eroticLove/EroticLove";
-import FlirtTarot from "../../screens/private/tarot/flirtTarot/FlirtTarot";
-import InDepthLove from "../../screens/private/tarot/inDepthLove/InDepthLove";
-import LoveTriangleTarot from "../../screens/private/tarot/loveTriangleTarot/LoveTriangleTarot";
-import MadeForEachOther from "../../screens/private/tarot/madeForEachOther/MadeForEachOther";
-import RomanticBreakUpTarot from "../../screens/private/tarot/romanticBreakupTarot/RomanticBreakUpTarot";
-import YesNoTarot from "../../screens/private/tarot/yesNoTarot/YesNoTarot";
-import TarotReadingPage from "../../screens/private/v2/tarot/TarotReadingPage";
-import TarotCardDetailPage from "../../screens/private/v2/tarot/TarotCardDetailPage";
-import TarotCardSelectionPage from "../../screens/private/v2/tarot/TarotCardSelectionPage";
-import LoveTriangleSelectionPage from "../../screens/private/v2/tarot/LoveTriangleSelectionPage";
-import LoveTriangleResultPage from "../../screens/private/v2/tarot/LoveTriangleResultPage";
-import Home from "../../screens/v2/home/Home";
-import ProfileV2 from "../../screens/v2/user/Profile";
-import Explore from "../../screens/private/explore/Explore";
-import AddProfile from "../../screens/v2/user/AddProfile";
-import EditProfile from "../../screens/v2/user/EditProfile";
-import LiveLanding from "../../screens/private/live/LiveLanding";
+import { lazy } from "react";
+
+const VideoCalling = lazy(() => import("../../component/call/VideoCall"));
+const AgoraVoiceCalling = lazy(() => import("../../component/call/VoiceCall"));
+const Onboarding = lazy(() => import("../../screens/public/onboarding/Onboarding"));
+
+const Login = lazy(() => import("../../screens").then(module => ({ default: module.Login })));
+const Register = lazy(() => import("../../screens").then(module => ({ default: module.Register })));
+const ForgotPassword = lazy(() => import("../../screens").then(module => ({ default: module.ForgotPassword })));
+const OtpVerification = lazy(() => import("../../screens").then(module => ({ default: module.OtpVerification })));
+const VerifyPassword = lazy(() => import("../../screens").then(module => ({ default: module.VerifyPassword })));
+const Horoscope = lazy(() => import("../../screens").then(module => ({ default: module.Horoscope })));
+const Kundli = lazy(() => import("../../screens").then(module => ({ default: module.Kundli })));
+const Numerology = lazy(() => import("../../screens").then(module => ({ default: module.Numerology })));
+const Tarot = lazy(() => import("../../screens").then(module => ({ default: module.Tarot })));
+const FreeReadings = lazy(() => import("../../screens").then(module => ({ default: module.FreeReadings })));
+const AstroLive = lazy(() => import("../../screens").then(module => ({ default: module.AstroLive })));
+const Video = lazy(() => import("../../screens").then(module => ({ default: module.Video })));
+const Blog = lazy(() => import("../../screens").then(module => ({ default: module.Blog })));
+const SessionDetails = lazy(() => import("../../screens").then(module => ({ default: module.SessionDetails })));
+const Shop = lazy(() => import("../../screens").then(module => ({ default: module.Shop })));
+const Profile = lazy(() => import("../../screens").then(module => ({ default: module.Profile })));
+const TalkToAstrologer = lazy(() => import("../../screens").then(module => ({ default: module.TalkToAstrologer })));
+const Payment = lazy(() => import("../../screens").then(module => ({ default: module.Payment })));
+const Astrologers = lazy(() => import("../../screens").then(module => ({ default: module.Astrologers })));
+const Streaming = lazy(() => import("../../screens").then(module => ({ default: module.Streaming })));
+const DetailHoroscope = lazy(() => import("../../screens").then(module => ({ default: module.DetailHoroscope })));
+const TodayPanchang = lazy(() => import("../../screens").then(module => ({ default: module.TodayPanchang })));
+const Vaar = lazy(() => import("../../screens").then(module => ({ default: module.Vaar })));
+const Tithi = lazy(() => import("../../screens").then(module => ({ default: module.Tithi })));
+const OneCardTarot = lazy(() => import("../../screens").then(module => ({ default: module.OneCardTarot })));
+const ThreeCardTarot = lazy(() => import("../../screens").then(module => ({ default: module.ThreeCardTarot })));
+const WellNessTarot = lazy(() => import("../../screens").then(module => ({ default: module.WellNessTarot })));
+const TarotResult = lazy(() => import("../../screens").then(module => ({ default: module.TarotResult })));
+const Daily = lazy(() => import("../../screens").then(module => ({ default: module.Daily })));
+const SignScreen = lazy(() => import("../../screens").then(module => ({ default: module.SignScreen })));
+const Monthly = lazy(() => import("../../screens").then(module => ({ default: module.Monthly })));
+const Yesterday = lazy(() => import("../../screens").then(module => ({ default: module.Yesterday })));
+const Tomorrow = lazy(() => import("../../screens").then(module => ({ default: module.Tomorrow })));
+const MatchMaking = lazy(() => import("../../screens").then(module => ({ default: module.MatchMaking })));
+const MatchDetails = lazy(() => import("../../screens").then(module => ({ default: module.MatchDetails })));
+const About = lazy(() => import("../../screens").then(module => ({ default: module.About })));
+const Disclaimer = lazy(() => import("../../screens").then(module => ({ default: module.Disclaimer })));
+const PricingPolicy = lazy(() => import("../../screens").then(module => ({ default: module.PricingPolicy })));
+const PrivacyPolicy = lazy(() => import("../../screens").then(module => ({ default: module.PrivacyPolicy })));
+const RefundPolicy = lazy(() => import("../../screens").then(module => ({ default: module.RefundPolicy })));
+const TermsConditions = lazy(() => import("../../screens").then(module => ({ default: module.TermsConditions })));
+const Notification = lazy(() => import("../../screens").then(module => ({ default: module.Notification })));
+const WalletTranscations = lazy(() => import("../../screens").then(module => ({ default: module.WalletTranscations })));
+const AstrologerProfile = lazy(() => import("../../screens").then(module => ({ default: module.AstrologerProfile })));
+
+const SingleBlogDetails = lazy(() => import("../../screens/private/blog/blogHeader/SingleBlog"));
+
+const AgeCalc = lazy(() => import("../../screens/private/calculator/ageCalculator/AgeCalc"));
+const AgeReport = lazy(() => import("../../screens/private/calculator/ageCalculator/AgeReport"));
+const AtmakarakaCalculator = lazy(() => import("../../screens/private/calculator/Atmakaraka/AtmakarakaCalculator"));
+const AtmakarakaReport = lazy(() => import("../../screens/private/calculator/Atmakaraka/Report"));
+const BirthCalc = lazy(() => import("../../screens/private/calculator/birthCalc/BirthCalc"));
+const BirthReport = lazy(() => import("../../screens/private/calculator/birthCalc/BirthReport"));
+const DashaCalc = lazy(() => import("../../screens/private/calculator/dasha/DashaCalc"));
+const DashaReport = lazy(() => import("../../screens/private/calculator/dasha/DashaReport"));
+const DestinyCalc = lazy(() => import("../../screens/private/calculator/destiny/DestinyCalc"));
+const DestinyReport = lazy(() => import("../../screens/private/calculator/destiny/DestinyReport"));
+const FlamesCalc = lazy(() => import("../../screens/private/calculator/flames/FlamesCalc"));
+const FlamesReport = lazy(() => import("../../screens/private/calculator/flames/FlamesReport"));
+const Friendship = lazy(() => import("../../screens/private/calculator/friendship/Friendship"));
+const FriendshipReport = lazy(() => import("../../screens/private/calculator/friendship/FriendshipReport"));
+const KaalSarpCalc = lazy(() => import("../../screens/private/calculator/kaalsarp/KaalSarpCalc"));
+const KaalSarpReport = lazy(() => import("../../screens/private/calculator/kaalsarp/KaalSarpReport"));
+const LoveCalc = lazy(() => import("../../screens/private/calculator/love/LoveCalc"));
+const LoveReport = lazy(() => import("../../screens/private/calculator/love/LoveReport"));
+const MangalDosha = lazy(() => import("../../screens/private/calculator/mangaldosha/MangalDosha"));
+const MangalReport = lazy(() => import("../../screens/private/calculator/mangaldosha/MangalReport"));
+const MobileCalc = lazy(() => import("../../screens/private/calculator/mobileNumber/MobileCalc"));
+const MobileReport = lazy(() => import("../../screens/private/calculator/mobileNumber/MobileReport"));
+const NumerologyCalc = lazy(() => import("../../screens/private/calculator/numerology/NumerologyCalc"));
+const NumerologyReport = lazy(() => import("../../screens/private/calculator/numerology/NumerologyReport"));
+const RashiCalc = lazy(() => import("../../screens/private/calculator/rashi/RashiCalc"));
+const RashiReport = lazy(() => import("../../screens/private/calculator/rashi/RashiReport"));
+const RisingSign = lazy(() => import("../../screens/private/calculator/risingsign/RisingSign"));
+const RisingSignReport = lazy(() => import("../../screens/private/calculator/risingsign/RisingSignReport"));
+const ShaniReport = lazy(() => import("../../screens/private/calculator/shanisadesati/ShaniReport"));
+const ShaniSadeSati = lazy(() => import("../../screens/private/calculator/shanisadesati/ShaniSadeSati"));
+const SunSignCalc = lazy(() => import("../../screens/private/calculator/sunsign/SunSignCalc"));
+const SunSignReport = lazy(() => import("../../screens/private/calculator/sunsign/SunSignReport"));
+const VehicleCalc = lazy(() => import("../../screens/private/calculator/vehicleNumber/VehicleCalc"));
+const VehicleReport = lazy(() => import("../../screens/private/calculator/vehicleNumber/VehicleReport"));
+
+const CompatibilityLanding = lazy(() => import("../../screens/private/compatibility/CompatibilityLanding"));
+const CompatibilityResult = lazy(() => import("../../screens/private/compatibility/CompatibilityResult"));
+const SelectPartner = lazy(() => import("../../screens/private/compatibility/SelectPartner"));
+
+const AstrologersDashboard = lazy(() => import("../../screens/private/home/components/astrologers/AstrologersDashboard"));
+const ChatList = lazy(() => import("../../screens/private/home/components/astrologers/atrologerchat/ChatList"));
+const ChatWindow = lazy(() => import("../../screens/private/home/components/chats/ChatWindow"));
+const InteractiveLiveStreaming = lazy(() => import("../../screens/private/home/components/livestream/InteractiveLiveStreaming"));
+const LivePlayerPage = lazy(() => import("../../screens/private/home/components/livestream/LivePlayerPage"));
+
+const Weekly = lazy(() => import("../../screens/private/horoscope/weeklyHoroscope/Weekly"));
+const Yearly = lazy(() => import("../../screens/private/horoscope/yearlyHoroscope/Yearly"));
+const HoroscopeNew = lazy(() => import("../../screens/private/horoscope/Horoscope"));
+
+const LifePathDetails = lazy(() => import("../../screens/private/numerology/lifepath/LifePathDetails"));
+const LifePathForm = lazy(() => import("../../screens/private/numerology/lifepath/LifePathForm"));
+
+const AIWow = lazy(() => import("../../screens/private/aiwow/AIWow"));
+const PalmistryLanding = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryLanding"));
+const PalmistryHandSelection = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryHandSelection"));
+const PalmistryInstructions = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryInstructions"));
+const PalmistryCamera = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryCamera"));
+const PalmistryAnalysis = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryAnalysis"));
+const PalmistryResult = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryResult"));
+const FaceReadingLanding = lazy(() => import("../../screens/private/aiwow/facereading/FaceReadingLanding"));
+const FaceReadingInstructions = lazy(() => import("../../screens/private/aiwow/facereading/FaceReadingInstructions"));
+const FaceReadingCamera = lazy(() => import("../../screens/private/aiwow/facereading/FaceReadingCamera"));
+const FaceReadingAnalysis = lazy(() => import("../../screens/private/aiwow/facereading/FaceReadingAnalysis"));
+const FaceReadingResult = lazy(() => import("../../screens/private/aiwow/facereading/FaceReadingResult"));
+const SignatureLanding = lazy(() => import("../../screens/private/aiwow/signature/SignatureLanding"));
+const SignatureInstructions = lazy(() => import("../../screens/private/aiwow/signature/SignatureInstructions"));
+const SignatureCamera = lazy(() => import("../../screens/private/aiwow/signature/SignatureCamera"));
+const SignatureAnalysis = lazy(() => import("../../screens/private/aiwow/signature/SignatureAnalysis"));
+const SignatureResult = lazy(() => import("../../screens/private/aiwow/signature/SignatureResult"));
+const GemstoneLanding = lazy(() => import("../../screens/private/aiwow/gemstone/GemstoneLanding"));
+const GemstoneInstructions = lazy(() => import("../../screens/private/aiwow/gemstone/GemstoneInstructions"));
+const GemstoneCamera = lazy(() => import("../../screens/private/aiwow/gemstone/GemstoneCamera"));
+const GemstoneAnalysis = lazy(() => import("../../screens/private/aiwow/gemstone/GemstoneAnalysis"));
+const GemstoneResult = lazy(() => import("../../screens/private/aiwow/gemstone/GemstoneResult"));
+const ClothColorLanding = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorLanding"));
+const ClothColorForm = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorForm"));
+const ClothColorInstructions = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorInstructions"));
+const ClothColorCamera = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorCamera"));
+const ClothColorAnalysis = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorAnalysis"));
+const ClothColorResult = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorResult"));
+const TalkToKundliChat = lazy(() => import("../../screens/private/aiwow/talktokundli/TalkToKundliChat"));
+const CosmicChat = lazy(() => import("../../screens/private/aiwow/cosmicchat/CosmicChat"));
+const DailyCosmicBriefing = lazy(() => import("../../screens/private/aiwow/dailycosmicbriefing/DailyCosmicBriefing"));
+const DreamInterpreter = lazy(() => import("../../screens/private/aiwow/dreaminterpreter/DreamInterpreter"));
+const AgenticCalendar = lazy(() => import("../../screens/private/aiwow/agenticcalendar/AgenticCalendar"));
+const SmartMatchmaking = lazy(() => import("../../screens/private/aiwow/smartmatchmaking/SmartMatchmaking"));
+const KarmicDebtTracker = lazy(() => import("../../screens/private/aiwow/karmicdebt/KarmicDebtTracker"));
+const AstroVitals = lazy(() => import("../../screens/private/aiwow/astrovitals/AstroVitals"));
+const AuraLanding = lazy(() => import("../../screens/private/aiwow/aura/AuraLanding"));
+const AuraInstructions = lazy(() => import("../../screens/private/aiwow/aura/AuraInstructions"));
+const AuraCamera = lazy(() => import("../../screens/private/aiwow/aura/AuraCamera"));
+const AuraAnalysis = lazy(() => import("../../screens/private/aiwow/aura/AuraAnalysis"));
+const AuraResult = lazy(() => import("../../screens/private/aiwow/aura/AuraResult"));
+
+const SingleCallHistory = lazy(() => import("../../screens/private/orderHistory/components/Call/SingleCallHistory"));
+const SingleChatHistory = lazy(() => import("../../screens/private/orderHistory/components/Chat/SingleChatHistory"));
+const OrderHistory = lazy(() => import("../../screens/private/orderHistory/OrderHistory"));
+
+const FinalPay = lazy(() => import("../../screens/private/payment/FinalPay"));
+
+const ConsultantList = lazy(() => import("../../screens/private/shop/consultant/ConsultantList"));
+const PaymentScreen = lazy(() => import("../../screens/private/shop/consultant/PaymentScreen"));
+const PlayScreen = lazy(() => import("../../screens/private/shop/detail/playscreen/PlayScreen"));
+const ProductDetail = lazy(() => import("../../screens/private/shop/detail/ProductDetail"));
+const ProductList = lazy(() => import("../../screens/private/shop/product/ProductList"));
+
+const BuisnessBreakupTarot = lazy(() => import("../../screens/private/tarot/buisnessBreakupTarot/BuisnessBreakupTarot"));
+const CareerSelectTarot = lazy(() => import("../../screens/private/tarot/careerSelectTarot/CareerSelectTarot"));
+const DailyTarot = lazy(() => import("../../screens/private/tarot/dailyTarot/DailyTarot"));
+const EroticLove = lazy(() => import("../../screens/private/tarot/eroticLove/EroticLove"));
+const FlirtTarot = lazy(() => import("../../screens/private/tarot/flirtTarot/FlirtTarot"));
+const InDepthLove = lazy(() => import("../../screens/private/tarot/inDepthLove/InDepthLove"));
+const LoveTriangleTarot = lazy(() => import("../../screens/private/tarot/loveTriangleTarot/LoveTriangleTarot"));
+const MadeForEachOther = lazy(() => import("../../screens/private/tarot/madeForEachOther/MadeForEachOther"));
+const RomanticBreakUpTarot = lazy(() => import("../../screens/private/tarot/romanticBreakupTarot/RomanticBreakUpTarot"));
+const YesNoTarot = lazy(() => import("../../screens/private/tarot/yesNoTarot/YesNoTarot"));
+
+const TarotReadingPage = lazy(() => import("../../screens/private/v2/tarot/TarotReadingPage"));
+const TarotCardDetailPage = lazy(() => import("../../screens/private/v2/tarot/TarotCardDetailPage"));
+const TarotCardSelectionPage = lazy(() => import("../../screens/private/v2/tarot/TarotCardSelectionPage"));
+const LoveTriangleSelectionPage = lazy(() => import("../../screens/private/v2/tarot/LoveTriangleSelectionPage"));
+const LoveTriangleResultPage = lazy(() => import("../../screens/private/v2/tarot/LoveTriangleResultPage"));
+
+const Home = lazy(() => import("../../screens/v2/home/Home"));
+const ProfileV2 = lazy(() => import("../../screens/v2/user/Profile"));
+const Explore = lazy(() => import("../../screens/private/explore/Explore"));
+const AddProfile = lazy(() => import("../../screens/v2/user/AddProfile"));
+const EditProfile = lazy(() => import("../../screens/v2/user/EditProfile"));
+const LiveLanding = lazy(() => import("../../screens/private/live/LiveLanding"));
 
 export const PATH = {
   // DEFAULT: {
