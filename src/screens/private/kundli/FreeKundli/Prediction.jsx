@@ -141,6 +141,12 @@ const Prediction = ({ params, skipToken }) => {
 
                     const metaKey = `${index}-${key}`;
                     const isMetaOpen = openMeta[metaKey];
+                    
+                    // Show only first 150 characters
+                    const fullText = value.bot_response;
+                    const previewLength = 500;
+                    const previewText = fullText.substring(0, previewLength);
+                    const showPreview = fullText.length > previewLength;
 
                     return (
                       <div
@@ -166,14 +172,15 @@ const Prediction = ({ params, skipToken }) => {
                         </div>
 
                         <p className="text-sm text-gray-600 leading-relaxed">
-                          {value.bot_response}
+                          {isMetaOpen ? fullText : previewText}
+                          {!isMetaOpen && showPreview && "..."}
                         </p>
 
                         <p className="mt-2 text-xs text-gray-500">
                           Probability: {formatValue(value.probability)}
                         </p>
 
-                        {(value.contributors || value.houseScores) && (
+                        {(showPreview || value.contributors || value.houseScores) && (
                           <button
                             onClick={() =>
                               setOpenMeta((p) => ({

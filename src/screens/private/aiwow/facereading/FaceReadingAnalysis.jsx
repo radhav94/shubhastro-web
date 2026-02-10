@@ -58,11 +58,20 @@ const FaceReadingAnalysis = () => {
           navigate('/aiwow/face-reading/result');
         }, 1000);
       } else {
+        // Clear old face reading data from localStorage on failure
+        localStorage.removeItem('faceReadingResult');
+        localStorage.removeItem('faceReadingImage');
+        
         setProgress(0);
         setError(result.error || { message: 'Analysis failed. Please try again.' });
       }
     } catch (error) {
       console.error('Analysis error:', error);
+      
+      // Clear old face reading data from localStorage on error
+      localStorage.removeItem('faceReadingResult');
+      localStorage.removeItem('faceReadingImage');
+      
       setProgress(0);
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {

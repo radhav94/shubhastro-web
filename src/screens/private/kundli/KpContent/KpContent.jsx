@@ -73,8 +73,8 @@ const planetaryHeaders = [
   },
   {
     label: "Degree",
-    key: "global_degree",
-    render: (row) => row.global_degree?.toFixed?.(2) || "--",
+    key: "local_degree",
+    render: (row) => row.local_degree?.toFixed?.(2) || "--",
   },
 
   {

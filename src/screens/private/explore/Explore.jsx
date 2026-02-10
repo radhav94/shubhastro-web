@@ -3,17 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { ChevronLeft, Edit, ChevronRight } from "lucide-react";
 import styles from "./Explore.module.scss";
-import ProfileListingModal from "../../../component/UI/Profile/ProfileListingModal";
-import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
 import { 
   useGetAllKundlisQuery,
-  useCreateKundliMutation 
 } from "../../../services/appServices/kundliServicesNew";
 import { useGetExplorePageDataQuery } from "../../../redux/api/explore/exploreApi";
 import { setForm } from "../../../redux/kundliform/formSlice";
-import { Toast } from "../../../component";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { getRouteFromSlug, requiresProfileData } from "../../../utils/constanats/exploreRouteConfig";
+import { ProfileManager } from "../../../component/UI/Profile";
 
 // Import default images as fallback
 import horoscopeImg from "../../../assets/explore/horoscope.png";
@@ -27,7 +24,6 @@ import matchmakingImg from "../../../assets/explore/matchmaking.png";
 import tarotImg from "../../../assets/explore/tarot.png";
 import newsImg from "../../../assets/explore/news.png";
 import numerology from "../../../assets/images/numerology.svg";
-import { ProfileManager } from "../../../component/UI/Profile";
 
 // Reusable Section Title with Divider Component
 const SectionTitleWithDivider = ({ title }) => (
@@ -58,7 +54,6 @@ const Explore = () => {
   const dispatch = useDispatch();
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [showSelectProfile, setShowSelectProfile] = useState(false);
-  const [showAddProfile, setShowAddProfile] = useState(false);
 
   // Get token
   const role = localStorage.getItem("shubhtalk_role");
@@ -68,10 +63,9 @@ const Explore = () => {
       : localStorage.getItem("shubhtalk_customer_token");
 
   // API Hooks
-  const { data, isLoading, refetch } = useGetAllKundlisQuery(undefined, {
+  const { data, refetch } = useGetAllKundlisQuery(undefined, {
     skip: !token,
   });
-  const [createKundli, { isLoading: isCreating }] = useCreateKundliMutation();
   
   // Fetch Explore Page Data
   const { data: exploreData, isLoading: isLoadingExplore } = useGetExplorePageDataQuery();
@@ -92,47 +86,6 @@ const Explore = () => {
   const handleSelectProfile = (profile) => {
     setSelectedProfile(profile);
     setShowSelectProfile(false);
-  };
-
-  const handleAddProfile = () => {
-    setShowSelectProfile(false);
-    setShowAddProfile(true);
-  };
-
-  const handleSubmitProfile = async (formData) => {
-    try {
-      const dateObj = new Date(formData.birthDate);
-      const timeObj = formData.birthTime ? formData.birthTime.split(":") : ["12", "0"];
-
-      const payload = {
-        name: formData.name,
-        gender: formData.identity.toLowerCase(),
-        relation: formData.relation,
-        day: dateObj.getDate(),
-        month: dateObj.getMonth() + 1,
-        year: dateObj.getFullYear(),
-        hour: formData.unknownBirthTime ? 12 : parseInt(timeObj[0]),
-        min: formData.unknownBirthTime ? 0 : parseInt(timeObj[1]),
-        second: 0,
-        place: formData.birthPlace,
-        lat: parseFloat(formData.latitude) || 0,
-        lon: parseFloat(formData.longitude) || 0,
-        tzone: 5.5,
-      };
-
-      const result = await createKundli(payload).unwrap();
-      Toast.success("Profile added successfully");
-      setShowAddProfile(false);
-      refetch();
-
-      // Select the newly created profile
-      if (result?.data) {
-        setSelectedProfile(result.data);
-      }
-    } catch (err) {
-      console.error("Error creating profile:", err);
-      Toast.error(err?.data?.message || "Failed to add profile");
-    }
   };
 
   // Helper function to format date
@@ -178,8 +131,8 @@ const Explore = () => {
             {section.description || "An ever growing library on the story of you"}
           </p>
 
-          <div className={styles.topCardsGrid}>
-            {sectionContent.slice(0, 3).map((card, idx) => (
+          <div className={`${styles.topCardsGrid} ${sectionContent.length > 3 ? styles.scrollable : ''}`}>
+            {sectionContent.map((card, idx) => (
               <div
                 key={idx}
                 className={styles.topCard}
@@ -208,7 +161,7 @@ const Explore = () => {
               <SectionTitleWithDivider 
                 title={(section.display_title || section.title || "").toUpperCase()} 
               />
-              <ChevronRight size={24} className={styles.sectionArrow} />
+              {/* <ChevronRight size={24} className={styles.sectionArrow} /> */}
             </div>
 
             <div className={styles.kundliGrid}>
@@ -591,30 +544,6 @@ const Explore = () => {
           delete: true,
         }}
       />
-
-      {/* Select Profile Modal */}
-      {/* <ProfileListingModal
-        isOpen={showSelectProfile}
-        onClose={() => setShowSelectProfile(false)}
-        profiles={profiles}
-        selectedProfileId={selectedProfile?._id}
-        onSelectProfile={handleSelectProfile}
-        onAddProfile={handleAddProfile}
-        title="Select Profile"
-        showAddButton={true}
-        showDeleteButton={false}
-        emptyMessage="No profiles found. Add a profile to get started."
-      /> */}
-
-      {/* Add Profile Modal */}
-      {/* <AddProfileModal
-        isOpen={showAddProfile}
-        onClose={() => setShowAddProfile(false)}
-        onSubmit={handleSubmitProfile}
-        isLoading={isCreating}
-        title="Add Profile"
-        showProfileListing={false}
-      /> */}
     </div>
   );
 };

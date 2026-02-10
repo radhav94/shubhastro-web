@@ -46,8 +46,8 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   color: $color-black;
   display: flex;
   align-self: flex-start;
-  margin: 7px;
-  border-bottom: 1px solid $color-grey-light;
+  // margin: 7px;
+  // border-bottom: 1px solid $color-grey-light;
   padding-bottom: 12px;
 }
 
@@ -121,6 +121,7 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   padding: 10px;
   width: auto;
   word-wrap: break-word;
+  text-align: center;
 }
 
 .detailsTable th {

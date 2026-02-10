@@ -36,9 +36,9 @@ const Sidebar = () => {
   return (
     <div className={styles.sidebar}>
       <div className={styles.leftContainer}>
-        <PrimaryText isSemiBold size_20>
+        <h2 className={styles.sideTitle}>
           SELECT OTHER SIGN
-        </PrimaryText>
+        </h2>
         <div className={styles.dropdownContainer}>
           <select
             value={defaultSign}
@@ -54,9 +54,9 @@ const Sidebar = () => {
           </select>
         </div>
         <div className={styles.dropdownContainer}>
-          <PrimaryText paddingBottom="10px" isSemiBold size_20>
+          {/* <h3 className={styles.sideTitle}>
             Horoscopes
-          </PrimaryText>
+          </h3> */}
           <ul id="horoscope-type" className={styles.horoscopes}>
             <Link to={`/horoscopes/daily-horoscope/${paramSign}`}>
               <li

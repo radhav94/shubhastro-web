@@ -34,7 +34,7 @@ import { PATH } from "../../../../../utils/routes/Paths";
 import ProfileListingModal from "../../../../../component/UI/Profile/ProfileListingModal";
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
 import GiftModal from "../../../../../component/call/GiftModal";
-import {ProfileManager} from "../../../../../component/UI/Profile";
+import { ProfileManager } from "../../../../../component/UI/Profile";
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
@@ -58,13 +58,13 @@ const ChatWindow = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showProfileManagerModal, setShowProfileManagerModal] = useState(false);
   const [showGiftModal, setShowGiftModal] = useState(false);
-  
+
   // Check if there's an active video call
   const isVideoCallActive = activeCall && activeCall.callType === "video";
-  
+
   // Get wallet balance
   const { balance, refreshWallet } = useWalletBalance();
-  
+
   // Fetch kundli profiles
   const { data: profilesData } = useGetAllKundlisQuery();
   const profiles = profilesData?.data || [];
@@ -103,11 +103,11 @@ const ChatWindow = () => {
 
   const [message, setMessage] = useState("");
 
-  const { 
-    waitingPopup: localWaitingPopup, 
-    handleAudioCall, 
-    handleVideoCall, 
-    handleCancelCall 
+  const {
+    waitingPopup: localWaitingPopup,
+    handleAudioCall,
+    handleVideoCall,
+    handleCancelCall
   } = useChatSocket({
     userId,
     astrologerId,
@@ -128,18 +128,37 @@ const ChatWindow = () => {
   const history = data?.data || [];
 
   const finalMsgs = useMemo(() => {
-    const historyMsgs = history.map((item) => ({
-      text: item.message || "",
-      type: item?.type,
-      isSender: isUserSide
-        ? item.sender === "user"
-        : item.sender === "astrologer",
-      time: new Date(item.createdAt).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      dateTime: item.createdAt,
-    }));
+    const historyMsgs = history.map((item) => {
+      // Parse gift messages from history (detect by __GIFT__ prefix)
+      let messageText = item.message || "";
+      let giftData = null;
+      
+      if (messageText.startsWith("__GIFT__")) {
+        try {
+          const jsonString = messageText.substring(8); // Remove __GIFT__ prefix
+          const parsed = JSON.parse(jsonString);
+          messageText = parsed.text;
+          giftData = parsed.giftData;
+        } catch (e) {
+          console.error("Failed to parse gift message from history:", e);
+        }
+      }
+      
+      return {
+        text: messageText,
+        type: item?.type,
+        isSender: isUserSide
+          ? item.sender === "user"
+          : item.sender === "astrologer",
+        time: new Date(item.createdAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        dateTime: item.createdAt,
+        giftData: giftData,
+      };
+    });
+
 
     const socket = messages.map((msg, idx) => ({
       id: `socket-${idx}-${msg.time}`,
@@ -149,7 +168,9 @@ const ChatWindow = () => {
       type: msg?.type,
       date: msg.date || formatDate(new Date()),
       dateTime: msg.dateTime || new Date().toISOString(),
+      giftData: msg?.giftData, // Include gift data from socket messages
     }));
+
 
     return [...historyMsgs, ...socket].sort(
       (a, b) => new Date(a.dateTime) - new Date(b.dateTime)
@@ -181,7 +202,7 @@ const ChatWindow = () => {
       const baseUrl = window.location.origin;
 
       const kundliLink = `${baseUrl}/kundli/${kundli._id}`;
-      isUserSide ? sendMessage(kundliLink,'kundli') : astroReply(kundliLink);
+      isUserSide ? sendMessage(kundliLink, 'kundli') : astroReply(kundliLink);
 
       setMessage("");
       return;
@@ -233,12 +254,13 @@ const ChatWindow = () => {
     const audioUrl = signedUrl.uploadUrl.split("?")[0];
     const uploadUrl = signedUrl.uploadUrl;
     await uploadFileToS3(uploadUrl, blob);
-    const jsonString = JSON.stringify({
-      type: "voice",
-      audioUrl,
-      duration,
-    });
-    sendMessage(jsonString);
+    // const jsonString = JSON.stringify({
+    //   type: "voice",
+    //   audioUrl,
+    //   duration,
+    // });
+    const attachType = getAttachType(blob.type);
+    sendMessage(audioUrl, attachType);
     setMessage("");
   };
 
@@ -261,8 +283,9 @@ const ChatWindow = () => {
     //   fileSize: meta.size,
     // });
 
-    // sendMessage(jsonString);
-    // setMessage("");
+    const attachType = getAttachType(blob.type);
+    sendMessage(fileUrl, attachType);
+    setMessage("");
     console.log("FILE UPLOADED URL:", fileUrl);
   };
 
@@ -280,6 +303,18 @@ const ChatWindow = () => {
     }
 
     return "success";
+  };
+
+  const getAttachType = (mimeType) => {
+    if (mimeType.startsWith('image/')) {
+      return 'image';
+    } else if (mimeType.startsWith('video/')) {
+      return 'video';
+    } else if (mimeType.startsWith('audio/')) {
+      return 'audio';
+    } else {
+      return 'attachment';
+    }
   };
 
   // Floating action handlers
@@ -311,7 +346,7 @@ const ChatWindow = () => {
     setShowProfileManagerModal(false);
   };
 
-   // Auto-end chat when timer reaches 0
+  // Auto-end chat when timer reaches 0
   useLayoutEffect(() => {
     if (chatSeconds === 0 && remainingTime > 0) {
       // Timer has reached 0, automatically end the chat
@@ -332,21 +367,24 @@ const ChatWindow = () => {
             disabled={!!activeCall}
             walletBalance={balance || 0}
             experience={experience}
+            remainingTime={chatSeconds > 0 ? chatSeconds : 0}
+            onRecharge={handleRecharge}
+            isVideoCallActive={isVideoCallActive}
           />
 
           {/* Call Buttons Below Header */}
           <div className={styles.callButtonsContainer}>
-            <button 
-              className={styles.voiceCallButton} 
+            <button
+              className={styles.voiceCallButton}
               onClick={handleAudioCall}
               disabled={!!activeCall}
             >
               <img src={CallIcon} alt="Voice Call" width="20" height="20" />
               Voice Call
             </button>
-            
-            <button 
-              className={styles.videoCallButton} 
+
+            <button
+              className={styles.videoCallButton}
               onClick={handleVideoCall}
               disabled={!!activeCall}
             >
@@ -386,12 +424,12 @@ const ChatWindow = () => {
             />
           )}
 
-          {!isVideoCallActive && (
+          {/* {!isVideoCallActive && (
             <ChatFooter 
               remainingTime={chatSeconds > 0 ? chatSeconds : 0}
               onRecharge={handleRecharge}
             />
-          )}
+          )} */}
 
           {/* {waitingPopup && (
             <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
@@ -450,6 +488,9 @@ const ChatWindow = () => {
           refreshWallet();
         }}
         astrologerId={astrologerId}
+        astrologerName={fullName}
+        roomId={roomId}
+        userId={userId}
       />
     </>
   );

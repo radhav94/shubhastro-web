@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import socketService from "../../../../../services/socketService";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import toast from "../../../../../component/toast";
-import {useChat as useChatContext} from "../../../../../context/ChatContext"
+import { useChat as useChatContext } from "../../../../../context/ChatContext"
+import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
 
 export default function useChat({
   userId,
@@ -20,6 +21,10 @@ export default function useChat({
   const [isTyping, setIsTyping] = useState(false);
   const [isMessageDisabled, setIsMessageDisabled] = useState(false);
 
+  // Fetch kundli profiles to get the "Self" profile
+  const { data: profilesData } = useGetAllKundlisQuery();
+  const profiles = profilesData?.data || [];
+
   const formatTime = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
@@ -28,53 +33,84 @@ export default function useChat({
   };
 
   const handleChatEndedFromServer = () => {
-      setIsMessageDisabled(true);
-      setOpenFeedback(true);
-      stopTimer();
-      setActiveChat(null);
-    };
+    setIsMessageDisabled(true);
+    setOpenFeedback(true);
+    stopTimer();
+    setActiveChat(null);
+  };
 
   useEffect(() => {
-    if(activeChat?.astrologerId !== astrologerId) setIsMessageDisabled(true)
-    if(!roomId || !userId || !astrologerId) return;
+    if (activeChat?.astrologerId !== astrologerId) setIsMessageDisabled(true)
+    if (!roomId || !userId || !astrologerId) return;
     socketService.connect({
       onConnected: () => {
-        if(Object.keys(activeChat || {}).length > 0) { //Check if chat is active
+        if (Object.keys(activeChat || {}).length > 0) { //Check if chat is active
           startTimer(); //Start timer only when there is active chat
           setIsMessageDisabled(false);
           //Send msg first time only 
-          if(!refreshKey) {
-            sendMessage(`Hi ${astrologerName || ""}`); 
+          if (!refreshKey) {
+            // Check if there's an AI initial query stored
+            const aiInitialQuery = localStorage.getItem("aiInitialQuery");
+
+            if (aiInitialQuery) {
+              // Send the AI query directly
+              sendMessage(aiInitialQuery);
+              localStorage.removeItem("aiInitialQuery");
+            } else {
+              // Regular greeting message
+              sendMessage(`Hi ${astrologerName || ""}`);
+            }
+
+            // Find the kundli profile with relation "Self"
+            const selfProfile = profiles.find(profile => profile.relation === "Self");
+            const profileIdToUse = selfProfile?._id || kundliId;
+
             const baseUrl = window.location.origin;
-            const kundliLink = `${baseUrl}/kundli/${kundliId}`;
-            setTimeout(() => sendMessage(kundliLink,'kundli'), 300);
+            const kundliLink = `${baseUrl}/kundli/${profileIdToUse}`;
+            setTimeout(() => sendMessage(kundliLink, 'kundli'), 300);
           }
         }
       },
       onError: (errMsg) => {
-        toast.error(errMsg ||"Something went wrong");
+        toast.error(errMsg || "Something went wrong");
         setError(errMsg);
-      if(errMsg === 'Chat no longer available' || errMsg === 'Chat has already ended' || errMsg === 'Session not found'){
-        setIsMessageDisabled(true);
-        stopTimer();
-        setActiveChat(null);
-      }
+        if (errMsg === 'Chat no longer available' || errMsg === 'Chat has already ended' || errMsg === 'Session not found') {
+          setIsMessageDisabled(true);
+          stopTimer();
+          setActiveChat(null);
+        }
       },
       onWarn: (msg) => {
-        toast.warning(msg ||"Something went wrong");
+        toast.warning(msg || "Something went wrong");
       },
     });
 
     const handleAddMessage = (data) => {
       const isSenderUser = data.sender === "user";
-        addMessage({
-          text: data.message,
-          sender: isSenderUser,
-          time: formatTime(),
-          dateTime: data?.dateTime,
-          type:data.type,
-
-        });
+      
+      // Parse gift messages (detect by __GIFT__ prefix)
+      let messageText = data.message;
+      let giftData = null;
+      
+      if (data.message && data.message.startsWith("__GIFT__")) {
+        try {
+          const jsonString = data.message.substring(8); // Remove __GIFT__ prefix
+          const parsed = JSON.parse(jsonString);
+          messageText = parsed.text;
+          giftData = parsed.giftData;
+        } catch (e) {
+          console.error("Failed to parse gift message:", e);
+        }
+      }
+      
+      addMessage({
+        text: messageText,
+        sender: isSenderUser,
+        time: formatTime(),
+        dateTime: data?.dateTime,
+        type: data.type,
+        giftData: giftData,
+      });
     }
 
     const handleWarning = (msg) => {
@@ -82,9 +118,9 @@ export default function useChat({
     }
 
     const handleTyping = (isTyping) => {
-     console.log('Typing event received:', isTyping);
-     setIsTyping(isTyping === true);
-   }
+      console.log('Typing event received:', isTyping);
+      setIsTyping(isTyping === true);
+    }
 
     voiceSocket.on("message:recieved", handleAddMessage);
     voiceSocket.on("warning", handleWarning);
@@ -100,7 +136,7 @@ export default function useChat({
   }, [roomId, activeChat]);
 
   // USER SEND
-  const sendMessage = (text,type="message") => {
+  const sendMessage = (text, type = "message") => {
     const res = socketService.sendMessage({
       message: text,
       roomId,
@@ -153,7 +189,7 @@ export default function useChat({
     chatSeconds,
     isMessageDisabled,
     setIsMessageDisabled,
-    remainingTime : activeChat?.remainingTime || 0,
+    remainingTime: activeChat?.remainingTime || 0,
     handleChatEndedFromServer
   };
 }

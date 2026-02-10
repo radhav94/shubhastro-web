@@ -97,6 +97,7 @@ $floating-button-gap: 14px;
   background: $bg-header;
   border-bottom: none;
   flex-shrink: 0;
+  gap: $spacing-lg;
 }
 
 /* ==================== CALL BUTTONS BELOW HEADER ==================== */
@@ -160,11 +161,13 @@ $floating-button-gap: 14px;
   align-items: center;
   gap: $spacing-xl;
   flex: 1;
+  min-width: 0; /* Allow flex item to shrink */
 }
 
 .headerRight {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .backIcon {
@@ -197,7 +200,14 @@ $floating-button-gap: 14px;
   flex-direction: column;
   gap: 2px;
   flex: 1;
-  min-width: 0;
+  min-width: 0; /* Allow text truncation */
+  overflow: hidden;
+}
+
+.userInfo > * {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .experienceText {
@@ -339,6 +349,275 @@ $floating-button-gap: 14px;
 .checkmark {
   font-size: 16px;
   color: $text-timestamp;
+}
+
+/* ==================== MEDIA MESSAGE TYPES ==================== */
+
+/* Image Messages */
+.imageMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.messageImage {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  max-height: 350px;
+  border-radius: 12px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.messageImage:hover {
+  transform: scale(1.02);
+}
+
+/* Video Messages */
+.videoMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.videoWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.messageVideo {
+  width: 100%;
+  height: auto;
+  max-height: 350px;
+  display: block;
+  border-radius: 12px;
+}
+
+.videoOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.videoWrapper:hover .videoOverlay {
+  opacity: 1;
+}
+
+.playIcon {
+  font-size: 48px;
+  color: #fff;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Attachment Messages */
+.attachmentMessage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  min-width: 240px;
+  max-width: 100%;
+}
+
+.senderBubble .attachmentMessage {
+  background: rgba(247, 88, 1, 0.08);
+}
+
+.attachmentIcon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 8px;
+  background: rgba(247, 88, 1, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $icon-color;
+}
+
+.attachmentInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attachmentName {
+  font-size: 14px;
+  font-weight: 500;
+  color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attachmentSize {
+  font-size: 12px;
+  color: $text-timestamp;
+}
+
+.downloadButton {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 50%;
+  background: rgba(247, 88, 1, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $icon-color;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.downloadButton:hover {
+  background: rgba(247, 88, 1, 0.2);
+  transform: scale(1.05);
+}
+
+.downloadButton:active {
+  transform: scale(0.95);
+}
+
+/* Kundli Link */
+.kundliLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4a4a4a;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.kundliLink:hover {
+  color: $icon-color;
+}
+
+/* Gift Messages */
+.giftMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.giftTextWithImage {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: #4a4a4a;
+  line-height: 1.5;
+}
+
+.giftInlineImg {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 6px;
+  vertical-align: middle;
+  display: inline-block;
+  border: 1.5px solid rgba(247, 88, 1, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.giftPreviewContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 12px;
+  background: rgba(247, 88, 1, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(247, 88, 1, 0.1);
+}
+
+.giftPreviewImg {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(247, 88, 1, 0.15);
+}
+
+.giftPreviewName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #F75801;
+  text-align: center;
+}
+
+.giftImageContainer {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(247, 88, 1, 0.05);
+  border: 2px solid rgba(247, 88, 1, 0.1);
+}
+
+.giftImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Image Preview Modal */
+.imagePreviewModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  cursor: pointer;
+  padding: 20px;
+}
+
+.imagePreviewContent {
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.previewImage {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 /* ==================== TYPING INDICATOR ==================== */
@@ -579,14 +858,24 @@ $floating-button-gap: 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: $bg-footer;
+  gap: 30px;
+  // background: $bg-footer;
   flex-shrink: 0;
+}
+
+/* Chat Footer in Header (Mobile) */
+.headerRight .chatFooter {
+  padding: 0;
+  min-height: auto;
+  gap: $spacing-lg;
+  flex-wrap: nowrap;
 }
 
 .timerText {
   font-size: 15px;
-  color: $text-white;
+  color: $text-black;
   font-weight: 400;
+  white-space: nowrap;
 }
 
 .timerHighlight {
@@ -607,6 +896,8 @@ $floating-button-gap: 14px;
   display: flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .rechargeButton img {
@@ -669,6 +960,7 @@ $floating-button-gap: 14px;
     min-height: var(--chat-header-height);
     max-height: var(--chat-header-height);
     flex-shrink: 0;
+    gap: $spacing-md;
   }
 
   .callButtonsContainer {
@@ -690,7 +982,39 @@ $floating-button-gap: 14px;
   }
 
   .headerLeft {
-    gap: $spacing-lg;
+    gap: $spacing-md;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .headerRight {
+    flex-shrink: 0;
+  }
+
+  /* Chat Footer in Header - Mobile Responsive */
+  .headerRight .chatFooter {
+    padding: 0;
+    min-height: auto;
+    gap: $spacing-md;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .timerText {
+    font-size: 11px;
+    text-align: right;
+  }
+
+  .rechargeButton {
+    padding: 6px 16px;
+    font-size: 12px;
+    border-radius: 20px;
+    gap: 4px;
+  }
+
+  .rechargeButton img {
+    width: 14px;
+    height: 14px;
   }
 
   .backIcon {
@@ -843,11 +1167,75 @@ $floating-button-gap: 14px;
   }
 
   .rechargeButton {
-    padding: $spacing-md 20px;
+    padding: 4px $spacing-md;
     font-size: 13px;
     border-radius: 24px;
     flex-shrink: 0;
     white-space: nowrap;
+  }
+
+  /* Media message adjustments for mobile */
+  .messageImage {
+    max-width: 220px;
+    max-height: 280px;
+  }
+
+  .videoWrapper {
+    max-width: 220px;
+  }
+
+  .messageVideo {
+    max-height: 280px;
+  }
+
+  .playIcon {
+    font-size: 40px;
+  }
+
+  .attachmentMessage {
+    min-width: 200px;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .attachmentIcon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+
+  .attachmentName {
+    font-size: 13px;
+  }
+
+  .attachmentSize {
+    font-size: 11px;
+  }
+
+  .downloadButton {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+  }
+
+  .downloadButton svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Gift preview adjustments for mobile */
+  .giftPreviewImg {
+    width: 100px;
+    height: 100px;
+  }
+
+  .giftPreviewName {
+    font-size: 12px;
+  }
+
+  .giftInlineImg {
+    width: 28px;
+    height: 28px;
   }
 }
 

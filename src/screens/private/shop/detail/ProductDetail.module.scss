@@ -25,7 +25,7 @@
 }
 .title {
   font-size: 25px;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .price {
@@ -42,16 +42,18 @@
 
 .bookBtn {
   margin-top: 25px;
-  background: #ff6600;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   padding: 12px 20px;
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 50px;
   font-size: 16px;
   cursor: pointer;
+  transition: all 0.2s ease;
 
   &:hover {
-    background: #e55c00;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
   }
 }
 

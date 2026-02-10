@@ -51,11 +51,20 @@ const AuraAnalysis = () => {
           navigate('/aiwow/aura/result');
         }, 1000);
       } else {
+        // Clear old aura data from localStorage on failure
+        localStorage.removeItem('auraResult');
+        localStorage.removeItem('auraImage');
+        
         setProgress(0);
         setError(result.error || { message: 'Analysis failed. Please try again.' });
       }
     } catch (error) {
       console.error('Analysis error:', error);
+      
+      // Clear old aura data from localStorage on error
+      localStorage.removeItem('auraResult');
+      localStorage.removeItem('auraImage');
+      
       setProgress(0);
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {

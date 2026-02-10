@@ -628,6 +628,11 @@ const MatchMaking = () => {
             ? primaryProfile?._id
             : partnerProfile?._id
         }
+        excludedProfileIds={
+          selectingType === "PRIMARY"
+            ? partnerProfile?._id ? [partnerProfile._id] : []
+            : primaryProfile?._id ? [primaryProfile._id] : []
+        }
         title="Select Profile"
         enabledOperations={{
           list: true,

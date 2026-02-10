@@ -6,19 +6,34 @@ const WheelDatePicker = ({
   onChange, 
   onClose,
   minYear = 1700,
-  maxYear = new Date().getFullYear() + 1000
+  maxYear = new Date().getFullYear() // Default to current year
 }) => {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth() + 1;
+  const currentDay = today.getDate();
+
   // Parse initial value or use current date
   const parseDate = (dateStr) => {
     if (!dateStr) {
-      const now = new Date();
       return {
-        day: now.getDate(),
-        month: now.getMonth() + 1,
-        year: now.getFullYear(),
+        day: currentDay,
+        month: currentMonth,
+        year: currentYear,
       };
     }
     const [year, month, day] = dateStr.split("-").map(Number);
+    
+    // Prevent future dates
+    const parsedDate = new Date(year, month - 1, day);
+    if (parsedDate > today) {
+      return {
+        day: currentDay,
+        month: currentMonth,
+        year: currentYear,
+      };
+    }
+    
     return { day, month, year };
   };
 
@@ -40,9 +55,20 @@ const WheelDatePicker = ({
     "July", "August", "September", "October", "November", "December"
   ];
 
-  // Generate years dynamically based on props
+  // Get available months based on selected year
+  const getAvailableMonths = (year) => {
+    // If selected year is current year, only show months up to current month
+    if (year === currentYear) {
+      return months.slice(0, currentMonth);
+    }
+    return months;
+  };
+
+  const availableMonths = getAvailableMonths(selectedYear);
+
+  // Generate years dynamically based on props (never exceed current year)
   const years = Array.from(
-    { length: maxYear - minYear + 1 }, 
+    { length: Math.min(maxYear, currentYear) - minYear + 1 }, 
     (_, i) => minYear + i
   );
 
@@ -51,8 +77,20 @@ const WheelDatePicker = ({
     return new Date(year, month, 0).getDate();
   };
 
+  // Get available days based on selected month/year
+  const getAvailableDays = (month, year) => {
+    const totalDays = getDaysInMonth(month, year);
+    
+    // If selected year and month are current, limit to current day
+    if (year === currentYear && month === currentMonth) {
+      return Array.from({ length: currentDay }, (_, i) => i + 1);
+    }
+    
+    return Array.from({ length: totalDays }, (_, i) => i + 1);
+  };
+
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
-  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const days = getAvailableDays(selectedMonth, selectedYear);
 
   // Scroll handling with debounce for better performance
   const handleScroll = (ref, items, setter) => {
@@ -100,10 +138,18 @@ const WheelDatePicker = ({
 
   // Adjust day if it exceeds days in selected month
   useEffect(() => {
-    if (selectedDay > daysInMonth) {
-      setSelectedDay(daysInMonth);
+    const maxAvailableDay = days[days.length - 1] || 1;
+    if (selectedDay > maxAvailableDay) {
+      setSelectedDay(maxAvailableDay);
     }
-  }, [selectedMonth, selectedYear]);
+  }, [selectedMonth, selectedYear, days]);
+
+  // Adjust month if it exceeds available months for selected year
+  useEffect(() => {
+    if (selectedYear === currentYear && selectedMonth > currentMonth) {
+      setSelectedMonth(currentMonth);
+    }
+  }, [selectedYear]);
 
   // Auto-update the date when selection changes
   useEffect(() => {
@@ -175,11 +221,11 @@ const WheelDatePicker = ({
           <div
             className={styles.wheel}
             ref={monthRef}
-            onScroll={() => handleScroll(monthRef, months.map((_, i) => i + 1), setSelectedMonth)}
-            onScrollEnd={() => handleScrollEnd(monthRef, months.map((_, i) => i + 1), selectedMonth)}
+            onScroll={() => handleScroll(monthRef, availableMonths.map((_, i) => i + 1), setSelectedMonth)}
+            onScrollEnd={() => handleScrollEnd(monthRef, availableMonths.map((_, i) => i + 1), selectedMonth)}
           >
             <div className={styles.spacer}></div>
-            {months.map((month, index) => (
+            {availableMonths.map((month, index) => (
               <div
                 key={month}
                 className={`${styles.wheelItem} ${
