@@ -10,6 +10,8 @@ import { IoChevronForward } from "react-icons/io5";
 import WalletModal from "./WalletModal";
 import WalletIcon from "../../assets/icons/wallet-2.svg";
 import AstrologerShopImage from "../../assets/images/astrologer-shop.png";
+import { getUserFromStorage } from "../../utils/authStorage";
+import socketService from "../../services/socketService";
 
 // Fallback dummy data
 const DUMMY_GIFTS = [
@@ -56,12 +58,14 @@ const DUMMY_COMBOS = [
   },
 ];
 
-const GiftModal = ({ isOpen, onClose, astrologerId }) => {
+const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, userId }) => {
   const { data, isLoading } = useGetAllGiftsQuery();
   const [sendGift, { isLoading: isSending }] = useSendGiftMutation();
   const [selected, setSelected] = useState(null);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const { balance, refreshWallet } = useWalletBalance();
+  
+  const user = getUserFromStorage();
 
   // Use API data if available, otherwise use dummy data
   const gifts = data?.data && data.data.length > 0 ? data.data : DUMMY_GIFTS;
@@ -83,7 +87,7 @@ const GiftModal = ({ isOpen, onClose, astrologerId }) => {
     }
 
     try {
-      await sendGift({
+      const response = await sendGift({
         giftId: selected._id,
         astrologerId: astrologerId,
       }).unwrap();
@@ -94,6 +98,47 @@ const GiftModal = ({ isOpen, onClose, astrologerId }) => {
       // Dispatch custom event to notify other components
       window.dispatchEvent(new Event("walletBalanceUpdated"));
       
+      // Send gift message to chat if roomId and userId are available
+      if (roomId && userId) {
+        // Construct user name properly
+        let userName;
+        if (user?.firstName && user?.lastName) {
+          // Check if first name and last name are the same (case-insensitive)
+          if (user.firstName.toLowerCase() === user.lastName.toLowerCase()) {
+            userName = user.firstName; // Show only first name if they're the same
+          } else {
+            userName = `${user.firstName} ${user.lastName}`; // Show full name
+          }
+        } else {
+          userName = user?.firstName || user?.phoneNumber || "User";
+        }
+        
+        const astrologerDisplayName = astrologerName || "Astrologer";
+        
+        // Create gift data object
+        const giftDataToSend = {
+          giftName: selected.giftName,
+          giftImg: selected.giftImg,
+          price: selected.price,
+        };
+        
+        // Encode gift data as JSON string in the message with a special prefix
+        const giftMessage = `__GIFT__${JSON.stringify({
+          text: `${userName} has sent a gift to ${astrologerDisplayName}`,
+          giftData: giftDataToSend
+        })}`;
+      
+        // Send the gift message through socket
+        // Using "message" type so backend accepts it
+        socketService.sendMessage({
+          roomId,
+          userId,
+          astrologerId,
+          message: giftMessage,
+          type: "message",
+          kundliId: null
+        });
+      }
       toast.success("Gift sent successfully");
       onClose();
     } catch (error) {

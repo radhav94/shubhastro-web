@@ -87,13 +87,29 @@ export default function useChat({
 
     const handleAddMessage = (data) => {
       const isSenderUser = data.sender === "user";
+      
+      // Parse gift messages (detect by __GIFT__ prefix)
+      let messageText = data.message;
+      let giftData = null;
+      
+      if (data.message && data.message.startsWith("__GIFT__")) {
+        try {
+          const jsonString = data.message.substring(8); // Remove __GIFT__ prefix
+          const parsed = JSON.parse(jsonString);
+          messageText = parsed.text;
+          giftData = parsed.giftData;
+        } catch (e) {
+          console.error("Failed to parse gift message:", e);
+        }
+      }
+      
       addMessage({
-        text: data.message,
+        text: messageText,
         sender: isSenderUser,
         time: formatTime(),
         dateTime: data?.dateTime,
         type: data.type,
-
+        giftData: giftData,
       });
     }
 
