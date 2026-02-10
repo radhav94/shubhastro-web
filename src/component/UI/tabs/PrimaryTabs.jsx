@@ -1,24 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useParams, useSearchParams } from "react-router-dom";
 import styles from "./PrimaryTabs.module.scss";
 import ConnectCard from "../cards/connectCard/ConnectCard";
 import ServiceCards from "../../../screens/private/home/components/serviceCards/ServiceCards";
 import ZodiacCarousel from "../../../screens/private/horoscope/zodiacCarousel/ZodiacCarousel";
-import { useParams } from "react-router-dom";
 
 const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0 }) => {
-  const [activeTabIndex, setActiveTabIndex] = useState(
-    tabs.length > 0 ? initialActiveIndex : -1
-  );
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTabIndex, setActiveTabIndex] = useState(initialActiveIndex);
 
-  if (activeTabIndex === -1) {
+  // Sync activeTabIndex with initialActiveIndex when it changes
+  useEffect(() => {
+    setActiveTabIndex(initialActiveIndex);
+  }, [initialActiveIndex]);
+
+  if (tabs.length === 0) {
     return <div>No tabs to display.</div>;
   }
+  
   const { kundliId } = useParams();
 
   const activeStyle = {
     display: "none",
     background: "black",
+  };
+
+  const handleTabClick = (index) => {
+    setActiveTabIndex(index);
+    
+    // If clicking on "Free Report" tab (index 6), set subtab=generalInfo
+    if (index === 6) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set('subtab', 'generalInfo');
+      console.log('Setting subtab parameter:', newParams.toString());
+      setSearchParams(newParams, { replace: true });
+    } else {
+      // Remove subtab parameter for other tabs
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('subtab');
+      setSearchParams(newParams, { replace: true });
+    }
   };
 
   return (
@@ -30,7 +52,7 @@ const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0 }) => {
             className={`${styles.tabButton} ${
               activeTabIndex === index ? styles.active : ""
             }`}
-            onClick={() => setActiveTabIndex(index)}
+            onClick={() => handleTabClick(index)}
           >
             {tab.label}
           </button>
