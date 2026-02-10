@@ -26,6 +26,7 @@ import { useGetBalanceMutation } from "../../redux/api/wallet/walletApi";
 import ProfileManager from "../UI/Profile/ProfileManager";
 import { useGetAllKundlisQuery } from "../../services/appServices/kundliServicesNew";
 import { Toast } from "../index";
+import { getUserFromStorage } from "../../utils/authStorage";
 
 const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 
@@ -70,6 +71,21 @@ const VideoCalling = ({ callData }) => {
 
   // Default avatar URL
   const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
+  // Get customer name from storage
+  const user = getUserFromStorage();
+  const customerName = useMemo(() => {
+    console.log("🔍 User from storage:", user);
+    if (!user) {
+      console.log("⚠️ No user found in storage");
+      return "Customer";
+    }
+    const name = user.firstName && user.lastName 
+      ? `${user.firstName} ${user.lastName}`.trim()
+      : user.firstName || "Customer";
+    console.log("✅ Customer name:", name);
+    return name;
+  }, [user]);
 
   /* ================= LOCAL VIDEO ================= */
   const playLocalVideo = (container) => {
@@ -646,7 +662,11 @@ const VideoCalling = ({ callData }) => {
 
               <div className={styles.astrologerInfo}>
                 <h3 className={styles.astrologerName}>{callerName}</h3>
-                <p className={styles.astrologerExp}>Exp. 20 Years</p>
+                <p className={styles.astrologerExp}>
+                  {lastRequestedAstro?.role 
+                    ? lastRequestedAstro.role.charAt(0).toUpperCase() + lastRequestedAstro.role.slice(1).toLowerCase()
+                    : "Astrologer"} • Exp. {lastRequestedAstro?.experience || "20"} Years
+                </p>
               </div>
 
               <div className={styles.walletBadge}>
@@ -715,6 +735,11 @@ const VideoCalling = ({ callData }) => {
                     />
                   </div>
                 )}
+                {/* Customer Name Label */}
+                <div className={styles.localVideoLabel}>
+                  <span className={styles.localVideoName}>{customerName}</span>
+                  <span className={styles.localVideoRole}>{user?.role || "Customer"}</span>
+                </div>
               </div>
             </div>
 
