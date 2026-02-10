@@ -346,6 +346,9 @@ const ChatWindow = () => {
             disabled={!!activeCall}
             walletBalance={balance || 0}
             experience={experience}
+            remainingTime={chatSeconds > 0 ? chatSeconds : 0}
+            onRecharge={handleRecharge}
+            isVideoCallActive={isVideoCallActive}
           />
 
           {/* Call Buttons Below Header */}
@@ -356,16 +359,18 @@ const ChatWindow = () => {
               disabled={!!activeCall}
             >
               <img src={CallIcon} alt="Voice Call" width="20" height="20" />
-              {/* Voice Call */}
+              Voice Call
             </button>
 
+            <span className={styles.dividerLine}></span>
+            
             <button
               className={styles.videoCallButton}
               onClick={handleVideoCall}
               disabled={!!activeCall}
             >
               <img src={VideocamIcon} alt="Video Call" width="20" height="20" />
-              {/* Video Call */}
+              Video Call
             </button>
           </div>
 
@@ -400,12 +405,12 @@ const ChatWindow = () => {
             />
           )}
 
-          {!isVideoCallActive && (
-            <ChatFooter
+          {/* {!isVideoCallActive && (
+            <ChatFooter 
               remainingTime={chatSeconds > 0 ? chatSeconds : 0}
               onRecharge={handleRecharge}
             />
-          )}
+          )} */}
 
           {/* {waitingPopup && (
             <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />

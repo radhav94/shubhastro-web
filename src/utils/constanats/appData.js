@@ -632,3 +632,12 @@ export const appData = [
     TotalRows: 1136,
   },
 ];
+
+export const relationOption = [
+    { id: 1, title: "Self", value: "Self" },
+    { id: 2, title: "Brother", value: "Brother" },
+    { id: 3, title: "Sister", value: "Sister" },
+    { id: 4, title: "Mother", value: "Mother" },
+    { id: 5, title: "Father", value: "Father" },
+    { id: 6, title: "Friend", value: "Friend" },
+  ];
