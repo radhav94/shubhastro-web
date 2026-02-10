@@ -113,19 +113,12 @@ const Home = () => {
     await handleChatStart(astrologer, false);
   };
 
-  if (isLoading) {
-    return (
-      <div className={styles.home}>
-        <div className={styles.mainContent}>Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <div className={styles.home}>
       <main className={styles.mainContent}>
         {/* Dynamic rendering based on API response */}
-        {sortedSections && sortedSections.length > 0 ? (
+        {sortedSections && sortedSections.length > 0 && (
           sortedSections.map((section) => {
             // Skip sections without display_type
             if (!section.display_type) {
@@ -139,10 +132,7 @@ const Home = () => {
               onChatStart: handleAIChatStart,
             });
           })
-        ) : (
-          <div className={styles.emptyState}>
-            <p>No content available</p>
-          </div>
+        
         )}
       </main>
 

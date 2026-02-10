@@ -38,7 +38,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 9999;
+  z-index: 999999;
 
   // Modern blur effect with a fallback
   background-color: rgba(255, 255, 255, 0.5); // Fallback for older browsers
@@ -54,22 +54,24 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 1rem;
   background-color: #ffffff;
-  padding: 2rem 3rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+  padding: 2.5rem 3.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 // The GIF spinner element
 .spinnerGif {
-  width: 100px; // Slightly smaller for a cleaner look
-  height: 100px;
+  width: 320px; // Increased for better visibility
+  height: 320px;
 }
 
 // The loading message text with the pulse animation
 .message {
-  font-size: 1rem;
+  margin-top: 0.5rem;
+  font-size: 1.1rem;
   font-weight: 500; // Medium weight is often cleaner than bold
   color: #555;
   animation: pulse 1.5s ease-in-out infinite;

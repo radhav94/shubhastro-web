@@ -11,10 +11,11 @@ import {
 import PublicRoute from "./utils/routes/PublicRoute";
 import PrivateRoute from "./utils/routes/PrivateRoute";
 import MixedRoute from "./utils/routes/MixedRoute";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { CallProvider } from "./context/CallContext";
 import { ChatProvider } from "./context/ChatContext";
 import ErrorBoundary from "./component/ErrorBoundary";
+import PrimaryLoader from "./component/UI/PrimaryLoader";
 
 function App() {
   const flattenRoutes = (routes) => {
@@ -111,7 +112,9 @@ function App() {
       <CallProvider>
         <ChatProvider>
           <div className={classes.app}>
-            <RouterProvider router={roleWiseRouting} />
+            <Suspense fallback={<PrimaryLoader isLoading={true} />}>
+              <RouterProvider router={roleWiseRouting} />
+            </Suspense>
           </div>
         </ChatProvider>
       </CallProvider>
