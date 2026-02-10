@@ -59,7 +59,6 @@ const AstrologerProfile = () => {
   } = useGetAstrologerByIdQuery({ id }, { skip: !id });
 
   const data = astrologerData?.data;
-
   const {
     data: reviewsData,
     isLoading: reviewsLoading,
@@ -549,9 +548,11 @@ const AstrologerProfile = () => {
     rating: data?.rating ?? 4.5,
     totalRatings: data?.totalRatings ?? 1020,
     availability: formatAvailability(data?.availability),
-    chatMinutes: data?.chatMinutes ?? 1500,
-    callMinutes: data?.callMinutes ?? 1200,
-    videoMinutes: data?.videoMinutes ?? 4.5,
+    metrics: {
+      chatMinutes: data?.metrics?.chatMinutes ?? 0,
+      audioMinutes: data?.metrics?.audioMinutes ?? 0,
+      videoMinutes: data?.metrics?.videoMinutes ?? 0,
+    },
     description:
       data?.description ||
       "With years of dedicated practice, I've guided thousands of individuals across love, career, health, and life direction. My work combines classical Vedic principles with deep intuitive understanding, helping clients receive...",
@@ -766,13 +767,13 @@ const AstrologerProfile = () => {
       <div className={styles.minutesSection}>
         <div className={styles.minuteItem}>
           <img src={ChatMinutesIcon} alt="Chat" className={styles.minuteIcon} />
-          <div className={styles.minuteValue}>{displayData.chatMinutes}</div>
+          <div className={styles.minuteValue}>{displayData.metrics.chatMinutes}</div>
           <div className={styles.minuteLabel}>Chat Minutes</div>
         </div>
         <div className={styles.minuteDivider}></div>
         <div className={styles.minuteItem}>
           <img src={CallMinutesIcon} alt="Call" className={styles.minuteIcon} />
-          <div className={styles.minuteValue}>{displayData.callMinutes}</div>
+          <div className={styles.minuteValue}>{displayData.metrics.audioMinutes}</div>
           <div className={styles.minuteLabel}>Call Minutes</div>
         </div>
         <div className={styles.minuteDivider}></div>
@@ -782,7 +783,7 @@ const AstrologerProfile = () => {
             alt="Video"
             className={styles.minuteIcon}
           />
-          <div className={styles.minuteValue}>{displayData.videoMinutes}</div>
+          <div className={styles.minuteValue}>{displayData.metrics.videoMinutes}</div>
           <div className={styles.minuteLabel}>Video Minutes</div>
         </div>
       </div>

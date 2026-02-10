@@ -346,6 +346,9 @@ const ChatWindow = () => {
             disabled={!!activeCall}
             walletBalance={balance || 0}
             experience={experience}
+            remainingTime={chatSeconds > 0 ? chatSeconds : 0}
+            onRecharge={handleRecharge}
+            isVideoCallActive={isVideoCallActive}
           />
 
           {/* Call Buttons Below Header */}
@@ -400,12 +403,12 @@ const ChatWindow = () => {
             />
           )}
 
-          {!isVideoCallActive && (
-            <ChatFooter
+          {/* {!isVideoCallActive && (
+            <ChatFooter 
               remainingTime={chatSeconds > 0 ? chatSeconds : 0}
               onRecharge={handleRecharge}
             />
-          )}
+          )} */}
 
           {/* {waitingPopup && (
             <WaitingPopup open={waitingPopup} onCancel={handleCancelCall} />
