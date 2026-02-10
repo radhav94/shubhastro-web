@@ -27,7 +27,7 @@ const VoiceMessage = ({ url, duration, time, isSender }) => {
     };
 
     const onTimeUpdate = () => {
-      if (!audio.duration) return;
+      if (!audio.duration || !isFinite(audio.duration) || audio.duration <= 0) return;
       setProgress((audio.currentTime / audio.duration) * 100);
     };
 
@@ -59,7 +59,9 @@ const VoiceMessage = ({ url, duration, time, isSender }) => {
         </div>
 
         <div className={styles.meta}>
-          <span className={styles.duration}>{duration}s</span>
+          <span className={styles.duration}>
+            {duration && isFinite(duration) && duration > 0 ? `${duration}s` : '--'}
+          </span>
           {/* <span className={styles.time}>{time}</span> */}
         </div>
       </div>

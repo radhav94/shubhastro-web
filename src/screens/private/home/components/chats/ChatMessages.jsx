@@ -1,26 +1,35 @@
 import { useState } from "react";
 import styles from "./ChatWindow.module.scss";
 import { PrimaryText } from "../../../../../component";
-import VoiceMessage from "../../../../../screens/private/talkToAstrologer/voiceChat/VoiceMessage";
+import AudioMessageWrapper from "./AudioMessageWrapper";
 import { GrReactjs } from "react-icons/gr";
+import { IoCheckmarkDone, IoDocument, IoDownload, IoPlay } from "react-icons/io5";
+import { FiFile } from "react-icons/fi";
 import IframeModal from "./IframeModal";
-import { IoCheckmark, IoCheckmarkDone } from "react-icons/io5";
 import dayjs from "dayjs";
 
-const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
+const ChatMessages = ({ messages, isTyping, messagesRef }) => {
   const [iframeSrc, setIframeSrc] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
 
-  const extractKundliPath = (url) => {
-    setLoading(true);
+  const getFileExtension = (filename) => {
+    return filename?.split('.').pop()?.toLowerCase() || '';
+  };
+
+  const getFileName = (url) => {
     try {
-      const parsed = new URL(url);
-      setLoading(false);
-      return parsed.pathname; // "/kundli/:id"
+      return url?.split('/').pop() || 'attachment';
     } catch {
-      setLoading(false);
-      return null;
+      return 'attachment';
     }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (!bytes) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
   // Group messages by date
@@ -62,59 +71,109 @@ const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
                 className={styles.messageWrapper}
               >
                 <div
-                  className={`${styles.msgBubble} ${
-                    msg.isSender ? styles.senderBubble : styles.receiverBubble
-                  }`}
+                  className={`${styles.msgBubble} ${msg.isSender ? styles.senderBubble : styles.receiverBubble
+                    }`}
                 >
                   <div className={styles.bubbleContent}>
-                    <PrimaryText size={14} color={"#4a4a4a"}>
-                      {(() => {
-                        try {
-                          const parsed = JSON.parse(msg.text);
-                          // ONLY handle voice messages
-                          if (parsed?.type === "voice") {
-                            return (
-                              <VoiceMessage
-                                url={parsed.audioUrl}
-                                duration={parsed.duration}
-                                time={msg.time}
-                                isSender={msg.isSender}
-                              />
-                            );
-                          }
-                          if (parsed?.type === "file") {
-                            return null;
-                          }
-                        } catch {
-                          if (msg.text == null) {
-                            return msg?.text;
-                          }
+                    {(() => {
+                      // Voice messages
+                      if (msg?.type === "audio") {
+                        return (
+                          <AudioMessageWrapper
+                            url={msg.text}
+                            duration={msg.duration}
+                            time={msg.time}
+                            isSender={msg.isSender}
+                          />
+                        );
+                      }
 
-                          if (msg.type == "kundli") {
-                            return (
-                              <div
-                                onClick={() => {
-                                  setIframeSrc(msg.text);
-                                }}
-                                style={{
-                                  textDecoration: "underline",
-                                  fontWeight: 600,
-                                  cursor: "pointer",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 6,
-                                  color: "#4a4a4a",
-                                }}
-                              >
-                                <GrReactjs />
-                                View Kundli
-                              </div>
-                            );
-                          }
-                        }
-                        return msg?.text;
-                      })()}
-                    </PrimaryText>
+                      // Image messages
+                      if (msg?.type === "image") {
+                        return (
+                          <div className={styles.imageMessage}>
+                            <img
+                              src={msg.text}
+                              alt="Shared image"
+                              className={styles.messageImage}
+                              onClick={() => setImagePreview(msg.text)}
+                            />
+                          </div>
+                        );
+                      }
+
+                      // Video messages
+                      if (msg?.type === "video") {
+                        return (
+                          <div className={styles.videoMessage}>
+                            <div className={styles.videoWrapper}>
+                              <video
+                                src={msg.text}
+                                className={styles.messageVideo}
+                                controls
+                                preload="metadata"
+                              />
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // Attachment/Document messages
+                      if (msg?.type === "attachment") {
+                        const fileName = getFileName(msg.text);
+                        const fileExt = getFileExtension(fileName);
+                        
+                        return (
+                          <div className={styles.attachmentMessage}>
+                            <div className={styles.attachmentIcon}>
+                              {fileExt === 'pdf' ? (
+                                <IoDocument size={24} />
+                              ) : (
+                                <FiFile size={24} />
+                              )}
+                            </div>
+                            <div className={styles.attachmentInfo}>
+                              <div className={styles.attachmentName}>{fileName}</div>
+                              {msg.fileSize && (
+                                <div className={styles.attachmentSize}>
+                                  {formatFileSize(msg.fileSize)}
+                                </div>
+                              )}
+                            </div>
+                            <a
+                              href={msg.text}
+                              download={fileName}
+                              className={styles.downloadButton}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <IoDownload size={20} />
+                            </a>
+                          </div>
+                        );
+                      }
+
+                      // Kundli messages
+                      if (msg?.type === "kundli") {
+                        return (
+                          <div
+                            onClick={() => {
+                              setIframeSrc(msg.text);
+                            }}
+                            className={styles.kundliLink}
+                          >
+                            <GrReactjs />
+                            View Kundli
+                          </div>
+                        );
+                      }
+
+                      // Text messages
+                      return (
+                        <PrimaryText size={14} color={"#4a4a4a"}>
+                          {msg?.text}
+                        </PrimaryText>
+                      );
+                    })()}
                   </div>
                   <div className={styles.msgTimeWrapper}>
                     <span className={styles.msgTime}>{msg.time}</span>
@@ -141,13 +200,22 @@ const ChatMessages = ({ messages, isTyping, error, messagesRef }) => {
         )}
       </div>
 
-      {/* 👇 Modal */}
+      {/* Kundli Modal */}
       <IframeModal
         open={!!iframeSrc}
         src={iframeSrc}
         onClose={() => setIframeSrc(null)}
         loading={loading}
       />
+
+      {/* Image Preview Modal */}
+      {imagePreview && (
+        <div className={styles.imagePreviewModal} onClick={() => setImagePreview(null)}>
+          <div className={styles.imagePreviewContent}>
+            <img src={imagePreview} alt="Preview" className={styles.previewImage} />
+          </div>
+        </div>
+      )}
     </>
   );
 };

@@ -52,12 +52,16 @@ const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Get state from navigation
   const navigationState = location.state || {};
-  
-  const [activeTab, setActiveTab] = useState(navigationState.activeTab || "Profile");
-  const [orderHistoryTab, setOrderHistoryTab] = useState(navigationState.orderHistoryTab || "call"); // Sub-tab for order history
+
+  const [activeTab, setActiveTab] = useState(
+    navigationState.activeTab || "Profile",
+  );
+  const [orderHistoryTab, setOrderHistoryTab] = useState(
+    navigationState.orderHistoryTab || "call",
+  ); // Sub-tab for order history
   const transactionListRef = useRef(null);
   const orderListRef = useRef(null); // Ref for order history scroll
   const user = getUserFromStorage();
@@ -98,12 +102,8 @@ const Profile = () => {
   const [createChatRoom] = useCreateChatRoomMutation();
 
   // Use profile manager hook
-  const {
-    selectedProfile,
-    profiles,
-    profilesLoading,
-    isCreating,
-  } = useProfileManager(dispatch);
+  const { selectedProfile, profiles, profilesLoading, isCreating } =
+    useProfileManager(dispatch);
 
   // Profile modal state
   const [showAddProfileModal, setShowAddProfileModal] = useState(false);
@@ -113,7 +113,8 @@ const Profile = () => {
   const [profileToDelete, setProfileToDelete] = useState(null);
 
   // RTK Query hooks for profile operations
-  const [createKundli, { isLoading: isCreatingProfile }] = useCreateKundliMutation();
+  const [createKundli, { isLoading: isCreatingProfile }] =
+    useCreateKundliMutation();
   const [deleteKundli] = useDeleteKundliMutation();
   const [editKundli] = useEditKundliMutation();
 
@@ -250,7 +251,7 @@ const Profile = () => {
   });
   const savedKundlis = kundliData?.data || [];
 
-    // Build params for Kundali API from first profile
+  // Build params for Kundali API from first profile
   const firstProfile = savedKundlis[0];
   const kundliParams = firstProfile
     ? buildVedicParam({
@@ -264,7 +265,8 @@ const Profile = () => {
         day: firstProfile.day,
         month: firstProfile.month,
         year: firstProfile.year,
-        hour: firstProfile.hour > 12
+        hour:
+          firstProfile.hour > 12
             ? firstProfile.hour - 12
             : firstProfile.hour === 0
               ? 12
@@ -1005,9 +1007,7 @@ const Profile = () => {
 
                     <div className={styles.profileCardContent}>
                       <div className={styles.profileCardHeader}>
-                        <div className={styles.badge}>
-                          {index === 0 ? "Self" : kundli.relation || "Brother"}
-                        </div>
+                        <div className={styles.badge}>{kundli?.relation}</div>
                         <div className={styles.profileActions}>
                           <button
                             className={styles.iconButton}
@@ -1015,12 +1015,14 @@ const Profile = () => {
                           >
                             <LuPencilLine size={18} />
                           </button>
-                          <button
-                            className={styles.iconButton}
-                            onClick={() => handleDeleteClick(kundli)}
-                          >
-                            <TiUserDelete size={18} />
-                          </button>
+                          {kundli?.relation !== "Self" && (
+                            <button
+                              className={styles.iconButton}
+                              onClick={() => handleDeleteClick(kundli)}
+                            >
+                              <TiUserDelete size={18} />
+                            </button>
+                          )}
                         </div>
                       </div>
 
@@ -1138,9 +1140,11 @@ const Profile = () => {
                           </div>
 
                           <div className={styles.orderCardBottom}>
-                            <button 
+                            <button
                               className={styles.rateButton}
-                              onClick={() => handleRateConsultation(order.astrologer)}
+                              onClick={() =>
+                                handleRateConsultation(order.astrologer)
+                              }
                             >
                               Rate Consultation
                             </button>

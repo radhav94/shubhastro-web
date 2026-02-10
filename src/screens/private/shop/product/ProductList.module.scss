@@ -157,3 +157,16 @@
   border-radius: 6px;
   margin-bottom: 8px;
 }
+
+.emptyState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  
+  p {
+    font-size: 18px;
+    color: #777;
+    font-weight: 500;
+  }
+}

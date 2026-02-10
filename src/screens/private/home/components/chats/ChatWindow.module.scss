@@ -361,6 +361,199 @@ $floating-button-gap: 14px;
   color: $text-timestamp;
 }
 
+/* ==================== MEDIA MESSAGE TYPES ==================== */
+
+/* Image Messages */
+.imageMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.messageImage {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  max-height: 350px;
+  border-radius: 12px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.messageImage:hover {
+  transform: scale(1.02);
+}
+
+/* Video Messages */
+.videoMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.videoWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.messageVideo {
+  width: 100%;
+  height: auto;
+  max-height: 350px;
+  display: block;
+  border-radius: 12px;
+}
+
+.videoOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.videoWrapper:hover .videoOverlay {
+  opacity: 1;
+}
+
+.playIcon {
+  font-size: 48px;
+  color: #fff;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Attachment Messages */
+.attachmentMessage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  min-width: 240px;
+  max-width: 100%;
+}
+
+.senderBubble .attachmentMessage {
+  background: rgba(247, 88, 1, 0.08);
+}
+
+.attachmentIcon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 8px;
+  background: rgba(247, 88, 1, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $icon-color;
+}
+
+.attachmentInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attachmentName {
+  font-size: 14px;
+  font-weight: 500;
+  color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attachmentSize {
+  font-size: 12px;
+  color: $text-timestamp;
+}
+
+.downloadButton {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 50%;
+  background: rgba(247, 88, 1, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $icon-color;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.downloadButton:hover {
+  background: rgba(247, 88, 1, 0.2);
+  transform: scale(1.05);
+}
+
+.downloadButton:active {
+  transform: scale(0.95);
+}
+
+/* Kundli Link */
+.kundliLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4a4a4a;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.kundliLink:hover {
+  color: $icon-color;
+}
+
+/* Image Preview Modal */
+.imagePreviewModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  cursor: pointer;
+  padding: 20px;
+}
+
+.imagePreviewContent {
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.previewImage {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
 /* ==================== TYPING INDICATOR ==================== */
 .typingIndicator {
   display: flex;
@@ -851,6 +1044,55 @@ $floating-button-gap: 14px;
     border-radius: 24px;
     flex-shrink: 0;
     white-space: nowrap;
+  }
+
+  /* Media message adjustments for mobile */
+  .messageImage {
+    max-width: 220px;
+    max-height: 280px;
+  }
+
+  .videoWrapper {
+    max-width: 220px;
+  }
+
+  .messageVideo {
+    max-height: 280px;
+  }
+
+  .playIcon {
+    font-size: 40px;
+  }
+
+  .attachmentMessage {
+    min-width: 200px;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .attachmentIcon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+
+  .attachmentName {
+    font-size: 13px;
+  }
+
+  .attachmentSize {
+    font-size: 11px;
+  }
+
+  .downloadButton {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+  }
+
+  .downloadButton svg {
+    width: 18px;
+    height: 18px;
   }
 }
 
