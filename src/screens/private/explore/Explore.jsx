@@ -24,6 +24,7 @@ import matchmakingImg from "../../../assets/explore/matchmaking.png";
 import tarotImg from "../../../assets/explore/tarot.png";
 import newsImg from "../../../assets/explore/news.png";
 import numerology from "../../../assets/images/numerology.svg";
+import { DefaultImages } from "../../../utils/appImages";
 
 // Reusable Section Title with Divider Component
 const SectionTitleWithDivider = ({ title }) => (
@@ -141,7 +142,7 @@ const Explore = () => {
               >
                 <h3 className={styles.cardTitle}>{card.title}</h3>
                 <img
-                  src={card.imageUrl || defaultImages.horoscope}
+                  src={card.imageUrl || DefaultImages.HoroscopeDefault}
                   alt={card.title}
                   className={styles.cardIcon}
                 />
@@ -173,7 +174,7 @@ const Explore = () => {
                 >
                   <div className={styles.kundliCardImage}>
                     <img
-                      src={card.imageUrl || defaultImages.vedic}
+                      src={card.imageUrl || DefaultImages.VedicKundliDefault}
                       alt={card.title}
                       className={styles.chartImage}
                     />
@@ -215,9 +216,9 @@ const Explore = () => {
                   <h3 className={styles.destinyCardTitle}>{card.title}</h3>
                   <p className={styles.destinyCardSubtitle}>{card.description}</p>
                 </div>
-                {card.imageUrl && (
+                {card.image_url && (
                   <img
-                    src={card.imageUrl}
+                    src={card.image_url || DefaultImages.VedicKundliDefault}
                     alt={card.title}
                     className={styles.destinyCardImage}
                   />
@@ -255,7 +256,7 @@ const Explore = () => {
               >
                 <div className={styles.blogImage}>
                   <img
-                    src={blog.imageUrl || defaultImages.news}
+                    src={blog.imageUrl || DefaultImages.BlogsDefault}
                     alt={blog.title}
                     className={styles.blogBgImage}
                   />
@@ -295,7 +296,7 @@ const Explore = () => {
               >
                 <div className={styles.blogImage}>
                   <img
-                    src={news.imageUrl || defaultImages.news}
+                    src={news.imageUrl || DefaultImages.NewBlogsDefault}
                     alt={news.title}
                     className={styles.blogBgImage}
                   />

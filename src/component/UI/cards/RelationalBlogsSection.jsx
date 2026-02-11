@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { PATH } from "../../../utils/routes/Paths";
 import styles from "./RelationalBlogsSection.module.scss";
+import { DefaultImages } from "../../../utils/appImages";
 
 const RelationalBlogsSection = ({ blogs = [], title, subtitle }) => {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ const RelationalBlogsSection = ({ blogs = [], title, subtitle }) => {
           >
             <div className={styles.imageWrapper}>
               <img
-                src={blog.imageUrl || blog.img}
+                src={blog.imageUrl || DefaultImages.BlogsDefault}
                 alt={blog.title}
                 className={styles.blogImage}
                 onError={(e) => {

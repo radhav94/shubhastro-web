@@ -3,6 +3,7 @@ import { ChevronRight, ExternalLink } from "lucide-react";
 import SectionHeader from "./SectionHeader";
 import styles from "../Home.module.scss";
 import { Toast } from "../../../../component";
+import { DefaultImages } from "../../../../utils/appImages";
 
 const NewsSection = ({ newsData, title, showMore }) => {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ const NewsSection = ({ newsData, title, showMore }) => {
           >
             <div className={styles.blogImageWrapper}>
               <img
-                src={news.imageUrl}
+                src={news.imageUrl || DefaultImages.NewBlogsDefault}
                 alt={news.title}
                 className={styles.blogImage}
                 onError={(e) => {

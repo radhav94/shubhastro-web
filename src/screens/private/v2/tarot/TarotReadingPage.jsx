@@ -82,7 +82,7 @@ const TarotReadingPage = () => {
       </div>
 
       <div className={styles.tarotIntro}>
-        <h2 className={styles.tarotHeading}>Let the Cards Guide You</h2>
+        <h2 className={styles.tarotHeading}>Let the Cards Guide You </h2>
         <p className={styles.tarotDescription}>
           Discover insights into love, career and life through tarot readings and expert consultations.
         </p>

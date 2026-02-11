@@ -7,6 +7,7 @@ import numerology from "../../../../assets/images/numerology.svg";
 import matchmaking from "../../../../assets/images/matchmaking.svg";
 import tarot from "../../../../assets/images/tarot.svg";
 import styles from "../Home.module.scss";
+import { DefaultImages } from "../../../../utils/appImages";
 
 const DiscoverMoreSection = ({ data = [], title, showMore }) => {
   const navigate = useNavigate();
@@ -108,7 +109,7 @@ const DiscoverMoreSection = ({ data = [], title, showMore }) => {
               <p className={styles.discoverText}>{item.description}</p>
             </div>
             <img
-              src={item.image}
+              src={item.image || DefaultImages.VedicKundliDefault}
               alt={item.title}
               className={styles.discoverImage}
             />

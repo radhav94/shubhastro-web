@@ -10,6 +10,7 @@ import {
 import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { SHOP_PRODUCTS } from "../data/productData";
+import { DefaultImages } from "../../../../utils/appImages";
 
 const LIMIT = 20;
 
@@ -42,15 +43,10 @@ const ProductList = () => {
     data: liveData,
     isLoading,
     isFetching,
-  } = useGetAllEPoojaQuery(
-    isLiveDarshan ? { page, limit: LIMIT } : skipToken
-  );
+  } = useGetAllEPoojaQuery(isLiveDarshan ? { page, limit: LIMIT } : skipToken);
 
-  const {
-    data: oldData,
-    isFetching: oldFetching,
-  } = useGetAllOldEPoojaQuery(
-    !isLiveDarshan ? { slug, page, limit: LIMIT } : skipToken
+  const { data: oldData, isFetching: oldFetching } = useGetAllOldEPoojaQuery(
+    !isLiveDarshan ? { slug, page, limit: LIMIT } : skipToken,
   );
 
   useEffect(() => {
@@ -97,16 +93,11 @@ const ProductList = () => {
 
   const handleObserver = useCallback(
     ([entry]) => {
-      if (
-        entry.isIntersecting &&
-        hasMore &&
-        !isFetching &&
-        !oldFetching
-      ) {
+      if (entry.isIntersecting && hasMore && !isFetching && !oldFetching) {
         setPage((prev) => prev + 1);
       }
     },
-    [hasMore, isFetching, oldFetching]
+    [hasMore, isFetching, oldFetching],
   );
 
   useEffect(() => {
@@ -137,8 +128,6 @@ const ProductList = () => {
         </div>
       ) : (
         <>
-          
-
           <div className={styles.grid}>
             {products.map((product) => (
               <div
@@ -152,12 +141,8 @@ const ProductList = () => {
               >
                 <div className={styles.imageWrapper}>
                   <img
-                    src={
-                      product.defaultImage ||
-                      product.image ||
-                      "https://images.unsplash.com/photo-1625072290979-cac544181be8"
-                    }
-                    alt={product.title || product.name}
+                    src={product.image || DefaultImages.AstromallSubCategoryDefault}
+                    alt={product.title }
                   />
 
                   {isLiveDarshan && (
@@ -175,7 +160,7 @@ const ProductList = () => {
                         e.stopPropagation();
                         navigate(
                           `/shop/${slug}/${getProductRouteId(product)}`,
-                          { state: product }
+                          { state: product },
                         );
                       }}
                     >

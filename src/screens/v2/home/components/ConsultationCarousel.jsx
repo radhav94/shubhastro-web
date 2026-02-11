@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../../utils/routes/Paths";
 import consult from "../../../../assets/images/astrologer.svg";
 import styles from "../Home.module.scss";
+import { DefaultImages } from "../../../../utils/appImages";
 
 const ConsultationCarousel = ({ data = [], title }) => {
     const [activeSlide, setActiveSlide] = useState(0);
@@ -90,7 +91,7 @@ const ConsultationCarousel = ({ data = [], title }) => {
                         </div>
                         <div className={styles.slideImageWrapper}>
                             <img
-                                src={slide.image}
+                                src={slide.image || DefaultImages.AstrologerDefaultImg}
                                 alt="Astrologer"
                                 className={styles.astrologerImage}
                                 onError={(e) => {

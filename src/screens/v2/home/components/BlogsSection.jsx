@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import { PATH } from "../../../../utils/routes/Paths";
 import SectionHeader from "./SectionHeader";
 import styles from "../Home.module.scss";
+import { DefaultImages } from "../../../../utils/appImages";
 
 export function formatDateToReadable(input) {
   const [day, month, year] = input.split("/").map(Number);
@@ -90,7 +91,7 @@ const BlogsSection = ({ blogData = [], title, showMore }) => {
           >
             <div className={styles.blogImageWrapper}>
               <img
-                src={blog.imageUrl || blog}
+                src={blog.imageUrl || DefaultImages.BlogsDefault}
                 alt={blog.title}
                 className={styles.blogImage}
                 onError={(e) => {

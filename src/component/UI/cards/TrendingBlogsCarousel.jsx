@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../utils/routes/Paths";
 import styles from "./TrendingBlogsCarousel.module.scss";
+import { DefaultImages } from "../../../utils/appImages";
 
 const TrendingBlogsCarousel = ({ blogs = [], title, subtitle }) => {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ const TrendingBlogsCarousel = ({ blogs = [], title, subtitle }) => {
             >
               <div className={styles.imageWrapper}>
                 <img
-                  src={blog.imageUrl || blog.img}
+                  src={blog.imageUrl || DefaultImages.BlogsDefault}
                   alt={blog.title}
                   className={styles.blogImage}
                   onError={(e) => {
