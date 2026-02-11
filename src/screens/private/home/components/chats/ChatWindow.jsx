@@ -369,6 +369,7 @@ const ChatWindow = () => {
             remainingTime={chatSeconds > 0 ? chatSeconds : 0}
             onRecharge={handleRecharge}
             isVideoCallActive={isVideoCallActive}
+            onChatEnd={handleChatEnd}
           />
 
           {/* Call Buttons Below Header */}
