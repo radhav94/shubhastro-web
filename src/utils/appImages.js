@@ -32,6 +32,8 @@ import CardBlackDefault from "../assets/default-img/card_black.png";
 import MarriageDefault from "../assets/default-img/marriage.png";
 import NewBlogsDefault from "../assets/default-img/new-blogs.jpeg";
 import VedicKundliDefault from "../assets/default-img/vedic-kundli.svg";
+import AriesDefault from "../assets/default-img/aries-default.svg";
+import TalkToDefaultAstrologer from "../assets/default-img/talk-to-defaultastrollger.png";
 
 export const DefaultImages = {
   AstrologerDefaultImg,
@@ -46,6 +48,8 @@ export const DefaultImages = {
   MarriageDefault,
   NewBlogsDefault,
   VedicKundliDefault,
+  AriesDefault,
+  TalkToDefaultAstrologer,
 };
 
 
