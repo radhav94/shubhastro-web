@@ -129,14 +129,13 @@ const ChatWindow = () => {
 
   const finalMsgs = useMemo(() => {
     const historyMsgs = history.map((item) => {
-      // Parse gift messages from history (detect by __GIFT__ prefix)
+      // Parse gift messages from history (detect by type === "gift")
       let messageText = item.message || "";
       let giftData = null;
       
-      if (messageText.startsWith("__GIFT__")) {
+      if (item.type === "gift") {
         try {
-          const jsonString = messageText.substring(8); // Remove __GIFT__ prefix
-          const parsed = JSON.parse(jsonString);
+          const parsed = JSON.parse(messageText);
           messageText = parsed.text;
           giftData = parsed.giftData;
         } catch (e) {

@@ -88,14 +88,13 @@ export default function useChat({
     const handleAddMessage = (data) => {
       const isSenderUser = data.sender === "user";
       
-      // Parse gift messages (detect by __GIFT__ prefix)
+      // Parse gift messages (detect by type === "gift")
       let messageText = data.message;
       let giftData = null;
       
-      if (data.message && data.message.startsWith("__GIFT__")) {
+      if (data.type === "gift") {
         try {
-          const jsonString = data.message.substring(8); // Remove __GIFT__ prefix
-          const parsed = JSON.parse(jsonString);
+          const parsed = JSON.parse(data.message);
           messageText = parsed.text;
           giftData = parsed.giftData;
         } catch (e) {
