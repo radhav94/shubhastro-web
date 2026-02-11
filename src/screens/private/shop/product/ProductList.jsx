@@ -130,13 +130,14 @@ const ProductList = () => {
 
   return (
     <div className={styles.wrapper}>
+      <h2 className={styles.heading}>{location.state?.name}</h2>
       {products.length === 0 && !isLoading && !isFetching && !oldFetching ? (
         <div className={styles.emptyState}>
           <p>No data found</p>
         </div>
       ) : (
         <>
-          <h2 className={styles.heading}>{location.state?.name}</h2>
+          
 
           <div className={styles.grid}>
             {products.map((product) => (

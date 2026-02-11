@@ -19,6 +19,36 @@ import whatsapp from "../assets/icons/whatsapp.png";
 import CopyLink from "../assets/icons/link.png";
 import Video from "../assets/icons/video.png";
 
+// application all default images
+import AstrologerDefaultImg from "../assets/default-img/astrologer.svg";
+import AstromallCategoryDefault from "../assets/default-img/astromall-category.png";
+import AstrologerNumerologyDefault from "../assets/default-img/astrologer-numerology.png";
+import AstromallSubCategoryDefault from "../assets/default-img/astromall-sub-category.jpeg";
+import HoroscopeDefault from "../assets/default-img/horoscope.png";
+import KundliChartDefault from "../assets/default-img/kundli-chart.png";
+import TarotCardDefault from "../assets/default-img/tarot-card.png";
+import BlogsDefault from "../assets/default-img/blogs.png";
+import CardBlackDefault from "../assets/default-img/card_black.png";
+import MarriageDefault from "../assets/default-img/marriage.png";
+import NewBlogsDefault from "../assets/default-img/new-blogs.jpeg";
+import VedicKundliDefault from "../assets/default-img/vedic-kundli.svg";
+
+export const DefaultImages = {
+  AstrologerDefaultImg,
+  AstromallCategoryDefault,
+  AstrologerNumerologyDefault,
+  AstromallSubCategoryDefault,
+  HoroscopeDefault,
+  KundliChartDefault,
+  TarotCardDefault,
+  BlogsDefault,
+  CardBlackDefault,
+  MarriageDefault,
+  NewBlogsDefault,
+  VedicKundliDefault,
+};
+
+
 export const AppIcons = {
   Logo,
   Call,
