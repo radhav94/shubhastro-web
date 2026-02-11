@@ -112,9 +112,9 @@ const ChatInput = ({
           </div>
         </div>
 
-        <button className={styles.endCallButton} onClick={onChatEnd}>
+        {/* <button className={styles.endCallButton} onClick={onChatEnd}>
           <IoCallSharp />
-        </button>
+        </button> */}
       </div>
       
       <KundliSelectModal
