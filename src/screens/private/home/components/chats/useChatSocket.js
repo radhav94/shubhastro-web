@@ -43,50 +43,28 @@ const useChatSocket = ({
   };
 
   const handleAudioCall = () => {
-    console.log("🎵 Audio Call Clicked", { userId, astrologerId, kundliId, activeCall });
-    
-    if (activeCall) {
-      Toast.error("You are already on a call");
-      return;
-    }
+    console.log("🎵 Audio Call Clicked", { userId, astrologerId, kundliId, activeCall, chatRoomId });
 
-    // End the chat session completely before initiating call
-    console.log("🔚 Ending chat session");
-    setActiveChat(null);
-    stopTimer();
-    console.log("✅ Chat session ended, timer stopped, state reset");
-
-    connectSocket();
-
-    console.log("🎵 Emitting call:initiate for audio");
+    console.log("🎵 Emitting call:initiate for audio with isSwitch and roomId");
     voiceSocket.emit("call:initiate", {
       userId,
       astrologerId,
       type: "audio",
+      isSwitch: true,
+      roomId: chatRoomId,
     });
   };
 
   const handleVideoCall = () => {
-    console.log("📹 Video Call Clicked", { userId, astrologerId, kundliId, activeCall });
-    
-    if (activeCall) {
-      Toast.error("You are already on a call");
-      return;
-    }
+    console.log("📹 Video Call Clicked", { userId, astrologerId, kundliId, activeCall, chatRoomId });
 
-    // End the chat session completely before initiating call
-    console.log("🔚 Ending chat session");
-    setActiveChat(null);
-    stopTimer();
-    console.log("✅ Chat session ended, timer stopped, state reset");
-
-    connectSocket();
-
-    console.log("📹 Emitting call:initiate for video");
+    console.log("📹 Emitting call:initiate for video with isSwitch and roomId");
     voiceSocket.emit("call:initiate", {
       userId,
       astrologerId,
       type: "video",
+      isSwitch: true,
+      roomId: chatRoomId,
     });
   };
 
