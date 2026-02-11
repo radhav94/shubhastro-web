@@ -122,23 +122,29 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
           price: selected.price,
         };
         
-        // Encode gift data as JSON string in the message with a special prefix
-        const giftMessage = `__GIFT__${JSON.stringify({
+        // Create gift message with JSON data
+        const giftMessage = JSON.stringify({
           text: `${userName} has sent a gift to ${astrologerDisplayName}`,
           giftData: giftDataToSend
-        })}`;
+        });
       
-        // Send the gift message through socket
-        // Using "message" type so backend accepts it
-        socketService.sendMessage({
+        // Send the gift message through socket with type "gift"
+        const sendResult = socketService.sendMessage({
           roomId,
           userId,
           astrologerId,
           message: giftMessage,
-          type: "message",
+          type: "gift",
           kundliId: null
         });
+
+        // Check if there was an error sending the message
+        if (sendResult?.error) {
+          toast.error(sendResult.error);
+          return;
+        }
       }
+      
       toast.success("Gift sent successfully");
       onClose();
     } catch (error) {
