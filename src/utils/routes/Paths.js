@@ -1,4 +1,5 @@
 import { lazy } from "react";
+const NotFound = lazy(() => import("../../screens/private/NotFound/NotFound"));
 
 const VideoCalling = lazy(() => import("../../component/call/VideoCall"));
 const AgoraVoiceCalling = lazy(() => import("../../component/call/VoiceCall"));
@@ -211,6 +212,10 @@ export const PATH = {
       path: "/verify-password/:id",
       element: VerifyPassword,
     },
+    NOT_FOUND:{
+      path: "*",
+      element: NotFound,
+    }
   },
 
   privateRoutes: {
