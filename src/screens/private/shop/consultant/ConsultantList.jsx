@@ -17,11 +17,11 @@ const ConsultantList = () => {
     specialties: "",
   });
 
-  const data = astroRes?.data || [];
+  const data = astroRes?.data?.result || [];
 
   // ⬇️ FIX: include page also
   useEffect(() => {
-    if (!data) return;
+    if (!data || data.length === 0) return;
 
     setAllAstrologers((prev) => {
       if (page === 1) {
@@ -60,7 +60,7 @@ const ConsultantList = () => {
 
   return (
     <div className={styles.cardsContainer}>
-      {allAstrologers.map((astro) => (
+      {allAstrologers?.map((astro) => (
         <div key={astro._id} className={styles.cardWrapper}>
           <ConsultantCard data={astro} />
         </div>

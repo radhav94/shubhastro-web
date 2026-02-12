@@ -10,10 +10,6 @@ const BlogHeader = () => {
   const [page, setPage] = useState(1);
   const { data, isLoading } = useGetBlogQuery({ page, limit: 10 });
 
-  if (isLoading) {
-    return <p className={styles.loading}>Loading blogs...</p>;
-  }
-
   const blogs = data?.data || [];
   const pagination = data?.pagination;
 

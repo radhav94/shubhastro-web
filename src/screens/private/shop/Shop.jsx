@@ -3,6 +3,7 @@ import { SHOP_CATEGORIES } from "./data/shop";
 import styles from "./Shop.module.scss";
 import { useNavigate } from "react-router-dom";
 import { useGetAllCategoriesQuery } from "../../../redux/api/astromall/epooja/epoojaApi";
+import { DefaultImages } from "../../../utils/appImages";
 
 const LIMIT = 10;
 
@@ -73,7 +74,7 @@ const Shop = () => {
             onClick={() => navigate(`/shop/${cat.slug}`, { state: cat })}
           >
             <img
-              src={cat.imgUrl}
+              src={cat.imgUrl || DefaultImages.AstromallCategoryDefault}
               className={styles.image}
               alt={cat.name}
             />

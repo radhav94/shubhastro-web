@@ -3,6 +3,7 @@ import { PiBookOpenTextLight } from "react-icons/pi";
 import styles from "./RecommendedAstrologerCard.module.scss";
 import astrologerImage from "../../../assets/images/top-rated-1.svg";
 import { useNavigate } from "react-router-dom";
+import { DefaultImages } from "../../../utils/appImages";
 
 const RecommendedAstrologerCard = ({ data, onConnect }) => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const RecommendedAstrologerCard = ({ data, onConnect }) => {
     <div className={styles.card}>
       <div className={styles.imageContainer}>
         <img
-          src={profileImage}
+          src={profileImage || DefaultImages.AstrologerDefaultImg}
           alt={fullName}
           className={styles.image}
           onError={(e) => {

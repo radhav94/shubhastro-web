@@ -12,7 +12,8 @@ const ChatHeader = ({
   walletBalance = 0,
   remainingTime = 0,
   onRecharge,
-  isVideoCallActive
+  isVideoCallActive,
+  onChatEnd
 }) => {
   return (
     <div className={styles.header}>
@@ -36,7 +37,7 @@ const ChatHeader = ({
       </div>
 
       <div className={styles.headerRight}>
-     {!isVideoCallActive && <ChatFooter remainingTime={remainingTime} onRecharge={onRecharge} walletBalance={walletBalance} />}
+     {!isVideoCallActive && <ChatFooter remainingTime={remainingTime} onRecharge={onRecharge} walletBalance={walletBalance} onChatEnd={onChatEnd}/>}
         {/* <div className={styles.walletBadge}>
           <FaWallet className={styles.walletIcon} />
           <span className={styles.walletAmount}>₹{walletBalance}</span>

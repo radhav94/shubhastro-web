@@ -1,7 +1,7 @@
 import { BookOpen } from "lucide-react";
-import astrologerImage from "../../../../assets/images/top-rated-1.svg";
 import styles from "../Home.module.scss";
 import { Link } from "react-router-dom";
+import { DefaultImages } from "../../../../utils/appImages";
 
 const AstrologerCard = ({ astrologer, onConnect }) => {
   return (
@@ -9,7 +9,7 @@ const AstrologerCard = ({ astrologer, onConnect }) => {
       <Link to={`/astrologer/${astrologer?._id} `} className={styles.cardLink}>
         <div className={styles.astrologerImageWrapper}>
           <img
-            src={astrologer.imageUrl || astrologerImage}
+            src={astrologer.imageUrl || DefaultImages.AstrologerDefaultImg}
             alt={astrologer.firstName}
             className={styles.astrologerImg}
             onError={(e) => {
@@ -43,7 +43,7 @@ const AstrologerCard = ({ astrologer, onConnect }) => {
               </defs>
             </svg>
           </span>
-          <span className={styles.ratingText}>{astrologer.rating ?? 4}</span>
+          <span className={styles.ratingText}>{astrologer.rating}</span>
         </div>
         <h3 className={styles.astrologerName}>
           {astrologer.firstName} {astrologer.lastName}
