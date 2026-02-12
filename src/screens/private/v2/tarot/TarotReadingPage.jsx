@@ -12,22 +12,25 @@ const TarotReadingPage = () => {
   const observerRef = useRef(null)
 
   const allTarotReadings = [
-    { id: 1, title: 'Daily Cosmic Guidance', type: 'Free', apiEndpoint: 'daily' },
-    { id: 2, title: 'Yes/ No Tarot', type: 'Free', apiEndpoint: 'yes-no' },
+    // { id: 1, title: 'Daily Cosmic Guidance', type: 'Free', apiEndpoint: 'daily' },
+    { id: 1, title: 'Yes/ No Tarot', type: 'Free', apiEndpoint: 'yes-no' },
+    { id: 2, title: 'Career Select', type: 'Free', apiEndpoint: 'career-select' },
     { id: 3, title: 'Love Triangle', type: 'Paid', apiEndpoint: 'love-triangle' },
     { id: 4, title: 'Daily Horoscope', type: 'Paid', apiEndpoint: 'daily' },
     { id: 5, title: 'In Depth Love', type: 'Free', apiEndpoint: 'in-depth-love' },
     { id: 6, title: 'Erotic Love', type: 'Free', apiEndpoint: 'erotic-love' },
-    { id: 7, title: 'Romantic Breakup', type: 'Paid', apiEndpoint: 'romantic-breakup' },
-    { id: 8, title: 'Business Breakup', type: 'Paid', apiEndpoint: 'business-breakup' },
-    { id: 9, title: 'Career Guidance', type: 'Free', apiEndpoint: 'career-select' },
-    { id: 10, title: 'Financial Future', type: 'Paid', apiEndpoint: 'daily' },
-    { id: 11, title: 'Health Reading', type: 'Free', apiEndpoint: 'daily' },
-    { id: 12, title: 'Spiritual Path', type: 'Paid', apiEndpoint: 'daily' },
-    { id: 13, title: 'Past Life', type: 'Paid', apiEndpoint: 'daily' },
-    { id: 14, title: 'Dream Analysis', type: 'Free', apiEndpoint: 'daily' },
-    { id: 15, title: 'Soul Mate', type: 'Paid', apiEndpoint: 'made-for-each-other-or-not' },
-    { id: 16, title: 'Life Purpose', type: 'Free', apiEndpoint: 'daily' }
+    { id: 7, title: 'Made for Each Other', type: 'Free', apiEndpoint: 'made-for-each-other' },
+    { id: 8, title: 'Flirt Reading', type: 'Free', apiEndpoint: 'flirt-reading' },
+    { id: 9, title: 'Romantic Breakup', type: 'Paid', apiEndpoint: 'romantic-breakup' },
+    { id: 10, title: 'Business Breakup', type: 'Paid', apiEndpoint: 'business-breakup' },
+
+    // { id: 10, title: 'Financial Future', type: 'Paid', apiEndpoint: 'daily' },
+    // { id: 11, title: 'Health Reading', type: 'Free', apiEndpoint: 'daily' },
+    // { id: 12, title: 'Spiritual Path', type: 'Paid', apiEndpoint: 'daily' },
+    // { id: 13, title: 'Past Life', type: 'Paid', apiEndpoint: 'daily' },
+    // { id: 14, title: 'Dream Analysis', type: 'Free', apiEndpoint: 'daily' },
+    // { id: 15, title: 'Soul Mate', type: 'Paid', apiEndpoint: 'made-for-each-other-or-not' },
+    // { id: 16, title: 'Life Purpose', type: 'Free', apiEndpoint: 'daily' }
   ]
 
   useEffect(() => {
