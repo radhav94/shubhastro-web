@@ -2,7 +2,7 @@ import styles from "./AstrologersCard.module.scss";
 import PrimaryText from "../../PrimaryText";
 import PrimaryButton from "../../PrimaryButton";
 import { appColors } from "../../../utils/theme";
-import { AppIcons, AppImages } from "../../../utils/appImages";
+import { AppIcons, AppImages, DefaultImages } from "../../../utils/appImages";
 import Divider from "../../Divider";
 import { MdOutlineCurrencyRupee } from "react-icons/md";
 import { GetString } from "../../../utils/helper/string.utils";

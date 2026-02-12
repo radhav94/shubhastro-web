@@ -79,7 +79,7 @@ const Report = ({ data }) => {
         <div className="mx-2" />
 
         <PrimaryText isSemiBold size_20 color={appColors.tri}>
-          ({birthDetails?.day} - {birthDetails?.month} - {birthDetails?.year})
+          ({String(birthDetails?.day).padStart(2, "0")} - {String(birthDetails?.month).padStart(2, "0")} - {birthDetails?.year})
         </PrimaryText>
       </div>
 

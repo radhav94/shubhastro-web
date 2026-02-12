@@ -3,22 +3,12 @@ import { useGetMahaDashaPredictionsQuery } from "../../../../redux/api/kundli/da
 import styles from "./DashaContent.module.scss";
 import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 
 const Vimshottari = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
 
-  const queryArgs = formData
-    ? {
-        dob: `${formData.day}/${formData.month}/${formData.year}`,
-        tob: `${String(formData.hour).padStart(2, "0")}:${String(
-          formData.min,
-        ).padStart(2, "0")}`,
-        lat: formData.lat,
-        lon: formData.lon,
-        tz: formData.tzone,
-        lang: "en",
-      }
-    : skipToken;
+  const queryArgs = formData ? buildVedicParam(formData) : skipToken;
 
   const { data, isLoading } = useGetMahaDashaPredictionsQuery(queryArgs);
 
