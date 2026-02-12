@@ -66,11 +66,11 @@ const Profile = () => {
   const transactionListRef = useRef(null);
   const orderListRef = useRef(null); // Ref for order history scroll
   const user = getUserFromStorage();
-  const userName = user
-    ? user.firstName && user.lastName
-      ? `${user.firstName} ${user.lastName}`
-      : user.phoneNumber || "Guest User"
-    : "Guest User";
+  // const userName = user
+  //   ? user.firstName && user.lastName
+  //     ? `${user.firstName} ${user.lastName}`
+  //     : user.phoneNumber || "Guest User"
+  //   : "Guest User";
   const userId = localStorage.getItem("shubhtalk_customer_id");
 
   // Connect popup state
@@ -252,6 +252,30 @@ const Profile = () => {
   });
   const savedKundlis = kundliData?.data || [];
 
+    // Get user name with fallback to first Kundli name
+ 
+  const userName = (() => {
+    // First priority: User's registered name
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    if (user?.firstName) {
+      return user.firstName;
+    }
+    
+    // Second priority: First Kundli profile name
+    if (savedKundlis.length > 0 && savedKundlis[0]?.name) {
+      return savedKundlis[0].name;
+    }
+    
+    // Third priority: Phone number
+    if (user?.phoneNumber) {
+      return user.phoneNumber;
+    }
+    
+    // Last resort
+    return "Guest User";
+  })();
   // Build params for Kundali API from first profile
   const firstProfile = savedKundlis[0];
   const kundliParams = firstProfile
