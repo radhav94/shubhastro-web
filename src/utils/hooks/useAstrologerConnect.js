@@ -7,6 +7,7 @@ import { useCall } from "../../context/CallContext";
 import { useChat } from "../../context/ChatContext";
 import { useGetBalanceMutation } from "../../redux/api/wallet/walletApi";
 import { useCreateChatRoomMutation } from "../../redux/api/chatApi";
+import { useGetAllKundlisQuery } from "../../services/appServices/kundliServicesNew";
 import Toast from "../../component/toast";
 
 export const useAstrologerConnect = () => {
@@ -21,6 +22,13 @@ export const useAstrologerConnect = () => {
   });
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
   const [chatRoomId, setChatRoomId] = useState(null);
+
+  // Fetch user's kundli profiles for validation
+  const { data: kundliData, isLoading: isValidating } = useGetAllKundlisQuery(undefined, {
+    skip: !token || !userIdLocal,
+  });
+
+  const profiles = kundliData?.data || [];
 
   const {
     setActiveCall,
@@ -48,9 +56,39 @@ export const useAstrologerConnect = () => {
   const [getBalance] = useGetBalanceMutation();
   const [createChatRoom] = useCreateChatRoomMutation();
 
+  /**
+   * Validates if user can connect (logged in + has kundli)
+   * @returns {boolean} - true if validation passes, false otherwise
+   */
+  const validateBeforeConnection = useCallback(() => {
+    // Check if user is logged in
+    if (!token || !userIdLocal) {
+      Toast.error("Please login to continue");
+      navigate(PATH.publicRoutes.LOGIN.path);
+      return false;
+    }
+
+    // Check if user has at least one kundli profile
+    const hasKundli = profiles.length > 0;
+
+    if (!hasKundli) {
+      Toast.error("Please create your Kundli before starting chat or call.");
+      navigate(PATH.privateRoutes.PROFILE.path, { state: { requiresCreation: true } });
+      return false;
+    }
+
+    return true;
+  }, [token, userIdLocal, profiles, navigate]);
+
   // Chat handler
   const handleChatStart = useCallback(async (astro, checkBalance = true) => {
     console.log("🚀 Chat Start - Astrologer:", astro);
+    
+    // Validate profile and kundli before proceeding
+    if (!validateBeforeConnection()) {
+      return false;
+    }
+
     setSelectedAstrologer(astro);
     setLastRequestedAstro(astro);
     activeCallAstroRef.current = astro; // Store in ref immediately
@@ -75,12 +113,18 @@ export const useAstrologerConnect = () => {
     // setOpenModal((prev) => ({ ...prev, kundli: true }));
     handleAfterKundliSelect(astro, null) // Pass null for chat
     return true;
-  }, [getBalance, setLastRequestedAstro]);
+  }, [getBalance, setLastRequestedAstro, validateBeforeConnection]);
 
   // Call handler
   const handleCallStart = useCallback(async (astro, type) => {
     console.log("📞 Call Start - Astrologer:", astro);
     console.log("📞 Call Type:", type);
+    
+    // Validate profile and kundli before proceeding
+    if (!validateBeforeConnection()) {
+      return false;
+    }
+
     setSelectedAstrologer(astro);
     setLastRequestedCallAstro(astro);
     activeCallAstroRef.current = astro; // Store in ref immediately
@@ -102,7 +146,7 @@ export const useAstrologerConnect = () => {
     // setOpenModal((prev) => ({ ...prev, kundli: true }));
     handleAfterKundliSelect(astro, type) // Pass type directly
     return true;
-  }, [getBalance, setLastRequestedCallAstro]);
+  }, [getBalance, setLastRequestedCallAstro, validateBeforeConnection]);
 
   // After kundli selection
   const handleAfterKundliSelect = useCallback(async (selectedAstrologer, connectionType = null) => {
@@ -173,5 +217,10 @@ export const useAstrologerConnect = () => {
     setChatRoomId,
     activeCallAstroRef,
     kundliRef,
+    // Validation properties
+    validateBeforeConnection,
+    isValidating,
+    hasProfile: !!(token && userIdLocal),
+    hasKundli: profiles.length > 0,
   };
 };
