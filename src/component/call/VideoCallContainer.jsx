@@ -1,7 +1,8 @@
 // import { useCall } from "../context/CallContext";
+import { lazy } from "react";
 import { useCall } from "../../context/CallContext";
-import VideoCalling from "./VideoCall";
-import AgoraVoiceCalling from "./VoiceCall";
+const VideoCalling = lazy(() => import("./VideoCall"));
+const AgoraVoiceCalling = lazy(() => import("./VoiceCall"));
 
 
 export default function VideoCallContainer() {
