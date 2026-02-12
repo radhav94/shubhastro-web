@@ -831,6 +831,12 @@ const VideoCalling = ({ callData }) => {
                   <span className={styles.controlLabel}>AI Wow</span>
                 </div> */}
 
+                <button className={styles.rechargeNowBtn}>Recharge Now
+                  <svg xmlns="http://www.w3.org/2000/svg" width="8" height="15" viewBox="0 0 8 15" fill="none">
+                    <path d="M0.75 13.95L6.18333 8.51667C6.825 7.875 6.825 6.825 6.18333 6.18333L0.75 0.75" stroke="#FEFEFE" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+
                 <div className={`${styles.controlItem} ${styles.giftWrapMain}`}>
                   <button
                     className={`${styles.controlBtn} ${styles.sendGiftBg}`}

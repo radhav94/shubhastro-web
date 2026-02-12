@@ -730,11 +730,20 @@
   border-radius: var(--Radius-full, 999px);
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: #fff;
-  @media (width <= 380px) {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 22vh;
+  margin: 0 auto;
+  @media (width <= 767px) {
     width: fit-content;
     height: 36px;
     font-size: 14px;
     padding: 0 16px;
+    bottom: 32vh;
+  }
+  @media (width <= 380px) {
+    bottom: 34vh;
   }
 }
 .totalTime,.callerNameTitle{
