@@ -26,6 +26,11 @@ const TopHeader = () => {
   const isLoggedIn = !!user && !!token;
 
   // Fixed list of supported languages with English labels
+  const [open, setOpen] = useState(false);
+  const [activeLang, setActiveLang] = useState("EN"); // default label
+
+  const getAbbr = (code) => code.toUpperCase(); // "en" → "EN"
+
   const supportedLanguages = [
     { code: 'en', name: 'English' },
     { code: 'hi', name: 'Hindi' },
@@ -185,7 +190,9 @@ const TopHeader = () => {
             className={styles.hamburger}
             onClick={() => setIsDrawerOpen(true)}
           >
-            ☰
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="16" viewBox="0 0 24 16" fill="none">
+              <path d="M1.33333 16H22.6667C23.4 16 24 15.4 24 14.6667C24 13.9333 23.4 13.3333 22.6667 13.3333H1.33333C0.6 13.3333 0 13.9333 0 14.6667C0 15.4 0.6 16 1.33333 16ZM1.33333 9.33333H22.6667C23.4 9.33333 24 8.73333 24 8C24 7.26667 23.4 6.66667 22.6667 6.66667H1.33333C0.6 6.66667 0 7.26667 0 8C0 8.73333 0.6 9.33333 1.33333 9.33333ZM0 1.33333C0 2.06667 0.6 2.66667 1.33333 2.66667H22.6667C23.4 2.66667 24 2.06667 24 1.33333C24 0.6 23.4 0 22.6667 0H1.33333C0.6 0 0 0.6 0 1.33333Z" fill="#030303"/>
+            </svg>
           </div>
 
           <div className={styles.logoHeader} onClick={() => navigate("/")}>
@@ -291,20 +298,54 @@ const TopHeader = () => {
             Live
           </NavLink>
         </nav>
-
+            
         <div className={styles.headerActions}>
-          <select
-            className={`${styles.languageDropdown} notranslate`}
-            onChange={(e) => handleLanguageChange(e.target.value)}
-            value={selectedLang}
-            translate="no"
-          >
-            {supportedLanguages.map((lang) => (
-              <option key={lang.code} value={lang.code} className="notranslate">
-                {lang.name}
-              </option>
-            ))}
-          </select>
+
+          {/* language start */}
+          <div className={styles.languageWrap}>
+            <span
+              className={styles.onHoverChangeLang}
+              onClick={() => setOpen((prev) => !prev)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M9.99 0C4.47 0 0 4.48 0 10C0 15.52 4.47 20 9.99 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 9.99 0ZM16.92 6H13.97C13.65 4.75 13.19 3.55 12.59 2.44C14.43 3.07 15.96 4.35 16.92 6ZM10 2.04C10.83 3.24 11.48 4.57 11.91 6H8.09C8.52 4.57 9.17 3.24 10 2.04ZM2.26 12C2.1 11.36 2 10.69 2 10C2 9.31 2.1 8.64 2.26 8H5.64C5.56 8.66 5.5 9.32 5.5 10C5.5 10.68 5.56 11.34 5.64 12H2.26ZM3.08 14H6.03C6.35 15.25 6.81 16.45 7.41 17.56C5.57 16.93 4.04 15.66 3.08 14ZM6.03 6H3.08C4.04 4.34 5.57 3.07 7.41 2.44C6.81 3.55 6.35 4.75 6.03 6ZM10 17.96C9.17 16.76 8.52 15.43 8.09 14H11.91C11.48 15.43 10.83 16.76 10 17.96ZM12.34 12H7.66C7.57 11.34 7.5 10.68 7.5 10C7.5 9.32 7.57 8.65 7.66 8H12.34C12.43 8.65 12.5 9.32 12.5 10C12.5 10.68 12.43 11.34 12.34 12ZM12.59 17.56C13.19 16.45 13.65 15.25 13.97 14H16.92C15.96 15.65 14.43 16.93 12.59 17.56ZM14.36 12C14.44 11.34 14.5 10.68 14.5 10C14.5 9.32 14.44 8.66 14.36 8H17.74C17.9 8.64 18 9.31 18 10C18 10.69 17.9 11.36 17.74 12H14.36Z" fill="#424242"/>
+              </svg>
+
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="8" viewBox="0 0 14 8" fill="none">
+                <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_9128_57)"/>
+                <defs>
+                  <linearGradient id="paint0_linear_9128_57" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#F75801"/>
+                    <stop offset="1" stop-color="#D43400"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              {/* {activeLang} */}
+            </span>
+
+            <div
+              className={`${styles.languageDropdown} ${
+                open ? styles.open : styles.close
+              } notranslate`}
+              translate="no"
+            >
+              {supportedLanguages.map((lang) => (
+                <p
+                  key={lang.code}
+                  className="notranslate"
+                  onClick={() => {
+                    handleLanguageChange(lang.code);
+                    setActiveLang(getAbbr(lang.code)); // 👈 set abbreviation
+                    setOpen(false); // close with animation
+                  }}
+                >
+                  {lang.name}
+                </p>
+              ))}
+            </div>
+          </div>
+          {/* language end */}
+
           <div className={styles.walletBadge}>
             <div className={styles.coinIcon}></div>
             <span className={styles.walletAmount}>

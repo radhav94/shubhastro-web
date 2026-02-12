@@ -60,7 +60,8 @@
   cursor: pointer;
   margin-right: 10px;
   @media screen and (width <= 1180px) {
-    display: block;
+    display: flex;
+    align-items: center;
   }
 }
 
@@ -284,34 +285,65 @@
   gap: 12px;
 }
 
-.languageDropdown {
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(247, 88, 1, 0.3);
-  background: #fff;
-  color: #2c1b0e;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: "Poppins", sans-serif;
-  outline: none;
-
-  &:hover {
-    border-color: #f75801;
-    box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
-  }
-
-  &:focus {
-    border-color: #f75801;
-    box-shadow: 0 0 0 3px rgba(247, 88, 1, 0.1);
-  }
-
-  @media screen and (width <= 480px) {
-    padding: 6px 8px;
-    font-size: 12px;
-  }
+.languageWrap {
+  position: relative;
+  display: inline-block;
 }
+
+.onHoverChangeLang {
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #fff;
+  border-radius: 50px;
+  padding:2px 5px;
+  font-size: 14px;
+}
+
+/* Dropdown hidden by default */
+.languageDropdown {
+  position: absolute;
+  top: 120%;   /* below Lang */
+  right: -50px;
+  // left: 0;
+  min-width: 120px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  padding: 8px 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(0.95);
+  transition: all 0.25s ease;
+  z-index: 1000;
+  max-height: 300px;
+  overflow: auto;
+}
+
+/* Show on hover */
+.languageWrap:hover .languageDropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+/* Items */
+.languageDropdown p {
+  margin: 0;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+  font-size: 12px;
+  width: 100%;
+}
+
+.languageDropdown p:hover {
+  background: #f2f2f2;
+}
+
 
 .liveButton {
   display: flex;
@@ -446,6 +478,12 @@
   font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.5px;
+  @media (width <= 767px) {
+    font-size: 18px;
+  }
+  @media (width <= 380px) {
+    font-size: 16px;
+  }
 }
 
 .profileIcon {
@@ -515,10 +553,6 @@
   //   width: 32px;
   //   height: 32px;
   // }
-
-  .walletAmount {
-    font-size: 18px;
-  }
 
   .profileIcon {
     width: 44px;
