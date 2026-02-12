@@ -27,6 +27,7 @@ import ProfileManager from "../UI/Profile/ProfileManager";
 import { useGetAllKundlisQuery } from "../../services/appServices/kundliServicesNew";
 import { Toast } from "../index";
 import { getUserFromStorage } from "../../utils/authStorage";
+import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance";
 
 const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 
@@ -65,6 +66,8 @@ const VideoCalling = ({ callData }) => {
   const [selectedProfile, setSelectedProfile] = useState(null);
 
   const [getBalance] = useGetBalanceMutation();
+  const { balance, isFetching, refreshWallet } = useWalletBalance();
+  
   // Fetch kundli profiles
   const { data: profilesData } = useGetAllKundlisQuery();
   const profiles = profilesData?.data || [];
@@ -362,6 +365,10 @@ const VideoCalling = ({ callData }) => {
       endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
     });
 
+    // Refresh wallet balance after call ends
+    refreshWallet();
+    window.dispatchEvent(new Event("walletBalanceUpdated"));
+
     setOpenReview(true);
     await cleanup();
   };
@@ -556,6 +563,27 @@ const VideoCalling = ({ callData }) => {
     setIsChatOpen(true);
   };
 
+  const handleNavigateToChat = () => {
+    if (!activeCall?.astrologerId || !activeCall?.roomId) {
+      console.error("Missing required chat data");
+      return;
+    }
+
+    setIsMinimized(true);
+    navigate(`/chat-with-astrologers/${activeCall.astrologerId}`, {
+      state: {
+        userId: activeCall.userId,
+        astrologerId: activeCall.astrologerId,
+        roomId: activeCall.chatRoomId || activeCall.roomId,
+        fullName: callerName,
+        isUserSide: activeCall.isUserSide,
+        kundliId: activeCall.kundliId,
+        astrologerName: callerName,
+        astroID: activeCall.astrologerID,
+      }
+    });
+  };
+
   const formatTime = (s) =>
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(
       2,
@@ -671,7 +699,9 @@ const VideoCalling = ({ callData }) => {
 
               <div className={styles.walletBadge}>
                 <span className={styles.walletIcon}>💰</span>
-                <span className={styles.walletAmount}>₹20</span>
+                <span className={styles.walletAmount}>
+                  {isFetching ? "..." : balance !== null ? `₹${balance.toFixed(2)}` : "₹0.00"}
+                </span>
               </div>
             </div>
 
@@ -814,26 +844,7 @@ const VideoCalling = ({ callData }) => {
                 <div className={styles.controlItem}>
                   <button
                     className={styles.controlBtn}
-                    onClick={() => {
-                      if (!activeCall?.astrologerId || !activeCall?.roomId) {
-                        console.error("Missing required chat data");
-                        return;
-                      }
-
-                      setIsMinimized(true);
-                      navigate(`/chat-with-astrologers/${activeCall.astrologerId}`, {
-                        state: {
-                          userId: activeCall.userId,
-                          astrologerId: activeCall.astrologerId,
-                          roomId: activeCall.chatRoomId || activeCall.roomId,
-                          fullName: callerName,
-                          isUserSide: activeCall.isUserSide,
-                          kundliId: activeCall.kundliId,
-                          astrologerName: callerName,
-                          astroID: activeCall.astrologerID,
-                        }
-                      });
-                    }}
+                    onClick={handleNavigateToChat}
                   >
                     <IoChatbubbleEllipses size={24} />
                   </button>

@@ -181,6 +181,10 @@ const ChatWindow = () => {
   const handleDisconnect = () => {
     try {
       voiceSocket.emit("chat:end", { roomId, endedBy: "CUSTOMER" });
+      
+      // Refresh wallet balance after chat ends
+      refreshWallet();
+      window.dispatchEvent(new Event("walletBalanceUpdated"));
     } catch (error) {
       handleChatEndedFromServer();
       console.log('chat end error', error)
