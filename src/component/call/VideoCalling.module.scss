@@ -189,10 +189,10 @@
   transform: scale(1.05);
 }
 
-.localVideoPreview > div {
-  width: 100% !important;
-  height: 100% !important;
-}
+// .localVideoPreview > div {
+//   width: 100% !important;
+//   height: 100% !important;
+// }
 
 .localVideoPreview video {
   object-fit: cover !important;
@@ -202,18 +202,27 @@
 
 .localVideoLabel {
   position: absolute;
-  bottom: 8px;
-  left: 8px;
-  right: 8px;
+  top: 0px;
+  left: 0px;
+  /* right: 8px; */
   padding: 6px 8px;
   display: flex;
   flex-direction: column;
+  height: fit-content;
+  width: 100%;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 50%), rgb(0 0 0 / 38%), transparent);
 }
 
 .localVideoName {
   font-size: 12px;
   font-weight: 600;
   color: #fff;
+  width: 100%;
+  display: flex;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
 }
 
 .localVideoRole {
@@ -222,6 +231,10 @@
   font-weight: 600;
   line-height: 1.4;
   letter-spacing: 0.3px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
 }
 
 .waitingText {
@@ -239,34 +252,33 @@
    =============================== */
 
 .header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4), transparent);
+  background: #FFF5EC;
   z-index: 100;
+  box-shadow: 0px 5px 100px #000;
 }
 
 .backBtn {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 50px;
   border: none;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgba(0, 0, 0, 0);
+  color: #333;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: background 0.2s ease;
+  border: 1px solid var(--orange_gradient, #F75801);
+  background: var(--cta-10, rgba(229, 99, 41, 0.10));
 }
 
 .backBtn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .astrologerInfo {
@@ -277,15 +289,19 @@
 .astrologerName {
   font-size: 18px;
   font-weight: 600;
-  color: #fff;
+  color: #333;
   margin: 0;
   line-height: 1.2;
 }
 
 .astrologerExp {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(0, 0, 0, 0.6);
   margin: 2px 0 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
 }
 
 .walletBadge {
@@ -313,17 +329,18 @@
    =============================== */
 
 .actionButtons {
-  position: fixed;
-  top: 64px;
-  left: 0;
-  right: 0;
+  // position: fixed;
+  // top: 64px;
+  // left: 0;
+  // right: 0;
   display: flex;
   gap: 10px;
   padding: 12px 16px;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), transparent);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent);
   z-index: 100;
   overflow-x: auto;
   scrollbar-width: none;
+  justify-content: center;
 }
 
 .actionButtons::-webkit-scrollbar {
@@ -334,21 +351,25 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
+  padding: 6px 25px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 400;
   cursor: pointer;
   transition: all 0.2s ease;
+  border-radius: 50px;
+  border: 1px solid var(--primary-900k, #E56329);
+  background: var(--surface, #FEFEFE);
+  border-radius: 50px;
+  border: 1px solid var(--base-white, #FEFEFE);
+  background: #fff1;
+  backdrop-filter: blur(10px);
 }
 
 .actionBtn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  // background: rgba(0, 0, 0, 0.8);
   transform: translateY(-2px);
+  box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.15);
 }
 
 .actionBtn svg {
@@ -365,7 +386,7 @@
   left: 0;
   right: 0;
   z-index: 100;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.7), transparent);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgb(0 0 0 / 30%), transparent);
   padding: 20px 16px 16px;
 }
 
@@ -416,13 +437,34 @@
 }
 
 .controlLabel {
-  font-size: 11px;
+  font-size: 12px;
   color: rgba(255, 255, 255, 0.8);
   text-align: center;
   line-height: 1.2;
-  max-width: 80px;
+  max-width: 90px;
+}
+.controlBtn.sendGiftBg{
+  background: #4CAF50;
+  svg{
+    fill: #fff;
+  }
 }
 
+.controlItem.giftWrapMain{
+  position: absolute;
+  right: 4vw;
+  bottom: 150px;
+  @media (width <= 767px) {
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 150px;
+    margin: 0 auto;
+  }
+  @media (width <= 380px) {
+    bottom: 130px;
+  }
+}
 /* ===============================
    ⏱️ BOTTOM BAR
    =============================== */
@@ -435,7 +477,44 @@
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+.bottomBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
 
+.callTimerBottom {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.8);
+  font-weight: 500;
+}
+
+.timerRed {
+  color: #ff3b30;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.rechargeBtn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  border-radius: 20px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.rechargeBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
 .callTimer {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.9);
@@ -570,6 +649,198 @@
    📱 MOBILE (≤768px)
    =============================== */
 
+   /* ===============================
+   🔘 ACTION BUTTONS
+   =============================== */
+.groupBtns{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  // background: #fff;
+  @media (width <= 767px) {
+    padding: 6px 16px 6px 16px;
+    background: #fff;
+    width: 100%;
+    top: 52px;
+    left: 0;
+    position: absolute;
+  }
+}
+
+.dividerLine{
+  display: block;
+  height: 30px;
+  width: 1px;
+  background-color: #BDBDBD;
+  @media (width <= 767px) {
+    display: none;    
+  }
+}
+
+.groupBtnsRight{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 10px;
+}
+.rechargeButton {
+  // padding: $spacing-lg 24px;
+  // padding: 5px;
+  width: 30px;
+  border-radius: 24px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  @media (width <= 767px) {
+    font-size: 12px;
+    border-radius: 20px;
+    gap: 4px;
+    span svg{
+      width: 30px;
+    }
+  }
+}
+
+.rechargeButton img {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  @media (width <= 767px) {
+    width: 14px;
+    height: 14px;
+  }
+}
+.rechargeNowBtn{
+  display: flex;
+  width: 180px;
+  height: 42px;
+  padding: 0 24px;
+  justify-content: center;
+  align-items: center;
+  gap: var(--Spacing-1, 4px);
+  border-radius: var(--Radius-full, 999px);
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  color: #fff;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 22vh;
+  margin: 0 auto;
+  @media (width <= 767px) {
+    width: fit-content;
+    height: 36px;
+    font-size: 14px;
+    padding: 0 16px;
+    bottom: 32vh;
+  }
+  @media (width <= 380px) {
+    bottom: 34vh;
+  }
+}
+.totalTime,.callerNameTitle{
+  color: var(--paragraph, #424242);
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 28px; /* 155.556% */
+  display: block;
+  text-align: center;
+  margin-block: 10px;
+  @media (width <= 380px) {
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+  }
+}
+.callerNameTitle{
+  color: var(--title, #030303);
+  font-size: 25px;
+  font-weight: 700;
+  line-height: normal;
+  margin-block: unset;
+  @media (width <= 380px) {
+    font-size: 20px;
+  }
+}
+.rechargeButton:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+}
+
+.rechargeButton:active {
+  transform: scale(0.95);
+}
+.chateM{
+  width: 40px;
+  height: 40px;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid var(--cta, #E56329);
+  // background: var(--surface, #FEFEFE);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+  font-weight: 600;
+  color: #F75801;
+  transition: all 0.2s ease;
+  &:hover{
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+  }
+  @media (width <= 767px) {
+    font-size: 12px;
+    width: 100%;
+    border-radius: 40px;
+    gap: 6px;
+    height: auto;
+  }
+}
+
+.chateEnd{
+  background-color: #E4342F;
+  display: flex;
+  // height: 42px;
+  padding: 6px 16px;
+  align-items: center;
+  gap: 8px; 
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  svg{
+      width: 14px;
+    }
+  @media (width <= 767px) {
+    font-size: 12px;
+    gap: 3px; 
+    padding: 6px;
+    svg{
+      width: 12px;
+    }
+  }
+
+  &:hover{
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+  }
+}
+
+.actionBtn svg {
+  flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
 
   body {
@@ -653,12 +924,16 @@
     height: 56px;
   }
 
-  .controlLabel {
-    font-size: 10px;
-  }
+  // .controlLabel {
+  //   font-size: 10px;
+  // }
 
   .bottomBar {
     padding-top: 10px;
+  }
+
+  .callTimerBottom {
+    font-size: 12px;
   }
 
   .callTimer {
@@ -672,7 +947,7 @@
 
   .floatingMini {
     width: 200px;
-    height: 145px;
+    height: 165px;
   }
 }
 
@@ -740,13 +1015,22 @@
     top: 50px;
     padding: 8px 10px;
     gap: 6px;
+    margin-top: 44px;
   }
 
-  .actionBtn {
-    padding: 7px 12px;
-    font-size: 11px;
-    gap: 4px;
+  .callTimerBottom {
+    font-size: 0px;
+    width: 100%;
+    text-align: center;
+    span{font-size: 14px;}
   }
+
+
+  // .actionBtn {
+  //   padding: 7px 12px;
+  //   font-size: 11px;
+  //   gap: 4px;
+  // }
 
   .actionBtn svg {
     width: 14px;
@@ -756,7 +1040,7 @@
   .localVideoPreview {
     width: 90px;
     height: 120px;
-    top: 105px;
+    top: 160px;
     right: 10px;
     border-radius: 12px;
   }
@@ -779,10 +1063,9 @@
     height: 20px;
   }
 
-  .controlLabel {
-    font-size: 9px;
-    max-width: 70px;
-  }
+  // .controlLabel {
+  //   font-size: 10px;
+  // }
 
   .bottomBar {
     padding-top: 8px;
@@ -803,8 +1086,8 @@
   }
 
   .floatingMini {
-    width: 170px;
-    height: 125px;
+    width: 130px;
+    height: 165px;
   }
 
   .miniHeader {
@@ -883,10 +1166,10 @@
     gap: 12px;
   }
 
-  .actionBtn {
-    padding: 12px 18px;
-    font-size: 14px;
-  }
+  // .actionBtn {
+  //   padding: 12px 18px;
+  //   font-size: 14px;
+  // }
 
   .localVideoPreview {
     width: 180px;
@@ -915,9 +1198,9 @@
     height: 28px;
   }
 
-  .controlLabel {
-    font-size: 12px;
-  }
+  // .controlLabel {
+  //   font-size: 12px;
+  // }
 
   .bottomBar {
     max-width: 600px;
@@ -932,5 +1215,10 @@
   .rechargeBtn {
     padding: 12px 24px;
     font-size: 15px;
+  }
+}
+@media (width <= 380px) {
+  .actionBtn {
+    padding: 6px 10px;
   }
 }
