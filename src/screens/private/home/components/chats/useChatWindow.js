@@ -4,6 +4,7 @@ import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import toast from "../../../../../component/toast";
 import { useChat as useChatContext } from "../../../../../context/ChatContext"
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
+import { useCall } from "../../../../../context/CallContext";
 
 export default function useChat({
   userId,
@@ -16,6 +17,7 @@ export default function useChat({
   refreshKey = 0
 }) {
   const { startTimer, stopTimer, chatSeconds, setActiveChat, activeChat } = useChatContext();
+  const { activeCall } = useCall();
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
@@ -40,7 +42,7 @@ export default function useChat({
   };
 
   useEffect(() => {
-    if (activeChat?.astrologerId !== astrologerId) setIsMessageDisabled(true)
+    if (activeChat?.astrologerId !== astrologerId && activeCall?.astrologerId !== astrologerId) setIsMessageDisabled(true)
     if (!roomId || !userId || !astrologerId) return;
     socketService.connect({
       onConnected: () => {
@@ -132,7 +134,7 @@ export default function useChat({
       voiceSocket.off("typing", handleTyping);
       voiceSocket.off("chat:ended", handleChatEndedFromServer);
     };
-  }, [roomId, activeChat]);
+  }, [roomId, activeChat, activeCall]);
 
   // USER SEND
   const sendMessage = (text, type = "message") => {

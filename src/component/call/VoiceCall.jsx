@@ -33,7 +33,16 @@ const AgoraVoiceCalling = ({ callData }) => {
 
   if (!activeCall || activeCall.callType !== "audio") return null;
 
-  const { roomId, agoraToken, callerName, isUserSide, experience } = callData;
+  const { 
+    roomId, 
+    agoraToken, 
+    callerName, 
+    isUserSide, 
+    experience, 
+    astrologerImage,
+    astrologerId,
+    astrologerID 
+  } = callData;
 
   /* ================= REFS ================= */
   const clientRef = useRef(null);
@@ -54,7 +63,7 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [speakerOn, setSpeakerOn] = useState(true);
 
   /* ================= WALLET BALANCE ================= */
-  const { balance, isFetching } = useWalletBalance();
+  const { balance, isFetching, refreshWallet } = useWalletBalance();
 
   /* ================= START CALL ================= */
   useEffect(() => {
@@ -159,6 +168,11 @@ const AgoraVoiceCalling = ({ callData }) => {
       roomId,
       endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
     });
+    
+    // Refresh wallet balance after call ends
+    refreshWallet();
+    window.dispatchEvent(new Event("walletBalanceUpdated"));
+    
     await cleanup();
   };
 
@@ -231,6 +245,28 @@ const AgoraVoiceCalling = ({ callData }) => {
 
     // videoTrackRef.current.play("local-video");
     setIsVideo(true);
+  };
+
+  /* ================= NAVIGATE TO CHAT ================= */
+  const handleNavigateToChat = () => {
+    if (!activeCall?.astrologerId || !activeCall?.roomId) {
+      console.error("Missing required chat data");
+      return;
+    }
+
+    setIsMinimized(true);
+    navigate(`/chat-with-astrologers/${activeCall.astrologerId}`, {
+      state: {
+        userId: activeCall.userId,
+        astrologerId: activeCall.astrologerId,
+        roomId: activeCall.chatRoomId || activeCall.roomId,
+        fullName: callerName,
+        isUserSide: activeCall.isUserSide,
+        kundliId: activeCall.kundliId,
+        astrologerName: callerName,
+        astroID: activeCall.astrologerID,
+      }
+    });
   };
 
   useEffect(() => {
@@ -318,11 +354,14 @@ const AgoraVoiceCalling = ({ callData }) => {
             
             <div className={styles.astrologerInfo}>
               <h3 className={styles.astrologerName}>{callerName}</h3>
-              <p className={styles.astrologerExp}> {experience} Years</p>
+              <p className={styles.astrologerExp}>{experience ? `${experience} Years` : 'Astrologer'}</p>
             </div>
 
             <div className={styles.groupBtns}>
-              <button className={styles.chateM}>
+              <button 
+                className={styles.chateM}
+                onClick={handleNavigateToChat}
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
                   <path d="M15 0H1.66667C0.75 0 0.00833333 0.75 0.00833333 1.66667L0 16.6667L3.33333 13.3333H15C15.9167 13.3333 16.6667 12.5833 16.6667 11.6667V1.66667C16.6667 0.75 15.9167 0 15 0ZM4.16667 5.83333H12.5C12.9583 5.83333 13.3333 6.20833 13.3333 6.66667C13.3333 7.125 12.9583 7.5 12.5 7.5H4.16667C3.70833 7.5 3.33333 7.125 3.33333 6.66667C3.33333 6.20833 3.70833 5.83333 4.16667 5.83333ZM9.16667 10H4.16667C3.70833 10 3.33333 9.625 3.33333 9.16667C3.33333 8.70833 3.70833 8.33333 4.16667 8.33333H9.16667C9.625 8.33333 10 8.70833 10 9.16667C10 9.625 9.625 10 9.16667 10ZM12.5 5H4.16667C3.70833 5 3.33333 4.625 3.33333 4.16667C3.33333 3.70833 3.70833 3.33333 4.16667 3.33333H12.5C12.9583 3.33333 13.3333 3.70833 13.3333 4.16667C13.3333 4.625 12.9583 5 12.5 5Z" fill="url(#paint0_linear_8989_297)"/>
                   <defs>
@@ -335,7 +374,7 @@ const AgoraVoiceCalling = ({ callData }) => {
                 Chat
               </button>
 
-              <button className={styles.chateM}>
+              <button className={styles.chateM} onClick={toggleCamera}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="17" height="11" viewBox="0 0 17 11" fill="none">
                   <path d="M12.8333 4.125V0.916667C12.8333 0.4125 12.4208 0 11.9167 0H0.916667C0.4125 0 0 0.4125 0 0.916667V10.0833C0 10.5875 0.4125 11 0.916667 11H11.9167C12.4208 11 12.8333 10.5875 12.8333 10.0833V6.875L14.9325 8.97417C15.51 9.55167 16.5 9.13917 16.5 8.32333V2.6675C16.5 1.85167 15.51 1.43917 14.9325 2.01667L12.8333 4.125Z" fill="url(#paint0_linear_8989_303)"/>
                   <defs>
@@ -345,16 +384,16 @@ const AgoraVoiceCalling = ({ callData }) => {
                     </linearGradient>
                   </defs>
                 </svg>
-                Video
+                {isVideo ? "Audio" : "Video"}
               </button>
 
               <span class={styles.dividerLine}></span>
             </div>
 
             <div className={styles.groupBtnsRight}>
-              <div class={styles.callTimerBottom}>Call Ends in <span class={styles.timerRed}>147928:07</span></div>
+              <div class={styles.callTimerBottom}>Call Ends in <span class={styles.timerRed}>{formatTime(callSeconds)}</span></div>
 
-              <button className={styles.chateEnd}>
+              <button className={styles.chateEnd} onClick={endCall}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <g clip-path="url(#clip0_8989_310)">
                     <path d="M7.11979 8.87333C7.79636 9.5505 8.56101 10.1335 9.39313 10.6067L10.2398 9.76C10.4211 9.58076 10.6499 9.45723 10.8992 9.40406C11.1485 9.35089 11.4078 9.3703 11.6465 9.46C12.2513 9.6857 12.8797 9.84225 13.5198 9.92667C13.8402 9.97195 14.1331 10.1322 14.3441 10.3775C14.5551 10.6228 14.6696 10.9365 14.6665 11.26V13.26C14.6672 13.4457 14.6292 13.6294 14.5548 13.7996C14.4804 13.9697 14.3713 14.1224 14.2345 14.2479C14.0977 14.3734 13.9362 14.469 13.7603 14.5285C13.5844 14.588 13.398 14.61 13.2131 14.5933C11.1617 14.3704 9.19113 13.6694 7.45979 12.5467C6.65664 12.0367 5.91214 11.4398 5.23979 10.7667M3.45979 8.54C2.33703 6.80867 1.63603 4.83811 1.41313 2.78667C1.39647 2.60231 1.41838 2.41651 1.47746 2.24108C1.53654 2.06566 1.63151 1.90446 1.7563 1.76775C1.8811 1.63103 2.033 1.5218 2.20232 1.44701C2.37164 1.37222 2.55469 1.33351 2.73979 1.33333H4.73979C5.06333 1.33015 5.37699 1.44472 5.6223 1.65569C5.86761 1.86666 6.02784 2.15963 6.07313 2.48C6.15754 3.12004 6.31409 3.74848 6.53979 4.35333C6.62949 4.59195 6.6489 4.85127 6.59573 5.10059C6.54256 5.3499 6.41903 5.57874 6.23979 5.76L5.39313 6.60667" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
@@ -417,12 +456,12 @@ const AgoraVoiceCalling = ({ callData }) => {
                   <span className={styles.onlineCircle}></span>
                   <img
                     className={styles.avatar}
-                    src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                    alt="avatar"
+                    src={astrologerImage || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+                    alt={callerName}
                   />
                 </div>
-                <h1 className={styles.callerNameTitle}>Dr. Anjali Sharma</h1>
-                <span className={styles.totalTime}>45:00</span>
+                <h1 className={styles.callerNameTitle}>{callerName}</h1>
+                <span className={styles.totalTime}>{formatTime(callSeconds)}</span>
               </div>
 
               <button className={styles.rechargeNowBtn}>Recharge Now
