@@ -50,14 +50,16 @@ function App() {
   };
 
   const roleWiseRouting = createBrowserRouter([
-    ...Object.values(PATH.publicRoutes).map((route) => ({
-      path: route.path,
-      element: (
-        <NavigationSetup>
-          <PublicRoute component={route.element} />
-        </NavigationSetup>
-      ),
-    })),
+    ...Object.values(PATH.publicRoutes)
+      .filter((route) => route.path !== "*")
+      .map((route) => ({
+        path: route.path,
+        element: (
+          <NavigationSetup>
+            <PublicRoute component={route.element} />
+          </NavigationSetup>
+        ),
+      })),
 
     {
       path: "/",
@@ -89,11 +91,13 @@ function App() {
           };
         }),
         { path: "/", element: <Navigate to={PATH.privateRoutes.HOME.path} /> },
-        { path: "*", element: <Navigate to={PATH.privateRoutes.HOME.path} /> },
+        {
+          path: "*",
+          element: <PATH.publicRoutes.NOT_FOUND.element />,
+          handle: { header: true, footer: true },
+        },
       ],
     },
-
-    { path: "*", element: <Navigate to="/" /> },
   ]);
 
   useEffect(() => {

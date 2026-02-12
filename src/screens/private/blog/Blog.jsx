@@ -35,10 +35,6 @@ const Blog = () => {
   const moreTitle = moreSection?.title;
   const moreSubtitle = moreSection?.sub_title || moreSection?.subtitle;
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <>
       {/* Trending Blogs Carousel - at the very top */}
