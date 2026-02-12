@@ -4,6 +4,7 @@ import { FaStar } from "react-icons/fa";
 import { PiBookOpenTextLight } from "react-icons/pi";
 import astrologerImage from "../../../assets/images/top-rated-1.svg";
 import { Link } from "react-router-dom";
+import { DefaultImages } from "../../../utils/appImages";
 
 const TopAstrologerCard = ({ data, onConnect }) => {
   // Handle rating - use rating field or default to 4.5
@@ -27,7 +28,7 @@ const TopAstrologerCard = ({ data, onConnect }) => {
       >
         <div className={styles.imageContainer}>
           <img
-            src={imageUrl}
+            src={imageUrl || DefaultImages.AstrologerDefaultImg}
             alt={`${data?.firstName} ${data?.lastName}`}
             className={styles.profileImage}
             onError={(e) => {

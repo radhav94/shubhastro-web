@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import SectionHeader from "./SectionHeader";
 import styles from "../Home.module.scss";
 import { PATH } from "../../../../utils/routes/Paths";
+import { DefaultImages } from "../../../../utils/appImages";
 
 const AstrologersByCategorySection = ({ data, title, showMore }) => {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ const AstrologersByCategorySection = ({ data, title, showMore }) => {
 
             {category.image_url && (
               <img
-                src={category.image_url}
+                src={category.image_url || DefaultImages.MarriageDefault}
                 alt={category.title}
                 className={styles.lifeAreaIconImg}
               />

@@ -8,6 +8,7 @@ import {
   useGetSingleOldEPoojaQuery,
 } from "../../../../redux/api/astromall/epooja/epoojaApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import { DefaultImages } from "../../../../utils/appImages";
 
 const ProductDetail = () => {
   const navigate = useNavigate();
@@ -108,7 +109,7 @@ const ProductDetail = () => {
         <div className={styles.wrapper}>
           <div className={styles.flex}>
             <div className={styles.left}>
-              <img src={product.image} alt={product.name} />
+              <img src={product.image || DefaultImages.AstromallSubCategoryDefault} alt={product.name} />
             </div>
 
             <div className={styles.right}>

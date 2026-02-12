@@ -4,6 +4,7 @@ import { IoArrowBackOutline, IoArrowForwardOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import { zodiac } from "../zodiac";
 import { PrimaryText } from "../../../../component";
+import { DefaultImages } from "../../../../utils/appImages";
 
 const ZodiacCarousel = () => {
   const [data] = zodiac();
@@ -79,7 +80,7 @@ const ZodiacCarousel = () => {
                 to={`/horoscopes/todays-horoscope/${sign.name.toLowerCase()}`}
                 className={styles.imgCircle}
               >
-                <img src={sign.img} alt={sign.name} />
+                <img src={sign.img || DefaultImages?.AriesDefault} alt={sign.name} />
               </Link>
               <h3 className={styles.name}>{sign.name.toUpperCase()}</h3>
               <p className={styles.range}>{sign.range.toUpperCase()}</p>

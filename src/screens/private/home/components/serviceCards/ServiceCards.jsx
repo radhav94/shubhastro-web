@@ -5,7 +5,7 @@ import { IoArrowBackOutline, IoArrowForwardOutline } from "react-icons/io5";
 import { PrimaryText, Title } from "../../../../../component";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../../../utils/routes/Paths";
-import { AppIcons } from "../../../../../utils/appImages";
+import { AppIcons ,DefaultImages} from "../../../../../utils/appImages";
 import { useGetHomeDetailsQuery } from "../../../../../services/appServices/homeServices";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
 
@@ -15,6 +15,8 @@ const iconMap = {
   numerology: AppIcons.Star,
   tarot: AppIcons.Tarot,
 };
+
+
 
 const ServiceCards = () => {
   //  HOOK MUST RUN ALWAYS (Fixes your error)
@@ -100,7 +102,7 @@ const ServiceCards = () => {
                 onClick={() => handleClick(service)}
               >
                 <img
-                  src={service.icon || iconMap["numerology"]}
+                  src={service.icon || iconMap["numerology"] || DefaultImages?.AriesDefault}
                   alt={service.title}
                   className={styles.icon}
                 />

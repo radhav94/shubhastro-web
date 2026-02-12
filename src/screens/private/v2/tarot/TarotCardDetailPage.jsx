@@ -8,6 +8,7 @@ import {
 } from '../../../../redux/api/tarot/tarotApi'
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader'
 import styles from './TarotCardDetailPage.module.css'
+import { DefaultImages } from '../../../../utils/appImages'
 
 const TarotCardDetailPage = () => {
   const navigate = useNavigate()
@@ -158,7 +159,7 @@ const TarotCardDetailPage = () => {
         <div className={styles.cardDisplay}>
           {displayData.card_image ? (
             <img 
-              src={displayData.card_image?.classic || displayData.card_image?.artwork || displayData.card_image} 
+              src={displayData.card_image?.classic || displayData.card_image?.artwork || displayData.card_image || DefaultImages.TarotCardDefault} 
               alt={displayData.card_name || displayData.name || 'Tarot Card'}
               className={styles.tarotCard}
             />

@@ -1,5 +1,6 @@
 import React from "react";
 import Styles from "./BlogCard.module.scss";
+import { DefaultImages } from "../../../utils/appImages";
 
 const BlogCard = ({ image, title, author, date, authorIcon }) => {
   // Function to parse DD/MM/YYYY format to a valid Date object
@@ -35,7 +36,7 @@ const BlogCard = ({ image, title, author, date, authorIcon }) => {
   return (
     <article className={Styles.blogCard}>
       <div className={Styles.imageContainer}>
-        <img src={image} alt={title} className={Styles.mainImage} />
+        <img src={image || DefaultImages.BlogsDefault} alt={title} className={Styles.mainImage} />
       </div>
 
       <div className={Styles.contentContainer}>

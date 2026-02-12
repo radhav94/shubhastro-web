@@ -3,6 +3,7 @@ import { FaStar } from "react-icons/fa";
 import { PiBookOpenTextLight } from "react-icons/pi";
 import astrologerImage from "../../../assets/images/top-rated-1.svg";
 import { useNavigate } from "react-router-dom";
+import { DefaultImages } from "../../../utils/appImages";
 
 const ChatAstrologerCard = ({ data, onConnect }) => {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ const ChatAstrologerCard = ({ data, onConnect }) => {
     <div className={styles.card}>
       <div className={styles.imageSection}>
         <img
-          src={imageUrl}
+          src={imageUrl || DefaultImages.AstrologerDefaultImg}
           alt={`${data?.firstName} ${data?.lastName}`}
           onClick={() =>
             navigate(`/astrologer/${data?.astrologerId || data?._id}`)

@@ -11,6 +11,8 @@ const PaymentScreen = () => {
   const gst = +(amount * 0.18).toFixed(2);
   const total = amount + gst;
 
+  console.log(astrologer)
+
   return (
     <div className={styles.container}>
       <h2 className={styles.heading}>Payment Information</h2>

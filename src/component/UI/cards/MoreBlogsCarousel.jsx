@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { PATH } from "../../../utils/routes/Paths";
 import styles from "./MoreBlogsCarousel.module.scss";
+import { DefaultImages } from "../../../utils/appImages";
 
 const MoreBlogsCarousel = ({ blogs = [], currentBlogId, title, subtitle }) => {
   const navigate = useNavigate();
@@ -102,7 +103,7 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId, title, subtitle }) => {
               >
                 <div className={styles.imageWrapper}>
                   <img
-                    src={blog.imageUrl || blog.img}
+                    src={blog.imageUrl || DefaultImages.BlogsDefault}
                     alt={blog.title}
                     className={styles.blogImage}
                     onError={(e) => {

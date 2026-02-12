@@ -25,7 +25,7 @@ const AstrologerCard = ({
         <div className={!isLayoutClassic ? styles.avatarWrapper1 : styles.avatarWrapper}>
           <Link to={`/astrologer/${data?.astrologerId || data?._id}`}>        
             <img
-              src={data?.imageUrl || data?.icon}
+              src={data?.imageUrl || DefaultImages?.AstrologerDefaultImg}
               alt={data?.firstName}
               className={styles.avatar}
             />
