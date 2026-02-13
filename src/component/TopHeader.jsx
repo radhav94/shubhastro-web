@@ -233,14 +233,14 @@ const TopHeader = () => {
           >
             AI WOW
           </NavLink>
-          <NavLink
+          {/* <NavLink
             to="/blog"
             className={({ isActive }) =>
               `${styles.headerNavLink} ${isActive ? styles.active : ""}`
             }
           >
             Blogs
-          </NavLink>
+          </NavLink> */}
           <NavLink
             to="/explore"
             className={({ isActive }) =>
@@ -265,30 +265,30 @@ const TopHeader = () => {
           >
             Kundli
           </NavLink>
-          <NavLink
+          {/* <NavLink
             to="/matchmaking"
             className={({ isActive }) =>
               `${styles.headerNavLink} ${isActive ? styles.active : ""}`
             }
           >
             Match Making
-          </NavLink>
-          <NavLink
+          </NavLink> */}
+          {/* <NavLink
             to="/numerology"
             className={({ isActive }) =>
               `${styles.headerNavLink} ${isActive ? styles.active : ""}`
             }
           >
             Numerology
-          </NavLink>
-          <NavLink
+          </NavLink> */}
+          {/* <NavLink
             to="/horoscopes/daily-horoscope"
             className={({ isActive }) =>
               `${styles.headerNavLink} ${isActive ? styles.active : ""}`
             }
           >
             Horoscopes
-          </NavLink>
+          </NavLink> */}
           <NavLink
             to="/live-landing"
             className={({ isActive }) =>
@@ -363,6 +363,98 @@ const TopHeader = () => {
           </div>
         </div>
       </header>
+
+
+      <nav className={styles.headerNavigation}>
+          {/* <NavLink
+            to="/tarot"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Tarot
+          </NavLink> */}
+          {/* <NavLink
+            to="/chat-with-astrologers"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Astrologers
+          </NavLink> */}
+          {/* <NavLink
+            to="/aiwow"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            AI WOW
+          </NavLink> */}
+          <NavLink
+            to="/blog"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Blogs
+          </NavLink>
+          {/* <NavLink
+            to="/explore"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Explore
+          </NavLink> */}
+          {/* <NavLink
+            to="/shop"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Astromall
+          </NavLink> */}
+          {/* <NavLink
+            to={PATH.privateRoutes.KUNDLI.path}
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Kundli
+          </NavLink> */}
+          <NavLink
+            to="/matchmaking"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Match Making
+          </NavLink>
+          <NavLink
+            to="/numerology"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Numerology
+          </NavLink>
+          <NavLink
+            to="/horoscopes/daily-horoscope"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Horoscopes
+          </NavLink>
+          {/* <NavLink
+            to="/live-landing"
+            className={({ isActive }) =>
+              `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+            }
+          >
+            Live
+          </NavLink> */}
+        </nav>
 
       {/* 📱 Mobile Drawer */}
       {isDrawerOpen && (
