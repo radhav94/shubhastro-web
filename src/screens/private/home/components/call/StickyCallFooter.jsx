@@ -42,7 +42,10 @@ const StickyCallFooter = () => {
   // Hide only on detail page
   if (onTalkDetailPage) return null;
 
-  if (!waitingList && !callApproval && !activeCall && !missedApproval)
+  // Don't show if there's an active call (call UI is already visible)
+  if (activeCall) return null;
+
+  if (!waitingList && !callApproval && !missedApproval)
     return null;
   
   return (

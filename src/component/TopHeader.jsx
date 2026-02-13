@@ -8,13 +8,22 @@ import ShubhTalkLogo from "../assets/images/ShubhAstrologo.svg";
 import ShubhTalkLogoMobile from "../assets/images/mobile-shubh-astro-logo.svg";
 import { useWalletBalance } from "../screens/private/wallet/useWalletBalance";
 import { getToken } from "../utils/token";
-
+import { useGetAllKundlisQuery } from "../services/appServices/kundliServicesNew"; 
 const TopHeader = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState('en');
   const token = getToken();
+
+  const userId = localStorage.getItem("shubhtalk_customer_id");   
+
+  // Fetch kundli profiles for name fallback
+  const { data: kundliData } = useGetAllKundlisQuery(userId, {
+    skip: !userId || !token,
+  });
+  const savedKundlis = kundliData?.data || [];      
+
 
   const {
     balance,
@@ -121,11 +130,22 @@ const TopHeader = () => {
     return amount % 1 === 0 ? `₹${amount}` : `₹${amount.toFixed(2)}`;
   };
 
-  const displayName = user
-    ? user.firstName
-      ? user.firstName
-      : user.phoneNumber || "Guest"
-    : "Guest";
+  const displayName = (() => {
+    // First priority: User's registered firstName
+    if (user?.firstName) return user.firstName;
+    
+    // Second priority: First name from first Kundli
+    if (savedKundlis.length > 0 && savedKundlis[0]?.name) {
+      return savedKundlis[0].name.split(" ")[0]; // First name only
+    }
+    
+    // Third priority: Phone number
+    if (user?.phoneNumber) return user.phoneNumber;
+    
+    // Last resort
+    return "Guest";
+  })();
+        
 
   // Handle language change with Google Translate
   const handleLanguageChange = (targetLang) => {
