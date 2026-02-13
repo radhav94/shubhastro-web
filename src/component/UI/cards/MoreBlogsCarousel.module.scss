@@ -456,30 +456,27 @@
 
 .dotsContainer {
   display: flex;
-  justify-content: center;
   gap: 10px;
-  margin-top: 32px;
-  padding-bottom: 20px;
+  margin-bottom: 16px;
+  width: fit-content;
 
   @media (max-width: 768px) {
-    margin-top: 24px;
     gap: 8px;
-    padding-bottom: 16px;
   }
 }
 
 .dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: rgba(255, 107, 53, 0.3);
-  border: none;
-  cursor: pointer;
+  background: #d4c4b0;
+  position: relative;
   transition: all 0.3s ease;
-  padding: 0;
+  cursor: pointer;
+  box-shadow: inset 6px 0 0 0 #ffffff;
 
   &:hover {
-    background: rgba(255, 107, 53, 0.5);
+    background: rgba(255, 255, 255, 1);
     transform: scale(1.1);
   }
 
@@ -490,12 +487,14 @@
 }
 
 .activeDot {
-  background: #FF6B35;
+  background: #fff;
+  box-shadow: inset 6px 0 0 0 #d43400;
+  transform: scale(1.1);
   width: 14px;
   height: 14px;
 
   @media (max-width: 768px) {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
   }
 }

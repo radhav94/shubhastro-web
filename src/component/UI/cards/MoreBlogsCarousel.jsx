@@ -146,6 +146,21 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId, title, subtitle }) => {
                     }}
                   />
                   <div className={styles.overlay}>
+                    
+                    {/* Navigation Dots */}
+                    <div className={styles.dotsContainer}>
+                      {filteredBlogs.map((_, index) => (
+                        <button
+                          key={index}
+                          className={`${styles.dot} ${
+                            index === currentIndex ? styles.activeDot : ""
+                          }`}
+                          onClick={() => scrollToIndex(index)}
+                          aria-label={`Go to blog ${index + 1}`}
+                        />
+                      ))}
+                    </div>    
+
                     <h3 className={styles.blogTitle}>{blog.title}</h3>
                     {(blog.author || blog.authorIcon || subtitle) && (
                       <div className={styles.authorInfo}>
@@ -164,20 +179,6 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId, title, subtitle }) => {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Navigation Dots */}
-          <div className={styles.dotsContainer}>
-            {filteredBlogs.map((_, index) => (
-              <button
-                key={index}
-                className={`${styles.dot} ${
-                  index === currentIndex ? styles.activeDot : ""
-                }`}
-                onClick={() => scrollToIndex(index)}
-                aria-label={`Go to blog ${index + 1}`}
-              />
             ))}
           </div>
         </div>

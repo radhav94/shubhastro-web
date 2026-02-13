@@ -1,6 +1,8 @@
 /* PROFILE HEADER */
 .profileHeader {
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -8,8 +10,17 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(10px);
   max-width: 100%;
+  padding: 20px 40px;
+  @media (width <= 1180px) {
+    padding: 0px 16px;
+  }
 }
-
+.profileInnerWrap{
+  width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+}
 /* MOBILE PROFILE BAR */
 .mobileProfileBar {
   display: flex;
@@ -126,16 +137,6 @@
 @media (min-width: 769px) {
   .mobileProfileBar {
     display: none;
-  }
-
-  .profileHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 20px 40px;
-    background: #fff;
   }
 
   .profileSelector {

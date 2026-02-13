@@ -1,11 +1,11 @@
 .trendingSection {
-  max-width: 1600px;
-  padding: 0 48px;
-  margin: 32px auto 40px;
+  // max-width: 1600px;
+  // padding: 0 48px;
+  margin: 0px auto 40px;
 
   @media (max-width: 768px) {
-    margin: 32px auto 40px;
-    padding: 0 16px;
+    margin: 0px auto 40px;
+    // padding: 0 16px;
   }
 }
 
@@ -16,22 +16,47 @@
     margin-bottom: 24px;
   }
 }
-
-.title {
-  font-size: 32px;
-  text-align: left;
-  color: #030303;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-  line-height: 1.2;
-  font-weight: 600;
-  line-height: 20px; /* 125% */
-  // text-transform: uppercase;
-
-  @media (max-width: 768px) {
-    font-size: 25px;
-    margin-bottom: 6px;
+.btnShare{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  button:first-child,button:last-child{
+    display: flex;
+    height: 40px;
+    padding: 0 25px;
+    justify-content: center;
+    align-items: center;
+    gap: var(--Spacing-1, 4px);
+    border-radius: 50px;
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+    @media (width <= 767px) {
+      padding: 0 16px;
+    }
   }
+  button:last-child{
+    width: 40px;
+    padding: 0;
+    background: rgba(254, 254, 254, 0.20);
+  }
+}
+.title {
+  display: flex;
+  padding: 2px 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 100px;
+  background: #FFF5EC;
+  color: #E56329;
+  font-size: 14px;
+  font-weight: 500;
+  width: fit-content;
+  margin-bottom: 5px;
+
+  // @media (max-width: 768px) {
+  //   font-size: 25px;
+  //   margin-bottom: 6px;
+  // }
 }
 
 .subtitle {
@@ -77,7 +102,7 @@
   flex: 0 0 calc(100% - 0px);
   width: calc(100% - 0px);
   background: transparent;
-  border-radius: 24px;
+  // border-radius: 24px;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.3s ease;
@@ -86,27 +111,23 @@
   &:hover {
     transform: scale(1.02);
   }
-
-  @media (max-width: 768px) {
-    border-radius: 16px;
-  }
 }
 
 .imageWrapper {
   position: relative;
   width: 100%;
-  height: 400px;
+  height: 500px;
   overflow: hidden;
-  border-radius: 24px;
+  // border-radius: 24px;
 
-  @media (max-width: 768px) {
-    height: 300px;
-    border-radius: 12px;
+  @media (max-width: 1180px) {
+    height: 50vh;
+    // border-radius: 12px;
   }
 
-  @media (max-width: 767px) {
-    height: auto;
-  }
+  // @media (max-width: 767px) {
+  //   height: 400px;
+  // }
 }
 
 .blogImage {
@@ -126,41 +147,38 @@
   left: 0;
   right: 0;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%);
-  padding: 40px 32px 32px;
+  padding: 40px 48px 48px;
   color: white;
 
   @media (max-width: 768px) {
-    padding: 32px 24px 24px;
-  }
-
-  @media (max-width: 480px) {
-    padding: 24px 16px 16px;
+    padding: 32px 16px 16px;
   }
 }
 
 .blogTitle {
+  color: #FEFEFE;
   font-size: 32px;
-  font-weight: 500;
-  color: white;
-  margin-bottom: 0px;
-  line-height: 1.3;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  font-weight: 600;
+  max-width: 50%;
 
   @media (max-width: 768px) {
-    font-size: 24px;
-    margin-bottom: 12px;
+    font-size: 22px;
+    max-width: 100%;
+    // margin-bottom: 12px;
   }
 
   @media (max-width: 480px) {
     font-size: 20px;
-    margin-bottom: 10px;
+    // margin-bottom: 10px;
   }
 }
 
 .authorInfo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  color: #FEFEFE;
+  font-size: 16px;
+  font-weight: 400;
+  margin-bottom: 20px;
+  width: fit-content;
 }
 
 .authorIcon {
@@ -186,7 +204,7 @@
   font-size: 16px;
   color: white;
   font-weight: 400;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  // text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 
   @media (max-width: 768px) {
     font-size: 15px;
@@ -199,28 +217,27 @@
 
 .dotsContainer {
   display: flex;
-  justify-content: center;
   gap: 10px;
-  margin-top: 24px;
+  margin-bottom: 16px;
+  width: fit-content;
 
   @media (max-width: 768px) {
-    margin-top: 20px;
     gap: 8px;
   }
 }
 
 .dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: rgba(255, 107, 53, 0.3);
-  border: none;
-  cursor: pointer;
+  background: #d4c4b0;
+  position: relative;
   transition: all 0.3s ease;
-  padding: 0;
+  cursor: pointer;
+  box-shadow: inset 6px 0 0 0 #ffffff;
 
   &:hover {
-    background: rgba(255, 107, 53, 0.5);
+    background: rgba(255, 255, 255, 1);
     transform: scale(1.1);
   }
 
@@ -231,12 +248,14 @@
 }
 
 .activeDot {
-  background: #FF6B35;
+  background: #fff;
+  box-shadow: inset 6px 0 0 0 #d43400;
+  transform: scale(1.1);
   width: 14px;
   height: 14px;
 
   @media (max-width: 768px) {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
   }
 }
