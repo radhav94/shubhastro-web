@@ -18,14 +18,14 @@ $mobile-screen-width: 500px;
     display: flex;
     flex-direction: column;
     flex: 1;
-    margin-top: -10px;
+    // margin-top: -10px;
     // margin-top: 1rem;
-    @media screen and (max-width: 1180px) {
-      margin-top: -24px;
-    }
-    @media screen and (max-width: 767px) {
-      margin-top: -1px;
-    }
+    // @media screen and (max-width: 1180px) {
+    //   margin-top: -24px;
+    // }
+    // @media screen and (max-width: 767px) {
+    //   margin-top: -1px;
+    // }
   }
 
   .topBarContainer {
@@ -54,7 +54,7 @@ $mobile-screen-width: 500px;
     top: 0;
     width: 100%;
     z-index: 2001;
-    background: white;
+    background: #FFF5EC;
   }
 
   .fixedTopBar {
@@ -74,9 +74,12 @@ $mobile-screen-width: 500px;
   .topGap {
     height: 100px; // TopHeader (88px) + TopBar (95px)
 
-    @media screen and (max-width: 767px) {
-      height: 70px; // TopHeader (76px) + TopBar (68px)
+    @media screen and (max-width: 1180px) {
+      height: 53px; // TopHeader (76px) + TopBar (68px)
     }
+    // @media screen and (max-width: 767px) {
+    //   height: 70px; // TopHeader (76px) + TopBar (68px)
+    // }
   }
 
   .footerWrapper {

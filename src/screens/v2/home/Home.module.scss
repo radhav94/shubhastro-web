@@ -31,7 +31,7 @@
     sans-serif;
 
   @media screen and (width <= 767px) {
-    padding-top: 0px;
+    // padding-top: 0px;
     padding-bottom: 0px;
   }
 }
@@ -315,8 +315,13 @@
 
 /* Main Content */
 .mainContent {
-  padding: 16px 16px 0;
-}
+    padding: 0 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+    @media (width <= 767px) {
+      padding: 0 16px;
+    }
+  }
 
 /* Today's Horoscope Section */
 .horoscopeSection {
@@ -2250,11 +2255,11 @@
     height: 46px;
   }
 
-  .mainContent {
-    padding: 0 32px;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
+  // .mainContent {
+  //   padding: 0 32px;
+  //   max-width: 1400px;
+  //   margin: 0 auto;
+  // }
 
   /* Horoscope Card - Tablet */
   .horoscopeSection {
@@ -2475,10 +2480,10 @@
     padding: 10px 48px;
   }
 
-  .mainContent {
-    padding: 0 48px;
-    max-width: 1600px;
-  }
+  // .mainContent {
+  //   padding: 0 48px;
+  //   max-width: 1600px;
+  // }
 
   /* Horoscope Card - Desktop */
   // .horoscopeCard {
@@ -2597,10 +2602,10 @@
     padding: 10px 64px;
   }
 
-  .mainContent {
-    padding: 0 64px;
-    max-width: 1800px;
-  }
+  // .mainContent {
+  //   padding: 0 64px;
+  //   max-width: 1800px;
+  // }
 
   /* Horoscope Card - Large Desktop */
   // .horoscopeCard {
@@ -2652,10 +2657,10 @@
     padding: 10px 80px;
   }
 
-  .mainContent {
-    padding: 0 80px;
-    max-width: 2000px;
-  }
+  // .mainContent {
+  //   padding: 0 80px;
+  //   max-width: 2000px;
+  // }
 
   /* Horoscope Card - XL Desktop */
   // .horoscopeCard {
