@@ -4,7 +4,6 @@ import { voiceSocket } from "../../../../services/voiceSocketServices";
 import { useChat } from "../../../../context/ChatContext";
 import { useCall } from "../../../../context/CallContext";
 import { Toast } from "../../../../component";
-import { useCreateChatRoomMutation } from "../../../../redux/api/chatApi";
 
 export const useAstrologerConnection = (externalAstroRef = null) => {
   const navigate = useNavigate();
@@ -33,7 +32,6 @@ export const useAstrologerConnection = (externalAstroRef = null) => {
     setActiveCall,
   } = useCall();
 
-  const [createChatRoom] = useCreateChatRoomMutation();
 
   // Restore waiting state from localStorage on mount
   useEffect(() => {
@@ -160,7 +158,6 @@ export const useAstrologerConnection = (externalAstroRef = null) => {
       type,
       remainingTime,
       astrologerId,
-      chatRoomId: socketChatRoomId, // Check if socket already provides chatRoomId
       ...rest
     }) => {
       resetCallFlow();
@@ -176,7 +173,6 @@ export const useAstrologerConnection = (externalAstroRef = null) => {
         type,
         remainingTime,
         astrologerId,
-        socketChatRoomId,
         ...rest
       });
       console.log("External Ref:", externalAstroRef?.current);
@@ -198,39 +194,9 @@ export const useAstrologerConnection = (externalAstroRef = null) => {
           return;
         }
 
-        let chatRoomId = socketChatRoomId; // Use from socket if provided
-
-        // Only create chat room if not provided by socket
-        if (!chatRoomId) {
-          console.log("Creating chat room with:", {
-            userId: userIdLocal,
-            astrologerId: astroId,
-          });
-
-          const res = await createChatRoom({
-            userId: userIdLocal,
-            astrologerId: astroId,
-          });
-
-          console.log("Chat room creation response:", res);
-
-          // Check if the response has an error
-          if (res?.error) {
-            console.error("API Error:", res.error);
-            // Don't throw, just log and continue - maybe the call can work without it
-            console.warn("Continuing without chat room creation");
-            chatRoomId = null;
-          } else {
-            chatRoomId = res?.data?.data;
-            console.log("✅ Chat room created:", chatRoomId);
-          }
-        } else {
-          console.log("✅ Using chat room from socket:", chatRoomId);
-        }
 
         setActiveCall({
           roomId,
-          chatRoomId,
           agoraToken: token,
           callerName: astro?.firstName || "",
           isUserSide: true,
@@ -298,7 +264,6 @@ export const useAstrologerConnection = (externalAstroRef = null) => {
     setActiveChatRoomId,
     setActiveCallRoomId,
     localSelectedProfile,
-    createChatRoom,
     setActiveChat,
     setChatSeconds,
     setActiveCall,

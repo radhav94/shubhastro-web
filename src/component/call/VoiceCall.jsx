@@ -259,7 +259,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       state: {
         userId: activeCall.userId,
         astrologerId: activeCall.astrologerId,
-        roomId: activeCall.chatRoomId || activeCall.roomId,
+        roomId: activeCall.roomId,
         fullName: callerName,
         isUserSide: activeCall.isUserSide,
         kundliId: activeCall.kundliId,
@@ -464,7 +464,14 @@ const AgoraVoiceCalling = ({ callData }) => {
                 <span className={styles.totalTime}>{formatTime(callSeconds)}</span>
               </div>
 
-              <button className={styles.rechargeNowBtn}>Recharge Now
+              <button 
+                className={styles.rechargeNowBtn}
+                onClick={() => {
+                  setIsMinimized(true);
+                  navigate(PATH.privateRoutes.RECHARGE.path);
+                }}
+              >
+                Recharge Now
                 <svg xmlns="http://www.w3.org/2000/svg" width="8" height="15" viewBox="0 0 8 15" fill="none">
                   <path d="M0.75 13.95L6.18333 8.51667C6.825 7.875 6.825 6.825 6.18333 6.18333L0.75 0.75" stroke="#FEFEFE" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
