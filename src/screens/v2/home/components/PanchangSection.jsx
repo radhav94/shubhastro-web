@@ -32,8 +32,8 @@ const PanchangSection = () => {
     date.setDate(date.getDate() + daysOffset);
 
     return {
-      day: date.getDate(),
-      month: date.getMonth() + 1,
+      day: pad(date.getDate()),
+      month: pad(date.getMonth() + 1),
       year: date.getFullYear(),
       hour: pad(date.getHours()),
       min: pad(date.getMinutes()),
