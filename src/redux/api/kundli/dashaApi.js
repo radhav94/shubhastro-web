@@ -117,6 +117,19 @@ export const dashaApi = vedicApi.injectEndpoints({
         },
       }),
     }),
+    getCurrentMahadashaFull: builder.query({
+      query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
+        url: "dashas/current-mahadasha-full",
+        params: {
+          dob,
+          tob,
+          lat,
+          lon,
+          tz,
+          lang,
+        },
+      }),
+    }),
   }),
 });
 
@@ -129,4 +142,5 @@ export const {
   useGetSadesatiQuery,
   useGetSadeSatiTableQuery,
   useGetMatchMakingQuery,
+  useGetCurrentMahadashaFullQuery,
 } = dashaApi;
