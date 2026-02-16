@@ -13,6 +13,7 @@ import BlogsSection from "../components/BlogsSection";
 import NewsSection from "../components/NewsSection";
 import AstrologersByCategorySection from "../components/AstrologersByCategorySection";
 import ConnectAgainSection from "../components/ConnectAgainSection";
+import VimshottariTimelineSection from "../components/VimshottariTimelineSection";
 
 /**
  * Maps display_type to corresponding React component
@@ -141,6 +142,11 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
           title={sectionData.display_title}
           showMore={sectionData.show_more}
         />
+      );
+
+    case "vimshottari-timeline":
+      return(
+        <VimshottariTimelineSection/>
       );
 
     default:
