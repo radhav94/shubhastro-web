@@ -735,18 +735,18 @@ export const PATH = {
       header: false,
       footer: false,
     },
-    KARMIC_DEBT_TRACKER: {
-      path: "/aiwow/karmic-debt-tracker",
-      element: KarmicDebtTracker,
-      header: false,
-      footer: false,
-    },
-    ASTRO_VITALS: {
-      path: "/aiwow/astro-vitals",
-      element: AstroVitals,
-      header: false,
-      footer: false,
-    },
+    // KARMIC_DEBT_TRACKER: {
+    //   path: "/aiwow/karmic-debt-tracker",
+    //   element: KarmicDebtTracker,
+    //   header: false,
+    //   footer: false,
+    // },
+    // ASTRO_VITALS: {
+    //   path: "/aiwow/astro-vitals",
+    //   element: AstroVitals,
+    //   header: false,
+    //   footer: false,
+    // },
     AURA_LANDING: {
       path: "/aiwow/aura",
       element: AuraLanding,
