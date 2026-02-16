@@ -100,13 +100,8 @@ const VimshottariTimelineSection = () => {
   const transformDashaData = (response) => {
     if (!response) return null;
 
-    console.log("🔮 Transforming Dasha Data:", response);
-
     const allDashaCards = [];
-    // Only take first 4 dasha levels
-    const dashaLevels = (response.order_names || ["mahadasha", "antardasha", "paryantardasha", "Shookshamadasha"]).slice(0, 4);
-
-    console.log("🔮 Dasha Levels (First 4):", dashaLevels);
+    const dashaLevels = response.order_names || ["mahadasha", "antardasha", "paryantardasha", "Shookshamadasha", "Pranadasha"];
 
     dashaLevels.forEach((levelName) => {
       const periods = response[levelName] || [];
@@ -127,15 +122,6 @@ const VimshottariTimelineSection = () => {
           const segmentEnd = new Date(nextPeriod.start).getTime();
           const now = new Date().getTime();
           const segmentProgress = ((now - segmentStart) / (segmentEnd - segmentStart)) * 100;
-
-          console.log(`📊 ${levelName} Segment Progress Calculation:`, {
-            period: period.name,
-            segmentStart: new Date(segmentStart).toISOString(),
-            segmentEnd: new Date(segmentEnd).toISOString(),
-            now: new Date(now).toISOString(),
-            rawProgress: segmentProgress,
-            clampedProgress: Math.min(Math.max(segmentProgress, 0), 100)
-          });
 
           allDashaCards.push({
             id: `${levelName}-${currentIdx}`,
@@ -159,7 +145,6 @@ const VimshottariTimelineSection = () => {
       }
     });
 
-    console.log("🔮 Transformed Cards (Current periods only):", allDashaCards);
     return allDashaCards;
   };
 
