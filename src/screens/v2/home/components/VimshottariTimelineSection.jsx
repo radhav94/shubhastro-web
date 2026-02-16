@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useSelector } from "react-redux";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useGetCurrentMahadashaFullQuery } from "../../../../redux/api/kundli/dashaApi";
 import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
@@ -7,33 +8,33 @@ import styles from "../Home.module.scss";
 const VimshottariTimelineSection = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const cardsContainerRef = useRef(null);
+  
+  // Check if user is logged in
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
 
   // Get user's kundli profiles
-  const { data: profilesData, isLoading: profilesLoading } = useGetAllKundlisQuery();
+  const { data: profilesData, isLoading: profilesLoading } = useGetAllKundlisQuery(undefined, {
+    skip: !isLoggedIn,
+  });
   const profiles = profilesData?.data || [];
 
-  // Get the first profile (default) or use hardcoded values
+  // Get the first profile (default)
   const defaultProfile = profiles.length > 0 ? profiles[0] : null;
 
-  // Prepare API parameters from default profile
+  // Only prepare API parameters if we have a valid profile
   const apiParams = defaultProfile ? {
     dob: `${String(defaultProfile.day).padStart(2, '0')}/${String(defaultProfile.month).padStart(2, '0')}/${defaultProfile.year}`,
     tob: `${String(defaultProfile.hour).padStart(2, '0')}:${String(defaultProfile.min).padStart(2, '0')}`,
-    lat: defaultProfile.lat || 19.21,
-    lon: defaultProfile.lon || 72.8307,
-    tz: defaultProfile.tzone || 5.5,
+    lat: defaultProfile.lat,
+    lon: defaultProfile.lon,
+    tz: defaultProfile.tzone,
     lang: "en",
-  } : {
-    dob: "04/10/1993",
-    tob: "01:50",
-    lat: 19.21,
-    lon: 72.8307,
-    tz: 5.5,
-    lang: "en",
-  };
+  } : null;
 
-  // Fetch dasha data from API
-  const { data: apiData, isLoading: dashaLoading, isError } = useGetCurrentMahadashaFullQuery(apiParams);
+  // Fetch dasha data from API only if we have valid params
+  const { data: apiData, isLoading: dashaLoading, isError } = useGetCurrentMahadashaFullQuery(apiParams, {
+    skip: !apiParams || !isLoggedIn,
+  });
 
   // Log API response for debugging
   console.log("🔮 Dasha API Response:", apiData);
@@ -181,6 +182,16 @@ const VimshottariTimelineSection = () => {
   };
 
   const isLoading = profilesLoading || dashaLoading;
+
+  // Don't render the section if user is not logged in
+  if (!isLoggedIn) {
+    return null;
+  }
+
+  // Don't render if user has no kundli profile
+  if (!defaultProfile) {
+    return null;
+  }
 
   if (isLoading) {
     return (
