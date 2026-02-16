@@ -22,6 +22,23 @@ import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
  * 
  * Each row click navigates to next level with right-to-left swipe animation
  */
+
+// Helper function to convert planet names to short codes
+const getPlanetShortCode = (planetName) => {
+  const planetCodes = {
+    'Sun': 'Su',
+    'Moon': 'Mo',
+    'Mars': 'Ma',
+    'Mercury': 'Me',
+    'Jupiter': 'Ju',
+    'Venus': 'Ve',
+    'Saturn': 'Sa',
+    'Rahu': 'Ra',
+    'Ketu': 'Ke'
+  };
+  return planetCodes[planetName] || planetName;
+};
+
 const AdditionalPlanetaryInfo = () => {
   const payload = useSelector((state) => state?.form?.kundliPayload);
   const params = payload ? buildVedicParam(payload) : null;
@@ -154,13 +171,16 @@ const AdditionalPlanetaryInfo = () => {
         console.log('Found Antardasha at index:', selectedIndex);
         
         return planetPairs.map((pair, index) => {
-          const subPlanet = pair.split('/')[1]; // Get second planet from "Mercury/Mercury"
+          // pair is like "Mercury/Mercury"
+          const [mainPlanet, subPlanet] = pair.split('/');
+          const displayName = `${getPlanetShortCode(mainPlanet)}-${getPlanetShortCode(subPlanet)}`;
+          
           // First row gets parent Mahadasha start date, rest get previous row's end date
           const rowStartDate = index === 0 ? (parentEndDate || "Birth") : endDates[index - 1];
           const rowEndDate = endDates[index];
           
           return {
-            planet: subPlanet,
+            planet: displayName, // Display as "Me-Me"
             startDate: rowStartDate,
             endDate: rowEndDate,
             index: index, // Store index for later use
@@ -204,12 +224,15 @@ const AdditionalPlanetaryInfo = () => {
         console.log('Found Pratyantardasha at indices:', mahaIndex, antarIndex);
         
         return selectedPratyantardashaArray.map((triple, index) => {
-          const pratyantarPlanet = triple.split('/')[2]; // Get third planet from "Sa/Me/Ve"
+          // triple is like "Sa/Me/Ve"
+          const [mahaPlanet, antarPlanet, pratyantarPlanet] = triple.split('/');
+          const displayName = `${getPlanetShortCode(mahaPlanet)}-${getPlanetShortCode(antarPlanet)}-${getPlanetShortCode(pratyantarPlanet)}`;
+          
           const rowStartDate = index === 0 ? (parentEndDate || "Birth") : selectedPratyantardashaOrderArray[index - 1];
           const rowEndDate = selectedPratyantardashaOrderArray[index];
           
           return {
-            planet: pratyantarPlanet,
+            planet: displayName, // Display as "Sa-Me-Ve"
             startDate: rowStartDate,
             endDate: rowEndDate,
             index: index, // Store index for later use
