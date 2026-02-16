@@ -7,7 +7,7 @@ const FeatureCard = ({ badge, badgeType, title, description, icon, onStartNow, l
     <div className={styles.card} onClick={onStartNow}>
       <div className={styles.iconWrapper}>
         <div className={styles.iconBackground}>
-          <img src={getAIWowIcon(icon)} alt={title} className={styles.icon} />
+          <img src={icon} alt={title} className={styles.icon} />
         </div>
       </div>
       
