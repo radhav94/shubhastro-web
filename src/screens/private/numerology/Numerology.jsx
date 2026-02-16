@@ -388,7 +388,7 @@ const NumerologyWeb = () => {
       ) : null}
 
       {/* TALK TO EXPERT BUTTON (Full Width) */}
-      <section className={styles.fullWidthExpertSection}>
+      {/* <section className={styles.fullWidthExpertSection}>
         <Link
           to={PATH.privateRoutes.Chat_With_ASTROLOGER.path}
           state={{
@@ -399,35 +399,35 @@ const NumerologyWeb = () => {
             Talk to a Numerology Expert
           </button>
         </Link>
-      </section>
+      </section> */}
 
       {/* WHAT THIS MEANS FOR YOU */}
-      <section className={styles.meansSection}>
+      {/* <section className={styles.meansSection}>
         <h2 className={styles.meansTitle}>What this means for you</h2>
 
         <div className={styles.meansCarousel}>
           <div className={styles.meansCard}>
-            <div className={styles.meansIcon}>{/* Icon placeholder */}</div>
+            <div className={styles.meansIcon}> */}{/* Icon placeholder */}{/* </div>
             <p className={styles.meansText}>
               Strong potential for leadership-led growth
             </p>
           </div>
 
           <div className={styles.meansCard}>
-            <div className={styles.meansIcon}>{/* Icon placeholder */}</div>
+            <div className={styles.meansIcon}> */}{/* Icon placeholder */}{/* </div>
             <p className={styles.meansText}>
               Natural ability to inspire and motivate others
             </p>
           </div>
 
           <div className={styles.meansCard}>
-            <div className={styles.meansIcon}>{/* Icon placeholder */}</div>
+            <div className={styles.meansIcon}> */}{/* Icon placeholder */}{/* </div>
             <p className={styles.meansText}>
               Excellent communication and creative skills
             </p>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* TALK TO NUMEROLOGY EXPERT */}
       <section className={styles.expertSection}>
@@ -452,7 +452,7 @@ const NumerologyWeb = () => {
       </section>
 
       {/* CURRENT CYCLE - PERSONAL YEAR NUMBER */}
-      <section className={styles.cycleSection}>
+      {/* <section className={styles.cycleSection}>
         <div className={styles.cycleCard}>
           <span className={styles.cycleBadge}>Current Cycle</span>
           <h3 className={styles.cycleTitle}>Personal Year Number</h3>
@@ -467,10 +467,10 @@ const NumerologyWeb = () => {
             Avoid stagnation.
           </p>
         </div>
-      </section>
+      </section> */}
 
       {/* GET DETAILED YEAR GUIDANCE */}
-      <section className={styles.expertSection}>
+      {/* <section className={styles.expertSection}>
         <div className={styles.expertCard}>
           <div className={styles.expertContent}>
             <h3 className={styles.expertTitle}>Get Detailed Year Guidance</h3>
@@ -483,11 +483,11 @@ const NumerologyWeb = () => {
               <button className={styles.consultBtn}>Consult Now →</button>
             </Link>
           </div>
-          <div className={styles.expertImage}>
+          <div className={styles.expertImage}> */}
             {/* Placeholder for guidance image */}
-          </div>
+          {/* </div>
         </div>
-      </section>
+      </section> */}
 
       {/* FEATURE CARDS */}
       {/* <section className={styles.features}>
