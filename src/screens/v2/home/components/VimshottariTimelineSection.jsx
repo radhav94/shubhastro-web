@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useGetCurrentMahadashaFullQuery } from "../../../../redux/api/kundli/dashaApi";
 import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
@@ -8,6 +9,7 @@ import styles from "../Home.module.scss";
 const VimshottariTimelineSection = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const cardsContainerRef = useRef(null);
+  const navigate = useNavigate();
   
   // Check if user is logged in
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
@@ -96,12 +98,13 @@ const VimshottariTimelineSection = () => {
     return -1;
   };
 
-  // Transform API data - Show only first 4 dasha levels and only current periods
+  // Transform API data - Show only first 3 dasha levels (hide Sookshmadasha and Pranadasha)
   const transformDashaData = (response) => {
     if (!response) return null;
 
     const allDashaCards = [];
-    const dashaLevels = response.order_names || ["mahadasha", "antardasha", "paryantardasha", "Shookshamadasha", "Pranadasha"];
+    // Only show first 3 levels: Mahadasha, Antardasha, Pratyantardasha
+    const dashaLevels = ["mahadasha", "antardasha", "paryantardasha"];
 
     dashaLevels.forEach((levelName) => {
       const periods = response[levelName] || [];
@@ -166,6 +169,18 @@ const VimshottariTimelineSection = () => {
     }
   };
 
+  // Navigate to Kundali page with first profile and activate Kundali tab
+  const handleSeeFullDasha = () => {
+    if (defaultProfile && defaultProfile._id) {
+      // Navigate to /kundli/:kundliId?tab=kundli to open Kundali tab (index 1)
+      // This will show the Vimshottari Dasha section
+      navigate(`/kundli/${defaultProfile._id}?tab=kundli`);
+    } else {
+      // If no profile, navigate to kundli page to create one
+      navigate('/kundli');
+    }
+  };
+
   const isLoading = profilesLoading || dashaLoading;
 
   // Don't render the section if user is not logged in
@@ -221,7 +236,7 @@ const VimshottariTimelineSection = () => {
             </div>
           </div>
         </h2>
-        <button className={styles.seeFullDashaBtn}>
+        <button className={styles.seeFullDashaBtn} onClick={handleSeeFullDasha}>
           See Full Dasha <ChevronRight size={18} />
         </button>
       </div>
