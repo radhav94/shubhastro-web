@@ -4,28 +4,40 @@
   position: relative;
   min-height: 100vh;
   padding-top: 100px;
-  background: #e5e7eb;
+  background: #f5f5f5;
   padding-bottom: 2rem;
   @media screen and (width <= 1180px) {
     padding-top: 53px;
   }
 }
-
+.headerWrap{
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  // box-shadow: 0 2px 8px rgba(247, 88, 1, 0.08);
+}
 .header {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 1.25rem;
-  background: #fff;
+  padding:6px 16px;
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.08);
-  @media screen and (width <= 767px) {
-    padding: 0.5rem 1.25rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  @media (width <= 767px) {
+    justify-content: space-between;
   }
 }
-
+.headerBack{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: absolute;
+  @media (width <= 767px) {
+    position: unset;
+  }
+}
 .backButton {
   background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   border: none;
@@ -37,8 +49,8 @@
   color: #fff;
   transition: all 0.2s;
   border-radius: 0.5rem;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
   flex-shrink: 0;
 
@@ -77,22 +89,25 @@
   align-items: flex-end;
   cursor: pointer;
   margin:0 auto;
-  padding: 0.5rem 1rem;
+  // padding: 0.5rem 1rem;
   // background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   // border-radius: 0.5rem;
   // transition: all 0.2s;
   // box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
   color: #000;
 
-  @media screen and (width <= 767px) {
-    padding: 0.4rem 0.8rem;
-  }
+  // @media screen and (width <= 767px) {
+  //   padding: 0.4rem 0.8rem;
+  // }
 
   // &:hover {
   //   background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
   //   transform: translateY(-1px);
   //   box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
   // }
+  @media screen and (width <= 767px) {
+    margin: unset;
+  }
 }
 
 .selectLabel {
@@ -132,18 +147,18 @@
 
 // Hero Section - matching AI Experiences Hub
 .heroSection {
-  margin-bottom: 1.5rem;
-  padding: 0.75rem 0;
+  margin-bottom: 1rem;
+  // padding: 0.75rem 0;
   text-align: center;
-  background-color: #fff;
-  border-radius: 16px;
+  // background-color: #fff;
+  // border-radius: 16px;
   @media screen and (width <= 767px) {
-    padding: 0rem 0;
+    // padding: 0rem 0;
     // display: flex;
     // flex-direction: column;
     // align-items: center;
     text-align: left;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
     border-radius: 16px;
     background-color: transparent;
   }
@@ -156,7 +171,7 @@
   line-height: 1.2;
   letter-spacing: -0.02em;
   @media screen and (width <= 767px){
-    font-size: 2rem;
+    font-size: 1.6rem;
     margin: 0 0 0.3rem 0;
   }
   span{
@@ -179,14 +194,14 @@
 }
 
 .heroSubtitle {
-  font-size: 0.8rem;
+  font-size: 1.1rem;
   color: #6b7280;
   margin: 0 auto;
   line-height: 1.6;
   max-width: 42rem;
 
-  @media (min-width: 768px) {
-    font-size: 1.125rem;
+  @media (max-width: 767px) {
+    font-size: 0.8rem;
   }
 }
 
@@ -258,27 +273,16 @@
     padding: 2rem;
   }
 
-  .header {
-    padding: 1rem 2rem;
-  }
+  // .header {
+  //   padding: 1rem 2rem;
+  // }
 
   .title {
     font-size: 1.375rem;
   }
 
-  .heroSection {
-    margin-bottom: 3rem;
-    padding: 1.5rem 0;
-  }
-}
-
-// Desktop responsive
-@media (min-width: 1024px) {
-  // .content {
-  //   padding: 2.5rem 3rem;
+  // .heroSection {
+  //   margin-bottom: 3rem;
+  //   padding: 1.5rem 0;
   // }
-
-  .heroSection {
-    margin-bottom: 3rem;
-  }
 }

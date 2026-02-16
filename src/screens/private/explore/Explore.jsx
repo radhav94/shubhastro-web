@@ -482,19 +482,21 @@ const Explore = () => {
   if (isLoadingExplore) {
     return (
       <div className={styles.explorePage}>
-        <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
-            <ChevronLeft size={24} />
-          </button>
-          <div className={styles.profileSelector}>
-            <span className={styles.selectLabel}>Select Profile</span>
-            <div className={styles.profileName}>
-              {selectedProfile ? selectedProfile.name : "Select Profile"}
+        <div className={styles.headerWrap}>
+          <div className={styles.header}>
+            <button className={styles.backButton} onClick={() => navigate(-1)}>
+              <ChevronLeft size={24} />
+            </button>
+            <div className={styles.profileSelector}>
+              <span className={styles.selectLabel}>Select Profile</span>
+              <div className={styles.profileName}>
+                {selectedProfile ? selectedProfile.name : "Select Profile"}
+              </div>
             </div>
+            <button className={styles.editButton}>
+              <Edit size={20} />
+            </button>
           </div>
-          <button className={styles.editButton}>
-            <Edit size={20} />
-          </button>
         </div>
         <PrimaryLoader />
       </div>
@@ -504,6 +506,7 @@ const Explore = () => {
   return (
     <div className={styles.explorePage}>
       {/* Header */}
+      <div className={styles.headerWrap}>
       <div className={styles.header}>
         <button className={styles.backButton} onClick={() => navigate(-1)}>
           <ChevronLeft size={24} />
@@ -522,7 +525,7 @@ const Explore = () => {
           <Edit size={20} />
         </button>
       </div>
-
+    </div>
       {/* Main Content */}
       <div className={styles.content}>
         {/* Render sections dynamically based on API data */}

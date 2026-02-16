@@ -85,9 +85,12 @@
   }
 }
 .bottomImg{
-  width: 32vw;
+  width: 40vw;
   height: auto;
   margin: 50px auto 0px auto;
+  @media (width <= 768px) {
+    width: 60vw;
+  }
   @media (width <= 767px) {
     display: none;
   }
