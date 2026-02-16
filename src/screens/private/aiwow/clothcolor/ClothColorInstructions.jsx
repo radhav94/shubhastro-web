@@ -1,10 +1,13 @@
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './ClothColorInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
+import { setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
 
 const ClothColorInstructions = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const fileInputRef = useRef(null);
 
   const handleCamera = () => {
@@ -20,7 +23,7 @@ const ClothColorInstructions = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        localStorage.setItem('clothColorImage', reader.result);
+        dispatch(setClothColorImage(reader.result));
         navigate('/aiwow/cloth-color/capture');
       };
       reader.readAsDataURL(file);

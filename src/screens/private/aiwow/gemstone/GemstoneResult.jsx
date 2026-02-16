@@ -1,50 +1,78 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import styles from './GemstoneResult.module.scss';
 import { Toast } from '../../../../component';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const GemstoneResult = () => {
   const navigate = useNavigate();
   const [resultData, setResultData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  
+  // Get data from Redux
+  const reduxResult = useSelector((state) => state.aiwow.gemstone.result);
+  const reduxImage = useSelector((state) => state.aiwow.gemstone.image);
 
   useEffect(() => {
-    const storedResult = localStorage.getItem('gemstoneResult');
-    const storedImage = localStorage.getItem('gemstoneImage');
-    
-    if (storedResult) {
+    console.log('GemstoneResult - Loading result:', {
+      hasReduxResult: !!reduxResult,
+      reduxResultType: typeof reduxResult,
+      reduxResultKeys: reduxResult ? Object.keys(reduxResult) : [],
+      hasReduxImage: !!reduxImage
+    });
+
+    if (reduxResult) {
       try {
-        const parsedResult = JSON.parse(storedResult);
-        const apiData = parsedResult.data || parsedResult;
+        // Handle nested data structure
+        const apiData = reduxResult.data || reduxResult;
+        
+        console.log('GemstoneResult - Processing data:', {
+          hasApiData: !!apiData,
+          apiDataKeys: apiData ? Object.keys(apiData) : [],
+          hasGemstones: !!(apiData.gemstones),
+          gemstonesCount: apiData.gemstones?.length || 0
+        });
+        
+        // Get the first gemstone from the array
+        const gemstone = apiData.gemstones?.[0] || apiData;
+        
+        console.log('GemstoneResult - Gemstone data:', {
+          hasGemstone: !!gemstone,
+          gemstoneKeys: gemstone ? Object.keys(gemstone) : [],
+          hasIdentification: !!(gemstone.gemstoneIdentification),
+          hasAstrologicalProperties: !!(gemstone.astrologicalProperties)
+        });
         
         setResultData({
-          image: apiData.gemstoneImage || storedImage,
-          identification: apiData.gemstoneIdentification || {},
-          details: apiData.gemstoneDetails || {},
-          astrological: apiData.astrologicalProperties || {},
-          suitability: apiData.suitabilityAnalysis || {},
-          wearing: apiData.wearingGuidelines || {},
-          healing: apiData.healingProperties || {},
-          compatibility: apiData.compatibility || {},
-          market: apiData.marketInfo || {},
-          overall: apiData.overallReading || {},
-          confidenceScore: apiData.confidenceScore || 85,
+          image: apiData.gemstoneImage || reduxImage,
+          identification: gemstone.gemstoneIdentification || {},
+          details: gemstone.gemstoneDetails || {},
+          astrological: gemstone.astrologicalProperties || {},
+          suitability: gemstone.suitabilityAnalysis || {},
+          wearing: gemstone.wearingGuidelines || {},
+          healing: gemstone.healingProperties || {},
+          compatibility: gemstone.compatibility || {},
+          market: gemstone.marketInfo || {},
+          overall: gemstone.overallReading || {},
+          personalized: gemstone.personalizedInsights || {},
+          confidenceScore: gemstone.confidenceScore || 85,
         });
       } catch (error) {
         console.error('Error parsing result:', error);
         Toast.error('Failed to load analysis results');
-        navigate('/aiwow/gemstone/instructions');
+        navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path, { replace: true });
         return;
       }
     } else {
       Toast.error('No analysis results found');
-      navigate('/aiwow/gemstone/instructions');
+      navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path, { replace: true });
       return;
     }
     
     setLoading(false);
-  }, [navigate]);
+  }, [reduxResult, reduxImage, navigate]);
 
   const renderOverview = () => (
     <div className={styles.tabContent}>
@@ -421,7 +449,7 @@ const GemstoneResult = () => {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate('/aiwow')}>
+        <button className={styles.backButton} onClick={() => navigate("/aiwow/gemstone")}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -468,10 +496,6 @@ const GemstoneResult = () => {
         {activeTab === 'astrological' && renderAstrological()}
         {activeTab === 'suitability' && renderSuitability()}
         {activeTab === 'healing' && renderHealing()}
-
-        <button className={styles.doneButton} onClick={() => navigate('/aiwow')}>
-          Done
-        </button>
       </div>
     </div>
   );

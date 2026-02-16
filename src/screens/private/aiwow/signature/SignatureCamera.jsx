@@ -1,10 +1,13 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './SignatureCamera.module.scss';
 import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
+import { setSignatureImage } from '../../../../redux/aiwow/aiwowSlice';
 
 const SignatureCamera = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
@@ -132,7 +135,7 @@ const SignatureCamera = () => {
 
   const proceedWithImage = () => {
     if (capturedImage) {
-      localStorage.setItem('signatureImage', capturedImage);
+      dispatch(setSignatureImage(capturedImage));
       navigate('/aiwow/signature/capture');
     }
   };

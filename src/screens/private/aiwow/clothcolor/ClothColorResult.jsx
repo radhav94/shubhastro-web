@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import styles from './ClothColorResult.module.scss';
 import { Toast } from '../../../../component';
 
@@ -8,26 +9,42 @@ const ClothColorResult = () => {
   const [activeTab, setActiveTab] = useState('recommended');
   const [resultData, setResultData] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Get data from Redux
+  const reduxResult = useSelector((state) => state.aiwow.clothColor.result);
+  const reduxImage = useSelector((state) => state.aiwow.clothColor.image);
+  const reduxFormData = useSelector((state) => state.aiwow.clothColor.formData);
 
   useEffect(() => {
-    const storedResult = localStorage.getItem('clothColorResult');
-    const storedImage = localStorage.getItem('clothColorImage');
-    const storedFormData = localStorage.getItem('clothColorFormData');
-    
-    if (storedResult) {
+    console.log('ClothColorResult - Loading result:', {
+      hasReduxResult: !!reduxResult,
+      reduxResultType: typeof reduxResult,
+      reduxResultKeys: reduxResult ? Object.keys(reduxResult) : [],
+      hasReduxImage: !!reduxImage,
+      hasReduxFormData: !!reduxFormData
+    });
+
+    if (reduxResult) {
       try {
-        const parsedResult = JSON.parse(storedResult);
-        console.log('📦 Parsed result:', parsedResult);
+        console.log('📦 Redux result:', reduxResult);
         
         // Handle the actual API response structure
-        const apiData = parsedResult.data || parsedResult;
-        const formData = storedFormData ? JSON.parse(storedFormData) : {};
+        const apiData = reduxResult.data || reduxResult;
+        const formData = reduxFormData || {};
+        
+        console.log('ClothColorResult - Processing data:', {
+          hasApiData: !!apiData,
+          apiDataKeys: apiData ? Object.keys(apiData) : [],
+          hasDetectedColors: !!(apiData.detectedColors),
+          hasRecommendedColors: !!(apiData.recommendedColors),
+          hasAstrologicalMatches: !!(apiData.astrologicalMatches)
+        });
         
         // Check if we have the new API structure with detectedColors, aiConfidence, astrologicalMatches
         if (apiData.detectedColors || apiData.astrologicalMatches) {
           console.log('✅ Using new API structure');
           setResultData({
-            image: storedImage,
+            image: reduxImage,
             intention: formData.intention || apiData.intention,
             analysisDate: apiData.analysisDate,
             dominantPlanet: apiData.dominantPlanet || apiData.astrologicalMatches?.dominantPlanet,
@@ -44,7 +61,7 @@ const ClothColorResult = () => {
           // Old structure
           console.log('✅ Using old API structure');
           setResultData({
-            image: storedImage,
+            image: reduxImage,
             intention: formData.intention || apiData.intention,
             analysisDate: apiData.analysisDate,
             dominantPlanet: apiData.dominantPlanet,
@@ -67,7 +84,7 @@ const ClothColorResult = () => {
     }
     
     setLoading(false);
-  }, [navigate]);
+  }, [reduxResult, reduxImage, reduxFormData, navigate]);
 
   const getIntentionLabel = (intention) => {
     const labels = {
