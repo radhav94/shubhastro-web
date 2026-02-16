@@ -181,80 +181,84 @@ const TalkToKundliChat = () => {
   return (
     <div className={styles.container}>
       {/* Header */}
-      <header className={styles.header}>
-        <button className={styles.backButton} onClick={handleBack}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <div className={styles.headerInfo}>
-          <h1 className={styles.title}>AI Kundli Assistant</h1>
-          {selectedProfile && (
-            <p className={styles.subtitle}>{selectedProfile.name}'s Chart</p>
-          )}
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={handleBack}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div className={styles.headerInfo}>
+            <h1 className={styles.title}>AI Kundli Assistant</h1>
+            {selectedProfile && (
+              <p className={styles.subtitle}>{selectedProfile.name}'s Chart</p>
+            )}
+          </div>
         </div>
       </header>
-
-      {/* Messages */}
-      <div className={styles.messagesContainer}>
-        {messages.length === 0 && !isLoading && (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>💬</div>
-            <p>Starting your personalized chat session...</p>
-          </div>
-        )}
-
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`${styles.messageWrapper} ${
-              message.type === 'user' ? styles.userMessage : styles.aiMessage
-            }`}
-          >
-            <div className={styles.messageBubble}>
-              <p className={styles.messageText}>{message.text}</p>
-              <span className={styles.messageTime}>
-                {message.timestamp.toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </span>
+      
+      <div className={styles.containerDiv}>
+        {/* Messages */}
+        <div className={styles.messagesContainer}>
+          {messages.length === 0 && !isLoading && (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyIcon}>💬</div>
+              <p>Starting your personalized chat session...</p>
             </div>
-          </div>
-        ))}
+          )}
 
-        {isLoading && (
-          <div className={`${styles.messageWrapper} ${styles.aiMessage}`}>
-            <div className={styles.messageBubble}>
-              <div className={styles.typingIndicator}>
-                <span></span>
-                <span></span>
-                <span></span>
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`${styles.messageWrapper} ${
+                message.type === 'user' ? styles.userMessage : styles.aiMessage
+              }`}
+            >
+              <div className={styles.messageBubble}>
+                <p className={styles.messageText}>{message.text}</p>
+                <span className={styles.messageTime}>
+                  {message.timestamp.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
               </div>
             </div>
-          </div>
-        )}
+          ))}
 
-        <div ref={messagesEndRef} />
-      </div>
+          {isLoading && (
+            <div className={`${styles.messageWrapper} ${styles.aiMessage}`}>
+              <div className={styles.messageBubble}>
+                <div className={styles.typingIndicator}>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            </div>
+          )}
 
-      {/* Suggested Questions */}
-      {messages.length === 1 && !isLoading && (
-        <div className={styles.suggestedQuestions}>
-          <p className={styles.suggestedTitle}>Try asking:</p>
-          <div className={styles.suggestedList}>
-            {suggestedQuestions.map((question, index) => (
-              <button
-                key={index}
-                className={styles.suggestedButton}
-                onClick={() => handleSuggestedQuestion(question)}
-              >
-                {question}
-              </button>
-            ))}
-          </div>
+          <div ref={messagesEndRef} />
         </div>
-      )}
+
+        {/* Suggested Questions */}
+        {messages.length === 1 && !isLoading && (
+          <div className={styles.suggestedQuestions}>
+            <p className={styles.suggestedTitle}>Try asking:</p>
+            <div className={styles.suggestedList}>
+              {suggestedQuestions.map((question, index) => (
+                <button
+                  key={index}
+                  className={styles.suggestedButton}
+                  onClick={() => handleSuggestedQuestion(question)}
+                >
+                  {question}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}  
+      </div>
 
       {/* Input */}
       <div className={styles.inputContainer}>
