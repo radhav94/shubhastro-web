@@ -144,8 +144,8 @@
   top: 0;
   z-index: 100;
   // border-bottom: 1px solid rgba(247 88 1 / 30%);
-  padding: 0px 32px;
-  max-width: 1400px;
+  padding: 0px 16px;
+  max-width: 1200px;
   margin: 0 auto;
   @media (width <= 1180px) {
     padding: 6px 16px;
@@ -195,7 +195,7 @@
 }
 
 .greetingText {
-  display: flex;
+  display: none;
   flex-direction: column;
   margin-top: 6px;
 }
@@ -217,12 +217,12 @@
   font-weight: 500;
   color: #1a1a1a;
   @include line-clamp(1);
-  text-box-trim: trim-both;
-  text-box-edge: cap alphabetic;
-  margin-top: 7px;
+  // text-box-trim: trim-both;
+  // text-box-edge: cap alphabetic;
+  margin-top: 0px;
   @media (width <= 767px) {
     font-size: 1rem;
-    margin-top: 3px;
+    margin-top: 0px;
   }
 }
 
@@ -257,8 +257,8 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  padding: 2px 32px;
-  min-width: 1400px;
+  padding: 2px 16px;
+  min-width: 1200px;
   margin: 0 auto;
   @media (width <= 1180px) {
     padding: 2px 16px;

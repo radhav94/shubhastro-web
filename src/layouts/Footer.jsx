@@ -123,7 +123,7 @@ const Footer = () => {
   
   return (
     <footer className={styles.footer}>
-      <div className={styles.container}>
+      {/* <div className={styles.container}> */}
         <div className={styles.footer_main}>
           <div className={styles.footer_column}>
             <img
@@ -202,19 +202,21 @@ const Footer = () => {
             </a>
           </div>
         </div>
-      </div>
+      {/* </div> */}
 
         {/* Bottom Bar */}
-        <div className={styles.footer_bottom}>
-          <p>© 2001-{currentYear} Shubh Talk Pvt. Ltd. All rights reserved</p>
-          <ul>
-            <li>
-              <Link to="/policy">Privacy Policy</Link>
-            </li>
-            <li>
-              <Link to="/termandcondition">T&C</Link>
-            </li>
-          </ul>
+        <div className={styles.footerOuter}>
+          <div className={styles.footer_bottom}>
+            <p>© 2001-{currentYear} Shubh Talk Pvt. Ltd. All rights reserved</p>
+            <ul>
+              <li>
+                <Link to="/policy">Privacy Policy</Link>
+              </li>
+              <li>
+                <Link to="/termandcondition">T&C</Link>
+              </li>
+            </ul>
+          </div>
         </div>
 
       {/* New Bottom Navigation (Modern Design) - Hidden on home page */}

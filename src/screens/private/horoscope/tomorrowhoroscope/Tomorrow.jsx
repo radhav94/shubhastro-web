@@ -40,7 +40,7 @@ const Tomorrow = () => {
       )}
       <div className={styles.sidebar}>
         <Sidebar />
-        <div>
+        <div className={styles.rightSideContainer}>
           <PrimaryText isSemiBold size_20>
             {sign.charAt(0).toUpperCase() + sign.slice(1)} Tomorrow Horoscope
           </PrimaryText>

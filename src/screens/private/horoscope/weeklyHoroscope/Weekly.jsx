@@ -49,7 +49,7 @@ const Weekly = () => {
       <div className={styles.sidebar}>
         <Sidebar />
 
-        <div>
+        <div className={styles.rightSideContainer}>
           {/* HEADER */}
           <PrimaryText isSemiBold size_20>
             {sign.charAt(0).toUpperCase() + sign.slice(1)} Horoscope
@@ -68,7 +68,7 @@ const Weekly = () => {
           {/*  LUCKY DETAILS */}
           {isSuccess && (
             <div style={{ marginBottom: "20px" }}>
-              <PrimaryText size_20 isBold>
+              <PrimaryText size_20 isSemiBold>
                 Lucky Details
               </PrimaryText>
 
