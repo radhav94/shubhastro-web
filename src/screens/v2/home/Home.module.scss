@@ -316,9 +316,84 @@
 /* Main Content */
 .mainContent {
     padding: 0 16px;
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
+    
+    @media (min-width: 768px) {
+      padding: 0 32px;
+    }
+    
+    @media (min-width: 1024px) {
+      padding: 0 48px;
+    }
+    
+    @media (min-width: 1280px) {
+      padding: 0 64px;
+    }
+    
+    @media (min-width: 1440px) {
+      padding: 0 80px;
+    }
+    
+    @media (min-width: 1920px) {
+      max-width: 1920px;
+      padding: 0 100px;
+    }
   }
+
+/* Mobile Layout - Show on mobile, hide on desktop */
+.mobileLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  
+  @media (min-width: 1024px) {
+    display: none;
+  }
+}
+
+/* Two Column Layout - Hide on mobile, show on desktop */
+.twoColumnLayout {
+  display: none;
+  
+  @media (min-width: 1024px) {
+    display: grid;
+    grid-template-columns: minmax(320px, 380px) 1fr;
+    gap: 32px;
+  }
+  
+  @media (min-width: 1280px) {
+    grid-template-columns: minmax(350px, 420px) 1fr;
+    gap: 40px;
+  }
+  
+  @media (min-width: 1440px) {
+    grid-template-columns: minmax(380px, 450px) 1fr;
+    gap: 48px;
+  }
+  
+  @media (min-width: 1920px) {
+    grid-template-columns: 480px 1fr;
+    gap: 56px;
+  }
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: sticky;
+  top: 24px;
+  align-self: flex-start;
+  height: fit-content;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0; // Prevents overflow issues
+}
 
 /* Today's Horoscope Section */
 .horoscopeSection {
@@ -789,6 +864,14 @@
   }
 }
 
+/* Quick Actions in Left Column - Vertical Layout */
+.leftColumn .quickActions {
+  @media screen and (min-width: 1024px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
 .quickActions::-webkit-scrollbar {
   display: none;
 }
@@ -821,6 +904,16 @@
   box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.04);
 }
 
+/* Action Card in Left Column - Horizontal Layout */
+.leftColumn .actionCard {
+  @media screen and (min-width: 1024px) {
+    flex-direction: row;
+    align-items: center;
+    padding: 16px 20px;
+    gap: 16px;
+  }
+}
+
 .actionTitle {
   font-family: "Poppins", sans-serif;
   font-size: 18px;
@@ -829,6 +922,15 @@
   text-align: center;
   color: #2c1b0e;
   margin: 0;
+}
+
+/* Action Title in Left Column - Left Aligned */
+.leftColumn .actionTitle {
+  @media screen and (min-width: 1024px) {
+    text-align: left;
+    flex: 1;
+    font-size: 16px;
+  }
 }
 
 /* Media Area */
@@ -842,6 +944,14 @@
   align-items: flex-end;
   justify-content: center;
   overflow: visible;
+}
+
+/* Action Media in Left Column - Fixed Width */
+.leftColumn .actionMedia {
+  @media screen and (min-width: 1024px) {
+    width: auto;
+    flex-shrink: 0;
+  }
 }
 
 /* Circle behind image */
@@ -873,6 +983,14 @@
   z-index: 2;
   @media (width <= 767px) {
      height: auto;
+  }
+}
+
+/* Action Image in Left Column - Smaller Size */
+.leftColumn .actionImg {
+  @media screen and (min-width: 1024px) {
+    height: 60px;
+    width: 60px;
   }
 }
 

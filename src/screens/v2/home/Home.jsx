@@ -114,26 +114,66 @@ const Home = () => {
   };
 
 
+  // Separate sections into left and right columns for desktop
+  const leftSectionTypes = ['daily-cosmic-insight', 'explore-panchang', 'complementary-services'];
+  
+  const leftSections = sortedSections?.filter(section => 
+    leftSectionTypes.includes(section.display_type)
+  ) || [];
+  
+  const rightSections = sortedSections?.filter(section => 
+    !leftSectionTypes.includes(section.display_type)
+  ) || [];
+
   return (
     <div className={styles.home}>
       <main className={styles.mainContent}>
-        {/* Dynamic rendering based on API response */}
-        {sortedSections && sortedSections.length > 0 && (
-          sortedSections.map((section) => {
-            // Skip sections without display_type
-            if (!section.display_type) {
-              console.warn("Section missing display_type:", section);
-              return null;
-            }
+        {/* Mobile View - Original Layout */}
+        <div className={styles.mobileLayout}>
+          {sortedSections && sortedSections.length > 0 && (
+            sortedSections.map((section) => {
+              if (!section.display_type) {
+                console.warn("Section missing display_type:", section);
+                return null;
+              }
+              return renderSection(section.display_type, section, {
+                onConnect: handleConnectClick,
+                onChatStart: handleAIChatStart,
+              });
+            })
+          )}
+        </div>
 
-            // Render section based on display_type
-            return renderSection(section.display_type, section, {
-              onConnect: handleConnectClick,
-              onChatStart: handleAIChatStart,
-            });
-          })
-        
-        )}
+        {/* Desktop View - Two Column Layout */}
+        <div className={styles.twoColumnLayout}>
+          {/* Left Column */}
+          <div className={styles.leftColumn}>
+            {leftSections.map((section) => {
+              if (!section.display_type) {
+                console.warn("Section missing display_type:", section);
+                return null;
+              }
+              return renderSection(section.display_type, section, {
+                onConnect: handleConnectClick,
+                onChatStart: handleAIChatStart,
+              });
+            })}
+          </div>
+
+          {/* Right Column */}
+          <div className={styles.rightColumn}>
+            {rightSections.map((section) => {
+              if (!section.display_type) {
+                console.warn("Section missing display_type:", section);
+                return null;
+              }
+              return renderSection(section.display_type, section, {
+                onConnect: handleConnectClick,
+                onChatStart: handleAIChatStart,
+              });
+            })}
+          </div>
+        </div>
       </main>
 
       <BottomNavigation />
