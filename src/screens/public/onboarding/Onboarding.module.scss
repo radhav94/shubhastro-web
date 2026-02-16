@@ -385,7 +385,7 @@
 .primaryBtn {
   width: calc(100% - 0px);
   margin: 5px 0px 10px 0px;
-  padding: 18px;
+  padding: 15px 18px;
   background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
   color: white;
   border: none;
@@ -798,7 +798,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 16px 12px;
+  padding: 10px 12px;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
   background: white;
@@ -1046,8 +1046,8 @@
     .primaryBtn {
       width: 100%;
       max-width: 100%;
-      padding: 18px 50px;
-      font-size: 17px;
+      padding: 10px 20px;
+      font-size: 16px;
       margin: 0;
       box-shadow: 0 4px 16px rgba(42, 28, 6, 0.3);
 
@@ -1135,11 +1135,11 @@
       margin-bottom: 36px;
     }
 
-    .phoneInput,
-    .countryCode {
-      padding: 18px 14px;
-      font-size: 16px;
-    }
+    // .phoneInput,
+    // .countryCode {
+    //   padding: 18px 14px;
+    //   font-size: 16px;
+    // }
 
     .socialBtn {
       padding: 17px;
@@ -1160,11 +1160,11 @@
       margin-bottom: 10px;
     }
 
-    .phoneInput,
-    .countryCode {
-      padding: 20px;
-      font-size: 17px;
-    }
+    // .phoneInput,
+    // .countryCode {
+    //   padding: 20px;
+    //   font-size: 17px;
+    // }
 
     .socialBtn {
       padding: 18px;
@@ -1180,13 +1180,13 @@
       font-size: 14px;
     }
 
-    .loginScreen .otpprimaryBtn {
-      width: 100%;
-      padding: 20px;
-      font-size: 18px;
-      margin: 0 0 28px 0;
-      max-width: 100%;
-    }
+    // .loginScreen .otpprimaryBtn {
+    //   width: 100%;
+    //   padding: 20px;
+    //   font-size: 18px;
+    //   margin: 0 0 28px 0;
+    //   max-width: 100%;
+    // }
 
     // OTP Screen
     .otpScreen {

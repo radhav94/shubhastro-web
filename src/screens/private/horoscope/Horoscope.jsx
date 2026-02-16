@@ -103,7 +103,7 @@ const HoroscopeNew = () => {
   const [activeCategory, setActiveCategory] = useState('');
   const [showZodiacModal, setShowZodiacModal] = useState(false);
 
-  const tabs = ['Today', 'Daily', 'This Week', 'This Year'];
+  const tabs = ['Today', /* 'Daily', */ 'This Week', 'This Year'];
   
   // Categories will be dynamically generated from API response
   const [categories, setCategories] = useState([]);

@@ -78,10 +78,12 @@ const TarotReadingPage = () => {
   return (
     <div className={styles.tarotReadingPage}>
       <div className={styles.tarotHeader}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className={styles.tarotTitle}>Tarot Reading</h1>
+        <div className={styles.taroteHeaderInner}>
+          <button className={styles.backButton} onClick={() => navigate(-1)}>
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className={styles.tarotTitle}>Tarot Reading</h1>
+        </div>
       </div>
 
       <div className={styles.tarotIntro}>

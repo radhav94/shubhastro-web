@@ -56,7 +56,7 @@ const Yearly = () => {
       <div className={styles.sidebar}>
         <Sidebar />
 
-        <div>
+        <div className={styles.rightSideContainer}>
           {/* SUBHEADER */}
           <PrimaryText isSemiBold size_20>
             {toTitle(sign)} Horoscope
@@ -82,7 +82,7 @@ const Yearly = () => {
                 return (
                   <div key={phaseKey} style={{ marginBottom: "30px" }}>
                     {/* PHASE HEADING */}
-                    <PrimaryText size_20 isBold paddingBottom="5px">
+                    <PrimaryText size_20 isSemiBold paddingBottom="5px">
                       Quarter {idx + 1}: {phase.period}
                     </PrimaryText>
 
