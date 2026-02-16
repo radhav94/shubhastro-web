@@ -232,24 +232,24 @@ const AIWow = () => {
       icon: "calendar",
       onClick: () => handleFeatureClick("/aiwow/agentic-calendar"),
     },
-    {
-      id: "karmic-debt-tracker",
-      badge: "New",
-      badgeType: "new",
-      title: "Karmic Debt Tracker",
-      description: "Track and understand your karmic patterns and life lessons",
-      icon: "health",
-      onClick: () => handleFeatureClick("/aiwow/karmic-debt-tracker"),
-    },
-    {
-      id: "astro-vitals",
-      badge: "Beta",
-      badgeType: "beta",
-      title: "AstroVitals",
-      description: "Health insights through astrological analysis",
-      icon: "health",
-      onClick: () => handleFeatureClick("/aiwow/astro-vitals"),
-    },
+    // {
+    //   id: "karmic-debt-tracker",
+    //   badge: "New",
+    //   badgeType: "new",
+    //   title: "Karmic Debt Tracker",
+    //   description: "Track and understand your karmic patterns and life lessons",
+    //   icon: "health",
+    //   onClick: () => handleFeatureClick("/aiwow/karmic-debt-tracker"),
+    // },
+    // {
+    //   id: "astro-vitals",
+    //   badge: "Beta",
+    //   badgeType: "beta",
+    //   title: "AstroVitals",
+    //   description: "Health insights through astrological analysis",
+    //   icon: "health",
+    //   onClick: () => handleFeatureClick("/aiwow/astro-vitals"),
+    // },
   ];
 
   // Coming Soon Features - Empty array since Aura Photography is now unlocked
