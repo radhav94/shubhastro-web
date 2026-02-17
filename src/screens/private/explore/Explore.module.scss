@@ -36,33 +36,30 @@
     padding:0 16px;
   }
 }
-
 .backButton {
-  background: #fdeeea;
-  border: 1px solid #f75801;
+  background: rgb(255 244 236);
+  border: none;
+  color: #D43400;
   cursor: pointer;
-  padding: 10px;
-  color: #333;
-  border-radius: 12px;
-  transition: 0.2s ease;
+  padding: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  width: 44px;
-  height: 44px;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #D43400;
 
   @media screen and (width <= 767px){
     width: 36px;
     height: 36px;
-    border-radius: 8px;
   }
   
   svg {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     path{
-      stroke: #f75801;
+      stroke: #d43400;
     }
   }
   &:active {

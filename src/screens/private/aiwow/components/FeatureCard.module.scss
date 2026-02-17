@@ -34,9 +34,8 @@
   }
 
   &:hover {
-    transform: translateY(-4px);
-    // box-shadow: 0 12px 24px rgba(247, 88, 1, 0.15), 0 4px 8px rgba(247, 88, 1, 0.08);
-    // border-color: rgba(247, 88, 1, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     .description{
       width: calc(100% - 50px);
       @media (width <= 768px) {
@@ -63,7 +62,7 @@
 
   &:active {
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(247, 88, 1, 0.12), 0 2px 4px rgba(247, 88, 1, 0.06);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   }
 }
 

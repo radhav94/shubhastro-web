@@ -4,7 +4,7 @@
   background: #FFFFFF;
   border-radius: 16px;
   padding: 16px;
-  gap: 16px;
+  // gap: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -23,13 +23,14 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
+    gap: 6px;
     // @media screen and (width <= 1200px) {
     //   height: 160px;
     // }
   }
 
   &:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   }
 }
@@ -40,7 +41,7 @@
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid #f5f5f5;
-  margin-bottom: 4px;
+  margin-bottom: -12px;
   // @media (width <= 767px){
   //   width: 100px;
   //   height: 160px;
@@ -54,17 +55,15 @@
 }
 
 .ratingBadge {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 6px 12px;
-  border-radius: 20px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  // position: absolute;
-  // left: 7px;
-  // top: 7px;
+  background: #fff8f0;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #606060;
 }
 
 .starIcon {
@@ -81,22 +80,17 @@
 
 .name {
   font-size: 18px;
-  font-weight: 600;
-  color: #2C2C2C;
-  margin: 0 0 12px 0;
-  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  color: #1a1a1a;
+  text-align: center;
+  margin: 0;
   line-height: 1.3;
-  letter-spacing: -0.3px;
-  cursor: pointer;
-  transition: color 0.2s;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;  
+  max-width: 100%;
   overflow: hidden;
-
-  &:hover {
-    color: #f75801;
-  }
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  // -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
 
   @media (max-width: 768px) {
     font-size: 14px;
@@ -116,10 +110,12 @@
 }
 
 .experienceText {
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 12px;
   font-weight: 500;
-  color: #666666;
-  font-family: "Poppins", sans-serif;
 }
 
 .connectButton {
@@ -129,8 +125,8 @@
   color: #FFFFFF;
   border: none;
   border-radius: 50px;
-  padding: 12px 40px;
-  font-size: 15px;
+  padding: 10px 10px;
+  font-size: 13px;
   font-weight: 600;
   font-family: "Poppins", sans-serif;
   cursor: pointer;
@@ -139,9 +135,8 @@
   box-shadow: 0 4px 12px rgba(247, 88, 1, 0.25);
 
   &:hover {
-    background: linear-gradient(135deg, #d43400 0%, #b82d00 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(247, 88, 1, 0.35);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   }
 
   &:active {

@@ -22,13 +22,13 @@
   /* border: none; */
   color: #F75801;
   cursor: pointer;
-  padding: 12px;
+  padding: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border: 1px solid #F75801;
 }
 

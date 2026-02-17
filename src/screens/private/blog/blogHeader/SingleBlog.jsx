@@ -23,13 +23,15 @@ const SingleBlogDetails = () => {
 
   return (
     <>
-      <header className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <h1 className={styles.headerTitle}>{data?.title || "Blogs"}</h1>
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={() => navigate(-1)}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <h1 className={styles.headerTitle}>{data?.title || "Blogs"}</h1>
+        </div>
       </header>
 
       <div className={styles.singleBlogWrapper}>

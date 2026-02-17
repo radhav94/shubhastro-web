@@ -160,12 +160,12 @@
   width: 100%;
 }
 .notSureCard {
-  min-width: 220px;
-  max-width: 220px;
+  min-width: 190px;
+  max-width: 190px;
   padding: 10px 0px;
 
   @media screen and (width <= 767px) {
-    min-width: 180px;
+    min-width: 150px;
     // padding: 0px 14px 14px 14px;
   }
 }

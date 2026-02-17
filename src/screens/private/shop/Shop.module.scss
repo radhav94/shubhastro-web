@@ -1,5 +1,7 @@
 .wrapper {
-  padding: 20px 40px;
+  padding: 20px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
   @media (max-width: 629px) {
     padding: 16px;
   }
@@ -9,7 +11,7 @@
   font-size: 28px;
   margin-bottom: 20px;
   margin-top: 100px;
-  font-weight: 600;
+  font-weight: 500;
   @media (width <= 767px) {
     margin-top: 68px;
     font-size: 20px;
@@ -35,13 +37,13 @@
 .card {
   background: #fff;
   border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
-
+  
   &:hover {
     transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
   img {
@@ -61,7 +63,7 @@
   h3 {
     margin: 6px 0;
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 500;
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;  
@@ -92,7 +94,7 @@
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   color: #c00;
   display: -webkit-box;
   -webkit-line-clamp: 1;

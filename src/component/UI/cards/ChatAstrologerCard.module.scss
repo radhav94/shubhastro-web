@@ -81,39 +81,29 @@
 }
 
 .ratingBadge {
-  // position: absolute;
-  // top: 7px;
-  // left: 7px;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 6px 12px;
-  border-radius: 20px;
   display: flex;
   align-items: center;
   gap: 4px;
-  font-family: "Poppins", sans-serif;
-  font-weight: 600;
-  font-size: 13px;
-  color: #2c2c2c;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.10);
-  backdrop-filter: blur(4px);
+  background: #fff8f0;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #606060;
   width: fit-content;
-  margin: 10px auto 0 auto;
-
-  @media (max-width: 768px) {
-    padding: 5px 10px;
-    font-size: 12px;
-    top: 7px;
-    left: 7px;
-  }
+  margin: 6px auto 0 auto;
 }
 
 .starIcon {
-  color: #ffb800;
+  color: #FFB800;
   font-size: 14px;
+}
 
-  @media (max-width: 768px) {
-    font-size: 13px;
-  }
+.ratingText {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2C2C2C;
+  font-family: "Poppins", sans-serif;
 }
 
 .infoSection {
@@ -133,7 +123,7 @@
 .name {
   font-family: "Poppins", sans-serif;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 500;
   color: #2c2c2c;
   margin: 0;
   line-height: 1.3;
@@ -219,21 +209,19 @@
   color: #ffffff;
   border: none;
   border-radius: 25px;
-  padding: 10px 20px;
+  padding: 10px 10px;
   width: 100%;
   font-family: "Poppins", sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 8px;
   letter-spacing: 0.3px;
-  box-shadow: 0 4px 12px rgba(247, 88, 1, 0.25);
 
   &:hover {
-    background: linear-gradient(135deg, #d43400 0%, #b82d00 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(247, 88, 1, 0.35);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 
   &:active {

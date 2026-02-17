@@ -1,10 +1,12 @@
 .profilePage {
   // min-height: 100vh;
-  margin-top: 6rem;
+  // margin-top: 6rem;
   // background: #F9F4EF;
   // padding-bottom: 2rem;
+  max-width: 1200px;
+  margin: 6rem auto 0rem auto;
   @media (width <= 767px) {
-    margin-top: 4rem;
+    margin: 4rem auto 0rem auto;
   }
 }
 

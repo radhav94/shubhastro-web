@@ -493,7 +493,7 @@
 .rightColumn {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 0px;
   min-width: 0; // Prevents overflow issues
 }
 
@@ -1397,9 +1397,14 @@
   align-items: center;
   justify-content: space-between;
   // box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
   @media screen and (width <= 767px) {
-    min-width: 180px;
+    min-width: 150px;
+  }
+  &:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -3250,14 +3255,14 @@
     transform 0.2s,
     box-shadow 0.2s;
   @media screen and (width <= 767px) {
-    flex: 0 0 170px;
-    min-width: 170px;
+    flex: 0 0 150px;
+    min-width: 150px;
   }
 }
 
 .blogCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
 }
 
 .blogImageWrapper {
@@ -3281,7 +3286,7 @@
 .blogTitle {
   font-family: "Poppins", sans-serif;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 500;
   color: #1a1a1a;
   margin: 0 0 10px 0;
   line-height: 1.3;

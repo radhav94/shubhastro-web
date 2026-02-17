@@ -256,52 +256,54 @@ const NumerologyWeb = () => {
       {isLoading && <PrimaryLoader />}
 
       {/* Profile Header - Desktop Only */}
-      <div className={styles.profileHeader}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M15 18L9 12L15 6"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <div
-          className={styles.profileSelector}
-          onClick={() => setShowSelectProfile(true)}
-        >
-          <span className={styles.selectLabel}>Select Profile</span>
-          <span className={styles.profileName}>
-            {selectedProfile ? selectedProfile.name : "Select Profile"}
+      <div className={styles.profileHeaderWrap}>
+        <div className={styles.profileHeader}>
+          <button className={styles.backBtn} onClick={() => navigate(-1)}>
             <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              style={{
-                display: "inline-block",
-                marginLeft: "4px",
-                verticalAlign: "middle",
-              }}
             >
               <path
-                d="M4 6L8 10L12 6"
+                d="M15 18L9 12L15 6"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>
-          </span>
+          </button>
+          <div
+            className={styles.profileSelector}
+            onClick={() => setShowSelectProfile(true)}
+          >
+            <span className={styles.selectLabel}>Select Profile</span>
+            <span className={styles.profileName}>
+              {selectedProfile ? selectedProfile.name : "Select Profile"}
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{
+                  display: "inline-block",
+                  marginLeft: "4px",
+                  verticalAlign: "middle",
+                }}
+              >
+                <path
+                  d="M4 6L8 10L12 6"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+          </div>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 .relationalBlogsSection {
-  max-width: 1600px;
-  padding: 0 48px;
+  max-width: 1200px;
+  padding: 0 16px;
   width: 100%;
   margin: 32px auto 40px;
 
@@ -24,7 +24,7 @@
   text-align: left;
   font-size: 24px;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 20px;
   text-transform: uppercase;
 
@@ -106,7 +106,7 @@
   flex-shrink: 0;
   
   &:hover {
-    transform: translateY(-5px);
+    transform: translateY(-2px);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
   }
 
@@ -114,24 +114,27 @@
   // For 3 columns: (100% - 40px) / 3 ≈ 31.5%
   // For 4 columns: (100% - 60px) / 4 ≈ 23%
   width: calc((100vw - 80px) / 3);
-  max-width: 360px;
-
-  @media (min-width: 1400px) {
-    width: calc((100vw - 120px) / 4);
-    max-width: 360px;
+  max-width: 220px;
+  @media (max-width: 767px) {
+    width: 150px;
   }
 
-  @media (max-width: 991px) {
-    width: 280px;
-  }
+  // @media (min-width: 1400px) {
+  //   width: calc((100vw - 120px) / 4);
+  //   max-width: 360px;
+  // }
 
-  @media (max-width: 768px) {
-    width: 240px;
-  }
+  // @media (max-width: 991px) {
+  //   width: 280px;
+  // }
 
-  @media (max-width: 576px) {
-    width: 170px;
-  }
+  // @media (max-width: 768px) {
+  //   width: 240px;
+  // }
+
+  // @media (max-width: 576px) {
+  //   width: 170px;
+  // }
 }
 
 .imageWrapper {
