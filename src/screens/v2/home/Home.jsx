@@ -157,16 +157,18 @@ const Home = () => {
         <div className={styles.twoColumnLayout}>
           {/* Left Column */}
           <div className={styles.leftColumn}>
-            {leftSections.map((section) => {
-              if (!section.display_type) {
-                console.warn("Section missing display_type:", section);
-                return null;
-              }
-              return renderSection(section.display_type, section, {
-                onConnect: handleConnectClick,
-                onChatStart: handleAIChatStart,
-              });
-            })}
+            <div className={styles.leftColumnMain}>
+              {leftSections.map((section) => {
+                if (!section.display_type) {
+                  console.warn("Section missing display_type:", section);
+                  return null;
+                }
+                return renderSection(section.display_type, section, {
+                  onConnect: handleConnectClick,
+                  onChatStart: handleAIChatStart,
+                });
+              })}
+            </div>
           </div>
 
           {/* Right Column */}
