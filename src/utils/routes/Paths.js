@@ -538,7 +538,7 @@ export const PATH = {
       footer: false,
     },
     PALMISTRY_LANDING: {
-      path: "/aiwow/palmistry",
+      path: "/aiwow/ai-palmistry-scanner",
       element: PalmistryLanding,
       header: false,
       footer: false,
@@ -574,7 +574,7 @@ export const PATH = {
       footer: false,
     },
     FACE_READING_LANDING: {
-      path: "/aiwow/face-reading",
+      path: "/aiwow/astro-face-reading",
       element: FaceReadingLanding,
       header: false,
       footer: false,
@@ -604,7 +604,7 @@ export const PATH = {
       footer: false,
     },
     SIGNATURE_LANDING: {
-      path: "/aiwow/signature",
+      path: "/aiwow/signature-analysis",
       element: SignatureLanding,
       header: false,
       footer: false,
@@ -634,7 +634,7 @@ export const PATH = {
       footer: false,
     },
     GEMSTONE_LANDING: {
-      path: "/aiwow/gemstone",
+      path: "/aiwow/gemstone-authenticity",
       element: GemstoneLanding,
       header: false,
       footer: false,
@@ -664,7 +664,7 @@ export const PATH = {
       footer: false,
     },
     CLOTH_COLOR_LANDING: {
-      path: "/aiwow/cloth-color",
+      path: "/aiwow/clothes-colour-analysis",
       element: ClothColorLanding,
       header: false,
       footer: false,
@@ -700,7 +700,7 @@ export const PATH = {
       footer: false,
     },
     TALK_TO_KUNDLI_CHAT: {
-      path: "/aiwow/talk-to-kundli",
+      path: "/aiwow/talk-to-your-kundli",
       element: TalkToKundliChat,
       header: false,
       footer: false,
@@ -748,7 +748,7 @@ export const PATH = {
     //   footer: false,
     // },
     AURA_LANDING: {
-      path: "/aiwow/aura",
+      path: "/aiwow/aura-photography",
       element: AuraLanding,
       header: false,
       footer: false,
