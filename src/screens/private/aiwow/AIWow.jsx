@@ -46,6 +46,11 @@ const AIWow = () => {
   // Get profiles from API
   const profiles = data?.data || [];
 
+  // Get explore page sections
+
+  const aiwowSections = aiwowData?.data?.list || [];
+
+
   // Initialize from localStorage and validate against API profiles
   useEffect(() => {
     if (!profiles.length || isFetching) return;
