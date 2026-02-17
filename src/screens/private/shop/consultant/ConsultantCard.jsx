@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Divider, PrimaryText } from "../../../../component";
-import { AppIcons } from "../../../../utils/appImages";
+import { AppIcons, DefaultImages } from "../../../../utils/appImages";
 import { GetString } from "../../../../utils/helper/string.utils";
 import { appColors } from "../../../../utils/theme";
 import styles from "./ConsultantCard.module.scss";
@@ -23,7 +23,7 @@ const ConsultantCard = ({ data }) => {
       >
         <div className={styles.avatarWrapper}>
           <img
-            src={data?.imageUrl}
+            src={data?.imageUrl || DefaultImages.AstrologerNumerologyDefault}
             alt={data?.firstName}
             className={styles.avatar}
           />
