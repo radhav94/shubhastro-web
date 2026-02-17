@@ -26,11 +26,11 @@ export const buildKundliPayload = (formData) => {
     month: monthMap[formData.month],
     year: Number(formData.year),
 
-    //  FIXED
-    hour: hour24,
-    min: Number(formData.minute),
+    //  FIXED - Format as 2-digit strings
+    hour: String(hour24).padStart(2, "0"),
+    min: String(Number(formData.minute)).padStart(2, "0"),
 
-    second: 0,
+    second: "00",
     place: formData.birthPlace,
     lat: Number(formData.latitude),
     lon: Number(formData.longitude),
