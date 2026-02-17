@@ -1,9 +1,8 @@
 import styles from "./ChatAstrologerCard.module.scss";
 import { FaStar } from "react-icons/fa";
 import { PiBookOpenTextLight } from "react-icons/pi";
-import astrologerImage from "../../../assets/images/top-rated-1.svg";
 import { useNavigate } from "react-router-dom";
-import { DefaultImages } from "../../../utils/appImages";
+import { getAstrologerDefaultImage } from "../../../utils/appImages";
 
 const ChatAstrologerCard = ({ data, onConnect }) => {
   const navigate = useNavigate();
@@ -42,25 +41,25 @@ const ChatAstrologerCard = ({ data, onConnect }) => {
     })
     .slice(0, 2);
 
-  // Handle image - try multiple possible fields
+  // Handle image - try multiple possible fields with gender-based fallback
   const imageUrl =
     data?.imageUrl ||
     data?.aadharCardImgUrl ||
     data?.panCardImgUrl ||
-    astrologerImage;
+    getAstrologerDefaultImage(data?.gender);
 
   return (
     <div className={styles.card}>
       <div className={styles.imageSection}>
         <img
-          src={imageUrl || DefaultImages.AstrologerDefaultImg}
+          src={imageUrl}
           alt={`${data?.firstName} ${data?.lastName}`}
           onClick={() =>
             navigate(`/astrologer/${data?.astrologerId || data?._id}`)
           }
           className={styles.astrologerImage}
           onError={(e) => {
-            e.target.src = astrologerImage;
+            e.target.src = getAstrologerDefaultImage(data?.gender);
           }}
         />
         {rating && <div className={styles.ratingBadge}>
