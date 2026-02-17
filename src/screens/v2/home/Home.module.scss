@@ -495,6 +495,7 @@
   flex-direction: column;
   gap: 0px;
   min-width: 0; // Prevents overflow issues
+  padding-bottom: 30px;
 }
 
 /* Today's Horoscope Section */
@@ -3117,14 +3118,14 @@
 
 .discoverCard:nth-child(1) .discoverImage {
   // width: 100%;
-  max-height: 100%;
+  max-height: 80%;
   top: 0;
   right: 0;
 }
 
 .discoverCard:nth-child(3) .discoverImage {
   // width: auto;
-  max-height: 100%;
+  max-height: 80%;
   top: 0;
   right: 0;
   @media screen and (width <= 767px) {
