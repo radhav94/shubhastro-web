@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { logout } from '../auth/authSlice';
 
 // Helper to create initial state for image-based modules
 const createImageModuleState = (extraFields = {}) => ({
@@ -187,6 +188,12 @@ const aiwowSlice = createSlice({
 
     // Clear all AI Wow data
     clearAllAiwowData: () => initialState,
+  },
+  extraReducers: (builder) => {
+    // Listen to logout action from authSlice
+    builder.addCase(logout, (state) => {
+      state.selectedKundliProfile = null;
+    });
   },
 });
 

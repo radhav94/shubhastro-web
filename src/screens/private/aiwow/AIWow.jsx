@@ -10,6 +10,7 @@ import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServi
 import { useGetAiWowPageDataQuery } from "../../../redux/api/aiwow/aiwowApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
+import { logout } from "../../../redux/auth/authSlice";
 
 const AIWow = () => {
   const navigate = useNavigate();
@@ -115,6 +116,12 @@ const AIWow = () => {
   };
 
   const handleClick = (slug) => {
+    // Check if user is logged in
+    if (!token) {
+      navigate("/login?skip=welcome");
+      return;
+    }
+
     if (slug == "ar-vastu-scanner") {
       setShowMobileAppModal(true);
     } else {
