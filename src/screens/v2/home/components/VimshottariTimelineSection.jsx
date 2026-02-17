@@ -243,9 +243,9 @@ const VimshottariTimelineSection = () => {
 
       {/* Dasha Cards - Always show in slider */}
       <div className={styles.dashaSliderWrapper}>
-        <button className={styles.sliderBtn} onClick={handleScrollLeft}>
+        {/* <button className={styles.sliderBtn} onClick={handleScrollLeft}>
           <ChevronLeft size={24} />
-        </button>
+        </button> */}
 
         <div className={styles.dashaCardsSlider} ref={cardsContainerRef}>
           {dashaData.map((dasha) => (
@@ -282,9 +282,9 @@ const VimshottariTimelineSection = () => {
           ))}
         </div>
 
-        <button className={styles.sliderBtn} onClick={handleScrollRight}>
+        {/* <button className={styles.sliderBtn} onClick={handleScrollRight}>
           <ChevronRight size={24} />
-        </button>
+        </button> */}
       </div>
 
       {/* Timeline Bars - Show only current periods */}
