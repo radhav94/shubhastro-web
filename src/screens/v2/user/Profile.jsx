@@ -837,17 +837,19 @@ const Profile = () => {
   };
 
   const handleLogout = () => {
+   
     // Dispatch Redux logout action
     dispatch(logout());
-
+    
     // Clear all authentication related data from localStorage
-    localStorage.removeItem("shubhtalk_customer_token");
-    localStorage.removeItem("shubhtalk_role");
-    localStorage.removeItem("shubhtalk_user");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("userData");
-    localStorage.removeItem("astro_wallet_balance");
+    localStorage.clear();
+    // localStorage.removeItem("shubhtalk_customer_token");
+    // localStorage.removeItem("shubhtalk_role");
+    // localStorage.removeItem("shubhtalk_user");
+    // localStorage.removeItem("accessToken");
+    // localStorage.removeItem("refreshToken");
+    // localStorage.removeItem("userData");
+    // localStorage.removeItem("astro_wallet_balance");
 
     window.dispatchEvent(new Event("auth-change"));
 
