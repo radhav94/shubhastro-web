@@ -1,28 +1,29 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import styles from './ClothColorAnalysis.module.scss';
 import { analyzeClothColor } from '../../../../services/appServices/aiWowService';
-import { Toast } from '../../../../component';
+import { setClothColorResult, clearClothColorData } from '../../../../redux/aiwow/aiwowSlice';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const ClothColorAnalysis = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const clothImage = useSelector((state) => state.aiwow.clothColor.image);
+  const formData = useSelector((state) => state.aiwow.clothColor.formData);
   const [progress, setProgress] = useState(0);
-  const [clothImage, setClothImage] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const storedImage = localStorage.getItem('clothColorImage');
-    if (storedImage) {
-      setClothImage(storedImage);
-      performAnalysis(storedImage);
+    if (clothImage) {
+      performAnalysis(clothImage);
     } else {
-      // No image found, silently redirect back
-      navigate('/aiwow/cloth-color/instructions');
+      navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path);
       return;
     }
-  }, [navigate]);
+  }, [clothImage, navigate]);
 
   const performAnalysis = async (imageData) => {
     setIsAnalyzing(true);
@@ -38,28 +39,25 @@ const ClothColorAnalysis = () => {
         });
       }, 200);
 
-      // Get form data from localStorage
-      const storedFormData = localStorage.getItem('clothColorFormData');
-      const birthData = storedFormData ? JSON.parse(storedFormData) : null;
+      // Get form data from Redux
+      const birthData = formData || null;
 
       const result = await analyzeClothColor(imageData, birthData);
 
       clearInterval(progressInterval);
 
       if (result.success) {
-        localStorage.setItem('clothColorResult', JSON.stringify(result.data));
+        dispatch(setClothColorResult(result.data));
         
         setProgress(100);
         setAnalysisComplete(true);
         
         setTimeout(() => {
-          navigate('/aiwow/cloth-color/result');
+          navigate(PATH.privateRoutes.CLOTH_COLOR_RESULT.path);
         }, 1000);
       } else {
-        // Clear old cloth color data from localStorage on failure
-        localStorage.removeItem('clothColorResult');
-        localStorage.removeItem('clothColorImage');
-        localStorage.removeItem('clothColorFormData');
+        // DON'T clear data on error - keep image and form data for retry
+        // dispatch(clearClothColorData());
         
         setProgress(0);
         setError(result.error || { message: 'Analysis failed. Please try again.' });
@@ -67,10 +65,8 @@ const ClothColorAnalysis = () => {
     } catch (error) {
       console.error('Analysis error:', error);
       
-      // Clear old cloth color data from localStorage on error
-      localStorage.removeItem('clothColorResult');
-      localStorage.removeItem('clothColorImage');
-      localStorage.removeItem('clothColorFormData');
+      // DON'T clear data on error - keep image and form data for retry
+      // dispatch(clearClothColorData());
       
       setProgress(0);
       setError({ message: 'An unexpected error occurred. Please try again.' });
@@ -81,13 +77,15 @@ const ClothColorAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate('/aiwow/cloth-color/result');
+      navigate(PATH.privateRoutes.CLOTH_COLOR_RESULT.path);
     }
   };
 
   const handleRetry = () => {
+    // Clear error and data, then navigate back to start over
     setError(null);
-    navigate('/aiwow/cloth-color/instructions');
+    dispatch(clearClothColorData());
+    navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path);
   };
 
   return (

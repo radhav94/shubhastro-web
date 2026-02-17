@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "../redux/auth/authSlice";
 import formReducer from "../redux/kundliform/formSlice";
+import aiwowReducer from "../redux/aiwow/aiwowSlice";
 import { baseApi } from "../redux/api/baseApi/baseApi";
 import { pythonApi } from "../redux/api/baseApi/pythonApi";
 import { horoscopeApi } from "../redux/api/baseApi/horoscopeBaseApi";
@@ -16,6 +17,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     form: formReducer,
+    aiwow: aiwowReducer,
     [baseApi.reducerPath]: baseApi.reducer,
     [privateRequestNew.reducerPath]: privateRequestNew.reducer,
     [localReuqqestApi.reducerPath]: localReuqqestApi.reducer,

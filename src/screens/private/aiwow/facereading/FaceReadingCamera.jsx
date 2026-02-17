@@ -1,10 +1,13 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './FaceReadingCamera.module.scss';
 import { useFaceDetection } from '../../../../utils/hooks/useFaceDetection';
+import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
 
 const FaceReadingCamera = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
@@ -184,7 +187,7 @@ const FaceReadingCamera = () => {
 
   const proceedWithImage = () => {
     if (capturedImage) {
-      localStorage.setItem('faceReadingImage', capturedImage);
+      dispatch(setFaceReadingImage(capturedImage));
       navigate('/aiwow/face-reading/capture');
     }
   };

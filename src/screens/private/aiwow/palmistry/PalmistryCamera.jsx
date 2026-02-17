@@ -1,10 +1,14 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from './PalmistryCamera.module.scss';
 import { useHandDetection } from '../../../../utils/hooks/useHandDetection';
+import { setPalmistryImage } from '../../../../redux/aiwow/aiwowSlice';
 
 const PalmistryCamera = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const selectedHand = useSelector((state) => state.aiwow.palmistry.selectedHand) || 'right';
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
@@ -12,10 +16,6 @@ const PalmistryCamera = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
-  // Initialize with localStorage value or default to 'right'
-  const [selectedHand, setSelectedHand] = useState(() => {
-    return localStorage.getItem('selectedHand') || 'right';
-  });
 
   const {
     handsLoaded,
@@ -132,7 +132,7 @@ const PalmistryCamera = () => {
     // Start camera with new mode will be handled by useEffect
   };
 
-  const captureImage = () => {
+  const captureImage = async () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -143,10 +143,94 @@ const PalmistryCamera = () => {
       const context = canvas.getContext('2d');
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       
-      const imageData = canvas.toDataURL('image/jpeg');
-      setCapturedImage(imageData);
+      // Get the full image data
+      const fullImageData = canvas.toDataURL('image/jpeg', 0.95);
+      
+      // Try to crop to hand region if hand is detected
+      let croppedImage = fullImageData;
+      
+      if (handDetected && detectionCanvasRef.current) {
+        try {
+          // Get hand landmarks from detection canvas
+          const detectionCanvas = detectionCanvasRef.current;
+          const detectionContext = detectionCanvas.getContext('2d');
+          const imageData = detectionContext.getImageData(0, 0, detectionCanvas.width, detectionCanvas.height);
+          
+          // Find bounding box of detected hand
+          const bounds = findHandBounds(imageData);
+          
+          if (bounds) {
+            // Add padding around the hand (20% on each side)
+            const padding = 0.2;
+            const paddedWidth = bounds.width * (1 + padding * 2);
+            const paddedHeight = bounds.height * (1 + padding * 2);
+            const paddedX = Math.max(0, bounds.x - bounds.width * padding);
+            const paddedY = Math.max(0, bounds.y - bounds.height * padding);
+            
+            // Ensure we don't exceed canvas bounds
+            const cropX = Math.max(0, paddedX);
+            const cropY = Math.max(0, paddedY);
+            const cropWidth = Math.min(paddedWidth, canvas.width - cropX);
+            const cropHeight = Math.min(paddedHeight, canvas.height - cropY);
+            
+            // Create a new canvas for the cropped image
+            const cropCanvas = document.createElement('canvas');
+            cropCanvas.width = cropWidth;
+            cropCanvas.height = cropHeight;
+            const cropContext = cropCanvas.getContext('2d');
+            
+            // Draw the cropped region
+            cropContext.drawImage(
+              canvas,
+              cropX, cropY, cropWidth, cropHeight,
+              0, 0, cropWidth, cropHeight
+            );
+            
+            croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
+            console.log('Hand cropped successfully');
+          }
+        } catch (error) {
+          console.error('Error cropping hand:', error);
+          // Fall back to full image if cropping fails
+        }
+      }
+      
+      setCapturedImage(croppedImage);
       stopCamera();
     }
+  };
+
+  // Helper function to find hand bounding box from image data
+  const findHandBounds = (imageData) => {
+    const { data, width, height } = imageData;
+    let minX = width, minY = height, maxX = 0, maxY = 0;
+    let foundPixels = false;
+    
+    // Scan for non-transparent pixels (hand detection overlay)
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const index = (y * width + x) * 4;
+        const alpha = data[index + 3];
+        
+        // If pixel is not fully transparent, it's part of the hand
+        if (alpha > 0) {
+          foundPixels = true;
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
+        }
+      }
+    }
+    
+    if (!foundPixels) return null;
+    
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY
+    };
   };
 
   const retakePhoto = () => {
@@ -155,9 +239,8 @@ const PalmistryCamera = () => {
   };
 
   const proceedWithImage = () => {
-    // Store the captured image (you can use localStorage, Redux, or pass via state)
     if (capturedImage) {
-      localStorage.setItem('palmistryImage', capturedImage);
+      dispatch(setPalmistryImage(capturedImage));
       navigate('/aiwow/palmistry/capture');
     }
   };

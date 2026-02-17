@@ -1,29 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import styles from './SignatureAnalysis.module.scss';
 import { Toast } from '../../../../component';
 import { analyzeSignature } from '../../../../services/appServices/aiWowService';
+import { setSignatureResult, clearSignatureData } from '../../../../redux/aiwow/aiwowSlice';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const SignatureAnalysis = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const signatureImage = useSelector((state) => state.aiwow.signature.image);
   const [progress, setProgress] = useState(0);
-  const [signatureImage, setSignatureImage] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Get the captured/uploaded image from localStorage
-    const storedImage = localStorage.getItem('signatureImage');
-    if (storedImage) {
-      setSignatureImage(storedImage);
-      performAnalysis(storedImage);
+    if (signatureImage) {
+      performAnalysis(signatureImage);
     } else {
-      // If no image, silently redirect back to instructions
-      navigate('/aiwow/signature/instructions');
+      navigate(PATH.privateRoutes.SIGNATURE_INSTRUCTIONS.path);
       return;
     }
-  }, [navigate]);
+  }, [navigate, signatureImage]);
 
   const performAnalysis = async (imageData) => {
     setIsAnalyzing(true);
@@ -46,18 +46,17 @@ const SignatureAnalysis = () => {
       clearInterval(progressInterval);
 
       if (result.success) {
-        localStorage.setItem('signatureResult', JSON.stringify(result.data));
+        dispatch(setSignatureResult(result.data));
         
         setProgress(100);
         setAnalysisComplete(true);
         
         setTimeout(() => {
-          navigate('/aiwow/signature/result');
+          navigate(PATH.privateRoutes.SIGNATURE_RESULT.path);
         }, 1000);
       } else {
-        // Clear old signature data from localStorage on failure
-        localStorage.removeItem('signatureResult');
-        localStorage.removeItem('signatureImage');
+        // DON'T clear data on error - keep image for retry
+        // dispatch(clearSignatureData());
         
         setProgress(0);
         setError(result.error || { message: 'Analysis failed. Please try again.' });
@@ -65,9 +64,8 @@ const SignatureAnalysis = () => {
     } catch (error) {
       console.error('Analysis error:', error);
       
-      // Clear old signature data from localStorage on error
-      localStorage.removeItem('signatureResult');
-      localStorage.removeItem('signatureImage');
+      // DON'T clear data on error - keep image for retry
+      // dispatch(clearSignatureData());
       
       setProgress(0);
       setError({ message: 'An unexpected error occurred. Please try again.' });
@@ -78,13 +76,15 @@ const SignatureAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate('/aiwow/signature/result');
+      navigate(PATH.privateRoutes.SIGNATURE_RESULT.path);
     }
   };
 
   const handleRetry = () => {
+    // Clear error and data, then navigate back to start over
     setError(null);
-    navigate('/aiwow/signature/instructions');
+    dispatch(clearSignatureData());
+    navigate(PATH.privateRoutes.SIGNATURE_INSTRUCTIONS.path);
   };
 
   return (

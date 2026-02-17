@@ -1,29 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import styles from './FaceReadingAnalysis.module.scss';
 import { analyzeFace } from '../../../../services/appServices/aiWowService';
+import { setFaceReadingResult, clearFaceReadingData } from '../../../../redux/aiwow/aiwowSlice';
 import { Toast } from '../../../../component';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const FaceReadingAnalysis = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const faceImage = useSelector((state) => state.aiwow.faceReading.image);
   const [progress, setProgress] = useState(0);
-  const [faceImage, setFaceImage] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Get the captured/uploaded image from localStorage
-    const storedImage = localStorage.getItem('faceReadingImage');
-    if (storedImage) {
-      setFaceImage(storedImage);
-      performAnalysis(storedImage);
+    if (faceImage) {
+      performAnalysis(faceImage);
     } else {
-      // If no image, silently redirect back to instructions
-      navigate('/aiwow/face-reading/instructions');
+      navigate(PATH.privateRoutes.FACE_READING_INSTRUCTIONS.path);
       return;
     }
-  }, [navigate]);
+  }, [navigate, faceImage]);
 
   const performAnalysis = async (imageData) => {
     setIsAnalyzing(true);
@@ -46,33 +46,30 @@ const FaceReadingAnalysis = () => {
       clearInterval(progressInterval);
 
       if (result.success) {
-        // Store the analysis result
-        localStorage.setItem('faceReadingResult', JSON.stringify(result.data));
+        dispatch(setFaceReadingResult(result.data));
         
-        // Complete progress
         setProgress(100);
         setAnalysisComplete(true);
         
-        // Navigate to results after a short delay
         setTimeout(() => {
-          navigate('/aiwow/face-reading/result');
+          navigate(PATH.privateRoutes.FACE_READING_RESULT.path);
         }, 1000);
       } else {
-        // Clear old face reading data from localStorage on failure
-        localStorage.removeItem('faceReadingResult');
-        localStorage.removeItem('faceReadingImage');
+        // DON'T clear data on error - keep image for retry
+        // dispatch(clearFaceReadingData());
         
         setProgress(0);
+        // Don't show Toast here - interceptor already showed it
         setError(result.error || { message: 'Analysis failed. Please try again.' });
       }
     } catch (error) {
       console.error('Analysis error:', error);
       
-      // Clear old face reading data from localStorage on error
-      localStorage.removeItem('faceReadingResult');
-      localStorage.removeItem('faceReadingImage');
+      // DON'T clear data on error - keep image for retry
+      // dispatch(clearFaceReadingData());
       
       setProgress(0);
+      // Don't show Toast here - interceptor already showed it
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {
       setIsAnalyzing(false);
@@ -81,13 +78,15 @@ const FaceReadingAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate('/aiwow/face-reading/result');
+      navigate(PATH.privateRoutes.FACE_READING_RESULT.path);
     }
   };
 
   const handleRetry = () => {
+    // Clear error and data, then navigate back to start over
     setError(null);
-    navigate('/aiwow/face-reading/instructions');
+    dispatch(clearFaceReadingData());
+    navigate(PATH.privateRoutes.FACE_READING_INSTRUCTIONS.path);
   };
 
   return (

@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './PalmistryHandSelection.module.scss';
+import { setPalmistrySelectedHand } from '../../../../redux/aiwow/aiwowSlice';
 
 const PalmistryHandSelection = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [selectedHand, setSelectedHand] = useState(null);
 
   const handleHandSelect = (hand) => {
@@ -12,8 +15,7 @@ const PalmistryHandSelection = () => {
 
   const handleProceed = () => {
     if (selectedHand) {
-      // Store selected hand in localStorage
-      localStorage.setItem('selectedHand', selectedHand);
+      dispatch(setPalmistrySelectedHand(selectedHand));
       navigate('/aiwow/palmistry/instructions');
     }
   };

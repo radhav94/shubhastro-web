@@ -1,10 +1,13 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './GemstoneCamera.module.scss';
 import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
+import { setGemstoneImage } from '../../../../redux/aiwow/aiwowSlice';
 
 const GemstoneCamera = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
@@ -132,7 +135,7 @@ const GemstoneCamera = () => {
 
   const proceedWithImage = () => {
     if (capturedImage) {
-      localStorage.setItem('gemstoneImage', capturedImage);
+      dispatch(setGemstoneImage(capturedImage));
       navigate('/aiwow/gemstone/capture');
     }
   };

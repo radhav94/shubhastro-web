@@ -1,22 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from './ClothColorForm.module.scss';
 import { Toast } from '../../../../component';
+import { setClothColorFormData } from '../../../../redux/aiwow/aiwowSlice';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const ClothColorForm = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
   const [formData, setFormData] = useState({
     intention: 'career_success',
   });
 
+  // Check if profile is selected from Redux
   useEffect(() => {
-    // Check if Kundli profile is selected
-    const profileStr = localStorage.getItem('selectedKundliProfile');
-    if (!profileStr) {
+    if (!selectedProfile) {
       Toast.error('Please select a Kundli profile first from AI WOW main page');
-      navigate('/aiwow');
+      navigate(PATH.privateRoutes.AIWOW.path);
     }
-  }, [navigate]);
+  }, [selectedProfile, navigate]);
 
   const intentions = [
     {
@@ -61,11 +65,11 @@ const ClothColorForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Store form data in localStorage
-    localStorage.setItem('clothColorFormData', JSON.stringify(formData));
+    // Store form data in Redux
+    dispatch(setClothColorFormData(formData));
     
     // Navigate to instructions
-    navigate('/aiwow/cloth-color/instructions');
+    navigate(PATH.privateRoutes.CLOTH_COLOR_INSTRUCTIONS.path);
   };
 
   return (

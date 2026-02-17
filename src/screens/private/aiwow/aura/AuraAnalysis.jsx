@@ -1,32 +1,51 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import styles from './AuraAnalysis.module.scss';
 import { analyzeAura } from '../../../../services/appServices/aiWowService';
+import { setAuraResult, clearAuraData } from '../../../../redux/aiwow/aiwowSlice';
 import { Toast } from '../../../../component';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const AuraAnalysis = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const auraImage = useSelector((state) => state.aiwow.aura.image);
   const [progress, setProgress] = useState(0);
-  const [auraImage, setAuraImage] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const storedImage = localStorage.getItem('auraImage');
-    if (storedImage) {
-      setAuraImage(storedImage);
-      performAnalysis(storedImage);
-    } else {
-      navigate('/aiwow/aura/instructions');
-      return;
+    // Only run analysis if we have an image and haven't started yet
+    if (auraImage && !isAnalyzing && !analysisComplete && !error) {
+      // Validate image format
+      if (typeof auraImage !== 'string' || !auraImage.startsWith('data:image/')) {
+        console.error('Invalid image format in Redux state:', typeof auraImage);
+        Toast.error('Invalid image format. Please try again.');
+        dispatch(clearAuraData());
+        navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path);
+        return;
+      }
+
+      performAnalysis(auraImage);
+    } else if (!auraImage && !isAnalyzing && !analysisComplete && !error) {
+      // Only redirect if we don't have an image and we're not in the middle of anything
+      console.warn('No aura image found in Redux state, redirecting to instructions');
+      navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path, { replace: true });
     }
-  }, [navigate]);
+  }, [auraImage]); // Only depend on auraImage to avoid infinite loops
 
   const performAnalysis = async (imageData) => {
     setIsAnalyzing(true);
+    setError(null);
     
     try {
+      // Validate image data before sending
+      if (!imageData || typeof imageData !== 'string') {
+        throw new Error('Invalid image data');
+      }
+
       const progressInterval = setInterval(() => {
         setProgress(prev => {
           if (prev >= 90) {
@@ -41,32 +60,71 @@ const AuraAnalysis = () => {
 
       clearInterval(progressInterval);
 
+      // Validate API response structure
+      if (!result || typeof result !== 'object') {
+        throw new Error('Invalid API response format');
+      }
+
       if (result.success) {
-        localStorage.setItem('auraResult', JSON.stringify(result.data));
+        // Validate result data exists
+        if (!result.data) {
+          console.error('API returned success but no data');
+          throw new Error('No analysis data received from server');
+        }
+
+        // Store result in Redux
+        dispatch(setAuraResult(result.data));
         
         setProgress(100);
         setAnalysisComplete(true);
         
         setTimeout(() => {
-          navigate('/aiwow/aura/result');
+          navigate(PATH.privateRoutes.AURA_RESULT.path);
         }, 1000);
       } else {
-        // Clear old aura data from localStorage on failure
-        localStorage.removeItem('auraResult');
-        localStorage.removeItem('auraImage');
+        // DON'T clear data on error - keep image for retry
+        // dispatch(clearAuraData());
         
         setProgress(0);
-        setError(result.error || { message: 'Analysis failed. Please try again.' });
+        
+        // Handle structured error from API
+        const errorMessage = result.error?.message || result.message || 'Analysis failed. Please try again.';
+        const errorDetails = result.error?.details || null;
+        
+        // Don't show Toast here - interceptor already showed it
+        // Just display the error details on screen
+        setError({ 
+          message: errorMessage,
+          details: errorDetails
+        });
       }
     } catch (error) {
       console.error('Analysis error:', error);
       
-      // Clear old aura data from localStorage on error
-      localStorage.removeItem('auraResult');
-      localStorage.removeItem('auraImage');
+      // DON'T clear data on error - keep image for retry
+      // dispatch(clearAuraData());
       
       setProgress(0);
-      setError({ message: 'An unexpected error occurred. Please try again.' });
+      
+      // Determine error message
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      
+      if (error.message === 'Network Error' || error.message === 'Failed to fetch') {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      } else if (error.message === 'Invalid image data') {
+        errorMessage = 'Invalid image. Please capture a new image.';
+      } else if (error.response?.status === 413) {
+        errorMessage = 'Image file is too large. Please use a smaller image.';
+      } else if (error.response?.status === 429) {
+        errorMessage = 'Too many requests. Please wait a moment and try again.';
+      } else if (error.response?.status >= 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      // Don't show Toast here - interceptor already showed it
+      setError({ message: errorMessage });
     } finally {
       setIsAnalyzing(false);
     }
@@ -74,13 +132,15 @@ const AuraAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate('/aiwow/aura/result');
+      navigate(PATH.privateRoutes.AURA_RESULT.path);
     }
   };
 
   const handleRetry = () => {
+    // Clear error and data, then navigate back to start over
     setError(null);
-    navigate('/aiwow/aura/instructions');
+    dispatch(clearAuraData());
+    navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path);
   };
 
   return (

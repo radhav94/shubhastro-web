@@ -1,43 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import styles from './AuraResult.module.scss';
 import { Toast } from '../../../../component';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const AuraResult = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overall');
-  const [analysisData, setAnalysisData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [validationError, setValidationError] = useState(null);
+  
+  const analysisData = useSelector((state) => state.aiwow.aura.result);
+  const auraImage = useSelector((state) => state.aiwow.aura.image);
 
   useEffect(() => {
-    const storedResult = localStorage.getItem('auraResult');
-    
-    if (storedResult) {
-      try {
-        const parsedResult = JSON.parse(storedResult);
-        // Handle both nested data and direct response
-        const data = parsedResult.data || parsedResult;
-        if (data && (data.aura || data.astrologicalData)) {
-          setAnalysisData(data);
-        } else {
-          Toast.error('Invalid analysis data format');
-          navigate('/aiwow/aura/instructions');
-          return;
-        }
-      } catch (error) {
-        console.error('Error parsing result:', error);
-        Toast.error('Failed to load analysis results');
-        navigate('/aiwow/aura/instructions');
-        return;
-      }
-    } else {
-      Toast.error('No analysis results found');
-      navigate('/aiwow/aura/instructions');
+    console.log('AuraResult - Loading result:', {
+      hasReduxResult: !!analysisData,
+      reduxResultType: typeof analysisData,
+      reduxResultKeys: analysisData ? Object.keys(analysisData) : []
+    });
+
+    // Validate Redux state
+    if (!analysisData) {
+      console.error('No analysis data found in Redux state');
+      Toast.error('No analysis results found. Please analyze your aura first.');
+      navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path, { replace: true });
       return;
     }
-    
-    setLoading(false);
-  }, [navigate]);
+
+    // Validate data structure - handle both direct data and nested data
+    try {
+      const actualData = analysisData.data || analysisData;
+      
+      if (typeof actualData !== 'object') {
+        throw new Error('Invalid data format: expected object');
+      }
+
+      console.log('AuraResult - Validated data:', {
+        hasActualData: !!actualData,
+        actualDataKeys: Object.keys(actualData),
+        hasOverallReading: !!(actualData.overallReading),
+        hasAuraColors: !!(actualData.auraColors),
+        hasChakraAnalysis: !!(actualData.chakraAnalysis)
+      });
+
+      // Check for required fields (adjust based on your API response)
+      const hasValidStructure = 
+        actualData.overallReading || 
+        actualData.auraColors || 
+        actualData.chakraAnalysis ||
+        actualData.energyLevels;
+
+      if (!hasValidStructure) {
+        console.warn('Analysis data missing expected fields:', actualData);
+        setValidationError('Incomplete analysis data received. Some information may be missing.');
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.error('Data validation error:', error);
+      Toast.error('Invalid analysis data format. Please try again.');
+      navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path, { replace: true });
+    }
+  }, [analysisData, navigate]);
 
   const tabs = [
     { id: 'overall', label: 'Overall' },
@@ -62,7 +88,7 @@ const AuraResult = () => {
       <div className={styles.container}>
         <div className={styles.errorContainer}>
           <p>No analysis data available</p>
-          <button onClick={() => navigate('/aiwow/aura/instructions')}>
+          <button onClick={() => navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path)}>
             Try Again
           </button>
         </div>
@@ -78,7 +104,7 @@ const AuraResult = () => {
   } = analysisData;
 
   // Map API response to component structure
-  const auraImage = imageUrl;
+  const displayImage = imageUrl || auraImage;
   const dominantColor = {
     color: aura.primaryColor,
     percentage: aura.intensity,
@@ -128,7 +154,7 @@ const AuraResult = () => {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate('/aiwow')}>
+        <button className={styles.backButton} onClick={() => navigate(PATH.privateRoutes.AIWOW.path)}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -137,9 +163,9 @@ const AuraResult = () => {
       </header>
 
       <div className={styles.content}>
-        {auraImage && (
+        {displayImage && (
           <div className={styles.imageSection}>
-            <img src={auraImage} alt="Aura" className={styles.auraImage} />
+            <img src={displayImage} alt="Aura" className={styles.auraImage} />
           </div>
         )}
 
@@ -382,7 +408,7 @@ const AuraResult = () => {
 
         <button 
           className={styles.consultButton}
-          onClick={() => navigate('/talk-to-astrologer')}
+          onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
         >
           Consult with Expert Astrologer
         </button>

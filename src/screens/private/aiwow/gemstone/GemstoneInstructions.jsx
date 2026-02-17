@@ -1,10 +1,13 @@
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './GemstoneInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
+import { setGemstoneImage } from '../../../../redux/aiwow/aiwowSlice';
 
 const GemstoneInstructions = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const fileInputRef = useRef(null);
 
   const handleCamera = () => {
@@ -20,7 +23,7 @@ const GemstoneInstructions = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        localStorage.setItem('gemstoneImage', reader.result);
+        dispatch(setGemstoneImage(reader.result));
         navigate('/aiwow/gemstone/capture');
       };
       reader.readAsDataURL(file);

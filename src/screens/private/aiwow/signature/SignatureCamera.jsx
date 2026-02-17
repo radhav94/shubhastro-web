@@ -1,10 +1,13 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './SignatureCamera.module.scss';
 import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
+import { setSignatureImage } from '../../../../redux/aiwow/aiwowSlice';
 
 const SignatureCamera = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
@@ -106,7 +109,7 @@ const SignatureCamera = () => {
     // Start camera with new mode will be handled by useEffect
   };
 
-  const captureImage = () => {
+  const captureImage = async () => {
     stopDetection();
     
     if (videoRef.current && canvasRef.current) {
@@ -119,10 +122,97 @@ const SignatureCamera = () => {
       const context = canvas.getContext('2d');
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       
-      const imageData = canvas.toDataURL('image/jpeg');
-      setCapturedImage(imageData);
+      // Get the full image data
+      const fullImageData = canvas.toDataURL('image/jpeg', 0.95);
+      
+      // Try to crop to signature region
+      let croppedImage = fullImageData;
+      
+      try {
+        // Get image data for processing
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        
+        // Find signature bounds using edge detection
+        const bounds = findSignatureBounds(imageData);
+        
+        if (bounds && bounds.width > 50 && bounds.height > 20) {
+          // Add padding around the signature (15% on each side)
+          const padding = 0.15;
+          const paddedWidth = bounds.width * (1 + padding * 2);
+          const paddedHeight = bounds.height * (1 + padding * 2);
+          const paddedX = Math.max(0, bounds.x - bounds.width * padding);
+          const paddedY = Math.max(0, bounds.y - bounds.height * padding);
+          
+          // Ensure we don't exceed canvas bounds
+          const cropX = Math.max(0, paddedX);
+          const cropY = Math.max(0, paddedY);
+          const cropWidth = Math.min(paddedWidth, canvas.width - cropX);
+          const cropHeight = Math.min(paddedHeight, canvas.height - cropY);
+          
+          // Create a new canvas for the cropped image
+          const cropCanvas = document.createElement('canvas');
+          cropCanvas.width = cropWidth;
+          cropCanvas.height = cropHeight;
+          const cropContext = cropCanvas.getContext('2d');
+          
+          // Draw the cropped region
+          cropContext.drawImage(
+            canvas,
+            cropX, cropY, cropWidth, cropHeight,
+            0, 0, cropWidth, cropHeight
+          );
+          
+          croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
+          console.log('Signature cropped successfully');
+        }
+      } catch (error) {
+        console.error('Error cropping signature:', error);
+        // Fall back to full image if cropping fails
+      }
+      
+      setCapturedImage(croppedImage);
       stopCamera();
     }
+  };
+
+  // Helper function to find signature bounding box using edge detection
+  const findSignatureBounds = (imageData) => {
+    const { data, width, height } = imageData;
+    let minX = width, minY = height, maxX = 0, maxY = 0;
+    let foundPixels = false;
+    
+    // Convert to grayscale and find dark pixels (signature ink)
+    const threshold = 180; // Pixels darker than this are considered part of signature
+    
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const index = (y * width + x) * 4;
+        const r = data[index];
+        const g = data[index + 1];
+        const b = data[index + 2];
+        
+        // Calculate grayscale value
+        const gray = (r + g + b) / 3;
+        
+        // If pixel is dark enough, it's likely part of the signature
+        if (gray < threshold) {
+          foundPixels = true;
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
+        }
+      }
+    }
+    
+    if (!foundPixels) return null;
+    
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY
+    };
   };
 
   const retakePhoto = () => {
@@ -132,7 +222,7 @@ const SignatureCamera = () => {
 
   const proceedWithImage = () => {
     if (capturedImage) {
-      localStorage.setItem('signatureImage', capturedImage);
+      dispatch(setSignatureImage(capturedImage));
       navigate('/aiwow/signature/capture');
     }
   };

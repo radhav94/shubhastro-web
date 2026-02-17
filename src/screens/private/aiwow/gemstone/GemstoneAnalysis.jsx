@@ -1,29 +1,29 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import styles from './GemstoneAnalysis.module.scss';
 import { analyzeGemstone } from '../../../../services/appServices/aiWowService';
+import { setGemstoneResult, clearGemstoneData } from '../../../../redux/aiwow/aiwowSlice';
 import { Toast } from '../../../../component';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const GemstoneAnalysis = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const gemstoneImage = useSelector((state) => state.aiwow.gemstone.image);
   const [progress, setProgress] = useState(0);
-  const [gemstoneImage, setGemstoneImage] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Get the captured/uploaded image from localStorage
-    const storedImage = localStorage.getItem('gemstoneImage');
-    if (storedImage) {
-      setGemstoneImage(storedImage);
-      performAnalysis(storedImage);
+    if (gemstoneImage) {
+      performAnalysis(gemstoneImage);
     } else {
-      // If no image, silently redirect back to instructions
-      navigate('/aiwow/gemstone/instructions');
+      navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path);
       return;
     }
-  }, [navigate]);
+  }, [navigate, gemstoneImage]);
 
   const performAnalysis = async (imageData) => {
     setIsAnalyzing(true);
@@ -46,18 +46,17 @@ const GemstoneAnalysis = () => {
       clearInterval(progressInterval);
 
       if (result.success) {
-        localStorage.setItem('gemstoneResult', JSON.stringify(result.data));
+        dispatch(setGemstoneResult(result.data));
         
         setProgress(100);
         setAnalysisComplete(true);
         
         setTimeout(() => {
-          navigate('/aiwow/gemstone/result');
+          navigate(PATH.privateRoutes.GEMSTONE_RESULT.path);
         }, 1000);
       } else {
-        // Clear old gemstone data from localStorage on failure
-        localStorage.removeItem('gemstoneResult');
-        localStorage.removeItem('gemstoneImage');
+        // DON'T clear data on error - keep image for retry
+        // dispatch(clearGemstoneData());
         
         setProgress(0);
         setError(result.error || { message: 'Analysis failed. Please try again.' });
@@ -65,9 +64,8 @@ const GemstoneAnalysis = () => {
     } catch (error) {
       console.error('Analysis error:', error);
       
-      // Clear old gemstone data from localStorage on error
-      localStorage.removeItem('gemstoneResult');
-      localStorage.removeItem('gemstoneImage');
+      // DON'T clear data on error - keep image for retry
+      // dispatch(clearGemstoneData());
       
       setProgress(0);
       setError({ message: 'An unexpected error occurred. Please try again.' });
@@ -78,13 +76,15 @@ const GemstoneAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate('/aiwow/gemstone/result');
+      navigate(PATH.privateRoutes.GEMSTONE_RESULT.path);
     }
   };
 
   const handleRetry = () => {
+    // Clear error and data, then navigate back to start over
     setError(null);
-    navigate('/aiwow/gemstone/instructions');
+    dispatch(clearGemstoneData());
+    navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path);
   };
 
   return (

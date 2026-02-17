@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import styles from './FaceReadingResult.module.scss';
 import { Toast } from '../../../../component';
 
@@ -8,20 +9,34 @@ const FaceReadingResult = () => {
   const [activeTab, setActiveTab] = useState('overall');
   const [analysisData, setAnalysisData] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Get data from Redux
+  const reduxResult = useSelector((state) => state.aiwow.faceReading.result);
+  const reduxImage = useSelector((state) => state.aiwow.faceReading.image);
 
   useEffect(() => {
-    const storedResult = localStorage.getItem('faceReadingResult');
-    
-    if (storedResult) {
+    console.log('FaceReadingResult - Loading result:', {
+      hasReduxResult: !!reduxResult,
+      reduxResultType: typeof reduxResult,
+      reduxResultKeys: reduxResult ? Object.keys(reduxResult) : [],
+      hasReduxImage: !!reduxImage
+    });
+
+    if (reduxResult) {
       try {
-        const parsedResult = JSON.parse(storedResult);
-        if (parsedResult.data) {
-          setAnalysisData(parsedResult.data);
-        } else {
-          Toast.error('Invalid analysis data format');
-          navigate('/aiwow/face-reading/instructions');
-          return;
-        }
+        // Handle nested data structure
+        const resultData = reduxResult.data || reduxResult;
+        
+        console.log('FaceReadingResult - Processing data:', {
+          hasResultData: !!resultData,
+          resultDataKeys: resultData ? Object.keys(resultData) : [],
+          hasFaceImage: !!(resultData.faceImage || reduxImage)
+        });
+
+        setAnalysisData({
+          ...resultData,
+          faceImage: reduxImage || resultData.faceImage
+        });
       } catch (error) {
         console.error('Error parsing result:', error);
         Toast.error('Failed to load analysis results');
@@ -35,7 +50,7 @@ const FaceReadingResult = () => {
     }
     
     setLoading(false);
-  }, [navigate]);
+  }, [reduxResult, reduxImage, navigate]);
 
   const tabs = [
     { id: 'overall', label: 'Overall' },
@@ -358,7 +373,7 @@ const FaceReadingResult = () => {
 
         <button 
           className={styles.consultButton}
-          onClick={() => navigate('/talk-to-astrologer')}
+          onClick={() => navigate('/chat-with-astrologers')}
         >
           Consult with Expert Astrologer
         </button>

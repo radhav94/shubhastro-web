@@ -1,10 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './PalmistryInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
+import { setPalmistryImage } from '../../../../redux/aiwow/aiwowSlice';
 
 const PalmistryInstructions = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const fileInputRef = useRef(null);
 
   const handleCamera = () => {
@@ -20,7 +23,7 @@ const PalmistryInstructions = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        localStorage.setItem('palmistryImage', reader.result);
+        dispatch(setPalmistryImage(reader.result));
         navigate('/aiwow/palmistry/capture');
       };
       reader.readAsDataURL(file);
