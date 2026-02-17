@@ -1,5 +1,5 @@
 import styles from "./Footer.module.scss";
-import ShubhTalkLogo from "../assets/images/ShubhAstrologo.svg"; // Assuming you have your logo in an assets folder
+import ShubhTalkLogo from "../assets/images/ShubhAstrologoFooter.svg"; // Assuming you have your logo in an assets folder
 
 // Importing icons for a cleaner, more modern approach
 import {

@@ -1026,7 +1026,7 @@
 .actionTitle {
   font-family: "Poppins", sans-serif;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.15;
   text-align: center;
   color: #2c1b0e;
@@ -3245,7 +3245,7 @@
 
 .blogCard {
   // flex: 0 0 220px;
-  min-width: 190px;
+  width: 190px;
   background: #ffffff;
   border-radius: 16px;
   overflow: hidden;
@@ -3254,9 +3254,10 @@
   transition:
     transform 0.2s,
     box-shadow 0.2s;
+    flex-shrink: 0;
   @media screen and (width <= 767px) {
-    flex: 0 0 150px;
-    min-width: 150px;
+    // flex: 0 0 150px;
+    width: 150px;
   }
 }
 
