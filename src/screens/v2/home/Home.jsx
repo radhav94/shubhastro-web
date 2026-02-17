@@ -115,11 +115,20 @@ const Home = () => {
 
 
   // Separate sections into left and right columns for desktop
-  const leftSectionTypes = ['daily-cosmic-insight', 'explore-panchang', 'complementary-services'];
+  const leftSectionTypes = ['complementary-services', 'daily-cosmic-insight', 'explore-panchang'];
   
-  const leftSections = sortedSections?.filter(section => 
-    leftSectionTypes.includes(section.display_type)
-  ) || [];
+  const leftSections = useMemo(() => {
+    const filtered = sortedSections?.filter(section => 
+      leftSectionTypes.includes(section.display_type)
+    ) || [];
+    
+    // Sort by the order defined in leftSectionTypes
+    return filtered.sort((a, b) => {
+      const indexA = leftSectionTypes.indexOf(a.display_type);
+      const indexB = leftSectionTypes.indexOf(b.display_type);
+      return indexA - indexB;
+    });
+  }, [sortedSections]);
   
   const rightSections = sortedSections?.filter(section => 
     !leftSectionTypes.includes(section.display_type)
