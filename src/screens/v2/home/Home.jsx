@@ -157,7 +157,7 @@ const Home = () => {
         <div className={styles.twoColumnLayout}>
           {/* Left Column */}
           <div className={styles.leftColumn}>
-            <div className={styles.leftColumnMain}>
+            {/* <div className={styles.leftColumnMain}> */}
               {leftSections.map((section) => {
                 if (!section.display_type) {
                   console.warn("Section missing display_type:", section);
@@ -169,7 +169,7 @@ const Home = () => {
                 });
               })}
             </div>
-          </div>
+          {/* </div> */}
 
           {/* Right Column */}
           <div className={styles.rightColumn}>
