@@ -348,7 +348,7 @@
 .mobileLayout {
   display: none;
   flex-direction: column;
-  gap: 24px;
+  gap: 0px;
   
   @media (width <= 1180px) {
     display: flex;
@@ -1379,9 +1379,9 @@
   // @media (width <= 1600px) {
   //   width: calc(100% + 210px);
   // }
-  // @media (width <= 1800px) {
-  //   width: calc(100% + 310px);
-  // }
+  @media (width <= 767px) {
+    padding: 4px 0px 20px 0px;
+  }
 }
 
 .astrologersGrid::-webkit-scrollbar {
@@ -2598,9 +2598,9 @@
     font-size: 18px;
   }
 
-  .astrologersGrid {
-    gap: 20px;
-  }
+  // .astrologersGrid {
+  //   gap: 20px;
+  // }
 
   // .astrologerCard {
   //   min-width: 220px;
@@ -3236,6 +3236,7 @@
   padding: 4px 4px 20px 4px;
   @media (width <= 767px) {
     gap: 16px;    
+    padding: 0px 0px 20px 0px;
   }
 }
 
@@ -3427,7 +3428,7 @@
   color: #1a1a1a;
 
   @media screen and (width <= 767px) {
-    padding: 20px 12px;
+    padding: 10px 0px;
   }
 }
 
@@ -3436,6 +3437,9 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  @media screen and (width <= 767px) {
+    margin-bottom: 10px;
+  }
 }
 
 .vimshottariTitle {
@@ -3569,6 +3573,7 @@
   @media screen and (width <= 767px) {
     grid-auto-columns: calc(100% - 0px);
     gap: 12px;
+    padding: 0px;
   }
 }
 
