@@ -130,6 +130,51 @@ export const kundliVedicApi = vedicApi.injectEndpoints({
         },
       }),
     }),
+
+    getMahaDasha: builder.query({
+      query: (params) => ({
+        url: "dashas/maha-dasha",
+        params: {
+          dob: params.dob,
+          tob: params.tob,
+          lat: params.lat,
+          lon: params.lon,
+          tz: params.tz || 5.5,
+          lang: "en",
+        },
+      }),
+    }),
+
+    getAntarDasha: builder.query({
+      query: (params) => ({
+        url: "dashas/antar-dasha",
+        params: {
+          dob: params.dob,
+          tob: params.tob,
+          lat: params.lat,
+          lon: params.lon,
+          tz: params.tz || 5.5,
+          lang: "en",
+          md: params.md, // Mahadasha planet name
+        },
+      }),
+    }),
+
+    getPratyantarDasha: builder.query({
+      query: (params) => ({
+        url: "dashas/paryantar-dasha",
+        params: {
+          dob: params.dob,
+          tob: params.tob,
+          lat: params.lat,
+          lon: params.lon,
+          tz: params.tz || 5.5,
+          lang: "en",
+          md: params.md, // Mahadasha planet name
+          ad: params.ad, // Antardasha planet name
+        },
+      }),
+    }),
   }),
 });
 
@@ -142,4 +187,7 @@ export const {
   useGetPlanetsQuery,
   useGetKpDetailsQuery,
   useGetAi12MonthsPredictionQuery,
+  useGetMahaDashaQuery,
+  useGetAntarDashaQuery,
+  useGetPratyantarDashaQuery,
 } = kundliVedicApi;

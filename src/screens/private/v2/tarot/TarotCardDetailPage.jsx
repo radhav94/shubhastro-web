@@ -105,14 +105,16 @@ const TarotCardDetailPage = () => {
   if (error) {
     return (
       <div className={styles.detailPage}>
-        <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
-            <ChevronLeft size={24} />
-          </button>
-          <h1 className={styles.title}>{reading.title}</h1>
-        </div>
-        <div className={styles.errorContainer}>
-          <p className={styles.errorText}>Failed to load card details. Please try again.</p>
+        <div className={styles.headerWrap}>
+          <div className={styles.header}>
+            <button className={styles.backButton} onClick={() => navigate(-1)}>
+              <ChevronLeft size={24} />
+            </button>
+            <h1 className={styles.title}>{reading.title}</h1>
+          </div>
+          <div className={styles.errorContainer}>
+            <p className={styles.errorText}>Failed to load card details. Please try again.</p>
+          </div>
         </div>
       </div>
     )
@@ -130,13 +132,14 @@ const TarotCardDetailPage = () => {
 
   return (
     <div className={styles.detailPage}>
-      <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className={styles.title}>{reading.title}</h1>
-      </div>
-
+      <div className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={() => navigate(-1)}>
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className={styles.title}>{reading.title}</h1>
+        </div>
+        </div>
       {/* Tabs for Breakup Readings */}
       {isBreakupReading && (
         <div className={styles.tabsContainer}>

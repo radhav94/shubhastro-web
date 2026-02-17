@@ -134,13 +134,15 @@ const TarotCardSelectionPage = () => {
 
   return (
     <div className={styles.selectionPage}>
-      <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
-          <ChevronLeft size={24} />
-        </button>
-        <button className={styles.shuffleButton} onClick={handleShuffle}>
-          <Shuffle size={24} />
-        </button>
+      <div className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={() => navigate(-1)}>
+            <ChevronLeft size={24} />
+          </button>
+          <button className={styles.shuffleButton} onClick={handleShuffle}>
+            <Shuffle size={24} />
+          </button>
+        </div>
       </div>
 
       <div className={styles.content}>

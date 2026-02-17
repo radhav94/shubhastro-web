@@ -43,7 +43,7 @@
 }
 
 .tarotIntro {
-  padding: 24px 16px;
+  padding: 16px;
   max-width: 1200px;
   margin: 0 auto;
   /* background: white; */
@@ -313,9 +313,9 @@
   }
 
   .tarotCardTitle {
-    margin-top: 8px;
+    margin-top: 0px;
     font-size: 14px;
-    max-width: 70%;
+    max-width: 100%;
   }
 
   .tarotBadge {

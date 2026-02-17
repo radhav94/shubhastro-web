@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useGetCurrentMahadashaFullQuery } from "../../../../redux/api/kundli/dashaApi";
 import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
@@ -8,6 +9,7 @@ import styles from "../Home.module.scss";
 const VimshottariTimelineSection = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const cardsContainerRef = useRef(null);
+  const navigate = useNavigate();
   
   // Check if user is logged in
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
@@ -96,17 +98,13 @@ const VimshottariTimelineSection = () => {
     return -1;
   };
 
-  // Transform API data - Show only first 4 dasha levels and only current periods
+  // Transform API data - Show only first 3 dasha levels (hide Sookshmadasha and Pranadasha)
   const transformDashaData = (response) => {
     if (!response) return null;
 
-    console.log("🔮 Transforming Dasha Data:", response);
-
     const allDashaCards = [];
-    // Only take first 4 dasha levels
-    const dashaLevels = (response.order_names || ["mahadasha", "antardasha", "paryantardasha", "Shookshamadasha"]).slice(0, 4);
-
-    console.log("🔮 Dasha Levels (First 4):", dashaLevels);
+    // Only show first 3 levels: Mahadasha, Antardasha, Pratyantardasha
+    const dashaLevels = ["mahadasha", "antardasha", "paryantardasha"];
 
     dashaLevels.forEach((levelName) => {
       const periods = response[levelName] || [];
@@ -127,15 +125,6 @@ const VimshottariTimelineSection = () => {
           const segmentEnd = new Date(nextPeriod.start).getTime();
           const now = new Date().getTime();
           const segmentProgress = ((now - segmentStart) / (segmentEnd - segmentStart)) * 100;
-
-          console.log(`📊 ${levelName} Segment Progress Calculation:`, {
-            period: period.name,
-            segmentStart: new Date(segmentStart).toISOString(),
-            segmentEnd: new Date(segmentEnd).toISOString(),
-            now: new Date(now).toISOString(),
-            rawProgress: segmentProgress,
-            clampedProgress: Math.min(Math.max(segmentProgress, 0), 100)
-          });
 
           allDashaCards.push({
             id: `${levelName}-${currentIdx}`,
@@ -159,7 +148,6 @@ const VimshottariTimelineSection = () => {
       }
     });
 
-    console.log("🔮 Transformed Cards (Current periods only):", allDashaCards);
     return allDashaCards;
   };
 
@@ -178,6 +166,18 @@ const VimshottariTimelineSection = () => {
   const handleScrollRight = () => {
     if (cardsContainerRef.current) {
       cardsContainerRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+    }
+  };
+
+  // Navigate to Kundali page with first profile and activate Kundali tab
+  const handleSeeFullDasha = () => {
+    if (defaultProfile && defaultProfile._id) {
+      // Navigate to /kundli/:kundliId?tab=kundli to open Kundali tab (index 1)
+      // This will show the Vimshottari Dasha section
+      navigate(`/kundli/${defaultProfile._id}?tab=kundli`);
+    } else {
+      // If no profile, navigate to kundli page to create one
+      navigate('/kundli');
     }
   };
 
@@ -236,16 +236,16 @@ const VimshottariTimelineSection = () => {
             </div>
           </div>
         </h2>
-        <button className={styles.seeFullDashaBtn}>
+        <button className={styles.seeFullDashaBtn} onClick={handleSeeFullDasha}>
           See Full Dasha <ChevronRight size={18} />
         </button>
       </div>
 
       {/* Dasha Cards - Always show in slider */}
       <div className={styles.dashaSliderWrapper}>
-        <button className={styles.sliderBtn} onClick={handleScrollLeft}>
+        {/* <button className={styles.sliderBtn} onClick={handleScrollLeft}>
           <ChevronLeft size={24} />
-        </button>
+        </button> */}
 
         <div className={styles.dashaCardsSlider} ref={cardsContainerRef}>
           {dashaData.map((dasha) => (
@@ -282,9 +282,9 @@ const VimshottariTimelineSection = () => {
           ))}
         </div>
 
-        <button className={styles.sliderBtn} onClick={handleScrollRight}>
+        {/* <button className={styles.sliderBtn} onClick={handleScrollRight}>
           <ChevronRight size={24} />
-        </button>
+        </button> */}
       </div>
 
       {/* Timeline Bars - Show only current periods */}

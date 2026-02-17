@@ -6,6 +6,10 @@
 }
 
 /* Horoscope Page - Exact Figma Match */
+.horoscope-header-Wrap{
+  background-color: #fff;
+  border-bottom: 1px solid #e8e8e8;
+}
 .horoscope-page {
   min-height: 100vh;
   background: #f8f8f8;
@@ -18,14 +22,9 @@
   /* padding-top: 20px; */
 }
 
-/* .horoscope-page-content {
-  background: #ffffff;
-} */
-
-@media (max-width: 768px) {
-  .horoscope-page {
-    padding-top: 0px; /* Adjust for mobile TopHeader height */
-  }
+.horoscope-page-content {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* Header Section */
@@ -36,7 +35,14 @@
   background: #ffffff;
   gap: 12px;
   /* margin-bottom: 10px; */
-  border-bottom: 1px solid #e8e8e8;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .horoscope-page {
+    padding-top: 0px; /* Adjust for mobile TopHeader height */
+  }
 }
 
 .back-button {
@@ -595,12 +601,11 @@
     background: #f8f8f8;
   }
   
-  .horoscope-page-content {
+  /* .horoscope-page-content {
     max-width: 100%;
     margin: 0 auto;
-    /* background: #ffffff; */
     box-shadow: none;
-  }
+  } */
 
   /* .horoscope-container {
     padding: 0 24px 24px;
@@ -774,13 +779,12 @@
     box-shadow: none;
   }
 
-  .horoscope-page-content {
+  /* .horoscope-page-content {
     max-width: 100%;
     margin: 0 auto;
-    /* background: #ffffff; */
     box-shadow: none;
     padding: 0;
-  }
+  } */
 
   /* Desktop Header */
 
@@ -952,10 +956,10 @@
 
 /* Extra Large Desktop - Min-width 1440px */
 @media (min-width: 1440px) {
-  .horoscope-page-content {
+  /* .horoscope-page-content {
     max-width: 100%;
     margin: 0 auto;
-  }
+  } */
 
   /* .horoscope-container {
     padding: 0 40px 40px;

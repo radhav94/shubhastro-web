@@ -5,12 +5,17 @@
   flex-direction: column;
 }
 
+.headerWrap{
+  background: white;
+}
 .header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 16px;
   padding: 16px;
-  background: white;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 16px;
 }
 
 .backButton {
@@ -31,10 +36,12 @@
 }
 
 .title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: #333;
   margin: 0;
+  width: calc(100% - 48px);
+  text-align: left;
 }
 
 .content {

@@ -364,7 +364,7 @@ const HoroscopeNew = () => {
     <div className="horoscope-page">
       <PrimaryLoader isLoading={isLoading} />
       
-      <div className="horoscope-page-content">
+      <div className="horoscope-header-Wrap">
         <div className="horoscope-header">
           <button className="back-button" onClick={() => navigate('/')}>
             <ChevronLeft size={24} />
@@ -379,7 +379,9 @@ const HoroscopeNew = () => {
             <ChevronDown size={16} />
           </button>
         </div>
+      </div>
 
+      <div className="horoscope-page-content">
         <div className="horoscope-container">
           <div className="zodiac-display">
             <div className="zodiac-info">

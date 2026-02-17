@@ -4,6 +4,7 @@ import styles from "./KundaliContent.module.scss";
 import { appColors } from "../../../../utils/theme";
 import DynamicTable from "../../../../component/UI/table/kundli/DynamicTable";
 import DynamicChart from "../../../../component/UI/charts/kundli/DynamicChart";
+import AdditionalPlanetaryInfo from "./AdditionalPlanetaryInfo";
 import {
   useGetChartQuery,
   useGetPlanetsQuery,
@@ -130,6 +131,12 @@ const NorthIndian = () => {
               data={planetData}
             />
           )}
+
+          {/* Vimshottari Dasha Section */}
+          <AdditionalPlanetaryInfo 
+            title="Vimshottari Dasha"
+            isLoading={false}
+          />
         </div>
       )}
     </div>
