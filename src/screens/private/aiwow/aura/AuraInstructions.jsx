@@ -1,10 +1,13 @@
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './AuraInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
+import { setAuraImage } from '../../../../redux/aiwow/aiwowSlice';
 
 const AuraInstructions = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const fileInputRef = useRef(null);
 
   const handleCamera = () => {
@@ -20,7 +23,7 @@ const AuraInstructions = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        localStorage.setItem('auraImage', reader.result);
+        dispatch(setAuraImage(reader.result));
         navigate('/aiwow/aura/capture');
       };
       reader.readAsDataURL(file);

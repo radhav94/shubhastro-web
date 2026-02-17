@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import styles from "./AIWow.module.scss";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import FeatureCard from "./components/FeatureCard";
 import ComingSoonCard from "./components/ComingSoonCard";
 import MobileAppModal from "./components/MobileAppModal";
@@ -8,13 +9,17 @@ import { ProfileManager } from "../../../component/UI/Profile";
 import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
 import { useGetAiWowPageDataQuery } from "../../../redux/api/aiwow/aiwowApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
+import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 
 const AIWow = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
-  const [selectedProfile, setSelectedProfile] = useState(null);
+  
+  // Get selected profile from Redux
+  const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
 
   // Get token
   const role = localStorage.getItem("shubhtalk_role");
@@ -42,32 +47,35 @@ const AIWow = () => {
   const profiles = data?.data || [];
 
   // Get explore page sections
+
   const aiwowSections = aiwowData?.data?.list || [];
 
-  // Auto-select first profile on load - only after data is fetched
-  useEffect(() => {
-    if (profiles.length > 0 && !selectedProfile && !isFetching) {
-      setSelectedProfile(profiles[0]);
-      // Store selected profile
-      localStorage.setItem(
-        "selectedKundliProfile",
-        JSON.stringify(profiles[0]),
-      );
-    }
-  }, [profiles, selectedProfile, isFetching]);
 
-  // Clear selected profile when user changes (on refresh after login)
+  // Initialize from localStorage and validate against API profiles
   useEffect(() => {
-    if (currentUserId && selectedProfile) {
-      const profileBelongsToCurrentUser = profiles.some(
-        (profile) => profile._id === selectedProfile._id,
-      );
+    if (!profiles.length || isFetching) return;
 
-      if (!profileBelongsToCurrentUser) {
-        setSelectedProfile(null);
-      }
+    const saved = localStorage.getItem("selectedKundliProfile");
+    let parsed = null;
+
+    try {
+      parsed = saved ? JSON.parse(saved) : null;
+    } catch (error) {
+      console.error("Error parsing saved profile:", error);
+      localStorage.removeItem("selectedKundliProfile");
     }
-  }, [currentUserId, profiles]);
+
+    // If saved profile exists & belongs to this user → restore it
+    if (parsed && profiles.some(p => p._id === parsed._id)) {
+      dispatch(setSelectedKundliProfile(parsed));
+      return;
+    }
+
+    // Otherwise fallback to first profile
+    const first = profiles[0];
+    dispatch(setSelectedKundliProfile(first));
+    localStorage.setItem("selectedKundliProfile", JSON.stringify(first));
+  }, [profiles, isFetching, dispatch]);
 
   // Scroll to section if hash is present in URL
   useEffect(() => {
@@ -97,8 +105,7 @@ const AIWow = () => {
   };
 
   const handleProfileSelect = (profile) => {
-    setSelectedProfile(profile);
-    // Store selected profile
+    dispatch(setSelectedKundliProfile(profile));
     localStorage.setItem("selectedKundliProfile", JSON.stringify(profile));
     setShowProfileModal(false);
   };

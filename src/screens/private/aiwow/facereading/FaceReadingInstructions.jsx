@@ -1,10 +1,13 @@
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './FaceReadingInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
+import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
 
 const FaceReadingInstructions = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const fileInputRef = useRef(null);
 
   const handleCamera = () => {
@@ -20,7 +23,7 @@ const FaceReadingInstructions = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        localStorage.setItem('faceReadingImage', reader.result);
+        dispatch(setFaceReadingImage(reader.result));
         navigate('/aiwow/face-reading/capture');
       };
       reader.readAsDataURL(file);

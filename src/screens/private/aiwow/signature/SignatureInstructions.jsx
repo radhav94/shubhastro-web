@@ -1,10 +1,13 @@
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './SignatureInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
+import { setSignatureImage } from '../../../../redux/aiwow/aiwowSlice';
 
 const SignatureInstructions = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const fileInputRef = useRef(null);
 
   const handleCamera = () => {
@@ -20,7 +23,7 @@ const SignatureInstructions = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        localStorage.setItem('signatureImage', reader.result);
+        dispatch(setSignatureImage(reader.result));
         navigate('/aiwow/signature/capture');
       };
       reader.readAsDataURL(file);

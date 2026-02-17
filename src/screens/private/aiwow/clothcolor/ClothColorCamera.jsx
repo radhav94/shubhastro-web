@@ -1,10 +1,13 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './ClothColorCamera.module.scss';
 import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
+import { setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
 
 const ClothColorCamera = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
@@ -155,7 +158,7 @@ const ClothColorCamera = () => {
 
   const proceedWithImage = () => {
     if (capturedImage) {
-      localStorage.setItem('clothColorImage', capturedImage);
+      dispatch(setClothColorImage(capturedImage));
       navigate('/aiwow/cloth-color/capture');
     }
   };

@@ -1,33 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import styles from './PalmistryAnalysis.module.scss';
 import { Toast } from '../../../../component';
 import { analyzePalm } from '../../../../services/appServices/aiWowService';
+import { setPalmistryResult, setPalmistryResultId, clearPalmistryData } from '../../../../redux/aiwow/aiwowSlice';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const PalmistryAnalysis = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const palmImage = useSelector((state) => state.aiwow.palmistry.image);
+  const selectedHand = useSelector((state) => state.aiwow.palmistry.selectedHand);
   const [progress, setProgress] = useState(0);
-  const [palmImage, setPalmImage] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedHand, setSelectedHand] = useState('');
 
   useEffect(() => {
-    // Get the captured/uploaded image from localStorage
-    const storedImage = localStorage.getItem('palmistryImage');
-    const hand = localStorage.getItem('selectedHand');
-    
-    if (storedImage && hand) {
-      setPalmImage(storedImage);
-      setSelectedHand(hand);
-      performAnalysis(storedImage, hand);
+    if (palmImage && selectedHand) {
+      performAnalysis(palmImage, selectedHand);
     } else {
-      // If no image or hand selection, silently redirect back
-      navigate('/aiwow/palmistry/hand-selection');
+      navigate(PATH.privateRoutes.PALMISTRY_HAND_SELECTION.path);
       return;
     }
-  }, [navigate]);
+  }, [palmImage, selectedHand, navigate]);
 
   const performAnalysis = async (imageData, hand) => {
     setIsAnalyzing(true);
@@ -53,45 +50,44 @@ const PalmistryAnalysis = () => {
         const resultId = result.data?.id || result.data?._id;
         
         if (resultId) {
-          // Cache result temporarily for immediate navigation (fast UX)
-          sessionStorage.setItem('palmistryResult', JSON.stringify(result.data));
-          sessionStorage.setItem('palmistryResultId', resultId);
+          // Store result in Redux
+          dispatch(setPalmistryResult(result.data));
+          dispatch(setPalmistryResultId(resultId));
           
           setProgress(100);
           setAnalysisComplete(true);
           
           setTimeout(() => {
-            navigate(`/aiwow/palmistry/result/${resultId}`);
+            navigate(`${PATH.privateRoutes.PALMISTRY_RESULT.path}/${resultId}`);
           }, 1000);
         } else {
-          // Fallback: If no ID, use localStorage (old behavior)
-          localStorage.setItem('palmistryResult', JSON.stringify(result.data));
+          // Fallback: Store result without ID
+          dispatch(setPalmistryResult(result.data));
           
           setProgress(100);
           setAnalysisComplete(true);
           
           setTimeout(() => {
-            navigate('/aiwow/palmistry/result');
+            navigate(PATH.privateRoutes.PALMISTRY_RESULT.path);
           }, 1000);
         }
       } else {
-        // Clear old palmistry data from localStorage on failure
-        localStorage.removeItem('palmistryResult');
-        localStorage.removeItem('palmistryImage');
-        localStorage.removeItem('selectedHand');
+        // DON'T clear data on error - keep image and hand selection for retry
+        // dispatch(clearPalmistryData());
         
         setProgress(0);
+        // Don't show Toast here - interceptor already showed it
+        // Just display the error details on screen
         setError(result.error || { message: 'Analysis failed. Please try again.' });
       }
     } catch (error) {
       console.error('Analysis error:', error);
       
-      // Clear old palmistry data from localStorage on error
-      localStorage.removeItem('palmistryResult');
-      localStorage.removeItem('palmistryImage');
-      localStorage.removeItem('selectedHand');
+      // DON'T clear data on error - keep image and hand selection for retry
+      // dispatch(clearPalmistryData());
       
       setProgress(0);
+      // Don't show Toast here - interceptor already showed it
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {
       setIsAnalyzing(false);
@@ -100,13 +96,15 @@ const PalmistryAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate('/aiwow/palmistry/result');
+      navigate(PATH.privateRoutes.PALMISTRY_RESULT.path);
     }
   };
 
   const handleRetry = () => {
+    // Clear error and data, then navigate back to start over
     setError(null);
-    navigate('/aiwow/palmistry/hand-selection');
+    dispatch(clearPalmistryData());
+    navigate(PATH.privateRoutes.PALMISTRY_HAND_SELECTION.path);
   };
 
   return (

@@ -1,92 +1,95 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import styles from './PalmistryResult.module.scss';
 import { getPalmistryResult } from '../../../../services/appServices/aiWowService';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
+import { Toast } from '../../../../component';
 
 const PalmistryResult = () => {
   const navigate = useNavigate();
   const { resultId } = useParams();
   const [activeTab, setActiveTab] = useState('overview');
   const [resultData, setResultData] = useState(null);
-  const [palmImage, setPalmImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Get data from Redux
+  const reduxResult = useSelector((state) => state.aiwow.palmistry.result);
+  const reduxResultId = useSelector((state) => state.aiwow.palmistry.resultId);
+  const palmImage = useSelector((state) => state.aiwow.palmistry.image);
 
   useEffect(() => {
     const loadResult = async () => {
-      // Try sessionStorage first (for immediate navigation after analysis)
-      const cachedResult = sessionStorage.getItem('palmistryResult');
-      const cachedImage = sessionStorage.getItem('palmistryImage') || localStorage.getItem('palmistryImage');
+      console.log('PalmistryResult - Loading result:', {
+        hasReduxResult: !!reduxResult,
+        reduxResultType: typeof reduxResult,
+        reduxResultKeys: reduxResult ? Object.keys(reduxResult) : [],
+        resultId,
+        reduxResultId
+      });
       
-      if (cachedResult) {
-        try {
-          const parsed = JSON.parse(cachedResult);
-          const data = parsed.data || parsed;
-          setResultData(data);
-          if (cachedImage) setPalmImage(cachedImage);
-          
-          // If we have resultId, fetch from backend in background to ensure fresh data
-          if (resultId) {
-            fetchFromBackend(resultId, cachedImage);
-          }
+      // First, try Redux state
+      if (reduxResult) {
+        // Handle different data structures
+        // API returns: { success: true, data: { lines, overallReading, ... } }
+        // Redux stores: result.data (which is the palmistry data)
+        const palmData = reduxResult.data || reduxResult;
+        
+        console.log('PalmistryResult - Processing palm data:', {
+          hasPalmData: !!palmData,
+          palmDataType: typeof palmData,
+          palmDataKeys: palmData ? Object.keys(palmData) : [],
+          hasLines: !!(palmData?.lines),
+          hasOverallReading: !!(palmData?.overallReading)
+        });
+        
+        // Validate that we have the required fields
+        if (palmData && (palmData.lines || palmData.overallReading)) {
+          setResultData(palmData);
+        } else {
+          console.error('Invalid palmistry data structure:', palmData);
+          Toast.error('Invalid analysis data. Please try again.');
+          navigate('/aiwow/palmistry/hand-selection');
           return;
-        } catch (error) {
-          console.error('Error parsing cached result:', error);
         }
+        
+        // If we have resultId in URL but not in Redux, fetch from backend
+        if (resultId && resultId !== reduxResultId) {
+          await fetchFromBackend(resultId);
+        }
+        return;
       }
       
-      // If no cache and we have resultId, fetch from backend
+      // If no Redux data and we have resultId, fetch from backend
       if (resultId) {
         setIsLoading(true);
-        await fetchFromBackend(resultId, cachedImage);
+        await fetchFromBackend(resultId);
       } else {
-        // Fallback: Try localStorage (old behavior for backward compatibility)
-        const storedResult = localStorage.getItem('palmistryResult');
-        const storedImage = localStorage.getItem('palmistryImage');
-        
-        if (storedResult) {
-          try {
-            const parsed = JSON.parse(storedResult);
-            const data = parsed.data || parsed;
-            setResultData(data);
-            if (storedImage) setPalmImage(storedImage);
-          } catch (error) {
-            console.error('Error parsing stored result:', error);
-            setError('Failed to load result');
-          }
-        } else {
-          setError('No result found');
-        }
+        // No data available
+        Toast.error('No analysis results found');
+        navigate('/aiwow/palmistry/hand-selection');
       }
     };
-    
+
     loadResult();
-  }, [resultId]);
+  }, [resultId, reduxResult, reduxResultId, navigate]);
   
-  const fetchFromBackend = async (id, cachedImage) => {
+  const fetchFromBackend = async (id) => {
     try {
       const result = await getPalmistryResult(id);
       
       if (result.success) {
         const data = result.data?.data || result.data;
         setResultData(data);
-        
-        // Update cache with fresh data
-        sessionStorage.setItem('palmistryResult', JSON.stringify(data));
-        
-        // Set image if available
-        if (cachedImage) {
-          setPalmImage(cachedImage);
-        } else if (data.palmImage) {
-          setPalmImage(data.palmImage);
-        }
       } else {
         setError(result.error || 'Failed to load result');
+        Toast.error('Failed to load result');
       }
     } catch (err) {
       console.error('Error fetching result:', err);
       setError('Failed to load result from server');
+      Toast.error('Failed to load result from server');
     } finally {
       setIsLoading(false);
     }
@@ -141,10 +144,17 @@ const PalmistryResult = () => {
     );
   }
 
-  const { hand, lines, overallReading, astroCorrelation } = resultData;
+  const { hand, lines, overallReading, astroCorrelation } = resultData || {};
 
-  // Safety checks for nested data
-  if (!lines || !overallReading) {
+  // Safety checks for nested data with detailed logging
+  if (!lines && !overallReading) {
+    console.error('Missing required palmistry data:', {
+      hasResultData: !!resultData,
+      resultDataKeys: resultData ? Object.keys(resultData) : [],
+      lines: lines,
+      overallReading: overallReading
+    });
+    
     return (
       <div className={styles.container}>
         <header className={styles.header}>
@@ -156,9 +166,11 @@ const PalmistryResult = () => {
           <h1 className={styles.title}>Palmistry Analysis</h1>
         </header>
         <div className={styles.errorContainer}>
-          <p className={styles.errorText}>Unable to load analysis results. Please try again.</p>
+          <p className={styles.errorText}>
+            Incomplete analysis data. Please try analyzing your palm again.
+          </p>
           <button className={styles.retryButton} onClick={() => navigate('/aiwow/palmistry')}>
-            Go Back
+            Start New Analysis
           </button>
         </div>
       </div>

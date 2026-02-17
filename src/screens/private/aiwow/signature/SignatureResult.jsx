@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import styles from './SignatureResult.module.scss';
 import { Toast } from '../../../../component';
 
@@ -8,18 +9,33 @@ const SignatureResult = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [resultData, setResultData] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Get data from Redux
+  const reduxResult = useSelector((state) => state.aiwow.signature.result);
+  const reduxImage = useSelector((state) => state.aiwow.signature.image);
 
   useEffect(() => {
-    const storedResult = localStorage.getItem('signatureResult');
-    const storedImage = localStorage.getItem('signatureImage');
-    
-    if (storedResult) {
+    console.log('SignatureResult - Loading result:', {
+      hasReduxResult: !!reduxResult,
+      reduxResultType: typeof reduxResult,
+      reduxResultKeys: reduxResult ? Object.keys(reduxResult) : [],
+      hasReduxImage: !!reduxImage
+    });
+
+    if (reduxResult) {
       try {
-        const parsedResult = JSON.parse(storedResult);
-        const apiData = parsedResult.data || parsedResult;
+        // Handle nested data structure
+        const apiData = reduxResult.data || reduxResult;
+        
+        console.log('SignatureResult - Processing data:', {
+          hasApiData: !!apiData,
+          apiDataKeys: apiData ? Object.keys(apiData) : [],
+          hasQualityMetrics: !!(apiData.qualityMetrics),
+          hasStrokeAnalysis: !!(apiData.strokeAnalysis)
+        });
         
         setResultData({
-          image: apiData.signatureImage || storedImage,
+          image: apiData.signatureImage || reduxImage,
           quality: apiData.qualityMetrics || {},
           stroke: apiData.strokeAnalysis || {},
           letter: apiData.letterAnalysis || {},
@@ -43,7 +59,7 @@ const SignatureResult = () => {
     }
     
     setLoading(false);
-  }, [navigate]);
+  }, [reduxResult, reduxImage, navigate]);
 
   const renderOverview = () => (
     <div className={styles.tabContent}>
