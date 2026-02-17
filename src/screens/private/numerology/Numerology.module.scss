@@ -215,6 +215,9 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 6px 16px;
+  @media (width <= 767px) {
+    padding: 0px 16px;
+  }
 }
 
 /* MOBILE PROFILE BAR */
