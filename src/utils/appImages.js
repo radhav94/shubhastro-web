@@ -21,6 +21,8 @@ import Video from "../assets/icons/video.png";
 
 // application all default images
 import AstrologerDefaultImg from "../assets/default-img/astrologer.svg";
+import AstrologerMaleDefaultImg from "../assets/default-img/astrologer male_v.1.png"; // Male astrologer
+import AstrologerFemaleDefaultImg from "../assets/default-img/astrologer female_v.1.png"; // Female astrologer
 import AstromallCategoryDefault from "../assets/default-img/astromall-category.png";
 import AstrologerNumerologyDefault from "../assets/default-img/astrologer-numerology.png";
 import AstromallSubCategoryDefault from "../assets/default-img/astromall-sub-category.jpeg";
@@ -37,6 +39,8 @@ import TalkToDefaultAstrologer from "../assets/default-img/talk-to-defaultastrol
 
 export const DefaultImages = {
   AstrologerDefaultImg,
+  AstrologerMaleDefaultImg,
+  AstrologerFemaleDefaultImg,
   AstromallCategoryDefault,
   AstrologerNumerologyDefault,
   AstromallSubCategoryDefault,
@@ -50,6 +54,25 @@ export const DefaultImages = {
   VedicKundliDefault,
   AriesDefault,
   TalkToDefaultAstrologer,
+};
+
+/**
+ * Get astrologer default image based on gender
+ * @param {string} gender - 'male', 'female', or other
+ * @returns {string} - Default image path
+ */
+export const getAstrologerDefaultImage = (gender) => {
+  if (!gender) return DefaultImages.AstrologerDefaultImg;
+  
+  const genderLower = gender.toLowerCase();
+  
+  if (genderLower === 'male' || genderLower === 'm') {
+    return DefaultImages.AstrologerMaleDefaultImg;
+  } else if (genderLower === 'female' || genderLower === 'f') {
+    return DefaultImages.AstrologerFemaleDefaultImg;
+  }
+  
+  return DefaultImages.AstrologerDefaultImg;
 };
 
 

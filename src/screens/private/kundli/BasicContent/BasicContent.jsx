@@ -93,7 +93,7 @@ const BasicContent = (props) => {
   const basicDetailsData = {
     Name: userDetails?.name || "--",
     Date: formatDate(userDetails.day, monthMap[userDetails.month] || userDetails.month, userDetails.year) || "--",
-    Time: format12HourTime(userDetails.hour, userDetails.minute) || "--",
+    Time: format12HourTime(userDetails.hour, userDetails.minute, userDetails.meridiem) || "--",
     Place: userDetails?.birthPlace || "--",
     Rasi: birthDetails?.rasi || "--",
     Nakshatra: birthDetails?.nakshatra || "--",

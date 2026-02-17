@@ -1,10 +1,8 @@
-import React from "react";
 import styles from "./TopAstrologerCard.module.scss";
 import { FaStar } from "react-icons/fa";
 import { PiBookOpenTextLight } from "react-icons/pi";
-import astrologerImage from "../../../assets/images/top-rated-1.svg";
 import { Link } from "react-router-dom";
-import { DefaultImages } from "../../../utils/appImages";
+import { getAstrologerDefaultImage } from "../../../utils/appImages";
 
 const TopAstrologerCard = ({ data, onConnect }) => {
   // Handle rating - use rating field or default to 4.5
@@ -13,12 +11,12 @@ const TopAstrologerCard = ({ data, onConnect }) => {
   // Handle experience - convert to number if string
   const experience = parseInt(data?.experience) || 0;
 
-  // Handle image - try multiple possible fields
+  // Handle image - try multiple possible fields with gender-based fallback
   const imageUrl =
     data?.imageUrl ||
     data?.aadharCardImgUrl ||
     data?.panCardImgUrl ||
-    astrologerImage;
+    getAstrologerDefaultImage(data?.gender);
 
   return (
     <div className={styles.topAstrologerCard}>
@@ -28,11 +26,11 @@ const TopAstrologerCard = ({ data, onConnect }) => {
       >
         <div className={styles.imageContainer}>
           <img
-            src={imageUrl || DefaultImages.AstrologerDefaultImg}
+            src={imageUrl}
             alt={`${data?.firstName} ${data?.lastName}`}
             className={styles.profileImage}
             onError={(e) => {
-              e.target.src = astrologerImage;
+              e.target.src = getAstrologerDefaultImage(data?.gender);
             }}
           />
         </div>
