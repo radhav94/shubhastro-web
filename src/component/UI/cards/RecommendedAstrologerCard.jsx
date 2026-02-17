@@ -1,9 +1,8 @@
 import { FaStar } from "react-icons/fa";
 import { PiBookOpenTextLight } from "react-icons/pi";
 import styles from "./RecommendedAstrologerCard.module.scss";
-import astrologerImage from "../../../assets/images/top-rated-1.svg";
 import { useNavigate } from "react-router-dom";
-import { DefaultImages } from "../../../utils/appImages";
+import { getAstrologerDefaultImage } from "../../../utils/appImages";
 
 const RecommendedAstrologerCard = ({ data, onConnect }) => {
   const navigate = useNavigate();
@@ -12,18 +11,18 @@ const RecommendedAstrologerCard = ({ data, onConnect }) => {
   const fullName = `${firstName || ""} ${lastName || ""}`.trim();
   const displayExperience = experience ? `${experience} years exp.` : "";
   
-  // Try multiple image fields with fallback
-  const profileImage = imageUrl || aadharCardImgUrl || panCardImgUrl || astrologerImage;
+  // Try multiple image fields with fallback to gender-based default
+  const profileImage = imageUrl || aadharCardImgUrl || panCardImgUrl || getAstrologerDefaultImage(data?.gender);
 
   return (
     <div className={styles.card}>
       <div className={styles.imageContainer}>
         <img
-          src={profileImage || DefaultImages.AstrologerDefaultImg}
+          src={profileImage}
           alt={fullName}
           className={styles.image}
           onError={(e) => {
-            e.target.src = astrologerImage;
+            e.target.src = getAstrologerDefaultImage(data?.gender);
           }}
         />
       </div>

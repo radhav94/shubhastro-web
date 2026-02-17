@@ -1,7 +1,7 @@
 import { BookOpen } from "lucide-react";
 import styles from "../Home.module.scss";
 import { Link } from "react-router-dom";
-import { DefaultImages } from "../../../../utils/appImages";
+import { getAstrologerDefaultImage } from "../../../../utils/appImages";
 
 const AstrologerCard = ({ astrologer, onConnect }) => {
   return (
@@ -9,7 +9,7 @@ const AstrologerCard = ({ astrologer, onConnect }) => {
       <Link to={`/astrologer/${astrologer?._id} `} className={styles.cardLink}>
         <div className={styles.astrologerImageWrapper}>
           <img
-            src={astrologer.imageUrl || DefaultImages.AstrologerDefaultImg}
+            src={astrologer.imageUrl || getAstrologerDefaultImage(astrologer.gender)}
             alt={astrologer.firstName}
             className={styles.astrologerImg}
             onError={(e) => {

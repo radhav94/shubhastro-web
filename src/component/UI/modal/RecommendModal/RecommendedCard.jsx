@@ -1,7 +1,7 @@
 import styles from "./recommendedCard.module.scss";
 import { FaStar } from "react-icons/fa";
 import { PiBookOpenTextLight } from "react-icons/pi";
-import astrologerImage from "../../../../assets/images/top-rated-1.svg";
+import { getAstrologerDefaultImage } from "../../../../utils/appImages";
 
 const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall, mode }) => {
   const rating = astro?.rating || 4.5;
@@ -30,11 +30,10 @@ const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall, mode }) => {
     <>
       <div className={styles.card}>
         <img
-          src={astro?.imageUrl || astrologerImage}
+          src={astro?.imageUrl || getAstrologerDefaultImage(astro?.gender)}
           alt={fullName}
           onError={(e) => {
-            e.target.src =
-              "https://shubhastroassets.s3.ap-south-1.amazonaws.com/astrologer_male.png";
+            e.target.src = getAstrologerDefaultImage(astro?.gender);
           }}
         />
 

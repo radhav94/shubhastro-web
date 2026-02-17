@@ -2,9 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../../utils/routes/Paths";
-import consult from "../../../../assets/images/astrologer.svg";
 import styles from "../Home.module.scss";
-import { DefaultImages } from "../../../../utils/appImages";
+import { getAstrologerDefaultImage } from "../../../../utils/appImages";
 
 const ConsultationCarousel = ({ data = [], title }) => {
     const [activeSlide, setActiveSlide] = useState(0);
@@ -18,21 +17,21 @@ const ConsultationCarousel = ({ data = [], title }) => {
         title: item.title || "Consult our astrologers today.",
         subtitle: item.description || "Get advice from astrologers.",
         buttonText: "Consult Now",
-        image: item.image_url || consult,
+        image: item.image_url || getAstrologerDefaultImage(),
     })) : [
         {
             id: 1,
             title: "Consult our astrologers today.",
             subtitle: "Get advice from astrologers.",
             buttonText: "Consult Now",
-            image: consult,
+            image: getAstrologerDefaultImage(),
         },
         {
             id: 2,
             title: "Want to know your future?",
             subtitle: "Get advice from experts.",
             buttonText: "Consult Now",
-            image: consult,
+            image: getAstrologerDefaultImage(),
         },
     ];
 
@@ -91,7 +90,7 @@ const ConsultationCarousel = ({ data = [], title }) => {
                         </div>
                         <div className={styles.slideImageWrapper}>
                             <img
-                                src={slide.image || DefaultImages.AstrologerDefaultImg}
+                                src={slide.image || getAstrologerDefaultImage()}
                                 alt="Astrologer"
                                 className={styles.astrologerImage}
                                 onError={(e) => {

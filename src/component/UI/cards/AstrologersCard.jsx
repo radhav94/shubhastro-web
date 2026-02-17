@@ -2,7 +2,7 @@ import styles from "./AstrologersCard.module.scss";
 import PrimaryText from "../../PrimaryText";
 import PrimaryButton from "../../PrimaryButton";
 import { appColors } from "../../../utils/theme";
-import { AppIcons, AppImages, DefaultImages } from "../../../utils/appImages";
+import { AppIcons, AppImages, DefaultImages, getAstrologerDefaultImage } from "../../../utils/appImages";
 import Divider from "../../Divider";
 import { MdOutlineCurrencyRupee } from "react-icons/md";
 import { GetString } from "../../../utils/helper/string.utils";
@@ -25,7 +25,7 @@ const AstrologerCard = ({
         <div className={!isLayoutClassic ? styles.avatarWrapper1 : styles.avatarWrapper}>
           <Link to={`/astrologer/${data?.astrologerId || data?._id}`}>        
             <img
-              src={data?.imageUrl || DefaultImages?.AstrologerDefaultImg}
+              src={data?.imageUrl || getAstrologerDefaultImage(data?.gender)}
               alt={data?.firstName}
               className={styles.avatar}
             />

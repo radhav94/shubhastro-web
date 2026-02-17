@@ -35,6 +35,7 @@ import ProfileListingModal from "../../../../../component/UI/Profile/ProfileList
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
 import GiftModal from "../../../../../component/call/GiftModal";
 import { ProfileManager } from "../../../../../component/UI/Profile";
+import { useChat as useChatContext } from "../../../../../context/ChatContext";
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
@@ -58,9 +59,11 @@ const ChatWindow = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showProfileManagerModal, setShowProfileManagerModal] = useState(false);
   const [showGiftModal, setShowGiftModal] = useState(false);
+  const { activeChat } = useChatContext();
 
   // Check if there's an active video call
   const isVideoCallActive = activeCall && activeCall.callType === "video";
+  const isChatActive = activeChat && activeChat.roomId;
 
   // Get wallet balance
   const { balance, refreshWallet } = useWalletBalance();
@@ -374,6 +377,7 @@ const ChatWindow = () => {
             onRecharge={handleRecharge}
             isVideoCallActive={isVideoCallActive}
             onChatEnd={handleChatEnd}
+            isChatActive={isChatActive}
           />
 
           {/* Call Buttons Below Header */}

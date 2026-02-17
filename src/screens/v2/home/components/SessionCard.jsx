@@ -2,7 +2,7 @@ import { Calendar, Clock, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import astrologerSquare from "../../../../assets/images/astrologer-square.svg";
 import styles from "../Home.module.scss";
-import { DefaultImages } from "../../../../utils/appImages";
+import { getAstrologerDefaultImage } from "../../../../utils/appImages";
 
 const SessionCard = ({ session, onCallAgain, isLoading }) => {
   // Format date from startTime
@@ -44,7 +44,7 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
     >
       <div className={styles.sessionImageWrapper}>
         <img
-          src={session.astrologerImage || DefaultImages.AstrologerDefaultImg}
+          src={session.astrologerImage || getAstrologerDefaultImage(session.astrologerGender)}
           alt={session.astrologerName}
           className={styles.sessionImage}
           onError={(e) => {
