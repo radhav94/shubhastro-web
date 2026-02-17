@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import wheel from "../../../../assets/images/wheel.svg";
+import cos from "../../../../assets/images/cosmic.png";
 import styles from "../Home.module.scss";
 
 const CosmicInsightSection = ({ data }) => {
@@ -72,13 +73,13 @@ const CosmicInsightSection = ({ data }) => {
           <h3 className={styles.cosmicTitle}>{data?.sub_title}</h3>
           <p className={styles.cosmicText}>{data?.description}</p>
         </div>
-        <div className={styles.cosmicArt}>
+        {/* <div className={styles.cosmicArt}>
           <img
-            src={imageUrl}
+            src={cos}
             alt="Zodiac Wheel"
             className={styles.zodiacWheel}
           />
-        </div>
+        </div> */}
       </div>
     </section>
   );

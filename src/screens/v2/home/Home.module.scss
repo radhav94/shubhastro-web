@@ -401,7 +401,7 @@
     height: 100%;
     align-items: flex-start;
     flex-direction: column;
-    padding: 16px 16px 0 16px;
+    padding: 16px 16px 16px 16px;
     & .cosmicArt{
       position: unset;
       transform: rotate(90deg);
@@ -485,7 +485,7 @@
       border-radius: var(--Radius-4, 12px);
       border: 1px solid rgba(0, 0, 0, 0.02);
       background: var(--card-2, #FFF5EC);
-      padding: 18px 0 0 18px;
+      padding: 10px 0 0 18px;
     }
   }
 }
@@ -2041,7 +2041,7 @@
 .timingsRow {
   display: flex;
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 0px;
 }
 
 .timingsCard {
@@ -2565,7 +2565,7 @@
   .quickActions {
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
-    margin-bottom: 32px;
+    // margin-bottom: 32px;
   }
 
   .actionTitle {
@@ -2772,7 +2772,7 @@
   .quickActions {
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
-    margin-bottom: 40px;
+    // margin-bottom: 40px;
   }
 
 
@@ -2881,7 +2881,7 @@
   .quickActions {
     grid-template-columns: repeat(4, 1fr);
     gap: 24px;
-    margin-bottom: 48px;
+    // margin-bottom: 48px;
   }
 
   .actionTitle {
@@ -2936,7 +2936,7 @@
   .quickActions {
     grid-template-columns: repeat(4, 1fr);
     gap: 28px;
-    margin-bottom: 56px;
+    // margin-bottom: 56px;
   }
 
   .actionTitle {
@@ -3009,6 +3009,9 @@
   justify-content: space-between;
   margin-bottom: 20px;
   gap: 16px;
+  @media (width <= 767px) {
+    justify-content: center;
+  }
 }
 
 .discoverHeader .sectionHeader {
