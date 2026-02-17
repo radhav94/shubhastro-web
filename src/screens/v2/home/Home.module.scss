@@ -316,76 +316,178 @@
 /* Main Content */
 .mainContent {
     padding: 0 16px;
-    max-width: 100%;
+    max-width: 1200px;
     margin: 0 auto;
-    
-    @media (min-width: 768px) {
-      padding: 0 32px;
+    @media (width <= 1180px) {
+      padding: 0 16px;
     }
     
-    @media (min-width: 1024px) {
-      padding: 0 48px;
-    }
+    // @media (min-width: 768px) {
+    //   padding: 0 32px;
+    // }
     
-    @media (min-width: 1280px) {
-      padding: 0 64px;
-    }
+    // @media (min-width: 1024px) {
+    //   padding: 0 48px;
+    // }
     
-    @media (min-width: 1440px) {
-      padding: 0 80px;
-    }
+    // @media (min-width: 1280px) {
+    //   padding: 0 64px;
+    // }
     
-    @media (min-width: 1920px) {
-      max-width: 1920px;
-      padding: 0 100px;
-    }
+    // @media (min-width: 1440px) {
+    //   padding: 0 138px;
+    // }
+    
+    // @media (min-width: 1920px) {
+    //   max-width: 1920px;
+    //   padding: 0 100px;
+    // }
   }
 
 /* Mobile Layout - Show on mobile, hide on desktop */
 .mobileLayout {
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 24px;
   
-  @media (min-width: 1024px) {
-    display: none;
+  @media (width <= 1180px) {
+    display: flex;
   }
 }
 
 /* Two Column Layout - Hide on mobile, show on desktop */
 .twoColumnLayout {
-  display: none;
+  display: grid;
+  grid-template-columns: minmax(250px, 250px) 1fr;
+  gap: 20px;
   
-  @media (min-width: 1024px) {
-    display: grid;
-    grid-template-columns: minmax(320px, 380px) 1fr;
-    gap: 32px;
-  }
+  // @media (min-width: 1024px) {
+  //   display: grid;
+  //   grid-template-columns: minmax(320px, 380px) 1fr;
+  //   gap: 20px;
+  // }
   
-  @media (min-width: 1280px) {
-    grid-template-columns: minmax(350px, 420px) 1fr;
-    gap: 40px;
-  }
+  // @media (min-width: 1280px) {
+  //   grid-template-columns: minmax(350px, 420px) 1fr;
+  //   gap: 20px;
+  // }
   
-  @media (min-width: 1440px) {
-    grid-template-columns: minmax(380px, 450px) 1fr;
-    gap: 48px;
-  }
+  // @media (min-width: 1440px) {
+  //   grid-template-columns: minmax(250px, 250px) 1fr;
+  //   gap: 20px;
+  // }
   
-  @media (min-width: 1920px) {
-    grid-template-columns: 480px 1fr;
-    gap: 56px;
+  // @media (min-width: 1920px) {
+  //   grid-template-columns: 480px 1fr;
+  //   gap: 20px;
+  // }
+  @media (width <= 1180px) {
+    display: none;
   }
 }
 
 .leftColumn {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  // gap: 0px;
   position: sticky;
   top: 24px;
   align-self: flex-start;
   height: fit-content;
+  & .cosmicInsightSection{
+    // height: 400px;
+  }
+  & .cosmicInsightCard{
+    height: 100%;
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 16px 16px 0 16px;
+    & .cosmicArt{
+      position: unset;
+      transform: rotate(90deg);
+      width: calc(100% + 32px);
+      margin-left: -16px;
+      margin-top: -40px;
+    }
+  }
+  & .cosmicContent{
+    max-width: 100%;
+    padding: 0;
+    text-align: center;
+    & .cosmicTitle{
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: 0;
+    }
+    & .cosmicText{
+      font-size: 14px;
+    }
+    & .cosmicHeader{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+  & .panchangSection{
+    background-color: #fff;
+    padding: 16px;
+    border-radius: 24px;
+    // .panchangHeader{
+    //   position: relative;
+    // }
+    .panchangCenter{
+      position: absolute;
+      top: 0;
+      .sunIcon{
+        position: unset;
+        margin: unset;
+      }
+    }
+  }
+  & .panchangTabs{
+    gap: 5px;
+    .panchangTab{
+      padding: 8px 5px;
+    }
+  }
+  & .panchangCard{
+    padding:20px 6px;
+    // border: none;
+    box-shadow: none;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    background: var(--card-2, #FFF5EC);
+    position: relative;
+    .panchangTitle{
+      font-size: 14px;
+    }
+  }
+  & .timingsRow{
+    flex-direction: column;
+    margin-bottom: 0;
+    & .timingsCard{
+      width: 100%;
+      box-shadow: none;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.03);
+      background: var(--card-2, #FFF5EC);
+      padding: 6px;
+      .timingTime{
+        font-weight: 500;
+      }
+    }
+  }
+  & .quickActions{
+    background-color: #fff;
+    padding: 16px;
+    border-radius: 24px;
+    .actionCard{
+      border-radius: var(--Radius-4, 12px);
+      border: 1px solid rgba(0, 0, 0, 0.02);
+      background: var(--card-2, #FFF5EC);
+      padding: 18px 0 0 18px;
+    }
+  }
 }
 
 .rightColumn {
@@ -402,7 +504,7 @@
     --orange_gradient,
     linear-gradient(90deg, #f75801 0%, #d43400 100%)
   );
-  border-radius: 24px;
+  border-radius: 12px;
   border: 1px solid #f0d07f;
   display: flex;
   justify-content: space-between;
@@ -491,13 +593,17 @@
 
 .horoscopeHeading {
   font-family: "Poppins", sans-serif;
-  font-size: clamp(16px, 4.5vw, 20px);
-  font-weight: 500;
+  // font-size: clamp(16px, 4vw, 26px);
+  font-size: 1.6rem;
+  font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.4px;
   color: #fff;
   margin-bottom: 6px;
   word-wrap: break-word;
+  @media (width <= 767px) {
+    font-size: 1rem;
+  }
 }
 
 .horoscopeSubtext {
@@ -597,7 +703,7 @@
 
   // background: linear-gradient(151.72deg, #ffecf0 10.17%, #f2eaff 101.97%);
   background-color: #ffe4ba;
-  border-radius: 20px;
+  border-radius: 12px;
   box-shadow: 0px 4px 12px rgba(127, 74, 87, 0.08);
 
   padding: 18px;
@@ -629,21 +735,24 @@
 }
 .slideTitle {
   font-family: "Poppins", sans-serif;
-  font-size: 30px;
+  font-size: 20px;
   font-weight: 500;
   /* reduced */
-  line-height: 1.15;
+  // line-height: 1.15;
   letter-spacing: -0.02em;
   color: #101010;
   margin: 0;
   @include line-clamp(2);
+  @media (width <= 767px) {
+    font-size: 18px;
+  }
 }
 
 .slideSubtitle {
   font-family: "Poppins", sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 400;
-  line-height: 1.4;
+  // line-height: 1.4;
   letter-spacing: -0.02em;
   color: #6b6b6b;
   margin: 0;
@@ -656,7 +765,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 5px;
 
   width: fit-content;
   // background: #2a1c06;
@@ -667,11 +776,11 @@
   color: #fff;
   border: none;
 
-  padding: 8px 10px 8px 16px;
+  padding: 4px 10px 4px 16px;
   border-radius: 999px;
 
   font-family: "Poppins", sans-serif;
-  font-size: 16px;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   position: relative;
@@ -763,17 +872,17 @@
     flex: 0 0 calc(50% - 8px);
     min-width: calc(50% - 8px);
     min-height: auto;
-    padding: 22px;
+    padding: 1rem;
     scroll-snap-align: start;
   }
 
-  .slideTitle {
-    font-size: 22px;
-  }
+  // .slideTitle {
+  //   font-size: 22px;
+  // }
 
-  .slideSubtitle {
-    font-size: 17px;
-  }
+  // .slideSubtitle {
+  //   font-size: 17px;
+  // }
 }
 
 /* =========================
@@ -786,13 +895,13 @@
     min-height: auto;
   }
 
-  .slideTitle {
-    font-size: 26px;
-  }
+  // .slideTitle {
+  //   font-size: 26px;
+  // }
 
-  .slideSubtitle {
-    font-size: 18px;
-  }
+  // .slideSubtitle {
+  //   font-size: 18px;
+  // }
 }
 
 /* =========================
@@ -814,7 +923,7 @@
     flex: 0 0 88%;
     min-width: 88%;
     min-height: auto;
-    padding: 14px;
+    padding: 1rem;
     border-radius: 18px;
   }
 
@@ -825,18 +934,18 @@
     /* ✅ mobile gap */
   }
 
-  .slideTitle {
-    font-size: 18px;
-    line-height: 1.2;
-  }
+  // .slideTitle {
+  //   font-size: 18px;
+  //   line-height: 1.2;
+  // }
 
-  .slideSubtitle {
-    font-size: 13px;
-    line-height: 1.3;
-  }
+  // .slideSubtitle {
+  //   font-size: 13px;
+  //   line-height: 1.3;
+  // }
 
   .slideButton {
-    font-size: 13px;
+    // font-size: 13px;
     // padding: 10px 16px;
     border-radius: 999px;
     margin-top: 4px;
@@ -989,8 +1098,8 @@
 /* Action Image in Left Column - Smaller Size */
 .leftColumn .actionImg {
   @media screen and (min-width: 1024px) {
-    height: 60px;
-    width: 60px;
+    height: 76px;
+    width: auto;
   }
 }
 
@@ -1021,7 +1130,7 @@
     --orange_gradient,
     linear-gradient(90deg, #f75801 0%, #d43400 100%)
   );
-  border-radius: 24px;
+  // border-radius: 24px;
   padding: 20px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
   margin-bottom: 40px;
@@ -1263,9 +1372,16 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: 4px 4px 20px 4px;
-  @media screen and (width <= 767px) {
-    padding: 4px 4px 20px 0px;
-  }
+  // width: calc(100% + 130px);
+  // @media screen and (width <= 767px) {
+  //   padding: 4px 4px 20px 0px;
+  // }
+  // @media (width <= 1600px) {
+  //   width: calc(100% + 210px);
+  // }
+  // @media (width <= 1800px) {
+  //   width: calc(100% + 310px);
+  // }
 }
 
 .astrologersGrid::-webkit-scrollbar {
@@ -1273,14 +1389,14 @@
 }
 
 .astrologerCard {
-  min-width: 220px;
+  min-width: 190px;
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  // box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   position: relative;
   @media screen and (width <= 767px) {
     min-width: 180px;
@@ -1304,7 +1420,7 @@
   height: 100px;
   border-radius: 50%;
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: -16px;
   background: #f5f5f5;
   display: flex;
   align-items: center;
@@ -1345,22 +1461,22 @@
 
 .ratingText {
   font-family: "Poppins", sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  color: #2c1b0e;
+  font-size: 12px;
+  font-weight: 400;
+  color: #606060;
 }
 
 .astrologerName {
   font-family: "Poppins", sans-serif;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 500;
   color: #1a1a1a;
-  margin: 10px 0 10px 0;
+  margin: 10px 0 6px 0;
   text-align: center;
   @include line-clamp(1);
   @media screen and (width <= 767px) {
     font-size: 14px;
-    margin-bottom: 6px;
+    // margin-bottom: 6px;
   }
 }
 
@@ -1401,16 +1517,16 @@
   padding: 10px 10px;
   border-radius: 50px;
   font-family: "Poppins", sans-serif;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
 
   @media screen and (width <= 767px) {
-    padding: 8px 16px;
-    font-size: 13px;
+    padding: 8px 10px;
+    // font-size: 13px;
   }
 }
 
@@ -1440,7 +1556,7 @@
 
 .lifeAreaCard {
   border-radius: 20px;
-  padding: 18px 16px;
+  padding: 16px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -1452,7 +1568,7 @@
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   // min-height: 140px;
   position: relative;
-  width: 300px;
+  width: 260px;
   gap: 16px;
   flex-shrink: 0;
   @media screen and (width <= 767px) {
@@ -1467,12 +1583,15 @@
 
 .lifeAreaTitle {
   font-family: "Poppins", sans-serif;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 500;
   line-height: 1.3;
   color: #1a1a1a;
   margin: 0;
   flex: 1;
+  @media (width <= 767px) {
+    font-size: 1rem;
+  }
 }
 
 .lifeAreaIcon {
@@ -1769,7 +1888,7 @@
     linear-gradient(90deg, #f75801 0%, #d43400 100%)
   );
   border-radius: 24px;
-  padding: 24px 20px;
+  padding: 16px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -1871,12 +1990,12 @@
 
 .panchangTab {
   flex: 1;
-  padding: 12px 24px;
+  padding: 12px 5px;
   border: 2px solid #e5e5e5;
   border-radius: 50px;
   background: #ffffff;
   font-family: "Poppins", sans-serif;
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 500;
   color: #101010;
   cursor: pointer;
@@ -2019,14 +2138,14 @@
     gap: 10px;
   }
 
-  .lifeAreaCard {
-    padding: 16px 14px;
-    // min-height: 130px;
-  }
+  // .lifeAreaCard {
+  //   padding: 16px 14px;
+  //   // min-height: 130px;
+  // }
 
-  .lifeAreaTitle {
-    font-size: 14px;
-  }
+  // .lifeAreaTitle {
+  //   font-size: 14px;
+  // }
 
   .lifeAreaIcon {
     width: 50px;
@@ -2038,18 +2157,18 @@
     height: 24px;
   }
 
-  .cosmicInsightCard {
-    padding: 20px 18px;
-    // min-height: 200px;
-  }
+  // .cosmicInsightCard {
+  //   padding: 20px 18px;
+  //   // min-height: 200px;
+  // }
 
   .cosmicContent {
     max-width: 70%;
   }
 
-  .cosmicTitle {
-    font-size: 22px;
-  }
+  // .cosmicTitle {
+  //   font-size: 22px;
+  // }
 
   .cosmicText {
     font-size: 13px;
@@ -2395,10 +2514,6 @@
     font-size: 13px;
   }
 
-  .horoscopeHeading {
-    font-size: 22px;
-  }
-
   .horoscopeSubtext {
     font-size: 13px;
   }
@@ -2422,21 +2537,21 @@
     flex: 0 0 calc(50% - 10px);
     min-width: calc(50% - 10px);
     min-height: auto;
-    padding: 22px;
+    padding: 1rem;
   }
 
-  .slideTitle {
-    font-size: 22px;
-  }
+  // .slideTitle {
+  //   font-size: 22px;
+  // }
 
-  .slideSubtitle {
-    font-size: 16px;
-  }
+  // .slideSubtitle {
+  //   font-size: 16px;
+  // }
 
-  .slideButton {
-    font-size: 15px;
-    // padding: 13px 20px;
-  }
+  // .slideButton {
+  //   font-size: 15px;
+  //   // padding: 13px 20px;
+  // }
 
   /* Quick Actions - Tablet */
   .quickActions {
@@ -2506,16 +2621,16 @@
   }
 
   .lifeAreaCard {
-    padding: 28px 24px;
+    // padding: 28px 24px;
     // min-height: 160px;
     flex-direction: row;
     align-items: center;
   }
 
-  .lifeAreaTitle {
-    font-size: 20px;
-    max-width: 60%;
-  }
+  // .lifeAreaTitle {
+  //   font-size: 20px;
+  //   max-width: 60%;
+  // }
 
   .lifeAreaIcon {
     width: 80px;
@@ -2560,11 +2675,11 @@
     margin-bottom: 32px;
   }
 
-  .cosmicInsightCard {
-    padding: 32px 28px;
-    // min-height: 240px;
-    flex-direction: row;
-  }
+  // .cosmicInsightCard {
+  //   padding: 32px 28px;
+  //   // min-height: 240px;
+  //   flex-direction: row;
+  // }
 
   .cosmicContent {
     padding-right: 20px;
@@ -2575,9 +2690,9 @@
     font-size: 12px;
   }
 
-  .cosmicTitle {
-    font-size: 32px;
-  }
+  // .cosmicTitle {
+  //   font-size: 32px;
+  // }
 
   .cosmicText {
     font-size: 16px;
@@ -2615,10 +2730,6 @@
     font-size: 14px;
   }
 
-  .horoscopeHeading {
-    font-size: 24px;
-  }
-
   .horoscopeSubtext {
     font-size: 14px;
   }
@@ -2633,21 +2744,21 @@
     flex: 0 0 calc(45% - 10px);
     min-width: calc(45% - 10px);
     min-height: auto;
-    padding: 26px;
+    padding: 1rem;
   }
 
-  .slideTitle {
-    font-size: 22px;
-  }
+  // .slideTitle {
+  //   font-size: 22px;
+  // }
 
-  .slideSubtitle {
-    font-size: 17px;
-  }
+  // .slideSubtitle {
+  //   font-size: 17px;
+  // }
 
-  .slideButton {
-    font-size: 16px;
-    // padding: 14px 22px;
-  }
+  // .slideButton {
+  //   font-size: 16px;
+  //   // padding: 14px 22px;
+  // }
 
   /* Quick Actions - Desktop */
   .quickActions {
@@ -2687,14 +2798,14 @@
   // }
 
   /* Life Area Section - Desktop */
-  .lifeAreaCard {
-    padding: 32px 28px;
-    // min-height: 160px;
-  }
+  // .lifeAreaCard {
+  //   padding: 32px 28px;
+  //   // min-height: 160px;
+  // }
 
-  .lifeAreaTitle {
-    font-size: 22px;
-  }
+  // .lifeAreaTitle {
+  //   font-size: 22px;
+  // }
 
   .lifeAreaIcon {
     width: 90px;
@@ -2702,14 +2813,14 @@
   }
 
   /* Cosmic Insight - Desktop */
-  .cosmicInsightCard {
-    padding: 36px 32px;
-    // min-height: 260px;
-  }
+  // .cosmicInsightCard {
+  //   padding: 36px 32px;
+  //   // min-height: 260px;
+  // }
 
-  .cosmicTitle {
-    font-size: 36px;
-  }
+  // .cosmicTitle {
+  //   font-size: 36px;
+  // }
 
   .cosmicText {
     font-size: 17px;
@@ -2733,9 +2844,9 @@
   //   // padding: 32px 48px;
   // }
 
-  .horoscopeHeading {
-    font-size: 32px;
-  }
+  // .horoscopeHeading {
+  //   font-size: 32px;
+  // }
 
   // .horoscopePlanet {
   //   width: 190px;
@@ -2747,16 +2858,16 @@
     flex: 0 0 calc(40% - 10px);
     min-width: calc(40% - 10px);
     min-height: auto;
-    padding: 28px;
+    padding: 1rem;
   }
 
-  .slideTitle {
-    font-size: 22px;
-  }
+  // .slideTitle {
+  //   font-size: 22px;
+  // }
 
-  .slideSubtitle {
-    font-size: 18px;
-  }
+  // .slideSubtitle {
+  //   font-size: 18px;
+  // }
 
   /* Quick Actions - Large Desktop */
   .quickActions {
@@ -2788,9 +2899,9 @@
   //   padding: 0px 26px;
   // }
 
-  .horoscopeHeading {
-    font-size: 28px;
-  }
+  // .horoscopeHeading {
+  //   font-size: 28px;
+  // }
 
   // .horoscopePlanet {
   //   width: 190px;
@@ -2802,16 +2913,16 @@
     flex: 0 0 calc(35% - 10px);
     min-width: calc(35% - 10px);
     min-height: auto;
-    padding: 30px;
+    padding: 1rem;
   }
 
-  .slideTitle {
-    font-size: 26px;
-  }
+  // .slideTitle {
+  //   font-size: 26px;
+  // }
 
-  .slideSubtitle {
-    font-size: 19px;
-  }
+  // .slideSubtitle {
+  //   font-size: 19px;
+  // }
 
   /* Quick Actions - XL Desktop */
   .quickActions {
@@ -2850,14 +2961,14 @@
   // }
 
   /* Life Area Section - XL Desktop */
-  .lifeAreaCard {
-    padding: 36px 32px;
-    // min-height: 180px;
-  }
+  // .lifeAreaCard {
+  //   padding: 36px 32px;
+  //   // min-height: 180px;
+  // }
 
-  .lifeAreaTitle {
-    font-size: 24px;
-  }
+  // .lifeAreaTitle {
+  //   font-size: 24px;
+  // }
 
   .lifeAreaIcon {
     width: 100px;
@@ -2865,14 +2976,14 @@
   }
 
   /* Cosmic Insight - XL Desktop */
-  .cosmicInsightCard {
-    padding: 40px 36px;
-    // min-height: 280px;
-  }
+  // .cosmicInsightCard {
+  //   padding: 40px 36px;
+  //   // min-height: 280px;
+  // }
 
-  .cosmicTitle {
-    font-size: 40px;
-  }
+  // .cosmicTitle {
+  //   font-size: 40px;
+  // }
 
   .cosmicText {
     font-size: 18px;
@@ -3128,12 +3239,12 @@
 }
 
 .blogCard {
-  flex: 0 0 220px;
-  min-width: 220px;
+  // flex: 0 0 220px;
+  min-width: 190px;
   background: #ffffff;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  // box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition:
     transform 0.2s,
