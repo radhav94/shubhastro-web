@@ -401,13 +401,14 @@
     height: 100%;
     align-items: flex-start;
     flex-direction: column;
-    padding: 16px 16px 16px 16px;
+    padding: 16px 16px 0px 16px;
     & .cosmicArt{
-      position: unset;
+      position: relative;
       transform: rotate(90deg);
       width: calc(100% + 32px);
       margin-left: -16px;
-      margin-top: -40px;
+      margin-top: -90px;
+      top: 60px;
     }
   }
   & .cosmicContent{
@@ -437,10 +438,14 @@
     // }
     .panchangCenter{
       position: absolute;
+      left: 0;
+      right: 0;
       top: 0;
+      margin: 0 auto;
       .sunIcon{
         position: unset;
         margin: unset;
+        height: 50px;
       }
     }
   }
@@ -1999,7 +2004,7 @@
 .panchangTab {
   flex: 1;
   padding: 12px 5px;
-  border: 2px solid #e5e5e5;
+  border: 1px solid #f75801;
   border-radius: 50px;
   background: #ffffff;
   font-family: "Poppins", sans-serif;
@@ -2019,7 +2024,7 @@
     --orange_gradient,
     linear-gradient(90deg, #f75801 0%, #d43400 100%)
   );
-  // border-color: #ff9800;
+  border-color: #f75801;
   color: #ffffff;
 }
 
@@ -3579,7 +3584,7 @@
   }
 
   @media screen and (width <= 767px) {
-    grid-auto-columns: calc(100% - 0px);
+    grid-auto-columns: calc(100% - 130px);
     gap: 12px;
     padding: 0px;
   }
@@ -3602,8 +3607,8 @@
 }
 
 .dashaCard {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
+  background: #FEFEFE;
+  border: 1px solid rgba(189, 189, 189, 0.20);
   border-radius: 16px;
   padding: 16px;
   transition: all 0.3s ease;
@@ -3611,6 +3616,7 @@
 
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
   }
 
   // @media screen and (width <= 767px) {

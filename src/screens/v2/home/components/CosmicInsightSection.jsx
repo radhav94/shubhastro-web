@@ -73,13 +73,13 @@ const CosmicInsightSection = ({ data }) => {
           <h3 className={styles.cosmicTitle}>{data?.sub_title}</h3>
           <p className={styles.cosmicText}>{data?.description}</p>
         </div>
-        {/* <div className={styles.cosmicArt}>
+        <div className={styles.cosmicArt}>
           <img
             src={cos}
             alt="Zodiac Wheel"
             className={styles.zodiacWheel}
           />
-        </div> */}
+        </div>
       </div>
     </section>
   );
