@@ -472,10 +472,10 @@
 .walletBadge::before,.walletBadge::after {
   content: "";
   position: absolute;
-  top: -13px;
+  top: -8px;
   left: 28%;
   width: 16px;
-  height: 16px;
+  height: 10px;
   background: #fff4ec;
   border-radius: 50%;
   @media screen and (width <= 767px) {
@@ -485,18 +485,18 @@
 }
 
 .walletBadge::after {
-  bottom: -13px;
+  bottom: -8px;
   left: 28%;
   top: unset;
   @media screen and (width <= 767px) {
-    height: 16px;
+    // height: 16px;
     bottom: -10px;
   }
 }
 
 .coinIcon {
-  width: 20px;
-  height: 20px;
+  width: 17px;
+  height: 17px;
   background: radial-gradient(
     circle at 35% 35%,
     #ffe873 0%,
@@ -519,8 +519,8 @@
 // .coinIcon::before {
 //   content: "";
 //   position: absolute;
-//   width: 22px;
-//   height: 22px;
+//   width: 17px;
+//   height: 17px;
 //   border: 2px solid rgba(139, 111, 71, 0.5);
 //   border-radius: 50%;
 // }
