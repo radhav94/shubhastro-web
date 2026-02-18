@@ -224,7 +224,47 @@ const PalmistryResult = () => {
 
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Personalized Insights</h3>
-              <p className={styles.text}>{overallReading?.personalizedInsights || 'No data available'}</p>
+              {overallReading?.personalizedInsights?.zodiacSign && (
+                <div className={styles.subsection}>
+                  <h4 className={styles.subsectionTitle}>Zodiac Sign</h4>
+                  <p className={styles.text}>{overallReading.personalizedInsights.zodiacSign}</p>
+                </div>
+              )}
+              {overallReading?.personalizedInsights?.rulingPlanet && (
+                <div className={styles.subsection}>
+                  <h4 className={styles.subsectionTitle}>Ruling Planet</h4>
+                  <p className={styles.text}>{overallReading.personalizedInsights.rulingPlanet}</p>
+                </div>
+              )}
+              {overallReading?.personalizedInsights?.astrologyCorrelation && (
+                <div className={styles.subsection}>
+                  <h4 className={styles.subsectionTitle}>Astrology Correlation</h4>
+                  <p className={styles.text}>{overallReading.personalizedInsights.astrologyCorrelation}</p>
+                </div>
+              )}
+              {overallReading?.personalizedInsights?.elementalHandType && (
+                <div className={styles.subsection}>
+                  <h4 className={styles.subsectionTitle}>Elemental Hand Type</h4>
+                  <p className={styles.text}>{overallReading.personalizedInsights.elementalHandType}</p>
+                </div>
+              )}
+              {overallReading?.personalizedInsights?.dominantMounts?.length > 0 && (
+                <div className={styles.subsection}>
+                  <h4 className={styles.subsectionTitle}>Dominant Mounts</h4>
+                  <ul className={styles.list}>
+                    {overallReading.personalizedInsights.dominantMounts.map((mount, idx) => (
+                      <li key={idx}>{mount}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {/* Fallback for old string format */}
+              {typeof overallReading?.personalizedInsights === 'string' && (
+                <p className={styles.text}>{overallReading.personalizedInsights}</p>
+              )}
+              {!overallReading?.personalizedInsights && (
+                <p className={styles.text}>No data available</p>
+              )}
             </div>
           </>
         )}
@@ -493,11 +533,7 @@ const PalmistryResult = () => {
                       <h3 className={styles.lineTitle}>Marriage Lines</h3>
                       <div className={styles.lineScore}>{resultData.secondaryLines.marriageLines.count}</div>
                     </div>
-                    <ul className={styles.list}>
-                      {resultData.secondaryLines.marriageLines.interpretations?.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
+                    <p className={styles.text}>{resultData.secondaryLines.marriageLines.interpretation}</p>
                   </div>
                 )}
 
@@ -507,11 +543,7 @@ const PalmistryResult = () => {
                       <h3 className={styles.lineTitle}>Travel Lines</h3>
                       <div className={styles.lineScore}>{resultData.secondaryLines.travelLines.count}</div>
                     </div>
-                    <ul className={styles.list}>
-                      {resultData.secondaryLines.travelLines.interpretations?.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
+                    <p className={styles.text}>{resultData.secondaryLines.travelLines.interpretation}</p>
                   </div>
                 )}
               </>
