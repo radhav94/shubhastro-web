@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Hands } from "@mediapipe/hands";
 
-export const useHandDetection = ({ videoRef, canvasRef }) => {
+export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds }) => {
   const [handsLoaded, setHandsLoaded] = useState(false);
   const [handDetected, setHandDetected] = useState(false);
   const [isPalmOpen, setIsPalmOpen] = useState(false);
+  const [isInBounds, setIsInBounds] = useState(false);
   
   const handsRef = useRef(null);
   const rafRef = useRef(null);
@@ -62,6 +63,7 @@ export const useHandDetection = ({ videoRef, canvasRef }) => {
 
     let isValid = false;
     let palmOpen = false;
+    let inBounds = false;
 
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
       const landmarks = results.multiHandLandmarks[0];
@@ -69,8 +71,11 @@ export const useHandDetection = ({ videoRef, canvasRef }) => {
       // Check if palm is open by analyzing finger positions
       palmOpen = isPalmOpenCheck(landmarks);
       
+      // Check if hand is within capture box bounds
+      inBounds = checkHandInBounds(landmarks, canvas.width, canvas.height);
+      
       // Draw hand landmarks
-      drawHand(ctx, landmarks, canvas.width, canvas.height, palmOpen);
+      drawHand(ctx, landmarks, canvas.width, canvas.height, palmOpen && inBounds);
       
       // Validate hand detection
       isValid = validateHand(landmarks, canvas.width, canvas.height);
@@ -78,6 +83,72 @@ export const useHandDetection = ({ videoRef, canvasRef }) => {
 
     setHandDetected(isValid);
     setIsPalmOpen(palmOpen);
+    setIsInBounds(inBounds);
+    
+    console.log('📊 Detection States:', { 
+      handDetected: isValid, 
+      isPalmOpen: palmOpen, 
+      isInBounds: inBounds 
+    });
+  };
+
+  /* ------------------ CHECK HAND IN BOUNDS ------------------ */
+  const checkHandInBounds = (landmarks, width, height) => {
+    if (!getCaptureBoxBounds) {
+      console.log('⚠️ No capture box bounds function provided');
+      return false;
+    }
+    
+    // Get capture box bounds dynamically by calling the function
+    const captureBoxBounds = getCaptureBoxBounds();
+    
+    if (!captureBoxBounds) {
+      console.log('⚠️ No capture box bounds returned');
+      return false;
+    }
+    
+    // Get capture box bounds (as percentage of video dimensions)
+    const boxLeft = captureBoxBounds.left * width;
+    const boxRight = captureBoxBounds.right * width;
+    const boxTop = captureBoxBounds.top * height;
+    const boxBottom = captureBoxBounds.bottom * height;
+    
+    // Check if ALL hand landmarks are within bounds (very strict checking)
+    let landmarksInside = 0;
+    let landmarksOutside = 0;
+    
+    landmarks.forEach((landmark, index) => {
+      const x = landmark.x * width;
+      const y = landmark.y * height;
+      
+      const isInside = x >= boxLeft && x <= boxRight && y >= boxTop && y <= boxBottom;
+      
+      if (isInside) {
+        landmarksInside++;
+      } else {
+        landmarksOutside++;
+      }
+    });
+    
+    // Calculate percentage
+    const percentageInside = landmarksInside / landmarks.length;
+    const isInBounds = percentageInside >= 0.95; // 95% must be inside (very strict)
+    
+    console.log('🖐️ Hand Detection:', {
+      total: landmarks.length,
+      inside: landmarksInside,
+      outside: landmarksOutside,
+      percentage: (percentageInside * 100).toFixed(1) + '%',
+      isInBounds: isInBounds,
+      boxBounds: { 
+        left: boxLeft.toFixed(0), 
+        right: boxRight.toFixed(0), 
+        top: boxTop.toFixed(0), 
+        bottom: boxBottom.toFixed(0) 
+      }
+    });
+    
+    return isInBounds;
   };
 
   /* ------------------ PALM OPEN CHECK ------------------ */
@@ -123,6 +194,8 @@ export const useHandDetection = ({ videoRef, canvasRef }) => {
 
   /* ------------------ DRAW HAND ------------------ */
   const drawHand = (ctx, landmarks, width, height, palmOpen) => {
+    // Don't draw debug box - we'll use the orange CSS box
+    
     // Draw connections between landmarks
     const connections = [
       [0, 1], [1, 2], [2, 3], [3, 4], // Thumb
@@ -199,6 +272,7 @@ export const useHandDetection = ({ videoRef, canvasRef }) => {
     }
     setHandDetected(false);
     setIsPalmOpen(false);
+    setIsInBounds(false);
     
     if (canvasRef.current) {
       const ctx = canvasRef.current.getContext('2d');
@@ -210,6 +284,7 @@ export const useHandDetection = ({ videoRef, canvasRef }) => {
     handsLoaded,
     handDetected,
     isPalmOpen,
+    isInBounds,
     startDetection,
     stopDetection
   };

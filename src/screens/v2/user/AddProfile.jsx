@@ -206,9 +206,8 @@ const AddProfile = () => {
           <label className={styles.label}>Birth Time</label>
           <div className={styles.inputWrapper}>
             <input
-              type="text"
+              type="time"
               className={styles.input}
-              placeholder="Select here"
               value={formData.birthTime}
               onChange={(e) => handleInputChange('birthTime', e.target.value)}
               disabled={formData.unknownTime}

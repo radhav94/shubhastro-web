@@ -16,14 +16,57 @@ const PalmistryCamera = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
+  const captureAreaRef = useRef(null); // Reference to capture area div
+
+  // Calculate capture box bounds dynamically
+  const getCaptureBoxBounds = () => {
+    if (!captureAreaRef.current || !videoRef.current) {
+      // Return default bounds if refs not ready
+      return {
+        left: 0.15,
+        right: 0.85,
+        top: 0.10,
+        bottom: 0.90
+      };
+    }
+
+    try {
+      const videoRect = videoRef.current.getBoundingClientRect();
+      const boxRect = captureAreaRef.current.getBoundingClientRect();
+
+      // Calculate bounds as percentage of video dimensions
+      const bounds = {
+        left: (boxRect.left - videoRect.left) / videoRect.width,
+        right: (boxRect.right - videoRect.left) / videoRect.width,
+        top: (boxRect.top - videoRect.top) / videoRect.height,
+        bottom: (boxRect.bottom - videoRect.top) / videoRect.height,
+      };
+
+      console.log('📐 Orange Box Bounds:', bounds);
+      return bounds;
+    } catch (error) {
+      console.error('Error calculating bounds:', error);
+      return {
+        left: 0.15,
+        right: 0.85,
+        top: 0.10,
+        bottom: 0.90
+      };
+    }
+  };
 
   const {
     handsLoaded,
     handDetected,
     isPalmOpen,
+    isInBounds,
     startDetection,
     stopDetection
-  } = useHandDetection({ videoRef, canvasRef: detectionCanvasRef });
+  } = useHandDetection({ 
+    videoRef, 
+    canvasRef: detectionCanvasRef,
+    getCaptureBoxBounds: getCaptureBoxBounds // Pass function, not result
+  });
 
   // Start detection when models are loaded and video is ready
   useEffect(() => {
@@ -121,6 +164,49 @@ const PalmistryCamera = () => {
     }
   };
 
+  const captureImage = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Get orange box bounds dynamically
+      const bounds = getCaptureBoxBounds();
+
+      // Calculate crop dimensions based on orange box bounds
+      const boxX = bounds.left * canvas.width;
+      const boxY = bounds.top * canvas.height;
+      const boxWidth = (bounds.right - bounds.left) * canvas.width;
+      const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
+
+      console.log('📸 Cropping to orange box:', { boxX, boxY, boxWidth, boxHeight });
+
+      // Create a new canvas for the cropped image (only orange box area)
+      const cropCanvas = document.createElement('canvas');
+      cropCanvas.width = boxWidth;
+      cropCanvas.height = boxHeight;
+      const cropContext = cropCanvas.getContext('2d');
+
+      // Draw only the orange box region
+      cropContext.drawImage(
+        canvas,
+        boxX, boxY, boxWidth, boxHeight,  // Source rectangle (from original canvas)
+        0, 0, boxWidth, boxHeight          // Destination rectangle (to crop canvas)
+      );
+
+      // Get the cropped image
+      const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
+
+      setCapturedImage(croppedImage);
+      stopCamera();
+    }
+  };
+
   const switchCamera = () => {
     // Stop current camera completely before switching
     stopCamera();
@@ -130,107 +216,6 @@ const PalmistryCamera = () => {
     setFacingMode(nextMode);
     
     // Start camera with new mode will be handled by useEffect
-  };
-
-  const captureImage = async () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      // Get the full image data
-      const fullImageData = canvas.toDataURL('image/jpeg', 0.95);
-      
-      // Try to crop to hand region if hand is detected
-      let croppedImage = fullImageData;
-      
-      if (handDetected && detectionCanvasRef.current) {
-        try {
-          // Get hand landmarks from detection canvas
-          const detectionCanvas = detectionCanvasRef.current;
-          const detectionContext = detectionCanvas.getContext('2d');
-          const imageData = detectionContext.getImageData(0, 0, detectionCanvas.width, detectionCanvas.height);
-          
-          // Find bounding box of detected hand
-          const bounds = findHandBounds(imageData);
-          
-          if (bounds) {
-            // Add padding around the hand (20% on each side)
-            const padding = 0.2;
-            const paddedWidth = bounds.width * (1 + padding * 2);
-            const paddedHeight = bounds.height * (1 + padding * 2);
-            const paddedX = Math.max(0, bounds.x - bounds.width * padding);
-            const paddedY = Math.max(0, bounds.y - bounds.height * padding);
-            
-            // Ensure we don't exceed canvas bounds
-            const cropX = Math.max(0, paddedX);
-            const cropY = Math.max(0, paddedY);
-            const cropWidth = Math.min(paddedWidth, canvas.width - cropX);
-            const cropHeight = Math.min(paddedHeight, canvas.height - cropY);
-            
-            // Create a new canvas for the cropped image
-            const cropCanvas = document.createElement('canvas');
-            cropCanvas.width = cropWidth;
-            cropCanvas.height = cropHeight;
-            const cropContext = cropCanvas.getContext('2d');
-            
-            // Draw the cropped region
-            cropContext.drawImage(
-              canvas,
-              cropX, cropY, cropWidth, cropHeight,
-              0, 0, cropWidth, cropHeight
-            );
-            
-            croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
-            console.log('Hand cropped successfully');
-          }
-        } catch (error) {
-          console.error('Error cropping hand:', error);
-          // Fall back to full image if cropping fails
-        }
-      }
-      
-      setCapturedImage(croppedImage);
-      stopCamera();
-    }
-  };
-
-  // Helper function to find hand bounding box from image data
-  const findHandBounds = (imageData) => {
-    const { data, width, height } = imageData;
-    let minX = width, minY = height, maxX = 0, maxY = 0;
-    let foundPixels = false;
-    
-    // Scan for non-transparent pixels (hand detection overlay)
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const index = (y * width + x) * 4;
-        const alpha = data[index + 3];
-        
-        // If pixel is not fully transparent, it's part of the hand
-        if (alpha > 0) {
-          foundPixels = true;
-          minX = Math.min(minX, x);
-          minY = Math.min(minY, y);
-          maxX = Math.max(maxX, x);
-          maxY = Math.max(maxY, y);
-        }
-      }
-    }
-    
-    if (!foundPixels) return null;
-    
-    return {
-      x: minX,
-      y: minY,
-      width: maxX - minX,
-      height: maxY - minY
-    };
   };
 
   const retakePhoto = () => {
@@ -337,11 +322,27 @@ const PalmistryCamera = () => {
             />
             <div className={styles.overlay}>
               {/* Capture area frame - smaller and centered on palm */}
-              <div className={styles.captureArea}>
-                <div className={`${styles.frameCorner} ${handDetected && isPalmOpen ? styles.detected : styles.notDetected}`} style={{ top: 0, left: 0 }}></div>
-                <div className={`${styles.frameCorner} ${handDetected && isPalmOpen ? styles.detected : styles.notDetected}`} style={{ top: 0, right: 0 }}></div>
-                <div className={`${styles.frameCorner} ${handDetected && isPalmOpen ? styles.detected : styles.notDetected}`} style={{ bottom: 0, left: 0 }}></div>
-                <div className={`${styles.frameCorner} ${handDetected && isPalmOpen ? styles.detected : styles.notDetected}`} style={{ bottom: 0, right: 0 }}></div>
+              <div className={styles.captureArea} ref={captureAreaRef}>
+                <div className={`${styles.frameCorner} ${
+                  handDetected && isPalmOpen && isInBounds ? styles.detected : 
+                  handDetected && !isInBounds ? styles.outOfBounds : 
+                  styles.notDetected
+                }`} style={{ top: 0, left: 0 }}></div>
+                <div className={`${styles.frameCorner} ${
+                  handDetected && isPalmOpen && isInBounds ? styles.detected : 
+                  handDetected && !isInBounds ? styles.outOfBounds : 
+                  styles.notDetected
+                }`} style={{ top: 0, right: 0 }}></div>
+                <div className={`${styles.frameCorner} ${
+                  handDetected && isPalmOpen && isInBounds ? styles.detected : 
+                  handDetected && !isInBounds ? styles.outOfBounds : 
+                  styles.notDetected
+                }`} style={{ bottom: 0, left: 0 }}></div>
+                <div className={`${styles.frameCorner} ${
+                  handDetected && isPalmOpen && isInBounds ? styles.detected : 
+                  handDetected && !isInBounds ? styles.outOfBounds : 
+                  styles.notDetected
+                }`} style={{ bottom: 0, right: 0 }}></div>
               </div>
               
               <div className={styles.palmLabel}>
@@ -349,9 +350,13 @@ const PalmistryCamera = () => {
                 <span>Palm</span>
               </div>
             </div>
-            {(!handDetected || !isPalmOpen) && handsLoaded && (
+            {(!handDetected || !isPalmOpen || !isInBounds) && handsLoaded && (
               <div className={styles.handDetectionMessage}>
-                <p>{!handDetected ? 'Show your palm to the camera' : 'Open your palm fully'}</p>
+                <p>
+                  {!handDetected ? 'Show your palm to the camera' : 
+                   !isPalmOpen ? 'Open your palm fully' : 
+                   !isInBounds ? 'Move your hand inside the box' : ''}
+                </p>
               </div>
             )}
           </>
@@ -373,18 +378,22 @@ const PalmistryCamera = () => {
       <div className={styles.controls}>
         {!capturedImage ? (
           <button 
-            className={`${styles.captureButton} ${(!handDetected || !isPalmOpen) && handsLoaded ? styles.disabled : ''}`} 
+            className={`${styles.captureButton} ${(!handDetected || !isPalmOpen || !isInBounds) && handsLoaded ? styles.disabled : ''}`} 
             onClick={captureImage}
-            disabled={(!handDetected || !isPalmOpen) && handsLoaded}
+            disabled={(!handDetected || !isPalmOpen || !isInBounds) && handsLoaded}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!handDetected || !isPalmOpen) && handsLoaded ? "0.5" : "1"}/>
-                <circle cx="20" cy="20" r="14" fill="white" opacity={(!handDetected || !isPalmOpen) && handsLoaded ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!handDetected || !isPalmOpen || !isInBounds) && handsLoaded ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="14" fill="white" opacity={(!handDetected || !isPalmOpen || !isInBounds) && handsLoaded ? "0.5" : "1"}/>
               </svg>
             </div>
             <span className={styles.captureText}>
-              {!handsLoaded ? 'Loading...' : (handDetected && isPalmOpen ? 'Capture' : 'No Palm Detected')}
+              {!handsLoaded ? 'Loading...' : 
+               (handDetected && isPalmOpen && isInBounds ? 'Capture' : 
+                !handDetected ? 'No Palm Detected' :
+                !isPalmOpen ? 'Open Palm' :
+                'Move Inside Box')}
             </span>
           </button>
         ) : (

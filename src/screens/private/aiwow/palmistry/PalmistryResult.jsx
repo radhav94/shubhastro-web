@@ -146,6 +146,17 @@ const PalmistryResult = () => {
 
   const { hand, lines, overallReading, astroCorrelation } = resultData || {};
 
+  // Debug logging to see actual data structure
+  console.log('PalmistryResult - Data structure:', {
+    hasResultData: !!resultData,
+    resultDataKeys: resultData ? Object.keys(resultData) : [],
+    overallReadingType: typeof overallReading,
+    overallReadingKeys: overallReading ? Object.keys(overallReading) : [],
+    astroCorrelationType: typeof astroCorrelation,
+    astroCorrelationKeys: astroCorrelation ? Object.keys(astroCorrelation) : [],
+    astroCorrelationValue: astroCorrelation
+  });
+
   // Safety checks for nested data with detailed logging
   if (!lines && !overallReading) {
     console.error('Missing required palmistry data:', {
@@ -214,18 +225,49 @@ const PalmistryResult = () => {
 
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Personality Type</h3>
-              <p className={styles.text}>{overallReading?.personalityType || 'No data available'}</p>
+              <p className={styles.text}>
+                {typeof overallReading?.personalityType === 'string' 
+                  ? overallReading.personalityType 
+                  : 'No data available'}
+              </p>
             </div>
 
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Life Path</h3>
-              <p className={styles.text}>{overallReading?.lifePath || 'No data available'}</p>
+              <p className={styles.text}>
+                {typeof overallReading?.lifePath === 'string' 
+                  ? overallReading.lifePath 
+                  : 'No data available'}
+              </p>
             </div>
 
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Personalized Insights</h3>
-              <p className={styles.text}>{overallReading?.personalizedInsights || 'No data available'}</p>
+              <p className={styles.text}>
+                {typeof overallReading?.personalizedInsights === 'string' 
+                  ? overallReading.personalizedInsights 
+                  : 'No data available'}
+              </p>
             </div>
+
+            {/* Astro Correlation in Overview */}
+            {astroCorrelation && typeof astroCorrelation === 'object' && (
+              <>
+                {astroCorrelation.zodiacSign && (
+                  <div className={styles.section}>
+                    <h3 className={styles.sectionTitle}>Zodiac Sign</h3>
+                    <p className={styles.text}>{String(astroCorrelation.zodiacSign)}</p>
+                  </div>
+                )}
+
+                {astroCorrelation.elementalHandType && (
+                  <div className={styles.section}>
+                    <h3 className={styles.sectionTitle}>Hand Type</h3>
+                    <p className={styles.text}>{String(astroCorrelation.elementalHandType)}</p>
+                  </div>
+                )}
+              </>
+            )}
           </>
         )}
 
@@ -668,6 +710,45 @@ const PalmistryResult = () => {
 
             {astroCorrelation && (
               <>
+                {astroCorrelation.zodiacSign && (
+                  <div className={styles.card}>
+                    <h3 className={styles.cardTitle}>Zodiac Sign</h3>
+                    <p className={styles.text}>{astroCorrelation.zodiacSign}</p>
+                  </div>
+                )}
+
+                {astroCorrelation.rulingPlanet && (
+                  <div className={styles.card}>
+                    <h3 className={styles.cardTitle}>Ruling Planet</h3>
+                    <p className={styles.text}>{astroCorrelation.rulingPlanet}</p>
+                  </div>
+                )}
+
+                {astroCorrelation.elementalHandType && (
+                  <div className={styles.card}>
+                    <h3 className={styles.cardTitle}>Elemental Hand Type</h3>
+                    <p className={styles.text}>{astroCorrelation.elementalHandType}</p>
+                  </div>
+                )}
+
+                {astroCorrelation.dominantMounts?.length > 0 && (
+                  <div className={styles.card}>
+                    <h3 className={styles.cardTitle}>Dominant Mounts</h3>
+                    <ul className={styles.list}>
+                      {astroCorrelation.dominantMounts.map((item, idx) => (
+                        <li key={idx}>{typeof item === 'string' ? item : JSON.stringify(item)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {astroCorrelation.astrologyCorrelation && (
+                  <div className={styles.card}>
+                    <h3 className={styles.cardTitle}>Astrology Correlation</h3>
+                    <p className={styles.text}>{astroCorrelation.astrologyCorrelation}</p>
+                  </div>
+                )}
+
                 {astroCorrelation.planetaryInfluences?.length > 0 && (
                   <div className={styles.card}>
                     <h3 className={styles.cardTitle}>Planetary Influences</h3>
