@@ -1,14 +1,27 @@
 import { useState } from "react";
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
 import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
 import { Heart, Rocket, DollarSign, Plus, User, HelpCircle } from "lucide-react";
 import { registerUser } from "../../../services/appServices/authService";
 import { useCreateKundliMutation } from "../../../services/appServices/kundliServicesNew";
 
+// Validation schema
+const validationSchema = Yup.object({
+  guidance: Yup.array()
+    .of(Yup.string())
+    .min(0, "Please select at least one area of guidance")
+    .max(6, "You can select up to 6 areas"),
+});
+
 const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep = 2, totalSteps = 3, onStepChange }) => {
-  const [selected, setSelected] = useState(formData.guidance || []);
   const [loading, setLoading] = useState(false);
   const [createKundli] = useCreateKundliMutation();
+
+  const initialValues = {
+    guidance: formData.guidance || [],
+  };
 
   const options = [
     { id: "love", label: "Love & Relationships", icon: Heart, color: "#FFE5F0" },
@@ -19,15 +32,9 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
     { id: "others", label: "Others", icon: HelpCircle, color: "#FFF4E0" },
   ];
 
-  const toggleOption = (id) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
-  const handleNext = async () => {
+  const handleSubmit = async (values) => {
     setLoading(true);
-    updateFormData({ guidance: selected });
+    updateFormData({ guidance: values.guidance });
 
     try {
       // Check if token exists
@@ -174,60 +181,78 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
   };
 
   return (
-    <div className={styles.guidanceScreen}>
-      <div className={styles.header}>
-        <div className={styles.progressDots}>
-          {Array.from({ length: totalSteps }).map((_, index) => (
-            <span
-              key={index}
-              className={
-                index === currentStep ? styles.dotActive : styles.dotInactive
-              }
-              onClick={() => onStepChange && onStepChange(index)}
-              style={{ cursor: onStepChange ? 'pointer' : 'default' }}
-            ></span>
-          ))}
-        </div>
-        {/* <button className={styles.skipBtn} onClick={onSkip}>
-          Skip for Now
-        </button> */}
-      </div>
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}
+      validateOnChange={true}
+      validateOnBlur={true}
+    >
+      {({ values, setFieldValue }) => {
+        const toggleOption = (id) => {
+          const currentGuidance = values.guidance;
+          const newGuidance = currentGuidance.includes(id)
+            ? currentGuidance.filter((item) => item !== id)
+            : [...currentGuidance, id];
+          setFieldValue("guidance", newGuidance);
+        };
 
-      <div className={styles.content}>
-        <h1 className={styles.title}>What brings you here today?</h1>
-        <p className={styles.subtitle}>
-          Choose what you'd like guidance on love, career, health or more.
-        </p>
+        return (
+          <Form className={styles.guidanceScreen}>
+            <div className={styles.header}>
+              <div className={styles.progressDots}>
+                {Array.from({ length: totalSteps }).map((_, index) => (
+                  <span
+                    key={index}
+                    className={
+                      index === currentStep ? styles.dotActive : styles.dotInactive
+                    }
+                    onClick={() => onStepChange && onStepChange(index)}
+                    style={{ cursor: onStepChange ? 'pointer' : 'default' }}
+                  ></span>
+                ))}
+              </div>
+            </div>
 
-        <div className={styles.optionsGrid}>
-          {options.map((option) => {
-            const Icon = option.icon;
-            const isSelected = selected.includes(option.id);
-            return (
-              <button
-                key={option.id}
-                className={`${styles.optionCard} ${isSelected ? styles.selected : ""}`}
-                style={{ backgroundColor: option.color }}
-                onClick={() => toggleOption(option.id)}
-              >
-                <span className={styles.optionLabel}>{option.label}</span>
-                <div className={styles.optionIcon}>
-                  <Icon size={24} />
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+            <div className={styles.content}>
+              <h1 className={styles.title}>What brings you here today?</h1>
+              <p className={styles.subtitle}>
+                Choose what you'd like guidance on love, career, health or more.
+              </p>
 
-      <button 
-        className={styles.otpprimaryBtn} 
-        onClick={handleNext}
-        disabled={loading}
-      >
-        {loading ? "Saving..." : "Next"}
-      </button>
-    </div>
+              <div className={styles.optionsGrid}>
+                {options.map((option) => {
+                  const Icon = option.icon;
+                  const isSelected = values.guidance.includes(option.id);
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      className={`${styles.optionCard} ${isSelected ? styles.selected : ""}`}
+                      style={{ backgroundColor: option.color }}
+                      onClick={() => toggleOption(option.id)}
+                    >
+                      <span className={styles.optionLabel}>{option.label}</span>
+                      <div className={styles.optionIcon}>
+                        <Icon size={24} />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <button 
+              type="submit"
+              className={styles.otpprimaryBtn}
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Next"}
+            </button>
+          </Form>
+        );
+      }}
+    </Formik>
   );
 };
 
