@@ -243,11 +243,54 @@ const PalmistryResult = () => {
 
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Personalized Insights</h3>
-              <p className={styles.text}>
-                {typeof overallReading?.personalizedInsights === 'string' 
-                  ? overallReading.personalizedInsights 
-                  : 'No data available'}
-              </p>
+              {overallReading?.personalizedInsights && typeof overallReading.personalizedInsights === 'object' ? (
+                <>
+                  {overallReading.personalizedInsights.zodiacSign && (
+                    <div className={styles.subsection}>
+                      <h4 className={styles.subsectionTitle}>Zodiac Sign</h4>
+                      <p className={styles.text}>{overallReading.personalizedInsights.zodiacSign}</p>
+                    </div>
+                  )}
+                  
+                  {overallReading.personalizedInsights.rulingPlanet && (
+                    <div className={styles.subsection}>
+                      <h4 className={styles.subsectionTitle}>Ruling Planet</h4>
+                      <p className={styles.text}>{overallReading.personalizedInsights.rulingPlanet}</p>
+                    </div>
+                  )}
+                  
+                  {overallReading.personalizedInsights.elementalHandType && (
+                    <div className={styles.subsection}>
+                      <h4 className={styles.subsectionTitle}>Hand Type</h4>
+                      <p className={styles.text}>{overallReading.personalizedInsights.elementalHandType}</p>
+                    </div>
+                  )}
+                  
+                  {overallReading.personalizedInsights.dominantMounts?.length > 0 && (
+                    <div className={styles.subsection}>
+                      <h4 className={styles.subsectionTitle}>Dominant Mounts</h4>
+                      <ul className={styles.list}>
+                        {overallReading.personalizedInsights.dominantMounts.map((mount, idx) => (
+                          <li key={idx}>{mount}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {overallReading.personalizedInsights.astrologyCorrelation && (
+                    <div className={styles.subsection}>
+                      <h4 className={styles.subsectionTitle}>Astrology Correlation</h4>
+                      <p className={styles.text}>{overallReading.personalizedInsights.astrologyCorrelation}</p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className={styles.text}>
+                  {typeof overallReading?.personalizedInsights === 'string' 
+                    ? overallReading.personalizedInsights 
+                    : 'No data available'}
+                </p>
+              )}
             </div>
 
             {/* Astro Correlation in Overview */}

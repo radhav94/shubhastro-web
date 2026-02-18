@@ -65,6 +65,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
+  display: none; // Hide the detection canvas (green square)
 }
 
 .faceDetectionMessage {
@@ -98,6 +99,80 @@
   right: 0;
   bottom: 0;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  // Create blur effect around circle - only outside, not underneath
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+      circle at center,
+      transparent 0%,
+      transparent 250px,
+      rgba(0, 0, 0, 0.6) 280px,
+      rgba(0, 0, 0, 0.8) 100%
+    );
+    
+    @media (max-width: 768px) {
+      background: radial-gradient(
+        circle at center,
+        transparent 0%,
+        transparent 210px,
+        rgba(0, 0, 0, 0.6) 240px,
+        rgba(0, 0, 0, 0.8) 100%
+      );
+    }
+    
+    @media (max-width: 480px) {
+      background: radial-gradient(
+        circle at center,
+        transparent 0%,
+        transparent 180px,
+        rgba(0, 0, 0, 0.6) 210px,
+        rgba(0, 0, 0, 0.8) 100%
+      );
+    }
+  }
+}
+
+.faceCircle {
+  width: 500px;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+  position: relative;
+  z-index: 1;
+
+  @media (max-width: 768px) {
+    width: 420px;
+    height: 420px;
+  }
+
+  @media (max-width: 480px) {
+    width: 360px;
+    height: 360px;
+  }
+
+  &.detected {
+    color: #22c55e; // Green when face detected
+  }
+
+  &.notDetected {
+    color: #f97316; // Orange when no face detected
+  }
+}
+
+.circleSvg {
+  width: 100%;
+  height: 100%;
 }
 
 .frameCorner {
