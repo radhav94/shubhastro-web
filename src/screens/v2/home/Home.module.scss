@@ -430,9 +430,11 @@
     background-color: #fff;
     padding: 16px;
     border-radius: 24px;
-    // .panchangHeader{
-    //   position: relative;
-    // }
+    transition: transform 0.2s, box-shadow 0.2s;
+    &:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
     .panchangCenter{
       position: absolute;
       left: 0;
@@ -2009,11 +2011,6 @@
 /* Explore Panchang Section */
 .panchangSection {
   margin-bottom: 24px;
-  transition: transform 0.2s, box-shadow 0.2s;
-  &:hover{
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
 }
 
 .panchangTabs {
@@ -2053,7 +2050,7 @@
   background: #ffffff;
   border-radius: 20px;
   padding: 24px 20px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  // box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
   margin-bottom: 16px;
   border: 1px solid rgba(189, 189, 189, 0.3);
 }
@@ -2077,7 +2074,7 @@
   padding: 15px 15px;
   border: 1px solid rgba(189, 189, 189, 0.3);
   background: var(--card, #ffffff);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  // box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
 }
 
 .panchangLeft,
@@ -2099,7 +2096,7 @@
 
 .sunIcon {
   width: auto;
-  height: 75px;
+  height: 64px;
   object-fit: contain;
   position: absolute;
   margin-top: -35px;
@@ -2107,7 +2104,7 @@
 
 .panchangTitle {
   font-family: "Poppins", sans-serif;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 500;
   color: #1a1a1a;
   margin: 0 0 6px 0;
@@ -2146,7 +2143,7 @@
 .timingTime {
   font-family: "Poppins", sans-serif;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   color: #1a1a1a;
   margin: 0 0 4px 0;
 }
@@ -3661,7 +3658,7 @@
   margin: 0;
 
   @media screen and (width <= 767px) {
-    font-size: 28px;
+    font-size: 20px;
   }
 }
 
