@@ -48,6 +48,8 @@ const ProfileListingModal = ({
     ];
     const birthDate = `${String(profile.day).padStart(2, "0")} ${monthNames[profile.month - 1]} ${profile.year}`;
 
+    console.log(`🕐 ${profile.name}: hour=${profile.hour}, min=${profile.min}`);
+
     const hour12 =
       profile.hour > 12
         ? profile.hour - 12
@@ -55,6 +57,9 @@ const ProfileListingModal = ({
           ? 12
           : profile.hour;
     const meridiem = profile.hour >= 12 ? "PM" : "AM";
+    
+    console.log(`   → Converted: ${hour12}:${profile.min} ${meridiem}`);
+    
     const birthTime = `${String(hour12).padStart(2, "0")}:${String(profile.min).padStart(2, "0")} ${meridiem}`;
 
     return {

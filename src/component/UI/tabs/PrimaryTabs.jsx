@@ -32,13 +32,15 @@ const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0 }) => {
     // If clicking on "Free Report" tab (index 6), set subtab=generalInfo
     if (index === 6) {
       const newParams = new URLSearchParams(searchParams);
+      newParams.set('tab', 'free-report');
       newParams.set('subtab', 'generalInfo');
-      console.log('Setting subtab parameter:', newParams.toString());
+      console.log('PrimaryTabs: Setting tab and subtab parameters:', newParams.toString());
       setSearchParams(newParams, { replace: true });
     } else {
       // Remove subtab parameter for other tabs
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('subtab');
+      newParams.delete('tab');
       setSearchParams(newParams, { replace: true });
     }
   };

@@ -252,20 +252,29 @@ const Profile = () => {
   });
   const savedKundlis = kundliData?.data || [];
 
+  // Capitalize first letter of each word
+  const capitalizeWords = (str) => {
+    if (!str) return str;
+    return str
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
     // Get user name with fallback to first Kundli name
  
   const userName = (() => {
     // First priority: User's registered name
     if (user?.firstName && user?.lastName) {
-      return `${user.firstName} ${user.lastName}`;
+      return capitalizeWords(`${user.firstName} ${user.lastName}`);
     }
     if (user?.firstName) {
-      return user.firstName;
+      return capitalizeWords(user.firstName);
     }
     
     // Second priority: First Kundli profile name
     if (savedKundlis.length > 0 && savedKundlis[0]?.name) {
-      return savedKundlis[0].name;
+      return capitalizeWords(savedKundlis[0].name);
     }
     
     // Third priority: Phone number
@@ -869,6 +878,25 @@ const Profile = () => {
       .slice(0, 2);
   };
 
+  // Get user avatar display (initials or emoji)
+  const userAvatarDisplay = (() => {
+    // If user has registered name, show initials
+    if (user?.firstName && user?.lastName) {
+      return getInitials(`${user.firstName} ${user.lastName}`);
+    }
+    if (user?.firstName) {
+      return user.firstName.charAt(0).toUpperCase();
+    }
+    
+    // If first kundli exists, show its initials
+    if (savedKundlis.length > 0 && savedKundlis[0]?.name) {
+      return getInitials(savedKundlis[0].name);
+    }
+    
+    // Default: show goat emoji
+    return "🐏";
+  })();
+
   return (
     <div className={styles.profilePage}>
       {/* Header */}
@@ -879,13 +907,13 @@ const Profile = () => {
 
         <div className={styles.headerCenter}>
           <div className={styles.userAvatar}>
-            <span>🐏</span>
+            <span>{userAvatarDisplay}</span>
           </div>
           <div className={styles.headerInfo}>
             <h1 className={styles.profileName}>{userName}</h1>
             <p className={styles.profileDetails}>
               {savedKundlis[0]
-                ? `${dayjs(`${savedKundlis[0].year}-${savedKundlis[0].month}-${savedKundlis[0].day}`).format("MMM DD, YYYY")} • ${String(savedKundlis[0].hour).padStart(2, "0")}:${String(savedKundlis[0].min).padStart(2, "0")}`
+                ? `${dayjs(`${savedKundlis[0].year}-${savedKundlis[0].month}-${savedKundlis[0].day}`).format("MMM DD, YYYY")} • ${String(savedKundlis[0].hour > 12 ? savedKundlis[0].hour - 12 : savedKundlis[0].hour === 0 ? 12 : savedKundlis[0].hour).padStart(2, "0")}:${String(savedKundlis[0].min).padStart(2, "0")} ${savedKundlis[0].hour >= 12 ? "PM" : "AM"}`
                 : " "}
             </p>
           </div>
@@ -1058,8 +1086,8 @@ const Profile = () => {
                         {dayjs(
                           `${kundli.year}-${kundli.month}-${kundli.day}`,
                         ).format("DD MMM YYYY")}{" "}
-                        • {String(kundli.hour).padStart(2, "0")}:
-                        {String(kundli.min).padStart(2, "0")} PM
+                        • {String(kundli.hour > 12 ? kundli.hour - 12 : kundli.hour === 0 ? 12 : kundli.hour).padStart(2, "0")}:
+                        {String(kundli.min).padStart(2, "0")} {kundli.hour >= 12 ? "PM" : "AM"}
                       </p>
                       <p className={styles.profileCardLocation}>
                         {kundli.place}

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import * as faceapi from "face-api.js";
 
-export const useFaceDetection = ({ videoRef, canvasRef }) => {
+export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [faceDetected, setFaceDetected] = useState(false);
+  const [faceInCircle, setFaceInCircle] = useState(false);
   
   const detectionStartedRef = useRef(false);
   const rafRef = useRef(null);
@@ -79,6 +80,7 @@ export const useFaceDetection = ({ videoRef, canvasRef }) => {
       if (stoppedRef.current) return; // ⭐ IGNORE LATE RESULT after async operation
 
       let isValid = false;
+      let isInCircle = false;
 
       if (detection) {
         const { box, score } = detection.detection;
@@ -101,12 +103,19 @@ export const useFaceDetection = ({ videoRef, canvasRef }) => {
         const ratio = faceArea / videoArea;
 
         isValid = score > 0.5 && ratio > 0.04 && ratio < 0.7 && hasAllFeatures;
+        
+        // Check if face is within circular boundary
+        if (isValid && getCircleBounds) {
+          isInCircle = checkFaceInCircle(box, landmarks, video, getCircleBounds);
+        }
+        
         drawBox(canvas, video, box, isValid);
       } else {
         clearCanvas(canvas);
       }
 
       setFaceDetected(prev => (prev !== isValid ? isValid : prev));
+      setFaceInCircle(prev => (prev !== isInCircle ? isInCircle : prev));
     } catch (err) {
       if (!stoppedRef.current) {
         console.error("Face detection error:", err);
@@ -119,6 +128,39 @@ export const useFaceDetection = ({ videoRef, canvasRef }) => {
   };
 
   /* ------------------ CANVAS HELPERS ------------------ */
+  const checkFaceInCircle = (box, landmarks, video, getCircleBounds) => {
+    const circleBounds = getCircleBounds();
+    if (!circleBounds) return false;
+
+    const { centerX, centerY, radius } = circleBounds;
+    
+    // Scale circle bounds to video dimensions
+    const scaleX = video.videoWidth / video.offsetWidth;
+    const scaleY = video.videoHeight / video.offsetHeight;
+    
+    const scaledCenterX = centerX * scaleX;
+    const scaledCenterY = centerY * scaleY;
+    const scaledRadius = radius * Math.min(scaleX, scaleY);
+
+    // Get all landmark points
+    const allPoints = landmarks.positions;
+    
+    // Check if at least 90% of landmarks are inside the circle
+    let pointsInside = 0;
+    allPoints.forEach(point => {
+      const dx = point.x - scaledCenterX;
+      const dy = point.y - scaledCenterY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance <= scaledRadius) {
+        pointsInside++;
+      }
+    });
+
+    const percentageInside = pointsInside / allPoints.length;
+    return percentageInside >= 0.9; // 90% of face landmarks must be inside circle
+  };
+
   const drawBox = (canvas, video, box, valid) => {
     if (!canvas) return;
 
@@ -142,6 +184,7 @@ export const useFaceDetection = ({ videoRef, canvasRef }) => {
   return {
     modelsLoaded,
     faceDetected,
+    faceInCircle,
     startDetection,
     stopDetection
   };
