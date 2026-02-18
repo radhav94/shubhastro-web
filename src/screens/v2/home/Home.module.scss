@@ -92,7 +92,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  // background: linear-gradient(135deg, #8b6f47 0%, #6b4423 50%, #3e2415 100%);
   background: linear-gradient(
     135deg,
     rgba(245, 138, 34, 1) 0%,
@@ -101,10 +100,8 @@
   padding: 8px 24px 8px 10px;
   border-radius: 50px;
   color: #fff;
-  // cursor: pointer;
-  // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   position: relative;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .walletBadge::before {

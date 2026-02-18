@@ -560,13 +560,13 @@
   border: 1px solid #f25302;
   flex-shrink: 0;
   @media (width <= 1180px) {
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
   }
-  @media (width <= 767px) {
-    width: 33px;
-    height: 33px;
-  }
+  // @media (width <= 767px) {
+  //   width: 33px;
+  //   height: 33px;
+  // }
 }
 
 .profileIcon:hover {
@@ -607,7 +607,7 @@
   }
 
   .walletBadge {
-    padding: 6px 14px 6px 8px;
+    padding: 4px 14px 4px 8px;
   }
 
   // .coinIcon {
