@@ -1,8 +1,39 @@
 import { useState } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 import styles from "./Onboarding.module.scss";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import WheelDatePicker from "../../../component/UI/WheelDatePicker/WheelDatePicker";
+
+// Validation schema
+const validationSchema = Yup.object({
+  birthDate: Yup.string()
+    .required("Birth date is required")
+    .matches(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+  birthTime: Yup.string()
+    .when("unknownBirthTime", {
+      is: false,
+      then: (schema) => schema.matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+  birthPlace: Yup.string()
+    .required("Place of birth is required")
+    .min(2, "Place name must be at least 2 characters"),
+  unknownBirthTime: Yup.boolean(),
+  latitude: Yup.number()
+    .nullable()
+    .when("birthPlace", {
+      is: (val) => val && val.length > 0,
+      then: (schema) => schema.required("Please select a location from the dropdown"),
+    }),
+  longitude: Yup.number()
+    .nullable()
+    .when("birthPlace", {
+      is: (val) => val && val.length > 0,
+      then: (schema) => schema.required("Please select a location from the dropdown"),
+    }),
+});
 
 const BirthDetailsScreen = ({
   onNext,
@@ -15,43 +46,19 @@ const BirthDetailsScreen = ({
   onStepChange,
 }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [localData, setLocalData] = useState({
+
+  const initialValues = {
     birthDate: formData.birthDate || "",
     birthTime: formData.birthTime || "",
     birthPlace: formData.birthPlace || "",
     unknownBirthTime: formData.unknownBirthTime || false,
     latitude: formData.latitude || null,
     longitude: formData.longitude || null,
-  });
-
-  const [errors, setErrors] = useState({
-    birthDate: "",
-    birthPlace: "",
-  });
-
-  const validateForm = () => {
-    const newErrors = {
-      birthDate: "",
-      birthPlace: "",
-    };
-
-    if (!localData.birthDate) {
-      newErrors.birthDate = "Birth date is required";
-    }
-
-    if (!localData.birthPlace) {
-      newErrors.birthPlace = "Place of birth is required";
-    }
-
-    setErrors(newErrors);
-    return !newErrors.birthDate && !newErrors.birthPlace;
   };
 
-  const handleNext = () => {
-    if (validateForm()) {
-      updateFormData(localData);
-      onNext();
-    }
+  const handleSubmit = (values) => {
+    updateFormData(values);
+    onNext();
   };
 
   // Format date for display (DD/MM/YYYY)
@@ -62,119 +69,145 @@ const BirthDetailsScreen = ({
   };
 
   return (
-    <div className={styles.birthDetailsScreen}>
-      <div className={styles.header}>
-        <div className={styles.progressDots}>
-          {Array.from({ length: totalSteps }).map((_, index) => (
-            <span
-              key={index}
-              className={
-                index === currentStep ? styles.dotActive : styles.dotInactive
-              }
-              onClick={() => onStepChange && onStepChange(index)}
-              style={{ cursor: onStepChange ? 'pointer' : 'default' }}
-            ></span>
-          ))}
-        </div>
-        {/* <button className={styles.skipBtn} onClick={onSkip}>
-          Skip for Now
-        </button> */}
-      </div>
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}
+      validateOnChange={true}
+      validateOnBlur={true}
+      enableReinitialize={false}
+    >
+      {({ values, setFieldValue, setFieldTouched, errors, touched, isValid, validateForm }) => (
+        <Form className={styles.birthDetailsScreen}>
+          <div className={styles.header}>
+            <div className={styles.progressDots}>
+              {Array.from({ length: totalSteps }).map((_, index) => (
+                <span
+                  key={index}
+                  className={
+                    index === currentStep ? styles.dotActive : styles.dotInactive
+                  }
+                  onClick={() => onStepChange && onStepChange(index)}
+                  style={{ cursor: onStepChange ? 'pointer' : 'default' }}
+                ></span>
+              ))}
+            </div>
+          </div>
 
-      <div className={styles.content}>
-        <h1 className={styles.title}>
-          Share the moment the stars welcomed you
-        </h1>
+          <div className={styles.content}>
+            <h1 className={styles.title}>
+              Share the moment the stars welcomed you
+            </h1>
 
-        <div className={styles.formGroup}>
-          <label>Birth Date<span className={styles.required}>*</span></label>
-          <div 
-            className={`${styles.inputWrapper} ${errors.birthDate ? styles.error : ""}`}
-            onClick={() => setShowDatePicker(true)}
+            <div className={styles.formGroup}>
+              <label>Birth Date<span className={styles.required}>*</span></label>
+              <div 
+                className={`${styles.inputWrapper} ${touched.birthDate && errors.birthDate ? styles.error : ""}`}
+                onClick={() => setShowDatePicker(true)}
+              >
+                <input
+                  type="text"
+                  value={formatDateDisplay(values.birthDate)}
+                  readOnly
+                  className={styles.input}
+                  placeholder="DD/MM/YYYY"
+                />
+                <Calendar className={styles.inputIcon} size={20} />
+              </div>
+              <ErrorMessage name="birthDate">
+                {(msg) => <span className={styles.errorText}>{msg}</span>}
+              </ErrorMessage>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Birth Time</label>
+              <div className={styles.inputWrapper}>
+                <Field
+                  type="time"
+                  name="birthTime"
+                  onClick={(e) => e.target.showPicker?.()}
+                  className={styles.input}
+                  placeholder="Select here"
+                  disabled={values.unknownBirthTime}
+                />
+                <Clock className={styles.inputIcon} size={20} />
+              </div>
+              <label className={styles.checkboxLabel}>
+                <Field
+                  type="checkbox"
+                  name="unknownBirthTime"
+                  onChange={(e) => {
+                    setFieldValue("unknownBirthTime", e.target.checked);
+                    if (e.target.checked) {
+                      setFieldValue("birthTime", "");
+                    }
+                  }}
+                />
+                Don't know the exact time of birth
+              </label>
+              <ErrorMessage name="birthTime">
+                {(msg) => <span className={styles.errorText}>{msg}</span>}
+              </ErrorMessage>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Place of Birth<span className={styles.required}>*</span></label>
+              <div className={`${styles.inputWrapper} ${touched.birthPlace && errors.birthPlace ? styles.error : ""}`}>
+                <LocationSearch
+                  value={values.birthPlace}
+                  onChange={(e) => {
+                    setFieldValue("birthPlace", e.target.value);
+                    setFieldTouched("birthPlace", true);
+                    // Reset coordinates when user types manually
+                    if (e.target.value !== values.birthPlace) {
+                      setFieldValue("latitude", null);
+                      setFieldValue("longitude", null);
+                    }
+                  }}
+                  onPlaceSelect={(place) => {
+                    setFieldValue("birthPlace", place.address);
+                    setFieldValue("latitude", place.lat);
+                    setFieldValue("longitude", place.lng);
+                    setFieldTouched("birthPlace", true);
+                    // Trigger validation after setting all values
+                    setTimeout(() => validateForm(), 0);
+                  }}
+                  placeholder="Select here"
+                />
+                <MapPin className={styles.inputIcon} size={20} />
+              </div>
+              <ErrorMessage name="birthPlace">
+                {(msg) => <span className={styles.errorText}>{msg}</span>}
+              </ErrorMessage>
+              {touched.birthPlace && !values.latitude && values.birthPlace && (
+                <span className={styles.errorText}>Please select a location from the dropdown</span>
+              )}
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            className={styles.otpprimaryBtn}
+            disabled={!values.birthDate || !values.birthPlace || !values.latitude || Object.keys(errors).length > 0}
           >
-            <input
-              type="text"
-              value={formatDateDisplay(localData.birthDate)}
-              readOnly
-              className={styles.input}
-              placeholder="DD/MM/YYYY"
+            Next
+          </button>
+
+          {showDatePicker && (
+            <WheelDatePicker
+              value={values.birthDate}
+              onChange={(date) => {
+                setFieldValue("birthDate", date);
+                setFieldTouched("birthDate", true);
+                // Trigger validation after setting the value
+                setTimeout(() => validateForm(), 0);
+              }}
+              onClose={() => setShowDatePicker(false)}
             />
-            <Calendar className={styles.inputIcon} size={20} />
-          </div>
-          {errors.birthDate && (
-            <span className={styles.errorText}>{errors.birthDate}</span>
           )}
-        </div>
-
-        <div className={styles.formGroup}>
-          <label>Birth Time</label>
-          <div className={styles.inputWrapper}>
-            <input
-              type="time"
-              value={localData.birthTime}
-              onClick={(e) => e.target.showPicker?.()}
-              onChange={(e) =>
-                setLocalData({ ...localData, birthTime: e.target.value })
-              }
-              className={styles.input}
-              placeholder="Select here"
-              disabled={localData.unknownBirthTime}
-            />
-            <Clock className={styles.inputIcon} size={20} />
-          </div>
-          <label className={styles.checkboxLabel}>
-            <input
-              type="checkbox"
-              checked={localData.unknownBirthTime}
-              onChange={(e) =>
-                setLocalData({
-                  ...localData,
-                  unknownBirthTime: e.target.checked,
-                })
-              }
-            />
-            Don't know the exact time of birth
-          </label>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label>Place of Birth<span className={styles.required}>*</span></label>
-          <div className={`${styles.inputWrapper} ${errors.birthPlace ? styles.error : ""}`}>
-            <LocationSearch
-              value={localData.birthPlace}
-              onChange={(e) =>
-                setLocalData({ ...localData, birthPlace: e.target.value })
-              }
-              onPlaceSelect={(place) =>
-                setLocalData({
-                  ...localData,
-                  birthPlace: place.address,
-                  latitude: place.lat,
-                  longitude: place.lng,
-                })
-              }
-              placeholder="Select here"
-            />
-            <MapPin className={styles.inputIcon} size={20} />
-          </div>
-          {errors.birthPlace && (
-            <span className={styles.errorText}>{errors.birthPlace}</span>
-          )}
-        </div>
-      </div>
-
-      <button className={styles.otpprimaryBtn} onClick={handleNext}>
-        Next
-      </button>
-
-      {showDatePicker && (
-        <WheelDatePicker
-          value={localData.birthDate}
-          onChange={(date) => setLocalData({ ...localData, birthDate: date })}
-          onClose={() => setShowDatePicker(false)}
-        />
+        </Form>
       )}
-    </div>
+    </Formik>
   );
 };
 

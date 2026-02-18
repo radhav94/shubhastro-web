@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import styles from "./AIWow.module.scss";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import toast from "react-hot-toast";
 import FeatureCard from "./components/FeatureCard";
 import ComingSoonCard from "./components/ComingSoonCard";
 import MobileAppModal from "./components/MobileAppModal";
@@ -119,6 +120,12 @@ const AIWow = () => {
     // Check if user is logged in
     if (!token) {
       navigate("/login?skip=welcome");
+      return;
+    }
+
+    // Check if user has selected a Kundli/Profile
+    if (!selectedProfile) {
+      toast.error("Please select one Kundli to proceed.");
       return;
     }
 

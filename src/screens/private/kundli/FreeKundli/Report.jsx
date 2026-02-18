@@ -20,11 +20,11 @@ const Report = ({ data }) => {
       label: "General",
       value: "general",
       children: [
-        {
-          label: "General Info",
-          value: "generalInfo",
-          component: () => <General />,
-        },
+        // {
+        //   label: "General Info",
+        //   value: "generalInfo",
+        //   component: () => <General />,
+        // },
         {
           label: "Planetary",
           value: "planetary",
