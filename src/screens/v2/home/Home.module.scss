@@ -684,7 +684,7 @@
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 0 0 16px;
+  padding: 5px 0 16px;
   flex-wrap: nowrap;
   @media screen and (width <= 767px) {
     gap: 12px;
@@ -716,6 +716,11 @@
   scroll-snap-align: center;
   position: relative;
   overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  &:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
 }
 
 /* =========================
@@ -800,7 +805,7 @@
 
 .slideButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 12px rgba(42, 28, 6, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* =========================
@@ -868,7 +873,7 @@
 ========================= */
 @media (min-width: 768px) {
   .carouselContainer {
-    padding: 0 0px 18px;
+    padding: 5px 0px 18px;
   }
 
   .carouselSlide {
@@ -1413,7 +1418,7 @@
   }
   &:hover{
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -1546,8 +1551,7 @@
 
 .connectBtn:hover {
   transform: translateY(-2px);
-  // background: #1a1108;
-  box-shadow: 0 6px 16px rgba(42, 28, 6, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Explore by Life Area Section */
@@ -1592,7 +1596,7 @@
 
 .lifeAreaCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .lifeAreaTitle {
@@ -1741,7 +1745,7 @@
 
 .sessionCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .sessionImageWrapper {
@@ -1837,8 +1841,8 @@
 }
 
 .callAgainBtn:hover {
-  transform: translateY(-1px);
-  // background: #1a1108;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .callAgainBtn:disabled {
@@ -2544,7 +2548,7 @@
 
   .carouselContainer {
     gap: 12px;
-    padding: 0 0px 18px;
+    padding: 5px 0px 18px;
   }
 
   .carouselSlide {
@@ -3073,8 +3077,8 @@
 }
 
 .discoverCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .discoverCard:nth-child(1) {
@@ -3276,7 +3280,7 @@
 
 .blogCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .blogImageWrapper {
@@ -3613,8 +3617,8 @@
   width: 100%;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
   // @media screen and (width <= 767px) {
