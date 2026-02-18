@@ -601,8 +601,8 @@
   // font-size: clamp(16px, 4vw, 26px);
   font-size: 1.6rem;
   font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.4px;
+  // line-height: 1.2;
+  // letter-spacing: -0.4px;
   color: #fff;
   margin-bottom: 6px;
   word-wrap: break-word;
@@ -1338,9 +1338,9 @@
 /* Top Rated Astrologers Section */
 .astrologersSection {
   margin-bottom: 24px;
-  @media screen and (width <= 767px) {
-    margin-bottom: 12px;
-  }
+  // @media screen and (width <= 767px) {
+  //   margin-bottom: 24px;
+  // }
 }
 .leftColumnMain{
   height: 1200px;
@@ -1392,7 +1392,7 @@
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 4px 4px 20px 4px;
+  padding: 4px 4px 0px 4px;
   // width: calc(100% + 130px);
   // @media screen and (width <= 767px) {
   //   padding: 4px 4px 20px 0px;
@@ -1401,7 +1401,7 @@
   //   width: calc(100% + 210px);
   // }
   @media (width <= 767px) {
-    padding: 4px 0px 20px 0px;
+    padding: 4px 0px 0px 0px;
   }
 }
 
@@ -2644,7 +2644,7 @@
 
   .lifeAreaGrid {
     gap: 20px;
-    padding-block: 10px;
+    padding-top: 10px;
   }
 
   .lifeAreaCard {
@@ -3583,7 +3583,7 @@
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 4px;
+  padding: 4px 0;
   flex: 1;
 
   &::-webkit-scrollbar {
