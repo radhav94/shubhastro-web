@@ -535,11 +535,7 @@ const PalmistryResult = () => {
                       <h3 className={styles.lineTitle}>Marriage Lines</h3>
                       <div className={styles.lineScore}>{resultData.secondaryLines.marriageLines.count}</div>
                     </div>
-                    <ul className={styles.list}>
-                      {resultData.secondaryLines.marriageLines.interpretations?.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
+                    <p className={styles.text}>{resultData.secondaryLines.marriageLines.interpretation}</p>
                   </div>
                 )}
 
@@ -549,11 +545,7 @@ const PalmistryResult = () => {
                       <h3 className={styles.lineTitle}>Travel Lines</h3>
                       <div className={styles.lineScore}>{resultData.secondaryLines.travelLines.count}</div>
                     </div>
-                    <ul className={styles.list}>
-                      {resultData.secondaryLines.travelLines.interpretations?.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
+                    <p className={styles.text}>{resultData.secondaryLines.travelLines.interpretation}</p>
                   </div>
                 )}
               </>

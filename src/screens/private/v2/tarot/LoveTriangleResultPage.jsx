@@ -51,16 +51,18 @@ const LoveTriangleResultPage = () => {
   if (error) {
     return (
       <div className={styles.resultPage}>
-        <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
-            <ChevronLeft size={24} />
-          </button>
-          <h1 className={styles.title}>{reading?.title || "Love Triangle"}</h1>
-        </div>
-        <div className={styles.errorContainer}>
-          <p className={styles.errorText}>
-            Failed to load reading. Please try again.
-          </p>
+          <div className={styles.headerWrap}>
+            <div className={styles.header}>
+            <button className={styles.backButton} onClick={() => navigate(-1)}>
+              <ChevronLeft size={24} />
+            </button>
+            <h1 className={styles.title}>{reading?.title || "Love Triangle"}</h1>
+          </div>
+          <div className={styles.errorContainer}>
+            <p className={styles.errorText}>
+              Failed to load reading. Please try again.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -107,23 +109,27 @@ const LoveTriangleResultPage = () => {
 
   return (
     <div className={styles.resultPage}>
-      <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className={styles.title}>{reading?.title || "Love Triangle"}</h1>
+      <div className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={() => navigate(-1)}>
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className={styles.title}>{reading?.title || "Love Triangle"}</h1>
+        </div>
       </div>
 
-      <div className={styles.tabs}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            className={`${styles.tab} ${activeTab === tab.id ? styles.activeTab : ""}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className={styles.tabsWrap}>
+        <div className={styles.tabs}>
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              className={`${styles.tab} ${activeTab === tab.id ? styles.activeTab : ""}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className={styles.content}>

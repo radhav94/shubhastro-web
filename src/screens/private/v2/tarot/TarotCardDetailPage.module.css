@@ -17,19 +17,25 @@
   margin: 0 auto;
   gap: 16px;
 }
-
+.tabsContainerWrap{
+  display: flex;
+  min-width: 1200px;
+  margin: 0 auto;
+  padding:0 16px;
+  gap: 16px;
+}
 .backButton {
   background: #fff4ec;
   border: 1px solid #ff5722;
   color: #333;
   cursor: pointer;
-  padding: 12px;
+  padding: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
 }
 .backButton svg path{
   stroke:#dc2626;
@@ -63,7 +69,9 @@
   padding: 16px;
   border: 1.07px solid #D9D9D9;
 }
-
+.cardDetails{
+  display: flex;
+}
 .tarotCard {
   width: 100%;
   height: auto;
@@ -108,7 +116,6 @@
   .backButton {
     width: 36px;
     height: 36px;
-    padding: 10px;
   }
   .header {
     padding: 6px 16px;
@@ -279,6 +286,12 @@
   margin: 0;
 }
 
+@media (max-width: 1180px) {
+  .tabsContainerWrap{
+    min-width: 100%;
+    padding: 0px 0px;
+  }
+}
 @media (max-width: 768px) {
   .dailySection {
     padding: 16px;
@@ -315,7 +328,7 @@
 .tabsContainer {
   display: flex;
   gap: 8px;
-  padding: 16px;
+  padding:0px 16px;
   background: white;
   border-bottom: 1px solid #e0e0e0;
 }
@@ -323,26 +336,35 @@
 .tab {
   flex: 1;
   padding: 12px 24px;
-  background: #f5f5f5;
+  /* background: #f5f5f5; */
   border: none;
-  border-radius: 8px;
+  /* border-radius: 8px; */
   font-size: 16px;
   font-weight: 500;
-  color: #666;
+  color: #333;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .tab:hover {
-  background: #e8e8e8;
+  /* background: #e8e8e8; */
+  color: #ff5722;
+  font-weight: 600;
+  border-bottom: 2px solid #ff5722;
 }
 
 .activeTab {
-  background: #ff6b35;
-  color: white;
+  /* background: #ff6b35; */
+  color: #ff5722;
   font-weight: 600;
+  border-bottom: 2px solid #ff5722;
 }
 
 .activeTab:hover {
-  background: #ff5722;
+  border-bottom: 2px solid #ff5722;
+}
+@media (width <= 767px) {
+  .tab {
+    padding: 0px 24px;
+  }
 }

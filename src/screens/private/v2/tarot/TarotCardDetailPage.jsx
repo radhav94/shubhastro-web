@@ -143,18 +143,20 @@ const TarotCardDetailPage = () => {
       {/* Tabs for Breakup Readings */}
       {isBreakupReading && (
         <div className={styles.tabsContainer}>
-          <button 
-            className={`${styles.tab} ${activeTab === 0 ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab(0)}
-          >
-            You
-          </button>
-          <button 
-            className={`${styles.tab} ${activeTab === 1 ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab(1)}
-          >
-            Partner
-          </button>
+          <div className={styles.tabsContainerWrap}>
+            <button 
+              className={`${styles.tab} ${activeTab === 0 ? styles.activeTab : ''}`}
+              onClick={() => setActiveTab(0)}
+            >
+              You
+            </button>
+            <button 
+              className={`${styles.tab} ${activeTab === 1 ? styles.activeTab : ''}`}
+              onClick={() => setActiveTab(1)}
+            >
+              Partner
+            </button>
+          </div>
         </div>
       )}
 

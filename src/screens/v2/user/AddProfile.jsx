@@ -44,8 +44,8 @@ const AddProfile = () => {
 
     // Parse time from HH:MM format
     const timeParts = formData.birthTime ? formData.birthTime.split(':') : ['0', '0']
-    const hour = formData.unknownTime ? 0 : parseInt(timeParts[0])
-    const min = formData.unknownTime ? 0 : parseInt(timeParts[1])
+    const hour = formData.unknownTime ? "00" : String(parseInt(timeParts[0])).padStart(2, "0")
+    const min = formData.unknownTime ? "00" : String(parseInt(timeParts[1])).padStart(2, "0")
 
     return {
       name: formData.name,
@@ -56,7 +56,7 @@ const AddProfile = () => {
       year,
       hour,
       min,
-      second: 0,
+      second: "00",
       place: formData.placeOfBirth,
       lat: formData.latitude || 0,
       lon: formData.longitude || 0,
