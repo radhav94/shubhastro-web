@@ -33,6 +33,8 @@ import { getToken } from "../../../utils/token";
  * @param {Function} props.onStartCall - Callback when Start Call button is clicked (receives selected profile)
  * @param {Object} props.enabledOperations - Control which operations are enabled (list, add, edit, delete)
  * @param {string[]} props.excludedProfileIds - Array of profile IDs to exclude from the list
+ * @param {Array} props.profilesList - Optional external profiles list (for non-logged-in users)
+ * @param {Function} props.onDeleteProfile - Optional callback for profile deletion (for non-logged-in users)
  */
 const ProfileManager = ({
   isOpen = false,
@@ -50,6 +52,8 @@ const ProfileManager = ({
     delete: true,
   },
   excludedProfileIds = [],
+  profilesList = null,
+  onDeleteProfile: onDeleteProfileCallback = null,
 }) => {
   // Local state for modal visibility
   const [showAddProfile, setShowAddProfile] = useState(false);
@@ -61,20 +65,25 @@ const ProfileManager = ({
   // State for Start Call mode
   const [selectedProfileForCall, setSelectedProfileForCall] = useState(null);
 
-  // RTK Query hooks
-  const [createKundli, { isLoading: isCreating }] = useCreateKundliMutation();
-  const [deleteKundli] = useDeleteKundliMutation();
-  const [editKundli] = useEditKundliMutation();
-
   // Get token
   const token = getToken();
+
+  // RTK Query hooks - Only use mutations when user is logged in
+  const [createKundli, { isLoading: isCreating }] = token
+    ? useCreateKundliMutation()
+    : [null, { isLoading: false }];
+  const [deleteKundli] = token ? useDeleteKundliMutation() : [null];
+  const [editKundli] = token ? useEditKundliMutation() : [null];
 
   // Fetch profiles
   const { data } = useGetAllKundlisQuery(undefined, {
     skip: !token || !isOpen,
   });
 
-  const profiles = data?.data || [];
+  const savedProfiles = data?.data || [];
+  
+  // Use external profiles list if provided (for non-logged-in users), otherwise use saved profiles
+  const profiles = profilesList !== null ? profilesList : savedProfiles;
 
   console.log(excludedProfileIds)
 
@@ -180,23 +189,43 @@ const ProfileManager = ({
         throw new Error("Duplicate profile");
       }
 
-      await createKundli(payload).unwrap();
-      Toast.success("Profile added successfully");
+      // Only call API if user is logged in
+      if (token && createKundli) {
+        await createKundli(payload).unwrap();
+        Toast.success("Profile added successfully");
+      } else {
+        // Non-logged-in user: just show success message
+        // The parent component should handle temporary profile creation
+        Toast.success("Profile added");
+      }
+      
       setShowAddProfile(false);
+      
+      // Call onProfileSelect with the new profile data so parent can handle it
+      if (onProfileSelect) {
+        const tempProfile = {
+          ...payload,
+          _id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        };
+        onProfileSelect(tempProfile);
+      }
+      
       onClose();
     } catch (err) {
       console.error("Add profile error:", err);
       setShowAddProfile(false);
-      onClose();
+      
       // Only show custom toast for duplicate error (already shown above)
       // For API errors, global handler in privateRequestNew.js will show the toast
       if (err.message !== "Duplicate profile") {
+        onClose();
         throw err;
       }
     }
   };
 
   // Handler: Submit edited profile
+
   const handleSubmitEditProfile = async (formData) => {
     try {
       if (!profileToEdit) return;
@@ -204,13 +233,28 @@ const ProfileManager = ({
       // Build payload with updated data
       const payload = buildKundliPayload(formData);
 
-      // Call editKundli with id and payload
-      await editKundli({
-        id: profileToEdit.kundli_ID,
-        ...payload,
-      }).unwrap();
+      // Only call API if user is logged in
+      if (token && editKundli) {
+        // Call editKundli with id and payload
+        await editKundli({
+          id: profileToEdit.kundli_ID,
+          ...payload,
+        }).unwrap();
 
-      Toast.success("Profile updated successfully");
+        Toast.success("Profile updated successfully");
+      } else {
+        // Non-logged-in user: just show success message
+        Toast.success("Profile updated");
+        
+        // Call onProfileSelect with updated profile so parent can handle it
+        if (onProfileSelect) {
+          const updatedProfile = {
+            ...payload,
+            _id: profileToEdit._id,
+          };
+          onProfileSelect(updatedProfile);
+        }
+      }
 
       setShowEditProfile(false);
       setProfileToEdit(null);
@@ -225,8 +269,17 @@ const ProfileManager = ({
     if (!profileToDelete) return;
 
     try {
-      await deleteKundli(profileToDelete).unwrap();
-      Toast.success("Profile deleted successfully");
+      // Only call API if user is logged in
+      if (token && deleteKundli) {
+        await deleteKundli(profileToDelete).unwrap();
+        Toast.success("Profile deleted successfully");
+      } else {
+        // Non-logged-in user: use callback if provided
+        if (onDeleteProfileCallback) {
+          onDeleteProfileCallback(profileToDelete);
+        }
+        Toast.success("Profile deleted");
+      }
 
       setShowDeleteModal(false);
       setProfileToDelete(null);
