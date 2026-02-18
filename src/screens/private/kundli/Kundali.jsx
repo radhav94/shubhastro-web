@@ -326,6 +326,15 @@ const Kundali = () => {
 
   // Handlers
   const handleSelectProfile = (profile) => {
+    // If it's a temporary profile (from non-logged-in user), add it to tempProfiles
+    if (!isLoggedIn && profile._id?.startsWith('temp_')) {
+      // Check if this temp profile already exists
+      const exists = tempProfiles.some(p => p._id === profile._id);
+      if (!exists) {
+        setTempProfiles(prev => [...prev, profile]);
+      }
+    }
+    
     setSelectedProfile(profile);
     setShowSelectProfile(false);
   };
@@ -385,6 +394,7 @@ const Kundali = () => {
           setSelectedProfile(result.data);
         }
       } else {
+        // Non-logged-in user: create temporary profile without API call
         const tempProfile = {
           ...payload,
           _id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -397,12 +407,15 @@ const Kundali = () => {
       
       setShowAddProfile(false);
     } catch (err) {
-      const errorMessage = 
-        err?.data?.message || 
-        err?.message || 
-        "Failed to add profile";
-      
-      Toast.error(errorMessage);
+      // Only show error toast if it's not a duplicate profile error
+      if (err?.message !== "Duplicate profile") {
+        const errorMessage = 
+          err?.data?.message || 
+          err?.message || 
+          "Failed to add profile";
+        
+        Toast.error(errorMessage);
+      }
       throw err;
     }
   };
@@ -522,6 +535,15 @@ const Kundali = () => {
         onProfileSelect={handleSelectProfile}
         selectedProfileId={selectedProfile?._id}
         title="Select Profile"
+        profilesList={profiles}
+        onDeleteProfile={(profileId) => {
+          if (!isLoggedIn) {
+            setTempProfiles(prev => prev.filter(p => p._id !== profileId));
+            if (selectedProfile?._id === profileId) {
+              setSelectedProfile(null);
+            }
+          }
+        }}
         enabledOperations={{
           list: true,
           add: true,
