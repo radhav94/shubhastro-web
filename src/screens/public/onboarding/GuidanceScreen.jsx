@@ -50,8 +50,12 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
       const fullName = formData.name || "";
       const nameParts = fullName.trim().split(/\s+/);
       const firstName = nameParts[0] || "";
-      const lastName = nameParts.slice(1).join(" ") || firstName; // Use firstName as lastName if no last name provided
-      
+      const lastName = nameParts.slice(1).join(" "); 
+
+      // Use this firstName as lastName if no last name provided
+      // const lastName = nameParts.slice(1).join(" ") || firstname; 
+
+
       // Format phone number with 91 prefix (without +)
       let phoneNumber = formData.phoneNumber || "";
       // Remove any existing +91 or 91 prefix to avoid duplication

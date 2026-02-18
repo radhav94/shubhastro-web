@@ -56,6 +56,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: scaleX(1) !important; // Force no mirror - show original camera view
+  -webkit-transform: scaleX(1) !important;
 }
 
 .detectionCanvas {
@@ -131,12 +133,17 @@
   }
 
   &.detected {
-    border-color: #22c55e; // Green when palm detected
+    border-color: #22c55e; // Green when palm detected and in bounds
     box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
   }
 
   &.notDetected {
-    border-color: #ef4444; // Red when no palm detected
+    border-color: #F75801; // Orange when no palm detected or not in bounds
+    box-shadow: 0 0 20px rgba(247, 88, 1, 0.5);
+  }
+  
+  &.outOfBounds {
+    border-color: #ef4444; // Red when hand is outside the box
     box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
   }
 

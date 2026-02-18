@@ -21,9 +21,37 @@ const FaceReadingCamera = () => {
   const {
     modelsLoaded,
     faceDetected,
+    faceInCircle,
     startDetection,
     stopDetection
-  } = useFaceDetection({ videoRef, canvasRef: detectionCanvasRef });
+  } = useFaceDetection({ 
+    videoRef, 
+    canvasRef: detectionCanvasRef,
+    getCircleBounds: () => getCircleBounds()
+  });
+
+  // Function to get circle bounds dynamically
+  const getCircleBounds = () => {
+    if (!videoRef.current) return null;
+    
+    const video = videoRef.current;
+    const videoRect = video.getBoundingClientRect();
+    
+    // Circle is centered in the video
+    const centerX = videoRect.width / 2;
+    const centerY = videoRect.height / 2;
+    
+    // Circle radius based on screen size
+    let radius = 250; // 500px diameter / 2
+    if (window.innerWidth <= 768) {
+      radius = 210; // 420px diameter / 2
+    }
+    if (window.innerWidth <= 480) {
+      radius = 180; // 360px diameter / 2
+    }
+    
+    return { centerX, centerY, radius };
+  };
 
   // Safety net cleanup on unmount
   useEffect(() => {
@@ -168,13 +196,56 @@ const FaceReadingCamera = () => {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      // Get circle bounds
+      const circleBounds = getCircleBounds();
+      if (!circleBounds) return;
+      
+      const { centerX, centerY, radius } = circleBounds;
+      
+      // Scale to video dimensions for high quality
+      const scaleX = video.videoWidth / video.offsetWidth;
+      const scaleY = video.videoHeight / video.offsetHeight;
+      
+      const scaledCenterX = centerX * scaleX;
+      const scaledCenterY = centerY * scaleY;
+      const scaledRadius = radius * Math.min(scaleX, scaleY);
+      
+      // Set canvas to circle diameter for square output (easier for processing)
+      const diameter = scaledRadius * 2;
+      canvas.width = diameter;
+      canvas.height = diameter;
       
       const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
       
-      const imageData = canvas.toDataURL('image/jpeg');
+      // Clear canvas
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Create circular clipping path
+      context.save();
+      context.beginPath();
+      context.arc(diameter / 2, diameter / 2, scaledRadius, 0, Math.PI * 2);
+      context.closePath();
+      context.clip();
+      
+      // Draw the circular portion of the video
+      // Source: area from video that corresponds to the circle
+      // Destination: centered in canvas
+      context.drawImage(
+        video,
+        scaledCenterX - scaledRadius, // source x
+        scaledCenterY - scaledRadius, // source y
+        diameter, // source width
+        diameter, // source height
+        0, // destination x
+        0, // destination y
+        diameter, // destination width
+        diameter  // destination height
+      );
+      
+      context.restore();
+      
+      // Convert to high quality JPEG (0.95 quality)
+      const imageData = canvas.toDataURL('image/jpeg', 0.95);
       setCapturedImage(imageData);
       stopCamera();
     }
@@ -280,14 +351,24 @@ const FaceReadingCamera = () => {
               className={styles.detectionCanvas}
             />
             <div className={styles.overlay}>
-              <div className={`${styles.frameCorner} ${faceDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', left: '5%' }}></div>
-              <div className={`${styles.frameCorner} ${faceDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', right: '5%' }}></div>
-              <div className={`${styles.frameCorner} ${faceDetected ? styles.detected : styles.notDetected}`} style={{ bottom: '20%', left: '5%' }}></div>
-              <div className={`${styles.frameCorner} ${faceDetected ? styles.detected : styles.notDetected}`} style={{ bottom: '20%', right: '5%' }}></div>
+              {/* Circular face frame */}
+              <div className={`${styles.faceCircle} ${faceInCircle ? styles.detected : styles.notDetected}`}>
+                <svg className={styles.circleSvg} viewBox="0 0 300 300">
+                  <circle 
+                    cx="150" 
+                    cy="150" 
+                    r="140" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="4"
+                    strokeDasharray="10 5"
+                  />
+                </svg>
+              </div>
             </div>
-            {!faceDetected && modelsLoaded && (
+            {!faceInCircle && modelsLoaded && (
               <div className={styles.faceDetectionMessage}>
-                <p>Position your face within the frame</p>
+                <p>Position your face within the circle</p>
               </div>
             )}
           </>
@@ -301,18 +382,18 @@ const FaceReadingCamera = () => {
       <div className={styles.controls}>
         {!capturedImage ? (
           <button 
-            className={`${styles.captureButton} ${(!faceDetected && modelsLoaded) ? styles.disabled : ''}`} 
+            className={`${styles.captureButton} ${(!faceInCircle && modelsLoaded) ? styles.disabled : ''}`} 
             onClick={captureImage}
-            disabled={!faceDetected && modelsLoaded}
+            disabled={!faceInCircle && modelsLoaded}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!faceDetected && modelsLoaded) ? "0.5" : "1"}/>
-                <circle cx="20" cy="20" r="14" fill="white" opacity={(!faceDetected && modelsLoaded) ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!faceInCircle && modelsLoaded) ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="14" fill="white" opacity={(!faceInCircle && modelsLoaded) ? "0.5" : "1"}/>
               </svg>
             </div>
             <span className={styles.captureText}>
-              {!modelsLoaded ? 'Loading...' : (faceDetected ? 'Capture' : 'No Face Detected')}
+              {!modelsLoaded ? 'Loading...' : (faceInCircle ? 'Capture' : 'Face Outside Circle')}
             </span>
           </button>
         ) : (
