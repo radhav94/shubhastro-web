@@ -65,6 +65,10 @@ const SignatureResult = () => {
     <div className={styles.tabContent}>
       <div className={styles.signatureImageWrapper}>
         <img src={resultData.image} alt="Signature" className={styles.signatureImage} />
+        <div className={styles.cornerTopLeft}></div>
+        <div className={styles.cornerTopRight}></div>
+        <div className={styles.cornerBottomLeft}></div>
+        <div className={styles.cornerBottomRight}></div>
       </div>
 
       <div className={styles.qualityCard}>

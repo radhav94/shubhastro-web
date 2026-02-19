@@ -11,6 +11,7 @@ const SignatureCamera = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
+  const captureAreaRef = useRef(null); // Reference to capture area
   const [stream, setStream] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
@@ -112,7 +113,7 @@ const SignatureCamera = () => {
   const captureImage = async () => {
     stopDetection();
     
-    if (videoRef.current && canvasRef.current) {
+    if (videoRef.current && canvasRef.current && captureAreaRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       
@@ -122,53 +123,41 @@ const SignatureCamera = () => {
       const context = canvas.getContext('2d');
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       
-      // Get the full image data
-      const fullImageData = canvas.toDataURL('image/jpeg', 0.95);
+      // Calculate capture box bounds based on the visible capture area
+      const videoRect = video.getBoundingClientRect();
+      const boxRect = captureAreaRef.current.getBoundingClientRect();
       
-      // Try to crop to signature region
-      let croppedImage = fullImageData;
+      // Calculate bounds as percentage of video dimensions
+      const bounds = {
+        left: (boxRect.left - videoRect.left) / videoRect.width,
+        right: (boxRect.right - videoRect.left) / videoRect.width,
+        top: (boxRect.top - videoRect.top) / videoRect.height,
+        bottom: (boxRect.bottom - videoRect.top) / videoRect.height,
+      };
       
-      try {
-        // Get image data for processing
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        
-        // Find signature bounds using edge detection
-        const bounds = findSignatureBounds(imageData);
-        
-        if (bounds && bounds.width > 50 && bounds.height > 20) {
-          // Add padding around the signature (15% on each side)
-          const padding = 0.15;
-          const paddedWidth = bounds.width * (1 + padding * 2);
-          const paddedHeight = bounds.height * (1 + padding * 2);
-          const paddedX = Math.max(0, bounds.x - bounds.width * padding);
-          const paddedY = Math.max(0, bounds.y - bounds.height * padding);
-          
-          // Ensure we don't exceed canvas bounds
-          const cropX = Math.max(0, paddedX);
-          const cropY = Math.max(0, paddedY);
-          const cropWidth = Math.min(paddedWidth, canvas.width - cropX);
-          const cropHeight = Math.min(paddedHeight, canvas.height - cropY);
-          
-          // Create a new canvas for the cropped image
-          const cropCanvas = document.createElement('canvas');
-          cropCanvas.width = cropWidth;
-          cropCanvas.height = cropHeight;
-          const cropContext = cropCanvas.getContext('2d');
-          
-          // Draw the cropped region
-          cropContext.drawImage(
-            canvas,
-            cropX, cropY, cropWidth, cropHeight,
-            0, 0, cropWidth, cropHeight
-          );
-          
-          croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
-          console.log('Signature cropped successfully');
-        }
-      } catch (error) {
-        console.error('Error cropping signature:', error);
-        // Fall back to full image if cropping fails
-      }
+      // Calculate crop dimensions based on capture box bounds
+      const boxX = bounds.left * canvas.width;
+      const boxY = bounds.top * canvas.height;
+      const boxWidth = (bounds.right - bounds.left) * canvas.width;
+      const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
+      
+      console.log('📸 Cropping to capture box:', { boxX, boxY, boxWidth, boxHeight });
+      
+      // Create a new canvas for the cropped image (only capture box area)
+      const cropCanvas = document.createElement('canvas');
+      cropCanvas.width = boxWidth;
+      cropCanvas.height = boxHeight;
+      const cropContext = cropCanvas.getContext('2d');
+      
+      // Draw only the capture box region
+      cropContext.drawImage(
+        canvas,
+        boxX, boxY, boxWidth, boxHeight,  // Source rectangle (from original canvas)
+        0, 0, boxWidth, boxHeight          // Destination rectangle (to crop canvas)
+      );
+      
+      // Get the cropped image
+      const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
       
       setCapturedImage(croppedImage);
       stopCamera();
@@ -318,10 +307,13 @@ const SignatureCamera = () => {
               className={styles.detectionCanvas}
             />
             <div className={styles.overlay}>
-              <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', left: '5%' }}></div>
-              <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', right: '5%' }}></div>
-              <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ bottom: '20%', left: '5%' }}></div>
-              <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ bottom: '20%', right: '5%' }}></div>
+              {/* Capture area frame with 500px width */}
+              <div className={styles.captureArea} ref={captureAreaRef}>
+                <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ top: 0, left: 0 }}></div>
+                <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ top: 0, right: 0 }}></div>
+                <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ bottom: 0, left: 0 }}></div>
+                <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ bottom: 0, right: 0 }}></div>
+              </div>
             </div>
             {!objectDetected && detectionReady && (
               <div className={styles.detectionMessage}>
