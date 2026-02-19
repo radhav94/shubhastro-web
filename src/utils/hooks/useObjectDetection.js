@@ -134,22 +134,33 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
     const data = imageData.data;
     let darkPixels = 0;
     let contrastPixels = 0;
+    let edgePixels = 0;
+    let skinTonePixels = 0;
     const totalPixels = data.length / 4;
 
-    // Detect dark strokes (signature ink) - more lenient threshold
+    // Detect dark strokes (signature ink) and check for skin tones
     for (let i = 0; i < data.length; i += 4) {
       const r = data[i];
       const g = data[i + 1];
       const b = data[i + 2];
       const brightness = (r + g + b) / 3;
 
-      // More lenient - detect darker pixels
-      if (brightness < 150) darkPixels++;
+      // Detect dark pixels (ink)
+      if (brightness < 120) darkPixels++;
+
+      // Detect skin tones (to reject faces)
+      // Skin tone detection: R > G > B, with specific ranges
+      if (r > 95 && g > 40 && b > 20 && 
+          r > g && g > b && 
+          Math.abs(r - g) > 15 &&
+          r - b > 15) {
+        skinTonePixels++;
+      }
     }
 
     // Enhanced edge detection for signature strokes
-    for (let y = 1; y < height - 1; y += 2) { // Sample every other row for performance
-      for (let x = 1; x < width - 1; x += 2) { // Sample every other column
+    for (let y = 1; y < height - 1; y += 2) {
+      for (let x = 1; x < width - 1; x += 2) {
         const i = (y * width + x) * 4;
         const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
         
@@ -161,21 +172,37 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
         const downI = ((y + 1) * width + x) * 4;
         const downBrightness = (data[downI] + data[downI + 1] + data[downI + 2]) / 3;
         
-        // More lenient edge detection
-        if (Math.abs(brightness - rightBrightness) > 30 || Math.abs(brightness - downBrightness) > 30) {
-          contrastPixels++;
+        // Strong edge detection for text
+        if (Math.abs(brightness - rightBrightness) > 50 || Math.abs(brightness - downBrightness) > 50) {
+          edgePixels++;
         }
       }
     }
 
     const darkRatio = darkPixels / totalPixels;
-    const contrastRatio = contrastPixels / (totalPixels / 4); // Adjusted for sampling
+    const edgeRatio = edgePixels / (totalPixels / 4);
+    const skinRatio = skinTonePixels / totalPixels;
 
-    console.log('Signature detection:', { darkRatio, contrastRatio, darkPixels, contrastPixels });
+    console.log('Signature detection:', { 
+      darkRatio: darkRatio.toFixed(3), 
+      edgeRatio: edgeRatio.toFixed(3),
+      skinRatio: skinRatio.toFixed(3),
+      darkPixels, 
+      edgePixels,
+      skinTonePixels
+    });
 
-    // More lenient thresholds - signature detected if there are dark marks with some contrast
-    const detected = darkRatio > 0.03 && darkRatio < 0.7 && contrastRatio > 0.01;
-    const quality = Math.min(100, Math.round((darkRatio * 100 + contrastRatio * 200)));
+    // Strict detection: 
+    // - Must have dark ink (but not too much - not a dark background)
+    // - Must have strong edges (text has sharp edges)
+    // - Must NOT have significant skin tones (reject faces)
+    const detected = 
+      darkRatio > 0.05 &&      // Has some dark ink
+      darkRatio < 0.5 &&       // But not too dark (not a dark background)
+      edgeRatio > 0.03 &&      // Has strong edges (text)
+      skinRatio < 0.15;        // No significant skin tones (not a face)
+
+    const quality = detected ? Math.min(100, Math.round((darkRatio * 100 + edgeRatio * 200))) : 0;
 
     return { detected, quality };
   };
@@ -260,22 +287,18 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
   const drawDetectionOverlay = (ctx, width, height, detected) => {
     if (!detected) return;
 
+    // Calculate center box dimensions (500px equivalent in video dimensions)
+    const boxWidth = Math.min(width * 0.7, 500 * (width / 500)); // 70% of width or 500px equivalent
+    const boxHeight = boxWidth * 0.5; // Maintain 2:1 aspect ratio
+    const boxX = (width - boxWidth) / 2;
+    const boxY = (height - boxHeight) / 2;
+
     ctx.strokeStyle = '#22c55e';
     ctx.lineWidth = 4;
-    ctx.strokeRect(
-      width * 0.1,
-      height * 0.15,
-      width * 0.8,
-      height * 0.7
-    );
+    ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
 
     ctx.fillStyle = 'rgba(34, 197, 94, 0.15)';
-    ctx.fillRect(
-      width * 0.1,
-      height * 0.15,
-      width * 0.8,
-      height * 0.7
-    );
+    ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
   };
 
   /* ------------------ START/STOP DETECTION ------------------ */
