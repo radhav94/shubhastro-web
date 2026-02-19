@@ -134,17 +134,20 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId, title, subtitle }) => {
               <div
                 key={blog._id || blog.blogId}
                 className={styles.blogCard}
-                onClick={() => handleBlogClick(blog)}
               >
                 <div className={styles.imageWrapper}>
+                  
                   <img
                     src={blog.imageUrl || blog.img}
                     alt={blog.title}
                     className={styles.blogImage}
+                    onClick={() => handleBlogClick(blog)}   // ✅ only image clickable
                     onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/1200x400?text=Blog+Image";
+                      e.target.src =
+                        "https://via.placeholder.com/1200x400?text=Blog+Image";
                     }}
                   />
+
                   <div className={styles.overlay}>
                     
                     {/* Navigation Dots */}
@@ -155,13 +158,17 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId, title, subtitle }) => {
                           className={`${styles.dot} ${
                             index === currentIndex ? styles.activeDot : ""
                           }`}
-                          onClick={() => scrollToIndex(index)}
+                          onClick={(e) => {
+                            e.stopPropagation(); // prevent image click
+                            scrollToIndex(index);
+                          }}
                           aria-label={`Go to blog ${index + 1}`}
                         />
                       ))}
-                    </div>    
+                    </div>
 
                     <h3 className={styles.blogTitle}>{blog.title}</h3>
+
                     {(blog.author || blog.authorIcon || subtitle) && (
                       <div className={styles.authorInfo}>
                         {blog.authorIcon && (
@@ -182,6 +189,7 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId, title, subtitle }) => {
             ))}
           </div>
         </div>
+
       )}
     </div>
   );

@@ -91,7 +91,13 @@
     gap: 12px;
   }
 }
+.overlay {
+  pointer-events: none;
+}
 
+.dotsContainer button {
+  pointer-events: auto;
+}
 .relatedBlogCard {
   background: #fff;
   border-radius: 16px;
@@ -111,8 +117,8 @@
   }
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
   }
 
   .imageWrapper {
