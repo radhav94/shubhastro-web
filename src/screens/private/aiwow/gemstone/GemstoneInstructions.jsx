@@ -35,85 +35,90 @@ const GemstoneInstructions = () => {
       <div className={styles.content}>
         <h2 className={styles.title}>Before you start</h2>
 
-        <div className={styles.imageWrapper}>
-          <img 
-            src={getAIWowInstructionImage('gemstone')} 
-            alt="Gemstone example" 
-            className={styles.gemstoneImage}
-          />
-          <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
-          <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
-          <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
-          <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
-        </div>
+        <div className={styles.middleContent}>
 
-        <div className={styles.checklistSection}>
-          <div className={styles.checkItem}>
-            <div className={styles.checkIcon}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div>
-              <h3 className={styles.checkTitle}>Verify Certification</h3>
-              <p className={styles.checkDescription}>Ensure the gemstone comes with a valid certification from a recognized authority.</p>
-            </div>
+          <div className={styles.imageWrapper}>
+            <img 
+              src={getAIWowInstructionImage('gemstone')} 
+              alt="Gemstone example" 
+              className={styles.gemstoneImage}
+            />
+            <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
+            <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
+            <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
+            <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
           </div>
 
-          <div className={styles.checkItem}>
-            <div className={styles.checkIcon}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+        <div>
+            <div className={styles.checklistSection}>
+              <div className={styles.checkItem}>
+                <div className={styles.checkIcon}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className={styles.checkTitle}>Verify Certification</h3>
+                  <p className={styles.checkDescription}>Ensure the gemstone comes with a valid certification from a recognized authority.</p>
+                </div>
+              </div>
+
+              <div className={styles.checkItem}>
+                <div className={styles.checkIcon}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className={styles.checkTitle}>Inspect Clarity</h3>
+                  <p className={styles.checkDescription}>Evaluate the clarity of the gemstone to determine its quality and authenticity.</p>
+                </div>
+              </div>
+
+              <div className={styles.checkItem}>
+                <div className={styles.checkIcon}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className={styles.checkTitle}>Examine Cut Quality</h3>
+                  <p className={styles.checkDescription}>Assess the cut of the gemstone for precision and craftsmanship, which contribute to its value.</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className={styles.checkTitle}>Inspect Clarity</h3>
-              <p className={styles.checkDescription}>Evaluate the clarity of the gemstone to determine its quality and authenticity.</p>
+
+            <div className={styles.disclaimer}>
+              <h4 className={styles.disclaimerTitle}>Disclaimer</h4>
+              <p className={styles.disclaimerText}>
+                This gemstone authenticity check is for informational purposes only and should not replace professional appraisal. Our analysis is powered by advanced AI.
+              </p>
             </div>
+
+            <div className={styles.buttonGroup}>
+              <button 
+                className={styles.uploadButton}
+                onClick={handleUpload}
+              >
+                Upload Photo
+              </button>
+              <button 
+                className={styles.cameraButton}
+                onClick={handleCamera}
+              >
+                Use Camera
+              </button>
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
           </div>
-
-          <div className={styles.checkItem}>
-            <div className={styles.checkIcon}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div>
-              <h3 className={styles.checkTitle}>Examine Cut Quality</h3>
-              <p className={styles.checkDescription}>Assess the cut of the gemstone for precision and craftsmanship, which contribute to its value.</p>
-            </div>
-          </div>
         </div>
-
-        <div className={styles.disclaimer}>
-          <h4 className={styles.disclaimerTitle}>Disclaimer</h4>
-          <p className={styles.disclaimerText}>
-            This gemstone authenticity check is for informational purposes only and should not replace professional appraisal. Our analysis is powered by advanced AI.
-          </p>
-        </div>
-
-        <div className={styles.buttonGroup}>
-          <button 
-            className={styles.uploadButton}
-            onClick={handleUpload}
-          >
-            Upload Photo
-          </button>
-          <button 
-            className={styles.cameraButton}
-            onClick={handleCamera}
-          >
-            Use Camera
-          </button>
-        </div>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={handleFileChange}
-        />
       </div>
     </div>
   );
