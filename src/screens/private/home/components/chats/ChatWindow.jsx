@@ -53,6 +53,7 @@ const ChatWindow = () => {
     astroID,
     experience
   } = state || {};
+  // console.log('kundliId in chat', kundliId)
 
   const { activeCall } = useCall();
   const [openFeedback, setOpenFeedback] = useState(false);

@@ -75,6 +75,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
     handleAfterKundliSelect: hookHandleAfterKundliSelect,
     openModal: hookOpenModal,
     setOpenModal: hookSetOpenModal,
+    kundliRef
   } = useAstrologerConnect();
 
   // Use profile manager hook (same as TalkToAstrologer)
@@ -118,7 +119,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
 
   //  keep astro in ref (important)
   const activeCallAstroRef = useRef(null);
-  const kundliRef = useRef(null);
+  // const kundliRef = useRef(null);
   const [callRoomId, setCallRoomId] = useState(null);
   const [chatRoomId, setChatRoomId] = useState(null);
 

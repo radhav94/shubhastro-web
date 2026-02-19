@@ -1443,18 +1443,19 @@
 }
 
 .astrologerImageWrapper {
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
-  overflow: hidden;
-  margin-bottom: -16px;
+  overflow: visible;
+  margin-bottom: 0px;
   background: #f5f5f5;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
   @media screen and (width <= 767px) {
-    width: 90px;
-    height: 90px;
+    width: 120px;
+    height: 120px;
   }
 }
 
@@ -1462,20 +1463,26 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
 }
 
 .ratingBadge {
   display: flex;
-    align-items: center;
-    gap: 4px;
-    background: #fff8f0;
-    padding: 4px 10px;
-    border-radius: 16px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #333;
+  align-items: center;
+  gap: 4px;
+  background: #fff8f0;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   @media screen and (width <= 767px) {
-    margin-bottom: 6px;
+    padding: 4px 10px;
   }
 }
 
@@ -1522,15 +1529,123 @@
 .experienceText {
   font-family: "Poppins", sans-serif;
   font-size: 12px;
-  color: #666;
+  color: #999;
   @include line-clamp(1);
 }
+
+.actionButtons {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  padding: 0 16px 16px;
+  @media screen and (width <= 767px) {
+    gap: 8px;
+    padding: 0 12px 12px;
+  }
+}
+
+.buttonWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.chatBtn {
+  width: 100%;
+  background: transparent;
+  color: #f75801;
+  border: 1px solid #f75801;
+  padding: 10px 12px;
+  border-radius: 50px;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  img {
+    width: 16px;
+    height: 16px;
+  }
+
+  @media screen and (width <= 767px) {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  &:hover {
+    background: #fff5ec;
+    transform: translateY(-1px);
+  }
+}
+
+.callBtn {
+  width: 100%;
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
+  color: #ffffff;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 50px;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  img {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(1);
+  }
+
+  @media screen and (width <= 767px) {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+  }
+}
+
+.priceText {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  text-align: center;
+
+  @media screen and (width <= 767px) {
+    font-size: 11px;
+  }
+}
+
+.priceAmount {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
 .bottomWrap {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
 .connectBtn {
   width: 80%;
   // background: #2c1b0e;
@@ -1735,7 +1850,6 @@
   display: flex;
   gap: 0;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
   transition:
     transform 0.2s,
     box-shadow 0.2s;
@@ -1752,9 +1866,15 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.sessionImageWrapper {
+.sessionCardLink {
   flex: 0 0 40%;
   width: 40%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.sessionImageWrapper {
+  width: 100%;
   height: 100%;
   overflow: hidden;
   background: #fff;
@@ -1776,6 +1896,12 @@
   padding: 20px;
 }
 
+.sessionNameLink {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
 .sessionName {
   font-family: "Poppins", sans-serif;
   font-size: 18px;
@@ -1783,6 +1909,15 @@
   color: #1a1a1a;
   margin: 0;
   line-height: 1.2;
+}
+
+.sessionDateTime {
+  display: flex;
+  gap: 16px;
+  @media screen and (width <= 767px) {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 }
 
 .sessionDetails {
@@ -1809,15 +1944,129 @@
   font-family: "Poppins", sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: #666;
+  color: #999;
 }
 
 .sessionDuration {
   font-family: "Poppins", sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: #888;
+  color: #666;
   margin: 0;
+}
+
+.sessionActionButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+  @media screen and (width <= 767px) {
+    gap: 8px;
+  }
+}
+
+.sessionButtonWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.sessionChatBtn {
+  width: 100%;
+  background: transparent;
+  color: #f75801;
+  border: 1px solid #f75801;
+  padding: 10px 12px;
+  border-radius: 50px;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  img {
+    width: 16px;
+    height: 16px;
+  }
+
+  @media screen and (width <= 767px) {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  &:hover {
+    background: #fff5ec;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.sessionCallBtn {
+  width: 100%;
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
+  color: #ffffff;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 50px;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  img {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(1);
+  }
+
+  @media screen and (width <= 767px) {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.sessionPriceText {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  text-align: center;
+
+  @media screen and (width <= 767px) {
+    font-size: 11px;
+  }
+}
+
+.sessionPriceAmount {
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 .callAgainBtn {
