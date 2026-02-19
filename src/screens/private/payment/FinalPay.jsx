@@ -1,19 +1,22 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import styles from "./FinalPay.module.scss";
-import { Toast } from "../../../component";
 import { FaCcMastercard } from "react-icons/fa";
-import { LuBadgeIndianRupee } from "react-icons/lu";
 import { useGetPlanByIdQuery } from "../../../redux/api/plansApi/plansApi";
 import { useWalletBalance } from "../wallet/useWalletBalance";
-import { useCreditWalletMutation } from "../../../redux/api/wallet/walletApi";
+import { useRazorpayPayment } from "../../../utils/hooks/useRazorpay";
+import Toast from "../../../component/toast";
 
 const FinalPay = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const planId = location.state?.planId;
-  const { data } = useGetPlanByIdQuery(planId);
+  const { data, isLoading: isPlanLoading, error: planError } = useGetPlanByIdQuery(planId, {
+    skip: !planId,
+  });
+
+  const [paymentAttempted, setPaymentAttempted] = useState(false);
 
   const amount = data?.data?.actualPrice || 0;
   const extra = data?.data?.discountedPrice || 0;
@@ -21,56 +24,92 @@ const FinalPay = () => {
   const gst = +(amount * 0.18).toFixed(2);
   const totalAmount = +(amount + gst).toFixed(2);
 
-  // Use wallet balance hook
+  // Wallet balance hook
   const { refreshWallet } = useWalletBalance();
   
-  // Credit wallet mutation
-  const [creditWallet] = useCreditWalletMutation();
-  
-  // Loading state for payment
-  const [isProcessing, setIsProcessing] = useState(false);
+  // Razorpay payment hook
+  const { initiatePayment, isProcessing, isLoaded, scriptError } = useRazorpayPayment();
 
-  // Refresh wallet balance on mount
+  // Redirect if no plan ID
+  useEffect(() => {
+    if (!planId) {
+      Toast.error("No plan selected. Please select a plan first.");
+      navigate("/payment");
+    }
+  }, [planId, navigate]);
+
+  // Refresh wallet on mount
   useEffect(() => {
     refreshWallet();
   }, [refreshWallet]);
 
-  const handlePayment = async (method) => {
-    try {
-      setIsProcessing(true);
-      
-      // Prepare payload for wallet credit API
-      const payload = {
-        message: `Wallet recharge via ${method}`,
-        amount: amount + extra, // Total coins to credit (actual price + bonus)
-        action: "credit",
-        type: "coin",
-        reason: "purchase",
-        plan_id: planId || 0,
-      };
-      // Call the credit wallet API
-      const response = await creditWallet(payload).unwrap();
-
-      // Refresh wallet balance to get updated balance
-      refreshWallet();
-
-      // Dispatch wallet update events for other components
-      window.dispatchEvent(new Event("wallet-updated"));
-      window.dispatchEvent(new Event("walletBalanceUpdated"));
-
-      Toast.success(`Recharge successful via ${method}!`);
-      
-      // Navigate after a short delay to ensure state updates
-      setTimeout(() => {
-        navigate("/");
-      }, 500);
-    } catch (error) {
-      console.error("Wallet credit error:", error);
-      Toast.error(error?.data?.message || "Payment failed. Please try again.");
-    } finally {
-      setIsProcessing(false);
+  // Handle plan loading error
+  useEffect(() => {
+    if (planError) {
+      Toast.error("Failed to load plan details. Please try again.");
+      navigate("/payment");
     }
+  }, [planError, navigate]);
+
+  const handlePayment = async () => {
+    // Prevent multiple payment attempts
+    if (paymentAttempted) {
+      Toast.warning("Payment already initiated. Please complete or cancel the current payment.");
+      return;
+    }
+
+    // Validate plan data
+    if (!data?.data) {
+      Toast.error("Plan details not loaded. Please try again.");
+      return;
+    }
+
+    // Validate amount
+    if (amount <= 0) {
+      Toast.error("Invalid payment amount. Please contact support.");
+      return;
+    }
+
+    setPaymentAttempted(true);
+
+    await initiatePayment({
+      planId: data?.data?._id || planId,
+      planData: data.data,
+      onSuccess: () => {
+        // Refresh wallet balance
+        refreshWallet();
+        
+        // Navigate to home after successful payment
+        Toast.success("Redirecting to home...");
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
+      },
+      onFailure: (error) => {
+        console.error("Payment failed:", error);
+        setPaymentAttempted(false);
+        
+        // Don't show error toast if payment was cancelled
+        if (!error?.cancelled) {
+          // Error toast already shown by hook
+        }
+      },
+    });
   };
+
+  // Loading state
+  if (isPlanLoading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loading}>Loading payment details...</div>
+      </div>
+    );
+  }
+
+  // No plan data
+  if (!data?.data) {
+    return null;
+  }
 
   return (
     <div className={styles.container}>
@@ -99,32 +138,47 @@ const FinalPay = () => {
         </table>
       </div>
 
-      <div className={styles.cashbackBox}>
-        ₹ {extra} in wallet after recharge
-      </div>
+      {extra > 0 && (
+        <div className={styles.cashbackBox}>
+          ₹ {extra} bonus in wallet after recharge
+        </div>
+      )}
 
-      <p className={styles.chooseText}>Choose Payment Method</p>
+      <p className={styles.chooseText}>Proceed to Payment</p>
 
       <div className={styles.payGrid}>
-        <button onClick={() => handlePayment("Card")} disabled={isProcessing}>
-          <FaCcMastercard size={36} />
-          <span>{isProcessing ? "Processing..." : "Credit/Debit Card"}</span>
+        <button 
+          onClick={handlePayment} 
+          disabled={isProcessing || !isLoaded || !!scriptError || paymentAttempted}
+          className={styles.razorpayButton}
+          aria-label="Pay with Razorpay"
+        >
+          <FaCcMastercard size={36} aria-hidden="true" />
+          <span>
+            {isProcessing 
+              ? "Processing..." 
+              : !isLoaded 
+              ? "Loading payment gateway..." 
+              : scriptError
+              ? "Payment gateway unavailable"
+              : "Pay with Razorpay"}
+          </span>
         </button>
-        <button onClick={() => handlePayment("UPI")} disabled={isProcessing}>
-          <LuBadgeIndianRupee size={36} />
-          <span>{isProcessing ? "Processing..." : "UPI"}</span>
-        </button>
-
-        <button onClick={() => handlePayment("NetBanking")} disabled={isProcessing}>
-          <img src="https://img.icons8.com/ios/50/bank.png" alt="NetBanking" />
-          {isProcessing ? "Processing..." : "Net Banking"}
-        </button>
-
-        <button onClick={() => handlePayment("Wallet")} disabled={isProcessing}>
-          <img src="https://img.icons8.com/ios/50/wallet.png" alt="Wallet" />
-          {isProcessing ? "Processing..." : "Other Wallets"}
-        </button>
+        
+        <div className={styles.paymentInfo}>
+          <p>Supports: Credit/Debit Cards, UPI, Net Banking, Wallets</p>
+          <p className={styles.secureText}>🔒 Secure payment powered by Razorpay</p>
+        </div>
       </div>
+
+      {scriptError && (
+        <div className={styles.errorBox}>
+          <p>{scriptError}</p>
+          <button onClick={() => window.location.reload()} className={styles.retryButton}>
+            Retry
+          </button>
+        </div>
+      )}
     </div>
   );
 };
