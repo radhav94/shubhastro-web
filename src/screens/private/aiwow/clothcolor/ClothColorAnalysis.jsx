@@ -120,12 +120,12 @@ const ClothColorAnalysis = () => {
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>
-              <div className={styles.progressBar}>
+              {/* <div className={styles.progressBar}>
                 <div 
                   className={styles.progressFill} 
                   style={{ width: `${Math.max(0, progress - 20)}%` }}
                 ></div>
-              </div>
+              </div> */}
             </div>
 
             <div className={styles.messageSection}>
