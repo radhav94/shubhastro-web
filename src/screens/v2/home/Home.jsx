@@ -1,4 +1,6 @@
 import { useState, useMemo } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Toast, RechargeModal } from "../../../component";
 import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
@@ -12,8 +14,15 @@ import styles from "./Home.module.scss";
 import {ProfileManager} from "../../../component/UI/Profile";
 
 const Home = () => {
-  const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
+  const navigate = useNavigate();
+  const { isLoggedIn } = useSelector((state) => state.auth);
+  
+  // COMMENTED OUT: No longer using ConnectAstrologerPopup
+  // const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
+  
+  // NEW: Store the connection type when opening ProfileManager
+  const [pendingConnectionType, setPendingConnectionType] = useState(null);
 
   // Fetch home data
   const { data, isLoading } = useGetHomeDetailsQuery();
@@ -51,6 +60,8 @@ const Home = () => {
     setOpenModal: hookSetOpenModal,
     selectedAstrologer: hookSelectedAstrologer,
     activeCallAstroRef,
+    hasKundli,
+    kundliRef
   } = useAstrologerConnect();
 
   // Use astrologer connection hook (pass the ref from useAstrologerConnect)
@@ -62,7 +73,7 @@ const Home = () => {
     setLocalSelectedProfile,
     resetCallState,
     setSelectedAstrologer: setAstrologerRef,
-  } = useAstrologerConnection(activeCallAstroRef);
+  } = useAstrologerConnection(activeCallAstroRef, kundliRef.current);
 
   // Handler for profile selection
   const handleProfileSelect = (profile) => {
@@ -78,11 +89,38 @@ const Home = () => {
 
   // Handler for ProfileManager startCallMode - receives selected profile and triggers connection
   const handleProfileManagerStartCall = (selectedProfile) => {
-    hookHandleAfterKundliSelect(selectedProfile);
+    // The astrologer is already stored in selectedAstrologer state and activeCallAstroRef
+    // The connectionType is stored in pendingConnectionType
+    // Now we need to perform the same validations as the normal flow
+    
+    if (selectedAstrologer && pendingConnectionType) {
+      // Call the appropriate handler based on connection type
+      // This ensures all validations (balance check, online check) are performed
+      if (pendingConnectionType === "chat") {
+        handleChatStart(selectedAstrologer);
+      } else if (pendingConnectionType === "audio") {
+        handleCallStart(selectedAstrologer, "audio");
+      }
+      
+      // Clear the pending connection type
+      setPendingConnectionType(null);
+    }
+    
+    // OLD LOGIC (commented out): This was bypassing validations
+    // if (selectedAstrologer && pendingConnectionType) {
+    //   hookHandleAfterKundliSelect(selectedAstrologer, pendingConnectionType);
+    //   setPendingConnectionType(null);
+    // }
   };
 
-  // Handle connect button click
-  const handleConnectClick = (astrologer) => {
+  // Handle connect button click - now receives connectionType (chat or audio)
+  const handleConnectClick = (astrologer, connectionType) => {
+    // Check if user is logged in
+    if (!isLoggedIn) {
+      navigate("/login?skip=welcome");
+      return;
+    }
+    
     if (WaitingList || callWaitingList) {
       Toast.error(
         "You are already waiting for an astrologer. Please cancel the current request first.",
@@ -92,13 +130,36 @@ const Home = () => {
 
     setSelectedAstrologer(astrologer);
     setAstrologerRef(astrologer);
-    setIsConnectPopupOpen(true);
+
+    // NEW FLOW: Check if kundli is available and directly initiate connection
+    if (hasKundli) {
+      // If kundli is available, directly initiate the connection based on type
+      if (connectionType === "chat") {
+        handleChatStart(astrologer);
+      } else if (connectionType === "audio") {
+        handleCallStart(astrologer, "audio");
+      }
+    } else {
+      // If no kundli, store the connection type and open ProfileManager to add kundli
+      setPendingConnectionType(connectionType);
+      hookSetOpenModal((prev) => ({ ...prev, kundli: true }));
+    }
+
+    // OLD FLOW (commented out for reference):
+    // if (hasKundli) {
+    //   // If kundli is available, show the ConnectAstrologerPopup to select Call/Chat/Video
+    //   setIsConnectPopupOpen(true);
+    // } else {
+    //   // If no kundli, open ProfileManager to add kundli
+    //   hookSetOpenModal((prev) => ({ ...prev, kundli: true }));
+    // }
   };
 
-  const handleClosePopup = () => {
-    setIsConnectPopupOpen(false);
-    setSelectedAstrologer(null);
-  };
+  // COMMENTED OUT: No longer using ConnectAstrologerPopup
+  // const handleClosePopup = () => {
+  //   setIsConnectPopupOpen(false);
+  //   setSelectedAstrologer(null);
+  // };
 
   // Handler for AI chat start with initial query
   const handleAIChatStart = async (astrologer, initialQuery) => {
@@ -189,8 +250,8 @@ const Home = () => {
 
       <BottomNavigation />
 
-      {/* Connect Astrologer Popup */}
-      {isConnectPopupOpen && selectedAstrologer && (
+      {/* Connect Astrologer Popup - COMMENTED OUT: Now skipping popup and directly initiating connections */}
+      {/* {isConnectPopupOpen && selectedAstrologer && (
         <ConnectAstrologerPopup
           isOpen={isConnectPopupOpen}
           astrologer={selectedAstrologer}
@@ -198,14 +259,14 @@ const Home = () => {
           onChatStart={handleChatStart}
           onCallStart={handleCallStart}
         />
-      )}
+      )} */}
 
       <ProfileManager
         isOpen={hookOpenModal.kundli}
         onClose={() => hookSetOpenModal((prev) => ({ ...prev, kundli: false }))}
         startCallMode={true}
         onStartCall={handleProfileManagerStartCall}
-        title="Select Profile to Continue"
+        title="Select Profile"
         enabledOperations={{
           list: true,
           add: true,

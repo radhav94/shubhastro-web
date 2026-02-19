@@ -1463,14 +1463,6 @@ const Profile = () => {
         onCallStart={handleCallStart}
       />
 
-      {/* Waiting Modal - shows for both chat and call */}
-      {(WaitingList || callWaitingList) && connectionType && (
-        <WaitingModal
-          callRoomId={callRoomId || chatRoomId}
-          resetCallState={resetCallState}
-          connectionType={connectionType}
-        />
-      )}
 
       {/* Add Profile Modal */}
       <AddProfileModal

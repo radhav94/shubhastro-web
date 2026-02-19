@@ -57,10 +57,30 @@ export const useAstrologerConnect = () => {
   const [createChatRoom] = useCreateChatRoomMutation();
 
   /**
+   * Selects the appropriate kundli from the user's profiles
+   * Priority: 1) "self" relation kundli, 2) first kundli in the list
+   * @returns {object|null} - Selected kundli profile or null
+   */
+  const getSelectedKundli = useCallback(() => {
+    if (!profiles || profiles.length === 0) {
+      return null;
+    }
+
+    // Try to find a kundli with relation "self" (case-insensitive)
+    const selfKundli = profiles.find(
+      (profile) => profile.relation?.toLowerCase() === "self"
+    );
+
+    // Return self kundli if found, otherwise return the first kundli
+    return selfKundli || profiles[0];
+  }, [profiles]);
+
+  /**
    * Validates if user can connect (logged in + has kundli)
    * @returns {boolean} - true if validation passes, false otherwise
    */
   const validateBeforeConnection = useCallback(() => {
+    // alert("validateBeforeConnection")
     // Check if user is logged in
     if (!token || !userIdLocal) {
       Toast.error("Please login to continue");
@@ -119,6 +139,7 @@ export const useAstrologerConnect = () => {
   const handleCallStart = useCallback(async (astro, type) => {
     console.log("📞 Call Start - Astrologer:", astro);
     console.log("📞 Call Type:", type);
+    // alert("handleCallStart")
     
     // Validate profile and kundli before proceeding
     if (!validateBeforeConnection()) {
@@ -151,7 +172,27 @@ export const useAstrologerConnect = () => {
   // After kundli selection
   const handleAfterKundliSelect = useCallback(async (selectedAstrologer, connectionType = null) => {
     // setOpenModal((prev) => ({ ...prev, kundli: false }));
+    console.log("handleAfterKundliSelect", selectedAstrologer);
 
+    // NEW LOGIC: Select kundli with priority - "self" relation first, then first kundli
+    let selectedKundli = null;
+    if (profiles && profiles.length > 0) {
+      // Try to find a kundli with relation "self" (case-insensitive)
+      const selfKundli = profiles.find(
+        (profile) => profile.relation?.toLowerCase() === "self"
+      );
+      // Use self kundli if found, otherwise use the first kundli
+      selectedKundli = selfKundli || profiles[0];
+      console.log('selectedKundli', selectedKundli)
+      
+      if (selectedKundli) {
+        kundliRef.current = selectedKundli._id;
+        setLastSelectedKundli(selectedKundli);
+        console.log("📋 Selected Kundli:", selectedKundli.relation || "Unknown", "ID:", selectedKundli._id);
+      }
+    }
+
+    // OLD LOGIC (commented out for reference):
     // if (!kundli?._id) return Toast.error("Kundli not selected properly");
     // kundliRef.current = kundli._id;
     // setLastSelectedKundli(kundli);
@@ -198,10 +239,11 @@ export const useAstrologerConnect = () => {
     } catch (error) {
       console.error(error);
     }
-  }, [token, userIdLocal, activeCall, navigate, location, setLastSelectedKundli, setLastCallType, setCallWaitingList]);
+  }, [token, userIdLocal, activeCall, navigate, location, setLastSelectedKundli, setLastCallType, setCallWaitingList, profiles]);
 
   const handleRechargeNow = useCallback(() => {
     setOpenModal((prev) => ({ ...prev, recharge: false }));
+    // alert("handleRechargeNow")
     navigate(PATH.privateRoutes.RECHARGE.path);
   }, [navigate]);
 

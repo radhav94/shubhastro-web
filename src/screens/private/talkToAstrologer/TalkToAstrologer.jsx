@@ -469,6 +469,7 @@ const TalkToAstrologer = () => {
       resetCallFlow();
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
+      console.log(kundliId, "kundli")
 
       try {
         // const res = await createChatRoom({

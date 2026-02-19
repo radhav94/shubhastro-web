@@ -17,11 +17,11 @@ const MySessionsSection = ({ onConnectClick }) => {
   });
   const sessions = data?.data?.recentSessions || [];
 
-  const handleCallAgain = (session) => {
+  const handleCallAgain = (session,connectionType) => {
     if (onConnectClick) {
       // If session has full astrologer object, use it
       if (session.astrologer) {
-        onConnectClick(session.astrologer);
+        onConnectClick(session.astrologer,connectionType);
       } else if (session.astrologerId || session.astrologerName) {
         // Otherwise, construct astrologer object from session data
         const astrologer = {
@@ -34,7 +34,7 @@ const MySessionsSection = ({ onConnectClick }) => {
           imageUrl: session.astrologerImage,
           isActive:session.isActive,
         };
-        onConnectClick(astrologer);
+        onConnectClick(astrologer,connectionType);
       } else {
         console.error("Session data missing astrologer information:", session);
       }
@@ -108,7 +108,7 @@ const MySessionsSection = ({ onConnectClick }) => {
           <SessionCard
             key={i}
             session={session}
-            onCallAgain={() => handleCallAgain(session)}
+            onCallAgain={handleCallAgain}
             isLoading={loadingCallAgain === session.id}
           />
         ))}
