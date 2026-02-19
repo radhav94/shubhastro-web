@@ -653,295 +653,299 @@ const AstrologerProfile = () => {
   return (
     <div className={styles.profilePage}>
       {/* Top Header */}
-      <div className={styles.topHeader}>
-        <div className={styles.headerLeft}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
-            <IoChevronBack />
-          </button>
-          <h2 className={styles.headerTitle}>Profile</h2>
-        </div>
-        <div className={styles.headerActions}>
-          <button
-            className={`${styles.followBtn} ${isFollowing ? styles.following : ""}`}
-            onClick={handleFollow}
-            disabled={followLoading || unfollowLoading}
-          >
-            {followLoading || unfollowLoading
-              ? "..."
-              : isFollowing
-                ? "Following"
-                : "Follow"}
-          </button>
-          <button className={styles.shareBtn} onClick={handleShare}>
-            <img src={ShareIcon} alt="Share" className={styles.shareIcon} />
-          </button>
-        </div>
-      </div>
-
-      {/* Profile Card */}
-      <div className={styles.profileCard}>
-        <div className={styles.profileImageWrapper}>
-          <img
-            src={displayData.imageUrl || AstrologerPlaceholder}
-            alt={displayData.firstName}
-            className={styles.profileImage}
-          />
-        </div>
-        <div className={styles.profileInfo}>
-          <h1 className={styles.astrologerName}>
-            {displayData.firstName} {displayData.lastName}
-          </h1>
-          <p className={styles.skills}>
-            {displayData.specialities.join(" • ")}
-          </p>
-          <p className={styles.expertise}>
-            {displayData.expertise.join(" • ")}
-          </p>
-          <div className={styles.languages}>
-            {displayData.languagePreference.map((lang, i) => (
-              <span key={i} className={styles.languageTag}>
-                {lang}
-              </span>
-            ))}
+      <header className={styles.topHeaderWrap}>
+        <div className={styles.topHeader}>
+          <div className={styles.headerLeft}>
+            <button className={styles.backBtn} onClick={() => navigate(-1)}>
+              <IoChevronBack />
+            </button>
+            <h2 className={styles.headerTitle}>Profile</h2>
+          </div>
+          <div className={styles.headerActions}>
+            <button
+              className={`${styles.followBtn} ${isFollowing ? styles.following : ""}`}
+              onClick={handleFollow}
+              disabled={followLoading || unfollowLoading}
+            >
+              {followLoading || unfollowLoading
+                ? "..."
+                : isFollowing
+                  ? "Following"
+                  : "Follow"}
+            </button>
+            <button className={styles.shareBtn} onClick={handleShare}>
+              <img src={ShareIcon} alt="Share" className={styles.shareIcon} />
+            </button>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Stats Section */}
-      <div className={styles.statsSection}>
-        <div className={styles.statItem}>
-          <img
-            src={ExperienceIcon}
-            alt="Experience"
-            className={styles.statIcon}
-          />
-          <div className={styles.statValue}>{displayData.experience}+</div>
-          <div className={styles.statLabel}>Experience</div>
-        </div>
-        <div className={styles.statDivider}></div>
-        <div className={styles.statItem}>
-          <img
-            src={ConsultationsIcon}
-            alt="Consultations"
-            className={styles.statIcon}
-          />
-          <div className={styles.statValue}>
-            {displayData.totalConsultations}
-          </div>
-          <div className={styles.statLabel}>Consultations</div>
-        </div>
-        <div className={styles.statDivider}></div>
-        <div className={styles.statItem}>
-          <img src={RatingIcon} alt="Rating" className={styles.statIcon} />
-          <div className={styles.statValue}>{displayData.rating}</div>
-          <div className={styles.statLabel}>Rating</div>
-        </div>
-      </div>
-
-      {/* Consultation Hours */}
-      <div className={styles.consultationHours}>
-        <div className={styles.hoursHeader}>
-          <img src={TimeIcon} alt="Time" className={styles.clockIcon} />
-          <span className={styles.hoursTitle}>Consultation Hours</span>
-        </div>
-        <div className={styles.hoursContent}>
-          <div className={styles.timeSlots}>
-            {displayData.availability.map((slot, index) => (
-              <div key={index} className={styles.timeSlot}>
-                {slot.time}
-              </div>
-            ))}
-          </div>
-          <button className={styles.reminderBtn} onClick={handleSetReminder}>
+      <div className={styles.profileContentMain}>
+        {/* Profile Card */}
+        <div className={styles.profileCard}>
+          <div className={styles.profileImageWrapper}>
             <img
-              src={NotificationIcon}
-              alt="Notification"
-              className={styles.notificationIcon}
+              src={displayData.imageUrl || AstrologerPlaceholder}
+              alt={displayData.firstName}
+              className={styles.profileImage}
             />
-            Set Reminder
-          </button>
+          </div>
+          <div className={styles.profileInfo}>
+            <h1 className={styles.astrologerName}>
+              {displayData.firstName} {displayData.lastName}
+            </h1>
+            <p className={styles.skills}>
+              {displayData.specialities.join(" • ")}
+            </p>
+            <p className={styles.expertise}>
+              {displayData.expertise.join(" • ")}
+            </p>
+            <div className={styles.languages}>
+              {displayData.languagePreference.map((lang, i) => (
+                <span key={i} className={styles.languageTag}>
+                  {lang}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Minutes Section */}
-      <div className={styles.minutesSection}>
-        <div className={styles.minuteItem}>
-          <img src={ChatMinutesIcon} alt="Chat" className={styles.minuteIcon} />
-          <div className={styles.minuteValue}>{displayData.metrics.chatMinutes}</div>
-          <div className={styles.minuteLabel}>Chat Minutes</div>
+        {/* Stats Section */}
+        <div className={styles.statsSection}>
+          <div className={styles.statItem}>
+            <img
+              src={ExperienceIcon}
+              alt="Experience"
+              className={styles.statIcon}
+            />
+            <div className={styles.statValue}>{displayData.experience}+</div>
+            <div className={styles.statLabel}>Experience</div>
+          </div>
+          <div className={styles.statDivider}></div>
+          <div className={styles.statItem}>
+            <img
+              src={ConsultationsIcon}
+              alt="Consultations"
+              className={styles.statIcon}
+            />
+            <div className={styles.statValue}>
+              {displayData.totalConsultations}
+            </div>
+            <div className={styles.statLabel}>Consultations</div>
+          </div>
+          <div className={styles.statDivider}></div>
+          <div className={styles.statItem}>
+            <img src={RatingIcon} alt="Rating" className={styles.statIcon} />
+            <div className={styles.statValue}>{displayData.rating}</div>
+            <div className={styles.statLabel}>Rating</div>
+          </div>
         </div>
-        <div className={styles.minuteDivider}></div>
-        <div className={styles.minuteItem}>
-          <img src={CallMinutesIcon} alt="Call" className={styles.minuteIcon} />
-          <div className={styles.minuteValue}>{displayData.metrics.audioMinutes}</div>
-          <div className={styles.minuteLabel}>Call Minutes</div>
-        </div>
-        <div className={styles.minuteDivider}></div>
-        <div className={styles.minuteItem}>
-          <img
-            src={VideoMinutesIcon}
-            alt="Video"
-            className={styles.minuteIcon}
-          />
-          <div className={styles.minuteValue}>{displayData.metrics.videoMinutes}</div>
-          <div className={styles.minuteLabel}>Video Minutes</div>
-        </div>
-      </div>
 
-      {/* About Section */}
-      <div className={styles.aboutSection}>
-        <h3 className={styles.aboutTitle}>About</h3>
-        <p
-          className={`${styles.aboutText} ${showFullAbout ? styles.expanded : ""}`}
-        >
-          {displayData.description}
-        </p>
-        {displayData.description.length > 150 && (
-          <button
-            className={styles.readMoreBtn}
-            onClick={() => setShowFullAbout(!showFullAbout)}
-          >
-            {showFullAbout ? "Read Less" : "Read More"}
-          </button>
-        )}
-
-        {/* Video Gallery */}
-        {displayData.gallery.length > 0 && (
-          <div className={styles.videoGallery}>
-            {displayData.gallery.slice(0, 3).map((video, index) => (
-              <div key={index} className={styles.videoThumbnail}>
-                <img src={video} alt={`Video ${index + 1}`} />
-                <div className={styles.playButton}>
-                  <FaPlay />
+        {/* Consultation Hours */}
+        <div className={styles.consultationHours}>
+          <div className={styles.hoursHeader}>
+            <img src={TimeIcon} alt="Time" className={styles.clockIcon} />
+            <span className={styles.hoursTitle}>Consultation Hours</span>
+          </div>
+          <div className={styles.hoursContent}>
+            <div className={styles.timeSlots}>
+              {displayData.availability.map((slot, index) => (
+                <div key={index} className={styles.timeSlot}>
+                  {slot.time}
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <button className={styles.reminderBtn} onClick={handleSetReminder}>
+              <img
+                src={NotificationIcon}
+                alt="Notification"
+                className={styles.notificationIcon}
+              />
+              Set Reminder
+            </button>
           </div>
-        )}
-      </div>
+        </div>
 
-      {/* Send a Gift Section */}
-      <div className={styles.giftSection}>
-        <div className={styles.giftContent}>
-          <h3 className={styles.giftTitle}>Send a Gift</h3>
-          <p className={styles.giftSubtitle}>
-            Show your appreciation to your favorite astrologer.
-          </p>
-          <button
-            className={styles.sendNowBtn}
-            onClick={() => setIsGiftModalOpen(true)}
+        {/* Minutes Section */}
+        <div className={styles.minutesSection}>
+          <div className={styles.minuteItem}>
+            <img src={ChatMinutesIcon} alt="Chat" className={styles.minuteIcon} />
+            <div className={styles.minuteValue}>{displayData.metrics.chatMinutes}</div>
+            <div className={styles.minuteLabel}>Chat Minutes</div>
+          </div>
+          <div className={styles.minuteDivider}></div>
+          <div className={styles.minuteItem}>
+            <img src={CallMinutesIcon} alt="Call" className={styles.minuteIcon} />
+            <div className={styles.minuteValue}>{displayData.metrics.audioMinutes}</div>
+            <div className={styles.minuteLabel}>Call Minutes</div>
+          </div>
+          <div className={styles.minuteDivider}></div>
+          <div className={styles.minuteItem}>
+            <img
+              src={VideoMinutesIcon}
+              alt="Video"
+              className={styles.minuteIcon}
+            />
+            <div className={styles.minuteValue}>{displayData.metrics.videoMinutes}</div>
+            <div className={styles.minuteLabel}>Video Minutes</div>
+          </div>
+        </div>
+
+        {/* About Section */}
+        <div className={styles.aboutSection}>
+          <h3 className={styles.aboutTitle}>About</h3>
+          <p
+            className={`${styles.aboutText} ${showFullAbout ? styles.expanded : ""}`}
           >
-            Send Now
-          </button>
-        </div>
-        <div className={styles.giftImage}>
-          <img src={SendGiftImage} alt="Send Gift" />
-        </div>
-      </div>
-
-      {/* User Reviews */}
-      <div className={styles.reviewsSection}>
-        <div className={styles.devider}>
-          <h3 className={styles.sectionTitle}>USER REVIEWS</h3>
-          <div className={styles.titleDivider}>
-            <div className={styles.dividerLine}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
-                <path d="M92.803 0.406393C92.803 0.630933 90.7481 0.812789 88.2131 0.812789C85.6781 0.812789 0 0.630933 0 0.406393C0 0.181853 85.6786 0 88.2131 0C90.7481 0 92.803 0.181853 92.803 0.406393Z" fill="#0002"/>
-              </svg>
-            </div>
-            <span className={styles.dividerMoon}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="4" height="5" viewBox="0 0 4 5" fill="none">
-                <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#0002"/>
-              </svg>
-            </span>
-            <div className={styles.dividerLine}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
-                <path d="M-4.06066e-06 0.406393C-4.06066e-06 0.630933 2.05498 0.812789 4.58996 0.812789C7.12494 0.812789 92.803 0.630933 92.803 0.406393C92.803 0.181853 7.12439 0 4.58996 0C2.05498 0 -4.06066e-06 0.181853 -4.06066e-06 0.406393Z" fill="#0002"/>
-              </svg>     
-            </div>
-          </div>
-        </div>
-        <div className={styles.reviewsSummary}>
-          <StarRating rating={averageRating} />
-          <p className={styles.reviewsCount}>
-            {averageRating.toFixed(1)} out of 5 • {totalReviews} total ratings
+            {displayData.description}
           </p>
-        </div>
+          {displayData.description.length > 150 && (
+            <button
+              className={styles.readMoreBtn}
+              onClick={() => setShowFullAbout(!showFullAbout)}
+            >
+              {showFullAbout ? "Read Less" : "Read More"}
+            </button>
+          )}
 
-        {reviewsLoading ? (
-          <div className={styles.reviewsLoading}>Loading reviews...</div>
-        ) : reviews.length > 0 ? (
-          <div className={styles.reviewsList}>
-            {reviews.slice(0, 4).map((review) => (
-              <div key={review._id} className={styles.reviewCard}>
-                <div className={styles.reviewHeader}>
-                  <span className={styles.reviewDate}>
-                    <IoCalendarOutline className={styles.calendarIcon} />
-                    {new Date(review.createdAt).toLocaleDateString("en-GB")}
-                  </span>
-                  <div className={styles.reviewRating}>
-                    <FaStar className={styles.reviewStar} />
-                    <span>{review.rating}</span>
+          {/* Video Gallery */}
+          {displayData.gallery.length > 0 && (
+            <div className={styles.videoGallery}>
+              {displayData.gallery.slice(0, 3).map((video, index) => (
+                <div key={index} className={styles.videoThumbnail}>
+                  <img src={video} alt={`Video ${index + 1}`} />
+                  <div className={styles.playButton}>
+                    <FaPlay />
                   </div>
                 </div>
-                <h4 className={styles.reviewerName}>{review.customerName}</h4>
-                {review.review && (
-                  <p className={styles.reviewText}>{review.review}</p>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Send a Gift Section */}
+        <div className={styles.giftSection}>
+          <div className={styles.giftContent}>
+            <h3 className={styles.giftTitle}>Send a Gift</h3>
+            <p className={styles.giftSubtitle}>
+              Show your appreciation to your favorite astrologer.
+            </p>
+            <button
+              className={styles.sendNowBtn}
+              onClick={() => setIsGiftModalOpen(true)}
+            >
+              Send Now
+            </button>
+          </div>
+          <div className={styles.giftImage}>
+            <img src={SendGiftImage} alt="Send Gift" />
+          </div>
+        </div>
+
+        {/* User Reviews */}
+        <div className={styles.reviewsSection}>
+          <div className={styles.devider}>
+            <h3 className={styles.sectionTitle}>USER REVIEWS</h3>
+            <div className={styles.titleDivider}>
+              <div className={styles.dividerLine}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
+                  <path d="M92.803 0.406393C92.803 0.630933 90.7481 0.812789 88.2131 0.812789C85.6781 0.812789 0 0.630933 0 0.406393C0 0.181853 85.6786 0 88.2131 0C90.7481 0 92.803 0.181853 92.803 0.406393Z" fill="#0002"/>
+                </svg>
+              </div>
+              <span className={styles.dividerMoon}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="4" height="5" viewBox="0 0 4 5" fill="none">
+                  <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#0002"/>
+                </svg>
+              </span>
+              <div className={styles.dividerLine}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
+                  <path d="M-4.06066e-06 0.406393C-4.06066e-06 0.630933 2.05498 0.812789 4.58996 0.812789C7.12494 0.812789 92.803 0.630933 92.803 0.406393C92.803 0.181853 7.12439 0 4.58996 0C2.05498 0 -4.06066e-06 0.181853 -4.06066e-06 0.406393Z" fill="#0002"/>
+                </svg>     
+              </div>
+            </div>
+          </div>
+          <div className={styles.reviewsSummary}>
+            <StarRating rating={averageRating} />
+            <p className={styles.reviewsCount}>
+              {averageRating.toFixed(1)} out of 5 • {totalReviews} total ratings
+            </p>
+          </div>
+
+          {reviewsLoading ? (
+            <div className={styles.reviewsLoading}>Loading reviews...</div>
+          ) : reviews.length > 0 ? (
+            <div className={styles.reviewsList}>
+              {reviews.slice(0, 4).map((review) => (
+                <div key={review._id} className={styles.reviewCard}>
+                  <div className={styles.reviewHeader}>
+                    <span className={styles.reviewDate}>
+                      <IoCalendarOutline className={styles.calendarIcon} />
+                      {new Date(review.createdAt).toLocaleDateString("en-GB")}
+                    </span>
+                    <div className={styles.reviewRating}>
+                      <FaStar className={styles.reviewStar} />
+                      <span>{review.rating}</span>
+                    </div>
+                  </div>
+                  <h4 className={styles.reviewerName}>{review.customerName}</h4>
+                  {review.review && (
+                    <p className={styles.reviewText}>{review.review}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className={styles.noReviews}>
+              No reviews yet. Be the first to review!
+            </div>
+          )}
+
+          <button
+            className={styles.shareReviewBtn}
+            onClick={handleOpenReviewModal}
+          >
+            Share a Review
+          </button>
+        </div>
+
+        {/* Astrologer Shop */}
+        <div className={styles.shopSection}>
+          <div className={styles.shopHeader}>
+            <h3 className={styles.sectionTitle}>Check out Astrologers Shop</h3>
+            <FaChevronRight className={styles.chevronIcon} />
+          </div>
+          <div className={styles.productGrid}>
+            {displayData.products.slice(0, 3).map((product, index) => (
+              <div key={index} className={styles.productCard}>
+                {product.isPopular && (
+                  <div className={styles.productBadge}>
+                    <FaStar className={styles.badgeStar} />
+                    Most Popular
+                  </div>
                 )}
+                <div className={styles.productImage}>
+                  {product.image ? (
+                    <img src={product.image} alt={product.name} />
+                  ) : (
+                    <img src={AstrologerShopImage} alt={product.name} />
+                  )}
+                </div>
+                <div className={styles.productInfo}>
+                  <h4 className={styles.productName}>{product.name}</h4>
+                  <p className={styles.productDesc}>{product.description}</p>
+                  <div className={styles.productPrice}>
+                    <span className={styles.currentPrice}>₹{product.price}</span>
+                    {product.originalPrice && (
+                      <span className={styles.originalPrice}>
+                        ₹{product.originalPrice}
+                      </span>
+                    )}
+                  </div>
+                  <button className={styles.addToCartBtn}>+ Add to cart</button>
+                </div>
               </div>
             ))}
           </div>
-        ) : (
-          <div className={styles.noReviews}>
-            No reviews yet. Be the first to review!
-          </div>
-        )}
-
-        <button
-          className={styles.shareReviewBtn}
-          onClick={handleOpenReviewModal}
-        >
-          Share a Review
-        </button>
-      </div>
-
-      {/* Astrologer Shop */}
-      <div className={styles.shopSection}>
-        <div className={styles.shopHeader}>
-          <h3 className={styles.sectionTitle}>Check out Astrologers Shop</h3>
-          <FaChevronRight className={styles.chevronIcon} />
-        </div>
-        <div className={styles.productGrid}>
-          {displayData.products.slice(0, 3).map((product, index) => (
-            <div key={index} className={styles.productCard}>
-              {product.isPopular && (
-                <div className={styles.productBadge}>
-                  <FaStar className={styles.badgeStar} />
-                  Most Popular
-                </div>
-              )}
-              <div className={styles.productImage}>
-                {product.image ? (
-                  <img src={product.image} alt={product.name} />
-                ) : (
-                  <img src={AstrologerShopImage} alt={product.name} />
-                )}
-              </div>
-              <div className={styles.productInfo}>
-                <h4 className={styles.productName}>{product.name}</h4>
-                <p className={styles.productDesc}>{product.description}</p>
-                <div className={styles.productPrice}>
-                  <span className={styles.currentPrice}>₹{product.price}</span>
-                  {product.originalPrice && (
-                    <span className={styles.originalPrice}>
-                      ₹{product.originalPrice}
-                    </span>
-                  )}
-                </div>
-                <button className={styles.addToCartBtn}>+ Add to cart</button>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
 
