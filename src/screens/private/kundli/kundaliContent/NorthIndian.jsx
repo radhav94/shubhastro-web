@@ -132,11 +132,7 @@ const NorthIndian = () => {
             />
           )}
 
-          {/* Vimshottari Dasha Section */}
-          <AdditionalPlanetaryInfo 
-            title="Vimshottari Dasha"
-            isLoading={false}
-          />
+
         </div>
       )}
     </div>
