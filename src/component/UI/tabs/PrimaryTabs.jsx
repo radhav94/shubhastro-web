@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useParams, useSearchParams } from "react-router-dom";
 import styles from "./PrimaryTabs.module.scss";
@@ -11,9 +11,9 @@ const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0 }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(initialActiveIndex);
 
   // Sync activeTabIndex with initialActiveIndex when it changes
-  useEffect(() => {
-    setActiveTabIndex(initialActiveIndex);
-  }, [initialActiveIndex]);
+  // useEffect(() => {
+  //   setActiveTabIndex(initialActiveIndex);
+  // }, [initialActiveIndex]);
 
   if (tabs.length === 0) {
     return <div>No tabs to display.</div>;

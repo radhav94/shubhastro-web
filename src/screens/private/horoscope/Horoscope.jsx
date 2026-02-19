@@ -102,6 +102,7 @@ const HoroscopeNew = () => {
   const [activeTab, setActiveTab] = useState(getInitialTab());
   const [activeCategory, setActiveCategory] = useState('');
   const [showZodiacModal, setShowZodiacModal] = useState(false);
+  const [expandedIndex, setExpandedIndex] = useState(null);
 
   const tabs = ['Today', /* 'Daily', */ 'This Week', 'This Year'];
   
@@ -329,11 +330,11 @@ const HoroscopeNew = () => {
     // Navigate to corresponding route
     // Both "Today" and "Daily" go to daily-horoscope
     if (tab === 'Today' || tab === 'Daily') {
-      navigate('/horoscopes/daily-horoscope');
+      navigate(`/horoscopes/daily-horoscope/${selectedZodiac}`);
     } else if (tab === 'This Week') {
-      navigate('/horoscopes/weekly-horoscope');
+      navigate(`/horoscopes/weekly-horoscope/${selectedZodiac}`);
     } else if (tab === 'This Year') {
-      navigate('/horoscopes/yearly-horoscope');
+      navigate(`/horoscopes/yearly-horoscope/${selectedZodiac}`);
     }
   };
 
@@ -359,6 +360,10 @@ const HoroscopeNew = () => {
   // Get zodiac image from appSvgs
   const capitalizedSign = selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1);
   const zodiacImage = appSvgs[capitalizedSign];
+
+  const toggleSection = (index) => {
+    setExpandedIndex(expandedIndex === index ? null : index);
+  };
 
   return (
     <div className="horoscope-page">
@@ -490,19 +495,33 @@ const HoroscopeNew = () => {
                 )}
                 
                 {currentContent.overviewSections.map((section, index) => (
-                  <div key={index} className="overview-section">
-                    <h3 className="overview-section-title">
-                      {section.title}
-                      {section.score && (
-                        <span style={{ fontSize: '14px', color: 'orange', marginLeft: '8px' }}>
-                          ({section.score}/100)
-                        </span>
-                      )}
-                    </h3>
-                    <div className="overview-section-content">
-                      {section.content.split('\n\n').map((paragraph, pIndex) => (
-                        <p key={pIndex}>{paragraph}</p>
-                      ))}
+                  <div key={index} className="overview-section-accordion">
+                    <div 
+                      className="overview-section-header"
+                      onClick={() => toggleSection(index)}
+                    >
+                      <div className="overview-header-content">
+                        <h3 className="overview-section-title">
+                          {section.title}
+                        </h3>
+                        {section.score && (
+                          <span className="overview-score">
+                            ({section.score}/100)
+                          </span>
+                        )}
+                      </div>
+                      <div className={`overview-arrow ${expandedIndex === index ? 'overview-arrow-expanded' : ''}`}>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                          <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div className={`overview-section-content ${expandedIndex === index ? 'overview-content-expanded' : ''}`}>
+                      <div className="overview-content-inner">
+                        {section.content.split('\n\n').map((paragraph, pIndex) => (
+                          <p key={pIndex}>{paragraph}</p>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))}

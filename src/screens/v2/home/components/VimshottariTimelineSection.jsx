@@ -169,12 +169,11 @@ const VimshottariTimelineSection = () => {
     }
   };
 
-  // Navigate to Kundali page with first profile and activate Kundali tab
+  // Navigate to Kundali page with first profile and activate Dasha tab
   const handleSeeFullDasha = () => {
     if (defaultProfile && defaultProfile._id) {
-      // Navigate to /kundli/:kundliId?tab=kundli to open Kundali tab (index 1)
-      // This will show the Vimshottari Dasha section
-      navigate(`/kundli/${defaultProfile._id}?tab=kundli`);
+      // Navigate to /kundli/:kundliId?tab=dasha to open Dasha tab (index 5)
+      navigate(`/kundli/${defaultProfile._id}?tab=dasha`);
     } else {
       // If no profile, navigate to kundli page to create one
       navigate('/kundli');
