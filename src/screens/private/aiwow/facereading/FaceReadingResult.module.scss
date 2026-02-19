@@ -191,6 +191,92 @@
   margin: 0;
 }
 
+// Guidance Grid - Responsive Layout
+.guidanceGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.guidanceCard {
+  background: #f3f4f6;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+
+  @media (min-width: 768px) {
+    border: none;
+  }
+}
+
+.guidanceHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+
+  @media (min-width: 768px) {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .cardTitle {
+    margin: 0;
+  }
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.auraHeaderContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.guidanceArrow {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  transition: transform 0.2s;
+
+  @media (min-width: 768px) {
+    display: none;
+  }
+}
+
+.guidanceContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  padding: 0 1.25rem;
+
+  @media (min-width: 768px) {
+    max-height: none;
+    overflow: visible;
+    padding: 0 1.25rem 1.25rem;
+  }
+
+
+
+  &.expanded {
+    max-height: 1000px;
+    padding: 0 1.25rem 1.25rem;
+  }
+}
+
 .list {
   list-style: none;
   padding: 0;
@@ -262,7 +348,7 @@
 }
 
 .percentage {
-  font-size: 2.5rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #6b7280;
   line-height: 1;
