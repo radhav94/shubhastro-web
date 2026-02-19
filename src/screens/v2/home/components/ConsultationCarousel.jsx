@@ -73,7 +73,7 @@ const ConsultationCarousel = ({ data = [], title }) => {
         <section className={styles.carouselSection}>
             <div className={styles.carouselContainer} ref={carouselRef}>
                 {carouselSlides.map((slide, index) => (
-                    <div
+                    <div onClick={handleConsultNow}
                         key={slide.id + "-" + index}
                         className={`${styles.carouselSlide} ${activeSlide === index ? styles.activeSlide : ""}`}
                     >
@@ -82,7 +82,6 @@ const ConsultationCarousel = ({ data = [], title }) => {
                             <p className={styles.slideSubtitle}>{slide.subtitle}</p>
                             <button
                                 className={`${styles.slideButton} ${loadingConsult ? styles.loading : ""}`}
-                                onClick={handleConsultNow}
                                 disabled={loadingConsult}
                             >
                                 {slide.buttonText} <ChevronRight size={16} />

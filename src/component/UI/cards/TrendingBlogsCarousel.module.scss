@@ -142,6 +142,13 @@
 }
 
 .overlay {
+  pointer-events: none;
+}
+
+.dotsContainer button,.btnShare {
+  pointer-events: auto;
+}
+.overlay {
   position: absolute;
   bottom: 0;
   left: 0;

@@ -1,7 +1,13 @@
 @use "../../../assets/variables/variables" as *;
 
+.profileContentMain{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
 .profilePage {
-  min-height: 100vh;
+  // min-height: 100vh;
   // background: linear-gradient(to bottom, #fff4ec 0%, #F9F4EF 20%, #F9F4EF 100%);
   font-family: "Poppins", sans-serif;
   // padding-bottom: 80px;
@@ -10,16 +16,20 @@
 /* ===========================
    TOP HEADER
 =========================== */
+.topHeaderWrap{
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
 .topHeader {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
-  background: #fff4ec;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  border-bottom: none;
+  padding: 16px;
+  @media (width <= 767px) {
+      padding: 6px 16px;
+  }
 }
 
 .headerLeft {
@@ -30,8 +40,8 @@
 }
 
 .backBtn {
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 1.5px solid #F75801;
   background: transparent;
@@ -79,19 +89,20 @@
 }
 
 .followBtn {
-  padding: 14px 40px;
+  height: 40px;
+  padding: 0px 16px;
   border-radius: 32px;
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: #FFFFFF;
   border: none;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
   font-family: "Poppins", sans-serif;
   @media (width <= 767px) {
-    padding: 10px 20px;
+    padding: 6px 20px;
     font-size: 12px;
   }
 
@@ -117,10 +128,10 @@
 }
 
 .shareBtn {
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: #FFFFFF;
+  background: #fffaf2;
   border: none;
   display: flex;
   align-items: center;
@@ -130,16 +141,20 @@
   font-size: 22px;
   transition: all 0.2s;
   flex-shrink: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f75801;
   @media (width <= 767px) {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
   }
 
   .shareIcon {
     width: 22px;
     height: 22px;
     object-fit: contain;
+    @media (width <= 767px) {
+      width: 18px;
+      height: 18px;
+    }
   }
 
   &:hover {
@@ -155,25 +170,19 @@
 /* ===========================
    PROFILE CARD
 =========================== */
-.profileCard {
+.profileCard,.statsSection,.consultationHours,.minutesSection,.aboutSection,.giftSection {
   background: #FFFFFF;
   border-radius: 20px;
   // border: 1px solid rgba(0, 0, 0, 0.03);
-  padding: 25px 12px;
-  margin: 16px 16px 32px;
+  padding: 16px;
+  margin: 16px 0px 16px;
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  // box-shadow: 0px 4.04px 49.48px 0px rgba(0, 0, 0, 0.06);
-  width: calc(100% - 32px);
+  width: 100%;
   min-height: 120px;
-  @media (width <= 768px) {
-    margin: 12px 16px;
-    padding: 12px 24px;
-  }
   @media (width <= 767px) {
     border-radius: 12px;
-    padding: 12px 12px;
   }
 }
 
@@ -185,7 +194,7 @@
 .profileImage {
   width: 140px;
   height: 140px;
-  border-radius: 20px;
+  border-radius: 12px;
   object-fit: cover;
   border: none;
   display: block;
@@ -252,23 +261,23 @@
 /* ===========================
    STATS SECTION
 =========================== */
-.statsSection {
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.02);
-  padding: 32px 16px;
-  margin: 0 16px 32px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  box-shadow: none;
-  width: calc(100% - 32px);
-  min-height: 80px;
-  @media (width <= 767px) {
-    padding: 12px 16px;
-    margin: 0 16px 10px;
-  }
-}
+// .statsSection {
+//   background: #fff;
+//   border-radius: 16px;
+//   border: 1px solid rgba(0, 0, 0, 0.02);
+//   padding: 32px 16px;
+//   margin: 0 16px 32px;
+//   display: flex;
+//   justify-content: space-around;
+//   align-items: center;
+//   box-shadow: none;
+//   width: calc(100% - 32px);
+//   min-height: 80px;
+//   @media (width <= 767px) {
+//     padding: 12px 16px;
+//     margin: 0 16px 10px;
+//   }
+// }
 
 .statItem {
   display: flex;
@@ -328,21 +337,14 @@
 =========================== */
 .consultationHours {
   background: #FFF5EC;
-  border-radius: 20px;
-  padding: 24px 20px;
-  margin: 0 16px 32px;
-  box-shadow: none;
-  @media (width <= 767px) {
-    border-radius:12px;
-    padding: 16px 20px;
-  }
+  flex-direction: column;
 }
 
 .hoursHeader {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 0px;
 }
 
 .clockIcon {
@@ -366,6 +368,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 16px;
+  width: 100%;
 }
 
 .timeSlots {
@@ -417,17 +420,10 @@
    MINUTES SECTION
 =========================== */
 .minutesSection {
-  background: #fff;
-  border-radius: 20px;
-  padding: 32px 16px;
-  margin: 0 16px 32px;
   display: flex;
   justify-content: space-around;
   align-items: center;
   box-shadow: none;
-  @media (width <= 767px) {
-    padding: 16px 16px;
-  }
 }
 
 .minuteItem {
@@ -486,21 +482,15 @@
    ABOUT SECTION
 =========================== */
 .aboutSection {
-  background: transparent;
-  border-radius: 0;
-  padding: 0 20px;
-  margin: 0 16px 32px;
-  box-shadow: none;
-  @media (width <= 767px) {
-    padding: 0;
-  }
+  flex-direction: column;
+  gap: 0;
 }
 
 .aboutTitle {
   font-size: 24px;
   font-weight: 600;
   color: #101010;
-  margin: 0 0 6px 0;
+  margin: 0 0 0 0;
   letter-spacing: -0.3px;
   text-align: left;
   @media (width <= 767px) {
@@ -548,10 +538,12 @@
 .videoGallery {
   display: flex;
   gap: 16px;
-  margin-top: 24px;
+  margin-top: 16px;
   overflow-x: auto;
   scrollbar-width: none;
   padding-bottom: 4px;
+  overflow: auto;
+  width: 100%;
 
   &::-webkit-scrollbar {
     display: none;
@@ -610,8 +602,6 @@
 .giftSection {
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   border-radius: 24px;
-  padding: 12px 24px;
-  margin: 0 16px 48px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -623,15 +613,9 @@
   min-height: 180px;
   overflow: hidden;
   @media (width <= 768px) {
-    margin: 0 16px 12px;
     flex-direction: row;
     text-align: left;
-    padding: 16px 24px;
     border-radius: 12px;
-  }
-  @media (width <= 767px) {
-    border-radius: 12px;
-    padding: 16px;
   }
 }
 
@@ -735,11 +719,11 @@
   background: transparent;
   border-radius: 0;
   padding: 0 20px;
-  margin: 0 16px 32px 16px;
+  margin: 32px 16px 32px 16px;
   box-shadow: none;
   @media (width <= 767px) {
     padding: 0px;
-    margin: 32px 16px 32px 16px;
+    margin: 32px 0px 32px 0px;
   }
 }
 
@@ -820,7 +804,7 @@
   border-radius: 20px;
   padding: 20px;
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .reviewHeader {
@@ -912,6 +896,7 @@
   box-shadow: none;
   @media (width <= 767px) {
     padding: 0px;
+    margin: 0;
   }
 }
 
@@ -1063,10 +1048,10 @@
    BOTTOM BAR
 =========================== */
 .bottomBar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  // position: fixed;
+  // bottom: 0;
+  // left: 0;
+  // right: 0;
   width: 100%;
   background: #fff;
   display: flex;
@@ -1182,15 +1167,15 @@
     padding-bottom: 20px;
   }
 
-  .topHeader {
-    padding: 12px 16px;
-  }
+  // .topHeader {
+  //   padding: 12px 16px;
+  // }
 
-  .consultationHours,
-  .minutesSection,
-  .aboutSection,
-  .shopSection {
-    margin: 0 16px 12px;
-    border-radius: 12px;
-  }
+  // .consultationHours,
+  // .minutesSection,
+  // .aboutSection,
+  // .shopSection {
+  //   margin: 0 16px 12px;
+  //   border-radius: 12px;
+  // }
 }
