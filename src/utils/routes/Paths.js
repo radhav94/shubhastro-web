@@ -283,28 +283,20 @@ export const PATH = {
         path: "/horoscopes/:slug",
         element: SignScreen,
       },
-      DAILY_DETAIL: {
-        path: "/horoscopes/daily-horoscope/:sign",
-        element: Daily,
-      },
       DAILY_NEW: {
-        path: "/horoscopes/daily-horoscope",
+        path: ["/horoscopes/daily-horoscope/:sign", "/horoscopes/daily-horoscope"],
         element: HoroscopeNew,
-      },
-      WEEKLY_DETAIL: {
-        path: "/horoscopes/weekly-horoscope/:sign",
-        element: Weekly,
       },
       WEEKLY_NEW: {
-        path: "/horoscopes/weekly-horoscope",
+        path: ["/horoscopes/weekly-horoscope/:sign", "/horoscopes/weekly-horoscope"],
         element: HoroscopeNew,
       },
-      YEARLY_DETAIL: {
-        path: "/horoscopes/yearly-horoscope/:sign",
-        element: Yearly,
-      },
       YEARLY_NEW: {
-        path: "/horoscopes/yearly-horoscope",
+        path: ["/horoscopes/yearly-horoscope/:sign", "/horoscopes/yearly-horoscope"],
+        element: HoroscopeNew,
+      },
+      TODAY_NEW: {
+        path: ["/horoscopes/todays-horoscope/:sign", "/horoscopes/todays-horoscope"],
         element: HoroscopeNew,
       },
       MONTHLY: {
@@ -322,14 +314,6 @@ export const PATH = {
       TOMORROW: {
         path: "/horoscopes/tomorrow-horoscope/:sign",
         element: Tomorrow,
-      },
-      TODAY: {
-        path: "/horoscopes/todays-horoscope/:sign",
-        element: Daily,
-      },
-      TODAY_NEW: {
-        path: "/horoscopes/todays-horoscope",
-        element: HoroscopeNew,
       },
     },
     HOROSCOPEDETAILS: {
