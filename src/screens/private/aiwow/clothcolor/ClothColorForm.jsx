@@ -18,7 +18,7 @@ const ClothColorForm = () => {
   useEffect(() => {
     if (!selectedProfile) {
       Toast.error('Please select a Kundli profile first from AI WOW main page');
-      navigate(PATH.privateRoutes.AIWOW.path);
+      navigate(PATH.privateRoutes.AI_WOW.path);
     }
   }, [selectedProfile, navigate]);
 
