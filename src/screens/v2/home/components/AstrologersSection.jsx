@@ -1,5 +1,5 @@
 import SectionHeader from "./SectionHeader";
-import AstrologerCard from "./AstrologerCard";
+import NewAstrologerCard from "../../../../component/UI/cards/newAstrologerCard/NewAstrologerCard";
 import styles from "../Home.module.scss";
 
 const AstrologersSection = ({ title, astrologers, onConnect }) => {
@@ -10,7 +10,7 @@ const AstrologersSection = ({ title, astrologers, onConnect }) => {
             <SectionHeader title={title} />
             <div className={styles.astrologersGrid}>
                 {astrologers.map((astrologer) => (
-                    <AstrologerCard
+                    <NewAstrologerCard
                         key={astrologer._id}
                         astrologer={astrologer}
                         onConnect={onConnect}

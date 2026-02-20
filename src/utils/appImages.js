@@ -164,6 +164,7 @@ import Sagittarius from "../assets/svg/sagittarius.svg";
 import Capricorn from "../assets/svg/capricorn.svg";
 import Aquarius from "../assets/svg/aquarius.svg";
 import Pisces from "../assets/svg/pisces.svg";
+import Experience from "../assets/icons/experience.svg"
 
 export const appSvgs = {
   Aries,
@@ -178,6 +179,7 @@ export const appSvgs = {
   Capricorn,
   Aquarius,
   Pisces,
+  Experience
 };
 
 // AI WOW Icons
