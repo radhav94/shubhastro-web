@@ -950,14 +950,14 @@ const AstrologerProfile = () => {
       </div>
 
       {/* Bottom Connect Button */}
-      <div className={styles.bottomBar}>
+      {/* <div className={styles.bottomBar}>
         <button
           className={styles.connectNowBtn}
           onClick={handleConnectClick}
         >
           Connect Now
         </button>
-      </div>
+      </div> */}
 
       {/* Modals */}
       <ConnectAstrologerPopup
