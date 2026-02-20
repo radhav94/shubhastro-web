@@ -6,22 +6,12 @@ import Table from "../../../../../component/UI/table/kundli/free-report/Table";
 import styles from "./SadeSati.module.scss";
 import { GiStonePath, GiMeditation } from "react-icons/gi";
 import { MdOutlineTipsAndUpdates } from "react-icons/md";
+import { buildVedicParam } from "../../../../../utils/VedicParams.js/vedicParams";
 
 const SadeSati = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
 
-  const queryArgs = formData
-    ? {
-      dob: `${formData.day}/${String(formData.month).padStart(2, "0")}/${formData.year}`,
-      tob: `${String(formData.hour).padStart(2, "0")}:${String(
-        formData.min
-      ).padStart(2, "0")}`,
-      lat: formData.lat,
-      lon: formData.lon,
-      tz: formData.tzone,
-      lang: "en",
-    }
-    : skipToken;
+  const queryArgs = formData ? buildVedicParam(formData) : skipToken;
 
   const { data: sadeSatiTableResponse, isLoading } = useGetSadeSatiTableQuery(queryArgs);
   const sadeSatiTableData = sadeSatiTableResponse?.response;
