@@ -5,12 +5,12 @@ import { useChat } from "../../../../context/ChatContext";
 import { useCall } from "../../../../context/CallContext";
 import { Toast } from "../../../../component";
 
-export const useAstrologerConnection = (externalAstroRef = null) => {
+export const useAstrologerConnection = (externalAstroRef = null, selectedKundli) => {
   const navigate = useNavigate();
   const [callRoomId, setCallRoomId] = useState(null);
   const [chatRoomId, setChatRoomId] = useState(null);
   const [connectionType, setConnectionType] = useState(null);
-  const [localSelectedProfile, setLocalSelectedProfile] = useState(null);
+  const [localSelectedProfile, setLocalSelectedProfile] = useState(selectedKundli);
 
   const activeAstroRef = useRef(null);
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
@@ -69,6 +69,10 @@ export const useAstrologerConnection = (externalAstroRef = null) => {
     }
   }, [userIdLocal, setWaitingList, setCallWaitingList]);
 
+  useEffect(() => {
+    setLocalSelectedProfile(selectedKundli)
+  }, [selectedKundli])
+
   // Socket event handlers
   useEffect(() => {
     if (!userIdLocal) return;
@@ -116,7 +120,7 @@ export const useAstrologerConnection = (externalAstroRef = null) => {
 
       // Use external ref if provided, otherwise use local ref
       const astro = externalAstroRef?.current || activeAstroRef.current;
-      const kundliId = localSelectedProfile?._id;
+      const kundliId = localSelectedProfile;
 
       try {
         if (!roomId) throw new Error("Room ID missing");
@@ -165,7 +169,7 @@ export const useAstrologerConnection = (externalAstroRef = null) => {
 
       // Use external ref if provided, otherwise use local ref
       const astro = externalAstroRef?.current || activeAstroRef.current;
-      const kundliId = localSelectedProfile?._id;
+      const kundliId = localSelectedProfile;
 
       console.log("🔍 Call Accepted - Full Socket Data:", {
         roomId,

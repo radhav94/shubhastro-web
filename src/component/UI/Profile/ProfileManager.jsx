@@ -191,26 +191,41 @@ const ProfileManager = ({
 
       // Only call API if user is logged in
       if (token && createKundli) {
-        await createKundli(payload).unwrap();
+        const result = await createKundli(payload).unwrap();
         Toast.success("Profile added successfully");
+        
+        // NEW LOGIC: In Start Call mode, auto-select the newly created profile
+        if (startCallMode && result?.data) {
+          setSelectedProfileForCall(result.data);
+          if (onProfileSelect) {
+            onProfileSelect(result.data);
+          }
+        }
       } else {
         // Non-logged-in user: just show success message
         // The parent component should handle temporary profile creation
         Toast.success("Profile added");
+        
+        // Call onProfileSelect with the new profile data so parent can handle it
+        if (onProfileSelect) {
+          const tempProfile = {
+            ...payload,
+            _id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          };
+          onProfileSelect(tempProfile);
+          
+          // In Start Call mode, auto-select the newly created profile
+          if (startCallMode) {
+            setSelectedProfileForCall(tempProfile);
+          }
+        }
       }
       
+      // Only close the AddProfileModal, keep ProfileListingModal open
       setShowAddProfile(false);
       
-      // Call onProfileSelect with the new profile data so parent can handle it
-      if (onProfileSelect) {
-        const tempProfile = {
-          ...payload,
-          _id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        };
-        onProfileSelect(tempProfile);
-      }
-      
-      onClose();
+      // OLD LOGIC (commented out): This was closing both modals
+      // onClose();
     } catch (err) {
       console.error("Add profile error:", err);
       setShowAddProfile(false);
@@ -218,7 +233,8 @@ const ProfileManager = ({
       // Only show custom toast for duplicate error (already shown above)
       // For API errors, global handler in privateRequestNew.js will show the toast
       if (err.message !== "Duplicate profile") {
-        onClose();
+        // OLD LOGIC: This was closing the ProfileListingModal on error
+        // onClose();
         throw err;
       }
     }
