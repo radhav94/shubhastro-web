@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   AstrologerCard,
   DetailsModal,
@@ -34,8 +34,11 @@ import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
 import ChatAstrologerCard from "../../../component/UI/cards/ChatAstrologerCard";
 import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
-import RecommendedAstrologerCard from "../../../component/UI/cards/RecommendedAstrologerCard";
-import TopAstrologerCard from "../../../component/UI/cards/TopAstrologerCard";
+// COMMENTED OUT: Replaced with NewAstrologerCard
+// import RecommendedAstrologerCard from "../../../component/UI/cards/RecommendedAstrologerCard";
+// import TopAstrologerCard from "../../../component/UI/cards/TopAstrologerCard";
+import NewAstrologerCard from "../../../component/UI/cards/newAstrologerCard/NewAstrologerCard";
+import NewAstrologerDetailsCard from "../../../component/UI/cards/newAstrologerCard/NewAstrologerDetailsCard";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -50,11 +53,15 @@ const astroImages = [
 const TalkToAstrologer = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { isLoggedIn } = useSelector((state) => state.auth);
   const [isRecommendModalOpen, setIsRecommendModalOpen] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showRecommend, setShowRecommend] = useState(true);
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
-  const [showFilterAstrologer,setShowFilterAstrologer] = useState(false)
+  const [showFilterAstrologer, setShowFilterAstrologer] = useState(false);
+
+  // NEW: Store the connection type when opening ProfileManager
+  const [pendingConnectionType, setPendingConnectionType] = useState(null);
 
   const location = useLocation(); //  get current URL
   // const isChatMode = location.pathname === "/chat-with-astrologers";
@@ -120,7 +127,8 @@ const TalkToAstrologer = () => {
     handleAfterKundliSelect: hookHandleAfterKundliSelect,
     openModal: hookOpenModal,
     setOpenModal: hookSetOpenModal,
-    kundliRef
+    kundliRef,
+    hasKundli,
   } = useAstrologerConnect();
 
   // Use profile manager hook (same as Home page)
@@ -395,7 +403,68 @@ const TalkToAstrologer = () => {
 
   // Handler for ProfileManager startCallMode - receives selected profile and triggers connection
   const handleProfileManagerStartCall = (selectedProfile) => {
-    hookHandleAfterKundliSelect(selectedProfile);
+    // The astrologer is already stored in selectedAstrologer state and activeCallAstroRef
+    // The connectionType is stored in pendingConnectionType
+    // Now we need to perform the same validations as the normal flow
+
+    if (selectedAstrologer && pendingConnectionType) {
+      // Call the appropriate handler based on connection type
+      // This ensures all validations (balance check, online check) are performed
+      if (pendingConnectionType === "chat") {
+        hookHandleChatStart(selectedAstrologer);
+      } else if (pendingConnectionType === "audio") {
+        hookHandleCallStart(selectedAstrologer, "audio");
+      }
+
+      // Clear the pending connection type
+      setPendingConnectionType(null);
+    }
+
+    // OLD LOGIC (commented out): This was bypassing validations
+    // hookHandleAfterKundliSelect(selectedProfile);
+  };
+
+  // Handle connect button click - reused from Home page
+  // Receives connectionType (chat or audio) from NewAstrologerCard
+  const handleConnectClick = (astrologer, connectionType) => {
+    // Check if user is logged in
+    if (!isLoggedIn) {
+      navigate("/login?skip=welcome");
+      return;
+    }
+
+    if (WaitingList || callWaitingList) {
+      Toast.error(
+        "You are already waiting for an astrologer. Please cancel the current request first.",
+      );
+      return;
+    }
+
+    setSelectedAstrologer(astrologer);
+    activeCallAstroRef.current = astrologer;
+
+    // NEW FLOW: Check if kundli is available and directly initiate connection
+    if (hasKundli) {
+      // If kundli is available, directly initiate the connection based on type
+      if (connectionType === "chat") {
+        hookHandleChatStart(astrologer);
+      } else if (connectionType === "audio") {
+        hookHandleCallStart(astrologer, "audio");
+      }
+    } else {
+      // If no kundli, store the connection type and open ProfileManager to add kundli
+      setPendingConnectionType(connectionType);
+      hookSetOpenModal((prev) => ({ ...prev, kundli: true }));
+    }
+
+    // OLD FLOW (commented out for reference):
+    // This was the inline logic that directly called hookHandleChatStart/hookHandleCallStart
+    // without checking login status or waiting list
+    // if (type === "chat") {
+    //   hookHandleChatStart(astrologer, true);
+    // } else if (type === "audio") {
+    //   hookHandleCallStart(astrologer, "audio");
+    // }
   };
 
   /* ------------------- SOCKET CALL FLOW (ADDED ONLY) ------------------- */
@@ -469,7 +538,7 @@ const TalkToAstrologer = () => {
       resetCallFlow();
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
-      console.log(kundliId, "kundli")
+      console.log(kundliId, "kundli");
 
       try {
         // const res = await createChatRoom({
@@ -492,7 +561,7 @@ const TalkToAstrologer = () => {
           kundliId,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
-          experience: astro?.experience
+          experience: astro?.experience,
         });
       } catch {
         Toast.error("Failed to start call");
@@ -596,7 +665,6 @@ const TalkToAstrologer = () => {
     };
   }, [userIdLocal, isRecommendModalOpen]);
 
-  
   //JSX
   return (
     <div className={styles.mainContainer}>
@@ -669,14 +737,32 @@ const TalkToAstrologer = () => {
 
           <div className={styles.topAstrologersGrid}>
             {topTenAstrologers.map((astro) => (
-              <TopAstrologerCard
+              // REPLACED: TopAstrologerCard with NewAstrologerCard for consistency
+              // <TopAstrologerCard
+              //   key={astro._id}
+              //   data={astro}
+              //   onConnect={() => {
+              //     setSelectedAstrologer(astro);
+              //     setIsConnectPopupOpen(true);
+              //     activeCallAstroRef.current = astro;
+              //   }}
+              // />
+              <NewAstrologerCard
                 key={astro._id}
-                data={astro}
-                onConnect={() => {
-                  setSelectedAstrologer(astro);
-                  setIsConnectPopupOpen(true);
-                  activeCallAstroRef.current = astro;
-                }}
+                astrologer={astro}
+                onConnect={handleConnectClick}
+                // OLD INLINE LOGIC (commented out):
+                // onConnect={(astrologer, type) => {
+                //   setSelectedAstrologer(astrologer);
+                //   setIsConnectPopupOpen(true);
+                //   activeCallAstroRef.current = astrologer;
+                //   // Type will be "chat" or "audio" from NewAstrologerCard buttons
+                //   if (type === "chat") {
+                //     hookHandleChatStart(astrologer, true);
+                //   } else if (type === "audio") {
+                //     hookHandleCallStart(astrologer, "audio");
+                //   }
+                // }}
               />
             ))}
           </div>
@@ -735,8 +821,9 @@ const TalkToAstrologer = () => {
 
       <div className={styles.cardsContainer}>
         {allAstrologers?.map((astro, index) => (
-          <div key={astro._id} className={styles.cardWrapper}>
-            {isChatMode ? (
+          <>
+            <div key={astro._id} className={styles.cardWrapper}>
+              {/* {isChatMode ? (
               <ChatAstrologerCard
                 data={astro}
                 onConnect={() => {
@@ -765,8 +852,13 @@ const TalkToAstrologer = () => {
                   setIsConnectPopupOpen(true);
                 }}
               />
-            )}
-          </div>
+            )} */}
+
+              <NewAstrologerDetailsCard key={astro._id}
+                astrologer={astro}
+                onConnect={handleConnectClick} />
+            </div>
+          </>
         ))}
 
         {isFetching && (
@@ -846,13 +938,18 @@ const TalkToAstrologer = () => {
             <div className={styles.recommendedGrid}>
               {recommendedAstrologers.map((astro) => (
                 <div key={astro._id} className={styles.notSureCard}>
-                  <RecommendedAstrologerCard
+                  {/* REPLACED: RecommendedAstrologerCard with NewAstrologerCard for consistency */}
+                  {/* <RecommendedAstrologerCard
                     data={astro}
                     onConnect={() => {
                       setSelectedAstrologer(astro);
                       setIsConnectPopupOpen(true);
                       activeCallAstroRef.current = astro;
                     }}
+                  /> */}
+                  <NewAstrologerCard
+                    astrologer={astro}
+                    onConnect={handleConnectClick}
                   />
                 </div>
               ))}
@@ -968,6 +1065,7 @@ const TalkToAstrologer = () => {
             setIsRecommendModalOpen(false);
           }}
           mode={isChatMode ? "chat" : "call"}
+          onConnect={handleConnectClick}
         />
       )}
 

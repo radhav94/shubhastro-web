@@ -1,5 +1,7 @@
 import { useGetRecommendedAstrologersQuery } from "../../../../redux/api/astrologer/astrologerApi";
-import RecommendedCard from "./RecommendedCard";
+// COMMENTED OUT: Replaced with NewAstrologerCard
+// import RecommendedCard from "./RecommendedCard";
+import NewAstrologerCard from "../../cards/newAstrologerCard/NewAstrologerCard";
 import styles from "./recommendModal.module.scss";
 import { IoClose } from "react-icons/io5";
 import { useEffect, useRef, useState } from "react";
@@ -20,7 +22,7 @@ import { useProfileManager } from "../../../../screens/private/kundli/hooks/useP
 import { useDispatch } from "react-redux";
 import ProfileManager from "../../Profile/ProfileManager";
 
-const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
+const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -136,13 +138,15 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
     hookHandleAfterKundliSelect(selectedProfile);
   };
 
-  // Handle connect button click - open popup
-  const handleConnectClick = (astro) => {
-    setSelectedAstrologer(astro);
-    setIsConnectPopupOpen(true);
-    activeCallAstroRef.current = astro;
-    setHasStartedFlow(true); // Mark that user has started the connect flow
-  };
+  // Handle connect button click - now received as prop from TalkToAstrologer
+  // This ensures we reuse the same validation logic (login check, waiting list check, kundli check)
+  // OLD LOGIC (commented out): This was opening ConnectAstrologerPopup
+  // const handleConnectClick = (astro) => {
+  //   setSelectedAstrologer(astro);
+  //   setIsConnectPopupOpen(true);
+  //   activeCallAstroRef.current = astro;
+  //   setHasStartedFlow(true); // Mark that user has started the connect flow
+  // };
 
   /* ------------------- SOCKET CALL FLOW (ADDED ONLY) ------------------- */
 
@@ -400,14 +404,22 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen }) => {
             <div className={styles.modalBody}>
               <div className={styles.grid}>
                 {recommendedAstros?.data?.map((astro) => (
-                  <RecommendedCard
-                    isActiveType={activeType}
+                  // REPLACED: RecommendedCard with NewAstrologerCard for consistency
+                  // OLD LOGIC (commented out):
+                  // <RecommendedCard
+                  //   isActiveType={activeType}
+                  //   key={astro._id}
+                  //   astro={astro}
+                  //   mode={mode}
+                  //   onChat={() => handleConnectClick(astro)}
+                  //   onAudioCall={() => handleConnectClick(astro)}
+                  //   onVideoCall={() => handleConnectClick(astro)}
+                  // />
+                  <NewAstrologerCard
                     key={astro._id}
-                    astro={astro}
-                    mode={mode}
-                    onChat={() => handleConnectClick(astro)}
-                    onAudioCall={() => handleConnectClick(astro)}
-                    onVideoCall={() => handleConnectClick(astro)}
+                    astrologer={astro}
+                    onConnect={onConnect}
+                    className={styles.card}
                   />
                 ))}
               </div>
