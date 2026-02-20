@@ -7,8 +7,9 @@ import { PATH } from '../../../../utils/routes/Paths';
 
 const GemstoneResult = () => {
   const navigate = useNavigate();
-  const [resultData, setResultData] = useState(null);
+  const [gemstones, setGemstones] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedGemstoneIndex, setSelectedGemstoneIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('overview');
   
   // Get data from Redux
@@ -35,17 +36,11 @@ const GemstoneResult = () => {
           gemstonesCount: apiData.gemstones?.length || 0
         });
         
-        // Get the first gemstone from the array
-        const gemstone = apiData.gemstones?.[0] || apiData;
+        // Check if we have multiple gemstones
+        const gemstonesArray = apiData.gemstones || [apiData];
         
-        console.log('GemstoneResult - Gemstone data:', {
-          hasGemstone: !!gemstone,
-          gemstoneKeys: gemstone ? Object.keys(gemstone) : [],
-          hasIdentification: !!(gemstone.gemstoneIdentification),
-          hasAstrologicalProperties: !!(gemstone.astrologicalProperties)
-        });
-        
-        setResultData({
+        // Process each gemstone
+        const processedGemstones = gemstonesArray.map((gemstone) => ({
           image: apiData.gemstoneImage || reduxImage,
           identification: gemstone.gemstoneIdentification || {},
           details: gemstone.gemstoneDetails || {},
@@ -58,7 +53,14 @@ const GemstoneResult = () => {
           overall: gemstone.overallReading || {},
           personalized: gemstone.personalizedInsights || {},
           confidenceScore: gemstone.confidenceScore || 85,
+        }));
+        
+        console.log('GemstoneResult - Processed gemstones:', {
+          count: processedGemstones.length,
+          names: processedGemstones.map(g => g.identification.name)
         });
+        
+        setGemstones(processedGemstones);
       } catch (error) {
         console.error('Error parsing result:', error);
         Toast.error('Failed to load analysis results');
@@ -74,41 +76,43 @@ const GemstoneResult = () => {
     setLoading(false);
   }, [reduxResult, reduxImage, navigate]);
 
-  const renderOverview = () => (
+  const renderOverview = (resultData) => (
     <div className={styles.tabContent}>
-      <div className={styles.gemstoneImageWrapper}>
-        <img src={resultData.image} alt="Gemstone" className={styles.gemstoneImage} />
-      </div>
+      <div className={styles.overviewRow}>
+        <div className={styles.gemstoneImageWrapper}>
+          <img src={resultData.image} alt="Gemstone" className={styles.gemstoneImage} />
+        </div>
 
-      <div className={styles.identificationCard}>
-        <h3 className={styles.cardTitle}>Gemstone Identification</h3>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Name:</span>
-          <span className={styles.value}>{resultData.identification.name}</span>
+        <div className={styles.identificationCard}>
+          <h3 className={styles.cardTitle}>Gemstone Identification</h3>
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Name:</span>
+            <span className={styles.value}>{resultData.identification.name}</span>
+          </div>
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Hindi Name:</span>
+            <span className={styles.value}>{resultData.identification.hindiName}</span>
+          </div>
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Scientific Name:</span>
+            <span className={styles.value}>{resultData.identification.scientificName}</span>
+          </div>
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Natural:</span>
+            <span className={styles.value}>{resultData.identification.isNatural ? 'Yes' : 'No'}</span>
+          </div>
         </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Hindi Name:</span>
-          <span className={styles.value}>{resultData.identification.hindiName}</span>
-        </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Scientific Name:</span>
-          <span className={styles.value}>{resultData.identification.scientificName}</span>
-        </div>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Natural:</span>
-          <span className={styles.value}>{resultData.identification.isNatural ? 'Yes' : 'No'}</span>
-        </div>
-      </div>
 
-      <div className={styles.summaryCard}>
-        <h3 className={styles.cardTitle}>Overall Summary</h3>
-        <p className={styles.summaryText}>{resultData.overall.summary}</p>
-        <p className={styles.recommendationText}>{resultData.overall.recommendation}</p>
+        <div className={styles.summaryCard}>
+          <h3 className={styles.cardTitle}>Overall Summary</h3>
+          <p className={styles.summaryText}>{resultData.overall.summary}</p>
+          <p className={styles.recommendationText}>{resultData.overall.recommendation}</p>
+        </div>
       </div>
     </div>
   );
 
-  const renderDetails = () => (
+  const renderDetails = (resultData) => (
     <div className={styles.tabContent}>
       <div className={styles.detailsCard}>
         <h3 className={styles.cardTitle}>Quality & Characteristics</h3>
@@ -189,7 +193,7 @@ const GemstoneResult = () => {
     </div>
   );
 
-  const renderAstrological = () => (
+  const renderAstrological = (resultData) => (
     <div className={styles.tabContent}>
       <div className={styles.astroCard}>
         <h3 className={styles.cardTitle}>Astrological Properties</h3>
@@ -253,7 +257,7 @@ const GemstoneResult = () => {
     </div>
   );
 
-  const renderSuitability = () => (
+  const renderSuitability = (resultData) => (
     <div className={styles.tabContent}>
       <div className={styles.suitabilityCard}>
         <div className={styles.scoreHeader}>
@@ -338,7 +342,7 @@ const GemstoneResult = () => {
     </div>
   );
 
-  const renderHealing = () => (
+  const renderHealing = (resultData) => (
     <div className={styles.tabContent}>
       <div className={styles.healingCard}>
         <h3 className={styles.cardTitle}>Healing Properties</h3>
@@ -442,9 +446,11 @@ const GemstoneResult = () => {
     );
   }
 
-  if (!resultData) {
+  if (!gemstones || gemstones.length === 0) {
     return null;
   }
+
+  const currentGemstone = gemstones[selectedGemstoneIndex];
 
   return (
     <div className={styles.container}>
@@ -458,6 +464,25 @@ const GemstoneResult = () => {
       </header>
 
       <div className={styles.content}>
+        {/* Main tabs for gemstone selection (only show if multiple gemstones) */}
+        {gemstones.length > 1 && (
+          <div className={styles.gemstoneTabs}>
+            {gemstones.map((gemstone, index) => (
+              <button
+                key={index}
+                className={`${styles.gemstoneTab} ${selectedGemstoneIndex === index ? styles.active : ''}`}
+                onClick={() => {
+                  setSelectedGemstoneIndex(index);
+                  setActiveTab('overview'); // Reset to overview when switching gemstones
+                }}
+              >
+                {gemstone.identification.name || `Gemstone ${index + 1}`}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Sub-tabs for gemstone details */}
         <div className={styles.tabs}>
           <button
             className={`${styles.tab} ${activeTab === 'overview' ? styles.active : ''}`}
@@ -491,11 +516,11 @@ const GemstoneResult = () => {
           </button>
         </div>
 
-        {activeTab === 'overview' && renderOverview()}
-        {activeTab === 'details' && renderDetails()}
-        {activeTab === 'astrological' && renderAstrological()}
-        {activeTab === 'suitability' && renderSuitability()}
-        {activeTab === 'healing' && renderHealing()}
+        {activeTab === 'overview' && renderOverview(currentGemstone)}
+        {activeTab === 'details' && renderDetails(currentGemstone)}
+        {activeTab === 'astrological' && renderAstrological(currentGemstone)}
+        {activeTab === 'suitability' && renderSuitability(currentGemstone)}
+        {activeTab === 'healing' && renderHealing(currentGemstone)}
       </div>
     </div>
   );

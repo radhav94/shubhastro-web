@@ -46,13 +46,54 @@
   margin: 0 auto;
 }
 
+.gemstoneTabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #e5e7eb;
+  background: #ffffff;
+  position: sticky;
+  top: 57px;
+  z-index: 10;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.gemstoneTab {
+  flex: 1;
+  min-width: 120px;
+  padding: 18px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 15px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  
+  &:hover {
+    color: #1f2937;
+    background: #f9fafb;
+  }
+  
+  &.active {
+    color: #D43400;
+    border-bottom-color: #D43400;
+    background: #fff5f0;
+  }
+}
+
 .tabs {
   display: flex;
   gap: 0;
   border-bottom: 1px solid #e5e7eb;
   background: #ffffff;
   position: sticky;
-  top: 57px;
   z-index: 9;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -60,6 +101,16 @@
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+// When gemstone tabs exist, adjust detail tabs position
+.content:has(.gemstoneTabs) .tabs {
+  top: 114px;
+}
+
+// When no gemstone tabs, keep original position
+.content:not(:has(.gemstoneTabs)) .tabs {
+  top: 57px;
 }
 
 .tab {
@@ -90,13 +141,32 @@
   padding: 24px 16px;
 }
 
+.overviewRow {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  
+  @media (min-width: 768px) {
+    flex-wrap: nowrap;
+  }
+}
+
 .gemstoneImageWrapper {
   width: 100%;
-  max-width: 400px;
-  margin: 0 auto 24px;
-  border-radius: 16px;
+  max-width: 200px;
+  flex-shrink: 0;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  
+  @media (min-width: 768px) {
+    max-width: 220px;
+  }
+  
+  @media (min-width: 1024px) {
+    max-width: 250px;
+  }
 }
 
 .gemstoneImage {
@@ -119,6 +189,17 @@
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 16px;
+}
+
+.overviewRow .identificationCard,
+.overviewRow .summaryCard {
+  flex: 1;
+  min-width: 250px;
+  margin-bottom: 0;
+  
+  @media (max-width: 767px) {
+    width: 100%;
+  }
 }
 
 .cardTitle {
@@ -328,10 +409,6 @@
     padding: 18px 16px;
   }
   
-  .gemstoneImageWrapper {
-    max-width: 500px;
-  }
-  
   .cardTitle {
     font-size: 20px;
   }
@@ -359,10 +436,6 @@
 @media (min-width: 1024px) {
   .tabContent {
     padding: 40px 32px;
-  }
-  
-  .gemstoneImageWrapper {
-    max-width: 600px;
   }
   
   .cardTitle {
