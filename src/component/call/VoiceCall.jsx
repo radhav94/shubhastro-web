@@ -20,6 +20,7 @@ import { useCall } from "../../context/CallContext";
 import { PATH } from "../../utils/routes/Paths";
 import GiftModal from "./GiftModal";
 import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance";
+import RechargeModal from "../recharge-modal/RechargeModal";
 
 // Import SVG icons from chat assets
 import VideocamIcon from "../../assets/chat/Videocam.svg";
@@ -61,6 +62,7 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [isRemoteVideo, setIsRemoteVideo] = useState(false);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
   const [speakerOn, setSpeakerOn] = useState(true);
+  const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
 
   /* ================= WALLET BALANCE ================= */
   const { balance, isFetching, refreshWallet } = useWalletBalance();
@@ -468,7 +470,7 @@ const AgoraVoiceCalling = ({ callData }) => {
                 className={styles.rechargeNowBtn}
                 onClick={() => {
                   setIsMinimized(true);
-                  navigate(PATH.privateRoutes.RECHARGE.path);
+                  setIsRechargeModalOpen(true);
                 }}
               >
                 Recharge Now
@@ -583,6 +585,17 @@ const AgoraVoiceCalling = ({ callData }) => {
         onClose={() => setIsGiftModalOpen(false)}
         astrologerId={activeCall?.astrologerId}
         astrologerName={callerName}
+      />
+
+      {/* Recharge Modal */}
+      <RechargeModal
+        isOpen={isRechargeModalOpen}
+        onClose={() => setIsRechargeModalOpen(false)}
+        onSuccess={(paymentData) => {
+          console.log('Payment successful in voice call:', paymentData);
+          refreshWallet();
+        }}
+        title="Recharge to Continue Call"
       />
     </>
   );

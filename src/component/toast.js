@@ -31,6 +31,10 @@ const warning = (msg) => {
   return rht(ensureString(msg), { ...options, icon: "⚠️" });
 };
 
+const info = (msg) => {
+  return rht(ensureString(msg), { ...options, icon: "ℹ️" });
+};
+
 const promise = (myPromise, msgObj) => {
   return rht.promise(myPromise, msgObj, options);
 };
@@ -39,6 +43,7 @@ const toast = {
   success,
   error,
   warning,
+  info,
   promise,
 };
 
