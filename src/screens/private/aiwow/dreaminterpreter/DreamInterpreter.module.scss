@@ -13,6 +13,7 @@
 
 .headerWrap{
   background: white;
+  border-bottom: 1px solid #e0e0e0;
 }
 .header {
   display: flex;
@@ -36,6 +37,12 @@
   border-radius: 0.5rem;
   transition: all 0.2s;
   box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
+  width: 40px;
+  height: 40px;
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
 
   &:hover {
     background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);

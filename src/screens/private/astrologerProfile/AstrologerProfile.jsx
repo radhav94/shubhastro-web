@@ -995,14 +995,14 @@ const AstrologerProfile = () => {
       <StickyReview />
 
       {/* Waiting Modal */}
-      {(WaitingList || callWaitingList) && (
+      {/* {(WaitingList || callWaitingList) && (
         <WaitingModal
           isOpen={WaitingList || callWaitingList}
           onClose={resetCallState}
           waitingTime={WaitingList || callWaitingList}
           connectionType={connectionType}
         />
-      )}
+      )} */}
 
       {/* Gift Modal */}
       <GiftModal

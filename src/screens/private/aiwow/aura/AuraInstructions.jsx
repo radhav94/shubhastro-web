@@ -35,6 +35,7 @@ const AuraInstructions = () => {
       <div className={styles.content}>
         <h2 className={styles.title}>Before you start</h2>
 
+        <div className={styles.middleContent}>
         <div className={styles.imageWrapper}>
           <img 
             src={getAIWowInstructionImage('aura')} 
@@ -47,6 +48,7 @@ const AuraInstructions = () => {
           <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
         </div>
 
+        <div>
         <div className={styles.checklistSection}>
           <div className={styles.checkItem}>
             <div className={styles.checkIcon}>
@@ -114,6 +116,8 @@ const AuraInstructions = () => {
           style={{ display: 'none' }}
           onChange={handleFileChange}
         />
+        </div>
+      </div>
       </div>
     </div>
   );

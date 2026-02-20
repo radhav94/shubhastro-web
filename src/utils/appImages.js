@@ -19,6 +19,10 @@ import whatsapp from "../assets/icons/whatsapp.png";
 import CopyLink from "../assets/icons/link.png";
 import Video from "../assets/icons/video.png";
 
+// Astrologers card icon
+import ChatMinutesIcon from "../assets/icons/experienceIcon.svg";
+import CallMinutesIcon from "../assets/icons/callMinutess.svg";
+
 // application all default images
 import AstrologerDefaultImg from "../assets/default-img/astrologer.svg";
 import AstrologerMaleDefaultImg from "../assets/default-img/astrologer male_v.1.png"; // Male astrologer
@@ -96,6 +100,8 @@ export const AppIcons = {
   whatsapp,
   CopyLink,
   Video,
+  ChatMinutesIcon,
+  CallMinutesIcon
 };
 
 //appImages

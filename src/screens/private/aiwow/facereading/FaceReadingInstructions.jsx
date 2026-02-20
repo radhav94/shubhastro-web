@@ -35,6 +35,7 @@ const FaceReadingInstructions = () => {
       <div className={styles.content}>
         <h2 className={styles.title}>Before you start</h2>
 
+      <div className={styles.middleContent}>
         <div className={styles.imageWrapper}>
           <img 
             src={getAIWowInstructionImage('faceReading')} 
@@ -46,7 +47,9 @@ const FaceReadingInstructions = () => {
           <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
           <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
         </div>
+      
 
+      <div>
         <div className={styles.checklistSection}>
           <div className={styles.checkItem}>
             <div className={styles.checkIcon}>
@@ -114,6 +117,8 @@ const FaceReadingInstructions = () => {
           style={{ display: 'none' }}
           onChange={handleFileChange}
         />
+      </div>
+        </div>
       </div>
     </div>
   );

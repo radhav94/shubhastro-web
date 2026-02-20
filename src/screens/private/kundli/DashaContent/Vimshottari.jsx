@@ -5,6 +5,7 @@ import styles from "./DashaContent.module.scss";
 import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
+import AdditionalPlanetaryInfo from "../kundaliContent/AdditionalPlanetaryInfo";
 
 const Vimshottari = () => {
   const [expandedIndex, setExpandedIndex] = useState(null);
@@ -31,6 +32,12 @@ const Vimshottari = () => {
   };
 
   return (
+    <>
+     {/* Vimshottari Dasha Section */}
+          <AdditionalPlanetaryInfo 
+            title="Vimshottari Dasha"
+            isLoading={false}
+          />
     <div className={styles.dashaContainer}>
       {data.response.dashas.map((dasha, i) => (
         <div key={i} className={styles.dashaAccordion}>
@@ -66,8 +73,9 @@ const Vimshottari = () => {
             </div>
           </div>
         </div>
-      ))}
+      ))}  
     </div>
+    </>
   );
 };
 

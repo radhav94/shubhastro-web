@@ -85,14 +85,16 @@ const DailyCosmicBriefing = () => {
   if (isLoading) {
     return (
       <div className={styles.container}>
-        <header className={styles.header}>
-          <button className={styles.backButton} onClick={handleBack}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-          <div className={styles.headerInfo}>
-            <h1 className={styles.title}>Daily Cosmic Briefing</h1>
+        <header className={styles.headerWrap}>
+          <div className={styles.header}>
+            <button className={styles.backButton} onClick={handleBack}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <div className={styles.headerInfo}>
+              <h1 className={styles.title}>Daily Cosmic Briefing</h1>
+            </div>
           </div>
         </header>
         <div className={styles.loadingContainer}>
@@ -110,17 +112,19 @@ const DailyCosmicBriefing = () => {
   return (
     <div className={styles.container}>
       {/* Header */}
-      <header className={styles.header}>
-        <button className={styles.backButton} onClick={handleBack}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <div className={styles.headerInfo}>
-          <h1 className={styles.title}>Daily Cosmic Briefing</h1>
-          {selectedProfile && (
-            <p className={styles.subtitle}>{selectedProfile.name}</p>
-          )}
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={handleBack}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div className={styles.headerInfo}>
+            <h1 className={styles.title}>Daily Cosmic Briefing</h1>
+            {selectedProfile && (
+              <p className={styles.subtitle}>{selectedProfile.name}</p>
+            )}
+          </div>
         </div>
       </header>
 

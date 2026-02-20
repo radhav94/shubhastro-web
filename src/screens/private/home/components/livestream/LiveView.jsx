@@ -574,13 +574,13 @@ const LiveView = (props) => {
           />
 
           {/* Waiting Modal */}
-          {showWaitingModal && (
+          {/* {showWaitingModal && (
             <WaitingModal
               callRoomId={callRoomId}
               resetCallState={resetCallState}
               connectionType="video"
             />
-          )}
+          )} */}
 
           {/* NEW BOTTOM ACTION BAR */}
           <div className="right-action-bar">

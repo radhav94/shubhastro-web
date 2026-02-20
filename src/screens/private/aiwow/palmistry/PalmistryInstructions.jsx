@@ -35,85 +35,89 @@ const PalmistryInstructions = () => {
       <div className={styles.content}>
         <h2 className={styles.title}>Before you start</h2>
 
-        <div className={styles.imageWrapper}>
-          <img 
-            src={getAIWowInstructionImage('palmistry')} 
-            alt="Palm example" 
-            className={styles.palmImage}
-          />
-          <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
-          <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
-          <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
-          <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
-        </div>
+          <div className={styles.middleContent}>
+            <div className={styles.imageWrapper}>
+              <img 
+                src={getAIWowInstructionImage('palmistry')} 
+                alt="Palm example" 
+                className={styles.palmImage}
+              />
+              <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
+              <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
+              <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
+              <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
+            </div>
 
-        <div className={styles.checklistSection}>
-          <div className={styles.checkItem}>
-            <div className={styles.checkIcon}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+          <div>
+            <div className={styles.checklistSection}>
+              <div className={styles.checkItem}>
+                <div className={styles.checkIcon}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className={styles.checkTitle}>Clear Background</h3>
+                  <p className={styles.checkDescription}>Use a neutral background to avoid distractions in the photo</p>
+                </div>
+              </div>
+
+              <div className={styles.checkItem}>
+                <div className={styles.checkIcon}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className={styles.checkTitle}>Focus on Your Palm</h3>
+                  <p className={styles.checkDescription}>Make sure your palm is centered and clearly visible in the frame</p>
+                </div>
+              </div>
+
+              <div className={styles.checkItem}>
+                <div className={styles.checkIcon}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className={styles.checkTitle}>Steady Hands</h3>
+                  <p className={styles.checkDescription}>Keep your hands steady to avoid blurriness for better detail</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className={styles.checkTitle}>Clear Background</h3>
-              <p className={styles.checkDescription}>Use a neutral background to avoid distractions in the photo</p>
+
+            <div className={styles.disclaimer}>
+              <h4 className={styles.disclaimerTitle}>Disclaimer</h4>
+              <p className={styles.disclaimerText}>
+                This palm reading is for informational purposes only and not a substitute for professional advice. Analysis is based on AI interpretation.
+              </p>
             </div>
+
+            <div className={styles.buttonGroup}>
+              <button 
+                className={styles.uploadButton}
+                onClick={handleUpload}
+              >
+                Upload Photo
+              </button>
+              <button 
+                className={styles.cameraButton}
+                onClick={handleCamera}
+              >
+                Use Camera
+              </button>
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
           </div>
-
-          <div className={styles.checkItem}>
-            <div className={styles.checkIcon}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div>
-              <h3 className={styles.checkTitle}>Focus on Your Palm</h3>
-              <p className={styles.checkDescription}>Make sure your palm is centered and clearly visible in the frame</p>
-            </div>
-          </div>
-
-          <div className={styles.checkItem}>
-            <div className={styles.checkIcon}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div>
-              <h3 className={styles.checkTitle}>Steady Hands</h3>
-              <p className={styles.checkDescription}>Keep your hands steady to avoid blurriness for better detail</p>
-            </div>
-          </div>
         </div>
-
-        <div className={styles.disclaimer}>
-          <h4 className={styles.disclaimerTitle}>Disclaimer</h4>
-          <p className={styles.disclaimerText}>
-            This palm reading is for informational purposes only and not a substitute for professional advice. Analysis is based on AI interpretation.
-          </p>
-        </div>
-
-        <div className={styles.buttonGroup}>
-          <button 
-            className={styles.uploadButton}
-            onClick={handleUpload}
-          >
-            Upload Photo
-          </button>
-          <button 
-            className={styles.cameraButton}
-            onClick={handleCamera}
-          >
-            Use Camera
-          </button>
-        </div>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={handleFileChange}
-        />
       </div>
     </div>
   );
