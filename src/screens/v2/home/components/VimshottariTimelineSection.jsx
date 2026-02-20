@@ -69,12 +69,14 @@ const VimshottariTimelineSection = () => {
     const end = new Date(endDate).getTime();
     const now = new Date().getTime();
 
-    if (now < start) return 0;
-    if (now > end) return 100;
+    if (now >= end) return 100;
+    if (now <= start) return 0;
 
     const total = end - start;
     const elapsed = now - start;
-    return Math.round((elapsed / total) * 100);
+    const pct = parseFloat(((elapsed / total) * 100).toFixed(1));
+    // Cap at 99.9 so an active period never shows 100% prematurely
+    return Math.min(pct, 99.9);
   };
 
   const getPlanetShort = (name) => {
@@ -89,11 +91,9 @@ const VimshottariTimelineSection = () => {
     const now = new Date().getTime();
     for (let i = 0; i < periods.length; i++) {
       const start = new Date(periods[i].start).getTime();
-      const end = i < periods.length - 1
-        ? new Date(periods[i + 1].start).getTime()
-        : new Date(periods[i].start).getTime() + (365 * 24 * 60 * 60 * 1000);
+      const end = new Date(periods[i].end).getTime();
 
-      if (now >= start && now < end) return i;
+      if (now >= start && now <= end) return i;
     }
     return -1;
   };
@@ -117,34 +117,32 @@ const VimshottariTimelineSection = () => {
       // Only add the current period card for this level
       if (currentIdx >= 0) {
         const period = periods[currentIdx];
-        const nextPeriod = periods[currentIdx + 1];
+        const periodEnd = period.end;
 
-        if (nextPeriod) {
-          // Calculate progress within the current segment
-          const segmentStart = new Date(period.start).getTime();
-          const segmentEnd = new Date(nextPeriod.start).getTime();
-          const now = new Date().getTime();
-          const segmentProgress = ((now - segmentStart) / (segmentEnd - segmentStart)) * 100;
+        // Calculate progress within the current segment
+        const segmentStart = new Date(period.start).getTime();
+        const segmentEnd = new Date(periodEnd).getTime();
+        const now = new Date().getTime();
+        const segmentProgress = ((now - segmentStart) / (segmentEnd - segmentStart)) * 100;
 
-          allDashaCards.push({
-            id: `${levelName}-${currentIdx}`,
-            type: levelName.toUpperCase(),
-            planet: period.name,
-            startDate: formatDate(period.start),
-            endDate: formatDate(nextPeriod.start),
-            progress: calculateProgress(period.start, nextPeriod.start),
-            segmentProgress: Math.min(Math.max(segmentProgress, 0), 100), // Clamp between 0-100
-            isCurrent: true,
-            duration: calculateDuration(period.start, nextPeriod.start),
-            subPeriods: periods.map((p, i) => ({
-              name: getPlanetShort(p.name),
-              planet: p.name,
-              active: i === currentIdx,
-              startDate: p.start,
-              endDate: i < periods.length - 1 ? periods[i + 1].start : null,
-            })),
-          });
-        }
+        allDashaCards.push({
+          id: `${levelName}-${currentIdx}`,
+          type: levelName.toUpperCase(),
+          planet: period.name,
+          startDate: formatDate(period.start),
+          endDate: formatDate(periodEnd),
+          progress: calculateProgress(period.start, periodEnd),
+          segmentProgress: Math.min(Math.max(segmentProgress, 0), 100),
+          isCurrent: true,
+          duration: calculateDuration(period.start, periodEnd),
+          subPeriods: periods.map((p, i) => ({
+            name: getPlanetShort(p.name),
+            planet: p.name,
+            active: i === currentIdx,
+            startDate: p.start,
+            endDate: p.end,
+          })),
+        });
       }
     });
 
