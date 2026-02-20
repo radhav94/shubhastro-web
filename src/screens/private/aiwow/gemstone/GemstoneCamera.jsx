@@ -187,7 +187,7 @@ const GemstoneCamera = () => {
           <h3 className={styles.errorTitle}>Camera Access Required</h3>
           <p className={styles.errorText}>{error}</p>
           <div className={styles.errorButtons}>
-            <button className={styles.retryButton} onClick={startCamera}>
+            <button className={styles.retryButton} onClick={() => window.location.reload()}>
               Try Again
             </button>
             <button className={styles.backButton} onClick={handleBack}>

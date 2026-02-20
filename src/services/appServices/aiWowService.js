@@ -571,7 +571,7 @@ const base64ToBlob = async (base64String) => {
  * @param {File|Blob|string} imageData - Image file, blob, or base64 string
  * @returns {Promise} API response with analysis results
  */
-export const analyzeAura = async (imageData) => {
+export const analyzeAura = async (imageData, signal = null) => {
   try {
     const formData = new FormData();
     
@@ -613,6 +613,7 @@ export const analyzeAura = async (imageData) => {
           'Content-Type': 'multipart/form-data',
         },
         timeout: 60000,
+        signal, // Pass abort signal to axios
       }
     );
 
