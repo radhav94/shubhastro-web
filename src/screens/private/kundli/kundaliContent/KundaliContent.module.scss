@@ -150,14 +150,14 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   background-color: $color-white;
   border-radius: 16px;
   padding: 24px;
-  margin-top: 24px;
-  border: 1px solid $color-grey-light;
-  box-shadow: $shadow-4;
+  margin-block: 16px;
+  // border: 1px solid $color-grey-light;
+  // box-shadow: $shadow-4;
 }
 
 .sectionTitle {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
   color: $color-black;
   margin: 0 0 16px 0;
   border-bottom: 2px solid $color-dasha-orange;

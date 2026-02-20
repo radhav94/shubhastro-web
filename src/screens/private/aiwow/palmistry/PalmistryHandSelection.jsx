@@ -47,8 +47,19 @@ const PalmistryHandSelection = () => {
             onClick={() => handleHandSelect('left')}
           >
             <div className={styles.handIcon}>
-              <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-                <path d="M20 60V30C20 28 21 27 23 27C25 27 26 28 26 30V20C26 18 27 17 29 17C31 17 32 18 32 20V15C32 13 33 12 35 12C37 12 38 13 38 15V20C38 18 39 17 41 17C43 17 44 18 44 20V35L50 28C51 27 52 27 53 28C54 29 54 30 53 31L44 50C43 52 42 54 40 56C38 58 36 59 34 60H20Z" stroke="currentColor" strokeWidth="2" fill="none"/>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <g clip-path="url(#clip0_9475_7868)">
+                  <path d="M13 24C9.73998 24 6.80998 22.01 5.59998 18.98L2.56998 11.37C2.25998 10.58 2.99998 9.79 3.80998 10.05L4.59998 10.31C5.15998 10.49 5.61998 10.92 5.83998 11.47L7.24998 15H7.99998V3.25C7.99998 2.56 8.55998 2 9.24998 2C9.93998 2 10.5 2.56 10.5 3.25V12H11.5V1.25C11.5 0.56 12.06 0 12.75 0C13.44 0 14 0.56 14 1.25V12H15V2.75C15 2.06 15.56 1.5 16.25 1.5C16.94 1.5 17.5 2.06 17.5 2.75V12H18.5V5.75C18.5 5.06 19.06 4.5 19.75 4.5C20.44 4.5 21 5.06 21 5.75V16C21 20.42 17.42 24 13 24Z" fill="url(#paint0_linear_9475_7868)"/>
+                </g>
+                <defs>
+                  <linearGradient id="paint0_linear_9475_7868" x1="2.4978" y1="12" x2="21" y2="12" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#F75801"/>
+                    <stop offset="1" stop-color="#D43400"/>
+                  </linearGradient>
+                  <clipPath id="clip0_9475_7868">
+                    <rect width="24" height="24" fill="white"/>
+                  </clipPath>
+                </defs>
               </svg>
             </div>
             <h3 className={styles.handLabel}>Left Hand</h3>
@@ -68,8 +79,19 @@ const PalmistryHandSelection = () => {
             onClick={() => handleHandSelect('right')}
           >
             <div className={styles.handIcon}>
-              <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-                <path d="M60 60V30C60 28 59 27 57 27C55 27 54 28 54 30V20C54 18 53 17 51 17C49 17 48 18 48 20V15C48 13 47 12 45 12C43 12 42 13 42 15V20C42 18 41 17 39 17C37 17 36 18 36 20V35L30 28C29 27 28 27 27 28C26 29 26 30 27 31L36 50C37 52 38 54 40 56C42 58 44 59 46 60H60Z" stroke="currentColor" strokeWidth="2" fill="none"/>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <g clip-path="url(#clip0_9475_7871)">
+                  <path d="M11 24C14.26 24 17.19 22.01 18.4 18.98L21.43 11.37C21.74 10.58 21 9.79 20.19 10.05L19.4 10.31C18.84 10.49 18.38 10.92 18.16 11.47L16.75 15H16V3.25C16 2.56 15.44 2 14.75 2C14.06 2 13.5 2.56 13.5 3.25V12H12.5V1.25C12.5 0.56 11.94 0 11.25 0C10.56 0 10 0.56 10 1.25V12H9.00002V2.75C9.00002 2.06 8.44002 1.5 7.75002 1.5C7.06002 1.5 6.50002 2.06 6.50002 2.75V12H5.50002V5.75C5.50002 5.06 4.94002 4.5 4.25002 4.5C3.56002 4.5 3.00002 5.06 3.00002 5.75V16C3.00002 20.42 6.58002 24 11 24Z" fill="url(#paint0_linear_9475_7871)"/>
+                </g>
+                <defs>
+                  <linearGradient id="paint0_linear_9475_7871" x1="21.5022" y1="12" x2="3.00002" y2="12" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#F75801"/>
+                    <stop offset="1" stop-color="#D43400"/>
+                  </linearGradient>
+                  <clipPath id="clip0_9475_7871">
+                    <rect width="24" height="24" fill="white" transform="matrix(-1 0 0 1 24 0)"/>
+                  </clipPath>
+                </defs>
               </svg>
             </div>
             <h3 className={styles.handLabel}>Right Hand</h3>
