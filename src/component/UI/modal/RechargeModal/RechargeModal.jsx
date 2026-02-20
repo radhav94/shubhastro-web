@@ -1,6 +1,6 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { PrimaryText } from "../../../index";
-import { PATH } from "../../../../utils/routes/Paths";
+import NewRechargeModal from "../../../recharge-modal/RechargeModal";
 import styles from "./RechargeModal.module.scss";
 
 const RechargeModal = ({
@@ -9,7 +9,7 @@ const RechargeModal = ({
   astrologer,
   connectionType = "chat",
 }) => {
-  const navigate = useNavigate();
+  const [showPlansModal, setShowPlansModal] = useState(false);
 
   if (!isOpen) return null;
 
@@ -22,31 +22,51 @@ const RechargeModal = ({
   const astrologerName = astrologer?.firstName || "Astrologer";
 
   const handleRecharge = () => {
+    setShowPlansModal(true);
+  };
+
+  const handlePlansModalClose = () => {
+    setShowPlansModal(false);
     onClose();
-    navigate(PATH.privateRoutes.RECHARGE.path);
+  };
+
+  const handleRechargeSuccess = (paymentData) => {
+    console.log('Recharge successful:', paymentData);
+    setShowPlansModal(false);
+    onClose();
   };
 
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div
-        className={styles.modalContainer}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <PrimaryText isCenter className="pt-4">
-          Minimum balance of 5 minutes (₹ {minBalance}) is required to start{" "}
-          {connectionType} with {astrologerName}.
-        </PrimaryText>
+    <>
+      <div className={styles.modalOverlay} onClick={onClose}>
+        <div
+          className={styles.modalContainer}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <PrimaryText isCenter className="pt-4">
+            Minimum balance of 5 minutes (₹ {minBalance}) is required to start{" "}
+            {connectionType} with {astrologerName}.
+          </PrimaryText>
 
-        <div className={styles.modalButtons}>
-          <button className={styles.rejectBtn} onClick={onClose}>
-            Cancel
-          </button>
-          <button className={styles.acceptBtn} onClick={handleRecharge}>
-            Recharge
-          </button>
+          <div className={styles.modalButtons}>
+            <button className={styles.rejectBtn} onClick={onClose}>
+              Cancel
+            </button>
+            <button className={styles.acceptBtn} onClick={handleRecharge}>
+              Recharge
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* New Recharge Modal with Plans */}
+      <NewRechargeModal
+        isOpen={showPlansModal}
+        onClose={handlePlansModalClose}
+        onSuccess={handleRechargeSuccess}
+        title="Recharge Wallet"
+      />
+    </>
   );
 };
 
