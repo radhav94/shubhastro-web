@@ -20,6 +20,20 @@
   padding: 1.25rem;
   margin: -1.5rem -1.5rem 1.5rem -1.5rem;
   border-radius: 12px 12px 0 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  user-select: none;
+
+  &:hover {
+    opacity: 0.95;
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
 }
 
 .cardTitle {
@@ -28,6 +42,32 @@
   letter-spacing: 0.3px;
   font-size: 1.375rem;
   margin: 0;
+  flex: 1;
+}
+
+.dropdownIcon {
+  color: #ffffff;
+  font-size: 1.5rem;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+
+  &.expanded {
+    transform: rotate(180deg);
+  }
+}
+
+/* Collapsible Content */
+.collapsibleContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-in-out, opacity 0.3s ease;
+  opacity: 0;
+
+  &.expanded {
+    max-height: 10000px;
+    opacity: 1;
+  }
 }
 
 /* Section */
@@ -116,6 +156,9 @@
   .cardTitle {
     font-size: 1.25rem;
   }
+  .dropdownIcon {
+    font-size: 1.375rem;
+  }
   .sectionContent {
     font-size: 0.875rem;
   }
@@ -135,6 +178,10 @@
 
   .cardTitle {
     font-size: 1rem;
+  }
+
+  .dropdownIcon {
+    font-size: 1.25rem;
   }
 
   .section {
@@ -166,6 +213,10 @@
 
   .cardTitle {
     font-size: 1rem;
+  }
+
+  .dropdownIcon {
+    font-size: 1.125rem;
   }
 
   .sectionContent {

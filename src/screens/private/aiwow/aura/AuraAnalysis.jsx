@@ -15,6 +15,25 @@ const AuraAnalysis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [error, setError] = useState(null);
+  const isMountedRef = React.useRef(true); // Track if component is mounted
+  const abortControllerRef = React.useRef(null); // Store abort controller
+
+  useEffect(() => {
+    // Set mounted flag
+    isMountedRef.current = true;
+
+    // Cleanup function to prevent navigation after unmount and abort API request
+    return () => {
+      isMountedRef.current = false;
+      console.log('AuraAnalysis unmounting - aborting API request');
+      
+      // Abort ongoing API request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        console.log('API request aborted');
+      }
+    };
+  }, []);
 
   useEffect(() => {
     // Only run analysis if we have an image and haven't started yet
@@ -40,6 +59,10 @@ const AuraAnalysis = () => {
     setIsAnalyzing(true);
     setError(null);
     
+    // Create AbortController to cancel request on unmount
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController; // Store reference
+    
     try {
       // Validate image data before sending
       if (!imageData || typeof imageData !== 'string') {
@@ -56,9 +79,16 @@ const AuraAnalysis = () => {
         });
       }, 200);
 
-      const result = await analyzeAura(imageData);
+      // Pass abort signal to API call
+      const result = await analyzeAura(imageData, abortController.signal);
 
       clearInterval(progressInterval);
+
+      // Check if component is still mounted before processing result
+      if (!isMountedRef.current) {
+        console.log('Component unmounted - ignoring API result');
+        return;
+      }
 
       // Validate API response structure
       if (!result || typeof result !== 'object') {
@@ -78,8 +108,13 @@ const AuraAnalysis = () => {
         setProgress(100);
         setAnalysisComplete(true);
         
+        // Only navigate if component is still mounted
         setTimeout(() => {
-          navigate(PATH.privateRoutes.AURA_RESULT.path);
+          if (isMountedRef.current) {
+            navigate(PATH.privateRoutes.AURA_RESULT.path);
+          } else {
+            console.log('Component unmounted - skipping navigation to result');
+          }
         }, 1000);
       } else {
         // DON'T clear data on error - keep image for retry
@@ -99,7 +134,19 @@ const AuraAnalysis = () => {
         });
       }
     } catch (error) {
+      // Ignore abort errors
+      if (error.name === 'AbortError' || error.message === 'canceled') {
+        console.log('API request aborted - user navigated away');
+        return;
+      }
+
       console.error('Analysis error:', error);
+      
+      // Check if component is still mounted before showing error
+      if (!isMountedRef.current) {
+        console.log('Component unmounted - ignoring error');
+        return;
+      }
       
       // DON'T clear data on error - keep image for retry
       // dispatch(clearAuraData());
@@ -126,7 +173,9 @@ const AuraAnalysis = () => {
       // Don't show Toast here - interceptor already showed it
       setError({ message: errorMessage });
     } finally {
-      setIsAnalyzing(false);
+      if (isMountedRef.current) {
+        setIsAnalyzing(false);
+      }
     }
   };
 

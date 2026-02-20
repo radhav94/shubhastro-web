@@ -1,32 +1,58 @@
-import React from "react";
+import React, { useState } from "react";
 import PrimaryText from "../../../../../../component/PrimaryText";
 import styles from "./GemStoneCard.module.scss";
+import { ChevronDown } from "lucide-react";
+
+const AccordionSection = ({ title, children, defaultOpen = false }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  return (
+    <div className={styles.cardBox}>
+      <button
+        className={styles.accordionHeader}
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+      >
+        <PrimaryText size="lg" weight="600" className={styles.cardTitle}>
+          {title}
+        </PrimaryText>
+        <ChevronDown 
+          className={`${styles.accordionIcon} ${isOpen ? styles.iconRotated : ''}`}
+          size={24}
+        />
+      </button>
+
+      <div className={`${styles.accordionContent} ${isOpen ? styles.contentExpanded : ''}`}>
+        {children}
+      </div>
+    </div>
+  );
+};
 
 const GemStoneCard = ({ gem }) => {
   if (!gem) return null;
 
   return (
     <div className={styles.wrapper}>
-      {/* TITLE */}
-      <PrimaryText size="xl" weight="700" className={styles.title}>
-        {gem.name}
-      </PrimaryText>
-
-      <PrimaryText size="md" weight="500" className={styles.subTitle}>
-        Planet: {gem.planet}
-      </PrimaryText>
-
-      {/* DESCRIPTION */}
-      <PrimaryText size="base" className={styles.description}>
-        {gem.description}
-      </PrimaryText>
-
-      {/* BASIC DETAILS CARD */}
-      <div className={styles.cardBox}>
-        <PrimaryText size="lg" weight="600" className={styles.cardTitle}>
-          Basic Details
+      {/* TOP DESCRIPTION CARD */}
+      <div className={styles.topCard}>
+        {/* TITLE */}
+        <PrimaryText size="xl" weight="700" className={styles.title}>
+          {gem.name}
         </PrimaryText>
 
+        <PrimaryText size="md" weight="500" className={styles.subTitle}>
+          Planet: {gem.planet}
+        </PrimaryText>
+
+        {/* DESCRIPTION */}
+        <PrimaryText size="base" className={styles.description}>
+          {gem.description}
+        </PrimaryText>
+      </div>
+
+      {/* BASIC DETAILS CARD */}
+      <AccordionSection title="Basic Details" defaultOpen={false}>
         <div className={styles.grid}>
           <div>
             <strong>Gem:</strong> {gem.gem}
@@ -47,14 +73,10 @@ const GemStoneCard = ({ gem }) => {
             <strong>Metal:</strong> {gem.metal}
           </div>
         </div>
-      </div>
+      </AccordionSection>
 
       {/* SUBSTITUTE */}
-      <div className={styles.cardBox}>
-        <PrimaryText size="lg" weight="600" className={styles.cardTitle}>
-          Substitutes
-        </PrimaryText>
-
+      <AccordionSection title="Substitutes" defaultOpen={false}>
         <div className={styles.rowList}>
           {gem.substitute.map((item, index) => (
             <div key={index} className={`${styles.rowItem} ${styles.subRow}`}>
@@ -62,14 +84,10 @@ const GemStoneCard = ({ gem }) => {
             </div>
           ))}
         </div>
-      </div>
+      </AccordionSection>
 
       {/* NOT TO WEAR WITH */}
-      <div className={styles.cardBox}>
-        <PrimaryText size="lg" weight="600" className={styles.cardTitle}>
-          Not to Wear With
-        </PrimaryText>
-
+      <AccordionSection title="Not to Wear With" defaultOpen={false}>
         <div className={styles.rowList}>
           {gem.not_to_wear_with.map((item, index) => (
             <div key={index} className={`${styles.rowItem} ${styles.notRow}`}>
@@ -77,14 +95,10 @@ const GemStoneCard = ({ gem }) => {
             </div>
           ))}
         </div>
-      </div>
+      </AccordionSection>
 
       {/* GOOD RESULTS */}
-      <div className={styles.cardBox}>
-        <PrimaryText size="lg" weight="600" className={styles.cardTitle}>
-          Good Results
-        </PrimaryText>
-
+      <AccordionSection title="Good Results" defaultOpen={false}>
         <div className={styles.rowList}>
           {gem.good_results.map((item, index) => (
             <div key={index} className={`${styles.rowItem} ${styles.goodRow}`}>
@@ -92,14 +106,10 @@ const GemStoneCard = ({ gem }) => {
             </div>
           ))}
         </div>
-      </div>
+      </AccordionSection>
 
       {/* DISEASES */}
-      <div className={styles.cardBox}>
-        <PrimaryText size="lg" weight="600" className={styles.cardTitle}>
-          Diseases It Helps With
-        </PrimaryText>
-
+      <AccordionSection title="Diseases It Helps With" defaultOpen={false}>
         <div className={styles.rowList}>
           {gem.diseases_cure.map((item, index) => (
             <div key={index} className={`${styles.rowItem} ${styles.disRow}`}>
@@ -107,14 +117,10 @@ const GemStoneCard = ({ gem }) => {
             </div>
           ))}
         </div>
-      </div>
+      </AccordionSection>
 
       {/* FLAW RESULTS */}
-      <div className={styles.cardBox}>
-        <PrimaryText size="lg" weight="600" className={styles.cardTitle}>
-          Flaws & Their Effects
-        </PrimaryText>
-
+      <AccordionSection title="Flaws & Their Effects" defaultOpen={false}>
         <div className={styles.table}>
           {gem.flaw_results.map((row, index) => (
             <div className={styles.tableRow} key={index}>
@@ -123,38 +129,29 @@ const GemStoneCard = ({ gem }) => {
             </div>
           ))}
         </div>
-      </div>
+      </AccordionSection>
 
       {/* TIME TO WEAR */}
-      <div className={styles.cardBox}>
-        <PrimaryText size="lg" weight="600" className={styles.cardTitle}>
-          Time to Wear
-        </PrimaryText>
+      <AccordionSection title="Time to Wear" defaultOpen={false}>
         <PrimaryText marginBottom="5px" size="base">
           {gem.time_to_wear}
         </PrimaryText>
         <PrimaryText marginTop="5px" size="lg">
           In short : {gem.time_to_wear_short}
         </PrimaryText>
-      </div>
+      </AccordionSection>
 
       {/* METHODS */}
-      <div className={styles.cardBox}>
-        <PrimaryText size="lg" weight="600" className={styles.cardTitle}>
-          How to Wear
-        </PrimaryText>
+      <AccordionSection title="How to Wear" defaultOpen={false}>
         <PrimaryText size="base">{gem.methods}</PrimaryText>
-      </div>
+      </AccordionSection>
 
       {/* MANTRA */}
-      <div className={styles.cardBox}>
-        <PrimaryText size="lg" weight="600" className={styles.cardTitle}>
-          Mantra
-        </PrimaryText>
+      <AccordionSection title="Mantra" defaultOpen={false}>
         <PrimaryText size="base" className={styles.mantra}>
           {gem.mantra}
         </PrimaryText>
-      </div>
+      </AccordionSection>
     </div>
   );
 };

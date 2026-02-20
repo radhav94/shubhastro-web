@@ -1,6 +1,12 @@
-
 import { vedicApi } from "../baseApi/vedicApi";
 
+const formatDobParam = (dob) => {
+  if (!dob || typeof dob !== "string") return dob;
+  const parts = dob.split("/");
+  if (parts.length !== 3) return dob;
+  const [day, month, year] = parts;
+  return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
+};
 
 export const planetApi = vedicApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -8,7 +14,7 @@ export const planetApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, planet, lang = "en" }) => ({
         url: "horoscope/planet-report",
         params: {
-          dob,
+          dob: formatDobParam(dob),
           tob,
           lat,
           lon,
@@ -23,7 +29,7 @@ export const planetApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "extended-horoscope/gem-suggestion",
         params: {
-          dob,
+          dob: formatDobParam(dob),
           tob,
           lat,
           lon,
@@ -37,7 +43,7 @@ export const planetApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "extended-horoscope/rudraksh-suggestion",
         params: {
-          dob,
+          dob: formatDobParam(dob),
           tob,
           lat,
           lon,
@@ -50,7 +56,7 @@ export const planetApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "extended-horoscope/yoga-list",
         params: {
-          dob,
+          dob: formatDobParam(dob),
           tob,
           lat,
           lon,
@@ -63,7 +69,7 @@ export const planetApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "dashas/maha-dasha-predictions",
         params: {
-          dob,
+          dob: formatDobParam(dob),
           tob,
           lat,
           lon,

@@ -1,12 +1,13 @@
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useGetKaalSarpDoshQuery } from "../../../../../redux/api/kundli/dashaApi";
 import { useSelector } from "react-redux";
+import { useState } from "react";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
-import styles from "../manglik/Manglik.module.scss";
-import { buildVedicParam } from "../../../../../utils/VedicParams.js/vedicParams";
+import styles from "./KaalSarp.module.scss";
 
 const KaalSarp = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
+  const [isRemediesExpanded, setIsRemediesExpanded] = useState(false);
 
   const queryArgs = formData ? buildVedicParam(formData) : skipToken;
 
@@ -33,56 +34,74 @@ const KaalSarp = () => {
         <div className={styles.headerContent}>
           <h1 className={styles.headerTitle}>Kaal Sarp Dosh Analysis</h1>
 
-          <div className={styles.statsGrid}>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Dosh Present</span>
-              <span className={styles.statValue}>
-                {kaalsarp.is_dosha_present ? "Yes" : "No"}
-              </span>
+          <div className={styles.contentWrapper}>
+            {/* Left Column - Stats Grid */}
+            <div className={styles.leftColumn}>
+              <div className={styles.statsGrid}>
+                <div className={styles.statCard}>
+                  <span className={styles.statLabel}>Dosh Present</span>
+                  <span className={styles.statValue}>
+                    {kaalsarp.is_dosha_present ? "Yes" : "No"}
+                  </span>
+                </div>
+                <div className={styles.statCard}>
+                  <span className={styles.statLabel}>Dosha Type</span>
+                  <span className={styles.statValue}>
+                    {kaalsarp.dosha_type || "--"}
+                  </span>
+                </div>
+                <div className={styles.statCard}>
+                  <span className={styles.statLabel}>Dosha Direction</span>
+                  <span className={styles.statValue}>
+                    {kaalsarp.dosha_direction || "--"}
+                  </span>
+                </div>
+                <div className={styles.statCard}>
+                  <span className={styles.statLabel}>Rahu Ketu Axis</span>
+                  <span className={styles.statValue}>
+                    {kaalsarp.rahu_ketu_axis || "--"}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Dosha Type</span>
-              <span className={styles.statValue}>
-                {kaalsarp.dosha_type || "--"}
-              </span>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Dosha Direction</span>
-              <span className={styles.statValue}>
-                {kaalsarp.dosha_direction || "--"}
-              </span>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Rahu Ketu Axis</span>
-              <span className={styles.statValue}>
-                {kaalsarp.rahu_ketu_axis || "--"}
-              </span>
-            </div>
-          </div>
 
-          {kaalsarp.bot_response && (
-            <div className={styles.summaryCard}>
-              <h3 className={styles.summaryTitle}>Details</h3>
-              <p className={styles.summaryText}>{kaalsarp.bot_response}</p>
-            </div>
-          )}
+            {/* Right Column - Details */}
+            {kaalsarp.bot_response && (
+              <div className={styles.rightColumn}>
+                <div className={styles.summaryCard}>
+                  <h3 className={styles.summaryTitle}>Details</h3>
+                  <p className={styles.summaryText}>{kaalsarp.bot_response}</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Remedies Section */}
       {kaalsarp.remedies?.length > 0 && (
         <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>
-            <span className={styles.sectionIcon}>🙏</span>
-            Remedies
-          </h2>
-          <div className={styles.factorsList}>
-            {kaalsarp.remedies.map((item, i) => (
-              <div key={i} className={styles.factorCard}>
-                <span className={styles.factorIcon}>•</span>
-                <p className={styles.factorText}>{item}</p>
-              </div>
-            ))}
+          <div 
+            className={styles.sectionHeader}
+            onClick={() => setIsRemediesExpanded(!isRemediesExpanded)}
+          >
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionIcon}>🙏</span>
+              Remedies
+            </h2>
+            <span className={`${styles.dropdownArrow} ${isRemediesExpanded ? styles.expanded : ''}`}>
+              ▼
+            </span>
+          </div>
+          <div className={`${styles.collapsibleContent} ${isRemediesExpanded ? styles.expanded : ''}`}>
+            <div className={styles.remediesGrid}>
+              {kaalsarp.remedies.map((item, i) => (
+                <div key={i} className={styles.remedyCard}>
+                  <span className={styles.remedyIcon}>•</span>
+                  <p className={styles.remedyText}>{item}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

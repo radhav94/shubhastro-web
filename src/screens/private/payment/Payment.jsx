@@ -57,7 +57,7 @@ const Payment = () => {
           {allPlans?.map((pack) => (
             <Link
               to="/recharge/payment"
-              state={{ planId: pack.plan_id }}
+              state={{ planId: pack?.plan_id }}
               key={pack._id}
               className={styles.linkWrapper}
             >

@@ -1,15 +1,39 @@
+// Breakpoints
+$mobile: 480px;
+$tablet: 768px;
+$desktop: 1024px;
+
 .container {
   max-width: 480px;
   margin: 0 auto;
-  padding: 10px;
+  padding: 16px;
   text-align: center;
+
+  @media (max-width: $mobile) {
+    padding: 12px;
+    max-width: 100%;
+  }
+
+  @media (min-width: $tablet) {
+    padding: 20px;
+  }
 }
 
 .header {
   font-size: 24px;
   font-weight: 700;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   color: #222;
+
+  @media (max-width: $mobile) {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  @media (min-width: $tablet) {
+    font-size: 28px;
+    margin-bottom: 25px;
+  }
 }
 
 .card {
@@ -18,6 +42,18 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   padding: 20px;
   margin-bottom: 20px;
+
+  @media (max-width: $mobile) {
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  @media (min-width: $tablet) {
+    padding: 24px;
+    margin-bottom: 24px;
+  }
 }
 
 .table {
@@ -29,12 +65,34 @@
     font-size: 15px;
     border-bottom: 1px solid #eee;
     color: #333;
+    text-align: left;
+
+    &:last-child {
+      text-align: right;
+    }
+
+    @media (max-width: $mobile) {
+      padding: 10px 4px;
+      font-size: 14px;
+    }
+
+    @media (min-width: $tablet) {
+      padding: 14px 12px;
+      font-size: 16px;
+    }
   }
 }
 
 .totalRow td {
   background: #fafafa;
   border-bottom: none !important;
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
+
+  @media (max-width: $mobile) {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
 }
 
 .cashbackBox {
@@ -44,8 +102,21 @@
   font-size: 15px;
   font-weight: 500;
   color: #4b4b00;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   border-left: 4px solid #ffe580;
+
+  @media (max-width: $mobile) {
+    padding: 10px 12px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+  }
+
+  @media (min-width: $tablet) {
+    padding: 14px 16px;
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
 }
 
 .chooseText {
@@ -53,41 +124,413 @@
   font-weight: 600;
   margin-bottom: 12px;
   color: #444;
+
+  @media (max-width: $mobile) {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+
+  @media (min-width: $tablet) {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
 }
 
 .payGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 14px;
+
+  @media (max-width: $mobile) {
+    gap: 12px;
+  }
+
+  @media (min-width: $tablet) {
+    gap: 16px;
+  }
 
   button {
     background: white;
     border: 1px solid #e5e5e5;
     border-radius: 12px;
-    padding: 16px 10px;
+    padding: 16px 20px;
     cursor: pointer;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
-    transition: 0.2s ease;
+    transition: all 0.2s ease;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 60px;
+
+    @media (max-width: $mobile) {
+      padding: 14px 16px;
+      border-radius: 10px;
+      gap: 10px;
+      min-height: 56px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    @media (min-width: $tablet) {
+      padding: 18px 24px;
+      min-height: 64px;
+    }
+
+    // Touch-friendly on mobile
+    @media (max-width: $mobile) {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    svg {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+
+      @media (max-width: $mobile) {
+        width: 32px;
+        height: 32px;
+      }
+
+      @media (min-width: $tablet) {
+        width: 40px;
+        height: 40px;
+      }
+    }
 
     img {
       width: 30px;
       height: 30px;
-      margin-bottom: 10px;
+      flex-shrink: 0;
+
+      @media (max-width: $mobile) {
+        width: 28px;
+        height: 28px;
+      }
+
+      @media (min-width: $tablet) {
+        width: 32px;
+        height: 32px;
+      }
     }
 
     span {
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 16px;
+      font-weight: 600;
       color: #333;
+      line-height: 1.4;
+
+      @media (max-width: $mobile) {
+        font-size: 14px;
+      }
+
+      @media (min-width: $tablet) {
+        font-size: 18px;
+      }
     }
 
-    &:hover {
+    &:hover:not(:disabled) {
       background: #f4f7ff;
       border-color: #cfd8ff;
       transform: translateY(-2px);
+
+      @media (max-width: $mobile) {
+        // Reduce transform on mobile for better performance
+        transform: translateY(-1px);
+      }
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .razorpayButton {
+    background: linear-gradient(135deg, #528ff0 0%, #3b5998 100%);
+    border: none;
+    color: white;
+
+    span {
+      color: white;
+    }
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, #4178d4 0%, #2d4373 100%);
+      border-color: transparent;
+    }
+
+    &:active:not(:disabled) {
+      background: linear-gradient(135deg, #3a6bc2 0%, #253559 100%);
+    }
+  }
+
+  .paymentInfo {
+    text-align: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 8px;
+
+    @media (max-width: $mobile) {
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 6px;
+    }
+
+    @media (min-width: $tablet) {
+      padding: 14px;
+      margin-top: 10px;
+    }
+
+    p {
+      font-size: 13px;
+      color: #666;
+      margin: 0;
+      margin-bottom: 4px;
+      line-height: 1.5;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      @media (max-width: $mobile) {
+        font-size: 12px;
+      }
+
+      @media (min-width: $tablet) {
+        font-size: 14px;
+      }
+    }
+
+    .secureText {
+      color: #28a745;
+      font-weight: 500;
+      margin-top: 4px;
+
+      @media (max-width: $mobile) {
+        font-size: 11px;
+      }
+    }
+  }
+}
+
+.loading {
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 16px;
+  color: #666;
+
+  @media (max-width: $mobile) {
+    padding: 30px 16px;
+    font-size: 14px;
+  }
+
+  @media (min-width: $tablet) {
+    padding: 50px 24px;
+    font-size: 18px;
+  }
+}
+
+.errorBox {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+  text-align: center;
+
+  @media (max-width: $mobile) {
+    padding: 12px;
+    margin-top: 12px;
+    border-radius: 6px;
+  }
+
+  @media (min-width: $tablet) {
+    padding: 20px;
+    margin-top: 20px;
+  }
+
+  p {
+    color: #856404;
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    line-height: 1.5;
+
+    @media (max-width: $mobile) {
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    @media (min-width: $tablet) {
+      font-size: 15px;
+      margin-bottom: 14px;
+    }
+  }
+
+  .retryButton {
+    background: #ffc107;
+    color: #000;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    min-height: 44px; // Touch-friendly
+
+    @media (max-width: $mobile) {
+      padding: 10px 20px;
+      font-size: 13px;
+      width: 100%;
+      max-width: 200px;
+    }
+
+    @media (min-width: $tablet) {
+      padding: 12px 28px;
+      font-size: 15px;
+    }
+
+    &:hover {
+      background: #e0a800;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+// Landscape mobile optimization
+@media (max-width: $tablet) and (orientation: landscape) {
+  .container {
+    padding: 12px 16px;
+  }
+
+  .header {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .card {
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+
+  .table td {
+    padding: 8px 4px;
+    font-size: 13px;
+  }
+
+  .cashbackBox {
+    padding: 8px 12px;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .payGrid button {
+    padding: 12px 16px;
+    min-height: 48px;
+  }
+}
+
+// Small mobile devices (< 360px)
+@media (max-width: 360px) {
+  .container {
+    padding: 10px;
+  }
+
+  .header {
+    font-size: 18px;
+  }
+
+  .table td {
+    font-size: 13px;
+    padding: 8px 4px;
+  }
+
+  .payGrid button {
+    padding: 12px 14px;
+    min-height: 52px;
+
+    span {
+      font-size: 13px;
+    }
+
+    svg {
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  .paymentInfo p {
+    font-size: 11px;
+  }
+}
+
+// Large desktop
+@media (min-width: $desktop) {
+  .container {
+    max-width: 520px;
+    padding: 24px;
+  }
+
+  .header {
+    font-size: 30px;
+  }
+
+  .card {
+    padding: 28px;
+  }
+
+  .table td {
+    font-size: 17px;
+    padding: 16px 14px;
+  }
+}
+
+// Print styles
+@media print {
+  .payGrid,
+  .errorBox {
+    display: none;
+  }
+
+  .container {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
+
+// Dark mode support (if needed in future)
+@media (prefers-color-scheme: dark) {
+  // Can add dark mode styles here if needed
+}
+
+// Reduced motion for accessibility
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .payGrid button {
+    &:hover:not(:disabled) {
+      transform: none;
     }
   }
 }

@@ -36,6 +36,7 @@ import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundl
 import GiftModal from "../../../../../component/call/GiftModal";
 import { ProfileManager } from "../../../../../component/UI/Profile";
 import { useChat as useChatContext } from "../../../../../context/ChatContext";
+import RechargeModal from "../../../../../component/recharge-modal/RechargeModal";
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
@@ -60,6 +61,7 @@ const ChatWindow = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showProfileManagerModal, setShowProfileManagerModal] = useState(false);
   const [showGiftModal, setShowGiftModal] = useState(false);
+  const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
   const { activeChat } = useChatContext();
 
   // Check if there's an active video call
@@ -338,7 +340,13 @@ const ChatWindow = () => {
   };
 
   const handleRecharge = () => {
-    navigate('/recharge');
+    setIsRechargeModalOpen(true);
+  };
+
+  const handleRechargeSuccess = (paymentData) => {
+    console.log('Payment successful in chat:');
+    // Wallet balance is already refreshed by the modal
+    refreshWallet();
   };
 
   const handleSelectProfile = (profile) => {
@@ -502,6 +510,14 @@ const ChatWindow = () => {
         astrologerName={fullName}
         roomId={roomId}
         userId={userId}
+      />
+
+      {/* Recharge Modal */}
+      <RechargeModal
+        isOpen={isRechargeModalOpen}
+        onClose={() => setIsRechargeModalOpen(false)}
+        onSuccess={handleRechargeSuccess}
+        title="Recharge to Continue Chat"
       />
     </>
   );
