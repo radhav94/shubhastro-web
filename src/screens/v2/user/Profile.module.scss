@@ -20,25 +20,22 @@
 }
 
 .backButton {
-  width: 48px;
-  height: 48px;
-  background: transparent;
-  border: 1px solid #a4a4a4;
-  border-radius: 50%;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
+  color: #fff;
+  border-radius: 0.5rem;
   transition: all 0.2s;
-  color: #D43400;
-  @media (width <= 767px) {
-    width: 36px;
-    height: 36px;
-  }
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
 
   &:hover {
-    background: #f5f5f5;
+    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
   }
 }
 
@@ -256,7 +253,7 @@
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 30px;
-  padding: 0.75rem 1.5rem;
+  padding: 0.6rem 1.2rem;
   font-size: 0.9375rem;
   font-weight: 500;
   color: #000;
@@ -310,8 +307,8 @@
 }
 
 .avatarCircle {
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: 70px;
   background: #e8e8e8;
   // border: 2px solid #fdefd8;
   border-radius: 16px;
@@ -387,7 +384,7 @@
 }
 
 .profileCardName {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 500;
   color: #000;
   margin: 0;
@@ -395,7 +392,7 @@
 }
 
 .profileCardDate,.profileCardLocation {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #999;
   margin: 0;
   line-height: 1.4;
@@ -415,10 +412,10 @@
 
 // Sticky Add Profile Button
 .stickyButtonContainer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  // position: fixed;
+  // bottom: 0;
+  // left: 0;
+  // right: 0;
   padding: 1rem;
   // background: #F9F4EF;
   z-index: 10;
@@ -858,23 +855,26 @@
 }
 
 .contactSupportButton {
-  width: 100%;
-  background: #2a1c06;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   color: #fff;
   border: none;
-  border-radius: 50px;
-  padding: 1rem 1.5rem;
-  font-size: 1.125rem;
+  border-radius: 30px;
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
+  margin-top: 1rem;
   transition: all 0.2s;
+  margin:  auto;
+  width: fit-content;
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  align-items: center;
+  @media (width <= 767px) {
+    width: 100%;
+  }
 
   &:hover {
-    background: #1a1006;
     transform: translateY(-2px);
   }
 
@@ -1115,22 +1115,22 @@
   }
 }
 
-.contactSupportButton {
-  width: 100%;
-  background: #000;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+// .contactSupportButton {
+//   width: 100%;
+//   background: #000;
+//   color: #fff;
+//   border: none;
+//   border-radius: 12px;
+//   padding: 1rem;
+//   font-size: 1rem;
+//   font-weight: 600;
+//   cursor: pointer;
+//   transition: all 0.2s;
 
-  &:hover {
-    background: #333;
-  }
-}
+//   &:hover {
+//     background: #333;
+//   }
+// }
 
 // Modal
 .modalOverlay {

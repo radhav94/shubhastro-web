@@ -35,18 +35,20 @@ const ClothColorInstructions = () => {
       <div className={styles.content}>
         <h2 className={styles.title}>Before you start</h2>
 
-        <div className={styles.imageWrapper}>
-          <img 
-            src={getAIWowInstructionImage('clothColor')} 
-            alt="Clothes example" 
-            className={styles.clothesImage}
-          />
-          <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
-          <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
-          <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
-          <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
-        </div>
+        <div className={styles.middleContent}>
+          <div className={styles.imageWrapper}>
+            <img 
+              src={getAIWowInstructionImage('clothColor')} 
+              alt="Clothes example" 
+              className={styles.clothesImage}
+            />
+            <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
+            <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
+            <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
+            <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
+          </div>
 
+        <div>
         <div className={styles.checklistSection}>
           <div className={styles.checkItem}>
             <div className={styles.checkIcon}>
@@ -115,6 +117,8 @@ const ClothColorInstructions = () => {
           onChange={handleFileChange}
         />
       </div>
+    </div>
+    </div>
     </div>
   );
 };
