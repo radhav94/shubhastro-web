@@ -277,7 +277,7 @@ const PalmistryCamera = () => {
           <h3 className={styles.errorTitle}>Camera Access Required</h3>
           <p className={styles.errorText}>{error}</p>
           <div className={styles.errorButtons}>
-            <button className={styles.retryButton} onClick={startCamera}>
+            <button className={styles.retryButton} onClick={() => window.location.reload()}>
               Try Again
             </button>
             <button className={styles.backButton} onClick={handleBack}>
@@ -321,6 +321,12 @@ const PalmistryCamera = () => {
               className={styles.detectionCanvas}
             />
             <div className={styles.overlay}>
+              {/* Blur overlays for all four sides */}
+              <div className={styles.blurTop}></div>
+              <div className={styles.blurBottom}></div>
+              <div className={styles.blurLeft}></div>
+              <div className={styles.blurRight}></div>
+              
               {/* Capture area frame - smaller and centered on palm */}
               <div className={styles.captureArea} ref={captureAreaRef}>
                 <div className={`${styles.frameCorner} ${

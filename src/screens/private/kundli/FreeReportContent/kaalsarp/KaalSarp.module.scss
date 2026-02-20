@@ -1,0 +1,420 @@
+// --- Theme Variables ---
+$color-white: #ffffff;
+$color-text-primary: #2d2d2d;
+$color-text-secondary: #666666;
+$color-bg-light: #f5f5f5;
+$color-border: #e0e0e0;
+$color-accent: #ffcb03;
+$font-primary: "Poppins", sans-serif;
+
+// --- Container ---
+.manglikContainer {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: $font-primary;
+  max-width: 1200px;
+
+  @media (max-width: 1024px) {
+    max-width: 1000px;
+  }
+  @media (max-width: 768px) {
+    padding: 0px;
+    max-width: 900px;
+  } 
+}
+
+// --- Header Card ---
+.headerCard {
+  position: relative;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  min-height: 300px;
+}
+
+.headerOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 15px;
+  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
+  background: var(--surface, #FEFEFE);
+}
+
+.headerContent {
+  position: relative;
+  z-index: 1;
+  padding: 24px 20px;
+  color: #ffffff;
+
+  @media (min-width: 768px) {
+    padding: 32px 28px;
+  }
+}
+
+.headerTitle {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 24px 0;
+  color: #2d2d2d;
+
+  @media (min-width: 768px) {
+    font-size: 24px;
+  }
+}
+
+// --- Two Column Layout ---
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    gap: 24px;
+    align-items: flex-start;
+  }
+}
+
+.leftColumn {
+  flex: 1;
+  min-width: 0;
+
+  @media (min-width: 768px) {
+    flex: 0 0 58%;
+  }
+}
+
+.rightColumn {
+  flex: 1;
+  min-width: 0;
+
+  @media (min-width: 768px) {
+    flex: 0 0 38%;
+  }
+}
+
+// --- Stats Grid ---
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (min-width: 768px) {
+    gap: 16px;
+  }
+}
+
+.statCard {
+  border-radius: 15px;
+  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
+  background: var(--surface, #FEFEFE);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  @media (min-width: 768px) {
+    padding: 20px;
+  }
+}
+
+.statLabel {
+  font-size: 12px;
+  color: #2d2d2d;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  @media (min-width: 768px) {
+    font-size: 13px;
+  }
+}
+
+.statValue {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2d2d2d;
+
+  @media (min-width: 768px) {
+    font-size: 22px;
+  }
+}
+
+// --- Summary Card ---
+.summaryCard {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.5));
+  height: 100%;
+
+  @media (min-width: 768px) {
+    padding: 20px;
+  }
+}
+
+.summaryTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d2d2d;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  @media (min-width: 768px) {
+    font-size: 15px;
+    margin-bottom: 16px;
+  }
+}
+
+.summaryText {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #2d2d2d;
+  margin: 0;
+
+  @media (min-width: 768px) {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+}
+
+// --- Section ---
+.section {
+  margin-bottom: 24px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  padding: 12px 16px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid $color-border;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #f9f9f9;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  @media (min-width: 768px) {
+    padding: 16px 20px;
+  }
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  @media (min-width: 768px) {
+    font-size: 22px;
+  }
+}
+
+.sectionIcon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.dropdownArrow {
+  font-size: 14px;
+  color: $color-text-secondary;
+  transition: transform 0.3s ease;
+  display: inline-block;
+
+  &.expanded {
+    transform: rotate(180deg);
+  }
+}
+
+// --- Collapsible Content ---
+.collapsibleContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-in-out, opacity 0.3s ease;
+  opacity: 0;
+
+  &.expanded {
+    max-height: 2000px;
+    opacity: 1;
+  }
+}
+
+// --- Remedies Grid (3 columns) ---
+.remediesGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  padding: 4px 0;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+}
+
+.remedyCard {
+  background: #fff9e6;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid #ffe066;
+  transition: all 0.2s ease;
+  height: 100%;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  @media (min-width: 768px) {
+    padding: 18px 20px;
+  }
+}
+
+.remedyIcon {
+  font-size: 20px;
+  color: #f59e0b;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.remedyText {
+  font-size: 14px;
+  line-height: 1.6;
+  color: $color-text-primary;
+  margin: 0;
+  flex: 1;
+
+  @media (min-width: 768px) {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+}
+
+// --- Factors List (kept for other sections) ---
+.factorsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.factorCard {
+  background: #fff9e6;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid #ffe066;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  @media (min-width: 768px) {
+    padding: 18px 20px;
+  }
+}
+
+.factorIcon {
+  font-size: 20px;
+  color: #f59e0b;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.factorText {
+  font-size: 14px;
+  line-height: 1.6;
+  color: $color-text-primary;
+  margin: 0;
+  flex: 1;
+
+  @media (min-width: 768px) {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+}
+
+// --- Aspects List ---
+.aspectsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aspectCard {
+  background: #fff9e6;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid #ffe066;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  @media (min-width: 768px) {
+    padding: 18px 20px;
+  }
+}
+
+.aspectIcon {
+  font-size: 20px;
+  color: #f59e0b;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.aspectText {
+  font-size: 14px;
+  line-height: 1.6;
+  color: $color-text-primary;
+  margin: 0;
+  flex: 1;
+
+  @media (min-width: 768px) {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+}
+
+// --- Empty State ---
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: $color-text-secondary;
+  font-size: 16px;
+}

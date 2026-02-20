@@ -107,11 +107,67 @@
   justify-content: center;
 }
 
+.blurTop,
+.blurBottom,
+.blurLeft,
+.blurRight {
+  position: absolute;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+.blurTop {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc((100vh - min(70vw * 4 / 3, 350px * 4 / 3)) / 2);
+  
+  @media (min-width: 768px) {
+    height: calc((100vh - min(50vw * 4 / 3, 400px * 4 / 3)) / 2);
+  }
+}
+
+.blurBottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc((100vh - min(70vw * 4 / 3, 350px * 4 / 3)) / 2);
+  
+  @media (min-width: 768px) {
+    height: calc((100vh - min(50vw * 4 / 3, 400px * 4 / 3)) / 2);
+  }
+}
+
+.blurLeft {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc((100vw - min(70vw, 350px)) / 2);
+  
+  @media (min-width: 768px) {
+    width: calc((100vw - min(50vw, 400px)) / 2);
+  }
+}
+
+.blurRight {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: calc((100vw - min(70vw, 350px)) / 2);
+  
+  @media (min-width: 768px) {
+    width: calc((100vw - min(50vw, 400px)) / 2);
+  }
+}
+
 .captureArea {
   position: relative;
   width: 70%;
   max-width: 350px;
   aspect-ratio: 3/4;
+  z-index: 2;
   
   @media (min-width: 768px) {
     width: 50%;

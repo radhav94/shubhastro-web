@@ -6,6 +6,14 @@ const formatDate = (dateString) => {
   return `${day}/${month}/${year}`;
 };
 
+const formatDobParam = (dob) => {
+  if (!dob || typeof dob !== "string") return dob;
+  const parts = dob.split("/");
+  if (parts.length !== 3) return dob;
+  const [day, month, year] = parts;
+  return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
+};
+
 export const dashaApi = vedicApi.injectEndpoints({
   endpoints: (builder) => ({
     getMahaDashaPredictions: builder.query({
@@ -25,7 +33,7 @@ export const dashaApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "dosha/manglik-dosh",
         params: {
-          dob,
+          dob: formatDobParam(dob),
           tob,
           lat,
           lon,
@@ -38,7 +46,7 @@ export const dashaApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "dosha/kaalsarp-dosh",
         params: {
-          dob,
+          dob: formatDobParam(dob),
           tob,
           lat,
           lon,
@@ -51,7 +59,7 @@ export const dashaApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "dosha/mangal-dosh",
         params: {
-          dob,
+          dob: formatDobParam(dob),
           tob,
           lat,
           lon,
@@ -64,7 +72,7 @@ export const dashaApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "dosha/pitra-dosh",
         params: {
-          dob,
+          dob: formatDobParam(dob),
           tob,
           lat,
           lon,
@@ -77,7 +85,7 @@ export const dashaApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "extended-horoscope/current-sade-sati",
         params: {
-          dob,
+          dob: formatDobParam(dob),
           tob,
           lat,
           lon,
@@ -90,7 +98,7 @@ export const dashaApi = vedicApi.injectEndpoints({
       query: ({ dob, tob, lat, lon, tz, lang = "en" }) => ({
         url: "extended-horoscope/sade-sati-table",
         params: {
-          dob,
+          dob: formatDobParam(dob),
           tob,
           lat,
           lon,

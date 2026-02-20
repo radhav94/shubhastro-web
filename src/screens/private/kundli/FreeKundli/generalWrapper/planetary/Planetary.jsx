@@ -4,6 +4,7 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import { useGetPlanetReportQuery } from "../../../../../../redux/api/kundli/planetApi";
 import PrimaryLoader from "../../../../../../component/UI/PrimaryLoader";
 import PlanetaryCard from "./PlanetaryCard";
+import { buildVedicParam } from "../../../../../../utils/VedicParams.js/vedicParams";
 
 // List of all planets to fetch
 const PLANETS = [
@@ -22,20 +23,7 @@ const Planetary = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
 
   // Common args
-  const baseArgs = formData
-    ? {
-        dob: `${String(formData.day).padStart(2, "0")}/${String(
-          formData.month
-        ).padStart(2, "0")}/${formData.year}`,
-        tob: `${String(formData.hour).padStart(2, "0")}:${String(
-          formData.min
-        ).padStart(2, "0")}`,
-        lat: formData.lat,
-        lon: formData.lon,
-        tz: formData.tzone,
-        lang: "en",
-      }
-    : skipToken;
+  const baseArgs = formData ? buildVedicParam(formData) : skipToken;
 
   // Fetch each planet report
   const planetQueries = PLANETS.map((planet) =>
