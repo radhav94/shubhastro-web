@@ -11,8 +11,12 @@
 
 .onboardingContainer {
   min-height: 100vh;
-  background: linear-gradient(180deg, #3d2817 0%, #1a1410 100%);
+  background: #f5f5f5;
   position: relative;
+  margin: 0 auto;
+  max-width: 1200px;
+  padding:16px;
+  // border-radius: 12px;
   // padding-top: 67px; // Space for fixed header
 }
 
@@ -509,10 +513,11 @@
 // Birth Details & Form Screens
 .birthDetailsScreen,
 .personalizeScreen {
-  min-height: 100vh;
+  min-height: calc(100vh - 32px);
   display: flex;
   flex-direction: column;
   background: #fff;
+  border-radius: 12px;
 }
 
 .formGroup {
@@ -629,7 +634,7 @@
   color: #2c2c2c;
 
   &.active {
-    border-color: #3d2817;
+    border-color: #f35401;
     transform: scale(1.02);
   }
 
