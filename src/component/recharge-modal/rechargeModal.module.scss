@@ -1,0 +1,585 @@
+// Modal Overlay
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Modal Container
+.modalContainer {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Modal Header
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.modalTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover:not(:disabled) {
+    background-color: #f3f4f6;
+    color: #111827;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Modal Body
+.modalBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  min-height: 200px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+
+    &:hover {
+      background: #9ca3af;
+    }
+  }
+}
+
+// Plans Container
+.plansContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  padding: 4px;
+}
+
+// Plan Card
+.planCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #ffffff;
+  position: relative;
+  min-height: 140px;
+
+  &:hover {
+    border-color: #ff6b35;
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.1);
+    transform: translateY(-4px);
+  }
+
+  &.selected {
+    border-color: #ff6b35;
+    background: linear-gradient(135deg, #fff5f2 0%, #ffffff 100%);
+    box-shadow: 0 4px 16px rgba(255, 107, 53, 0.15);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #ff6b35;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+  }
+
+  &.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}
+
+// Selection Indicator
+.selectionIndicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.radioButton {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  background: #ffffff;
+
+  .planCard.selected & {
+    border-color: #ff6b35;
+    background: #ff6b35;
+  }
+}
+
+.radioInner {
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border-radius: 50%;
+}
+
+// Plan Content
+.planContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  text-align: center;
+}
+
+.priceSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.mainPrice {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+.extraAmount {
+  font-size: 13px;
+  font-weight: 600;
+  color: #10b981;
+  background: #d1fae5;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.totalAmount {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.description {
+  font-size: 12px;
+  color: #4b5563;
+  line-height: 1.4;
+  display: none; // Hide in grid view
+}
+
+.validity {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #6b7280;
+
+  svg {
+    color: #9ca3af;
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.features {
+  display: none; // Hide in grid view
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #4b5563;
+
+  svg {
+    color: #10b981;
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.bestValueBadge {
+  position: absolute;
+  top: -1px;
+  right: 12px;
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 0 0 6px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// Modal Footer
+.modalFooter {
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.payButton {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Loading State
+.loadingContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  padding: 4px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  @media (min-width: 641px) and (max-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.skeletonCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+  min-height: 140px;
+  align-items: center;
+
+  @media (max-width: 640px) {
+    padding: 12px;
+    min-height: 120px;
+  }
+}
+
+.skeletonRadio {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  align-self: flex-end;
+}
+
+.skeletonContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.skeletonPrice {
+  width: 80px;
+  height: 28px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonText {
+  width: 100%;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+
+  &:last-child {
+    width: 70%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// Error State
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.errorIcon {
+  margin-bottom: 16px;
+  color: #ef4444;
+}
+
+.errorMessage {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0 0 20px 0;
+}
+
+.retryButton {
+  padding: 10px 24px;
+  background: #ff6b35;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #ff8c5a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+  }
+}
+
+// Empty State
+.emptyContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.emptyIcon {
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.emptyMessage {
+  font-size: 16px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+// Responsive Design
+@media (max-width: 640px) {
+  .modalOverlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modalContainer {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 20px 20px 0 0;
+    animation: slideUpMobile 0.3s ease-out;
+  }
+
+  @keyframes slideUpMobile {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .modalHeader {
+    padding: 16px 20px;
+  }
+
+  .modalTitle {
+    font-size: 18px;
+  }
+
+  .modalBody {
+    padding: 20px;
+  }
+
+  // Mobile: 2 columns
+  .plansContainer {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .planCard {
+    padding: 12px;
+    min-height: 120px;
+  }
+
+  .mainPrice {
+    font-size: 22px;
+  }
+
+  .extraAmount {
+    font-size: 11px;
+    padding: 2px 6px;
+  }
+
+  .totalAmount {
+    font-size: 11px;
+  }
+
+  .validity {
+    font-size: 10px;
+  }
+
+  .modalFooter {
+    padding: 16px 20px;
+  }
+
+  .payButton {
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  .bestValueBadge {
+    font-size: 9px;
+    padding: 2px 8px;
+  }
+}
+
+// Tablet: 3 columns
+@media (min-width: 641px) and (max-width: 1024px) {
+  .plansContainer {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// Desktop: 4+ columns
+@media (min-width: 1025px) {
+  .plansContainer {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}
