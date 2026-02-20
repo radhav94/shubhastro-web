@@ -3,30 +3,17 @@ import { useGetSadesatiQuery } from "../../../redux/api/kundli/dashaApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import styles from "./Sadesati.module.scss";
 import { getToken } from "../../../utils/token";
-
 import { FaClock, FaMoon, FaUserClock, FaBookReader } from "react-icons/fa";
 import { GiStonePath, GiMeditation } from "react-icons/gi";
 import { MdOutlineTipsAndUpdates } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import { buildVedicParam } from "../../../utils/VedicParams.js/vedicParams";
 
 const Sadesati = () => {
   const navigate = useNavigate();
   const formData = useSelector((state) => state?.form?.kundliPayload);
 
-  const queryArgs = {
-    dob: formData
-      ? `${formData.day}/${formData.month}/${formData.year}`
-      : "12/12/1999",
-    tob: formData
-      ? `${String(formData.hour).padStart(2, "0")}:${String(
-          formData.min
-        ).padStart(2, "0")}`
-      : "12:12",
-    lat: formData?.lat || 18.23,
-    lon: formData?.lon || 71.34,
-    tz: formData?.tzone || 5.5,
-    lang: "en",
-  };
+  const queryArgs = formData ? buildVedicParam(formData) : null;
 
   const { data, isLoading } = useGetSadesatiQuery(queryArgs);
   const sadesati = data?.response;

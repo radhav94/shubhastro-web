@@ -10,18 +10,7 @@ const Pitra = () => {
   const [isEffectsExpanded, setIsEffectsExpanded] = useState(false);
   const [isRemediesExpanded, setIsRemediesExpanded] = useState(false);
 
-  const queryArgs = formData
-    ? {
-      dob: `${formData.day}/${formData.month}/${formData.year}`,
-      tob: `${String(formData.hour).padStart(2, "0")}:${String(
-        formData.min
-      ).padStart(2, "0")}`,
-      lat: formData.lat,
-      lon: formData.lon,
-      tz: formData.tzone,
-      lang: "en",
-    }
-    : skipToken;
+  const queryArgs = formData ? buildVedicParam(formData) : skipToken;
 
   const { data, isLoading } = useGetPitraDoshQuery(queryArgs);
   const pitra = data?.response;

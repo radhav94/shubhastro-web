@@ -9,18 +9,7 @@ const KaalSarp = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
   const [isRemediesExpanded, setIsRemediesExpanded] = useState(false);
 
-  const queryArgs = formData
-    ? {
-      dob: `${formData.day}/${formData.month}/${formData.year}`,
-      tob: `${String(formData.hour).padStart(2, "0")}:${String(
-        formData.min
-      ).padStart(2, "0")}`,
-      lat: formData.lat,
-      lon: formData.lon,
-      tz: formData.tzone,
-      lang: "en",
-    }
-    : skipToken;
+  const queryArgs = formData ? buildVedicParam(formData) : skipToken;
 
   const { data, isLoading } = useGetKaalSarpDoshQuery(queryArgs);
   const kaalsarp = data?.response;
