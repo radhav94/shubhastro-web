@@ -85,7 +85,7 @@ const NewAstrologerDetailsCard = ({
 
         {/* Languages */}
         <div className={styles.detailsLanguages}>
-          {(astrologer?.languagePreferences).map((lang, index) => (
+          {astrologer?.languagePreferences?.map((lang, index) => (
             <span key={index} className={styles.detailsLanguageBadge}>
               {lang.languageName}
             </span>
