@@ -106,11 +106,11 @@
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.3s ease;
-  scroll-snap-align: center;
+  // scroll-snap-align: center;
 
-  &:hover {
-    transform: scale(1.02);
-  }
+  // &:hover {
+  //   transform: scale(1.02);
+  // }
 }
 
 .imageWrapper {
@@ -136,9 +136,9 @@
   object-fit: cover;
   transition: transform 0.3s ease;
 
-  .blogCard:hover & {
-    transform: scale(1.05);
-  }
+  // .blogCard:hover & {
+  //   transform: scale(1.05);
+  // }
 }
 
 .overlay {
