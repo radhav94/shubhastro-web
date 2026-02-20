@@ -38,6 +38,7 @@ import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect"
 // import RecommendedAstrologerCard from "../../../component/UI/cards/RecommendedAstrologerCard";
 // import TopAstrologerCard from "../../../component/UI/cards/TopAstrologerCard";
 import NewAstrologerCard from "../../../component/UI/cards/newAstrologerCard/NewAstrologerCard";
+import NewAstrologerDetailsCard from "../../../component/UI/cards/newAstrologerCard/NewAstrologerDetailsCard";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -57,8 +58,8 @@ const TalkToAstrologer = () => {
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showRecommend, setShowRecommend] = useState(true);
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
-  const [showFilterAstrologer,setShowFilterAstrologer] = useState(false)
-  
+  const [showFilterAstrologer, setShowFilterAstrologer] = useState(false);
+
   // NEW: Store the connection type when opening ProfileManager
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
 
@@ -405,7 +406,7 @@ const TalkToAstrologer = () => {
     // The astrologer is already stored in selectedAstrologer state and activeCallAstroRef
     // The connectionType is stored in pendingConnectionType
     // Now we need to perform the same validations as the normal flow
-    
+
     if (selectedAstrologer && pendingConnectionType) {
       // Call the appropriate handler based on connection type
       // This ensures all validations (balance check, online check) are performed
@@ -414,11 +415,11 @@ const TalkToAstrologer = () => {
       } else if (pendingConnectionType === "audio") {
         hookHandleCallStart(selectedAstrologer, "audio");
       }
-      
+
       // Clear the pending connection type
       setPendingConnectionType(null);
     }
-    
+
     // OLD LOGIC (commented out): This was bypassing validations
     // hookHandleAfterKundliSelect(selectedProfile);
   };
@@ -431,7 +432,7 @@ const TalkToAstrologer = () => {
       navigate("/login?skip=welcome");
       return;
     }
-    
+
     if (WaitingList || callWaitingList) {
       Toast.error(
         "You are already waiting for an astrologer. Please cancel the current request first.",
@@ -537,7 +538,7 @@ const TalkToAstrologer = () => {
       resetCallFlow();
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
-      console.log(kundliId, "kundli")
+      console.log(kundliId, "kundli");
 
       try {
         // const res = await createChatRoom({
@@ -560,7 +561,7 @@ const TalkToAstrologer = () => {
           kundliId,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
-          experience: astro?.experience
+          experience: astro?.experience,
         });
       } catch {
         Toast.error("Failed to start call");
@@ -664,7 +665,6 @@ const TalkToAstrologer = () => {
     };
   }, [userIdLocal, isRecommendModalOpen]);
 
-  
   //JSX
   return (
     <div className={styles.mainContainer}>
@@ -821,8 +821,9 @@ const TalkToAstrologer = () => {
 
       <div className={styles.cardsContainer}>
         {allAstrologers?.map((astro, index) => (
-          <div key={astro._id} className={styles.cardWrapper}>
-            {/* {isChatMode ? (
+          <>
+            <div key={astro._id} className={styles.cardWrapper}>
+              {/* {isChatMode ? (
               <ChatAstrologerCard
                 data={astro}
                 onConnect={() => {
@@ -853,16 +854,11 @@ const TalkToAstrologer = () => {
               />
             )} */}
 
-
-            <ChatAstrologerCard
-                data={astro}
-                onConnect={() => {
-                  setSelectedAstrologer(astro);
-                  setIsConnectPopupOpen(true);
-                  activeCallAstroRef.current = astro;
-                }}
-              />
-          </div>
+              <NewAstrologerDetailsCard key={astro._id}
+                astrologer={astro}
+                onConnect={handleConnectClick} />
+            </div>
+          </>
         ))}
 
         {isFetching && (
