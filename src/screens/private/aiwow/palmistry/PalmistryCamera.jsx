@@ -321,6 +321,12 @@ const PalmistryCamera = () => {
               className={styles.detectionCanvas}
             />
             <div className={styles.overlay}>
+              {/* Blur overlays for all four sides */}
+              <div className={styles.blurTop}></div>
+              <div className={styles.blurBottom}></div>
+              <div className={styles.blurLeft}></div>
+              <div className={styles.blurRight}></div>
+              
               {/* Capture area frame - smaller and centered on palm */}
               <div className={styles.captureArea} ref={captureAreaRef}>
                 <div className={`${styles.frameCorner} ${
