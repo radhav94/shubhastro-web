@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./Rudraksha.module.scss";
 import PrimaryText from "../../../../../../component/PrimaryText";
+import { ChevronDown } from "lucide-react";
 
 const RudrakshaCard = ({ data }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   if (!data) return null;
 
   const {
@@ -15,38 +18,53 @@ const RudrakshaCard = ({ data }) => {
 
   return (
     <div className={styles.wrapper}>
-      <h1 className={styles.title}>{name}</h1>
+      <div className={styles.accordionCard}>
+        <button
+          className={styles.accordionHeader}
+          onClick={() => setIsOpen(!isOpen)}
+          aria-expanded={isOpen}
+        >
+          <h1 className={styles.title}>{name}</h1>
+          <ChevronDown 
+            className={`${styles.accordionIcon} ${isOpen ? styles.iconRotated : ''}`}
+            size={24}
+          />
+        </button>
 
-      <div className={styles.section}>
-        <h2 className={styles.label}>Description:</h2>
-        <p className={styles.value}>{mukhi_description}</p>
-      </div>
+        <div className={`${styles.accordionContent} ${isOpen ? styles.contentExpanded : ''}`}>
+          <div className={styles.section}>
+            <h2 className={styles.label}>Description:</h2>
+            <p className={styles.value}>{mukhi_description}</p>
+          </div>
 
-      <div className={styles.section}>
-        <h2 className={styles.label}>For Disease Cure:</h2>
-        <div className={styles.valueBadges}>
-          {mukhi_for_disease_cure?.map((num, index) => (
-            <PrimaryText key={index} className={styles.badgeRed}>
-              {num} Mukhi
-            </PrimaryText>
-          ))}
+          <div className={styles.section}>
+            <h2 className={styles.label}>For Disease Cure:</h2>
+            <div className={styles.valueBadges}>
+              {mukhi_for_disease_cure?.map((num, index) => (
+                <PrimaryText key={index} className={styles.badgeRed}>
+                  {num} Mukhi
+                </PrimaryText>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.section}>
+            <h2 className={styles.label}>
+              For Money & Prosperity:
+            </h2>
+            <div className={styles.valueBadges}>
+              {mukhi_for_money?.map((num, index) => (
+                <PrimaryText key={index} className={styles.badgeGreen}>
+                  {num} Mukhi
+                </PrimaryText>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className={styles.section}>
-        <h2 className={styles.label}>
-          For Money & Prosperity:
-        </h2>
-        <div className={styles.valueBadges}>
-          {mukhi_for_money?.map((num, index) => (
-            <PrimaryText key={index} className={styles.badgeGreen}>
-              {num} Mukhi
-            </PrimaryText>
-          ))}
-        </div>
-      </div>
-
-      <div className={styles.section}>
+      {/* AI Recommendation - Outside Dropdown */}
+      <div className={styles.aiSection}>
         <h2 className={styles.label}>
           AI Recommendation:
         </h2>

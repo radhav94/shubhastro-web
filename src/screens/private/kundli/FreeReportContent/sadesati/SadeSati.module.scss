@@ -52,6 +52,38 @@
   }
 }
 
+/* TWO COLUMN LAYOUT */
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+}
+
+.leftColumn {
+  flex: 0 0 auto;
+  min-width: 0;
+
+  @media (min-width: 768px) {
+    flex: 0 0 48%;
+  }
+}
+
+.rightColumn {
+  flex: 1;
+  min-width: 0;
+
+  @media (min-width: 768px) {
+    flex: 0 0 48%;
+  }
+}
+
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -117,11 +149,30 @@
 .section {
   background: #ffffff;
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: 0;
   margin-bottom: 1.5rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
   @media (width <= 768px) {
     border-radius: 12px;
+  }
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  padding: 1.25rem 1.5rem;
+  background: #fff;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #f9f9f9;
+  }
+
+  @media (width <= 768px) {
     padding: 1rem;
   }
 }
@@ -133,11 +184,40 @@
   font-size: 1.25rem;
   font-weight: 700;
   color: #2d3748;
-  margin-bottom: 1.25rem;
+  margin: 0;
 }
 
 .sectionIcon {
   font-size: 1.5rem;
+}
+
+.dropdownArrow {
+  font-size: 14px;
+  color: #718096;
+  transition: transform 0.3s ease;
+  display: inline-block;
+
+  &.expanded {
+    transform: rotate(180deg);
+  }
+}
+
+/* COLLAPSIBLE CONTENT */
+.collapsibleContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-in-out, opacity 0.3s ease;
+  opacity: 0;
+
+  &.expanded {
+    max-height: 2000px;
+    opacity: 1;
+    padding: 0 1.5rem 1.5rem 1.5rem;
+
+    @media (width <= 768px) {
+      padding: 0 1rem 1rem 1rem;
+    }
+  }
 }
 
 /* REMEDIES GRID */
