@@ -109,10 +109,10 @@ const PalmistryAnalysis = () => {
 
   return (
     <div className={styles.container}>
+      <h2 className={styles.title}>
+        {error ? 'Analysis Failed' : 'Analysing Palm'}
+      </h2>
       <div className={styles.content}>
-        <h2 className={styles.title}>
-          {error ? 'Analysis Failed' : 'Analysing Palm'}
-        </h2>
 
         <div className={styles.imagesWrapper}>
           <div className={styles.imageWrapper}>

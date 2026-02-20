@@ -24,26 +24,28 @@
 }
 
 .backButton {
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   border: none;
   cursor: pointer;
   padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #fff;
   border-radius: 0.5rem;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
   }
 }
-
 .title {
   font-size: 1rem;
   font-weight: 600;
-  color: white;
+  color: #333;
   margin: 0;
 }
 
@@ -93,8 +95,14 @@
 
 .content {
   max-width: 800px;
-  margin: 0 auto;
+  margin: 16px auto;
   padding: 1rem;
+  background-color: #fff;
+  border-radius: 12px;
+  @media (width <= 767px) {
+    margin: 0px auto;
+    border-radius: 12px;
+  }
 }
 
 .imageSection {
@@ -265,7 +273,7 @@
 
 .list {
   margin: 0;
-  padding-left: 1.25rem;
+  // padding-left: 1.25rem;
   
   li {
     font-size: 0.9375rem;
@@ -311,21 +319,25 @@
   margin-bottom: 1rem;
   box-shadow: 0 2px 8px rgba(247, 88, 1, 0.15);
 }
-
+.tabsContainerWrap{
+  background-color: #fff;
+}
 .tabsContainer {
   position: sticky;
   top: 57px;
   left: 0;
   right: 0;
   background: white;
-  border-bottom: 2px solid rgba(247, 88, 1, 0.1);
+  // border-bottom: 2px solid rgba(247, 88, 1, 0.1);
   display: flex;
   justify-content: space-around;
-  padding: 0.5rem;
+  padding: 6px 16px 0px 16px;
   z-index: 9;
-  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
+  // box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  max-width: 1200px;
+  margin: 0 auto;
 
   &::-webkit-scrollbar {
     display: none;
@@ -366,9 +378,9 @@
     padding: 2rem;
   }
 
-  .header {
-    padding: 1rem 2rem;
-  }
+  // .header {
+  //   padding: 1rem 2rem;
+  // }
 
   .title {
     font-size: 1.125rem;
@@ -379,9 +391,9 @@
     padding: 0.75rem 1rem;
   }
 
-  .tabsContainer {
-    padding: 0.75rem 1rem;
-  }
+  // .tabsContainer {
+  //   padding: 0.75rem 1rem;
+  // }
 }
 
 .noDataCard {

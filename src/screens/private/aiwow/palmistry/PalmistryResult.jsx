@@ -126,13 +126,15 @@ const PalmistryResult = () => {
   if (error || !resultData) {
     return (
       <div className={styles.container}>
-        <header className={styles.header}>
+        <header className={styles.headerWrap}>
+        <div className={styles.header}>
           <button className={styles.backButton} onClick={() => navigate('/aiwow')}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
           <h1 className={styles.title}>Palmistry Analysis</h1>
+          </div>
         </header>
         <div className={styles.errorContainer}>
           <p className={styles.errorText}>
@@ -170,13 +172,15 @@ const PalmistryResult = () => {
     
     return (
       <div className={styles.container}>
-        <header className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate('/aiwow')}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-          <h1 className={styles.title}>Palmistry Analysis</h1>
+        <header className={styles.headerWrap}>
+          <div className={styles.header}>
+            <button className={styles.backButton} onClick={() => navigate('/aiwow')}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <h1 className={styles.title}>Palmistry Analysis</h1>
+          </div>
         </header>
         <div className={styles.errorContainer}>
           <p className={styles.errorText}>
@@ -192,15 +196,18 @@ const PalmistryResult = () => {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
+      <header className={styles.headerWrap}>
+      <div className={styles.header}>
         <button className={styles.backButton} onClick={() => navigate('/aiwow')}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
         <h1 className={styles.title}>Palmistry Analysis</h1>
+        </div>
       </header>
 
+      <div className={styles.tabsContainerWrap}>
       <div className={styles.tabsContainer}>
         {tabs.map(tab => (
           <button
@@ -211,6 +218,7 @@ const PalmistryResult = () => {
             {tab.label}
           </button>
         ))}
+      </div>
       </div>
 
       <div className={styles.content}>
