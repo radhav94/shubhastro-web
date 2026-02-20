@@ -293,7 +293,7 @@ export const useRazorpayPayment = () => {
    */
   const handlePaymentFailure = useCallback(async (error, backendOrderId, planId, onFailure) => {
     clearPaymentTimeout();
-    closeRazorpayModal();
+    closeRazorpayModal(); // Close the Razorpay window immediately
     
     // Prevent duplicate API calls
     if (orderStatusUpdatedRef.current) {
@@ -389,8 +389,7 @@ export const useRazorpayPayment = () => {
         backdropclose: false,
       },
       retry: {
-        enabled: true,
-        max_count: 3,
+        enabled: false, // Disable retry to prevent retrying failed payments
       },
       timeout: PAYMENT_TIMEOUT / 1000, // Convert to seconds
     };
@@ -408,8 +407,15 @@ export const useRazorpayPayment = () => {
       const razorpayInstance = new window.Razorpay(options);
       razorpayInstanceRef.current = razorpayInstance;
 
-      // Handle payment failure event
+      // Handle payment failure event - close modal immediately
       razorpayInstance.on("payment.failed", (response) => {
+        // Close the Razorpay modal immediately on failure
+        try {
+          razorpayInstance.close();
+        } catch (closeError) {
+          console.error("[Razorpay] Error closing modal on failure:", closeError);
+        }
+        
         handlePaymentFailure(response.error, backendOrderId, planId, onFailure);
       });
 
