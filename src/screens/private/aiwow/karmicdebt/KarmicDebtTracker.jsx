@@ -3,34 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import styles from './KarmicDebtTracker.module.scss';
 import { Toast } from '../../../../component';
 import { analyzeKarmicDebt } from '../../../../services/appServices/aiWowService';
+import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
+import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 
 const KarmicDebtTracker = () => {
   const navigate = useNavigate();
-  const [selectedProfile, setSelectedProfile] = useState(null);
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
 
-  useEffect(() => {
-    const profileData = localStorage.getItem('selectedKundliProfile');
-    if (!profileData) {
-      Toast.error('Please select a kundli profile first');
-      navigate('/aiwow', { replace: true });
-      return;
-    }
-
-    try {
-      const profile = JSON.parse(profileData);
-      setSelectedProfile(profile);
-    } catch (error) {
-      console.error('Invalid profile data:', error);
-      Toast.error('Invalid profile data. Please select again.');
-      localStorage.removeItem('selectedKundliProfile');
-      navigate('/aiwow', { replace: true });
-    }
-  }, [navigate]);
-
   const handleAnalyze = async () => {
-    if (!selectedProfile) {
+    if (!profile) {
       Toast.error('Profile not found');
       return;
     }
@@ -39,18 +23,18 @@ const KarmicDebtTracker = () => {
       setIsLoading(true);
 
       const data = {
-        name: selectedProfile.name,
-        gender: selectedProfile.identity?.toLowerCase() || 'male',
-        day: selectedProfile.day,
-        month: selectedProfile.month,
-        year: selectedProfile.year,
-        hour: selectedProfile.hour || 0,
-        min: selectedProfile.minute || 0,
+        name: profile.name,
+        gender: profile.identity?.toLowerCase() || 'male',
+        day: profile.day,
+        month: profile.month,
+        year: profile.year,
+        hour: profile.hour || 0,
+        min: profile.minute || 0,
         second: 0,
-        place: selectedProfile.place || '',
-        lat: selectedProfile.lat || 0,
-        lon: selectedProfile.lon || 0,
-        tzone: selectedProfile.timezone || 5.5
+        place: profile.place || '',
+        lat: profile.lat || 0,
+        lon: profile.lon || 0,
+        tzone: profile.timezone || 5.5
       };
 
       const result = await analyzeKarmicDebt(data);
@@ -73,7 +57,6 @@ const KarmicDebtTracker = () => {
     if (analysis) {
       setAnalysis(null);
     } else {
-      localStorage.removeItem('selectedKundliProfile');
       navigate(-1);
     }
   };
@@ -81,6 +64,10 @@ const KarmicDebtTracker = () => {
   const handleNewAnalysis = () => {
     setAnalysis(null);
   };
+
+  if (profileLoading) {
+    return <PrimaryLoader isLoading={true} />;
+  }
 
   return (
     <div className={styles.container}>
@@ -93,8 +80,8 @@ const KarmicDebtTracker = () => {
         </button>
         <div className={styles.headerInfo}>
           <h1 className={styles.title}>Karmic Debt Tracker</h1>
-          {selectedProfile && (
-            <p className={styles.subtitle}>{selectedProfile.name}</p>
+          {profile && (
+            <p className={styles.subtitle}>{profile.name}</p>
           )}
         </div>
       </header>
@@ -109,18 +96,18 @@ const KarmicDebtTracker = () => {
               Understand your karmic debts and life lessons based on your birth date numerology
             </p>
 
-            {selectedProfile && (
+            {profile && (
               <div className={styles.profileCard}>
                 <h3 className={styles.profileTitle}>Profile Details</h3>
                 <div className={styles.profileDetails}>
                   <div className={styles.profileRow}>
                     <span className={styles.profileLabel}>Name:</span>
-                    <span className={styles.profileValue}>{selectedProfile.name}</span>
+                    <span className={styles.profileValue}>{profile.name}</span>
                   </div>
                   <div className={styles.profileRow}>
                     <span className={styles.profileLabel}>Birth Date:</span>
                     <span className={styles.profileValue}>
-                      {selectedProfile.day}/{selectedProfile.month}/{selectedProfile.year}
+                      {profile.day}/{profile.month}/{profile.year}
                     </span>
                   </div>
                 </div>

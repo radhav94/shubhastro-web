@@ -6,11 +6,20 @@ import { analyzeAura } from '../../../../services/appServices/aiWowService';
 import { setAuraResult, clearAuraData } from '../../../../redux/aiwow/aiwowSlice';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
+import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 
 const AuraAnalysis = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const auraImage = useSelector((state) => state.aiwow.aura.image);
+  
+  // Use the hook to get selected Kundli profile with error handling
+  const { profile, isLoading: profileLoading, error: profileError } = useSelectedKundliProfile({
+    required: true,
+    showToast: true,
+    redirectPath: PATH.privateRoutes.AIWOW?.path || '/aiwow',
+  });
+  
   const [progress, setProgress] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
@@ -36,8 +45,8 @@ const AuraAnalysis = () => {
   }, []);
 
   useEffect(() => {
-    // Only run analysis if we have an image and haven't started yet
-    if (auraImage && !isAnalyzing && !analysisComplete && !error) {
+    // Only run analysis if we have both image and profile, and haven't started yet
+    if (auraImage && profile && !profileLoading && !isAnalyzing && !analysisComplete && !error) {
       // Validate image format
       if (typeof auraImage !== 'string' || !auraImage.startsWith('data:image/')) {
         console.error('Invalid image format in Redux state:', typeof auraImage);
@@ -48,14 +57,21 @@ const AuraAnalysis = () => {
       }
 
       performAnalysis(auraImage);
-    } else if (!auraImage && !isAnalyzing && !analysisComplete && !error) {
+    } else if (!auraImage && !isAnalyzing && !analysisComplete && !error && !profileLoading) {
       // Only redirect if we don't have an image and we're not in the middle of anything
       console.warn('No aura image found in Redux state, redirecting to instructions');
       navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path, { replace: true });
     }
-  }, [auraImage]); // Only depend on auraImage to avoid infinite loops
+  }, [auraImage, profile, profileLoading]); // Depend on profile and profileLoading
 
   const performAnalysis = async (imageData) => {
+    // Double-check profile is available before API call
+    if (!profile) {
+      Toast.error('Profile not available. Please select a profile.');
+      navigate(PATH.privateRoutes.AIWOW?.path || '/aiwow');
+      return;
+    }
+
     setIsAnalyzing(true);
     setError(null);
     
@@ -79,8 +95,14 @@ const AuraAnalysis = () => {
         });
       }, 200);
 
-      // Pass abort signal to API call
-      const result = await analyzeAura(imageData, abortController.signal);
+      // Pass profile data along with image to API
+      const result = await analyzeAura({
+        image: imageData,
+        profileId: profile._id,
+        name: profile.name,
+        birthDate: profile.birthDate,
+        // Add other profile fields as needed by your API
+      }, abortController.signal);
 
       clearInterval(progressInterval);
 

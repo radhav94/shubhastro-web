@@ -1,34 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './DailyCosmicBriefing.module.scss';
-import { Toast } from '../../../../component';
 import { getDailyCosmicBriefing } from '../../../../services/appServices/aiWowService';
+import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
+import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 
 const DailyCosmicBriefing = () => {
   const navigate = useNavigate();
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  
   const [briefing, setBriefing] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedProfile, setSelectedProfile] = useState(null);
 
   useEffect(() => {
-    const profileData = localStorage.getItem('selectedKundliProfile');
-    if (!profileData) {
-      Toast.error('Please select a kundli profile first');
-      navigate('/aiwow', { replace: true });
-      return;
-    }
-
-    try {
-      const profile = JSON.parse(profileData);
-      setSelectedProfile(profile);
+    if (profile && !profileLoading) {
       fetchBriefing(profile);
-    } catch (error) {
-      console.error('Invalid profile data:', error);
-      Toast.error('Invalid profile data. Please select again.');
-      localStorage.removeItem('selectedKundliProfile');
-      navigate('/aiwow', { replace: true });
     }
-  }, [navigate]);
+  }, [profile, profileLoading]);
 
   const fetchBriefing = async (profile) => {
     try {
@@ -72,7 +60,6 @@ const DailyCosmicBriefing = () => {
   };
 
   const handleBack = () => {
-    localStorage.removeItem('selectedKundliProfile');
     navigate(-1);
   };
 
@@ -82,27 +69,8 @@ const DailyCosmicBriefing = () => {
     return '#ef4444'; // red
   };
 
-  if (isLoading) {
-    return (
-      <div className={styles.container}>
-        <header className={styles.headerWrap}>
-          <div className={styles.header}>
-            <button className={styles.backButton} onClick={handleBack}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            <div className={styles.headerInfo}>
-              <h1 className={styles.title}>Daily Cosmic Briefing</h1>
-            </div>
-          </div>
-        </header>
-        <div className={styles.loadingContainer}>
-          <div className={styles.loader}></div>
-          <p>Loading your cosmic briefing...</p>
-        </div>
-      </div>
-    );
+  if (profileLoading || isLoading) {
+    return <PrimaryLoader isLoading={true} />;
   }
 
   if (!briefing) {
@@ -121,8 +89,8 @@ const DailyCosmicBriefing = () => {
           </button>
           <div className={styles.headerInfo}>
             <h1 className={styles.title}>Daily Cosmic Briefing</h1>
-            {selectedProfile && (
-              <p className={styles.subtitle}>{selectedProfile.name}</p>
+            {profile && (
+              <p className={styles.subtitle}>{profile.name}</p>
             )}
           </div>
         </div>
