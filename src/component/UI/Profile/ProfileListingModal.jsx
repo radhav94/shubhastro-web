@@ -18,6 +18,7 @@ const ProfileListingModal = ({
   showEditButton = true,
   hasNestedModal = false, // New prop to indicate if nested modal is open
   callModeBtnTitle,
+  startCallModeBtnType,
 }) => {
   if (!isOpen) return null;
 
@@ -204,7 +205,11 @@ const ProfileListingModal = ({
                 onClick={onStartCall}
                 disabled={!selectedProfileId}
               >
-                {callModeBtnTitle}
+                {startCallModeBtnType
+                  ? startCallModeBtnType === "audio"
+                    ? "Start Call"
+                    : "Start Chat"
+                  : callModeBtnTitle}
               </button>
             )}
           </div>

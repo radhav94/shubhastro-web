@@ -267,6 +267,7 @@ const Home = () => {
         startCallMode={true}
         onStartCall={handleProfileManagerStartCall}
         title="Select Profile"
+        startCallModeBtnType={pendingConnectionType}
         enabledOperations={{
           list: true,
           add: true,

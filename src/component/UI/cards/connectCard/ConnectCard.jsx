@@ -12,7 +12,7 @@ const ConnectCard = () => {
       </p>
 
       <div className={styles.buttons}>
-        <Link to="/talk-to-astrologers" className={styles.btn}>
+        <Link to="/chat-with-astrologers" className={styles.btn}>
           <FiPhoneCall className={styles.icon} />
           Talk to Astrologer
         </Link>

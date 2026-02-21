@@ -59,6 +59,7 @@ const TalkToAstrologer = () => {
   const [showRecommend, setShowRecommend] = useState(true);
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [showFilterAstrologer, setShowFilterAstrologer] = useState(false);
+  
 
   // NEW: Store the connection type when opening ProfileManager
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
@@ -854,9 +855,11 @@ const TalkToAstrologer = () => {
               />
             )} */}
 
-              <NewAstrologerDetailsCard key={astro._id}
+              <NewAstrologerDetailsCard
+                key={astro._id}
                 astrologer={astro}
-                onConnect={handleConnectClick} />
+                onConnect={handleConnectClick}
+              />
             </div>
           </>
         ))}
@@ -1014,7 +1017,8 @@ const TalkToAstrologer = () => {
         onClose={() => hookSetOpenModal((prev) => ({ ...prev, kundli: false }))}
         startCallMode={true}
         onStartCall={handleProfileManagerStartCall}
-        title="Select Profile to Continue"
+        title="Select Profile"
+        startCallModeBtnType={pendingConnectionType}
         enabledOperations={{
           list: true,
           add: true,
