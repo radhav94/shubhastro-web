@@ -1,0 +1,37 @@
+@use '../../../assets/variables/variables' as *;
+
+.chartContainer {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.chartTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+}
+
+.chartWrapper {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 1rem 0;
+
+  canvas {
+    max-height: 350px;
+  }
+
+  @media (min-width: 768px) {
+    max-width: 450px;
+  }
+}
+
+.noData {
+  text-align: center;
+  padding: 2rem;
+  color: #9ca3af;
+  font-size: 0.9375rem;
+}

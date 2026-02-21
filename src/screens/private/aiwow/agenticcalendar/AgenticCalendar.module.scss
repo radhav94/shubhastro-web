@@ -87,7 +87,6 @@
 
 .content {
   flex: 1;
-  overflow-y: auto;
   padding: 1rem;
 
   @media (min-width: 768px) {
@@ -96,7 +95,7 @@
 
   @media (min-width: 1024px) {
     padding: 2rem;
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
     width: 100%;
   }
@@ -414,9 +413,47 @@
 }
 
 .eventsAnalysis {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 1rem;
+  
+  // Mobile: 1 per row
+  grid-template-columns: 1fr;
+  
+  // Tablet: 2 per row
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  // Desktop: Dynamic based on number of events
+  @media (min-width: 1024px) {
+    // 1 event: centered with max-width
+    &[data-count="1"] {
+      grid-template-columns: 1fr;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    // 2 events: 2 columns
+    &[data-count="2"] {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    // 3 events: 3 columns
+    &[data-count="3"] {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    
+    // 4+ events: 4 columns (auto wraps)
+    &[data-count="4"],
+    &[data-count="5"],
+    &[data-count="6"],
+    &[data-count="7"],
+    &[data-count="8"],
+    &[data-count="9"],
+    &[data-count="10"] {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
 }
 
 .eventCard {

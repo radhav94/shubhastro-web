@@ -517,12 +517,23 @@
   }
 }
 
+// Insights Container - 2 column layout
+.insightsContainer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 // Insight Card
 .insightCard {
   background: #f9fafb;
   border-radius: 1rem;
   padding: 1.5rem;
-  margin-bottom: 1rem;
   border: 1px solid #e5e7eb;
 }
 
@@ -560,6 +571,114 @@
   &:hover,&:active {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+  }
+}
+
+// Aura Container - Layout for colors and pie chart
+.auraContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+}
+
+.auraColorsList {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    flex: 1;
+  }
+}
+
+.auraColorCard {
+  background: #f3f4f6;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+
+  @media (min-width: 768px) {
+    border: none;
+  }
+}
+
+.auraColorHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+
+  @media (min-width: 768px) {
+    cursor: default;
+    pointer-events: none;
+  }
+}
+
+.auraPieChartContainer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  
+  @media (min-width: 768px) {
+    flex: 0 0 35%;
+    position: sticky;
+    top: 120px;
+  }
+}
+
+.auraPieChart {
+  width: 100%;
+  max-width: 280px;
+  
+  @media (min-width: 768px) {
+    max-width: 100%;
+  }
+}
+
+// Cosmic tab specific styles - always use dropdown behavior
+.cosmicHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+
+  .cardTitle {
+    margin: 0;
+  }
+}
+
+.cosmicArrow {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  transition: transform 0.2s;
+}
+
+.cosmicDropdown {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  padding: 0 1.25rem;
+
+  &.expanded {
+    max-height: 1000px;
+    padding: 0 1.25rem 1.25rem;
   }
 }
 

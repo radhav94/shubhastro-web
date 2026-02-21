@@ -221,7 +221,10 @@ const AgenticCalendar = () => {
 
             {/* Events Analysis */}
             {analysis.optimalTimings && analysis.optimalTimings.length > 0 && (
-              <div className={styles.eventsAnalysis}>
+              <div 
+                className={styles.eventsAnalysis}
+                data-count={analysis.optimalTimings.length}
+              >
                 {analysis.optimalTimings.map((timing, index) => (
                   <div key={index} className={styles.eventCard}>
                     <div className={styles.eventCardHeader}>

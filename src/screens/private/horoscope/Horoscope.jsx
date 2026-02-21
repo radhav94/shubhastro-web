@@ -494,37 +494,39 @@ const HoroscopeNew = () => {
                   </div>
                 )}
                 
-                {currentContent.overviewSections.map((section, index) => (
-                  <div key={index} className="overview-section-accordion">
-                    <div 
-                      className="overview-section-header"
-                      onClick={() => toggleSection(index)}
-                    >
-                      <div className="overview-header-content">
-                        <h3 className="overview-section-title">
-                          {section.title}
-                        </h3>
-                        {section.score && (
-                          <span className="overview-score">
-                            ({section.score}/100)
-                          </span>
-                        )}
+                <div className="overview-cards-grid">
+                  {currentContent.overviewSections.map((section, index) => (
+                    <div key={index} className="overview-card">
+                      <div 
+                        className="overview-card-header"
+                        onClick={() => toggleSection(index)}
+                      >
+                        <div className="overview-card-left">
+                          <h3 className="overview-card-title">
+                            {section.title}
+                          </h3>
+                          {section.score && (
+                            <span className="overview-card-score">
+                              ({section.score}/100)
+                            </span>
+                          )}
+                        </div>
+                        <div className={`overview-card-arrow ${expandedIndex === index ? 'overview-card-arrow-expanded' : ''}`}>
+                          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
                       </div>
-                      <div className={`overview-arrow ${expandedIndex === index ? 'overview-arrow-expanded' : ''}`}>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                          <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
+                      <div className={`overview-card-body ${expandedIndex === index ? 'overview-card-body-expanded' : ''}`}>
+                        <div className="overview-card-text">
+                          {section.content.split('\n\n').map((paragraph, pIndex) => (
+                            <p key={pIndex}>{paragraph}</p>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                    <div className={`overview-section-content ${expandedIndex === index ? 'overview-content-expanded' : ''}`}>
-                      <div className="overview-content-inner">
-                        {section.content.split('\n\n').map((paragraph, pIndex) => (
-                          <p key={pIndex}>{paragraph}</p>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             ) : (
               /* Single Category Content */
