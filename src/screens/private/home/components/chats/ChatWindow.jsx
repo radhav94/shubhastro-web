@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useState, useRef, useEffect } from "react";
 import styles from "./ChatWindow.module.scss";
 import { useLocation, useNavigate } from "react-router-dom";
 import useChat from "./useChatWindow";
@@ -6,7 +6,6 @@ import { useGetChatHistoryQuery } from "../../../../../redux/api/chatApi";
 import { useInactivityTimer } from "../../../../../utils/hooks/useInactivityTimer";
 import InactivityModal from "../../../../../component/UI/modal/inActivity/InactivityModal";
 import { useCall } from "../../../../../context/CallContext";
-import { useRef } from "react";
 
 import ChatHeader from "./ChatHeader";
 import ChatMessages from "./ChatMessages";
@@ -360,6 +359,39 @@ const ChatWindow = () => {
     handleSend(selectedProfile);
     setShowProfileManagerModal(false);
   };
+
+  // Redirect to home when chat ends or voice/video call ends while on chat window
+  const prevActiveCallRef = useRef(activeCall);
+  const prevChatActiveRef = useRef(isChatActive);
+  const prevFeedbackRef = useRef(openFeedback);
+  useEffect(() => {
+    const hadCall = prevActiveCallRef.current;
+    const hadChat = prevChatActiveRef.current;
+    const hadFeedback = prevFeedbackRef.current;
+    prevActiveCallRef.current = activeCall;
+    prevChatActiveRef.current = isChatActive;
+    prevFeedbackRef.current = openFeedback;
+
+    // Don't redirect while feedback modal is open
+    if (openFeedback) return;
+
+    // Feedback just closed and no active session → redirect home
+    if (hadFeedback && !openFeedback && !isChatActive && !activeCall) {
+      navigate(PATH.privateRoutes.HOME.path, { replace: true });
+      return;
+    }
+
+    // Chat was active and just ended → redirect home
+    if (hadChat && !isChatActive && !activeCall) {
+      navigate(PATH.privateRoutes.HOME.path, { replace: true });
+      return;
+    }
+
+    // Voice/video call was active and just ended, no active chat → redirect home
+    if (hadCall && !activeCall && !isChatActive) {
+      navigate(PATH.privateRoutes.HOME.path, { replace: true });
+    }
+  }, [activeCall, isChatActive, openFeedback, navigate]);
 
   // Auto-end chat when timer reaches 0
   useLayoutEffect(() => {
