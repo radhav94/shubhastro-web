@@ -11,96 +11,109 @@ import {
 import PublicRoute from "./utils/routes/PublicRoute";
 import PrivateRoute from "./utils/routes/PrivateRoute";
 import MixedRoute from "./utils/routes/MixedRoute";
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useMemo } from "react";
 import { CallProvider } from "./context/CallContext";
 import { ChatProvider } from "./context/ChatContext";
 import ErrorBoundary from "./component/ErrorBoundary";
+import RouteErrorBoundary from "./component/RouteErrorBoundary";
 import PrimaryLoader from "./component/UI/PrimaryLoader";
 
-function App() {
-  const flattenRoutes = (routes) => {
-    const flattened = [];
+// Flatten routes helper - moved outside component for better performance
+const flattenRoutes = (routes) => {
+  const flattened = [];
 
-    Object.values(routes).forEach((route) => {
-      if (!route || typeof route !== "object") return;
+  Object.values(routes).forEach((route) => {
+    if (!route || typeof route !== "object") return;
 
-      const paths = Array.isArray(route.path) ? route.path : [route.path];
+    const paths = Array.isArray(route.path) ? route.path : [route.path];
 
-      if (route.element && paths[0]) {
-        paths.forEach((p) => {
-          flattened.push({ ...route, path: p });
-        });
-      }
-
-      Object.values(route).forEach((nestedRoute) => {
-        if (nestedRoute && typeof nestedRoute === "object") {
-          const nestedPaths = Array.isArray(nestedRoute.path)
-            ? nestedRoute.path
-            : [nestedRoute.path];
-          if (nestedRoute.element && nestedPaths[0]) {
-            nestedPaths.forEach((p) => {
-              flattened.push({ ...nestedRoute, path: p });
-            });
-          }
-        }
+    if (route.element && paths[0]) {
+      paths.forEach((p) => {
+        flattened.push({ ...route, path: p });
       });
+    }
+
+    Object.values(route).forEach((nestedRoute) => {
+      if (nestedRoute && typeof nestedRoute === "object") {
+        const nestedPaths = Array.isArray(nestedRoute.path)
+          ? nestedRoute.path
+          : [nestedRoute.path];
+        if (nestedRoute.element && nestedPaths[0]) {
+          nestedPaths.forEach((p) => {
+            flattened.push({ ...nestedRoute, path: p });
+          });
+        }
+      }
     });
+  });
 
-    return flattened;
-  };
+  return flattened;
+};
 
-  const roleWiseRouting = createBrowserRouter([
-    ...Object.values(PATH.publicRoutes)
-      .filter((route) => route.path !== "*")
-      .map((route) => ({
-        path: route.path,
+// Shared error element instance
+const routeErrorElement = <RouteErrorBoundary />;
+
+function App() {
+  // Memoize router creation - only create once
+  const roleWiseRouting = useMemo(() => {
+    return createBrowserRouter([
+      ...Object.values(PATH.publicRoutes)
+        .filter((route) => route.path !== "*")
+        .map((route) => ({
+          path: route.path,
+          element: (
+            <NavigationSetup>
+              <PublicRoute component={route.element} />
+            </NavigationSetup>
+          ),
+          errorElement: routeErrorElement,
+        })),
+
+      {
+        path: "/",
         element: (
           <NavigationSetup>
-            <PublicRoute component={route.element} />
+            <MixedRoute component={HomeLayout} />
           </NavigationSetup>
         ),
-      })),
-
-    {
-      path: "/",
-      element: (
-        <NavigationSetup>
-          <MixedRoute component={HomeLayout} />
-        </NavigationSetup>
-      ),
-      children: [
-        ...flattenRoutes(PATH.privateRoutes).map((child) => {
-          // Numerology and ProductDetail routes require authentication
-          if (
-            child.path === "/numerology" ||
-            child.path === PATH.privateRoutes.NUMEROLOGY?.path ||
-            child.path === "/shop/:slug/:productSlug" ||
-            child.path === PATH.privateRoutes.PRODUCT_DETAIL?.path
-          ) {
+        errorElement: routeErrorElement,
+        children: [
+          ...flattenRoutes(PATH.privateRoutes).map((child) => {
+            // Numerology and ProductDetail routes require authentication
+            if (
+              child.path === "/numerology" ||
+              child.path === PATH.privateRoutes.NUMEROLOGY?.path ||
+              child.path === "/shop/:slug/:productSlug" ||
+              child.path === PATH.privateRoutes.PRODUCT_DETAIL?.path
+            ) {
+              return {
+                path: child.path,
+                element: <PrivateRoute component={child.element} />,
+                errorElement: routeErrorElement,
+                handle: { header: child.header ?? true, footer: child.footer ?? true },
+              };
+            }
+            // All other routes are accessible to everyone
             return {
               path: child.path,
-              element: <PrivateRoute component={child.element} />,
+              element: <child.element />,
+              errorElement: routeErrorElement,
               handle: { header: child.header ?? true, footer: child.footer ?? true },
             };
-          }
-          // All other routes are accessible to everyone
-          return {
-            path: child.path,
-            element: <child.element />,
-            handle: { header: child.header ?? true, footer: child.footer ?? true },
-          };
-        }),
-        { path: "/", element: <Navigate to={PATH.privateRoutes.HOME.path} /> },
-        {
-          path: "*",
-          element: <PATH.publicRoutes.NOT_FOUND.element />,
-          handle: { header: true, footer: true },
-        },
-      ],
-    },
-  ]);
+          }),
+          { path: "/", element: <Navigate to={PATH.privateRoutes.HOME.path} /> },
+          {
+            path: "*",
+            element: <PATH.publicRoutes.NOT_FOUND.element />,
+            handle: { header: true, footer: true },
+          },
+        ],
+      },
+    ]);
+  }, []); // Empty deps - router only created once
 
   useEffect(() => {
+    // Google Maps autocomplete z-index fix
     const style = document.createElement("style");
     style.innerHTML = `
       .pac-container {
@@ -109,6 +122,24 @@ function App() {
       }
     `;
     document.head.appendChild(style);
+
+    // Global error handler for uncaught errors
+    const handleError = (event) => {
+      console.error('🔴 Uncaught error:', event.error);
+    };
+
+    // Global handler for unhandled promise rejections
+    const handleUnhandledRejection = (event) => {
+      console.error('🔴 Unhandled promise rejection:', event.reason);
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
   }, []);
 
   return (
