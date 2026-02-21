@@ -18,9 +18,14 @@ import {
 import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { ProfileManager } from "../../../component/UI/Profile";
+import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 
 const NumerologyWeb = () => {
   const navigate = useNavigate();
+  const requireAuth = useRequireAuth();
+
+  // ✅ Authentication check - redirect to login if not authenticated
+  if (!requireAuth()) return null;
   const [showSelectProfile, setShowSelectProfile] = useState(false);
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);

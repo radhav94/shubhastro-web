@@ -90,6 +90,13 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
       }),
     }),
 
+    getAstrologerFilterCategoryTab: builder.query({
+      query: () => ({
+        url: "filters/get-filters/skills",
+        method: "GET",
+      }),
+    }),
+
     getRecommendedAstrologers: builder.query({
       query: () => ({
         url: "astrologers/recommendation",
@@ -102,6 +109,7 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
 //  EXPORT HOOKS
 export const {
   useGetAstrologersQuery,
+  useGetAstrologerFilterCategoryTabQuery,
   useGetAstrologerByIdQuery,
   useLazyFilterAstrologersQuery,
   useGetRecommendedAstrologersQuery,

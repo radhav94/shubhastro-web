@@ -12,10 +12,10 @@ import BottomNavigation from "./components/BottomNavigation";
 import { renderSection, sortSectionsByOrder } from "./utils/sectionMapper";
 import styles from "./Home.module.scss";
 import {ProfileManager} from "../../../component/UI/Profile";
+import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 
 const Home = () => {
-  const navigate = useNavigate();
-  const { isLoggedIn } = useSelector((state) => state.auth);
+  const requireAuth = useRequireAuth();
   
   // COMMENTED OUT: No longer using ConnectAstrologerPopup
   // const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
@@ -116,10 +116,7 @@ const Home = () => {
   // Handle connect button click - now receives connectionType (chat or audio)
   const handleConnectClick = (astrologer, connectionType) => {
     // Check if user is logged in
-    if (!isLoggedIn) {
-      navigate("/login?skip=welcome");
-      return;
-    }
+     if (!requireAuth()) return;
     
     if (WaitingList || callWaitingList) {
       Toast.error(
