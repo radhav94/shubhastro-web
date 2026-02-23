@@ -11,7 +11,8 @@ import {
 
 import { getViewerToken } from "../../../../../services/appServices/authService";
 
-const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
+// const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
+const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 
 export const useLiveStreaming = (client, ROLE, channel) => {
   const [calling, setCalling] = useState(true);

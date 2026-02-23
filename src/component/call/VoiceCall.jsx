@@ -26,7 +26,8 @@ import RechargeModal from "../recharge-modal/RechargeModal";
 import VideocamIcon from "../../assets/chat/Videocam.svg";
 import CallIcon from "../../assets/chat/Call.svg";
 
-const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
+// const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
+const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 
 const AgoraVoiceCalling = ({ callData }) => {
   const { activeCall, setActiveCall, callSeconds, setCallSeconds, startTimer, stopTimer } = useCall();
@@ -102,7 +103,7 @@ const AgoraVoiceCalling = ({ callData }) => {
 
       client.on("user-left", endCall);
 
-      await client.join(APP_ID, roomId, agoraToken, null);
+      await client.join(APP_ID, roomId, agoraToken, "");
 
       micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack();
       await client.publish([micTrackRef.current]);
