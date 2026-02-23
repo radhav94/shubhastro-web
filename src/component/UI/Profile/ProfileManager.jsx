@@ -24,6 +24,7 @@ import { getToken } from "../../../utils/token";
  * - Start Call mode for profile selection
  *
  * @param {Object} props - Component props
+ * @param {string} props.startCallModeBtnType - start call btn Title
  * @param {boolean} props.isOpen - Whether the profile manager is open
  * @param {Function} props.onClose - Callback when profile manager closes
  * @param {Function} props.onProfileSelect - Callback when a profile is selected
@@ -43,6 +44,7 @@ const ProfileManager = ({
   selectedProfileId = null,
   title = "Select Profile",
   startCallMode = false,
+  startCallModeBtnType = "",
   callModeBtnTitle = "Start Call",
   onStartCall = () => {},
   enabledOperations = {
@@ -361,6 +363,7 @@ const ProfileManager = ({
         onAddProfile={handleAddProfile}
         onStartCall={handleStartCall}
         title={title}
+        startCallModeBtnType={startCallModeBtnType}
         callModeBtnTitle={callModeBtnTitle}
         showAddButton={enabledOperations.add}
         showDeleteButton={enabledOperations.delete}

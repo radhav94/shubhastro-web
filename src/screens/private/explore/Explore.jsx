@@ -11,6 +11,8 @@ import { setForm } from "../../../redux/kundliform/formSlice";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { getRouteFromSlug, requiresProfileData } from "../../../utils/constanats/exploreRouteConfig";
 import { ProfileManager } from "../../../component/UI/Profile";
+import useRequireAuth from "../../../utils/hooks/useRequireAuth";
+import toast from "react-hot-toast";
 
 // Import default images as fallback
 import horoscopeImg from "../../../assets/explore/horoscope.png";
@@ -53,6 +55,7 @@ const SectionTitleWithDivider = ({ title }) => (
 const Explore = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const requireAuth = useRequireAuth();
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [showSelectProfile, setShowSelectProfile] = useState(false);
 
@@ -427,6 +430,91 @@ const Explore = () => {
       redirectUrl = titleToRouteMap[card.title] || card.redirect_url || card.redirectUrl || card.url || card.link;
     }
     
+    // 🔹 SECTION: "ALL ABOUT YOU"
+    // 1️⃣ Explore Daily Horoscope - No login required (no changes)
+    // 2️⃣ Kundli Reports and Remedies For You - Requires auth + kundali check
+    if (sectionType === "all-about-you") {
+      const cardTitle = card.title || "";
+      
+      // Explore Daily Horoscope - No auth required
+      if (cardTitle.includes("Horoscope")) {
+        // No changes - proceed directly
+        if (redirectUrl) {
+          navigate(redirectUrl);
+        }
+        return;
+      }
+      
+      // Kundli Reports and Remedies For You - Requires auth + kundali
+      if (cardTitle.includes("Kundli") || cardTitle.includes("Remedies")) {
+        // Check authentication first
+        if (!requireAuth()) return;
+        
+        // Check if kundali profile exists
+        if (!profiles || profiles.length === 0) {
+          toast.error("Please add a Kundali profile to proceed.");
+          setShowSelectProfile(true);
+          return;
+        }
+        
+        // Proceed with navigation
+        if (redirectUrl) {
+          navigate(redirectUrl);
+        }
+        return;
+      }
+    }
+    
+    // 🔹 SECTION: "DISCOVER YOUR KUNDLI"
+    // All four cards: Vedic Kundli, Dasha, Ashtakvarga Chart, KP Chart
+    // Requires auth + kundali check
+    const kundliCards = ["Vedic Kundli", "Vedic Kundali", "Dasha", "Ashtakvarga Chart", "Ashtakvarga", "KP Chart", "KP"];
+    if (kundliCards.includes(card.title)) {
+      // Check authentication first
+      if (!requireAuth()) return;
+      
+      // Check if kundali profile exists
+      if (!profiles || profiles.length === 0) {
+        toast.error("Please add a Kundali profile to proceed.");
+        setShowSelectProfile(true);
+        return;
+      }
+      
+      // Proceed with navigation (existing logic below will handle profile data)
+    }
+    
+    // 🔹 SECTION: "EXPLORE YOUR DESTINY"
+    // 1️⃣ Tarot - No login required (no changes)
+    // 2️⃣ Numerology - Requires auth + kundali check
+    // 3️⃣ Gemstone - No login required (no changes)
+    if (card.title === "Numerology") {
+      // Check authentication first
+      if (!requireAuth()) return;
+      
+      // Check if kundali profile exists
+      if (!profiles || profiles.length === 0) {
+        toast.error("Please add a Kundali profile to proceed.");
+        setShowSelectProfile(true);
+        return;
+      }
+      
+      // Proceed with navigation
+      if (redirectUrl) {
+        navigate(redirectUrl);
+      }
+      return;
+    }
+    
+    // Tarot and Gemstone - No auth required (no changes)
+    if (card.title === "Tarot" || card.title === "Gemstones" || card.title === "Gemstone") {
+      // No changes - proceed directly
+      if (redirectUrl) {
+        navigate(redirectUrl);
+      }
+      return;
+    }
+    
+    // OLD LOGIC (kept for reference and other cards):
     // Special handling for Kundli card - pass selected profile if needed
     const needsProfile = (sectionType === "all-about-you" && card.slug) 
       ? requiresProfileData(card.slug) 
