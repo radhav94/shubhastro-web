@@ -4301,3 +4301,162 @@
   }
 }
 
+
+/* Birth Panchang Section */
+.birthPanchangSection {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.birthPanchangHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  background: var(--orange_gradient, linear-gradient(90deg, #f75801 0%, #d43400 100%));
+  color: #fff;
+
+  h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.3px;
+  }
+}
+
+.birthPanchangLoading {
+  padding: 40px;
+  text-align: center;
+  color: #757575;
+  font-size: 14px;
+}
+
+.birthPanchangContent {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.birthPanchangCards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+
+  @media screen and (width <= 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media screen and (width <= 767px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.birthPanchangCard {
+  background: #FEFEFE;
+  border: 1px solid rgba(189, 189, 189, 0.2);
+  border-radius: 12px;
+  padding: 14px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.bpCardLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #757575;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.bpCardIcon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.bpCardValue {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 2px;
+
+  @media screen and (width <= 767px) {
+    font-size: 14px;
+  }
+}
+
+.bpCardSub {
+  font-size: 13px;
+  color: #757575;
+}
+
+/* Sun & Moon row */
+.birthPanchangPlanets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  @media screen and (width <= 767px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.birthPlanetCard {
+  background: #FEFEFE;
+  border: 1px solid rgba(189, 189, 189, 0.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.planetHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.planetIcon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.planetName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.planetDetails {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.planetDetail {
+  font-size: 13px;
+  color: #757575;
+  white-space: nowrap;
+
+  strong {
+    color: #1a1a1a;
+    font-weight: 600;
+  }
+}
