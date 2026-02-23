@@ -10,7 +10,7 @@
 
 /* ==================== COLOR VARIABLES ==================== */
 /* Background Colors */
-$bg-main: #F7F7F7;
+$bg-main: #f7f7f700;
 $bg-header: #FFF5EC;
 $bg-input-bar: #FFFFFF;
 $bg-footer: #2A3B4D;
@@ -65,20 +65,24 @@ $input-icon-gap: 10px;
 
 /* Floating button spacing */
 $floating-button-gap: 14px;
-
+.layout{
+  height: 95px;
+}
 /* PAGE WRAPPER */
 .chatPage {
   height: calc(100dvh - 90px);
-  width: 100%;
-  background: $bg-main;
+  max-width: 1200px;
+  // padding: 0 16px;
+  background: #fff;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  margin: 0 auto;
   @media (width <= 1180px) {
-    height: calc(100dvh - 76px);
+    height: calc(100dvh - 53px);
   }
   @media (width <= 767px) {
-    height: calc(100dvh - 68px);
+    height: calc(100dvh - 53px);
   }
 }
 
@@ -86,6 +90,7 @@ $floating-button-gap: 14px;
 .chatWindow {
   height: 100%;
   display: flex;
+  background-color: #fff;
   flex-direction: column;
   overflow: hidden;
   background: $bg-main;

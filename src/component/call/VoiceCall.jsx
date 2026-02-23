@@ -346,6 +346,7 @@ const AgoraVoiceCalling = ({ callData }) => {
           )}
 
           {/* Header */}
+          <div className={styles.headerWrap}>
           <div className={styles.header}>
             <button
               className={styles.backBtn}
@@ -431,6 +432,7 @@ const AgoraVoiceCalling = ({ callData }) => {
                 </span>
               </div> */}
 
+            </div>
             </div>
           </div>
 
