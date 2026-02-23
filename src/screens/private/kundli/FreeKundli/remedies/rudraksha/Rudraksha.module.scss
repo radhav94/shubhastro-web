@@ -1,5 +1,5 @@
 .wrapper {
-  padding: 1.5rem;
+  // padding: 1.5rem;
   width: 100%;
   margin: 0 auto;
   max-width: 1200px;
@@ -22,7 +22,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
+  padding: 1rem;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -38,7 +38,7 @@
 }
 
 .title {
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #F75801;
   margin: 0;
@@ -148,7 +148,7 @@
 }
 
 .aiSection {
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   background: #ffffff;
   padding: 1.25rem;
   border-radius: 12px;
@@ -156,9 +156,9 @@
 }
 
 @media (max-width: 768px) {
-  .wrapper {
-    padding: 1rem;
-  }
+  // .wrapper {
+  //   padding: 1rem;
+  // }
 
   .accordionHeader {
     padding: 1rem;

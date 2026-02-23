@@ -2,9 +2,9 @@
   background: #ffffff;
   // border: 1px solid #e5e7eb;
   border-radius: 16px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  // padding: 1.5rem;
+  margin-bottom: 1rem;
+  // box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 
   &:hover {
@@ -16,10 +16,10 @@
 
 /* Header */
 .cardHeader {
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-  padding: 1.25rem;
-  margin: -1.5rem -1.5rem 1.5rem -1.5rem;
-  border-radius: 12px 12px 0 0;
+  background: #fff;
+  padding: 0.8rem;
+  // margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+  border-radius: 12px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -37,16 +37,16 @@
 }
 
 .cardTitle {
-  color: #ffffff!important;
+  color: #333;
   font-weight: 600;
   letter-spacing: 0.3px;
-  font-size: 1.375rem;
+  font-size: 1rem;
   margin: 0;
   flex: 1;
 }
 
 .dropdownIcon {
-  color: #ffffff;
+  color: #333;
   font-size: 1.5rem;
   transition: transform 0.3s ease;
   flex-shrink: 0;
@@ -63,6 +63,10 @@
   overflow: hidden;
   transition: max-height 0.4s ease-in-out, opacity 0.3s ease;
   opacity: 0;
+  padding: 0px 16px;
+  @media (width <= 767px) {
+    padding: 0px 0px;
+  }
 
   &.expanded {
     max-height: 10000px;
@@ -146,13 +150,13 @@
 
 /* Tablet */
 @media (max-width: 1024px) {
-  .card {
-    padding: 1.25rem;
-  }
-  .cardHeader {
-    margin: -1.25rem -1.25rem 1.25rem -1.25rem;
-    padding: 1rem;
-  }
+  // .card {
+  //   padding: 1.25rem;
+  // }
+  // .cardHeader {
+  //   margin: -1.25rem -1.25rem 1.25rem -1.25rem;
+  //   padding: 1rem;
+  // }
   .cardTitle {
     font-size: 1.25rem;
   }
@@ -166,15 +170,15 @@
 
 /* Mobile */
 @media (max-width: 768px) {
-  .card {
-    padding: 1rem;
-    border-radius: 12px;
-  }
+  // .card {
+  //   padding: 1rem;
+  //   border-radius: 12px;
+  // }
 
-  .cardHeader {
-    margin: -1rem -1rem 1rem -1rem;
-    padding: 0.875rem;
-  }
+  // .cardHeader {
+  //   margin: -1rem -1rem 1rem -1rem;
+  //   padding: 0.875rem;
+  // }
 
   .cardTitle {
     font-size: 1rem;
@@ -201,15 +205,15 @@
 
 /* Small Mobile */
 @media (max-width: 480px) {
-  .card {
-    padding: 0.875rem;
-  }
+  // .card {
+  //   padding: 0.875rem;
+  // }
 
-  .cardHeader {
-    margin: -0.875rem -0.875rem 0.875rem -0.875rem;
-    padding: 0.75rem;
-    border-radius: 12px 12px 0 0;
-  }
+  // .cardHeader {
+  //   margin: -0.875rem -0.875rem 0.875rem -0.875rem;
+  //   padding: 0.75rem;
+  //   border-radius: 12px 12px 0 0;
+  // }
 
   .cardTitle {
     font-size: 1rem;
