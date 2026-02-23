@@ -874,12 +874,14 @@ const TalkToAstrologer = () => {
           </div>
         )}
 
-        {!isFetching && allAstrologers.length === 0 && (
+        
+      </div>
+
+      {!isFetching && allAstrologers.length === 0 && (
           <div className={styles.emptyState}>
             <PrimaryText>No astrologers found.</PrimaryText>
           </div>
         )}
-      </div>
 
       <div ref={loadMoreRef} className={styles.loaderWrapper}>
         {isFetching && <PrimaryLoader />}

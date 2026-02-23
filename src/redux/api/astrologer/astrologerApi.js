@@ -63,20 +63,44 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
           astroName: searchText,
           limit,
           page,
-          isActiveType,
-          experties: experties, //  single value
-          sorting: selectedSort ? "true" : "false",
-          sortByPrice: selectedSort === "Sort By Price" ? "1" : "0",
-          sortByRating: selectedSort === "Sort By Rating" ? "1" : "0",
-          gender: selectedGender?.toLowerCase() || "",
+          gender: selectedGender || "",
         });
 
+        // ✅ NEW LOGIC: Handle selectedSkills array
+        // If selectedSkills array has items, convert to comma-separated string and pass to skills field
         if (Array.isArray(selectedSkills) && selectedSkills.length > 0) {
-          params.append("specialities", selectedSkills.join(",")); //  Face Reading,Kp
+          params.append("skills", selectedSkills.join(","));
+        } 
+        // If no selectedSkills but experties is provided, use experties for skills field
+        else if (experties) {
+          params.append("skills", experties);
         }
-        if (isActive === true) {
-          params.append("isActive", "true");
+
+        // ✅ OLD LOGIC (COMMENTED OUT - Replaced with new selectedSkills logic above)
+        // if (Array.isArray(selectedSkills) && selectedSkills.length > 0) {
+        //   params.append("specialities", selectedSkills.join(",")); //  Face Reading,Kp
+        // }
+
+        // Handle sorting
+        if (selectedSort) {
+          params.append("sort", selectedSort);
         }
+
+        // ✅ OLD SORTING LOGIC (COMMENTED OUT - Replaced with new sort field above)
+        // sorting: selectedSort ? "true" : "false",
+        // sortByPrice: selectedSort === "Sort By Price" ? "1" : "0",
+        // sortByRating: selectedSort === "Sort By Rating" ? "1" : "0",
+
+        // Handle active status
+        // if (isActive === true) {
+        //   params.append("isActive", "true");
+        // }
+
+        // // Handle active type
+        // if (isActiveType) {
+        //   params.append("isActiveType", isActiveType);
+        // }
+
         return {
           url: `astrologers/filterAstrologers?${params.toString()}`,
           method: "GET",
