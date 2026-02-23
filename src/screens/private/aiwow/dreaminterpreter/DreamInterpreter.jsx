@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './DreamInterpreter.module.scss';
 import { Toast } from '../../../../component';
 import { interpretDream } from '../../../../services/appServices/aiWowService';
+import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
+import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 
 const DreamInterpreter = () => {
   const navigate = useNavigate();
-  const [selectedProfile, setSelectedProfile] = useState(null);
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  
   const [dreamDescription, setDreamDescription] = useState('');
   const [tags, setTags] = useState('');
   const [lifePhase, setLifePhase] = useState('');
@@ -15,27 +18,13 @@ const DreamInterpreter = () => {
   const [interpretation, setInterpretation] = useState(null);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const profileData = localStorage.getItem('selectedKundliProfile');
-    if (!profileData) {
-      Toast.error('Please select a kundli profile first');
-      navigate('/aiwow', { replace: true });
-      return;
-    }
-
-    try {
-      const profile = JSON.parse(profileData);
-      setSelectedProfile(profile);
-    } catch (error) {
-      console.error('Invalid profile data:', error);
-      Toast.error('Invalid profile data. Please select again.');
-      localStorage.removeItem('selectedKundliProfile');
-      navigate('/aiwow', { replace: true });
-    }
-  }, [navigate]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!profile) {
+      Toast.error('Profile not available');
+      return;
+    }
 
     if (!dreamDescription.trim()) {
       Toast.error('Please describe your dream');
@@ -52,18 +41,18 @@ const DreamInterpreter = () => {
 
       const dreamData = {
         dreamDescription: dreamDescription.trim(),
-        name: selectedProfile.name,
-        gender: selectedProfile.identity?.toLowerCase() || 'male',
-        day: selectedProfile.day,
-        month: selectedProfile.month,
-        year: selectedProfile.year,
-        hour: selectedProfile.hour || 0,
-        min: selectedProfile.minute || 0,
+        name: profile.name,
+        gender: profile.identity?.toLowerCase() || 'male',
+        day: profile.day,
+        month: profile.month,
+        year: profile.year,
+        hour: profile.hour || 0,
+        min: profile.minute || 0,
         second: 0,
-        place: selectedProfile.place,
-        lat: selectedProfile.lat || 0,
-        lon: selectedProfile.lon || 0,
-        tzone: selectedProfile.timezone || 5.5
+        place: profile.place,
+        lat: profile.lat || 0,
+        lon: profile.lon || 0,
+        tzone: profile.timezone || 5.5
       };
 
       // Add tags if provided
@@ -111,7 +100,6 @@ const DreamInterpreter = () => {
       setLifePhase('');
       setChallenges('');
     } else {
-      localStorage.removeItem('selectedKundliProfile');
       navigate(-1);
     }
   };
@@ -129,6 +117,10 @@ const DreamInterpreter = () => {
     setChallenges('');
   };
 
+  if (profileLoading) {
+    return <PrimaryLoader isLoading={true} />;
+  }
+
   return (
     <div className={styles.container}>
       {/* Header */}
@@ -141,8 +133,8 @@ const DreamInterpreter = () => {
           </button>
           <div className={styles.headerInfo}>
             <h1 className={styles.title}>Dream Interpreter</h1>
-            {selectedProfile && (
-              <p className={styles.subtitle}>{selectedProfile.name}</p>
+            {profile && (
+              <p className={styles.subtitle}>{profile.name}</p>
             )}
           </div>
         </div>

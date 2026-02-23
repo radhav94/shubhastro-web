@@ -14,6 +14,7 @@ import NewsSection from "../components/NewsSection";
 import AstrologersByCategorySection from "../components/AstrologersByCategorySection";
 import ConnectAgainSection from "../components/ConnectAgainSection";
 import VimshottariTimelineSection from "../components/VimshottariTimelineSection";
+import BirthPanchangSection from "../components/BirthPanchangSection";
 
 /**
  * Maps display_type to corresponding React component
@@ -147,6 +148,11 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
     case "vimshottari-timeline":
       return(
         <VimshottariTimelineSection/>
+      );
+
+    case "birth-panchang":
+      return (
+        <BirthPanchangSection key={sectionData._id} />
       );
 
     default:

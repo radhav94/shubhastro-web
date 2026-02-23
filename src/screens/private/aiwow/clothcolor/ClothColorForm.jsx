@@ -1,26 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import styles from './ClothColorForm.module.scss';
-import { Toast } from '../../../../component';
 import { setClothColorFormData } from '../../../../redux/aiwow/aiwowSlice';
 import { PATH } from '../../../../utils/routes/Paths';
+import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
+import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 
 const ClothColorForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  
   const [formData, setFormData] = useState({
     intention: 'career_success',
   });
-
-  // Check if profile is selected from Redux
-  useEffect(() => {
-    if (!selectedProfile) {
-      Toast.error('Please select a Kundli profile first from AI WOW main page');
-      navigate(PATH.privateRoutes.AI_WOW.path);
-    }
-  }, [selectedProfile, navigate]);
 
   const intentions = [
     {
@@ -71,6 +65,10 @@ const ClothColorForm = () => {
     // Navigate to instructions
     navigate(PATH.privateRoutes.CLOTH_COLOR_INSTRUCTIONS.path);
   };
+
+  if (profileLoading) {
+    return <PrimaryLoader isLoading={true} />;
+  }
 
   return (
     <div className={styles.container}>

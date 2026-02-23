@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import styles from './FaceReadingResult.module.scss';
-import { Toast } from '../../../../component';
+import { Toast, PieChart } from '../../../../component';
 
 const FaceReadingResult = () => {
   const navigate = useNavigate();
@@ -60,6 +60,19 @@ const FaceReadingResult = () => {
     { id: 'features', label: 'Features' },
     { id: 'cosmic', label: 'Cosmic' },
   ];
+
+  // Prepare pie chart data for aura colors
+  const auraChartData = useMemo(() => {
+    if (!analysisData?.auraColors) return [];
+    
+    return Object.entries(analysisData.auraColors)
+      .filter(([_, value]) => value && value.percentage)
+      .map(([key, value]) => ({
+        label: value.color || key.charAt(0).toUpperCase() + key.slice(1), // Use actual color name
+        value: value.percentage,
+        color: value.color?.toLowerCase() || '#ccc'
+      }));
+  }, [analysisData]);
 
   if (loading) {
     return (
@@ -287,37 +300,59 @@ const FaceReadingResult = () => {
           {/* Aura Tab */}
           {activeTab === 'aura' && (
             <div className={styles.section}>
-              <div className={styles.guidanceGrid}>
-                {auraColors && Object.entries(auraColors).map(([key, value]) => (
-                  value && (
-                    <div key={key} className={styles.guidanceCard}>
-                      <button
-                        onClick={() => setExpandedGuidance(expandedGuidance === `aura-${key}` ? null : `aura-${key}`)}
-                        className={styles.guidanceHeader}
-                      >
-                        <div className={styles.auraHeaderContent}>
-                          <div 
-                            className={styles.colorCircle} 
-                            style={{ backgroundColor: value.color?.toLowerCase() || '#ccc' }}
-                          ></div>
-                          <div className={styles.auraInfo}>
-                            <h3 className={styles.auraColor}>{value.color || 'Unknown'}</h3>
-                            <p className={styles.auraType}>{key.charAt(0).toUpperCase() + key.slice(1)}</p>
+              <div className={styles.auraContainer}>
+                {/* Aura Colors List */}
+                <div className={styles.auraColorsList}>
+                  {auraColors && Object.entries(auraColors)
+                    .sort((a, b) => {
+                      // Sort order: primary (indigo), secondary (blue), tertiary (gold), quaternary (green)
+                      const order = { primary: 0, secondary: 1, tertiary: 2, quaternary: 3 };
+                      return order[a[0]] - order[b[0]];
+                    })
+                    .map(([key, value]) => (
+                      value && (
+                        <div key={key} className={styles.auraColorCard}>
+                          <button
+                            onClick={() => setExpandedGuidance(expandedGuidance === `aura-${key}` ? null : `aura-${key}`)}
+                            className={styles.auraColorHeader}
+                          >
+                            <div className={styles.auraHeaderContent}>
+                              <div 
+                                className={styles.colorCircle} 
+                                style={{ backgroundColor: value.color?.toLowerCase() || '#ccc' }}
+                              ></div>
+                              <div className={styles.auraInfo}>
+                                <h3 className={styles.auraColor}>{value.color || 'Unknown'}</h3>
+                                <p className={styles.auraType}>{key.charAt(0).toUpperCase() + key.slice(1)}</p>
+                              </div>
+                            </div>
+                            <div className={styles.headerRight}>
+                              <div className={styles.auraPercentage}>{value.percentage || 0}%</div>
+                              <span className={styles.guidanceArrow}>
+                                {expandedGuidance === `aura-${key}` ? '▲' : '▼'}
+                              </span>
+                            </div>
+                          </button>
+                          <div className={`${styles.guidanceContent} ${expandedGuidance === `aura-${key}` ? styles.expanded : ''}`}>
+                            <p className={styles.auraMeaning}>{value.meaning || ''}</p>
                           </div>
                         </div>
-                        <div className={styles.headerRight}>
-                          <div className={styles.auraPercentage}>{value.percentage || 0}%</div>
-                          <span className={styles.guidanceArrow}>
-                            {expandedGuidance === `aura-${key}` ? '▲' : '▼'}
-                          </span>
-                        </div>
-                      </button>
-                      <div className={`${styles.guidanceContent} ${expandedGuidance === `aura-${key}` ? styles.expanded : ''}`}>
-                        <p className={styles.auraMeaning}>{value.meaning || ''}</p>
-                      </div>
-                    </div>
-                  )
-                ))}
+                      )
+                    ))}
+                </div>
+
+                {/* Pie Chart */}
+                {auraChartData.length > 0 && (
+                  <div className={styles.auraPieChartContainer}>
+                    <PieChart 
+                      data={auraChartData}
+                      title="Aura Distribution"
+                      showLegend={false}
+                      height={280}
+                      className={styles.auraPieChart}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -362,14 +397,14 @@ const FaceReadingResult = () => {
                   <div className={styles.guidanceCard}>
                     <button
                       onClick={() => setExpandedGuidance(expandedGuidance === 'cosmic-planet' ? null : 'cosmic-planet')}
-                      className={styles.guidanceHeader}
+                      className={styles.cosmicHeader}
                     >
                       <h3 className={styles.cardTitle}>🪐 Dominant Planet</h3>
-                      <span className={styles.guidanceArrow}>
+                      <span className={styles.cosmicArrow}>
                         {expandedGuidance === 'cosmic-planet' ? '▲' : '▼'}
                       </span>
                     </button>
-                    <div className={`${styles.guidanceContent} ${expandedGuidance === 'cosmic-planet' ? styles.expanded : ''}`}>
+                    <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-planet' ? styles.expanded : ''}`}>
                       <p className={styles.cosmicPlanet}>{cosmicConnections.dominantPlanet.planet}</p>
                       <p className={styles.cosmicText}>{cosmicConnections.dominantPlanet.influence}</p>
                       {cosmicConnections.dominantPlanet.traits && (
@@ -388,14 +423,14 @@ const FaceReadingResult = () => {
                   <div className={styles.guidanceCard}>
                     <button
                       onClick={() => setExpandedGuidance(expandedGuidance === 'cosmic-zodiac' ? null : 'cosmic-zodiac')}
-                      className={styles.guidanceHeader}
+                      className={styles.cosmicHeader}
                     >
                       <h3 className={styles.cardTitle}>♈ Zodiac Alignment</h3>
-                      <span className={styles.guidanceArrow}>
+                      <span className={styles.cosmicArrow}>
                         {expandedGuidance === 'cosmic-zodiac' ? '▲' : '▼'}
                       </span>
                     </button>
-                    <div className={`${styles.guidanceContent} ${expandedGuidance === 'cosmic-zodiac' ? styles.expanded : ''}`}>
+                    <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-zodiac' ? styles.expanded : ''}`}>
                       <p className={styles.cosmicPlanet}>{cosmicConnections.zodiacAlignment.sign}</p>
                       <p className={styles.cosmicText}>{cosmicConnections.zodiacAlignment.description}</p>
                       {cosmicConnections.zodiacAlignment.compatibility && (
@@ -412,14 +447,14 @@ const FaceReadingResult = () => {
                   <div className={styles.guidanceCard}>
                     <button
                       onClick={() => setExpandedGuidance(expandedGuidance === 'cosmic-element' ? null : 'cosmic-element')}
-                      className={styles.guidanceHeader}
+                      className={styles.cosmicHeader}
                     >
                       <h3 className={styles.cardTitle}>🔥 Elemental Energy</h3>
-                      <span className={styles.guidanceArrow}>
+                      <span className={styles.cosmicArrow}>
                         {expandedGuidance === 'cosmic-element' ? '▲' : '▼'}
                       </span>
                     </button>
-                    <div className={`${styles.guidanceContent} ${expandedGuidance === 'cosmic-element' ? styles.expanded : ''}`}>
+                    <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-element' ? styles.expanded : ''}`}>
                       <p className={styles.cosmicPlanet}>
                         {cosmicConnections.elementalEnergy.element} - {cosmicConnections.elementalEnergy.percentage}%
                       </p>
@@ -439,14 +474,14 @@ const FaceReadingResult = () => {
                   <div className={styles.guidanceCard}>
                     <button
                       onClick={() => setExpandedGuidance(expandedGuidance === 'cosmic-spiritual' ? null : 'cosmic-spiritual')}
-                      className={styles.guidanceHeader}
+                      className={styles.cosmicHeader}
                     >
                       <h3 className={styles.cardTitle}>🕉️ Spiritual Path</h3>
-                      <span className={styles.guidanceArrow}>
+                      <span className={styles.cosmicArrow}>
                         {expandedGuidance === 'cosmic-spiritual' ? '▲' : '▼'}
                       </span>
                     </button>
-                    <div className={`${styles.guidanceContent} ${expandedGuidance === 'cosmic-spiritual' ? styles.expanded : ''}`}>
+                    <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-spiritual' ? styles.expanded : ''}`}>
                       <p className={styles.cosmicText}>{cosmicConnections.spiritualPath.path}</p>
                       {cosmicConnections.spiritualPath.guidance && (
                         <>
@@ -473,14 +508,14 @@ const FaceReadingResult = () => {
                   <div className={styles.guidanceCard}>
                     <button
                       onClick={() => setExpandedGuidance(expandedGuidance === 'cosmic-remedies' ? null : 'cosmic-remedies')}
-                      className={styles.guidanceHeader}
+                      className={styles.cosmicHeader}
                     >
                       <h3 className={styles.cardTitle}>🔮 Astrological Remedies</h3>
-                      <span className={styles.guidanceArrow}>
+                      <span className={styles.cosmicArrow}>
                         {expandedGuidance === 'cosmic-remedies' ? '▲' : '▼'}
                       </span>
                     </button>
-                    <div className={`${styles.guidanceContent} ${expandedGuidance === 'cosmic-remedies' ? styles.expanded : ''}`}>
+                    <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-remedies' ? styles.expanded : ''}`}>
                       <ul className={styles.list}>
                         {personalizedInsights.remedies.map((remedy, index) => (
                           <li key={index} className={styles.listItem}>{remedy}</li>
@@ -494,21 +529,25 @@ const FaceReadingResult = () => {
           )}
         </div>
 
-        {/* Relationship Insights */}
-        {overallReading.relationshipInsights && (
-          <div className={styles.insightCard}>
-            <h3 className={styles.insightTitle}>💕 Relationship Insights</h3>
-            <p className={styles.insightText}>{overallReading.relationshipInsights}</p>
+        {/* Relationship Insights & Spiritual Guidance */}
+        {(overallReading.relationshipInsights || overallReading.spiritualGuidance) && (
+          <div className={styles.insightsContainer}>
+            {overallReading.relationshipInsights && (
+              <div className={styles.insightCard}>
+                <h3 className={styles.insightTitle}>💕 Relationship Insights</h3>
+                <p className={styles.insightText}>{overallReading.relationshipInsights}</p>
+              </div>
+            )}
+
+            {overallReading.spiritualGuidance && (
+              <div className={styles.insightCard}>
+                <h3 className={styles.insightTitle}>🙏 Spiritual Guidance</h3>
+                <p className={styles.insightText}>{overallReading.spiritualGuidance}</p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Spiritual Guidance */}
-        {overallReading.spiritualGuidance && (
-          <div className={styles.insightCard}>
-            <h3 className={styles.insightTitle}>🙏 Spiritual Guidance</h3>
-            <p className={styles.insightText}>{overallReading.spiritualGuidance}</p>
-          </div>
-        )}
         <div className='text-center'>
           <button 
             className={styles.consultButton}

@@ -13,6 +13,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useTalkToAstrologer } from "./useTalkToAstrologer";
 import {
   useGetAstrologersQuery,
+  useGetAstrologerFilterCategoryTabQuery,
   useGetRecommendedAstrologersQuery,
 } from "../../../redux/api/astrologer/astrologerApi";
 import FilterChips from "../../../component/UI/chips/astrologer/FilterChips";
@@ -39,6 +40,7 @@ import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect"
 // import TopAstrologerCard from "../../../component/UI/cards/TopAstrologerCard";
 import NewAstrologerCard from "../../../component/UI/cards/newAstrologerCard/NewAstrologerCard";
 import NewAstrologerDetailsCard from "../../../component/UI/cards/newAstrologerCard/NewAstrologerDetailsCard";
+import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -53,12 +55,16 @@ const astroImages = [
 const TalkToAstrologer = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isLoggedIn } = useSelector((state) => state.auth);
+  const requireAuth = useRequireAuth();
   const [isRecommendModalOpen, setIsRecommendModalOpen] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showRecommend, setShowRecommend] = useState(true);
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [showFilterAstrologer, setShowFilterAstrologer] = useState(false);
+
+  const { data: astroFilterTab, isFetchingFilterTab } = useGetAstrologerFilterCategoryTabQuery();
+
+  
 
   // NEW: Store the connection type when opening ProfileManager
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
@@ -428,10 +434,7 @@ const TalkToAstrologer = () => {
   // Receives connectionType (chat or audio) from NewAstrologerCard
   const handleConnectClick = (astrologer, connectionType) => {
     // Check if user is logged in
-    if (!isLoggedIn) {
-      navigate("/login?skip=welcome");
-      return;
-    }
+     if (!requireAuth()) return;
 
     if (WaitingList || callWaitingList) {
       Toast.error(
@@ -682,6 +685,8 @@ const TalkToAstrologer = () => {
         isOnlineFromURL={isOnlineFromURL}
         setShowFilterAstrologer={setShowFilterAstrologer}
         selectedType={location.state?.selectedType}
+        astroFilterTab={astroFilterTab}
+        isFetchingFilterTab={isFetchingFilterTab}
       />
 
       {/* Top Astrologers Section - New Design */}
@@ -854,9 +859,11 @@ const TalkToAstrologer = () => {
               />
             )} */}
 
-              <NewAstrologerDetailsCard key={astro._id}
+              <NewAstrologerDetailsCard
+                key={astro._id}
                 astrologer={astro}
-                onConnect={handleConnectClick} />
+                onConnect={handleConnectClick}
+              />
             </div>
           </>
         ))}
@@ -1014,7 +1021,8 @@ const TalkToAstrologer = () => {
         onClose={() => hookSetOpenModal((prev) => ({ ...prev, kundli: false }))}
         startCallMode={true}
         onStartCall={handleProfileManagerStartCall}
-        title="Select Profile to Continue"
+        title="Select Profile"
+        startCallModeBtnType={pendingConnectionType}
         enabledOperations={{
           list: true,
           add: true,

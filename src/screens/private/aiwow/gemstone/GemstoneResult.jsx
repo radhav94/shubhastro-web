@@ -12,34 +12,21 @@ const GemstoneResult = () => {
   const [selectedGemstoneIndex, setSelectedGemstoneIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('overview');
   
-  // Get data from Redux
+  // Dropdown states for Suitability tab
+  const [openSections, setOpenSections] = useState({});
+
+  const toggleSection = (key) => {
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const reduxResult = useSelector((state) => state.aiwow.gemstone.result);
   const reduxImage = useSelector((state) => state.aiwow.gemstone.image);
 
   useEffect(() => {
-    console.log('GemstoneResult - Loading result:', {
-      hasReduxResult: !!reduxResult,
-      reduxResultType: typeof reduxResult,
-      reduxResultKeys: reduxResult ? Object.keys(reduxResult) : [],
-      hasReduxImage: !!reduxImage
-    });
-
     if (reduxResult) {
       try {
-        // Handle nested data structure
         const apiData = reduxResult.data || reduxResult;
-        
-        console.log('GemstoneResult - Processing data:', {
-          hasApiData: !!apiData,
-          apiDataKeys: apiData ? Object.keys(apiData) : [],
-          hasGemstones: !!(apiData.gemstones),
-          gemstonesCount: apiData.gemstones?.length || 0
-        });
-        
-        // Check if we have multiple gemstones
         const gemstonesArray = apiData.gemstones || [apiData];
-        
-        // Process each gemstone
         const processedGemstones = gemstonesArray.map((gemstone) => ({
           image: apiData.gemstoneImage || reduxImage,
           identification: gemstone.gemstoneIdentification || {},
@@ -54,12 +41,6 @@ const GemstoneResult = () => {
           personalized: gemstone.personalizedInsights || {},
           confidenceScore: gemstone.confidenceScore || 85,
         }));
-        
-        console.log('GemstoneResult - Processed gemstones:', {
-          count: processedGemstones.length,
-          names: processedGemstones.map(g => g.identification.name)
-        });
-        
         setGemstones(processedGemstones);
       } catch (error) {
         console.error('Error parsing result:', error);
@@ -72,363 +53,337 @@ const GemstoneResult = () => {
       navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path, { replace: true });
       return;
     }
-    
     setLoading(false);
   }, [reduxResult, reduxImage, navigate]);
 
-  const renderOverview = (resultData) => (
+  // ─── Dropdown Arrow Component ───
+  const Arrow = ({ isOpen }) => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+      style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+      <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
+  // ─── OVERVIEW TAB ───
+  const renderOverview = (d) => (
     <div className={styles.tabContent}>
       <div className={styles.overviewRow}>
         <div className={styles.gemstoneImageWrapper}>
-          <img src={resultData.image} alt="Gemstone" className={styles.gemstoneImage} />
+          <img src={d.image} alt="Gemstone" className={styles.gemstoneImage} />
         </div>
-
         <div className={styles.identificationCard}>
           <h3 className={styles.cardTitle}>Gemstone Identification</h3>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Name:</span>
-            <span className={styles.value}>{resultData.identification.name}</span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Hindi Name:</span>
-            <span className={styles.value}>{resultData.identification.hindiName}</span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Scientific Name:</span>
-            <span className={styles.value}>{resultData.identification.scientificName}</span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Natural:</span>
-            <span className={styles.value}>{resultData.identification.isNatural ? 'Yes' : 'No'}</span>
-          </div>
+          <InfoRow label="Name" value={d.identification.name} />
+          <InfoRow label="Hindi Name" value={d.identification.hindiName} />
+          <InfoRow label="Scientific" value={d.identification.scientificName} />
+          <InfoRow label="Natural" value={d.identification.isNatural ? 'Yes' : 'No'} />
         </div>
-
         <div className={styles.summaryCard}>
           <h3 className={styles.cardTitle}>Overall Summary</h3>
-          <p className={styles.summaryText}>{resultData.overall.summary}</p>
-          <p className={styles.recommendationText}>{resultData.overall.recommendation}</p>
+          <p className={styles.summaryText}>{d.overall.summary}</p>
+          <p className={styles.recommendationText}>{d.overall.recommendation}</p>
         </div>
       </div>
     </div>
   );
 
-  const renderDetails = (resultData) => (
+  // ─── DETAILS TAB ───
+  const renderDetails = (d) => (
     <div className={styles.tabContent}>
-      <div className={styles.detailsCard}>
-        <h3 className={styles.cardTitle}>Quality & Characteristics</h3>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Quality:</span>
-          <span className={styles.value}>{resultData.details.quality}</span>
+      <div className={styles.detailsGrid}>
+        {/* Quality */}
+        <div className={styles.detailBox}>
+          <h4 className={styles.boxTitle}>Quality</h4>
+          <p className={styles.boxValue}>{d.details.quality || '—'}</p>
         </div>
-        
-        {resultData.details.color && (
-          <>
-            <h4 className={styles.subTitle}>Color</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Primary:</span>
-              <span className={styles.value}>{resultData.details.color.primary}</span>
-            </div>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Secondary:</span>
-              <span className={styles.value}>{resultData.details.color.secondary}</span>
-            </div>
-          </>
+
+        {/* Color */}
+        {d.details.color && (
+          <div className={styles.detailBox}>
+            <h4 className={styles.boxTitle}>Color</h4>
+            <InfoRow label="Primary" value={d.details.color.primary} />
+            <InfoRow label="Secondary" value={d.details.color.secondary} />
+          </div>
         )}
 
-        {resultData.details.clarity && (
-          <>
-            <h4 className={styles.subTitle}>Clarity</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Grade:</span>
-              <span className={styles.value}>{resultData.details.clarity.grade}</span>
-            </div>
-            {resultData.details.clarity.inclusions && resultData.details.clarity.inclusions.length > 0 && (
-              <div className={styles.infoRow}>
-                <span className={styles.label}>Inclusions:</span>
-                <span className={styles.value}>{resultData.details.clarity.inclusions.join(', ')}</span>
-              </div>
+        {/* Clarity */}
+        {d.details.clarity && (
+          <div className={styles.detailBox}>
+            <h4 className={styles.boxTitle}>Clarity</h4>
+            <InfoRow label="Grade" value={d.details.clarity.grade} />
+            {d.details.clarity.inclusions?.length > 0 && (
+              <InfoRow label="Inclusions" value={d.details.clarity.inclusions.join(', ')} />
             )}
-          </>
+          </div>
         )}
 
-        {resultData.details.cut && (
-          <>
-            <h4 className={styles.subTitle}>Cut</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Shape:</span>
-              <span className={styles.value}>{resultData.details.cut.shape}</span>
-            </div>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Quality:</span>
-              <span className={styles.value}>{resultData.details.cut.quality}</span>
-            </div>
-          </>
+        {/* Cut */}
+        {d.details.cut && (
+          <div className={styles.detailBox}>
+            <h4 className={styles.boxTitle}>Cut</h4>
+            <InfoRow label="Shape" value={d.details.cut.shape} />
+            <InfoRow label="Quality" value={d.details.cut.quality} />
+          </div>
         )}
 
-        {resultData.details.estimatedCarat && (
-          <>
-            <h4 className={styles.subTitle}>Carat Weight</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Range:</span>
-              <span className={styles.value}>{resultData.details.estimatedCarat.range}</span>
-            </div>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Approximate:</span>
-              <span className={styles.value}>{resultData.details.estimatedCarat.approximate} carats</span>
-            </div>
-          </>
+        {/* Carat */}
+        {d.details.estimatedCarat && (
+          <div className={styles.detailBox}>
+            <h4 className={styles.boxTitle}>Carat Weight</h4>
+            <InfoRow label="Range" value={d.details.estimatedCarat.range} />
+            <InfoRow label="Approx" value={`${d.details.estimatedCarat.approximate} ct`} />
+          </div>
         )}
 
-        {resultData.details.treatment && (
-          <>
-            <h4 className={styles.subTitle}>Treatment</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Detected:</span>
-              <span className={styles.value}>{resultData.details.treatment.isDetected ? 'Yes' : 'No'}</span>
-            </div>
-            <p className={styles.treatmentDesc}>{resultData.details.treatment.description}</p>
-          </>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderAstrological = (resultData) => (
-    <div className={styles.tabContent}>
-      <div className={styles.astroCard}>
-        <h3 className={styles.cardTitle}>Astrological Properties</h3>
-        
-        {resultData.astrological.rulingPlanet && (
-          <>
-            <h4 className={styles.subTitle}>Ruling Planet</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Planet:</span>
-              <span className={styles.value}>{resultData.astrological.rulingPlanet.planet}</span>
-            </div>
-            <p className={styles.influenceText}>{resultData.astrological.rulingPlanet.influence}</p>
-          </>
-        )}
-
-        {resultData.astrological.zodiacSigns && (
-          <>
-            <h4 className={styles.subTitle}>Zodiac Signs</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Primary:</span>
-              <span className={styles.value}>{resultData.astrological.zodiacSigns.primary}</span>
-            </div>
-            {resultData.astrological.zodiacSigns.secondary && (
-              <div className={styles.infoRow}>
-                <span className={styles.label}>Secondary:</span>
-                <span className={styles.value}>{resultData.astrological.zodiacSigns.secondary.join(', ')}</span>
-              </div>
+        {/* Treatment */}
+        {d.details.treatment && (
+          <div className={styles.detailBox}>
+            <h4 className={styles.boxTitle}>Treatment</h4>
+            <InfoRow label="Detected" value={d.details.treatment.isDetected ? 'Yes' : 'No'} />
+            {d.details.treatment.description && (
+              <p className={styles.boxDesc}>{d.details.treatment.description}</p>
             )}
-          </>
-        )}
-
-        {resultData.astrological.chakra && (
-          <>
-            <h4 className={styles.subTitle}>Chakra</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Name:</span>
-              <span className={styles.value}>{resultData.astrological.chakra.name}</span>
-            </div>
-            <p className={styles.benefitsText}>{resultData.astrological.chakra.benefits}</p>
-          </>
-        )}
-
-        {resultData.astrological.element && (
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Element:</span>
-            <span className={styles.value}>{resultData.astrological.element}</span>
           </div>
-        )}
-
-        {resultData.astrological.numerology && (
-          <>
-            <h4 className={styles.subTitle}>Numerology</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Number:</span>
-              <span className={styles.value}>{resultData.astrological.numerology.number}</span>
-            </div>
-            <p className={styles.significanceText}>{resultData.astrological.numerology.significance}</p>
-          </>
         )}
       </div>
     </div>
   );
 
-  const renderSuitability = (resultData) => (
+  // ─── ASTROLOGICAL TAB ───
+  const renderAstrological = (d) => (
     <div className={styles.tabContent}>
-      <div className={styles.suitabilityCard}>
-        <div className={styles.scoreHeader}>
-          <h3 className={styles.cardTitle}>Suitability Analysis</h3>
-          <div className={styles.suitabilityScore}>
-            <span className={styles.scoreValue}>{resultData.suitability.score}</span>
-            <span className={styles.scoreLabel}>{resultData.suitability.level}</span>
-          </div>
-        </div>
-
-        {resultData.suitability.forDasha && (
-          <div className={styles.infoRow}>
-            <span className={styles.label}>For Dasha:</span>
-            <span className={styles.value}>{resultData.suitability.forDasha}</span>
+      <div className={styles.astroGrid}>
+        {d.astrological.rulingPlanet && (
+          <div className={styles.astroBox}>
+            <h4 className={styles.boxTitle}>Ruling Planet</h4>
+            <p className={styles.boxHighlight}>{d.astrological.rulingPlanet.planet}</p>
+            <p className={styles.boxDesc}>{d.astrological.rulingPlanet.influence}</p>
           </div>
         )}
 
-        {resultData.suitability.benefits && resultData.suitability.benefits.length > 0 && (
-          <>
-            <h4 className={styles.subTitle}>Benefits</h4>
-            <ul className={styles.benefitsList}>
-              {resultData.suitability.benefits.map((benefit, index) => (
-                <li key={index} className={styles.benefitItem}>{benefit}</li>
-              ))}
-            </ul>
-          </>
+        {d.astrological.zodiacSigns && (
+          <div className={styles.astroBox}>
+            <h4 className={styles.boxTitle}>Zodiac Signs</h4>
+            <p className={styles.boxHighlight}>{d.astrological.zodiacSigns.primary}</p>
+            {d.astrological.zodiacSigns.secondary?.length > 0 && (
+              <p className={styles.boxDesc}>Also: {d.astrological.zodiacSigns.secondary.join(', ')}</p>
+            )}
+          </div>
         )}
 
-        {resultData.suitability.cautions && resultData.suitability.cautions.length > 0 && (
-          <>
-            <h4 className={styles.subTitle}>Cautions</h4>
-            <ul className={styles.cautionsList}>
-              {resultData.suitability.cautions.map((caution, index) => (
-                <li key={index} className={styles.cautionItem}>{caution}</li>
-              ))}
-            </ul>
-          </>
+        {d.astrological.chakra && (
+          <div className={styles.astroBox}>
+            <h4 className={styles.boxTitle}>Chakra</h4>
+            <p className={styles.boxHighlight}>{d.astrological.chakra.name}</p>
+            <p className={styles.boxDesc}>{d.astrological.chakra.benefits}</p>
+          </div>
+        )}
+
+        {d.astrological.element && (
+          <div className={styles.astroBox}>
+            <h4 className={styles.boxTitle}>Element</h4>
+            <p className={styles.boxHighlight}>{d.astrological.element}</p>
+          </div>
+        )}
+
+        {d.astrological.numerology && (
+          <div className={styles.astroBox}>
+            <h4 className={styles.boxTitle}>Numerology</h4>
+            <p className={styles.boxHighlight}>{d.astrological.numerology.number}</p>
+            <p className={styles.boxDesc}>{d.astrological.numerology.significance}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // ─── SUITABILITY TAB (with dropdowns) ───
+  const renderSuitability = (d) => (
+    <div className={styles.tabContent}>
+      {/* Suitability Analysis - Dropdown */}
+      <div className={styles.dropdown}>
+        <button className={styles.dropdownHeader} onClick={() => toggleSection('suitability')}>
+          <div className={styles.dropdownTitleWrap}>
+            <h3 className={styles.dropdownTitle}>Suitability Analysis</h3>
+            {d.suitability.score && (
+              <span className={styles.scoreBadge}>{d.suitability.score} - {d.suitability.level}</span>
+            )}
+          </div>
+          <Arrow isOpen={openSections.suitability} />
+        </button>
+        {openSections.suitability && (
+          <div className={styles.dropdownBody}>
+            <div className={styles.suitRow}>
+              {d.suitability.forDasha && (
+                <div className={styles.suitBox}>
+                  <h4 className={styles.boxTitle}>For Dasha</h4>
+                  <p className={styles.boxValue}>{d.suitability.forDasha}</p>
+                </div>
+              )}
+              {d.suitability.benefits?.length > 0 && (
+                <div className={styles.suitBox}>
+                  <h4 className={styles.boxTitle}>Benefits</h4>
+                  <ul className={styles.compactList}>
+                    {d.suitability.benefits.map((b, i) => <li key={i}>{b}</li>)}
+                  </ul>
+                </div>
+              )}
+              {d.suitability.cautions?.length > 0 && (
+                <div className={styles.suitBox}>
+                  <h4 className={styles.boxTitle}>Cautions</h4>
+                  <ul className={styles.compactList}>
+                    {d.suitability.cautions.map((c, i) => <li key={i}>{c}</li>)}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
-      {resultData.wearing && (
-        <div className={styles.wearingCard}>
-          <h3 className={styles.cardTitle}>Wearing Guidelines</h3>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Best Day:</span>
-            <span className={styles.value}>{resultData.wearing.bestDay}</span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Best Time:</span>
-            <span className={styles.value}>{resultData.wearing.bestTime}</span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Finger:</span>
-            <span className={styles.value}>{resultData.wearing.finger}</span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Hand:</span>
-            <span className={styles.value}>{resultData.wearing.hand}</span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Metal:</span>
-            <span className={styles.value}>{resultData.wearing.metal}</span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Weight:</span>
-            <span className={styles.value}>{resultData.wearing.weight}</span>
-          </div>
-          {resultData.wearing.mantra && (
-            <>
-              <h4 className={styles.subTitle}>Mantra</h4>
-              <p className={styles.mantraText}>{resultData.wearing.mantra}</p>
-            </>
-          )}
-          {resultData.wearing.activationRitual && (
-            <>
-              <h4 className={styles.subTitle}>Activation Ritual</h4>
-              <p className={styles.ritualText}>{resultData.wearing.activationRitual}</p>
-            </>
+      {/* Wearing Guidelines - Dropdown */}
+      {d.wearing && (
+        <div className={styles.dropdown}>
+          <button className={styles.dropdownHeader} onClick={() => toggleSection('wearing')}>
+            <h3 className={styles.dropdownTitle}>Wearing Guidelines</h3>
+            <Arrow isOpen={openSections.wearing} />
+          </button>
+          {openSections.wearing && (
+            <div className={styles.dropdownBody}>
+              <div className={styles.suitRow}>
+                <div className={styles.suitBox}>
+                  <h4 className={styles.boxTitle}>When to Wear</h4>
+                  <InfoRow label="Best Day" value={d.wearing.bestDay} />
+                  <InfoRow label="Best Time" value={d.wearing.bestTime} />
+                </div>
+                <div className={styles.suitBox}>
+                  <h4 className={styles.boxTitle}>How to Wear</h4>
+                  <InfoRow label="Finger" value={d.wearing.finger} />
+                  <InfoRow label="Hand" value={d.wearing.hand} />
+                  <InfoRow label="Metal" value={d.wearing.metal} />
+                  <InfoRow label="Weight" value={d.wearing.weight} />
+                </div>
+                {(d.wearing.mantra || d.wearing.activationRitual) && (
+                  <div className={styles.suitBox}>
+                    <h4 className={styles.boxTitle}>Ritual</h4>
+                    {d.wearing.mantra && <p className={styles.mantraText}>{d.wearing.mantra}</p>}
+                    {d.wearing.activationRitual && <p className={styles.boxDesc}>{d.wearing.activationRitual}</p>}
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
       )}
     </div>
   );
 
-  const renderHealing = (resultData) => (
+  // ─── HEALING TAB (with dropdowns) ───
+  const renderHealing = (d) => (
     <div className={styles.tabContent}>
-      <div className={styles.healingCard}>
-        <h3 className={styles.cardTitle}>Healing Properties</h3>
-        
-        {resultData.healing.physical && resultData.healing.physical.length > 0 && (
-          <>
-            <h4 className={styles.subTitle}>Physical Benefits</h4>
-            <ul className={styles.healingList}>
-              {resultData.healing.physical.map((item, index) => (
-                <li key={index} className={styles.healingItem}>{item}</li>
-              ))}
-            </ul>
-          </>
-        )}
-
-        {resultData.healing.emotional && resultData.healing.emotional.length > 0 && (
-          <>
-            <h4 className={styles.subTitle}>Emotional Benefits</h4>
-            <ul className={styles.healingList}>
-              {resultData.healing.emotional.map((item, index) => (
-                <li key={index} className={styles.healingItem}>{item}</li>
-              ))}
-            </ul>
-          </>
-        )}
-
-        {resultData.healing.spiritual && resultData.healing.spiritual.length > 0 && (
-          <>
-            <h4 className={styles.subTitle}>Spiritual Benefits</h4>
-            <ul className={styles.healingList}>
-              {resultData.healing.spiritual.map((item, index) => (
-                <li key={index} className={styles.healingItem}>{item}</li>
-              ))}
-            </ul>
-          </>
+      {/* Healing Properties - Dropdown */}
+      <div className={styles.dropdown}>
+        <button className={styles.dropdownHeader} onClick={() => toggleSection('healing')}>
+          <h3 className={styles.dropdownTitle}>Healing Properties</h3>
+          <Arrow isOpen={openSections.healing} />
+        </button>
+        {openSections.healing && (
+          <div className={styles.dropdownBody}>
+            <div className={styles.suitRow}>
+              {d.healing.physical?.length > 0 && (
+                <div className={styles.suitBox}>
+                  <h4 className={styles.boxTitle}>Physical</h4>
+                  <ul className={styles.compactList}>
+                    {d.healing.physical.map((item, i) => <li key={i}>{item}</li>)}
+                  </ul>
+                </div>
+              )}
+              {d.healing.emotional?.length > 0 && (
+                <div className={styles.suitBox}>
+                  <h4 className={styles.boxTitle}>Emotional</h4>
+                  <ul className={styles.compactList}>
+                    {d.healing.emotional.map((item, i) => <li key={i}>{item}</li>)}
+                  </ul>
+                </div>
+              )}
+              {d.healing.spiritual?.length > 0 && (
+                <div className={styles.suitBox}>
+                  <h4 className={styles.boxTitle}>Spiritual</h4>
+                  <ul className={styles.compactList}>
+                    {d.healing.spiritual.map((item, i) => <li key={i}>{item}</li>)}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
-      {resultData.compatibility && (
-        <div className={styles.compatibilityCard}>
-          <h3 className={styles.cardTitle}>Gemstone Compatibility</h3>
-          
-          {resultData.compatibility.compatibleGemstones && resultData.compatibility.compatibleGemstones.length > 0 && (
-            <>
-              <h4 className={styles.subTitle}>Compatible Gemstones</h4>
-              <p className={styles.compatibleText}>{resultData.compatibility.compatibleGemstones.join(', ')}</p>
-            </>
-          )}
-
-          {resultData.compatibility.incompatibleGemstones && resultData.compatibility.incompatibleGemstones.length > 0 && (
-            <>
-              <h4 className={styles.subTitle}>Incompatible Gemstones</h4>
-              <p className={styles.incompatibleText}>{resultData.compatibility.incompatibleGemstones.join(', ')}</p>
-            </>
-          )}
-
-          {resultData.compatibility.stackingAdvice && (
-            <>
-              <h4 className={styles.subTitle}>Stacking Advice</h4>
-              <p className={styles.adviceText}>{resultData.compatibility.stackingAdvice}</p>
-            </>
+      {/* Compatibility - Dropdown */}
+      {d.compatibility && (
+        <div className={styles.dropdown}>
+          <button className={styles.dropdownHeader} onClick={() => toggleSection('compatibility')}>
+            <h3 className={styles.dropdownTitle}>Gemstone Compatibility</h3>
+            <Arrow isOpen={openSections.compatibility} />
+          </button>
+          {openSections.compatibility && (
+            <div className={styles.dropdownBody}>
+              <div className={styles.suitRow}>
+                {d.compatibility.compatibleGemstones?.length > 0 && (
+                  <div className={styles.suitBox}>
+                    <h4 className={styles.boxTitle}>Compatible</h4>
+                    <p className={styles.compatibleText}>{d.compatibility.compatibleGemstones.join(', ')}</p>
+                  </div>
+                )}
+                {d.compatibility.incompatibleGemstones?.length > 0 && (
+                  <div className={styles.suitBox}>
+                    <h4 className={styles.boxTitle}>Incompatible</h4>
+                    <p className={styles.incompatibleText}>{d.compatibility.incompatibleGemstones.join(', ')}</p>
+                  </div>
+                )}
+                {d.compatibility.stackingAdvice && (
+                  <div className={styles.suitBox}>
+                    <h4 className={styles.boxTitle}>Stacking Advice</h4>
+                    <p className={styles.boxDesc}>{d.compatibility.stackingAdvice}</p>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
       )}
 
-      {resultData.market && (
-        <div className={styles.marketCard}>
-          <h3 className={styles.cardTitle}>Market Information</h3>
-          {resultData.market.priceRange && (
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Price Range:</span>
-              <span className={styles.value}>
-                ₹{resultData.market.priceRange.low.toLocaleString()} - ₹{resultData.market.priceRange.high.toLocaleString()}
-              </span>
-            </div>
-          )}
-          {resultData.market.perCaratPrice && (
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Per Carat:</span>
-              <span className={styles.value}>{resultData.market.perCaratPrice}</span>
-            </div>
-          )}
-          {resultData.market.investmentGrade !== undefined && (
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Investment Grade:</span>
-              <span className={styles.value}>{resultData.market.investmentGrade ? 'Yes' : 'No'}</span>
+      {/* Market Info - Dropdown */}
+      {d.market && (
+        <div className={styles.dropdown}>
+          <button className={styles.dropdownHeader} onClick={() => toggleSection('market')}>
+            <h3 className={styles.dropdownTitle}>Market Information</h3>
+            <Arrow isOpen={openSections.market} />
+          </button>
+          {openSections.market && (
+            <div className={styles.dropdownBody}>
+              <div className={styles.suitRow}>
+                {d.market.priceRange && (
+                  <div className={styles.suitBox}>
+                    <h4 className={styles.boxTitle}>Price Range</h4>
+                    <p className={styles.boxHighlight}>
+                      ₹{d.market.priceRange.low?.toLocaleString()} - ₹{d.market.priceRange.high?.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+                {d.market.perCaratPrice && (
+                  <div className={styles.suitBox}>
+                    <h4 className={styles.boxTitle}>Per Carat</h4>
+                    <p className={styles.boxHighlight}>{d.market.perCaratPrice}</p>
+                  </div>
+                )}
+                {d.market.investmentGrade !== undefined && (
+                  <div className={styles.suitBox}>
+                    <h4 className={styles.boxTitle}>Investment Grade</h4>
+                    <p className={styles.boxHighlight}>{d.market.investmentGrade ? 'Yes' : 'No'}</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -439,23 +394,19 @@ const GemstoneResult = () => {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loadingContainer}>
-          <p>Loading results...</p>
-        </div>
+        <div className={styles.loadingContainer}><p>Loading results...</p></div>
       </div>
     );
   }
 
-  if (!gemstones || gemstones.length === 0) {
-    return null;
-  }
+  if (!gemstones || gemstones.length === 0) return null;
 
   const currentGemstone = gemstones[selectedGemstoneIndex];
 
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate("/aiwow/gemstone")}>
+        <button className={styles.backButton} onClick={() => navigate("/aiwow/gemstone-authenticity")}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -464,17 +415,13 @@ const GemstoneResult = () => {
       </header>
 
       <div className={styles.content}>
-        {/* Main tabs for gemstone selection (only show if multiple gemstones) */}
         {gemstones.length > 1 && (
           <div className={styles.gemstoneTabs}>
             {gemstones.map((gemstone, index) => (
               <button
                 key={index}
                 className={`${styles.gemstoneTab} ${selectedGemstoneIndex === index ? styles.active : ''}`}
-                onClick={() => {
-                  setSelectedGemstoneIndex(index);
-                  setActiveTab('overview'); // Reset to overview when switching gemstones
-                }}
+                onClick={() => { setSelectedGemstoneIndex(index); setActiveTab('overview'); }}
               >
                 {gemstone.identification.name || `Gemstone ${index + 1}`}
               </button>
@@ -482,38 +429,16 @@ const GemstoneResult = () => {
           </div>
         )}
 
-        {/* Sub-tabs for gemstone details */}
         <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${activeTab === 'overview' ? styles.active : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            Overview
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'details' ? styles.active : ''}`}
-            onClick={() => setActiveTab('details')}
-          >
-            Details
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'astrological' ? styles.active : ''}`}
-            onClick={() => setActiveTab('astrological')}
-          >
-            Astrological
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'suitability' ? styles.active : ''}`}
-            onClick={() => setActiveTab('suitability')}
-          >
-            Suitability
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'healing' ? styles.active : ''}`}
-            onClick={() => setActiveTab('healing')}
-          >
-            Healing
-          </button>
+          {['overview', 'details', 'astrological', 'suitability', 'healing'].map((tab) => (
+            <button
+              key={tab}
+              className={`${styles.tab} ${activeTab === tab ? styles.active : ''}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
         </div>
 
         {activeTab === 'overview' && renderOverview(currentGemstone)}
@@ -522,6 +447,17 @@ const GemstoneResult = () => {
         {activeTab === 'suitability' && renderSuitability(currentGemstone)}
         {activeTab === 'healing' && renderHealing(currentGemstone)}
       </div>
+    </div>
+  );
+};
+
+// ─── Reusable InfoRow ───
+const InfoRow = ({ label, value }) => {
+  if (!value) return null;
+  return (
+    <div className={styles.infoRow}>
+      <span className={styles.label}>{label}:</span>
+      <span className={styles.value}>{value}</span>
     </div>
   );
 };

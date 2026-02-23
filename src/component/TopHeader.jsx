@@ -8,9 +8,11 @@ import ShubhTalkLogo from "../assets/images/ShubhAstrologo.svg";
 import ShubhTalkLogoMobile from "../assets/images/mobile-shubh-astro-logo.svg";
 import { useWalletBalance } from "../screens/private/wallet/useWalletBalance";
 import { getToken } from "../utils/token";
-import { useGetAllKundlisQuery } from "../services/appServices/kundliServicesNew"; 
+import { useGetAllKundlisQuery } from "../services/appServices/kundliServicesNew";
+import useRequireAuth from "../utils/hooks/useRequireAuth"; 
 const TopHeader = () => {
   const navigate = useNavigate();
+  const requireAuth = useRequireAuth();
   const [user, setUser] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState('en');
@@ -109,8 +111,7 @@ const TopHeader = () => {
   }, [refreshWallet]);
 
   const handleProfileClick = () => {
-    const token = localStorage.getItem("shubhtalk_customer_token");
-    token ? navigate("/profile") : navigate("/login?skip=welcome");
+    requireAuth() && navigate("/profile");
   };
 
   const formatAmount = (amount) => {

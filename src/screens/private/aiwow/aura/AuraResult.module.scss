@@ -174,18 +174,236 @@
   gap: 1rem;
 }
 
-// Cards - Matching the gray background from image
-.card {
+.cardsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  align-items: start;
+  grid-auto-rows: auto;
+}
+
+.auraColorsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.planetaryGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.energyGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.spiritualGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.planetCard {
   background: #f3f4f6;
   border-radius: 1rem;
   padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.planetName {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 0.5rem 0;
+}
+
+.planetAspect {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0 0 0.75rem 0;
+}
+
+.planetInfluence {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #F75801;
+  margin: 0;
+}
+
+// Cards - Matching the gray background from image
+.card,
+.dominantCard {
+  background: #f3f4f6;
+  border-radius: 1rem;
+  padding: 0;
+  position: relative;
+  overflow: visible;
+  height: auto;
+  align-self: start;
+}
+
+.cardHeaderButton {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: left;
+  min-height: 70px;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  &:active {
+    background: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.dropdownArrow {
+  font-size: 0.875rem;
+  color: #6b7280;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+
+.cardDropdown {
+  display: none;
+  padding: 0 1.25rem 1.25rem 1.25rem;
+}
+
+.cardDropdown.expanded {
+  display: block;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cardStaticContent {
+  padding: 1.5rem 1.25rem;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dominantContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.dominantColorCircle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dominantInfo {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.dominantColorName {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+}
+
+.dominantPercentage {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #6b7280;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.dominantMeaning {
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.energyCard {
+  background: #f3f4f6;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.energyContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.energyInfo {
+  flex: 1;
+}
+
+.energyLabel {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+}
+
+.energyPercentage {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #6b7280;
+  margin: 0;
+  position: absolute;
+  right: 1.25rem;
+  top: 3rem;
+}
+
+.energyDescription {
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0;
 }
 
 .cardTitle {
   font-size: 1.125rem;
   font-weight: 700;
   color: #000000;
-  margin: 0 0 1rem 0;
+  margin: 0;
+  flex: 1;
+  line-height: 1.4;
 }
 
 .cardText {
@@ -489,10 +707,58 @@
   }
 
   .card,
+  .dominantCard,
+  .energyCard,
   .analysisCard,
   .auraCard,
   .featureCard,
   .cosmicCard {
-    padding: 1.5rem;
+    padding: 0;
+  }
+
+  .cardHeaderButton {
+    padding: 1.75rem 1.5rem;
+    min-height: 80px;
+  }
+
+  .cardStaticContent {
+    padding: 1.75rem 1.5rem;
+    min-height: 80px;
+  }
+
+  .cardsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    align-items: start;
+    grid-auto-rows: auto;
+  }
+
+  .auraColorsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .planetaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .energyGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .spiritualGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .planetaryGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .energyGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .spiritualGrid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }

@@ -10,6 +10,10 @@ const AuraResult = () => {
   const [activeTab, setActiveTab] = useState('overall');
   const [loading, setLoading] = useState(true);
   const [validationError, setValidationError] = useState(null);
+  const [expandedDominant, setExpandedDominant] = useState(false);
+  const [expandedAstrological, setExpandedAstrological] = useState(false);
+  const [expandedStrengths, setExpandedStrengths] = useState(false);
+  const [expandedRecommendations, setExpandedRecommendations] = useState(false);
   
   const analysisData = useSelector((state) => state.aiwow.aura.result);
   const auraImage = useSelector((state) => state.aiwow.aura.image);
@@ -191,103 +195,147 @@ const AuraResult = () => {
         <div className={styles.tabContent}>
           {activeTab === 'overall' && (
             <div className={styles.section}>
-              {dominantColor.color && (
-                <div className={styles.dominantCard}>
-                  <h3 className={styles.cardTitle}>🌟 Dominant Aura Color</h3>
-                  <div className={styles.colorDisplay}>
-                    <div 
-                      className={styles.colorCircle} 
-                      style={{ backgroundColor: dominantColor.color }}
-                    ></div>
-                    <div className={styles.colorInfo}>
-                      <h4 className={styles.colorName}>
-                        {dominantColor.color === '#FFD700' ? 'Gold' : 
-                         dominantColor.color === '#FFA500' ? 'Orange' : 
-                         dominantColor.color}
-                      </h4>
-                      <p className={styles.colorPercentage}>{dominantColor.percentage}%</p>
+              <div className={styles.cardsGrid}>
+                {dominantColor.color && (
+                  <div className={styles.dominantCard}>
+                    <button
+                      className={styles.cardHeaderButton}
+                      onClick={() => setExpandedDominant(!expandedDominant)}
+                    >
+                      <h3 className={styles.cardTitle}>🌟 Dominant Aura Color</h3>
+                      <span className={styles.dropdownArrow}>
+                        {expandedDominant ? '▲' : '▼'}
+                      </span>
+                    </button>
+                    <div className={`${styles.cardDropdown} ${expandedDominant ? styles.expanded : ''}`}>
+                      <div className={styles.dominantContent}>
+                        <div 
+                          className={styles.dominantColorCircle} 
+                          style={{ backgroundColor: dominantColor.color }}
+                        ></div>
+                        <div className={styles.dominantInfo}>
+                          <h4 className={styles.dominantColorName}>
+                            {dominantColor.color}
+                          </h4>
+                          <p className={styles.dominantPercentage}>{dominantColor.percentage}%</p>
+                        </div>
+                      </div>
+                      <p className={styles.dominantMeaning}>{dominantColor.meaning}</p>
                     </div>
                   </div>
-                  <p className={styles.colorMeaning}>{dominantColor.meaning}</p>
-                </div>
-              )}
+                )}
 
-              {astrologicalData.sunSign && (
-                <div className={styles.card}>
-                  <h3 className={styles.cardTitle}>♈ Astrological Profile</h3>
-                  <div className={styles.chipContainer}>
-                    <span className={styles.chip}>Sun: {astrologicalData.sunSign}</span>
-                    <span className={styles.chip}>Element: {astrologicalData.element}</span>
-                    <span className={styles.chip}>Planet: {astrologicalData.dominantPlanet}</span>
-                    <span className={styles.chip}>Moon: {astrologicalData.moonPhase}</span>
+                {astrologicalData.sunSign && (
+                  <div className={styles.card}>
+                    <button
+                      className={styles.cardHeaderButton}
+                      onClick={() => setExpandedAstrological(!expandedAstrological)}
+                    >
+                      <h3 className={styles.cardTitle}>♈ Astrological Profile</h3>
+                      <span className={styles.dropdownArrow}>
+                        {expandedAstrological ? '▲' : '▼'}
+                      </span>
+                    </button>
+                    <div className={`${styles.cardDropdown} ${expandedAstrological ? styles.expanded : ''}`}>
+                      <div className={styles.chipContainer}>
+                        <span className={styles.chip}>Sun: {astrologicalData.sunSign}</span>
+                        <span className={styles.chip}>Element: {astrologicalData.element}</span>
+                        <span className={styles.chip}>Planet: {astrologicalData.dominantPlanet}</span>
+                        <span className={styles.chip}>Moon: {astrologicalData.moonPhase}</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {overallReading.strengths?.length > 0 && (
-                <div className={styles.card}>
-                  <h3 className={styles.cardTitle}>✨ Strengths</h3>
-                  <ul className={styles.list}>
-                    {overallReading.strengths.map((strength, index) => (
-                      <li key={index} className={styles.listItem}>{strength}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                {overallReading.strengths?.length > 0 && (
+                  <div className={styles.card}>
+                    <button
+                      className={styles.cardHeaderButton}
+                      onClick={() => setExpandedStrengths(!expandedStrengths)}
+                    >
+                      <h3 className={styles.cardTitle}>✨ Strengths</h3>
+                      <span className={styles.dropdownArrow}>
+                        {expandedStrengths ? '▲' : '▼'}
+                      </span>
+                    </button>
+                    <div className={`${styles.cardDropdown} ${expandedStrengths ? styles.expanded : ''}`}>
+                      <ul className={styles.list}>
+                        {overallReading.strengths.map((strength, index) => (
+                          <li key={index} className={styles.listItem}>{strength}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
 
-              {overallReading.challenges?.length > 0 && (
-                <div className={styles.card}>
-                  <h3 className={styles.cardTitle}>⚡ Areas for Growth</h3>
-                  <ul className={styles.list}>
-                    {overallReading.challenges.map((challenge, index) => (
-                      <li key={index} className={styles.listItem}>{challenge}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                {overallReading.challenges?.length > 0 && (
+                  <div className={styles.card}>
+                    <div className={styles.cardStaticContent}>
+                      <h3 className={styles.cardTitle}>⚡ Areas for Growth</h3>
+                      <ul className={styles.list}>
+                        {overallReading.challenges.map((challenge, index) => (
+                          <li key={index} className={styles.listItem}>{challenge}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
 
-              {recommendations?.length > 0 && (
-                <div className={styles.card}>
-                  <h3 className={styles.cardTitle}>💡 Recommendations</h3>
-                  <ul className={styles.list}>
-                    {recommendations.map((rec, index) => (
-                      <li key={index} className={styles.listItem}>{rec}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                {recommendations?.length > 0 && (
+                  <div className={styles.card}>
+                    <button
+                      className={styles.cardHeaderButton}
+                      onClick={() => setExpandedRecommendations(!expandedRecommendations)}
+                    >
+                      <h3 className={styles.cardTitle}>💡 Recommendations</h3>
+                      <span className={styles.dropdownArrow}>
+                        {expandedRecommendations ? '▲' : '▼'}
+                      </span>
+                    </button>
+                    <div className={`${styles.cardDropdown} ${expandedRecommendations ? styles.expanded : ''}`}>
+                      <ul className={styles.list}>
+                        {recommendations.map((rec, index) => (
+                          <li key={index} className={styles.listItem}>{rec}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {activeTab === 'colors' && (
             <div className={styles.section}>
-              {auraColors?.length > 0 && auraColors.map((color, index) => (
-                <div key={index} className={styles.auraCard}>
-                  <div className={styles.auraHeader}>
-                    <div 
-                      className={styles.colorCircle} 
-                      style={{ backgroundColor: color.color }}
-                    ></div>
-                    <div className={styles.auraInfo}>
-                      <h3 className={styles.auraColor}>
-                        {color.color === '#FFD700' ? 'Gold' : 
-                         color.color === '#FFA500' ? 'Orange' : 
-                         color.color}
-                      </h3>
-                      <p className={styles.auraType}>{color.type}</p>
+              <div className={styles.auraColorsGrid}>
+                {auraColors?.length > 0 && auraColors.map((color, index) => (
+                  <div key={index} className={styles.auraCard}>
+                    <div className={styles.auraHeader}>
+                      <div 
+                        className={styles.colorCircle} 
+                        style={{ backgroundColor: color.color }}
+                      ></div>
+                      <div className={styles.auraInfo}>
+                        <h3 className={styles.auraColor}>
+                          {color.color === '#FFD700' ? 'Gold' : 
+                           color.color === '#FFA500' ? 'Orange' : 
+                           color.color}
+                        </h3>
+                        <p className={styles.auraType}>{color.type}</p>
+                      </div>
+                      <div className={styles.auraPercentage}>{color.percentage}%</div>
                     </div>
-                    <div className={styles.auraPercentage}>{color.percentage}%</div>
+                    <p className={styles.auraMeaning}>{color.meaning}</p>
+                    {color.traits && (
+                      <div className={styles.chipContainer}>
+                        {color.traits.map((trait, idx) => (
+                          <span key={idx} className={styles.chip}>{trait}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <p className={styles.auraMeaning}>{color.meaning}</p>
-                  {color.traits && (
-                    <div className={styles.chipContainer}>
-                      {color.traits.map((trait, idx) => (
-                        <span key={idx} className={styles.chip}>{trait}</span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
@@ -300,27 +348,15 @@ const AuraResult = () => {
                 </p>
               </div>
               
-              {astrologicalData.planetaryInfluences?.map((planet, index) => (
-                <div key={index} className={styles.chakraCard}>
-                  <div className={styles.chakraHeader}>
-                    <div>
-                      <h3 className={styles.chakraName}>{planet.planet}</h3>
-                      <p className={styles.chakraLocation}>{planet.aspect}</p>
-                    </div>
-                    <div className={styles.chakraStatus}>
-                      <span className={styles.statusBadge}>
-                        {planet.influence}%
-                      </span>
-                    </div>
+              <div className={styles.planetaryGrid}>
+                {astrologicalData.planetaryInfluences?.map((planet, index) => (
+                  <div key={index} className={styles.planetCard}>
+                    <h4 className={styles.planetName}>{planet.planet}</h4>
+                    <p className={styles.planetAspect}>{planet.aspect}</p>
+                    <div className={styles.planetInfluence}>{planet.influence}%</div>
                   </div>
-                  <div className={styles.progressBar}>
-                    <div 
-                      className={styles.progressFill} 
-                      style={{ width: `${planet.influence}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
@@ -329,79 +365,80 @@ const AuraResult = () => {
               {energyLevel.overall && (
                 <div className={styles.energyCard}>
                   <h3 className={styles.cardTitle}>⚡ Overall Energy Level</h3>
-                  <div className={styles.energyMeter}>
-                    <div className={styles.meterBar}>
-                      <div 
-                        className={styles.meterFill} 
-                        style={{ width: `${energyLevel.overall}%` }}
-                      ></div>
+                  <div className={styles.energyContent}>
+                    <div className={styles.energyInfo}>
+                      <p className={styles.energyLabel}>85%</p>
                     </div>
-                    <p className={styles.energyValue}>{energyLevel.overall}%</p>
+                    <p className={styles.energyPercentage}>{energyLevel.overall}%</p>
                   </div>
                   <p className={styles.energyDescription}>{energyLevel.description}</p>
                 </div>
               )}
 
-              {energyLevel.emotional && (
-                <div className={styles.card}>
-                  <h3 className={styles.cardTitle}>💖 Emotional Energy</h3>
-                  <p className={styles.cardText}>{energyLevel.emotional}</p>
-                </div>
-              )}
+              <div className={styles.energyGrid}>
+                {energyLevel.emotional && (
+                  <div className={styles.card}>
+                    <h3 className={styles.cardTitle}>💖 Emotional Energy</h3>
+                    <p className={styles.cardText}>{energyLevel.emotional}</p>
+                  </div>
+                )}
 
-              {energyLevel.mental && (
-                <div className={styles.card}>
-                  <h3 className={styles.cardTitle}>🧠 Mental Energy</h3>
-                  <p className={styles.cardText}>{energyLevel.mental}</p>
-                </div>
-              )}
+                {energyLevel.mental && (
+                  <div className={styles.card}>
+                    <h3 className={styles.cardTitle}>🧠 Mental Energy</h3>
+                    <p className={styles.cardText}>{energyLevel.mental}</p>
+                  </div>
+                )}
 
-              {energyLevel.physical && (
-                <div className={styles.card}>
-                  <h3 className={styles.cardTitle}>💪 Physical Energy</h3>
-                  <p className={styles.cardText}>{energyLevel.physical}</p>
-                </div>
-              )}
+                {energyLevel.physical && (
+                  <div className={styles.card}>
+                    <h3 className={styles.cardTitle}>💪 Physical Energy</h3>
+                    <p className={styles.cardText}>{energyLevel.physical}</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {activeTab === 'spiritual' && (
             <div className={styles.section}>
-              {spiritualInsights.path && (
-                <div className={styles.card}>
-                  <h3 className={styles.cardTitle}>🕉️ Spiritual Path</h3>
-                  <p className={styles.cardText}>{spiritualInsights.path}</p>
-                </div>
-              )}
+              <div className={styles.spiritualGrid}>
+                {spiritualInsights.path && (
+                  <div className={styles.card}>
+                    <h3 className={styles.cardTitle}>🕉️ Spiritual Path</h3>
+                    <p className={styles.cardText}>{spiritualInsights.path}</p>
+                  </div>
+                )}
 
-              {spiritualInsights.guidance && (
-                <div className={styles.card}>
-                  <h3 className={styles.cardTitle}>🌟 Spiritual Guidance</h3>
-                  <p className={styles.cardText}>{spiritualInsights.guidance}</p>
-                </div>
-              )}
+                {spiritualInsights.guidance && (
+                  <div className={styles.card}>
+                    <h3 className={styles.cardTitle}>🌟 Spiritual Guidance</h3>
+                    <p className={styles.cardText}>{spiritualInsights.guidance}</p>
+                  </div>
+                )}
 
-              {spiritualInsights.practices?.length > 0 && (
-                <div className={styles.card}>
-                  <h3 className={styles.cardTitle}>🧘 Recommended Practices</h3>
-                  <ul className={styles.list}>
-                    {spiritualInsights.practices.map((practice, index) => (
-                      <li key={index} className={styles.listItem}>{practice}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                {spiritualInsights.practices?.length > 0 && (
+                  <div className={styles.card}>
+                    <h3 className={styles.cardTitle}>🧘 Recommended Practices</h3>
+                    <ul className={styles.list}>
+                      {spiritualInsights.practices.map((practice, index) => (
+                        <li key={index} className={styles.listItem}>{practice}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
-              {spiritualInsights.affirmations?.length > 0 && (
-                <div className={styles.card}>
-                  <h3 className={styles.cardTitle}>✨ Daily Affirmations</h3>
-                  <ul className={styles.list}>
-                    {spiritualInsights.affirmations.map((affirmation, index) => (
-                      <li key={index} className={styles.listItem}>{affirmation}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                {spiritualInsights.affirmations?.length > 0 && (
+                  <div className={styles.card}>
+                    <h3 className={styles.cardTitle}>✨ Daily Affirmations</h3>
+                    <ul className={styles.list}>
+                      {spiritualInsights.affirmations.map((affirmation, index) => (
+                        <li key={index} className={styles.listItem}>{affirmation}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

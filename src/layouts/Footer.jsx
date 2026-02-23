@@ -21,7 +21,7 @@ import { logout } from "../redux/auth/authSlice";
 
 // Data for links - easy to manage and update
 const quickLinks = [
-  { href: "/talk-to-astrologers", text: "Talk to Astrologer" },
+  { href: "/chat-with-astrologers", text: "Talk to Astrologer" },
   { href: "/chat-with-astrologers", text: "Chat with Astrologer" },
   { href: "/shop", text: "Astromall" },
   { href: "/tarot", text: "Tarot" },

@@ -41,3 +41,6 @@ export { default as AddProfileModal } from "../component/UI/Profile/AddProfileMo
 export { default as EditProfileModal } from "../component/UI/Profile/EditProfileModal";
 export { default as ProfileListingModal } from "../component/UI/Profile/ProfileListingModal";
 export { default as DeleteConfirmationModal } from "../component/UI/modal/deleteModal/DeleteConfirmationModal";
+
+//charts
+export { default as PieChart } from "../component/UI/charts/PieChart";

@@ -12,11 +12,13 @@ import { useGetAiWowPageDataQuery } from "../../../redux/api/aiwow/aiwowApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { logout } from "../../../redux/auth/authSlice";
+import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 
 const AIWow = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+  const requireAuth = useRequireAuth();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
   
@@ -118,10 +120,7 @@ const AIWow = () => {
 
   const handleClick = (slug) => {
     // Check if user is logged in
-    if (!token) {
-      navigate("/login?skip=welcome");
-      return;
-    }
+    if (!requireAuth()) return;
 
     // Check if user has selected a Kundli/Profile
     if (!selectedProfile) {

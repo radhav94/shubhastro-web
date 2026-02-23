@@ -141,121 +141,125 @@ const SignatureResult = () => {
       <div className={styles.analysisCard}>
         <h3 className={styles.cardTitle}>Stroke Analysis</h3>
         
-        {resultData.stroke.direction && (
-          <>
-            <h4 className={styles.subTitle}>Direction</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Type:</span>
-              <span className={styles.value}>{resultData.stroke.direction.type}</span>
+        <div className={styles.analysisGrid}>
+          {resultData.stroke.direction && (
+            <div className={styles.analysisItem}>
+              <h4 className={styles.analysisItemTitle}>Direction</h4>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Type:</span>
+                <span className={styles.value}>{resultData.stroke.direction.type}</span>
+              </div>
+              <p className={styles.description}>{resultData.stroke.direction.description}</p>
             </div>
-            <p className={styles.description}>{resultData.stroke.direction.description}</p>
-          </>
-        )}
+          )}
 
-        {resultData.stroke.slant && (
-          <>
-            <h4 className={styles.subTitle}>Slant</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Type:</span>
-              <span className={styles.value}>{resultData.stroke.slant.type}</span>
+          {resultData.stroke.slant && (
+            <div className={styles.analysisItem}>
+              <h4 className={styles.analysisItemTitle}>Slant</h4>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Type:</span>
+                <span className={styles.value}>{resultData.stroke.slant.type}</span>
+              </div>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Angle:</span>
+                <span className={styles.value}>{resultData.stroke.slant.angle}°</span>
+              </div>
+              <p className={styles.description}>{resultData.stroke.slant.description}</p>
             </div>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Angle:</span>
-              <span className={styles.value}>{resultData.stroke.slant.angle}°</span>
-            </div>
-            <p className={styles.description}>{resultData.stroke.slant.description}</p>
-          </>
-        )}
+          )}
 
-        {resultData.stroke.pressure && (
-          <>
-            <h4 className={styles.subTitle}>Pressure</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Level:</span>
-              <span className={styles.value}>{resultData.stroke.pressure.level}</span>
+          {resultData.stroke.pressure && (
+            <div className={styles.analysisItem}>
+              <h4 className={styles.analysisItemTitle}>Pressure</h4>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Level:</span>
+                <span className={styles.value}>{resultData.stroke.pressure.level}</span>
+              </div>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Consistency:</span>
+                <span className={styles.value}>{resultData.stroke.pressure.consistency}</span>
+              </div>
+              <p className={styles.description}>{resultData.stroke.pressure.description}</p>
             </div>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Consistency:</span>
-              <span className={styles.value}>{resultData.stroke.pressure.consistency}</span>
-            </div>
-            <p className={styles.description}>{resultData.stroke.pressure.description}</p>
-          </>
-        )}
+          )}
 
-        {resultData.stroke.speed && (
-          <>
-            <h4 className={styles.subTitle}>Speed</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Type:</span>
-              <span className={styles.value}>{resultData.stroke.speed.type}</span>
+          {resultData.stroke.speed && (
+            <div className={styles.analysisItem}>
+              <h4 className={styles.analysisItemTitle}>Speed</h4>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Type:</span>
+                <span className={styles.value}>{resultData.stroke.speed.type}</span>
+              </div>
+              <p className={styles.description}>{resultData.stroke.speed.description}</p>
             </div>
-            <p className={styles.description}>{resultData.stroke.speed.description}</p>
-          </>
-        )}
+          )}
 
-        {resultData.stroke.fluidity && (
-          <>
-            <h4 className={styles.subTitle}>Fluidity</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Type:</span>
-              <span className={styles.value}>{resultData.stroke.fluidity.type}</span>
+          {resultData.stroke.fluidity && (
+            <div className={styles.analysisItem}>
+              <h4 className={styles.analysisItemTitle}>Fluidity</h4>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Type:</span>
+                <span className={styles.value}>{resultData.stroke.fluidity.type}</span>
+              </div>
+              <p className={styles.description}>{resultData.stroke.fluidity.description}</p>
             </div>
-            <p className={styles.description}>{resultData.stroke.fluidity.description}</p>
-          </>
-        )}
+          )}
+        </div>
       </div>
 
       <div className={styles.analysisCard}>
         <h3 className={styles.cardTitle}>Letter Analysis</h3>
         
-        {resultData.letter.size && (
-          <>
-            <h4 className={styles.subTitle}>Size</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Overall:</span>
-              <span className={styles.value}>{resultData.letter.size.overall}</span>
+        <div className={styles.analysisGrid}>
+          {resultData.letter.size && (
+            <div className={styles.analysisItem}>
+              <h4 className={styles.analysisItemTitle}>Size</h4>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Overall:</span>
+                <span className={styles.value}>{resultData.letter.size.overall}</span>
+              </div>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Consistency:</span>
+                <span className={styles.value}>{resultData.letter.size.consistency}</span>
+              </div>
+              <p className={styles.description}>{resultData.letter.size.description}</p>
             </div>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Consistency:</span>
-              <span className={styles.value}>{resultData.letter.size.consistency}</span>
-            </div>
-            <p className={styles.description}>{resultData.letter.size.description}</p>
-          </>
-        )}
+          )}
 
-        {resultData.letter.spacing && (
-          <>
-            <h4 className={styles.subTitle}>Spacing</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Letter Spacing:</span>
-              <span className={styles.value}>{resultData.letter.spacing.letterSpacing}</span>
+          {resultData.letter.spacing && (
+            <div className={styles.analysisItem}>
+              <h4 className={styles.analysisItemTitle}>Spacing</h4>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Letter Spacing:</span>
+                <span className={styles.value}>{resultData.letter.spacing.letterSpacing}</span>
+              </div>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Word Spacing:</span>
+                <span className={styles.value}>{resultData.letter.spacing.wordSpacing}</span>
+              </div>
+              <p className={styles.description}>{resultData.letter.spacing.description}</p>
             </div>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Word Spacing:</span>
-              <span className={styles.value}>{resultData.letter.spacing.wordSpacing}</span>
-            </div>
-            <p className={styles.description}>{resultData.letter.spacing.description}</p>
-          </>
-        )}
+          )}
 
-        {resultData.letter.style && (
-          <>
-            <h4 className={styles.subTitle}>Style</h4>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Legibility:</span>
-              <span className={styles.value}>{resultData.letter.style.legibility}</span>
+          {resultData.letter.style && (
+            <div className={styles.analysisItem}>
+              <h4 className={styles.analysisItemTitle}>Style</h4>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Legibility:</span>
+                <span className={styles.value}>{resultData.letter.style.legibility}</span>
+              </div>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Embellishments:</span>
+                <span className={styles.value}>{resultData.letter.style.embellishments ? 'Yes' : 'No'}</span>
+              </div>
+              <div className={styles.infoRow}>
+                <span className={styles.label}>Simplicity:</span>
+                <span className={styles.value}>{resultData.letter.style.simplicity}</span>
+              </div>
+              <p className={styles.description}>{resultData.letter.style.description}</p>
             </div>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Embellishments:</span>
-              <span className={styles.value}>{resultData.letter.style.embellishments ? 'Yes' : 'No'}</span>
-            </div>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Simplicity:</span>
-              <span className={styles.value}>{resultData.letter.style.simplicity}</span>
-            </div>
-            <p className={styles.description}>{resultData.letter.style.description}</p>
-          </>
-        )}
+          )}
+        </div>
       </div>
 
       <div className={styles.analysisCard}>
@@ -422,60 +426,62 @@ const SignatureResult = () => {
 
   const renderInsights = () => (
     <div className={styles.tabContent}>
-      {resultData.detailed.strengths && resultData.detailed.strengths.length > 0 && (
-        <div className={styles.insightsCard}>
-          <h3 className={styles.cardTitle}>Strengths</h3>
-          <ul className={styles.insightsList}>
-            {resultData.detailed.strengths.map((strength, index) => (
-              <li key={index} className={styles.insightItem}>{strength}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <div className={styles.insightsGrid}>
+        {resultData.detailed.strengths && resultData.detailed.strengths.length > 0 && (
+          <div className={styles.insightsCard}>
+            <h3 className={styles.cardTitle}>Strengths</h3>
+            <ul className={styles.insightsList}>
+              {resultData.detailed.strengths.map((strength, index) => (
+                <li key={index} className={styles.insightItem}>{strength}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-      {resultData.detailed.challenges && resultData.detailed.challenges.length > 0 && (
-        <div className={styles.insightsCard}>
-          <h3 className={styles.cardTitle}>Challenges</h3>
-          <ul className={styles.challengesList}>
-            {resultData.detailed.challenges.map((challenge, index) => (
-              <li key={index} className={styles.challengeItem}>{challenge}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {resultData.detailed.challenges && resultData.detailed.challenges.length > 0 && (
+          <div className={styles.insightsCard}>
+            <h3 className={styles.cardTitle}>Challenges</h3>
+            <ul className={styles.challengesList}>
+              {resultData.detailed.challenges.map((challenge, index) => (
+                <li key={index} className={styles.challengeItem}>{challenge}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-      {resultData.detailed.recommendations && resultData.detailed.recommendations.length > 0 && (
-        <div className={styles.insightsCard}>
-          <h3 className={styles.cardTitle}>Recommendations</h3>
-          <ul className={styles.recommendationsList}>
-            {resultData.detailed.recommendations.map((recommendation, index) => (
-              <li key={index} className={styles.recommendationItem}>{recommendation}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {resultData.detailed.recommendations && resultData.detailed.recommendations.length > 0 && (
+          <div className={styles.insightsCard}>
+            <h3 className={styles.cardTitle}>Recommendations</h3>
+            <ul className={styles.recommendationsList}>
+              {resultData.detailed.recommendations.map((recommendation, index) => (
+                <li key={index} className={styles.recommendationItem}>{recommendation}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-      {resultData.detailed.careerSuggestions && resultData.detailed.careerSuggestions.length > 0 && (
-        <div className={styles.insightsCard}>
-          <h3 className={styles.cardTitle}>Career Suggestions</h3>
-          <ul className={styles.careerList}>
-            {resultData.detailed.careerSuggestions.map((career, index) => (
-              <li key={index} className={styles.careerItem}>{career}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {resultData.detailed.careerSuggestions && resultData.detailed.careerSuggestions.length > 0 && (
+          <div className={styles.insightsCard}>
+            <h3 className={styles.cardTitle}>Career Suggestions</h3>
+            <ul className={styles.careerList}>
+              {resultData.detailed.careerSuggestions.map((career, index) => (
+                <li key={index} className={styles.careerItem}>{career}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-      {resultData.detailed.relationshipInsights && resultData.detailed.relationshipInsights.length > 0 && (
-        <div className={styles.insightsCard}>
-          <h3 className={styles.cardTitle}>Relationship Insights</h3>
-          <ul className={styles.relationshipList}>
-            {resultData.detailed.relationshipInsights.map((insight, index) => (
-              <li key={index} className={styles.relationshipItem}>{insight}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {resultData.detailed.relationshipInsights && resultData.detailed.relationshipInsights.length > 0 && (
+          <div className={styles.insightsCard}>
+            <h3 className={styles.cardTitle}>Relationship Insights</h3>
+            <ul className={styles.relationshipList}>
+              {resultData.detailed.relationshipInsights.map((insight, index) => (
+                <li key={index} className={styles.relationshipItem}>{insight}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 

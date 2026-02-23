@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import styles from './AstroVitals.module.scss';
 import { Toast } from '../../../../component';
 import { syncAstroVitals } from '../../../../services/appServices/aiWowService';
+import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
+import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 
 const AstroVitals = () => {
   const navigate = useNavigate();
-  const [selectedProfile, setSelectedProfile] = useState(null);
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
 
@@ -16,25 +19,6 @@ const AstroVitals = () => {
   const [systolic, setSystolic] = useState('');
   const [diastolic, setDiastolic] = useState('');
   const [sleepQuality, setSleepQuality] = useState('');
-
-  useEffect(() => {
-    const profileData = localStorage.getItem('selectedKundliProfile');
-    if (!profileData) {
-      Toast.error('Please select a kundli profile first');
-      navigate('/aiwow', { replace: true });
-      return;
-    }
-
-    try {
-      const profile = JSON.parse(profileData);
-      setSelectedProfile(profile);
-    } catch (error) {
-      console.error('Invalid profile data:', error);
-      Toast.error('Invalid profile data. Please select again.');
-      localStorage.removeItem('selectedKundliProfile');
-      navigate('/aiwow', { replace: true });
-    }
-  }, [navigate]);
 
   const validateAndSetValue = (value, setter, min, max) => {
     // Remove non-numeric characters except for leading digits
@@ -59,6 +43,11 @@ const AstroVitals = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!profile) {
+      Toast.error('Profile not available');
+      return;
+    }
 
     if (!heartRate || !stressLevel) {
       Toast.error('Please enter heart rate and stress level');
@@ -107,23 +96,23 @@ const AstroVitals = () => {
       setIsLoading(true);
 
       const vitalsData = {
-        userId: selectedProfile._id || '10',
+        userId: profile._id || '10',
         heartRate: hr,
         stressLevel: stress,
         timestamp: new Date().toISOString(),
         deviceId: 'web-app',
-        name: selectedProfile.name,
-        gender: selectedProfile.identity?.toLowerCase() || 'male',
-        day: String(selectedProfile.day),
-        month: String(selectedProfile.month),
-        year: String(selectedProfile.year),
-        hour: String(selectedProfile.hour || 0),
-        min: String(selectedProfile.minute || 0),
+        name: profile.name,
+        gender: profile.identity?.toLowerCase() || 'male',
+        day: String(profile.day),
+        month: String(profile.month),
+        year: String(profile.year),
+        hour: String(profile.hour || 0),
+        min: String(profile.minute || 0),
         second: '0',
-        place: selectedProfile.place,
-        lat: String(selectedProfile.latitude || 0),
-        lon: String(selectedProfile.longitude || 0),
-        tzone: String(selectedProfile.timezone || 5.5)
+        place: profile.place,
+        lat: String(profile.latitude || 0),
+        lon: String(profile.longitude || 0),
+        tzone: String(profile.timezone || 5.5)
       };
 
       // Add optional metrics
@@ -168,10 +157,13 @@ const AstroVitals = () => {
       setDiastolic('');
       setSleepQuality('');
     } else {
-      localStorage.removeItem('selectedKundliProfile');
       navigate(-1);
     }
   };
+
+  if (profileLoading) {
+    return <PrimaryLoader isLoading={true} />;
+  }
 
   const handleNewAnalysis = () => {
     setAnalysis(null);
@@ -205,8 +197,8 @@ const AstroVitals = () => {
         </button>
         <div className={styles.headerInfo}>
           <h1 className={styles.title}>AstroVitals</h1>
-          {selectedProfile && (
-            <p className={styles.subtitle}>{selectedProfile.name}</p>
+          {profile && (
+            <p className={styles.subtitle}>{profile.name}</p>
           )}
         </div>
       </header>

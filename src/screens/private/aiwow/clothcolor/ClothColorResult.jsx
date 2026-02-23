@@ -128,46 +128,48 @@ const ClothColorResult = () => {
       {resultData.recommendedColors && Array.isArray(resultData.recommendedColors) && resultData.recommendedColors.length > 0 && (
         <div className={styles.colorsCard}>
           <h3 className={styles.cardTitle}>Recommended Colors</h3>
-          {resultData.recommendedColors.map((color, index) => (
-            <div key={index} className={styles.colorItem}>
-              <div className={styles.colorHeader}>
-                <div className={styles.colorInfo}>
-                  <div 
-                    className={styles.colorSwatch} 
-                    style={{ backgroundColor: color.hexCode || '#000' }}
-                  ></div>
-                  <div>
-                    <h4 className={styles.colorName}>{String(color.colorName || 'Unknown')}</h4>
-                    <span className={styles.colorType}>
-                      {color.type ? String(color.type) : ''}{color.type && color.planet ? ' • ' : ''}{color.planet ? String(color.planet) : ''}
-                    </span>
+          <div className={styles.colorsGrid}>
+            {resultData.recommendedColors.map((color, index) => (
+              <div key={index} className={styles.colorItem}>
+                <div className={styles.colorHeader}>
+                  <div className={styles.colorInfo}>
+                    <div 
+                      className={styles.colorSwatch} 
+                      style={{ backgroundColor: color.hexCode || '#000' }}
+                    ></div>
+                    <div>
+                      <h4 className={styles.colorName}>{String(color.colorName || 'Unknown')}</h4>
+                      <span className={styles.colorType}>
+                        {color.type ? String(color.type) : ''}{color.type && color.planet ? ' • ' : ''}{color.planet ? String(color.planet) : ''}
+                      </span>
+                    </div>
                   </div>
+                  <span className={styles.hexCode}>{String(color.hexCode || '')}</span>
                 </div>
-                <span className={styles.hexCode}>{String(color.hexCode || '')}</span>
+                {color.description && (
+                  <p className={styles.colorDescription}>{String(color.description)}</p>
+                )}
+                
+                {color.benefits && Array.isArray(color.benefits) && color.benefits.length > 0 && (
+                  <>
+                    <h5 className={styles.subTitle}>Benefits</h5>
+                    <ul className={styles.benefitsList}>
+                      {color.benefits.map((benefit, idx) => (
+                        <li key={idx} className={styles.benefitItem}>{String(benefit)}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                
+                {color.whenToWear && (
+                  <div className={styles.whenToWear}>
+                    <span className={styles.whenLabel}>When to Wear:</span>
+                    <span className={styles.whenValue}>{String(color.whenToWear)}</span>
+                  </div>
+                )}
               </div>
-              {color.description && (
-                <p className={styles.colorDescription}>{String(color.description)}</p>
-              )}
-              
-              {color.benefits && Array.isArray(color.benefits) && color.benefits.length > 0 && (
-                <>
-                  <h5 className={styles.subTitle}>Benefits</h5>
-                  <ul className={styles.benefitsList}>
-                    {color.benefits.map((benefit, idx) => (
-                      <li key={idx} className={styles.benefitItem}>{String(benefit)}</li>
-                    ))}
-                  </ul>
-                </>
-              )}
-              
-              {color.whenToWear && (
-                <div className={styles.whenToWear}>
-                  <span className={styles.whenLabel}>When to Wear:</span>
-                  <span className={styles.whenValue}>{String(color.whenToWear)}</span>
-                </div>
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -178,32 +180,34 @@ const ClothColorResult = () => {
       {resultData.suggestedCombinations && Array.isArray(resultData.suggestedCombinations) && resultData.suggestedCombinations.length > 0 && (
         <div className={styles.combinationsCard}>
           <h3 className={styles.cardTitle}>Suggested Color Combinations</h3>
-          {resultData.suggestedCombinations.map((combo, index) => (
-            <div key={index} className={styles.comboItem}>
-              {combo.colors && Array.isArray(combo.colors) && (
-                <div className={styles.comboColors}>
-                  {combo.colors.map((color, idx) => (
-                    <div key={idx} className={styles.comboColorBox}>
-                      <div 
-                        className={styles.comboSwatch} 
-                        style={{ backgroundColor: color.hexCode || '#000' }}
-                      ></div>
-                      <span className={styles.comboColorName}>{String(color.colorName || 'Unknown')}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {combo.description && (
-                <p className={styles.comboDescription}>{String(combo.description)}</p>
-              )}
-              {combo.occasion && (
-                <div className={styles.comboOccasion}>
-                  <span className={styles.occasionLabel}>Best For:</span>
-                  <span className={styles.occasionValue}>{String(combo.occasion)}</span>
-                </div>
-              )}
-            </div>
-          ))}
+          <div className={styles.combinationsGrid}>
+            {resultData.suggestedCombinations.map((combo, index) => (
+              <div key={index} className={styles.comboItem}>
+                {combo.colors && Array.isArray(combo.colors) && (
+                  <div className={styles.comboColors}>
+                    {combo.colors.map((color, idx) => (
+                      <div key={idx} className={styles.comboColorBox}>
+                        <div 
+                          className={styles.comboSwatch} 
+                          style={{ backgroundColor: color.hexCode || '#000' }}
+                        ></div>
+                        <span className={styles.comboColorName}>{String(color.colorName || 'Unknown')}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {combo.description && (
+                  <p className={styles.comboDescription}>{String(combo.description)}</p>
+                )}
+                {combo.occasion && (
+                  <div className={styles.comboOccasion}>
+                    <span className={styles.occasionLabel}>Best For:</span>
+                    <span className={styles.occasionValue}>{String(combo.occasion)}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -264,32 +268,34 @@ const ClothColorResult = () => {
           <p className={styles.avoidIntro}>
             These colors may not be favorable for your intention on this day:
           </p>
-          {resultData.colorsToAvoid.map((color, index) => (
-            <div key={index} className={styles.avoidItem}>
-              <div className={styles.avoidHeader}>
-                <div className={styles.avoidColorInfo}>
-                  <div 
-                    className={styles.avoidSwatch} 
-                    style={{ backgroundColor: color.hexCode || '#000' }}
-                  ></div>
-                  <div>
-                    <h4 className={styles.avoidColorName}>{String(color.colorName || 'Unknown')}</h4>
-                    <span className={styles.avoidHex}>{String(color.hexCode || '')}</span>
+          <div className={styles.avoidGrid}>
+            {resultData.colorsToAvoid.map((color, index) => (
+              <div key={index} className={styles.avoidItem}>
+                <div className={styles.avoidHeader}>
+                  <div className={styles.avoidColorInfo}>
+                    <div 
+                      className={styles.avoidSwatch} 
+                      style={{ backgroundColor: color.hexCode || '#000' }}
+                    ></div>
+                    <div>
+                      <h4 className={styles.avoidColorName}>{String(color.colorName || 'Unknown')}</h4>
+                      <span className={styles.avoidHex}>{String(color.hexCode || '')}</span>
+                    </div>
                   </div>
                 </div>
+                {color.reason && (
+                  <div className={styles.avoidReason}>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={styles.warningIcon}>
+                      <path d="M8 1L1 14H15L8 1Z" stroke="#f59e0b" strokeWidth="1.5" fill="none"/>
+                      <path d="M8 6V9" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round"/>
+                      <circle cx="8" cy="11.5" r="0.5" fill="#f59e0b"/>
+                    </svg>
+                    <span className={styles.reasonText}>{String(color.reason)}</span>
+                  </div>
+                )}
               </div>
-              {color.reason && (
-                <div className={styles.avoidReason}>
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={styles.warningIcon}>
-                    <path d="M8 1L1 14H15L8 1Z" stroke="#f59e0b" strokeWidth="1.5" fill="none"/>
-                    <path d="M8 6V9" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round"/>
-                    <circle cx="8" cy="11.5" r="0.5" fill="#f59e0b"/>
-                  </svg>
-                  <span className={styles.reasonText}>{String(color.reason)}</span>
-                </div>
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       ) : (
         <div className={styles.avoidCard}>

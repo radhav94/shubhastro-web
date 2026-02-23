@@ -26,18 +26,14 @@
   align-items: center;
   justify-content: center;
   color: #1f2937;
-  
-  &:hover {
-    opacity: 0.7;
-  }
+  &:hover { opacity: 0.7; }
 }
 
 .title {
   font-size: 18px;
   font-weight: 600;
   color: #1f2937;
-  margin: 0;
-  margin-left: 12px;
+  margin: 0 0 0 12px;
 }
 
 .content {
@@ -46,26 +42,22 @@
   margin: 0 auto;
 }
 
+// ─── Gemstone Selection Tabs ───
 .gemstoneTabs {
   display: flex;
-  gap: 0;
   border-bottom: 2px solid #e5e7eb;
-  background: #ffffff;
+  background: #fff;
   position: sticky;
   top: 57px;
   z-index: 10;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  &::-webkit-scrollbar { display: none; }
 }
 
 .gemstoneTab {
   flex: 1;
   min-width: 120px;
-  padding: 18px 16px;
+  padding: 16px;
   background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
@@ -73,106 +65,68 @@
   font-weight: 600;
   color: #6b7280;
   cursor: pointer;
-  transition: all 0.2s;
   white-space: nowrap;
-  
-  &:hover {
-    color: #1f2937;
-    background: #f9fafb;
-  }
-  
-  &.active {
-    color: #D43400;
-    border-bottom-color: #D43400;
-    background: #fff5f0;
-  }
+  transition: all 0.2s;
+  &:hover { color: #1f2937; background: #f9fafb; }
+  &.active { color: #D43400; border-bottom-color: #D43400; background: #fff5f0; }
 }
 
+// ─── Detail Tabs ───
 .tabs {
   display: flex;
-  gap: 0;
   border-bottom: 1px solid #e5e7eb;
-  background: #ffffff;
+  background: #fff;
   position: sticky;
   top: 57px;
   z-index: 9;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  &::-webkit-scrollbar { display: none; }
 }
 
-// When gemstone tabs exist, adjust detail tabs position
-.gemstoneTabs ~ .tabs {
-  top: 114px;
-}
+.gemstoneTabs ~ .tabs { top: 114px; }
 
 .tab {
   flex: 1;
-  min-width: 100px;
-  padding: 16px 12px;
+  min-width: 90px;
+  padding: 14px 10px;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #6b7280;
   cursor: pointer;
-  transition: all 0.2s;
   white-space: nowrap;
-  
-  &:hover {
-    color: #1f2937;
-  }
-  
-  &.active {
-    color: #000000;
-    border-bottom-color: #000000;
-  }
+  transition: all 0.2s;
+  &:hover { color: #1f2937; }
+  &.active { color: #000; border-bottom-color: #000; }
 }
 
 .tabContent {
-  padding: 24px 16px;
+  padding: 16px;
 }
 
+// ─── OVERVIEW TAB ───
 .overviewRow {
   display: flex;
   gap: 12px;
   align-items: flex-start;
-  flex-wrap: wrap;
-  
+
   @media (max-width: 767px) {
-    justify-content: center;
-  }
-  
-  @media (min-width: 768px) {
-    flex-wrap: nowrap;
-    gap: 16px;
+    flex-direction: column;
+    align-items: center;
   }
 }
 
 .gemstoneImageWrapper {
-  width: 100%;
-  max-width: 150px;
+  width: 120px;
   flex-shrink: 0;
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  
-  @media (max-width: 767px) {
-    margin: 0 auto;
-  }
-  
-  @media (min-width: 768px) {
-    max-width: 220px;
-    margin: 0;
-  }
-  
-  @media (min-width: 1024px) {
-    max-width: 250px;
-  }
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+  @media (min-width: 768px) { width: 160px; }
+  @media (min-width: 1024px) { width: 200px; }
 }
 
 .gemstoneImage {
@@ -183,146 +137,38 @@
 }
 
 .identificationCard,
-.summaryCard,
-.detailsCard,
-.astroCard,
-.suitabilityCard,
-.wearingCard,
-.healingCard,
-.compatibilityCard,
-.marketCard {
+.summaryCard {
+  flex: 1;
+  min-width: 0;
   background: #f3f4f6;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-  
-  @media (min-width: 768px) {
-    padding: 20px;
+  border-radius: 10px;
+  padding: 12px;
+
+  @media (max-width: 767px) {
+    width: 100%;
   }
 }
 
-.overviewRow .identificationCard,
-.overviewRow .summaryCard {
-  flex: 1;
-  min-width: 0;
-  margin-bottom: 0;
-  
-  @media (max-width: 767px) {
-    width: 100%;
-    min-width: 100%;
-  }
-  
+.summaryCard {
   @media (min-width: 768px) {
-    min-width: 250px;
+    max-width: 340px;
   }
 }
 
 .cardTitle {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: #1f2937;
-  margin: 0 0 12px 0;
-  
-  @media (min-width: 768px) {
-    font-size: 18px;
-    margin: 0 0 16px 0;
-  }
-}
-
-.subTitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 12px 0 8px 0;
-  
-  @media (min-width: 768px) {
-    font-size: 15px;
-    margin: 16px 0 12px 0;
-  }
-}
-
-.infoRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 6px 0;
-  border-bottom: 1px solid #e5e7eb;
-  gap: 8px;
-  
-  &:last-child {
-    border-bottom: none;
-  }
-  
-  @media (min-width: 768px) {
-    padding: 8px 0;
-  }
-}
-
-.label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #6b7280;
-  flex-shrink: 0;
-  
-  @media (min-width: 768px) {
-    font-size: 14px;
-    margin-right: 16px;
-  }
-}
-
-.value {
-  font-size: 13px;
-  font-weight: 400;
-  color: #1f2937;
-  text-align: right;
-  word-break: break-word;
-  
-  @media (min-width: 768px) {
-    font-size: 14px;
-  }
-}
-
-.scoreCard {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 16px;
-}
-
-.scoreLabel {
-  font-size: 14px;
-  font-weight: 500;
-  color: #6b7280;
-}
-
-.scoreValue {
-  font-size: 24px;
-  font-weight: 700;
-  color: #D43400;
+  margin: 0 0 8px 0;
 }
 
 .summaryText,
-.recommendationText,
-.influenceText,
-.benefitsText,
-.significanceText,
-.treatmentDesc,
-.mantraText,
-.ritualText,
-.compatibleText,
-.incompatibleText,
-.adviceText {
-  font-size: 14px;
-  line-height: 1.6;
+.recommendationText {
+  font-size: 13px;
+  line-height: 1.5;
   color: #4b5563;
-  margin: 0 0 12px 0;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
+  margin: 0 0 8px 0;
+  &:last-child { margin-bottom: 0; }
 }
 
 .recommendationText {
@@ -330,104 +176,225 @@
   color: #1f2937;
 }
 
-.scoreHeader {
+// ─── INFO ROW (shared) ───
+.infoRow {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 16px;
+  padding: 4px 0;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 8px;
+  &:last-child { border-bottom: none; }
 }
 
-.suitabilityScore {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  
-  .scoreValue {
-    font-size: 32px;
-    margin-bottom: 4px;
+.label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.value {
+  font-size: 12px;
+  color: #1f2937;
+  text-align: right;
+  word-break: break-word;
+}
+
+// ─── DETAILS TAB - Vertical Grid ───
+.detailsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
   }
-  
-  .scoreLabel {
-    font-size: 12px;
-    font-weight: 600;
-    color: #D43400;
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr 1fr;
   }
 }
 
-.benefitsList,
-.cautionsList,
-.healingList {
-  list-style: none;
-  padding: 0;
+.detailBox {
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.boxTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 6px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.boxValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #D43400;
   margin: 0;
 }
 
-.benefitItem,
-.cautionItem,
-.healingItem {
-  font-size: 14px;
-  line-height: 1.6;
+.boxHighlight {
+  font-size: 16px;
+  font-weight: 700;
+  color: #D43400;
+  margin: 0 0 4px 0;
+}
+
+.boxDesc {
+  font-size: 12px;
+  line-height: 1.5;
   color: #4b5563;
-  padding: 8px 0 8px 24px;
-  position: relative;
-  
-  &:before {
-    content: '•';
-    position: absolute;
-    left: 8px;
-    color: #D43400;
-    font-weight: 700;
+  margin: 4px 0 0 0;
+}
+
+// ─── ASTROLOGICAL TAB - Single Row Boxes ───
+.astroGrid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
   }
 }
 
-.cautionItem {
-  &:before {
-    content: '⚠';
-    color: #f59e0b;
+.astroBox {
+  flex: 1;
+  min-width: 140px;
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 12px;
+
+  @media (max-width: 480px) {
+    min-width: 100%;
+  }
+}
+
+// ─── DROPDOWN SECTIONS (Suitability & Healing) ───
+.dropdown {
+  background: #f3f4f6;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.dropdownHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #1f2937;
+  transition: background 0.15s;
+
+  &:hover { background: rgba(0, 0, 0, 0.03); }
+}
+
+.dropdownTitleWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dropdownTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.scoreBadge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #D43400;
+  background: #fff5f0;
+  padding: 2px 10px;
+  border-radius: 12px;
+}
+
+.dropdownBody {
+  padding: 0 14px 14px;
+}
+
+// ─── Single Row Boxes inside dropdowns ───
+.suitRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+  }
+}
+
+.suitBox {
+  flex: 1;
+  min-width: 160px;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 10px 12px;
+
+  @media (max-width: 600px) {
+    min-width: 100%;
+  }
+}
+
+.compactList {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0 0;
+
+  li {
+    font-size: 12px;
+    line-height: 1.5;
+    color: #4b5563;
+    padding: 2px 0 2px 14px;
+    position: relative;
+
+    &::before {
+      content: '•';
+      position: absolute;
+      left: 2px;
+      color: #D43400;
+      font-weight: 700;
+    }
   }
 }
 
 .mantraText {
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 12px;
+  font-size: 12px;
   font-family: 'Georgia', serif;
   font-style: italic;
   color: #1f2937;
+  background: #f9fafb;
+  border-radius: 6px;
+  padding: 8px;
+  margin: 4px 0 0 0;
 }
 
 .compatibleText {
+  font-size: 12px;
   color: #D43400;
   font-weight: 500;
+  margin: 4px 0 0 0;
 }
 
 .incompatibleText {
+  font-size: 12px;
   color: #dc2626;
   font-weight: 500;
+  margin: 4px 0 0 0;
 }
 
-.doneButton {
-  width: calc(100% - 32px);
-  margin: 24px 16px;
-  padding: 16px;
-  background: #000000;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  
-  &:hover {
-    background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
-  }
-  
-  &:active {
-    transform: scale(0.98);
-  }
-}
-
+// ─── Loading ───
 .loadingContainer {
   display: flex;
   align-items: center;
@@ -437,64 +404,21 @@
   color: #6b7280;
 }
 
-// Tablet
+// ─── Tablet ───
 @media (min-width: 768px) {
-  .tabContent {
-    padding: 32px 24px;
-  }
-  
-  .tab {
-    font-size: 15px;
-    padding: 18px 16px;
-  }
-  
-  .cardTitle {
-    font-size: 20px;
-  }
-  
-  .subTitle {
-    font-size: 16px;
-  }
-  
-  .infoRow {
-    padding: 10px 0;
-  }
-  
-  .label,
-  .value {
-    font-size: 15px;
-  }
-  
-  .doneButton {
-    width: calc(100% - 48px);
-    margin: 32px 24px;
-  }
+  .tabContent { padding: 24px; }
+  .tab { font-size: 14px; padding: 16px 14px; }
+  .cardTitle { font-size: 16px; }
+  .boxTitle { font-size: 13px; }
+  .label, .value { font-size: 13px; }
+  .infoRow { padding: 6px 0; }
+  .dropdownTitle { font-size: 15px; }
 }
 
-// Desktop
+// ─── Desktop ───
 @media (min-width: 1024px) {
-  .tabContent {
-    padding: 40px 32px;
-  }
-  
-  .cardTitle {
-    font-size: 22px;
-  }
-  
-  .identificationCard,
-  .summaryCard,
-  .detailsCard,
-  .astroCard,
-  .suitabilityCard,
-  .wearingCard,
-  .healingCard,
-  .compatibilityCard,
-  .marketCard {
-    padding: 24px;
-  }
-  
-  .doneButton {
-    max-width: 400px;
-    margin: 40px auto;
-  }
+  .tabContent { padding: 32px; }
+  .cardTitle { font-size: 18px; }
+  .identificationCard, .summaryCard { padding: 16px; }
+  .detailBox, .astroBox, .suitBox { padding: 14px; }
 }

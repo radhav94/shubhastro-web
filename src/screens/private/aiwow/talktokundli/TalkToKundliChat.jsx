@@ -3,14 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import styles from './TalkToKundliChat.module.scss';
 import { Toast } from '../../../../component';
 import { startKundliChat, sendKundliChatMessage } from '../../../../services/appServices/aiWowService';
+import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
+import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 
 const TalkToKundliChat = () => {
   const navigate = useNavigate();
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState(null);
-  const [selectedProfile, setSelectedProfile] = useState(null);
   const [suggestedQuestions, setSuggestedQuestions] = useState([
     "What career path is best suited for me?",
     "When is a good time for marriage?",
@@ -20,26 +23,12 @@ const TalkToKundliChat = () => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Load selected profile and start session
+  // Start session when profile is loaded
   useEffect(() => {
-    const profileData = localStorage.getItem('selectedKundliProfile');
-    if (!profileData) {
-      Toast.error('Please select a kundli profile first');
-      navigate('/aiwow', { replace: true });
-      return;
-    }
-
-    try {
-      const profile = JSON.parse(profileData);
-      setSelectedProfile(profile);
+    if (profile && !profileLoading) {
       startSession(profile);
-    } catch (error) {
-      console.error('Invalid profile data:', error);
-      Toast.error('Invalid profile data. Please select again.');
-      localStorage.removeItem('selectedKundliProfile');
-      navigate('/aiwow', { replace: true });
     }
-  }, [navigate]);
+  }, [profile, profileLoading]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -173,10 +162,12 @@ const TalkToKundliChat = () => {
   };
 
   const handleBack = () => {
-    // Clear selected profile when going back
-    localStorage.removeItem('selectedKundliProfile');
     navigate(-1);
   };
+
+  if (profileLoading) {
+    return <PrimaryLoader isLoading={true} />;
+  }
 
   return (
     <div className={styles.container}>
@@ -190,8 +181,8 @@ const TalkToKundliChat = () => {
           </button>
           <div className={styles.headerInfo}>
             <h1 className={styles.title}>AI Kundli Assistant</h1>
-            {selectedProfile && (
-              <p className={styles.subtitle}>{selectedProfile.name}'s Chart</p>
+            {profile && (
+              <p className={styles.subtitle}>{profile.name}'s Chart</p>
             )}
           </div>
         </div>

@@ -224,88 +224,98 @@ const PalmistryResult = () => {
       <div className={styles.content}>
         {activeTab === 'overview' && (
           <>
-            <div className={styles.imageSection}>
-              {palmImage && (
-                <div className={styles.palmImageWrapper}>
-                  <img src={palmImage} alt="Palm" className={styles.palmImage} />
-                  <div className={styles.handBadge}>{hand === 'left' ? 'Left Hand' : 'Right Hand'}</div>
+            <div className={styles.overviewLayout}>
+              <div className={styles.imageSection}>
+                {palmImage && (
+                  <div className={styles.palmImageWrapper}>
+                    <img src={palmImage} alt="Palm" className={styles.palmImage} />
+                    <div className={styles.handBadge}>{hand === 'left' ? 'Left Hand' : 'Right Hand'}</div>
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.contentSection}>
+                <div className={styles.twoColumnGrid}>
+                  <div className={styles.section}>
+                    <h3 className={styles.sectionTitle}>Personality Type</h3>
+                    <p className={styles.text}>
+                      {typeof overallReading?.personalityType === 'string' 
+                        ? overallReading.personalityType 
+                        : 'No data available'}
+                    </p>
+                  </div>
+
+                  <div className={styles.section}>
+                    <h3 className={styles.sectionTitle}>Life Path</h3>
+                    <p className={styles.text}>
+                      {typeof overallReading?.lifePath === 'string' 
+                        ? overallReading.lifePath 
+                        : 'No data available'}
+                    </p>
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
 
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Personality Type</h3>
-              <p className={styles.text}>
-                {typeof overallReading?.personalityType === 'string' 
-                  ? overallReading.personalityType 
-                  : 'No data available'}
-              </p>
-            </div>
-
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Life Path</h3>
-              <p className={styles.text}>
-                {typeof overallReading?.lifePath === 'string' 
-                  ? overallReading.lifePath 
-                  : 'No data available'}
-              </p>
-            </div>
-
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Personalized Insights</h3>
+            <div className={styles.insightsWrapper}>
+              <h3 className={styles.insightsMainTitle}>Personalized Insights</h3>
               {overallReading?.personalizedInsights && typeof overallReading.personalizedInsights === 'object' ? (
                 <>
-                  {overallReading.personalizedInsights.zodiacSign && (
-                    <div className={styles.subsection}>
-                      <h4 className={styles.subsectionTitle}>Zodiac Sign</h4>
-                      <p className={styles.text}>{overallReading.personalizedInsights.zodiacSign}</p>
-                    </div>
-                  )}
-                  
-                  {overallReading.personalizedInsights.rulingPlanet && (
-                    <div className={styles.subsection}>
-                      <h4 className={styles.subsectionTitle}>Ruling Planet</h4>
-                      <p className={styles.text}>{overallReading.personalizedInsights.rulingPlanet}</p>
-                    </div>
-                  )}
-                  
-                  {overallReading.personalizedInsights.elementalHandType && (
-                    <div className={styles.subsection}>
-                      <h4 className={styles.subsectionTitle}>Hand Type</h4>
-                      <p className={styles.text}>{overallReading.personalizedInsights.elementalHandType}</p>
-                    </div>
-                  )}
-                  
-                  {overallReading.personalizedInsights.dominantMounts?.length > 0 && (
-                    <div className={styles.subsection}>
-                      <h4 className={styles.subsectionTitle}>Dominant Mounts</h4>
-                      <ul className={styles.list}>
-                        {overallReading.personalizedInsights.dominantMounts.map((mount, idx) => (
-                          <li key={idx}>{mount}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  <div className={styles.insightsGrid}>
+                    {overallReading.personalizedInsights.zodiacSign && (
+                      <div className={styles.insightCard}>
+                        <h4 className={styles.insightTitle}>Zodiac Sign</h4>
+                        <p className={styles.insightText}>{overallReading.personalizedInsights.zodiacSign}</p>
+                      </div>
+                    )}
+                    
+                    {overallReading.personalizedInsights.rulingPlanet && (
+                      <div className={styles.insightCard}>
+                        <h4 className={styles.insightTitle}>Ruling Planet</h4>
+                        <p className={styles.insightText}>{overallReading.personalizedInsights.rulingPlanet}</p>
+                      </div>
+                    )}
+                    
+                    {overallReading.personalizedInsights.elementalHandType && (
+                      <div className={styles.insightCard}>
+                        <h4 className={styles.insightTitle}>Hand Type</h4>
+                        <p className={styles.insightText}>{overallReading.personalizedInsights.elementalHandType}</p>
+                      </div>
+                    )}
+                    
+                    {overallReading.personalizedInsights.dominantMounts?.length > 0 && (
+                      <div className={styles.insightCard}>
+                        <h4 className={styles.insightTitle}>Dominant Mounts</h4>
+                        <ul className={styles.insightList}>
+                          {overallReading.personalizedInsights.dominantMounts.map((mount, idx) => (
+                            <li key={idx}>{mount}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                   
                   {overallReading.personalizedInsights.astrologyCorrelation && (
-                    <div className={styles.subsection}>
+                    <div className={styles.section} style={{ marginTop: '1rem' }}>
                       <h4 className={styles.subsectionTitle}>Astrology Correlation</h4>
                       <p className={styles.text}>{overallReading.personalizedInsights.astrologyCorrelation}</p>
                     </div>
                   )}
                 </>
               ) : (
-                <p className={styles.text}>
-                  {typeof overallReading?.personalizedInsights === 'string' 
-                    ? overallReading.personalizedInsights 
-                    : 'No data available'}
-                </p>
+                <div className={styles.section}>
+                  <p className={styles.text}>
+                    {typeof overallReading?.personalizedInsights === 'string' 
+                      ? overallReading.personalizedInsights 
+                      : 'No data available'}
+                  </p>
+                </div>
               )}
             </div>
 
             {/* Astro Correlation in Overview */}
             {astroCorrelation && typeof astroCorrelation === 'object' && (
-              <>
+              <div className={styles.astroCorrelationSection}>
                 {astroCorrelation.zodiacSign && (
                   <div className={styles.section}>
                     <h3 className={styles.sectionTitle}>Zodiac Sign</h3>
@@ -319,7 +329,7 @@ const PalmistryResult = () => {
                     <p className={styles.text}>{String(astroCorrelation.elementalHandType)}</p>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </>
         )}
@@ -334,45 +344,47 @@ const PalmistryResult = () => {
                 </div>
                 <p className={styles.lineSummary}>{lines.fate.interpretation.summary}</p>
                 
-                <div className={styles.subsection}>
-                  <h4 className={styles.subsectionTitle}>Career Path</h4>
-                  <p className={styles.text}>{lines.fate.interpretation.careerPath}</p>
-                </div>
-
-                <div className={styles.subsection}>
-                  <h4 className={styles.subsectionTitle}>Life Purpose</h4>
-                  <p className={styles.text}>{lines.fate.interpretation.lifePurpose}</p>
-                </div>
-
-                <div className={styles.subsection}>
-                  <h4 className={styles.subsectionTitle}>Success Timing</h4>
-                  <p className={styles.text}>{lines.fate.interpretation.successTiming}</p>
-                </div>
-
-                {lines.fate.interpretation.strengths?.length > 0 && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Strengths</h4>
-                    <ul className={styles.list}>
-                      {lines.fate.interpretation.strengths.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
+                <div className={styles.lineDetailsGrid}>
+                  <div className={styles.lineDetailCard}>
+                    <h4 className={styles.lineDetailTitle}>Career Path</h4>
+                    <p className={styles.lineDetailText}>{lines.fate.interpretation.careerPath}</p>
                   </div>
-                )}
 
-                {lines.fate.interpretation.challenges?.length > 0 && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Challenges</h4>
-                    <ul className={styles.list}>
-                      {lines.fate.interpretation.challenges.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
+                  <div className={styles.lineDetailCard}>
+                    <h4 className={styles.lineDetailTitle}>Life Purpose</h4>
+                    <p className={styles.lineDetailText}>{lines.fate.interpretation.lifePurpose}</p>
                   </div>
-                )}
+
+                  <div className={styles.lineDetailCard}>
+                    <h4 className={styles.lineDetailTitle}>Success Timing</h4>
+                    <p className={styles.lineDetailText}>{lines.fate.interpretation.successTiming}</p>
+                  </div>
+
+                  {lines.fate.interpretation.strengths?.length > 0 && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Strengths</h4>
+                      <ul className={styles.lineDetailList}>
+                        {lines.fate.interpretation.strengths.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {lines.fate.interpretation.challenges?.length > 0 && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Challenges</h4>
+                      <ul className={styles.lineDetailList}>
+                        {lines.fate.interpretation.challenges.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
 
                 {lines.fate.interpretation.remedies?.length > 0 && (
-                  <div className={styles.subsection}>
+                  <div className={styles.remediesSection}>
                     <h4 className={styles.subsectionTitle}>Remedies</h4>
                     <ul className={styles.list}>
                       {lines.fate.interpretation.remedies.map((item, idx) => (
@@ -394,52 +406,54 @@ const PalmistryResult = () => {
                   <p className={styles.lineSummary}>{lines.heart.interpretation.summary}</p>
                 )}
                 
-                {lines.heart.interpretation?.emotionalNature && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Emotional Nature</h4>
-                    <p className={styles.text}>{lines.heart.interpretation.emotionalNature}</p>
-                  </div>
-                )}
+                <div className={styles.lineDetailsGrid}>
+                  {lines.heart.interpretation?.emotionalNature && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Emotional Nature</h4>
+                      <p className={styles.lineDetailText}>{lines.heart.interpretation.emotionalNature}</p>
+                    </div>
+                  )}
 
-                {lines.heart.interpretation?.relationshipPattern && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Relationship Pattern</h4>
-                    <p className={styles.text}>{lines.heart.interpretation.relationshipPattern}</p>
-                  </div>
-                )}
+                  {lines.heart.interpretation?.relationshipPattern && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Relationship Pattern</h4>
+                      <p className={styles.lineDetailText}>{lines.heart.interpretation.relationshipPattern}</p>
+                    </div>
+                  )}
 
-                {lines.heart.interpretation?.strengths?.length > 0 && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Strengths</h4>
-                    <ul className={styles.list}>
-                      {lines.heart.interpretation.strengths.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  {lines.heart.interpretation?.strengths?.length > 0 && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Strengths</h4>
+                      <ul className={styles.lineDetailList}>
+                        {lines.heart.interpretation.strengths.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                {lines.heart.interpretation?.challenges?.length > 0 && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Challenges</h4>
-                    <ul className={styles.list}>
-                      {lines.heart.interpretation.challenges.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  {lines.heart.interpretation?.challenges?.length > 0 && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Challenges</h4>
+                      <ul className={styles.lineDetailList}>
+                        {lines.heart.interpretation.challenges.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                {lines.heart.interpretation?.remedies?.length > 0 && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Remedies</h4>
-                    <ul className={styles.list}>
-                      {lines.heart.interpretation.remedies.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  {lines.heart.interpretation?.remedies?.length > 0 && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Remedies</h4>
+                      <ul className={styles.lineDetailList}>
+                        {lines.heart.interpretation.remedies.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -453,48 +467,50 @@ const PalmistryResult = () => {
                   <p className={styles.lineSummary}>{lines.head.interpretation.summary}</p>
                 )}
                 
-                {lines.head.interpretation?.thinkingStyle && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Thinking Style</h4>
-                    <p className={styles.text}>{lines.head.interpretation.thinkingStyle}</p>
-                  </div>
-                )}
+                <div className={styles.lineDetailsGrid}>
+                  {lines.head.interpretation?.thinkingStyle && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Thinking Style</h4>
+                      <p className={styles.lineDetailText}>{lines.head.interpretation.thinkingStyle}</p>
+                    </div>
+                  )}
 
-                {lines.head.interpretation?.intellectualDepth && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Intellectual Depth</h4>
-                    <p className={styles.text}>{lines.head.interpretation.intellectualDepth}</p>
-                  </div>
-                )}
+                  {lines.head.interpretation?.intellectualDepth && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Intellectual Depth</h4>
+                      <p className={styles.lineDetailText}>{lines.head.interpretation.intellectualDepth}</p>
+                    </div>
+                  )}
 
-                {lines.head.interpretation?.careerAptitude && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Career Aptitude</h4>
-                    <p className={styles.text}>{lines.head.interpretation.careerAptitude}</p>
-                  </div>
-                )}
+                  {lines.head.interpretation?.careerAptitude && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Career Aptitude</h4>
+                      <p className={styles.lineDetailText}>{lines.head.interpretation.careerAptitude}</p>
+                    </div>
+                  )}
 
-                {lines.head.interpretation?.strengths?.length > 0 && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Strengths</h4>
-                    <ul className={styles.list}>
-                      {lines.head.interpretation.strengths.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  {lines.head.interpretation?.strengths?.length > 0 && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Strengths</h4>
+                      <ul className={styles.lineDetailList}>
+                        {lines.head.interpretation.strengths.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                {lines.head.interpretation?.challenges?.length > 0 && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Challenges</h4>
-                    <ul className={styles.list}>
-                      {lines.head.interpretation.challenges.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  {lines.head.interpretation?.challenges?.length > 0 && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Challenges</h4>
+                      <ul className={styles.lineDetailList}>
+                        {lines.head.interpretation.challenges.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -508,56 +524,58 @@ const PalmistryResult = () => {
                   <p className={styles.lineSummary}>{lines.life.interpretation.summary}</p>
                 )}
                 
-                {lines.life.interpretation?.vitalityLevel && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Vitality Level</h4>
-                    <p className={styles.text}>{lines.life.interpretation.vitalityLevel}</p>
-                  </div>
-                )}
+                <div className={styles.lineDetailsGrid}>
+                  {lines.life.interpretation?.vitalityLevel && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Vitality Level</h4>
+                      <p className={styles.lineDetailText}>{lines.life.interpretation.vitalityLevel}</p>
+                    </div>
+                  )}
 
-                {lines.life.interpretation?.healthIndicators?.length > 0 && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Health Indicators</h4>
-                    <ul className={styles.list}>
-                      {lines.life.interpretation.healthIndicators.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  {lines.life.interpretation?.healthIndicators?.length > 0 && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Health Indicators</h4>
+                      <ul className={styles.lineDetailList}>
+                        {lines.life.interpretation.healthIndicators.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                {lines.life.interpretation?.lifeEvents?.length > 0 && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Life Events</h4>
-                    <ul className={styles.list}>
-                      {lines.life.interpretation.lifeEvents.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  {lines.life.interpretation?.lifeEvents?.length > 0 && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Life Events</h4>
+                      <ul className={styles.lineDetailList}>
+                        {lines.life.interpretation.lifeEvents.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                {lines.life.interpretation?.strengths?.length > 0 && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Strengths</h4>
-                    <ul className={styles.list}>
-                      {lines.life.interpretation.strengths.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  {lines.life.interpretation?.strengths?.length > 0 && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Strengths</h4>
+                      <ul className={styles.lineDetailList}>
+                        {lines.life.interpretation.strengths.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                {lines.life.interpretation?.challenges?.length > 0 && (
-                  <div className={styles.subsection}>
-                    <h4 className={styles.subsectionTitle}>Challenges</h4>
-                    <ul className={styles.list}>
-                      {lines.life.interpretation.challenges.map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  {lines.life.interpretation?.challenges?.length > 0 && (
+                    <div className={styles.lineDetailCard}>
+                      <h4 className={styles.lineDetailTitle}>Challenges</h4>
+                      <ul className={styles.lineDetailList}>
+                        {lines.life.interpretation.challenges.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -618,16 +636,16 @@ const PalmistryResult = () => {
         )}
 
         {activeTab === 'personality' && (
-          <>
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Personality Type</h3>
-              <p className={styles.text}>{overallReading?.personalityType || 'No data available'}</p>
+          <div className={styles.personalityGrid}>
+            <div className={styles.personalityCard}>
+              <h3 className={styles.personalityCardTitle}>Personality Type</h3>
+              <p className={styles.personalityCardText}>{overallReading?.personalityType || 'No data available'}</p>
             </div>
 
             {lines?.heart?.detected && (
-              <div className={styles.card}>
-                <h3 className={styles.cardTitle}>Emotional Nature</h3>
-                <p className={styles.text}>{lines.heart.interpretation?.emotionalNature || 'No data available'}</p>
+              <div className={styles.personalityCard}>
+                <h3 className={styles.personalityCardTitle}>Emotional Nature</h3>
+                <p className={styles.personalityCardText}>{lines.heart.interpretation?.emotionalNature || 'No data available'}</p>
                 
                 {lines.heart.interpretation?.strengths?.length > 0 && (
                   <div className={styles.subsection}>
@@ -654,9 +672,9 @@ const PalmistryResult = () => {
             )}
 
             {lines?.head?.detected && (
-              <div className={styles.card}>
-                <h3 className={styles.cardTitle}>Thinking Style</h3>
-                <p className={styles.text}>{lines.head.interpretation?.thinkingStyle || 'No data available'}</p>
+              <div className={styles.personalityCard}>
+                <h3 className={styles.personalityCardTitle}>Thinking Style</h3>
+                <p className={styles.personalityCardText}>{lines.head.interpretation?.thinkingStyle || 'No data available'}</p>
                 
                 {lines.head.interpretation?.strengths?.length > 0 && (
                   <div className={styles.subsection}>
@@ -670,59 +688,59 @@ const PalmistryResult = () => {
                 )}
               </div>
             )}
-          </>
+          </div>
         )}
 
         {activeTab === 'career' && (
-          <>
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Career Guidance</h3>
-              <p className={styles.text}>{overallReading?.careerGuidance || 'No data available'}</p>
+          <div className={styles.careerGrid}>
+            <div className={styles.careerCard}>
+              <h3 className={styles.careerCardTitle}>Career Guidance</h3>
+              <p className={styles.careerCardText}>{overallReading?.careerGuidance || 'No data available'}</p>
             </div>
 
             {lines?.head?.detected && (
-              <div className={styles.card}>
-                <h3 className={styles.cardTitle}>Career Aptitude</h3>
-                <p className={styles.text}>{lines.head.interpretation?.careerAptitude || 'No data available'}</p>
+              <div className={styles.careerCard}>
+                <h3 className={styles.careerCardTitle}>Career Aptitude</h3>
+                <p className={styles.careerCardText}>{lines.head.interpretation?.careerAptitude || 'No data available'}</p>
               </div>
             )}
 
             {lines?.fate?.detected && (
               <>
-                <div className={styles.card}>
-                  <h3 className={styles.cardTitle}>Career Path</h3>
-                  <p className={styles.text}>{lines.fate.interpretation?.careerPath || 'No data available'}</p>
+                <div className={styles.careerCard}>
+                  <h3 className={styles.careerCardTitle}>Career Path</h3>
+                  <p className={styles.careerCardText}>{lines.fate.interpretation?.careerPath || 'No data available'}</p>
                 </div>
 
-                <div className={styles.card}>
-                  <h3 className={styles.cardTitle}>Life Purpose</h3>
-                  <p className={styles.text}>{lines.fate.interpretation?.lifePurpose || 'No data available'}</p>
+                <div className={styles.careerCard}>
+                  <h3 className={styles.careerCardTitle}>Life Purpose</h3>
+                  <p className={styles.careerCardText}>{lines.fate.interpretation?.lifePurpose || 'No data available'}</p>
                 </div>
 
-                <div className={styles.card}>
-                  <h3 className={styles.cardTitle}>Success Timing</h3>
-                  <p className={styles.text}>{lines.fate.interpretation?.successTiming || 'No data available'}</p>
+                <div className={styles.careerCard}>
+                  <h3 className={styles.careerCardTitle}>Success Timing</h3>
+                  <p className={styles.careerCardText}>{lines.fate.interpretation?.successTiming || 'No data available'}</p>
                 </div>
               </>
             )}
 
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Life Path</h3>
-              <p className={styles.text}>{overallReading?.lifePath || 'No data available'}</p>
+            <div className={styles.careerCard}>
+              <h3 className={styles.careerCardTitle}>Life Path</h3>
+              <p className={styles.careerCardText}>{overallReading?.lifePath || 'No data available'}</p>
             </div>
-          </>
+          </div>
         )}
 
         {activeTab === 'insights' && (
-          <>
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Relationship Advice</h3>
-              <p className={styles.text}>{overallReading?.relationshipAdvice || 'No data available'}</p>
+          <div className={styles.insightsTabGrid}>
+            <div className={styles.insightTabCard}>
+              <h3 className={styles.insightTabCardTitle}>Relationship Advice</h3>
+              <p className={styles.insightTabCardText}>{overallReading?.relationshipAdvice || 'No data available'}</p>
             </div>
 
             {overallReading?.healthIndicators?.length > 0 && (
-              <div className={styles.card}>
-                <h3 className={styles.cardTitle}>Health Indicators</h3>
+              <div className={styles.insightTabCard}>
+                <h3 className={styles.insightTabCardTitle}>Health Indicators</h3>
                 <ul className={styles.list}>
                   {overallReading.healthIndicators.map((item, idx) => (
                     <li key={idx}>{item}</li>
@@ -732,8 +750,8 @@ const PalmistryResult = () => {
             )}
 
             {overallReading?.luckyPeriods?.length > 0 && (
-              <div className={styles.card}>
-                <h3 className={styles.cardTitle}>Lucky Periods</h3>
+              <div className={styles.insightTabCard}>
+                <h3 className={styles.insightTabCardTitle}>Lucky Periods</h3>
                 <ul className={styles.list}>
                   {overallReading.luckyPeriods.map((item, idx) => (
                     <li key={idx}>{item}</li>
@@ -744,7 +762,7 @@ const PalmistryResult = () => {
 
             {overallReading?.warnings?.length > 0 && (
               <div className={styles.warningCard}>
-                <h3 className={styles.cardTitle}>Important Warnings</h3>
+                <h3 className={styles.insightTabCardTitle}>Important Warnings</h3>
                 <ul className={styles.list}>
                   {overallReading.warnings.map((item, idx) => (
                     <li key={idx}>{item}</li>
@@ -756,29 +774,29 @@ const PalmistryResult = () => {
             {astroCorrelation && (
               <>
                 {astroCorrelation.zodiacSign && (
-                  <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>Zodiac Sign</h3>
-                    <p className={styles.text}>{astroCorrelation.zodiacSign}</p>
+                  <div className={styles.insightTabCard}>
+                    <h3 className={styles.insightTabCardTitle}>Zodiac Sign</h3>
+                    <p className={styles.insightTabCardText}>{astroCorrelation.zodiacSign}</p>
                   </div>
                 )}
 
                 {astroCorrelation.rulingPlanet && (
-                  <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>Ruling Planet</h3>
-                    <p className={styles.text}>{astroCorrelation.rulingPlanet}</p>
+                  <div className={styles.insightTabCard}>
+                    <h3 className={styles.insightTabCardTitle}>Ruling Planet</h3>
+                    <p className={styles.insightTabCardText}>{astroCorrelation.rulingPlanet}</p>
                   </div>
                 )}
 
                 {astroCorrelation.elementalHandType && (
-                  <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>Elemental Hand Type</h3>
-                    <p className={styles.text}>{astroCorrelation.elementalHandType}</p>
+                  <div className={styles.insightTabCard}>
+                    <h3 className={styles.insightTabCardTitle}>Elemental Hand Type</h3>
+                    <p className={styles.insightTabCardText}>{astroCorrelation.elementalHandType}</p>
                   </div>
                 )}
 
                 {astroCorrelation.dominantMounts?.length > 0 && (
-                  <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>Dominant Mounts</h3>
+                  <div className={styles.insightTabCard}>
+                    <h3 className={styles.insightTabCardTitle}>Dominant Mounts</h3>
                     <ul className={styles.list}>
                       {astroCorrelation.dominantMounts.map((item, idx) => (
                         <li key={idx}>{typeof item === 'string' ? item : JSON.stringify(item)}</li>
@@ -788,15 +806,15 @@ const PalmistryResult = () => {
                 )}
 
                 {astroCorrelation.astrologyCorrelation && (
-                  <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>Astrology Correlation</h3>
-                    <p className={styles.text}>{astroCorrelation.astrologyCorrelation}</p>
+                  <div className={styles.insightTabCard}>
+                    <h3 className={styles.insightTabCardTitle}>Astrology Correlation</h3>
+                    <p className={styles.insightTabCardText}>{astroCorrelation.astrologyCorrelation}</p>
                   </div>
                 )}
 
                 {astroCorrelation.planetaryInfluences?.length > 0 && (
-                  <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>Planetary Influences</h3>
+                  <div className={styles.insightTabCard}>
+                    <h3 className={styles.insightTabCardTitle}>Planetary Influences</h3>
                     <ul className={styles.list}>
                       {astroCorrelation.planetaryInfluences.map((item, idx) => (
                         <li key={idx}>{item}</li>
@@ -806,15 +824,15 @@ const PalmistryResult = () => {
                 )}
 
                 {astroCorrelation.dashaAlignment && (
-                  <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>Dasha Alignment</h3>
-                    <p className={styles.text}>{astroCorrelation.dashaAlignment}</p>
+                  <div className={styles.insightTabCard}>
+                    <h3 className={styles.insightTabCardTitle}>Dasha Alignment</h3>
+                    <p className={styles.insightTabCardText}>{astroCorrelation.dashaAlignment}</p>
                   </div>
                 )}
 
                 {astroCorrelation.recommendations?.length > 0 && (
-                  <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>Recommendations</h3>
+                  <div className={styles.insightTabCard}>
+                    <h3 className={styles.insightTabCardTitle}>Recommendations</h3>
                     <ul className={styles.list}>
                       {astroCorrelation.recommendations.map((item, idx) => (
                         <li key={idx}>{item}</li>
@@ -824,7 +842,7 @@ const PalmistryResult = () => {
                 )}
               </>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
