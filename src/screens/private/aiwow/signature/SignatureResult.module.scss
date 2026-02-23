@@ -169,6 +169,49 @@
   margin-bottom: 16px;
 }
 
+.analysisGrid {
+  display: grid;
+  gap: 16px;
+  
+  // Mobile: 1 column (stacked)
+  grid-template-columns: 1fr;
+  
+  // Desktop: 3 columns per row
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.analysisItem {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.analysisItemTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+}
+
+.insightsGrid {
+  display: grid;
+  gap: 16px;
+  
+  // Mobile: 1 column (stacked)
+  grid-template-columns: 1fr;
+  
+  // Desktop: 3 columns per row
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+    
+    .insightsCard {
+      margin-bottom: 0;
+    }
+  }
+}
+
 .cardTitle {
   font-size: 18px;
   font-weight: 700;
