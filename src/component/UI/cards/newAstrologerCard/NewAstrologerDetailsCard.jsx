@@ -29,19 +29,21 @@ const NewAstrologerDetailsCard = ({
         className={styles.detailsImageLink}
       >
         <div className={styles.detailsImageWrapper}>
-          <img
-            src={imageUrl}
-            alt={`${astrologer?.firstName} ${astrologer?.lastName}`}
-            onClick={() =>
-              navigate(
-                `/astrologer/${astrologer?.astrologerId || astrologer?._id}`,
-              )
-            }
-            className={styles.detailsImage}
-            onError={(e) => {
-              e.target.style.display = "none";
-            }}
-          />
+          <div className={styles.detailImgInner}>
+            <img
+              src={imageUrl}
+              alt={`${astrologer?.firstName} ${astrologer?.lastName}`}
+              onClick={() =>
+                navigate(
+                  `/astrologer/${astrologer?.astrologerId || astrologer?._id}`,
+                )
+              }
+              className={styles.detailsImage}
+              onError={(e) => {
+                e.target.style.display = "none";
+              }}
+            />
+          </div>
           {/* Rating Badge */}
           {astrologer?.rating && <div className={styles.detailsRatingBadge}>
             <Star
