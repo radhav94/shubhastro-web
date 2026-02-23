@@ -2080,6 +2080,9 @@
   @media screen and (width <= 767px) {
     padding: 8px 10px;
     font-size: 12px;
+    img{
+      display: none;
+    }
   }
 
   &:hover {
@@ -2122,6 +2125,9 @@
   @media screen and (width <= 767px) {
     padding: 8px 10px;
     font-size: 12px;
+    img{
+      display: none;
+    }
   }
 
   &:hover {
