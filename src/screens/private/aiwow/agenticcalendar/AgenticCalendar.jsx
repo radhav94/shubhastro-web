@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import styles from './AgenticCalendar.module.scss';
 import { Toast } from '../../../../component';
 import { analyzeCalendarEvents } from '../../../../services/appServices/aiWowService';
+import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
+import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 
 const AgenticCalendar = () => {
   const navigate = useNavigate();
-  const [selectedProfile, setSelectedProfile] = useState(null);
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  
   const [events, setEvents] = useState(['']);
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
@@ -23,25 +26,6 @@ const AgenticCalendar = () => {
     'Moving House',
     'Important Meeting'
   ];
-
-  useEffect(() => {
-    const profileData = localStorage.getItem('selectedKundliProfile');
-    if (!profileData) {
-      Toast.error('Please select a kundli profile first');
-      navigate('/aiwow', { replace: true });
-      return;
-    }
-
-    try {
-      const profile = JSON.parse(profileData);
-      setSelectedProfile(profile);
-    } catch (error) {
-      console.error('Invalid profile data:', error);
-      Toast.error('Invalid profile data. Please select again.');
-      localStorage.removeItem('selectedKundliProfile');
-      navigate('/aiwow', { replace: true });
-    }
-  }, [navigate]);
 
   const handleAddEvent = () => {
     setEvents([...events, '']);
@@ -101,7 +85,6 @@ const AgenticCalendar = () => {
       setAnalysis(null);
       setEvents(['']);
     } else {
-      localStorage.removeItem('selectedKundliProfile');
       navigate(-1);
     }
   };
@@ -110,6 +93,10 @@ const AgenticCalendar = () => {
     setAnalysis(null);
     setEvents(['']);
   };
+
+  if (profileLoading) {
+    return <PrimaryLoader isLoading={true} />;
+  }
 
   return (
     <div className={styles.container}>
@@ -123,8 +110,8 @@ const AgenticCalendar = () => {
           </button>
           <div className={styles.headerInfo}>
             <h1 className={styles.title}>Agentic Calendar</h1>
-            {selectedProfile && (
-              <p className={styles.subtitle}>{selectedProfile.name}</p>
+            {profile && (
+              <p className={styles.subtitle}>{profile.name}</p>
             )}
           </div>
         </div>
