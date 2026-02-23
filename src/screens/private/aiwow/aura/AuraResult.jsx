@@ -342,10 +342,12 @@ const AuraResult = () => {
           {activeTab === 'chakras' && (
             <div className={styles.section}>
               <div className={styles.card}>
-                <h3 className={styles.cardTitle}>🌟 Planetary Influences</h3>
-                <p className={styles.cardText}>
-                  Your aura is influenced by planetary energies. Dominant planet: {astrologicalData.dominantPlanet}
-                </p>
+                <div className={styles.cardStaticContent}>
+                  <h3 className={styles.cardTitle}>🌟 Planetary Influences</h3>
+                  <p className={styles.cardText}>
+                    Your aura is influenced by planetary energies. Dominant planet: {astrologicalData.dominantPlanet}
+                  </p>
+                </div>
               </div>
               
               <div className={styles.planetaryGrid}>
@@ -378,22 +380,28 @@ const AuraResult = () => {
               <div className={styles.energyGrid}>
                 {energyLevel.emotional && (
                   <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>💖 Emotional Energy</h3>
-                    <p className={styles.cardText}>{energyLevel.emotional}</p>
+                    <div className={styles.cardStaticContent}>
+                      <h3 className={styles.cardTitle}>💖 Emotional Energy</h3>
+                      <p className={styles.cardText}>{energyLevel.emotional}</p>
+                    </div>
                   </div>
                 )}
 
                 {energyLevel.mental && (
                   <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>🧠 Mental Energy</h3>
-                    <p className={styles.cardText}>{energyLevel.mental}</p>
+                    <div className={styles.cardStaticContent}>
+                      <h3 className={styles.cardTitle}>🧠 Mental Energy</h3>
+                      <p className={styles.cardText}>{energyLevel.mental}</p>
+                    </div>
                   </div>
                 )}
 
                 {energyLevel.physical && (
                   <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>💪 Physical Energy</h3>
-                    <p className={styles.cardText}>{energyLevel.physical}</p>
+                    <div className={styles.cardStaticContent}>
+                      <h3 className={styles.cardTitle}>💪 Physical Energy</h3>
+                      <p className={styles.cardText}>{energyLevel.physical}</p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -405,37 +413,45 @@ const AuraResult = () => {
               <div className={styles.spiritualGrid}>
                 {spiritualInsights.path && (
                   <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>🕉️ Spiritual Path</h3>
-                    <p className={styles.cardText}>{spiritualInsights.path}</p>
+                    <div className={styles.cardStaticContent}>
+                      <h3 className={styles.cardTitle}>🕉️ Spiritual Path</h3>
+                      <p className={styles.cardText}>{spiritualInsights.path}</p>
+                    </div>
                   </div>
                 )}
 
                 {spiritualInsights.guidance && (
                   <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>🌟 Spiritual Guidance</h3>
-                    <p className={styles.cardText}>{spiritualInsights.guidance}</p>
+                    <div className={styles.cardStaticContent}>
+                      <h3 className={styles.cardTitle}>🌟 Spiritual Guidance</h3>
+                      <p className={styles.cardText}>{spiritualInsights.guidance}</p>
+                    </div>
                   </div>
                 )}
 
                 {spiritualInsights.practices?.length > 0 && (
                   <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>🧘 Recommended Practices</h3>
-                    <ul className={styles.list}>
-                      {spiritualInsights.practices.map((practice, index) => (
-                        <li key={index} className={styles.listItem}>{practice}</li>
-                      ))}
-                    </ul>
+                    <div className={styles.cardStaticContent}>
+                      <h3 className={styles.cardTitle}>🧘 Recommended Practices</h3>
+                      <ul className={styles.list}>
+                        {spiritualInsights.practices.map((practice, index) => (
+                          <li key={index} className={styles.listItem}>{practice}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 )}
 
                 {spiritualInsights.affirmations?.length > 0 && (
                   <div className={styles.card}>
-                    <h3 className={styles.cardTitle}>✨ Daily Affirmations</h3>
-                    <ul className={styles.list}>
-                      {spiritualInsights.affirmations.map((affirmation, index) => (
-                        <li key={index} className={styles.listItem}>{affirmation}</li>
-                      ))}
-                    </ul>
+                    <div className={styles.cardStaticContent}>
+                      <h3 className={styles.cardTitle}>✨ Daily Affirmations</h3>
+                      <ul className={styles.list}>
+                        {spiritualInsights.affirmations.map((affirmation, index) => (
+                          <li key={index} className={styles.listItem}>{affirmation}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 )}
               </div>

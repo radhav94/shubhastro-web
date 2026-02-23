@@ -102,7 +102,6 @@ const HoroscopeNew = () => {
   const [activeTab, setActiveTab] = useState(getInitialTab());
   const [activeCategory, setActiveCategory] = useState('');
   const [showZodiacModal, setShowZodiacModal] = useState(false);
-  const [expandedIndex, setExpandedIndex] = useState(null);
 
   const tabs = ['Today', /* 'Daily', */ 'This Week', 'This Year'];
   
@@ -361,8 +360,18 @@ const HoroscopeNew = () => {
   const capitalizedSign = selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1);
   const zodiacImage = appSvgs[capitalizedSign];
 
-  const toggleSection = (index) => {
-    setExpandedIndex(expandedIndex === index ? null : index);
+  // Truncate text to 200 words
+  const truncateToWords = (text, wordLimit) => {
+    const words = text.split(/\s+/);
+    if (words.length <= wordLimit) return { text, isTruncated: false };
+    return { text: words.slice(0, wordLimit).join(' '), isTruncated: true };
+  };
+
+  // Navigate to specific section route
+  const handleShowMore = (categoryId) => {
+    // Instead of navigating to a new route, just set the active category
+    // This will show the full content for that specific category
+    setActiveCategory(categoryId);
   };
 
   return (
@@ -494,38 +503,44 @@ const HoroscopeNew = () => {
                   </div>
                 )}
                 
-                <div className="overview-cards-grid">
-                  {currentContent.overviewSections.map((section, index) => (
-                    <div key={index} className="overview-card">
-                      <div 
-                        className="overview-card-header"
-                        onClick={() => toggleSection(index)}
-                      >
-                        <div className="overview-card-left">
-                          <h3 className="overview-card-title">
-                            {section.title}
-                          </h3>
-                          {section.score && (
-                            <span className="overview-card-score">
-                              ({section.score}/100)
-                            </span>
-                          )}
+                <div className={`overview-cards-grid ${(activeTab === 'This Week' || activeTab === 'This Year') ? 'three-column' : ''}`}>
+                  {currentContent.overviewSections.map((section, index) => {
+                    const { text: truncatedText, isTruncated } = activeTab === 'This Year' 
+                      ? truncateToWords(section.content, 25) 
+                      : { text: section.content, isTruncated: false };
+                    
+                    return (
+                      <div key={index} className="overview-card">
+                        <div className="overview-card-header">
+                          <div className="overview-card-left">
+                            <h3 className="overview-card-title">
+                              {section.title}
+                            </h3>
+                            {section.score && (
+                              <span className="overview-card-score">
+                                ({section.score}/100)
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div className={`overview-card-arrow ${expandedIndex === index ? 'overview-card-arrow-expanded' : ''}`}>
-                          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
+                        <div className="overview-card-body overview-card-body-expanded">
+                          <div className="overview-card-text">
+                            {truncatedText.split('\n\n').map((paragraph, pIndex) => (
+                              <p key={pIndex}>{paragraph}</p>
+                            ))}
+                            {isTruncated && (
+                              <span 
+                                className="show-more-link"
+                                onClick={() => handleShowMore(categories.find(c => c.label === section.title)?.id || section.title)}
+                              >
+                                ... Show More
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <div className={`overview-card-body ${expandedIndex === index ? 'overview-card-body-expanded' : ''}`}>
-                        <div className="overview-card-text">
-                          {section.content.split('\n\n').map((paragraph, pIndex) => (
-                            <p key={pIndex}>{paragraph}</p>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ) : (

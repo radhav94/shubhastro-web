@@ -6,6 +6,27 @@ import { getPalmistryResult } from '../../../../services/appServices/aiWowServic
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { Toast } from '../../../../component';
 
+const LineDropdown = ({ title, subtitle, children, isOpen, onToggle }) => (
+  <div className={styles.lineDropdown}>
+    <button className={styles.lineDropdownHeader} onClick={onToggle}>
+      <div>
+        <h3 className={styles.lineTitle}>{title}</h3>
+        {subtitle && <p className={styles.lineSubtitle}>{subtitle}</p>}
+      </div>
+      <svg 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24" 
+        fill="none"
+        className={`${styles.dropdownIcon} ${isOpen ? styles.dropdownIconOpen : ''}`}
+      >
+        <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </button>
+    {isOpen && <div className={styles.lineDropdownContent}>{children}</div>}
+  </div>
+);
+
 const PalmistryResult = () => {
   const navigate = useNavigate();
   const { resultId } = useParams();
@@ -13,11 +34,25 @@ const PalmistryResult = () => {
   const [resultData, setResultData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [openLines, setOpenLines] = useState({
+    fate: false,
+    heart: false,
+    head: false,
+    life: false,
+    sun: false,
+    mercury: false,
+    marriage: false,
+    travel: false
+  });
   
   // Get data from Redux
   const reduxResult = useSelector((state) => state.aiwow.palmistry.result);
   const reduxResultId = useSelector((state) => state.aiwow.palmistry.resultId);
   const palmImage = useSelector((state) => state.aiwow.palmistry.image);
+
+  const toggleLine = (lineName) => {
+    setOpenLines(prev => ({ ...prev, [lineName]: !prev[lineName] }));
+  };
 
   useEffect(() => {
     const loadResult = async () => {
@@ -258,60 +293,62 @@ const PalmistryResult = () => {
             </div>
 
             <div className={styles.insightsWrapper}>
-              <h3 className={styles.insightsMainTitle}>Personalized Insights</h3>
-              {overallReading?.personalizedInsights && typeof overallReading.personalizedInsights === 'object' ? (
-                <>
-                  <div className={styles.insightsGrid}>
-                    {overallReading.personalizedInsights.zodiacSign && (
-                      <div className={styles.insightCard}>
-                        <h4 className={styles.insightTitle}>Zodiac Sign</h4>
-                        <p className={styles.insightText}>{overallReading.personalizedInsights.zodiacSign}</p>
-                      </div>
-                    )}
-                    
-                    {overallReading.personalizedInsights.rulingPlanet && (
-                      <div className={styles.insightCard}>
-                        <h4 className={styles.insightTitle}>Ruling Planet</h4>
-                        <p className={styles.insightText}>{overallReading.personalizedInsights.rulingPlanet}</p>
-                      </div>
-                    )}
-                    
-                    {overallReading.personalizedInsights.elementalHandType && (
-                      <div className={styles.insightCard}>
-                        <h4 className={styles.insightTitle}>Hand Type</h4>
-                        <p className={styles.insightText}>{overallReading.personalizedInsights.elementalHandType}</p>
-                      </div>
-                    )}
-                    
-                    {overallReading.personalizedInsights.dominantMounts?.length > 0 && (
-                      <div className={styles.insightCard}>
-                        <h4 className={styles.insightTitle}>Dominant Mounts</h4>
-                        <ul className={styles.insightList}>
-                          {overallReading.personalizedInsights.dominantMounts.map((mount, idx) => (
-                            <li key={idx}>{mount}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {overallReading.personalizedInsights.astrologyCorrelation && (
-                    <div className={styles.section} style={{ marginTop: '1rem' }}>
-                      <h4 className={styles.subsectionTitle}>Astrology Correlation</h4>
-                      <p className={styles.text}>{overallReading.personalizedInsights.astrologyCorrelation}</p>
+              <div className={styles.insightsCard}>
+                <h3 className={styles.insightsMainTitle}>Personalized Insights</h3>
+                {overallReading?.personalizedInsights && typeof overallReading.personalizedInsights === 'object' ? (
+                  <>
+                    <div className={styles.insightsGrid}>
+                      {overallReading.personalizedInsights.zodiacSign && (
+                        <div className={styles.insightCard}>
+                          <h4 className={styles.insightTitle}>Zodiac Sign</h4>
+                          <p className={styles.insightText}>{overallReading.personalizedInsights.zodiacSign}</p>
+                        </div>
+                      )}
+                      
+                      {overallReading.personalizedInsights.rulingPlanet && (
+                        <div className={styles.insightCard}>
+                          <h4 className={styles.insightTitle}>Ruling Planet</h4>
+                          <p className={styles.insightText}>{overallReading.personalizedInsights.rulingPlanet}</p>
+                        </div>
+                      )}
+                      
+                      {overallReading.personalizedInsights.elementalHandType && (
+                        <div className={styles.insightCard}>
+                          <h4 className={styles.insightTitle}>Hand Type</h4>
+                          <p className={styles.insightText}>{overallReading.personalizedInsights.elementalHandType}</p>
+                        </div>
+                      )}
+                      
+                      {overallReading.personalizedInsights.dominantMounts?.length > 0 && (
+                        <div className={styles.insightCard}>
+                          <h4 className={styles.insightTitle}>Dominant Mounts</h4>
+                          <ul className={styles.insightList}>
+                            {overallReading.personalizedInsights.dominantMounts.map((mount, idx) => (
+                              <li key={idx}>{mount}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </>
-              ) : (
-                <div className={styles.section}>
-                  <p className={styles.text}>
-                    {typeof overallReading?.personalizedInsights === 'string' 
-                      ? overallReading.personalizedInsights 
-                      : 'No data available'}
-                  </p>
-                </div>
-              )}
+                  </>
+                ) : (
+                  <div className={styles.section}>
+                    <p className={styles.text}>
+                      {typeof overallReading?.personalizedInsights === 'string' 
+                        ? overallReading.personalizedInsights 
+                        : 'No data available'}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
+
+            {overallReading?.personalizedInsights?.astrologyCorrelation && (
+              <div className={styles.section} style={{ marginTop: '1rem' }}>
+                <h4 className={styles.subsectionTitle}>Astrology Correlation</h4>
+                <p className={styles.text}>{overallReading.personalizedInsights.astrologyCorrelation}</p>
+              </div>
+            )}
 
             {/* Astro Correlation in Overview */}
             {astroCorrelation && typeof astroCorrelation === 'object' && (
@@ -336,14 +373,14 @@ const PalmistryResult = () => {
 
         {activeTab === 'lines' && (
           <>
-            {/* Fate Line - Always show if interpretation exists */}
+            {/* Fate Line */}
             {lines?.fate?.interpretation && (
-              <div className={styles.lineCard}>
-                <div className={styles.lineHeader}>
-                  <h3 className={styles.lineTitle}>Fate Line</h3>
-                </div>
-                <p className={styles.lineSummary}>{lines.fate.interpretation.summary}</p>
-                
+              <LineDropdown
+                title="Fate Line"
+                subtitle={lines.fate.interpretation.summary}
+                isOpen={openLines.fate}
+                onToggle={() => toggleLine('fate')}
+              >
                 <div className={styles.lineDetailsGrid}>
                   <div className={styles.lineDetailCard}>
                     <h4 className={styles.lineDetailTitle}>Career Path</h4>
@@ -393,19 +430,17 @@ const PalmistryResult = () => {
                     </ul>
                   </div>
                 )}
-              </div>
+              </LineDropdown>
             )}
 
             {/* Heart Line */}
             {(lines?.heart?.detected || lines?.heart?.interpretation) && (
-              <div className={styles.lineCard}>
-                <div className={styles.lineHeader}>
-                  <h3 className={styles.lineTitle}>Heart Line</h3>
-                </div>
-                {lines.heart.interpretation?.summary && (
-                  <p className={styles.lineSummary}>{lines.heart.interpretation.summary}</p>
-                )}
-                
+              <LineDropdown
+                title="Heart Line"
+                subtitle={lines.heart.interpretation?.summary}
+                isOpen={openLines.heart}
+                onToggle={() => toggleLine('heart')}
+              >
                 <div className={styles.lineDetailsGrid}>
                   {lines.heart.interpretation?.emotionalNature && (
                     <div className={styles.lineDetailCard}>
@@ -454,19 +489,17 @@ const PalmistryResult = () => {
                     </div>
                   )}
                 </div>
-              </div>
+              </LineDropdown>
             )}
 
             {/* Head Line */}
             {(lines?.head?.detected || lines?.head?.interpretation) && (
-              <div className={styles.lineCard}>
-                <div className={styles.lineHeader}>
-                  <h3 className={styles.lineTitle}>Head Line</h3>
-                </div>
-                {lines.head.interpretation?.summary && (
-                  <p className={styles.lineSummary}>{lines.head.interpretation.summary}</p>
-                )}
-                
+              <LineDropdown
+                title="Head Line"
+                subtitle={lines.head.interpretation?.summary}
+                isOpen={openLines.head}
+                onToggle={() => toggleLine('head')}
+              >
                 <div className={styles.lineDetailsGrid}>
                   {lines.head.interpretation?.thinkingStyle && (
                     <div className={styles.lineDetailCard}>
@@ -511,19 +544,17 @@ const PalmistryResult = () => {
                     </div>
                   )}
                 </div>
-              </div>
+              </LineDropdown>
             )}
 
             {/* Life Line */}
             {(lines?.life?.detected || lines?.life?.interpretation) && (
-              <div className={styles.lineCard}>
-                <div className={styles.lineHeader}>
-                  <h3 className={styles.lineTitle}>Life Line</h3>
-                </div>
-                {lines.life.interpretation?.summary && (
-                  <p className={styles.lineSummary}>{lines.life.interpretation.summary}</p>
-                )}
-                
+              <LineDropdown
+                title="Life Line"
+                subtitle={lines.life.interpretation?.summary}
+                isOpen={openLines.life}
+                onToggle={() => toggleLine('life')}
+              >
                 <div className={styles.lineDetailsGrid}>
                   {lines.life.interpretation?.vitalityLevel && (
                     <div className={styles.lineDetailCard}>
@@ -576,12 +607,12 @@ const PalmistryResult = () => {
                     </div>
                   )}
                 </div>
-              </div>
+              </LineDropdown>
             )}
 
-            {/* Secondary Lines */}
+            {/* Secondary Lines - 2 Column Grid */}
             {resultData.secondaryLines && (
-              <>
+              <div className={styles.secondaryLinesGrid}>
                 {resultData.secondaryLines.sunLine?.interpretation && (
                   <div className={styles.lineCard}>
                     <div className={styles.lineHeader}>
@@ -619,7 +650,7 @@ const PalmistryResult = () => {
                     <p className={styles.text}>{resultData.secondaryLines.travelLines.interpretation}</p>
                   </div>
                 )}
-              </>
+              </div>
             )}
 
             {/* Show message if no lines detected */}
