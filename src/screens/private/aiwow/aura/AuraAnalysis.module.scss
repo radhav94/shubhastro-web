@@ -40,10 +40,17 @@
   width: 100%;
   max-width: 400px;
   margin: 0 auto 2rem;
-  aspect-ratio: 1;
   background: #f3f4f6;
   border-radius: 0.75rem;
   overflow: hidden;
+}
+
+.auraImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 0.75rem;
+  object-fit: contain;
 }
 
 .palmImage {
