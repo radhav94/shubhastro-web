@@ -109,34 +109,36 @@ const PalmistryAnalysis = () => {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>
-        {error ? 'Analysis Failed' : 'Analysing Palm'}
-      </h2>
       <div className={styles.content}>
-
-        <div className={styles.imagesWrapper}>
-          <div className={styles.imageWrapper}>
-            {palmImage ? (
-              <>
-                <img 
-                  src={palmImage} 
-                  alt="Palm being analyzed" 
-                  className={styles.palmImage}
-                />
-                <div className={styles.handLabel}>
-                  {selectedHand === 'left' ? 'Left hand Palm' : 'Right hand Palm'}
-                </div>
-              </>
-            ) : (
-              <div className={styles.imagePlaceholder}>Loading image...</div>
-            )}
-            <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
-            <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
-            <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
-            <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
+        <div className={styles.leftSection}>
+          <h2 className={styles.title}>
+            {error ? 'Analysis Failed' : 'Analysing Palm'}
+          </h2>
+          <div className={styles.imagesWrapper}>
+            <div className={styles.imageWrapper}>
+              {palmImage ? (
+                <>
+                  <img 
+                    src={palmImage} 
+                    alt="Palm being analyzed" 
+                    className={styles.palmImage}
+                  />
+                  <div className={styles.handLabel}>
+                    {selectedHand === 'left' ? 'Left hand Palm' : 'Right hand Palm'}
+                  </div>
+                </>
+              ) : (
+                <div className={styles.imagePlaceholder}>Loading image...</div>
+              )}
+              <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
+              <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
+              <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
+              <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
+            </div>
           </div>
         </div>
 
+        <div className={styles.rightSection}>
         {!error ? (
           <>
             <div className={styles.progressSection}>
@@ -167,7 +169,7 @@ const PalmistryAnalysis = () => {
               disabled={!analysisComplete}
               style={{ opacity: analysisComplete ? 1 : 0.6 }}
             >
-              {isAnalyzing ? 'Analyzing...' : 'Show Result'}
+              Analysing...
             </button>
           </>
         ) : (
@@ -217,6 +219,7 @@ const PalmistryAnalysis = () => {
             </button>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

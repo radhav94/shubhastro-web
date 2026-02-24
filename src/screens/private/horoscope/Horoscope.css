@@ -483,6 +483,7 @@
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 6;
+  line-clamp: 6;
   -webkit-box-orient: vertical;
   text-overflow: ellipsis;
 }
@@ -527,6 +528,7 @@
     font-size: 13px;
     line-height: 1.5;
     -webkit-line-clamp: 6;
+    line-clamp: 6;
   }
 }
 
@@ -534,16 +536,20 @@
 @media (max-width: 640px) {
   .overview-cards-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 8px;
+  }
+  
+  .overview-cards-grid.three-column {
+    grid-template-columns: 1fr;
   }
   
   .overview-card {
-    border-radius: 10px;
-    height: 180px;
+    border-radius: 8px;
+    height: 150px;
   }
   
   .overview-card-header {
-    padding: 14px 16px;
+    padding: 10px 12px;
   }
   
   .overview-card-left {
@@ -551,22 +557,23 @@
   }
   
   .overview-card-title {
-    font-size: 14px;
+    font-size: 13px;
   }
   
   .overview-card-score {
-    font-size: 12px;
+    font-size: 11px;
   }
   
   .overview-card-text {
-    padding: 12px 16px 16px 16px;
-    font-size: 12px;
-    line-height: 1.5;
-    -webkit-line-clamp: 6;
+    padding: 10px 12px 12px 12px;
+    font-size: 11px;
+    line-height: 1.4;
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
   }
   
   .overview-card-text p {
-    margin-top: 6px;
+    margin-top: 4px;
   }
   
   .overview-card-text p:first-child {
@@ -1059,9 +1066,10 @@
   }
 
   .overview-card-text {
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.6;
     -webkit-line-clamp: 6;
+    line-clamp: 6;
   }
 
   .overview-card-text p {

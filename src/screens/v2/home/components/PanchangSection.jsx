@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useFetchAdvancePanchangQuery } from "../../../../redux/api/panchang/panchangApi";
 import SectionHeader from "./SectionHeader";
 import sun from "../../../../assets/images/sun.svg";
@@ -21,7 +22,12 @@ const formatTime = (time) => {
 };
 
 const PanchangSection = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("today");
+
+  const handleNavigateToPanchang = () => {
+    navigate("/panchang");
+  };
 
   // Helper function to pad numbers
   const pad = (num) => String(num).padStart(2, "0");
@@ -86,7 +92,9 @@ const PanchangSection = () => {
 
   return (
     <section className={styles.panchangSection}>
-      <SectionHeader title="EXPLORE PANCHANG" />
+      <div onClick={handleNavigateToPanchang} style={{ cursor: "pointer" }}>
+        <SectionHeader title="EXPLORE PANCHANG" />
+      </div>
 
       <div className={styles.panchangTabs}>
         <button
@@ -117,7 +125,7 @@ const PanchangSection = () => {
         </div>
       ) : (
         <>
-          <div className={styles.panchangCard}>
+          <div className={styles.panchangCard} onClick={handleNavigateToPanchang} style={{ cursor: "pointer" }}>
             <div className={styles.panchangHeader}>
               <div className={styles.panchangLeft}>
                 <h3 className={styles.panchangTitle}>
@@ -137,7 +145,7 @@ const PanchangSection = () => {
             </div>
           </div>
 
-          <div className={styles.timingsRow}>
+          <div className={styles.timingsRow} onClick={handleNavigateToPanchang} style={{ cursor: "pointer" }}>
             {/* Sun Timings Card */}
             <div className={styles.timingsCard}>
               <div className={styles.panchangTimings}>

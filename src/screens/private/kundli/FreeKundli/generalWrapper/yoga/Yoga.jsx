@@ -6,6 +6,7 @@ import PrimaryLoader from "../../../../../../component/UI/PrimaryLoader";
 import YogaSummaryCard from "./YogaSummaryCard";
 import YogaCard from "./YogaCard";
 import { buildVedicParam } from "../../../../../../utils/VedicParams.js/vedicParams";
+import styles from "./YogaCard.module.scss";
 
 const Yoga = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
@@ -24,10 +25,13 @@ const Yoga = () => {
       {/* Summary Card */}
       {/* {summary && <YogaSummaryCard summary={summary} />} */}
 
-      {/* All Yoga Cards */}
-      {yogaList.map((item, index) => (
-        <YogaCard key={index} yoga={item} />
-      ))}
+      {/* All Yoga Cards - 3 Column Grid */}
+      <div className={styles.yogaGrid}>
+        {yogaList.map((item, index) => (
+          <YogaCard key={index} yoga={item} />
+        ))}
+        
+      </div>
     </div>
   );
 };
