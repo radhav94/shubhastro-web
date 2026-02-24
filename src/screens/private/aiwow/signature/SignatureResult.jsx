@@ -286,21 +286,23 @@ const SignatureResult = () => {
       {resultData.personality.personalityTraits && resultData.personality.personalityTraits.length > 0 && (
         <div className={styles.traitsCard}>
           <h3 className={styles.cardTitle}>Personality Traits</h3>
-          {resultData.personality.personalityTraits.map((trait, index) => (
-            <div key={index} className={styles.traitItem}>
-              <div className={styles.traitHeader}>
-                <h4 className={styles.traitName}>{trait.trait}</h4>
-                <span className={styles.traitScore}>{trait.score}%</span>
-              </div>
-              <p className={styles.traitDescription}>{trait.description}</p>
-              {trait.indicators && trait.indicators.length > 0 && (
-                <div className={styles.indicators}>
-                  <span className={styles.indicatorLabel}>Indicators:</span>
-                  <span className={styles.indicatorValue}>{trait.indicators.join(', ')}</span>
+          <div className={styles.traitsGrid}>
+            {resultData.personality.personalityTraits.map((trait, index) => (
+              <div key={index} className={styles.traitItem}>
+                <div className={styles.traitHeader}>
+                  <h4 className={styles.traitName}>{trait.trait}</h4>
+                  <span className={styles.traitScore}>{trait.score}%</span>
                 </div>
-              )}
-            </div>
-          ))}
+                <p className={styles.traitDescription}>{trait.description}</p>
+                {trait.indicators && trait.indicators.length > 0 && (
+                  <div className={styles.indicators}>
+                    <span className={styles.indicatorLabel}>Indicators:</span>
+                    <span className={styles.indicatorValue}>{trait.indicators.join(', ')}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

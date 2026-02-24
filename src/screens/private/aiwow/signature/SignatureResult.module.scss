@@ -337,15 +337,20 @@
   text-transform: capitalize;
 }
 
+.traitsGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+  
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .traitItem {
   background: #ffffff;
   border-radius: 8px;
   padding: 16px;
-  margin-bottom: 12px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
 }
 
 .traitHeader {
