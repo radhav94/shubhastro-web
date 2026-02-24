@@ -31,7 +31,7 @@ import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance"
 import RechargeModal from "../recharge-modal/RechargeModal";
 import { PATH } from "../../utils/routes/Paths";
 
-const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
+const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 
 const VideoCalling = ({ callData }) => {
   const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer } = useCall();
