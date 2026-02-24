@@ -63,39 +63,41 @@ const SignatureResult = () => {
 
   const renderOverview = () => (
     <div className={styles.tabContent}>
-      <div className={styles.signatureImageWrapper}>
-        <img src={resultData.image} alt="Signature" className={styles.signatureImage} />
-        <div className={styles.cornerTopLeft}></div>
-        <div className={styles.cornerTopRight}></div>
-        <div className={styles.cornerBottomLeft}></div>
-        <div className={styles.cornerBottomRight}></div>
-      </div>
-
-      <div className={styles.qualityCard}>
-        <h3 className={styles.cardTitle}>Quality Metrics</h3>
-        <div className={styles.scoreGrid}>
-          <div className={styles.scoreItem}>
-            <span className={styles.scoreLabel}>Overall Quality</span>
-            <span className={styles.scoreValue}>{resultData.quality.overallQuality}%</span>
-          </div>
-          <div className={styles.scoreItem}>
-            <span className={styles.scoreLabel}>Clarity</span>
-            <span className={styles.scoreValue}>{resultData.quality.clarity}%</span>
-          </div>
-          <div className={styles.scoreItem}>
-            <span className={styles.scoreLabel}>Contrast</span>
-            <span className={styles.scoreValue}>{resultData.quality.contrast}%</span>
-          </div>
-          <div className={styles.scoreItem}>
-            <span className={styles.scoreLabel}>Completeness</span>
-            <span className={styles.scoreValue}>{resultData.quality.completeness}%</span>
-          </div>
+      <div className={styles.overviewGrid}>
+        <div className={styles.signatureImageWrapper}>
+          <img src={resultData.image} alt="Signature" className={styles.signatureImage} />
+          <div className={styles.cornerTopLeft}></div>
+          <div className={styles.cornerTopRight}></div>
+          <div className={styles.cornerBottomLeft}></div>
+          <div className={styles.cornerBottomRight}></div>
         </div>
-        <div className={styles.acceptableStatus}>
-          <span className={styles.statusLabel}>Status:</span>
-          <span className={`${styles.statusValue} ${resultData.quality.isAcceptable ? styles.acceptable : styles.notAcceptable}`}>
-            {resultData.quality.isAcceptable ? 'Acceptable' : 'Not Acceptable'}
-          </span>
+
+        <div className={styles.qualityCard}>
+          <h3 className={styles.cardTitle}>Quality Metrics</h3>
+          <div className={styles.scoreGrid}>
+            <div className={styles.scoreItem}>
+              <span className={styles.scoreLabel}>Overall Quality</span>
+              <span className={styles.scoreValue}>{resultData.quality.overallQuality}%</span>
+            </div>
+            <div className={styles.scoreItem}>
+              <span className={styles.scoreLabel}>Clarity</span>
+              <span className={styles.scoreValue}>{resultData.quality.clarity}%</span>
+            </div>
+            <div className={styles.scoreItem}>
+              <span className={styles.scoreLabel}>Contrast</span>
+              <span className={styles.scoreValue}>{resultData.quality.contrast}%</span>
+            </div>
+            <div className={styles.scoreItem}>
+              <span className={styles.scoreLabel}>Completeness</span>
+              <span className={styles.scoreValue}>{resultData.quality.completeness}%</span>
+            </div>
+          </div>
+          <div className={styles.acceptableStatus}>
+            <span className={styles.statusLabel}>Status:</span>
+            <span className={`${styles.statusValue} ${resultData.quality.isAcceptable ? styles.acceptable : styles.notAcceptable}`}>
+              {resultData.quality.isAcceptable ? 'Acceptable' : 'Not Acceptable'}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -549,9 +551,9 @@ const SignatureResult = () => {
         {activeTab === 'personality' && renderPersonality()}
         {activeTab === 'insights' && renderInsights()}
 
-        <button className={styles.doneButton} onClick={() => navigate('/aiwow')}>
+        {/* <button className={styles.doneButton} onClick={() => navigate('/aiwow')}>
           Done
-        </button>
+        </button> */}
       </div>
     </div>
   );
