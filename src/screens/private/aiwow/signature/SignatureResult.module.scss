@@ -89,15 +89,37 @@
 }
 
 .tabContent {
-  padding: 24px 16px;
+  padding: 16px;
+  
+  @media (min-width: 1024px) {
+    padding: 24px 16px;
+  }
+}
+
+// Two-column layout wrapper for desktop
+.overviewGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  
+  @media (min-width: 1024px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
 }
 
 .signatureImageWrapper {
   position: relative;
   width: 100%;
   max-width: 1000px;
-  margin: 0 auto 24px;
+  margin: 0 auto 16px;
   background: #ffffff;
+  
+  @media (min-width: 1024px) {
+    margin: 0;
+  }
 }
 
 .signatureImage {
@@ -165,8 +187,13 @@
 .insightsCard {
   background: #f3f4f6;
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   margin-bottom: 16px;
+  
+  @media (min-width: 1024px) {
+    padding: 20px;
+    margin-bottom: 0;
+  }
 }
 
 .analysisGrid {
@@ -213,10 +240,15 @@
 }
 
 .cardTitle {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: #1f2937;
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
+  
+  @media (min-width: 1024px) {
+    font-size: 18px;
+    margin: 0 0 16px 0;
+  }
 }
 
 .subTitle {
@@ -229,8 +261,13 @@
 .scoreGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 12px;
+  
+  @media (min-width: 1024px) {
+    gap: 16px;
+    margin-bottom: 16px;
+  }
 }
 
 .scoreItem {
@@ -239,21 +276,34 @@
   align-items: center;
   background: #ffffff;
   border-radius: 8px;
-  padding: 16px;
+  padding: 12px;
+  
+  @media (min-width: 1024px) {
+    padding: 16px;
+  }
 }
 
 .scoreLabel {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   color: #6b7280;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   text-align: center;
+  
+  @media (min-width: 1024px) {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
 }
 
 .scoreValue {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: #D43400;
+  
+  @media (min-width: 1024px) {
+    font-size: 24px;
+  }
 }
 
 .acceptableStatus {
@@ -262,18 +312,30 @@
   align-items: center;
   background: #ffffff;
   border-radius: 8px;
-  padding: 12px 16px;
+  padding: 10px 12px;
+  
+  @media (min-width: 1024px) {
+    padding: 12px 16px;
+  }
 }
 
 .statusLabel {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #6b7280;
+  
+  @media (min-width: 1024px) {
+    font-size: 14px;
+  }
 }
 
 .statusValue {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
+  
+  @media (min-width: 1024px) {
+    font-size: 14px;
+  }
   
   &.acceptable {
     color: #D43400;
@@ -497,10 +559,6 @@
 
 // Tablet
 @media (min-width: 768px) {
-  .tabContent {
-    padding: 32px 24px;
-  }
-  
   .tab {
     font-size: 15px;
     padding: 18px 16px;
@@ -511,7 +569,7 @@
   }
   
   .cardTitle {
-    font-size: 20px;
+    font-size: 18px;
   }
   
   .subTitle {
@@ -544,16 +602,12 @@
 
 // Desktop
 @media (min-width: 1024px) {
-  .tabContent {
-    padding: 40px 32px;
-  }
-  
   .signatureImageWrapper {
-    max-width: 700px;
+    max-width: none;
   }
   
   .cardTitle {
-    font-size: 22px;
+    font-size: 20px;
   }
   
   .qualityCard,
@@ -566,6 +620,10 @@
   .socialCard,
   .insightsCard {
     padding: 24px;
+  }
+  
+  .styleCard {
+    margin-top: 24px;
   }
   
   .doneButton {

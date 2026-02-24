@@ -4,6 +4,7 @@ import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useState } from "react";
 import styles from "./Pitra.module.scss";
+import { buildVedicParam } from "../../../../../utils/VedicParams.js/vedicParams";
 
 const Pitra = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
