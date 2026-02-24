@@ -65,9 +65,10 @@ export const CallProvider = ({ children }) => {
       voiceSocket.connect();
     }
     const handleActivity = (data) => {
-      if (data?.remainingTime) {
+      console.log("[CallContext] activity event:", data);
+      if (data?.remainingTime && data.remainingTime > 0) {
         // Server sync every minute - update remaining time and ensure timer is running
-        setCallSeconds(data?.remainingTime * 60);
+        setCallSeconds(Math.floor(data.remainingTime * 60));
         
         // Make sure timer is running for local countdown
         if (!timerRef.current) {

@@ -41,6 +41,8 @@
 .headerWrap{
   width: 100%;
   background: #FFF5EC;
+  position: relative;
+  z-index: 20;
 }
 .header {
   // position: fixed
@@ -134,6 +136,7 @@
     top: 53px;
     left: 0;
     position: absolute;
+    z-index: 20;
   }
 }
 
@@ -200,11 +203,22 @@
   border-radius: var(--Radius-full, 999px);
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: #fff;
-  @media (width <= 380px) {
-    width: fit-content;
-    height: 36px;
+  margin-top: 8px;
+  position: relative;
+  z-index: 110;
+  @media (width <= 767px) {
+    width: 160px;
+    height: 38px;
     font-size: 14px;
     padding: 0 16px;
+    margin-top: 6px;
+  }
+  @media (width <= 380px) {
+    width: fit-content;
+    height: 34px;
+    font-size: 13px;
+    padding: 0 14px;
+    margin-top: 4px;
   }
 }
 .totalTime,.callerNameTitle{
@@ -212,25 +226,27 @@
   font-size: 18px;
   font-style: normal;
   font-weight: 400;
-  line-height: 28px; /* 155.556% */
+  line-height: 28px;
   display: block;
   text-align: center;
-  margin-block: 10px;
+  margin-block: 4px;
   @media (width <= 380px) {
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
     line-height: 20px;
+    margin-block: 2px;
   }
 }
 .callerNameTitle{
   color: var(--title, #030303);
-  font-size: 25px;
+  font-size: 22px;
   font-weight: 700;
   line-height: normal;
-  margin-block: unset;
+  margin-block: 4px;
   @media (width <= 380px) {
-    font-size: 20px;
+    font-size: 18px;
+    margin-block: 2px;
   }
 }
 .rechargeButton:hover {
@@ -306,10 +322,12 @@
   gap: 10px;
   padding: 12px 16px;
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent);
-  z-index: 100;
+  z-index: 20;
   overflow-x: auto;
   scrollbar-width: none;
   justify-content: center;
+  position: relative;
+  pointer-events: auto;
 }
 
 .actionButtons::-webkit-scrollbar {
@@ -346,30 +364,28 @@
    =============================== */
 
 .voiceCenter {
-  position: absolute;
-  inset: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 10;
-  margin-top: -100px;
+  position: relative;
+  padding-bottom: 160px;
   @media (width <= 767px) {
-    margin-top: -25px;
+    padding-bottom: 140px;
   }
   @media (width <= 380px) {
-    margin-top: -70px;
+    padding-bottom: 120px;
   }
 }
 
 .avatarContainer {
   position: relative;
-  // margin-bottom: 24px;
-  width: 200px;
-  height: 200px;
-  // overflow: hidden;
+  width: 180px;
+  height: 180px;
   border-radius: 200px;
-  margin: 0 auto 20px auto;
+  margin: 0 auto 12px auto;
   display: flex;
 	justify-content: center;
 	align-items: center;
@@ -404,12 +420,13 @@
   }
 
   @media (width <= 767px) {
-    width: 160px;
-    height: 160px;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 10px auto;
   }
   @media (width <= 380px) {
-    width: 120px;
-    height: 120px;
+    width: 110px;
+    height: 110px;
     margin: 0 auto 6px auto;
   }
   .onlineCircle{
@@ -441,16 +458,17 @@
 .controlItem.giftWrapMain{
   position: absolute;
   right: 4vw;
-  bottom: 150px;
+  bottom: 160px;
   @media (width <= 767px) {
     position: absolute;
-    right: 0;
-    left: 0;
-    bottom: 150px;
-    margin: 0 auto;
+    right: 16px;
+    left: auto;
+    bottom: 140px;
+    margin: 0;
   }
   @media (width <= 380px) {
-    bottom: 130px;
+    bottom: 120px;
+    right: 12px;
   }
 }
 .avatar {
@@ -519,6 +537,13 @@
   z-index: 100;
   background: linear-gradient(to top, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.9), transparent);
   padding: 20px 16px 16px;
+  pointer-events: none;
+  @media (width <= 767px) {
+    padding: 16px 12px 12px;
+  }
+  @media (width <= 380px) {
+    padding: 12px 10px 10px;
+  }
 }
 
 .controlGrid {
@@ -526,6 +551,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-bottom: 16px;
+  pointer-events: auto;
 }
 
 .controlItem {
@@ -759,7 +785,7 @@
   }
 
   .actionButtons {
-    top: 56px;
+    top: unset;
     padding: 10px 12px;
     gap: 8px;
   }
@@ -872,7 +898,7 @@
   }
 
   .actionButtons {
-    top: 50px;
+    top: unset;
     padding: 8px 10px;
     gap: 6px;
     margin-top: 37px;
@@ -995,7 +1021,7 @@
   }
 
   .actionButtons {
-    top: 72px;
+    top: unset;
     padding: 14px 24px;
     gap: 12px;
   }

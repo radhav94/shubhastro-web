@@ -1,26 +1,24 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import {
   IoMic,
   IoMicOff,
   IoArrowBack,
-  IoSwapHorizontal,
-  IoSparkles,
   IoGift,
   IoVolumeHigh,
   IoVolumeMute,
-  IoAttach,
-  IoTime,
   IoCallSharp,
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import styles from "./VoiceCall.module.scss";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
-import { PATH } from "../../utils/routes/Paths";
 import GiftModal from "./GiftModal";
 import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance";
 import RechargeModal from "../recharge-modal/RechargeModal";
+import ProfileManager from "../UI/Profile/ProfileManager";
+import { useGetAllKundlisQuery } from "../../services/appServices/kundliServicesNew";
+import VideoCallChat from "./VideoCallChat";
 
 // Import SVG icons from chat assets
 import VideocamIcon from "../../assets/chat/Videocam.svg";
@@ -30,7 +28,7 @@ import CallIcon from "../../assets/chat/Call.svg";
 const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 
 const AgoraVoiceCalling = ({ callData }) => {
-  const { activeCall, setActiveCall, callSeconds, setCallSeconds, startTimer, stopTimer } = useCall();
+  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer } = useCall();
   const navigate = useNavigate();
 
   if (!activeCall || activeCall.callType !== "audio") return null;
@@ -42,8 +40,6 @@ const AgoraVoiceCalling = ({ callData }) => {
     isUserSide, 
     experience, 
     astrologerImage,
-    astrologerId,
-    astrologerID 
   } = callData;
 
   /* ================= REFS ================= */
@@ -56,7 +52,6 @@ const AgoraVoiceCalling = ({ callData }) => {
   /* ================= STATE ================= */
   const [micOn, setMicOn] = useState(true);
   const [joined, setJoined] = useState(false);
-  const [callState, setCallState] = useState("connecting");
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isVideo, setIsVideo] = useState(false);
@@ -64,9 +59,47 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
   const [speakerOn, setSpeakerOn] = useState(true);
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState(null);
 
   /* ================= WALLET BALANCE ================= */
-  const { balance, isFetching, refreshWallet } = useWalletBalance();
+  const { refreshWallet } = useWalletBalance();
+
+  // Fetch kundli profiles
+  const { data: profilesData } = useGetAllKundlisQuery();
+  const profiles = profilesData?.data || [];
+
+  // Ref to store sendMessage function from VideoCallChat
+  const sendChatMessageRef = useRef(null);
+
+  /* ================= CHAT & PROFILE HANDLERS ================= */
+  const toggleChat = () => {
+    setIsChatOpen((prev) => !prev);
+  };
+
+  const handleCloseProfileModal = () => {
+    setShowProfileModal(false);
+  };
+
+  const handleProfileSelect = (profile) => {
+    if (!profile?._id) {
+      console.error("Invalid profile selected");
+      return;
+    }
+
+    setSelectedProfile(profile);
+
+    const baseUrl = window.location.origin;
+    const kundliLink = `${baseUrl}/kundli/${profile._id}`;
+
+    if (sendChatMessageRef.current) {
+      sendChatMessageRef.current(kundliLink, "kundli");
+    }
+
+    setShowProfileModal(false);
+    setIsChatOpen(true);
+  };
 
   /* ================= START CALL ================= */
   useEffect(() => {
@@ -110,10 +143,10 @@ const AgoraVoiceCalling = ({ callData }) => {
       // videoTrackRef.current = await AgoraRTC.createCameraVideoTrack();
 
       setJoined(true);
-      setCallState("connected");
       
       // Set initial call seconds and start the countdown timer
       const seconds = Number(activeCall.remainingTime) * 60;
+      console.log("[VoiceCall] remainingTime from API:", activeCall.remainingTime, "→ seconds:", seconds);
       setCallSeconds(seconds);
       
       // Start the timer for local countdown (server syncs every minute via activity events)
@@ -167,6 +200,11 @@ const AgoraVoiceCalling = ({ callData }) => {
 
   /* ================= END CALL ================= */
   const endCall = async () => {
+    setReviewData({
+      astrologerID: activeCall?.astrologerID,
+      fullName: activeCall?.callerName || callerName,
+    });
+
     voiceSocket.emit("call_end", {
       roomId,
       endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
@@ -176,6 +214,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     refreshWallet();
     window.dispatchEvent(new Event("walletBalanceUpdated"));
     
+    setOpenReview(true);
     await cleanup();
   };
 
@@ -219,10 +258,38 @@ const AgoraVoiceCalling = ({ callData }) => {
     document.removeEventListener("touchend", stopDrag);
   };
 
-  const formatTime = (sec) =>
-    `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(
-      sec % 60
-    ).padStart(2, "0")}`;
+  const formatTime = (sec) => {
+    const totalSec = Math.max(0, Math.floor(Number(sec) || 0));
+    const hours = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    if (hours > 0) {
+      return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  };
+
+  // Get kundliId with fallback logic
+  const effectiveKundliId = useMemo(() => {
+    if (activeCall?.kundliId) return activeCall.kundliId;
+    if (lastSelectedKundli?._id) return lastSelectedKundli._id;
+    if (profiles && profiles.length > 0) return profiles[0]._id;
+    return null;
+  }, [activeCall?.kundliId, lastSelectedKundli, profiles]);
+
+  const astrologerName = useMemo(() => {
+    if (!lastRequestedAstro) return callerName || "";
+    return `${lastRequestedAstro.firstName || ""} ${lastRequestedAstro.lastName || ""}`.trim();
+  }, [lastRequestedAstro, callerName]);
+
+  const chatData = useMemo(() => ({
+    userId: activeCall?.userId,
+    astrologerId: activeCall?.astrologerId,
+    chatRoomId: activeCall?.roomId,
+    kundliId: effectiveKundliId,
+    isUserSide: activeCall?.isUserSide,
+    astrologerName: astrologerName
+  }), [activeCall?.userId, activeCall?.astrologerId, activeCall?.roomId, effectiveKundliId, activeCall?.isUserSide, astrologerName]);
 
   const toggleCamera = async () => {
     const client = clientRef.current;
@@ -391,11 +458,11 @@ const AgoraVoiceCalling = ({ callData }) => {
                 {isVideo ? "Audio" : "Video"}
               </button>
 
-              <span class={styles.dividerLine}></span>
+              <span className={styles.dividerLine}></span>
             </div>
 
             <div className={styles.groupBtnsRight}>
-              <div class={styles.callTimerBottom}>Call Ends in <span class={styles.timerRed}>{formatTime(callSeconds)}</span></div>
+              <div className={styles.callTimerBottom}>Call Ends in <span className={styles.timerRed}>{formatTime(callSeconds)}</span></div>
 
               <button className={styles.chateEnd} onClick={endCall}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -412,9 +479,12 @@ const AgoraVoiceCalling = ({ callData }) => {
                 End
               </button>
 
-              <span class={styles.dividerLine}></span>
+              <span className={styles.dividerLine}></span>
 
-              <button className={styles.rechargeButton}>
+              <button 
+                className={styles.rechargeButton}
+                onClick={() => setIsRechargeModalOpen(true)}
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34" fill="none">
                   <path fill-rule="evenodd" clip-rule="evenodd" d="M5 0C2.23858 0 0 2.23858 0 5V28.3333C0 31.0948 2.23858 33.3333 5 33.3333H28.3333C31.0948 33.3333 33.3333 31.0948 33.3333 28.3333V11.6667C33.3333 9.48964 31.942 7.63757 30 6.95118V5C30 2.23858 27.7614 0 25 0H5ZM5 3.33333C4.07953 3.33333 3.33333 4.07953 3.33333 5C3.33333 5.92048 4.07953 6.66667 5 6.66667H26.6667V5C26.6667 4.07953 25.9205 3.33333 25 3.33333H5ZM25 16.6667C23.1591 16.6667 21.6667 18.1591 21.6667 20C21.6667 21.841 23.1591 23.3333 25 23.3333H28.3333C29.2538 23.3333 30 22.5871 30 21.6667V18.3333C30 17.4129 29.2538 16.6667 28.3333 16.6667H25Z" fill="url(#paint0_linear_9010_318)"/>
                   <defs>
@@ -439,7 +509,7 @@ const AgoraVoiceCalling = ({ callData }) => {
 
           {/* Action Buttons */}
           <div className={styles.actionButtons}>
-            <button className={styles.actionBtn}>
+            <button className={styles.actionBtn} onClick={toggleChat}>
               {/* <IoAttach size={16} /> */}
               <span>Attach File</span>
             </button>
@@ -447,7 +517,13 @@ const AgoraVoiceCalling = ({ callData }) => {
               {/* <IoSparkles size={16} /> */}
               <span>Suggested Remedy</span>
             </button>
-            <button className={styles.actionBtn}>
+            <button
+              className={styles.actionBtn}
+              onClick={() => {
+                setIsMinimized(true);
+                navigate("/profile", { state: { activeTab: "Order History", orderHistoryTab: "call" } });
+              }}
+            >
               {/* <IoTime size={16} /> */}
               <span>View History</span>
             </button>
@@ -456,7 +532,6 @@ const AgoraVoiceCalling = ({ callData }) => {
           {/* Voice Center (Avatar & Timer) */}
           {!isRemoteVideo && (
             <div className={styles.voiceCenter}>
-              <div className={styles.voiceCenterWrap}>
                 <div className={styles.avatarContainer}>
                   <span className={styles.onlineCircle}></span>
                   <img
@@ -467,14 +542,10 @@ const AgoraVoiceCalling = ({ callData }) => {
                 </div>
                 <h1 className={styles.callerNameTitle}>{callerName}</h1>
                 <span className={styles.totalTime}>{formatTime(callSeconds)}</span>
-              </div>
 
               <button 
                 className={styles.rechargeNowBtn}
-                onClick={() => {
-                  setIsMinimized(true);
-                  setIsRechargeModalOpen(true);
-                }}
+                onClick={() => setIsRechargeModalOpen(true)}
               >
                 Recharge Now
                 <svg xmlns="http://www.w3.org/2000/svg" width="8" height="15" viewBox="0 0 8 15" fill="none">
@@ -578,6 +649,29 @@ const AgoraVoiceCalling = ({ callData }) => {
               <button className={styles.rechargeBtn}>Recharge Now</button>
             </div> */}
           </div>
+
+          {/* Chat Panel */}
+          <VideoCallChat
+            isOpen={isChatOpen}
+            onClose={() => setIsChatOpen(false)}
+            videoCallData={chatData}
+            sendMessageRef={sendChatMessageRef}
+          />
+
+          {/* Profile Listing Modal */}
+          <ProfileManager
+            isOpen={showProfileModal}
+            onClose={handleCloseProfileModal}
+            onProfileSelect={handleProfileSelect}
+            selectedProfileId={selectedProfile?._id}
+            title="Select Profile"
+            enabledOperations={{
+              list: true,
+              add: true,
+              edit: true,
+              delete: true,
+            }}
+          />
 
         </div>
       )}

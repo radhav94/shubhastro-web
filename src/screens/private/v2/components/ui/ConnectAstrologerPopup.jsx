@@ -16,10 +16,10 @@ const ConnectAstrologerPopup = ({
     }
   };
 
-  // Check if service is available
-  const isChatAvailable = astrologer?.price?.chatRate?.amount > 0;
-  const isCallAvailable = astrologer?.price?.audioRate?.amount > 0;
-  const isVideoAvailable = astrologer?.price?.videoCallRate?.amount > 0;
+  // Check if service is available (if price data exists, check amount; if no price data, assume available)
+  const isChatAvailable = astrologer?.price ? astrologer.price.chatRate?.amount > 0 : true;
+  const isCallAvailable = astrologer?.price ? astrologer.price.audioRate?.amount > 0 : true;
+  const isVideoAvailable = astrologer?.price ? astrologer.price.videoCallRate?.amount > 0 : true;
 
   const handleConnect = async (type) => {
     if (!astrologer) return;
