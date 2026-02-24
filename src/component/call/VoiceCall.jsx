@@ -143,10 +143,10 @@ const AgoraVoiceCalling = ({ callData }) => {
       // videoTrackRef.current = await AgoraRTC.createCameraVideoTrack();
 
       setJoined(true);
-      setCallState("connected");
       
       // Set initial call seconds and start the countdown timer
       const seconds = Number(activeCall.remainingTime) * 60;
+      console.log("[VoiceCall] remainingTime from API:", activeCall.remainingTime, "→ seconds:", seconds);
       setCallSeconds(seconds);
       
       // Start the timer for local countdown (server syncs every minute via activity events)
@@ -259,9 +259,10 @@ const AgoraVoiceCalling = ({ callData }) => {
   };
 
   const formatTime = (sec) => {
-    const hours = Math.floor(sec / 3600);
-    const mins = Math.floor((sec % 3600) / 60);
-    const secs = sec % 60;
+    const totalSec = Math.max(0, Math.floor(Number(sec) || 0));
+    const hours = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
     if (hours > 0) {
       return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
     }
