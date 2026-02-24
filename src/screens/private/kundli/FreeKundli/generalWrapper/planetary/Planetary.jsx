@@ -5,6 +5,7 @@ import { useGetPlanetReportQuery } from "../../../../../../redux/api/kundli/plan
 import PrimaryLoader from "../../../../../../component/UI/PrimaryLoader";
 import PlanetaryCard from "./PlanetaryCard";
 import { buildVedicParam } from "../../../../../../utils/VedicParams.js/vedicParams";
+import styles from "./Planetary.module.scss";
 
 // List of all planets to fetch
 const PLANETS = [
@@ -41,7 +42,7 @@ const Planetary = () => {
     .filter(Boolean);
 
   return (
-    <div>
+    <div className={styles.planetaryGrid}>
       {isLoading && <PrimaryLoader isLoading={isLoading} />}
 
       {planetaryData.map((planet, index) => (
