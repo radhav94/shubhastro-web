@@ -90,26 +90,29 @@ const GemstoneAnalysis = () => {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <h2 className={styles.title}>
-          {error ? 'Analysis Failed' : 'Analysing gemstone'}
-        </h2>
+        <div className={styles.leftSection}>
+          <h2 className={styles.title}>
+            {error ? 'Analysis Failed' : 'Analysing gemstone'}
+          </h2>
 
-        <div className={styles.imageWrapper}>
-          {gemstoneImage ? (
-            <img 
-              src={gemstoneImage} 
-              alt="Gemstone being analyzed" 
-              className={styles.gemstoneImage}
-            />
-          ) : (
-            <div className={styles.imagePlaceholder}>Loading image...</div>
-          )}
-          <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
-          <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
-          <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
-          <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
+          <div className={styles.imageWrapper}>
+            {gemstoneImage ? (
+              <img 
+                src={gemstoneImage} 
+                alt="Gemstone being analyzed" 
+                className={styles.gemstoneImage}
+              />
+            ) : (
+              <div className={styles.imagePlaceholder}>Loading image...</div>
+            )}
+            <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
+            <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
+            <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
+            <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
+          </div>
         </div>
 
+        <div className={styles.rightSection}>
         {!error ? (
           <>
             <div className={styles.progressSection}>
@@ -140,7 +143,7 @@ const GemstoneAnalysis = () => {
               disabled={!analysisComplete}
               style={{ opacity: analysisComplete ? 1 : 0.6 }}
             >
-              {isAnalyzing ? 'Analyzing...' : 'Show Result'}
+              Analysing...
             </button>
           </>
         ) : (
@@ -183,6 +186,7 @@ const GemstoneAnalysis = () => {
             </button>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

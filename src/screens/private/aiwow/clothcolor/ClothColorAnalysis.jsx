@@ -91,26 +91,29 @@ const ClothColorAnalysis = () => {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <h2 className={styles.title}>
-          {error ? 'Analysis Failed' : 'Analysing Clothes'}
-        </h2>
+        <div className={styles.leftSection}>
+          <h2 className={styles.title}>
+            {error ? 'Analysis Failed' : 'Analysing Clothes'}
+          </h2>
 
-        <div className={styles.imageWrapper}>
-          {clothImage ? (
-            <img 
-              src={clothImage} 
-              alt="Clothes being analyzed" 
-              className={styles.clothImage}
-            />
-          ) : (
-            <div className={styles.imagePlaceholder}>Loading image...</div>
-          )}
-          <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
-          <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
-          <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
-          <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
+          <div className={styles.imageWrapper}>
+            {clothImage ? (
+              <img 
+                src={clothImage} 
+                alt="Clothes being analyzed" 
+                className={styles.clothImage}
+              />
+            ) : (
+              <div className={styles.imagePlaceholder}>Loading image...</div>
+            )}
+            <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
+            <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
+            <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
+            <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
+          </div>
         </div>
 
+        <div className={styles.rightSection}>
         {!error ? (
           <>
             <div className={styles.progressSection}>
@@ -141,7 +144,7 @@ const ClothColorAnalysis = () => {
               disabled={!analysisComplete}
               style={{ opacity: analysisComplete ? 1 : 0.6 }}
             >
-              {isAnalyzing ? 'Analyzing...' : 'Show Result'}
+              Analysing...
             </button>
           </>
         ) : (
@@ -184,6 +187,7 @@ const ClothColorAnalysis = () => {
             </button>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

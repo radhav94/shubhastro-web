@@ -14,7 +14,7 @@ const YogaCard = ({ yoga }) => {
 
   return (
     <div className={styles.wrapper}>
-      {/* Title - Clickable Header */}
+      {/* Title - Clickable Header (only on mobile) */}
       <div className={styles.header} onClick={toggleExpand}>
         <h2 className={styles.title}>
           {yoga.yoga}
@@ -24,7 +24,7 @@ const YogaCard = ({ yoga }) => {
         />
       </div>
 
-      {/* Collapsible Content */}
+      {/* Content - Always visible on desktop/tablet, collapsible on mobile */}
       <div className={`${styles.content} ${isExpanded ? styles.contentExpanded : ''}`}>
         {/* Meaning */}
         <div className={styles.section}>

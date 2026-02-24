@@ -306,123 +306,125 @@ const SignatureResult = () => {
         </div>
       )}
 
-      {resultData.personality.leadershipQualities && (
-        <div className={styles.leadershipCard}>
-          <h3 className={styles.cardTitle}>Leadership Qualities</h3>
-          <div className={styles.scoreHeader}>
-            <span className={styles.scoreLabel}>Leadership Score</span>
-            <span className={styles.scoreValue}>{resultData.personality.leadershipQualities.score}%</span>
+      <div className={styles.personalityCardsGrid}>
+        {resultData.personality.leadershipQualities && (
+          <div className={styles.leadershipCard}>
+            <h3 className={styles.cardTitle}>Leadership Qualities</h3>
+            <div className={styles.scoreHeader}>
+              <span className={styles.scoreLabel}>Leadership Score</span>
+              <span className={styles.scoreValue}>{resultData.personality.leadershipQualities.score}%</span>
+            </div>
+            <p className={styles.description}>{resultData.personality.leadershipQualities.description}</p>
+            
+            {resultData.personality.leadershipQualities.strengths && resultData.personality.leadershipQualities.strengths.length > 0 && (
+              <>
+                <h4 className={styles.subTitle}>Strengths</h4>
+                <div className={styles.strengthsTags}>
+                  {resultData.personality.leadershipQualities.strengths.map((strength, index) => (
+                    <span key={index} className={styles.tag}>{strength}</span>
+                  ))}
+                </div>
+              </>
+            )}
+            
+            {resultData.personality.leadershipQualities.areas && resultData.personality.leadershipQualities.areas.length > 0 && (
+              <>
+                <h4 className={styles.subTitle}>Areas for Development</h4>
+                <ul className={styles.areasList}>
+                  {resultData.personality.leadershipQualities.areas.map((area, index) => (
+                    <li key={index} className={styles.areaItem}>{area}</li>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
-          <p className={styles.description}>{resultData.personality.leadershipQualities.description}</p>
-          
-          {resultData.personality.leadershipQualities.strengths && resultData.personality.leadershipQualities.strengths.length > 0 && (
-            <>
-              <h4 className={styles.subTitle}>Strengths</h4>
-              <div className={styles.strengthsTags}>
-                {resultData.personality.leadershipQualities.strengths.map((strength, index) => (
-                  <span key={index} className={styles.tag}>{strength}</span>
-                ))}
-              </div>
-            </>
-          )}
-          
-          {resultData.personality.leadershipQualities.areas && resultData.personality.leadershipQualities.areas.length > 0 && (
-            <>
-              <h4 className={styles.subTitle}>Areas for Development</h4>
-              <ul className={styles.areasList}>
-                {resultData.personality.leadershipQualities.areas.map((area, index) => (
-                  <li key={index} className={styles.areaItem}>{area}</li>
-                ))}
-              </ul>
-            </>
-          )}
-        </div>
-      )}
+        )}
 
-      {resultData.personality.communicationStyle && (
-        <div className={styles.communicationCard}>
-          <h3 className={styles.cardTitle}>Communication Style</h3>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Type:</span>
-            <span className={styles.value}>{resultData.personality.communicationStyle.type}</span>
+        {resultData.personality.communicationStyle && (
+          <div className={styles.communicationCard}>
+            <h3 className={styles.cardTitle}>Communication Style</h3>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Type:</span>
+              <span className={styles.value}>{resultData.personality.communicationStyle.type}</span>
+            </div>
+            <p className={styles.description}>{resultData.personality.communicationStyle.description}</p>
+            
+            {resultData.personality.communicationStyle.characteristics && resultData.personality.communicationStyle.characteristics.length > 0 && (
+              <>
+                <h4 className={styles.subTitle}>Characteristics</h4>
+                <div className={styles.characteristicsTags}>
+                  {resultData.personality.communicationStyle.characteristics.map((char, index) => (
+                    <span key={index} className={styles.tag}>{char}</span>
+                  ))}
+                </div>
+              </>
+            )}
+            
+            {resultData.personality.communicationStyle.strengths && resultData.personality.communicationStyle.strengths.length > 0 && (
+              <>
+                <h4 className={styles.subTitle}>Strengths</h4>
+                <div className={styles.strengthsTags}>
+                  {resultData.personality.communicationStyle.strengths.map((strength, index) => (
+                    <span key={index} className={styles.tag}>{strength}</span>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
-          <p className={styles.description}>{resultData.personality.communicationStyle.description}</p>
-          
-          {resultData.personality.communicationStyle.characteristics && resultData.personality.communicationStyle.characteristics.length > 0 && (
-            <>
-              <h4 className={styles.subTitle}>Characteristics</h4>
-              <div className={styles.characteristicsTags}>
-                {resultData.personality.communicationStyle.characteristics.map((char, index) => (
-                  <span key={index} className={styles.tag}>{char}</span>
-                ))}
-              </div>
-            </>
-          )}
-          
-          {resultData.personality.communicationStyle.strengths && resultData.personality.communicationStyle.strengths.length > 0 && (
-            <>
-              <h4 className={styles.subTitle}>Strengths</h4>
-              <div className={styles.strengthsTags}>
-                {resultData.personality.communicationStyle.strengths.map((strength, index) => (
-                  <span key={index} className={styles.tag}>{strength}</span>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
+        )}
 
-      {resultData.personality.emotionalPatterns && (
-        <div className={styles.emotionalCard}>
-          <h3 className={styles.cardTitle}>Emotional Patterns</h3>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Stability:</span>
-            <span className={styles.value}>{resultData.personality.emotionalPatterns.stability}</span>
+        {resultData.personality.emotionalPatterns && (
+          <div className={styles.emotionalCard}>
+            <h3 className={styles.cardTitle}>Emotional Patterns</h3>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Stability:</span>
+              <span className={styles.value}>{resultData.personality.emotionalPatterns.stability}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Expression:</span>
+              <span className={styles.value}>{resultData.personality.emotionalPatterns.expression}</span>
+            </div>
+            <p className={styles.description}>{resultData.personality.emotionalPatterns.description}</p>
+            
+            {resultData.personality.emotionalPatterns.characteristics && resultData.personality.emotionalPatterns.characteristics.length > 0 && (
+              <>
+                <h4 className={styles.subTitle}>Characteristics</h4>
+                <div className={styles.characteristicsTags}>
+                  {resultData.personality.emotionalPatterns.characteristics.map((char, index) => (
+                    <span key={index} className={styles.tag}>{char}</span>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Expression:</span>
-            <span className={styles.value}>{resultData.personality.emotionalPatterns.expression}</span>
-          </div>
-          <p className={styles.description}>{resultData.personality.emotionalPatterns.description}</p>
-          
-          {resultData.personality.emotionalPatterns.characteristics && resultData.personality.emotionalPatterns.characteristics.length > 0 && (
-            <>
-              <h4 className={styles.subTitle}>Characteristics</h4>
-              <div className={styles.characteristicsTags}>
-                {resultData.personality.emotionalPatterns.characteristics.map((char, index) => (
-                  <span key={index} className={styles.tag}>{char}</span>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
+        )}
 
-      {resultData.personality.socialConfidence && (
-        <div className={styles.socialCard}>
-          <h3 className={styles.cardTitle}>Social Confidence</h3>
-          <div className={styles.scoreHeader}>
-            <span className={styles.scoreLabel}>Confidence Score</span>
-            <span className={styles.scoreValue}>{resultData.personality.socialConfidence.score}%</span>
+        {resultData.personality.socialConfidence && (
+          <div className={styles.socialCard}>
+            <h3 className={styles.cardTitle}>Social Confidence</h3>
+            <div className={styles.scoreHeader}>
+              <span className={styles.scoreLabel}>Confidence Score</span>
+              <span className={styles.scoreValue}>{resultData.personality.socialConfidence.score}%</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Level:</span>
+              <span className={styles.value}>{resultData.personality.socialConfidence.level}</span>
+            </div>
+            <p className={styles.description}>{resultData.personality.socialConfidence.description}</p>
+            
+            {resultData.personality.socialConfidence.characteristics && resultData.personality.socialConfidence.characteristics.length > 0 && (
+              <>
+                <h4 className={styles.subTitle}>Characteristics</h4>
+                <div className={styles.characteristicsTags}>
+                  {resultData.personality.socialConfidence.characteristics.map((char, index) => (
+                    <span key={index} className={styles.tag}>{char}</span>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Level:</span>
-            <span className={styles.value}>{resultData.personality.socialConfidence.level}</span>
-          </div>
-          <p className={styles.description}>{resultData.personality.socialConfidence.description}</p>
-          
-          {resultData.personality.socialConfidence.characteristics && resultData.personality.socialConfidence.characteristics.length > 0 && (
-            <>
-              <h4 className={styles.subTitle}>Characteristics</h4>
-              <div className={styles.characteristicsTags}>
-                {resultData.personality.socialConfidence.characteristics.map((char, index) => (
-                  <span key={index} className={styles.tag}>{char}</span>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 
