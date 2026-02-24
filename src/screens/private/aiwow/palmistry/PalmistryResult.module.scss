@@ -262,6 +262,53 @@
   box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
 }
 
+.lineDropdown {
+  background: white;
+  border: 2px solid rgba(247, 88, 1, 0.2);
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
+  overflow: hidden;
+}
+
+.lineDropdownHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(247, 88, 1, 0.05);
+  }
+}
+
+.lineDropdownContent {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.dropdownIcon {
+  flex-shrink: 0;
+  color: #F75801;
+  transition: transform 0.2s;
+}
+
+.dropdownIconOpen {
+  transform: rotate(180deg);
+}
+
+.lineSubtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0.25rem 0 0 0;
+  line-height: 1.4;
+}
+
 .lineHeader {
   display: flex;
   justify-content: space-between;
@@ -300,6 +347,14 @@
 .insightsWrapper {
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+
+.insightsCard {
+  background: white;
+  border: 2px solid rgba(206, 200, 197, 0.2);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
 }
 
 .insightsMainTitle {
@@ -755,4 +810,15 @@
   color: #6b7280;
   margin: 0;
   line-height: 1.6;
+}
+
+.secondaryLinesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+
+  @media (width <= 640px) {
+    grid-template-columns: 1fr;
+  }
 }

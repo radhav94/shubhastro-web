@@ -49,8 +49,8 @@
 }
 
 .astrologerImageWrapper {
-  width: 140px;
-  height: 140px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   overflow: visible;
   margin-bottom: 0px;
@@ -60,8 +60,8 @@
   justify-content: center;
   position: relative;
   @media screen and (width <= 767px) {
-    width: 120px;
-    height: 120px;
+    width: 90px;
+    height: 90px;
   }
 }
 
@@ -77,7 +77,7 @@
   align-items: center;
   gap: 4px;
   background: #fff8f0;
-  padding: 6px 12px;
+  padding: 3px 8px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
@@ -87,9 +87,10 @@
   left: 50%;
   transform: translateX(-50%);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  @media screen and (width <= 767px) {
-    padding: 4px 10px;
-  }
+  bottom: -8px;
+  // @media screen and (width <= 767px) {
+  //   padding: 4px 10px;
+  // }
 }
 
 
@@ -396,7 +397,7 @@
 .detailsName {
   font-family: "Poppins", sans-serif;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 500;
   color: #1a1a1a;
   margin: 0;
   line-height: 1.2;

@@ -95,14 +95,8 @@ const AuraAnalysis = () => {
         });
       }, 200);
 
-      // Pass profile data along with image to API
-      const result = await analyzeAura({
-        image: imageData,
-        profileId: profile._id,
-        name: profile.name,
-        birthDate: profile.birthDate,
-        // Add other profile fields as needed by your API
-      }, abortController.signal);
+      // Pass only image data and abort signal to API
+      const result = await analyzeAura(imageData, abortController.signal);
 
       clearInterval(progressInterval);
 

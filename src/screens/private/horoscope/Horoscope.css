@@ -391,38 +391,29 @@
   align-items: start;
 }
 
+.overview-cards-grid.three-column {
+  grid-template-columns: repeat(3, 1fr);
+}
+
 .overview-card {
   background: #ffffff;
   border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e8e8e8;
-  height: fit-content;
-}
-
-.overview-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: #d0d0d0;
+  border: 1px solid #d0d0d0;
+  height: 220px;
+  display: flex;
+  flex-direction: column;
 }
 
 .overview-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 20px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  padding: 16px 18px;
   user-select: none;
   gap: 12px;
-}
-
-.overview-card-header:hover {
-  background-color: #fafafa;
-}
-
-.overview-card-header:active {
-  background-color: #f5f5f5;
+  flex-shrink: 0;
 }
 
 .overview-card-left {
@@ -452,60 +443,56 @@
   flex-shrink: 0;
 }
 
-.overview-card-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-}
-
-.overview-card:hover .overview-card-arrow {
-  color: #666;
-}
-
-.overview-card-arrow-expanded {
-  transform: rotate(180deg);
-  color: #F75801;
-}
-
 .overview-card-body {
-  display: none;
+  display: block;
+  flex: 1;
+  overflow: hidden;
 }
 
 .overview-card-body-expanded {
   display: block;
-  animation: slideDown 0.3s ease-out;
+  flex: 1;
+  overflow: hidden;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.show-more-link {
+  color: #F75801;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline;
+  margin-left: 4px;
+  transition: color 0.2s ease;
+}
+
+.show-more-link:hover {
+  color: #D43400;
+  text-decoration: underline;
+}
+
+.show-more-link:active {
+  color: #B82E00;
 }
 
 .overview-card-text {
-  padding: 0 20px 20px 20px;
-  border-top: 1px solid #f0f0f0;
-  font-size: 14px;
-  line-height: 1.7;
+  padding: 14px 18px 18px 18px;
+  border-top: 1px solid #d0d0d0;
+  font-size: 13px;
+  line-height: 1.6;
   color: #666666;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
 }
 
 .overview-card-text p {
-  margin: 16px 0 0 0;
+  margin: 8px 0 0 0;
 }
 
 .overview-card-text p:first-child {
-  margin-top: 16px;
+  margin-top: 0;
 }
 
 .overview-card-text p:last-child {
@@ -519,8 +506,12 @@
     gap: 14px;
   }
   
+  .overview-card {
+    height: 200px;
+  }
+  
   .overview-card-header {
-    padding: 16px 18px;
+    padding: 14px 16px;
   }
   
   .overview-card-title {
@@ -532,7 +523,10 @@
   }
   
   .overview-card-text {
-    padding: 0 18px 18px 18px;
+    padding: 12px 16px 16px 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-line-clamp: 6;
   }
 }
 
@@ -545,6 +539,7 @@
   
   .overview-card {
     border-radius: 10px;
+    height: 180px;
   }
   
   .overview-card-header {
@@ -564,16 +559,18 @@
   }
   
   .overview-card-text {
-    padding: 0 16px 16px 16px;
-    font-size: 13px;
+    padding: 12px 16px 16px 16px;
+    font-size: 12px;
+    line-height: 1.5;
+    -webkit-line-clamp: 6;
   }
   
   .overview-card-text p {
-    margin-top: 12px;
+    margin-top: 6px;
   }
   
   .overview-card-text p:first-child {
-    margin-top: 12px;
+    margin-top: 0;
   }
 }
 
@@ -1040,34 +1037,39 @@
     gap: 20px;
   }
 
+  .overview-cards-grid.three-column {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
   .overview-card {
     border-radius: 14px;
+    height: 220px;
   }
 
   .overview-card-header {
-    padding: 20px 24px;
+    padding: 16px 20px;
   }
 
   .overview-card-title {
-    font-size: 17px;
+    font-size: 16px;
   }
 
   .overview-card-score {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .overview-card-text {
-    font-size: 15px;
-    line-height: 1.75;
-    padding: 0 24px 24px 24px;
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-line-clamp: 6;
   }
 
   .overview-card-text p {
-    margin-top: 18px;
+    margin-top: 8px;
   }
 
   .overview-card-text p:first-child {
-    margin-top: 18px;
+    margin-top: 0;
   }
 
   /* Desktop Modal */

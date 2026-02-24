@@ -164,6 +164,19 @@
   }
 }
 
+// Two Column Layout for Desktop
+.twoColumnLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  @media (min-width: 768px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+}
+
 .textGray {
   color: #666;
   text-align: left;

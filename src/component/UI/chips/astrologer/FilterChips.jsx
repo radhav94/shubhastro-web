@@ -130,9 +130,9 @@ const FilterChips = ({
   
   const skillFilterData = filterTabData?.find((item) => item.title === "Skill");
   const filterButtons = [
-    { name: "All" },
-    { name: "Online" },
-    ...(skillFilterData?.list || []).map((skill) => ({ name: skill.title })),
+    { name: "All",slug:"all" },
+    { name: "Online",slug:"online" },
+    ...(skillFilterData?.list || []).map((skill) => ({ name: skill.title,slug:skill.slug })),
   ];
 
   // ✅ STATIC DATA (COMMENTED OUT - Replaced with dynamic API data)
@@ -156,9 +156,9 @@ const FilterChips = ({
   const genderData = filterTabData?.find((item) => item.title === "Gender");
   const sortingData = filterTabData?.find((item) => item.title === "Sorting");
 
-  const skills = skillsData?.list?.map((item) => item.title) || [];
-  const genders = genderData?.list?.map((item) => item.title) || [];
-  const sorting = sortingData?.list?.map((item) => item.title) || [];
+  const skills = skillsData?.list?.map((item) => item) || [];
+  const genders = genderData?.list?.map((item) => item) || [];
+  const sorting = sortingData?.list?.map((item) => item) || [];
 
   // ✅ STATIC DATA (COMMENTED OUT - Replaced with dynamic API data above)
   // const genders = ["Male", "Female"];
@@ -291,12 +291,15 @@ const FilterChips = ({
       isFilterActiveRef.current = true;
       applyFilters({ searchValue: value, category: "search", pageNo: 1 });
     } else if (value.length === 0) {
-      handleClick("All");
+      handleClick("all");
     }
   };
 
   const applyFiltersClick = () => {
-    setActive("filter");
+    // Only set active to "filter" if there are actually filters selected
+    if (selectedSkills.length > 0 || selectedGender || selectedSort) {
+      setActive("filter");
+    }
     setPage(1);
     pageRef.current = 1;
     setHasMore(true);
@@ -319,7 +322,7 @@ const FilterChips = ({
     );
   };
 
-  const selectAll = () => setSelectedSkills([...skills]);
+  const selectAll = () => setSelectedSkills(skills.map(skill => skill.slug));
 
   const clearAll = () => {
     setSelectedSkills([]);
@@ -327,8 +330,12 @@ const FilterChips = ({
     setSelectedSort("");
   };
 
-  const handleClick = (item) => {
-    setActive(item);
+  const handleClick = (itemSlug) => {
+    // Find the button by slug to get the name for active state
+    const clickedButton = filterButtons.find(btn => btn.slug === itemSlug);
+    const itemName = clickedButton?.name || itemSlug;
+    
+    setActive(itemName);
     setPage(1);
     pageRef.current = 1;
     setHasMore(true);
@@ -339,19 +346,19 @@ const FilterChips = ({
     setSelectedSort("");
     setSearchText("");
 
-    if (item === "All") {
+    if (itemSlug === "all" || itemName === "All") {
       isFilterActiveRef.current = false;
       setShowFilterAstrologer(false); // Show TOP ASTROLOGERS when "All" is selected
       onSelect?.(null);
       return;
     }
 
-    setEexperties(item);
+    setEexperties(itemSlug);
     isFilterActiveRef.current = true;
 
     applyFilters({
       pageNo: 1,
-      experties: item,
+      experties: itemSlug,
       ignoreSearch: true,
       append: false,
     });
@@ -414,12 +421,13 @@ const FilterChips = ({
           ) : (
             filterButtons.map((btn) => {
               const isActive = active === btn.name;
+            
               return (
                 <div
                   key={btn.name}
                   ref={(el) => (chipRefs.current[btn.name] = el)}
                   className={`${styles.chip} ${isActive ? styles.activeChip : ""}`}
-                  onClick={() => handleClick(btn.name)}
+                  onClick={() => handleClick(btn.slug)}
                 >
                   <span>{btn.name}</span>
                 </div>
@@ -483,12 +491,12 @@ const FilterChips = ({
                     </div>
                     <div className={styles.optionsList}>
                       {skills.map((skill) => {
-                        const isSelected = selectedSkills.includes(skill);
+                        const isSelected = selectedSkills.includes(skill.slug);
                         return (
                           <div
-                            key={skill}
+                            key={skill.title}
                             className={styles.option}
-                            onClick={() => toggleSkill(skill)}
+                            onClick={() => toggleSkill(skill.slug)}
                           >
                             <FaCheck
                               className={
@@ -501,7 +509,7 @@ const FilterChips = ({
                             <span
                               className={isSelected ? styles.selectedText : ""}
                             >
-                              {skill}
+                              {skill.title}
                             </span>
                           </div>
                         );
@@ -513,13 +521,15 @@ const FilterChips = ({
                 {activeModalTab === "Gender" && (
                   <div className={styles.optionsList}>
                     {genders.map((g) => {
-                      const isSelected = selectedGender === g;
+                      console.log("Gender:",g)
+                      const isSelected = selectedGender === g.slug;
+
                       return (
                         <div
-                          key={g}
+                          key={g.slug}
                           className={styles.option}
                           onClick={() =>
-                            toggleValue(g, setSelectedGender, selectedGender)
+                            toggleValue(g.slug, setSelectedGender, selectedGender)
                           }
                         >
                           <FaCheck
@@ -533,7 +543,7 @@ const FilterChips = ({
                           <span
                             className={isSelected ? styles.selectedText : ""}
                           >
-                            {g}
+                            {g.title}
                           </span>
                         </div>
                       );
@@ -544,13 +554,13 @@ const FilterChips = ({
                 {activeModalTab === "Sorting" && (
                   <div className={styles.optionsList}>
                     {sorting.map((s) => {
-                      const isSelected = selectedSort === s;
+                      const isSelected = selectedSort === s.slug;
                       return (
                         <div
-                          key={s}
+                          key={s.slug}
                           className={styles.option}
                           onClick={() =>
-                            toggleValue(s, setSelectedSort, selectedSort)
+                            toggleValue(s.slug, setSelectedSort, selectedSort)
                           }
                         >
                           <FaCheck
@@ -564,7 +574,7 @@ const FilterChips = ({
                           <span
                             className={isSelected ? styles.selectedText : ""}
                           >
-                            {s}
+                            {s.title}
                           </span>
                         </div>
                       );
@@ -679,7 +689,7 @@ const FilterChips = ({
                 className={styles.resetBtn}
                 onClick={() => {
                   clearAll();
-                  handleClick("All");
+                  handleClick("all");
                 }}
               >
                 Reset

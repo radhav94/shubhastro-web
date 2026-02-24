@@ -4,7 +4,7 @@ import styles from "../Home.module.scss";
 
 const HoroscopeCard = ({ data }) => {
   const title = data?.display_title || "TODAY'S HOROSCOPE";
-  const imageUrl = data?.image_url;
+  const imageUrl = data?.image_url?.original;
 
   return (
     <Link to="/horoscopes/daily-horoscope">

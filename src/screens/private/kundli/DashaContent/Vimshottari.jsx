@@ -62,13 +62,15 @@ const Vimshottari = () => {
           {/* Accordion Content */}
           <div className={`${styles.dashaContent} ${expandedIndex === i ? styles.contentExpanded : ''}`}>
             <div className={styles.contentInner}>
-              <div className={styles.textGray}>
-                <span className={styles.desc}>Prediction : </span>{" "}
-                {dasha.prediction}
-              </div>
-              <div className={styles.textGray}>
-                <span className={styles.desc}>Planet in Zodiac : </span>{" "}
-                {dasha.planet_in_zodiac}
+              <div className={styles.twoColumnLayout}>
+                <div className={styles.textGray}>
+                  <span className={styles.desc}>Prediction : </span>{" "}
+                  {dasha.prediction}
+                </div>
+                <div className={styles.textGray}>
+                  <span className={styles.desc}>Planet in Zodiac : </span>{" "}
+                  {dasha.planet_in_zodiac}
+                </div>
               </div>
             </div>
           </div>
