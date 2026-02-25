@@ -116,7 +116,7 @@ const PieChart = ({
   return (
     <div className={`${styles.chartContainer} ${className}`}>
       {title && <h3 className={styles.chartTitle}>{title}</h3>}
-      <div className={styles.chartWrapper} style={{ maxHeight: `${height}px` }}>
+      <div className={styles.chartWrapper}>
         <canvas ref={chartRef}></canvas>
       </div>
     </div>
