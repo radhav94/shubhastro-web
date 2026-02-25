@@ -518,33 +518,37 @@ const SignatureResult = () => {
         </div>
       </header>
 
-      <div className={styles.content}>
-        <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${activeTab === 'overview' ? styles.active : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            Overview
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'stroke' ? styles.active : ''}`}
-            onClick={() => setActiveTab('stroke')}
-          >
-            Stroke & Letter
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'personality' ? styles.active : ''}`}
-            onClick={() => setActiveTab('personality')}
-          >
-            Personality
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'insights' ? styles.active : ''}`}
-            onClick={() => setActiveTab('insights')}
-          >
-            Insights
-          </button>
+        
+        <div className={styles.tabsWrap}>
+          <div className={styles.tabs}>
+            <button
+              className={`${styles.tab} ${activeTab === 'overview' ? styles.active : ''}`}
+              onClick={() => setActiveTab('overview')}
+            >
+              Overview
+            </button>
+            <button
+              className={`${styles.tab} ${activeTab === 'stroke' ? styles.active : ''}`}
+              onClick={() => setActiveTab('stroke')}
+            >
+              Stroke & Letter
+            </button>
+            <button
+              className={`${styles.tab} ${activeTab === 'personality' ? styles.active : ''}`}
+              onClick={() => setActiveTab('personality')}
+            >
+              Personality
+            </button>
+            <button
+              className={`${styles.tab} ${activeTab === 'insights' ? styles.active : ''}`}
+              onClick={() => setActiveTab('insights')}
+            >
+              Insights
+            </button>
+          </div>
         </div>
+
+      <div className={styles.content}>
 
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'stroke' && renderStrokeAnalysis()}

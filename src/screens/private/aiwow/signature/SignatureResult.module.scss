@@ -3,36 +3,53 @@
 .container {
   position: relative;
   min-height: 100vh;
-  padding-top: 120px;
-  background: #ffffff;
-  padding-bottom: 80px;
+  background: #f5f5f5;
+  padding-top: 95px;
+  @media screen and (width <= 1180px) {
+    padding-top: 53px;
+  }
 }
 
+.headerWrap{
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+}
 .header {
   display: flex;
+  // justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  padding:6px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 16px;
 }
 
 .backButton {
-  background: none;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   border: none;
-  padding: 8px;
   cursor: pointer;
+  padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1f2937;
-  
+  color: #fff;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
+  width: 40px;
+  height: 40px;
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
+
   &:hover {
-    opacity: 0.7;
+    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
   }
 }
+
 
 .title {
   font-size: 18px;
@@ -43,21 +60,28 @@
 }
 
 .content {
-  padding: 0;
+  // padding: 0;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 20px auto;
+  @media (width <= 767px) {
+    margin: 0px auto;
+  }
 }
-
+.tabsWrap{
+  width: 100%;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+}
 .tabs {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid #e5e7eb;
-  background: #ffffff;
   position: sticky;
   top: 57px;
   z-index: 9;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  max-width: 1200px;
+  margin: 0 auto;
   
   &::-webkit-scrollbar {
     display: none;
@@ -66,8 +90,8 @@
 
 .tab {
   flex: 1;
-  min-width: 100px;
-  padding: 16px 12px;
+  // min-width: 100px;
+  padding: 16px 16px;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
@@ -79,20 +103,20 @@
   white-space: nowrap;
   
   &:hover {
-    color: #1f2937;
+    color: #E54D00;
   }
   
   &.active {
-    color: #000000;
-    border-bottom-color: #000000;
+    color: #E54D00;
+    border-bottom-color: #E54D00;
   }
 }
 
 .tabContent {
-  padding: 16px;
+  // padding: 16px;
   
-  @media (min-width: 1024px) {
-    padding: 24px 16px;
+  @media (max-width: 1024px) {
+    padding: 16px;
   }
 }
 
@@ -178,22 +202,29 @@
 
 .qualityCard,
 .styleCard,
-.analysisCard,
-.traitsCard,
 .leadershipCard,
 .communicationCard,
 .emotionalCard,
-.socialCard,
-.insightsCard {
-  background: #f3f4f6;
+.socialCard {
+  background: #f2f2f2;
   border-radius: 12px;
-  padding: 16px;
+  padding:16px;
   margin-bottom: 16px;
   
-  @media (min-width: 1024px) {
-    padding: 20px;
-    margin-bottom: 0;
-  }
+  // @media (min-width: 1024px) {
+  //   padding: 0px;
+  //   margin-bottom: 16px;
+  // }
+}
+.analysisCard,
+.traitsCard{
+  padding: 0;
+  margin-bottom: 16px;
+}
+.insightsCard{
+  background: #fff;
+  padding: 16px;
+  border-radius: 12px;
 }
 
 .analysisGrid {
@@ -233,15 +264,15 @@
   @media (min-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
     
-    .insightsCard {
-      margin-bottom: 0;
-    }
+    // .insightsCard {
+    //   margin-bottom: 0;
+    // }
   }
 }
 
 .cardTitle {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 500;
   color: #1f2937;
   margin: 0 0 12px 0;
   
@@ -610,17 +641,17 @@
     font-size: 20px;
   }
   
-  .qualityCard,
-  .styleCard,
-  .analysisCard,
-  .traitsCard,
-  .leadershipCard,
-  .communicationCard,
-  .emotionalCard,
-  .socialCard,
-  .insightsCard {
-    padding: 24px;
-  }
+  // .qualityCard,
+  // .styleCard,
+  // .analysisCard,
+  // .traitsCard,
+  // .leadershipCard,
+  // .communicationCard,
+  // .emotionalCard,
+  // .socialCard,
+  // .insightsCard {
+  //   padding:0 16px;
+  // }
   
   .styleCard {
     margin-top: 24px;
