@@ -100,6 +100,7 @@ const AshtakvargaContent = () => {
                     key={index}
                     title={chart.title}
                     src={chart.src}
+                    fontSize ={20}
                   />
                 )
             )}

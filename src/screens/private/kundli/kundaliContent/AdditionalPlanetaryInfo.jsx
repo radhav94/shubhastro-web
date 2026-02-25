@@ -39,7 +39,7 @@ const getPlanetShortCode = (planetName) => {
   return planetCodes[planetName] || planetName;
 };
 
-const AdditionalPlanetaryInfo = () => {
+const AdditionalPlanetaryInfo = ({ onPlanetClick }) => {
   const payload = useSelector((state) => state?.form?.kundliPayload);
   const params = payload ? buildVedicParam(payload) : null;
 
@@ -89,6 +89,22 @@ const AdditionalPlanetaryInfo = () => {
   ];
 
   const handleRowClick = (row) => {
+    if (currentStep < 3) {
+      setDirection(1);
+      setSelectedPath([...selectedPath, row]);
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePlanetLinkClick = (e, row) => {
+    e.stopPropagation(); // Prevent row click from firing
+    
+    // Call the onPlanetClick callback if provided (for scrolling to accordion)
+    if (onPlanetClick && currentStep === 1) {
+      onPlanetClick(row.planet);
+    }
+    
+    // Also navigate to next step (original functionality)
     if (currentStep < 3) {
       setDirection(1);
       setSelectedPath([...selectedPath, row]);
@@ -355,7 +371,18 @@ const AdditionalPlanetaryInfo = () => {
                       className={styles.dashaTableRow}
                       onClick={() => handleRowClick(row)}
                     >
-                      <div className={styles.dashaTableCell}>{row.planet}</div>
+                      <div className={styles.dashaTableCell}>
+                        {currentStep === 1 ? (
+                          <a 
+                            className={styles.planetLink}
+                            onClick={(e) => handlePlanetLinkClick(e, row)}
+                          >
+                            {row.planet}
+                          </a>
+                        ) : (
+                          <span>{row.planet}</span>
+                        )}
+                      </div>
                       <div className={styles.dashaTableCell}>{row.startDate}</div>
                       <div className={styles.dashaTableCell}>{row.endDate}</div>
                       {currentStep < 3 && (

@@ -15,6 +15,20 @@ const Vimshottari = () => {
 
   const { data, isLoading } = useGetMahaDashaPredictionsQuery(queryArgs);
 
+  const handlePlanetClick = (planetName) => {
+    if (!data?.response?.dashas) return;
+
+    // Find the index of the dasha that matches the planet name
+    const dashaIndex = data.response.dashas.findIndex(
+      (dasha) => dasha.dasha === planetName
+    );
+
+    if (dashaIndex !== -1) {
+      // Expand the accordion
+      setExpandedIndex(dashaIndex);
+    }
+  };
+
   if (isLoading) {
     return <PrimaryLoader isLoading={isLoading} />;
   }
@@ -37,6 +51,7 @@ const Vimshottari = () => {
           <AdditionalPlanetaryInfo 
             title="Vimshottari Dasha"
             isLoading={false}
+            onPlanetClick={handlePlanetClick}
           />
     <div className={styles.dashaContainer}>
       {data.response.dashas.map((dasha, i) => (
@@ -47,7 +62,7 @@ const Vimshottari = () => {
             onClick={() => toggleDasha(i)}
           >
             <div className={styles.headerContent}>
-              <div className={styles.dashaName}>{dasha.dasha}</div>
+              <div className={styles.dashaName}>{dasha.dasha} Mahadasha</div>
               <div className={styles.dateRange}>
                 {dasha.dasha_start_year} - {dasha.dasha_end_year}
               </div>
