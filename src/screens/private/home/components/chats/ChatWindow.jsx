@@ -120,6 +120,7 @@ const ChatWindow = () => {
     kundliId,
     roomId,
     isUserSide,
+    astroID,
   });
 
   // Use global waiting list from CallContext
