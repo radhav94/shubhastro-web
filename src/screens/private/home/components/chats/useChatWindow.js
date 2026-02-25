@@ -17,7 +17,7 @@ export default function useChat({
   refreshKey = 0
 }) {
   const { startTimer, stopTimer, chatSeconds, setActiveChat, activeChat } = useChatContext();
-  const { activeCall } = useCall();
+  const { activeCall, openReview } = useCall();
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
@@ -36,9 +36,15 @@ export default function useChat({
 
   const handleChatEndedFromServer = () => {
     setIsMessageDisabled(true);
-    setOpenFeedback(true);
     stopTimer();
     setActiveChat(null);
+
+    // Don't show chat feedback if call review is already open (chat→call switch scenario)
+    // or if there's an active call (chat ended because user switched to call)
+    if (openReview || activeCall) {
+      return;
+    }
+    setOpenFeedback(true);
   };
 
   useEffect(() => {
