@@ -4523,3 +4523,603 @@
     font-weight: 600;
   }
 }
+
+/* =========================
+   Muhurat Section
+========================= */
+.muhuratSection {
+  margin-bottom: 24px;
+}
+
+/* =========================
+   Agentic Calendar Section
+========================= */
+.agenticCalendarSection {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.muhuratGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.muhuratCard {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 14px 16px;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  &.skeleton {
+    min-height: 90px;
+    animation: shimmer 1.5s infinite;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeletonLine {
+  height: 14px;
+  background: #e8e8e8;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  width: 70%;
+
+  &:last-child {
+    width: 50%;
+    margin-bottom: 0;
+  }
+}
+
+.muhuratCardTitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 10px 0;
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
+}
+
+.muhuratTimeRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.muhuratLabel {
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  color: #888;
+  font-weight: 400;
+}
+
+.muhuratTime {
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+/* Plan Your Events Banner */
+.planEventsBanner {
+  background: linear-gradient(135deg, #f75801 0%, #d43400 100%);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(247, 88, 1, 0.3);
+  }
+}
+
+.planEventsContent {
+  flex: 1;
+}
+
+.planEventsTitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 6px 0;
+
+  @media (max-width: 480px) {
+    font-size: 18px;
+  }
+}
+
+.planEventsSubtitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.planEventsLocation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.planEventsArrow {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+/* Select Occasions */
+.occasionsWrapper {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid #f0f0f0;
+}
+
+.occasionsTitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 12px 0;
+}
+
+.occasionsScroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 8px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.occasionChip {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  border-radius: 50px;
+  border: 1.5px solid #f75801;
+  background: transparent;
+  color: #f75801;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(247, 88, 1, 0.05);
+  }
+
+  &.selected {
+    background: #f75801;
+    color: #fff;
+  }
+}
+
+.occasionsHint {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  color: #aaa;
+  margin: 8px 0 0 0;
+}
+
+/* Add Custom Chip */
+.addCustomChip {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  border-radius: 50px;
+  border: 1.5px dashed #f75801;
+  background: rgba(247, 88, 1, 0.05);
+  color: #f75801;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(247, 88, 1, 0.1);
+  }
+}
+
+/* Custom Occasion Modal */
+.customModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+
+  @media (min-width: 768px) {
+    align-items: center;
+  }
+}
+
+.customModal {
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  animation: slideUp 0.25s ease-out;
+
+  @media (min-width: 768px) {
+    border-radius: 20px;
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.customModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.customModalTitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.customModalClose {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #f75801;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.customModalLabel {
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.customModalInput {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 12px;
+  background: #f5f5f5;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  outline: none;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: #aaa;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(247, 88, 1, 0.2);
+  }
+}
+
+.customModalCharCount {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  color: #aaa;
+  display: block;
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+
+.customModalAddBtn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):hover {
+    opacity: 0.9;
+  }
+}
+
+/* Selected Occasions List */
+.selectedOccasionsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.selectedOccasionItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #fff5ec;
+  border-radius: 50px;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #f75801;
+}
+
+.removeOccasion {
+  background: none;
+  border: none;
+  color: #f75801;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+/* Chip Close Button */
+.chipClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  color: #f75801;
+  font-size: 10px;
+  line-height: 1;
+  margin-left: 6px;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #ffeee5;
+  }
+}
+
+/* Time Period Chips */
+.periodDivider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 12px 0;
+}
+
+.periodScroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.periodChip {
+  flex-shrink: 0;
+  padding: 8px 20px;
+  border-radius: 50px;
+  border: 1.5px solid #f75801;
+  background: transparent;
+  color: #f75801;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(247, 88, 1, 0.05);
+  }
+
+  &.periodSelected {
+    background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+    color: #fff;
+    border-color: transparent;
+  }
+}
+
+/* Date Chip */
+.dateChip {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  border-radius: 50px;
+  border: 1.5px dashed #f75801;
+  background: rgba(247, 88, 1, 0.05);
+  color: #f75801;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(247, 88, 1, 0.1);
+  }
+
+  &.periodSelected {
+    background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+    color: #fff;
+    border: 1.5px solid transparent;
+  }
+}
+
+/* Calendar */
+.calendarNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.calendarNavBtn {
+  background: none;
+  border: none;
+  color: #f75801;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.calendarMonthLabel {
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+}
+
+.calendarDayHeader {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #888;
+  padding: 8px 0;
+}
+
+.calendarDay {
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  background: none;
+  border: none;
+  padding: 10px 0;
+  border-radius: 50%;
+  cursor: pointer;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+
+  &:hover {
+    background: #fff5ec;
+  }
+
+  &.calendarDayMuted {
+    color: #ccc;
+    pointer-events: none;
+  }
+
+  &.calendarDayToday {
+    font-weight: 600;
+    color: #f75801;
+  }
+
+  &.calendarDaySelected {
+    background: linear-gradient(135deg, #f75801 0%, #d43400 100%);
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
+/* Get Muhurat Button */
+.getMuhuratBtn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 16px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
