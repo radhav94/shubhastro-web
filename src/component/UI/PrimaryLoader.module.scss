@@ -58,8 +58,13 @@
   background-color: #ffffff;
   padding: 2.5rem 3.5rem;
   border-radius: 16px;
-  box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  // box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.2);
+  // border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 16px;
+  img{
+    width: 100px;
+    height: auto;
+  }
 }
 
 // The GIF spinner element

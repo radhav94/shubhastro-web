@@ -13,11 +13,21 @@
 .content {
   flex: 1;
   padding: 1rem;
-  max-width: 600px;
-  margin: 0 auto;
+  max-width: 1200px;
+  margin: 16px auto;
+  gap: 16px;
   width: 100%;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 12px;
+  @media (width <= 1180px) {
+    width: 94%;
+  }
+  @media (width <= 767px) {
+    flex-direction: column;
+  }
 }
 
 .topBar {
@@ -165,23 +175,23 @@
 }
 
 @media (min-width: 768px) {
-  .content {
-    padding: 2rem;
-    max-width: 1200px;
-    flex-direction: row;
-    align-items: center;
-    gap: 3rem;
-  }
+  // .content {
+  //   padding: 2rem;
+  //   max-width: 1200px;
+  //   flex-direction: row;
+  //   align-items: center;
+  //   gap: 3rem;
+  // }
 
   .leftSection {
-    flex: 0 0 45%;
+    // flex: 0 0 45%;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
   .rightSection {
-    flex: 1;
+    // flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
