@@ -3,10 +3,11 @@
 .container {
   position: relative;
   min-height: 100vh;
-  // padding-top: 120px;
-  background: #e5e7eb;
-  display: flex;
-  flex-direction: column;
+  background: #f5f5f5;
+  padding-top: 95px;
+  @media screen and (width <= 1180px) {
+    padding-top: 53px;
+  }
 }
 
 .content {
@@ -17,6 +18,13 @@
   width: 100%;
   display: flex;
   flex-direction: column;
+  margin-top: 16px;
+  // border: 1px solid #ddd;
+  border-radius: 12px;
+  background-color: #fff;
+  @media (width <= 767px) {
+      width: 94%;    
+  }
 }
 
 .topBar {
@@ -28,8 +36,8 @@
 }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 600;
   color: #1f2937;
   margin: 0 0 1.5rem 0;
   text-align: center;
