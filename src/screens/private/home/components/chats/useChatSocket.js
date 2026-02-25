@@ -79,8 +79,18 @@ const useChatSocket = ({
       setGlobalWaitingList(data?.waitingTime || 5);
     };
 
-    const handleCallAccepted = ({ roomId, token, type, remainingTime }) => {
-      console.log("✅ call:accepted event received", { roomId, type });
+    const handleCallAccepted = ({ roomId, token, type, remainingTime, isSwitch }) => {
+      
+      // If this is a switch from audio to video, let CallContext handle it
+      if (isSwitch && type === "video") {
+        console.log("🔄 Video upgrade accepted - CallContext will handle the switch");
+        setWaitingPopup(false);
+        setGlobalWaitingList(null);
+        setCallRoomId(null);
+        return;
+      }
+      
+      // Regular call acceptance
       setActiveCall({
         roomId,
         chatRoomId,
@@ -101,6 +111,16 @@ const useChatSocket = ({
 
     const handleCallRejected = (data) => {
       console.log("❌ call:rejected event received", data);
+      
+      // Check if this is a video switch rejection during an active audio call
+      if (data?.switchRejected && data?.type === "audio") {
+        console.log("🔄 Video switch rejected - audio call continues");
+        Toast.info(data?.message || "Video call request rejected. Continuing with audio call.");
+        // Don't reset anything - the audio call should continue
+        return;
+      }
+      
+      // Regular call rejection - end everything
       const errorMsg = data?.sessionData?.sessionEndReason === "rejected"
         ? "Astrologer has rejected the call request"
         : "Call request was rejected";
