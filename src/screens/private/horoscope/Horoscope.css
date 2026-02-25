@@ -104,6 +104,9 @@
   gap: 4px;
   min-height: auto;
   max-width: 200px;
+  svg path{
+    stroke: #F75801;
+  }
 }
 
 .selector-content {
@@ -959,9 +962,9 @@
 
   /* Desktop Header */
 
-  .profile-selector {
+  /* .profile-selector {
     max-width: 250px;
-  }
+  } */
 
   .selector-label {
     font-size: 12px;
