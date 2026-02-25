@@ -52,7 +52,7 @@ export const planetaryHeaders = [
   {
     label: "Retro",
     key: "retro",
-    render: (row) => (row.retro === "Retro" ? "Retro" : "Direct"),
+    render: (row) => row.retro === "Retro" || row.retro === "Direct" ? row.retro : "-",
   },
 
   // Combust / Planet set
@@ -160,11 +160,11 @@ export function formatPlanetData(rawResponse) {
         nakshatra_lord: value.nakshatra_lord || "-",
         nakshatra_pada: value.nakshatra_pada || "-",
 
-        local_degree: value.local_degree?.toFixed(2) || "-",
+        local_degree: decimalToDMS(value.local_degree) || "-",
         global_degree: value.global_degree?.toFixed(2) || "-",
         progress_percentage: value.progress_in_percentage?.toFixed(2) || "-",
 
-        retro: value.retro ? "Retro" : "Direct",
+        retro: value.retro === true ? "Retro" : value.retro === false ? "Direct" : "-",
         is_planet_set: value.is_planet_set ? "Yes" : "No",
         is_combust: value.is_combust ? "Yes" : "No",
 
@@ -175,4 +175,17 @@ export function formatPlanetData(rawResponse) {
   });
 
   return planets;
+}
+
+export function decimalToDMS(decimal) {
+  if (decimal === null || decimal === undefined || isNaN(decimal)) {
+    return "-";
+  }
+
+  const degrees = Math.floor(decimal);
+  const minutesFloat = (decimal - degrees) * 60;
+  const minutes = Math.floor(minutesFloat);
+  const seconds = Math.round((minutesFloat - minutes) * 60);
+
+  return `${degrees}° ${minutes}′ ${seconds}″`;
 }

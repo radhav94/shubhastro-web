@@ -22,6 +22,19 @@ const sectionVariants = {
   },
 };
 
+function decimalToDMS(decimal) {
+  if (decimal === null || decimal === undefined || isNaN(decimal)) {
+    return "-";
+  }
+
+  const degrees = Math.floor(decimal);
+  const minutesFloat = (decimal - degrees) * 60;
+  const minutes = Math.floor(minutesFloat);
+  const seconds = Math.round((minutesFloat - minutes) * 60);
+
+  return `${degrees}° ${minutes}′ ${seconds}″`;
+}
+
 const rulingHeaders = [
   { label: "Planets", key: "planet_name" },
   {
@@ -74,13 +87,13 @@ const planetaryHeaders = [
   {
     label: "Degree",
     key: "local_degree",
-    render: (row) => row.local_degree?.toFixed?.(2) || "--",
+    render: (row) => decimalToDMS(row.local_degree),
   },
 
   {
     label: "Retro",
     key: "retro",
-    render: (row) => (row.retro ? "Retro" : "Direct"),
+    render: (row) => row.retro === true ? "Retro" : row.retro === false ? "Direct" : "-",
   },
 ];
 
