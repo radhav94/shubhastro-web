@@ -247,7 +247,7 @@
   flex: 0 0 calc(100% - 0px);
   width: calc(100% - 0px);
   background: transparent;
-  border-radius: 24px;
+  border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -293,18 +293,18 @@
   // border-radius: 24px;
 
   // When inside a card with .content (Related Blogs), adjust styling
-  .blogCard:has(.content) & {
-    border-radius: 24px 24px 0 0;
+  // .blogCard:has(.content) & {
+  //   border-radius: 24px 24px 0 0;
 
-    @media (max-width: 768px) {
-      height: 180px;
-      border-radius: 12px 12px 0 0;
-    }
-  }
+  //   @media (max-width: 768px) {
+  //     height: 180px;
+  //     border-radius: 12px 12px 0 0;
+  //   }
+  // }
 
   @media (max-width: 1180px) {
     height: 50vh;
-    border-radius: 12px;
+    // border-radius: 12px;
   }
 
   @media (max-width: 768px) {
