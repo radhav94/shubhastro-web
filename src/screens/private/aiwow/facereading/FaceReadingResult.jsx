@@ -123,17 +123,22 @@ const FaceReadingResult = () => {
 
       <div className={styles.content}>
         {/* Face Image */}
-        {faceImage && (
-          <div className={styles.imageSection}>
-            <img src={faceImage} alt="Face" className={styles.faceImage} />
-          </div>
-        )}
+        
 
         {/* Overall Summary */}
         {overallReading.summary && (
           <div className={styles.summaryCard}>
+
+            {faceImage && (
+              <div className={styles.imageSection}>
+                <img src={faceImage} alt="Face" className={styles.faceImage} />
+              </div>
+            )}
+            
+            <div>
             <h3 className={styles.summaryTitle}>Overall Reading</h3>
             <p className={styles.summaryText}>{overallReading.summary}</p>
+            </div>
           </div>
         )}
 
