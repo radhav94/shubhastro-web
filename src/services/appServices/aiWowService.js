@@ -987,11 +987,15 @@ export const analyzeSmartMatchmaking = async (userA, userB) => {
  * @param {Array<string>} events - List of events to analyze
  * @returns {Promise} API response with timing recommendations
  */
-export const analyzeCalendarEvents = async (events) => {
+export const analyzeCalendarEvents = async (events, { date, kundliId } = {}) => {
   try {
+    const payload = { events };
+    if (date) payload.date = date;
+    if (kundliId) payload.kundliId = kundliId;
+
     const response = await privatePost(
       'companion-suite/agentic-calendar/analyze',
-      { events }
+      payload
     );
 
     return {

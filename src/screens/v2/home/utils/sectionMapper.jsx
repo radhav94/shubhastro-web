@@ -15,6 +15,8 @@ import AstrologersByCategorySection from "../components/AstrologersByCategorySec
 import ConnectAgainSection from "../components/ConnectAgainSection";
 import VimshottariTimelineSection from "../components/VimshottariTimelineSection";
 import BirthPanchangSection from "../components/BirthPanchangSection";
+import MuhuratSection from "../components/MuhuratSection";
+import PlanEventsBanner from "../components/agenticCalendarSection";
 
 /**
  * Maps display_type to corresponding React component
@@ -152,7 +154,19 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
 
     case "birth-panchang":
       return (
+        <>
         <BirthPanchangSection key={sectionData._id} />
+        </>
+      );
+
+    case "muharat-widget":
+      return (
+        <MuhuratSection key={sectionData._id} />
+      );
+
+    case "ai-agentic":
+      return (
+        <PlanEventsBanner key={sectionData._id} />
       );
 
     default:

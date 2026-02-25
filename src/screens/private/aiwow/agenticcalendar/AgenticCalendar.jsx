@@ -1,278 +1,472 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './AgenticCalendar.module.scss';
 import { Toast } from '../../../../component';
 import { analyzeCalendarEvents } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
+import { FiMapPin, FiCalendar, FiChevronLeft, FiChevronRight, FiChevronUp, FiChevronDown } from 'react-icons/fi';
+
+const DEFAULT_OCCASIONS = [
+  'Marriage',
+  'Job Interview',
+  'Business Launch',
+  'House Purchase',
+  'Travel',
+  'Surgery',
+  'Investment',
+  'Education',
+  'Moving House',
+  'Important Meeting'
+];
 
 const AgenticCalendar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
-  
-  const [events, setEvents] = useState(['']);
+
+  // State from MuhuratSection navigation
+  const navState = location.state || {};
+
+  const [selectedOccasions, setSelectedOccasions] = useState([]);
+  const [customOccasions, setCustomOccasions] = useState([]);
+  const [showCustomModal, setShowCustomModal] = useState(false);
+  const [customInput, setCustomInput] = useState('');
+  const [selectedPeriod, setSelectedPeriod] = useState('Today');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [customDate, setCustomDate] = useState(null);
+  const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
+  const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
+
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
+  const [expandedOccasion, setExpandedOccasion] = useState(null);
 
-  const commonEvents = [
-    'Marriage',
-    'Job Interview',
-    'Business Launch',
-    'House Purchase',
-    'Travel',
-    'Surgery',
-    'Investment',
-    'Education',
-    'Moving House',
-    'Important Meeting'
-  ];
+  const [navStateConsumed, setNavStateConsumed] = useState(false);
 
-  const handleAddEvent = () => {
-    setEvents([...events, '']);
-  };
+  // Initialize from navigation state (once only)
+  useEffect(() => {
+    if (navState.occasions?.length) {
+      const defaultSet = new Set(DEFAULT_OCCASIONS);
+      const customs = navState.occasions.filter((o) => !defaultSet.has(o));
+      if (customs.length) setCustomOccasions(customs);
+      setSelectedOccasions(navState.occasions);
+    }
+    if (navState.period) setSelectedPeriod(navState.period);
+    if (navState.customDate) {
+      setCustomDate(new Date(navState.customDate));
+      setSelectedPeriod(null);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleRemoveEvent = (index) => {
-    if (events.length > 1) {
-      const newEvents = events.filter((_, i) => i !== index);
-      setEvents(newEvents);
+  // Clear nav state on first user interaction
+  const clearNavState = () => {
+    if (!navStateConsumed && (navState.occasions || navState.period || navState.customDate)) {
+      navigate(location.pathname, { replace: true, state: {} });
+      setNavStateConsumed(true);
     }
   };
 
-  const handleEventChange = (index, value) => {
-    const newEvents = [...events];
-    newEvents[index] = value;
-    setEvents(newEvents);
+  const allOccasions = [...DEFAULT_OCCASIONS, ...customOccasions];
+
+  const toggleOccasion = (occasion) => {
+    clearNavState();
+    setSelectedOccasions((prev) =>
+      prev.includes(occasion) ? prev.filter((o) => o !== occasion) : [...prev, occasion]
+    );
   };
 
-  const handleQuickAdd = (event) => {
-    const lastEvent = events[events.length - 1];
-    if (lastEvent === '') {
-      const newEvents = [...events];
-      newEvents[newEvents.length - 1] = event;
-      setEvents(newEvents);
-    } else {
-      setEvents([...events, event]);
+  const handleRemoveChip = (occasion) => {
+    clearNavState();
+    setSelectedOccasions((prev) => prev.filter((o) => o !== occasion));
+    if (customOccasions.includes(occasion)) {
+      setCustomOccasions((prev) => prev.filter((o) => o !== occasion));
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleAddCustom = () => {
+    clearNavState();
+    const trimmed = customInput.trim();
+    if (trimmed && !allOccasions.includes(trimmed)) {
+      setCustomOccasions((prev) => [...prev, trimmed]);
+      setSelectedOccasions((prev) => [...prev, trimmed]);
+      setCustomInput('');
+      setShowCustomModal(false);
+    }
+  };
 
-    const validEvents = events.filter(event => event.trim() !== '');
-    
-    if (validEvents.length === 0) {
-      Toast.error('Please add at least one event');
+  const handleGetTimings = async () => {
+    if (selectedOccasions.length === 0) {
+      Toast.error('Please select at least one occasion');
       return;
     }
-
     try {
       setIsLoading(true);
-
-      const result = await analyzeCalendarEvents(validEvents);
-
+      setAnalysis(null);
+      setExpandedOccasion(null);
+      const result = await analyzeCalendarEvents(selectedOccasions, {
+        date: customDate ? customDate.toISOString() : new Date().toISOString(),
+        kundliId: profile?._id,
+      });
       if (result.success) {
         setAnalysis(result.data);
+        setExpandedOccasion(selectedOccasions[0]);
+      } else {
+        Toast.error(result.error || 'Failed to analyze events');
       }
-    } catch (error) {
-      console.error('Failed to analyze events:', error);
+    } catch (err) {
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleBack = () => {
-    if (analysis) {
-      setAnalysis(null);
-      setEvents(['']);
+  // Parse time string like "6:27 AM" or "02:08 PM" and return a Date for today
+  const parseTime = (timeStr) => {
+    if (!timeStr) return null;
+    const cleaned = timeStr.trim();
+    const match = cleaned.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    if (!match) return null;
+    let h = parseInt(match[1], 10);
+    const m = parseInt(match[2], 10);
+    const meridiem = match[3].toUpperCase();
+    if (meridiem === 'PM' && h !== 12) h += 12;
+    if (meridiem === 'AM' && h === 12) h = 0;
+    const d = new Date();
+    d.setHours(h, m, 0, 0);
+    return d;
+  };
+
+  // Check if a time range slot has passed, considering the event date
+  const isSlotPassed = (timeRangeStr, eventDate) => {
+    if (!timeRangeStr) return false;
+    
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    // Parse event date if provided
+    let eventDateObj;
+    if (eventDate) {
+      // eventDate format: "2026-02-26" (ISO date string)
+      eventDateObj = new Date(eventDate + 'T00:00:00');
     } else {
-      navigate(-1);
+      eventDateObj = today;
     }
+    
+    // Compare dates (ignoring time)
+    const eventDateOnly = new Date(eventDateObj.getFullYear(), eventDateObj.getMonth(), eventDateObj.getDate());
+    
+    // If event date is in the past, all slots are passed
+    if (eventDateOnly < today) {
+      return true;
+    }
+    
+    // If event date is in the future, no slots are passed
+    if (eventDateOnly > today) {
+      return false;
+    }
+    
+    // Event date is today - compare time
+    // Split on any dash variant to get start time
+    const parts = timeRangeStr.split(/\s*[-–—−]\s*/);
+    if (parts.length < 1) return false;
+    
+    // Parse the start time
+    const timeMatch = parts[0].trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    if (!timeMatch) return false;
+    
+    let h = parseInt(timeMatch[1], 10);
+    const m = parseInt(timeMatch[2], 10);
+    const meridiem = timeMatch[3].toUpperCase();
+    if (meridiem === 'PM' && h !== 12) h += 12;
+    if (meridiem === 'AM' && h === 12) h = 0;
+    
+    // Create the full datetime for today
+    const slotDateTime = new Date();
+    slotDateTime.setHours(h, m, 0, 0);
+    
+    return slotDateTime < now;
   };
 
-  const handleNewAnalysis = () => {
-    setAnalysis(null);
-    setEvents(['']);
-  };
-
-  if (profileLoading) {
-    return <PrimaryLoader isLoading={true} />;
-  }
+  if (profileLoading) return <PrimaryLoader isLoading={true} />;
 
   return (
     <div className={styles.container}>
       {/* Header */}
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={handleBack}>
+          <button className={styles.backButton} onClick={() => navigate(-1)}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
           <div className={styles.headerInfo}>
             <h1 className={styles.title}>Agentic Calendar</h1>
-            {profile && (
-              <p className={styles.subtitle}>{profile.name}</p>
-            )}
+            {profile && <p className={styles.subtitle}>{profile.name}</p>}
           </div>
         </div>
       </header>
 
-      {/* Content */}
       <div className={styles.content}>
-        {!analysis ? (
-          <form onSubmit={handleSubmit} className={styles.form}>
-            <div className={styles.introSection}>
-              <div className={styles.introIcon}>📅</div>
-              <h2 className={styles.introTitle}>Plan Your Events</h2>
-              <p className={styles.introText}>
-                Get astrologically optimal timing recommendations for your important life events
-              </p>
-            </div>
+        {/* Plan Your Events Banner */}
+        <div className={styles.banner}>
+          <h2 className={styles.bannerTitle}>PLAN YOUR EVENTS</h2>
+          <p className={styles.bannerSubtitle}>
+            Get astrologically optimal timing recommendations for your important life events
+          </p>
+          <div className={styles.bannerLocation}>
+            <FiMapPin size={14} />
+            <span>Based On: Mumbai</span>
+          </div>
+        </div>
 
-            {/* Quick Add Buttons */}
-            <div className={styles.quickAddSection}>
-              <h3 className={styles.quickAddTitle}>Quick Add Common Events</h3>
-              <div className={styles.quickAddButtons}>
-                {commonEvents.map((event, index) => (
+        {/* Select Your Occasion */}
+        <div className={styles.occasionCard}>
+          <h3 className={styles.occasionTitle}>SELECT YOUR OCCASION</h3>
+          <div className={styles.chipsWrap}>
+            {[...allOccasions]
+              .sort((a, b) => {
+                const aS = selectedOccasions.includes(a);
+                const bS = selectedOccasions.includes(b);
+                if (aS && !bS) return -1;
+                if (!aS && bS) return 1;
+                return 0;
+              })
+              .map((occasion) => {
+                const isSelected = selectedOccasions.includes(occasion);
+                const isCustom = customOccasions.includes(occasion);
+                return (
                   <button
-                    key={index}
-                    type="button"
-                    className={styles.quickAddButton}
-                    onClick={() => handleQuickAdd(event)}
+                    key={occasion}
+                    className={`${styles.chip} ${isSelected ? styles.chipSelected : ''}`}
+                    onClick={() => !isSelected && toggleOccasion(occasion)}
                   >
-                    + {event}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Event Inputs */}
-            <div className={styles.eventsSection}>
-              <h3 className={styles.eventsTitle}>Your Events</h3>
-              <div className={styles.eventsList}>
-                {events.map((event, index) => (
-                  <div key={index} className={styles.eventItem}>
-                    <input
-                      type="text"
-                      className={styles.eventInput}
-                      placeholder={`Event ${index + 1} (e.g., Marriage, Job Interview)`}
-                      value={event}
-                      onChange={(e) => handleEventChange(index, e.target.value)}
-                      disabled={isLoading}
-                    />
-                    {events.length > 1 && (
-                      <button
-                        type="button"
-                        className={styles.removeButton}
-                        onClick={() => handleRemoveEvent(index)}
-                        disabled={isLoading}
+                    {occasion}
+                    {isSelected && isCustom && <span className={styles.customBadge}>Custom</span>}
+                    {isSelected && (
+                      <span
+                        className={styles.chipClose}
+                        onClick={(e) => { e.stopPropagation(); handleRemoveChip(occasion); }}
+                        role="button"
+                        aria-label={`Remove ${occasion}`}
                       >
-                        ×
-                      </button>
+                        ✕
+                      </span>
                     )}
-                  </div>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                className={styles.addEventButton}
-                onClick={handleAddEvent}
-                disabled={isLoading || events.length >= 10}
-              >
-                + Add Another Event
-              </button>
-            </div>
-
-            <button 
-              type="submit" 
-              className={styles.submitButton}
-              disabled={isLoading || events.every(e => e.trim() === '')}
-            >
-              {isLoading ? (
-                <>
-                  <span className={styles.spinner}></span>
-                  Analyzing Events...
-                </>
-              ) : (
-                'Get Timing Recommendations'
-              )}
-            </button>
-          </form>
-        ) : (
-          <div className={styles.resultSection}>
-            <div className={styles.resultHeader}>
-              <div className={styles.resultIcon}>✨</div>
-              <h2 className={styles.resultTitle}>Timing Recommendations</h2>
-            </div>
-
-            {/* Events Analysis */}
-            {analysis.optimalTimings && analysis.optimalTimings.length > 0 && (
-              <div 
-                className={styles.eventsAnalysis}
-                data-count={analysis.optimalTimings.length}
-              >
-                {analysis.optimalTimings.map((timing, index) => (
-                  <div key={index} className={styles.eventCard}>
-                    <div className={styles.eventCardHeader}>
-                      <h3 className={styles.eventName}>{timing.eventName}</h3>
-                      {timing.muhuratScore && (
-                        <span className={styles.scoreBadge}>
-                          {timing.muhuratScore}/100
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Best Timing */}
-                    <div className={styles.timingSection}>
-                      <h4 className={styles.timingTitle}>🌟 Optimal Timing</h4>
-                      <div className={styles.timingDetails}>
-                        {timing.bestDate && (
-                          <p className={styles.timingText}>
-                            <strong>Date:</strong> {timing.bestDate}
-                          </p>
-                        )}
-                        {timing.bestTimeRange && (
-                          <p className={styles.timingText}>
-                            <strong>Time:</strong> {timing.bestTimeRange}
-                          </p>
-                        )}
-                        {timing.muhuratType && (
-                          <p className={styles.timingText}>
-                            <strong>Muhurat Type:</strong>{' '}
-                            <span className={styles.muhuratType}>
-                              {timing.muhuratType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                            </span>
-                          </p>
-                        )}
-                        {timing.reason && (
-                          <p className={styles.timingReason}>{timing.reason}</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* General Guidance */}
-            {analysis.generalGuidance && (
-              <div className={styles.guidanceCard}>
-                <div className={styles.guidanceIcon}>🔮</div>
-                <div className={styles.guidanceContent}>
-                  <h3 className={styles.guidanceTitle}>General Guidance</h3>
-                  <p className={styles.guidanceText}>{analysis.generalGuidance}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Action Button */}
-            <button className={styles.newAnalysisButton} onClick={handleNewAnalysis}>
-              Analyze More Events
+                  </button>
+                );
+              })}
+            <button className={styles.addCustomChip} onClick={() => setShowCustomModal(true)}>
+              + Add Custom
             </button>
           </div>
-        )}
+          <p className={styles.hint}>Select one or more occasions to view Muhurat</p>
+
+          {/* Period Chips */}
+          <div className={styles.periodDivider} />
+          <div className={styles.periodWrap}>
+            {['Today', 'Tomorrow', 'This Week', 'This Month'].map((p) => (
+              <button
+                key={p}
+                className={`${styles.periodChip} ${selectedPeriod === p ? styles.periodActive : ''}`}
+                onClick={() => { clearNavState(); setSelectedPeriod(p); setCustomDate(null); }}
+              >
+                {p}
+              </button>
+            ))}
+            <button
+              className={`${styles.dateChip} ${customDate ? styles.periodActive : ''}`}
+              onClick={() => setShowDatePicker(true)}
+            >
+              <FiCalendar size={14} />
+              {customDate
+                ? customDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })
+                : 'Date'}
+            </button>
+          </div>
+
+          {/* Get Timing Button */}
+          <button
+            className={styles.getTimingsBtn}
+            disabled={selectedOccasions.length === 0 || isLoading}
+            onClick={handleGetTimings}
+          >
+            {isLoading ? (
+              <>
+                <span className={styles.spinner} />
+                Analyzing...
+              </>
+            ) : (
+              'Get Timing Recommendations'
+            )}
+          </button>
+
+          {/* Results Accordion */}
+          {analysis?.optimalTimings?.length > 0 && (
+            <div className={styles.resultsWrap}>
+              {analysis.optimalTimings.map((timing) => {
+                const name = timing.eventName;
+                const isExpanded = expandedOccasion === name;
+                const isCustom = customOccasions.includes(name);
+
+                // Build time slots from API data
+                const slots = [];
+                if (timing.bestTimeRange) {
+                  slots.push({ time: timing.bestTimeRange, best: true });
+                }
+                if (timing.alternateTimeRange) {
+                  slots.push({ time: timing.alternateTimeRange, best: false });
+                }
+                // If API returns timeSlots array
+                if (timing.timeSlots?.length) {
+                  timing.timeSlots.forEach((s) => slots.push(s));
+                }
+
+                // Split into passed and upcoming
+                const passed = slots.filter((s) => isSlotPassed(s.time, timing.bestDate));
+                const upcoming = slots.filter((s) => !isSlotPassed(s.time, timing.bestDate));
+
+                return (
+                  <div key={name} className={styles.accordion}>
+                    <button
+                      className={`${styles.accordionHeader} ${isExpanded ? styles.accordionOpen : ''}`}
+                      onClick={() => setExpandedOccasion(isExpanded ? null : name)}
+                    >
+                      <div className={styles.accordionTitle}>
+                        <span>{name}</span>
+                        {isCustom && <span className={styles.customTag}>Custom</span>}
+                      </div>
+                      {isExpanded ? <FiChevronUp size={20} color="#f75801" /> : <FiChevronDown size={20} color="#f75801" />}
+                    </button>
+
+                    {isExpanded && (
+                      <div className={styles.accordionBody}>
+                        {passed.length > 0 && (
+                          <>
+                            <h4 className={styles.slotGroupTitle}>Earlier Today</h4>
+                            {passed.map((s, i) => (
+                              <div key={i} className={styles.slotRow}>
+                                <span className={styles.slotTime}>{s.time}</span>
+                                <span className={styles.passedBadge}>Passed</span>
+                              </div>
+                            ))}
+                          </>
+                        )}
+                        {upcoming.length > 0 && (
+                          <>
+                            <h4 className={styles.slotGroupTitle}>Upcoming</h4>
+                            {upcoming.map((s, i) => (
+                              <div key={i} className={`${styles.slotRow} ${s.best ? styles.slotBest : styles.slotUpcoming}`}>
+                                <span className={styles.slotTime}>{s.time}</span>
+                                {s.best && <span className={styles.bestBadge}>Best Time</span>}
+                              </div>
+                            ))}
+                          </>
+                        )}
+                        {passed.length === 0 && upcoming.length === 0 && timing.bestDate && (
+                          <div className={styles.slotRow + ' ' + styles.slotBest}>
+                            <span className={styles.slotTime}>
+                              {timing.bestDate} {timing.bestTimeRange && `• ${timing.bestTimeRange}`}
+                            </span>
+                            <span className={styles.bestBadge}>Best Time</span>
+                          </div>
+                        )}
+                        {timing.reason && <p className={styles.slotReason}>{timing.reason}</p>}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Date Picker Modal */}
+      {showDatePicker && (
+        <div className={styles.overlay} onClick={() => setShowDatePicker(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h4 className={styles.modalTitle}>Select Custom Date</h4>
+              <button className={styles.modalClose} onClick={() => setShowDatePicker(false)} aria-label="Close">✕</button>
+            </div>
+            <div className={styles.calendarNav}>
+              <button className={styles.calNavBtn} onClick={() => {
+                if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear((y) => y - 1); }
+                else setCalendarMonth((m) => m - 1);
+              }}>
+                <FiChevronLeft size={20} />
+              </button>
+              <span className={styles.calMonthLabel}>
+                {new Date(calendarYear, calendarMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </span>
+              <button className={styles.calNavBtn} onClick={() => {
+                if (calendarMonth === 11) { setCalendarMonth(0); setCalendarYear((y) => y + 1); }
+                else setCalendarMonth((m) => m + 1);
+              }}>
+                <FiChevronRight size={20} />
+              </button>
+            </div>
+            <div className={styles.calGrid}>
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
+                <span key={d} className={styles.calDayHeader}>{d}</span>
+              ))}
+              {(() => {
+                const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+                const offset = firstDay === 0 ? 6 : firstDay - 1;
+                const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+                const prevDays = new Date(calendarYear, calendarMonth, 0).getDate();
+                const cells = [];
+                for (let i = offset - 1; i >= 0; i--) {
+                  cells.push(<span key={`p${i}`} className={`${styles.calDay} ${styles.calDayMuted}`}>{prevDays - i}</span>);
+                }
+                const today = new Date();
+                for (let d = 1; d <= daysInMonth; d++) {
+                  const thisDate = new Date(calendarYear, calendarMonth, d);
+                  const isToday = d === today.getDate() && calendarMonth === today.getMonth() && calendarYear === today.getFullYear();
+                  const isSel = customDate && d === customDate.getDate() && calendarMonth === customDate.getMonth() && calendarYear === customDate.getFullYear();
+                  cells.push(
+                    <button key={d} className={`${styles.calDay} ${isSel ? styles.calDaySelected : ''} ${isToday && !isSel ? styles.calDayToday : ''}`}
+                      onClick={() => { clearNavState(); setCustomDate(thisDate); setSelectedPeriod(null); setShowDatePicker(false); }}>
+                      {d}
+                    </button>
+                  );
+                }
+                const rem = 42 - cells.length;
+                for (let i = 1; i <= rem; i++) {
+                  cells.push(<span key={`n${i}`} className={`${styles.calDay} ${styles.calDayMuted}`}>{i}</span>);
+                }
+                return cells;
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Custom Occasion Modal */}
+      {showCustomModal && (
+        <div className={styles.overlay} onClick={() => setShowCustomModal(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h4 className={styles.modalTitle}>Add Custom Occasion</h4>
+              <button className={styles.modalClose} onClick={() => { setShowCustomModal(false); setCustomInput(''); }} aria-label="Close">✕</button>
+            </div>
+            <label className={styles.modalLabel}>Occasion Name</label>
+            <input
+              type="text"
+              className={styles.modalInput}
+              placeholder="e.g., House Warming"
+              value={customInput}
+              onChange={(e) => { if (e.target.value.length <= 30) setCustomInput(e.target.value); }}
+              maxLength={30}
+              autoFocus
+              onKeyDown={(e) => e.key === 'Enter' && handleAddCustom()}
+            />
+            <span className={styles.modalCharCount}>{customInput.length}/30 characters</span>
+            <button className={styles.modalAddBtn} onClick={handleAddCustom} disabled={!customInput.trim()}>Add</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
