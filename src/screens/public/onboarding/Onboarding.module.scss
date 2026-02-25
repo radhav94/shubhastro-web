@@ -18,6 +18,10 @@
   padding:16px;
   // border-radius: 12px;
   // padding-top: 67px; // Space for fixed header
+  @media (width <= 767px) {
+     padding:0px;
+     background: #fff;
+  }
 }
 
 // Loading Screen
@@ -419,16 +423,16 @@
   margin: 0 24px 32px;
 }
 
-.otpprimaryBtn {
-  width: calc(100% - 40px);
+.otpprimaryBtn,.otpprimaryBtnPer {
+  width: calc(100% - 32px);
   max-width: 500px;
-  margin: 20px auto;
-  padding: 18px;
+  margin: 20px auto 0px auto;
+  padding: 16px;
   background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
   color: white;
   border: none;
   border-radius: 50px;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -447,6 +451,16 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+}
+.otpprimaryBtnPer{
+  margin: 20px auto 20px auto;
+  @media (width <= 767px) {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: calc(100% - 32px);
   }
 }
 
@@ -513,7 +527,7 @@
 // Birth Details & Form Screens
 .birthDetailsScreen,
 .personalizeScreen {
-  min-height: calc(100vh - 32px);
+  // min-height: calc(100vh - 32px);
   display: flex;
   flex-direction: column;
   background: #fff;
