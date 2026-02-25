@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import ChevronLeft from '../components/ui/ChevronLeft'
 import { Shuffle } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -36,13 +36,14 @@ const TarotCardSelectionPage = () => {
 
   const [selectedCards, setSelectedCards] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isShuffling, setIsShuffling] = useState(false)
   const containerRef = useRef(null)
 
   // Skip API hooks - we'll call them manually on button click
   const [skipQuery, setSkipQuery] = useState(true)
 
   // Use cards from API or fallback to default (10 cards)
-  const cards = cardsData.length > 0
+  const initialCards = cardsData.length > 0
     ? cardsData.map((card, index) => ({
       id: index + 1,
       pattern: 'floral',
@@ -61,7 +62,16 @@ const TarotCardSelectionPage = () => {
       { id: 10, name: 'the-hermit', pattern: 'floral' }
     ]
 
+  const [cards, setCards] = useState(initialCards)
+
+  // Auto-shuffle on mount (e.g. when navigating back from tarot-card page)
+  useEffect(() => {
+    const timer = setTimeout(() => handleShuffle(), 300)
+    return () => clearTimeout(timer)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleCardClick = (card) => {
+    if (isShuffling) return
     console.log('Selected card:', card)
 
     if (isMultiCardReading) {
@@ -80,10 +90,26 @@ const TarotCardSelectionPage = () => {
   }
 
   const handleShuffle = () => {
-    // Shuffle cards array
-    const shuffled = [...cards].sort(() => Math.random() - 0.5)
-    // Note: You may need to update the cards state if you want to persist the shuffle
-    console.log('Cards shuffled')
+    if (isShuffling) return
+
+    // Phase 1: collapse cards to center
+    setIsShuffling(true)
+    setSelectedCards([])
+
+    // Phase 2: after collapse, shuffle the array and fan back out
+    setTimeout(() => {
+      const shuffled = [...cards]
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      }
+      setCards(shuffled)
+
+      // Phase 3: remove shuffling state so cards fan out with transition
+      setTimeout(() => {
+        setIsShuffling(false)
+      }, 50)
+    }, 500)
   }
 
   const handleShowReading = async () => {
@@ -204,14 +230,17 @@ const TarotCardSelectionPage = () => {
             const verticalLift = curveHeight
 
             const rotation = angle
-            const zIndex = index // Keep same z-index for all cards
+            const zIndex = index
 
-            const transform = `translateX(${spread}px) translateY(${verticalLift + selectedLift}px) rotate(${rotation}deg)`
+            // During shuffle: collapse all cards to center stack
+            const transform = isShuffling
+              ? `translateX(0px) translateY(0px) rotate(${(index - centerIndex) * 2}deg)`
+              : `translateX(${spread}px) translateY(${verticalLift + selectedLift}px) rotate(${rotation}deg)`
 
             return (
               <div
                 key={card.id}
-                className={`${styles.card} ${isSelected ? styles.selectedCard : ''}`}
+                className={`${styles.card} ${isSelected ? styles.selectedCard : ''} ${isShuffling ? styles.shuffling : ''}`}
                 style={{
                   transform,
                   zIndex,
