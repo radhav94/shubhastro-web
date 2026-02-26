@@ -405,6 +405,9 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   svg {
     width: 20px;
     height: 20px;
+    path{
+      stroke: #F75801;
+    }
   }
 }
 

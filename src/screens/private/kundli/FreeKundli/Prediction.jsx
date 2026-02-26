@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useGetAi12MonthsPredictionQuery } from "../../../../redux/api/kundli/kundliApi";
+// import onboardingBg from "../../../assets/images/onboarding.png";
+import arrowUp from "../../../../assets/images/arrow-up.svg";
 
 /* ================= UTIL HELPERS ================= */
 
@@ -114,7 +116,13 @@ const Prediction = ({ params, skipToken }) => {
                 {specifications?.dasha || "Prediction"}
               </p>
               <span className="text-sm text-gray-400">
-                {isOpen ? "▲" : "▼"}
+                <img
+                  src={arrowUp}
+                  alt="toggle"
+                  className={`transition-transform duration-300 ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
+                />
               </span>
             </button>
 
