@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useGetAi12MonthsPredictionQuery } from "../../../../redux/api/kundli/kundliApi";
-// import onboardingBg from "../../../assets/images/onboarding.png";
 import arrowUp from "../../../../assets/images/arrow-up.svg";
 
 /* ================= UTIL HELPERS ================= */
