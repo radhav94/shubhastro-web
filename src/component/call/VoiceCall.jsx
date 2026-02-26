@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import {
   IoMic,
@@ -24,6 +24,8 @@ import { Toast } from "../index";
 // Import SVG icons from chat assets
 import VideocamIcon from "../../assets/chat/Videocam.svg";
 import CallIcon from "../../assets/chat/Call.svg";
+import ChatNotificationBanner from "../UI/ChatNotificationBanner/ChatNotificationBanner";
+import { getAstrologerDefaultImage } from "../../utils/appImages";
 
 // const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
@@ -64,6 +66,39 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [showRechargeButton, setShowRechargeButton] = useState(false);
+
+  /* ================= CHAT NOTIFICATION ================= */
+  const [chatNotification, setChatNotification] = useState(null);
+  const notificationTimerRef = useRef(null);
+
+  const showChatNotification = useCallback((data) => {
+    if (data.sender === "user") return;
+    
+    const messageText = data.type === "gift" ? "🎁 Sent a gift" : (data.message || data.response || "New message");
+    const astroImage = astrologerImage || lastRequestedAstro?.imageUrl || lastRequestedAstro?.aadharCardImgUrl || lastRequestedAstro?.panCardImgUrl || null;
+    const astroGender = lastRequestedAstro?.gender || null;
+    setChatNotification({
+      senderName: callerName || "Astrologer",
+      message: messageText,
+      image: astroImage,
+      gender: astroGender,
+      astrologerId: activeCall?.astrologerId,
+    });
+
+    // Auto-dismiss after 4 seconds
+    if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
+    notificationTimerRef.current = setTimeout(() => {
+      setChatNotification(null);
+    }, 4000);
+  }, [callerName, astrologerImage, lastRequestedAstro]);
+
+  useEffect(() => {
+    voiceSocket.on("message:recieved", showChatNotification);
+    return () => {
+      voiceSocket.off("message:recieved", showChatNotification);
+      if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
+    };
+  }, [showChatNotification]);
 
   /* ================= WALLET BALANCE ================= */
   const { refreshWallet } = useWalletBalance();
@@ -412,6 +447,34 @@ const AgoraVoiceCalling = ({ callData }) => {
       {/* FULL VIEW */}
       {!isMinimized && (
         <div className={styles.fullscreenWrapper}>
+          {/* Chat Notification Banner - rendered INSIDE fullscreen so it's always visible */}
+          {chatNotification && (
+            <div style={{ position: 'fixed', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 99999, width: 'fit-content', maxWidth: '90vw' }}>
+              <ChatNotificationBanner
+                senderName={chatNotification.senderName}
+                message={chatNotification.message}
+                imageUrl={chatNotification.image}
+                gender={chatNotification.gender}
+                onClose={() => setChatNotification(null)}
+                onClick={() => {
+                  setChatNotification(null);
+                  setIsMinimized(true);
+                  navigate(`/chat-with-astrologers/${chatNotification.astrologerId}`, {
+                    state: {
+                      userId: activeCall?.userId,
+                      astrologerId: activeCall?.astrologerId,
+                      roomId: activeCall?.roomId,
+                      fullName: callerName,
+                      isUserSide: activeCall?.isUserSide,
+                      kundliId: activeCall?.kundliId,
+                      astrologerName: callerName,
+                      astroID: activeCall?.astrologerID,
+                    }
+                  });
+                }}
+              />
+            </div>
+          )}
           {/* Remote Video (if enabled) */}
           <div
             id="remote-video"

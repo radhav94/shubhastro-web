@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import {
   IoMic,
@@ -30,6 +30,7 @@ import { getUserFromStorage } from "../../utils/authStorage";
 import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance";
 import RechargeModal from "../recharge-modal/RechargeModal";
 import { PATH } from "../../utils/routes/Paths";
+import ChatNotificationBanner from "../UI/ChatNotificationBanner/ChatNotificationBanner";
 
 const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 
@@ -77,6 +78,38 @@ const VideoCalling = ({ callData }) => {
 
   // Default avatar URL
   const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
+  /* ================= CHAT NOTIFICATION ================= */
+  const [chatNotification, setChatNotification] = useState(null);
+  const notificationTimerRef = useRef(null);
+
+  const showChatNotification = useCallback((data) => {
+    if (data.sender === "user") return;
+    
+    const messageText = data.type === "gift" ? "🎁 Sent a gift" : (data.message || data.response || "New message");
+    const astroImage = lastRequestedAstro?.imageUrl || lastRequestedAstro?.aadharCardImgUrl || lastRequestedAstro?.panCardImgUrl || null;
+    const astroGender = lastRequestedAstro?.gender || null;
+    setChatNotification({
+      senderName: callerName || "Astrologer",
+      message: messageText,
+      image: astroImage,
+      gender: astroGender,
+      astrologerId: activeCall?.astrologerId,
+    });
+
+    if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
+    notificationTimerRef.current = setTimeout(() => {
+      setChatNotification(null);
+    }, 4000);
+  }, [callerName, lastRequestedAstro]);
+
+  useEffect(() => {
+    voiceSocket.on("message:recieved", showChatNotification);
+    return () => {
+      voiceSocket.off("message:recieved", showChatNotification);
+      if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
+    };
+  }, [showChatNotification]);
 
   // Get customer name from storage
   const user = getUserFromStorage();
@@ -678,6 +711,34 @@ const VideoCalling = ({ callData }) => {
         className={styles.videoContainer}
         style={{ visibility: isMinimized ? "hidden" : "visible" }}
       >
+        {/* Chat Notification Banner */}
+        {chatNotification && (
+          <div style={{ position: 'fixed', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 99999, width: 'fit-content', maxWidth: '90vw' }}>
+            <ChatNotificationBanner
+              senderName={chatNotification.senderName}
+              message={chatNotification.message}
+              imageUrl={chatNotification.image}
+              gender={chatNotification.gender}
+              onClose={() => setChatNotification(null)}
+              onClick={() => {
+                setChatNotification(null);
+                setIsMinimized(true);
+                navigate(`/chat-with-astrologers/${chatNotification.astrologerId}`, {
+                  state: {
+                    userId: activeCall?.userId,
+                    astrologerId: activeCall?.astrologerId,
+                    roomId: activeCall?.roomId,
+                    fullName: callerName,
+                    isUserSide: activeCall?.isUserSide,
+                    kundliId: activeCall?.kundliId,
+                    astrologerName: callerName,
+                    astroID: activeCall?.astrologerID,
+                  }
+                });
+              }}
+            />
+          </div>
+        )}
         {!joined ? (
           <div className={styles.waitingText}>Connecting…</div>
         ) : (
