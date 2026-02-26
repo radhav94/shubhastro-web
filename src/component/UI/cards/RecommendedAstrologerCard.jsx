@@ -30,7 +30,7 @@ const RecommendedAstrologerCard = ({ data, onConnect }) => {
       <div className={styles.leftSection}>
         <div className={styles.ratingBadge}>
           <FaStar className={styles.starIcon} />
-          <span className={styles.ratingText}>{rating || "0"}</span>
+          <span className={styles.ratingText}>{rating ? Number(rating).toFixed(1) : "0.0"}</span>
         </div>
         <h3 
           className={styles.name}

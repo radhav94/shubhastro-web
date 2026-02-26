@@ -45,6 +45,7 @@ import CallMinutesIcon from "../../../assets/icons/callMinutess.svg";
 import VideoMinutesIcon from "../../../assets/icons/videoMinutes.svg";
 import SendGiftImage from "../../../assets/images/send-gift.png";
 import AstrologerShopImage from "../../../assets/images/astrologer-shop.png";
+import AstrologerNumerologyDefault from "../../../assets/default-img/astrologer-numerology.png";
 import { getAstrologerDefaultImage } from "../../../utils/appImages";
 import GiftModal from "../../../component/call/GiftModal";
 
@@ -76,8 +77,9 @@ const AstrologerProfile = () => {
       }
     };
 
-    window.addEventListener('reviewSubmitted', handleReviewSubmitted);
-    return () => window.removeEventListener('reviewSubmitted', handleReviewSubmitted);
+    window.addEventListener("reviewSubmitted", handleReviewSubmitted);
+    return () =>
+      window.removeEventListener("reviewSubmitted", handleReviewSubmitted);
   }, [data?.astrologer_ID, refetchReviews]);
 
   const isInitiallyFollowing = astrologerData?.data?.isFollowing || false;
@@ -257,7 +259,8 @@ const AstrologerProfile = () => {
 
   const handleSetReminder = () => {
     try {
-      const astrologerName = `${displayData.firstName} ${displayData.lastName}`.trim();
+      const astrologerName =
+        `${displayData.firstName} ${displayData.lastName}`.trim();
       const availability = displayData.availability[0]; // Get first available slot
       
       // Parse the time slot (e.g., "11 AM - 4 PM")
@@ -266,47 +269,53 @@ const AstrologerProfile = () => {
       // Get today's date
       const today = new Date();
       const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
-      
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const day = String(today.getDate()).padStart(2, "0");
+
       // Parse time and convert to 24-hour format
       const parseTime = (timeStr) => {
-        const [time, period] = timeStr.split(' ');
-        let [hours, minutes = '00'] = time.split(':');
+        const [time, period] = timeStr.split(" ");
+        let [hours, minutes = "00"] = time.split(":");
         hours = parseInt(hours);
-        
-        if (period === 'PM' && hours !== 12) {
+
+        if (period === "PM" && hours !== 12) {
           hours += 12;
-        } else if (period === 'AM' && hours === 12) {
+        } else if (period === "AM" && hours === 12) {
           hours = 0;
         }
-        
-        return `${String(hours).padStart(2, '0')}${minutes.padStart(2, '0')}`;
+
+        return `${String(hours).padStart(2, "0")}${minutes.padStart(2, "0")}`;
       };
       
       const startTime = parseTime(timeSlot);
       
       // Create Google Calendar URL
-      const eventTitle = encodeURIComponent(`Consultation with ${astrologerName}`);
-      const eventDetails = encodeURIComponent(
-        `Reminder for consultation with ${astrologerName}\n\nSpecialties: ${displayData.specialities.join(', ')}\nLanguages: ${displayData.languagePreference.join(', ')}`
+      const eventTitle = encodeURIComponent(
+        `Consultation with ${astrologerName}`,
       );
-      const eventLocation = encodeURIComponent('ShubhTalk - Online Consultation');
-      
+      const eventDetails = encodeURIComponent(
+        `Reminder for consultation with ${astrologerName}\n\nSpecialties: ${displayData.specialities.join(", ")}\nLanguages: ${displayData.languagePreference.join(", ")}`,
+      );
+      const eventLocation = encodeURIComponent(
+        "ShubhTalk - Online Consultation",
+      );
+
       // Format: YYYYMMDDTHHmmss
       const startDateTime = `${year}${month}${day}T${startTime}00`;
       // Add 1 hour duration
-      const endHours = String((parseInt(startTime.substring(0, 2)) + 1) % 24).padStart(2, '0');
+      const endHours = String(
+        (parseInt(startTime.substring(0, 2)) + 1) % 24,
+      ).padStart(2, "0");
       const endDateTime = `${year}${month}${day}T${endHours}${startTime.substring(2, 4)}00`;
       
       const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${startDateTime}/${endDateTime}&details=${eventDetails}&location=${eventLocation}&sf=true&output=xml`;
       
       // Open Google Calendar in new tab
-      window.open(googleCalendarUrl, '_blank');
-      toast.success('Opening Google Calendar...');
+      window.open(googleCalendarUrl, "_blank");
+      toast.success("Opening Google Calendar...");
     } catch (error) {
-      console.error('Error creating calendar reminder:', error);
-      toast.error('Failed to create reminder. Please try again.');
+      console.error("Error creating calendar reminder:", error);
+      toast.error("Failed to create reminder. Please try again.");
     }
   };
 
@@ -490,11 +499,8 @@ const AstrologerProfile = () => {
   const reviews = reviewsData?.data?.getDetail || [];
   const totalReviews = reviewsData?.data?.totalRecords || 0;
 
-  // Calculate average rating from reviews
-  const averageRating =
-    reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-      : data?.rating || 0;
+  // Use the overall rating from API data (not calculated from limited reviews)
+  const averageRating = data?.rating || 0;
 
   // Helper function to format availability slots
   const formatAvailability = (availability) => {
@@ -530,7 +536,11 @@ const AstrologerProfile = () => {
   const displayData = {
     firstName: data?.firstName || "Astrologer",
     lastName: data?.lastName || "",
-    imageUrl: data?.imageUrl || data?.aadharCardImgUrl || data?.panCardImgUrl || getAstrologerDefaultImage(data?.gender),
+    imageUrl:
+      data?.imageUrl ||
+      data?.aadharCardImgUrl ||
+      data?.panCardImgUrl ||
+      getAstrologerDefaultImage(data?.gender),
     specialities:
       data?.specialties?.length > 0
         ? data.specialties
@@ -739,7 +749,7 @@ const AstrologerProfile = () => {
           <div className={styles.statDivider}></div>
           <div className={styles.statItem}>
             <img src={RatingIcon} alt="Rating" className={styles.statIcon} />
-            <div className={styles.statValue}>{displayData.rating}</div>
+            <div className={styles.statValue}>{Number(displayData.rating).toFixed(1)}</div>
             <div className={styles.statLabel}>Rating</div>
           </div>
         </div>
@@ -772,14 +782,26 @@ const AstrologerProfile = () => {
         {/* Minutes Section */}
         <div className={styles.minutesSection}>
           <div className={styles.minuteItem}>
-            <img src={ChatMinutesIcon} alt="Chat" className={styles.minuteIcon} />
-            <div className={styles.minuteValue}>{displayData.metrics.chatMinutes}</div>
+            <img
+              src={ChatMinutesIcon}
+              alt="Chat"
+              className={styles.minuteIcon}
+            />
+            <div className={styles.minuteValue}>
+              {displayData.metrics.chatMinutes}
+            </div>
             <div className={styles.minuteLabel}>Chat Minutes</div>
           </div>
           <div className={styles.minuteDivider}></div>
           <div className={styles.minuteItem}>
-            <img src={CallMinutesIcon} alt="Call" className={styles.minuteIcon} />
-            <div className={styles.minuteValue}>{displayData.metrics.audioMinutes}</div>
+            <img
+              src={CallMinutesIcon}
+              alt="Call"
+              className={styles.minuteIcon}
+            />
+            <div className={styles.minuteValue}>
+              {displayData.metrics.audioMinutes}
+            </div>
             <div className={styles.minuteLabel}>Call Minutes</div>
           </div>
           <div className={styles.minuteDivider}></div>
@@ -789,7 +811,9 @@ const AstrologerProfile = () => {
               alt="Video"
               className={styles.minuteIcon}
             />
-            <div className={styles.minuteValue}>{displayData.metrics.videoMinutes}</div>
+            <div className={styles.minuteValue}>
+              {displayData.metrics.videoMinutes}
+            </div>
             <div className={styles.minuteLabel}>Video Minutes</div>
           </div>
         </div>
@@ -816,7 +840,13 @@ const AstrologerProfile = () => {
             <div className={styles.videoGallery}>
               {displayData.gallery.slice(0, 3).map((video, index) => (
                 <div key={index} className={styles.videoThumbnail}>
-                  <img src={video} alt={`Video ${index + 1}`} />
+                  <img
+                    src={video || AstrologerNumerologyDefault}
+                    alt={`Video ${index + 1}`}
+                    onError={(e) => {
+                      e.target.src = AstrologerNumerologyDefault;
+                    }}
+                  />
                   <div className={styles.playButton}>
                     <FaPlay />
                   </div>
@@ -851,19 +881,46 @@ const AstrologerProfile = () => {
             <h3 className={styles.sectionTitle}>USER REVIEWS</h3>
             <div className={styles.titleDivider}>
               <div className={styles.dividerLine}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
-                  <path d="M92.803 0.406393C92.803 0.630933 90.7481 0.812789 88.2131 0.812789C85.6781 0.812789 0 0.630933 0 0.406393C0 0.181853 85.6786 0 88.2131 0C90.7481 0 92.803 0.181853 92.803 0.406393Z" fill="#0002"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="93"
+                  height="1"
+                  viewBox="0 0 93 1"
+                  fill="none"
+                >
+                  <path
+                    d="M92.803 0.406393C92.803 0.630933 90.7481 0.812789 88.2131 0.812789C85.6781 0.812789 0 0.630933 0 0.406393C0 0.181853 85.6786 0 88.2131 0C90.7481 0 92.803 0.181853 92.803 0.406393Z"
+                    fill="#0002"
+                  />
                 </svg>
               </div>
               <span className={styles.dividerMoon}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="4" height="5" viewBox="0 0 4 5" fill="none">
-                  <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#0002"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="4"
+                  height="5"
+                  viewBox="0 0 4 5"
+                  fill="none"
+                >
+                  <path
+                    d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z"
+                    fill="#0002"
+                  />
                 </svg>
               </span>
               <div className={styles.dividerLine}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
-                  <path d="M-4.06066e-06 0.406393C-4.06066e-06 0.630933 2.05498 0.812789 4.58996 0.812789C7.12494 0.812789 92.803 0.630933 92.803 0.406393C92.803 0.181853 7.12439 0 4.58996 0C2.05498 0 -4.06066e-06 0.181853 -4.06066e-06 0.406393Z" fill="#0002"/>
-                </svg>     
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="93"
+                  height="1"
+                  viewBox="0 0 93 1"
+                  fill="none"
+                >
+                  <path
+                    d="M-4.06066e-06 0.406393C-4.06066e-06 0.630933 2.05498 0.812789 4.58996 0.812789C7.12494 0.812789 92.803 0.630933 92.803 0.406393C92.803 0.181853 7.12439 0 4.58996 0C2.05498 0 -4.06066e-06 0.181853 -4.06066e-06 0.406393Z"
+                    fill="#0002"
+                  />
+                </svg>
               </div>
             </div>
           </div>
@@ -887,7 +944,7 @@ const AstrologerProfile = () => {
                     </span>
                     <div className={styles.reviewRating}>
                       <FaStar className={styles.reviewStar} />
-                      <span>{review.rating}</span>
+                      <span>{Number(review.rating).toFixed(1)}</span>
                     </div>
                   </div>
                   <h4 className={styles.reviewerName}>{review.customerName}</h4>
@@ -937,7 +994,9 @@ const AstrologerProfile = () => {
                   <h4 className={styles.productName}>{product.name}</h4>
                   <p className={styles.productDesc}>{product.description}</p>
                   <div className={styles.productPrice}>
-                    <span className={styles.currentPrice}>₹{product.price}</span>
+                    <span className={styles.currentPrice}>
+                      ₹{product.price}
+                    </span>
                     {product.originalPrice && (
                       <span className={styles.originalPrice}>
                         ₹{product.originalPrice}
@@ -991,7 +1050,9 @@ const AstrologerProfile = () => {
       {hookOpenModal.recharge && (
         <RechargeModal
           isOpen={hookOpenModal.recharge}
-          onClose={() => hookSetOpenModal((prev) => ({ ...prev, recharge: false }))}
+          onClose={() =>
+            hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
+          }
         />
       )}
 

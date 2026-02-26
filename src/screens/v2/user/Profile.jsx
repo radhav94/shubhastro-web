@@ -29,6 +29,7 @@ import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import ConnectAstrologerPopup from "../../private/v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
+import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
 import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
@@ -76,10 +77,29 @@ const Profile = () => {
   // Connect popup state
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
+  const [selectedAstrologerId, setSelectedAstrologerId] = useState(null);
   const [callRoomId, setCallRoomId] = useState(null);
   const [chatRoomId, setChatRoomId] = useState(null);
   const [connectionType, setConnectionType] = useState(null);
   const activeAstroRef = useRef(null);
+
+  // Fetch latest astrologer details when selected (for dynamic pricing)
+  const {
+    data: latestAstrologerData,
+    isLoading: isLoadingAstrologer,
+    isFetching: isFetchingAstrologer,
+  } = useGetAstrologerByIdQuery(
+    { id: selectedAstrologerId },
+    { skip: !selectedAstrologerId }
+  );
+
+  // Update activeAstroRef when latest astrologer data is fetched
+  useEffect(() => {
+    if (latestAstrologerData?.data) {
+      activeAstroRef.current = latestAstrologerData.data;
+      console.log('✅ Updated activeAstroRef with latest pricing:', latestAstrologerData.data.price);
+    }
+  }, [latestAstrologerData]);
 
   // Get contexts
   const {
@@ -145,11 +165,13 @@ const Profile = () => {
     { userId, page: callHistoryPage, limit: 30 },
     { skip: !userId },
   );
+  console.log("callHistoryData",callHistoryData?.data?.callHistory)
 
   const { data: chatHistoryData, isLoading: isLoadingChats } =
     useGetUserChatMessagesQuery(userId, {
       skip: !userId,
     });
+
 
   // Get pagination info
   const callPagination = callHistoryData?.data?.pagination;
@@ -166,13 +188,14 @@ const Profile = () => {
             name: item?.receiverName || "Unknown",
             image: "https://i.pravatar.cc/100",
             _id: item?.receiverId,
+            astrologer_ID: item?.astrologer_ID || item?.receiverAstrologerId,
             firstName: item?.receiverName?.split(" ")[0] || "Unknown",
             lastName: item?.receiverName?.split(" ").slice(1).join(" ") || "",
             isActive: true,
           },
           date: item?.timestamp || new Date(),
           duration: `${item?.duration || 0} Min`,
-          amount: item?.duration || 0,
+          amount: item?.amount || 0,
           rate: 0,
           status: item?.status || "completed",
           roomId: item?.roomId,
@@ -209,6 +232,7 @@ const Profile = () => {
               : "Unknown",
             image: "https://i.pravatar.cc/150",
             _id: room.astrologerId,
+            astrologer_ID: room.astrologer_ID || room.astrologerAstrologerId,
             firstName: room.astrologerFirstName || "Unknown",
             lastName: room.astrologerLastName || "",
             isActive: true,
@@ -667,15 +691,18 @@ const Profile = () => {
       return;
     }
 
-    setSelectedAstrologer(astrologer);
+    // Set the astrologer ID to trigger fetching latest details
+    setSelectedAstrologerId(astrologer._id);
+    setSelectedAstrologer(astrologer); // Keep basic info for immediate display
     activeAstroRef.current = astrologer;
     setIsConnectPopupOpen(true);
   };
 
   // Handle rate consultation button click
   const handleRateConsultation = (astrologer) => {
+    console.log("astrologerssss",astrologer)
     setReviewData({
-      astrologerID: astrologer.astrologer_ID,
+      astrologerID: astrologer.astrologer_ID || astrologer._id,
       fullName: `${astrologer.firstName} ${astrologer.lastName || ""}`.trim(),
     });
     setOpenReview(true);
@@ -684,6 +711,7 @@ const Profile = () => {
   const handleClosePopup = () => {
     setIsConnectPopupOpen(false);
     setSelectedAstrologer(null);
+    setSelectedAstrologerId(null); // Clear the ID to stop fetching
   };
 
   // Handler for ProfileManager startCallMode - receives selected profile and triggers connection
@@ -1458,7 +1486,8 @@ const Profile = () => {
       <ConnectAstrologerPopup
         isOpen={isConnectPopupOpen}
         onClose={handleClosePopup}
-        astrologer={selectedAstrologer}
+        astrologer={latestAstrologerData?.data || selectedAstrologer}
+        isLoadingAstrologer={isLoadingAstrologer || isFetchingAstrologer}
         onChatStart={handleChatStart}
         onCallStart={handleCallStart}
       />
