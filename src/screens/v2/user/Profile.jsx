@@ -1186,13 +1186,17 @@ const Profile = () => {
                         <div key={order.id} className={styles.orderCard}>
                           <div className={styles.orderCardTop}>
                             <div className={styles.orderLeft}>
-                              <div className={styles.astrologerAvatar}>
+                              <div className={styles.astrologerAvatar} onClick={() => navigate(`/astrologer/${order.astrologer._id}`)} style={{ cursor: 'pointer' }}>
                                 <span>
                                   {getInitials(order.astrologer.name)}
                                 </span>
                               </div>
                               <div className={styles.orderInfo}>
-                                <h5 className={styles.astrologerName}>
+                                <h5 
+                                  className={styles.astrologerName}
+                                  onClick={() => navigate(`/astrologer/${order.astrologer._id}`)}
+                                  style={{ cursor: 'pointer' }}
+                                >
                                   {order.astrologer.name}
                                 </h5>
                                 <div className={styles.orderMeta}>
