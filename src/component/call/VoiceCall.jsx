@@ -49,6 +49,10 @@ const AgoraVoiceCalling = ({ callData }) => {
   const cleanupRef = useRef(false);
   const videoTrackRef = useRef(null);
   const remoteUserRef = useRef(null);
+  const userLeftTimerRef = useRef(null);
+  const isRefreshingRef = useRef(false);
+  // Track if this mount is a refresh-resume (activeCall restored from sessionStorage)
+  const isResumeFromRefresh = useRef(!!sessionStorage.getItem("shubhtalk_active_call"));
 
   /* ================= STATE ================= */
   const [micOn, setMicOn] = useState(true);
@@ -103,15 +107,42 @@ const AgoraVoiceCalling = ({ callData }) => {
     setIsChatOpen(true);
   };
 
+  /* ================= PREVENT ACCIDENTAL REFRESH & DETECT REFRESH ================= */
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      isRefreshingRef.current = true;
+      console.log("[VoiceCall] 🔄 beforeunload fired — isRefreshing=true, roomId:", roomId);
+      // Show browser confirmation to prevent accidental refresh
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
   /* ================= START CALL ================= */
   useEffect(() => {
     cleanupRef.current = false;
 
+    const savedCall = sessionStorage.getItem("shubhtalk_active_call");
+    const savedSecs = sessionStorage.getItem("shubhtalk_call_seconds");
+    console.log("[VoiceCall] 🚀 Mount — roomId:", roomId, "isUserSide:", isUserSide);
+    console.log("[VoiceCall] 📦 sessionStorage activeCall:", savedCall ? "exists" : "null", "| seconds:", savedSecs);
+
     const startCall = async () => {
+      console.log("[VoiceCall] ⏳ Creating Agora client & joining channel:", roomId);
       const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
       clientRef.current = client;
 
       client.on("user-published", async (user, mediaType) => {
+        console.log("[VoiceCall] 📡 user-published — uid:", user.uid, "mediaType:", mediaType, "pendingTimer:", !!userLeftTimerRef.current);
+        // Cancel any pending end-call grace timer — remote user is back
+        if (userLeftTimerRef.current) {
+          clearTimeout(userLeftTimerRef.current);
+          userLeftTimerRef.current = null;
+          console.log("[VoiceCall] ✅ user-published: cancelled pending endCall grace timer");
+        }
+
         await client.subscribe(user, mediaType);
         if (mediaType === "audio") {
           user.audioTrack?.setVolume(speakerOn ? 100 : 0);
@@ -130,34 +161,89 @@ const AgoraVoiceCalling = ({ callData }) => {
       });
 
       client.on("user-unpublished", async (user, mediaType) => {
+        console.log("[VoiceCall] 📴 user-unpublished — uid:", user.uid, "mediaType:", mediaType);
         if (mediaType === "video") {
           user.videoTrack?.stop();
           setIsRemoteVideo(false)
         }
       });
 
-      client.on("user-left", endCall);
+      // Grace period so a page refresh doesn't kill the call
+      client.on("user-left", (user) => {
+        console.log("[VoiceCall] 👋 user-left — uid:", user.uid, "starting 8s grace timer");
+        if (userLeftTimerRef.current) clearTimeout(userLeftTimerRef.current);
+        userLeftTimerRef.current = setTimeout(() => {
+          console.log("[VoiceCall] ⏰ user-left grace timer expired — ending call");
+          endCall();
+        }, 30000); // 30s grace period for rejoin
+      });
+
+      client.on("user-joined", (user) => {
+        console.log("[VoiceCall] 🤝 user-joined — uid:", user.uid, "pendingTimer:", !!userLeftTimerRef.current);
+        // User reconnected — cancel the pending end-call
+        if (userLeftTimerRef.current) {
+          clearTimeout(userLeftTimerRef.current);
+          userLeftTimerRef.current = null;
+          console.log("[VoiceCall] ✅ user-joined: cancelled pending endCall grace timer");
+        }
+      });
 
       await client.join(APP_ID, roomId, agoraToken, "");
+      console.log("[VoiceCall] ✅ Agora joined — channel:", roomId, "remoteUsers:", client.remoteUsers.length);
+
+      // Clear the resume flag now that we've successfully rejoined
+      if (isResumeFromRefresh.current) {
+        console.log("[VoiceCall] 🔄 Clearing isResumeFromRefresh flag (Agora joined successfully)");
+        // Delay clearing so any buffered socket events that arrive right after connect are still ignored
+        setTimeout(() => {
+          isResumeFromRefresh.current = false;
+          console.log("[VoiceCall] ✅ isResumeFromRefresh cleared");
+        }, 5000);
+      }
 
       micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack();
       await client.publish([micTrackRef.current]);
-      // videoTrackRef.current = await AgoraRTC.createCameraVideoTrack();
+      console.log("[VoiceCall] 🎙️ Mic track published");
 
       setJoined(true);
       
-      // Set initial call seconds and start the countdown timer
-      const seconds = Number(activeCall.remainingTime) * 60;
-      console.log("[VoiceCall] remainingTime from API:", activeCall.remainingTime, "→ seconds:", seconds);
-      setCallSeconds(seconds);
+      // Only set initial call seconds if not resuming from a refresh
+      const savedSeconds = sessionStorage.getItem("shubhtalk_call_seconds");
+      if (savedSeconds && Number(savedSeconds) > 0) {
+        console.log("[VoiceCall] 🔄 Resuming from refresh, seconds:", savedSeconds);
+      } else {
+        const seconds = Number(activeCall.remainingTime) * 60;
+        console.log("[VoiceCall] 🆕 Fresh call — remainingTime:", activeCall.remainingTime, "→ seconds:", seconds);
+        setCallSeconds(seconds);
+      }
       
-      // Start the timer for local countdown (server syncs every minute via activity events)
       startTimer();
     };
 
-    startCall();
+    startCall().catch((err) => console.error("[VoiceCall] ❌ startCall error:", err));
 
-    return () => cleanup();
+    // On unmount: only release Agora resources
+    // Do NOT clear activeCall — if this is a refresh, we need it to persist
+    return () => {
+      console.log("[VoiceCall] 🧹 useEffect cleanup (unmount) — isRefreshing:", isRefreshingRef.current);
+      cleanupRef.current = true;
+      if (userLeftTimerRef.current) {
+        clearTimeout(userLeftTimerRef.current);
+        userLeftTimerRef.current = null;
+      }
+      try {
+        micTrackRef.current?.stop();
+        micTrackRef.current?.close();
+        videoTrackRef.current?.stop();
+        videoTrackRef.current?.close();
+        clientRef.current?.leave();
+      } catch (e) {
+        console.warn("[VoiceCall] Voice unmount cleanup error:", e);
+      }
+      micTrackRef.current = null;
+      videoTrackRef.current = null;
+      clientRef.current = null;
+    };
     // eslint-disable-next-line
   }, [roomId]);
 
@@ -183,6 +269,12 @@ const AgoraVoiceCalling = ({ callData }) => {
   const cleanup = async () => {
     if (cleanupRef.current) return;
     cleanupRef.current = true;
+    console.log("[VoiceCall] 🧹 cleanup() — releasing all resources");
+
+    if (userLeftTimerRef.current) {
+      clearTimeout(userLeftTimerRef.current);
+      userLeftTimerRef.current = null;
+    }
 
     try {
       await micTrackRef.current?.stop();
