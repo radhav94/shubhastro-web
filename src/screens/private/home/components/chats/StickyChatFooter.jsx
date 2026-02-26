@@ -46,7 +46,7 @@ const StickyChatFooter = () => {
     return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-slideUp">
+    <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-slideUp waiting-queue">
       <div className="flex items-center gap-4 rounded-2xl bg-zinc-900/95 px-5 py-4 shadow-2xl backdrop-blur-md border border-zinc-800">
         {waitingList && <FooterWaiting />}
 
