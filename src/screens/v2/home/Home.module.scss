@@ -4410,7 +4410,7 @@
 .birthPanchangCards {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
+  gap: 16px;
 
   @media screen and (width <= 1024px) {
     grid-template-columns: repeat(3, 1fr);
@@ -4471,7 +4471,7 @@
 .birthPanchangPlanets {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 16px;
 
   @media screen and (width <= 767px) {
     grid-template-columns: 1fr;
