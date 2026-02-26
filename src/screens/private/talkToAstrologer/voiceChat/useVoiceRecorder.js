@@ -10,14 +10,15 @@ export const useVoiceRecorder = () => {
   const [seconds, setSeconds] = useState(0);
 
   const startRecording = async () => {
-    chunksRef.current = []; // ✅ reset FIRST
+    chunksRef.current = [];
 
     streamRef.current = await navigator.mediaDevices.getUserMedia({
       audio: true,
     });
 
+    // Use audio/webm — Chrome/Firefox don't support audio/mp4 in MediaRecorder
     const mediaRecorder = new MediaRecorder(streamRef.current, {
-      mimeType: "audio/webm", // ✅ important
+      mimeType: "audio/webm",
     });
 
     mediaRecorderRef.current = mediaRecorder;
@@ -28,7 +29,7 @@ export const useVoiceRecorder = () => {
       }
     };
 
-    mediaRecorder.start(100); // ✅ collect data every 100ms
+    mediaRecorder.start(100);
     setRecording(true);
 
     timerRef.current = setInterval(() => {
