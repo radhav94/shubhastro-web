@@ -47,6 +47,52 @@ const AdditionalPlanetaryInfo = ({ onPlanetClick }) => {
   const [selectedPath, setSelectedPath] = useState([]); // Stores {planet, startDate, endDate, index}
   const [direction, setDirection] = useState(1);
 
+  // Helper function to check if current date is between start and end dates
+  const isCurrentPeriod = (startDate, endDate) => {
+    if (!startDate || !endDate || startDate === "Birth") return false;
+    
+    try {
+      const currentDate = new Date();
+      
+      // Parse dates - handle both DD/MM/YYYY and other formats
+      const parseDate = (dateStr) => {
+        if (!dateStr || typeof dateStr !== 'string') return null;
+        
+        // Try DD/MM/YYYY format first
+        if (dateStr.includes('/')) {
+          const parts = dateStr.split('/');
+          if (parts.length === 3) {
+            const [day, month, year] = parts.map(Number);
+            return new Date(year, month - 1, day);
+          }
+        }
+        
+        // Try other date formats
+        const parsed = new Date(dateStr);
+        return isNaN(parsed.getTime()) ? null : parsed;
+      };
+      
+      const start = parseDate(startDate);
+      const end = parseDate(endDate);
+      
+      if (!start || !end) {
+        console.log('Failed to parse dates:', { startDate, endDate });
+        return false;
+      }
+      
+      const isCurrent = currentDate >= start && currentDate <= end;
+      
+      if (isCurrent) {
+        console.log('Current period found:', { startDate, endDate, currentDate });
+      }
+      
+      return isCurrent;
+    } catch (error) {
+      console.error('Error parsing dates:', error, { startDate, endDate });
+      return false;
+    }
+  };
+
   console.log('Dasha Component - Params:', params);
   console.log('Dasha Component - Payload:', payload);
 
@@ -99,16 +145,9 @@ const AdditionalPlanetaryInfo = ({ onPlanetClick }) => {
   const handlePlanetLinkClick = (e, row) => {
     e.stopPropagation(); // Prevent row click from firing
     
-    // Call the onPlanetClick callback if provided (for scrolling to accordion)
+    // Only open accordion and scroll, don't navigate to next step
     if (onPlanetClick && currentStep === 1) {
       onPlanetClick(row.planet);
-    }
-    
-    // Also navigate to next step (original functionality)
-    if (currentStep < 3) {
-      setDirection(1);
-      setSelectedPath([...selectedPath, row]);
-      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -263,18 +302,23 @@ const AdditionalPlanetaryInfo = ({ onPlanetClick }) => {
   };
 
   const getCurrentData = () => {
+    let data = [];
     if (currentStep === 1) {
-      return formatDashaData(mahaDashaData);
+      data = formatDashaData(mahaDashaData);
     } else if (currentStep === 2) {
       const selectedIndex = selectedPath[0]?.index; // Use index instead of planet name
       const selectedMahadashaStartDate = selectedPath[0]?.startDate;
-      return formatDashaData(antarDashaData, selectedIndex, selectedMahadashaStartDate);
+      data = formatDashaData(antarDashaData, selectedIndex, selectedMahadashaStartDate);
     } else if (currentStep === 3) {
       const selectedIndex = selectedPath[1]?.index; // Use index instead of planet name
       const selectedAntardashaStartDate = selectedPath[1]?.startDate;
-      return formatDashaData(pratyantarDashaData, selectedIndex, selectedAntardashaStartDate);
+      data = formatDashaData(pratyantarDashaData, selectedIndex, selectedAntardashaStartDate);
     }
-    return [];
+    
+    // Debug log to see the data
+    console.log('Current Data:', data);
+    
+    return data;
   };
 
   const slideVariants = {
@@ -372,18 +416,25 @@ const AdditionalPlanetaryInfo = ({ onPlanetClick }) => {
                       onClick={() => handleRowClick(row)}
                     >
                       <div className={styles.dashaTableCell}>
-                        {currentStep === 1 ? (
-                          <a 
-                            className={styles.planetLink}
-                            onClick={(e) => handlePlanetLinkClick(e, row)}
-                          >
-                            {row.planet}
-                          </a>
-                        ) : (
-                          <span>{row.planet}</span>
-                        )}
+                        <div className={styles.planetCellContent}>
+                          {currentStep === 1 ? (
+                            <a 
+                              className={styles.planetLink}
+                              onClick={(e) => handlePlanetLinkClick(e, row)}
+                            >
+                              {row.planet}
+                            </a>
+                          ) : (
+                            <span>{row.planet}</span>
+                          )}
+                          {isCurrentPeriod(row.startDate, row.endDate) && (
+                            <span className={styles.currentBadge}>Current</span>
+                          )}
+                        </div>
                       </div>
-                      <div className={styles.dashaTableCell}>{row.startDate}</div>
+                      <div className={styles.dashaTableCell}>
+                        {row.startDate}
+                      </div>
                       <div className={styles.dashaTableCell}>{row.endDate}</div>
                       {currentStep < 3 && (
                         <div className={styles.dashaTableArrow}>
