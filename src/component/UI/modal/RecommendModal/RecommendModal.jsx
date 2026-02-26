@@ -162,7 +162,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
     }
 
     return () => {
-      voiceSocket.off();
+      // Don't call voiceSocket.off() — it removes ALL listeners app-wide
     };
   }, [userIdLocal, open]);
 
