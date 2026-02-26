@@ -6,6 +6,7 @@ import { User } from "lucide-react";
 import { getUserFromStorage } from "../utils/authStorage";
 import ShubhTalkLogo from "../assets/images/ShubhAstrologo.svg";
 import ShubhTalkLogoMobile from "../assets/images/mobile-shubh-astro-logo.svg";
+import headerCoin from "../assets/images/headerCoin.svg";
 import { useWalletBalance } from "../screens/private/wallet/useWalletBalance";
 import { getToken } from "../utils/token";
 import { useGetAllKundlisQuery } from "../services/appServices/kundliServicesNew";
@@ -369,7 +370,8 @@ const TopHeader = () => {
             {/* language end */}
 
             <div className={styles.walletBadge}>
-              <div className={styles.coinIcon}></div>
+              {/* <div className={styles.coinIcon}></div> */}
+              <img src={headerCoin} className={styles.coinImg} alt="coin icon" />
               <span className={styles.walletAmount}>
                 {formatAmount(
                   isFetchingBalance ? "..." : isLoggedIn ? balance || 0 : 0,
