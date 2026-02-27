@@ -31,6 +31,9 @@ import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance"
 import RechargeModal from "../recharge-modal/RechargeModal";
 import { PATH } from "../../utils/routes/Paths";
 import ChatNotificationBanner from "../UI/ChatNotificationBanner/ChatNotificationBanner";
+import { capitalizeWords } from "../../utils/capitalize";
+import VideocamIcon from "../../assets/chat/Videocam.svg";
+import CallIcon from "../../assets/chat/Call.svg";
 
 const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 
@@ -392,7 +395,7 @@ const VideoCalling = ({ callData }) => {
     endCallRef.current = true;
 
     setReviewData({
-      astrologerID: activeCall.astrologerID,
+      astrologerID: activeCall?.astrologerID,
       fullName: activeCall.callerName,
     });
 
@@ -667,7 +670,7 @@ const VideoCalling = ({ callData }) => {
       >
         <div className={styles.miniHeader}>
           <span>
-            {callerName || "Video Call"} • {formatTime(callSeconds)}
+            {capitalizeWords(callerName) || "Video Call"} • {formatTime(callSeconds)}
           </span>
           <button onClick={() => setIsMinimized(false)}>⤢</button>
         </div>
@@ -753,7 +756,7 @@ const VideoCalling = ({ callData }) => {
               </button>
 
               <div className={styles.astrologerInfo}>
-                <h3 className={styles.astrologerName}>{callerName}</h3>
+                <h3 className={styles.astrologerName}>{capitalizeWords(callerName)}</h3>
                 <p className={styles.astrologerExp}>
                   {lastRequestedAstro?.role 
                     ? lastRequestedAstro.role.charAt(0).toUpperCase() + lastRequestedAstro.role.slice(1).toLowerCase()
@@ -783,15 +786,11 @@ const VideoCalling = ({ callData }) => {
                   className={styles.chateM}
                   onClick={() => setCameraOn((p) => !p)}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="17" height="11" viewBox="0 0 17 11" fill="none">
-                    <path d="M12.8333 4.125V0.916667C12.8333 0.4125 12.4208 0 11.9167 0H0.916667C0.4125 0 0 0.4125 0 0.916667V10.0833C0 10.5875 0.4125 11 0.916667 11H11.9167C12.4208 11 12.8333 10.5875 12.8333 10.0833V6.875L14.9325 8.97417C15.51 9.55167 16.5 9.13917 16.5 8.32333V2.6675C16.5 1.85167 15.51 1.43917 14.9325 2.01667L12.8333 4.125Z" fill="url(#paint0_linear_8989_303)"/>
-                    <defs>
-                      <linearGradient id="paint0_linear_8989_303" x1="0" y1="5.5" x2="16.5" y2="5.5" gradientUnits="userSpaceOnUse">
-                        <stop stop-color="#F75801"/>
-                        <stop offset="1" stop-color="#D43400"/>
-                      </linearGradient>
-                    </defs>
-                  </svg>
+                  {cameraOn ? (
+                    <img src={CallIcon} alt="audio" width="17" height="17" />
+                  ) : (
+                    <img src={VideocamIcon} alt="video" width="17" height="11" />
+                  )}
                   {cameraOn ? "Audio" : "Video"}
                 </button>
   
@@ -880,7 +879,7 @@ const VideoCalling = ({ callData }) => {
                     alt={callerName}
                     className={styles.avatarImage}
                   />
-                  <p className={styles.avatarName}>{callerName}</p>
+                  <p className={styles.avatarName}>{capitalizeWords(callerName)}</p>
                   <p className={styles.avatarStatus}>Camera is off</p>
                 </div>
               )}
@@ -907,8 +906,8 @@ const VideoCalling = ({ callData }) => {
                 )}
                 {/* Customer Name Label */}
                 <div className={styles.localVideoLabel}>
-                  <span className={styles.localVideoName}>{customerName}</span>
-                  <span className={styles.localVideoRole}>{user?.role || "Customer"}</span>
+                  <span className={styles.localVideoName}>{capitalizeWords(customerName)}</span>
+                  <span className={styles.localVideoRole}>{capitalizeWords(user?.role || "Customer")}</span>
                 </div>
               </div>
             </div>

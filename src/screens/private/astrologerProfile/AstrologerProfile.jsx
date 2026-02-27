@@ -362,7 +362,7 @@ const AstrologerProfile = () => {
         setActiveChat({
           roomId,
           chatRoomId: roomId,
-          callerName: astro?.firstName || "",
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
           userId: userId,
           astrologerId: astrologerId,
@@ -375,7 +375,7 @@ const AstrologerProfile = () => {
           state: {
             userId: userId,
             astrologerId,
-            fullName: astro?.firstName || "",
+            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
             roomId,
             isUserSide: true,
             astrologerName: data?.astrologer?.firstName || "",
@@ -418,7 +418,7 @@ const AstrologerProfile = () => {
           roomId,
           chatRoomId,
           agoraToken: token,
-          callerName: astro?.firstName || "",
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
           callType: type,
           userId: userIdLocal,
@@ -890,7 +890,7 @@ const AstrologerProfile = () => {
                       <span>{review.rating}</span>
                     </div>
                   </div>
-                  <h4 className={styles.reviewerName}>{review.customerName}</h4>
+                  <h4 className={styles.reviewerName}>{review.customerName?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</h4>
                   {review.review && (
                     <p className={styles.reviewText}>{review.review}</p>
                   )}

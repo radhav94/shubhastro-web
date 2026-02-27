@@ -25,17 +25,18 @@ import PlanEventsBanner from "../components/agenticCalendarSection";
  * @param {object} handlers - Event handlers (onConnect, onChatStart, etc.)
  * @returns {JSX.Element|null} - The corresponding component or null
  */
-export const renderSection = (displayType, sectionData, handlers = {}) => {
+export const renderSection = (displayType, sectionData, handlers = {}, keyPrefix = "") => {
   const { onConnect, onChatStart } = handlers;
+  const key = `${keyPrefix}${displayType}-${sectionData._id || sectionData.list_order || displayType}`;
 
   switch (displayType) {
     case "todays-horoscope":
-      return <HoroscopeCard key={sectionData._id} data={sectionData} />;
+      return <HoroscopeCard key={key} data={sectionData} />;
 
     case "consult-to-expert-astrologer":
       return (
         <ConsultationCarousel
-          key={sectionData._id}
+          key={key}
           data={sectionData.content || []}
           title={sectionData.display_title}
         />
@@ -44,7 +45,7 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
     case "complementary-services":
       return (
         <QuickActions
-          key={sectionData._id}
+          key={key}
           data={sectionData.content || []}
           title={sectionData.display_title}
         />
@@ -53,7 +54,7 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
     case "pandit-ai":
       return (
         <PanditAISection
-          key={sectionData._id}
+          key={key}
           data={sectionData.content?.[0]}
           astrologerId={sectionData.content?.[0]?.astrologer_id}
           onChatStart={onChatStart}
@@ -63,7 +64,7 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
     case "our-astrologers":
       return (
         <AstrologersSection
-          key={sectionData._id}
+          key={key}
           title={sectionData.display_title || "TALK TO AN ASTROLOGER"}
           astrologers={sectionData.content || []}
           onConnect={onConnect}
@@ -74,7 +75,7 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
     case "astrologer-grid":
       return (
         <AstrologersSection
-          key={sectionData._id}
+          key={key}
           title={sectionData.display_title || "TOP RATED ASTROLOGERS FOR YOU"}
           astrologers={sectionData.content || []}
           onConnect={onConnect}
@@ -85,7 +86,7 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
     case "astrologers-by-category":
       return (
         <AstrologersByCategorySection
-          key={sectionData._id}
+          key={key}
           data={sectionData.content || []}
           title={sectionData.display_title}
           showMore={sectionData.show_more}
@@ -94,16 +95,16 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
 
     case "my-sessions":
       return (
-        <MySessionsSection key={sectionData._id} onConnectClick={onConnect} />
+        <MySessionsSection key={key} onConnectClick={onConnect} />
       );
 
     case "daily-cosmic-insight":
-      return <CosmicInsightSection key={sectionData._id} data={sectionData} />;
+      return <CosmicInsightSection key={key} data={sectionData} />;
 
     case "explore-panchang":
       return (
         <PanchangSection
-          key={sectionData._id}
+          key={key}
           title={sectionData.display_title}
         />
       );
@@ -111,7 +112,7 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
     case "connect-again":
       return (
         <ConnectAgainSection
-          key={sectionData._id}
+          key={key}
           title={sectionData.display_title}
           onConnect={onConnect}
         />
@@ -120,7 +121,7 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
     case "discover-more":
       return (
         <DiscoverMoreSection
-          key={sectionData._id}
+          key={key}
           data={sectionData.content || []}
           title={sectionData.display_title}
           showMore={sectionData.show_more}
@@ -130,7 +131,7 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
     case "blog":
       return (
         <BlogsSection
-          key={sectionData._id}
+          key={key}
           blogData={sectionData.content || []}
           title={sectionData.display_title}
           showMore={sectionData.show_more}
@@ -140,7 +141,7 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
     case "news":
       return (
         <NewsSection
-          key={sectionData._id}
+          key={key}
           newsData={sectionData.content || []}
           title={sectionData.display_title}
           showMore={sectionData.show_more}
@@ -149,24 +150,22 @@ export const renderSection = (displayType, sectionData, handlers = {}) => {
 
     case "vimshottari-timeline":
       return(
-        <VimshottariTimelineSection/>
+        <VimshottariTimelineSection key={key} />
       );
 
     case "birth-panchang":
       return (
-        <>
-        <BirthPanchangSection key={sectionData._id} />
-        </>
+        <BirthPanchangSection key={key} />
       );
 
     case "muharat-widget":
       return (
-        <MuhuratSection key={sectionData._id} />
+        <MuhuratSection key={key} />
       );
 
     case "ai-agentic":
       return (
-        <PlanEventsBanner key={sectionData._id} />
+        <PlanEventsBanner key={key} />
       );
 
     default:

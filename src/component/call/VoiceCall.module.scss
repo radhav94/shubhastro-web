@@ -328,6 +328,19 @@
   justify-content: center;
   position: relative;
   pointer-events: auto;
+  transition: all 0.3s ease;
+}
+
+.actionButtonsBlur {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  .actionBtn {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+  }
 }
 
 .actionButtons::-webkit-scrollbar {
@@ -345,7 +358,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   border-radius: 50px;
-  border: 1px solid var(--primary-900k, #E56329);
+  border: none;
   background: var(--surface, #FEFEFE);
 }
 
@@ -455,21 +468,17 @@
   }
 }
 
+.giftRow {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
 .controlItem.giftWrapMain{
-  position: absolute;
-  right: 4vw;
-  bottom: 160px;
-  @media (width <= 767px) {
-    position: absolute;
-    right: 16px;
-    left: auto;
-    bottom: 140px;
-    margin: 0;
-  }
-  @media (width <= 380px) {
-    bottom: 120px;
-    right: 12px;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 .avatar {
   width: 100%;
@@ -567,7 +576,7 @@
   border-radius: 50%;
   border: none;
   background: #fff;
-  color: #333;
+  color: #E56329;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -581,16 +590,16 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
+.controlBtn.active {
+  background: #fff;
+  color: #E56329;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 .controlBtn.muted {
-  background: #ff3b30;
-  border: 2px solid #ff3b30;
-  color: #ff3b30;
-  svg{
-    fill: #fff;
-    path {
-      stroke: #fff;
-    }
-  }
+  background: #fff;
+  color: #E56329;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .videoIcon {
