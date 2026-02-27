@@ -175,6 +175,7 @@
   font-size: 13px;
   color: #666;
   margin: 2px 0;
+  white-space: nowrap;
 }
 
 .profileLocation {
@@ -188,13 +189,18 @@
 .profileActions {
   display: flex;
   align-items: center;
-  gap: 12px;
   flex-shrink: 0;
 }
 
 .radioBtn {
   font-size: 24px;
   color: #F75801;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .editBtn {
@@ -202,7 +208,7 @@
   border: none;
   color: #F75801;
   cursor: pointer;
-  padding: 8px;
+  padding: 4px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -230,7 +236,7 @@
   border: none;
   color: #ff4444;
   cursor: pointer;
-  padding: 8px;
+  padding: 4px;
   border-radius: 8px;
   display: flex;
   align-items: center;
