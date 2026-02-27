@@ -479,6 +479,8 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  grid-column: 1 / -1;
+  justify-self: center;
 }
 .avatar {
   width: 100%;
