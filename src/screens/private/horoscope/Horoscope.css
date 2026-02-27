@@ -476,6 +476,25 @@
   color: #B82E00;
 }
 
+.show-less-link {
+  color: #F75801;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 16px;
+  transition: color 0.2s ease;
+}
+
+.show-less-link:hover {
+  color: #D43400;
+  text-decoration: underline;
+}
+
+.show-less-link:active {
+  color: #B82E00;
+}
+
 .overview-card-text {
   padding: 14px 18px 18px 18px;
   border-top: 1px solid #d0d0d0;

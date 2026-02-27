@@ -63,7 +63,7 @@ const BottomNavigation = () => {
                 onClick={handleLiveClick}
             >
                 <div className={styles.liveBtn}>
-                    <Radio size={28} strokeWidth={2.5} />
+                    <Radio size={22} strokeWidth={2.5} />
                 </div>
                 <span className={styles.label}>Live</span>
             </button>
