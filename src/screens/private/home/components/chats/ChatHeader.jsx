@@ -3,6 +3,7 @@ import { IoArrowBack } from "react-icons/io5";
 // import { FaWallet } from "react-icons/fa";
 import { PrimaryText } from "../../../../../component";
 import ChatFooter from "./ChatFooter";
+import { capitalizeWords } from "../../../../../utils/capitalize";
 
 const ChatHeader = ({
   fullName,
@@ -29,7 +30,7 @@ const ChatHeader = ({
 
         <div className={styles.userInfo}>
           <PrimaryText size_16 isSemiBold>
-            {fullName || "Chat User"}
+            {capitalizeWords(fullName) || "Chat User"}
           </PrimaryText>
           <span className={styles.experienceText}>
             Exp. {experience} {experience > 1 ? "years" : "year"}

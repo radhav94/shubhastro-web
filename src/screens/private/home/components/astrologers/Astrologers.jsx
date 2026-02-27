@@ -186,7 +186,15 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       setCallWaitingList(data?.waitingTime || 5);
     };
 
-    const handleCallAccepted = async ({ roomId, token, type, remainingTime }) => {
+    const handleCallAccepted = async ({ roomId, token, type, remainingTime, isSwitch }) => {
+      // If this is a switch from audio to video, let CallContext handle it
+      if (isSwitch && type === "video") {
+        console.log("🔄 Video upgrade accepted - CallContext will handle the switch");
+        resetCallFlow();
+        return;
+      }
+      
+      // Regular call acceptance
       resetCallFlow();
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
@@ -196,7 +204,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           roomId,
           chatRoomId,
           agoraToken: token,
-          callerName: astro.firstName,
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
           callType: type,
           userId: userIdLocal,
@@ -227,7 +235,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
         setActiveChat({
           roomId,
           chatRoomId,
-          callerName: astro.firstName,
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
           userId: userIdLocal,
           astrologerId: astrologerId,
@@ -241,7 +249,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           state: {
             userId: userId,
             astrologerId,
-            fullName: astro.firstName,
+            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
             roomId,
             isUserSide: true,
             kundliId,
@@ -256,6 +264,14 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
     };
 
     const handleCallRejected = (data) => {
+      // Check if this is a video switch rejection during an active audio call
+      if (data?.switchRejected && data?.type === "audio") {
+        console.log("🔄 Video switch rejected - audio call continues");
+        // Don't reset anything - the audio call should continue
+        return;
+      }
+      
+      // Regular call rejection - end everything
       const errorMsg =
         data?.sessionData?.sessionEndReason === "rejected" &&
           data?.type === "chat"

@@ -98,7 +98,7 @@ const Home = () => {
       // This ensures all validations (balance check, online check) are performed
       if (pendingConnectionType === "chat") {
         handleChatStart(selectedAstrologer);
-      } else if (pendingConnectionType === "audio") {
+      } else if (pendingConnectionType === "audio" || pendingConnectionType === "call") {
         handleCallStart(selectedAstrologer, "audio");
       }
       
@@ -133,7 +133,7 @@ const Home = () => {
       // If kundli is available, directly initiate the connection based on type
       if (connectionType === "chat") {
         handleChatStart(astrologer);
-      } else if (connectionType === "audio") {
+      } else if (connectionType === "audio" || connectionType === "call") {
         handleCallStart(astrologer, "audio");
       }
     } else {
@@ -206,7 +206,7 @@ const Home = () => {
               return renderSection(section.display_type, section, {
                 onConnect: handleConnectClick,
                 onChatStart: handleAIChatStart,
-              });
+              }, "mobile-");
             })
           )}
         </div>
@@ -224,7 +224,7 @@ const Home = () => {
                 return renderSection(section.display_type, section, {
                   onConnect: handleConnectClick,
                   onChatStart: handleAIChatStart,
-                });
+                }, "desktop-left-");
               })}
             </div>
           {/* </div> */}
@@ -239,7 +239,7 @@ const Home = () => {
               return renderSection(section.display_type, section, {
                 onConnect: handleConnectClick,
                 onChatStart: handleAIChatStart,
-              });
+              }, "desktop-right-");
             })}
           </div>
         </div>

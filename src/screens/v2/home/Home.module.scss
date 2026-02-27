@@ -2770,6 +2770,11 @@
     font-size: 24px;
   }
 
+  .liveBtn {
+    width: 56px;
+    height: 56px;
+  }
+
   .liveButton::before {
     width: 70px;
     height: 35px;
@@ -2811,6 +2816,11 @@
     width: 72px;
     height: 72px;
     font-size: 32px;
+  }
+
+  .liveBtn {
+    width: 72px;
+    height: 72px;
   }
 
   .liveButton::before {
@@ -3596,13 +3606,13 @@
 
 .blogsGrid {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: 4px 4px 0px 4px;
   @media (width <= 767px) {
-    gap: 16px;    
+    // gap: 16px;    
     padding: 0px 0px 0px 0px;
   }
 }
@@ -3615,7 +3625,7 @@
   // flex: 0 0 220px;
   width: 190px;
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
   // box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   cursor: pointer;
