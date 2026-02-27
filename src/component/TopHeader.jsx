@@ -369,9 +369,11 @@ const TopHeader = () => {
             </div>
             {/* language end */}
 
-            <div className={styles.walletBadge}>
-              {/* <div className={styles.coinIcon}></div> */}
-              <img src={headerCoin} className={styles.coinImg} alt="coin icon" />
+            <div className={styles.walletBadge}
+              onClick={() => requireAuth() && navigate(PATH.privateRoutes.PROFILE.path)}
+              style={{ cursor: 'pointer' }}
+>
+               <img src={headerCoin} className={styles.coinImg} alt="coin icon" />
               <span className={styles.walletAmount}>
                 {formatAmount(
                   isFetchingBalance ? "..." : isLoggedIn ? balance || 0 : 0,

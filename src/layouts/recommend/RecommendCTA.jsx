@@ -28,7 +28,7 @@ const RecommendCTA = ({ mode = "chat", onClick, onClose }) => {
 
       {/* CTA */}
       <button className={styles.ctaBtn} onClick={onClick}>
-        {mode === "chat" ? "Chat Now" : "Talk Now"}
+        {mode === "chat" ? "Connect Now" : "Talk Now"}
       </button>
     </div>
   );
