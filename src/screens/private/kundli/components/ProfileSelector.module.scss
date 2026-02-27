@@ -106,15 +106,9 @@
 .profileSelector {
   flex: 1;
   text-align: center;
-  cursor: pointer;
   user-select: none;
   padding: 4px 12px;
   border-radius: 8px;
-  transition: 0.2s ease;
-  
-  &:active {
-    transform: scale(0.98);
-  }
 }
 
 .selectLabel {
@@ -128,8 +122,20 @@
   font-size: 18px;
   font-weight: 600;
   color: #333;
+  cursor: pointer;
+  transition: 0.2s ease;
+  display: inline-block;
+  
   @media (width <= 767px) {
     font-size: 16px;
+  }
+  
+  &:hover {
+    opacity: 0.7;
+  }
+  
+  &:active {
+    transform: scale(0.98);
   }
 }
 
@@ -140,12 +146,7 @@
   }
 
   .profileSelector {
-    cursor: pointer;
-    transition: 0.2s ease;
-
-    &:hover {
-      opacity: 0.7;
-    }
+    // Removed cursor and hover from parent container
   }
 
   .backBtn {
