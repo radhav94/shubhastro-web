@@ -239,8 +239,8 @@ const Profile = () => {
           },
           date: lastChat?.createdAt || new Date(),
           duration: `${room.chatHistory?.length || 0} Messages`,
-          amount: 0,
-          rate: 0,
+          amount: room?.amount || 0,
+          rate: room?.rate || 0,
           status: "completed",
           roomId: room.roomId,
           year: lastChat?.createdAt
