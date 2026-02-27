@@ -17,6 +17,7 @@ import toast from "../../../component/toast";
 import {
   useFollowAstrologerByIdMutation,
   useUnfollowAstrologerByIdMutation,
+  useCheckFollowingStatusQuery,
 } from "../../../redux/api/astrologer/followAstrologerApi";
 import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useCall } from "../../../context/CallContext";
@@ -82,10 +83,18 @@ const AstrologerProfile = () => {
       window.removeEventListener("reviewSubmitted", handleReviewSubmitted);
   }, [data?.astrologer_ID, refetchReviews]);
 
-  const isInitiallyFollowing = astrologerData?.data?.isFollowing || false;
-  const [isFollowing, setIsFollowing] = useState(isInitiallyFollowing);
   const [showFullAbout, setShowFullAbout] = useState(false);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
+
+  const { data: followingData } = useCheckFollowingStatusQuery(
+    { astrologerId: data?._id },
+    { skip: !data?._id }
+  );
+
+  // Check if the current astrologer is in the following list
+  const isFollowing = followingData?.data?.some(
+    (item) => item.astrologerId === data?._id && item.isFollowing === true
+  ) || false;
 
   const [followAstrologer, { isLoading: followLoading }] =
     useFollowAstrologerByIdMutation();
@@ -148,8 +157,6 @@ const AstrologerProfile = () => {
         await unfollowAstrologer({ astrologerId: data._id }).unwrap();
         toast.success(`You unfollowed ${data?.firstName}`);
       }
-
-      setIsFollowing(!isFollowing);
     } catch (err) {
       console.log("Follow/Unfollow error:", err);
     }
