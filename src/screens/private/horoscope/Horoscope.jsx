@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   useFetchDailyQuery, 
   useFetchWeeklyQuery, 
@@ -101,7 +101,12 @@ const HoroscopeNew = () => {
   const [tempSelectedZodiac, setTempSelectedZodiac] = useState(sign?.toLowerCase() || 'aries');
   const [activeTab, setActiveTab] = useState(getInitialTab());
   const [activeCategory, setActiveCategory] = useState('');
+  const [cameFromOverview, setCameFromOverview] = useState(false);
+  const [overviewCardIndex, setOverviewCardIndex] = useState(null);
   const [showZodiacModal, setShowZodiacModal] = useState(false);
+
+  // Refs for overview cards to scroll back on "Show Less"
+  const overviewCardRefs = useRef([]);
 
   const tabs = ['Today', /* 'Daily', */ 'This Week', 'This Year'];
   
@@ -325,6 +330,7 @@ const HoroscopeNew = () => {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    setCameFromOverview(false);
     
     // Navigate to corresponding route
     // Both "Today" and "Daily" go to daily-horoscope
@@ -344,7 +350,9 @@ const HoroscopeNew = () => {
   const handleConfirmZodiac = () => {
     setSelectedZodiac(tempSelectedZodiac);
     setShowZodiacModal(false);
-    // Don't navigate, just update state to stay on same page
+    // Update URL so the selected sign persists on refresh
+    const currentPath = pathname.replace(/\/[^/]+$/, `/${tempSelectedZodiac}`);
+    navigate(currentPath, { replace: true });
   };
 
   const handleOpenModal = () => {
@@ -368,9 +376,11 @@ const HoroscopeNew = () => {
   };
 
   // Navigate to specific section route
-  const handleShowMore = (categoryId) => {
+  const handleShowMore = (categoryId, cardIndex) => {
     // Instead of navigating to a new route, just set the active category
     // This will show the full content for that specific category
+    setCameFromOverview(true);
+    setOverviewCardIndex(cardIndex);
     setActiveCategory(categoryId);
   };
 
@@ -432,7 +442,10 @@ const HoroscopeNew = () => {
               <div key={category.id} className="category-item">
                 <button
                   className={`category-card ${activeCategory === category.id ? 'active' : ''}`}
-                  onClick={() => setActiveCategory(category.id)}
+                  onClick={() => {
+                    setCameFromOverview(false);
+                    setActiveCategory(category.id);
+                  }}
                 >
                   <span className="category-label">{category.label}</span>
                   <img className="categoryImages" src={getCategoryImage(category.id)} alt={category.label} />
@@ -510,7 +523,7 @@ const HoroscopeNew = () => {
                       : { text: section.content, isTruncated: false };
                     
                     return (
-                      <div key={index} className="overview-card">
+                      <div key={index} className="overview-card" ref={el => overviewCardRefs.current[index] = el}>
                         <div className="overview-card-header">
                           <div className="overview-card-left">
                             <h3 className="overview-card-title">
@@ -531,7 +544,7 @@ const HoroscopeNew = () => {
                             {isTruncated && (
                               <span 
                                 className="show-more-link"
-                                onClick={() => handleShowMore(categories.find(c => c.label === section.title)?.id || section.title)}
+                                onClick={() => handleShowMore(categories.find(c => c.label === section.title)?.id || section.title, index)}
                               >
                                 ... Show More
                               </span>
@@ -549,6 +562,25 @@ const HoroscopeNew = () => {
                 {currentContent.content.split('\n\n').map((paragraph, index) => (
                   <p key={index}>{paragraph}</p>
                 ))}
+                {cameFromOverview && activeTab === 'This Year' && activeCategory !== 'overview' && (
+                  <span 
+                    className="show-less-link"
+                    onClick={() => {
+                      const savedIndex = overviewCardIndex;
+                      setCameFromOverview(false);
+                      setOverviewCardIndex(null);
+                      setActiveCategory('overview');
+                      // Scroll to the card after state updates and re-render
+                      setTimeout(() => {
+                        if (savedIndex !== null && overviewCardRefs.current[savedIndex]) {
+                          overviewCardRefs.current[savedIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                      }, 100);
+                    }}
+                  >
+                    Show Less
+                  </span>
+                )}
               </div>
             )}
           </div>
