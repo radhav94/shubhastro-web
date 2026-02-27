@@ -554,14 +554,6 @@ const HoroscopeNew = () => {
                                 )}
                               </p>
                             ))}
-                            {isTruncated && (
-                              <span 
-                                className="show-more-link"
-                                onClick={() => handleShowMore(categories.find(c => c.label === section.title)?.id || section.title, index)}
-                              >
-                                ... Show More
-                              </span>
-                            )}
                           </div>
                         </div>
                       </div>
