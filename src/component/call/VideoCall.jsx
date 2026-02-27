@@ -417,12 +417,6 @@ const VideoCalling = ({ callData }) => {
       }
     };
 
-    const handleForceCallEnd = () => {
-      if (!endCallRef.current) {
-        safeEndCall();
-      }
-    };
-
     const handleDisconnect = () => {
       if (!endCallRef.current) {
         safeEndCall();
@@ -437,13 +431,11 @@ const VideoCalling = ({ callData }) => {
     };
 
     voiceSocket.on("call:ended", handleCallEnded);
-    voiceSocket.on("force_call_end", handleForceCallEnd);
     voiceSocket.on("disconnect", handleDisconnect);
     voiceSocket.on("warning", handleWarning);
 
     return () => {
       voiceSocket.off("call:ended", handleCallEnded);
-      voiceSocket.off("force_call_end", handleForceCallEnd);
       voiceSocket.off("disconnect", handleDisconnect);
       voiceSocket.off("warning", handleWarning);
     };
