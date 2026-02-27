@@ -128,7 +128,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
         setActiveChat({
           roomId,
           chatRoomId: roomId,
-          callerName: astro?.firstName || "",
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
           userId: userIdLocal,
           astrologerId: astrologerId,
@@ -142,7 +142,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           state: {
             userId: userIdLocal,
             astrologerId,
-            fullName: astro?.firstName || "",
+            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
             roomId,
             isUserSide: true,
             kundliId,
@@ -213,7 +213,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
         setActiveCall({
           roomId,
           agoraToken: token,
-          callerName: astro?.firstName || "",
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
           callType: type,
           userId: userIdLocal,

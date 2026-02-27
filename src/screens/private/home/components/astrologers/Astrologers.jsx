@@ -204,7 +204,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           roomId,
           chatRoomId,
           agoraToken: token,
-          callerName: astro.firstName,
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
           callType: type,
           userId: userIdLocal,
@@ -235,7 +235,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
         setActiveChat({
           roomId,
           chatRoomId,
-          callerName: astro.firstName,
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
           userId: userIdLocal,
           astrologerId: astrologerId,
@@ -249,7 +249,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           state: {
             userId: userId,
             astrologerId,
-            fullName: astro.firstName,
+            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
             roomId,
             isUserSide: true,
             kundliId,

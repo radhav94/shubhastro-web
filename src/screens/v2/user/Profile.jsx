@@ -518,7 +518,7 @@ const Profile = () => {
         setActiveChat({
           roomId,
           chatRoomId: roomId,
-          callerName: astro?.firstName || "",
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
           userId: userId,
           astrologerId: astrologerId,
@@ -533,7 +533,7 @@ const Profile = () => {
           state: {
             userId: userId,
             astrologerId,
-            fullName: astro?.firstName || "",
+            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
             roomId,
             isUserSide: true,
             kundliId,
@@ -590,7 +590,7 @@ const Profile = () => {
           roomId,
           chatRoomId,
           agoraToken: token,
-          callerName: astro?.firstName || "",
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
           callType: type,
           userId: userId,

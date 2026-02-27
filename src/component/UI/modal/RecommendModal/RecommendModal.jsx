@@ -221,7 +221,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
           roomId,
           chatRoomId,
           agoraToken: token,
-          callerName: astro.firstName,
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
           callType: type,
           userId: userIdLocal,
@@ -251,7 +251,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
         setActiveChat({
           roomId,
           chatRoomId,
-          callerName: astro.firstName,
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
           userId: userIdLocal,
           astrologerId: astrologerId,
@@ -265,7 +265,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
           state: {
             userId: userId,
             astrologerId,
-            fullName: astro.firstName,
+            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
             roomId,
             isUserSide: true,
             kundliId,

@@ -27,6 +27,7 @@ import VideocamIcon from "../../assets/chat/Videocam.svg";
 import CallIcon from "../../assets/chat/Call.svg";
 import ChatNotificationBanner from "../UI/ChatNotificationBanner/ChatNotificationBanner";
 import { getAstrologerDefaultImage } from "../../utils/appImages";
+import { capitalizeWords } from "../../utils/capitalize";
 
 // const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
 const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
@@ -482,7 +483,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         >
           <div className={styles.miniHeader}>
             <span>
-              {callerName} • {joined ? formatTime(callSeconds) : "Calling…"}
+              {capitalizeWords(callerName)} • {joined ? formatTime(callSeconds) : "Calling…"}
             </span>
             <button onClick={() => setIsMinimized(false)}>⤢</button>
           </div>
@@ -540,7 +541,7 @@ const AgoraVoiceCalling = ({ callData }) => {
             </button>
             
             <div className={styles.astrologerInfo}>
-              <h3 className={styles.astrologerName}>{callerName}</h3>
+              <h3 className={styles.astrologerName}>{capitalizeWords(callerName)}</h3>
               <p className={styles.astrologerExp}>{experience ? `${experience} Years` : 'Astrologer'}</p>
             </div>
 
@@ -623,7 +624,7 @@ const AgoraVoiceCalling = ({ callData }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className={styles.actionButtons}>
+          <div className={`${styles.actionButtons}`}>
             <button className={styles.actionBtn} onClick={toggleChat}>
               <span>Attach File</span>
             </button>
@@ -652,7 +653,7 @@ const AgoraVoiceCalling = ({ callData }) => {
                     alt={callerName}
                   />
                 </div>
-                <h1 className={styles.callerNameTitle}>{callerName}</h1>
+                <h1 className={styles.callerNameTitle}>{capitalizeWords(callerName)}</h1>
                 <span className={styles.totalTime}>{formatTime(callSeconds)}</span>
               </div>
 
@@ -685,10 +686,12 @@ const AgoraVoiceCalling = ({ callData }) => {
                 </button>
                 <span className={styles.controlLabel}>Send Gift</span>
               </div>
+            </div>
 
+            <div className={styles.controlGrid}>
               <div className={styles.controlItem}>
                 <button
-                  className={`${styles.controlBtn} ${!micOn ? styles.muted : ''}`}
+                  className={`${styles.controlBtn} ${!micOn ? styles.muted : styles.active}`}
                   onClick={() => setMicOn((m) => !m)}
                 >
                   {micOn ? <IoMic size={24} /> : <IoMicOff size={24} />}
@@ -710,7 +713,7 @@ const AgoraVoiceCalling = ({ callData }) => {
 
               <div className={styles.controlItem}>
                 <button 
-                  className={`${styles.controlBtn} ${!speakerOn ? styles.muted : ''}`}
+                  className={`${styles.controlBtn} ${!speakerOn ? styles.muted : styles.active}`}
                   onClick={() => setSpeakerOn((s) => !s)}
                 >
                   {speakerOn ? <IoVolumeHigh size={24} /> : <IoVolumeMute size={24} />}
