@@ -3596,13 +3596,13 @@
 
 .blogsGrid {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: 4px 4px 0px 4px;
   @media (width <= 767px) {
-    gap: 16px;    
+    // gap: 16px;    
     padding: 0px 0px 0px 0px;
   }
 }
