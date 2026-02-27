@@ -4193,14 +4193,21 @@
     .segmentPopup{
       transform: translateX(0%) translateY(-8px);
       right: unset;
-      left: -40px;
+      left: 0px;
     }
   }
   .timelineSegment:nth-child(2).activeSegment:hover{
     .segmentPopup{
       transform: translateX(0%) translateY(-8px);
       right: unset;
-      left: -90px;
+      left: -42px;
+    }
+  }
+  .timelineSegment:nth-child(3).activeSegment:hover{
+    .segmentPopup{
+      transform: translateX(0%) translateY(-8px);
+      right: unset;
+      left: -82px;
     }
   }
   .timelineSegment:nth-child(9).activeSegment:hover{
