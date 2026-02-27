@@ -49,8 +49,8 @@ const StickyCallFooter = () => {
     return null;
   
   return (
-    <div className="fixed bottom-4 sm:bottom-6 left-1/2 z-[1000] -translate-x-1/2 animate-slideUp w-[calc(100%-2rem)] sm:w-auto max-w-[600px]">
-      <div className="flex items-center gap-3 sm:gap-4 rounded-2xl bg-zinc-900/95 px-4 sm:px-5 py-3 sm:py-4 shadow-2xl backdrop-blur-md border border-zinc-800">
+    <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-slideUp waiting-queue">
+      <div className="flex items-center gap-4 rounded-2xl bg-zinc-900/95 px-5 py-4 shadow-2xl backdrop-blur-md border border-zinc-800">
         {waitingList && <FooterWaiting />}
 
         {callApproval && <FooterApproval />}
