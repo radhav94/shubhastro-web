@@ -32,7 +32,7 @@ import { getAstrologerDefaultImage } from "../../utils/appImages";
 const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 
 const AgoraVoiceCalling = ({ callData }) => {
-  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer } = useCall();
+  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, setWaitingList, resetCallFlow } = useCall();
   const navigate = useNavigate();
 
   if (!activeCall || activeCall.callType !== "audio") {
@@ -241,7 +241,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         fullName: activeCall?.callerName || callerName,
       });
 
-      voiceSocket.emit("call_end", {
+      voiceSocket.emit("call:end", {
         roomId,
         endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
       });
@@ -249,6 +249,9 @@ const AgoraVoiceCalling = ({ callData }) => {
       // Refresh wallet balance after call ends
       refreshWallet();
       window.dispatchEvent(new Event("walletBalanceUpdated"));
+      
+      // Clear waiting list to prevent waiting popup from showing
+      setWaitingList(null);
       
       setOpenReview(true);
     }
@@ -278,15 +281,11 @@ const AgoraVoiceCalling = ({ callData }) => {
     };
 
     window.addEventListener('call:upgrading-to-video', handleUpgradeEvent);
-    voiceSocket.on("call_ended", endCall);
-    voiceSocket.on("force_call_end", endCall);
     voiceSocket.on("disconnect", endCall);
     voiceSocket.on("warning", handleWarning);
 
     return () => {
       window.removeEventListener('call:upgrading-to-video', handleUpgradeEvent);
-      voiceSocket.off("call_ended", endCall);
-      voiceSocket.off("force_call_end", endCall);
       voiceSocket.off("disconnect", endCall);
       voiceSocket.off("warning", handleWarning);
     };
@@ -303,22 +302,6 @@ const AgoraVoiceCalling = ({ callData }) => {
 
   /* ================= SOCKET ================= */
   useEffect(() => {
-    console.log("🔌 VoiceCall: Setting up socket listeners");
-
-    const handleCallEnded = () => {
-      console.log("📞 VoiceCall: call_ended event received");
-      endCall();
-    };
-
-    const handleForceCallEnd = () => {
-      console.log("📞 VoiceCall: force_call_end event received");
-      endCall();
-    };
-
-    const handleDisconnect = () => {
-      console.log("📞 VoiceCall: disconnect event received");
-      endCall();
-    };
 
     const handleCallRejected = (data) => {
       
@@ -341,16 +324,10 @@ const AgoraVoiceCalling = ({ callData }) => {
       endCall();
     };
 
-    voiceSocket.on("call_ended", handleCallEnded);
-    voiceSocket.on("force_call_end", handleForceCallEnd);
-    voiceSocket.on("disconnect", handleDisconnect);
     voiceSocket.on("call:canceled", handleCallCanceled);
     voiceSocket.on("call:rejected", handleCallRejected);
 
     return () => {
-      voiceSocket.off("call_ended", handleCallEnded);
-      voiceSocket.off("force_call_end", handleForceCallEnd);
-      voiceSocket.off("disconnect", handleDisconnect);
       voiceSocket.off("call:canceled", handleCallCanceled);
       voiceSocket.off("call:rejected", handleCallRejected);
     };
