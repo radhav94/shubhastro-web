@@ -51,7 +51,7 @@ const NewAstrologerCard = ({
                 </defs>
               </svg>
             </span>
-            <span className={styles.ratingText}>{astrologer.rating}</span>
+            <span className={styles.ratingText}>{astrologer.rating ? Number(astrologer.rating).toFixed(1) : '0.0'}</span>
           </div>
         </div>
         <h3 className={styles.astrologerName}>

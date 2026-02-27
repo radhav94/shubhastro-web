@@ -599,6 +599,26 @@
     background: #f5f5f5;
     color: #999;
   }
+
+  // Adjust date input calendar icon position
+  &[type="date"] {
+    padding-right: 16px;
+    
+    &::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      opacity: 0.6;
+      margin-right: 0;
+      padding: 0;
+    }
+  }
+
+  // Adjust time input clock icon position
+  &[type="time"] {
+    &::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      opacity: 0.6;
+    }
+  }
 }
 
 .inputIcon {
