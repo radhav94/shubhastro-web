@@ -40,7 +40,7 @@ const NewAstrologerDetailsCard = ({
               }
               className={styles.detailsImage}
               onError={(e) => {
-                e.target.style.display = "none";
+                e.target.src = getAstrologerDefaultImage(astrologer?.gender);
               }}
             />
           </div>

@@ -1,28 +1,17 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import PrimaryText from "../../../../../../component/PrimaryText";
 import styles from "./GemStoneCard.module.scss";
-import { ChevronDown } from "lucide-react";
+import { IoChevronDown, IoChevronUp } from "react-icons/io5";
 
-const AccordionSection = ({ title, children, defaultOpen = false }) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-
+const SectionCard = ({ title, children }) => {
   return (
     <div className={styles.cardBox}>
-      <button
-        className={styles.accordionHeader}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-      >
+      <div className={styles.header}>
         <PrimaryText size="lg" weight="600" className={styles.cardTitle}>
           {title}
         </PrimaryText>
-        <ChevronDown 
-          className={`${styles.accordionIcon} ${isOpen ? styles.iconRotated : ''}`}
-          size={24}
-        />
-      </button>
-
-      <div className={`${styles.accordionContent} ${isOpen ? styles.contentExpanded : ''}`}>
+      </div>
+      <div className={styles.content}>
         {children}
       </div>
     </div>
@@ -30,13 +19,38 @@ const AccordionSection = ({ title, children, defaultOpen = false }) => {
 };
 
 const GemStoneCard = ({ gem }) => {
+  const [showAllFlaws, setShowAllFlaws] = useState(false);
+  const [showFullTimeToWear, setShowFullTimeToWear] = useState(false);
+  const [showFullMethods, setShowFullMethods] = useState(false);
+  const [showFullMantra, setShowFullMantra] = useState(false);
+
   if (!gem) return null;
+
+  const flawsToShow = showAllFlaws ? gem.flaw_results : gem.flaw_results.slice(0, 4);
+  const hasMoreFlaws = gem.flaw_results.length > 4;
+
+  const timeToWearText = gem.time_to_wear || "";
+  const shouldTruncateTimeToWear = timeToWearText.length > 300;
+  const displayTimeToWear = shouldTruncateTimeToWear && !showFullTimeToWear 
+    ? timeToWearText.slice(0, 300) + "..." 
+    : timeToWearText;
+
+  const methodsText = gem.methods || "";
+  const shouldTruncateMethods = methodsText.length > 300;
+  const displayMethods = shouldTruncateMethods && !showFullMethods 
+    ? methodsText.slice(0, 300) + "..." 
+    : methodsText;
+
+  const mantraText = gem.mantra || "";
+  const shouldTruncateMantra = mantraText.length > 300;
+  const displayMantra = shouldTruncateMantra && !showFullMantra 
+    ? mantraText.slice(0, 300) + "..." 
+    : mantraText;
 
   return (
     <div className={styles.wrapper}>
       {/* TOP DESCRIPTION CARD */}
       <div className={styles.topCard}>
-        {/* TITLE */}
         <PrimaryText size="xl" weight="700" className={styles.title}>
           {gem.name}
         </PrimaryText>
@@ -45,113 +59,147 @@ const GemStoneCard = ({ gem }) => {
           Planet: {gem.planet}
         </PrimaryText>
 
-        {/* DESCRIPTION */}
         <PrimaryText size="base" className={styles.description}>
           {gem.description}
         </PrimaryText>
       </div>
 
-      {/* BASIC DETAILS CARD */}
-      <AccordionSection title="Basic Details" defaultOpen={false}>
-        <div className={styles.grid}>
-          <div>
-            <strong>Gem:</strong> {gem.gem}
-          </div>
-          <div>
-            <strong>Other Name:</strong> {gem.other_name}
-          </div>
-          <div>
-            <strong>Finger:</strong> {gem.finger}
-          </div>
-          <div>
-            <strong>Weight:</strong> {gem.weight}
-          </div>
-          <div>
-            <strong>Day:</strong> {gem.day}
-          </div>
-          <div>
-            <strong>Metal:</strong> {gem.metal}
-          </div>
-        </div>
-      </AccordionSection>
-
-      {/* SUBSTITUTE */}
-      <AccordionSection title="Substitutes" defaultOpen={false}>
-        <div className={styles.rowList}>
-          {gem.substitute.map((item, index) => (
-            <div key={index} className={`${styles.rowItem} ${styles.subRow}`}>
-              {item}
+      {/* SECTIONS GRID */}
+      <div className={styles.sectionsGrid}>
+        {/* BASIC DETAILS CARD */}
+        <SectionCard title="Basic Details">
+          <div className={styles.grid}>
+            <div>
+              <strong>Gem:</strong> {gem.gem}
             </div>
-          ))}
-        </div>
-      </AccordionSection>
-
-      {/* NOT TO WEAR WITH */}
-      <AccordionSection title="Not to Wear With" defaultOpen={false}>
-        <div className={styles.rowList}>
-          {gem.not_to_wear_with.map((item, index) => (
-            <div key={index} className={`${styles.rowItem} ${styles.notRow}`}>
-              {item}
+            <div>
+              <strong>Other Name:</strong> {gem.other_name}
             </div>
-          ))}
-        </div>
-      </AccordionSection>
-
-      {/* GOOD RESULTS */}
-      <AccordionSection title="Good Results" defaultOpen={false}>
-        <div className={styles.rowList}>
-          {gem.good_results.map((item, index) => (
-            <div key={index} className={`${styles.rowItem} ${styles.goodRow}`}>
-              {item}
+            <div>
+              <strong>Finger:</strong> {gem.finger}
             </div>
-          ))}
-        </div>
-      </AccordionSection>
-
-      {/* DISEASES */}
-      <AccordionSection title="Diseases It Helps With" defaultOpen={false}>
-        <div className={styles.rowList}>
-          {gem.diseases_cure.map((item, index) => (
-            <div key={index} className={`${styles.rowItem} ${styles.disRow}`}>
-              {item}
+            <div>
+              <strong>Weight:</strong> {gem.weight}
             </div>
-          ))}
-        </div>
-      </AccordionSection>
-
-      {/* FLAW RESULTS */}
-      <AccordionSection title="Flaws & Their Effects" defaultOpen={false}>
-        <div className={styles.table}>
-          {gem.flaw_results.map((row, index) => (
-            <div className={styles.tableRow} key={index}>
-              <div className={styles.cellLeft}>{row.flaw_type}</div>
-              <div className={styles.cellRight}>{row.flaw_effects}</div>
+            <div>
+              <strong>Day:</strong> {gem.day}
             </div>
-          ))}
-        </div>
-      </AccordionSection>
+            <div>
+              <strong>Metal:</strong> {gem.metal}
+            </div>
+          </div>
+        </SectionCard>
 
-      {/* TIME TO WEAR */}
-      <AccordionSection title="Time to Wear" defaultOpen={false}>
-        <PrimaryText marginBottom="5px" size="base">
-          {gem.time_to_wear}
-        </PrimaryText>
-        <PrimaryText marginTop="5px" size="lg">
-          In short : {gem.time_to_wear_short}
-        </PrimaryText>
-      </AccordionSection>
+        {/* SUBSTITUTE */}
+        <SectionCard title="Substitutes">
+          <div className={styles.rowList}>
+            {gem.substitute.map((item, index) => (
+              <div key={index} className={`${styles.rowItem} ${styles.subRow}`}>
+                {item}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
 
-      {/* METHODS */}
-      <AccordionSection title="How to Wear" defaultOpen={false}>
-        <PrimaryText size="base">{gem.methods}</PrimaryText>
-      </AccordionSection>
+        {/* NOT TO WEAR WITH */}
+        <SectionCard title="Not to Wear With">
+          <div className={styles.rowList}>
+            {gem.not_to_wear_with.map((item, index) => (
+              <div key={index} className={`${styles.rowItem} ${styles.notRow}`}>
+                {item}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
 
-      {/* MANTRA */}
-      <AccordionSection title="Mantra" defaultOpen={false}>
-        <PrimaryText size="base" className={styles.mantra}>
-          {gem.mantra}
-        </PrimaryText>
-      </AccordionSection>
+        {/* GOOD RESULTS */}
+        <SectionCard title="Good Results">
+          <div className={styles.rowList}>
+            {gem.good_results.map((item, index) => (
+              <div key={index} className={`${styles.rowItem} ${styles.goodRow}`}>
+                {item}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+
+        {/* DISEASES */}
+        <SectionCard title="Diseases It Helps With">
+          <div className={styles.rowList}>
+            {gem.diseases_cure.map((item, index) => (
+              <div key={index} className={`${styles.rowItem} ${styles.disRow}`}>
+                {item}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+
+        {/* FLAW RESULTS */}
+        <SectionCard title="Flaws & Their Effects">
+          <div className={styles.table}>
+            {flawsToShow.map((row, index) => (
+              <div className={styles.tableRow} key={index}>
+                <div className={styles.cellLeft}>{row.flaw_type}</div>
+                <div className={styles.cellRight}>{row.flaw_effects}</div>
+              </div>
+            ))}
+          </div>
+          {hasMoreFlaws && (
+            <button 
+              className={styles.showMoreBtn}
+              onClick={() => setShowAllFlaws(!showAllFlaws)}
+            >
+              {showAllFlaws ? <IoChevronUp size={20} /> : <IoChevronDown size={20} />}
+            </button>
+          )}
+        </SectionCard>
+
+        {/* TIME TO WEAR */}
+        <SectionCard title="Time to Wear">
+          <PrimaryText marginBottom="5px" size="base">
+            {displayTimeToWear}
+          </PrimaryText>
+          {shouldTruncateTimeToWear && (
+            <span 
+              className={styles.showMoreText}
+              onClick={() => setShowFullTimeToWear(!showFullTimeToWear)}
+            >
+              {showFullTimeToWear ? 'Show Less' : 'Show More'}
+            </span>
+          )}
+          <PrimaryText marginTop="5px" size="lg">
+            In short : {gem.time_to_wear_short}
+          </PrimaryText>
+        </SectionCard>
+
+        {/* METHODS */}
+        <SectionCard title="How to Wear">
+          <PrimaryText size="base">{displayMethods}</PrimaryText>
+          {shouldTruncateMethods && (
+            <span 
+              className={styles.showMoreText}
+              onClick={() => setShowFullMethods(!showFullMethods)}
+            >
+              {showFullMethods ? 'Show Less' : 'Show More'}
+            </span>
+          )}
+        </SectionCard>
+
+        {/* MANTRA */}
+        <SectionCard title="Mantra">
+          <PrimaryText size="base" className={styles.mantra}>
+            {displayMantra}
+          </PrimaryText>
+          {shouldTruncateMantra && (
+            <span 
+              className={styles.showMoreText}
+              onClick={() => setShowFullMantra(!showFullMantra)}
+            >
+              {showFullMantra ? 'Show Less' : 'Show More'}
+            </span>
+          )}
+        </SectionCard>
+      </div>
     </div>
   );
 };

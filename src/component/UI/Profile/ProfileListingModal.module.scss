@@ -249,15 +249,16 @@
 .addProfileBtn {
   width: 100%;
   padding: 16px;
-  border-radius: var(--Radius-full, 999px);
+  // border-radius: var(--Radius-full, 999px);
   background: transparent;
   border: 2px solid #333;
   // background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-  // border: 2px solid #F75801;
+  border: 2px solid #F75801;
   border-radius: 50px;
   font-size: 15px;
   font-weight: 600;
-  color: #333;
+  // color: #333;
+  color: #F75801;
   cursor: pointer;
   transition: 0.2s ease;
 

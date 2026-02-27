@@ -112,7 +112,7 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData, c
 
           <button
             type="submit"
-            className={styles.otpprimaryBtn}
+            className={styles.otpprimaryBtnPer}
             disabled={!isValid || !values.name.trim()}
           >
             Next

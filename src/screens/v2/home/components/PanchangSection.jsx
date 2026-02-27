@@ -210,6 +210,7 @@ const PanchangSection = () => {
           </div>
         </>
       )}
+
     </section>
   );
 };

@@ -41,7 +41,12 @@
     // border-radius: 5px;
   }
 }
-
+.coinImg{
+  width: 25px;
+  @media (width <= 767px) {
+    width: 20px;
+  }
+}
 .active{
   // background-color: #000;
 }
@@ -457,7 +462,7 @@
 .walletBadge {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 6px;
   // background: linear-gradient(135deg, #8b6f47 0%, #6b4423 50%, #3e2415 100%);
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   padding: 4px 8px;
@@ -480,7 +485,7 @@
   border-radius: 50%;
   @media screen and (width <= 767px) {
     height: 16px;
-    top: -10px;
+    top: -14px;
   }
 }
 
@@ -490,7 +495,7 @@
   top: unset;
   @media screen and (width <= 767px) {
     // height: 16px;
-    bottom: -10px;
+    bottom: -14px;
   }
 }
 
@@ -535,7 +540,7 @@
 // }
 
 .walletAmount {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.5px;
   @media (width <= 767px) {

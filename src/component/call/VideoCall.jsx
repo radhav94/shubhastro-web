@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import {
   IoMic,
@@ -30,6 +30,7 @@ import { getUserFromStorage } from "../../utils/authStorage";
 import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance";
 import RechargeModal from "../recharge-modal/RechargeModal";
 import { PATH } from "../../utils/routes/Paths";
+import ChatNotificationBanner from "../UI/ChatNotificationBanner/ChatNotificationBanner";
 
 const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 
@@ -77,6 +78,38 @@ const VideoCalling = ({ callData }) => {
 
   // Default avatar URL
   const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
+  /* ================= CHAT NOTIFICATION ================= */
+  const [chatNotification, setChatNotification] = useState(null);
+  const notificationTimerRef = useRef(null);
+
+  const showChatNotification = useCallback((data) => {
+    if (data.sender === "user") return;
+    
+    const messageText = data.type === "gift" ? "🎁 Sent a gift" : (data.message || data.response || "New message");
+    const astroImage = lastRequestedAstro?.imageUrl || lastRequestedAstro?.aadharCardImgUrl || lastRequestedAstro?.panCardImgUrl || null;
+    const astroGender = lastRequestedAstro?.gender || null;
+    setChatNotification({
+      senderName: callerName || "Astrologer",
+      message: messageText,
+      image: astroImage,
+      gender: astroGender,
+      astrologerId: activeCall?.astrologerId,
+    });
+
+    if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
+    notificationTimerRef.current = setTimeout(() => {
+      setChatNotification(null);
+    }, 4000);
+  }, [callerName, lastRequestedAstro]);
+
+  useEffect(() => {
+    voiceSocket.on("message:recieved", showChatNotification);
+    return () => {
+      voiceSocket.off("message:recieved", showChatNotification);
+      if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
+    };
+  }, [showChatNotification]);
 
   // Get customer name from storage
   const user = getUserFromStorage();
@@ -678,6 +711,34 @@ const VideoCalling = ({ callData }) => {
         className={styles.videoContainer}
         style={{ visibility: isMinimized ? "hidden" : "visible" }}
       >
+        {/* Chat Notification Banner */}
+        {chatNotification && (
+          <div style={{ position: 'fixed', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 99999, width: 'fit-content', maxWidth: '90vw' }}>
+            <ChatNotificationBanner
+              senderName={chatNotification.senderName}
+              message={chatNotification.message}
+              imageUrl={chatNotification.image}
+              gender={chatNotification.gender}
+              onClose={() => setChatNotification(null)}
+              onClick={() => {
+                setChatNotification(null);
+                setIsMinimized(true);
+                navigate(`/chat-with-astrologers/${chatNotification.astrologerId}`, {
+                  state: {
+                    userId: activeCall?.userId,
+                    astrologerId: activeCall?.astrologerId,
+                    roomId: activeCall?.roomId,
+                    fullName: callerName,
+                    isUserSide: activeCall?.isUserSide,
+                    kundliId: activeCall?.kundliId,
+                    astrologerName: callerName,
+                    astroID: activeCall?.astrologerID,
+                  }
+                });
+              }}
+            />
+          </div>
+        )}
         {!joined ? (
           <div className={styles.waitingText}>Connecting…</div>
         ) : (
@@ -757,23 +818,25 @@ const VideoCalling = ({ callData }) => {
   
                 <span class={styles.dividerLine}></span>
   
-                <button 
-                  className={styles.rechargeButton}
-                  onClick={() => {
-                    setIsMinimized(true);
-                    setIsRechargeModalOpen(true);
-                  }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34" fill="none">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M5 0C2.23858 0 0 2.23858 0 5V28.3333C0 31.0948 2.23858 33.3333 5 33.3333H28.3333C31.0948 33.3333 33.3333 31.0948 33.3333 28.3333V11.6667C33.3333 9.48964 31.942 7.63757 30 6.95118V5C30 2.23858 27.7614 0 25 0H5ZM5 3.33333C4.07953 3.33333 3.33333 4.07953 3.33333 5C3.33333 5.92048 4.07953 6.66667 5 6.66667H26.6667V5C26.6667 4.07953 25.9205 3.33333 25 3.33333H5ZM25 16.6667C23.1591 16.6667 21.6667 18.1591 21.6667 20C21.6667 21.841 23.1591 23.3333 25 23.3333H28.3333C29.2538 23.3333 30 22.5871 30 21.6667V18.3333C30 17.4129 29.2538 16.6667 28.3333 16.6667H25Z" fill="url(#paint0_linear_9010_318)"/>
-                    <defs>
-                      <linearGradient id="paint0_linear_9010_318" x1="0" y1="16.6667" x2="33.3333" y2="16.6667" gradientUnits="userSpaceOnUse">
-                        <stop stop-color="#F75801"/>
-                        <stop offset="1" stop-color="#D43400"/>
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </button>
+                {showRechargeButton && (
+                  <button 
+                    className={styles.rechargeButton}
+                    onClick={() => {
+                      setIsMinimized(true);
+                      setIsRechargeModalOpen(true);
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34" fill="none">
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M5 0C2.23858 0 0 2.23858 0 5V28.3333C0 31.0948 2.23858 33.3333 5 33.3333H28.3333C31.0948 33.3333 33.3333 31.0948 33.3333 28.3333V11.6667C33.3333 9.48964 31.942 7.63757 30 6.95118V5C30 2.23858 27.7614 0 25 0H5ZM5 3.33333C4.07953 3.33333 3.33333 4.07953 3.33333 5C3.33333 5.92048 4.07953 6.66667 5 6.66667H26.6667V5C26.6667 4.07953 25.9205 3.33333 25 3.33333H5ZM25 16.6667C23.1591 16.6667 21.6667 18.1591 21.6667 20C21.6667 21.841 23.1591 23.3333 25 23.3333H28.3333C29.2538 23.3333 30 22.5871 30 21.6667V18.3333C30 17.4129 29.2538 16.6667 28.3333 16.6667H25Z" fill="url(#paint0_linear_9010_318)"/>
+                      <defs>
+                        <linearGradient id="paint0_linear_9010_318" x1="0" y1="16.6667" x2="33.3333" y2="16.6667" gradientUnits="userSpaceOnUse">
+                          <stop stop-color="#F75801"/>
+                          <stop offset="1" stop-color="#D43400"/>
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </button>
+                )}
 
               {/* <div className={styles.walletBadge}>
                 <span className={styles.walletIcon}>💰</span>
@@ -874,15 +937,17 @@ const VideoCalling = ({ callData }) => {
                   <span className={styles.controlLabel}>AI Wow</span>
                 </div> */}
 
-                <button className={styles.rechargeNowBtn} 
-                                onClick={() => {
-                                  setIsMinimized(true);
-                                  setIsRechargeModalOpen(true);
-                                }} >Recharge Now
-                  <svg xmlns="http://www.w3.org/2000/svg" width="8" height="15" viewBox="0 0 8 15" fill="none">
-                    <path d="M0.75 13.95L6.18333 8.51667C6.825 7.875 6.825 6.825 6.18333 6.18333L0.75 0.75" stroke="#FEFEFE" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
+                {showRechargeButton && (
+                  <button className={styles.rechargeNowBtn} 
+                    onClick={() => {
+                      setIsMinimized(true);
+                      setIsRechargeModalOpen(true);
+                    }} >Recharge Now
+                    <svg xmlns="http://www.w3.org/2000/svg" width="8" height="15" viewBox="0 0 8 15" fill="none">
+                      <path d="M0.75 13.95L6.18333 8.51667C6.825 7.875 6.825 6.825 6.18333 6.18333L0.75 0.75" stroke="#FEFEFE" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                )}
 
                 <div className={`${styles.controlItem} ${styles.giftWrapMain}`}>
                   <button

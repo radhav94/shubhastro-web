@@ -45,7 +45,7 @@ import CallMinutesIcon from "../../../assets/icons/callMinutess.svg";
 import VideoMinutesIcon from "../../../assets/icons/videoMinutes.svg";
 import SendGiftImage from "../../../assets/images/send-gift.png";
 import AstrologerShopImage from "../../../assets/images/astrologer-shop.png";
-import AstrologerPlaceholder from "../../../assets/images/astrologer-square.svg";
+import { getAstrologerDefaultImage } from "../../../utils/appImages";
 import GiftModal from "../../../component/call/GiftModal";
 
 const AstrologerProfile = () => {
@@ -548,7 +548,7 @@ const AstrologerProfile = () => {
   const displayData = {
     firstName: data?.firstName || "Astrologer",
     lastName: data?.lastName || "",
-    imageUrl: data?.imageUrl || "",
+    imageUrl: data?.imageUrl || data?.aadharCardImgUrl || data?.panCardImgUrl || getAstrologerDefaultImage(data?.gender),
     specialities:
       data?.specialties?.length > 0
         ? data.specialties
@@ -703,9 +703,12 @@ const AstrologerProfile = () => {
         <div className={styles.profileCard}>
           <div className={styles.profileImageWrapper}>
             <img
-              src={displayData.imageUrl || AstrologerPlaceholder}
+              src={displayData.imageUrl}
               alt={displayData.firstName}
               className={styles.profileImage}
+              onError={(e) => {
+                e.target.src = getAstrologerDefaultImage(data?.gender);
+              }}
             />
           </div>
           <div className={styles.profileInfo}>

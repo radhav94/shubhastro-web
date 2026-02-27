@@ -109,6 +109,9 @@
 
   svg {
     display: block;
+    path{
+      stroke: #F75801;
+    }
   }
 
   @media (max-width: 767px) {

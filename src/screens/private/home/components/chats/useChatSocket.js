@@ -11,6 +11,7 @@ const useChatSocket = ({
   kundliId,
   roomId: chatRoomId,
   isUserSide,
+  astroID,
 }) => {
   const { 
     activeCall, 
@@ -100,6 +101,7 @@ const useChatSocket = ({
         callType: type,
         userId,
         astrologerId,
+        astrologerID: astroID,
         kundliId,
         remainingTime,
       });

@@ -120,6 +120,7 @@ const ChatWindow = () => {
     kundliId,
     roomId,
     isUserSide,
+    astroID,
   });
 
   // Use global waiting list from CallContext
@@ -256,19 +257,24 @@ const ChatWindow = () => {
 
   const [getS3SignedUrl] = useGetS3SignedUrlMutation();
   const sendVoiceMessage = async (blob = null, duration) => {
-    const signedUrl = await getS3SignedUrl({
-      fileType: blob.type,
-    }).unwrap();
-    const audioUrl = signedUrl.uploadUrl.split("?")[0];
-    const uploadUrl = signedUrl.uploadUrl;
-    await uploadFileToS3(uploadUrl, blob);
-    // const jsonString = JSON.stringify({
-    //   type: "voice",
-    //   audioUrl,
-    //   duration,
-    // });
-    const attachType = getAttachType(blob.type);
-    sendMessage(audioUrl, attachType);
+    // Upload in background — don't block the chat UI
+    (async () => {
+      try {
+        // Request .m4a URL from S3 — use audio/x-m4a so backend generates .m4a extension
+        const signedUrl = await getS3SignedUrl({
+          fileType: "audio/x-m4a",
+        }).unwrap();
+        const audioUrl = signedUrl.uploadUrl.split("?")[0];
+        const uploadUrl = signedUrl.uploadUrl;
+        // Re-wrap blob with matching MIME type so S3 Content-Type header matches the signed URL
+        const m4aBlob = new Blob([blob], { type: "audio/x-m4a" });
+        await uploadFileToS3(uploadUrl, m4aBlob);
+        sendMessage(audioUrl, "audio");
+      } catch (err) {
+        console.error("Voice upload failed:", err);
+        Toast.error("Failed to send voice message");
+      }
+    })();
     setMessage("");
   };
 

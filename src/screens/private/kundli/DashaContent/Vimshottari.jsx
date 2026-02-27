@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useGetMahaDashaPredictionsQuery } from "../../../../redux/api/kundli/dashaApi";
 import styles from "./DashaContent.module.scss";
@@ -10,10 +10,33 @@ import AdditionalPlanetaryInfo from "../kundaliContent/AdditionalPlanetaryInfo";
 const Vimshottari = () => {
   const [expandedIndex, setExpandedIndex] = useState(null);
   const formData = useSelector((state) => state?.form?.kundliPayload);
+  const accordionRefs = useRef([]);
 
   const queryArgs = formData ? buildVedicParam(formData) : skipToken;
 
   const { data, isLoading } = useGetMahaDashaPredictionsQuery(queryArgs);
+
+  const handlePlanetClick = (planetName) => {
+    if (!data?.response?.dashas) return;
+
+    // Find the index of the dasha that matches the planet name
+    const dashaIndex = data.response.dashas.findIndex(
+      (dasha) => dasha.dasha === planetName
+    );
+
+    if (dashaIndex !== -1) {
+      // Expand the accordion
+      setExpandedIndex(dashaIndex);
+      
+      // Scroll to the accordion after a short delay to allow expansion animation
+      setTimeout(() => {
+        accordionRefs.current[dashaIndex]?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }, 100);
+    }
+  };
 
   if (isLoading) {
     return <PrimaryLoader isLoading={isLoading} />;
@@ -37,17 +60,22 @@ const Vimshottari = () => {
           <AdditionalPlanetaryInfo 
             title="Vimshottari Dasha"
             isLoading={false}
+            onPlanetClick={handlePlanetClick}
           />
     <div className={styles.dashaContainer}>
       {data.response.dashas.map((dasha, i) => (
-        <div key={i} className={styles.dashaAccordion}>
+        <div 
+          key={i} 
+          className={styles.dashaAccordion}
+          ref={(el) => (accordionRefs.current[i] = el)}
+        >
           {/* Accordion Header */}
           <div 
             className={styles.dashaHeader}
             onClick={() => toggleDasha(i)}
           >
             <div className={styles.headerContent}>
-              <div className={styles.dashaName}>{dasha.dasha}</div>
+              <div className={styles.dashaName}>{dasha.dasha} Mahadasha</div>
               <div className={styles.dateRange}>
                 {dasha.dasha_start_year} - {dasha.dasha_end_year}
               </div>
