@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import styles from "./Onboarding.module.scss";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
-import WheelDatePicker from "../../../component/UI/WheelDatePicker/WheelDatePicker";
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -45,8 +43,6 @@ const BirthDetailsScreen = ({
   totalSteps = 3,
   onStepChange,
 }) => {
-  const [showDatePicker, setShowDatePicker] = useState(false);
-
   const initialValues = {
     birthDate: formData.birthDate || "",
     birthTime: formData.birthTime || "",
@@ -59,13 +55,6 @@ const BirthDetailsScreen = ({
   const handleSubmit = (values) => {
     updateFormData(values);
     onNext();
-  };
-
-  // Format date for display (DD/MM/YYYY)
-  const formatDateDisplay = (dateStr) => {
-    if (!dateStr) return "DD/MM/YYYY";
-    const [year, month, day] = dateStr.split("-");
-    return `${day}/${month}/${year}`;
   };
 
   return (
@@ -101,18 +90,14 @@ const BirthDetailsScreen = ({
 
             <div className={styles.formGroup}>
               <label>Birth Date<span className={styles.required}>*</span></label>
-              <div 
-                className={`${styles.inputWrapper} ${touched.birthDate && errors.birthDate ? styles.error : ""}`}
-                onClick={() => setShowDatePicker(true)}
-              >
-                <input
-                  type="text"
-                  value={formatDateDisplay(values.birthDate)}
-                  readOnly
+              <div className={`${styles.inputWrapper} ${touched.birthDate && errors.birthDate ? styles.error : ""}`}>
+                <Field
+                  type="date"
+                  name="birthDate"
                   className={styles.input}
                   placeholder="DD/MM/YYYY"
+                  max={new Date().toISOString().split('T')[0]}
                 />
-                <Calendar className={styles.inputIcon} size={20} />
               </div>
               <ErrorMessage name="birthDate">
                 {(msg) => <span className={styles.errorText}>{msg}</span>}
@@ -192,19 +177,6 @@ const BirthDetailsScreen = ({
           >
             Next
           </button>
-
-          {showDatePicker && (
-            <WheelDatePicker
-              value={values.birthDate}
-              onChange={(date) => {
-                setFieldValue("birthDate", date);
-                setFieldTouched("birthDate", true);
-                // Trigger validation after setting the value
-                setTimeout(() => validateForm(), 0);
-              }}
-              onClose={() => setShowDatePicker(false)}
-            />
-          )}
         </Form>
       )}
     </Formik>

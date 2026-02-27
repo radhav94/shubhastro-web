@@ -538,8 +538,21 @@ const HoroscopeNew = () => {
                         </div>
                         <div className="overview-card-body overview-card-body-expanded">
                           <div className="overview-card-text">
-                            {truncatedText.split('\n\n').map((paragraph, pIndex) => (
-                              <p key={pIndex}>{paragraph}</p>
+                            {truncatedText.split('\n\n').map((paragraph, pIndex, arr) => (
+                              <p key={pIndex}>
+                                {paragraph}
+                                {isTruncated && pIndex === arr.length - 1 && (
+                                  <>
+                                    ...
+                                    <span 
+                                      className="show-more-link"
+                                      onClick={() => handleShowMore(categories.find(c => c.label === section.title)?.id || section.title)}
+                                    >
+                                      show more
+                                    </span>
+                                  </>
+                                )}
+                              </p>
                             ))}
                             {isTruncated && (
                               <span 

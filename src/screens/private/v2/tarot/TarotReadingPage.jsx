@@ -19,7 +19,7 @@ const TarotReadingPage = () => {
     { id: 4, title: 'Daily Horoscope', type: '', apiEndpoint: 'daily' },
     { id: 5, title: 'In Depth Love', type: '', apiEndpoint: 'in-depth-love' },
     { id: 6, title: 'Erotic Love', type: '', apiEndpoint: 'erotic-love' },
-    { id: 7, title: 'Made for Each Other', type: '', apiEndpoint: 'made-for-each-other' },
+    { id: 7, title: 'Made for Each Other', type: '', apiEndpoint: 'made-for-each-other-or-not' },
     { id: 8, title: 'Flirt Reading', type: '', apiEndpoint: 'flirt-reading' },
     { id: 9, title: 'Romantic Breakup', type: '', apiEndpoint: 'romantic-breakup' },
     { id: 10, title: 'Business Breakup', type: '', apiEndpoint: 'business-breakup' },
