@@ -640,4 +640,5 @@ export const relationOption = [
     { id: 4, title: "Mother", value: "Mother" },
     { id: 5, title: "Father", value: "Father" },
     { id: 6, title: "Friend", value: "Friend" },
+    { id: 7, title: "Wife", value: "Wife" },
   ];
