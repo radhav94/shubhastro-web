@@ -45,6 +45,7 @@ const AgenticCalendar = () => {
   const resultsRef = useRef(null);
 
   const [navStateConsumed, setNavStateConsumed] = useState(false);
+  const [autoSubmitPending, setAutoSubmitPending] = useState(false);
 
   // Initialize from navigation state (once only)
   useEffect(() => {
@@ -53,6 +54,7 @@ const AgenticCalendar = () => {
       const customs = navState.occasions.filter((o) => !defaultSet.has(o));
       if (customs.length) setCustomOccasions(customs);
       setSelectedOccasions(navState.occasions);
+      setAutoSubmitPending(true);
     }
     if (navState.period) setSelectedPeriod(navState.period);
     if (navState.customDate) {
@@ -60,6 +62,17 @@ const AgenticCalendar = () => {
       setSelectedPeriod(null);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-submit when redirected from home with pre-selected occasions
+  useEffect(() => {
+    if (autoSubmitPending && !profileLoading) {
+      setAutoSubmitPending(false);
+      // Clear nav state so a page refresh won't re-trigger auto-submit
+      navigate(location.pathname, { replace: true, state: {} });
+      setNavStateConsumed(true);
+      handleGetTimings();
+    }
+  }, [autoSubmitPending, profileLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Clear nav state on first user interaction
   const clearNavState = () => {
@@ -109,8 +122,13 @@ const AgenticCalendar = () => {
       setIsLoading(true);
       setAnalysis(null);
       setExpandedOccasion(null);
+      const dateObj = customDate || new Date();
+      const yyyy = dateObj.getFullYear();
+      const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const dd = String(dateObj.getDate()).padStart(2, '0');
+
       const result = await analyzeCalendarEvents(selectedOccasions, {
-        date: customDate ? customDate.toISOString() : new Date().toISOString(),
+        date: `${yyyy}-${mm}-${dd}`,
         kundliId: profile?._id,
       });
       if (result.success) {

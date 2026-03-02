@@ -146,6 +146,22 @@ const ProfileManager = ({
 
   // Handler: Open add profile modal
   const handleAddProfile = () => {
+    // Check if maximum profile limit is reached (5 profiles max)
+    const MAX_PROFILES = 5;
+    
+    console.log("=== ADD PROFILE CHECK ===");
+    console.log("Current profiles:", profiles);
+    console.log("Current profiles count:", profiles.length);
+    console.log("Max allowed:", MAX_PROFILES);
+    console.log("Limit exceeded?", profiles.length >= MAX_PROFILES);
+    
+    if (profiles.length >= MAX_PROFILES) {
+      Toast.error("Please Delete One Kundli from Existing One");
+      console.log("❌ Blocked: Profile limit reached");
+      return;
+    }
+    
+    console.log("✅ Opening Add Profile modal");
     setShowAddProfile(true);
   };
 
@@ -287,6 +303,25 @@ const ProfileManager = ({
     if (!profileToDelete) return;
 
     try {
+      // Find the profile being deleted
+      const profileBeingDeleted = profiles.find(p => p._id === profileToDelete);
+      
+      // Check if this is a "Self" profile
+      const isSelfProfile = profileBeingDeleted?.relation?.toLowerCase() === "self";
+      
+      // Count total "Self" profiles
+      const selfProfilesCount = profiles.filter(
+        p => p.relation?.toLowerCase() === "self"
+      ).length;
+      
+      // Prevent deletion if this is the last "Self" profile
+      if (isSelfProfile && selfProfilesCount === 1) {
+        Toast.error("Cannot delete the last Self profile. At least one Self profile is required.");
+        setShowDeleteModal(false);
+        setProfileToDelete(null);
+        return;
+      }
+
       // Only call API if user is logged in
       if (token && deleteKundli) {
         await deleteKundli(profileToDelete).unwrap();
@@ -330,6 +365,11 @@ const ProfileManager = ({
   const getEditInitialData = () => {
     if (!profileToEdit) return null;
 
+    // Ensure relation value matches the option values exactly (capitalize first letter)
+    const relationValue = profileToEdit.relation 
+      ? profileToEdit.relation.charAt(0).toUpperCase() + profileToEdit.relation.slice(1).toLowerCase()
+      : "Self";
+
     return {
       name: profileToEdit.name,
       identity:
@@ -338,7 +378,7 @@ const ProfileManager = ({
           : profileToEdit.gender === "female"
             ? "Female"
             : "Others",
-      relation: profileToEdit.relation || "Self",
+      relation: relationValue,
       birthDate: `${profileToEdit.year}-${String(profileToEdit.month).padStart(2, "0")}-${String(profileToEdit.day).padStart(2, "0")}`,
       birthTime: `${String(profileToEdit.hour).padStart(2, "0")}:${String(profileToEdit.min).padStart(2, "0")}`,
       birthPlace: profileToEdit.place,
@@ -379,7 +419,7 @@ const ProfileManager = ({
         isLoading={isCreating}
         title="Add Profile"
         showProfileListing={false}
-        savedKundlis={filteredProfiles}
+        savedKundlis={profiles}
       />
 
       {/* Edit Profile Modal */}
@@ -390,7 +430,7 @@ const ProfileManager = ({
         isLoading={isCreating}
         title="Edit Profile"
         initialData={getEditInitialData()}
-        savedKundlis={filteredProfiles}
+        savedKundlis={profiles}
       />
 
       {/* Delete Confirmation Modal */}

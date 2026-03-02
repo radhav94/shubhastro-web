@@ -14,9 +14,9 @@ const ProfileSelector = ({ selectedProfile, onSelectClick, onEditClick }) => {
                             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </button>
-                    <div className={styles.profileSelector} onClick={onSelectClick}>
+                    <div className={styles.profileSelector}>
                         <span className={styles.selectLabel}>Select Profile</span>
-                        <span className={styles.profileName}>
+                        <span className={styles.profileName} onClick={onSelectClick}>
                             {selectedProfile ? selectedProfile.name : "Select Profile"}
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline-block', marginLeft: '4px', verticalAlign: 'middle' }}>
                                 <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
