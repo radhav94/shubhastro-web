@@ -1062,7 +1062,7 @@ const Profile = () => {
                 </text>
               </svg>
             </div>
-            <Sparkles size={16} fill="#FFF" color="#FFF" />
+            {/* <Sparkles size={16} fill="#FFF" color="#FFF" /> */}
             <span className={styles.balanceLabel}>Balance</span>
           </div>
           <div className={styles.balanceAmount}>
