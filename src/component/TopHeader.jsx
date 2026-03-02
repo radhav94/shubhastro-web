@@ -338,8 +338,8 @@ const TopHeader = () => {
                   <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_9128_57)"/>
                   <defs>
                     <linearGradient id="paint0_linear_9128_57" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
-                      <stop stop-color="#F75801"/>
-                      <stop offset="1" stop-color="#D43400"/>
+                      <stop stopColor="#F75801"/>
+                      <stop offset="1" stopColor="#D43400"/>
                     </linearGradient>
                   </defs>
                 </svg>
@@ -369,9 +369,11 @@ const TopHeader = () => {
             </div>
             {/* language end */}
 
-            <div className={styles.walletBadge}>
-              {/* <div className={styles.coinIcon}></div> */}
-              <img src={headerCoin} className={styles.coinImg} alt="coin icon" />
+            <div className={styles.walletBadge}
+              onClick={() => requireAuth() && navigate(PATH.privateRoutes.PROFILE.path)}
+              style={{ cursor: 'pointer' }}
+>
+               <img src={headerCoin} className={styles.coinImg} alt="coin icon" />
               <span className={styles.walletAmount}>
                 {formatAmount(
                   isFetchingBalance ? "..." : isLoggedIn ? balance || 0 : 0,
@@ -394,7 +396,7 @@ const TopHeader = () => {
       <div className={styles.headerNavigationSubmenuWrap}>
         <nav className={styles.headerNavigationSubmenu}>
                 <span className={styles.quickNavText}>Quick Links 
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
                 </span>
             {/* <NavLink
               to="/tarot"

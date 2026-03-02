@@ -388,13 +388,13 @@
 
 .overview-cards-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   align-items: start;
 }
 
 .overview-cards-grid.three-column {
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .overview-card {
@@ -403,7 +403,7 @@
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   border: 1px solid #d0d0d0;
-  height: 220px;
+  height: 170px;
   display: flex;
   flex-direction: column;
 }
@@ -476,18 +476,34 @@
   color: #B82E00;
 }
 
+.show-less-link {
+  color: #F75801;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 16px;
+  transition: color 0.2s ease;
+}
+
+.show-less-link:hover {
+  color: #D43400;
+  text-decoration: underline;
+}
+
+.show-less-link:active {
+  color: #B82E00;
+}
+
 .overview-card-text {
   padding: 14px 18px 18px 18px;
   border-top: 1px solid #d0d0d0;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
   color: #666666;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 6;
-  line-clamp: 6;
-  -webkit-box-orient: vertical;
-  text-overflow: ellipsis;
+  overflow: auto;
+  word-wrap: break-word;
+
 }
 
 .overview-card-text p {
@@ -510,7 +526,7 @@
   }
   
   .overview-card {
-    height: 200px;
+    height: 170px;
   }
   
   .overview-card-header {
@@ -518,7 +534,7 @@
   }
   
   .overview-card-title {
-    font-size: 15px;
+    font-size: 14px;
   }
   
   .overview-card-score {
@@ -527,10 +543,8 @@
   
   .overview-card-text {
     padding: 12px 16px 16px 16px;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.5;
-    -webkit-line-clamp: 6;
-    line-clamp: 6;
   }
 }
 
@@ -551,7 +565,7 @@
   
   .overview-card {
     border-radius: 8px;
-    height: 150px;
+    height: 130px;
   }
   
   .overview-card-header {
@@ -574,8 +588,6 @@
     padding: 10px 12px 12px 12px;
     font-size: 11px;
     line-height: 1.4;
-    -webkit-line-clamp: 5;
-    line-clamp: 5;
   }
   
   .overview-card-text p {
@@ -1093,7 +1105,7 @@
 
   /* Desktop Overview Sections */
   .overview-cards-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
 
@@ -1103,7 +1115,7 @@
 
   .overview-card {
     border-radius: 14px;
-    height: 220px;
+    height: 180px;
   }
 
   .overview-card-header {
@@ -1119,10 +1131,9 @@
   }
 
   .overview-card-text {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.6;
-    -webkit-line-clamp: 6;
-    line-clamp: 6;
+
   }
 
   .overview-card-text p {

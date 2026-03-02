@@ -254,7 +254,16 @@ const LiveView = (props) => {
       setShowWaitingModal(true);
     };
 
-    const handleCallAccepted = async ({ roomId, token: agoraToken, type, remainingTime }) => {
+    const handleCallAccepted = async ({ roomId, token: agoraToken, type, remainingTime, isSwitch }) => {
+      // If this is a switch from audio to video, let CallContext handle it
+      if (isSwitch && type === "video") {
+        console.log("🔄 Video upgrade accepted - CallContext will handle the switch");
+        setShowWaitingModal(false);
+        resetCallFlow();
+        return;
+      }
+      
+      // Regular call acceptance
       setShowWaitingModal(false);
       resetCallFlow();
       const astro = astrologerRef.current;
@@ -297,6 +306,14 @@ const LiveView = (props) => {
     };
 
     const handleCallRejected = (data) => {
+      // Check if this is a video switch rejection during an active audio call
+      if (data?.switchRejected && data?.type === "audio") {
+        console.log("🔄 Video switch rejected - audio call continues");
+        // Don't reset anything - the audio call should continue
+        return;
+      }
+      
+      // Regular call rejection - end everything
       const errorMsg =
         data?.sessionData?.sessionEndReason === "rejected"
           ? "Astrologer has rejected the call request"
