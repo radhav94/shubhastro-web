@@ -78,14 +78,16 @@ const FaceReadingCamera = () => {
   }, [modelsLoaded]);
 
   useEffect(() => {
-    startCamera();
+    console.log('[FaceReadingCamera] facingMode changed to:', facingMode);
+    const timer = setTimeout(() => {
+      startCamera();
+    }, 200);
     
-    // Cleanup function to stop camera when component unmounts
     return () => {
+      clearTimeout(timer);
       console.log('FaceReadingCamera unmounting, stopping camera');
       stopDetection();
       
-      // Stop video stream
       if (videoRef.current && videoRef.current.srcObject) {
         const tracks = videoRef.current.srcObject.getTracks();
         tracks.forEach(track => {
@@ -95,14 +97,13 @@ const FaceReadingCamera = () => {
         videoRef.current.srcObject = null;
       }
       
-      // Stop stream state
       if (stream) {
         stream.getTracks().forEach(track => {
           track.stop();
         });
       }
     };
-  }, [facingMode, modelsLoaded]);
+  }, [facingMode]);
 
   const startCamera = async () => {
     try {
@@ -118,7 +119,7 @@ const FaceReadingCamera = () => {
       // Request camera permission
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode,
+          facingMode: { ideal: facingMode },
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }

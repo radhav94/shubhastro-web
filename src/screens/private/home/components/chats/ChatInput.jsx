@@ -53,8 +53,12 @@ const ChatInput = ({
   };
 
   const handleStopRecording = async () => {
-    const { blob, duration } = await stopRecording();
-    await sendVoiceMessage(blob, duration);
+    try {
+      const { blob, duration } = await stopRecording();
+      await sendVoiceMessage(blob, duration);
+    } catch (err) {
+      console.error("[VoiceRecorder] Stop failed:", err);
+    }
   };
 
   return (

@@ -33,9 +33,12 @@ const AuraCamera = () => {
   }, [modelsLoaded]);
 
   useEffect(() => {
-    startCamera();
+    const timer = setTimeout(() => {
+      startCamera();
+    }, 200);
     
     return () => {
+      clearTimeout(timer);
       stopDetection();
       
       if (videoRef.current && videoRef.current.srcObject) {
@@ -48,7 +51,7 @@ const AuraCamera = () => {
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [facingMode, modelsLoaded]);
+  }, [facingMode]);
 
   const startCamera = async () => {
     try {
@@ -61,7 +64,7 @@ const AuraCamera = () => {
 
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode,
+          facingMode: { ideal: facingMode },
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -119,6 +122,9 @@ const AuraCamera = () => {
   };
 
   const switchCamera = () => {
+    // Stop current camera completely before switching
+    stopCamera();
+    
     const nextMode = facingMode === 'user' ? 'environment' : 'user';
     setFacingMode(nextMode);
   };
@@ -213,6 +219,7 @@ const AuraCamera = () => {
               ref={videoRef}
               autoPlay
               playsInline
+              muted
               className={styles.video}
             />
             <canvas
