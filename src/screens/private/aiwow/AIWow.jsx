@@ -137,6 +137,12 @@ const AIWow = () => {
     
   };
 
+  const handleProfileClick = () => {
+    // ✅ Authentication check - redirect to login if not authenticated
+    if (!requireAuth()) return null;
+    setShowProfileModal(true);
+  };
+
   // Coming Soon Features - Empty array since Aura Photography is now unlocked
   // const comingSoonFeatures = [];
 
@@ -164,7 +170,7 @@ const AIWow = () => {
           </span>
           <div
             className={styles.profileSelector}
-            onClick={() => setShowProfileModal(true)}
+            onClick={handleProfileClick}
           >
             <span className={styles.selectLabel}>Select Profile</span>
             <span className={styles.profileName}>
