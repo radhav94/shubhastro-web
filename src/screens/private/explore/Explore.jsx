@@ -162,13 +162,13 @@ const Explore = () => {
     if (displayType === "discover-more" && slug === "discover-your-kundli") {
       return (
         <section key={index} className={styles.section}>
-          <h1 className={styles.titleSub}>Discover Your Kundli</h1>
+          {/* <h1 className={styles.titleSub}>Discover Your Kundli</h1> */}
+          <div className={styles.titleSub}>
+            <SectionTitleWithDivider 
+              title={(section.display_title || section.title || "").toUpperCase()} 
+            />
+          </div>
           <div className={styles.kundliSection}>
-            {/* <div className={styles.sectionHeader}>
-              <SectionTitleWithDivider 
-                title={(section.display_title || section.title || "").toUpperCase()} 
-              />
-            </div> */}
 
             <div className={styles.kundliGrid}>
               {sectionContent.slice(0, 4).map((card, idx) => (
@@ -202,13 +202,13 @@ const Explore = () => {
     if (displayType === "discover-more") {
       return (
         <section key={index} className={styles.section}>
-          <h1 className={styles.titleSub}>Explore Your Destiny</h1>
-          {/* <div className={styles.sectionHeader}>
+          {/* <h1 className={styles.titleSub}>Explore Your Destiny</h1> */}
+          <div className={styles.sectionHeader}>
             <SectionTitleWithDivider 
               title={(section.display_title || section.title || "").toUpperCase()} 
             />
-            <ChevronRight size={24} className={styles.sectionArrow} />
-          </div> */}
+            {/* <ChevronRight size={24} className={styles.sectionArrow} /> */}
+          </div>
 
           <div className={styles.destinyGrid}>
             {sectionContent.map((card, idx) => (
