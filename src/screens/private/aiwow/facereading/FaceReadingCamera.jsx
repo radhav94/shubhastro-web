@@ -192,6 +192,10 @@ const FaceReadingCamera = () => {
     // Start camera with new mode will be handled by useEffect
   };
 
+  // On desktop, faceInCircle check can be unreliable due to object-fit: cover coordinate mismatch
+  // Use faceDetected as the capture gate — circle is a visual guide
+  const canCapture = faceDetected;
+
   const captureImage = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
@@ -353,7 +357,7 @@ const FaceReadingCamera = () => {
             />
             <div className={styles.overlay}>
               {/* Circular face frame */}
-              <div className={`${styles.faceCircle} ${faceInCircle ? styles.detected : styles.notDetected}`}>
+              <div className={`${styles.faceCircle} ${canCapture ? styles.detected : styles.notDetected}`}>
                 <svg className={styles.circleSvg} viewBox="0 0 300 300">
                   <circle 
                     cx="150" 
@@ -367,7 +371,7 @@ const FaceReadingCamera = () => {
                 </svg>
               </div>
             </div>
-            {!faceInCircle && modelsLoaded && (
+            {!canCapture && modelsLoaded && (
               <div className={styles.faceDetectionMessage}>
                 <p>Position your face within the circle</p>
               </div>
@@ -383,18 +387,18 @@ const FaceReadingCamera = () => {
       <div className={styles.controls}>
         {!capturedImage ? (
           <button 
-            className={`${styles.captureButton} ${(!faceInCircle && modelsLoaded) ? styles.disabled : ''}`} 
+            className={`${styles.captureButton} ${(!canCapture && modelsLoaded) ? styles.disabled : ''}`} 
             onClick={captureImage}
-            disabled={!faceInCircle && modelsLoaded}
+            disabled={!canCapture && modelsLoaded}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!faceInCircle && modelsLoaded) ? "0.5" : "1"}/>
-                <circle cx="20" cy="20" r="14" fill="white" opacity={(!faceInCircle && modelsLoaded) ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!canCapture && modelsLoaded) ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="14" fill="white" opacity={(!canCapture && modelsLoaded) ? "0.5" : "1"}/>
               </svg>
             </div>
             <span className={styles.captureText}>
-              {!modelsLoaded ? 'Loading...' : (faceInCircle ? 'Capture' : 'Face Outside Circle')}
+              {!modelsLoaded ? 'Loading...' : (canCapture ? 'Capture' : 'No Face Detected')}
             </span>
           </button>
         ) : (
