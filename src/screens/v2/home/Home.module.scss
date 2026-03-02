@@ -391,9 +391,9 @@
   align-self: flex-start;
   height: fit-content;
   top: 100px;
-  & .cosmicInsightSection{
-    // height: 400px;
-  }
+  // & .cosmicInsightSection{
+  //   // height: 400px;
+  // }
   & .cosmicInsightCard{
     height: 100%;
     align-items: flex-start;
@@ -3476,6 +3476,7 @@
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;  
+  line-clamp: 3;
   overflow: hidden;
 }
 
@@ -3988,9 +3989,9 @@
   // }
 }
 
-.dashaCardHeader {
-  // margin-bottom: 12px;
-}
+// .dashaCardHeader {
+//   // margin-bottom: 12px;
+// }
 
 .dashaType {
   font-size: 14px;
