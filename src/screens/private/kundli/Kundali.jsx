@@ -40,8 +40,29 @@ import { ProfileManager } from "../../../component/UI/Profile";
 const Kundali = () => {
   const contentRef = useRef(null);
   const dispatch = useDispatch();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { kundliId } = useParams();
+  
+  // State to control active tab - default to Basic (0)
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  
+  // Sync activeTabIndex with query params on mount and when params change
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      const tabMap = {
+        'basic': 0,
+        'kundli': 1,
+        'kp': 2,
+        'ashtakvarga': 3,
+        'charts': 4,
+        'dasha': 5,
+        'free-report': 6,
+        '12-months': 7,
+      };
+      setActiveTabIndex(tabMap[tab] || 0);
+    }
+  }, [searchParams]);
 
   // Get initial tab index from query params
   const getInitialTabIndex = () => {
@@ -337,6 +358,15 @@ const Kundali = () => {
     
     setSelectedProfile(profile);
     setShowSelectProfile(false);
+    
+    // Reset to Basic tab (index 0)
+    setActiveTabIndex(0);
+    
+    // Clear tab and subtab query parameters
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete('tab');
+    newParams.delete('subtab');
+    setSearchParams(newParams, { replace: true });
   };
 
   const handleDeleteProfile = (e, profileId) => {
@@ -520,7 +550,11 @@ const Kundali = () => {
       {selectedProfile && (
         <div ref={contentRef} id="kundli-tabs">
           {planetLoading || isAstro ? (
-            <PrimaryTabs tabs={tabsData} initialActiveIndex={getInitialTabIndex()} />
+            <PrimaryTabs 
+              key={selectedProfile._id} 
+              tabs={tabsData} 
+              initialActiveIndex={activeTabIndex} 
+            />
           ) : (
             <HtmlContentCard sections={kundliInfoData} />
           )}

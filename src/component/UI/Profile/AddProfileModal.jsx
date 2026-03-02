@@ -44,7 +44,19 @@ const AddProfileModal = ({
     name: Yup.string()
       .required("Name is required")
       .matches(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces"),
-    relation: Yup.string().required("Relation is required"),
+    relation: Yup.string()
+      .required("Relation is required")
+      .test(
+        "unique-self",
+        "A Self profile already exists. Please select a different relation.",
+        function(value) {
+          // Allow any relation except "Self" if a Self profile already exists
+          if (value?.toLowerCase() === "self" && hasSelfProfile) {
+            return false;
+          }
+          return true;
+        }
+      ),
     birthDate: Yup.string().required("Birth date is required"),
     birthTime: Yup.string().when("unknownBirthTime", {
       is: false,
@@ -152,7 +164,7 @@ const AddProfileModal = ({
             {({ values, setFieldValue, resetForm }) => (
               <Form className={styles.profileForm}>
                 <div className={styles.formGroup}>
-                  <label>Name</label>
+                  <label>Name <span className={styles.required}>*</span></label>
                   <Field
                     type="text"
                     name="name"
@@ -245,23 +257,21 @@ const AddProfileModal = ({
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Relation</label>
+                  <label>Relation <span className={styles.required}>*</span></label>
                   <Field
                     as="select"
                     name="relation"
                   >
                     <option value="">Select relation</option>
-                    {relationOption
-                      .filter((opt) => hasSelfProfile ? opt.title !== "Self" : true)
-                      .map((option) => {
-                        return <option key={option.id} value={option.value}>{option.title}</option>;
-                      })}
+                    {relationOption.map((option) => {
+                      return <option key={option.id} value={option.value}>{option.title}</option>;
+                    })}
                   </Field>
                   <ErrorMessage name="relation" component="div" className={styles.errorText} />
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Birth Date</label>
+                  <label>Birth Date <span className={styles.required}>*</span></label>
                   <Field
                     type="date"
                     name="birthDate"
@@ -271,7 +281,7 @@ const AddProfileModal = ({
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Birth Time</label>
+                  <label>Birth Time <span className={styles.required}>*</span></label>
                   <Field
                     type="time"
                     name="birthTime"
@@ -288,7 +298,7 @@ const AddProfileModal = ({
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Place of Birth</label>
+                  <label>Place of Birth <span className={styles.required}>*</span></label>
                   <LocationSearch
                     value={values.birthPlace}
                     onChange={(e) => setFieldValue("birthPlace", e.target.value)}

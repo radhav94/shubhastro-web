@@ -41,7 +41,43 @@ const EditProfileModal = ({
     name: Yup.string()
       .required("Name is required")
       .matches(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces"),
-    relation: Yup.string().required("Relation is required"),
+    relation: Yup.string()
+      .required("Relation is required")
+      .test(
+        "unique-self",
+        "A Self profile already exists. Please select a different relation.",
+        function(value) {
+          // Allow "Self" if the current profile being edited is already "Self"
+          const isCurrentlySelf = initialData?.relation?.toLowerCase() === "self";
+          
+          // Allow any relation except "Self" if a Self profile already exists
+          // and the current profile is not already "Self"
+          if (value?.toLowerCase() === "self" && hasSelfProfile && !isCurrentlySelf) {
+            return false;
+          }
+          return true;
+        }
+      )
+      .test(
+        "last-self",
+        "Cannot change the last Self profile. At least one Self profile is required.",
+        function(value) {
+          // Check if this is the last "Self" profile being changed to something else
+          const isCurrentlySelf = initialData?.relation?.toLowerCase() === "self";
+          const isChangingFromSelf = isCurrentlySelf && value?.toLowerCase() !== "self";
+          
+          // Count total "Self" profiles
+          const selfProfilesCount = savedKundlis.filter(
+            p => p.relation?.toLowerCase() === "self"
+          ).length;
+          
+          // Prevent changing from "Self" if this is the last Self profile
+          if (isChangingFromSelf && selfProfilesCount === 1) {
+            return false;
+          }
+          return true;
+        }
+      ),
     birthDate: Yup.string().required("Birth date is required"),
     birthTime: Yup.string().when("unknownBirthTime", {
       is: false,
@@ -72,6 +108,21 @@ const EditProfileModal = ({
   const handleSubmit = async (values) => {
     if (!values.latitude || !values.longitude) {
       Toast.error("Please select a valid location from the dropdown");
+      return;
+    }
+
+    // Check if this is the last "Self" profile being changed to something else
+    const isCurrentlySelf = initialData?.relation?.toLowerCase() === "self";
+    const isChangingFromSelf = isCurrentlySelf && values.relation?.toLowerCase() !== "self";
+    
+    // Count total "Self" profiles
+    const selfProfilesCount = savedKundlis.filter(
+      p => p.relation?.toLowerCase() === "self"
+    ).length;
+    
+    // Prevent changing from "Self" if this is the last Self profile
+    if (isChangingFromSelf && selfProfilesCount === 1) {
+      Toast.error("Cannot change the last Self profile. At least one Self profile is required.");
       return;
     }
 
@@ -119,7 +170,7 @@ const EditProfileModal = ({
             {({ values, setFieldValue }) => (
               <Form className={styles.profileForm}>
                 <div className={styles.formGroup}>
-                  <label>Name</label>
+                  <label>Name <span className={styles.required}>*</span></label>
                   <Field
                     type="text"
                     name="name"
@@ -212,29 +263,25 @@ const EditProfileModal = ({
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Relation</label>
+                  <label>Relation <span className={styles.required}>*</span></label>
                   <Field
                     as="select"
                     name="relation"
                   >
                     <option value="">Select relation</option>
-                    {relationOption
-                      .filter((opt) => 
-                        values.relation?.toLowerCase() === "self" || !hasSelfProfile || opt.title !== "Self"
-                      )
-                      .map((option) => {
-                        return (
-                          <option key={option.id} value={option.value}>
-                            {option.title}
-                          </option>
-                        );
-                      })}
+                    {relationOption.map((option) => {
+                      return (
+                        <option key={option.id} value={option.value}>
+                          {option.title}
+                        </option>
+                      );
+                    })}
                   </Field>
                   <ErrorMessage name="relation" component="div" className={styles.errorText} />
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Birth Date</label>
+                  <label>Birth Date <span className={styles.required}>*</span></label>
                   <Field
                     type="date"
                     name="birthDate"
@@ -244,7 +291,7 @@ const EditProfileModal = ({
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Birth Time</label>
+                  <label>Birth Time <span className={styles.required}>*</span></label>
                   <Field
                     type="time"
                     name="birthTime"
@@ -261,7 +308,7 @@ const EditProfileModal = ({
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Place of Birth</label>
+                  <label>Place of Birth <span className={styles.required}>*</span></label>
                   <LocationSearch
                     value={values.birthPlace}
                     onChange={(e) => setFieldValue("birthPlace", e.target.value)}

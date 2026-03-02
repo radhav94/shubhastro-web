@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './AgenticCalendar.module.scss';
 import { Toast } from '../../../../component';
@@ -41,8 +41,11 @@ const AgenticCalendar = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [expandedOccasion, setExpandedOccasion] = useState(null);
+  const [locked, setLocked] = useState(false); // Lock selections after clicking Get Timing
+  const resultsRef = useRef(null);
 
   const [navStateConsumed, setNavStateConsumed] = useState(false);
+  const [autoSubmitPending, setAutoSubmitPending] = useState(false);
 
   // Initialize from navigation state (once only)
   useEffect(() => {
@@ -51,6 +54,7 @@ const AgenticCalendar = () => {
       const customs = navState.occasions.filter((o) => !defaultSet.has(o));
       if (customs.length) setCustomOccasions(customs);
       setSelectedOccasions(navState.occasions);
+      setAutoSubmitPending(true);
     }
     if (navState.period) setSelectedPeriod(navState.period);
     if (navState.customDate) {
@@ -58,6 +62,17 @@ const AgenticCalendar = () => {
       setSelectedPeriod(null);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-submit when redirected from home with pre-selected occasions
+  useEffect(() => {
+    if (autoSubmitPending && !profileLoading) {
+      setAutoSubmitPending(false);
+      // Clear nav state so a page refresh won't re-trigger auto-submit
+      navigate(location.pathname, { replace: true, state: {} });
+      setNavStateConsumed(true);
+      handleGetTimings();
+    }
+  }, [autoSubmitPending, profileLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Clear nav state on first user interaction
   const clearNavState = () => {
@@ -70,6 +85,7 @@ const AgenticCalendar = () => {
   const allOccasions = [...DEFAULT_OCCASIONS, ...customOccasions];
 
   const toggleOccasion = (occasion) => {
+    if (locked) return;
     clearNavState();
     setSelectedOccasions((prev) =>
       prev.includes(occasion) ? prev.filter((o) => o !== occasion) : [...prev, occasion]
@@ -77,6 +93,7 @@ const AgenticCalendar = () => {
   };
 
   const handleRemoveChip = (occasion) => {
+    if (locked) return;
     clearNavState();
     setSelectedOccasions((prev) => prev.filter((o) => o !== occasion));
     if (customOccasions.includes(occasion)) {
@@ -100,17 +117,26 @@ const AgenticCalendar = () => {
       Toast.error('Please select at least one occasion');
       return;
     }
+    setLocked(true);
     try {
       setIsLoading(true);
       setAnalysis(null);
       setExpandedOccasion(null);
+      const dateObj = customDate || new Date();
+      const yyyy = dateObj.getFullYear();
+      const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const dd = String(dateObj.getDate()).padStart(2, '0');
+
       const result = await analyzeCalendarEvents(selectedOccasions, {
-        date: customDate ? customDate.toISOString() : new Date().toISOString(),
+        date: `${yyyy}-${mm}-${dd}`,
         kundliId: profile?._id,
       });
       if (result.success) {
         setAnalysis(result.data);
         setExpandedOccasion(selectedOccasions[0]);
+        setTimeout(() => {
+          resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
       } else {
         Toast.error(result.error || 'Failed to analyze events');
       }
@@ -238,12 +264,13 @@ const AgenticCalendar = () => {
                 return (
                   <button
                     key={occasion}
-                    className={`${styles.chip} ${isSelected ? styles.chipSelected : ''}`}
-                    onClick={() => !isSelected && toggleOccasion(occasion)}
+                    className={`${styles.chip} ${isSelected ? styles.chipSelected : ''} ${locked ? styles.chipDisabled : ''}`}
+                    onClick={() => !isSelected && !locked && toggleOccasion(occasion)}
+                    disabled={locked}
                   >
                     {occasion}
                     {isSelected && isCustom && <span className={styles.customBadge}>Custom</span>}
-                    {isSelected && (
+                    {isSelected && !locked && (
                       <span
                         className={styles.chipClose}
                         onClick={(e) => { e.stopPropagation(); handleRemoveChip(occasion); }}
@@ -256,7 +283,7 @@ const AgenticCalendar = () => {
                   </button>
                 );
               })}
-            <button className={styles.addCustomChip} onClick={() => setShowCustomModal(true)}>
+            <button className={`${styles.addCustomChip} ${locked ? styles.chipDisabled : ''}`} onClick={() => { if (!locked) setShowCustomModal(true); }} disabled={locked}>
               + Add Custom
             </button>
           </div>
@@ -268,15 +295,17 @@ const AgenticCalendar = () => {
             {['Today', 'Tomorrow', 'This Week', 'This Month'].map((p) => (
               <button
                 key={p}
-                className={`${styles.periodChip} ${selectedPeriod === p ? styles.periodActive : ''}`}
-                onClick={() => { clearNavState(); setSelectedPeriod(p); setCustomDate(null); }}
+                className={`${styles.periodChip} ${selectedPeriod === p ? styles.periodActive : ''} ${locked ? styles.periodDisabled : ''}`}
+                onClick={() => { if (locked) return; clearNavState(); setSelectedPeriod(p); setCustomDate(null); }}
+                disabled={locked}
               >
                 {p}
               </button>
             ))}
             <button
-              className={`${styles.dateChip} ${customDate ? styles.periodActive : ''}`}
-              onClick={() => setShowDatePicker(true)}
+              className={`${styles.dateChip} ${customDate ? styles.periodActive : ''} ${locked ? styles.periodDisabled : ''}`}
+              onClick={() => { if (locked) return; setShowDatePicker(true); }}
+              disabled={locked}
             >
               <FiCalendar size={14} />
               {customDate
@@ -289,13 +318,23 @@ const AgenticCalendar = () => {
           <button
             className={styles.getTimingsBtn}
             disabled={selectedOccasions.length === 0 || isLoading}
-            onClick={handleGetTimings}
+            onClick={() => {
+              if (locked) {
+                setLocked(false);
+                setAnalysis(null);
+                setExpandedOccasion(null);
+              } else {
+                handleGetTimings();
+              }
+            }}
           >
             {isLoading ? (
               <>
                 <span className={styles.spinner} />
                 Analyzing...
               </>
+            ) : locked ? (
+              'Modify Selections'
             ) : (
               'Get Timing Recommendations'
             )}
@@ -303,7 +342,7 @@ const AgenticCalendar = () => {
 
           {/* Results Accordion */}
           {analysis?.optimalTimings?.length > 0 && (
-            <div className={styles.resultsWrap}>
+            <div className={styles.resultsWrap} ref={resultsRef}>
               {analysis.optimalTimings.map((timing) => {
                 const name = timing.eventName;
                 const isExpanded = expandedOccasion === name;

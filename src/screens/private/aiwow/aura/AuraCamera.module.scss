@@ -43,6 +43,12 @@
   }
 }
 
+.switchBtn {
+  @media (min-width: 769px) {
+    display: none;
+  }
+}
+
 .cameraWrapper {
   flex: 1;
   position: relative;

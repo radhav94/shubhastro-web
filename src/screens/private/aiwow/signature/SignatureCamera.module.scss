@@ -307,6 +307,10 @@
   &:hover {
     background: rgba(255, 255, 255, 0.3);
   }
+
+  @media (min-width: 769px) {
+    display: none;
+  }
 }
 
 .detectionCanvas {
