@@ -465,7 +465,7 @@
   gap: 6px;
   // background: linear-gradient(135deg, #8b6f47 0%, #6b4423 50%, #3e2415 100%);
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-  padding: 4px 8px;
+  padding: 4px 8px 4px 4px;
   border-radius: 50px;
   color: #fff;
   // cursor: pointer;
@@ -475,7 +475,7 @@
 }
 
 .walletBadge::before,.walletBadge::after {
-  content: "";
+  content: unset;
   position: absolute;
   top: -8px;
   left: 28%;
@@ -612,7 +612,8 @@
   }
 
   .walletBadge {
-    padding: 4px 14px 4px 8px;
+    padding: 4px 14px 4px 4px;
+    gap: 4px;
   }
 
   // .coinIcon {
