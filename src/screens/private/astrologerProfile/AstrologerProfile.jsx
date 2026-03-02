@@ -10,7 +10,10 @@ import {
 import { MdNotifications } from "react-icons/md";
 import { BiMessageDetail, BiPhone, BiVideo } from "react-icons/bi";
 import { PiBookOpenTextLight, PiUsersThreeBold } from "react-icons/pi";
-import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
+import {
+  useGetAstrologerByIdQuery,
+  useGetAstrologersQuery,
+} from "../../../redux/api/astrologer/astrologerApi";
 import { useNavigate, useParams } from "react-router-dom";
 import { ErrorText, PrimaryText } from "../../../component";
 import toast from "../../../component/toast";
@@ -33,6 +36,9 @@ import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal"
 import { useChat } from "../../../context/ChatContext";
 import { ProfileManager } from "../../../component/UI/Profile";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
+import { Link } from "react-router-dom";
+import { BookOpen } from "lucide-react";
+import { AppIcons, getAstrologerDefaultImage } from "../../../utils/appImages";
 
 // Import custom SVG icons
 import ExperienceIcon from "../../../assets/icons/experience.svg";
@@ -47,7 +53,6 @@ import VideoMinutesIcon from "../../../assets/icons/videoMinutes.svg";
 import SendGiftImage from "../../../assets/images/send-gift.png";
 import AstrologerShopImage from "../../../assets/images/astrologer-shop.png";
 import AstrologerNumerologyDefault from "../../../assets/default-img/astrologer-numerology.png";
-import { getAstrologerDefaultImage } from "../../../utils/appImages";
 import GiftModal from "../../../component/call/GiftModal";
 
 const AstrologerProfile = () => {
@@ -61,6 +66,13 @@ const AstrologerProfile = () => {
   } = useGetAstrologerByIdQuery({ id }, { skip: !id });
 
   const data = astrologerData?.data;
+
+  // Fetch top astrologers for left sidebar (desktop only)
+  const { data: topAstrologersData } = useGetAstrologersQuery({
+    page: 1,
+    limit: 10,
+    isActive: true,
+  });
   const {
     data: reviewsData,
     isLoading: reviewsLoading,
@@ -203,20 +215,40 @@ const AstrologerProfile = () => {
   };
 
   const handleChatStart = async (astro) => {
+    if (!token) {
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
+    
+    // Check if already in waiting state
+    if (WaitingList || callWaitingList) {
+      toast.error(
+        "You are already waiting for an astrologer. Please cancel the current request first.",
+      );
+      return;
+    }
+    
     activeCallAstroRef.current = astro;
     const result = await hookHandleChatStart(astro);
-    if (result) {
-      setIsConnectPopupOpen(false);
-    }
     return result;
   };
 
   const handleCallStart = async (astro, type) => {
+    if (!token) {
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
+    
+    // Check if already in waiting state
+    if (WaitingList || callWaitingList) {
+      toast.error(
+        "You are already waiting for an astrologer. Please cancel the current request first.",
+      );
+      return;
+    }
+    
     activeCallAstroRef.current = astro;
     const result = await hookHandleCallStart(astro, type);
-    if (result) {
-      setIsConnectPopupOpen(false);
-    }
     return result;
   };
 
@@ -527,6 +559,9 @@ const AstrologerProfile = () => {
   // Use the overall rating from API data (not calculated from limited reviews)
   const averageRating = data?.rating || 0;
 
+  // Get top astrologers list from the API response
+  const topAstrologers = topAstrologersData?.data?.topTenAstrologer || [];
+
   // Helper function to format availability slots
   const formatAvailability = (availability) => {
     if (!availability || availability.length === 0) {
@@ -715,210 +750,487 @@ const AstrologerProfile = () => {
         </div>
       </header>
 
-      <div className={styles.profileContentMain}>
-        {/* Profile Card */}
-        <div className={styles.profileCard}>
-          <div className={styles.profileImageWrapper}>
-            <img
-              src={displayData.imageUrl}
-              alt={displayData.firstName}
-              className={styles.profileImage}
-              onError={(e) => {
-                e.target.src = getAstrologerDefaultImage(data?.gender);
-              }}
-            />
-          </div>
-          <div className={styles.profileInfo}>
-            <h1 className={styles.astrologerName}>
-              {displayData.firstName} {displayData.lastName}
-            </h1>
-            <p className={styles.skills}>
-              {displayData.specialities.join(" • ")}
-            </p>
-            <p className={styles.expertise}>
-              {displayData.expertise.join(" • ")}
-            </p>
-            <div className={styles.languages}>
-              {displayData.languagePreference.map((lang, i) => (
-                <span key={i} className={styles.languageTag}>
-                  {lang}
+      {/* 3-Column Layout Container */}
+      <div className={styles.threeColumnLayout}>
+        {/* Left Sidebar - Top Astrologers (Desktop Only) */}
+        <aside className={styles.leftSidebar}>
+          <section className={styles.astrologersSection}>
+            <div className={styles.sectionHeader}>
+              <h3 className={styles.sidebarTitle}>TOP ASTROLOGERS</h3>
+              <div className={styles.titleDivider}>
+                <div className={styles.dividerLine}></div>
+                <span className={styles.dividerMoon}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="4"
+                    height="5"
+                    viewBox="0 0 4 5"
+                    fill="none"
+                  >
+                    <path
+                      d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z"
+                      fill="#0002"
+                    />
+                  </svg>
                 </span>
-              ))}
+                <div className={styles.dividerLine}></div>
+              </div>
             </div>
-          </div>
-        </div>
-
-        {/* Stats Section */}
-        <div className={styles.statsSection}>
-          <div className={styles.statItem}>
-            <img
-              src={ExperienceIcon}
-              alt="Experience"
-              className={styles.statIcon}
-            />
-            <div className={styles.statValue}>{displayData.experience}+</div>
-            <div className={styles.statLabel}>Experience</div>
-          </div>
-          <div className={styles.statDivider}></div>
-          <div className={styles.statItem}>
-            <img
-              src={ConsultationsIcon}
-              alt="Consultations"
-              className={styles.statIcon}
-            />
-            <div className={styles.statValue}>
-              {displayData.totalConsultations}
-            </div>
-            <div className={styles.statLabel}>Consultations</div>
-          </div>
-          <div className={styles.statDivider}></div>
-          <div className={styles.statItem}>
-            <img src={RatingIcon} alt="Rating" className={styles.statIcon} />
-            <div className={styles.statValue}>{Number(displayData.rating).toFixed(1)}</div>
-            <div className={styles.statLabel}>Rating</div>
-          </div>
-        </div>
-
-        {/* Consultation Hours */}
-        <div className={styles.consultationHours}>
-          <div className={styles.hoursHeader}>
-            <img src={TimeIcon} alt="Time" className={styles.clockIcon} />
-            <span className={styles.hoursTitle}>Consultation Hours</span>
-          </div>
-          <div className={styles.hoursContent}>
-            <div className={styles.timeSlots}>
-              {displayData.availability.map((slot, index) => (
-                <div key={index} className={styles.timeSlot}>
-                  {slot.time}
-                </div>
-              ))}
-            </div>
-            <button className={styles.reminderBtn} onClick={handleSetReminder}>
-              <img
-                src={NotificationIcon}
-                alt="Notification"
-                className={styles.notificationIcon}
-              />
-              Set Reminder
-            </button>
-          </div>
-        </div>
-
-        {/* Minutes Section */}
-        <div className={styles.minutesSection}>
-          <div className={styles.minuteItem}>
-            <img
-              src={ChatMinutesIcon}
-              alt="Chat"
-              className={styles.minuteIcon}
-            />
-            <div className={styles.minuteValue}>
-              {displayData.metrics.chatMinutes}
-            </div>
-            <div className={styles.minuteLabel}>Chat Minutes</div>
-          </div>
-          <div className={styles.minuteDivider}></div>
-          <div className={styles.minuteItem}>
-            <img
-              src={CallMinutesIcon}
-              alt="Call"
-              className={styles.minuteIcon}
-            />
-            <div className={styles.minuteValue}>
-              {displayData.metrics.audioMinutes}
-            </div>
-            <div className={styles.minuteLabel}>Call Minutes</div>
-          </div>
-          <div className={styles.minuteDivider}></div>
-          <div className={styles.minuteItem}>
-            <img
-              src={VideoMinutesIcon}
-              alt="Video"
-              className={styles.minuteIcon}
-            />
-            <div className={styles.minuteValue}>
-              {displayData.metrics.videoMinutes}
-            </div>
-            <div className={styles.minuteLabel}>Video Minutes</div>
-          </div>
-        </div>
-
-        {/* About Section */}
-        <div className={styles.aboutSection}>
-          <h3 className={styles.aboutTitle}>About</h3>
-          <p
-            className={`${styles.aboutText} ${showFullAbout ? styles.expanded : ""}`}
-          >
-            {displayData.description}
-          </p>
-          {displayData.description.length > 150 && (
-            <button
-              className={styles.readMoreBtn}
-              onClick={() => setShowFullAbout(!showFullAbout)}
-            >
-              {showFullAbout ? "Read Less" : "Read More"}
-            </button>
-          )}
-
-          {/* Video Gallery */}
-          {displayData.gallery.length > 0 && (
-            <div className={styles.videoGallery}>
-              {displayData.gallery.slice(0, 3).map((video, index) => (
-                <div key={index} className={styles.videoThumbnail}>
-                  <img
-                    src={video || AstrologerNumerologyDefault}
-                    alt={`Video ${index + 1}`}
-                    onError={(e) => {
-                      e.target.src = AstrologerNumerologyDefault;
-                    }}
-                  />
-                  <div className={styles.playButton}>
-                    <FaPlay />
+            <div className={styles.astrologersGrid}>
+              {topAstrologers.slice(0, 3).map((astrologer) => (
+                <div 
+                  key={astrologer._id}
+                  className={styles.astrologerCard}
+                >
+                  <Link to={`/astrologer/${astrologer?._id}`} className={styles.cardLink}>
+                    <div className={styles.astrologerImageWrapper}>
+                      <img
+                        src={astrologer.imageUrl || getAstrologerDefaultImage(astrologer.gender)}
+                        alt={astrologer.firstName}
+                        className={styles.astrologerImg}
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    </div>
+                    <div className={styles.ratingBadge}>
+                      <span className={styles.star}>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="21"
+                          viewBox="0 0 12 13"
+                          fill="none"
+                        >
+                          <g clipPath="url(#clip0_4961_937)">
+                            <path
+                              d="M5.94187 1.3447C6.09954 0.919606 6.69621 0.919606 6.85438 1.3447L7.87429 4.2327C7.90988 4.32678 7.97253 4.40762 8.05399 4.46454C8.13545 4.52146 8.23188 4.55179 8.33055 4.55152H10.837C11.3001 4.55152 11.5021 5.14081 11.138 5.42941L9.35441 7.06984C9.27451 7.13262 9.21612 7.21967 9.18762 7.31848C9.15912 7.41729 9.16196 7.52279 9.19575 7.61984L9.84712 10.4419C10.0058 10.8952 9.49237 11.2845 9.10411 11.0055L6.68143 9.43404C6.59847 9.37443 6.49953 9.34245 6.39812 9.34245C6.29672 9.34245 6.19778 9.37443 6.11481 9.43404L3.69214 11.0055C3.30437 11.2845 2.79047 10.8947 2.94912 10.4419L3.60049 7.61984C3.63428 7.52279 3.63713 7.41729 3.60863 7.31848C3.58012 7.21967 3.52173 7.13262 3.44184 7.06984L1.65821 5.42941C1.2936 5.14081 1.4966 4.55152 1.95877 4.55152H4.46521C4.56389 4.55186 4.66035 4.52156 4.74182 4.46463C4.82329 4.4077 4.88594 4.32682 4.92146 4.2327L5.94138 1.3447H5.94187Z"
+                              fill="#FFB246"
+                              stroke="#FFB246"
+                              strokeWidth="0.985428"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </g>
+                          <defs>
+                            <clipPath id="clip0_4961_937">
+                              <rect width="11.8251" height="12.0879" fill="white" />
+                            </clipPath>
+                          </defs>
+                        </svg>
+                      </span>
+                      <span className={styles.ratingText}>
+                        {astrologer.rating ? Number(astrologer.rating).toFixed(1) : '0.0'}
+                      </span>
+                    </div>
+                    <h3 className={styles.astrologerNames}>
+                      {astrologer.firstName} {astrologer.lastName}
+                    </h3>
+                    {astrologer.experience && (
+                      <div className={styles.experienceRow}>
+                        <BookOpen size={18} className={styles.bookIcon} />
+                        <span className={styles.experienceText}>
+                          {astrologer.experience} years exp.
+                        </span>
+                      </div>
+                    )}
+                  </Link>
+                  <div className={styles.actionButtons}>
+                    <div className={styles.buttonWrapper}>
+                      <button
+                        className={styles.chatBtn}
+                        onClick={() => handleChatStart(astrologer, "chat")}
+                      >
+                        <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+                      </button>
+                      <p className={styles.priceText}>
+                        <span className={styles.priceAmount}>
+                          ₹{astrologer?.price?.chatRate?.amount || 0}
+                        </span>/min
+                      </p>
+                    </div>
+                    <div className={styles.buttonWrapper}>
+                      <button
+                        className={styles.callBtn}
+                        onClick={() => handleCallStart(astrologer, "audio")}
+                      >
+                        <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
+                      </button>
+                      <p className={styles.priceText}>
+                        <span className={styles.priceAmount}>
+                          ₹{astrologer?.price?.audioRate?.amount || 0}
+                        </span>/min
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
+          </section>
+        </aside>
 
-        {/* Send a Gift Section */}
-        <div className={styles.giftSection}>
-          <div className={styles.giftContent}>
-            <h3 className={styles.giftTitle}>Send a Gift</h3>
-            <p className={styles.giftSubtitle}>
-              Show your appreciation to your favorite astrologer.
-            </p>
-            <button
-              className={styles.sendNowBtn}
-              onClick={() => setIsGiftModalOpen(true)}
-            >
-              Send Now
-            </button>
-          </div>
-          <div className={styles.giftImage}>
-            <img src={SendGiftImage} alt="Send Gift" />
-          </div>
-        </div>
-
-        {/* User Reviews */}
-        <div className={styles.reviewsSection}>
-          <div className={styles.devider}>
-            <h3 className={styles.sectionTitle}>USER REVIEWS</h3>
-            <div className={styles.titleDivider}>
-              <div className={styles.dividerLine}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="93"
-                  height="1"
-                  viewBox="0 0 93 1"
-                  fill="none"
-                >
-                  <path
-                    d="M92.803 0.406393C92.803 0.630933 90.7481 0.812789 88.2131 0.812789C85.6781 0.812789 0 0.630933 0 0.406393C0 0.181853 85.6786 0 88.2131 0C90.7481 0 92.803 0.181853 92.803 0.406393Z"
-                    fill="#0002"
-                  />
-                </svg>
+        {/* Center Column - Existing Profile Content */}
+        <div className={styles.centerColumn}>
+          <div className={styles.profileContentMain}>
+            {/* Profile Card */}
+            <div className={styles.profileCard}>
+              <div className={styles.profileImageWrapper}>
+                <img
+                  src={displayData.imageUrl}
+                  alt={displayData.firstName}
+                  className={styles.profileImage}
+                  onError={(e) => {
+                    e.target.src = getAstrologerDefaultImage(data?.gender);
+                  }}
+                />
               </div>
+              <div className={styles.profileInfo}>
+                <h1 className={styles.astrologerName}>
+                  {displayData.firstName} {displayData.lastName}
+                </h1>
+                <p className={styles.skills}>
+                  {displayData.specialities.join(" • ")}
+                </p>
+                <p className={styles.expertise}>
+                  {displayData.expertise.join(" • ")}
+                </p>
+                <div className={styles.languages}>
+                  {displayData.languagePreference.map((lang, i) => (
+                    <span key={i} className={styles.languageTag}>
+                      {lang}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Stats Section */}
+            <div className={styles.statsSection}>
+              <div className={styles.statItem}>
+                <img
+                  src={ExperienceIcon}
+                  alt="Experience"
+                  className={styles.statIcon}
+                />
+                <div className={styles.statValue}>
+                  {displayData.experience}+
+                </div>
+                <div className={styles.statLabel}>Experience</div>
+              </div>
+              <div className={styles.statDivider}></div>
+              <div className={styles.statItem}>
+                <img
+                  src={ConsultationsIcon}
+                  alt="Consultations"
+                  className={styles.statIcon}
+                />
+                <div className={styles.statValue}>
+                  {displayData.totalConsultations}
+                </div>
+                <div className={styles.statLabel}>Consultations</div>
+              </div>
+              <div className={styles.statDivider}></div>
+              <div className={styles.statItem}>
+                <img
+                  src={RatingIcon}
+                  alt="Rating"
+                  className={styles.statIcon}
+                />
+                <div className={styles.statValue}>
+                  {Number(displayData.rating).toFixed(1)}
+                </div>
+                <div className={styles.statLabel}>Rating</div>
+              </div>
+            </div>
+
+            {/* Consultation Hours */}
+            <div className={styles.consultationHours}>
+              <div className={styles.hoursHeader}>
+                <img src={TimeIcon} alt="Time" className={styles.clockIcon} />
+                <span className={styles.hoursTitle}>Consultation Hours</span>
+              </div>
+              <div className={styles.hoursContent}>
+                <div className={styles.timeSlots}>
+                  {displayData.availability.map((slot, index) => (
+                    <div key={index} className={styles.timeSlot}>
+                      {slot.time}
+                    </div>
+                  ))}
+                </div>
+                <button
+                  className={styles.reminderBtn}
+                  onClick={handleSetReminder}
+                >
+                  <img
+                    src={NotificationIcon}
+                    alt="Notification"
+                    className={styles.notificationIcon}
+                  />
+                  Set Reminder
+                </button>
+              </div>
+            </div>
+
+            {/* Minutes Section */}
+            <div className={styles.minutesSection}>
+              <div className={styles.minuteItem}>
+                <img
+                  src={ChatMinutesIcon}
+                  alt="Chat"
+                  className={styles.minuteIcon}
+                />
+                <div className={styles.minuteValue}>
+                  {displayData.metrics.chatMinutes}
+                </div>
+                <div className={styles.minuteLabel}>Chat Minutes</div>
+              </div>
+              <div className={styles.minuteDivider}></div>
+              <div className={styles.minuteItem}>
+                <img
+                  src={CallMinutesIcon}
+                  alt="Call"
+                  className={styles.minuteIcon}
+                />
+                <div className={styles.minuteValue}>
+                  {displayData.metrics.audioMinutes}
+                </div>
+                <div className={styles.minuteLabel}>Call Minutes</div>
+              </div>
+              <div className={styles.minuteDivider}></div>
+              <div className={styles.minuteItem}>
+                <img
+                  src={VideoMinutesIcon}
+                  alt="Video"
+                  className={styles.minuteIcon}
+                />
+                <div className={styles.minuteValue}>
+                  {displayData.metrics.videoMinutes}
+                </div>
+                <div className={styles.minuteLabel}>Video Minutes</div>
+              </div>
+            </div>
+
+            {/* About Section */}
+            <div className={styles.aboutSection}>
+              <h3 className={styles.aboutTitle}>About</h3>
+              <p
+                className={`${styles.aboutText} ${showFullAbout ? styles.expanded : ""}`}
+              >
+                {displayData.description}
+              </p>
+              {displayData.description.length > 150 && (
+                <button
+                  className={styles.readMoreBtn}
+                  onClick={() => setShowFullAbout(!showFullAbout)}
+                >
+                  {showFullAbout ? "Read Less" : "Read More"}
+                </button>
+              )}
+
+              {/* Video Gallery */}
+              {displayData.gallery.length > 0 && (
+                <div className={styles.videoGallery}>
+                  {displayData.gallery.slice(0, 3).map((video, index) => (
+                    <div key={index} className={styles.videoThumbnail}>
+                      <img
+                        src={video || AstrologerNumerologyDefault}
+                        alt={`Video ${index + 1}`}
+                        onError={(e) => {
+                          e.target.src = AstrologerNumerologyDefault;
+                        }}
+                      />
+                      <div className={styles.playButton}>
+                        <FaPlay />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Send a Gift Section */}
+            <div className={styles.giftSection}>
+              <div className={styles.giftContent}>
+                <h3 className={styles.giftTitle}>Send a Gift</h3>
+                <p className={styles.giftSubtitle}>
+                  Show your appreciation to your favorite astrologer.
+                </p>
+                <button
+                  className={styles.sendNowBtn}
+                  onClick={() => setIsGiftModalOpen(true)}
+                >
+                  Send Now
+                </button>
+              </div>
+              <div className={styles.giftImage}>
+                <img src={SendGiftImage} alt="Send Gift" />
+              </div>
+            </div>
+
+            {/* User Reviews */}
+            <div className={styles.reviewsSection}>
+              <div className={styles.devider}>
+                <h3 className={styles.sectionTitle}>USER REVIEWS</h3>
+                <div className={styles.titleDivider}>
+                  <div className={styles.dividerLine}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="93"
+                      height="1"
+                      viewBox="0 0 93 1"
+                      fill="none"
+                    >
+                      <path
+                        d="M92.803 0.406393C92.803 0.630933 90.7481 0.812789 88.2131 0.812789C85.6781 0.812789 0 0.630933 0 0.406393C0 0.181853 85.6786 0 88.2131 0C90.7481 0 92.803 0.181853 92.803 0.406393Z"
+                        fill="#0002"
+                      />
+                    </svg>
+                  </div>
+                  <span className={styles.dividerMoon}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="4"
+                      height="5"
+                      viewBox="0 0 4 5"
+                      fill="none"
+                    >
+                      <path
+                        d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z"
+                        fill="#0002"
+                      />
+                    </svg>
+                  </span>
+                  <div className={styles.dividerLine}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="93"
+                      height="1"
+                      viewBox="0 0 93 1"
+                      fill="none"
+                    >
+                      <path
+                        d="M-4.06066e-06 0.406393C-4.06066e-06 0.630933 2.05498 0.812789 4.58996 0.812789C7.12494 0.812789 92.803 0.630933 92.803 0.406393C92.803 0.181853 7.12439 0 4.58996 0C2.05498 0 -4.06066e-06 0.181853 -4.06066e-06 0.406393Z"
+                        fill="#0002"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.reviewsSummary}>
+                <StarRating rating={averageRating} />
+                <p className={styles.reviewsCount}>
+                  {averageRating.toFixed(1)} out of 5 • {totalReviews} total
+                  ratings
+                </p>
+              </div>
+
+              {reviewsLoading ? (
+                <div className={styles.reviewsLoading}>Loading reviews...</div>
+              ) : reviews.length > 0 ? (
+                <div className={styles.reviewsList}>
+                  {reviews.slice(0, 4).map((review) => (
+                    <div key={review._id} className={styles.reviewCard}>
+                      <div className={styles.reviewHeader}>
+                        <span className={styles.reviewDate}>
+                          <IoCalendarOutline className={styles.calendarIcon} />
+                          {new Date(review.createdAt).toLocaleDateString(
+                            "en-GB",
+                          )}
+                        </span>
+                        <div className={styles.reviewRating}>
+                          <FaStar className={styles.reviewStar} />
+                          <span>{Number(review.rating).toFixed(1)}</span>
+                        </div>
+                      </div>
+                      <h4 className={styles.reviewerName}>
+                        {review.customerName
+                          ?.toLowerCase()
+                          .replace(/\b\w/g, (c) => c.toUpperCase())}
+                      </h4>
+                      {review.review && (
+                        <p className={styles.reviewText}>{review.review}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.noReviews}>
+                  No reviews yet. Be the first to review!
+                </div>
+              )}
+
+              <button
+                className={styles.shareReviewBtn}
+                onClick={handleOpenReviewModal}
+              >
+                Share a Review
+              </button>
+            </div>
+
+            {/* Astrologer Shop */}
+            <div className={styles.shopSection}>
+              <div className={styles.shopHeader}>
+                <h3 className={styles.sectionTitle}>
+                  Check out Astrologers Shop
+                </h3>
+                <FaChevronRight className={styles.chevronIcon} />
+              </div>
+              <div className={styles.productGrid}>
+                {displayData.products.slice(0, 3).map((product, index) => (
+                  <div key={index} className={styles.productCard}>
+                    {product.isPopular && (
+                      <div className={styles.productBadge}>
+                        <FaStar className={styles.badgeStar} />
+                        Most Popular
+                      </div>
+                    )}
+                    <div className={styles.productImage}>
+                      {product.image ? (
+                        <img src={product.image} alt={product.name} />
+                      ) : (
+                        <img src={AstrologerShopImage} alt={product.name} />
+                      )}
+                    </div>
+                    <div className={styles.productInfo}>
+                      <h4 className={styles.productName}>{product.name}</h4>
+                      <p className={styles.productDesc}>
+                        {product.description}
+                      </p>
+                      <div className={styles.productPrice}>
+                        <span className={styles.currentPrice}>
+                          ₹{product.price}
+                        </span>
+                        {product.originalPrice && (
+                          <span className={styles.originalPrice}>
+                            ₹{product.originalPrice}
+                          </span>
+                        )}
+                      </div>
+                      <button className={styles.addToCartBtn}>
+                        + Add to cart
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* End Center Column */}
+
+        {/* Right Sidebar - Available Now & Connect (Desktop Only) */}
+        <aside className={styles.rightSidebar}>
+          {/* Available Now Card */}
+          <div className={styles.availableCard}>
+            <div className={styles.statusDot}></div>
+            <span className={styles.statusText}>Available Now</span>
+          </div>
+
+          {/* Connect Now Card */}
+          <div className={styles.connectCard}>
+            <h3 className={styles.connectTitle}>CONNECT NOW</h3>
+            <div className={styles.titleDivider}>
+              <div className={styles.dividerLine}></div>
               <span className={styles.dividerMoon}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -933,108 +1245,86 @@ const AstrologerProfile = () => {
                   />
                 </svg>
               </span>
-              <div className={styles.dividerLine}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="93"
-                  height="1"
-                  viewBox="0 0 93 1"
-                  fill="none"
-                >
-                  <path
-                    d="M-4.06066e-06 0.406393C-4.06066e-06 0.630933 2.05498 0.812789 4.58996 0.812789C7.12494 0.812789 92.803 0.630933 92.803 0.406393C92.803 0.181853 7.12439 0 4.58996 0C2.05498 0 -4.06066e-06 0.181853 -4.06066e-06 0.406393Z"
-                    fill="#0002"
-                  />
-                </svg>
+              <div className={styles.dividerLine}></div>
+            </div>
+
+            <div className={styles.connectOptions}>
+              <div
+                className={styles.connectOption}
+                onClick={() => handleChatStart(data)}
+              >
+                <div className={styles.optionIcon}>
+                  <BiMessageDetail />
+                </div>
+                <div className={styles.optionInfo}>
+                  <span className={styles.optionLabel}>Chat</span>
+                  <span className={styles.optionPrice}>
+                    ₹{data?.price?.chatRate?.amount || 5}/ min
+                  </span>
+                </div>
+              </div>
+
+              <div
+                className={styles.connectOption}
+                onClick={() => handleCallStart(data, "audio")}
+              >
+                <div className={styles.optionIcon}>
+                  <BiPhone />
+                </div>
+                <div className={styles.optionInfo}>
+                  <span className={styles.optionLabel}>Audio Call</span>
+                  <span className={styles.optionPrice}>
+                    ₹{data?.price?.audioRate?.amount || 20}/ min
+                  </span>
+                </div>
+              </div>
+
+              <div
+                className={styles.connectOption}
+                onClick={() => handleCallStart(data, "video")}
+              >
+                <div className={styles.optionIcon}>
+                  <BiVideo />
+                </div>
+                <div className={styles.optionInfo}>
+                  <span className={styles.optionLabel}>Video Call</span>
+                  <span className={styles.optionPrice}>
+                    ₹{data?.price?.videoCallRate?.amount || 60}/ min
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-          <div className={styles.reviewsSummary}>
-            <StarRating rating={averageRating} />
-            <p className={styles.reviewsCount}>
-              {averageRating.toFixed(1)} out of 5 • {totalReviews} total ratings
-            </p>
-          </div>
 
-          {reviewsLoading ? (
-            <div className={styles.reviewsLoading}>Loading reviews...</div>
-          ) : reviews.length > 0 ? (
-            <div className={styles.reviewsList}>
-              {reviews.slice(0, 4).map((review) => (
-                <div key={review._id} className={styles.reviewCard}>
-                  <div className={styles.reviewHeader}>
-                    <span className={styles.reviewDate}>
-                      <IoCalendarOutline className={styles.calendarIcon} />
-                      {new Date(review.createdAt).toLocaleDateString("en-GB")}
-                    </span>
-                    <div className={styles.reviewRating}>
-                      <FaStar className={styles.reviewStar} />
-                      <span>{Number(review.rating).toFixed(1)}</span>
-                    </div>
-                  </div>
-                  <h4 className={styles.reviewerName}>{review.customerName?.toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</h4>
-                  {review.review && (
-                    <p className={styles.reviewText}>{review.review}</p>
-                  )}
+          {/* Consultation Hours Card */}
+          <div className={styles.consultationCard}>
+            <div className={styles.hoursHeader}>
+              <img src={TimeIcon} alt="Time" className={styles.clockIcon} />
+              <span className={styles.hoursTitle}>Consultation Hours</span>
+            </div>
+
+            <div className={styles.todayLabel}>Todays availability</div>
+
+            <div className={styles.timeSlots}>
+              {displayData.availability.map((slot, index) => (
+                <div key={index} className={styles.timeSlot}>
+                  {slot.time}
                 </div>
               ))}
             </div>
-          ) : (
-            <div className={styles.noReviews}>
-              No reviews yet. Be the first to review!
-            </div>
-          )}
 
-          <button
-            className={styles.shareReviewBtn}
-            onClick={handleOpenReviewModal}
-          >
-            Share a Review
-          </button>
-        </div>
-
-        {/* Astrologer Shop */}
-        <div className={styles.shopSection}>
-          <div className={styles.shopHeader}>
-            <h3 className={styles.sectionTitle}>Check out Astrologers Shop</h3>
-            <FaChevronRight className={styles.chevronIcon} />
+            <button className={styles.reminderBtn} onClick={handleSetReminder}>
+              <img
+                src={NotificationIcon}
+                alt="Notification"
+                className={styles.notificationIcon}
+              />
+              Set Reminder
+            </button>
           </div>
-          <div className={styles.productGrid}>
-            {displayData.products.slice(0, 3).map((product, index) => (
-              <div key={index} className={styles.productCard}>
-                {product.isPopular && (
-                  <div className={styles.productBadge}>
-                    <FaStar className={styles.badgeStar} />
-                    Most Popular
-                  </div>
-                )}
-                <div className={styles.productImage}>
-                  {product.image ? (
-                    <img src={product.image} alt={product.name} />
-                  ) : (
-                    <img src={AstrologerShopImage} alt={product.name} />
-                  )}
-                </div>
-                <div className={styles.productInfo}>
-                  <h4 className={styles.productName}>{product.name}</h4>
-                  <p className={styles.productDesc}>{product.description}</p>
-                  <div className={styles.productPrice}>
-                    <span className={styles.currentPrice}>
-                      ₹{product.price}
-                    </span>
-                    {product.originalPrice && (
-                      <span className={styles.originalPrice}>
-                        ₹{product.originalPrice}
-                      </span>
-                    )}
-                  </div>
-                  <button className={styles.addToCartBtn}>+ Add to cart</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        </aside>
       </div>
+      {/* End 3-Column Layout */}
 
       {/* Bottom Connect Button */}
       {/* <div className={styles.bottomBar}>
@@ -1047,13 +1337,14 @@ const AstrologerProfile = () => {
       </div> */}
 
       {/* Modals */}
-      <ConnectAstrologerPopup
+      {/* ConnectAstrologerPopup - No longer needed, direct connection from sidebar */}
+      {/* <ConnectAstrologerPopup
         isOpen={isConnectPopupOpen}
         onClose={() => setIsConnectPopupOpen(false)}
         astrologer={data}
         onChatStart={handleChatStart}
         onCallStart={handleCallStart}
-      />
+      /> */}
 
       {/* Profile Manager Modal for Kundli Selection */}
       <ProfileManager

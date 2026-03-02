@@ -1,9 +1,623 @@
 @use "../../../assets/variables/variables" as *;
 
+/* ===========================
+   3-COLUMN LAYOUT (DESKTOP ONLY)
+=========================== */
+.threeColumnLayout {
+  display: flex;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  
+  @media (width <= 1024px) {
+    display: block;
+    padding: 0;
+  }
+}
+
+.leftSidebar,
+.rightSidebar {
+  display: none !important;
+  
+  @media (width >= 1025px) {
+    display: block !important;
+    width: 320px;
+    flex-shrink: 0;
+  }
+}
+
+.centerColumn {
+  flex: 1;
+  min-width: 0;
+  
+  @media (width <= 1024px) {
+    width: 100%;
+  }
+}
+
+/* ===========================
+   LEFT SIDEBAR - TOP ASTROLOGERS
+=========================== */
+.leftSidebar {
+  .astrologersSection {
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 16px;
+    position: sticky;
+    // top: 24px;
+  }
+  
+  .sectionHeader {
+    margin-bottom: 20px;
+  }
+  
+  .sidebarTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #030303;
+    margin: 0 0 0 0;
+    letter-spacing: 0.5px;
+    text-align: center;
+    line-height: 1.4;
+  }
+  
+  .astrologersGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+//New Css Card
+
+.astrologerCard {
+  min-width: 190px;
+  background: #FFF9F3;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  padding: 20px 16px 16px;
+  
+  @media screen and (width <= 767px) {
+    min-width: 150px;
+  }
+  
+  @media (min-width: 1024px) {
+    background: #FFF9F3;
+    border-radius: 24px;
+    padding: 24px 20px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    min-width: 280px;
+    
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+  }
+}
+
+.cardLink {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+  
+  @media (min-width: 1024px) {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 0 14px;
+    align-items: start;
+    margin-bottom: 20px;
+  }
+}
+
+.astrologerImageWrapper {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: visible;
+  margin-bottom: 0px;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  
+  @media screen and (width <= 767px) {
+    width: 90px;
+    height: 90px;
+  }
+  
+  @media (min-width: 1024px) {
+    width: 90px;
+    height: 90px;
+    border-radius: 16px;
+    margin-bottom: 0;
+    overflow: hidden;
+    grid-column: 1;
+    grid-row: 1 / 4;
+    position: static;
+  }
+}
+
+.astrologerImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  
+  @media (min-width: 1024px) {
+    border-radius: 16px;
+  }
+}
+
+.ratingBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff8f0;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  @media (min-width: 1024px) {
+    position: static;
+    transform: none;
+    background: #FFFFFF;
+    padding: 6px 12px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: start;
+    margin-bottom: 8px;
+  }
+}
+
+.star {
+  font-size: 16px;
+  svg {
+    width: 14px;
+    
+    @media (min-width: 1024px) {
+      width: 16px;
+    }
+  }
+}
+
+.ratingText {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #606060;
+  
+  @media (min-width: 1024px) {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+  }
+}
+
+.astrologerNames {
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin: 10px 0 6px 0;
+  text-align: center;
+  
+  @media (min-width: 1024px) {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 6px 0;
+    text-align: left;
+    line-height: 1.3;
+    color: #2C2C2C;
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+.experienceRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  @media (min-width: 1024px) {
+    gap: 6px;
+    grid-column: 2;
+    grid-row: 3;
+  }
+}
+
+.bookIcon {
+  color: #f75801;
+  flex-shrink: 0;
+  width: 14px;
+  
+  @media (min-width: 1024px) {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.experienceText {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  color: #999;
+  
+  @media (min-width: 1024px) {
+    font-size: 14px;
+    color: #888;
+    font-weight: 400;
+  }
+}
+
+.actionButtons {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  padding: 0;
+  
+  @media (min-width: 1024px) {
+    gap: 12px;
+  }
+}
+
+.buttonWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  
+  @media (min-width: 1024px) {
+    gap: 8px;
+  }
+}
+
+.chatBtn {
+  width: 100%;
+  background: transparent;
+  color: #f75801;
+  border: 1px solid #f75801;
+  padding: 8px 12px;
+  border-radius: 50px;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  img {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background: #fff5ec;
+    transform: translateY(-1px);
+  }
+  
+  @media (min-width: 1024px) {
+    // padding: 11px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    border-width: 2px;
+    
+    img {
+      width: 18px;
+      height: 18px;
+    }
+    
+    &:hover {
+      background: #FFF5EC;
+      transform: scale(1.02);
+      box-shadow: 0 2px 8px rgba(247, 88, 1, 0.15);
+    }
+  }
+}
+
+.callBtn {
+  width: 100%;
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
+  color: #ffffff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 50px;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  img {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(1);
+  }
+  
+  @media (min-width: 1024px) {
+    // padding: 11px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    
+    img {
+      width: 18px;
+      height: 18px;
+    }
+    
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+    }
+  }
+}
+
+.priceText {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  text-align: center;
+  
+  @media (min-width: 1024px) {
+    font-size: 13px;
+    color: #999;
+  }
+}
+
+.priceAmount {
+  font-weight: 600;
+  color: #1a1a1a;
+  
+  @media (min-width: 1024px) {
+    font-size: 15px;
+    font-weight: 700;
+    color: #000;
+  }
+}
+
+
+/* ===========================
+   RIGHT SIDEBAR - AVAILABLE NOW & CONNECT
+=========================== */
+.rightSidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  
+  .availableCard {
+    background: linear-gradient(90deg, #4CAF50 0%, #45A049 100%);
+    border-radius: 20px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+  }
+  
+  .statusDot {
+    width: 12px;
+    height: 12px;
+    background: #FFFFFF;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+  
+  .statusText {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FFFFFF;
+  }
+  
+  .connectCard {
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 16px;
+    position: sticky;
+    margin-top: 20px;
+  }
+  
+  .connectTitle {
+    font-size: 16px;
+    font-weight: 500;
+    color: #030303;
+    margin: 0 0 10px 0;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+  
+  .connectOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  
+  .connectOption {
+    background: #FFF5EC;
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    &:hover {
+      background: #FFE8D1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+  }
+  
+  .optionIcon {
+    width: 48px;
+    height: 48px;
+    background: #F75801;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  
+  .optionInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .optionLabel {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1A1A1A;
+  }
+  
+  .optionPrice {
+    font-size: 14px;
+    color: #666666;
+  }
+  
+  .consultationCard {
+    background: #FFF9F3;
+    border-radius: 20px;
+    padding: 16px;
+    position: sticky;
+    margin-top: 20px;
+  }
+  
+  .hoursHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .clockIcon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    color: #F75801;
+  }
+  
+  .hoursTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2C2C2C;
+  }
+  
+  .todayLabel {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2C2C2C;
+    margin-bottom: 16px;
+  }
+  
+  .timeSlots {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    margin-bottom: 24px;
+    font-size: 16px;
+    color: #666666;
+    font-weight: 400;
+  }
+  
+  .timeSlot {
+    font-size: 16px;
+    color: #666666;
+    font-weight: 400;
+    white-space: nowrap;
+    
+    &:not(:last-child)::after {
+      content: '|';
+      margin-left: 12px;
+      color: #CCCCCC;
+    }
+  }
+  
+  .reminderBtn {
+    width: 100%;
+    padding: 14px 24px;
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+    color: #FFFFFF;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    .notificationIcon {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+    }
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(247, 88, 1, 0.3);
+    }
+  }
+}
+
 .profileContentMain{
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 16px;
+  
+  @media (width >= 1025px) {
+    max-width: 100%;
+    padding: 0;
+  }
 }
 
 .profilePage {
@@ -175,7 +789,7 @@
   border-radius: 20px;
   // border: 1px solid rgba(0, 0, 0, 0.03);
   padding: 16px;
-  margin: 16px 0px 16px;
+  // margin: 16px 0px 16px;
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -185,7 +799,9 @@
     border-radius: 12px;
   }
 }
-
+.statsSection,.consultationHours,.minutesSection,.aboutSection,.giftSection {
+  margin-top: 10px;
+}
 .profileImageWrapper {
   position: relative;
   flex-shrink: 0;
@@ -338,6 +954,11 @@
 .consultationHours {
   background: #FFF5EC;
   flex-direction: column;
+  display: flex;
+  
+  @media (min-width: 1024px) {
+    display: none !important;
+  }
 }
 
 .hoursHeader {
@@ -369,6 +990,11 @@
   align-items: center;
   gap: 16px;
   width: 100%;
+  
+  @media (width <= 767px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .timeSlots {
@@ -382,6 +1008,10 @@
   font-size: 15px;
   color: #666666;
   font-weight: 400;
+  
+  @media (width <= 767px) {
+    font-size: 14px;
+  }
 }
 
 .reminderBtn {
@@ -398,8 +1028,12 @@
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  
   @media (width <= 767px) {
-    padding: 8px 16px;
+    padding: 10px 20px;
+    width: 100%;
+    justify-content: center;
+    font-size: 13px;
   }
 
   .notificationIcon {
@@ -410,7 +1044,6 @@
   }
 
   &:hover {
-    // background: #2D1F10;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
@@ -1151,12 +1784,29 @@
   font-size: 18px;
   color: #666666;
 }
-.titleDivider{
+.titleDivider {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-block: 10px;
   gap: 10px;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, transparent 0%, #D0D0D0 50%, transparent 100%);
+}
+
+.dividerMoon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  svg {
+    display: block;
+  }
 }
 
 /* ===========================
