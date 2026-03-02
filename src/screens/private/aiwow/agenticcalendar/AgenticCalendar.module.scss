@@ -265,6 +265,19 @@
   }
 }
 
+/* Disabled states when results are showing */
+.chipDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.periodDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Loading */
 .loadingWrap {
   display: flex;
