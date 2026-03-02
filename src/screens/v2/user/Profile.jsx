@@ -276,6 +276,9 @@ const Profile = () => {
   });
   const savedKundlis = kundliData?.data || [];
 
+  // Helper: Get primary profile (prioritize 'self' relation, otherwise first profile)
+  const primaryProfile = savedKundlis.find(profile => profile.relation?.toLowerCase() === 'self') || savedKundlis[0];
+
   // Capitalize first letter of each word
   const capitalizeWords = (str) => {
     if (!str) return str;
@@ -296,9 +299,9 @@ const Profile = () => {
       return capitalizeWords(user.firstName);
     }
     
-    // Second priority: First Kundli profile name
-    if (savedKundlis.length > 0 && savedKundlis[0]?.name) {
-      return capitalizeWords(savedKundlis[0].name);
+    // Second priority: Primary Kundli profile name (self or first)
+    if (primaryProfile?.name) {
+      return capitalizeWords(primaryProfile.name);
     }
     
     // Third priority: Phone number
@@ -309,31 +312,30 @@ const Profile = () => {
     // Last resort
     return "Guest User";
   })();
-  // Build params for Kundali API from first profile
-  const firstProfile = savedKundlis[0];
-  const kundliParams = firstProfile
+  // Build params for Kundali API from primary profile
+  const kundliParams = primaryProfile
     ? buildVedicParam({
-        name: firstProfile.name,
+        name: primaryProfile.name,
         gender:
-          firstProfile.gender === "male"
+          primaryProfile.gender === "male"
             ? "Male"
-            : firstProfile.gender === "female"
+            : primaryProfile.gender === "female"
               ? "Female"
               : "Others",
-        day: firstProfile.day,
-        month: firstProfile.month,
-        year: firstProfile.year,
+        day: primaryProfile.day,
+        month: primaryProfile.month,
+        year: primaryProfile.year,
         hour:
-          firstProfile.hour > 12
-            ? firstProfile.hour - 12
-            : firstProfile.hour === 0
+          primaryProfile.hour > 12
+            ? primaryProfile.hour - 12
+            : primaryProfile.hour === 0
               ? 12
-              : firstProfile.hour,
-        min: firstProfile.min,
-        meridiem: firstProfile.hour >= 12 ? "PM" : "AM",
-        birthPlace: firstProfile.place,
-        lat: firstProfile.lat,
-        lon: firstProfile.lon,
+              : primaryProfile.hour,
+        min: primaryProfile.min,
+        meridiem: primaryProfile.hour >= 12 ? "PM" : "AM",
+        birthPlace: primaryProfile.place,
+        lat: primaryProfile.lat,
+        lon: primaryProfile.lon,
         tzone: 5.5,
       })
     : null;
@@ -934,9 +936,9 @@ const Profile = () => {
       return user.firstName.charAt(0).toUpperCase();
     }
     
-    // If first kundli exists, show its initials
-    if (savedKundlis.length > 0 && savedKundlis[0]?.name) {
-      return getInitials(savedKundlis[0].name);
+    // If primary kundli exists, show its initials
+    if (primaryProfile?.name) {
+      return getInitials(primaryProfile.name);
     }
     
     // Default: show goat emoji
@@ -958,8 +960,8 @@ const Profile = () => {
           <div className={styles.headerInfo}>
             <h1 className={styles.profileName}>{userName}</h1>
             <p className={styles.profileDetails}>
-              {savedKundlis[0]
-                ? `${dayjs(`${savedKundlis[0].year}-${savedKundlis[0].month}-${savedKundlis[0].day}`).format("MMM DD, YYYY")} • ${String(savedKundlis[0].hour > 12 ? savedKundlis[0].hour - 12 : savedKundlis[0].hour === 0 ? 12 : savedKundlis[0].hour).padStart(2, "0")}:${String(savedKundlis[0].min).padStart(2, "0")} ${savedKundlis[0].hour >= 12 ? "PM" : "AM"}`
+              {primaryProfile
+                ? `${dayjs(`${primaryProfile.year}-${primaryProfile.month}-${primaryProfile.day}`).format("MMM DD, YYYY")} • ${String(primaryProfile.hour > 12 ? primaryProfile.hour - 12 : primaryProfile.hour === 0 ? 12 : primaryProfile.hour).padStart(2, "0")}:${String(primaryProfile.min).padStart(2, "0")} ${primaryProfile.hour >= 12 ? "PM" : "AM"}`
                 : " "}
             </p>
           </div>
