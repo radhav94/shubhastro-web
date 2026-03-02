@@ -187,7 +187,7 @@
   // grid-template-columns: repeat(5, 1fr);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   width: 100%;
   overflow: auto;
   padding-block: 4px;
@@ -361,7 +361,7 @@
   // grid-auto-rows: minmax(80px, auto);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   padding-block: 4px;
   // background: #fff;
   overflow: visible;
@@ -370,7 +370,7 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-auto-rows: 150px;
-    gap: 16px;
+    // gap: 16px;
   }
 
   @media (width <= 767px) {
@@ -754,7 +754,7 @@
 }
 
 .blogCard {
-  flex: 0 0 280px;
+  flex: 0 0 240px;
   cursor: pointer;
   transition: transform 0.2s ease;
   @media (width <= 767px) {
@@ -796,7 +796,7 @@
 
 .blogTitle {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
   color: #1a1a1a;
   margin: 0;
   line-height: 1.5;
@@ -846,13 +846,13 @@
     max-width: 800px;
   }
 
-  .blogsScroll {
-    gap: 24px;
-  }
+  // .blogsScroll {
+  //   gap: 24px;
+  // }
 
-  .blogCard {
-    flex: 0 0 320px;
-  }
+  // .blogCard {
+  //   flex: 0 0 320px;
+  // }
 }
 
 @media (min-width: 1024px) {
