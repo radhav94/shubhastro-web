@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setSelectedKundliProfile } from '../../redux/aiwow/aiwowSlice';
+import { useGetAllKundlisQuery } from '../../services/appServices/kundliServicesNew';
 import { PATH } from '../routes/Paths';
 import { Toast } from '../../component';
 
@@ -21,7 +22,7 @@ const useSelectedKundliProfile = (options = {}) => {
   const {
     required = true,
     showToast = true,
-    redirectPath = PATH.privateRoutes.AIWOW?.path || '/aiwow',
+    redirectPath = PATH.privateRoutes.AI_WOW?.path || '/aiwow',
     validateOnMount = true,
   } = options;
 
@@ -30,6 +31,12 @@ const useSelectedKundliProfile = (options = {}) => {
   
   // Get profile from Redux store
   const profileFromStore = useSelector((state) => state.aiwow?.selectedKundliProfile);
+  const token = useSelector((state) => state.auth?.token);
+
+  // Fetch all profiles as fallback when no profile is explicitly selected
+  const { data: allProfilesData, isLoading: profilesQueryLoading } = useGetAllKundlisQuery(undefined, {
+    skip: !token,
+  });
   
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,6 +120,12 @@ const useSelectedKundliProfile = (options = {}) => {
    * Loads profile from store or localStorage
    */
   const loadProfile = useCallback(() => {
+    // Wait for profiles query to finish before concluding no profile exists
+    if (profilesQueryLoading) {
+      setIsLoading(true);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -142,7 +155,25 @@ const useSelectedKundliProfile = (options = {}) => {
         return;
       }
 
-      // No profile found anywhere
+      // No profile found in store or localStorage — try fetching from API
+      // Prefer "Self" relation profile, fallback to first profile
+      const allProfiles = allProfilesData?.data || [];
+      if (allProfiles.length > 0) {
+        const fallbackProfile = allProfiles.find(
+          (p) => p.relation?.toLowerCase() === 'self'
+        ) || allProfiles[0];
+
+        const fallbackValidation = validateProfile(fallbackProfile);
+        if (fallbackValidation.valid) {
+          dispatch(setSelectedKundliProfile(fallbackProfile));
+          setProfile(fallbackProfile);
+          saveProfileToLocalStorage(fallbackProfile);
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Still no profile found
       const errorMsg = storageError || 'No Kundli profile selected';
       setError(errorMsg);
       
@@ -174,6 +205,8 @@ const useSelectedKundliProfile = (options = {}) => {
     }
   }, [
     profileFromStore,
+    allProfilesData,
+    profilesQueryLoading,
     validateProfile,
     getProfileFromLocalStorage,
     saveProfileToLocalStorage,

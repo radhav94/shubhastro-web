@@ -23,7 +23,7 @@ const DEFAULT_OCCASIONS = [
 const AgenticCalendar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile({ required: false, showToast: false });
 
   // State from MuhuratSection navigation
   const navState = location.state || {};
