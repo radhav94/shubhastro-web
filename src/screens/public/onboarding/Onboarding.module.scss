@@ -21,6 +21,8 @@
   @media (width <= 767px) {
      padding:0px;
      background: #fff;
+     max-width: 100%;
+     width: 100%;
   }
 }
 
@@ -867,9 +869,9 @@
 .phoneInput {
   width: 100%;
   padding: 16px;
+  font-size: 16px;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
-  font-size: 15px;
   color: #2c2c2c;
   outline: none;
 
