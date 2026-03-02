@@ -31,6 +31,12 @@
   border-radius: 0.5rem;
   transition: all 0.2s;
   box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
+  width: 40px;
+  height: 40px;
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
 
   &:hover {
     background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
@@ -47,16 +53,19 @@
 }
 
 .userAvatar {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   background: #fff;
   border: 2px solid #fdefd8;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
   flex-shrink: 0;
+  span{
+    font-size: 14px;
+    font-weight: 600;
+  }
   @media (width <= 767px) {
     width: 36px;
     height: 36px;
