@@ -18,15 +18,29 @@
 }
 
 .backButton {
-  background: none;
+  background: rgb(255, 244, 236);
   border: none;
-  padding: 8px;
+  color: #D43400;
   cursor: pointer;
+  padding: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1f2937;
-  &:hover { opacity: 0.7; }
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #D43400;
+  transition: all 0.2s ease;
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
+
+  &:hover {
+    // background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
 }
 
 .title {

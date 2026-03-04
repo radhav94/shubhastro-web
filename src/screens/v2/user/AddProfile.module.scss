@@ -14,20 +14,28 @@
 }
 
 .backButton {
-  width: 40px;
-  height: 40px;
-  background: transparent;
-  border: 1px solid #E0E0E0;
-  border-radius: 50%;
+  background: rgb(255, 244, 236);
+  border: none;
+  color: #D43400;
+  cursor: pointer;
+  padding: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: all 0.2s;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #D43400;
+  transition: all 0.2s ease;
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
 
   &:hover {
-    background: #F5F5F5;
+    // background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 }
 

@@ -16,21 +16,29 @@
 }
 
 .backButton {
-  width: 40px;
-  height: 40px;
-  background: var(--color-gray-200);
+  background: rgb(255, 244, 236);
   border: none;
-  border-radius: 10px;
+  color: #D43400;
+  cursor: pointer;
+  padding: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #D43400;
   transition: all 0.2s ease;
-  flex-shrink: 0;
-}
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
 
-.backButton:hover {
-  background: var(--color-gray-300);
+  &:hover {
+    // background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
 }
 
 .pageTitle {

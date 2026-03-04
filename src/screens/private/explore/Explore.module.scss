@@ -39,7 +39,7 @@
   }
 }
 .backButton {
-  background: rgb(255 244 236);
+  background: rgb(255, 244, 236);
   border: none;
   color: #D43400;
   cursor: pointer;
@@ -51,21 +51,16 @@
   width: 40px;
   height: 40px;
   border: 1px solid #D43400;
-
-  @media screen and (width <= 767px){
+  transition: all 0.2s ease;
+  @media (width <= 767px) {
     width: 36px;
     height: 36px;
   }
-  
-  svg {
-    width: 24px;
-    height: 24px;
-    path{
-      stroke: #d43400;
-    }
-  }
-  &:active {
-    transform: scale(0.95);
+
+  &:hover {
+    // background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 }
 
