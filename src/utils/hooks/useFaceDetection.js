@@ -19,10 +19,10 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
           faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
           faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
         ]);
-        console.log('Face detection models loaded successfully');
+        console.log('✅ Face detection models loaded successfully');
         setModelsLoaded(true);
       } catch (err) {
-        console.error('Error loading face detection models:', err);
+        console.error('❌ Error loading face detection models:', err);
       }
     };
 
@@ -31,98 +31,68 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
 
   /* ------------------ DETECTION LOOP ------------------ */
   const startDetection = () => {
+    console.log("startDetection called");
+    
     if (!modelsLoaded || detectionStartedRef.current) return;
     
-    stoppedRef.current = false; // ⭐ Reset stop flag
+    console.log("🚀 Starting face detection");
+    
+    stoppedRef.current = false;
     detectionStartedRef.current = true;
-    console.log('Starting face detection with RAF');
+    
     detectLoop();
   };
 
   const stopDetection = () => {
-    console.log('Stopping face detection, cancelling RAF');
-    stoppedRef.current = true; // ⭐ HARD STOP - prevents late async results
+    console.log("🛑 Stopping face detection");
+    
+    stoppedRef.current = true;
     detectionStartedRef.current = false;
     
-    // Cancel any pending animation frame
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
-      console.log('RAF cancelled');
     }
-    
-    setFaceDetected(false);
-    clearCanvas(canvasRef.current);
   };
 
   const detectLoop = async () => {
-    if (stoppedRef.current) return; // ⭐ EARLY EXIT if stopped
+
+    if (stoppedRef.current) return;
     
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
-    if (!video || video.readyState !== 4) {
+    if (!video || video.readyState !== 4 || video.videoWidth === 0) {
       rafRef.current = requestAnimationFrame(detectLoop);
       return;
     }
 
     try {
-      const detection = await faceapi
-        .detectSingleFace(
-          video,
-          new faceapi.TinyFaceDetectorOptions({
-            inputSize: 224,
-            scoreThreshold: 0.4
-          })
-        )
-        .withFaceLandmarks();
+      const detection = await faceapi.detectSingleFace(
+        video,
+        new faceapi.TinyFaceDetectorOptions({
+          inputSize: 160,  // Faster and better for webcam
+          scoreThreshold: 0.2
+        })
+      );
 
-      if (stoppedRef.current) return; // ⭐ IGNORE LATE RESULT after async operation
 
-      let isValid = false;
-      let isInCircle = false;
+      if (stoppedRef.current) return;
 
       if (detection) {
-        const { box, score } = detection.detection;
-        const landmarks = detection.landmarks;
+        setFaceDetected(true);
         
-        // Get key facial landmarks
-        const nose = landmarks.getNose();
-        const leftEye = landmarks.getLeftEye();
-        const rightEye = landmarks.getRightEye();
-        const mouth = landmarks.getMouth();
-        
-        // Check if all key landmarks are detected
-        const hasAllFeatures = nose?.length > 0 && 
-                               leftEye?.length > 0 && 
-                               rightEye?.length > 0 && 
-                               mouth?.length > 0;
-        
-        const faceArea = box.width * box.height;
-        const videoArea = video.videoWidth * video.videoHeight;
-        const ratio = faceArea / videoArea;
-
-        isValid = score > 0.5 && ratio > 0.04 && ratio < 0.7 && hasAllFeatures;
-        
-        // Check if face is within circular boundary
-        if (isValid && getCircleBounds) {
-          isInCircle = checkFaceInCircle(box, landmarks, video, getCircleBounds);
-        }
-        
-        drawBox(canvas, video, box, isValid);
+        const { box } = detection;
+        drawBox(canvas, video, box, true);
       } else {
+        setFaceDetected(false);
         clearCanvas(canvas);
       }
-
-      setFaceDetected(prev => (prev !== isValid ? isValid : prev));
-      setFaceInCircle(prev => (prev !== isInCircle ? isInCircle : prev));
     } catch (err) {
-      if (!stoppedRef.current) {
-        console.error("Face detection error:", err);
-      }
+      console.error("Face detection error:", err);
     }
 
-    if (detectionStartedRef.current && !stoppedRef.current) {
+    if (!stoppedRef.current) {
       rafRef.current = requestAnimationFrame(detectLoop);
     }
   };
@@ -145,7 +115,7 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
     // Get all landmark points
     const allPoints = landmarks.positions;
     
-    // Check if at least 90% of landmarks are inside the circle
+    // ✅ FIX 5: Relaxed circle detection threshold (60% instead of 90%)
     let pointsInside = 0;
     allPoints.forEach(point => {
       const dx = point.x - scaledCenterX;
@@ -158,7 +128,7 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
     });
 
     const percentageInside = pointsInside / allPoints.length;
-    return percentageInside >= 0.9; // 90% of face landmarks must be inside circle
+    return percentageInside >= 0.6; // ✅ 60% is more realistic for webcam detection
   };
 
   const drawBox = (canvas, video, box, valid) => {
