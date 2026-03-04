@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './GemstoneAnalysis.module.scss';
@@ -15,6 +15,26 @@ const GemstoneAnalysis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Track component mount status to prevent navigation after unmount
+  const isMountedRef = useRef(true);
+  // Store abort controller to cancel API request on unmount
+  const abortControllerRef = useRef(null);
+
+  // Cleanup effect to prevent navigation after unmount and abort API request
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      console.log('GemstoneAnalysis unmounting - aborting API request');
+      
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        console.log('API request aborted');
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (gemstoneImage) {
@@ -28,6 +48,10 @@ const GemstoneAnalysis = () => {
   const performAnalysis = async (imageData) => {
     setIsAnalyzing(true);
     
+    // Create AbortController to cancel request on unmount
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    
     try {
       // Start progress animation
       const progressInterval = setInterval(() => {
@@ -40,10 +64,16 @@ const GemstoneAnalysis = () => {
         });
       }, 200);
 
-      // Call the API
-      const result = await analyzeGemstone(imageData);
+      // Call the API with abort signal
+      const result = await analyzeGemstone(imageData, abortController.signal);
 
       clearInterval(progressInterval);
+
+      // Check if component is still mounted before processing result
+      if (!isMountedRef.current) {
+        console.log('Component unmounted - ignoring API result');
+        return;
+      }
 
       if (result.success) {
         dispatch(setGemstoneResult(result.data));
@@ -51,8 +81,13 @@ const GemstoneAnalysis = () => {
         setProgress(100);
         setAnalysisComplete(true);
         
+        // Only navigate if component is still mounted
         setTimeout(() => {
-          navigate(PATH.privateRoutes.GEMSTONE_RESULT.path);
+          if (isMountedRef.current) {
+            navigate(PATH.privateRoutes.GEMSTONE_RESULT.path);
+          } else {
+            console.log('Component unmounted - skipping navigation to result');
+          }
         }, 1000);
       } else {
         // DON'T clear data on error - keep image for retry
@@ -62,6 +97,18 @@ const GemstoneAnalysis = () => {
         setError(result.error || { message: 'Analysis failed. Please try again.' });
       }
     } catch (error) {
+      // Ignore abort errors - user navigated away
+      if (error.name === 'AbortError' || error.message === 'canceled') {
+        console.log('API request aborted - user navigated away');
+        return;
+      }
+
+      // Check if component is still mounted before showing error
+      if (!isMountedRef.current) {
+        console.log('Component unmounted - ignoring error');
+        return;
+      }
+
       console.error('Analysis error:', error);
       
       // DON'T clear data on error - keep image for retry
@@ -70,7 +117,9 @@ const GemstoneAnalysis = () => {
       setProgress(0);
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {
-      setIsAnalyzing(false);
+      if (isMountedRef.current) {
+        setIsAnalyzing(false);
+      }
     }
   };
 

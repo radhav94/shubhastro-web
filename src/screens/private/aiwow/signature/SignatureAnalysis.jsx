@@ -15,6 +15,26 @@ const SignatureAnalysis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Track component mount status to prevent navigation after unmount
+  const isMountedRef = React.useRef(true);
+  // Store abort controller to cancel API request on unmount
+  const abortControllerRef = React.useRef(null);
+
+  // Cleanup effect to prevent navigation after unmount and abort API request
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      console.log('SignatureAnalysis unmounting - aborting API request');
+      
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        console.log('API request aborted');
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (signatureImage) {
@@ -28,6 +48,10 @@ const SignatureAnalysis = () => {
   const performAnalysis = async (imageData) => {
     setIsAnalyzing(true);
     
+    // Create AbortController to cancel request on unmount
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    
     try {
       // Start progress animation
       const progressInterval = setInterval(() => {
@@ -40,10 +64,16 @@ const SignatureAnalysis = () => {
         });
       }, 200);
 
-      // Call the API
-      const result = await analyzeSignature(imageData);
+      // Call the API with abort signal
+      const result = await analyzeSignature(imageData, abortController.signal);
 
       clearInterval(progressInterval);
+
+      // Check if component is still mounted before processing result
+      if (!isMountedRef.current) {
+        console.log('Component unmounted - ignoring API result');
+        return;
+      }
 
       if (result.success) {
         dispatch(setSignatureResult(result.data));
@@ -51,8 +81,13 @@ const SignatureAnalysis = () => {
         setProgress(100);
         setAnalysisComplete(true);
         
+        // Only navigate if component is still mounted
         setTimeout(() => {
-          navigate(PATH.privateRoutes.SIGNATURE_RESULT.path);
+          if (isMountedRef.current) {
+            navigate(PATH.privateRoutes.SIGNATURE_RESULT.path);
+          } else {
+            console.log('Component unmounted - skipping navigation to result');
+          }
         }, 1000);
       } else {
         // DON'T clear data on error - keep image for retry
@@ -62,6 +97,18 @@ const SignatureAnalysis = () => {
         setError(result.error || { message: 'Analysis failed. Please try again.' });
       }
     } catch (error) {
+      // Ignore abort errors - user navigated away
+      if (error.name === 'AbortError' || error.message === 'canceled') {
+        console.log('API request aborted - user navigated away');
+        return;
+      }
+
+      // Check if component is still mounted before showing error
+      if (!isMountedRef.current) {
+        console.log('Component unmounted - ignoring error');
+        return;
+      }
+
       console.error('Analysis error:', error);
       
       // DON'T clear data on error - keep image for retry
@@ -70,7 +117,9 @@ const SignatureAnalysis = () => {
       setProgress(0);
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {
-      setIsAnalyzing(false);
+      if (isMountedRef.current) {
+        setIsAnalyzing(false);
+      }
     }
   };
 
