@@ -14,9 +14,21 @@ const GemstoneResult = () => {
   
   // Dropdown states for Suitability tab
   const [openSections, setOpenSections] = useState({});
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const toggleSection = (key) => {
-    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+    // Only toggle on mobile/tablet
+    if (!isDesktop) {
+      setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+    }
   };
 
   const reduxResult = useSelector((state) => state.aiwow.gemstone.result);
@@ -201,7 +213,7 @@ const GemstoneResult = () => {
   const renderSuitability = (d) => (
     <div className={styles.tabContent}>
       {/* Suitability Analysis - Dropdown */}
-      <div className={styles.dropdown}>
+      <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`}>
         <button className={styles.dropdownHeader} onClick={() => toggleSection('suitability')}>
           <div className={styles.dropdownTitleWrap}>
             <h3 className={styles.dropdownTitle}>Suitability Analysis</h3>
@@ -209,9 +221,9 @@ const GemstoneResult = () => {
               <span className={styles.scoreBadge}>{d.suitability.score} - {d.suitability.level}</span>
             )}
           </div>
-          <Arrow isOpen={openSections.suitability} />
+          {!isDesktop && <Arrow isOpen={openSections.suitability} />}
         </button>
-        {openSections.suitability && (
+        {(isDesktop || openSections.suitability) && (
           <div className={styles.dropdownBody}>
             <div className={styles.suitRow}>
               {d.suitability.forDasha && (
@@ -243,12 +255,12 @@ const GemstoneResult = () => {
 
       {/* Wearing Guidelines - Dropdown */}
       {d.wearing && (
-        <div className={styles.dropdown}>
+        <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`}>
           <button className={styles.dropdownHeader} onClick={() => toggleSection('wearing')}>
             <h3 className={styles.dropdownTitle}>Wearing Guidelines</h3>
-            <Arrow isOpen={openSections.wearing} />
+            {!isDesktop && <Arrow isOpen={openSections.wearing} />}
           </button>
-          {openSections.wearing && (
+          {(isDesktop || openSections.wearing) && (
             <div className={styles.dropdownBody}>
               <div className={styles.suitRow}>
                 <div className={styles.suitBox}>
@@ -282,12 +294,12 @@ const GemstoneResult = () => {
   const renderHealing = (d) => (
     <div className={styles.tabContent}>
       {/* Healing Properties - Dropdown */}
-      <div className={styles.dropdown}>
+      <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`}>
         <button className={styles.dropdownHeader} onClick={() => toggleSection('healing')}>
           <h3 className={styles.dropdownTitle}>Healing Properties</h3>
-          <Arrow isOpen={openSections.healing} />
+          {!isDesktop && <Arrow isOpen={openSections.healing} />}
         </button>
-        {openSections.healing && (
+        {(isDesktop || openSections.healing) && (
           <div className={styles.dropdownBody}>
             <div className={styles.suitRow}>
               {d.healing.physical?.length > 0 && (
@@ -321,12 +333,12 @@ const GemstoneResult = () => {
 
       {/* Compatibility - Dropdown */}
       {d.compatibility && (
-        <div className={styles.dropdown}>
+        <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`}>
           <button className={styles.dropdownHeader} onClick={() => toggleSection('compatibility')}>
             <h3 className={styles.dropdownTitle}>Gemstone Compatibility</h3>
-            <Arrow isOpen={openSections.compatibility} />
+            {!isDesktop && <Arrow isOpen={openSections.compatibility} />}
           </button>
-          {openSections.compatibility && (
+          {(isDesktop || openSections.compatibility) && (
             <div className={styles.dropdownBody}>
               <div className={styles.suitRow}>
                 {d.compatibility.compatibleGemstones?.length > 0 && (
@@ -355,12 +367,12 @@ const GemstoneResult = () => {
 
       {/* Market Info - Dropdown */}
       {d.market && (
-        <div className={styles.dropdown}>
+        <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`}>
           <button className={styles.dropdownHeader} onClick={() => toggleSection('market')}>
             <h3 className={styles.dropdownTitle}>Market Information</h3>
-            <Arrow isOpen={openSections.market} />
+            {!isDesktop && <Arrow isOpen={openSections.market} />}
           </button>
-          {openSections.market && (
+          {(isDesktop || openSections.market) && (
             <div className={styles.dropdownBody}>
               <div className={styles.suitRow}>
                 {d.market.priceRange && (
@@ -452,6 +464,13 @@ const GemstoneResult = () => {
         {activeTab === 'astrological' && renderAstrological(currentGemstone)}
         {activeTab === 'suitability' && renderSuitability(currentGemstone)}
         {activeTab === 'healing' && renderHealing(currentGemstone)}
+
+        <button 
+          className={styles.consultButton}
+          onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
+        >
+          Consult with Expert Astrologer
+        </button>
       </div>
     </div>
   );

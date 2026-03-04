@@ -267,6 +267,25 @@ const FaceReadingResult = () => {
                   </div>
                 )}
               </div>
+
+              {/* Relationship Insights & Spiritual Guidance */}
+              {(overallReading.relationshipInsights || overallReading.spiritualGuidance) && (
+                <div className={styles.insightsContainer}>
+                  {overallReading.relationshipInsights && (
+                    <div className={styles.insightCard}>
+                      <h3 className={styles.insightTitle}>💕 Relationship Insights</h3>
+                      <p className={styles.insightText}>{overallReading.relationshipInsights}</p>
+                    </div>
+                  )}
+
+                  {overallReading.spiritualGuidance && (
+                    <div className={styles.insightCard}>
+                      <h3 className={styles.insightTitle}>🙏 Spiritual Guidance</h3>
+                      <p className={styles.insightText}>{overallReading.spiritualGuidance}</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -533,25 +552,6 @@ const FaceReadingResult = () => {
             </div>
           )}
         </div>
-
-        {/* Relationship Insights & Spiritual Guidance */}
-        {(overallReading.relationshipInsights || overallReading.spiritualGuidance) && (
-          <div className={styles.insightsContainer}>
-            {overallReading.relationshipInsights && (
-              <div className={styles.insightCard}>
-                <h3 className={styles.insightTitle}>💕 Relationship Insights</h3>
-                <p className={styles.insightText}>{overallReading.relationshipInsights}</p>
-              </div>
-            )}
-
-            {overallReading.spiritualGuidance && (
-              <div className={styles.insightCard}>
-                <h3 className={styles.insightTitle}>🙏 Spiritual Guidance</h3>
-                <p className={styles.insightText}>{overallReading.spiritualGuidance}</p>
-              </div>
-            )}
-          </div>
-        )}
 
         <div className='text-center'>
           <button 

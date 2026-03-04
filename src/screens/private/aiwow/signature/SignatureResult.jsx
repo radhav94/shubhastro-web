@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import styles from './SignatureResult.module.scss';
 import { Toast } from '../../../../component';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const SignatureResult = () => {
   const navigate = useNavigate();
@@ -558,6 +559,13 @@ const SignatureResult = () => {
         {/* <button className={styles.doneButton} onClick={() => navigate('/aiwow')}>
           Done
         </button> */}
+
+        <button 
+          className={styles.consultButton}
+          onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
+        >
+          Consult with Expert Astrologer
+        </button>
       </div>
     </div>
   );
