@@ -405,14 +405,30 @@ const GemstoneResult = () => {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate("/aiwow/gemstone-authenticity")}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <h1 className={styles.title}>Gemstone Analysis</h1>
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={() => navigate("/aiwow/gemstone-authenticity")}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <h1 className={styles.title}>Gemstone Analysis</h1>
+        </div>
       </header>
+
+      <div className={styles.tabsWrap}>
+        <div className={styles.tabs}>
+            {['overview', 'details', 'astrological', 'suitability', 'healing'].map((tab) => (
+              <button
+                key={tab}
+                className={`${styles.tab} ${activeTab === tab ? styles.active : ''}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+        </div>
+      </div>
 
       <div className={styles.content}>
         {gemstones.length > 1 && (
@@ -429,17 +445,7 @@ const GemstoneResult = () => {
           </div>
         )}
 
-        <div className={styles.tabs}>
-          {['overview', 'details', 'astrological', 'suitability', 'healing'].map((tab) => (
-            <button
-              key={tab}
-              className={`${styles.tab} ${activeTab === tab ? styles.active : ''}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
+        
 
         {activeTab === 'overview' && renderOverview(currentGemstone)}
         {activeTab === 'details' && renderDetails(currentGemstone)}
