@@ -2059,10 +2059,11 @@
 
 .sessionChatBtn {
   width: 100%;
+  height: 38px;
   background: transparent;
   color: #f75801;
   border: 1px solid #f75801;
-  padding: 10px 12px;
+  padding: 0px 5px;
   border-radius: 50px;
   font-family: "Poppins", sans-serif;
   font-size: 13px;
@@ -2080,8 +2081,9 @@
   }
 
   @media screen and (width <= 767px) {
-    padding: 8px 10px;
+    // padding: 8px 10px;
     font-size: 12px;
+    height: 34px;
     img{
       display: none;
     }
@@ -2100,13 +2102,14 @@
 
 .sessionCallBtn {
   width: 100%;
+  height: 38px;
   background: var(
     --orange_gradient,
     linear-gradient(90deg, #f75801 0%, #d43400 100%)
   );
   color: #ffffff;
   border: none;
-  padding: 10px 12px;
+  padding: 0px 5px;
   border-radius: 50px;
   font-family: "Poppins", sans-serif;
   font-size: 13px;
@@ -2125,8 +2128,9 @@
   }
 
   @media screen and (width <= 767px) {
-    padding: 8px 10px;
+    // padding: 0px 5px;
     font-size: 12px;
+    height: 34px;
     img{
       display: none;
     }
