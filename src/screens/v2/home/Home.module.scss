@@ -4799,9 +4799,10 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 16px;
 
   @media (min-width: 768px) {
     align-items: center;
@@ -4810,7 +4811,7 @@
 
 .customModal {
   background: #fff;
-  border-radius: 20px 20px 0 0;
+  border-radius: 20px 20px;
   padding: 24px;
   width: 100%;
   max-width: 400px;

@@ -303,6 +303,19 @@
   border-radius: 10px;
   margin-bottom: 10px;
   overflow: hidden;
+
+  &.alwaysOpen {
+    @media (min-width: 1024px) {
+      .dropdownHeader {
+        cursor: default;
+        pointer-events: none;
+        
+        &:hover {
+          background: none;
+        }
+      }
+    }
+  }
 }
 
 .dropdownHeader {
@@ -445,4 +458,29 @@
   .cardTitle { font-size: 18px; }
   .identificationCard, .summaryCard { padding: 16px; }
   .detailBox, .astroBox, .suitBox { padding: 14px; }
+}
+
+
+// Consult Button
+.consultButton {
+  width: fit-content;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 16px auto;
+  display: block;
+  @media (width <= 767px) {
+    width: 100%;
+  }
+
+  &:hover,&:active {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+  }
 }
