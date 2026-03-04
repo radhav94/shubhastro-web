@@ -303,6 +303,19 @@
   border-radius: 10px;
   margin-bottom: 10px;
   overflow: hidden;
+
+  &.alwaysOpen {
+    @media (min-width: 1024px) {
+      .dropdownHeader {
+        cursor: default;
+        pointer-events: none;
+        
+        &:hover {
+          background: none;
+        }
+      }
+    }
+  }
 }
 
 .dropdownHeader {
