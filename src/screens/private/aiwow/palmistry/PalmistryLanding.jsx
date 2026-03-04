@@ -1,24 +1,32 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './PalmistryLanding.module.scss';
+import PalmLineIcon from '../../../../assets/icons/palmline.png';
+import PalmMountIcon from '../../../../assets/icons/palmmount.png';
+import CakeIcon from '../../../../assets/icons/Cake.png';
+import LoveIcon from '../../../../assets/icons/loveIcon.png';
 
 const PalmistryLanding = () => {
   const navigate = useNavigate();
 
   const features = [
     {
+      icon: PalmLineIcon,
       title: 'Palm Line Analysis',
       description: 'Examine the major lines on the palm to determine aspects of personality and destiny.',
     },
     {
+      icon: PalmMountIcon,
       title: 'Mount Identification',
       description: 'Identify the mounts on the palm that indicate strengths and challenges in various life areas.',
     },
     {
+      icon: CakeIcon,
       title: 'Age Prediction',
       description: 'Estimate the age of individuals based on the characteristics of their palm features.',
     },
     {
+      icon: LoveIcon,
       title: 'Compatibility Assessment',
       description: 'Evaluate relationship compatibility by analysing the palm prints of two individuals.',
     },
@@ -45,6 +53,9 @@ const PalmistryLanding = () => {
         <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
             <div key={index} className={styles.featureCard}>
+              <div className={styles.iconWrapper}>
+                <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
+              </div>
               <h3 className={styles.featureTitle}>{feature.title}</h3>
               <p className={styles.featureDescription}>{feature.description}</p>
             </div>

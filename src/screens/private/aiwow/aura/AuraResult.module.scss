@@ -811,6 +811,75 @@
 }
 
 @media (min-width: 1024px) {
+  // Desktop: Remove dropdown behavior, show content by default
+  .cardHeaderButton {
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .dropdownArrow {
+    display: none;
+  }
+
+  .cardDropdown {
+    display: block;
+    animation: none;
+  }
+
+  // Desktop: Reorder cards - Astrological Profile first, then 3 columns
+  .cardsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    grid-auto-rows: auto;
+    
+    // Astrological Profile (2nd card) moves to top, full width
+    .card:nth-child(2) {
+      grid-column: 1 / -1;
+      order: -1;
+    }
+    
+    // Dominant Aura Color, Strengths, Recommendations in 3 columns with equal height
+    .dominantCard,
+    .card:nth-child(3),
+    .card:nth-child(4) {
+      grid-column: span 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+  
+  // Ensure card content fills available space
+  .card,
+  .dominantCard {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .cardDropdown {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .planetaryGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+  }
+
+  .energyGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .spiritualGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
   .planetaryGrid {
     grid-template-columns: repeat(4, 1fr);
     gap: 1.25rem;

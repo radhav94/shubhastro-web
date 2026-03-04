@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import styles from './ClothColorResult.module.scss';
 import { Toast } from '../../../../component';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const ClothColorResult = () => {
   const navigate = useNavigate();
@@ -365,8 +366,16 @@ const ClothColorResult = () => {
           {activeTab === 'recommended' && renderRecommended()}
           {activeTab === 'combinations' && renderCombinations()}
           {activeTab === 'avoid' && renderAvoid()}
-        <button className={styles.doneButton} onClick={() => navigate('/aiwow')}>
+        {/* <button className={styles.doneButton} onClick={() => navigate('/aiwow')}> */}
+        {/* <button className={styles.doneButton} onClick={() => navigate('/aiwow')}>
           Done
+        </button> */}
+
+        <button 
+          className={styles.consultButton}
+          onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
+        >
+          Consult with Expert Astrologer
         </button>
       </div>
     </div>
