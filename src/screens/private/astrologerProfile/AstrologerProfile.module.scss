@@ -19,15 +19,15 @@
 
 .leftSidebar,
 .rightSidebar {
-  display: none !important;
+  display: block;
+  position: sticky;
+  top: -100px;
+  width: 260px;
+  flex-shrink: 0;
+  height: fit-content;
   
-  @media (width >= 1025px) {
-    display: block !important;
-    width: 260px;
-    flex-shrink: 0;
-    position: sticky;
-    top: 100px;
-    height: fit-content;
+  @media (width <= 1180px) {
+    display: none!important;
   }
 }
 
@@ -35,8 +35,9 @@
   flex: 1;
   min-width: 0;
   
-  @media (width <= 1024px) {
+  @media (width <= 1180px) {
     width: 100%;
+    padding: 0 16px;
   }
 }
 
@@ -48,7 +49,7 @@
     background: #FFFFFF;
     border-radius: 16px;
     padding: 16px;
-    position: sticky;
+    // position: sticky;
     // top: 24px;
   }
   
@@ -442,7 +443,7 @@
     border-radius: 16px;
     padding: 16px;
     position: sticky;
-    margin-top: 20px;
+    // margin-top: 20px;
   }
   
   .connectTitle {
@@ -513,7 +514,7 @@
     border-radius: 20px;
     padding: 16px;
     position: sticky;
-    margin-top: 20px;
+    // margin-top: 20px;
   }
   
   .hoursHeader {
