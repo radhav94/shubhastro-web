@@ -147,7 +147,7 @@ const Explore = () => {
               >
                 <h3 className={styles.cardTitle}>{card.title}</h3>
                 <img
-                  src={card.imageUrl || DefaultImages.HoroscopeDefault}
+                  src={card.image_url || DefaultImages.HoroscopeDefault}
                   alt={card.title}
                   className={styles.cardIcon}
                 />
@@ -179,7 +179,7 @@ const Explore = () => {
                 >
                   <div className={styles.kundliCardImage}>
                     <img
-                      src={card.imageUrl || DefaultImages.VedicKundliDefault}
+                      src={card.image_url || DefaultImages.VedicKundliDefault}
                       alt={card.title}
                       className={styles.chartImage}
                     />
