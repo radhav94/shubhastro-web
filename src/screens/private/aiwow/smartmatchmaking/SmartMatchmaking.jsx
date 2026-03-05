@@ -431,25 +431,28 @@ const SmartMatchmaking = () => {
             </div>
           ) : (
             <div className={styles.resultSection}>
-              {/* Overall Score Card */}
-            <div className={styles.scoreCard}>
-              <div className={styles.scoreCircle}>
-                <div className={styles.scoreValue}>{result?.overallScore || 0}</div>
-                <div className={styles.scoreMax}>/ 100</div>
-              </div>
-              <div className={styles.scoreInfo}>
-                <h2 className={styles.compatibilityLevel}>{result?.compatibilityLevel || 'N/A'}</h2>
-                <p className={styles.partnerNames}>
-                  {primaryProfile?.name} & {partnerProfile?.name}
-                </p>
-              </div>
-            </div>
+              {/* Score and Summary Wrapper */}
+              <div className={styles.scoreSummaryWrapper}>
+                {/* Overall Score Card */}
+                <div className={styles.scoreCard}>
+                  <div className={styles.scoreCircle}>
+                    <div className={styles.scoreValue}>{result?.overallScore || 0}</div>
+                    <div className={styles.scoreMax}>/ 100</div>
+                  </div>
+                  <div className={styles.scoreInfo}>
+                    <h2 className={styles.compatibilityLevel}>{result?.compatibilityLevel || 'N/A'}</h2>
+                    <p className={styles.partnerNames}>
+                      {primaryProfile?.name} & {partnerProfile?.name}
+                    </p>
+                  </div>
+                </div>
 
-            {/* Summary */}
-            <div className={styles.summaryCard}>
-              <h3 className={styles.cardTitle}>Summary</h3>
-              <p className={styles.summaryText}>{result?.summary || 'No summary available'}</p>
-            </div>
+                {/* Summary */}
+                <div className={styles.summaryCard}>
+                  <h3 className={styles.cardTitle}>Summary</h3>
+                  <p className={styles.summaryText}>{result?.summary || 'No summary available'}</p>
+                </div>
+              </div>
 
             {/* Category Scores */}
             <div className={styles.categoryCard}>

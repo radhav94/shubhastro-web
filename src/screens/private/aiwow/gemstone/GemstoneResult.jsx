@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import styles from './GemstoneResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
+import Footer from '../../../../layouts/Footer';
 
 const GemstoneResult = () => {
   const navigate = useNavigate();
@@ -416,6 +417,7 @@ const GemstoneResult = () => {
   const currentGemstone = gemstones[selectedGemstoneIndex];
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -473,6 +475,8 @@ const GemstoneResult = () => {
         </button>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 
