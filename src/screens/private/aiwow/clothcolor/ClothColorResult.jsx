@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import styles from './ClothColorResult.module.scss';
 import { Toast } from '../../../../component';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const ClothColorResult = () => {
   const navigate = useNavigate();
@@ -99,30 +100,32 @@ const ClothColorResult = () => {
 
   const renderRecommended = () => (
     <div className={styles.tabContent}>
+
+      <div className={styles.intentionCard}>
       {resultData.image && (
         <div className={styles.clothImageWrapper}>
           <img src={resultData.image} alt="Analyzed clothes" className={styles.clothImage} />
         </div>
       )}
-
-      <div className={styles.intentionCard}>
-        <h3 className={styles.cardTitle}>Analysis Details</h3>
-        <div className={styles.infoRow}>
-          <span className={styles.label}>Intention:</span>
-          <span className={styles.value}>{getIntentionLabel(resultData.intention)}</span>
+      <div className={styles.rightSideContent}>
+          <h3 className={styles.cardTitle}>Analysis Details</h3>
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Intention:</span>
+            <span className={styles.value}>{getIntentionLabel(resultData.intention)}</span>
+          </div>
+          {resultData.analysisDate && (
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Analysis Date:</span>
+              <span className={styles.value}>{String(resultData.analysisDate)}</span>
+            </div>
+          )}
+          {resultData.dominantPlanet && (
+            <div className={styles.infoRow}>
+              <span className={styles.label}>Dominant Planet:</span>
+              <span className={styles.value}>{String(resultData.dominantPlanet)}</span>
+            </div>
+          )}
         </div>
-        {resultData.analysisDate && (
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Analysis Date:</span>
-            <span className={styles.value}>{String(resultData.analysisDate)}</span>
-          </div>
-        )}
-        {resultData.dominantPlanet && (
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Dominant Planet:</span>
-            <span className={styles.value}>{String(resultData.dominantPlanet)}</span>
-          </div>
-        )}
       </div>
 
       {resultData.recommendedColors && Array.isArray(resultData.recommendedColors) && resultData.recommendedColors.length > 0 && (
@@ -324,16 +327,18 @@ const ClothColorResult = () => {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate('/aiwow')}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <h1 className={styles.title}>Color Analysis</h1>
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={() => navigate('/aiwow')}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <h1 className={styles.title}>Color Analysis</h1>
+        </div>
       </header>
 
-      <div className={styles.content}>
+      <div className={styles.tabsWrap}>
         <div className={styles.tabs}>
           <button
             className={`${styles.tab} ${activeTab === 'recommended' ? styles.active : ''}`}
@@ -355,12 +360,22 @@ const ClothColorResult = () => {
           </button>
         </div>
 
-        {activeTab === 'recommended' && renderRecommended()}
-        {activeTab === 'combinations' && renderCombinations()}
-        {activeTab === 'avoid' && renderAvoid()}
+        </div>
 
-        <button className={styles.doneButton} onClick={() => navigate('/aiwow')}>
+      <div className={styles.content}>
+          {activeTab === 'recommended' && renderRecommended()}
+          {activeTab === 'combinations' && renderCombinations()}
+          {activeTab === 'avoid' && renderAvoid()}
+        {/* <button className={styles.doneButton} onClick={() => navigate('/aiwow')}> */}
+        {/* <button className={styles.doneButton} onClick={() => navigate('/aiwow')}>
           Done
+        </button> */}
+
+        <button 
+          className={styles.consultButton}
+          onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
+        >
+          Consult with Expert Astrologer
         </button>
       </div>
     </div>

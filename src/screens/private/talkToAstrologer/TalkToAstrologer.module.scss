@@ -142,17 +142,15 @@
 .cardsContainer {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 16px;
   margin-top: 1.5rem;
 
   @media (max-width: 1200px) {
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
   }
 
   @media (max-width: 767px) {
     grid-template-columns: repeat(1, 1fr);
-    gap: 16px;
   }
 }
 

@@ -16,7 +16,8 @@ const FaceReadingCamera = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
-  const [videoActive, setVideoActive] = useState(true); // ⭐ NEW - Controls video element mounting
+  const [videoActive, setVideoActive] = useState(true);
+  const [videoReady, setVideoReady] = useState(false); // ⭐ Track video ready state
 
   const {
     modelsLoaded,
@@ -67,15 +68,13 @@ const FaceReadingCamera = () => {
     };
   }, []);
 
-  // Start detection when models are loaded and video is ready
+  // Start detection when BOTH models and video are ready
   useEffect(() => {
-    if (modelsLoaded && videoRef.current && videoRef.current.readyState >= 2) {
-      console.log('Models loaded, starting detection for existing video');
-      setTimeout(() => {
-        startDetection();
-      }, 300);
+    if (modelsLoaded && videoReady) {
+      console.log("Models + Video ready → Starting detection");
+      startDetection();
     }
-  }, [modelsLoaded]);
+  }, [modelsLoaded, videoReady]);
 
   useEffect(() => {
     console.log('[FaceReadingCamera] facingMode changed to:', facingMode);
@@ -83,32 +82,18 @@ const FaceReadingCamera = () => {
       startCamera();
     }, 200);
     
+    // ✅ FIX: Only cleanup timer, not detection (that's handled by unmount effect)
     return () => {
       clearTimeout(timer);
-      console.log('FaceReadingCamera unmounting, stopping camera');
-      stopDetection();
-      
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach(track => {
-          console.log('Stopping track:', track.kind);
-          track.stop();
-        });
-        videoRef.current.srcObject = null;
-      }
-      
-      if (stream) {
-        stream.getTracks().forEach(track => {
-          track.stop();
-        });
-      }
     };
   }, [facingMode]);
 
   const startCamera = async () => {
     try {
-      // Stop existing stream first
-      stopCamera();
+      // Stop existing stream first (only if stream exists)
+      if (stream) {
+        stopCamera();
+      }
 
       // Check if mediaDevices is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -130,18 +115,15 @@ const FaceReadingCamera = () => {
         setStream(mediaStream);
         setError(null);
         
-        // Start face detection once video is playing
+        // Set video ready when data is loaded
         videoRef.current.onloadedmetadata = () => {
+          console.log("Video metadata loaded");
           videoRef.current.play();
         };
-
-        videoRef.current.onplay = () => {
-          // Wait a bit for video to stabilize, then start detection
-          if (modelsLoaded) {
-            setTimeout(() => {
-              startDetection();
-            }, 300);
-          }
+        
+        videoRef.current.onloadeddata = () => {
+          console.log("Video ready");
+          setVideoReady(true);
         };
       }
     } catch (err) {
@@ -166,6 +148,7 @@ const FaceReadingCamera = () => {
 
   const stopCamera = () => {
     stopDetection();
+    setVideoReady(false); // Reset video ready state
     
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = videoRef.current.srcObject.getTracks();

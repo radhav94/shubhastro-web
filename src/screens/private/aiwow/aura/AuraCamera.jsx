@@ -16,6 +16,7 @@ const AuraCamera = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
+  const [videoReady, setVideoReady] = useState(false); // ⭐ Track video ready state
 
   const {
     modelsLoaded,
@@ -24,13 +25,27 @@ const AuraCamera = () => {
     stopDetection
   } = useFaceDetection({ videoRef, canvasRef: detectionCanvasRef });
 
+  // Safety net cleanup on unmount
   useEffect(() => {
-    if (modelsLoaded && videoRef.current && videoRef.current.readyState >= 2) {
-      setTimeout(() => {
-        startDetection();
-      }, 300);
+    return () => {
+      console.log('Component unmounting - final cleanup');
+      stopDetection();
+      
+      if (videoRef.current?.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach(track => {
+          track.stop();
+        });
+      }
+    };
+  }, []);
+
+  // Start detection when BOTH models and video are ready
+  useEffect(() => {
+    if (modelsLoaded && videoReady) {
+      console.log("Models + Video ready → Starting detection");
+      startDetection();
     }
-  }, [modelsLoaded]);
+  }, [modelsLoaded, videoReady]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,23 +54,15 @@ const AuraCamera = () => {
     
     return () => {
       clearTimeout(timer);
-      stopDetection();
-      
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
-        videoRef.current.srcObject = null;
-      }
-      
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
     };
   }, [facingMode]);
 
   const startCamera = async () => {
     try {
-      stopCamera();
+      // Only stop camera if stream exists
+      if (stream) {
+        stopCamera();
+      }
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setError('Camera is not supported on this device or browser.');
@@ -76,15 +83,13 @@ const AuraCamera = () => {
         setError(null);
         
         videoRef.current.onloadedmetadata = () => {
+          console.log("Video metadata loaded");
           videoRef.current.play();
         };
 
-        videoRef.current.onplay = () => {
-          if (modelsLoaded) {
-            setTimeout(() => {
-              startDetection();
-            }, 300);
-          }
+        videoRef.current.onloadeddata = () => {
+          console.log("Video ready");
+          setVideoReady(true);
         };
       }
     } catch (err) {
@@ -108,6 +113,7 @@ const AuraCamera = () => {
 
   const stopCamera = () => {
     stopDetection();
+    setVideoReady(false); // Reset video ready state
     
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = videoRef.current.srcObject.getTracks();

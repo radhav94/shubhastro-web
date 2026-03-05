@@ -72,9 +72,9 @@
   transform: scale(0.95);
 }
 
-@media screen and (max-width:1180px) {
+@media screen and (max-width:1024px) {
   .category-cards {
-    display: flex!important;
+    /* display: flex!important; */
     overflow: auto;
   }
 }
@@ -257,12 +257,12 @@
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 12px;
   padding: 16px 0;
-  overflow: auto;
+  /* overflow: auto; */
 }
 .category-item {
   height: 120px;
-  width: 120px;
-  flex-shrink: 0;
+  width: 100%;
+  /* flex-shrink: 0; */
 }
 
 .category-card {
@@ -566,7 +566,7 @@
   
   .overview-card {
     border-radius: 8px;
-    height: 130px;
+    height: auto;
   }
   
   .overview-card-header {
@@ -783,7 +783,13 @@
 .select-zodiac-button:active {
   transform: scale(0.98);
 }
-
+@media screen and (width <= 1024px) {
+  .category-item {
+    height: 80px;
+    width: 80px;
+    flex-shrink: 0;
+  }
+}
 @media screen and (width <= 767px) {
   .categoryImages{
     width: auto;
@@ -793,10 +799,6 @@
     height: 80px;
     width: 80px;
   } */
-   .category-item {
-    height: 80px;
-    width: 80px;
-  }
   .category-card::after{
     height: 5px;
     width: 40px;
@@ -1070,7 +1072,7 @@
   /* Desktop Category Cards */
 
   .category-label {
-    font-size: 14px;
+    font-size: 13.5px;
     height: fit-content;
   }
 
