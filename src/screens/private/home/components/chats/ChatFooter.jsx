@@ -1,16 +1,17 @@
 import styles from "./ChatWindow.module.scss";
 
 const ChatFooter = ({ remainingTime = 0, onRecharge, onChatEnd, isChatActive }) => {
-  // Format time as MM:SS
-  const formatTime = (seconds) => {
-    // Handle invalid values
-    if (!seconds || isNaN(seconds) || seconds < 0) {
-      return "0:00";
+  // Format time as HH:MM:SS or MM:SS
+  const formatTime = (sec) => {
+    const totalSec = Math.max(0, Math.floor(Number(sec) || 0));
+    const hours = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    
+    if (hours > 0) {
+      return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
     }
-
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
   return (
