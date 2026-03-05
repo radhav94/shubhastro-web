@@ -13,17 +13,24 @@
 .content {
   flex: 1;
   padding: 1rem;
-  max-width: 600px;
-  margin: 0 auto;
+  max-width: 900px;
+  margin: 16px auto;
+  gap: 2rem;
   width: 100%;
   display: flex;
-  flex-direction: column;
-  margin-top: 16px;
-  // border: 1px solid #ddd;
-  border-radius: 12px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
   background-color: #fff;
+  border-radius: 12px;
+  @media (width <= 1180px) {
+    width: 94%;
+    gap: 1rem;
+  }
   @media (width <= 767px) {
-      width: 94%;
+    flex-direction: column;
+    padding: 1rem;
+    // gap: 1rem;
   }
 }
 
@@ -46,11 +53,14 @@
 .imageWrapper {
   position: relative;
   width: 100%;
-  max-width: 600px;
-  margin: 0 auto 2rem;
-  background: #ffffff;
+  max-width: 200px;
+  margin: 0 auto 0rem;
+  aspect-ratio: 1;
+  background: #f3f4f6;
   border-radius: 0.75rem;
   overflow: hidden;
+  display: flex;
+  align-items: center;
 }
 
 .signatureImage {
@@ -174,16 +184,16 @@
 }
 
 @media (min-width: 768px) {
-  .content {
-    padding: 2rem;
-    max-width: 1200px;
-    flex-direction: row;
-    align-items: center;
-    gap: 3rem;
-  }
+  // .content {
+  //   padding: 1rem;
+  //   max-width: 900px;
+  //   flex-direction: row;
+  //   align-items: center;
+  //   gap: 3rem;
+  // }
 
   .leftSection {
-    flex: 0 0 45%;
+    // flex: 0 0 45%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -197,7 +207,7 @@
   }
 
   .title {
-    font-size: 1.75rem;
+    font-size: 1.2rem;
     text-align: center;
     width: 100%;
   }

@@ -748,7 +748,7 @@
   /* ✅ added */
   flex-direction: column;
   /* ✅ added */
-  gap: 12px;
+  gap: 5px;
   /* ✅ added gap between title/subtitle/button */
 }
 .slideTitle {
@@ -774,7 +774,7 @@
   letter-spacing: -0.02em;
   color: #6b6b6b;
   margin: 0;
-  margin-top: 2px;
+  // margin-top: 2px;
   @include line-clamp(1);
   /* ✅ small extra spacing */
 }
@@ -784,19 +784,15 @@
   align-items: center;
   justify-content: center;
   gap: 5px;
-
   width: fit-content;
-  // background: #2a1c06;
   background: var(
     --orange_gradient,
     linear-gradient(90deg, #f75801 0%, #d43400 100%)
   );
   color: #fff;
   border: none;
-
   padding: 6px 10px 6px 16px;
   border-radius: 999px;
-
   font-family: "Poppins", sans-serif;
   font-size: 0.9rem;
   font-weight: 500;
@@ -804,10 +800,7 @@
   position: relative;
   z-index: 10;
   pointer-events: auto;
-
-  margin-top: 6px;
-  /* ✅ extra gap before button */
-  // box-shadow: 0 4px 12px rgba(42, 28, 6, 0.25);
+  margin-top: 5px;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
@@ -966,7 +959,7 @@
     // font-size: 13px;
     // padding: 10px 16px;
     border-radius: 999px;
-    margin-top: 4px;
+    // margin-top: 4px;
   }
 
   .slideImageWrapper {
@@ -1955,10 +1948,14 @@
 }
 
 .sessionCardLink {
-  flex: 0 0 40%;
-  width: 40%;
+  flex: 0 0 30%;
+  width: 30%;
   text-decoration: none;
   color: inherit;
+  @media (width <= 767px) {
+    flex: 0 0 40%;
+    width: 40%;
+  }
 }
 
 .sessionImageWrapper {
@@ -1981,7 +1978,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 20px;
+  padding: 16px;
 }
 
 .sessionNameLink {
@@ -2221,9 +2218,9 @@
   //   min-height: 160px;
   // }
 
-  .sessionInfo {
-    padding: 12px;
-  }
+  // .sessionInfo {
+  //   padding: 12px;
+  // }
 
   .sessionName {
     font-size: 16px;
@@ -2372,7 +2369,7 @@
   font-family: "Poppins", sans-serif;
   font-size: 12px;
   font-weight: 500;
-  color: #101010;
+  color: #424242;
   cursor: pointer;
   transition: all 0.2s;
   @media screen and (width <= 767px) {
@@ -3047,9 +3044,9 @@
   //   min-height: 200px;
   // }
 
-  .sessionInfo {
-    padding: 24px;
-  }
+  // .sessionInfo {
+  //   padding: 24px;
+  // }
 
   .sessionName {
     font-size: 19px;

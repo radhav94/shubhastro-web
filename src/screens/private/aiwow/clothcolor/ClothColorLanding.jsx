@@ -4,6 +4,7 @@ import AuraSpectrumIcon from '../../../../assets/icons/auraspectrum.png';
 import VibrancyIcon from '../../../../assets/icons/vibrancy.png';
 import PatternIcon from '../../../../assets/icons/pattern.png';
 import StyleCaratIcon from '../../../../assets/icons/stylecarat.png';
+import Footer from '../../../../layouts/Footer';
 
 const ClothColorLanding = () => {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ const ClothColorLanding = () => {
   ];
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -69,6 +71,8 @@ const ClothColorLanding = () => {
         </button>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

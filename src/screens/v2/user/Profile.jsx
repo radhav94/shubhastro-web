@@ -1203,10 +1203,22 @@ const Profile = () => {
                       <h4 className={styles.yearTitle}>{year}</h4>
 
                       {ordersByYear[year].map((order) => (
-                        <div key={order.id} className={styles.orderCard}>
+                        <div 
+                          key={order.id} 
+                          className={styles.orderCard}
+                          onClick={() => navigate(`/profile/order-history/${order.astrologer._id}`)}
+                          style={{ cursor: 'pointer' }}
+                        >
                           <div className={styles.orderCardTop}>
                             <div className={styles.orderLeft}>
-                              <div className={styles.astrologerAvatar} onClick={() => navigate(`/astrologer/${order.astrologer._id}`)} style={{ cursor: 'pointer' }}>
+                              <div 
+                                className={styles.astrologerAvatar} 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/astrologer/${order.astrologer._id}`);
+                                }} 
+                                style={{ cursor: 'pointer' }}
+                              >
                                 <span>
                                   {getInitials(order.astrologer.name)}
                                 </span>
@@ -1214,7 +1226,10 @@ const Profile = () => {
                               <div className={styles.orderInfo}>
                                 <h5 
                                   className={styles.astrologerName}
-                                  onClick={() => navigate(`/astrologer/${order.astrologer._id}`)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/astrologer/${order.astrologer._id}`);
+                                  }}
                                   style={{ cursor: 'pointer' }}
                                 >
                                   {order.astrologer.name}
@@ -1249,18 +1264,20 @@ const Profile = () => {
                           <div className={styles.orderCardBottom}>
                             <button
                               className={styles.rateButton}
-                              onClick={() =>
-                                handleRateConsultation(order.astrologer)
-                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRateConsultation(order.astrologer);
+                              }}
                             >
                               Rate Consultation
                             </button>
                             <div className={styles.buttonSeparator}></div>
                             <button
                               className={styles.consultAgainButton}
-                              onClick={() =>
-                                handleConnectClick(order.astrologer)
-                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleConnectClick(order.astrologer);
+                              }}
                             >
                               Consult Again
                             </button>

@@ -5,6 +5,7 @@ import SmileIcon from '../../../../assets/icons/Smile.png';
 import CakeIcon from '../../../../assets/icons/Cake.png';
 import FlowerIcon from '../../../../assets/icons/Flower.png';
 import ContactsIcon from '../../../../assets/icons/Contacts.png';
+import Footer from '../../../../layouts/Footer';
 
 const FaceReadingLanding = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const FaceReadingLanding = () => {
   ];
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -70,6 +72,8 @@ const FaceReadingLanding = () => {
         </button>
       </div>
     </div>
+    <Footer />
+</>
   );
 };
 

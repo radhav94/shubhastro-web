@@ -13,6 +13,7 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { logout } from "../../../redux/auth/authSlice";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
+import Footer from "../../../layouts/Footer";
 
 const AIWow = () => {
   const navigate = useNavigate();
@@ -149,6 +150,7 @@ const AIWow = () => {
   
 
   return (
+    <>
     <div className={styles.container}>
       {isLoading && <PrimaryLoader />}
 
@@ -292,6 +294,8 @@ const AIWow = () => {
         onClose={() => setShowMobileAppModal(false)}
       />
     </div>
+    <Footer />
+    </>
   );
 };
 

@@ -465,7 +465,9 @@
     width: calc(100% - 32px);
   }
 }
-
+.otpprimaryBtn{
+  margin: 0px auto 20px auto;
+}
 // Guidance Screen
 .guidanceScreen {
   min-height: 100vh;

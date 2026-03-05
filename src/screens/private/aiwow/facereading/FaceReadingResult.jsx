@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import styles from './FaceReadingResult.module.scss';
 import { Toast, PieChart } from '../../../../component';
+import Footer from '../../../../layouts/Footer';
 
 const FaceReadingResult = () => {
   const navigate = useNavigate();
@@ -109,6 +110,7 @@ const FaceReadingResult = () => {
   } = analysisData;
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
       <div className={styles.header}>
@@ -563,6 +565,8 @@ const FaceReadingResult = () => {
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

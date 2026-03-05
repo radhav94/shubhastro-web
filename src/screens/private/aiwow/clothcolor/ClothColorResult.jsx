@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import styles from './ClothColorResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
+import Footer from '../../../../layouts/Footer';
 
 const ClothColorResult = () => {
   const navigate = useNavigate();
@@ -326,6 +327,7 @@ const ClothColorResult = () => {
   }
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -379,6 +381,8 @@ const ClothColorResult = () => {
         </button>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

@@ -254,6 +254,7 @@
 .category-cards {
   display: flex;
   /* grid-template-columns: repeat(11, 1fr); */
+  /* grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); */
   gap: 12px;
   padding: 16px 0;
   /* overflow: auto; */
