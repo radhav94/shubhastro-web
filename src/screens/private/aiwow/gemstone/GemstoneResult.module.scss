@@ -206,12 +206,39 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  margin-bottom: 32px; // Add spacing before astrological section
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
+    margin-bottom: 24px;
   }
   @media (min-width: 768px) {
     grid-template-columns: 1fr 1fr 1fr;
+    margin-bottom: 40px;
+  }
+}
+
+.astroDetailsGrid {
+  margin-top: 0; // Remove top margin since detailsGrid has bottom margin
+  
+  .SectionTitle {
+    grid-column: 1 / -1; // Make title span full width
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 16px 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e5e7eb;
+    
+    @media (min-width: 768px) {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+  }
+  
+  .tabContent {
+    grid-column: 1 / -1; // Make nested tabContent span full width
+    padding: 0; // Remove padding from nested tabContent
   }
 }
 
