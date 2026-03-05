@@ -6,6 +6,7 @@ import { analyzeCalendarEvents } from '../../../../services/appServices/aiWowSer
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { FiMapPin, FiCalendar, FiChevronLeft, FiChevronRight, FiChevronUp, FiChevronDown } from 'react-icons/fi';
+import Footer from '../../../../layouts/Footer';
 
 const DEFAULT_OCCASIONS = [
   'Marriage',
@@ -217,6 +218,7 @@ const AgenticCalendar = () => {
   if (profileLoading) return <PrimaryLoader isLoading={true} />;
 
   return (
+    <>
     <div className={styles.container}>
       {/* Header */}
       <header className={styles.headerWrap}>
@@ -507,6 +509,8 @@ const AgenticCalendar = () => {
         </div>
       )}
     </div>
+    <Footer />
+    </>
   );
 };
 

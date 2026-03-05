@@ -5,6 +5,7 @@ import ClarityIcon from '../../../../assets/icons/clarity.png';
 import ColorGradingIcon from '../../../../assets/icons/colorgrading.png';
 import CutPrecisionIcon from '../../../../assets/icons/curprecision.png';
 import CaratIcon from '../../../../assets/icons/carat.png';
+import Footer from '../../../../layouts/Footer';
 
 const GemstoneLanding = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const GemstoneLanding = () => {
   ];
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -70,6 +72,8 @@ const GemstoneLanding = () => {
         </button>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 
