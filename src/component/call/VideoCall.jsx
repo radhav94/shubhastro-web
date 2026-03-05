@@ -415,9 +415,21 @@ const VideoCalling = ({ callData }) => {
   /* ================= SOCKET ================= */
   useEffect(() => {
     const handleCallEnded = () => {
-      if (!endCallRef.current) {
-        safeEndCall();
-      }
+      // Server already ended the call, don't emit call:end again
+      if (endCallRef.current) return;
+      endCallRef.current = true;
+
+      setReviewData({
+        astrologerID: activeCall?.astrologerID,
+        fullName: activeCall.callerName,
+      });
+
+      // Refresh wallet balance after call ends
+      refreshWallet();
+      window.dispatchEvent(new Event("walletBalanceUpdated"));
+
+      setOpenReview(true);
+      cleanup();
     };
 
     const handleDisconnect = () => {

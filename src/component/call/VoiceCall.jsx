@@ -304,6 +304,27 @@ const AgoraVoiceCalling = ({ callData }) => {
   /* ================= SOCKET ================= */
   useEffect(() => {
 
+    const handleCallEnded = () => {
+      // Server already ended the call, don't emit call:end again
+      if (!isUpgradingToVideo.current) {
+        setReviewData({
+          astrologerID: activeCall?.astrologerID,
+          fullName: activeCall?.callerName || callerName,
+        });
+
+        // Refresh wallet balance after call ends
+        refreshWallet();
+        window.dispatchEvent(new Event("walletBalanceUpdated"));
+        
+        // Clear waiting list to prevent waiting popup from showing
+        setWaitingList(null);
+        
+        setOpenReview(true);
+      }
+      
+      cleanup(isUpgradingToVideo.current);
+    };
+
     const handleCallRejected = (data) => {
       
       // Check if this is a video switch rejection
@@ -325,10 +346,12 @@ const AgoraVoiceCalling = ({ callData }) => {
       endCall();
     };
 
+    voiceSocket.on("call:ended", handleCallEnded);
     voiceSocket.on("call:canceled", handleCallCanceled);
     voiceSocket.on("call:rejected", handleCallRejected);
 
     return () => {
+      voiceSocket.off("call:ended", handleCallEnded);
       voiceSocket.off("call:canceled", handleCallCanceled);
       voiceSocket.off("call:rejected", handleCallRejected);
     };
