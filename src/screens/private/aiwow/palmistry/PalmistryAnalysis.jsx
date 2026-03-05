@@ -16,6 +16,26 @@ const PalmistryAnalysis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Track component mount status to prevent navigation after unmount
+  const isMountedRef = React.useRef(true);
+  // Store abort controller to cancel API request on unmount
+  const abortControllerRef = React.useRef(null);
+
+  // Cleanup effect to prevent navigation after unmount and abort API request
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      console.log('PalmistryAnalysis unmounting - aborting API request');
+      
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        console.log('API request aborted');
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (palmImage && selectedHand) {
@@ -29,6 +49,10 @@ const PalmistryAnalysis = () => {
   const performAnalysis = async (imageData, hand) => {
     setIsAnalyzing(true);
     
+    // Create AbortController to cancel request on unmount
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    
     try {
       // Start progress animation
       const progressInterval = setInterval(() => {
@@ -41,10 +65,16 @@ const PalmistryAnalysis = () => {
         });
       }, 200);
 
-      // Call the API with hand parameter
-      const result = await analyzePalm(imageData, hand);
+      // Call the API with hand parameter and abort signal
+      const result = await analyzePalm(imageData, hand, abortController.signal);
 
       clearInterval(progressInterval);
+
+      // Check if component is still mounted before processing result
+      if (!isMountedRef.current) {
+        console.log('Component unmounted - ignoring API result');
+        return;
+      }
 
       if (result.success) {
         const resultId = result.data?.id || result.data?._id;
@@ -57,8 +87,13 @@ const PalmistryAnalysis = () => {
           setProgress(100);
           setAnalysisComplete(true);
           
+          // Only navigate if component is still mounted
           setTimeout(() => {
-            navigate(`${PATH.privateRoutes.PALMISTRY_RESULT.path}/${resultId}`);
+            if (isMountedRef.current) {
+              navigate(`${PATH.privateRoutes.PALMISTRY_RESULT.path}/${resultId}`);
+            } else {
+              console.log('Component unmounted - skipping navigation to result');
+            }
           }, 1000);
         } else {
           // Fallback: Store result without ID
@@ -67,8 +102,13 @@ const PalmistryAnalysis = () => {
           setProgress(100);
           setAnalysisComplete(true);
           
+          // Only navigate if component is still mounted
           setTimeout(() => {
-            navigate(PATH.privateRoutes.PALMISTRY_RESULT.path);
+            if (isMountedRef.current) {
+              navigate(PATH.privateRoutes.PALMISTRY_RESULT.path);
+            } else {
+              console.log('Component unmounted - skipping navigation to result');
+            }
           }, 1000);
         }
       } else {
@@ -81,6 +121,18 @@ const PalmistryAnalysis = () => {
         setError(result.error || { message: 'Analysis failed. Please try again.' });
       }
     } catch (error) {
+      // Ignore abort errors - user navigated away
+      if (error.name === 'AbortError' || error.message === 'canceled') {
+        console.log('API request aborted - user navigated away');
+        return;
+      }
+
+      // Check if component is still mounted before showing error
+      if (!isMountedRef.current) {
+        console.log('Component unmounted - ignoring error');
+        return;
+      }
+
       console.error('Analysis error:', error);
       
       // DON'T clear data on error - keep image and hand selection for retry
@@ -90,7 +142,9 @@ const PalmistryAnalysis = () => {
       // Don't show Toast here - interceptor already showed it
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {
-      setIsAnalyzing(false);
+      if (isMountedRef.current) {
+        setIsAnalyzing(false);
+      }
     }
   };
 

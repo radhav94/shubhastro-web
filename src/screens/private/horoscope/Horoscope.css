@@ -252,8 +252,9 @@
 
 /* Category Cards Section */
 .category-cards {
-  display: flex;
+  display: grid;
   /* grid-template-columns: repeat(11, 1fr); */
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 12px;
   padding: 16px 0;
   /* overflow: auto; */

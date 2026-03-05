@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './ClothColorAnalysis.module.scss';
@@ -15,6 +15,26 @@ const ClothColorAnalysis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Track component mount status to prevent navigation after unmount
+  const isMountedRef = useRef(true);
+  // Store abort controller to cancel API request on unmount
+  const abortControllerRef = useRef(null);
+
+  // Cleanup effect to prevent navigation after unmount and abort API request
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      console.log('ClothColorAnalysis unmounting - aborting API request');
+      
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        console.log('API request aborted');
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (clothImage) {
@@ -27,6 +47,10 @@ const ClothColorAnalysis = () => {
 
   const performAnalysis = async (imageData) => {
     setIsAnalyzing(true);
+    
+    // Create AbortController to cancel request on unmount
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
     
     try {
       const progressInterval = setInterval(() => {
@@ -42,9 +66,15 @@ const ClothColorAnalysis = () => {
       // Get form data from Redux
       const birthData = formData || null;
 
-      const result = await analyzeClothColor(imageData, birthData);
+      const result = await analyzeClothColor(imageData, birthData, abortController.signal);
 
       clearInterval(progressInterval);
+
+      // Check if component is still mounted before processing result
+      if (!isMountedRef.current) {
+        console.log('Component unmounted - ignoring API result');
+        return;
+      }
 
       if (result.success) {
         dispatch(setClothColorResult(result.data));
@@ -52,8 +82,13 @@ const ClothColorAnalysis = () => {
         setProgress(100);
         setAnalysisComplete(true);
         
+        // Only navigate if component is still mounted
         setTimeout(() => {
-          navigate(PATH.privateRoutes.CLOTH_COLOR_RESULT.path);
+          if (isMountedRef.current) {
+            navigate(PATH.privateRoutes.CLOTH_COLOR_RESULT.path);
+          } else {
+            console.log('Component unmounted - skipping navigation to result');
+          }
         }, 1000);
       } else {
         // DON'T clear data on error - keep image and form data for retry
@@ -63,6 +98,18 @@ const ClothColorAnalysis = () => {
         setError(result.error || { message: 'Analysis failed. Please try again.' });
       }
     } catch (error) {
+      // Ignore abort errors - user navigated away
+      if (error.name === 'AbortError' || error.message === 'canceled') {
+        console.log('API request aborted - user navigated away');
+        return;
+      }
+
+      // Check if component is still mounted before showing error
+      if (!isMountedRef.current) {
+        console.log('Component unmounted - ignoring error');
+        return;
+      }
+
       console.error('Analysis error:', error);
       
       // DON'T clear data on error - keep image and form data for retry
@@ -71,7 +118,9 @@ const ClothColorAnalysis = () => {
       setProgress(0);
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {
-      setIsAnalyzing(false);
+      if (isMountedRef.current) {
+        setIsAnalyzing(false);
+      }
     }
   };
 

@@ -107,7 +107,7 @@ const GemstoneResult = () => {
         {/* Quality */}
         <div className={styles.detailBox}>
           <h4 className={styles.boxTitle}>Quality</h4>
-          <p className={styles.boxValue}>{d.details.quality || '—'}</p>
+          <p className={styles.boxValue}>{d.details.quality || "—"}</p>
         </div>
 
         {/* Color */}
@@ -125,7 +125,10 @@ const GemstoneResult = () => {
             <h4 className={styles.boxTitle}>Clarity</h4>
             <InfoRow label="Grade" value={d.details.clarity.grade} />
             {d.details.clarity.inclusions?.length > 0 && (
-              <InfoRow label="Inclusions" value={d.details.clarity.inclusions.join(', ')} />
+              <InfoRow
+                label="Inclusions"
+                value={d.details.clarity.inclusions.join(", ")}
+              />
             )}
           </div>
         )}
@@ -144,7 +147,10 @@ const GemstoneResult = () => {
           <div className={styles.detailBox}>
             <h4 className={styles.boxTitle}>Carat Weight</h4>
             <InfoRow label="Range" value={d.details.estimatedCarat.range} />
-            <InfoRow label="Approx" value={`${d.details.estimatedCarat.approximate} ct`} />
+            <InfoRow
+              label="Approx"
+              value={`${d.details.estimatedCarat.approximate} ct`}
+            />
           </div>
         )}
 
@@ -152,12 +158,80 @@ const GemstoneResult = () => {
         {d.details.treatment && (
           <div className={styles.detailBox}>
             <h4 className={styles.boxTitle}>Treatment</h4>
-            <InfoRow label="Detected" value={d.details.treatment.isDetected ? 'Yes' : 'No'} />
+            <InfoRow
+              label="Detected"
+              value={d.details.treatment.isDetected ? "Yes" : "No"}
+            />
             {d.details.treatment.description && (
-              <p className={styles.boxDesc}>{d.details.treatment.description}</p>
+              <p className={styles.boxDesc}>
+                {d.details.treatment.description}
+              </p>
             )}
           </div>
         )}
+      </div>
+      
+      {/* Astrological Section */}
+      <div className={styles.astroDetailsGrid}>
+        <h2 className={styles.SectionTitle}>Astrological Properties</h2>
+        <div className={styles.astroGrid}>
+          {d.astrological.rulingPlanet && (
+            <div className={styles.astroBox}>
+              <h4 className={styles.boxTitle}>Ruling Planet</h4>
+              <p className={styles.boxHighlight}>
+                {d.astrological.rulingPlanet.planet}
+              </p>
+              <p className={styles.boxDesc}>
+                {d.astrological.rulingPlanet.influence}
+              </p>
+            </div>
+          )}
+
+          {d.astrological.zodiacSigns && (
+            <div className={styles.astroBox}>
+              <h4 className={styles.boxTitle}>Zodiac Signs</h4>
+              <p className={styles.boxHighlight}>
+                {d.astrological.zodiacSigns.primary}
+              </p>
+              {d.astrological.zodiacSigns.secondary?.length > 0 && (
+                <p className={styles.boxDesc}>
+                  Also: {d.astrological.zodiacSigns.secondary.join(", ")}
+                </p>
+              )}
+            </div>
+          )}
+
+          {d.astrological.chakra && (
+            <div className={styles.astroBox}>
+              <h4 className={styles.boxTitle}>Chakra</h4>
+              <p className={styles.boxHighlight}>
+                {d.astrological.chakra.name}
+              </p>
+              <p className={styles.boxDesc}>
+                {d.astrological.chakra.benefits}
+              </p>
+            </div>
+          )}
+
+          {d.astrological.element && (
+            <div className={styles.astroBox}>
+              <h4 className={styles.boxTitle}>Element</h4>
+              <p className={styles.boxHighlight}>{d.astrological.element}</p>
+            </div>
+          )}
+
+          {d.astrological.numerology && (
+            <div className={styles.astroBox}>
+              <h4 className={styles.boxTitle}>Numerology</h4>
+              <p className={styles.boxHighlight}>
+                {d.astrological.numerology.number}
+              </p>
+              <p className={styles.boxDesc}>
+                {d.astrological.numerology.significance}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -367,8 +441,8 @@ const GemstoneResult = () => {
       )}
 
       {/* Market Info - Dropdown */}
-      {d.market && (
-        <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`}>
+      {/* {d.market && (
+        <div className={styles.dropdown}>
           <button className={styles.dropdownHeader} onClick={() => toggleSection('market')}>
             <h3 className={styles.dropdownTitle}>Market Information</h3>
             {!isDesktop && <Arrow isOpen={openSections.market} />}
@@ -400,7 +474,7 @@ const GemstoneResult = () => {
             </div>
           )}
         </div>
-      )}
+      )} */}
     </div>
   );
 
@@ -459,11 +533,21 @@ const GemstoneResult = () => {
           </div>
         )}
 
-        
+        <div className={styles.tabs}>
+          {['overview', 'details', 'suitability', 'healing'].map((tab) => (
+            <button
+              key={tab}
+              className={`${styles.tab} ${activeTab === tab ? styles.active : ''}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
 
         {activeTab === 'overview' && renderOverview(currentGemstone)}
         {activeTab === 'details' && renderDetails(currentGemstone)}
-        {activeTab === 'astrological' && renderAstrological(currentGemstone)}
+        {/* {activeTab === 'astrological' && renderAstrological(currentGemstone)} */}
         {activeTab === 'suitability' && renderSuitability(currentGemstone)}
         {activeTab === 'healing' && renderHealing(currentGemstone)}
 
