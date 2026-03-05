@@ -5,6 +5,7 @@ import SmileIcon from '../../../../assets/icons/Smile.png';
 import EnergyLevelsIcon from '../../../../assets/icons/energylevels.png';
 import ChakraIcon from '../../../../assets/icons/chakra.png';
 import AuraSizeIcon from '../../../../assets/icons/aurasize.png';
+import Footer from '../../../../layouts/Footer';
 
 const AuraLanding = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const AuraLanding = () => {
   ];
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -70,6 +72,8 @@ const AuraLanding = () => {
         </button>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

@@ -34,9 +34,13 @@ export const getProfileData = () => {
  * Face Analysis API Service
  * Analyzes facial features from an uploaded image
  * @param {File|Blob|string} imageData - Image file, blob, or base64 string
+ * @param {AbortSignal} signal - Optional abort signal to cancel request
  * @returns {Promise} API response with analysis results
  */
-export const analyzeFace = async (imageData) => {
+// OLD CODE (commented out for reference):
+// export const analyzeFace = async (imageData) => {
+// NEW CODE (with abort signal support):
+export const analyzeFace = async (imageData, signal = null) => {
   try {
     const formData = new FormData();
     
@@ -67,6 +71,7 @@ export const analyzeFace = async (imageData) => {
           'Content-Type': 'multipart/form-data',
         },
         timeout: 60000, // 60 seconds timeout for AI processing
+        signal, // Pass abort signal to axios
       }
     );
 
@@ -157,9 +162,10 @@ export const analyzeFace = async (imageData) => {
  * Analyzes palm features from an uploaded image
  * @param {File|Blob|string} imageData - Image file, blob, or base64 string
  * @param {string} hand - Hand type ('left' or 'right')
+ * @param {AbortSignal} signal - Optional abort signal to cancel request
  * @returns {Promise} API response with analysis results
  */
-export const analyzePalm = async (imageData, hand = 'right') => {
+export const analyzePalm = async (imageData, hand = 'right', signal = null) => {
   try {
     const formData = new FormData();
     
@@ -191,6 +197,7 @@ export const analyzePalm = async (imageData, hand = 'right') => {
           'Content-Type': 'multipart/form-data',
         },
         timeout: 60000,
+        signal, // Pass abort signal to axios
       }
     );
 
@@ -280,9 +287,10 @@ export const analyzePalm = async (imageData, hand = 'right') => {
  * Signature Analysis API Service
  * Analyzes signature features from an uploaded image
  * @param {File|Blob|string} imageData - Image file, blob, or base64 string
+ * @param {AbortSignal} signal - Optional abort signal to cancel request
  * @returns {Promise} API response with analysis results
  */
-export const analyzeSignature = async (imageData) => {
+export const analyzeSignature = async (imageData, signal = null) => {
   try {
     const formData = new FormData();
     
@@ -311,6 +319,7 @@ export const analyzeSignature = async (imageData) => {
           'Content-Type': 'multipart/form-data',
         },
         timeout: 60000,
+        signal, // Pass abort signal to axios
       }
     );
 
@@ -401,9 +410,10 @@ export const analyzeSignature = async (imageData) => {
  * Analyzes clothing colors and their match with user's aura
  * @param {File|Blob|string} imageData - Image file, blob, or base64 string
  * @param {Object} intentionData - Intention for the day
+ * @param {AbortSignal} signal - Optional abort signal to cancel request
  * @returns {Promise} API response with analysis results
  */
-export const analyzeClothColor = async (imageData, intentionData) => {
+export const analyzeClothColor = async (imageData, intentionData, signal = null) => {
   try {
     const formData = new FormData();
     
@@ -442,6 +452,7 @@ export const analyzeClothColor = async (imageData, intentionData) => {
           'Content-Type': 'multipart/form-data',
         },
         timeout: 60000,
+        signal, // Pass abort signal to axios
       }
     );
 
@@ -703,9 +714,10 @@ export const analyzeAura = async (imageData, signal = null) => {
  * Gemstone Analysis API Service
  * Analyzes gemstone authenticity from an uploaded image
  * @param {File|Blob|string} imageData - Image file, blob, or base64 string
+ * @param {AbortSignal} signal - Optional abort signal to cancel request
  * @returns {Promise} API response with analysis results
  */
-export const analyzeGemstone = async (imageData) => {
+export const analyzeGemstone = async (imageData, signal = null) => {
   try {
     const formData = new FormData();
     
@@ -734,6 +746,7 @@ export const analyzeGemstone = async (imageData) => {
           'Content-Type': 'multipart/form-data',
         },
         timeout: 60000,
+        signal, // Pass abort signal to axios
       }
     );
 

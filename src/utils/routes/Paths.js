@@ -149,6 +149,7 @@ const AuraResult = lazy(() => import("../../screens/private/aiwow/aura/AuraResul
 const SingleCallHistory = lazy(() => import("../../screens/private/orderHistory/components/Call/SingleCallHistory"));
 const SingleChatHistory = lazy(() => import("../../screens/private/orderHistory/components/Chat/SingleChatHistory"));
 const OrderHistory = lazy(() => import("../../screens/private/orderHistory/OrderHistory"));
+const OrderDetails = lazy(() => import("../../screens/private/orderHistory/OrderDetails"));
 
 const FinalPay = lazy(() => import("../../screens/private/payment/FinalPay"));
 
@@ -1001,7 +1002,12 @@ export const PATH = {
       path: "/order-history",
       element: OrderHistory,
     },
-
+    OrderDetails: {
+      path: "/profile/order-history/:astrologerId",
+      element: OrderDetails,
+      header: false,
+      footer: false,
+    },
     UserChatHistory: {
       path: "/order-history/:roomId",
       element: SingleChatHistory,

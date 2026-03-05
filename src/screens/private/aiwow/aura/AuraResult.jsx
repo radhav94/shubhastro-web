@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import styles from './AuraResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
+import Footer from '../../../../layouts/Footer';
 
 const AuraResult = () => {
   const navigate = useNavigate();
@@ -156,6 +157,7 @@ const AuraResult = () => {
   const recommendations = aura.recommendations || [];
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -472,6 +474,8 @@ const AuraResult = () => {
         </button>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 
