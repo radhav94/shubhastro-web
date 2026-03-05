@@ -617,15 +617,24 @@
 
 .destinyCard {
   border-radius: 20px;
-  padding: 16px;
+  padding: 0px 0px 16px 16px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: space-between;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
   height: 110px;
+
+  &:last-child{
+    height: 236px;
+    flex-direction: column;
+    padding: 16px;
+    & .destinyCardContent{
+      text-align: center;
+    }
+  }
   @media (width <= 820px) {
     width: calc(33.33% - 11px); 
   }
@@ -653,6 +662,7 @@
   color: #1a1a1a;
   margin-bottom: 5px;
   line-height: 1.2;
+  margin-top: 16px;
 }
 
 .destinyCardSubtitle {
@@ -664,13 +674,13 @@
 }
 
 .destinyCardImage {
-  position: absolute;
+  // position: absolute;
   right: -15px;
   top: 1px;
-  width: 160px;
-  height: 160px;
+  width: auto;
+  height: 90px;
   object-fit: contain;
-  opacity: 0.3;
+  opacity: 1;
   z-index: 1;
 }
 
