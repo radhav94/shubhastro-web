@@ -82,18 +82,18 @@
 }
 
 .tabContent {
-  padding: 0px 16px;
+  padding: 0px 0px;
 
-  @media (max-width: 1024px) {
-    padding:0px 20px;
+  @media (max-width: 1180px) {
+    padding:0px 16px;
   }
 
   @media (max-width: 768px) {
     padding:0px 16px;
   }
 
-  @media (max-width: 480px) {
-    padding:0px 12px;
-  }
+  // @media (max-width: 480px) {
+  //   padding:0px 12px;
+  // }
 }
 
