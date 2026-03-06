@@ -1,5 +1,5 @@
 // src/components/LiveStreaming/LiveStreamingContainer.jsx
-import React from "react";
+import React, { useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { useLiveStreaming } from "./useLiveStreaming";
 import { useLiveChat } from "./useLiveChat";
@@ -15,6 +15,7 @@ import { useLiveList } from "../../../../../context/LiveListContext";
 const LiveStreamingContainer = ({ client }) => {
   const location = useLocation();
    const liveList = useLiveList();
+   console.log("liveList", liveList)
    const currentLive = liveList?.getCurrentLive();
 
    const direction = liveList?.direction || "up";
@@ -26,7 +27,37 @@ const LiveStreamingContainer = ({ client }) => {
 
   // 🟢 Hooks always called FIRST ✔
   const live = useLiveStreaming(client, ROLE,channel);
-  const chat = useLiveChat(ROLE);
+
+  const userIdLocal = localStorage.getItem("shubhtalk_customer_id") || "";
+  const userNameLocal = localStorage.getItem("shubhtalk_customer_name") || "User";
+
+  const handleAstrologerStatus = useCallback((data) => {
+    const { status, roomId, hostId, hostName } = data;
+
+    if (status === "ended") {
+      liveList?.removeLive(roomId);
+    }
+
+    if (status === "started") {
+      // Add new live and auto-switch to it so user reconnects
+      liveList?.addLive({
+        channel: roomId,
+        astrologerId: hostId,
+        astrologerName: hostName || "",
+      });
+      // Small delay to ensure addLive state update is flushed
+      setTimeout(() => {
+        liveList?.switchToChannel(roomId);
+      }, 100);
+    }
+  }, [liveList]);
+
+  const chat = useLiveChat({
+    roomId: channel,
+    userId: userIdLocal,
+    userName: userNameLocal,
+    onAstrologerStatus: handleAstrologerStatus,
+  });
 
 
     const swipeHandlers = useSwipeReel({
@@ -45,7 +76,7 @@ const LiveStreamingContainer = ({ client }) => {
   return (
   <div className="live-container" {...swipeHandlers}>
     <div
-      key={`${liveList.currentIndex}-${direction}`}
+      key={`${liveList?.currentIndex || 0}-${direction}`}
       className={`live-slide-wrapper ${direction}`}
     >
       <div className="slide-placeholder" />
@@ -57,7 +88,7 @@ const LiveStreamingContainer = ({ client }) => {
 />
 
     {/* 🔥 LIVE NAVIGATION CONTROLS */}
-    {ROLE !== "host" && liveList && (
+    {ROLE !== "host" && liveList && liveList.lives.length > 1 && (
       <div className="live-nav-controls">
         <button
           className="nav-btn"

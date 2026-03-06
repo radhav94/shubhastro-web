@@ -96,7 +96,14 @@ const LiveView = (props) => {
   ];
 
   // Combine real messages with sample messages
-  const displayMessages = messages && messages.length > 0 ? messages : sampleMessages;
+  // Normalize socket messages (message → text, userType → role, userName → sender)
+  const normalizedMessages = messages?.map((m) => ({
+    ...m,
+    text: m.text || m.message,
+    role: m.role || m.userType,
+    sender: m.sender || m.userName,
+  })) || [];
+  const displayMessages = normalizedMessages.length > 0 ? normalizedMessages : sampleMessages;
 
   const liveListCtx = useLiveList();
   const reelRef = useRef(null);
