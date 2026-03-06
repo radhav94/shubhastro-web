@@ -59,11 +59,9 @@ const Profile = () => {
   const navigationState = location.state || {};
 
   const [activeTab, setActiveTab] = useState(
-    navigationState.activeTab || "Profile",
+    navigationState.activeTab || "Profile"
   );
-  const [orderHistoryTab, setOrderHistoryTab] = useState(
-    navigationState.orderHistoryTab || "call",
-  ); // Sub-tab for order history
+  const [orderHistoryTab, setOrderHistoryTab] = useState("call"); // Sub-tab for order history
   const transactionListRef = useRef(null);
   const orderListRef = useRef(null); // Ref for order history scroll
   const user = getUserFromStorage();
@@ -275,6 +273,18 @@ const Profile = () => {
     refetchOnMountOrArgChange: true, // Always refetch when component mounts or userId changes
   });
   const savedKundlis = kundliData?.data || [];
+
+  // Debug: Log kundli structure
+  useEffect(() => {
+    if (savedKundlis.length > 0) {
+      console.log("First kundli structure:", savedKundlis[0]);
+      console.log("Available ID fields:", {
+        _id: savedKundlis[0]._id,
+        kundli_ID: savedKundlis[0].kundli_ID,
+        id: savedKundlis[0].id,
+      });
+    }
+  }, [savedKundlis]);
 
   // Helper: Get primary profile (prioritize 'self' relation, otherwise first profile)
   const primaryProfile = savedKundlis.find(profile => profile.relation?.toLowerCase() === 'self') || savedKundlis[0];
@@ -750,7 +760,28 @@ const Profile = () => {
   };
 
   const handleDeleteClick = (kundli) => {
-    setProfileToDelete(kundli._id);
+    console.log("=== DELETE BUTTON CLICKED ===");
+    console.log("Full kundli object:", kundli);
+    console.log("Available ID fields:");
+    console.log("  - kundli._id:", kundli._id);
+    console.log("  - kundli.id:", kundli.id);
+    console.log("  - kundli.kundli_ID:", kundli.kundli_ID);
+    console.log("  - kundli.kundliId:", kundli.kundliId);
+    
+    // Use _id (same as other working components)
+    const idToDelete = kundli._id;
+    
+    if (!idToDelete) {
+      console.error("❌ No valid ID found!");
+      Toast.error("Cannot delete: Invalid profile ID");
+      return;
+    }
+    
+    console.log("✅ Using ID:", idToDelete);
+    console.log("ID type:", typeof idToDelete);
+    console.log("ID length:", idToDelete.length);
+    
+    setProfileToDelete(idToDelete);
     setShowDeleteModal(true);
   };
 
@@ -878,16 +909,32 @@ const Profile = () => {
 
   // Handler: Confirm delete profile
   const confirmDeleteProfile = async () => {
-    if (!profileToDelete) return;
+    if (!profileToDelete) {
+      console.error("No profile ID to delete");
+      return;
+    }
+
+    console.log("=== DELETE PROFILE DEBUG ===");
+    console.log("Profile ID to delete:", profileToDelete);
+    console.log("Type of ID:", typeof profileToDelete);
+    console.log("ID length:", profileToDelete?.length);
 
     try {
-      await deleteKundli(profileToDelete).unwrap();
+      const result = await deleteKundli(profileToDelete).unwrap();
+      console.log("Delete successful:", result);
       Toast.success("Profile deleted successfully");
 
       setShowDeleteModal(false);
       setProfileToDelete(null);
     } catch (err) {
-      console.error("Delete profile error:", err);
+      console.error("=== DELETE ERROR ===");
+      console.error("Full error:", err);
+      console.error("Error data:", err?.data);
+      console.error("Error message:", err?.data?.message || err?.message);
+      
+      const errorMessage = err?.data?.message || err?.message || "Failed to delete profile";
+      Toast.error(errorMessage);
+      
       setShowDeleteModal(false);
       setProfileToDelete(null);
     }
@@ -1115,6 +1162,7 @@ const Profile = () => {
                           <button
                             className={styles.iconButton}
                             onClick={() => handleEditClick(kundli)}
+                            type="button"
                           >
                             <LuPencilLine size={18} />
                           </button>
@@ -1122,6 +1170,7 @@ const Profile = () => {
                             <button
                               className={styles.iconButton}
                               onClick={() => handleDeleteClick(kundli)}
+                              type="button"
                             >
                               <Trash2 size={18} />
                             </button>
@@ -1393,7 +1442,7 @@ const Profile = () => {
             <div className={styles.supportGrid}>
               <div
                 className={styles.supportGridCard}
-                onClick={() => navigate("/contact-us")}
+                onClick={() => navigate("/customer-support", { state: { fromTab: "Support" } })}
               >
                 <div className={styles.supportGridIcon}>
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
@@ -1412,7 +1461,7 @@ const Profile = () => {
 
               <div
                 className={styles.supportGridCard}
-                onClick={() => navigate("/faq")}
+                onClick={() => navigate("/faq", { state: { fromTab: "Support" } })}
               >
                 <div className={styles.supportGridIcon}>
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
@@ -1430,7 +1479,7 @@ const Profile = () => {
 
               <div
                 className={styles.supportGridCard}
-                onClick={() => navigate("/support-tickets")}
+                onClick={() => navigate(PATH.privateRoutes.RECENT_TICKETS.path, { state: { fromTab: "Support" } })}
               >
                 <div className={styles.supportGridIcon}>
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
@@ -1448,7 +1497,7 @@ const Profile = () => {
 
               <div
                 className={styles.supportGridCard}
-                onClick={() => navigate("/privacy")}
+                onClick={() => navigate("/privacy", { state: { activeTab } })}
               >
                 <div className={styles.supportGridIcon}>
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
@@ -1471,7 +1520,7 @@ const Profile = () => {
 
               <div
                 className={styles.otherCard}
-                onClick={() => navigate("/feedback")}
+                onClick={() => navigate("/feedback", { state: { fromTab: "Support" } })}
               >
                 <div className={styles.otherCardLeft}>
                   <h4 className={styles.otherCardTitle}>App Feedback</h4>
@@ -1488,7 +1537,7 @@ const Profile = () => {
 
               <div
                 className={styles.otherCard}
-                onClick={() => navigate("/community-guidelines")}
+                onClick={() => navigate("/community-guidelines", { state: { fromTab: "Support" } })}
               >
                 <div className={styles.otherCardLeft}>
                   <h4 className={styles.otherCardTitle}>
@@ -1557,14 +1606,13 @@ const Profile = () => {
       />
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <DeleteConfirmationModal
-          title="Delete Profile"
-          message="Are you sure you want to delete this profile? This action cannot be undone."
-          onCancel={handleCancelDelete}
-          onConfirm={confirmDeleteProfile}
-        />
-      )}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        title="Delete Profile"
+        message="Are you sure you want to delete this profile? This action cannot be undone."
+        onCancel={handleCancelDelete}
+        onConfirm={confirmDeleteProfile}
+      />
 
       {/* Sticky Review Modal */}
       <StickyReview />
