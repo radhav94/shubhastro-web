@@ -225,10 +225,12 @@ const GemstoneCamera = () => {
               autoPlay
               playsInline
               className={styles.video}
+              style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
             />
             <canvas
               ref={detectionCanvasRef}
               className={styles.detectionCanvas}
+              style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
             />
             <div className={styles.overlay}>
               <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', left: '5%' }}></div>

@@ -301,10 +301,12 @@ const SignatureCamera = () => {
               autoPlay
               playsInline
               className={styles.video}
+              style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
             />
             <canvas
               ref={detectionCanvasRef}
               className={styles.detectionCanvas}
+              style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
             />
             <div className={styles.overlay}>
               {/* Capture area frame with 500px width */}
