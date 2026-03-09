@@ -1,0 +1,264 @@
+.faqPage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f8f8f8;
+}
+
+.header {
+  margin-top: 50px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid #e0e0e0;
+  @media (min-width: 769px) {
+    margin-top: 100px;
+    top: 100px;
+    padding: 10px 25px;
+    
+  }
+}
+
+.backButton {
+  background: none;
+  border: 1px solid #ff6b35;
+  color: #ff6b35;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+
+  &:hover {
+    background: #fef5f2;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.headerSpacer {
+  width: 36px;
+}
+
+.content {
+  flex: 1;
+  padding: 20px 16px;
+  padding-bottom: 40px;
+
+  @media (min-width: 769px) {
+    padding-top: 25px;
+    padding-left: 100px;
+    padding-right: 100px;
+  }
+}
+
+.introSection {
+  margin-top: 16px;
+  margin-bottom: 24px;
+}
+
+.introTitle {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #333;
+  margin: 0;
+}
+
+.categoryContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.categoryPill {
+  background: white;
+  border: 1px solid #F44336;
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: #ff6b35;
+    color: #ff6b35;
+  }
+
+  &.active {
+    background: #ff6b35;
+    border-color: #ff6b35;
+    color: white;
+  }
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.faqItem {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.faqQuestion {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: white;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s;
+  gap: 12px;
+
+  &:hover {
+    background: #fafafa;
+  }
+}
+
+.questionText {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  flex: 1;
+  line-height: 1.4;
+}
+
+.iconWrapper {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  color: #ff6b35;
+}
+
+.faqAnswer {
+  padding: 0 16px 16px 16px;
+  background: #fafafa;
+  animation: slideDown 0.3s ease-out;
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #666;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.contactSection {
+  // background: #fef5f0;
+  // border-radius: 16px;
+  // padding: 32px 20px;
+  text-align: center;
+  margin-top: 32px;
+}
+
+.contactText {
+  background: #E4342F1A;
+  padding: 16px 10px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #d84315;
+  margin: 0 0 20px 0;
+  line-height: 1.3;
+  border-radius: 10px;
+}
+
+.contactButton {
+  width: 100%;
+  max-width: 320px;
+  background: #ff6b35;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.2);
+
+  &:hover {
+    background: #e55a2b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.arrow {
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 300;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .introTitle {
+    font-size: 16px;
+  }
+
+  .categoryPill {
+    font-size: 12px;
+    padding: 8px 14px;
+  }
+
+  .questionText {
+    font-size: 13px;
+  }
+
+  .faqAnswer p {
+    font-size: 12px;
+  }
+}

@@ -183,6 +183,13 @@ const Explore = lazy(() => import("../../screens/private/explore/Explore"));
 const AddProfile = lazy(() => import("../../screens/v2/user/AddProfile"));
 const EditProfile = lazy(() => import("../../screens/v2/user/EditProfile"));
 const LiveLanding = lazy(() => import("../../screens/private/live/LiveLanding"));
+const FAQ = lazy(() => import("../../screens/v2/user/FAQ"));
+const CustomerSupport = lazy(() => import("../../screens/v2/user/CustomerSupport"));
+const RecentTickets = lazy(() => import("../../screens/v2/user/RecentTickets"));
+const TicketDetails = lazy(() => import("../../screens/v2/user/TicketDetails"));
+const PrivacySecurity = lazy(() => import("../../screens/v2/user/PrivacySecurity"));
+const TermsConditionsView = lazy(() => import("../../screens/v2/user/TermsConditionsView"));
+const AppLicense = lazy(() => import("../../screens/v2/user/AppLicense"));
 
 export const PATH = {
   // DEFAULT: {
@@ -1029,6 +1036,48 @@ export const PATH = {
     EDITPROFILE: {
       path: "/profile/edit/:id",
       element: EditProfile,
+    },
+    FAQ: {
+      path: "/faq",
+      element: FAQ,
+      header: false,
+      footer: false,
+    },
+    CUSTOMER_SUPPORT: {
+      path: "/customer-support",
+      element: CustomerSupport,
+      header: false,
+      footer: false,
+    },
+    RECENT_TICKETS: {
+      path: "/recent-tickets",
+      element: RecentTickets,
+      header: false,
+      footer: false,
+    },
+    TICKET_DETAILS: {
+      path: "/recent-tickets/:ticketId",
+      element: TicketDetails,
+      header: false,
+      footer: false,
+    },
+    PRIVACY_SECURITY: {
+      path: "/privacy",
+      element: PrivacySecurity,
+      header: false,
+      footer: false,
+    },
+    TERMS_CONDITIONS_VIEW: {
+      path: "/terms-conditions-view",
+      element: TermsConditionsView,
+      header: false,
+      footer: false,
+    },
+    APP_LICENSE: {
+      path: "/app-license",
+      element: AppLicense,
+      header: false,
+      footer: false,
     },
   },
 };
