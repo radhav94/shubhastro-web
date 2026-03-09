@@ -58,7 +58,7 @@ const DUMMY_COMBOS = [
   },
 ];
 
-const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, userId }) => {
+const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, userId, socketSendFn }) => {
   const { data, isLoading } = useGetAllGiftsQuery();
   const [sendGift, { isLoading: isSending }] = useSendGiftMutation();
   const [selected, setSelected] = useState(null);
@@ -129,14 +129,21 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
         });
       
         // Send the gift message through socket with type "gift"
-        const sendResult = socketService.sendMessage({
-          roomId,
-          userId,
-          astrologerId,
-          message: giftMessage,
-          type: "gift",
-          kundliId: null
-        });
+        // Use custom socketSendFn if provided (for voice/video calls using voiceSocket),
+        // otherwise fall back to socketService (for regular chat)
+        let sendResult;
+        if (socketSendFn) {
+          sendResult = socketSendFn(giftMessage, "gift");
+        } else {
+          sendResult = socketService.sendMessage({
+            roomId,
+            userId,
+            astrologerId,
+            message: giftMessage,
+            type: "gift",
+            kundliId: null
+          });
+        }
 
         // Check if there was an error sending the message
         if (sendResult?.error) {

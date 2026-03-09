@@ -74,7 +74,7 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
         detectionHistoryRef.current.shift();
       }
 
-      const stableDetected = detectionHistoryRef.current.filter(Boolean).length >= 7;
+      const stableDetected = detectionHistoryRef.current.filter(Boolean).length >= 5;
 
       setObjectDetected(stableDetected);
       setDetectionQuality(quality);
@@ -213,6 +213,7 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
 
     let textureScore = 0;
     let colorfulPixels = 0;
+    let nonUniformPixels = 0;
     let sampledPixels = 0;
 
     // Sample center-heavy grid (cloth is usually centered)
@@ -222,6 +223,9 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
     const endY = Math.floor(height * 0.85);
 
     const step = 8; // lower = more accuracy, higher = faster
+
+    // Collect brightness values for uniformity check
+    const brightnessValues = [];
 
     for (let y = startY; y < endY; y += step) {
       for (let x = startX; x < endX; x += step) {
@@ -233,12 +237,25 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
         const max = Math.max(r, g, b);
         const min = Math.min(r, g, b);
         const variance = max - min;
+        const brightness = (r + g + b) / 3;
 
         textureScore += variance;
+        brightnessValues.push(brightness);
 
-        // Saturation check
+        // Saturation check (lowered for dark/plain fabrics)
         const saturation = max === 0 ? 0 : variance / max;
-        if (saturation > 0.12) colorfulPixels++;
+        if (saturation > 0.08) colorfulPixels++;
+
+        // Check for non-uniform pixels (any object vs blank wall)
+        // Compare with neighbor pixel if available
+        if (x + step < endX) {
+          const ni = (y * width + (x + step)) * 4;
+          const nr = data[ni];
+          const ng = data[ni + 1];
+          const nb = data[ni + 2];
+          const diff = Math.abs(r - nr) + Math.abs(g - ng) + Math.abs(b - nb);
+          if (diff > 15) nonUniformPixels++;
+        }
 
         sampledPixels++;
       }
@@ -246,12 +263,20 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
 
     const avgTexture = textureScore / sampledPixels;
     const colorRatio = colorfulPixels / sampledPixels;
+    const nonUniformRatio = nonUniformPixels / sampledPixels;
 
-    // Final decision
-    const detected =
-      avgTexture > 18 &&       // fabric texture
-      colorRatio > 0.18 &&     // not plain background
-      colorRatio < 0.9;        // avoid noise
+    // Calculate brightness variance (cloth has some variation vs blank wall)
+    const avgBrightness = brightnessValues.reduce((a, b) => a + b, 0) / brightnessValues.length;
+    const brightnessVariance = brightnessValues.reduce((sum, b) => sum + Math.pow(b - avgBrightness, 2), 0) / brightnessValues.length;
+    const brightnessStdDev = Math.sqrt(brightnessVariance);
+
+    // Final decision — more lenient for dark/plain fabrics
+    // Path 1: Colorful cloth (original logic, slightly relaxed)
+    const colorfulCloth = avgTexture > 12 && colorRatio > 0.12 && colorRatio < 0.95;
+    // Path 2: Dark/plain cloth — low saturation but has texture variation
+    const plainCloth = nonUniformRatio > 0.08 && brightnessStdDev > 8 && avgTexture > 5;
+
+    const detected = colorfulCloth || plainCloth;
 
     const quality = Math.min(
       100,

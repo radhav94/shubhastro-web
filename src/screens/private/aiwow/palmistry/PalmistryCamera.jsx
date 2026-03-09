@@ -330,13 +330,14 @@ const PalmistryCamera = () => {
               autoPlay
               playsInline
               className={styles.video}
+              style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
             />
             <canvas
               ref={detectionCanvasRef}
               className={styles.detectionCanvas}
+              style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
             />
             <div className={styles.overlay}>
-              {/* Blur overlays for all four sides */}
               <div className={styles.blurTop}></div>
               <div className={styles.blurBottom}></div>
               <div className={styles.blurLeft}></div>
