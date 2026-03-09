@@ -1,7 +1,7 @@
 .page {
   // background: #f5f1e9;
   min-height: 100vh;
-  padding-bottom: 80px;
+  // padding-bottom: 80px;
   position: relative;
   margin-top: 98px;
   @media screen and (width <= 1180px) {
@@ -929,12 +929,15 @@
 
 /* NUMEROLOGY SECTION */
 .numerologySection {
-  max-width: 480px;
-  margin: 0px auto 40px auto;
+  max-width: 1200px;
+  margin: 0px auto 16px auto;
   padding: 0 16px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
+  @media (width <= 767px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
 }
 
 .numerologyCard {
@@ -1009,14 +1012,14 @@
 
 /* RESPONSIVE */
 @media (min-width: 769px) {
-  .numerologySection {
-    max-width: 1200px;
-    margin: 0px auto 60px auto;
-    padding: 0 40px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
+  // .numerologySection {
+  //   max-width: 1200px;
+  //   margin: 0px auto 60px auto;
+  //   padding: 0 40px;
+  //   display: grid;
+  //   grid-template-columns: repeat(3, 1fr);
+  //   gap: 20px;
+  // }
 
   .numerologyCard {
     padding: 28px;
@@ -1048,9 +1051,9 @@
 
 /* EXPERT SECTION */
 .expertSection {
-  max-width: 480px;
+  max-width: 1200px;
   margin: 24px auto;
-  padding: 0 20px;
+  padding: 0 16px;
 }
 
 .expertCard {
@@ -1201,11 +1204,11 @@
 
 /* RESPONSIVE */
 @media (min-width: 769px) {
-  .expertSection {
-    max-width: 900px;
-    padding: 0 40px;
-    margin: 40px auto;
-  }
+  // .expertSection {
+  //   max-width: 900px;
+  //   padding: 0 40px;
+  //   margin: 40px auto;
+  // }
 
   .cycleSection {
     max-width: 900px;
