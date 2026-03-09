@@ -83,7 +83,7 @@ const useChatSocket = ({
     const handleCallAccepted = ({ roomId, token, type, remainingTime, isSwitch }) => {
       
       // If this is a switch from audio to video, let CallContext handle it
-      if (isSwitch && type === "video") {
+      if (isSwitch && type === "video" && activeCall && activeCall.callType === "audio") {
         console.log("🔄 Video upgrade accepted - CallContext will handle the switch");
         setWaitingPopup(false);
         setGlobalWaitingList(null);
