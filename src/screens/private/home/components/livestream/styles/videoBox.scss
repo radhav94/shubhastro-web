@@ -203,7 +203,7 @@
   background: linear-gradient(135deg, #ff2b6a, #ff6a88);
   color: white;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   box-shadow: 0 0 12px rgba(255, 73, 118, 0.7);
 }
 
@@ -349,7 +349,7 @@
 .input-wrapper input {
   width: 100%;
   border-radius: 50px;
-  border: 2px solid #000;
+  border: 2px solid #fff1;
   padding: 14px 50px 14px 20px;
   background: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.9);
@@ -401,7 +401,7 @@
   background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   color: #fff;
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -470,6 +470,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-height: 450px;
 }
 
 .chat-modal-messages::-webkit-scrollbar {
@@ -503,8 +504,8 @@
 }
 
 .message-avatar .avatar-circle {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
@@ -552,7 +553,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 16px 24px;
+  padding: 10px 16px;
   background: #fff;
   border-top: 1px solid #e5e5e5;
   flex-shrink: 0;
@@ -592,6 +593,7 @@
   font-size: 15px;
   outline: none;
   padding: 0;
+  height: 40px;
 }
 
 .chat-modal-input input::placeholder {
@@ -648,7 +650,7 @@
 }
 
 .share-title {
-  color: #f4e4b2;
+  color: #2c2c2c;
   font-size: 14px;
   font-weight: 600;
   text-align: center;
@@ -897,20 +899,20 @@
     margin: 14px auto 18px;
   }
 
-  .right-action-bar {
-    right: 20px;
-    bottom: 120px;
-    gap: 24px;
-  }
+  // .right-action-bar {
+  //   right: 20px;
+  //   bottom: 120px;
+  //   gap: 24px;
+  // }
 
   .icon-circle {
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     background: rgba(0, 0, 0, 0.88);
     
     svg {
-      width: 30px;
-      height: 30px;
+      width: 15px;
+      height: 15px;
     }
   }
 
@@ -974,7 +976,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 40px;
   z-index: 50;
 }
 
@@ -990,21 +992,22 @@
 }
 
 .icon-circle {
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.85);
-  border: none;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid #ffffff29;
   backdrop-filter: blur(20px);
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  flex-shrink: 0;
 }
 
 .icon-circle svg {
-  width: 28px;
-  height: 28px;
+  width: 15px;
+  height: 15px;
   stroke: #fff;
   stroke-width: 2.5;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));

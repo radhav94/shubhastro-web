@@ -48,8 +48,8 @@
 }
 
 .popup-title {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 600;
   color: #000;
   margin: 0 0 20px 20px;
   padding: 0;
@@ -66,7 +66,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
+  padding: 10px 0;
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -91,9 +91,10 @@
 }
 
 .waitlist-duration {
-  border: 1px solid var(--border-50, #BDBDBD80);
+  border: 1px solid rgba(189, 189, 189, .4);
+  background: var(--card-2, #FFF5EC);
   color: #030303;
-  padding: 8px 24px;
+  padding: 8px 16px;
   border-radius: 25px;
   font-size: 14px;
   font-weight: 500;
@@ -102,7 +103,7 @@
 .popup-divider {
   height: 1px;
   background: #d0d0d0;
-  margin: 20px 20px 16px;
+  margin: 0px 16px 16px 16px;
 }
 
 .join-section {
@@ -114,8 +115,8 @@
 }
 
 .join-title {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 600;
   color: #000;
   margin: 0;
 }
@@ -144,15 +145,21 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  padding: 16px 20px;
-  border-radius: 12px;
+  padding: 12px 20px;
+  border-radius: 50px;
   border: none;
-  background: #000;
+  background: linear-gradient(90deg, #f75801, #d43400);
   color: #fff;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+
+  &:first-child{
+    background: transparent;
+    color: #d43400;
+    border: 1px solid #d43400;
+  }
 }
 
 
@@ -165,9 +172,9 @@
   background: #000;
 }
 
-.video-call {
-  background: #000;
-}
+// .video-call {
+//   background: #000;
+// }
 
 /* Desktop responsive */
 @media (min-width: 769px) {
