@@ -53,6 +53,55 @@ const flattenRoutes = (routes) => {
 // Shared error element instance
 const routeErrorElement = <RouteErrorBoundary />;
 
+/**
+ * Session storage keys for error tracking
+ * @constant {Object}
+ */
+const ERROR_STORAGE_KEYS = {
+  CHUNK_ERROR_RELOAD: 'chunk-error-reload',
+};
+
+/**
+ * Checks if an error is related to chunk loading failures
+ * @param {Error} error - The error object to check
+ * @returns {boolean} True if error is chunk-related
+ */
+const isChunkLoadError = (error) => {
+  if (!error) return false;
+  
+  const chunkErrorPatterns = [
+    'Failed to fetch dynamically imported module',
+    'Importing a module script failed',
+    'error loading dynamically imported module',
+  ];
+  
+  return (
+    error.name === 'ChunkLoadError' ||
+    chunkErrorPatterns.some((pattern) => error.message?.includes(pattern))
+  );
+};
+
+/**
+ * Handles chunk loading errors with automatic page reload
+ * Reloads page once, then shows error if problem persists
+ * @param {string} context - Context where error occurred (for logging)
+ */
+const handleChunkLoadError = (context) => {
+  console.log(`🔴 Chunk loading error detected in ${context}`);
+  
+  const hasReloaded = sessionStorage.getItem(ERROR_STORAGE_KEYS.CHUNK_ERROR_RELOAD);
+  console.log('📊 Reload status:', { hasReloaded, context });
+  
+  if (!hasReloaded) {
+    sessionStorage.setItem(ERROR_STORAGE_KEYS.CHUNK_ERROR_RELOAD, 'true');
+    console.log(`🔄 Reloading page due to chunk error in ${context}...`);
+    window.location.reload();
+  } else {
+    sessionStorage.removeItem(ERROR_STORAGE_KEYS.CHUNK_ERROR_RELOAD);
+    console.error('❌ Chunk error persists after reload. Please clear cache.');
+  }
+};
+
 function App() {
   // Memoize router creation - only create once
   const roleWiseRouting = useMemo(() => {
@@ -123,19 +172,52 @@ function App() {
     `;
     document.head.appendChild(style);
 
-    // Global error handler for uncaught errors
+    /**
+     * Global error handler for uncaught errors
+     * Catches chunk loading errors and triggers reload
+     * @param {ErrorEvent} event - The error event
+     */
     const handleError = (event) => {
-      console.error('🔴 Uncaught error:', event.error);
+      if (import.meta.env.DEV) {
+        console.log('🔍 Error event received:', {
+          type: event.type,
+          error: event.error,
+          message: event.message,
+          hasError: !!event.error,
+        });
+      }
+      
+      if (isChunkLoadError(event.error)) {
+        event.preventDefault();
+        handleChunkLoadError('global error handler');
+      }
     };
 
-    // Global handler for unhandled promise rejections
+    /**
+     * Global handler for unhandled promise rejections
+     * Catches chunk loading errors in promises and triggers reload
+     * @param {PromiseRejectionEvent} event - The promise rejection event
+     */
     const handleUnhandledRejection = (event) => {
-      console.error('🔴 Unhandled promise rejection:', event.reason);
+      if (import.meta.env.DEV) {
+        console.log('🔍 Promise rejection event received:', {
+          type: event.type,
+          reason: event.reason,
+          hasReason: !!event.reason,
+        });
+      }
+      
+      if (isChunkLoadError(event.reason)) {
+        event.preventDefault();
+        handleChunkLoadError('promise rejection');
+      }
     };
 
+    // Register global error handlers
     window.addEventListener('error', handleError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
+    // Cleanup on unmount
     return () => {
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);

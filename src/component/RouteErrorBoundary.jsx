@@ -1,4 +1,5 @@
 import { useRouteError, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import styles from './ErrorBoundary.module.scss';
 
 /**
@@ -11,11 +12,38 @@ const RouteErrorBoundary = () => {
 
   console.error('🔴 Route Error:', error);
 
+  // Handle chunk loading errors with auto-reload
+  useEffect(() => {
+    const isChunkError = 
+      error?.message?.includes('Failed to fetch dynamically imported module') ||
+      error?.message?.includes('Importing a module script failed') ||
+      error?.message?.includes('error loading dynamically imported module') ||
+      error?.name === 'ChunkLoadError';
+
+    if (isChunkError) {
+      console.error('Chunk loading error detected in route, attempting reload...');
+      
+      const hasReloaded = sessionStorage.getItem('route-chunk-error-reload');
+      if (!hasReloaded) {
+        sessionStorage.setItem('route-chunk-error-reload', 'true');
+        // Auto-reload after a short delay
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      } else {
+        // Already tried reloading, clear flag and show error
+        sessionStorage.removeItem('route-chunk-error-reload');
+      }
+    }
+  }, [error]);
+
   const handleReload = () => {
+    sessionStorage.removeItem('route-chunk-error-reload');
     window.location.reload();
   };
 
   const handleGoHome = () => {
+    sessionStorage.removeItem('route-chunk-error-reload');
     navigate('/', { replace: true });
   };
 
@@ -24,7 +52,17 @@ const RouteErrorBoundary = () => {
   let errorMessage = 'An unexpected error occurred while loading this page.';
   let showDetails = false;
 
-  if (error?.status === 404) {
+  // Check for chunk loading errors
+  const isChunkError = 
+    error?.message?.includes('Failed to fetch dynamically imported module') ||
+    error?.message?.includes('Importing a module script failed') ||
+    error?.message?.includes('error loading dynamically imported module') ||
+    error?.name === 'ChunkLoadError';
+
+  if (isChunkError) {
+    errorTitle = 'Loading Issue';
+    errorMessage = 'Failed to load page resources. This might be due to a network issue or outdated cache. The page will reload automatically.';
+  } else if (error?.status === 404) {
     errorTitle = 'Page Not Found';
     errorMessage = 'The page you are looking for does not exist.';
   } else if (error?.status === 403) {
