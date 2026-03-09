@@ -82,8 +82,8 @@ const useChatSocket = ({
 
     const handleCallAccepted = ({ roomId, token, type, remainingTime, isSwitch }) => {
       
-      // If this is a switch from audio to video, let CallContext handle it
-      if (isSwitch && type === "video") {
+      // If this is a switch from audio to video AND there's an active audio call, let CallContext handle it
+      if (isSwitch && type === "video" && activeCall && activeCall.callType === "audio") {
         console.log("🔄 Video upgrade accepted - CallContext will handle the switch");
         setWaitingPopup(false);
         setGlobalWaitingList(null);
@@ -91,7 +91,7 @@ const useChatSocket = ({
         return;
       }
       
-      // Regular call acceptance
+      // Regular call acceptance (including direct video calls from chat)
       setActiveCall({
         roomId,
         chatRoomId,
@@ -177,6 +177,8 @@ const useChatSocket = ({
     userId,
     astrologerId,
     kundliId,
+    astroID,
+    activeCall,
     setActiveCall,
     setGlobalWaitingList,
     setActiveCallRoomId,
