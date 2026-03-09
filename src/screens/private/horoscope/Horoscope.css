@@ -527,7 +527,7 @@
   }
   
   .overview-card {
-    height: 170px;
+    height: 200px;
   }
   
   .overview-card-header {
@@ -1118,7 +1118,7 @@
 
   .overview-card {
     border-radius: 14px;
-    height: 180px;
+    height: 240px;
   }
 
   .overview-card-header {
