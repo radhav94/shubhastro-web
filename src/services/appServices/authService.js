@@ -26,3 +26,7 @@ export const getViewerToken = async (channel) => {
     `users/live/token/viewer?channel=${channel}`
   );
 };
+
+export const deleteAccount = async () => {
+  return await privateRequest.delete("users/delete-account");
+};

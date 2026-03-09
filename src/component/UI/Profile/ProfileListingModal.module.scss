@@ -29,6 +29,7 @@
   // overflow-y: auto;
   animation: slideUp 0.3s ease-out;
   box-shadow: 0 4.039px 49.479px 0 rgba(0, 0, 0, 0.06);
+  pointer-events: auto; /* Ensure bottom sheet is always clickable even when overlay is dimmed */
 }
 
 @keyframes slideUp {

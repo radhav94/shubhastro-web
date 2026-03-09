@@ -14,6 +14,7 @@ import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { logout } from "../../../redux/auth/authSlice";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import Footer from "../../../layouts/Footer";
+import { PATH } from "../../../utils/routes/Paths";
 
 const AIWow = () => {
   const navigate = useNavigate();
@@ -157,7 +158,7 @@ const AIWow = () => {
       <header className={styles.headerWrap}>
         <div className={styles.header}>
           <span class={styles.headerBack}>
-            <button className={styles.backButton} onClick={() => navigate(-1)}>
+            <button className={styles.backButton} onClick={() => navigate(PATH.privateRoutes.HOME.path)}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M15 18L9 12L15 6"

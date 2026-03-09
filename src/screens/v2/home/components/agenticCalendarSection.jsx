@@ -90,6 +90,18 @@ const PlanEventsBanner = () => {
 
   return (
     <section className={styles.agenticCalendarSection}>
+      {/* Section Header */}
+      <div className={styles.sessionsHeader}>
+        <div className={styles.sessionsHeaderLeft}>
+          <h2 className={styles.sessionsTitle}>AGENTIC CALENDAR</h2>
+          <div className={styles.agenticTitleDivider}>
+            <div className={styles.agenticDividerLine} />
+            <span className={styles.dividerMoon}>☾</span>
+            <div className={styles.agenticDividerLine} />
+          </div>
+        </div>
+      </div>
+
       {/* Plan Your Events Banner */}
       <div className={styles.planEventsBanner} onClick={handlePlanEventsBannerClick}>
         <div className={styles.planEventsContent}>

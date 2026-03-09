@@ -1,121 +1,198 @@
+import { useEffect, useRef, useState, useCallback } from "react";
+import { io } from "socket.io-client";
 
-// src/components/LiveStreaming/useLiveChat.js
-import { useEffect, useRef, useState } from "react";
-import AgoraRTM from "agora-rtm-sdk";
+const SOCKET_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
-const APP_ID = "b7bd8229702e4ec3b0938ea15f23a39c";
-const CHANNEL_NAME = "testnewchannellive";
-
-/**
- * NOTE:
- * Replace these with the tokens FROM AGORA CONSOLE
- * based on the exact UID format below
- */
-const HOST_RTM_TOKEN = "0065630460abdc141e3b2f8d9597752bd7dIABLdl39f32u9WaxkbW8BkxZk/KwceL4W5wpaGbJmA4wXJO2XjoAAAAAEAB/PLWUakh8aQEA6ANqSHxp";
-const AUDIENCE_RTM_TOKEN = "0065630460abdc141e3b2f8d9597752bd7dIADO0Pjfc31AGkCOfLnj2zSKEx9+J8BxwNmFiJgpqwcuMALXAzAAAAAAEAB/PLWUfUh8aQEA6AN9SHxp";
-
-export const useLiveChat = (ROLE) => {
-  const rtmClientRef = useRef(null);
-  const rtmChannelRef = useRef(null);
+export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus }) => {
+  const socketRef = useRef(null);
+  const currentRoomRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
+  const [participantCount, setParticipantCount] = useState(0);
+  const [isConnected, setIsConnected] = useState(false);
 
-  /**
-   * Generate UID based on role
-   * AND must match the UID used when generating the token in Agora Console
-   */
-  const rtmUid = ROLE === "host" ? "host-234" : "test-123";
-
-  // Select correct token for login
-  const selectedRTMToken =
-    ROLE === "host" ? HOST_RTM_TOKEN : AUDIENCE_RTM_TOKEN;
-
+  // 1. Socket connection — stays alive independent of roomId
   useEffect(() => {
-    const initRTM = async () => {
-      try {
-        console.log("RTM → init");
-
-        const client = AgoraRTM.createInstance(APP_ID);
-        rtmClientRef.current = client;
-
-        // LOGIN WITH TOKEN
-        await client.login({
-          uid: rtmUid,
-          token: selectedRTMToken,
-        });
-        console.log("RTM → Login Success:", rtmUid);
-
-        const rtmChannel = client.createChannel(CHANNEL_NAME);
-        rtmChannelRef.current = rtmChannel;
-
-        await rtmChannel.join();
-        console.log("RTM → Channel Join Success:", CHANNEL_NAME);
-
-        // Receive message
-        rtmChannel.on("ChannelMessage", (message, senderId) => {
-          console.log("RTM → New Msg:", message.text, "sender:", senderId);
-
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: Date.now(),
-              sender: senderId,
-              text: message.text,
-              role: senderId.startsWith("host") ? "host" : "audience",
-              isSelf: senderId === rtmUid,
-            },
-          ]);
-        });
-      } catch (err) {
-        console.error("RTM → ERROR:", err);
-      }
-    };
-
-    initRTM();
-
-    return () => {
-      if (rtmChannelRef.current) rtmChannelRef.current.leave();
-      if (rtmClientRef.current) rtmClientRef.current.logout();
-      console.log("RTM → Cleanup Done");
-    };
-  }, [rtmUid, selectedRTMToken]);
-
-  // SEND MESSAGE
-  const sendChatMessage = async () => {
-    const msg = chatInput.trim();
-    if (!msg) return;
-
-    if (!rtmChannelRef.current) {
-      console.warn("RTM → Channel not ready yet");
+    if (!userId) {
+      console.warn("LiveChat → Skipped: missing userId");
       return;
     }
 
-    try {
-      await rtmChannelRef.current.sendMessage({ text: msg });
-      console.log("RTM → Message Sent:", msg);
+    console.log("LiveChat → Connecting to", SOCKET_URL);
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          sender: rtmUid,
-          text: msg,
-          role: ROLE,
-          isSelf: true,
-        },
-      ]);
+    const socket = io(SOCKET_URL, {
+      transports: ["websocket"],
+      query: { role: "CUSTOMER", userId },
+      auth: { role: "CUSTOMER", userId },
+    });
+    socketRef.current = socket;
 
-      setChatInput("");
-    } catch (err) {
-      console.error("RTM → Send Fail:", err);
+    socket.on("connect", () => {
+      console.log("LiveChat → Connected, socketId:", socket.id);
+      setIsConnected(true);
+
+      // Auto-join current room on connect/reconnect
+      if (currentRoomRef.current) {
+        console.log("LiveChat → Auto-rejoining room:", currentRoomRef.current);
+        socket.emit("live:join_room", {
+          roomId: currentRoomRef.current,
+          userId,
+          userName,
+          userType: "audience",
+        });
+      }
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("LiveChat → Disconnected, reason:", reason);
+      setIsConnected(false);
+    });
+
+    socket.on("connect_error", (err) => {
+      console.error("LiveChat → Connection error:", err.message);
+    });
+
+    socket.on("live:joined", (data) => {
+      console.log("LiveChat → Joined room:", data);
+      setParticipantCount(data.participantCount);
+    });
+
+    socket.on("live:recent_messages", (data) => {
+      console.log("LiveChat → Recent messages loaded:", data.messages?.length || 0);
+      setMessages(data.messages || []);
+    });
+
+    socket.on("live:message", (msg) => {
+      console.log("LiveChat → Message received:", msg);
+      setMessages((prev) => [...prev, msg]);
+    });
+
+    socket.on("live:user_joined", (data) => {
+      setParticipantCount(data.participantCount);
+    });
+
+    socket.on("live:user_left", (data) => {
+      setParticipantCount(data.participantCount);
+    });
+
+    socket.on("live:room_ended", (data) => {
+      console.log("LiveChat → Session ended:", data);
+    });
+
+    socket.on("live:error", (data) => {
+      console.error("LiveChat → Error:", data.message);
+    });
+
+    return () => {
+      // Leave current room before disconnecting
+      if (currentRoomRef.current) {
+        socket.emit("live:leave_room", {
+          roomId: currentRoomRef.current,
+          userId,
+          userName,
+        });
+      }
+      socket.disconnect();
+      socketRef.current = null;
+      currentRoomRef.current = null;
+      console.log("LiveChat → Cleanup done");
+    };
+  }, [userId, userName]);
+
+  // 2. Astrologer status listener — separate effect so onAstrologerStatus updates don't reconnect socket
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket) return;
+
+    const handler = (data) => {
+      console.log("LiveChat → Astrologer status:", data);
+      onAstrologerStatus?.(data);
+    };
+
+    socket.on("live:astrologer_status", handler);
+    return () => socket.off("live:astrologer_status", handler);
+  }, [onAstrologerStatus]);
+
+  // 3. Room join/leave — reacts to roomId changes without reconnecting socket
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!roomId || !socket) return;
+
+    const joinRoom = () => {
+      // Leave previous room
+      if (currentRoomRef.current && currentRoomRef.current !== roomId) {
+        console.log("LiveChat → Leaving room:", currentRoomRef.current);
+        socket.emit("live:leave_room", {
+          roomId: currentRoomRef.current,
+          userId,
+          userName,
+        });
+      }
+
+      // Join new room
+      console.log("LiveChat → Joining room:", roomId);
+      setMessages([]);
+      currentRoomRef.current = roomId;
+
+      socket.emit("live:join_room", {
+        roomId,
+        userId,
+        userName,
+        userType: "audience",
+      });
+    };
+
+    // Join immediately if already connected, otherwise wait for connect
+    if (socket.connected) {
+      joinRoom();
+    } else {
+      socket.once("connect", joinRoom);
     }
-  };
+
+    return () => {
+      socket.off("connect", joinRoom);
+      if (currentRoomRef.current === roomId && socket.connected) {
+        socket.emit("live:leave_room", { roomId, userId, userName });
+        currentRoomRef.current = null;
+      }
+    };
+  }, [roomId, userId, userName]);
+
+  const sendChatMessage = useCallback(() => {
+    const msg = chatInput.trim();
+    if (!msg) {
+      console.warn("LiveChat → Send skipped: empty message");
+      return;
+    }
+    if (!socketRef.current?.connected) {
+      console.warn("LiveChat → Send skipped: socket not connected");
+      return;
+    }
+    if (!currentRoomRef.current) {
+      console.warn("LiveChat → Send skipped: not in a room");
+      return;
+    }
+
+    const payload = {
+      roomId: currentRoomRef.current,
+      userId,
+      userName,
+      message: msg,
+      userType: "audience",
+    };
+    console.log("LiveChat → Sending message:", payload);
+    socketRef.current.emit("live:send_message", payload);
+
+    setChatInput("");
+  }, [chatInput, userId, userName]);
 
   return {
     messages,
     chatInput,
     setChatInput,
     sendChatMessage,
+    participantCount,
+    isConnected,
   };
 };
