@@ -780,6 +780,23 @@ const AgoraVoiceCalling = ({ callData }) => {
         onClose={() => setIsGiftModalOpen(false)}
         astrologerId={activeCall?.astrologerId}
         astrologerName={callerName}
+        roomId={activeCall?.roomId}
+        userId={activeCall?.userId}
+        socketSendFn={(message, type) => {
+          if (!voiceSocket.connected) {
+            return { error: "Socket not connected" };
+          }
+          voiceSocket.emit("chat:message", {
+            sender: "user",
+            kundliId: effectiveKundliId,
+            roomId: activeCall?.roomId,
+            userId: activeCall?.userId,
+            astrologerId: activeCall?.astrologerId,
+            message,
+            type
+          });
+          return { success: true };
+        }}
       />
 
       {/* Recharge Modal */}
