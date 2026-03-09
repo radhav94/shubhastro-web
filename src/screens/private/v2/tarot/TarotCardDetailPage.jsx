@@ -161,124 +161,130 @@ const TarotCardDetailPage = () => {
       )}
 
       <div className={styles.content}>
-        <div className={styles.cardDisplay}>
-          {displayData.card_image ? (
-            <img 
-              src={displayData.card_image?.classic || displayData.card_image?.artwork || displayData.card_image || DefaultImages.TarotCardDefault} 
-              alt={displayData.card_name || displayData.name || 'Tarot Card'}
-              className={styles.tarotCard}
-            />
-          ) : (
-            <img 
-              src="/images/empress-tarot.jpg" 
-              alt="Tarot Card"
-              className={styles.tarotCard}
-            />
-          )}
+        {/* Left side - Card image */}
+        <div className={styles.cardDisplayWrap}>
+          <div className={styles.cardDisplay}>
+            {displayData.card_image ? (
+              <img 
+                src={displayData.card_image?.classic || displayData.card_image?.artwork || displayData.card_image || DefaultImages.TarotCardDefault} 
+                alt={displayData.card_name || displayData.name || 'Tarot Card'}
+                className={styles.tarotCard}
+              />
+            ) : (
+              <img 
+                src="/images/empress-tarot.jpg" 
+                alt="Tarot Card"
+                className={styles.tarotCard}
+              />
+            )}
+          </div>
         </div>
 
-        {(displayData.card_name || displayData.name) && (
-          <h2 className={styles.cardName}>{displayData.card_name || displayData.name}</h2>
-        )}
+        {/* Right side - Title, description, reading details */}
+        <div className={styles.cardTextWrap}>
+          {(displayData.card_name || displayData.name) && (
+            <h2 className={styles.cardName}>{displayData.card_name || displayData.name}</h2>
+          )}
 
-        {displayData.card_number && (
-          <p className={styles.cardNumber}>{displayData.card_number}</p>
-        )}
+          {displayData.card_number && (
+            <p className={styles.cardNumber}>{displayData.card_number}</p>
+          )}
 
-        {displayData.answer && (
-          <p className={styles.answer}>Answer: {displayData.answer}</p>
-        )}
+          {displayData.answer && (
+            <p className={styles.answer}>Answer: {displayData.answer}</p>
+          )}
 
-        {/* Traits Capsules */}
-        {displayData.traits && displayData.traits.length > 0 && (
-          <div className={styles.traitsContainer}>
-            {displayData.traits.map((trait, index) => (
-              <span key={index} className={styles.traitCapsule}>
-                {trait}
-              </span>
-            ))}
-          </div>
-        )}
+          {/* Traits Capsules */}
+          {displayData.traits && displayData.traits.length > 0 && (
+            <div className={styles.traitsContainer}>
+              {displayData.traits.map((trait, index) => (
+                <span key={index} className={styles.traitCapsule}>
+                  {trait}
+                </span>
+              ))}
+            </div>
+          )}
 
-        {/* Daily Format - Health, Relationship, Career, Finance */}
-        {isDaily ? (
-          <div className={styles.dailyContainer}>
-            {cardData.health && (
-              <div className={styles.dailySection}>
-                <h3 className={styles.dailySectionTitle}>💪 Health</h3>
-                <p className={styles.dailySectionText}>{cardData.health}</p>
-              </div>
-            )}
+          {/* Daily Format - Health, Relationship, Career, Finance */}
+          {isDaily ? (
+            <div className={styles.dailyContainer}>
+              {cardData.health && (
+                <div className={styles.dailySection}>
+                  <h3 className={styles.dailySectionTitle}>💪 Health</h3>
+                  <p className={styles.dailySectionText}>{cardData.health}</p>
+                </div>
+              )}
 
-            {cardData.relationship && (
-              <div className={styles.dailySection}>
-                <h3 className={styles.dailySectionTitle}>❤️ Relationship</h3>
-                <p className={styles.dailySectionText}>{cardData.relationship}</p>
-              </div>
-            )}
+              {cardData.relationship && (
+                <div className={styles.dailySection}>
+                  <h3 className={styles.dailySectionTitle}>❤️ Relationship</h3>
+                  <p className={styles.dailySectionText}>{cardData.relationship}</p>
+                </div>
+              )}
 
-            {cardData.career && (
-              <div className={styles.dailySection}>
-                <h3 className={styles.dailySectionTitle}>💼 Career</h3>
-                <p className={styles.dailySectionText}>{cardData.career}</p>
-              </div>
-            )}
+              {cardData.career && (
+                <div className={styles.dailySection}>
+                  <h3 className={styles.dailySectionTitle}>💼 Career</h3>
+                  <p className={styles.dailySectionText}>{cardData.career}</p>
+                </div>
+              )}
 
-            {cardData.finance && (
-              <div className={styles.dailySection}>
-                <h3 className={styles.dailySectionTitle}>💰 Finance</h3>
-                <p className={styles.dailySectionText}>{cardData.finance}</p>
-              </div>
-            )}
-          </div>
-        ) : (
-          /* Regular Format - Title, Description, Meaning, etc. */
-          <div className={styles.readingSection}>
-            {/* Breakup Reading - Show description */}
-            {isBreakupReading && displayData.description && (
-              <div className={styles.meaningSection}>
-                <h3 className={styles.sectionTitle}>
-                  {activeTab === 0 ? '🔍 Cause of Breakup' : '💡 Advice for Moving Forward'}
-                </h3>
-                <p className={styles.readingDescription}>{displayData.description}</p>
-              </div>
-            )}
-
-            {/* Regular readings */}
-            {!isBreakupReading && (
-              <>
-                {displayData.title && (
-                  <h2 className={styles.readingTitle}>{displayData.title}</h2>
-                )}
-                
-                {displayData.description && (
+              {cardData.finance && (
+                <div className={styles.dailySection}>
+                  <h3 className={styles.dailySectionTitle}>💰 Finance</h3>
+                  <p className={styles.dailySectionText}>{cardData.finance}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Regular Format - Title, Description, Meaning, etc. */
+            <div className={styles.readingSection}>
+              {/* Breakup Reading - Show description */}
+              {isBreakupReading && displayData.description && (
+                <div className={styles.meaningSection}>
+                  <h3 className={styles.sectionTitle}>
+                    {activeTab === 0 ? '🔍 Cause of Breakup' : '💡 Advice for Moving Forward'}
+                  </h3>
                   <p className={styles.readingDescription}>{displayData.description}</p>
-                )}
+                </div>
+              )}
 
-                {displayData.meaning && (
-                  <div className={styles.meaningSection}>
-                    <h3 className={styles.sectionTitle}>Meaning</h3>
-                    <p className={styles.readingDescription}>{displayData.meaning}</p>
-                  </div>
-                )}
+              {/* Regular readings */}
+              {!isBreakupReading && (
+                <>
+                  {displayData.title && (
+                    <h2 className={styles.readingTitle}>{displayData.title}</h2>
+                  )}
+                  
+                  {displayData.description && (
+                    <p className={styles.readingDescription}>{displayData.description}</p>
+                  )}
 
-                {displayData.upright && (
-                  <div className={styles.meaningSection}>
-                    <h3 className={styles.sectionTitle}>Upright</h3>
-                    <p className={styles.readingDescription}>{displayData.upright}</p>
-                  </div>
-                )}
+                  {displayData.meaning && (
+                    <div className={styles.meaningSection}>
+                      <h3 className={styles.sectionTitle}>Meaning</h3>
+                      <p className={styles.readingDescription}>{displayData.meaning}</p>
+                    </div>
+                  )}
 
-                {displayData.reversed && (
-                  <div className={styles.meaningSection}>
-                    <h3 className={styles.sectionTitle}>Reversed</h3>
-                    <p className={styles.readingDescription}>{displayData.reversed}</p>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
+                  {displayData.upright && (
+                    <div className={styles.meaningSection}>
+                      <h3 className={styles.sectionTitle}>Upright</h3>
+                      <p className={styles.readingDescription}>{displayData.upright}</p>
+                    </div>
+                  )}
+
+                  {displayData.reversed && (
+                    <div className={styles.meaningSection}>
+                      <h3 className={styles.sectionTitle}>Reversed</h3>
+                      <p className={styles.readingDescription}>{displayData.reversed}</p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
