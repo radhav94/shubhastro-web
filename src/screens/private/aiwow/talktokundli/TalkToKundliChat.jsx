@@ -94,10 +94,11 @@ const TalkToKundliChat = () => {
   const sendMessage = async () => {
     if (!inputMessage.trim() || !sessionId || isLoading) return;
 
+    const messageToSend = inputMessage.trim();
     const userMessage = {
       id: Date.now(),
       type: 'user',
-      text: inputMessage.trim(),
+      text: messageToSend,
       timestamp: new Date()
     };
 
@@ -106,7 +107,7 @@ const TalkToKundliChat = () => {
     setIsLoading(true);
 
     try {
-      const result = await sendKundliChatMessage(sessionId, inputMessage.trim());
+      const result = await sendKundliChatMessage(sessionId, messageToSend);
 
       if (result.success) {
         const responseData = result.data;
@@ -145,7 +146,12 @@ const TalkToKundliChat = () => {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      inputRef.current?.focus();
+      // Use requestAnimationFrame to ensure focus happens after render
+      requestAnimationFrame(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      });
     }
   };
 

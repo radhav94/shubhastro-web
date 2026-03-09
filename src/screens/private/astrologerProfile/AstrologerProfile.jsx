@@ -785,7 +785,7 @@ const AstrologerProfile = () => {
                   <Link to={`/astrologer/${astrologer?._id}`} className={styles.cardLink}>
                     <div className={styles.astrologerImageWrapper}>
                       <img
-                        src={astrologer.imageUrl || getAstrologerDefaultImage(astrologer.gender)}
+                        src={astrologer.imageUrl || astrologer?.profileImgUrl || getAstrologerDefaultImage(astrologer.gender)}
                         alt={astrologer.firstName}
                         className={styles.astrologerImg}
                         onError={(e) => {

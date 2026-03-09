@@ -350,9 +350,21 @@ const HoroscopeNew = () => {
   const handleConfirmZodiac = () => {
     setSelectedZodiac(tempSelectedZodiac);
     setShowZodiacModal(false);
-    // Update URL so the selected sign persists on refresh
-    const currentPath = pathname.replace(/\/[^/]+$/, `/${tempSelectedZodiac}`);
-    navigate(currentPath, { replace: true });
+    
+    // Construct the new path based on current tab
+    let newPath;
+    if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
+      newPath = `/horoscopes/daily-horoscope/${tempSelectedZodiac}`;
+    } else if (pathname.includes('weekly-horoscope')) {
+      newPath = `/horoscopes/weekly-horoscope/${tempSelectedZodiac}`;
+    } else if (pathname.includes('yearly-horoscope')) {
+      newPath = `/horoscopes/yearly-horoscope/${tempSelectedZodiac}`;
+    } else {
+      // Default to daily horoscope
+      newPath = `/horoscopes/daily-horoscope/${tempSelectedZodiac}`;
+    }
+    
+    navigate(newPath, { replace: true });
   };
 
   const handleOpenModal = () => {

@@ -9,11 +9,17 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px 16px;
+  padding-top: 88px;
   
   @media (width <= 1180px) {
     display: block;
     padding: 0;
+    padding-top: 72px;
     margin: 16px auto 0 auto;
+  }
+  
+  @media screen and (width <= 768px) {
+    padding-top: 60px;
   }
 }
 
@@ -625,7 +631,17 @@
 .topHeaderWrap{
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;
+  position: fixed;
+  top: 88px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  
+  @media screen and (width <= 768px) {
+    top: 53px;
+  }
 }
+
 .topHeader {
   max-width: 1200px;
   margin: 0 auto;
