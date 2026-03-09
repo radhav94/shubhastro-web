@@ -4,11 +4,19 @@
   left: 0;
   right: 0;
   bottom: 0;
-  width: 100vw;
+  width: 30vw;
   height: 100vh;
   overflow: hidden;
   background: #000;
   z-index: 10000;
+  margin: 0 auto;
+  @media (width <= 1180px) {
+    width: 50vw;
+  }
+  @media (width <= 820px) {
+    width: 100vw;
+    height: 100dvh; 
+  }
 }
 
 .reel-scroll-root {
@@ -683,17 +691,14 @@
   text-align: center;
 }
 
-
 /* Removed generic .chat-input-row button styles - using specific .call-price-btn class instead */
 
 
 /* 📱 MOBILE FULLSCREEN ONLY */
 @media (max-width: 768px) {
   .video-box {
-    width: 100vw !important;
-    height: 100vh !important;
-    background: #000 !important;
-    border-radius: 0 !important;
+    width: 100vw;
+    height: 100vh;
     margin: 0;
     box-shadow: none;
     top: 0 !important;
@@ -753,18 +758,18 @@
 
 /* Desktop view - Centered vertical container */
 @media (min-width: 769px) {
-  .video-box {
-    position: fixed;
-    top: 50px;
-    left: 50%;
-    transform: translate(-50%);
-    width: 30vw;
-    height: 85dvh;
-    overflow: hidden;
-    background: #000;
-    border-radius: 16px;
-    z-index: 50;
-  }
+  // .video-box {
+  //   position: fixed;
+  //   top: 50px;
+  //   left: 50%;
+  //   transform: translate(-50%);
+  //   width: 50vw;
+  //   height: 85dvh;
+  //   overflow: hidden;
+  //   background: #000;
+  //   border-radius: 16px;
+  //   z-index: 50;
+  // }
 
   .video-gold-glow {
     display: none;
