@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { io } from "socket.io-client";
+import { clearViewerSession } from "../../../../../utils/liveSessionStorage";
 
 const SOCKET_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
-export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus }) => {
+export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onStreamEnded }) => {
   const socketRef = useRef(null);
   const currentRoomRef = useRef(null);
 
@@ -78,10 +79,16 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus }) =>
 
     socket.on("live:room_ended", (data) => {
       console.log("LiveChat → Session ended:", data);
+      clearViewerSession();
+      onStreamEnded?.({ reason: data?.reason || "ended" });
     });
 
     socket.on("live:error", (data) => {
       console.error("LiveChat → Error:", data.message);
+      if (data.code === "ROOM_NOT_FOUND" || data.code === "ROOM_ENDED") {
+        clearViewerSession();
+        onStreamEnded?.({ reason: data.code });
+      }
     });
 
     return () => {

@@ -519,12 +519,44 @@
   padding-top: 2px;
 }
 
+.message-sender {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  margin-bottom: 2px;
+}
+
+.host-message .message-sender {
+  color: #F75801;
+}
+
 .message-text {
   color: #4a4a4a;
   font-size: 15px;
   line-height: 1.5;
   margin: 0;
   word-wrap: break-word;
+}
+
+.chat-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 8px;
+  color: #999;
+
+  span {
+    font-size: 32px;
+  }
+
+  p {
+    font-size: 14px;
+    text-align: center;
+    margin: 0;
+  }
 }
 
 .message-like {
@@ -556,32 +588,6 @@
   background: #fff;
   border-top: 1px solid #e5e5e5;
   flex-shrink: 0;
-}
-
-.modal-input-avatar {
-  flex-shrink: 0;
-  position: relative;
-  width: 48px;
-  height: 48px;
-}
-
-.modal-input-avatar .avatar-image {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-}
-
-.modal-input-avatar .avatar-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
 }
 
 .chat-modal-input input {

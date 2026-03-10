@@ -26,3 +26,11 @@ export const getViewerToken = async (channel) => {
     `users/live/token/viewer?channel=${channel}`
   );
 };
+
+export const getReconnectToken = async (channel) => {
+  return await privateRequest.post("users/live/reconnect-token", { channel });
+};
+
+export const refreshAgoraToken = async (channel, uid) => {
+  return await privateRequest.post("users/live/refresh-token", { channel, uid });
+};

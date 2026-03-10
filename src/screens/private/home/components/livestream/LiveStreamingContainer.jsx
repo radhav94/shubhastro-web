@@ -1,32 +1,55 @@
 // src/components/LiveStreaming/LiveStreamingContainer.jsx
-import React, { useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useCallback, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useLiveStreaming } from "./useLiveStreaming";
 import { useLiveChat } from "./useLiveChat";
 import LiveView from "./LiveView";
 import StartLivePopup from "./StartLivePopup";
 import { FiChevronUp, FiChevronDown } from "react-icons/fi";
 
-// imports
 import { useSwipeReel } from "./useSwipeReel";
 import "./styles/live.scss";
 import { useLiveList } from "../../../../../context/LiveListContext";
+import {
+  clearViewerSession,
+  restoreViewerSession,
+  saveViewerSession,
+} from "../../../../../utils/liveSessionStorage";
 
 const LiveStreamingContainer = ({ client }) => {
   const location = useLocation();
-   const liveList = useLiveList();
-   console.log("liveList", liveList)
-   const currentLive = liveList?.getCurrentLive();
+  const navigate = useNavigate();
+  const liveList = useLiveList();
+  console.log("liveList", liveList);
+  const currentLive = liveList?.getCurrentLive();
 
-   const direction = liveList?.direction || "up";
+  const direction = liveList?.direction || "up";
 
   const channel = liveList?.getCurrentChannel();
   const ROLE = location.pathname.includes("/astrologer-dashboard/live-streaming")
     ? "host"
     : "audience";
 
-  // 🟢 Hooks always called FIRST ✔
-  const live = useLiveStreaming(client, ROLE,channel);
+  const live = useLiveStreaming(client, ROLE, channel);
+
+  // Persist astrologer info in sessionStorage so refresh can restore it
+  useEffect(() => {
+    if (!channel || !currentLive || ROLE !== "audience") return;
+    const saved = restoreViewerSession();
+    if (saved?.channel === channel) {
+      // Update astrologer info in existing session
+      saveViewerSession({
+        ...saved,
+        astrologer: {
+          _id: currentLive.astrologerId,
+          firstName: currentLive.astrologerName?.split(" ")[0] || "",
+          lastName: currentLive.astrologerName?.split(" ").slice(1).join(" ") || "",
+          rating: currentLive.rating,
+          expertise: currentLive.expertise,
+        },
+      });
+    }
+  }, [channel, currentLive, ROLE]);
 
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id") || "";
   const userNameLocal = localStorage.getItem("shubhtalk_customer_name") || "User";
@@ -39,24 +62,36 @@ const LiveStreamingContainer = ({ client }) => {
     }
 
     if (status === "started") {
-      // Add new live and auto-switch to it so user reconnects
       liveList?.addLive({
         channel: roomId,
         astrologerId: hostId,
         astrologerName: hostName || "",
       });
-      // Small delay to ensure addLive state update is flushed
       setTimeout(() => {
         liveList?.switchToChannel(roomId);
       }, 100);
     }
   }, [liveList]);
 
+  // Handle stream ended (room not found, room ended, host disconnected)
+  const handleStreamEnded = useCallback(({ reason }) => {
+    console.log("Stream ended, reason:", reason);
+    clearViewerSession();
+
+    // If there are other lives, move to next; otherwise navigate away
+    if (liveList && liveList.lives.length > 1) {
+      liveList.removeLive(channel);
+    } else {
+      navigate("/live", { replace: true });
+    }
+  }, [liveList, channel, navigate]);
+
   const chat = useLiveChat({
     roomId: channel,
     userId: userIdLocal,
     userName: userNameLocal,
     onAstrologerStatus: handleAstrologerStatus,
+    onStreamEnded: handleStreamEnded,
   });
 
 
