@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import styles from './SignatureInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setSignatureImage } from '../../../../redux/aiwow/aiwowSlice';
+import Footer from '../../../../layouts/Footer';
 
 const SignatureInstructions = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const SignatureInstructions = () => {
   };
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -130,6 +132,8 @@ const SignatureInstructions = () => {
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

@@ -528,7 +528,7 @@ const Kundali = () => {
   };
 
   return (
-    <div className={isDirectKundliView ? "" : "mt-10"}>
+    <div className={isDirectKundliView ? "" : ""} style={!isDirectKundliView ? { paddingTop: '224px' } : {}}>
       {/* Free Kundli Online Title - Hidden in direct kundli view */}
       {!isDirectKundliView && <KundliHeader />}
 

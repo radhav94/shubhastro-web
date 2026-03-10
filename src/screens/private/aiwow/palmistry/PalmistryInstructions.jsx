@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import styles from './PalmistryInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setPalmistryImage } from '../../../../redux/aiwow/aiwowSlice';
+import Footer from '../../../../layouts/Footer';
 
 const PalmistryInstructions = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const PalmistryInstructions = () => {
   };
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -130,6 +132,8 @@ const PalmistryInstructions = () => {
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 
