@@ -25,6 +25,7 @@ const PalmistryCamera = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
+  const [isFrontCamera, setIsFrontCamera] = useState(true);
   const captureAreaRef = useRef(null); // Reference to capture area div
 
   // Calculate capture box bounds dynamically
@@ -124,6 +125,11 @@ const PalmistryCamera = () => {
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
+
+        // Detect actual camera facing mode from track
+        const videoTrack = mediaStream.getVideoTracks()[0];
+        const trackFacing = videoTrack?.getSettings?.()?.facingMode;
+        setIsFrontCamera(trackFacing !== 'environment');
         
         // Start hand detection once video is playing
         videoRef.current.onloadedmetadata = () => {
@@ -330,12 +336,12 @@ const PalmistryCamera = () => {
               autoPlay
               playsInline
               className={styles.video}
-              style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
+              style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
             />
             <canvas
               ref={detectionCanvasRef}
               className={styles.detectionCanvas}
-              style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
+              style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
             />
             <div className={styles.overlay}>
               <div className={styles.blurTop}></div>

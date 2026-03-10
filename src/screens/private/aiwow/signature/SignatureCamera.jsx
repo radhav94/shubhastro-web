@@ -16,6 +16,7 @@ const SignatureCamera = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('environment'); // Back camera for signature
+  const [isFrontCamera, setIsFrontCamera] = useState(false);
 
   const {
     detectionReady,
@@ -55,6 +56,11 @@ const SignatureCamera = () => {
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
+
+        // Detect actual camera facing mode from track
+        const videoTrack = mediaStream.getVideoTracks()[0];
+        const trackFacing = videoTrack?.getSettings?.()?.facingMode;
+        setIsFrontCamera(trackFacing !== 'environment');
         
         videoRef.current.onloadedmetadata = () => {
           videoRef.current.play();
@@ -301,12 +307,12 @@ const SignatureCamera = () => {
               autoPlay
               playsInline
               className={styles.video}
-              style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
+              style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
             />
             <canvas
               ref={detectionCanvasRef}
               className={styles.detectionCanvas}
-              style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
+              style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
             />
             <div className={styles.overlay}>
               {/* Capture area frame with 500px width */}
