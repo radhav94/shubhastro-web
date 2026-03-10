@@ -11,6 +11,17 @@
   padding: 16px 0;
   background: white;
   border-bottom: 1px solid #e0e0e0;
+  position: fixed;
+  top: 88px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+@media screen and (max-width: 768px) {
+  .tarotHeader {
+    top: 53px;
+  }
 }
 .taroteHeaderInner{
   max-width: 1200px;
@@ -44,9 +55,16 @@
 
 .tarotIntro {
   padding: 16px;
+  padding-top: 88px;
   max-width: 1200px;
   margin: 0 auto;
   /* background: white; */
+}
+
+@media screen and (max-width: 768px) {
+  .tarotIntro {
+    padding-top: 72px;
+  }
 }
 
 .tarotHeading {
