@@ -12,6 +12,7 @@ const FinalPay = () => {
   const navigate = useNavigate();
 
   const planId = location.state?.planId;
+  const returnUrl = location.state?.returnUrl; // Get return URL from state
   const { data, isLoading: isPlanLoading, error: planError } = useGetPlanByIdQuery(planId, {
     skip: !planId,
   });
@@ -79,11 +80,20 @@ const FinalPay = () => {
         // Refresh wallet balance
         refreshWallet();
         
-        // Navigate to home after successful payment
-        Toast.success("Redirecting to home...");
-        setTimeout(() => {
-          navigate("/");
-        }, 1500);
+        // Navigate back to return URL or home
+        if (returnUrl) {
+          Toast.success("Payment successful! Redirecting...");
+          setTimeout(() => {
+            // Add fromPayment parameter to trigger download retry
+            const separator = returnUrl.includes('?') ? '&' : '?';
+            navigate(`${returnUrl}${separator}fromPayment=true`);
+          }, 1500);
+        } else {
+          Toast.success("Redirecting to home...");
+          setTimeout(() => {
+            navigate("/");
+          }, 1500);
+        }
       },
       onFailure: (error) => {
         console.error("Payment failed:", error);
