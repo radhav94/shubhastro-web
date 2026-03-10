@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import styles from './ClothColorInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
+import Footer from '../../../../layouts/Footer';
 
 const ClothColorInstructions = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const ClothColorInstructions = () => {
   };
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -130,6 +132,8 @@ const ClothColorInstructions = () => {
     </div>
     </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

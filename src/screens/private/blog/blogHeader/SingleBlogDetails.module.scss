@@ -1,13 +1,21 @@
 // Header with back button
 .headerWrap{
+  position: fixed;
+  top: 88px; // Below TopHeader
+  left: 0;
+  right: 0;
   background: white;
   border-bottom: 1px solid #e0e0e0;
+  z-index: 1000;
+  
+  @media (max-width: 768px) {
+    top: 53px; // Adjust for mobile TopHeader height
+  }
 }
 .header {
   display: flex;
-  // justify-content: space-between;
   align-items: center;
-  padding:6px 16px;
+  padding:10px 16px;
   max-width: 1200px;
   margin: 0 auto;
   gap: 16px;
@@ -51,15 +59,15 @@
 }
 
 .singleBlogWrapper {
-  max-width: 1200px;   // 👈 increased width
-  // margin: 40px auto;
-  padding: 0 16px;     // keep slight padding
-  // line-height: 1.7;
+  max-width: 1200px;
+  padding: 0 16px;
   margin: 0 auto;
+  padding-top: 40px; // TopHeader (88px) + Blog Header (60px)
 
   @media (max-width: 900px) {
     padding: 0 16px;
     margin: 16px auto;
+    padding-top: 30px; // TopHeader (76px) + Blog Header (60px)
   }
 }
 

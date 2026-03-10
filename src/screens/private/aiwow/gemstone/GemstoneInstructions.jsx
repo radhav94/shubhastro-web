@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import styles from './GemstoneInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setGemstoneImage } from '../../../../redux/aiwow/aiwowSlice';
+import Footer from '../../../../layouts/Footer';
 
 const GemstoneInstructions = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const GemstoneInstructions = () => {
   };
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -131,6 +133,8 @@ const GemstoneInstructions = () => {
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

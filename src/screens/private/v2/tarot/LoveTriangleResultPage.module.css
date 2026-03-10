@@ -7,7 +7,20 @@
 
 .headerWrap{
   background: white;
+  position: fixed;
+  top: 88px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  border-bottom: 1px solid #e0e0e0;
 }
+
+@media screen and (max-width: 768px) {
+  .headerWrap {
+    top: 53px;
+  }
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -49,7 +62,19 @@
   width: 100%;
   background: white;
   border-bottom: 1px solid #e0e0e0;
+  position: fixed;
+  top: 152px;
+  left: 0;
+  right: 0;
+  z-index: 99;
 }
+
+@media screen and (max-width: 768px) {
+  .tabsWrap {
+    top: 99px;
+  }
+}
+
 .tabs {
   display: flex;
   padding: 0 16px;
@@ -82,7 +107,14 @@
   flex-direction: column;
   align-items: center;
   padding: 32px 16px;
+  padding-top: 140px;
   gap: 24px;
+}
+
+@media screen and (max-width: 768px) {
+  .content {
+    padding-top: 120px;
+  }
 }
 
 .cardDisplay {
@@ -143,11 +175,17 @@
 }
 
 @media (max-width: 768px) {
+  .tabsWrap {
+    padding: 6px 0;
+  }
   .tabs{
-    padding: 6px 16px;
+    padding: 0px 16px;
+  }
+  .headerWrap {
+    padding: 6px 0;
   }
   .header{
-    padding: 6px 16px;
+    padding: 0px 16px;
   }
   .backButton{
     width: 36px;
@@ -155,6 +193,7 @@
   }
   .content {
     padding: 24px 16px;
+    padding-top: 130px;
   }
 
   .cardDisplay {
