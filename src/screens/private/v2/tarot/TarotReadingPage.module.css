@@ -12,13 +12,13 @@
   background: white;
   border-bottom: 1px solid #e0e0e0;
   position: fixed;
-  top: 88px;
+  top: 93px;
   left: 0;
   right: 0;
   z-index: 100;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 1180px) {
   .tarotHeader {
     top: 53px;
   }

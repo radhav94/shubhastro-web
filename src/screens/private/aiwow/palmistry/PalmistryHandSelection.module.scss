@@ -10,8 +10,16 @@
   }
 }
 .headerWrap{
+  position: fixed;
+  top: 95px;
+  left: 0;
+  right: 0;
   background: white;
   border-bottom: 1px solid #e0e0e0;
+  z-index: 100;
+  @media screen and (width <= 1180px) {
+    top: 53px;
+  }
 }
 .header {
   display: flex;
@@ -63,6 +71,7 @@
   max-width: 600px;
   margin: 0 auto;
   padding: 1rem;
+  padding-top: calc(1rem + 56px); // Add space for fixed header
 }
 
 .instructionSection {
