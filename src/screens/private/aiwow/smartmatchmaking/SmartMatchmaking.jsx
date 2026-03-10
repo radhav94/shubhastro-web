@@ -319,6 +319,17 @@ const SmartMatchmaking = () => {
 
   return (
     <div className={styles.matchMakingMain}>
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={handleBack}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <h1 className={styles.title}>Smart Matchmaking</h1>
+        </div>
+      </header>
+
       <div className={styles.matchMaking}>
         <img className={styles.topImg} src={matchMakingImg} alt="img" />
         
@@ -326,8 +337,8 @@ const SmartMatchmaking = () => {
           {!result && !error ? (
             <>
               <div className={styles.topTitles}>
-                <h2>Smart Matchmaking</h2>
-                <p>AI-enhanced compatibility analysis for relationships</p>
+                <h2>AI-Enhanced Compatibility</h2>
+                <p>Discover deep insights about your relationship compatibility</p>
               </div>
 
               <form onSubmit={handleSubmit}>
@@ -527,7 +538,7 @@ const SmartMatchmaking = () => {
                     <div className={styles.personalityName}>{primaryProfile?.name}</div>
                   </div>
                   <div className={styles.traitsList}>
-                    {result?.personalityMatch?.userA?.traits?.map((trait, idx) => (
+                    {result?.personalityMatch?.[primaryProfile?.name]?.traits?.map((trait, idx) => (
                       <span key={idx} className={styles.traitTag}>{trait}</span>
                     )) || <span className={styles.traitTag}>No traits available</span>}
                   </div>
@@ -541,7 +552,7 @@ const SmartMatchmaking = () => {
                     <div className={styles.personalityName}>{partnerProfile?.name}</div>
                   </div>
                   <div className={styles.traitsList}>
-                    {result?.personalityMatch?.userB?.traits?.map((trait, idx) => (
+                    {result?.personalityMatch?.[partnerProfile?.name]?.traits?.map((trait, idx) => (
                       <span key={idx} className={styles.traitTag}>{trait}</span>
                     )) || <span className={styles.traitTag}>No traits available</span>}
                   </div>
