@@ -16,6 +16,7 @@ import EditProfileModal from '../../../../component/UI/Profile/EditProfileModal'
 import DeleteConfirmationModal from '../../../../component/UI/modal/deleteModal/DeleteConfirmationModal';
 import matchMakingImg from '../../../../assets/images/match-making-top-img.svg';
 import matchMakingImgBottom from '../../../../assets/images/match-making-bottom-img.svg';
+import Footer from '../../../../layouts/Footer';
 
 const SmartMatchmaking = () => {
   const navigate = useNavigate();
@@ -318,6 +319,7 @@ const SmartMatchmaking = () => {
   };
 
   return (
+    <>
     <div className={styles.matchMakingMain}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -646,23 +648,34 @@ const SmartMatchmaking = () => {
             <div className={styles.remediesCard}>
               <h3 className={styles.cardTitle}>Recommended Remedies</h3>
               <div className={styles.remediesList}>
-                {result?.remedies?.map((remedy, idx) => (
-                  <div key={idx} className={styles.remedyItem}>
-                    <div className={styles.remedyHeader}>
-                      <span className={styles.remedyWho}>
-                        {remedy.who === 'userA' 
-                          ? primaryProfile?.name 
-                          : remedy.who === 'userB' 
-                          ? partnerProfile?.name 
-                          : 'Both'}
-                      </span>
+                {result?.remedies?.map((remedy, idx) => {
+                  // Determine who the remedy is for
+                  let remedyFor = 'Both';
+                  if (remedy.who === 'userA') {
+                    remedyFor = primaryProfile?.name;
+                  } else if (remedy.who === 'userB') {
+                    remedyFor = partnerProfile?.name;
+                  } else if (remedy.who && remedy.who.toLowerCase() === 'both') {
+                    remedyFor = 'Both';
+                  } else if (remedy.who) {
+                    // Use the actual value from API if it's something else
+                    remedyFor = remedy.who;
+                  }
+
+                  return (
+                    <div key={idx} className={styles.remedyItem}>
+                      <div className={styles.remedyHeader}>
+                        <span className={styles.remedyWho}>
+                          {remedyFor}
+                        </span>
+                      </div>
+                      <p className={styles.remedyText}>{remedy.remedy}</p>
+                      <p className={styles.remedyPurpose}>
+                        <strong>Purpose:</strong> {remedy.purpose}
+                      </p>
                     </div>
-                    <p className={styles.remedyText}>{remedy.remedy}</p>
-                    <p className={styles.remedyPurpose}>
-                      <strong>Purpose:</strong> {remedy.purpose}
-                    </p>
-                  </div>
-                )) || <p className={styles.noData}>No remedies available</p>}
+                  );
+                }) || <p className={styles.noData}>No remedies available</p>}
               </div>
             </div>
 
@@ -763,6 +776,8 @@ const SmartMatchmaking = () => {
         />
       )}
     </div>
+    <Footer />
+    </>
   );
 };
 

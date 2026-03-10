@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import styles from './FaceReadingInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
+import Footer from '../../../../layouts/Footer';
 
 const FaceReadingInstructions = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const FaceReadingInstructions = () => {
   };
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -131,6 +133,8 @@ const FaceReadingInstructions = () => {
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

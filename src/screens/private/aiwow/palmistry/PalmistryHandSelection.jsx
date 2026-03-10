@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './PalmistryHandSelection.module.scss';
 import { setPalmistrySelectedHand } from '../../../../redux/aiwow/aiwowSlice';
-
+import Footer from '../../../../layouts/Footer';
 const PalmistryHandSelection = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -21,6 +21,7 @@ const PalmistryHandSelection = () => {
   };
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -116,6 +117,8 @@ const PalmistryHandSelection = () => {
         </button>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 
