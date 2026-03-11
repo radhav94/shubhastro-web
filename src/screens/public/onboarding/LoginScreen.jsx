@@ -89,6 +89,11 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
             value={phoneNumber}
             autoFocus
             onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && phoneNumber.length >= 10 && !loading) {
+                handleGetOTP();
+              }
+            }}
             placeholder="Enter your Number"
             className={styles.phoneInput}
             maxLength={10}

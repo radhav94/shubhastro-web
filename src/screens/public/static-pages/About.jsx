@@ -120,7 +120,7 @@ const About = () => {
       </section>
 
       {/* Why ShubhAstro Section */}
-      <section className={styles.whyShubhAstroSection}>
+      <section className={styles.whyShubhtalkSection}>
         <div className={styles.container}>
           <h2 className={styles.mainHeading}>WHY ShubhAstro</h2>
           <p className={styles.paragraph}>
