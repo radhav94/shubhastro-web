@@ -6,7 +6,7 @@ import ConnectCard from "../cards/connectCard/ConnectCard";
 import ServiceCards from "../../../screens/private/home/components/serviceCards/ServiceCards";
 import ZodiacCarousel from "../../../screens/private/horoscope/zodiacCarousel/ZodiacCarousel";
 
-const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0 }) => {
+const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0, onTabChange }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTabIndex, setActiveTabIndex] = useState(initialActiveIndex);
 
@@ -26,7 +26,15 @@ const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0 }) => {
     background: "black",
   };
 
-  const handleTabClick = (index) => {
+  const handleTabClick = async (index) => {
+    // Call onTabChange callback if provided (for custom logic like balance check)
+    if (onTabChange) {
+      const canProceed = await onTabChange(index, tabs[index].label);
+      if (!canProceed) {
+        return; // Don't change tab if callback returns false
+      }
+    }
+    
     setActiveTabIndex(index);
     
     // If clicking on "Free Report" tab (index 6), set subtab=generalInfo
@@ -48,17 +56,36 @@ const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0 }) => {
   return (
     <div className={styles.tabsContainer}>
       <nav className={styles.tabNav}>
-        {tabs.map((tab, index) => (
-          <button
-            key={tab.label}
-            className={`${styles.tabButton} ${
-              activeTabIndex === index ? styles.active : ""
-            }`}
-            onClick={() => handleTabClick(index)}
-          >
-            {tab.label}
-          </button>
-        ))}
+        {tabs.map((tab, index) => {
+          // Check if label is a React element (custom component like Download button)
+          const isCustomLabel = typeof tab.label === 'object' && tab.label !== null;
+          
+          if (isCustomLabel) {
+            // Render custom label without wrapping in button
+            return (
+              <div
+                key={index}
+                className={activeTabIndex === index ? styles.active : ""}
+                onClick={() => handleTabClick(index)}
+              >
+                {tab.label}
+              </div>
+            );
+          }
+          
+          // Regular tab button
+          return (
+            <button
+              key={tab.label}
+              className={`${styles.tabButton} ${
+                activeTabIndex === index ? styles.active : ""
+              }`}
+              onClick={() => handleTabClick(index)}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
       </nav>
 
       <main className={styles.tabContent}>
