@@ -4,9 +4,9 @@
   // background: #F9F4EF;
   // padding-bottom: 2rem;
   max-width: 1200px;
-  margin: 6rem auto 0rem auto;
-  @media (width <= 767px) {
-    margin: 4rem auto 0rem auto;
+  margin: 93px auto 0rem auto;
+  @media (width <= 1180px) {
+    margin: 53px auto 0rem auto;
   }
 }
 
@@ -318,15 +318,14 @@
 .avatarCircle {
   width: 70px;
   height: 70px;
-  background: #e8e8e8;
-  // border: 2px solid #fdefd8;
+  background: #fdefd8;
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2rem;
   font-weight: 600;
-  color: #2a1c06;
+  color: #d43400;
   flex-shrink: 0;
   @media (width <= 767px) {
     width: 60px;
