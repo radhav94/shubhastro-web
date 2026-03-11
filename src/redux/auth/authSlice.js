@@ -10,6 +10,8 @@ const getInitialAuthState = () => {
   return {
     isLoggedIn: !!token, // true if token exists
     token: token || null,
+    isRegister: false,
+    isVerified: false,
   };
 };
 
@@ -21,6 +23,8 @@ const authSlice = createSlice({
   reducers: {
     loginSuccess: (state, action) => {
       state.isLoggedIn = true;
+      state.isRegister = action.payload.isRegister;
+      state.isVerified = action.payload.isVerified;
       //   state.user = action.payload.user;
       state.token = action.payload.token;
     },
@@ -28,9 +32,14 @@ const authSlice = createSlice({
       state.isLoggedIn = false;
       //   state.user = null;
       state.token = null;
+      state.isRegister = false;
+      state.isVerified = false;
+    },
+    updateRegistrationStatus: (state, action) => {
+      state.isRegister = action.payload.isRegister;
     },
   },
 });
 
-export const { loginSuccess, logout } = authSlice.actions;
+export const { loginSuccess, logout, updateRegistrationStatus } = authSlice.actions;
 export default authSlice.reducer;

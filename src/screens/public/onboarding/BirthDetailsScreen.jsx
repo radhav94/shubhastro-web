@@ -115,21 +115,23 @@ const BirthDetailsScreen = ({
                   placeholder="Select here"
                   disabled={values.unknownBirthTime}
                 />
-                <Clock className={styles.inputIcon} size={20} />
+                {/* <Clock className={styles.inputIcon} size={20} /> */}
               </div>
-              <label className={styles.checkboxLabel}>
-                <Field
-                  type="checkbox"
-                  name="unknownBirthTime"
-                  onChange={(e) => {
-                    setFieldValue("unknownBirthTime", e.target.checked);
-                    if (e.target.checked) {
-                      setFieldValue("birthTime", "");
-                    }
-                  }}
-                />
-                Don't know the exact time of birth
-              </label>
+              <div className={styles.checkboxContainer}>
+                <label className={styles.checkboxLabel}>
+                  <Field
+                    type="checkbox"
+                    name="unknownBirthTime"
+                    onChange={(e) => {
+                      setFieldValue("unknownBirthTime", e.target.checked);
+                      if (e.target.checked) {
+                        setFieldValue("birthTime", "");
+                      }
+                    }}
+                  />
+                  <span>Don't know the exact time of birth</span>
+                </label>
+              </div>
               <ErrorMessage name="birthTime">
                 {(msg) => <span className={styles.errorText}>{msg}</span>}
               </ErrorMessage>

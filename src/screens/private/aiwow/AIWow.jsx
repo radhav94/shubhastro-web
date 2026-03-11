@@ -59,7 +59,14 @@ const AIWow = () => {
 
   // Initialize from localStorage and validate against API profiles
   useEffect(() => {
-    if (!profiles.length || isFetching) return;
+    if (isFetching) return;
+
+    // Handle case when all profiles are deleted
+    if (profiles.length === 0) {
+      dispatch(setSelectedKundliProfile(null));
+      localStorage.removeItem("selectedKundliProfile");
+      return;
+    }
 
     const saved = localStorage.getItem("selectedKundliProfile");
     let parsed = null;
