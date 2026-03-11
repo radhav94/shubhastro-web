@@ -15,10 +15,10 @@ import { useCall } from "../../../../../context/CallContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import Toast from "../../../../../component/toast";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
-import WaitingModal from "../../../../../component/UI/modal/waitingModal/WaitingModal";
 
 import { createPortal } from "react-dom";
 import { ChevronLeft } from "lucide-react";
+import { clearViewerSession } from "../../../../../utils/liveSessionStorage";
 
 const FixedLayer = ({ children }) => {
   return createPortal(children, document.body);
@@ -40,8 +40,11 @@ const LiveView = (props) => {
     messages,
     chatInput,
     setChatInput,
+    participantCount,
     hostLeft,
     astrologer,
+    handleLeave,
+    roomReady,
   } = props;
 
   const [showGifts, setShowGifts] = useState(false);
@@ -67,35 +70,6 @@ const LiveView = (props) => {
   
   const [createChatRoom] = useCreateChatRoomMutation();
 
-  // Sample messages for display
-  const sampleMessages = [
-    {
-      id: 1,
-      text: "I can totally relate to this. This phase is bringing so many internal changes.",
-      role: "user",
-      likes: 30
-    },
-    {
-      id: 2,
-      text: "This is the time to understand everything, to connect with yourself. Life is showing new colors.",
-      role: "user",
-      likes: 25
-    },
-    {
-      id: 3,
-      text: "Every challenge has a lesson, during this period we are seeing ourselves in a new light.",
-      role: "user",
-      likes: 42
-    },
-    {
-      id: 4,
-      text: "I can totally relate to this. This phase is bringing so many internal changes.",
-      role: "user",
-      likes: 30
-    }
-  ];
-
-  // Combine real messages with sample messages
   // Normalize socket messages (message → text, userType → role, userName → sender)
   const normalizedMessages = messages?.map((m) => ({
     ...m,
@@ -103,7 +77,7 @@ const LiveView = (props) => {
     role: m.role || m.userType,
     sender: m.sender || m.userName,
   })) || [];
-  const displayMessages = normalizedMessages.length > 0 ? normalizedMessages : sampleMessages;
+  const displayMessages = normalizedMessages;
 
   const liveListCtx = useLiveList();
   const reelRef = useRef(null);
@@ -129,15 +103,23 @@ const LiveView = (props) => {
   useEffect(() => {
     if (!hostLeft || ROLE === "host") return;
 
-    const t = setTimeout(() => {
-      liveListCtx?.goNextLive();
-    }, 2000);
+    // Close chat modal when astrologer ends the live
+    setShowChatModal(false);
+    setShowGifts(false);
+    setShowCallPopup(false);
+  }, [hostLeft, ROLE]);
 
-    return () => clearTimeout(t);
-  }, [hostLeft, ROLE, liveListCtx]);
+  // Also close popups when the socket room ends (roomReady → false)
+  useEffect(() => {
+    if (roomReady === false && ROLE !== "host") {
+      setShowChatModal(false);
+      setShowGifts(false);
+      setShowCallPopup(false);
+    }
+  }, [roomReady, ROLE]);
 
   const isHost = ROLE === "host";
-  const viewerCount = (remoteUsers?.length || 0) + 1;
+  const viewerCount = participantCount || (remoteUsers?.length || 0) + 1;
 
   const {
     messagesEndRef,
@@ -153,6 +135,9 @@ const LiveView = (props) => {
     if (isHost) {
       setCalling(false);
     } else {
+      // Intentional leave — clear saved session so refresh doesn't reconnect
+      clearViewerSession();
+      handleLeave?.();
       navigate(-1);
     }
   };
@@ -434,11 +419,11 @@ const LiveView = (props) => {
               </div>
             )}
 
-            {/* ENDED (this is your screenshot fix) */}
+            {/* ENDED — no other astrologers online */}
             {!isHost && hostLeft && (
               <div className="waiting-wrapper ended">
                 <div className="waiting-text">
-                  ⛔ Astrologer has ended the live
+                  🔮 Waiting for astrologer to go live…
                 </div>
               </div>
             )}
@@ -499,30 +484,24 @@ const LiveView = (props) => {
                 <div className="chat-modal-handle"></div>
                 
                 <div className="chat-modal-messages">
+                  {displayMessages.length === 0 && (
+                    <div className="chat-empty-state">
+                      <span>💬</span>
+                      <p>No messages yet. Be the first to say something!</p>
+                    </div>
+                  )}
                   {displayMessages.map((m, index) => (
-                    <div key={m.id || index} className="chat-modal-message">
+                    <div key={m.id || index} className={`chat-modal-message ${m.role === "host" ? "host-message" : ""}`}>
                       <div className="message-avatar">
-                        <img 
-                          src={m.avatar || (m.role === "host" && astrologer?.profileImage ? astrologer?.profileImage : "/default-avatar.jpg")} 
-                          alt={astrologer?.firstName || "User"}
-                          className="avatar-image"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
-                        <div className="avatar-circle" style={{ display: 'none' }}>
+                        <div className="avatar-circle">
                           {m.role === "host" ? "🕉️" : "👤"}
                         </div>
                       </div>
                       <div className="message-content">
+                        {m.sender && (
+                          <span className="message-sender">{m.sender}</span>
+                        )}
                         <p className="message-text">{m.text}</p>
-                      </div>
-                      <div className="message-like">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                        </svg>
-                        <span className="like-count">{m.likes || 30}</span>
                       </div>
                     </div>
                   ))}
@@ -530,18 +509,6 @@ const LiveView = (props) => {
                 </div>
 
                 <div className="chat-modal-input">
-                  <div className="modal-input-avatar">
-                    <img 
-                      src="/default-avatar.jpg" 
-                      alt="Your avatar"
-                      className="avatar-image"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.nextSibling.style.display = 'flex';
-                      }}
-                    />
-                    <div className="avatar-circle" style={{ display: 'none' }}>👤</div>
-                  </div>
                   <input
                     type="text"
                     placeholder="Share your thoughts..."
@@ -551,7 +518,6 @@ const LiveView = (props) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
                         handleSend(e);
-                        setShowChatModal(false);
                       }
                     }}
                     autoFocus
@@ -561,7 +527,6 @@ const LiveView = (props) => {
                     className="modal-send-btn"
                     onClick={(e) => {
                       handleSend(e);
-                      setShowChatModal(false);
                     }}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
