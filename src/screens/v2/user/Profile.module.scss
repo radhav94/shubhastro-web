@@ -97,20 +97,26 @@
 }
 
 .logoutButton {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   background: #ffe5e5;
   border: none;
-  border-radius: 50%;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #ff4444;
+  color: #d43400;
   flex-shrink: 0;
+  border: 1px solid #d43400;
+  transition: all 0.2s ease;
   @media (width <= 767px) {
    width: 36px;
-  height: 36px;
+    height: 36px;
+  }
+  &:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -131,6 +137,15 @@
   align-items: center;
   gap: 0.5rem;
   text-align: center;
+  &:nth-child(1){
+    border: 1px solid #e1baff;
+  }
+  &:nth-child(2){
+    border: 1px solid #addfff;
+  }
+  &:nth-child(3){
+    border: 1px solid #91ebb8;
+  }
 }
 
 .zodiacIcon {
@@ -369,20 +384,31 @@
 }
 
 .iconButton {
-  width: 44px;
-  height: 44px;
-  background: #fff5e6;
-  border: 2px solid #fdefd8;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  background: #ffe5e5;
+  border: 1px solid #d43400;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #000;
-  transition: all 0.2s;
+  color: #d43400;
+  transition: all 0.2s ease;
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
+  &:first-child{
+    color: green;
+    background: #0080001f;
+    border: 1px solid green;
+  }
 
   &:hover {
-    background: #ffe5cc;
+    // background: #ffd8d8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 
   &:disabled {
