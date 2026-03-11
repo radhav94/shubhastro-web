@@ -27,6 +27,36 @@ export const getViewerToken = async (channel) => {
   );
 };
 
+export const getReconnectToken = async (channel) => {
+  return await privateRequest.post("users/live/reconnect-token", { channel });
+};
+
+export const refreshAgoraToken = async (channel, uid) => {
+  return await privateRequest.post("users/live/refresh-token", { channel, uid });
+}
+
 export const deleteAccount = async () => {
   return await privateRequest.delete("users/delete-account");
+};
+
+// ── Live Chat REST APIs ──
+
+export const getActiveLiveRooms = async (page = 1, limit = 10) => {
+  return await privateRequest.get(
+    `live-chat/active-rooms?page=${page}&limit=${limit}`
+  );
+};
+
+export const getLiveRoomDetails = async (roomId) => {
+  return await privateRequest.get(`live-chat/room/${roomId}`);
+};
+
+export const getLiveRoomMessages = async (roomId, limit = 50) => {
+  return await privateRequest.get(
+    `live-chat/room/${roomId}/messages?limit=${limit}`
+  );
+};
+
+export const getLiveRoomParticipants = async (roomId) => {
+  return await privateRequest.get(`live-chat/room/${roomId}/participants`);
 };
