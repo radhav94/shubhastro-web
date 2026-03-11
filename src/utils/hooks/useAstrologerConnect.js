@@ -116,17 +116,31 @@ export const useAstrologerConnect = () => {
 
     // Check balance conditionally
     if (checkBalance) {
-      const result = await getBalance({ astrologerId: astro?._id });
-      if (result.data.data.status === false) {
-        setOpenModal((prev) => ({ ...prev, recharge: true }));
+      try {
+        const result = await getBalance({ astrologerId: astro?._id });
+        
+        // Check balance status
+        if (result?.data?.data?.status === false) {
+          setOpenModal((prev) => ({ ...prev, recharge: true }));
+          return false;
+        }
+        
+        // Check if astrologer is online for chat
+        const availability = result?.data?.data?.availability;
+        const isActive = availability?.isActive === true;
+        const isActiveForChat = Array.isArray(availability?.isActiveType) 
+          ? availability.isActiveType.includes("chat")
+          : false;
+        
+        if (!isActive || !isActiveForChat) {
+          Toast.error("Astrologer is not available for chat");
+          return false;
+        }
+      } catch (error) {
+        console.error("Error checking balance/availability:", error);
+        Toast.error("Failed to check astrologer availability");
         return false;
       }
-    }
-
-    // Check if online
-    if (!astro?.isActive) {
-      Toast.error("Astrologer is not online");
-      return false;
     }
 
     // Open kundli selection
@@ -151,16 +165,31 @@ export const useAstrologerConnect = () => {
     activeCallAstroRef.current = astro; // Store in ref immediately
     console.log("📝 Stored in activeCallAstroRef:", activeCallAstroRef.current);
 
-    // Check balance
-    const result = await getBalance({ astrologerId: astro?._id, type: "call" });
-    if (result.data.data.status === false) {
-      setOpenModal((prev) => ({ ...prev, recharge: true }));
-      return false;
-    }
+    try {
+      // Check balance
+      const result = await getBalance({ astrologerId: astro?._id, type: "call" });
+      
+      // Check balance status
+      if (result?.data?.data?.status === false) {
+        setOpenModal((prev) => ({ ...prev, recharge: true }));
+        return false;
+      }
 
-    // Check if online
-    if (!astro?.isActive) {
-      Toast.error("Astrologer is not online");
+      // Check if astrologer is online for the specific call type (audio/video)
+      const availability = result?.data?.data?.availability;
+      const isActive = availability?.isActive === true;
+      const isActiveForCallType = Array.isArray(availability?.isActiveType) 
+        ? availability.isActiveType.includes(type)
+        : false;
+      
+      if (!isActive || !isActiveForCallType) {
+        const callTypeLabel = type === "audio" ? "voice call" : "video call";
+        Toast.error(`Astrologer is not available for ${callTypeLabel}`);
+        return false;
+      }
+    } catch (error) {
+      console.error("Error checking balance/availability:", error);
+      Toast.error("Failed to check astrologer availability");
       return false;
     }
 
