@@ -51,6 +51,9 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs[index - 1].current.focus();
     }
+    if (e.key === "Enter" && otp.join("").length === 6 && !loading) {
+      handleContinue();
+    }
   };
 
   const handleContinue = async () => {

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import styles from "./Payment.module.scss";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useGetAllPlansQuery } from "../../../redux/api/plansApi/plansApi";
 import { getToken } from "../../../utils/token";
 import { useWalletBalance } from "../wallet/useWalletBalance";
@@ -16,7 +16,11 @@ const RechargePack = ({ actualPrice, discountedPrice, Active }) => (
 
 const Payment = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const token = getToken();
+  
+  // Get return URL from query params
+  const returnUrl = searchParams.get('returnUrl');
 
   useEffect(() => {
     if (!token) navigate("/login");
@@ -57,7 +61,7 @@ const Payment = () => {
           {allPlans?.map((pack) => (
             <Link
               to="/recharge/payment"
-              state={{ planId: pack?.plan_id }}
+              state={{ planId: pack?.plan_id, returnUrl }}
               key={pack._id}
               className={styles.linkWrapper}
             >
