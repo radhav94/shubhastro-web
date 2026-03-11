@@ -46,6 +46,9 @@ export const useLiveStreaming = (client, ROLE, channel) => {
   useEffect(() => {
     if (!channel) return;
 
+    // Clear stale token from previous channel
+    setToken(null);
+    setUid(null);
     setCalling(false);
     const t = setTimeout(() => setCalling(true), 100);
     return () => clearTimeout(t);
@@ -119,6 +122,13 @@ export const useLiveStreaming = (client, ROLE, channel) => {
           console.log("Viewer Token:", viewerToken);
           console.log("Viewer UID:", viewerUid);
 
+          if (!viewerToken) {
+            console.warn("No viewer token received — stream may not be active");
+            setToken(null);
+            setUid(null);
+            return;
+          }
+
           setToken(viewerToken);
           setUid(viewerUid);
           setIsReconnect(false);
@@ -136,6 +146,9 @@ export const useLiveStreaming = (client, ROLE, channel) => {
         }
       } catch (err) {
         console.error("Failed to get viewer token", err);
+        // Clear token so Agora doesn't try to join with stale/invalid credentials
+        setToken(null);
+        setUid(null);
       }
     };
 

@@ -4,9 +4,10 @@ import { clearViewerSession } from "../../../../../utils/liveSessionStorage";
 
 const SOCKET_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
-export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onStreamEnded }) => {
+export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onStreamEnded, onSessionStarted, onSessionEnded }) => {
   const socketRef = useRef(null);
   const currentRoomRef = useRef(null);
+  const [roomReady, setRoomReady] = useState(false);
 
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
@@ -57,6 +58,7 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     socket.on("live:joined", (data) => {
       console.log("LiveChat → Joined room:", data);
       setParticipantCount(data.participantCount);
+      setRoomReady(true);
     });
 
     socket.on("live:recent_messages", (data) => {
@@ -77,15 +79,40 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
       setParticipantCount(data.participantCount);
     });
 
+    // Broadcast: a new live session started somewhere
+    socket.on("live:session_started", (data) => {
+      console.log("LiveChat → Session started broadcast:", data);
+      onSessionStarted?.(data);
+    });
+
+    // Broadcast: a live session ended somewhere
+    socket.on("live:session_ended", (data) => {
+      console.log("LiveChat → Session ended broadcast:", data);
+      onSessionEnded?.(data);
+    });
+
     socket.on("live:room_ended", (data) => {
-      console.log("LiveChat → Session ended:", data);
+      console.log("LiveChat → Room ended:", data);
+      setRoomReady(false);
+      setMessages([]);
+      setParticipantCount(0);
+      currentRoomRef.current = null;
       clearViewerSession();
-      onStreamEnded?.({ reason: data?.reason || "ended" });
+      onStreamEnded?.({ reason: data?.reason || "ended", endedAt: data?.endedAt });
     });
 
     socket.on("live:error", (data) => {
-      console.error("LiveChat → Error:", data.message);
-      if (data.code === "ROOM_NOT_FOUND" || data.code === "ROOM_ENDED") {
+      console.warn("LiveChat → Error:", data.message);
+      if (data.code === "ROOM_NOT_FOUND") {
+        // Room doesn't exist yet — astrologer hasn't created it.
+        // Don't navigate away; just reset and wait for live:astrologer_status.
+        setRoomReady(false);
+        currentRoomRef.current = null;
+      } else if (data.code === "ROOM_ENDED") {
+        setRoomReady(false);
+        setMessages([]);
+        setParticipantCount(0);
+        currentRoomRef.current = null;
         clearViewerSession();
         onStreamEnded?.({ reason: data.code });
       }
@@ -140,6 +167,7 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
       // Join new room
       console.log("LiveChat → Joining room:", roomId);
       setMessages([]);
+      setRoomReady(false);
       currentRoomRef.current = roomId;
 
       socket.emit("live:join_room", {
@@ -164,6 +192,25 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
         currentRoomRef.current = null;
       }
     };
+  }, [roomId, userId, userName]);
+
+  // Retry joining the current room (e.g. after astrologer goes live)
+  const retryJoinRoom = useCallback((overrideRoomId) => {
+    const socket = socketRef.current;
+    const targetRoom = overrideRoomId || roomId;
+    if (!targetRoom || !socket?.connected) return;
+
+    console.log("LiveChat → Retrying join for room:", targetRoom);
+    setMessages([]);
+    setRoomReady(false);
+    currentRoomRef.current = targetRoom;
+
+    socket.emit("live:join_room", {
+      roomId: targetRoom,
+      userId,
+      userName,
+      userType: "audience",
+    });
   }, [roomId, userId, userName]);
 
   const sendChatMessage = useCallback(() => {
@@ -201,5 +248,7 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     sendChatMessage,
     participantCount,
     isConnected,
+    roomReady,
+    retryJoinRoom,
   };
 };

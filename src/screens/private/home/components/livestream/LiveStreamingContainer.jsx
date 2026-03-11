@@ -1,5 +1,5 @@
 // src/components/LiveStreaming/LiveStreamingContainer.jsx
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useLiveStreaming } from "./useLiveStreaming";
 import { useLiveChat } from "./useLiveChat";
@@ -54,6 +54,9 @@ const LiveStreamingContainer = ({ client }) => {
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id") || "";
   const userNameLocal = localStorage.getItem("shubhtalk_customer_name") || "User";
 
+  // Ref to hold retryJoinRoom — breaks circular dep between handleAstrologerStatus and chat
+  const retryJoinRef = useRef(null);
+
   const handleAstrologerStatus = useCallback((data) => {
     const { status, roomId, hostId, hostName } = data;
 
@@ -69,7 +72,9 @@ const LiveStreamingContainer = ({ client }) => {
       });
       setTimeout(() => {
         liveList?.switchToChannel(roomId);
-      }, 100);
+        // Retry joining the chat room with the specific roomId
+        retryJoinRef.current?.(roomId);
+      }, 300);
     }
   }, [liveList]);
 
@@ -86,13 +91,42 @@ const LiveStreamingContainer = ({ client }) => {
     }
   }, [liveList, channel, navigate]);
 
+  // Broadcast: new live session started (from any astrologer)
+  const handleSessionStarted = useCallback((data) => {
+    const { roomId, hostId, hostName } = data;
+    liveList?.addLive({
+      channel: roomId,
+      astrologerId: hostId,
+      astrologerName: hostName || "",
+    });
+  }, [liveList]);
+
+  // Broadcast: a live session ended (from any astrologer)
+  const handleSessionEnded = useCallback((data) => {
+    const { roomId } = data;
+    liveList?.removeLive(roomId);
+  }, [liveList]);
+
   const chat = useLiveChat({
     roomId: channel,
     userId: userIdLocal,
     userName: userNameLocal,
     onAstrologerStatus: handleAstrologerStatus,
     onStreamEnded: handleStreamEnded,
+    onSessionStarted: handleSessionStarted,
+    onSessionEnded: handleSessionEnded,
   });
+
+  // When astrologer goes live and the channel matches, retry joining the chat room
+  useEffect(() => {
+    if (!channel || !chat.isConnected || chat.roomReady) return;
+    chat.retryJoinRoom();
+  }, [channel, chat.isConnected, chat.roomReady]);
+
+  // Keep ref in sync so handleAstrologerStatus can call it
+  useEffect(() => {
+    retryJoinRef.current = chat.retryJoinRoom;
+  }, [chat.retryJoinRoom]);
 
 
     const swipeHandlers = useSwipeReel({

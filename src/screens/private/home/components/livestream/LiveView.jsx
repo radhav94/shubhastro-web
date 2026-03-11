@@ -44,6 +44,7 @@ const LiveView = (props) => {
     hostLeft,
     astrologer,
     handleLeave,
+    roomReady,
   } = props;
 
   const [showGifts, setShowGifts] = useState(false);
@@ -102,12 +103,20 @@ const LiveView = (props) => {
   useEffect(() => {
     if (!hostLeft || ROLE === "host") return;
 
-    const t = setTimeout(() => {
-      liveListCtx?.goNextLive();
-    }, 2000);
+    // Close chat modal when astrologer ends the live
+    setShowChatModal(false);
+    setShowGifts(false);
+    setShowCallPopup(false);
+  }, [hostLeft, ROLE]);
 
-    return () => clearTimeout(t);
-  }, [hostLeft, ROLE, liveListCtx]);
+  // Also close popups when the socket room ends (roomReady → false)
+  useEffect(() => {
+    if (roomReady === false && ROLE !== "host") {
+      setShowChatModal(false);
+      setShowGifts(false);
+      setShowCallPopup(false);
+    }
+  }, [roomReady, ROLE]);
 
   const isHost = ROLE === "host";
   const viewerCount = participantCount || (remoteUsers?.length || 0) + 1;
@@ -410,11 +419,11 @@ const LiveView = (props) => {
               </div>
             )}
 
-            {/* ENDED (this is your screenshot fix) */}
+            {/* ENDED — no other astrologers online */}
             {!isHost && hostLeft && (
               <div className="waiting-wrapper ended">
                 <div className="waiting-text">
-                  ⛔ Astrologer has ended the live
+                  🔮 Waiting for astrologer to go live…
                 </div>
               </div>
             )}
