@@ -443,7 +443,7 @@
   color: #f75801;
   margin: 0;
   text-align: center;
-  @include line-clamp(2);
+  // @include line-clamp(2);
   
   @media screen and (width <= 767px) {
     font-size: 13px;
@@ -478,6 +478,7 @@
   display: flex;
   gap: 12px;
   margin-top: auto;
+  width: 100%;
   
   @media screen and (width <= 767px) {
     gap: 8px;
