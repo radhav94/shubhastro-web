@@ -192,10 +192,10 @@ const Footer = () => {
             <h3 className={styles.column_title}>Customer Support</h3>
             <p>Have questions?</p>
             <a
-              href="mailto:support@shubhtalk.com"
+              href="mailto:support@shubhAstro.com"
               className={styles.support_link}
             >
-              support@shubhtalk.com
+              support@shubhAstro.com
             </a>
             <p>Or call us at</p>
             <a href="tel:+911234567890" className={styles.support_link}>
@@ -208,7 +208,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className={styles.footerOuter}>
           <div className={styles.footer_bottom}>
-            <p>© 2001-{currentYear} Shubh Talk Pvt. Ltd. All rights reserved</p>
+            <p>© 2001-{currentYear} Shubh Astro Pvt. Ltd. All rights reserved</p>
             <ul>
               <li>
                 <Link to="/policy">Privacy Policy</Link>
