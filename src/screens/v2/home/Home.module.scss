@@ -391,9 +391,9 @@
   align-self: flex-start;
   height: fit-content;
   top: -260px;
-  // & .cosmicInsightSection{
-  //   // height: 400px;
-  // }
+  & .cosmicInsightSection{
+    margin-bottom: 16px;
+  }
   & .cosmicInsightCard{
     height: 100%;
     align-items: flex-start;
@@ -436,6 +436,9 @@
     //   transform: translateY(-2px);
     //   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     // }
+    .sectionHeader {
+      margin-left: auto;
+    }
     .panchangCenter{
       position: absolute;
       left: 0;
@@ -586,16 +589,39 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
-  width: fit-content;
-  // max-width: 114px;
+  width: 100%;
+  max-width: 150px;
   height: 5.05px;
+
+  .dividerLine {
+    &:first-child {
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6));
+    }
+    &:last-child {
+      background: linear-gradient(to left, transparent, rgba(255, 255, 255, 0.6));
+    }
+  }
 }
 
-// .dividerLine {
-//   // flex: 1;
-//   // height: 1px;
-//   // background: #70430866;
-// }
+// Global tapered divider line style — applies to all section headers
+.dividerLine {
+  flex: 1;
+  height: 2px;
+  border-radius: 1px;
+  min-width: 40px;
+
+  svg {
+    display: none;
+  }
+
+  &:first-child {
+    background: linear-gradient(to right, transparent, rgba(42, 22, 27, 0.5));
+  }
+
+  &:last-child {
+    background: linear-gradient(to left, transparent, rgba(42, 22, 27, 0.5));
+  }
+}
 
 .dividerMoon {
   font-size: clamp(12px, 3vw, 14px);
@@ -992,6 +1018,7 @@
 
 /* Quick Actions in Left Column - Vertical Layout */
 .leftColumn .quickActions {
+  margin-bottom: 16px;
   @media screen and (min-width: 1024px) {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -1347,9 +1374,12 @@
 .leftColumnMain{
   height: 1200px;
 }
-.sectionHeader {
+.sectionHeader,.blogsHeaderLeft {
   text-align: center;
   margin-bottom: 16px;
+  width: fit-content;
+  // margin-left: auto;
+  margin-right: auto;
   @media screen and (width <= 767px) {
     margin-bottom: 12px;
   }
@@ -1370,7 +1400,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  max-width: 200px;
+  width: 100%;
   margin: 0 auto;
   svg path{
     fill-opacity: 1;
@@ -1793,6 +1823,7 @@
   // width: calc(100% / 5);
   gap: 10px;
   flex-shrink: 0;
+  height: 62px;
   @media screen and (width <= 767px) {
     width: auto;
   }
@@ -1874,7 +1905,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  max-width: 180px;
   width: 100%;
   margin: 0;
 }
@@ -2205,7 +2235,7 @@
   }
 
   .sessionsHeader .titleDivider {
-    max-width: 140px;
+    width: 100%;
   }
 
   .viewAllLink {
@@ -2298,7 +2328,17 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  max-width: 150px;
+  width: 100%;
+  max-width: 180px;
+
+  .dividerLine {
+    &:first-child {
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6));
+    }
+    &:last-child {
+      background: linear-gradient(to left, transparent, rgba(255, 255, 255, 0.6));
+    }
+  }
 }
 
 // .cosmicDivider .dividerLine {
@@ -3035,7 +3075,7 @@
   }
 
   .sessionsHeader .titleDivider {
-    max-width: 200px;
+    width: 100%;
   }
 
   // .sessionCard {
@@ -3379,13 +3419,13 @@
 
 .discoverHeader {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 20px;
   gap: 16px;
-  @media (width <= 767px) {
-    justify-content: center;
-  }
+  // @media (width <= 767px) {
+  //   justify-content: center;
+  // }
 }
 
 .discoverHeader .sectionHeader {
@@ -3569,12 +3609,14 @@
   }
 }
 
-.blogsHeaderLeft {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+// .blogsHeaderLeft {
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   width: fit-content;
+//   margin-left: auto;
+//   margin-right: auto;
+// }
 
 .blogsTitle {
   font-size: 16px;
@@ -3588,7 +3630,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  max-width: 280px;
   width: 100%;
   margin: 0;
 }
@@ -3692,8 +3733,7 @@
   }
 
   .blogsHeader .titleDivider {
-    max-width: auto;
-    width: auto;
+    width: 100%;
   }
 
   .blogImageWrapper {
@@ -3720,7 +3760,7 @@
   }
 
   .blogsHeader .titleDivider {
-    max-width: 320px;
+    width: 100%;
   }
 
   // .blogImageWrapper {
@@ -3739,7 +3779,7 @@
   }
 
   .blogsHeader .titleDivider {
-    max-width: 360px;
+    width: 100%;
   }
 
   // .blogImageWrapper {
@@ -4556,6 +4596,28 @@
   margin-bottom: 24px;
   @media (width <= 767px) {
     margin-bottom: 16px;
+  }
+}
+
+.agenticTitleDivider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.agenticDividerLine {
+  flex: 1;
+  height: 2px;
+  border-radius: 1px;
+  min-width: 40px;
+
+  &:first-child {
+    background: linear-gradient(to right, transparent, rgba(42, 22, 27, 0.5));
+  }
+
+  &:last-child {
+    background: linear-gradient(to left, transparent, rgba(42, 22, 27, 0.5));
   }
 }
 

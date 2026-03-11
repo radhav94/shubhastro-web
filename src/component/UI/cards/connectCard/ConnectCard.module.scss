@@ -1,9 +1,21 @@
 .connectCard {
   background: #fff; // yellow background (adjust if needed)
-  padding: 30px 20px;
-  border-radius: 8px;
+  // padding: 30px 20px;
+  border-radius: 16px;
   text-align: center;
   width: 100%;
+  overflow: hidden;
+  margin-block: 16px;
+  position: relative;
+
+  &:hover .askAnAstrobtn{
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      transform: translateY(-1px);
+  }
+
+  @media (max-width: 767px) {
+    border-radius: 8px;
+  }
 
   .title {
     font-size: 20px;
@@ -62,6 +74,44 @@
     .icon {
       font-size: 20px;
       color: #e0c200; // yellow-ish icon color like screenshot
+    }
+  }
+
+  .askToAsrtroDesktop{
+    cursor: pointer;
+    @media (width <= 767px) {
+      display: none;
+    }
+  }
+  .askToAsrtroMob{
+    cursor: pointer;
+    display: none;
+    @media (width <= 767px) {
+      display: block;
+    }
+  }
+  .askAnAstrobtn{
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+    color: #fff;
+    border-radius: 50px;
+    border: none;
+    outline: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: 0.2s ease-in-out;
+    position: absolute;
+    bottom: 16px;
+    left: 50px;
+    @media (width <= 820px) {
+        padding: 6px 12px; 
+        left: 34px;
+    }
+    @media (width <= 767px) {
+        left: 14px;
+        font-size: 10px;
+        bottom: 10px;
     }
   }
 }

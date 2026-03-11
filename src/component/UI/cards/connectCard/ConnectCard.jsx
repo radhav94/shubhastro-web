@@ -2,16 +2,23 @@ import styles from "./ConnectCard.module.scss";
 import { FiPhoneCall } from "react-icons/fi";
 import { BsChatDots } from "react-icons/bs";
 import { Link } from "react-router-dom";
+import askToAsrtroDesktop from "../../../../assets/images/ask-an-astrologer.png";
+import askToAsrtroMob from "../../../../assets/images/ask-an-astrologer-mob.png";
 
 const ConnectCard = () => {
   return (
     <div className={styles.connectCard}>
-      <p className={styles.title}>
+      <Link to="/chat-with-astrologers">
+        <img src={askToAsrtroDesktop} className={styles.askToAsrtroDesktop} alt="ask to astrologer" />
+        <img src={askToAsrtroMob} className={styles.askToAsrtroMob} alt="ask to astrologer" />
+        <button className={styles.askAnAstrobtn}>Ask An Astrologer</button>
+      </Link>
+      {/* <p className={styles.title}>
         When will I be financially stable? Talk to our expert astrologers for
         personalized guidance.
-      </p>
+      </p> */}
 
-      <div className={styles.buttons}>
+      {/* <div className={styles.buttons}>
         <Link to="/chat-with-astrologers" className={styles.btn}>
           <FiPhoneCall className={styles.icon} />
           Talk to Astrologer
@@ -21,7 +28,7 @@ const ConnectCard = () => {
           <BsChatDots className={styles.icon} />
           Chat with Astrologer
         </Link>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -415,9 +415,21 @@ const VideoCalling = ({ callData }) => {
   /* ================= SOCKET ================= */
   useEffect(() => {
     const handleCallEnded = () => {
-      if (!endCallRef.current) {
-        safeEndCall();
-      }
+      // Server already ended the call, don't emit call:end again
+      if (endCallRef.current) return;
+      endCallRef.current = true;
+
+      setReviewData({
+        astrologerID: activeCall?.astrologerID,
+        fullName: activeCall.callerName,
+      });
+
+      // Refresh wallet balance after call ends
+      refreshWallet();
+      window.dispatchEvent(new Event("walletBalanceUpdated"));
+
+      setOpenReview(true);
+      cleanup();
     };
 
     const handleDisconnect = () => {
@@ -1036,6 +1048,23 @@ const VideoCalling = ({ callData }) => {
           onClose={() => setIsGiftModalOpen(false)}
           astrologerId={activeCall?.astrologerId}
           astrologerName={callerName}
+          roomId={activeCall?.roomId}
+          userId={activeCall?.userId}
+          socketSendFn={(message, type) => {
+            if (!voiceSocket.connected) {
+              return { error: "Socket not connected" };
+            }
+            voiceSocket.emit("chat:message", {
+              sender: "user",
+              kundliId: effectiveKundliId,
+              roomId: activeCall?.roomId,
+              userId: activeCall?.userId,
+              astrologerId: activeCall?.astrologerId,
+              message,
+              type
+            });
+            return { success: true };
+          }}
         />
 
         {/* Profile Listing Modal */}

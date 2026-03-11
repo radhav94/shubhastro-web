@@ -12,12 +12,20 @@
 .headerWrap{
   background: white;
   border-bottom: 1px solid #e0e0e0;
+  position: fixed;
+  top: 88px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  @media screen and (width <= 768px) {
+    top: 53px;
+  }
 }
 .header {
   display: flex;
   // justify-content: space-between;
   align-items: center;
-  padding:6px 16px;
+  padding:10px 16px;
   max-width: 1200px;
   margin: 0 auto;
   gap: 16px;
@@ -82,7 +90,7 @@
   font-size: 0.875rem;
   color: #6b7280;
   line-height: 1.5;
-  margin: 0 0 1.5rem 0;
+  margin: 3rem 0 1.5rem 0;
 
   @media (min-width: 768px) {
     font-size: 0.9375rem;

@@ -33,4 +33,8 @@ export const getReconnectToken = async (channel) => {
 
 export const refreshAgoraToken = async (channel, uid) => {
   return await privateRequest.post("users/live/refresh-token", { channel, uid });
+}
+
+export const deleteAccount = async () => {
+  return await privateRequest.delete("users/delete-account");
 };

@@ -504,7 +504,10 @@ const GemstoneResult = () => {
         </div>
       </header>
 
-      <div className={styles.tabsWrap}>
+      
+      
+        {/* Duplicated Code  */}
+      {/* <div className={styles.tabsWrap}>
         <div className={styles.tabs}>
             {['overview', 'details', 'astrological', 'suitability', 'healing'].map((tab) => (
               <button
@@ -516,7 +519,7 @@ const GemstoneResult = () => {
               </button>
             ))}
         </div>
-      </div>
+      </div> */}
 
       <div className={styles.content}>
         {gemstones.length > 1 && (

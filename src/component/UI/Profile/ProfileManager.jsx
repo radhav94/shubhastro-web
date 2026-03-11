@@ -173,6 +173,13 @@ const ProfileManager = ({
 
   // Handler: Open delete confirmation modal
   const handleDeleteProfile = (profileId) => {
+    if (!profileId) {
+      console.error("❌ No profile ID provided!");
+      Toast.error("Cannot delete: Invalid profile ID");
+      return;
+    }
+    // Find the full profile object for logging
+    const profile = profiles.find(p => p._id === profileId);
     setProfileToDelete(profileId);
     setShowDeleteModal(true);
   };
@@ -300,11 +307,30 @@ const ProfileManager = ({
 
   // Handler: Confirm delete profile
   const confirmDeleteProfile = async () => {
-    if (!profileToDelete) return;
+    if (!profileToDelete) {
+      console.error("❌ No profile ID to delete");
+      return;
+    }
+
+    console.log("=== ProfileManager Confirm Delete ===");
+    console.log("Profile ID to delete:", profileToDelete);
+    console.log("Type:", typeof profileToDelete);
+    console.log("Length:", profileToDelete?.length);
+    console.log("Is valid MongoDB ObjectId format?", /^[a-f\d]{24}$/i.test(profileToDelete));
 
     try {
-      // Find the profile being deleted
+      // Find the profile being deleted using _id
       const profileBeingDeleted = profiles.find(p => p._id === profileToDelete);
+      
+      console.log("Profile being deleted:", profileBeingDeleted);
+      
+      if (!profileBeingDeleted) {
+        console.error("❌ Profile not found in list!");
+        Toast.error("Profile not found");
+        setShowDeleteModal(false);
+        setProfileToDelete(null);
+        return;
+      }
       
       // Check if this is a "Self" profile
       const isSelfProfile = profileBeingDeleted?.relation?.toLowerCase() === "self";
@@ -324,6 +350,7 @@ const ProfileManager = ({
 
       // Only call API if user is logged in
       if (token && deleteKundli) {
+        console.log("✅ Calling deleteKundli API with ID:", profileToDelete);
         await deleteKundli(profileToDelete).unwrap();
         Toast.success("Profile deleted successfully");
       } else {
@@ -337,7 +364,14 @@ const ProfileManager = ({
       setShowDeleteModal(false);
       setProfileToDelete(null);
     } catch (err) {
-      console.error("Delete profile error:", err);
+      console.error("=== ProfileManager Delete Error ===");
+      console.error("Full error:", err);
+      console.error("Error data:", err?.data);
+      console.error("Error message:", err?.data?.message || err?.message);
+      
+      const errorMessage = err?.data?.message || err?.message || "Failed to delete profile";
+      Toast.error(errorMessage);
+      
       setShowDeleteModal(false);
       setProfileToDelete(null);
     }
@@ -434,14 +468,13 @@ const ProfileManager = ({
       />
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <DeleteConfirmationModal
-          title="Delete Profile"
-          message="Are you sure you want to delete this profile? This action cannot be undone."
-          onCancel={handleCancelDelete}
-          onConfirm={confirmDeleteProfile}
-        />
-      )}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        title="Delete Profile"
+        message="Are you sure you want to delete this profile? This action cannot be undone."
+        onCancel={handleCancelDelete}
+        onConfirm={confirmDeleteProfile}
+      />
     </>
   );
 };

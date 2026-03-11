@@ -16,6 +16,7 @@ const FaceReadingCamera = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
+  const [isFrontCamera, setIsFrontCamera] = useState(true);
   const [videoActive, setVideoActive] = useState(true);
   const [videoReady, setVideoReady] = useState(false); // ⭐ Track video ready state
 
@@ -114,6 +115,11 @@ const FaceReadingCamera = () => {
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
+
+        // Detect actual camera facing mode from track
+        const videoTrack = mediaStream.getVideoTracks()[0];
+        const trackFacing = videoTrack?.getSettings?.()?.facingMode;
+        setIsFrontCamera(trackFacing !== 'environment');
         
         // Set video ready when data is loaded
         videoRef.current.onloadedmetadata = () => {
@@ -332,11 +338,13 @@ const FaceReadingCamera = () => {
                 playsInline
                 muted
                 className={styles.video}
+                style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
               />
             )}
             <canvas
               ref={detectionCanvasRef}
               className={styles.detectionCanvas}
+              style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
             />
             <div className={styles.overlay}>
               {/* Circular face frame */}

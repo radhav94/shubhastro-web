@@ -1,13 +1,18 @@
 .mainCon {
-  // background: #fff9c9;
   background: #f5e6d3;
-  padding-top: 1rem;
+  padding-top: 16px;
+  border-radius: 16px;
+  margin-bottom: 40px;
+  @media (width <= 1180px) {
+    border-radius: 0px;
+    margin-bottom: 0px;
+  }
 }
 .carouselWrapper {
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 20px 0;
+  padding: 20px 16px;
   @media (width <= 767px) {
     padding: 16px;
   }
@@ -19,7 +24,7 @@
     letter-spacing: 0.5px;
     color: #160115;
     text-align: center;
-    margin-top: 16px;
+    // margin-top: 16px;
     @media (width <= 767px) {
       font-size: 16px;
     }
@@ -37,9 +42,9 @@
   margin: 0 10px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   flex-shrink: 0;
-  @media (width <= 767px) {
-    display: none;
-  }
+  display: none;
+  // @media (width <= 767px) {
+  // }
 
   &.disabled {
     opacity: 0.4;
@@ -57,7 +62,7 @@
   display: flex;
   overflow-x: auto;
   scroll-behavior: smooth;
-  gap: 28px;
+  gap: 16px;
   padding: 10px 0;
 
   &::-webkit-scrollbar {
@@ -73,8 +78,8 @@
 }
 
 .imgCircle {
-  width: 170px;
-  height: 170px;
+  width: 138px;
+  height: 138px;
   border-radius: 50%;
   overflow: hidden;
   margin: 0 auto 10px auto;
@@ -102,16 +107,16 @@
 }
 
 .name {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 500;
   margin-top: 6px;
-  @media (width <= 767px) {
-    font-size: 1rem;
-  }
+  // @media (width <= 767px) {
+  //   font-size: 1rem;
+  // }
 }
 
 .range {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: #555;
 }

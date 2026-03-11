@@ -16,6 +16,7 @@ import EditProfileModal from '../../../../component/UI/Profile/EditProfileModal'
 import DeleteConfirmationModal from '../../../../component/UI/modal/deleteModal/DeleteConfirmationModal';
 import matchMakingImg from '../../../../assets/images/match-making-top-img.svg';
 import matchMakingImgBottom from '../../../../assets/images/match-making-bottom-img.svg';
+import Footer from '../../../../layouts/Footer';
 
 const SmartMatchmaking = () => {
   const navigate = useNavigate();
@@ -318,7 +319,19 @@ const SmartMatchmaking = () => {
   };
 
   return (
+    <>
     <div className={styles.matchMakingMain}>
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={handleBack}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <h1 className={styles.title}>Smart Matchmaking</h1>
+        </div>
+      </header>
+
       <div className={styles.matchMaking}>
         <img className={styles.topImg} src={matchMakingImg} alt="img" />
         
@@ -326,8 +339,8 @@ const SmartMatchmaking = () => {
           {!result && !error ? (
             <>
               <div className={styles.topTitles}>
-                <h2>Smart Matchmaking</h2>
-                <p>AI-enhanced compatibility analysis for relationships</p>
+                <h2>AI-Enhanced Compatibility</h2>
+                <p>Discover deep insights about your relationship compatibility</p>
               </div>
 
               <form onSubmit={handleSubmit}>
@@ -527,7 +540,7 @@ const SmartMatchmaking = () => {
                     <div className={styles.personalityName}>{primaryProfile?.name}</div>
                   </div>
                   <div className={styles.traitsList}>
-                    {result?.personalityMatch?.userA?.traits?.map((trait, idx) => (
+                    {result?.personalityMatch?.[primaryProfile?.name]?.traits?.map((trait, idx) => (
                       <span key={idx} className={styles.traitTag}>{trait}</span>
                     )) || <span className={styles.traitTag}>No traits available</span>}
                   </div>
@@ -541,7 +554,7 @@ const SmartMatchmaking = () => {
                     <div className={styles.personalityName}>{partnerProfile?.name}</div>
                   </div>
                   <div className={styles.traitsList}>
-                    {result?.personalityMatch?.userB?.traits?.map((trait, idx) => (
+                    {result?.personalityMatch?.[partnerProfile?.name]?.traits?.map((trait, idx) => (
                       <span key={idx} className={styles.traitTag}>{trait}</span>
                     )) || <span className={styles.traitTag}>No traits available</span>}
                   </div>
@@ -635,23 +648,34 @@ const SmartMatchmaking = () => {
             <div className={styles.remediesCard}>
               <h3 className={styles.cardTitle}>Recommended Remedies</h3>
               <div className={styles.remediesList}>
-                {result?.remedies?.map((remedy, idx) => (
-                  <div key={idx} className={styles.remedyItem}>
-                    <div className={styles.remedyHeader}>
-                      <span className={styles.remedyWho}>
-                        {remedy.who === 'userA' 
-                          ? primaryProfile?.name 
-                          : remedy.who === 'userB' 
-                          ? partnerProfile?.name 
-                          : 'Both'}
-                      </span>
+                {result?.remedies?.map((remedy, idx) => {
+                  // Determine who the remedy is for
+                  let remedyFor = 'Both';
+                  if (remedy.who === 'userA') {
+                    remedyFor = primaryProfile?.name;
+                  } else if (remedy.who === 'userB') {
+                    remedyFor = partnerProfile?.name;
+                  } else if (remedy.who && remedy.who.toLowerCase() === 'both') {
+                    remedyFor = 'Both';
+                  } else if (remedy.who) {
+                    // Use the actual value from API if it's something else
+                    remedyFor = remedy.who;
+                  }
+
+                  return (
+                    <div key={idx} className={styles.remedyItem}>
+                      <div className={styles.remedyHeader}>
+                        <span className={styles.remedyWho}>
+                          {remedyFor}
+                        </span>
+                      </div>
+                      <p className={styles.remedyText}>{remedy.remedy}</p>
+                      <p className={styles.remedyPurpose}>
+                        <strong>Purpose:</strong> {remedy.purpose}
+                      </p>
                     </div>
-                    <p className={styles.remedyText}>{remedy.remedy}</p>
-                    <p className={styles.remedyPurpose}>
-                      <strong>Purpose:</strong> {remedy.purpose}
-                    </p>
-                  </div>
-                )) || <p className={styles.noData}>No remedies available</p>}
+                  );
+                }) || <p className={styles.noData}>No remedies available</p>}
               </div>
             </div>
 
@@ -752,6 +776,8 @@ const SmartMatchmaking = () => {
         />
       )}
     </div>
+    <Footer />
+    </>
   );
 };
 

@@ -39,9 +39,7 @@ const TopHeader = () => {
 
   // Fixed list of supported languages with English labels
   const [open, setOpen] = useState(false);
-  const [activeLang, setActiveLang] = useState("EN"); // default label
-
-  const getAbbr = (code) => code.toUpperCase(); // "en" → "EN"
+  const [activeLang, setActiveLang] = useState("English"); // default language name
 
   const supportedLanguages = [
     { code: 'en', name: 'English' },
@@ -87,7 +85,14 @@ const TopHeader = () => {
       return "en";
     };
 
-    setSelectedLang(getCurrentLang());
+    const currentLangCode = getCurrentLang();
+    setSelectedLang(currentLangCode);
+    
+    // Update the displayed language name based on the current language code
+    const currentLang = supportedLanguages.find(lang => lang.code === currentLangCode);
+    if (currentLang) {
+      setActiveLang(currentLang.name);
+    }
   }, []);
 
   /* sync user */
@@ -164,44 +169,96 @@ const TopHeader = () => {
       return "en";
     };
 
+    // Clear Google Translate cookies completely
+    const clearCookies = () => {
+      const domain = window.location.hostname;
+      const cookiesToClear = ['googtrans', 'googtrans_backup'];
+      const paths = ['/', ''];
+      const domains = [
+        '',
+        `domain=${domain}`,
+        domain.split(".").length > 1 ? `domain=.${domain}` : null
+      ].filter(Boolean);
+
+      cookiesToClear.forEach(cookieName => {
+        paths.forEach(path => {
+          domains.forEach(domainStr => {
+            const pathStr = path ? `path=${path};` : '';
+            const domainPart = domainStr ? `${domainStr};` : '';
+            document.cookie = `${cookieName}=; ${pathStr} ${domainPart} expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
+          });
+        });
+      });
+    };
+
     // Set Google Translate cookie
     const setCookie = (lang) => {
       const domain = window.location.hostname;
       const cookieValue = `/en/${lang}`;
 
       // Set cookie for all domain variations
-      document.cookie = `googtrans=${cookieValue}; path=/;`;
-      document.cookie = `googtrans=${cookieValue}; path=/; domain=${domain}`;
+      document.cookie = `googtrans=${cookieValue}; path=/; max-age=31536000;`;
+      document.cookie = `googtrans=${cookieValue}; path=/; domain=${domain}; max-age=31536000;`;
       if (domain.split(".").length > 1) {
-        document.cookie = `googtrans=${cookieValue}; path=/; domain=.${domain}`;
+        document.cookie = `googtrans=${cookieValue}; path=/; domain=.${domain}; max-age=31536000;`;
+      }
+    };
+
+    // Force restore original content before switching
+    const restoreOriginalContent = () => {
+      // Remove all Google Translate elements
+      const gtElements = document.querySelectorAll('font[style*="vertical-align: inherit"]');
+      gtElements.forEach(el => {
+        const parent = el.parentNode;
+        if (parent) {
+          parent.replaceChild(document.createTextNode(el.textContent), el);
+        }
+      });
+
+      // Reset the iframe if it exists
+      const iframe = document.querySelector('.goog-te-banner-frame');
+      if (iframe) {
+        iframe.style.display = 'none';
       }
     };
 
     const currentLang = getCurrentLang();
     
-    // Update selected language state
+    // Update selected language state and UI immediately
     setSelectedLang(targetLang);
-
-    // If re-selecting the same language, we need to force a refresh
-    if (currentLang === targetLang) {
-      // Set the cookie and reload the page to re-apply translation
-      setCookie(targetLang);
-      window.location.reload();
-    } else {
-      // Different language - set cookie and trigger widget
-      setCookie(targetLang);
-
-      const selectElement = document.querySelector(".goog-te-combo");
-      if (selectElement) {
-        selectElement.value = targetLang;
-        selectElement.dispatchEvent(
-          new Event("change", { bubbles: true, cancelable: true }),
-        );
-      } else {
-        // If widget not found, reload to apply
-        window.location.reload();
-      }
+    const selectedLanguage = supportedLanguages.find(lang => lang.code === targetLang);
+    if (selectedLanguage) {
+      setActiveLang(selectedLanguage.name);
     }
+
+    // Close dropdown
+    setOpen(false);
+
+    // If switching to English, clear everything and reload
+    if (targetLang === 'en') {
+      clearCookies();
+      restoreOriginalContent();
+      // Force reload to reset to original English content
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+      return;
+    }
+
+    // For all other language switches, use a consistent approach
+    // Clear cookies first
+    clearCookies();
+    
+    // Wait for cookies to clear, then set new language and reload
+    setTimeout(() => {
+      setCookie(targetLang);
+      
+      // Always reload to ensure consistent translation
+      // This is more reliable than trying to trigger the widget
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    }, 100);
   };
 
   return (
@@ -330,9 +387,7 @@ const TopHeader = () => {
                 className={styles.onHoverChangeLang}
                 onClick={() => setOpen((prev) => !prev)}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M9.99 0C4.47 0 0 4.48 0 10C0 15.52 4.47 20 9.99 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 9.99 0ZM16.92 6H13.97C13.65 4.75 13.19 3.55 12.59 2.44C14.43 3.07 15.96 4.35 16.92 6ZM10 2.04C10.83 3.24 11.48 4.57 11.91 6H8.09C8.52 4.57 9.17 3.24 10 2.04ZM2.26 12C2.1 11.36 2 10.69 2 10C2 9.31 2.1 8.64 2.26 8H5.64C5.56 8.66 5.5 9.32 5.5 10C5.5 10.68 5.56 11.34 5.64 12H2.26ZM3.08 14H6.03C6.35 15.25 6.81 16.45 7.41 17.56C5.57 16.93 4.04 15.66 3.08 14ZM6.03 6H3.08C4.04 4.34 5.57 3.07 7.41 2.44C6.81 3.55 6.35 4.75 6.03 6ZM10 17.96C9.17 16.76 8.52 15.43 8.09 14H11.91C11.48 15.43 10.83 16.76 10 17.96ZM12.34 12H7.66C7.57 11.34 7.5 10.68 7.5 10C7.5 9.32 7.57 8.65 7.66 8H12.34C12.43 8.65 12.5 9.32 12.5 10C12.5 10.68 12.43 11.34 12.34 12ZM12.59 17.56C13.19 16.45 13.65 15.25 13.97 14H16.92C15.96 15.65 14.43 16.93 12.59 17.56ZM14.36 12C14.44 11.34 14.5 10.68 14.5 10C14.5 9.32 14.44 8.66 14.36 8H17.74C17.9 8.64 18 9.31 18 10C18 10.69 17.9 11.36 17.74 12H14.36Z" fill="#424242"/>
-                </svg>
+                <span className={styles.languageName}>{activeLang}</span>
 
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="8" viewBox="0 0 14 8" fill="none">
                   <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_9128_57)"/>
@@ -343,7 +398,6 @@ const TopHeader = () => {
                     </linearGradient>
                   </defs>
                 </svg>
-                {/* {activeLang} */}
               </span>
 
               <div
@@ -358,8 +412,6 @@ const TopHeader = () => {
                     className="notranslate"
                     onClick={() => {
                       handleLanguageChange(lang.code);
-                      setActiveLang(getAbbr(lang.code)); // 👈 set abbreviation
-                      setOpen(false); // close with animation
                     }}
                   >
                     {lang.name}
@@ -369,7 +421,7 @@ const TopHeader = () => {
             </div>
             {/* language end */}
 
-            <div className={styles.walletBadge}
+            {/* <div className={styles.walletBadge}
               onClick={() => requireAuth() && navigate(PATH.privateRoutes.PROFILE.path)}
               style={{ cursor: 'pointer' }}
 >
@@ -379,7 +431,7 @@ const TopHeader = () => {
                   isFetchingBalance ? "..." : isLoggedIn ? balance || 0 : 0,
                 )}
               </span>
-            </div>
+            </div> */}
             <div className={styles.profileDetailMain}>
               <div className={styles.profileIcon} onClick={handleProfileClick}>
                 <User size={24} strokeWidth={0} fill="#d53400" />

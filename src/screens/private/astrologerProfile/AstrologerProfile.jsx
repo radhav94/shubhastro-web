@@ -785,7 +785,7 @@ const AstrologerProfile = () => {
                   <Link to={`/astrologer/${astrologer?._id}`} className={styles.cardLink}>
                     <div className={styles.astrologerImageWrapper}>
                       <img
-                        src={astrologer.imageUrl || getAstrologerDefaultImage(astrologer.gender)}
+                        src={astrologer.imageUrl || astrologer?.profileImgUrl || getAstrologerDefaultImage(astrologer.gender)}
                         alt={astrologer.firstName}
                         className={styles.astrologerImg}
                         onError={(e) => {
@@ -1332,15 +1332,29 @@ const AstrologerProfile = () => {
       </div>
       {/* End 3-Column Layout */}
 
-      {/* Bottom Connect Button */}
-      {/* <div className={styles.bottomBar}>
+      {/* Mobile Bottom Bar - Chat & Call */}
+      <div className={styles.mobileBottomBar}>
         <button
-          className={styles.connectNowBtn}
-          onClick={handleConnectClick}
+          className={styles.mobileChatBtn}
+          onClick={() => handleChatStart(data)}
         >
-          Connect Now
+          <BiMessageDetail />
+          <div className={styles.btnContent}>
+            <span className={styles.btnLabel}>Chat</span>
+            <span className={styles.btnPrice}>₹{data?.price?.chatRate?.amount || 5}/min</span>
+          </div>
         </button>
-      </div> */}
+        <button
+          className={styles.mobileCallBtn}
+          onClick={() => handleCallStart(data, "audio")}
+        >
+          <BiPhone />
+          <div className={styles.btnContent}>
+            <span className={styles.btnLabel}>Call</span>
+            <span className={styles.btnPrice}>₹{data?.price?.audioRate?.amount || 20}/min</span>
+          </div>
+        </button>
+      </div>
 
       {/* Modals */}
       {/* ConnectAstrologerPopup - No longer needed, direct connection from sidebar */}

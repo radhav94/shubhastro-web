@@ -5,8 +5,18 @@ const DeleteConfirmationModal = ({
   title = "Delete Confirmation",
   message = "Are you sure you want to delete this?",
   onCancel,
-  onConfirm
+  onConfirm,
+  isOpen = false,
+  onClose,
+  isLoading = false
 }) => {
+  if (!isOpen) return null;
+
+  const handleCancel = () => {
+    if (onClose) onClose();
+    if (onCancel) onCancel();
+  };
+
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContainer}>
@@ -19,11 +29,19 @@ const DeleteConfirmationModal = ({
         </PrimaryText>
 
         <div className={styles.modalButtons}>
-          <button className={styles.cancelBtn} onClick={onCancel}>
+          <button 
+            className={styles.cancelBtn} 
+            onClick={handleCancel}
+            disabled={isLoading}
+          >
             Cancel
           </button>
-          <button className={styles.rejectBtn} onClick={onConfirm}>
-            Delete
+          <button 
+            className={styles.rejectBtn} 
+            onClick={onConfirm}
+            disabled={isLoading}
+          >
+            {isLoading ? "Deleting..." : "Delete"}
           </button>
         </div>
       </div>

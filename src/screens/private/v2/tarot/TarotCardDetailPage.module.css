@@ -7,7 +7,20 @@
 
 .headerWrap{
   background: white;
+  position: fixed;
+  top: 88px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  border-bottom: 1px solid #e0e0e0;
 }
+
+@media screen and (max-width: 768px) {
+  .headerWrap {
+    top: 53px;
+  }
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -56,7 +69,44 @@
   flex-direction: column;
   align-items: center;
   padding: 32px 16px;
+  padding-top: 88px;
   gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media screen and (max-width: 768px) {
+  .content {
+    padding-top: 72px;
+  }
+}
+
+/* Desktop: side-by-side layout */
+@media (min-width: 769px) {
+  .content {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 40px;
+    padding: 40px 32px;
+    padding-top: 88px;
+  }
+}
+
+.cardDisplayWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+@media (min-width: 769px) {
+  .cardDisplayWrap {
+    position: sticky;
+    top: 100px;
+    flex-shrink: 0;
+    width: 320px;
+  }
 }
 
 .cardDisplay {
@@ -69,13 +119,54 @@
   padding: 16px;
   border: 1.07px solid #D9D9D9;
 }
-.cardDetails{
+
+.cardTextWrap {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+@media (min-width: 769px) {
+  .cardTextWrap {
+    flex: 1;
+    align-items: flex-start;
+  }
 }
 .tarotCard {
   width: 100%;
   height: auto;
   border-radius: 8px;
+}
+
+.cardName {
+  font-size: 28px;
+  font-weight: 600;
+  color: #000;
+  margin: 0;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+@media (min-width: 769px) {
+  .cardName {
+    text-align: left;
+  }
+}
+
+.cardNumber {
+  font-size: 20px;
+  font-weight: 600;
+  color: #666;
+  margin: 0;
+  text-align: center;
+}
+
+@media (min-width: 769px) {
+  .cardNumber {
+    text-align: left;
+  }
 }
 
 .answer {
@@ -86,12 +177,24 @@
   text-align: center;
 }
 
+@media (min-width: 769px) {
+  .answer {
+    text-align: left;
+  }
+}
+
 .readingSection {
   width: 100%;
   max-width: 500px;
   background: #f0f0f0;
   border-radius: 16px;
   padding: 24px;
+}
+
+@media (min-width: 769px) {
+  .readingSection {
+    max-width: 100%;
+  }
 }
 
 .readingTitle {
@@ -117,11 +220,15 @@
     width: 36px;
     height: 36px;
   }
+  .headerWrap {
+    padding: 6px 0;
+  }
   .header {
-    padding: 6px 16px;
+    padding: 0px 16px;
   }
   .content {
     padding: 24px 16px;
+    padding-top: 72px;
   }
 
   .cardDisplay {
@@ -164,23 +271,6 @@
   }
 }
 
-.cardName {
-  font-size: 28px;
-  font-weight: 600;
-  color: #000;
-  margin: 0;
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.cardNumber {
-  font-size: 20px;
-  font-weight: 600;
-  color: #666;
-  margin: 0;
-  text-align: center;
-}
-
 .meaningSection {
   margin-top: 24px;
 }
@@ -214,6 +304,13 @@
   width: 100%;
   max-width: 500px;
   margin: 8px 0;
+}
+
+@media (min-width: 769px) {
+  .traitsContainer {
+    max-width: 100%;
+    justify-content: flex-start;
+  }
 }
 
 .traitCapsule {
@@ -260,6 +357,12 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+@media (min-width: 769px) {
+  .dailyContainer {
+    max-width: 100%;
+  }
 }
 
 .dailySection {
@@ -331,6 +434,17 @@
   padding:0px 16px;
   background: white;
   border-bottom: 1px solid #e0e0e0;
+  position: fixed;
+  top: 152px;
+  left: 0;
+  right: 0;
+  z-index: 99;
+}
+
+@media screen and (max-width: 768px) {
+  .tabsContainer {
+    top: 99px;
+  }
 }
 
 .tab {
