@@ -597,9 +597,7 @@ const AstrologerProfile = () => {
     firstName: data?.firstName || "Astrologer",
     lastName: data?.lastName || "",
     imageUrl:
-      data?.imageUrl ||
-      data?.aadharCardImgUrl ||
-      data?.panCardImgUrl ||
+      data?.profileImgUrl ||
       getAstrologerDefaultImage(data?.gender),
     specialities:
       data?.specialties?.length > 0

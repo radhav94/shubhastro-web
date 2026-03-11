@@ -38,7 +38,7 @@ import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal"
 import { useGetAstroDetailsQuery } from "../../../redux/api/kundli/kundliApi";
 import { buildVedicParam } from "../../../utils/VedicParams.js/vedicParams";
 import { PATH } from "../../../utils/routes/Paths";
-import { logout } from "../../../redux/auth/authSlice";
+import { logout, updateRegistrationStatus } from "../../../redux/auth/authSlice";
 import styles from "./Profile.module.scss";
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
 import { Toast } from "../../../component/index";
@@ -49,6 +49,8 @@ import {
   useEditKundliMutation,
 } from "../../../services/appServices/kundliServicesNew";
 import { ProfileManager } from "../../../component/UI/Profile";
+import { registerUser } from "../../../services/appServices/authService";
+import { useSelector } from "react-redux";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -57,6 +59,9 @@ const Profile = () => {
 
   // Get state from navigation
   const navigationState = location.state || {};
+
+  // Get isRegister from Redux auth state
+  const isRegister = useSelector((state) => state.auth.isRegister);
 
   const [activeTab, setActiveTab] = useState(
     navigationState.activeTab || "Profile"
@@ -287,7 +292,7 @@ const Profile = () => {
   }, [savedKundlis]);
 
   // Helper: Get primary profile (prioritize 'self' relation, otherwise first profile)
-  const primaryProfile = savedKundlis.find(profile => profile.relation?.toLowerCase() === 'self') || savedKundlis[0];
+  const primaryProfile = savedKundlis.find(profile => profile.relation?.toLowerCase() === 'Self') || savedKundlis[0];
 
   // Capitalize first letter of each word
   const capitalizeWords = (str) => {
@@ -869,7 +874,121 @@ const Profile = () => {
         throw new Error("Duplicate profile");
       }
 
-      await createKundli(payload).unwrap();
+      // Only call registerUser API if:
+      // 1. User skipped onboarding (isRegister = false)
+      // 2. AND the profile being added is "Self" relation
+      // 3. AND user has not been registered yet (check localStorage as source of truth)
+      const isSelfProfile = formData.relation?.toLowerCase() === "self";
+      
+      // Check if user is already registered from localStorage (source of truth)
+      const currentUserData = localStorage.getItem("userData");
+      const parsedUserData = currentUserData ? JSON.parse(currentUserData) : {};
+      const isAlreadyRegistered = parsedUserData.isRegister === true;
+      
+      if (isRegister === false && isSelfProfile && !isAlreadyRegistered) {
+        console.log("📝 User not registered and adding Self profile, calling registration API first...");
+        
+        // Prepare registration payload from profile data
+        const dateObj = new Date(formData.birthDate);
+        const phoneNumber = user?.phoneNumber || localStorage.getItem("shubhtalk_customer_phone") || "";
+        const cleanPhone = phoneNumber.replace(/^\+?91/, "");
+        const formattedPhone = `91${cleanPhone}`;
+        
+        const registrationPayload = {
+          firstName: formData.name.split(" ")[0] || formData.name,
+          lastName: formData.name.split(" ").slice(1).join(" ") || "",
+          dateOfBirth: formData.birthDate,
+          place: formData.birthPlace,
+          phoneNumber: formattedPhone,
+          password: "TempPass@123",
+          email: `${formattedPhone}@shubhtalk.com`,
+          gender: formData.identity.toLowerCase() === "others" ? "other" : formData.identity.toLowerCase(),
+          languagePreferences: ["en"],
+          role: "CUSTOMER",
+          lat: formData.latitude || 0,
+          lon: formData.longitude || 0,
+        };
+
+        try {
+          const regResponse = await registerUser(registrationPayload);
+          console.log("✅ Registration successful:", regResponse);
+          
+          // Update localStorage with registration data
+          const updatedUserData = {
+            ...parsedUserData,
+            isRegister: true,
+            firstName: registrationPayload.firstName,
+            lastName: registrationPayload.lastName,
+            place: formData.birthPlace,
+            dateOfBirth: formData.birthDate,
+            gender: formData.identity,
+          };
+          localStorage.setItem("userData", JSON.stringify(updatedUserData));
+          
+          // Update Redux state to reflect registration
+          dispatch(updateRegistrationStatus({ isRegister: true }));
+          
+          // Update shubhtalk_user for TopBar
+          const currentUser = localStorage.getItem("shubhtalk_user");
+          const parsedUser = currentUser ? JSON.parse(currentUser) : {};
+          const updatedUser = {
+            ...parsedUser,
+            firstName: registrationPayload.firstName,
+            lastName: registrationPayload.lastName,
+            place: formData.birthPlace,
+          };
+          localStorage.setItem("shubhtalk_user", JSON.stringify(updatedUser));
+          
+          // Dispatch event to notify components
+          window.dispatchEvent(new Event("auth-change"));
+          
+          Toast.success("Registration completed successfully");
+        } catch (regErr) {
+          console.error("❌ Registration failed:", regErr);
+          const errorMessage = regErr?.response?.data?.message || regErr?.message || "Registration failed. Please try again.";
+          
+          // If user is already registered, update localStorage and continue
+          if (errorMessage.toLowerCase().includes("already registered") || errorMessage.toLowerCase().includes("already exists")) {
+            console.log("⚠️ User already registered, updating local state and continuing...");
+            const updatedUserData = {
+              ...parsedUserData,
+              isRegister: true,
+            };
+            localStorage.setItem("userData", JSON.stringify(updatedUserData));
+            
+            // Update Redux state
+            dispatch(updateRegistrationStatus({ isRegister: true }));
+            
+            // Don't throw error, continue with kundli creation
+          } else {
+            Toast.error(errorMessage);
+            throw regErr;
+          }
+        }
+      } else if (isSelfProfile && isAlreadyRegistered) {
+        console.log("✅ User already registered, skipping registration API");
+      }
+
+      // Now create the kundli profile
+      const result = await createKundli(payload).unwrap();
+      
+      // If this is a Self profile, update shubhtalk_user to reflect the new name in TopHeader
+      if (isSelfProfile && result?.data) {
+        const currentUser = localStorage.getItem("shubhtalk_user");
+        const parsedUser = currentUser ? JSON.parse(currentUser) : {};
+        const updatedUser = {
+          ...parsedUser,
+          firstName: formData.name.split(" ")[0] || formData.name,
+          lastName: formData.name.split(" ").slice(1).join(" ") || "",
+          place: formData.birthPlace,
+        };
+        localStorage.setItem("shubhtalk_user", JSON.stringify(updatedUser));
+        
+        // Dispatch event to notify TopHeader to update
+        window.dispatchEvent(new Event("auth-change"));
+        console.log("✅ Updated shubhtalk_user with new Self profile name");
+      }
+      
       Toast.success("Profile added successfully");
       setShowAddProfileModal(false);
     } catch (err) {
@@ -1121,7 +1240,7 @@ const Profile = () => {
           className={styles.addMinutesButton}
           onClick={() => navigate("/recharge")}
         >
-          Add Shubh Minutes
+          Recharge Wallet
           <ChevronLeft size={20} style={{ transform: "rotate(180deg)" }} />
         </button>
       </div>
@@ -1166,7 +1285,7 @@ const Profile = () => {
                           >
                             <LuPencilLine size={18} />
                           </button>
-                          {kundli?.relation !== "Self" && (
+                          {kundli?.relation !== "Self" && kundli?.relation !== "self" && (
                             <button
                               className={styles.iconButton}
                               onClick={() => handleDeleteClick(kundli)}

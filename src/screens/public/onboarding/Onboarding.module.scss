@@ -607,20 +607,28 @@
   // Adjust date input calendar icon position
   &[type="date"] {
     padding-right: 16px;
+    cursor: pointer;
     
     &::-webkit-calendar-picker-indicator {
       cursor: pointer;
       opacity: 0.6;
       margin-right: 0;
       padding: 0;
+      // Make the calendar icon larger and more clickable
+      width: 20px;
+      height: 20px;
     }
   }
 
   // Adjust time input clock icon position
   &[type="time"] {
+    padding-right: 16px;
+    
     &::-webkit-calendar-picker-indicator {
       cursor: pointer;
       opacity: 0.6;
+      margin-right: 0;
+      padding: 0;
     }
   }
 }
@@ -634,18 +642,28 @@
   pointer-events: none;
 }
 
+.checkboxContainer {
+  margin-top: 12px;
+}
+
 .checkboxLabel {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
   color: #666;
-  margin-top: 12px;
   cursor: pointer;
+  width: fit-content;
 
   input[type="checkbox"] {
     width: 20px;
     height: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  span {
+    user-select: none;
     cursor: pointer;
   }
 }

@@ -93,6 +93,24 @@ const TopHeader = () => {
     if (currentLang) {
       setActiveLang(currentLang.name);
     }
+
+    // Verify Google Translate widget is properly initialized
+    // This helps ensure consistent behavior across environments
+    const checkGoogleTranslateWidget = () => {
+      const widget = document.querySelector('.goog-te-combo');
+      if (widget && currentLangCode !== 'en') {
+        // Ensure widget matches cookie
+        if (widget.value !== currentLangCode) {
+          widget.value = currentLangCode;
+          widget.dispatchEvent(new Event('change'));
+        }
+      }
+    };
+
+    // Check after a short delay to allow Google Translate to initialize
+    const timer = setTimeout(checkGoogleTranslateWidget, 500);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   /* sync user */
@@ -169,60 +187,76 @@ const TopHeader = () => {
       return "en";
     };
 
-    // Clear Google Translate cookies completely
+    // Clear Google Translate cookies completely - enhanced for production
     const clearCookies = () => {
-      const domain = window.location.hostname;
+      const hostname = window.location.hostname;
       const cookiesToClear = ['googtrans', 'googtrans_backup'];
-      const paths = ['/', ''];
-      const domains = [
-        '',
-        `domain=${domain}`,
-        domain.split(".").length > 1 ? `domain=.${domain}` : null
-      ].filter(Boolean);
+      
+      // Get all possible domain variations
+      const domainParts = hostname.split('.');
+      const domains = [''];
+      
+      // Add current domain
+      domains.push(`domain=${hostname}`);
+      
+      // Add parent domains (e.g., .example.com for sub.example.com)
+      if (domainParts.length > 1) {
+        domains.push(`domain=.${hostname}`);
+        
+        // Also try parent domain if subdomain exists
+        if (domainParts.length > 2) {
+          const parentDomain = domainParts.slice(-2).join('.');
+          domains.push(`domain=.${parentDomain}`);
+        }
+      }
 
+      // Clear cookies for all combinations
       cookiesToClear.forEach(cookieName => {
-        paths.forEach(path => {
-          domains.forEach(domainStr => {
+        domains.forEach(domainStr => {
+          // Try both with and without path
+          ['/', ''].forEach(path => {
             const pathStr = path ? `path=${path};` : '';
             const domainPart = domainStr ? `${domainStr};` : '';
-            document.cookie = `${cookieName}=; ${pathStr} ${domainPart} expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
+            
+            // Set multiple expiry formats for better compatibility
+            document.cookie = `${cookieName}=; ${pathStr} ${domainPart} expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0;`;
+            document.cookie = `${cookieName}=; ${pathStr} ${domainPart} expires=Thu, 01 Jan 1970 00:00:00 UTC; max-age=0;`;
           });
         });
       });
     };
 
-    // Set Google Translate cookie
+    // Set Google Translate cookie - enhanced for production
     const setCookie = (lang) => {
-      const domain = window.location.hostname;
+      const hostname = window.location.hostname;
       const cookieValue = `/en/${lang}`;
+      const maxAge = 31536000; // 1 year
 
-      // Set cookie for all domain variations
-      document.cookie = `googtrans=${cookieValue}; path=/; max-age=31536000;`;
-      document.cookie = `googtrans=${cookieValue}; path=/; domain=${domain}; max-age=31536000;`;
-      if (domain.split(".").length > 1) {
-        document.cookie = `googtrans=${cookieValue}; path=/; domain=.${domain}; max-age=31536000;`;
-      }
-    };
-
-    // Force restore original content before switching
-    const restoreOriginalContent = () => {
-      // Remove all Google Translate elements
-      const gtElements = document.querySelectorAll('font[style*="vertical-align: inherit"]');
-      gtElements.forEach(el => {
-        const parent = el.parentNode;
-        if (parent) {
-          parent.replaceChild(document.createTextNode(el.textContent), el);
+      // Set cookie for current domain
+      document.cookie = `googtrans=${cookieValue}; path=/; max-age=${maxAge}; SameSite=Lax;`;
+      
+      // Set for explicit domain
+      document.cookie = `googtrans=${cookieValue}; path=/; domain=${hostname}; max-age=${maxAge}; SameSite=Lax;`;
+      
+      // Set for parent domain if applicable
+      const domainParts = hostname.split('.');
+      if (domainParts.length > 1) {
+        document.cookie = `googtrans=${cookieValue}; path=/; domain=.${hostname}; max-age=${maxAge}; SameSite=Lax;`;
+        
+        if (domainParts.length > 2) {
+          const parentDomain = domainParts.slice(-2).join('.');
+          document.cookie = `googtrans=${cookieValue}; path=/; domain=.${parentDomain}; max-age=${maxAge}; SameSite=Lax;`;
         }
-      });
-
-      // Reset the iframe if it exists
-      const iframe = document.querySelector('.goog-te-banner-frame');
-      if (iframe) {
-        iframe.style.display = 'none';
       }
     };
 
     const currentLang = getCurrentLang();
+    
+    // Prevent unnecessary reload if already on target language
+    if (currentLang === targetLang) {
+      setOpen(false);
+      return;
+    }
     
     // Update selected language state and UI immediately
     setSelectedLang(targetLang);
@@ -234,31 +268,27 @@ const TopHeader = () => {
     // Close dropdown
     setOpen(false);
 
-    // If switching to English, clear everything and reload
+    // Clear all cookies first (for both English and other languages)
+    clearCookies();
+
+    // If switching to English, just reload after clearing cookies
     if (targetLang === 'en') {
-      clearCookies();
-      restoreOriginalContent();
-      // Force reload to reset to original English content
+      // Use a longer timeout to ensure cookies are cleared
       setTimeout(() => {
         window.location.reload();
-      }, 100);
+      }, 200);
       return;
     }
 
-    // For all other language switches, use a consistent approach
-    // Clear cookies first
-    clearCookies();
-    
-    // Wait for cookies to clear, then set new language and reload
+    // For other languages, set cookie then reload
     setTimeout(() => {
       setCookie(targetLang);
       
-      // Always reload to ensure consistent translation
-      // This is more reliable than trying to trigger the widget
+      // Reload after setting cookie
       setTimeout(() => {
         window.location.reload();
-      }, 100);
-    }, 100);
+      }, 200);
+    }, 200);
   };
 
   return (
