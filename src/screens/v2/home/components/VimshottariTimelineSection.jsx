@@ -256,10 +256,18 @@ const VimshottariTimelineSection = () => {
               <h3 className={styles.dashaPlanet}>{dasha.planet}</h3>
               <div className={styles.dashaDateRow}>
                 <span className={styles.dashaDateItem}>
-                  <span className={styles.dateArrowGreen}>↦</span> {dasha.startDate}
+                  <span className={styles.dateArrowGreen}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="10" viewBox="0 0 17 10" fill="none">
+                      <path d="M11.075 9.40833C11.4 9.73333 11.925 9.73333 12.25 9.40833L16.075 5.58333C16.4 5.25833 16.4 4.73333 16.075 4.40833L12.25 0.583333C11.925 0.258333 11.4 0.258333 11.075 0.583333C10.7583 0.908333 10.75 1.44167 11.075 1.76667L13.475 4.16667H4.16667C3.70833 4.16667 3.33333 4.54167 3.33333 5C3.33333 5.45833 3.70833 5.83333 4.16667 5.83333H13.475L11.075 8.23333C10.75 8.55833 10.75 9.08333 11.075 9.40833ZM0.833333 10C1.29167 10 1.66667 9.625 1.66667 9.16667V0.833333C1.66667 0.375 1.29167 0 0.833333 0C0.375 0 0 0.375 0 0.833333V9.16667C0 9.625 0.375 10 0.833333 10Z" fill="#4BA01D"/>
+                    </svg>
+                  </span> {dasha.startDate}
                 </span>
                 <span className={styles.dashaDateItem}>
-                  <span className={styles.dateArrowRed}>↤</span> {dasha.endDate}
+                  <span className={styles.dateArrowRed}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="10" viewBox="0 0 17 10" fill="none">
+                    <path d="M5.24385 9.40833C4.91885 9.73333 4.39385 9.73333 4.06885 9.40833L0.243847 5.58333C-0.081152 5.25833 -0.081152 4.73333 0.243847 4.40833L4.06885 0.583333C4.39385 0.258333 4.91885 0.258333 5.24385 0.583333C5.56051 0.908333 5.56885 1.44167 5.24385 1.76667L2.84385 4.16667H12.1522C12.6105 4.16667 12.9855 4.54167 12.9855 5C12.9855 5.45833 12.6105 5.83333 12.1522 5.83333H2.84385L5.24385 8.23333C5.56885 8.55833 5.56885 9.08333 5.24385 9.40833ZM15.4855 10C15.0272 10 14.6522 9.625 14.6522 9.16667V0.833333C14.6522 0.375 15.0272 0 15.4855 0C15.9438 0 16.3188 0.375 16.3188 0.833333V9.16667C16.3188 9.625 15.9438 10 15.4855 10Z" fill="#E4342F"/>
+                    </svg>
+                    </span> {dasha.endDate}
                 </span>
               </div>
               <div className={styles.dashaDivider}></div>
