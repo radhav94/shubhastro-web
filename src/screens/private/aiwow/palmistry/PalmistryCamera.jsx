@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './PalmistryCamera.module.scss';
@@ -9,6 +10,14 @@ const PalmistryCamera = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const selectedHand = useSelector((state) => state.aiwow.palmistry.selectedHand) || 'right';
+
+  // Lock body scroll when camera is open (fullscreen on mobile)
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
@@ -16,6 +25,7 @@ const PalmistryCamera = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
+  const [isFrontCamera, setIsFrontCamera] = useState(true);
   const captureAreaRef = useRef(null); // Reference to capture area div
 
   // Calculate capture box bounds dynamically
@@ -79,11 +89,14 @@ const PalmistryCamera = () => {
   }, [handsLoaded]);
 
   useEffect(() => {
-    console.log('PalmistryCamera mounted, starting camera');
-    startCamera();
+    console.log('[PalmistryCamera] facingMode changed to:', facingMode);
+    // Small delay to let old camera tracks fully release on mobile
+    const timer = setTimeout(() => {
+      startCamera();
+    }, 200);
     
-    // Cleanup function to stop camera when component unmounts
     return () => {
+      clearTimeout(timer);
       console.log('PalmistryCamera unmounting, stopping camera');
       stopCamera();
     };
@@ -100,10 +113,9 @@ const PalmistryCamera = () => {
         return;
       }
 
-      // Request camera permission
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode,
+          facingMode: { ideal: facingMode },
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -113,6 +125,11 @@ const PalmistryCamera = () => {
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
+
+        // Detect actual camera facing mode from track
+        const videoTrack = mediaStream.getVideoTracks()[0];
+        const trackFacing = videoTrack?.getSettings?.()?.facingMode;
+        setIsFrontCamera(trackFacing !== 'environment');
         
         // Start hand detection once video is playing
         videoRef.current.onloadedmetadata = () => {
@@ -151,15 +168,18 @@ const PalmistryCamera = () => {
   const stopCamera = () => {
     stopDetection();
     
+    // Stop all tracks from video element
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = videoRef.current.srcObject.getTracks();
-      tracks.forEach(track => track.stop());
-      videoRef.current.srcObject = null;
-    }
-    if (stream) {
-      stream.getTracks().forEach(track => {
+      tracks.forEach(track => {
+        console.log('[PalmistryCamera] Stopping track:', track.kind, track.label);
         track.stop();
       });
+      videoRef.current.srcObject = null;
+    }
+    // Also stop from stream state (belt & suspenders)
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
       setStream(null);
     }
   };
@@ -259,7 +279,7 @@ const PalmistryCamera = () => {
   };
 
   if (error) {
-    return (
+    return createPortal(
       <div className={styles.container}>
         <div className={styles.header}>
           <button className={styles.backBtn} onClick={handleBack}>
@@ -285,11 +305,12 @@ const PalmistryCamera = () => {
             </button>
           </div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
-  return (
+  return createPortal(
     <div className={styles.container}>
       <div className={styles.header}>
         <button className={styles.backBtn} onClick={handleBack}>
@@ -315,13 +336,14 @@ const PalmistryCamera = () => {
               autoPlay
               playsInline
               className={styles.video}
+              style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
             />
             <canvas
               ref={detectionCanvasRef}
               className={styles.detectionCanvas}
+              style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
             />
             <div className={styles.overlay}>
-              {/* Blur overlays for all four sides */}
               <div className={styles.blurTop}></div>
               <div className={styles.blurBottom}></div>
               <div className={styles.blurLeft}></div>
@@ -413,7 +435,8 @@ const PalmistryCamera = () => {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

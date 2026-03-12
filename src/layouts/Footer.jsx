@@ -18,6 +18,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { logout } from "../redux/auth/authSlice";
+import BottomNavigation from "../screens/v2/home/components/BottomNavigation";
 
 // Data for links - easy to manage and update
 const quickLinks = [
@@ -191,10 +192,10 @@ const Footer = () => {
             <h3 className={styles.column_title}>Customer Support</h3>
             <p>Have questions?</p>
             <a
-              href="mailto:support@shubhtalk.com"
+              href="mailto:support@shubhAstro.com"
               className={styles.support_link}
             >
-              support@shubhtalk.com
+              support@shubhAstro.com
             </a>
             <p>Or call us at</p>
             <a href="tel:+911234567890" className={styles.support_link}>
@@ -207,7 +208,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className={styles.footerOuter}>
           <div className={styles.footer_bottom}>
-            <p>© 2001-{currentYear} Shubh Talk Pvt. Ltd. All rights reserved</p>
+            <p>© 2001-{currentYear} Shubh Astro Pvt. Ltd. All rights reserved</p>
             <ul>
               <li>
                 <Link to="/policy">Privacy Policy</Link>
@@ -219,71 +220,9 @@ const Footer = () => {
           </div>
         </div>
 
-      {/* New Bottom Navigation (Modern Design) - Hidden on home page */}
+      {/* Bottom Navigation - Hidden on home page (Home renders its own) */}
       {location.pathname !== "/" && (
-        <nav className={styles.bottomNav}>
-          <button
-            className={`${styles.navItem} ${location.pathname === "/" ? styles.active : ""}`}
-            onClick={() => navigate("/")}
-          >
-            <div className={styles.iconCircle}>
-              <Home size={22} />
-            </div>
-            <span className={styles.label}>Home</span>
-            {location.pathname === "/" && (
-              <span className={styles.activeLine} />
-            )}
-          </button>
-
-          <button
-            className={`${styles.navItem} ${location.pathname === "/explore" ? styles.active : ""}`}
-            onClick={() => navigate("/explore")}
-          >
-            <div className={styles.iconCircle}>
-              <Compass size={22} />
-            </div>
-            <span className={styles.label}>Explore</span>
-            {location.pathname === "/explore" && (
-              <span className={styles.activeLine} />
-            )}
-          </button>
-
-          <button
-            className={styles.liveItem}
-            onClick={() => navigate("/live-landing")}
-          >
-            <div className={styles.liveCircle}>
-              <Radio size={22} />
-            </div>
-            <span className={styles.liveLabel}>LIVE</span>
-          </button>
-
-          <button
-            className={`${styles.navItem} ${location.pathname.startsWith("/shop") ? styles.active : ""}`}
-            onClick={() => navigate("/shop")}
-          >
-            <div className={styles.iconCircle}>
-              <Store size={22} />
-            </div>
-            <span className={styles.label}>Shop</span>
-            {location.pathname.startsWith("/shop") && (
-              <span className={styles.activeLine} />
-            )}
-          </button>
-
-          <button
-            className={`${styles.navItem} ${location.pathname.startsWith("/profile") ? styles.active : ""}`}
-            onClick={() => navigate("/profile")}
-          >
-            <div className={styles.iconCircle}>
-              <UserRound size={22} />
-            </div>
-            <span className={styles.label}>Profile</span>
-            {location.pathname.startsWith("/profile") && (
-              <span className={styles.activeLine} />
-            )}
-          </button>
-        </nav>
+        <BottomNavigation />
       )}
     </footer>
   );

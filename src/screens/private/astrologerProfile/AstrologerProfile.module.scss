@@ -1,9 +1,627 @@
 @use "../../../assets/variables/variables" as *;
 
+/* ===========================
+   3-COLUMN LAYOUT (DESKTOP ONLY)
+=========================== */
+.threeColumnLayout {
+  display: flex;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 16px 24px 16px;
+  
+  @media (width <= 1024px) {
+    display: block;
+    padding: 0;
+    padding-top: 72px;
+    margin: 16px auto 0 auto;
+  }
+  
+  @media screen and (width <= 767px) {
+    padding-top: 48px;
+  }
+}
+
+.leftSidebar,
+.rightSidebar {
+  display: block;
+  position: sticky;
+  top: -100px;
+  width: 260px;
+  flex-shrink: 0;
+  height: fit-content;
+  
+  @media (width <= 1024px) {
+    display: none!important;
+  }
+}
+
+.centerColumn {
+  flex: 1;
+  min-width: 0;
+  
+  @media (width <= 1180px) {
+    width: 100%;
+    // padding: 0 16px;
+  }
+}
+
+/* ===========================
+   LEFT SIDEBAR - TOP ASTROLOGERS
+=========================== */
+.leftSidebar {
+  .astrologersSection {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 16px;
+    // position: sticky;
+    // top: 24px;
+  }
+  
+  .sectionHeader {
+    margin-bottom: 20px;
+  }
+  
+  .sidebarTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #030303;
+    margin: 0 0 0 0;
+    letter-spacing: 0.5px;
+    text-align: center;
+    line-height: 1.4;
+  }
+  
+  .astrologersGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+//New Css Card
+
+.astrologerCard {
+  width: 100%;
+  background: #FFF5EC;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  padding: 16px;
+  border: 1px solid rgba(189, 189, 189, 0.20);
+
+  &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+    }
+}
+.rightSideContent{
+  display: flex;
+  flex-direction: column;
+}
+.cardLink {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  padding: 0;
+  gap: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  
+  // @media (min-width: 1024px) {
+  //   display: grid;
+  //   // grid-template-columns: 90px 1fr;
+  //   grid-template-rows: auto auto auto;
+  //   gap: 0 14px;
+  //   align-items: start;
+  //   margin-bottom: 20px;
+  // }
+}
+
+.astrologerImageWrapper {
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
+  overflow: visible;
+  margin-bottom: 0px;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  
+  @media screen and (width <= 767px) {
+    width: 50px;
+    height: 50px;
+  }
+  
+  // @media (min-width: 1024px) {
+  //   width: 90px;
+  //   height: 90px;
+  //   border-radius: 16px;
+  //   margin-bottom: 0;
+  //   overflow: hidden;
+  //   grid-column: 1;
+  //   grid-row: 1 / 4;
+  //   position: static;
+  // }
+}
+
+.astrologerImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  
+  @media (min-width: 1024px) {
+    border-radius: 16px;
+  }
+}
+
+.ratingBadge {
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff8f0;
+  // padding: 0px 6px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  @media (min-width: 1024px) {
+    position: static;
+    transform: none;
+    background: #FFFFFF;
+    padding: 0px 6px;
+    border-radius: 20px;
+    // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: start;
+    margin-bottom: 8px;
+  }
+}
+
+.star {
+  font-size: 16px;
+  svg {
+    width: 13px;
+  }
+}
+
+.ratingText {
+  font-size: 12px;
+  font-weight: 500;
+  color: #424242;
+}
+
+.astrologerNames {
+  // font-size: 14px;
+  font-weight: 500;
+  color: #030303;
+  margin: 10px 0 6px 0;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+  
+  @media (min-width: 1024px) {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 6px 0;
+    text-align: left;
+    line-height: 1.3;
+    color: #030303;
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+.experienceRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  @media (min-width: 1024px) {
+    gap: 6px;
+    grid-column: 2;
+    grid-row: 3;
+  }
+}
+
+.bookIcon {
+  color: #f75801;
+  flex-shrink: 0;
+  width: 14px;
+  
+  @media (min-width: 1024px) {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.experienceText {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  color: #999;
+  
+  @media (min-width: 1024px) {
+    font-size: 14px;
+    color: #888;
+    font-weight: 400;
+  }
+}
+
+.actionButtons {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  padding: 0;
+  
+  @media (min-width: 1024px) {
+    gap: 12px;
+  }
+}
+
+.buttonWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  
+  @media (min-width: 1024px) {
+    gap: 8px;
+  }
+}
+
+.chatBtn {
+  width: 100%;
+  height: 30px;
+  background: transparent;
+  color: #f75801;
+  border: 1px solid #f75801;
+  padding: 3px 12px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  img {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background: #fff5ec;
+    transform: translateY(-1px);
+  }
+  
+  @media (min-width: 1024px) {
+    // padding: 11px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    // border-width: 2px;
+    
+    img {
+      width: 18px;
+      height: 18px;
+    }
+    
+    &:hover {
+      background: #FFF5EC;
+      transform: scale(1.02);
+      box-shadow: 0 2px 8px rgba(247, 88, 1, 0.15);
+    }
+  }
+}
+
+.callBtn {
+  width: 100%;
+  height: 30px;
+  background: var(
+    --orange_gradient,
+    linear-gradient(90deg, #f75801 0%, #d43400 100%)
+  );
+  color: #ffffff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 50px;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  img {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(1);
+  }
+  
+  @media (min-width: 1024px) {
+    // padding: 11px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    
+    img {
+      width: 18px;
+      height: 18px;
+    }
+    
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+    }
+  }
+}
+
+.priceText {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  text-align: center;
+  
+  @media (min-width: 1024px) {
+    font-size: 13px;
+    color: #999;
+  }
+}
+
+.priceAmount {
+  font-weight: 600;
+  color: #1a1a1a;
+  
+  @media (min-width: 1024px) {
+    font-size: 15px;
+    font-weight: 700;
+    color: #000;
+  }
+}
+
+
+/* ===========================
+   RIGHT SIDEBAR - AVAILABLE NOW & CONNECT
+=========================== */
+.rightSidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  
+  .availableCard {
+    background: linear-gradient(90deg, #4CAF50 0%, #45A049 100%);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+  }
+  
+  .statusDot {
+    width: 12px;
+    height: 12px;
+    background: #FFFFFF;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+  
+  .statusText {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FFFFFF;
+  }
+  
+  .connectCard {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 16px;
+    position: sticky;
+    // margin-top: 20px;
+  }
+  
+  .connectTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #030303;
+    margin: 0 0 10px 0;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+  
+  .connectOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  
+  .connectOption {
+    background: #FFF5EC;
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    &:hover {
+      background: #FFE8D1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+  }
+  
+  .optionIcon {
+    width: 48px;
+    height: 48px;
+    background: #F75801;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  
+  .optionInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .optionLabel {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1A1A1A;
+  }
+  
+  .optionPrice {
+    font-size: 14px;
+    color: #666666;
+  }
+  
+  .consultationCard {
+    background: #FFF9F3;
+    border-radius: 20px;
+    padding: 16px;
+    position: sticky;
+    // margin-top: 20px;
+  }
+  
+  .hoursHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .clockIcon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    color: #F75801;
+  }
+  
+  .hoursTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2C2C2C;
+  }
+  
+  .todayLabel {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2C2C2C;
+    margin-bottom: 6px;
+  }
+  
+  .timeSlots {
+    // display: flex;
+    // flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #666666;
+    font-weight: 400;
+  }
+  
+  .timeSlot {
+    font-size: 16px;
+    color: #666666;
+    font-weight: 400;
+    position: relative;
+    
+    &:not(:nth-child(even))::after {
+      content: '|';
+      margin-block: 6px;
+      color: #CCCCCC;
+      position: absolute;
+      right: 0;
+      bottom: -6px;
+    }
+  }
+  
+  .reminderBtn {
+    width: 100%;
+    padding: 6px 12px;
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+    color: #FFFFFF;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    .notificationIcon {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+    }
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(247, 88, 1, 0.3);
+    }
+  }
+}
+
 .profileContentMain{
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 16px;
+  
+  @media (width >= 1025px) {
+    max-width: 100%;
+    padding: 0;
+  }
 }
 
 .profilePage {
@@ -11,6 +629,10 @@
   // background: linear-gradient(to bottom, #fff4ec 0%, #F9F4EF 20%, #F9F4EF 100%);
   font-family: "Poppins", sans-serif;
   // padding-bottom: 80px;
+  
+  // @media (width <= 1024px) {
+  //   padding-bottom: 160px; /* Mobile bottom bar (68px) + Bottom navigation (88px) + spacing */
+  // }
 }
 
 /* ===========================
@@ -19,7 +641,17 @@
 .topHeaderWrap{
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;
+  position: fixed;
+  top: 93px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  
+  @media screen and (width <= 1180px) {
+    top: 53px;
+  }
 }
+
 .topHeader {
   max-width: 1200px;
   margin: 0 auto;
@@ -172,10 +804,10 @@
 =========================== */
 .profileCard,.statsSection,.consultationHours,.minutesSection,.aboutSection,.giftSection {
   background: #FFFFFF;
-  border-radius: 20px;
+  border-radius: 16px;
   // border: 1px solid rgba(0, 0, 0, 0.03);
   padding: 16px;
-  margin: 16px 0px 16px;
+  // margin: 16px 0px 16px;
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -185,15 +817,17 @@
     border-radius: 12px;
   }
 }
-
+.statsSection,.consultationHours,.minutesSection,.aboutSection,.giftSection {
+  margin-top: 10px;
+}
 .profileImageWrapper {
   position: relative;
   flex-shrink: 0;
 }
 
 .profileImage {
-  width: 140px;
-  height: 140px;
+  width: 120px;
+  height: 120px;
   border-radius: 12px;
   object-fit: cover;
   border: none;
@@ -211,10 +845,10 @@
 }
 
 .astrologerName {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 500;
   color: #1A1A1A;
-  margin: 0 0 15px 0;
+  margin: 0 0 6px 0;
   line-height: 1.2;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -239,7 +873,7 @@
 .expertise {
   font-size: 14px;
   color: #A8A8A8;
-  margin: 0 0 14px 0;
+  margin: 0 0 8px 0;
   line-height: 1.5;
 }
 
@@ -288,8 +922,8 @@
 }
 
 .statIcon {
-  width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 32px;
   color: #D4A574;
   stroke-width: 1.5;
   margin-bottom: 8px;
@@ -302,7 +936,7 @@
 }
 
 .statValue {
-  font-size: 28px;
+  font-size: 1rem;
   font-weight: 600;
   color: #1A1A1A;
   line-height: 1;
@@ -314,13 +948,13 @@
 }
 
 .statLabel {
-  font-size: 14px;
+  font-size: 1rem;
   color: #101010;
   font-weight: 400;
   margin-top: 4px;
   opacity: 0.6;
   @media (width <= 460px) {
-    font-size: 12px;
+    font-size: 14px;
     margin-top: 0;
   }
 }
@@ -338,6 +972,11 @@
 .consultationHours {
   background: #FFF5EC;
   flex-direction: column;
+  display: flex;
+  
+  @media (min-width: 1024px) {
+    display: none !important;
+  }
 }
 
 .hoursHeader {
@@ -369,6 +1008,11 @@
   align-items: center;
   gap: 16px;
   width: 100%;
+  
+  @media (width <= 767px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .timeSlots {
@@ -382,6 +1026,10 @@
   font-size: 15px;
   color: #666666;
   font-weight: 400;
+  
+  @media (width <= 767px) {
+    font-size: 14px;
+  }
 }
 
 .reminderBtn {
@@ -398,8 +1046,12 @@
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  
   @media (width <= 767px) {
-    padding: 8px 16px;
+    padding: 10px 20px;
+    width: 100%;
+    justify-content: center;
+    font-size: 13px;
   }
 
   .notificationIcon {
@@ -410,7 +1062,6 @@
   }
 
   &:hover {
-    // background: #2D1F10;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
@@ -434,8 +1085,8 @@
 }
 
 .minuteIcon {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   color: #D4A574;
   margin-bottom: 8px;
   opacity: 0.85;
@@ -447,7 +1098,7 @@
 }
 
 .minuteValue {
-  font-size: 28px;
+  font-size: 1rem;
   font-weight: 600;
   color: #1A1A1A;
   line-height: 1;
@@ -459,7 +1110,7 @@
 }
 
 .minuteLabel {
-  font-size: 14px;
+  font-size: 1rem;
   color: #101010;
   text-align: center;
   font-weight: 400;
@@ -487,15 +1138,12 @@
 }
 
 .aboutTitle {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 500;
   color: #101010;
   margin: 0 0 0 0;
   letter-spacing: -0.3px;
   text-align: left;
-  @media (width <= 767px) {
-    font-weight: 500;
-  }
 }
 
 .aboutText {
@@ -552,15 +1200,17 @@
 
 .videoThumbnail {
   position: relative;
-  min-width: 240px;
-  width: 240px;
-  height: 300px;
-  border-radius: 20px;
+  // min-width: 140px;
+  width: 140px;
+  height: 190px;
+  border-radius: 12px;
   overflow: hidden;
   flex-shrink: 0;
   background: #E8E8E8;
   @media (width <= 767px) {
     border-radius: 12px;
+    width: 120px;
+    height: 170px;
   }
 
   img {
@@ -575,9 +1225,10 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 70px;
-  height: 70px;
-  background: rgba(255, 255, 255, 0.95);
+  width: 45px;
+  height: 45px;
+  // background: rgba(255, 255, 255, 0.95);
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -586,11 +1237,15 @@
   font-size: 24px;
   cursor: pointer;
   transition: all 0.2s;
-  padding-left: 6px;
+  padding-left: 2px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  svg{
+    width: 16px;
+    height: 16px;
+  }
 
   &:hover {
-    background: #FFFFFF;
+    // background: #FFFFFF;
     transform: translate(-50%, -50%) scale(1.1);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
   }
@@ -601,7 +1256,7 @@
 =========================== */
 .giftSection {
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-  border-radius: 24px;
+  border-radius: 16px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -633,33 +1288,33 @@
 }
 
 .giftTitle {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 500;
   color: #FEFEFE;
-  margin: 0 0 10px 0;
+  margin: 0 0 6px 0;
   letter-spacing: -0.3px;
   line-height: 1.3;
    @media (width <= 767px) {
-    font-size: 22px;
+    font-size:20px;
   }
 }
 
 .giftSubtitle {
   font-size: 15px;
   color: #FEFEFE;
-  margin: 0 0 22px 0;
+  margin: 0 0 16px 0;
   line-height: 1.6;
   font-weight: 400;
 }
 
 .sendNowBtn {
-  padding: 14px 44px;
+  padding: 10px 40px;
   background: var(--surface, #FEFEFE);
   color: #E56329;
   border: none;
   border-radius: 30px;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
   display: inline-block;
@@ -682,25 +1337,25 @@
 
 .giftImage {
   width: 280px;
-  height: 200px;
+  height: 289px;
   flex-shrink: 0;
-  position: relative;
+  position: absolute;
   z-index: 2;
+  right: -22px;
+  top: -66px;
 
   @media (width <= 768px) {
-      width: 240px;
-      height: 180px;
+      top: -66px;
   }
   @media (width <= 767px) {
     width: auto;
     height: 200px;
-    position: absolute;
-    right: -22px;
-    bottom: 0;
+    // bottom: 0;
+    top: -15px;
   }
   @media (width <= 475px) {
     right: -50px;
-    bottom: 0;
+    // bottom: 0;
   }
 
   img {
@@ -718,8 +1373,8 @@
 .reviewsSection {
   background: transparent;
   border-radius: 0;
-  padding: 0 20px;
-  margin: 32px 16px 32px 16px;
+  // padding: 0 20px;
+  margin: 32px 0px 32px 0px;
   box-shadow: none;
   @media (width <= 767px) {
     padding: 0px;
@@ -731,11 +1386,14 @@
   text-align: center;
   margin-bottom: 32px;
   position: relative;
+  @media (width <= 767px) {
+   margin-bottom: 12px;
+  }
 }
 
 .sectionTitle {
-  font-size: 16px;
-  font-weight: 500;
+  font-size:20px;
+  font-weight: 600;
   color: #030303;
   margin: 0;
   letter-spacing: 0.3px;
@@ -753,9 +1411,9 @@
 
 .starFilled,.starHalf,.starEmpty  {
   color: #F75801;
-  font-size: 48px;
+  font-size: 30px;
   @media (width <= 767px) {
-    font-size: 32px;
+    font-size: 22px;
   }
 }
 
@@ -770,7 +1428,7 @@
 .reviewsCount {
   font-size: 16px;
   color: #999999;
-  margin: 0 0 32px 0;
+  // margin: 0 0 32px 0;
   font-weight: 400;
   text-align: center;
 }
@@ -802,7 +1460,7 @@
 .reviewCard {
   background: #FFFFFF;
   border-radius: 20px;
-  padding: 20px;
+  padding: 16px;
   border: none;
   // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
@@ -811,7 +1469,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 2px;
 }
 
 .reviewDate {
@@ -833,11 +1491,11 @@
   align-items: center;
   gap: 6px;
   font-size: 15px;
-  font-weight: 600;
-  color: #1A1A1A;
-  background: #FBF0F1;
+  font-weight: 500;
+  color: #606060;
+  background: #FFF5EC;
   padding: 6px 12px;
-  border-radius: 14px;
+  border-radius: 40px;
 }
 
 .reviewStar {
@@ -847,9 +1505,9 @@
 
 .reviewerName {
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 500;
   color: #1A1A1A;
-  margin: 0 0 12px 0;
+  margin: 0;
   letter-spacing: -0.2px;
 }
 
@@ -891,8 +1549,8 @@
 .shopSection {
   background: transparent;
   border-radius: 0;
-  padding: 0 20px;
-  margin: 0 16px 32px;
+  padding: 0;
+  margin: 0 0px 32px;
   box-shadow: none;
   @media (width <= 767px) {
     padding: 0px;
@@ -925,26 +1583,27 @@
 }
 
 .productCard {
-  min-width: 240px;
+  width: 180px;
   background: #FFFFFF;
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 0;
   position: relative;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
 }
 
 .productBadge {
   position: absolute;
   top: 16px;
   left: 16px;
-  background: #FDEFD8;
-  padding: 8px 14px;
+  background: var(--card-2, #FFF5EC);
+  padding: 4px 8px;
   border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   color: #3D3D3D;
   display: flex;
   align-items: center;
@@ -960,7 +1619,7 @@
 
 .productImage {
   width: 100%;
-  height: 200px;
+  height: 120px;
   object-fit: cover;
   border-radius: 0;
   margin-bottom: 0;
@@ -983,9 +1642,9 @@
 }
 
 .productName {
-  font-size: 18px;
-  font-weight: 600;
-  color: #3D3D3D;
+  font-size: 16px;
+  font-weight: 500;
+  color: #030303;
   margin: 0 0 6px 0;
 }
 
@@ -1005,8 +1664,8 @@
 
 .currentPrice {
   font-size: 20px;
-  font-weight: 700;
-  color: #1A1A1A;
+  font-weight: 500;
+  color: #030303;
 }
 
 .originalPrice {
@@ -1023,8 +1682,8 @@
   color: #FFFFFF;
   border: none;
   border-radius: 26px;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
@@ -1045,50 +1704,79 @@
 }
 
 /* ===========================
-   BOTTOM BAR
+   MOBILE BOTTOM BAR - CHAT & CALL
 =========================== */
-.bottomBar {
-  // position: fixed;
-  // bottom: 0;
-  // left: 0;
-  // right: 0;
-  width: 100%;
-  background: #fff;
-  display: flex;
-  justify-content: center;
-  padding: 16px;
-  z-index: 100;
-  @media (width <= 767px) {
-    bottom: 88px;
-    padding: 16px 16px 50px 16px;
-  }
-  @media (width <= 360px) {
-    bottom: 88px;
-    padding: 16px 16px 28px 16px;
+.mobileBottomBar {
+  display: none;
+  
+  @media (width <= 1024px) {
+    display: flex;
+    position: fixed;
+    bottom: 120px; /* Above the bottom navigation (88px height) */
+    left: 0;
+    right: 0;
+    background: #FFFFFF;
+    padding: 8px 8px;
+    gap: 12px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1001; /* Higher than bottom navigation (1000) */
   }
 }
 
-.connectNowBtn {
-  width: 30%;
-  padding: 15px;
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-  color: #FFFFFF;
-  border: none;
-  border-radius: 28px;
-  font-size: 16px;
-  font-weight: 700;
+.mobileChatBtn,
+.mobileCallBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 8px;
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 16px rgba(61, 40, 23, 0.25);
-  @media (width <= 767px) {
-    width: 100%;
-  }
+  border: none;
+}
 
-  &:hover {
-    // background: #2D1F10;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(61, 40, 23, 0.35);
+.mobileChatBtn {
+  background: #FFF5EC;
+  color: #F75801;
+  border: 1.5px solid #F75801;
+  
+  &:active {
+    background: #FFE8D1;
+    transform: scale(0.98);
   }
+}
+
+.mobileCallBtn {
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  color: #FFFFFF;
+  
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(247, 88, 1, 0.3);
+  }
+}
+
+.btnContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.btnLabel {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.btnPrice {
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.9;
 }
 
 /* ===========================
@@ -1151,12 +1839,29 @@
   font-size: 18px;
   color: #666666;
 }
-.titleDivider{
+.titleDivider {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-block: 10px;
   gap: 10px;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, transparent 0%, #D0D0D0 50%, transparent 100%);
+}
+
+.dividerMoon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  svg {
+    display: block;
+  }
 }
 
 /* ===========================

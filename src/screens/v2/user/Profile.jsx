@@ -29,6 +29,7 @@ import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import ConnectAstrologerPopup from "../../private/v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
+import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
 import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
@@ -37,7 +38,7 @@ import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal"
 import { useGetAstroDetailsQuery } from "../../../redux/api/kundli/kundliApi";
 import { buildVedicParam } from "../../../utils/VedicParams.js/vedicParams";
 import { PATH } from "../../../utils/routes/Paths";
-import { logout } from "../../../redux/auth/authSlice";
+import { logout, updateRegistrationStatus } from "../../../redux/auth/authSlice";
 import styles from "./Profile.module.scss";
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
 import { Toast } from "../../../component/index";
@@ -48,6 +49,8 @@ import {
   useEditKundliMutation,
 } from "../../../services/appServices/kundliServicesNew";
 import { ProfileManager } from "../../../component/UI/Profile";
+import { registerUser } from "../../../services/appServices/authService";
+import { useSelector } from "react-redux";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -57,12 +60,13 @@ const Profile = () => {
   // Get state from navigation
   const navigationState = location.state || {};
 
+  // Get isRegister from Redux auth state
+  const isRegister = useSelector((state) => state.auth.isRegister);
+
   const [activeTab, setActiveTab] = useState(
-    navigationState.activeTab || "Profile",
+    navigationState.activeTab || "Profile"
   );
-  const [orderHistoryTab, setOrderHistoryTab] = useState(
-    navigationState.orderHistoryTab || "call",
-  ); // Sub-tab for order history
+  const [orderHistoryTab, setOrderHistoryTab] = useState("call"); // Sub-tab for order history
   const transactionListRef = useRef(null);
   const orderListRef = useRef(null); // Ref for order history scroll
   const user = getUserFromStorage();
@@ -76,10 +80,29 @@ const Profile = () => {
   // Connect popup state
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
+  const [selectedAstrologerId, setSelectedAstrologerId] = useState(null);
   const [callRoomId, setCallRoomId] = useState(null);
   const [chatRoomId, setChatRoomId] = useState(null);
   const [connectionType, setConnectionType] = useState(null);
   const activeAstroRef = useRef(null);
+
+  // Fetch latest astrologer details when selected (for dynamic pricing)
+  const {
+    data: latestAstrologerData,
+    isLoading: isLoadingAstrologer,
+    isFetching: isFetchingAstrologer,
+  } = useGetAstrologerByIdQuery(
+    { id: selectedAstrologerId },
+    { skip: !selectedAstrologerId }
+  );
+
+  // Update activeAstroRef when latest astrologer data is fetched
+  useEffect(() => {
+    if (latestAstrologerData?.data) {
+      activeAstroRef.current = latestAstrologerData.data;
+      console.log('✅ Updated activeAstroRef with latest pricing:', latestAstrologerData.data.price);
+    }
+  }, [latestAstrologerData]);
 
   // Get contexts
   const {
@@ -145,11 +168,13 @@ const Profile = () => {
     { userId, page: callHistoryPage, limit: 30 },
     { skip: !userId },
   );
+  console.log("callHistoryData",callHistoryData?.data?.callHistory)
 
   const { data: chatHistoryData, isLoading: isLoadingChats } =
     useGetUserChatMessagesQuery(userId, {
       skip: !userId,
     });
+
 
   // Get pagination info
   const callPagination = callHistoryData?.data?.pagination;
@@ -166,13 +191,14 @@ const Profile = () => {
             name: item?.receiverName || "Unknown",
             image: "https://i.pravatar.cc/100",
             _id: item?.receiverId,
+            astrologer_ID: item?.astrologer_ID || item?.receiverAstrologerId,
             firstName: item?.receiverName?.split(" ")[0] || "Unknown",
             lastName: item?.receiverName?.split(" ").slice(1).join(" ") || "",
             isActive: true,
           },
           date: item?.timestamp || new Date(),
           duration: `${item?.duration || 0} Min`,
-          amount: item?.duration || 0,
+          amount: item?.amount || 0,
           rate: 0,
           status: item?.status || "completed",
           roomId: item?.roomId,
@@ -209,14 +235,15 @@ const Profile = () => {
               : "Unknown",
             image: "https://i.pravatar.cc/150",
             _id: room.astrologerId,
+            astrologer_ID: room.astrologer_ID || room.astrologerAstrologerId,
             firstName: room.astrologerFirstName || "Unknown",
             lastName: room.astrologerLastName || "",
             isActive: true,
           },
           date: lastChat?.createdAt || new Date(),
           duration: `${room.chatHistory?.length || 0} Messages`,
-          amount: 0,
-          rate: 0,
+          amount: room?.amount || 0,
+          rate: room?.rate || 0,
           status: "completed",
           roomId: room.roomId,
           year: lastChat?.createdAt
@@ -252,6 +279,21 @@ const Profile = () => {
   });
   const savedKundlis = kundliData?.data || [];
 
+  // Debug: Log kundli structure
+  useEffect(() => {
+    if (savedKundlis.length > 0) {
+      console.log("First kundli structure:", savedKundlis[0]);
+      console.log("Available ID fields:", {
+        _id: savedKundlis[0]._id,
+        kundli_ID: savedKundlis[0].kundli_ID,
+        id: savedKundlis[0].id,
+      });
+    }
+  }, [savedKundlis]);
+
+  // Helper: Get primary profile (prioritize 'self' relation, otherwise first profile)
+  const primaryProfile = savedKundlis.find(profile => profile.relation?.toLowerCase() === 'Self') || savedKundlis[0];
+
   // Capitalize first letter of each word
   const capitalizeWords = (str) => {
     if (!str) return str;
@@ -272,9 +314,9 @@ const Profile = () => {
       return capitalizeWords(user.firstName);
     }
     
-    // Second priority: First Kundli profile name
-    if (savedKundlis.length > 0 && savedKundlis[0]?.name) {
-      return capitalizeWords(savedKundlis[0].name);
+    // Second priority: Primary Kundli profile name (self or first)
+    if (primaryProfile?.name) {
+      return capitalizeWords(primaryProfile.name);
     }
     
     // Third priority: Phone number
@@ -285,31 +327,30 @@ const Profile = () => {
     // Last resort
     return "Guest User";
   })();
-  // Build params for Kundali API from first profile
-  const firstProfile = savedKundlis[0];
-  const kundliParams = firstProfile
+  // Build params for Kundali API from primary profile
+  const kundliParams = primaryProfile
     ? buildVedicParam({
-        name: firstProfile.name,
+        name: primaryProfile.name,
         gender:
-          firstProfile.gender === "male"
+          primaryProfile.gender === "male"
             ? "Male"
-            : firstProfile.gender === "female"
+            : primaryProfile.gender === "female"
               ? "Female"
               : "Others",
-        day: firstProfile.day,
-        month: firstProfile.month,
-        year: firstProfile.year,
+        day: primaryProfile.day,
+        month: primaryProfile.month,
+        year: primaryProfile.year,
         hour:
-          firstProfile.hour > 12
-            ? firstProfile.hour - 12
-            : firstProfile.hour === 0
+          primaryProfile.hour > 12
+            ? primaryProfile.hour - 12
+            : primaryProfile.hour === 0
               ? 12
-              : firstProfile.hour,
-        min: firstProfile.min,
-        meridiem: firstProfile.hour >= 12 ? "PM" : "AM",
-        birthPlace: firstProfile.place,
-        lat: firstProfile.lat,
-        lon: firstProfile.lon,
+              : primaryProfile.hour,
+        min: primaryProfile.min,
+        meridiem: primaryProfile.hour >= 12 ? "PM" : "AM",
+        birthPlace: primaryProfile.place,
+        lat: primaryProfile.lat,
+        lon: primaryProfile.lon,
         tzone: 5.5,
       })
     : null;
@@ -494,7 +535,7 @@ const Profile = () => {
         setActiveChat({
           roomId,
           chatRoomId: roomId,
-          callerName: astro?.firstName || "",
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
           userId: userId,
           astrologerId: astrologerId,
@@ -509,7 +550,7 @@ const Profile = () => {
           state: {
             userId: userId,
             astrologerId,
-            fullName: astro?.firstName || "",
+            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
             roomId,
             isUserSide: true,
             kundliId,
@@ -528,7 +569,17 @@ const Profile = () => {
       token,
       type,
       remainingTime,
+      isSwitch,
     }) => {
+      // If this is a switch from audio to video, let CallContext handle it
+      if (isSwitch && type === "video") {
+        console.log("🔄 Video upgrade accepted - CallContext will handle the switch");
+        resetCallFlow();
+        localStorage.removeItem("waitingState");
+        return;
+      }
+      
+      // Regular call acceptance
       resetCallFlow();
 
       // Clear localStorage
@@ -556,7 +607,7 @@ const Profile = () => {
           roomId,
           chatRoomId,
           agoraToken: token,
-          callerName: astro?.firstName || "",
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
           callType: type,
           userId: userId,
@@ -572,6 +623,14 @@ const Profile = () => {
     };
 
     const handleRejected = (data) => {
+      // Check if this is a video switch rejection during an active audio call
+      if (data?.switchRejected && data?.type === "audio") {
+        console.log("🔄 Video switch rejected - audio call continues");
+        // Don't reset anything - the audio call should continue
+        return;
+      }
+      
+      // Regular call rejection - end everything
       const errorMsg =
         data?.sessionData?.sessionEndReason === "rejected" &&
         data?.type === "chat"
@@ -667,15 +726,18 @@ const Profile = () => {
       return;
     }
 
-    setSelectedAstrologer(astrologer);
+    // Set the astrologer ID to trigger fetching latest details
+    setSelectedAstrologerId(astrologer._id);
+    setSelectedAstrologer(astrologer); // Keep basic info for immediate display
     activeAstroRef.current = astrologer;
     setIsConnectPopupOpen(true);
   };
 
   // Handle rate consultation button click
   const handleRateConsultation = (astrologer) => {
+    console.log("astrologerssss",astrologer)
     setReviewData({
-      astrologerID: astrologer.astrologer_ID,
+      astrologerID: astrologer.astrologer_ID || astrologer._id,
       fullName: `${astrologer.firstName} ${astrologer.lastName || ""}`.trim(),
     });
     setOpenReview(true);
@@ -684,6 +746,7 @@ const Profile = () => {
   const handleClosePopup = () => {
     setIsConnectPopupOpen(false);
     setSelectedAstrologer(null);
+    setSelectedAstrologerId(null); // Clear the ID to stop fetching
   };
 
   // Handler for ProfileManager startCallMode - receives selected profile and triggers connection
@@ -702,7 +765,28 @@ const Profile = () => {
   };
 
   const handleDeleteClick = (kundli) => {
-    setProfileToDelete(kundli._id);
+    console.log("=== DELETE BUTTON CLICKED ===");
+    console.log("Full kundli object:", kundli);
+    console.log("Available ID fields:");
+    console.log("  - kundli._id:", kundli._id);
+    console.log("  - kundli.id:", kundli.id);
+    console.log("  - kundli.kundli_ID:", kundli.kundli_ID);
+    console.log("  - kundli.kundliId:", kundli.kundliId);
+    
+    // Use _id (same as other working components)
+    const idToDelete = kundli._id;
+    
+    if (!idToDelete) {
+      console.error("❌ No valid ID found!");
+      Toast.error("Cannot delete: Invalid profile ID");
+      return;
+    }
+    
+    console.log("✅ Using ID:", idToDelete);
+    console.log("ID type:", typeof idToDelete);
+    console.log("ID length:", idToDelete.length);
+    
+    setProfileToDelete(idToDelete);
     setShowDeleteModal(true);
   };
 
@@ -790,7 +874,121 @@ const Profile = () => {
         throw new Error("Duplicate profile");
       }
 
-      await createKundli(payload).unwrap();
+      // Only call registerUser API if:
+      // 1. User skipped onboarding (isRegister = false)
+      // 2. AND the profile being added is "Self" relation
+      // 3. AND user has not been registered yet (check localStorage as source of truth)
+      const isSelfProfile = formData.relation?.toLowerCase() === "self";
+      
+      // Check if user is already registered from localStorage (source of truth)
+      const currentUserData = localStorage.getItem("userData");
+      const parsedUserData = currentUserData ? JSON.parse(currentUserData) : {};
+      const isAlreadyRegistered = parsedUserData.isRegister === true;
+      
+      if (isRegister === false && isSelfProfile && !isAlreadyRegistered) {
+        console.log("📝 User not registered and adding Self profile, calling registration API first...");
+        
+        // Prepare registration payload from profile data
+        const dateObj = new Date(formData.birthDate);
+        const phoneNumber = user?.phoneNumber || localStorage.getItem("shubhtalk_customer_phone") || "";
+        const cleanPhone = phoneNumber.replace(/^\+?91/, "");
+        const formattedPhone = `91${cleanPhone}`;
+        
+        const registrationPayload = {
+          firstName: formData.name.split(" ")[0] || formData.name,
+          lastName: formData.name.split(" ").slice(1).join(" ") || "",
+          dateOfBirth: formData.birthDate,
+          place: formData.birthPlace,
+          phoneNumber: formattedPhone,
+          password: "TempPass@123",
+          email: `${formattedPhone}@shubhtalk.com`,
+          gender: formData.identity.toLowerCase() === "others" ? "other" : formData.identity.toLowerCase(),
+          languagePreferences: ["en"],
+          role: "CUSTOMER",
+          lat: formData.latitude || 0,
+          lon: formData.longitude || 0,
+        };
+
+        try {
+          const regResponse = await registerUser(registrationPayload);
+          console.log("✅ Registration successful:", regResponse);
+          
+          // Update localStorage with registration data
+          const updatedUserData = {
+            ...parsedUserData,
+            isRegister: true,
+            firstName: registrationPayload.firstName,
+            lastName: registrationPayload.lastName,
+            place: formData.birthPlace,
+            dateOfBirth: formData.birthDate,
+            gender: formData.identity,
+          };
+          localStorage.setItem("userData", JSON.stringify(updatedUserData));
+          
+          // Update Redux state to reflect registration
+          dispatch(updateRegistrationStatus({ isRegister: true }));
+          
+          // Update shubhtalk_user for TopBar
+          const currentUser = localStorage.getItem("shubhtalk_user");
+          const parsedUser = currentUser ? JSON.parse(currentUser) : {};
+          const updatedUser = {
+            ...parsedUser,
+            firstName: registrationPayload.firstName,
+            lastName: registrationPayload.lastName,
+            place: formData.birthPlace,
+          };
+          localStorage.setItem("shubhtalk_user", JSON.stringify(updatedUser));
+          
+          // Dispatch event to notify components
+          window.dispatchEvent(new Event("auth-change"));
+          
+          Toast.success("Registration completed successfully");
+        } catch (regErr) {
+          console.error("❌ Registration failed:", regErr);
+          const errorMessage = regErr?.response?.data?.message || regErr?.message || "Registration failed. Please try again.";
+          
+          // If user is already registered, update localStorage and continue
+          if (errorMessage.toLowerCase().includes("already registered") || errorMessage.toLowerCase().includes("already exists")) {
+            console.log("⚠️ User already registered, updating local state and continuing...");
+            const updatedUserData = {
+              ...parsedUserData,
+              isRegister: true,
+            };
+            localStorage.setItem("userData", JSON.stringify(updatedUserData));
+            
+            // Update Redux state
+            dispatch(updateRegistrationStatus({ isRegister: true }));
+            
+            // Don't throw error, continue with kundli creation
+          } else {
+            Toast.error(errorMessage);
+            throw regErr;
+          }
+        }
+      } else if (isSelfProfile && isAlreadyRegistered) {
+        console.log("✅ User already registered, skipping registration API");
+      }
+
+      // Now create the kundli profile
+      const result = await createKundli(payload).unwrap();
+      
+      // If this is a Self profile, update shubhtalk_user to reflect the new name in TopHeader
+      if (isSelfProfile && result?.data) {
+        const currentUser = localStorage.getItem("shubhtalk_user");
+        const parsedUser = currentUser ? JSON.parse(currentUser) : {};
+        const updatedUser = {
+          ...parsedUser,
+          firstName: formData.name.split(" ")[0] || formData.name,
+          lastName: formData.name.split(" ").slice(1).join(" ") || "",
+          place: formData.birthPlace,
+        };
+        localStorage.setItem("shubhtalk_user", JSON.stringify(updatedUser));
+        
+        // Dispatch event to notify TopHeader to update
+        window.dispatchEvent(new Event("auth-change"));
+        console.log("✅ Updated shubhtalk_user with new Self profile name");
+      }
+      
       Toast.success("Profile added successfully");
       setShowAddProfileModal(false);
     } catch (err) {
@@ -830,16 +1028,32 @@ const Profile = () => {
 
   // Handler: Confirm delete profile
   const confirmDeleteProfile = async () => {
-    if (!profileToDelete) return;
+    if (!profileToDelete) {
+      console.error("No profile ID to delete");
+      return;
+    }
+
+    console.log("=== DELETE PROFILE DEBUG ===");
+    console.log("Profile ID to delete:", profileToDelete);
+    console.log("Type of ID:", typeof profileToDelete);
+    console.log("ID length:", profileToDelete?.length);
 
     try {
-      await deleteKundli(profileToDelete).unwrap();
+      const result = await deleteKundli(profileToDelete).unwrap();
+      console.log("Delete successful:", result);
       Toast.success("Profile deleted successfully");
 
       setShowDeleteModal(false);
       setProfileToDelete(null);
     } catch (err) {
-      console.error("Delete profile error:", err);
+      console.error("=== DELETE ERROR ===");
+      console.error("Full error:", err);
+      console.error("Error data:", err?.data);
+      console.error("Error message:", err?.data?.message || err?.message);
+      
+      const errorMessage = err?.data?.message || err?.message || "Failed to delete profile";
+      Toast.error(errorMessage);
+      
       setShowDeleteModal(false);
       setProfileToDelete(null);
     }
@@ -888,9 +1102,9 @@ const Profile = () => {
       return user.firstName.charAt(0).toUpperCase();
     }
     
-    // If first kundli exists, show its initials
-    if (savedKundlis.length > 0 && savedKundlis[0]?.name) {
-      return getInitials(savedKundlis[0].name);
+    // If primary kundli exists, show its initials
+    if (primaryProfile?.name) {
+      return getInitials(primaryProfile.name);
     }
     
     // Default: show goat emoji
@@ -912,8 +1126,8 @@ const Profile = () => {
           <div className={styles.headerInfo}>
             <h1 className={styles.profileName}>{userName}</h1>
             <p className={styles.profileDetails}>
-              {savedKundlis[0]
-                ? `${dayjs(`${savedKundlis[0].year}-${savedKundlis[0].month}-${savedKundlis[0].day}`).format("MMM DD, YYYY")} • ${String(savedKundlis[0].hour > 12 ? savedKundlis[0].hour - 12 : savedKundlis[0].hour === 0 ? 12 : savedKundlis[0].hour).padStart(2, "0")}:${String(savedKundlis[0].min).padStart(2, "0")} ${savedKundlis[0].hour >= 12 ? "PM" : "AM"}`
+              {primaryProfile
+                ? `${dayjs(`${primaryProfile.year}-${primaryProfile.month}-${primaryProfile.day}`).format("MMM DD, YYYY")} • ${String(primaryProfile.hour > 12 ? primaryProfile.hour - 12 : primaryProfile.hour === 0 ? 12 : primaryProfile.hour).padStart(2, "0")}:${String(primaryProfile.min).padStart(2, "0")} ${primaryProfile.hour >= 12 ? "PM" : "AM"}`
                 : " "}
             </p>
           </div>
@@ -1014,7 +1228,7 @@ const Profile = () => {
                 </text>
               </svg>
             </div>
-            <Sparkles size={16} fill="#FFF" color="#FFF" />
+            {/* <Sparkles size={16} fill="#FFF" color="#FFF" /> */}
             <span className={styles.balanceLabel}>Balance</span>
           </div>
           <div className={styles.balanceAmount}>
@@ -1026,7 +1240,7 @@ const Profile = () => {
           className={styles.addMinutesButton}
           onClick={() => navigate("/recharge")}
         >
-          Add Shubh Minutes
+          Recharge Wallet
           <ChevronLeft size={20} style={{ transform: "rotate(180deg)" }} />
         </button>
       </div>
@@ -1067,13 +1281,15 @@ const Profile = () => {
                           <button
                             className={styles.iconButton}
                             onClick={() => handleEditClick(kundli)}
+                            type="button"
                           >
                             <LuPencilLine size={18} />
                           </button>
-                          {kundli?.relation !== "Self" && (
+                          {kundli?.relation !== "Self" && kundli?.relation !== "self" && (
                             <button
                               className={styles.iconButton}
                               onClick={() => handleDeleteClick(kundli)}
+                              type="button"
                             >
                               <Trash2 size={18} />
                             </button>
@@ -1155,16 +1371,35 @@ const Profile = () => {
                       <h4 className={styles.yearTitle}>{year}</h4>
 
                       {ordersByYear[year].map((order) => (
-                        <div key={order.id} className={styles.orderCard}>
+                        <div 
+                          key={order.id} 
+                          className={styles.orderCard}
+                          onClick={() => navigate(`/profile/order-history/${order.astrologer._id}`)}
+                          style={{ cursor: 'pointer' }}
+                        >
                           <div className={styles.orderCardTop}>
                             <div className={styles.orderLeft}>
-                              <div className={styles.astrologerAvatar}>
+                              <div 
+                                className={styles.astrologerAvatar} 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/astrologer/${order.astrologer._id}`);
+                                }} 
+                                style={{ cursor: 'pointer' }}
+                              >
                                 <span>
                                   {getInitials(order.astrologer.name)}
                                 </span>
                               </div>
                               <div className={styles.orderInfo}>
-                                <h5 className={styles.astrologerName}>
+                                <h5 
+                                  className={styles.astrologerName}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/astrologer/${order.astrologer._id}`);
+                                  }}
+                                  style={{ cursor: 'pointer' }}
+                                >
                                   {order.astrologer.name}
                                 </h5>
                                 <div className={styles.orderMeta}>
@@ -1197,18 +1432,20 @@ const Profile = () => {
                           <div className={styles.orderCardBottom}>
                             <button
                               className={styles.rateButton}
-                              onClick={() =>
-                                handleRateConsultation(order.astrologer)
-                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRateConsultation(order.astrologer);
+                              }}
                             >
                               Rate Consultation
                             </button>
                             <div className={styles.buttonSeparator}></div>
                             <button
                               className={styles.consultAgainButton}
-                              onClick={() =>
-                                handleConnectClick(order.astrologer)
-                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleConnectClick(order.astrologer);
+                              }}
                             >
                               Consult Again
                             </button>
@@ -1324,7 +1561,7 @@ const Profile = () => {
             <div className={styles.supportGrid}>
               <div
                 className={styles.supportGridCard}
-                onClick={() => navigate("/contact-us")}
+                onClick={() => navigate("/customer-support", { state: { fromTab: "Support" } })}
               >
                 <div className={styles.supportGridIcon}>
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
@@ -1343,7 +1580,7 @@ const Profile = () => {
 
               <div
                 className={styles.supportGridCard}
-                onClick={() => navigate("/faq")}
+                onClick={() => navigate("/faq", { state: { fromTab: "Support" } })}
               >
                 <div className={styles.supportGridIcon}>
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
@@ -1361,7 +1598,7 @@ const Profile = () => {
 
               <div
                 className={styles.supportGridCard}
-                onClick={() => navigate("/support-tickets")}
+                onClick={() => navigate(PATH.privateRoutes.RECENT_TICKETS.path, { state: { fromTab: "Support" } })}
               >
                 <div className={styles.supportGridIcon}>
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
@@ -1379,7 +1616,7 @@ const Profile = () => {
 
               <div
                 className={styles.supportGridCard}
-                onClick={() => navigate("/privacy")}
+                onClick={() => navigate("/privacy", { state: { activeTab } })}
               >
                 <div className={styles.supportGridIcon}>
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
@@ -1402,7 +1639,7 @@ const Profile = () => {
 
               <div
                 className={styles.otherCard}
-                onClick={() => navigate("/feedback")}
+                onClick={() => navigate("/feedback", { state: { fromTab: "Support" } })}
               >
                 <div className={styles.otherCardLeft}>
                   <h4 className={styles.otherCardTitle}>App Feedback</h4>
@@ -1419,7 +1656,7 @@ const Profile = () => {
 
               <div
                 className={styles.otherCard}
-                onClick={() => navigate("/community-guidelines")}
+                onClick={() => navigate("/community-guidelines", { state: { fromTab: "Support" } })}
               >
                 <div className={styles.otherCardLeft}>
                   <h4 className={styles.otherCardTitle}>
@@ -1458,7 +1695,8 @@ const Profile = () => {
       <ConnectAstrologerPopup
         isOpen={isConnectPopupOpen}
         onClose={handleClosePopup}
-        astrologer={selectedAstrologer}
+        astrologer={latestAstrologerData?.data || selectedAstrologer}
+        isLoadingAstrologer={isLoadingAstrologer || isFetchingAstrologer}
         onChatStart={handleChatStart}
         onCallStart={handleCallStart}
       />
@@ -1487,14 +1725,13 @@ const Profile = () => {
       />
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <DeleteConfirmationModal
-          title="Delete Profile"
-          message="Are you sure you want to delete this profile? This action cannot be undone."
-          onCancel={handleCancelDelete}
-          onConfirm={confirmDeleteProfile}
-        />
-      )}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        title="Delete Profile"
+        message="Are you sure you want to delete this profile? This action cannot be undone."
+        onCancel={handleCancelDelete}
+        onConfirm={confirmDeleteProfile}
+      />
 
       {/* Sticky Review Modal */}
       <StickyReview />

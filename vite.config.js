@@ -11,6 +11,8 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
+        // Disable manual chunks to prevent React 19 internal splitting issues
+        // This ensures React and its dependencies stay together
         manualChunks: undefined,
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -19,5 +21,8 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 2000,
   },
-  
+  // Optimize dependencies - ensure React stays together
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom'],
+  },
 });

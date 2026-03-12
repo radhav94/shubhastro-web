@@ -1,32 +1,48 @@
 .container {
   position: relative;
   min-height: 100vh;
-  padding-top: 120px;
-  background: #ffffff;
-  padding-bottom: 80px;
+  background: #f5f5f5;
+  padding-top: 95px;
+  @media screen and (width <= 1180px) {
+    padding-top: 53px;
+  }
 }
-
+.headerWrap{
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+}
 .header {
   display: flex;
   align-items: center;
-  padding: 16px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  padding:6px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 16px;
 }
-
 .backButton {
-  background: none;
+  background: rgb(255, 244, 236);
   border: none;
-  padding: 8px;
+  color: #D43400;
   cursor: pointer;
+  padding: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1f2937;
-  &:hover { opacity: 0.7; }
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #D43400;
+  transition: all 0.2s ease;
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
+
+  &:hover {
+    // background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
 }
 
 .title {
@@ -67,11 +83,15 @@
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s;
-  &:hover { color: #1f2937; background: #f9fafb; }
-  &.active { color: #D43400; border-bottom-color: #D43400; background: #fff5f0; }
+  &:hover,&.active { color: #1f2937;border-bottom-color: #D43400; background: #fff5f0; }
+  // &.active { color: #D43400;  }
 }
 
 // ─── Detail Tabs ───
+.tabsWrap{
+  width: 100%;
+  background-color: #fff;
+}
 .tabs {
   display: flex;
   border-bottom: 1px solid #e5e7eb;
@@ -80,6 +100,9 @@
   top: 57px;
   z-index: 9;
   overflow-x: auto;
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: 0 16px;
   &::-webkit-scrollbar { display: none; }
 }
 
@@ -87,19 +110,19 @@
 
 .tab {
   flex: 1;
-  min-width: 90px;
+  // min-width: 90px;
   padding: 14px 10px;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
   font-size: 13px;
   font-weight: 500;
-  color: #6b7280;
+  color: #1f2937;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s;
-  &:hover { color: #1f2937; }
-  &.active { color: #000; border-bottom-color: #000; }
+  &:hover { color: #D43400; }
+  &.active { color: #D43400; border-bottom-color: #D43400; }
 }
 
 .tabContent {
@@ -110,7 +133,9 @@
 .overviewRow {
   display: flex;
   gap: 12px;
-  align-items: flex-start;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 16px;
 
   @media (max-width: 767px) {
     flex-direction: column;
@@ -123,7 +148,8 @@
   flex-shrink: 0;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  // box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 
   @media (min-width: 768px) { width: 160px; }
   @media (min-width: 1024px) { width: 200px; }
@@ -140,7 +166,7 @@
 .summaryCard {
   flex: 1;
   min-width: 0;
-  background: #f3f4f6;
+  background: #fff;
   border-radius: 10px;
   padding: 12px;
 
@@ -149,15 +175,15 @@
   }
 }
 
-.summaryCard {
-  @media (min-width: 768px) {
-    max-width: 340px;
-  }
-}
+// .summaryCard {
+//   @media (min-width: 768px) {
+//     max-width: 340px;
+//   }
+// }
 
 .cardTitle {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   color: #1f2937;
   margin: 0 0 8px 0;
 }
@@ -206,24 +232,51 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  margin-bottom: 32px; // Add spacing before astrological section
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
+    margin-bottom: 24px;
   }
   @media (min-width: 768px) {
     grid-template-columns: 1fr 1fr 1fr;
+    margin-bottom: 40px;
+  }
+}
+
+.astroDetailsGrid {
+  margin-top: 0; // Remove top margin since detailsGrid has bottom margin
+  
+  .SectionTitle {
+    grid-column: 1 / -1; // Make title span full width
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 16px 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e5e7eb;
+    
+    @media (min-width: 768px) {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+  }
+  
+  .tabContent {
+    grid-column: 1 / -1; // Make nested tabContent span full width
+    padding: 0; // Remove padding from nested tabContent
   }
 }
 
 .detailBox {
-  background: #f3f4f6;
+  background: #fff;
   border-radius: 10px;
   padding: 12px;
 }
 
 .boxTitle {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   color: #1f2937;
   margin: 0 0 6px 0;
   text-transform: uppercase;
@@ -239,7 +292,7 @@
 
 .boxHighlight {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   color: #D43400;
   margin: 0 0 4px 0;
 }
@@ -265,7 +318,7 @@
 .astroBox {
   flex: 1;
   min-width: 140px;
-  background: #f3f4f6;
+  background: #fff;
   border-radius: 10px;
   padding: 12px;
 
@@ -276,10 +329,23 @@
 
 // ─── DROPDOWN SECTIONS (Suitability & Healing) ───
 .dropdown {
-  background: #f3f4f6;
+  background: #fff;
   border-radius: 10px;
   margin-bottom: 10px;
   overflow: hidden;
+
+  &.alwaysOpen {
+    @media (min-width: 1024px) {
+      .dropdownHeader {
+        cursor: default;
+        pointer-events: none;
+        
+        &:hover {
+          background: none;
+        }
+      }
+    }
+  }
 }
 
 .dropdownHeader {
@@ -294,7 +360,7 @@
   color: #1f2937;
   transition: background 0.15s;
 
-  &:hover { background: rgba(0, 0, 0, 0.03); }
+  &:hover { background: rgba(0, 0, 0, 0.01); }
 }
 
 .dropdownTitleWrap {
@@ -306,7 +372,7 @@
 
 .dropdownTitle {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   color: #1f2937;
   margin: 0;
 }
@@ -341,6 +407,7 @@
   background: #ffffff;
   border-radius: 8px;
   padding: 10px 12px;
+  border: 1px solid #ddd;
 
   @media (max-width: 600px) {
     min-width: 100%;
@@ -364,7 +431,7 @@
       position: absolute;
       left: 2px;
       color: #D43400;
-      font-weight: 700;
+      font-weight: 600;
     }
   }
 }
@@ -406,7 +473,7 @@
 
 // ─── Tablet ───
 @media (min-width: 768px) {
-  .tabContent { padding: 24px; }
+  // .tabContent { padding: 24px; }
   .tab { font-size: 14px; padding: 16px 14px; }
   .cardTitle { font-size: 16px; }
   .boxTitle { font-size: 13px; }
@@ -417,8 +484,33 @@
 
 // ─── Desktop ───
 @media (min-width: 1024px) {
-  .tabContent { padding: 32px; }
+  // .tabContent { padding: 32px; }
   .cardTitle { font-size: 18px; }
   .identificationCard, .summaryCard { padding: 16px; }
   .detailBox, .astroBox, .suitBox { padding: 14px; }
+}
+
+
+// Consult Button
+.consultButton {
+  width: fit-content;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 16px auto;
+  display: block;
+  // @media (width <= 767px) {
+  //   width: 100%;
+  // }
+
+  &:hover,&:active {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+  }
 }

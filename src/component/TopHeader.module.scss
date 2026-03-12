@@ -41,10 +41,15 @@
     // border-radius: 5px;
   }
 }
-
-.active{
-  // background-color: #000;
+.coinImg{
+  width: 25px;
+  @media (width <= 767px) {
+    width: 20px;
+  }
 }
+// .active{
+//   // background-color: #000;
+// }
 
 .headerActions {
   display: flex;
@@ -362,9 +367,16 @@
   align-items: center;
   gap: 5px;
   background-color: #fff;
-  border-radius: 50px;
-  padding:2px 5px;
-  font-size: 14px;
+  border-radius: 7px;
+  padding: 4px 10px;
+  border: 1px solid #fed0bf;
+}
+
+.languageName {
+  color: #424242;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 /* Dropdown hidden by default */
@@ -457,10 +469,10 @@
 .walletBadge {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 6px;
   // background: linear-gradient(135deg, #8b6f47 0%, #6b4423 50%, #3e2415 100%);
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-  padding: 4px 8px;
+  padding: 4px 8px 4px 4px;
   border-radius: 50px;
   color: #fff;
   // cursor: pointer;
@@ -470,7 +482,7 @@
 }
 
 .walletBadge::before,.walletBadge::after {
-  content: "";
+  content: unset;
   position: absolute;
   top: -8px;
   left: 28%;
@@ -480,7 +492,7 @@
   border-radius: 50%;
   @media screen and (width <= 767px) {
     height: 16px;
-    top: -10px;
+    top: -14px;
   }
 }
 
@@ -490,7 +502,7 @@
   top: unset;
   @media screen and (width <= 767px) {
     // height: 16px;
-    bottom: -10px;
+    bottom: -14px;
   }
 }
 
@@ -535,7 +547,7 @@
 // }
 
 .walletAmount {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.5px;
   @media (width <= 767px) {
@@ -607,7 +619,8 @@
   }
 
   .walletBadge {
-    padding: 4px 14px 4px 8px;
+    padding: 4px 14px 4px 4px;
+    gap: 4px;
   }
 
   // .coinIcon {

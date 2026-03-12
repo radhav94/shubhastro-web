@@ -24,10 +24,12 @@
   border-radius: 24px 24px 0 0;
   width: 100%;
   max-width: 500px;
-  max-height: 83vh;
-  overflow-y: auto;
+  height: auto;
+  // max-height: 83vh;
+  // overflow-y: auto;
   animation: slideUp 0.3s ease-out;
   box-shadow: 0 4.039px 49.479px 0 rgba(0, 0, 0, 0.06);
+  pointer-events: auto; /* Ensure bottom sheet is always clickable even when overlay is dimmed */
 }
 
 @keyframes slideUp {
@@ -64,9 +66,9 @@
 }
 
 .sheetTitle {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 24px;
+  font-size: 18px;
+  font-weight: 600;
+  margin-block: 16px;
   color: #000;
 }
 
@@ -174,6 +176,7 @@
   font-size: 13px;
   color: #666;
   margin: 2px 0;
+  white-space: nowrap;
 }
 
 .profileLocation {
@@ -187,13 +190,18 @@
 .profileActions {
   display: flex;
   align-items: center;
-  gap: 12px;
   flex-shrink: 0;
 }
 
 .radioBtn {
   font-size: 24px;
   color: #F75801;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .editBtn {
@@ -201,7 +209,7 @@
   border: none;
   color: #F75801;
   cursor: pointer;
-  padding: 8px;
+  padding: 4px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -229,7 +237,7 @@
   border: none;
   color: #ff4444;
   cursor: pointer;
-  padding: 8px;
+  padding: 4px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -310,7 +318,8 @@
     border-radius: 12px !important;
     width: 90%;
     max-width: 450px;
-    max-height: 80vh;
+    // max-height: 80vh;
+    height: auto;
     animation: fadeIn 0.3s ease-out !important;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   }
@@ -319,23 +328,23 @@
     display: none;
   }
 
-  .sheetContent {
-    padding: 32px 40px 40px;
-  }
+  // .sheetContent {
+  //   padding: 32px 40px 40px;
+  // }
 
   // .sheetTitle {
   //   font-size: 28px;
   //   margin-bottom: 28px;
   // }
 
-  .closeBtn {
-    display: flex;
-    top: 20px;
-    right: 32px;
-    font-size: 28px;
-    width: 36px;
-    height: 36px;
-  }
+  // .closeBtn {
+  //   display: flex;
+  //   top: 20px;
+  //   right: 32px;
+  //   font-size: 28px;
+  //   width: 36px;
+  //   height: 36px;
+  // }
 
   .profileAvatar {
     width: 64px;

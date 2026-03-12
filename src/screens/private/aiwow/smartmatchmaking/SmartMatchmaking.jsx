@@ -16,6 +16,7 @@ import EditProfileModal from '../../../../component/UI/Profile/EditProfileModal'
 import DeleteConfirmationModal from '../../../../component/UI/modal/deleteModal/DeleteConfirmationModal';
 import matchMakingImg from '../../../../assets/images/match-making-top-img.svg';
 import matchMakingImgBottom from '../../../../assets/images/match-making-bottom-img.svg';
+import Footer from '../../../../layouts/Footer';
 
 const SmartMatchmaking = () => {
   const navigate = useNavigate();
@@ -318,7 +319,19 @@ const SmartMatchmaking = () => {
   };
 
   return (
+    <>
     <div className={styles.matchMakingMain}>
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={handleBack}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <h1 className={styles.title}>Smart Matchmaking</h1>
+        </div>
+      </header>
+
       <div className={styles.matchMaking}>
         <img className={styles.topImg} src={matchMakingImg} alt="img" />
         
@@ -326,8 +339,8 @@ const SmartMatchmaking = () => {
           {!result && !error ? (
             <>
               <div className={styles.topTitles}>
-                <h2>Smart Matchmaking</h2>
-                <p>AI-enhanced compatibility analysis for relationships</p>
+                <h2>AI-Enhanced Compatibility</h2>
+                <p>Discover deep insights about your relationship compatibility</p>
               </div>
 
               <form onSubmit={handleSubmit}>
@@ -431,31 +444,34 @@ const SmartMatchmaking = () => {
             </div>
           ) : (
             <div className={styles.resultSection}>
-              {/* Overall Score Card */}
-            <div className={styles.scoreCard}>
-              <div className={styles.scoreCircle}>
-                <div className={styles.scoreValue}>{result.overallScore}</div>
-                <div className={styles.scoreMax}>/ 100</div>
-              </div>
-              <div className={styles.scoreInfo}>
-                <h2 className={styles.compatibilityLevel}>{result.compatibilityLevel}</h2>
-                <p className={styles.partnerNames}>
-                  {primaryProfile?.name} & {partnerProfile?.name}
-                </p>
-              </div>
-            </div>
+              {/* Score and Summary Wrapper */}
+              <div className={styles.scoreSummaryWrapper}>
+                {/* Overall Score Card */}
+                <div className={styles.scoreCard}>
+                  <div className={styles.scoreCircle}>
+                    <div className={styles.scoreValue}>{result?.overallScore || 0}</div>
+                    <div className={styles.scoreMax}>/ 100</div>
+                  </div>
+                  <div className={styles.scoreInfo}>
+                    <h2 className={styles.compatibilityLevel}>{result?.compatibilityLevel || 'N/A'}</h2>
+                    <p className={styles.partnerNames}>
+                      {primaryProfile?.name} & {partnerProfile?.name}
+                    </p>
+                  </div>
+                </div>
 
-            {/* Summary */}
-            <div className={styles.summaryCard}>
-              <h3 className={styles.cardTitle}>Summary</h3>
-              <p className={styles.summaryText}>{result.summary}</p>
-            </div>
+                {/* Summary */}
+                <div className={styles.summaryCard}>
+                  <h3 className={styles.cardTitle}>Summary</h3>
+                  <p className={styles.summaryText}>{result?.summary || 'No summary available'}</p>
+                </div>
+              </div>
 
             {/* Category Scores */}
             <div className={styles.categoryCard}>
               <h3 className={styles.cardTitle}>Compatibility Breakdown</h3>
               <div className={styles.categoryList}>
-                {Object.entries(result.categoryScores).map(([key, value]) => (
+                {result?.categoryScores && Object.entries(result.categoryScores).map(([key, value]) => (
                   <div key={key} className={styles.categoryItem}>
                     <div className={styles.categoryHeader}>
                       <span className={styles.categoryLabel}>
@@ -482,21 +498,21 @@ const SmartMatchmaking = () => {
                   <div className={styles.insightIcon}>🌟</div>
                   <div className={styles.insightContent}>
                     <div className={styles.insightLabel}>Guna Milan</div>
-                    <div className={styles.insightValue}>{result.astrologyInsights.gunaMilan}/36</div>
+                    <div className={styles.insightValue}>{result?.astrologyInsights?.gunaMilan || 0}/36</div>
                   </div>
                 </div>
                 <div className={styles.insightItem}>
                   <div className={styles.insightIcon}>🔥</div>
                   <div className={styles.insightContent}>
                     <div className={styles.insightLabel}>Manglik Status</div>
-                    <div className={styles.insightValue}>{result.astrologyInsights.manglikStatus}</div>
+                    <div className={styles.insightValue}>{result?.astrologyInsights?.manglikStatus || 'N/A'}</div>
                   </div>
                 </div>
                 <div className={styles.insightItem}>
                   <div className={styles.insightIcon}>⏰</div>
                   <div className={styles.insightContent}>
                     <div className={styles.insightLabel}>Dasha Alignment</div>
-                    <div className={styles.insightValue}>{result.astrologyInsights.dashaAlignment}</div>
+                    <div className={styles.insightValue}>{result?.astrologyInsights?.dashaAlignment || 'N/A'}</div>
                   </div>
                 </div>
                 <div className={styles.insightItem}>
@@ -504,7 +520,7 @@ const SmartMatchmaking = () => {
                   <div className={styles.insightContent}>
                     <div className={styles.insightLabel}>Dominant Planets</div>
                     <div className={styles.insightValue}>
-                      {result.astrologyInsights.dominantPlanets.join(', ')}
+                      {result?.astrologyInsights?.dominantPlanets?.join(', ') || 'N/A'}
                     </div>
                   </div>
                 </div>
@@ -524,9 +540,9 @@ const SmartMatchmaking = () => {
                     <div className={styles.personalityName}>{primaryProfile?.name}</div>
                   </div>
                   <div className={styles.traitsList}>
-                    {result.personalityMatch.userA.traits.map((trait, idx) => (
+                    {result?.personalityMatch?.[primaryProfile?.name]?.traits?.map((trait, idx) => (
                       <span key={idx} className={styles.traitTag}>{trait}</span>
-                    ))}
+                    )) || <span className={styles.traitTag}>No traits available</span>}
                   </div>
                 </div>
 
@@ -538,16 +554,16 @@ const SmartMatchmaking = () => {
                     <div className={styles.personalityName}>{partnerProfile?.name}</div>
                   </div>
                   <div className={styles.traitsList}>
-                    {result.personalityMatch.userB.traits.map((trait, idx) => (
+                    {result?.personalityMatch?.[partnerProfile?.name]?.traits?.map((trait, idx) => (
                       <span key={idx} className={styles.traitTag}>{trait}</span>
-                    ))}
+                    )) || <span className={styles.traitTag}>No traits available</span>}
                   </div>
                 </div>
               </div>
 
               <div className={styles.dynamicBox}>
                 <div className={styles.dynamicLabel}>Relationship Dynamic</div>
-                <p className={styles.dynamicText}>{result.personalityMatch.dynamic}</p>
+                <p className={styles.dynamicText}>{result?.personalityMatch?.dynamic || 'No dynamic information available'}</p>
               </div>
             </div>
 
@@ -555,7 +571,7 @@ const SmartMatchmaking = () => {
             <div className={styles.conflictCard}>
               <h3 className={styles.cardTitle}>Potential Challenges</h3>
               <div className={styles.conflictList}>
-                {result.conflictPrediction.map((conflict, idx) => (
+                {result?.conflictPrediction?.map((conflict, idx) => (
                   <div key={idx} className={styles.conflictItem}>
                     <div className={styles.conflictHeader}>
                       <span className={styles.conflictArea}>{conflict.area}</span>
@@ -565,7 +581,7 @@ const SmartMatchmaking = () => {
                     </div>
                     <p className={styles.conflictReason}>{conflict.reason}</p>
                   </div>
-                ))}
+                )) || <p className={styles.noData}>No conflict predictions available</p>}
               </div>
             </div>
 
@@ -573,7 +589,7 @@ const SmartMatchmaking = () => {
             <div className={styles.timelineCard}>
               <h3 className={styles.cardTitle}>Future Timeline</h3>
               <div className={styles.timelineList}>
-                {result.futureTimeline.map((phase, idx) => (
+                {result?.futureTimeline?.map((phase, idx) => (
                   <div key={idx} className={styles.timelineItem}>
                     <div className={styles.timelineDot} />
                     <div className={styles.timelineContent}>
@@ -586,7 +602,7 @@ const SmartMatchmaking = () => {
                       <p className={styles.timelineTheme}>{phase.theme}</p>
                     </div>
                   </div>
-                ))}
+                )) || <p className={styles.noData}>No timeline data available</p>}
               </div>
             </div>
 
@@ -596,17 +612,17 @@ const SmartMatchmaking = () => {
               <div className={styles.marriageContent}>
                 <div className={styles.marriageStatus}>
                   <div className={styles.marriageIcon}>
-                    {result.marriageRecommendation.suitable ? '✅' : '⚠️'}
+                    {result?.marriageRecommendation?.suitable ? '✅' : '⚠️'}
                   </div>
                   <div className={styles.marriageText}>
                     <div className={styles.marriageLabel}>Suitable for Marriage</div>
                     <div className={styles.marriageValue}>
-                      {result.marriageRecommendation.suitable ? 'Yes' : 'No'}
+                      {result?.marriageRecommendation?.suitable ? 'Yes' : 'No'}
                     </div>
                   </div>
                 </div>
                 
-                {result.marriageRecommendation.bestMarriageWindow && 
+                {result?.marriageRecommendation?.bestMarriageWindow && 
                  result.marriageRecommendation.bestMarriageWindow !== 'Not applicable due to age difference' && (
                   <div className={styles.marriageInfo}>
                     <div className={styles.marriageInfoLabel}>Best Marriage Window</div>
@@ -616,7 +632,7 @@ const SmartMatchmaking = () => {
                   </div>
                 )}
                 
-                {result.marriageRecommendation.riskIfDelayed && 
+                {result?.marriageRecommendation?.riskIfDelayed && 
                  result.marriageRecommendation.riskIfDelayed !== 'Not applicable due to age difference' && (
                   <div className={styles.marriageInfo}>
                     <div className={styles.marriageInfoLabel}>Risk if Delayed</div>
@@ -632,23 +648,34 @@ const SmartMatchmaking = () => {
             <div className={styles.remediesCard}>
               <h3 className={styles.cardTitle}>Recommended Remedies</h3>
               <div className={styles.remediesList}>
-                {result.remedies.map((remedy, idx) => (
-                  <div key={idx} className={styles.remedyItem}>
-                    <div className={styles.remedyHeader}>
-                      <span className={styles.remedyWho}>
-                        {remedy.who === 'userA' 
-                          ? primaryProfile?.name 
-                          : remedy.who === 'userB' 
-                          ? partnerProfile?.name 
-                          : 'Both'}
-                      </span>
+                {result?.remedies?.map((remedy, idx) => {
+                  // Determine who the remedy is for
+                  let remedyFor = 'Both';
+                  if (remedy.who === 'userA') {
+                    remedyFor = primaryProfile?.name;
+                  } else if (remedy.who === 'userB') {
+                    remedyFor = partnerProfile?.name;
+                  } else if (remedy.who && remedy.who.toLowerCase() === 'both') {
+                    remedyFor = 'Both';
+                  } else if (remedy.who) {
+                    // Use the actual value from API if it's something else
+                    remedyFor = remedy.who;
+                  }
+
+                  return (
+                    <div key={idx} className={styles.remedyItem}>
+                      <div className={styles.remedyHeader}>
+                        <span className={styles.remedyWho}>
+                          {remedyFor}
+                        </span>
+                      </div>
+                      <p className={styles.remedyText}>{remedy.remedy}</p>
+                      <p className={styles.remedyPurpose}>
+                        <strong>Purpose:</strong> {remedy.purpose}
+                      </p>
                     </div>
-                    <p className={styles.remedyText}>{remedy.remedy}</p>
-                    <p className={styles.remedyPurpose}>
-                      <strong>Purpose:</strong> {remedy.purpose}
-                    </p>
-                  </div>
-                ))}
+                  );
+                }) || <p className={styles.noData}>No remedies available</p>}
               </div>
             </div>
 
@@ -749,6 +776,8 @@ const SmartMatchmaking = () => {
         />
       )}
     </div>
+    <Footer />
+    </>
   );
 };
 

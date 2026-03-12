@@ -146,6 +146,22 @@ const ProfileManager = ({
 
   // Handler: Open add profile modal
   const handleAddProfile = () => {
+    // Check if maximum profile limit is reached (5 profiles max)
+    const MAX_PROFILES = 5;
+    
+    console.log("=== ADD PROFILE CHECK ===");
+    console.log("Current profiles:", profiles);
+    console.log("Current profiles count:", profiles.length);
+    console.log("Max allowed:", MAX_PROFILES);
+    console.log("Limit exceeded?", profiles.length >= MAX_PROFILES);
+    
+    if (profiles.length >= MAX_PROFILES) {
+      Toast.error("Please Delete One Kundli from Existing One");
+      console.log("❌ Blocked: Profile limit reached");
+      return;
+    }
+    
+    console.log("✅ Opening Add Profile modal");
     setShowAddProfile(true);
   };
 
@@ -157,6 +173,13 @@ const ProfileManager = ({
 
   // Handler: Open delete confirmation modal
   const handleDeleteProfile = (profileId) => {
+    if (!profileId) {
+      console.error("❌ No profile ID provided!");
+      Toast.error("Cannot delete: Invalid profile ID");
+      return;
+    }
+    // Find the full profile object for logging
+    const profile = profiles.find(p => p._id === profileId);
     setProfileToDelete(profileId);
     setShowDeleteModal(true);
   };
@@ -284,11 +307,50 @@ const ProfileManager = ({
 
   // Handler: Confirm delete profile
   const confirmDeleteProfile = async () => {
-    if (!profileToDelete) return;
+    if (!profileToDelete) {
+      console.error("❌ No profile ID to delete");
+      return;
+    }
+
+    console.log("=== ProfileManager Confirm Delete ===");
+    console.log("Profile ID to delete:", profileToDelete);
+    console.log("Type:", typeof profileToDelete);
+    console.log("Length:", profileToDelete?.length);
+    console.log("Is valid MongoDB ObjectId format?", /^[a-f\d]{24}$/i.test(profileToDelete));
 
     try {
+      // Find the profile being deleted using _id
+      const profileBeingDeleted = profiles.find(p => p._id === profileToDelete);
+      
+      console.log("Profile being deleted:", profileBeingDeleted);
+      
+      if (!profileBeingDeleted) {
+        console.error("❌ Profile not found in list!");
+        Toast.error("Profile not found");
+        setShowDeleteModal(false);
+        setProfileToDelete(null);
+        return;
+      }
+      
+      // Check if this is a "Self" profile
+      const isSelfProfile = profileBeingDeleted?.relation?.toLowerCase() === "self";
+      
+      // Count total "Self" profiles
+      const selfProfilesCount = profiles.filter(
+        p => p.relation?.toLowerCase() === "self"
+      ).length;
+      
+      // Prevent deletion if this is the last "Self" profile
+      if (isSelfProfile && selfProfilesCount === 1) {
+        Toast.error("Cannot delete the last Self profile. At least one Self profile is required.");
+        setShowDeleteModal(false);
+        setProfileToDelete(null);
+        return;
+      }
+
       // Only call API if user is logged in
       if (token && deleteKundli) {
+        console.log("✅ Calling deleteKundli API with ID:", profileToDelete);
         await deleteKundli(profileToDelete).unwrap();
         Toast.success("Profile deleted successfully");
       } else {
@@ -302,7 +364,14 @@ const ProfileManager = ({
       setShowDeleteModal(false);
       setProfileToDelete(null);
     } catch (err) {
-      console.error("Delete profile error:", err);
+      console.error("=== ProfileManager Delete Error ===");
+      console.error("Full error:", err);
+      console.error("Error data:", err?.data);
+      console.error("Error message:", err?.data?.message || err?.message);
+      
+      const errorMessage = err?.data?.message || err?.message || "Failed to delete profile";
+      Toast.error(errorMessage);
+      
       setShowDeleteModal(false);
       setProfileToDelete(null);
     }
@@ -330,6 +399,11 @@ const ProfileManager = ({
   const getEditInitialData = () => {
     if (!profileToEdit) return null;
 
+    // Ensure relation value matches the option values exactly (capitalize first letter)
+    const relationValue = profileToEdit.relation 
+      ? profileToEdit.relation.charAt(0).toUpperCase() + profileToEdit.relation.slice(1).toLowerCase()
+      : "Self";
+
     return {
       name: profileToEdit.name,
       identity:
@@ -338,7 +412,7 @@ const ProfileManager = ({
           : profileToEdit.gender === "female"
             ? "Female"
             : "Others",
-      relation: profileToEdit.relation || "Self",
+      relation: relationValue,
       birthDate: `${profileToEdit.year}-${String(profileToEdit.month).padStart(2, "0")}-${String(profileToEdit.day).padStart(2, "0")}`,
       birthTime: `${String(profileToEdit.hour).padStart(2, "0")}:${String(profileToEdit.min).padStart(2, "0")}`,
       birthPlace: profileToEdit.place,
@@ -379,7 +453,7 @@ const ProfileManager = ({
         isLoading={isCreating}
         title="Add Profile"
         showProfileListing={false}
-        savedKundlis={filteredProfiles}
+        savedKundlis={profiles}
       />
 
       {/* Edit Profile Modal */}
@@ -390,18 +464,17 @@ const ProfileManager = ({
         isLoading={isCreating}
         title="Edit Profile"
         initialData={getEditInitialData()}
-        savedKundlis={filteredProfiles}
+        savedKundlis={profiles}
       />
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <DeleteConfirmationModal
-          title="Delete Profile"
-          message="Are you sure you want to delete this profile? This action cannot be undone."
-          onCancel={handleCancelDelete}
-          onConfirm={confirmDeleteProfile}
-        />
-      )}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        title="Delete Profile"
+        message="Are you sure you want to delete this profile? This action cannot be undone."
+        onCancel={handleCancelDelete}
+        onConfirm={confirmDeleteProfile}
+      />
     </>
   );
 };

@@ -17,6 +17,11 @@
     height: auto;
     border-radius: 1rem;
   }
+  @media (width <= 390px) {
+    width: 140px;
+    height: auto;
+    border-radius: 1rem;
+  }
 
   &::before {
     content: '';

@@ -5,15 +5,23 @@
   min-height: 100vh;
   // padding-top: 120px;
   background: #f5f5f5;
-  padding-top: 100px;
+  padding-top: 150px;
   @media screen and (width <= 1180px) {
-    padding-top: 53px;
+    padding-top: 106px;
   }
 }
 
 .headerWrap{
+  position: fixed;
+  top: 94px;
+  left: 0;
+  right: 0;
   background: white;
   border-bottom: 1px solid #e0e0e0;
+  z-index: 100;
+  @media screen and (width <= 1180px) {
+    top: 53px;
+  }
 }
 .header {
   display: flex;
@@ -39,22 +47,28 @@
   }
 }
 .backButton {
-  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  background: rgb(255, 244, 236);
   border: none;
+  color: #D43400;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  border-radius: 0.5rem;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #D43400;
+  transition: all 0.2s ease;
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
 
   &:hover {
-    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    // background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 }
 

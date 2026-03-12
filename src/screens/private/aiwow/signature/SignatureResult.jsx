@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import styles from './SignatureResult.module.scss';
 import { Toast } from '../../../../component';
+import { PATH } from '../../../../utils/routes/Paths';
+import Footer from '../../../../layouts/Footer';
 
 const SignatureResult = () => {
   const navigate = useNavigate();
@@ -506,6 +508,7 @@ const SignatureResult = () => {
   }
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -558,8 +561,17 @@ const SignatureResult = () => {
         {/* <button className={styles.doneButton} onClick={() => navigate('/aiwow')}>
           Done
         </button> */}
+
+        <button 
+          className={styles.consultButton}
+          onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
+        >
+          Consult with Expert Astrologer
+        </button>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

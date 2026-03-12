@@ -81,13 +81,19 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
               className={styles.flag}
             />
             <span>+91</span>
-            <span className={styles.dropdownIcon}>▼</span>
+            {/* we are hiding this as it is only for India
+            <span className={styles.dropdownIcon}>▼</span> */}
           </div>
           <input
             type="tel"
             value={phoneNumber}
             autoFocus
             onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && phoneNumber.length >= 10 && !loading) {
+                handleGetOTP();
+              }
+            }}
             placeholder="Enter your Number"
             className={styles.phoneInput}
             maxLength={10}
@@ -107,6 +113,8 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
           <span>OR</span>
         </div> */}
 
+
+        {/* Hiding the Google button for now
         <button className={styles.socialBtn}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path
@@ -127,7 +135,7 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
             />
           </svg>
           Sign in with Google
-        </button>
+        </button> */}
 
         {/* <button className={styles.socialBtn}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -142,7 +150,7 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
         <p className={styles.terms}>
           By submitting, you agree to our{" "}
-          <a href="/terms" className={styles.termsLink}>
+          <a href="/terms-conditions" className={styles.termsLink}>
             Terms & Conditions
           </a>
         </p>

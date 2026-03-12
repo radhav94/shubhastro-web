@@ -18,10 +18,35 @@ export const chatApi = privateRequestNew.injectEndpoints({
     }),
 
     getChatMessages: builder.query({
-      query: ({ astrologerId = null, roomId = null }) => ({
+      query: ({ astrologerId = null, roomId = "", page = 1 }) => ({
         url: "chat/messages",
-        params: { astrologerId, roomId },
+        params: { astrologerId, roomId, page },
       }),
+      serializeQueryArgs: ({ endpointName, queryArgs }) => {
+        // Serialize by astrologerId and roomId only, not page
+        return `${endpointName}-${queryArgs.astrologerId}-${queryArgs.roomId}`;
+      },
+      merge: (currentCache, newItems, { arg }) => {
+        // If it's the first page, replace the cache
+        if (arg.page === 1) {
+          return newItems;
+        }
+        // Otherwise, merge the new data with existing
+        if (currentCache?.data?.chatHistory && newItems?.data?.chatHistory) {
+          return {
+            ...newItems,
+            data: {
+              ...newItems.data,
+              chatHistory: [...currentCache.data.chatHistory, ...newItems.data.chatHistory],
+              pagination: newItems.data.pagination, // Use latest pagination info
+            },
+          };
+        }
+        return newItems;
+      },
+      forceRefetch: ({ currentArg, previousArg }) => {
+        return currentArg?.page !== previousArg?.page;
+      },
     }),
 
     getChatHistory: builder.query({

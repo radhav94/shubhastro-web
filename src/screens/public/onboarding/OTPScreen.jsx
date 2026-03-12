@@ -51,6 +51,9 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs[index - 1].current.focus();
     }
+    if (e.key === "Enter" && otp.join("").length === 6 && !loading) {
+      handleContinue();
+    }
   };
 
   const handleContinue = async () => {
@@ -105,7 +108,13 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           dispatch(privateRequestNew.util.resetApiState());
 
           // Dispatch login action to Redux
-          dispatch(loginSuccess({ token: accessToken }));
+          dispatch(
+            loginSuccess({
+              isRegister: userData?.isRegister,
+              isVerified: userData?.isVerified,
+              token: accessToken,
+            }),
+          );
 
           updateFormData({
             otp: otpValue,
@@ -116,10 +125,15 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           // Check if user is already registered
           if (userData.isRegister) {
             // User is already registered, check for redirect path
-            const redirectPath = localStorage.getItem("shubhtalk_redirect_after_login");
+            const redirectPath = localStorage.getItem(
+              "shubhtalk_redirect_after_login",
+            );
             console.log("🔍 OTPScreen - Checking redirect path after login");
             console.log("📍 Redirect path from localStorage:", redirectPath);
-            console.log("📍 Current window location:", window.location.pathname);
+            console.log(
+              "📍 Current window location:",
+              window.location.pathname,
+            );
 
             if (redirectPath && redirectPath !== "/login") {
               // Clear the redirect path
@@ -134,7 +148,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
               // No redirect path, go to home
               console.log("ℹ️ No valid redirect path, going to home");
               console.log("📍 redirectPath value:", redirectPath);
-              toast.success("Welcome back!");
+              // toast.success("Welcome back!");
               setTimeout(() => {
                 console.log("🚀 Executing navigate to home");
                 navigate(PATH.privateRoutes.HOME.path || "/");

@@ -1,30 +1,40 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './AuraLanding.module.scss';
+import SmileIcon from '../../../../assets/icons/Smile.png';
+import EnergyLevelsIcon from '../../../../assets/icons/energylevels.png';
+import ChakraIcon from '../../../../assets/icons/chakra.png';
+import AuraSizeIcon from '../../../../assets/icons/aurasize.png';
+import Footer from '../../../../layouts/Footer';
 
 const AuraLanding = () => {
   const navigate = useNavigate();
 
   const features = [
     {
+      icon: SmileIcon,
       title: 'Aura Color Detection',
       description: 'Discover the dominant colors in your aura and what they reveal about your energy',
     },
     {
+      icon: EnergyLevelsIcon,
       title: 'Energy Analysis',
       description: 'Understand your current energy state and emotional vibrations',
     },
     {
+      icon: ChakraIcon,
       title: 'Chakra Alignment',
       description: 'Get insights into your chakra balance and energy flow',
     },
     {
+      icon: AuraSizeIcon,
       title: 'Spiritual Insights',
       description: 'Receive personalized guidance based on your aura reading and birth chart',
     },
   ];
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -45,6 +55,9 @@ const AuraLanding = () => {
         <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
             <div key={index} className={styles.featureCard}>
+              <div className={styles.iconWrapper}>
+                <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
+              </div>
               <h3 className={styles.featureTitle}>{feature.title}</h3>
               <p className={styles.featureDescription}>{feature.description}</p>
             </div>
@@ -59,6 +72,8 @@ const AuraLanding = () => {
         </button>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

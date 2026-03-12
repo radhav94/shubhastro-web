@@ -125,7 +125,7 @@ const Explore = () => {
     if (!sectionContent || sectionContent.length === 0) {
       return null;
     }
-
+    
     // All About You - Hero cards
     if (displayType === "all-about-you") {
       return (
@@ -134,6 +134,8 @@ const Explore = () => {
           <p className={styles.subtitle}>
             {section.description || "An ever growing library on the story of you"}
           </p>
+
+          <h1 className={styles.titleSub}>Quick Access</h1>
 
           <div className={`${styles.topCardsGrid} ${sectionContent.length > 3 ? styles.scrollable : ''}`}>
             {sectionContent.map((card, idx) => (
@@ -145,7 +147,7 @@ const Explore = () => {
               >
                 <h3 className={styles.cardTitle}>{card.title}</h3>
                 <img
-                  src={card.imageUrl || DefaultImages.HoroscopeDefault}
+                  src={card.image_url || DefaultImages.HoroscopeDefault}
                   alt={card.title}
                   className={styles.cardIcon}
                 />
@@ -160,13 +162,13 @@ const Explore = () => {
     if (displayType === "discover-more" && slug === "discover-your-kundli") {
       return (
         <section key={index} className={styles.section}>
+          {/* <h1 className={styles.titleSub}>Discover Your Kundli</h1> */}
+          <div className={styles.titleSub}>
+            <SectionTitleWithDivider 
+              title={(section.display_title || section.title || "").toUpperCase()} 
+            />
+          </div>
           <div className={styles.kundliSection}>
-            <div className={styles.sectionHeader}>
-              <SectionTitleWithDivider 
-                title={(section.display_title || section.title || "").toUpperCase()} 
-              />
-              {/* <ChevronRight size={24} className={styles.sectionArrow} /> */}
-            </div>
 
             <div className={styles.kundliGrid}>
               {sectionContent.slice(0, 4).map((card, idx) => (
@@ -177,7 +179,7 @@ const Explore = () => {
                 >
                   <div className={styles.kundliCardImage}>
                     <img
-                      src={card.imageUrl || DefaultImages.VedicKundliDefault}
+                      src={card.image_url || DefaultImages.VedicKundliDefault}
                       alt={card.title}
                       className={styles.chartImage}
                     />
@@ -200,11 +202,12 @@ const Explore = () => {
     if (displayType === "discover-more") {
       return (
         <section key={index} className={styles.section}>
+          {/* <h1 className={styles.titleSub}>Explore Your Destiny</h1> */}
           <div className={styles.sectionHeader}>
             <SectionTitleWithDivider 
               title={(section.display_title || section.title || "").toUpperCase()} 
             />
-            <ChevronRight size={24} className={styles.sectionArrow} />
+            {/* <ChevronRight size={24} className={styles.sectionArrow} /> */}
           </div>
 
           <div className={styles.destinyGrid}>
@@ -236,7 +239,7 @@ const Explore = () => {
     // Blog section
     if (displayType === "blog" && slug === "blog") {
       return (
-        <section key={index} className={styles.section}>
+        <section key={index} className={`${styles.section} ${styles.displayClass}`}>
           <div className={styles.sectionHeader}>
             <SectionTitleWithDivider 
               title={(section.display_title || section.title || "EXPLORE BLOGS").toUpperCase()} 
@@ -278,43 +281,44 @@ const Explore = () => {
     // News section (display_type: "blog" with slug: "news")
     if (displayType === "blog" && slug === "news") {
       return (
-        <section key={index} className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <SectionTitleWithDivider 
-              title={(section.display_title || section.title || "IN THE NEWS").toUpperCase()} 
-            />
-            <ChevronRight size={24} className={styles.sectionArrow} />
-          </div>
+        <section><h5>Blog</h5> </section>
+        // <section key={index} className={styles.section}>
+        //   <div className={styles.sectionHeader}>
+        //     <SectionTitleWithDivider 
+        //       title={(section.display_title || section.title || "IN THE NEWS").toUpperCase()} 
+        //     />
+        //     <ChevronRight size={24} className={styles.sectionArrow} />
+        //   </div>
 
-          <div className={styles.blogsScroll}>
-            {sectionContent.map((news, idx) => (
-              <div
-                key={idx}
-                className={styles.blogCard}
-                onClick={() => {
-                  if (news.redirect_url) {
-                    window.open(news.redirect_url, '_blank');
-                  }
-                }}
-              >
-                <div className={styles.blogImage}>
-                  <img
-                    src={news.imageUrl || DefaultImages.NewBlogsDefault}
-                    alt={news.title}
-                    className={styles.blogBgImage}
-                  />
-                  <span className={styles.blogDate}>
-                    {formatDate(news.date)}
-                  </span>
-                </div>
-                <h4 className={styles.blogTitle}>{news.title}</h4>
-                {news.news_channel && (
-                  <p className={styles.newsChannel}>{news.news_channel}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
+        //   <div className={styles.blogsScroll}>
+        //     {sectionContent.map((news, idx) => (
+        //       <div
+        //         key={idx}
+        //         className={styles.blogCard}
+        //         onClick={() => {
+        //           if (news.redirect_url) {
+        //             window.open(news.redirect_url, '_blank');
+        //           }
+        //         }}
+        //       >
+        //         <div className={styles.blogImage}>
+        //           <img
+        //             src={news.imageUrl || DefaultImages.NewBlogsDefault}
+        //             alt={news.title}
+        //             className={styles.blogBgImage}
+        //           />
+        //           <span className={styles.blogDate}>
+        //             {formatDate(news.date)}
+        //           </span>
+        //         </div>
+        //         <h4 className={styles.blogTitle}>{news.title}</h4>
+        //         {news.news_channel && (
+        //           <p className={styles.newsChannel}>{news.news_channel}</p>
+        //         )}
+        //       </div>
+        //     ))}
+        //   </div>
+        // </section>
       );
     }
 

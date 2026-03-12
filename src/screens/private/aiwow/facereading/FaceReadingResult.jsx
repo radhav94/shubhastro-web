@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import styles from './FaceReadingResult.module.scss';
 import { Toast, PieChart } from '../../../../component';
+import Footer from '../../../../layouts/Footer';
 
 const FaceReadingResult = () => {
   const navigate = useNavigate();
@@ -109,6 +110,7 @@ const FaceReadingResult = () => {
   } = analysisData;
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
       <div className={styles.header}>
@@ -267,6 +269,25 @@ const FaceReadingResult = () => {
                   </div>
                 )}
               </div>
+
+              {/* Relationship Insights & Spiritual Guidance */}
+              {(overallReading.relationshipInsights || overallReading.spiritualGuidance) && (
+                <div className={styles.insightsContainer}>
+                  {overallReading.relationshipInsights && (
+                    <div className={styles.insightCard}>
+                      <h3 className={styles.insightTitle}>💕 Relationship Insights</h3>
+                      <p className={styles.insightText}>{overallReading.relationshipInsights}</p>
+                    </div>
+                  )}
+
+                  {overallReading.spiritualGuidance && (
+                    <div className={styles.insightCard}>
+                      <h3 className={styles.insightTitle}>🙏 Spiritual Guidance</h3>
+                      <p className={styles.insightText}>{overallReading.spiritualGuidance}</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -534,25 +555,6 @@ const FaceReadingResult = () => {
           )}
         </div>
 
-        {/* Relationship Insights & Spiritual Guidance */}
-        {(overallReading.relationshipInsights || overallReading.spiritualGuidance) && (
-          <div className={styles.insightsContainer}>
-            {overallReading.relationshipInsights && (
-              <div className={styles.insightCard}>
-                <h3 className={styles.insightTitle}>💕 Relationship Insights</h3>
-                <p className={styles.insightText}>{overallReading.relationshipInsights}</p>
-              </div>
-            )}
-
-            {overallReading.spiritualGuidance && (
-              <div className={styles.insightCard}>
-                <h3 className={styles.insightTitle}>🙏 Spiritual Guidance</h3>
-                <p className={styles.insightText}>{overallReading.spiritualGuidance}</p>
-              </div>
-            )}
-          </div>
-        )}
-
         <div className='text-center'>
           <button 
             className={styles.consultButton}
@@ -563,6 +565,8 @@ const FaceReadingResult = () => {
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

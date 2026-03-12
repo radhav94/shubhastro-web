@@ -5,6 +5,8 @@ import styles from './PalmistryResult.module.scss';
 import { getPalmistryResult } from '../../../../services/appServices/aiWowService';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { Toast } from '../../../../component';
+import { PATH } from '../../../../utils/routes/Paths';
+import Footer from '../../../../layouts/Footer';
 
 const LineDropdown = ({ title, subtitle, children, isOpen, onToggle }) => (
   <div className={styles.lineDropdown}>
@@ -230,6 +232,7 @@ const PalmistryResult = () => {
   }
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
       <div className={styles.header}>
@@ -875,8 +878,17 @@ const PalmistryResult = () => {
             )}
           </div>
         )}
+
+        <button 
+          className={styles.consultButton}
+          onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
+        >
+          Consult with Expert Astrologer
+        </button>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

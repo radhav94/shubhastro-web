@@ -16,7 +16,9 @@ const FaceReadingCamera = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
-  const [videoActive, setVideoActive] = useState(true); // ⭐ NEW - Controls video element mounting
+  const [isFrontCamera, setIsFrontCamera] = useState(true);
+  const [videoActive, setVideoActive] = useState(true);
+  const [videoReady, setVideoReady] = useState(false); // ⭐ Track video ready state
 
   const {
     modelsLoaded,
@@ -67,47 +69,32 @@ const FaceReadingCamera = () => {
     };
   }, []);
 
-  // Start detection when models are loaded and video is ready
+  // Start detection when BOTH models and video are ready
   useEffect(() => {
-    if (modelsLoaded && videoRef.current && videoRef.current.readyState >= 2) {
-      console.log('Models loaded, starting detection for existing video');
-      setTimeout(() => {
-        startDetection();
-      }, 300);
+    if (modelsLoaded && videoReady) {
+      console.log("Models + Video ready → Starting detection");
+      startDetection();
     }
-  }, [modelsLoaded]);
+  }, [modelsLoaded, videoReady]);
 
   useEffect(() => {
-    startCamera();
+    console.log('[FaceReadingCamera] facingMode changed to:', facingMode);
+    const timer = setTimeout(() => {
+      startCamera();
+    }, 200);
     
-    // Cleanup function to stop camera when component unmounts
+    // ✅ FIX: Only cleanup timer, not detection (that's handled by unmount effect)
     return () => {
-      console.log('FaceReadingCamera unmounting, stopping camera');
-      stopDetection();
-      
-      // Stop video stream
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach(track => {
-          console.log('Stopping track:', track.kind);
-          track.stop();
-        });
-        videoRef.current.srcObject = null;
-      }
-      
-      // Stop stream state
-      if (stream) {
-        stream.getTracks().forEach(track => {
-          track.stop();
-        });
-      }
+      clearTimeout(timer);
     };
-  }, [facingMode, modelsLoaded]);
+  }, [facingMode]);
 
   const startCamera = async () => {
     try {
-      // Stop existing stream first
-      stopCamera();
+      // Stop existing stream first (only if stream exists)
+      if (stream) {
+        stopCamera();
+      }
 
       // Check if mediaDevices is supported
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -118,7 +105,7 @@ const FaceReadingCamera = () => {
       // Request camera permission
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode,
+          facingMode: { ideal: facingMode },
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -128,19 +115,21 @@ const FaceReadingCamera = () => {
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
+
+        // Detect actual camera facing mode from track
+        const videoTrack = mediaStream.getVideoTracks()[0];
+        const trackFacing = videoTrack?.getSettings?.()?.facingMode;
+        setIsFrontCamera(trackFacing !== 'environment');
         
-        // Start face detection once video is playing
+        // Set video ready when data is loaded
         videoRef.current.onloadedmetadata = () => {
+          console.log("Video metadata loaded");
           videoRef.current.play();
         };
-
-        videoRef.current.onplay = () => {
-          // Wait a bit for video to stabilize, then start detection
-          if (modelsLoaded) {
-            setTimeout(() => {
-              startDetection();
-            }, 300);
-          }
+        
+        videoRef.current.onloadeddata = () => {
+          console.log("Video ready");
+          setVideoReady(true);
         };
       }
     } catch (err) {
@@ -165,6 +154,7 @@ const FaceReadingCamera = () => {
 
   const stopCamera = () => {
     stopDetection();
+    setVideoReady(false); // Reset video ready state
     
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = videoRef.current.srcObject.getTracks();
@@ -190,6 +180,10 @@ const FaceReadingCamera = () => {
     
     // Start camera with new mode will be handled by useEffect
   };
+
+  // On desktop, faceInCircle check can be unreliable due to object-fit: cover coordinate mismatch
+  // Use faceDetected as the capture gate — circle is a visual guide
+  const canCapture = faceDetected;
 
   const captureImage = () => {
     if (videoRef.current && canvasRef.current) {
@@ -344,15 +338,17 @@ const FaceReadingCamera = () => {
                 playsInline
                 muted
                 className={styles.video}
+                style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
               />
             )}
             <canvas
               ref={detectionCanvasRef}
               className={styles.detectionCanvas}
+              style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
             />
             <div className={styles.overlay}>
               {/* Circular face frame */}
-              <div className={`${styles.faceCircle} ${faceInCircle ? styles.detected : styles.notDetected}`}>
+              <div className={`${styles.faceCircle} ${canCapture ? styles.detected : styles.notDetected}`}>
                 <svg className={styles.circleSvg} viewBox="0 0 300 300">
                   <circle 
                     cx="150" 
@@ -366,7 +362,7 @@ const FaceReadingCamera = () => {
                 </svg>
               </div>
             </div>
-            {!faceInCircle && modelsLoaded && (
+            {!canCapture && modelsLoaded && (
               <div className={styles.faceDetectionMessage}>
                 <p>Position your face within the circle</p>
               </div>
@@ -382,18 +378,18 @@ const FaceReadingCamera = () => {
       <div className={styles.controls}>
         {!capturedImage ? (
           <button 
-            className={`${styles.captureButton} ${(!faceInCircle && modelsLoaded) ? styles.disabled : ''}`} 
+            className={`${styles.captureButton} ${(!canCapture && modelsLoaded) ? styles.disabled : ''}`} 
             onClick={captureImage}
-            disabled={!faceInCircle && modelsLoaded}
+            disabled={!canCapture && modelsLoaded}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!faceInCircle && modelsLoaded) ? "0.5" : "1"}/>
-                <circle cx="20" cy="20" r="14" fill="white" opacity={(!faceInCircle && modelsLoaded) ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!canCapture && modelsLoaded) ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="14" fill="white" opacity={(!canCapture && modelsLoaded) ? "0.5" : "1"}/>
               </svg>
             </div>
             <span className={styles.captureText}>
-              {!modelsLoaded ? 'Loading...' : (faceInCircle ? 'Capture' : 'Face Outside Circle')}
+              {!modelsLoaded ? 'Loading...' : (canCapture ? 'Capture' : 'No Face Detected')}
             </span>
           </button>
         ) : (

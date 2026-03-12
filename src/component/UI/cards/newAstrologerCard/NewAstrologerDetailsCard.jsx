@@ -17,8 +17,8 @@ const NewAstrologerDetailsCard = ({
 
   const imageUrl =
     astrologer?.imageUrl ||
-    astrologer?.aadharCardImgUrl ||
-    astrologer?.panCardImgUrl ||
+    // astrologer?.aadharCardImgUrl ||
+    // astrologer?.panCardImgUrl ||
     astrologer?.profileImgUrl ||
     getAstrologerDefaultImage(astrologer?.gender);
 
@@ -40,7 +40,7 @@ const NewAstrologerDetailsCard = ({
               }
               className={styles.detailsImage}
               onError={(e) => {
-                e.target.style.display = "none";
+                e.target.src = getAstrologerDefaultImage(astrologer?.gender);
               }}
             />
           </div>

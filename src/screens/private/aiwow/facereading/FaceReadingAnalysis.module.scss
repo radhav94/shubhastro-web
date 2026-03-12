@@ -13,20 +13,24 @@
 .content {
   flex: 1;
   padding: 1rem;
-  max-width: 1200px;
+  max-width: 900px;
   margin: 16px auto;
-  gap: 16px;
+  gap: 2rem;
   width: 100%;
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: center;
   background-color: #fff;
   border-radius: 12px;
   @media (width <= 1180px) {
     width: 94%;
+    gap: 1rem;
   }
   @media (width <= 767px) {
     flex-direction: column;
+    padding: 1rem;
+    // gap: 1rem;
   }
 }
 
@@ -49,8 +53,8 @@
 .imageWrapper {
   position: relative;
   width: 100%;
-  max-width: 400px;
-  margin: 0 auto 2rem;
+  max-width: 200px;
+  // margin: 0 auto 2rem;
   aspect-ratio: 1;
   background: #f3f4f6;
   border-radius: 0.75rem;
@@ -174,31 +178,34 @@
   }
 }
 
+.leftSection {
+  // flex: 0 0 45%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  @media (width <= 767px) {
+    flex: 1;
+    width: 100%;
+  }
+}
+
+.rightSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  // max-width: 500px;
+  
+  @media (width <= 767px) {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
 @media (min-width: 768px) {
-  // .content {
-  //   padding: 2rem;
-  //   max-width: 1200px;
-  //   flex-direction: row;
-  //   align-items: center;
-  //   gap: 3rem;
-  // }
-
-  .leftSection {
-    // flex: 0 0 45%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .rightSection {
-    // flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
   .title {
-    font-size: 1.75rem;
+    font-size: 1.2rem;
     text-align: center;
     width: 100%;
   }

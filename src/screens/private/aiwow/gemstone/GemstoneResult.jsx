@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import styles from './GemstoneResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
+import Footer from '../../../../layouts/Footer';
 
 const GemstoneResult = () => {
   const navigate = useNavigate();
@@ -14,9 +15,21 @@ const GemstoneResult = () => {
   
   // Dropdown states for Suitability tab
   const [openSections, setOpenSections] = useState({});
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const toggleSection = (key) => {
-    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+    // Only toggle on mobile/tablet
+    if (!isDesktop) {
+      setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+    }
   };
 
   const reduxResult = useSelector((state) => state.aiwow.gemstone.result);
@@ -94,7 +107,7 @@ const GemstoneResult = () => {
         {/* Quality */}
         <div className={styles.detailBox}>
           <h4 className={styles.boxTitle}>Quality</h4>
-          <p className={styles.boxValue}>{d.details.quality || '—'}</p>
+          <p className={styles.boxValue}>{d.details.quality || "—"}</p>
         </div>
 
         {/* Color */}
@@ -112,7 +125,10 @@ const GemstoneResult = () => {
             <h4 className={styles.boxTitle}>Clarity</h4>
             <InfoRow label="Grade" value={d.details.clarity.grade} />
             {d.details.clarity.inclusions?.length > 0 && (
-              <InfoRow label="Inclusions" value={d.details.clarity.inclusions.join(', ')} />
+              <InfoRow
+                label="Inclusions"
+                value={d.details.clarity.inclusions.join(", ")}
+              />
             )}
           </div>
         )}
@@ -131,7 +147,10 @@ const GemstoneResult = () => {
           <div className={styles.detailBox}>
             <h4 className={styles.boxTitle}>Carat Weight</h4>
             <InfoRow label="Range" value={d.details.estimatedCarat.range} />
-            <InfoRow label="Approx" value={`${d.details.estimatedCarat.approximate} ct`} />
+            <InfoRow
+              label="Approx"
+              value={`${d.details.estimatedCarat.approximate} ct`}
+            />
           </div>
         )}
 
@@ -139,12 +158,80 @@ const GemstoneResult = () => {
         {d.details.treatment && (
           <div className={styles.detailBox}>
             <h4 className={styles.boxTitle}>Treatment</h4>
-            <InfoRow label="Detected" value={d.details.treatment.isDetected ? 'Yes' : 'No'} />
+            <InfoRow
+              label="Detected"
+              value={d.details.treatment.isDetected ? "Yes" : "No"}
+            />
             {d.details.treatment.description && (
-              <p className={styles.boxDesc}>{d.details.treatment.description}</p>
+              <p className={styles.boxDesc}>
+                {d.details.treatment.description}
+              </p>
             )}
           </div>
         )}
+      </div>
+      
+      {/* Astrological Section */}
+      <div className={styles.astroDetailsGrid}>
+        <h2 className={styles.SectionTitle}>Astrological Properties</h2>
+        <div className={styles.astroGrid}>
+          {d.astrological.rulingPlanet && (
+            <div className={styles.astroBox}>
+              <h4 className={styles.boxTitle}>Ruling Planet</h4>
+              <p className={styles.boxHighlight}>
+                {d.astrological.rulingPlanet.planet}
+              </p>
+              <p className={styles.boxDesc}>
+                {d.astrological.rulingPlanet.influence}
+              </p>
+            </div>
+          )}
+
+          {d.astrological.zodiacSigns && (
+            <div className={styles.astroBox}>
+              <h4 className={styles.boxTitle}>Zodiac Signs</h4>
+              <p className={styles.boxHighlight}>
+                {d.astrological.zodiacSigns.primary}
+              </p>
+              {d.astrological.zodiacSigns.secondary?.length > 0 && (
+                <p className={styles.boxDesc}>
+                  Also: {d.astrological.zodiacSigns.secondary.join(", ")}
+                </p>
+              )}
+            </div>
+          )}
+
+          {d.astrological.chakra && (
+            <div className={styles.astroBox}>
+              <h4 className={styles.boxTitle}>Chakra</h4>
+              <p className={styles.boxHighlight}>
+                {d.astrological.chakra.name}
+              </p>
+              <p className={styles.boxDesc}>
+                {d.astrological.chakra.benefits}
+              </p>
+            </div>
+          )}
+
+          {d.astrological.element && (
+            <div className={styles.astroBox}>
+              <h4 className={styles.boxTitle}>Element</h4>
+              <p className={styles.boxHighlight}>{d.astrological.element}</p>
+            </div>
+          )}
+
+          {d.astrological.numerology && (
+            <div className={styles.astroBox}>
+              <h4 className={styles.boxTitle}>Numerology</h4>
+              <p className={styles.boxHighlight}>
+                {d.astrological.numerology.number}
+              </p>
+              <p className={styles.boxDesc}>
+                {d.astrological.numerology.significance}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -201,7 +288,7 @@ const GemstoneResult = () => {
   const renderSuitability = (d) => (
     <div className={styles.tabContent}>
       {/* Suitability Analysis - Dropdown */}
-      <div className={styles.dropdown}>
+      <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`}>
         <button className={styles.dropdownHeader} onClick={() => toggleSection('suitability')}>
           <div className={styles.dropdownTitleWrap}>
             <h3 className={styles.dropdownTitle}>Suitability Analysis</h3>
@@ -209,9 +296,9 @@ const GemstoneResult = () => {
               <span className={styles.scoreBadge}>{d.suitability.score} - {d.suitability.level}</span>
             )}
           </div>
-          <Arrow isOpen={openSections.suitability} />
+          {!isDesktop && <Arrow isOpen={openSections.suitability} />}
         </button>
-        {openSections.suitability && (
+        {(isDesktop || openSections.suitability) && (
           <div className={styles.dropdownBody}>
             <div className={styles.suitRow}>
               {d.suitability.forDasha && (
@@ -243,12 +330,12 @@ const GemstoneResult = () => {
 
       {/* Wearing Guidelines - Dropdown */}
       {d.wearing && (
-        <div className={styles.dropdown}>
+        <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`}>
           <button className={styles.dropdownHeader} onClick={() => toggleSection('wearing')}>
             <h3 className={styles.dropdownTitle}>Wearing Guidelines</h3>
-            <Arrow isOpen={openSections.wearing} />
+            {!isDesktop && <Arrow isOpen={openSections.wearing} />}
           </button>
-          {openSections.wearing && (
+          {(isDesktop || openSections.wearing) && (
             <div className={styles.dropdownBody}>
               <div className={styles.suitRow}>
                 <div className={styles.suitBox}>
@@ -282,12 +369,12 @@ const GemstoneResult = () => {
   const renderHealing = (d) => (
     <div className={styles.tabContent}>
       {/* Healing Properties - Dropdown */}
-      <div className={styles.dropdown}>
+      <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`}>
         <button className={styles.dropdownHeader} onClick={() => toggleSection('healing')}>
           <h3 className={styles.dropdownTitle}>Healing Properties</h3>
-          <Arrow isOpen={openSections.healing} />
+          {!isDesktop && <Arrow isOpen={openSections.healing} />}
         </button>
-        {openSections.healing && (
+        {(isDesktop || openSections.healing) && (
           <div className={styles.dropdownBody}>
             <div className={styles.suitRow}>
               {d.healing.physical?.length > 0 && (
@@ -321,12 +408,12 @@ const GemstoneResult = () => {
 
       {/* Compatibility - Dropdown */}
       {d.compatibility && (
-        <div className={styles.dropdown}>
+        <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`}>
           <button className={styles.dropdownHeader} onClick={() => toggleSection('compatibility')}>
             <h3 className={styles.dropdownTitle}>Gemstone Compatibility</h3>
-            <Arrow isOpen={openSections.compatibility} />
+            {!isDesktop && <Arrow isOpen={openSections.compatibility} />}
           </button>
-          {openSections.compatibility && (
+          {(isDesktop || openSections.compatibility) && (
             <div className={styles.dropdownBody}>
               <div className={styles.suitRow}>
                 {d.compatibility.compatibleGemstones?.length > 0 && (
@@ -354,13 +441,13 @@ const GemstoneResult = () => {
       )}
 
       {/* Market Info - Dropdown */}
-      {d.market && (
+      {/* {d.market && (
         <div className={styles.dropdown}>
           <button className={styles.dropdownHeader} onClick={() => toggleSection('market')}>
             <h3 className={styles.dropdownTitle}>Market Information</h3>
-            <Arrow isOpen={openSections.market} />
+            {!isDesktop && <Arrow isOpen={openSections.market} />}
           </button>
-          {openSections.market && (
+          {(isDesktop || openSections.market) && (
             <div className={styles.dropdownBody}>
               <div className={styles.suitRow}>
                 {d.market.priceRange && (
@@ -387,7 +474,7 @@ const GemstoneResult = () => {
             </div>
           )}
         </div>
-      )}
+      )} */}
     </div>
   );
 
@@ -404,15 +491,35 @@ const GemstoneResult = () => {
   const currentGemstone = gemstones[selectedGemstoneIndex];
 
   return (
+    <>
     <div className={styles.container}>
-      <header className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate("/aiwow/gemstone-authenticity")}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <h1 className={styles.title}>Gemstone Analysis</h1>
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={() => navigate("/aiwow/gemstone-authenticity")}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <h1 className={styles.title}>Gemstone Analysis</h1>
+        </div>
       </header>
+
+      
+      
+        {/* Duplicated Code  */}
+      {/* <div className={styles.tabsWrap}>
+        <div className={styles.tabs}>
+            {['overview', 'details', 'astrological', 'suitability', 'healing'].map((tab) => (
+              <button
+                key={tab}
+                className={`${styles.tab} ${activeTab === tab ? styles.active : ''}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+        </div>
+      </div> */}
 
       <div className={styles.content}>
         {gemstones.length > 1 && (
@@ -430,7 +537,7 @@ const GemstoneResult = () => {
         )}
 
         <div className={styles.tabs}>
-          {['overview', 'details', 'astrological', 'suitability', 'healing'].map((tab) => (
+          {['overview', 'details', 'suitability', 'healing'].map((tab) => (
             <button
               key={tab}
               className={`${styles.tab} ${activeTab === tab ? styles.active : ''}`}
@@ -443,11 +550,20 @@ const GemstoneResult = () => {
 
         {activeTab === 'overview' && renderOverview(currentGemstone)}
         {activeTab === 'details' && renderDetails(currentGemstone)}
-        {activeTab === 'astrological' && renderAstrological(currentGemstone)}
+        {/* {activeTab === 'astrological' && renderAstrological(currentGemstone)} */}
         {activeTab === 'suitability' && renderSuitability(currentGemstone)}
         {activeTab === 'healing' && renderHealing(currentGemstone)}
+
+        <button 
+          className={styles.consultButton}
+          onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
+        >
+          Consult with Expert Astrologer
+        </button>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

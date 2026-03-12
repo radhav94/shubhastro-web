@@ -357,6 +357,12 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
     padding: 12px 8px;
     font-size: 13px;
   }
+  @media (max-width: 767px) {
+    & div{
+      display: flex;
+      flex-direction: column;
+    }
+  }
 }
 
 .planetLink {
@@ -371,6 +377,22 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   }
 }
 
+.currentBadge {
+  // position: absolute;
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: #f75801;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 8px;
+  vertical-align: middle;
+  width: fit-content;
+}
+
 .dashaTableArrow {
   display: flex;
   align-items: center;
@@ -383,6 +405,9 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   svg {
     width: 20px;
     height: 20px;
+    path{
+      stroke: #F75801;
+    }
   }
 }
 

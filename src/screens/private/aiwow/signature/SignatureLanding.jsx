@@ -1,30 +1,40 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './SignatureLanding.module.scss';
+import StrokeIcon from '../../../../assets/icons/Stroke.png';
+import PressureIcon from '../../../../assets/icons/pressure.png';
+import LetterIcon from '../../../../assets/icons/letter.png';
+import SignatureSizeIcon from '../../../../assets/icons/signauresize.png';
+import Footer from '../../../../layouts/Footer';
 
 const SignatureLanding = () => {
   const navigate = useNavigate();
 
   const features = [
     {
+      icon: StrokeIcon,
       title: 'Stroke Formation',
       description: 'Analyze stroke formation to reveal hidden talents and potential career paths.',
     },
     {
+      icon: PressureIcon,
       title: 'Pressure Analysis',
       description: 'Evaluate pressure points to uncover emotional depth and communication style.',
     },
     {
+      icon: LetterIcon,
       title: 'Letter Slant',
       description: 'Determine personality traits based on the slant and angle of letters.',
     },
     {
+      icon: SignatureSizeIcon,
       title: 'Signature Size',
       description: 'Assess self-confidence and social presence by measuring signature size.',
     },
   ];
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -45,6 +55,9 @@ const SignatureLanding = () => {
         <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
             <div key={index} className={styles.featureCard}>
+              <div className={styles.iconWrapper}>
+                <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
+              </div>
               <h3 className={styles.featureTitle}>{feature.title}</h3>
               <p className={styles.featureDescription}>{feature.description}</p>
             </div>
@@ -59,6 +72,8 @@ const SignatureLanding = () => {
         </button>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

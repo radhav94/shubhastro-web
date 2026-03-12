@@ -15,6 +15,7 @@ const ClothColorCamera = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
+  const [isFrontCamera, setIsFrontCamera] = useState(true);
 
   const {
     detectionReady,
@@ -80,6 +81,11 @@ const ClothColorCamera = () => {
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
+
+        // Detect actual camera facing mode from track
+        const videoTrack = mediaStream.getVideoTracks()[0];
+        const trackFacing = videoTrack?.getSettings?.()?.facingMode;
+        setIsFrontCamera(trackFacing !== 'environment');
 
         videoRef.current.onloadedmetadata = async () => {
           await videoRef.current.play();
@@ -251,8 +257,9 @@ const ClothColorCamera = () => {
               autoPlay
               playsInline
               className={styles.video}
+              style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
             />
-            <canvas ref={detectionCanvasRef} className={styles.detectionCanvas} />
+            <canvas ref={detectionCanvasRef} className={styles.detectionCanvas} style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }} />
             <div className={styles.overlay}>
               <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', left: '5%' }}></div>
               <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', right: '5%' }}></div>

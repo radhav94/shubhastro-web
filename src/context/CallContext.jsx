@@ -167,12 +167,49 @@ export const CallProvider = ({ children }) => {
 
     const handleActivity = (data) => {
       console.log("[CallContext] activity event:", data);
+      if (data?.remainingTime && data.remainingTime > 0) {
+        // Server sync every minute - update remaining time and ensure timer is running
+        setCallSeconds(Math.floor(data.remainingTime * 60));
+        
+        // Make sure timer is running for local countdown
+        if (!timerRef.current) {
+          startTimer();
+        }
+      }
+    };
+
+    const handleCallUpgrade = (data) => {
+      
+      // Dispatch event to notify VoiceCall component before state update
+      window.dispatchEvent(new CustomEvent('call:upgrading-to-video', { 
+        detail: { roomId: data.roomId } 
+      }));
+      
+      // Small delay to ensure the event is processed
+      setTimeout(() => {
+        setActiveCall((prevCall) => {
+          // Only upgrade if there's an active audio call
+          if (prevCall && prevCall.callType === "audio" && data.type === "video") {
+            console.log("✅ Upgrading call from audio to video");
+            return {
+              ...prevCall,
+              callType: "video",
+              agoraToken: data.agoraToken || data.token || prevCall.agoraToken,
+              roomId: data.roomId || prevCall.roomId,
+              remainingTime: data.remainingTime || prevCall.remainingTime,
+            };
+          }
+          return prevCall;
+        });
+      }, 50);
     };
 
     voiceSocket.on("activity", handleActivity);
+    voiceSocket.on("call:accepted", handleCallUpgrade);
 
     return () => {
       voiceSocket.off("activity", handleActivity);
+      voiceSocket.off("call:accepted", handleCallUpgrade);
     };
   }, [userIdLocal]);
 

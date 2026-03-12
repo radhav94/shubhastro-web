@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import styles from './AuraInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setAuraImage } from '../../../../redux/aiwow/aiwowSlice';
+import Footer from '../../../../layouts/Footer';
 
 const AuraInstructions = () => {
   const navigate = useNavigate();
@@ -31,7 +32,18 @@ const AuraInstructions = () => {
   };
 
   return (
+    <>
     <div className={styles.container}>
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={() => navigate(-1)}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <h1 className={styles.headerTitle}>AI Powered Aura Photography</h1>
+        </div>
+      </header>
       <div className={styles.content}>
         <h2 className={styles.title}>Before you start</h2>
 
@@ -120,6 +132,8 @@ const AuraInstructions = () => {
       </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

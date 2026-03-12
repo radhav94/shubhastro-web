@@ -3,30 +3,38 @@
 .container {
   position: relative;
   min-height: 100vh;
-  padding-top: 100px;
+  padding-top: 172px;
   background: #f5f5f5;
   padding-bottom: 2rem;
   @media screen and (width <= 1180px) {
-    padding-top: 53px;
+    padding-top: 125px;
+  }
+  @media screen and (width <= 767px) {
+    padding-top: 105px;
   }
 }
 .headerWrap{
+  position: fixed;
+  top: 95px;
+  left: 0;
+  right: 0;
   background: #fff;
   border-bottom: 1px solid #e0e0e0;
+  z-index: 100;
   // box-shadow: 0 2px 8px rgba(247, 88, 1, 0.08);
+  @media screen and (width <= 1180px) {
+    top: 53px;
+  }
 }
 .header {
   display: flex;
   align-items: center;
   gap: 1rem;
   padding:16px 16px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
   max-width: 1200px;
   margin: 0 auto;
   @media (width <= 767px) {
-    justify-content: space-between;
+    // justify-content: space-between;
     padding:6px 16px;
   }
 }
@@ -40,7 +48,7 @@
   }
 }
 .backButton {
-  background: rgb(255 244 236);
+  background: rgb(255, 244, 236);
   border: none;
   color: #D43400;
   cursor: pointer;
@@ -52,21 +60,16 @@
   width: 40px;
   height: 40px;
   border: 1px solid #D43400;
-
-  @media screen and (width <= 767px) {
+  transition: all 0.2s ease;
+  @media (width <= 767px) {
     width: 36px;
     height: 36px;
   }
 
-  // &:hover {
-  //   // background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
-  //   // transform: translateY(-1px);
-  //   box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
-  // }
-
-  svg {
-    width: 24px;
-    height: 24px;
+  &:hover {
+    // background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -115,6 +118,7 @@
   font-weight: 400;
   margin-bottom: 2px;
   width: 100%;
+  text-align: center;
 
   @media screen and (width <= 767px) {
     font-size: 0.7rem;
@@ -268,9 +272,9 @@
 
 // Tablet responsive
 @media (min-width: 768px) {
-  .content {
-    padding: 2rem;
-  }
+  // .content {
+  //   padding: 2rem;
+  // }
 
   // .header {
   //   padding: 1rem 2rem;

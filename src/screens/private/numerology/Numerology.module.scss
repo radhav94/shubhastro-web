@@ -1,11 +1,11 @@
 .page {
   // background: #f5f1e9;
   min-height: 100vh;
-  padding-bottom: 80px;
+  // padding-bottom: 80px;
   position: relative;
-  margin-top: 98px;
+  padding-top: 98px;
   @media screen and (width <= 1180px) {
-    margin-top: 53px;
+    padding-top: 53px;
   }
   // @media screen and (width <= 767px) {
   //   margin-top: 68px;
@@ -17,8 +17,10 @@
   text-align: center;
   position: relative;
   padding: 40px 20px;
+  padding-top: 100px;
   @media (width <= 767px){
     padding: 20px 20px;
+    padding-top: 80px;
   }
 }
 
@@ -203,16 +205,19 @@
 .profileHeaderWrap{
   background: #fff;
   border-bottom: 1px solid #e0e0e0;
+  position: fixed;
+  top: 94px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  @media screen and (width <= 1180px) {
+    top: 53px;
+  }
 }
 .profileHeader {
   display: flex; /* Hidden by default on mobile */
   align-items: center;
-  // position: sticky;
-  // top: 0;
-  z-index: 100;
-  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(10px);
-  margin-top: 100px;
   max-width: 1200px;
   margin: 0 auto;
   padding: 6px 16px;
@@ -240,7 +245,7 @@
 }
 
 .backBtn {
-  background: rgb(255 244 236);
+  background: rgb(255, 244, 236);
   border: none;
   color: #D43400;
   cursor: pointer;
@@ -252,22 +257,15 @@
   width: 40px;
   height: 40px;
   border: 1px solid #D43400;
-
+  transition: all 0.2s ease;
   @media (width <= 767px) {
     width: 36px;
     height: 36px;
   }
-
-  svg {
-    width: 24px;
-    height: 24px;
-    path{
-      stroke:#f75801;
-    }
-  }
-
-  &:active {
-    transform: scale(0.95);
+  &:hover {
+    // background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -936,24 +934,29 @@
 
 /* NUMEROLOGY SECTION */
 .numerologySection {
-  max-width: 480px;
-  margin: 0px auto 40px auto;
+  max-width: 1200px;
+  margin: 0px auto 16px auto;
   padding: 0 16px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
+  @media (width <= 767px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
 }
 
 .numerologyCard {
   border-radius: 16px;
   padding: 20px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 16px;
   transition: 0.2s ease;
   border-radius: 15px;
   border: 1px solid rgba(189, 189, 189, 0.30);
   background: var(--surface, #FEFEFE);
+  position: relative;
 
   &:hover {
     transform: translateY(-2px);
@@ -963,6 +966,7 @@
 
 .cardContent {
   flex: 1;
+  width: 100%;
 }
 
 .cardLabel {
@@ -990,13 +994,16 @@
 }
 
 .cardNumber {
-  font-size: 64px;
+  position: absolute;
+  // top: 20px;
+  right: 20px;
+  font-size: 30px;
   font-weight: 500;
   color: #E56329;
-  min-width: 100px;
+  // min-width: 80px;
   text-align: center;
   border-radius: 12px;
-  padding: 16px;
+  padding: 12px;
   line-height: 1;
   background: var(--card-2, #FFF5EC);
 }
@@ -1010,11 +1017,14 @@
 
 /* RESPONSIVE */
 @media (min-width: 769px) {
-  .numerologySection {
-    max-width: 900px;
-    margin: 0px auto 60px auto;
-    padding: 0 40px;
-  }
+  // .numerologySection {
+  //   max-width: 1200px;
+  //   margin: 0px auto 60px auto;
+  //   padding: 0 40px;
+  //   display: grid;
+  //   grid-template-columns: repeat(3, 1fr);
+  //   gap: 20px;
+  // }
 
   .numerologyCard {
     padding: 28px;
@@ -1035,17 +1045,20 @@
   }
 
   .cardNumber {
-    font-size: 72px;
-    min-width: 120px;
-    padding: 20px;
+    position: absolute;
+    top: 10px;
+    // right: 28px;
+    font-size: 30px;
+    // min-width: 90px;
+    // padding: 16px;
   }
 }
 
 /* EXPERT SECTION */
 .expertSection {
-  max-width: 480px;
+  max-width: 1200px;
   margin: 24px auto;
-  padding: 0 20px;
+  padding: 0 16px;
 }
 
 .expertCard {
@@ -1196,11 +1209,11 @@
 
 /* RESPONSIVE */
 @media (min-width: 769px) {
-  .expertSection {
-    max-width: 900px;
-    padding: 0 40px;
-    margin: 40px auto;
-  }
+  // .expertSection {
+  //   max-width: 900px;
+  //   padding: 0 40px;
+  //   margin: 40px auto;
+  // }
 
   .cycleSection {
     max-width: 900px;

@@ -62,6 +62,9 @@ $color-app-bg: #f5f5f5;
 
 .activeOuter {
   font-weight: 600;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  -webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
 
   &::after {
     content: "";
@@ -70,7 +73,7 @@ $color-app-bg: #f5f5f5;
     left: 0;
     right: 0;
     height: 2px;
-    background-color: #D43400;
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
     border-radius: 2px;
   }
 }

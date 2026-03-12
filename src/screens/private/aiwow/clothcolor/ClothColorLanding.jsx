@@ -1,29 +1,39 @@
 import { useNavigate } from 'react-router-dom';
 import styles from './ClothColorLanding.module.scss';
+import AuraSpectrumIcon from '../../../../assets/icons/auraspectrum.png';
+import VibrancyIcon from '../../../../assets/icons/vibrancy.png';
+import PatternIcon from '../../../../assets/icons/pattern.png';
+import StyleCaratIcon from '../../../../assets/icons/stylecarat.png';
+import Footer from '../../../../layouts/Footer';
 
 const ClothColorLanding = () => {
   const navigate = useNavigate();
 
   const features = [
     {
+      icon: AuraSpectrumIcon,
       title: 'Aura Spectrum',
       description: 'Analyze the dominant colors to reveal the wearer\'s personality traits.',
     },
     {
+      icon: VibrancyIcon,
       title: 'Vibrancy Index',
       description: 'Measure color intensity to reflect the wearer\'s energy and mood.',
     },
     {
+      icon: PatternIcon,
       title: 'Pattern Psychology',
       description: 'Understand how patterns mirror the wearer\'s inner self and aspirations.',
     },
     {
+      icon: StyleCaratIcon,
       title: 'Style Archetype',
       description: 'Determine the wearer\'s unique style archetype based on color preferences.',
     },
   ];
 
   return (
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -44,6 +54,9 @@ const ClothColorLanding = () => {
         <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
             <div key={index} className={styles.featureCard}>
+              <div className={styles.iconWrapper}>
+                <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
+              </div>
               <h3 className={styles.featureTitle}>{feature.title}</h3>
               <p className={styles.featureDescription}>{feature.description}</p>
             </div>
@@ -58,6 +71,8 @@ const ClothColorLanding = () => {
         </button>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

@@ -20,9 +20,18 @@ const SideBar = ({ open, onClose }) => {
       ? localStorage.getItem("shubhtalk_astro_token")
       : localStorage.getItem("shubhtalk_customer_token");
 
-  const [currentLang, setCurrentLang] = useState(
-    localStorage.getItem("selectedLanguage") || "en"
-  );
+  const [currentLang, setCurrentLang] = useState(() => {
+    // Get language from cookie instead of localStorage
+    const cookie = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("googtrans="));
+    if (cookie) {
+      const value = decodeURIComponent(cookie.split("=")[1]);
+      const parts = value.split("/");
+      return parts[2] || "en";
+    }
+    return "en";
+  });
 
   const handleLogout = () => {
     // Dispatch Redux logout action
@@ -46,17 +55,83 @@ const SideBar = ({ open, onClose }) => {
   };
 
   function handleLanguageChange(lang) {
-    const select = document.querySelector(".goog-te-combo");
+    // Clear Google Translate cookies completely
+    const clearCookies = () => {
+      const hostname = window.location.hostname;
+      const cookiesToClear = ['googtrans', 'googtrans_backup'];
+      
+      const domainParts = hostname.split('.');
+      const domains = [''];
+      
+      domains.push(`domain=${hostname}`);
+      
+      if (domainParts.length > 1) {
+        domains.push(`domain=.${hostname}`);
+        
+        if (domainParts.length > 2) {
+          const parentDomain = domainParts.slice(-2).join('.');
+          domains.push(`domain=.${parentDomain}`);
+        }
+      }
 
-    if (select) {
-      select.value = lang;
-      select.dispatchEvent(new Event("change"));
-      setCurrentLang(lang);
-      localStorage.setItem("selectedLanguage", lang);
-    } else {
-      console.error("Google Translate dropdown not found");
-    }
+      cookiesToClear.forEach(cookieName => {
+        domains.forEach(domainStr => {
+          ['/', ''].forEach(path => {
+            const pathStr = path ? `path=${path};` : '';
+            const domainPart = domainStr ? `${domainStr};` : '';
+            
+            document.cookie = `${cookieName}=; ${pathStr} ${domainPart} expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0;`;
+            document.cookie = `${cookieName}=; ${pathStr} ${domainPart} expires=Thu, 01 Jan 1970 00:00:00 UTC; max-age=0;`;
+          });
+        });
+      });
+    };
+
+    // Set Google Translate cookie
+    const setCookie = (lang) => {
+      const hostname = window.location.hostname;
+      const cookieValue = `/en/${lang}`;
+      const maxAge = 31536000;
+
+      document.cookie = `googtrans=${cookieValue}; path=/; max-age=${maxAge}; SameSite=Lax;`;
+      document.cookie = `googtrans=${cookieValue}; path=/; domain=${hostname}; max-age=${maxAge}; SameSite=Lax;`;
+      
+      const domainParts = hostname.split('.');
+      if (domainParts.length > 1) {
+        document.cookie = `googtrans=${cookieValue}; path=/; domain=.${hostname}; max-age=${maxAge}; SameSite=Lax;`;
+        
+        if (domainParts.length > 2) {
+          const parentDomain = domainParts.slice(-2).join('.');
+          document.cookie = `googtrans=${cookieValue}; path=/; domain=.${parentDomain}; max-age=${maxAge}; SameSite=Lax;`;
+        }
+      }
+    };
+
+    // Update state
+    setCurrentLang(lang);
+    
+    // Close sidebar
     onClose();
+
+    // Clear all cookies first
+    clearCookies();
+
+    // If switching to English, just reload
+    if (lang === 'en') {
+      setTimeout(() => {
+        window.location.reload();
+      }, 200);
+      return;
+    }
+
+    // For other languages, set cookie then reload
+    setTimeout(() => {
+      setCookie(lang);
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 200);
+    }, 200);
   }
 
   const MENU_LIST = [

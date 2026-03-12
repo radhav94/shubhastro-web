@@ -15,6 +15,7 @@ const GemstoneCamera = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('environment');
+  const [isFrontCamera, setIsFrontCamera] = useState(false);
 
   const {
     detectionReady,
@@ -54,6 +55,12 @@ const GemstoneCamera = () => {
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
+
+        // Detect actual camera facing mode from track
+        const videoTrack = mediaStream.getVideoTracks()[0];
+        const trackFacing = videoTrack?.getSettings?.()?.facingMode;
+        // If facingMode is 'user' or undefined (desktop webcam), it's front-facing
+        setIsFrontCamera(trackFacing !== 'environment');
         
         videoRef.current.onloadedmetadata = () => {
           videoRef.current.play();
@@ -225,10 +232,12 @@ const GemstoneCamera = () => {
               autoPlay
               playsInline
               className={styles.video}
+              style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
             />
             <canvas
               ref={detectionCanvasRef}
               className={styles.detectionCanvas}
+              style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
             />
             <div className={styles.overlay}>
               <div className={`${styles.frameCorner} ${objectDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', left: '5%' }}></div>

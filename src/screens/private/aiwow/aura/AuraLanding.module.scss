@@ -14,34 +14,48 @@
 .headerWrap{
   background: white;
   border-bottom: 1px solid #e0e0e0;
+  position: fixed;
+  top: 88px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  @media screen and (width <= 768px) {
+    top: 53px;
+  }
 }
 .header {
   display: flex;
   // justify-content: space-between;
   align-items: center;
-  padding:6px 16px;
+  padding:10px 16px;
   max-width: 1200px;
   margin: 0 auto;
   gap: 16px;
 }
 
 .backButton {
-  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  background: rgb(255, 244, 236);
   border: none;
+  color: #D43400;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  border-radius: 0.5rem;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #D43400;
+  transition: all 0.2s ease;
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
 
   &:hover {
-    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    // background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -64,7 +78,7 @@
   font-size: 0.875rem;
   color: #6b7280;
   line-height: 1.5;
-  margin: 0 0 1.5rem 0;
+  margin: 3rem 0 1.5rem 0;
 
   @media (min-width: 768px) {
     font-size: 0.9375rem;
@@ -96,6 +110,23 @@
     padding: 1.5rem;
     min-height: 160px;
   }
+}
+
+.iconWrapper {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.featureIcon {
+  width: 50pxpx;
+  height: 50pxpx;
+  object-fit: contain;
 }
 
 .featureTitle {

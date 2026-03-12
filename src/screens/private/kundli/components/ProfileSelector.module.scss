@@ -3,14 +3,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  position: fixed;
+  top: 150px;
+  left: 0;
+  right: 0;
+  z-index: 98;
   background: #fff;
   border-bottom: 1px solid #e0e0e0;
   backdrop-filter: blur(10px);
   max-width: 100%;
   padding: 8px 40px;
+  @media (width <= 1200px) {
+    top: 168px;
+  }
   @media (width <= 1180px) {
     padding: 0px 16px;
   }
@@ -20,6 +25,10 @@
   margin: 0 auto;
   display: flex;
   align-items: center;
+  padding-inline: 16px;
+  @media (width <= 1180px) {
+    padding-inline: 0px;
+  }
 }
 /* MOBILE PROFILE BAR */
 .mobileProfileBar {
@@ -40,36 +49,27 @@
 }
 
 .backBtn {
-  background: #fdeeea;
-  border: 1px solid #f75801;
-  // border: none;
+  background: rgb(255, 244, 236);
+  border: none;
+  color: #D43400;
   cursor: pointer;
-  padding: 10px;
-  color: #333;
-  border-radius: 12px;
-  transition: 0.2s ease;
+  padding: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  width: 44px;
-  height: 44px;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #D43400;
+  transition: all 0.2s ease;
   @media (width <= 767px) {
     width: 36px;
     height: 36px;
-    border-radius: 8px;
   }
-  
-  svg {
-    width: 20px;
-    height: 20px;
-    path{
-      stroke: #f75801;
-    }
-  }
-  
-  &:active {
-    transform: scale(0.95);
+  &:hover {
+    // background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -106,15 +106,9 @@
 .profileSelector {
   flex: 1;
   text-align: center;
-  cursor: pointer;
   user-select: none;
   padding: 4px 12px;
   border-radius: 8px;
-  transition: 0.2s ease;
-  
-  &:active {
-    transform: scale(0.98);
-  }
 }
 
 .selectLabel {
@@ -128,8 +122,20 @@
   font-size: 18px;
   font-weight: 600;
   color: #333;
+  cursor: pointer;
+  transition: 0.2s ease;
+  display: inline-block;
+  
   @media (width <= 767px) {
     font-size: 16px;
+  }
+  
+  &:hover {
+    opacity: 0.7;
+  }
+  
+  &:active {
+    transform: scale(0.98);
   }
 }
 
@@ -140,28 +146,7 @@
   }
 
   .profileSelector {
-    cursor: pointer;
-    transition: 0.2s ease;
-
-    &:hover {
-      opacity: 0.7;
-    }
-  }
-
-  .backBtn {
-    padding: 10px;
-    transition: 0.2s ease;
-    width: 48px;
-    height: 48px;
-
-    svg {
-      width: 24px;
-      height: 24px;
-    }
-
-    &:hover {
-      background: #f5f5f5;
-    }
+    // Removed cursor and hover from parent container
   }
 
   .editBtn {

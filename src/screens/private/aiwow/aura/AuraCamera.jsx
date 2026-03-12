@@ -16,6 +16,8 @@ const AuraCamera = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
+  const [isFrontCamera, setIsFrontCamera] = useState(true);
+  const [videoReady, setVideoReady] = useState(false); // ⭐ Track video ready state
 
   const {
     modelsLoaded,
@@ -24,35 +26,44 @@ const AuraCamera = () => {
     stopDetection
   } = useFaceDetection({ videoRef, canvasRef: detectionCanvasRef });
 
+  // Safety net cleanup on unmount
   useEffect(() => {
-    if (modelsLoaded && videoRef.current && videoRef.current.readyState >= 2) {
-      setTimeout(() => {
-        startDetection();
-      }, 300);
-    }
-  }, [modelsLoaded]);
-
-  useEffect(() => {
-    startCamera();
-    
     return () => {
+      console.log('Component unmounting - final cleanup');
       stopDetection();
       
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
-        videoRef.current.srcObject = null;
-      }
-      
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+      if (videoRef.current?.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach(track => {
+          track.stop();
+        });
       }
     };
-  }, [facingMode, modelsLoaded]);
+  }, []);
+
+  // Start detection when BOTH models and video are ready
+  useEffect(() => {
+    if (modelsLoaded && videoReady) {
+      console.log("Models + Video ready → Starting detection");
+      startDetection();
+    }
+  }, [modelsLoaded, videoReady]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      startCamera();
+    }, 200);
+    
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [facingMode]);
 
   const startCamera = async () => {
     try {
-      stopCamera();
+      // Only stop camera if stream exists
+      if (stream) {
+        stopCamera();
+      }
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setError('Camera is not supported on this device or browser.');
@@ -61,7 +72,7 @@ const AuraCamera = () => {
 
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode,
+          facingMode: { ideal: facingMode },
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -71,17 +82,20 @@ const AuraCamera = () => {
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
+
+        // Detect actual camera facing mode from track
+        const videoTrack = mediaStream.getVideoTracks()[0];
+        const trackFacing = videoTrack?.getSettings?.()?.facingMode;
+        setIsFrontCamera(trackFacing !== 'environment');
         
         videoRef.current.onloadedmetadata = () => {
+          console.log("Video metadata loaded");
           videoRef.current.play();
         };
 
-        videoRef.current.onplay = () => {
-          if (modelsLoaded) {
-            setTimeout(() => {
-              startDetection();
-            }, 300);
-          }
+        videoRef.current.onloadeddata = () => {
+          console.log("Video ready");
+          setVideoReady(true);
         };
       }
     } catch (err) {
@@ -105,6 +119,7 @@ const AuraCamera = () => {
 
   const stopCamera = () => {
     stopDetection();
+    setVideoReady(false); // Reset video ready state
     
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = videoRef.current.srcObject.getTracks();
@@ -119,6 +134,9 @@ const AuraCamera = () => {
   };
 
   const switchCamera = () => {
+    // Stop current camera completely before switching
+    stopCamera();
+    
     const nextMode = facingMode === 'user' ? 'environment' : 'user';
     setFacingMode(nextMode);
   };
@@ -213,11 +231,14 @@ const AuraCamera = () => {
               ref={videoRef}
               autoPlay
               playsInline
+              muted
               className={styles.video}
+              style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
             />
             <canvas
               ref={detectionCanvasRef}
               className={styles.detectionCanvas}
+              style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
             />
             <div className={styles.overlay}>
               <div className={`${styles.frameCorner} ${faceDetected ? styles.detected : styles.notDetected}`} style={{ top: '10%', left: '5%' }}></div>

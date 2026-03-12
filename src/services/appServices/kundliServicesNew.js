@@ -73,6 +73,18 @@ export const kundliApi = privateRequestNew.injectEndpoints({
         "Kundlis",
       ],
     }),
+
+    // GET KUNDLI PDF
+    getKundliPdf: builder.query({
+      query: ({ kundliId, language }) => ({
+        url: `kundlis/kundli-pdf`,
+        method: "GET",
+        params: { 
+          id: kundliId,
+          language: language || 'en'
+        },
+      }),
+    }),
   }),
 });
 
@@ -82,6 +94,8 @@ export const {
   useCreateKundliMutation,
   useDeleteKundliMutation,
   useEditKundliMutation,
+  useGetKundliPdfQuery,
+  useLazyGetKundliPdfQuery,
 } = kundliApi;
 
 // Export addKundli as an alias for createKundli for backward compatibility

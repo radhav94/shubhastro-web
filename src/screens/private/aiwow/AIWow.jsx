@@ -13,6 +13,8 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { logout } from "../../../redux/auth/authSlice";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
+import Footer from "../../../layouts/Footer";
+import { PATH } from "../../../utils/routes/Paths";
 
 const AIWow = () => {
   const navigate = useNavigate();
@@ -57,7 +59,14 @@ const AIWow = () => {
 
   // Initialize from localStorage and validate against API profiles
   useEffect(() => {
-    if (!profiles.length || isFetching) return;
+    if (isFetching) return;
+
+    // Handle case when all profiles are deleted
+    if (profiles.length === 0) {
+      dispatch(setSelectedKundliProfile(null));
+      localStorage.removeItem("selectedKundliProfile");
+      return;
+    }
 
     const saved = localStorage.getItem("selectedKundliProfile");
     let parsed = null;
@@ -137,19 +146,26 @@ const AIWow = () => {
     
   };
 
+  const handleProfileClick = () => {
+    // ✅ Authentication check - redirect to login if not authenticated
+    if (!requireAuth()) return null;
+    setShowProfileModal(true);
+  };
+
   // Coming Soon Features - Empty array since Aura Photography is now unlocked
   // const comingSoonFeatures = [];
 
   
 
   return (
+    <>
     <div className={styles.container}>
       {isLoading && <PrimaryLoader />}
 
       <header className={styles.headerWrap}>
         <div className={styles.header}>
           <span class={styles.headerBack}>
-            <button className={styles.backButton} onClick={() => navigate(-1)}>
+            <button className={styles.backButton} onClick={() => navigate(PATH.privateRoutes.HOME.path)}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M15 18L9 12L15 6"
@@ -164,7 +180,7 @@ const AIWow = () => {
           </span>
           <div
             className={styles.profileSelector}
-            onClick={() => setShowProfileModal(true)}
+            onClick={handleProfileClick}
           >
             <span className={styles.selectLabel}>Select Profile</span>
             <span className={styles.profileName}>
@@ -286,6 +302,8 @@ const AIWow = () => {
         onClose={() => setShowMobileAppModal(false)}
       />
     </div>
+    <Footer />
+    </>
   );
 };
 

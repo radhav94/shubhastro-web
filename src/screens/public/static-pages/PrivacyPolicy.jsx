@@ -9,7 +9,7 @@ const PrivacyPolicy = () => {
       <Divider />
       
       <p className={styles.paragraph}>
-        www.shubhtalk.com ("we", "Shubhtalk Services Private Limited ", "Shubhtalk" (web and application) hereinafter referred as "website") is committed to protect the privacy of the users of the website (including third party service providers, hereinafter referred to as 'astrologers', and buyers/customers whether registered or not registered). Please read this privacy policy carefully to understand how the website is going to use your information supplied by you to the Website.
+        www.ShubhAstro.com ("we", "ShubhAstro Services Private Limited ", "ShubhAstro" (web and application) hereinafter referred as "website") is committed to protect the privacy of the users of the website (including third party service providers, hereinafter referred to as 'astrologers', and buyers/customers whether registered or not registered). Please read this privacy policy carefully to understand how the website is going to use your information supplied by you to the Website.
       </p>
       
       <p className={styles.paragraph}>
@@ -21,7 +21,7 @@ const PrivacyPolicy = () => {
       </p>
       
       <p className={styles.paragraph}>
-        Shubhtalk ensures that all advertising and promotional materials for astrology and related services strictly adhere to the Advertising Standards Council of India (ASCI) guidelines and Consumer Protection Act, 2019. We provide clear disclaimers in all communications. stating that the predictions and advice provided through the platform are without guaranteed outcomes. Shubhtalk does not guarantee the accuracy of predictions, or the effectiveness of any services and all services are provided with full transparency, in line with the applicable laws.
+        ShubhAstro ensures that all advertising and promotional materials for astrology and related services strictly adhere to the Advertising Standards Council of India (ASCI) guidelines and Consumer Protection Act, 2019. We provide clear disclaimers in all communications. stating that the predictions and advice provided through the platform are without guaranteed outcomes. ShubhAstro does not guarantee the accuracy of predictions, or the effectiveness of any services and all services are provided with full transparency, in line with the applicable laws.
       </p>
       
       <h4 className={styles.subtitle}>USER'S CONSENT</h4>
@@ -39,26 +39,26 @@ const PrivacyPolicy = () => {
       
       <h4 className={styles.subtitle}>Collection of Personal Information</h4>
       <p className={styles.paragraph}>
-        Creating a user profile with Shubhtalk involves providing specific information. The mandatory details include your phone number for OTP (One-Time Password) verification, which is necessary to ensure the security and validity of the registration process. Your phone number may also be used for the purpose of Astrologers connecting with you via phone call when you have requested to talk with them on the website. Your phone number will never be shared with the Astrologers directly – when you are contacted via phone call, it is only through our service 'Astrologer connect' whereby you receive a phone call from the astrologer that you have chosen to consult with, with the website as the intermediary, so that your private phone number remains private, unknown, and unknowable to any third parties including Astrologers, and you are still able to use your phone to speak with them, as per your convenience. Additionally, you are required to provide your first name. Last name, and date of birth (DOB) are optional - these details are not mandatory to provide it during the registration process. If provided, this information will be stored and used in compliance with the Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011, and for the purposes described in this policy.
+        Creating a user profile with ShubhAstro involves providing specific information. The mandatory details include your phone number for OTP (One-Time Password) verification, which is necessary to ensure the security and validity of the registration process. Your phone number may also be used for the purpose of Astrologers connecting with you via phone call when you have requested to talk with them on the website. Your phone number will never be shared with the Astrologers directly – when you are contacted via phone call, it is only through our service 'Astrologer connect' whereby you receive a phone call from the astrologer that you have chosen to consult with, with the website as the intermediary, so that your private phone number remains private, unknown, and unknowable to any third parties including Astrologers, and you are still able to use your phone to speak with them, as per your convenience. Additionally, you are required to provide your first name. Last name, and date of birth (DOB) are optional - these details are not mandatory to provide it during the registration process. If provided, this information will be stored and used in compliance with the Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011, and for the purposes described in this policy.
       </p>
       
       <h4 className={styles.subtitle}>PURPOSE AND USE OF DATA/INFORMATION COLLECTION</h4>
       <p className={styles.paragraph}>
-        By collecting this information, Shubhtalk aims to create a personalized user profile that can cater to your specific needs and preferences. However, if you choose not to provide your date of birth, it won't hinder the registration process, and you can still access the services offered by Shubhtalk with your verified phone number.
+        By collecting this information, ShubhAstro aims to create a personalized user profile that can cater to your specific needs and preferences. However, if you choose not to provide your date of birth, it won't hinder the registration process, and you can still access the services offered by ShubhAstro with your verified phone number.
       </p>
       
       <h4 className={styles.subtitle}>Profile Deletion</h4>
       <p className={styles.paragraph}>
-        Delete Profile: If you wish to delete your entire shubhtalk profile, you can find an option to "Delete your account" Click on this setting option in the side menu and follow the instructions and complete the account deletion process.
+        Delete Profile: If you wish to delete your entire ShubhAstro profile, you can find an option to "Delete your account" Click on this setting option in the side menu and follow the instructions and complete the account deletion process.
       </p>
       
       <p className={styles.paragraph}>
-        User must also note that Personal information collected by Shubhtalk will be retained for as long as reasonable to fulfil the purposes outlined in this Privacy Policy, and to provide a smooth, quick and easy experience for users, or as required by law.
+        User must also note that Personal information collected by ShubhAstro will be retained for as long as reasonable to fulfil the purposes outlined in this Privacy Policy, and to provide a smooth, quick and easy experience for users, or as required by law.
       </p>
       
       <h4 className={styles.subtitle}>CONSENT MANAGEMENT</h4>
       <p className={styles.paragraph}>
-        Shubhtalk is committed to complete and total transparency when it comes to our handling of your data. Users can request the deletion of their data, or seek access to a summary of personal data being processed by us and our data processors, and seek information about the identities of any data processors or parties that are securely processing your data, along with a description of your personal data so shared, and make changes or updates to the said data if required by users, or withdraw partly or wholly their consent to processing or usage of their data by using this platform [Link to platform provided by consent manager's website] provided by our reputed Consent Manager [Consent Manager Website] and we will comply within a reasonable and lawful time unless we are required to retain certain information for legal or regulatory reasons.
+        ShubhAstro is committed to complete and total transparency when it comes to our handling of your data. Users can request the deletion of their data, or seek access to a summary of personal data being processed by us and our data processors, and seek information about the identities of any data processors or parties that are securely processing your data, along with a description of your personal data so shared, and make changes or updates to the said data if required by users, or withdraw partly or wholly their consent to processing or usage of their data by using this platform [Link to platform provided by consent manager's website] provided by our reputed Consent Manager [Consent Manager Website] and we will comply within a reasonable and lawful time unless we are required to retain certain information for legal or regulatory reasons.
       </p>
       
       <h4 className={styles.subtitle}>Voice Recording/Video call access and Microphone Permission</h4>
@@ -75,12 +75,12 @@ const PrivacyPolicy = () => {
       </p>
       
       <p className={styles.paragraph}>
-        While Shubhtalk also facilitates audio and video interactions, it is not responsible for any content, advice, or actions that occur during these sessions. Users should exercise discretion during such communications, and we recommend ensuring that no sensitive personal data is shared unless necessary. Any information shared during audio, video or text interactions, or any information shared not to the platform, but to the third party using the platform (such as Astrologers or other users) shall not fall under the ambit of information protected by this privacy policy, and Shubhtalk shall have no liability arising out of any consequences of sharing such information, or any responsibility whatsoever to safeguard, delete or control such information.
+        While ShubhAstro also facilitates audio and video interactions, it is not responsible for any content, advice, or actions that occur during these sessions. Users should exercise discretion during such communications, and we recommend ensuring that no sensitive personal data is shared unless necessary. Any information shared during audio, video or text interactions, or any information shared not to the platform, but to the third party using the platform (such as Astrologers or other users) shall not fall under the ambit of information protected by this privacy policy, and ShubhAstro shall have no liability arising out of any consequences of sharing such information, or any responsibility whatsoever to safeguard, delete or control such information.
       </p>
       
       <h4 className={styles.subtitle}>COMMITMENT</h4>
       <p className={styles.paragraph}>
-        The Website intends to protect the privacy of all kinds of users visiting the platform irrespective whether the user is a registered user or merely a visitor. It is recommended to every user to understand what types of personally identifiable information is collected. It is clarified and made explicit that Shubhtalk does not make any predictions or give any advise whatsoever. It only provides Kundlis, Horoscopes and astrology charts based entirely and only on the corpus of publically available and established knowledge of astrology, and how the personal information that the users provide corresponds to it. We commit that any information provided for these purposes will solely be used for those purposes only. Any information that may be needed to be provided to Astrologers is not taken from the information given to the website when a user makes their profile, or when they use any abovementioned service provided by the website such as Kundlis, Horoscopes or Astrology Charts, and is therefore completely separate. Each time a user wishes to consult an astrologer via the platform provided by the website, the information required to supply to the astrologer is separately asked for, and is not used, controlled, transmitted, shared by the website in any manner, except for its stated purpose i.e. its supply to the particular Astrologer to whom the information is given by the user. It is further clarified that the Website does not in any manner deal in selling or renting the information supplied to the Website.
+        The Website intends to protect the privacy of all kinds of users visiting the platform irrespective whether the user is a registered user or merely a visitor. It is recommended to every user to understand what types of personally identifiable information is collected. It is clarified and made explicit that ShubhAstro does not make any predictions or give any advise whatsoever. It only provides Kundlis, Horoscopes and astrology charts based entirely and only on the corpus of publically available and established knowledge of astrology, and how the personal information that the users provide corresponds to it. We commit that any information provided for these purposes will solely be used for those purposes only. Any information that may be needed to be provided to Astrologers is not taken from the information given to the website when a user makes their profile, or when they use any abovementioned service provided by the website such as Kundlis, Horoscopes or Astrology Charts, and is therefore completely separate. Each time a user wishes to consult an astrologer via the platform provided by the website, the information required to supply to the astrologer is separately asked for, and is not used, controlled, transmitted, shared by the website in any manner, except for its stated purpose i.e. its supply to the particular Astrologer to whom the information is given by the user. It is further clarified that the Website does not in any manner deal in selling or renting the information supplied to the Website.
       </p>
       
       <p className={styles.paragraph}>
@@ -114,7 +114,7 @@ const PrivacyPolicy = () => {
         </li>
         
         <li className={styles.listItem}>
-          <span className={styles.underline}>Device Information:</span> We collect device specific information such as but not limited to unique device identifiers, and mobile network information. Shubhtalk may associate user device identifiers or phone numbers with your Shubhtalk account for as long as reasonable.
+          <span className={styles.underline}>Device Information:</span> We collect device specific information such as but not limited to unique device identifiers, and mobile network information. ShubhAstro may associate user device identifiers or phone numbers with your ShubhAstro account for as long as reasonable.
         </li>
         
         <li className={styles.listItem}>
@@ -146,7 +146,7 @@ const PrivacyPolicy = () => {
       </p>
       
       <p className={styles.paragraph} style={{fontWeight: 'bold'}}>
-        SHUBHTALK IS NOT LIABLE FOR ANY CONSEQUENCES RESULTING FROM THE SUBMISSION OF INCORRECT OR FRAUDULENT INFORMATION.
+        ShubhAstro IS NOT LIABLE FOR ANY CONSEQUENCES RESULTING FROM THE SUBMISSION OF INCORRECT OR FRAUDULENT INFORMATION.
       </p>
       
       <p className={styles.paragraph}>
@@ -204,7 +204,7 @@ const PrivacyPolicy = () => {
       </p>
       
       <p className={styles.paragraph}>
-        <span className={styles.underline}>Safety and Security:</span> Shubhtalk.com honours users' privacy and employs the best practice to secure the user's personal details, such as birth details, address, etc., and also financial details such as credit card or debit card transaction details. Shubhtalk.com uses the best encryption methodologies to ensure secure transactions from our side and thus encourages our clients to use their credit/debit cards on Shubhtalk.com with full confidence. By doing so, we strive for the safety and security of our users, thus making their experience with Shubhtalk.com absolutely safe and secure.
+        <span className={styles.underline}>Safety and Security:</span> ShubhAstro.com honours users' privacy and employs the best practice to secure the user's personal details, such as birth details, address, etc., and also financial details such as credit card or debit card transaction details. ShubhAstro.com uses the best encryption methodologies to ensure secure transactions from our side and thus encourages our clients to use their credit/debit cards on ShubhAstro.com with full confidence. By doing so, we strive for the safety and security of our users, thus making their experience with ShubhAstro.com absolutely safe and secure.
       </p>
       
       <h4 className={styles.subtitle}>DISCLAIMER</h4>
@@ -237,7 +237,7 @@ const PrivacyPolicy = () => {
       </p>
       
       <p className={styles.paragraph}>
-        <strong>Email:</strong> <a href="mailto:contact@shubhtalk.com" className={styles.link}>contact@shubhtalk.com</a>
+        <strong>Email:</strong> <a href="mailto:contact@ShubhAstro.com" className={styles.link}>contact@ShubhAstro.com</a>
       </p>
       
       <p className={styles.paragraph}>
@@ -249,7 +249,7 @@ const PrivacyPolicy = () => {
       </p>
       
       <p className={styles.paragraph}>
-        <strong>Email: <a href="mailto:support@shubhtalk.com" className={styles.link}>support@shubhtalk.com</a></strong>
+        <strong>Email: <a href="mailto:support@ShubhAstro.com" className={styles.link}>support@ShubhAstro.com</a></strong>
       </p>
       
       <p className={styles.paragraph}>

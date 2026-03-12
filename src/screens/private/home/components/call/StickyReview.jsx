@@ -27,14 +27,15 @@ const StickyReview = () => {
 
       if (res.success) {
         Toast.success(res.message);
+        setOpenReview(false);
         // navigate(-1); // or home
       } else {
         Toast.error(res.message);
+        setOpenReview(false);
       }
-
-      setOpenReview(false);
     } catch (err) {
-      Toast.error("Failed to submit review");
+      // Global error handler in privateRequestNew.js will show the toast
+      setOpenReview(false);
     }
   };
   return (

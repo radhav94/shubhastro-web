@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useSearchParams, useParams } from "react-router-dom";
+import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryTabs from "../../../component/UI/tabs/PrimaryTabs";
 import BasicContent from "./BasicContent/BasicContent";
@@ -23,25 +23,48 @@ import {
   useGetAllKundlisQuery,
   useCreateKundliMutation,
   useDeleteKundliMutation,
+  useLazyGetKundliPdfQuery,
 } from "../../../services/appServices/kundliServicesNew";
 import { setForm } from "../../../redux/kundliform/formSlice";
 import { Toast } from "../../../component";
 import ProfileSelector from "./components/ProfileSelector";
 import KundliHeader from "./components/KundliHeader";
 import KundliInfoContent from "./components/KundliInfoContent";
-import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
-import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
-import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
-import ProfileListingModal from "../../../component/UI/Profile/ProfileListingModal";
-import LocationSearch from "../../../utils/location/locationSearchVedic";
-import styles from "./components/ProfileModals.module.scss";
+import styles from "../../../component/UI/tabs/PrimaryTabs.module.scss";
 import { ProfileManager } from "../../../component/UI/Profile";
+
 
 const Kundali = () => {
   const contentRef = useRef(null);
   const dispatch = useDispatch();
-  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { kundliId } = useParams();
+  
+  // State to control active tab - default to Basic (0)
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const [shouldRetryDownload, setShouldRetryDownload] = useState(false);
+  
+  // Sync activeTabIndex with query params on mount and when params change
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      const tabMap = {
+        'basic': 0,
+        'kundli': 1,
+        'kp': 2,
+        'ashtakvarga': 3,
+        'charts': 4,
+        'dasha': 5,
+        'free-report': 6,
+        '12-months': 7,
+        'Download': 8,
+        'download': 8, // Support lowercase as well
+      };
+      setActiveTabIndex(tabMap[tab] || 0);
+    }
+  }, [searchParams]);
 
   // Get initial tab index from query params
   const getInitialTabIndex = () => {
@@ -109,6 +132,7 @@ const Kundali = () => {
   });
   const [createKundli, { isLoading: isCreating }] = useCreateKundliMutation();
   const [deleteKundli] = useDeleteKundliMutation();
+  const [getKundliPdf] = useLazyGetKundliPdfQuery();
 
   // Combine saved profiles with temporary profiles
   const savedProfiles = kundliData?.data || [];
@@ -188,6 +212,20 @@ const Kundali = () => {
     }
   }, [selectedProfile, dispatch]);
 
+  // Check if user returned from payment and should retry download
+  useEffect(() => {
+    const fromPayment = searchParams.get('fromPayment');
+    if (fromPayment === 'true' && selectedProfile?._id) {
+      // Remove the fromPayment param
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('fromPayment');
+      setSearchParams(newParams, { replace: true });
+      
+      // Set flag to retry download
+      setShouldRetryDownload(true);
+    }
+  }, [searchParams, selectedProfile, setSearchParams]);
+
   const payload = useSelector((state) => state?.form?.kundliPayload);
   const params = buildVedicParam(payload);
 
@@ -204,6 +242,112 @@ const Kundali = () => {
   } = useGetAstroDetailsQuery(params ? params : skipToken);
 
   const astroDetails = data?.response;
+
+  // Function to handle PDF download
+  const handlePdfDownload = async () => {
+    if (isDownloadingPdf) return; // Prevent multiple clicks
+    
+    // Get language from Google Translate cookie
+    const getCurrentLang = () => {
+      const cookie = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("googtrans="));
+      if (cookie) {
+        const value = decodeURIComponent(cookie.split("=")[1]);
+        const parts = value.split("/");
+        return parts[2] || "en";
+      }
+      return "en";
+    };
+
+    const selectedLanguage = getCurrentLang();
+    
+    // Fetch PDF without wallet balance check
+    if (selectedProfile?._id) {
+      setIsDownloadingPdf(true);
+      try {
+        const result = await getKundliPdf({ 
+          kundliId: selectedProfile._id,
+          language: selectedLanguage 
+        }).unwrap();
+        
+        if (result?.success && result?.data) {
+          Toast.success("Opening PDF in new tab...");
+          
+          // Fetch the PDF as a blob to create a dummy URL
+          try {
+            const response = await fetch(result.data);
+            const blob = await response.blob();
+            
+            // Create a blob URL (this will show as blob:http://... in the browser)
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // Open the blob URL in a new tab
+            const newWindow = window.open(blobUrl, '_blank', 'noopener,noreferrer');
+            
+            // Add beforeunload event to the new window to show alert on close
+            // Note: Modern browsers show a generic "Leave site?" message for security
+            if (newWindow) {
+              // Wait a bit for the window to load
+              setTimeout(() => {
+                try {
+                  newWindow.addEventListener('beforeunload', (e) => {
+                    // Trigger the browser's native confirmation dialog
+                    e.preventDefault();
+                    // Modern browsers ignore custom messages and show generic "Leave site?" prompt
+                    return '';
+                  });
+                } catch (error) {
+                  console.log('Could not add beforeunload listener:', error);
+                }
+              }, 500);
+            }
+            
+            // Revoke the blob URL immediately after opening
+            // The PDF will still display in the opened window, but the URL becomes invalid
+            // This prevents the user from copying and reusing the URL
+            setTimeout(() => {
+              URL.revokeObjectURL(blobUrl);
+            }, 1000); // Revoke after 1 second
+            
+          } catch (fetchError) {
+            console.error("Failed to fetch PDF:", fetchError);
+            // Fallback to direct URL if blob creation fails
+            window.open(result.data, '_blank', 'noopener,noreferrer');
+          }
+        } else {
+          Toast.error("Failed to load PDF");
+        }
+      } catch (error) {
+        console.error("PDF fetch error:", error);
+        
+        // Check if status is 400 and redirect to recharge
+        if (error?.status === 400) {
+          Toast.error(error?.data?.message || "Insufficient balance. Redirecting to recharge...");
+          setTimeout(() => {
+            // Pass current URL as returnUrl to redirect back after payment
+            const currentUrl = window.location.pathname + window.location.search;
+            navigate(`/recharge?returnUrl=${encodeURIComponent(currentUrl)}`);
+          }, 1500);
+        } else {
+          Toast.error(error?.data?.message || "Failed to load PDF");
+        }
+      } finally {
+        setIsDownloadingPdf(false);
+      }
+    } else {
+      Toast.error("Please select a profile first");
+    }
+  };
+
+  // Effect to retry download after payment success
+  useEffect(() => {
+    if (shouldRetryDownload && selectedProfile?._id && !isDownloadingPdf) {
+      setShouldRetryDownload(false);
+      Toast.info("Retrying PDF download...");
+      handlePdfDownload();
+    }
+  }, [shouldRetryDownload, selectedProfile, isDownloadingPdf]);
 
   const tabsData = [
     {
@@ -243,6 +387,61 @@ const Kundali = () => {
     {
       label: "12 Months Prediction",
       content: <Prediction params={params} skipToken={skipToken} />,
+    },
+    {
+      label: (
+        <div
+          className={styles.downloadButton}
+          onClick={async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            await handlePdfDownload();
+          }}
+        >
+          {isDownloadingPdf ? (
+            <>
+              <svg 
+                width="18" 
+                height="18" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                style={{ animation: 'spin 1s linear infinite' }}
+              >
+                <circle cx="12" cy="12" r="10" opacity="0.25" />
+                <path d="M12 2a10 10 0 0 1 10 10" />
+              </svg>
+              Downloading...
+            </>
+          ) : (
+            <>
+              <svg 
+                width="18" 
+                height="18" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Download Report
+            </>
+          )}
+        </div>
+      ),
+      content: (
+        <div style={{ padding: "20px", textAlign: "center" }}>
+          <p>Click the Download button above to generate your Kundli PDF</p>
+        </div>
+      ),
     },
   ];
 
@@ -325,6 +524,13 @@ const Kundali = () => {
   };
 
   // Handlers
+  const handleTabChange = async (tabIndex, tabLabel) => {
+    console.log("Tab change requested:", tabIndex, tabLabel);
+    
+    // For all tabs, allow change
+    return true;
+  };
+
   const handleSelectProfile = (profile) => {
     // If it's a temporary profile (from non-logged-in user), add it to tempProfiles
     if (!isLoggedIn && profile._id?.startsWith('temp_')) {
@@ -337,6 +543,15 @@ const Kundali = () => {
     
     setSelectedProfile(profile);
     setShowSelectProfile(false);
+    
+    // Reset to Basic tab (index 0)
+    setActiveTabIndex(0);
+    
+    // Clear tab and subtab query parameters
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete('tab');
+    newParams.delete('subtab');
+    setSearchParams(newParams, { replace: true });
   };
 
   const handleDeleteProfile = (e, profileId) => {
@@ -498,7 +713,7 @@ const Kundali = () => {
   };
 
   return (
-    <div className={isDirectKundliView ? "" : "mt-10"}>
+    <div className={isDirectKundliView ? "" : ""} style={!isDirectKundliView ? { paddingTop: '224px' } : {}}>
       {/* Free Kundli Online Title - Hidden in direct kundli view */}
       {!isDirectKundliView && <KundliHeader />}
 
@@ -520,7 +735,12 @@ const Kundali = () => {
       {selectedProfile && (
         <div ref={contentRef} id="kundli-tabs">
           {planetLoading || isAstro ? (
-            <PrimaryTabs tabs={tabsData} initialActiveIndex={getInitialTabIndex()} />
+            <PrimaryTabs 
+              key={selectedProfile._id} 
+              tabs={tabsData} 
+              initialActiveIndex={activeTabIndex}
+              onTabChange={handleTabChange}
+            />
           ) : (
             <HtmlContentCard sections={kundliInfoData} />
           )}

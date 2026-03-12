@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { useFetchBirthDetailsQuery } from "../../../../redux/api/kundli/kundliApi";
 import { capitalizeWords } from "../../../../utils/capitalize";
 import { format12HourTime } from "../../../../utils/dateFormat/dateTime";
+import arrowUp from "../../../../assets/images/arrow-up.svg";
 
 const AccordionSection = ({ title, data = {}, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -32,7 +33,15 @@ const AccordionSection = ({ title, data = {}, defaultOpen = false }) => {
         aria-expanded={isOpen}
       >
         <h3 className={styles.accordionTitle}>{title}</h3>
-        <span className={styles.accordionIcon}>{isOpen ? "−" : "+"}</span>
+        <span className="text-sm text-gray-400">
+          <img
+            src={arrowUp}
+            alt="toggle"
+            className={`transition-transform duration-300 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
+        </span>
       </button>
 
       {isOpen && (
