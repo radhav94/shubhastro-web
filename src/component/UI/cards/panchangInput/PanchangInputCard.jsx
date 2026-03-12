@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import styles from "./PanchangInputCard.module.scss";
 
 import PrimaryButton from "../../../PrimaryButton";
 import PrimaryText from "../../../PrimaryText";
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import ErrorText from "../../../ErrorText";
-import { color } from "framer-motion";
 import { appColors } from "../../../../utils/theme";
 
 const PanchangInputCard = ({ imageSrc, title, onTap, initialDate, initialLocation, initialLatitude, initialLongitude }) => {
@@ -127,18 +126,21 @@ const PanchangInputCard = ({ imageSrc, title, onTap, initialDate, initialLocatio
               />
               {errors.location && <ErrorText>{errors.location}</ErrorText>}
             </div>
-          </div>
 
-          <PrimaryButton
-            width={"100%"}
-            title="Submit"
-            buttonStyles={{
-              marginTop: "16px",
-              paddingTop: "12px",
-              paddingBottom: "12px",
-            }}
-            type="submit"
-          />
+            {/* Submit Button */}
+            <div className={styles.submitButtonWrapper}>
+              <PrimaryButton
+                width={"100%"}
+                title="Submit"
+                buttonStyles={{
+                  paddingTop: "12px",
+                  paddingBottom: "12px",
+                  background: "linear-gradient(90deg, #f75801 0%, #d43400 100%)",
+                }}
+                type="submit"
+              />
+            </div>
+          </div>
         </form>
       </div>
     </div>
