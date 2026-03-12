@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import styles from "./TodayPanchang.module.scss";
 import { useFetchAdvancePanchangQuery } from "../../../../redux/api/panchang/panchangApi";
 
@@ -27,20 +28,47 @@ import { GoNumber } from "react-icons/go";
 import { WiMoonFull } from "react-icons/wi";
 
 const TodayPanchang = () => {
+  const location = useLocation();
   const pad = (num) => String(num).padStart(2, "0");
-  const now = new Date();
+  
+  // Get initial date and location from navigation state
+  const { date: initialDate, location: initialLocation, latitude: initialLat, longitude: initialLon } = location.state || {};
+  
+  // Initialize with passed data or current date/location
+  const now = initialDate ? new Date(initialDate) : new Date();
+  
   const [payload, setPayload] = useState({
     day: now.getDate(),
     month: now.getMonth() + 1,
     year: now.getFullYear(),
-    hour: pad(now.getHours()),      // 07 if needed
+    hour: pad(now.getHours()),
     min: pad(now.getMinutes()),  
-    lat: 19.132,
-    lon: 72.342, 
+    lat: initialLat || 19.132,
+    lon: initialLon || 72.342, 
     tzone: 5.5,
   });
+  
   const { data, isLoading, isSuccess } = useFetchAdvancePanchangQuery(payload);
   const panchangData = data?.response;
+
+  // Auto-trigger API call if date/location passed from navigation
+  useEffect(() => {
+    if (initialDate && initialLat && initialLon) {
+      const date = new Date(initialDate);
+      const pad = (val) => (val < 10 ? "0" + val : val);
+      
+      setPayload({
+        day: date.getDate(),
+        month: date.getMonth() + 1,
+        year: date.getFullYear(),
+        hour: pad(date.getHours()),
+        min: pad(date.getMinutes()),
+        lat: Number(initialLat),
+        lon: Number(initialLon),
+        tzone: 5.5,
+      });
+    }
+  }, [initialDate, initialLat, initialLon]);
 
   // -------------------- TODAY HIGHLIGHTS --------------------
   const todayData = [
@@ -355,7 +383,14 @@ const TodayPanchang = () => {
 
       {isSuccess && (
         <div className={styles.mainContainer}>
-          <PanchangInputCard onTap={onTap} title="Panchang" />
+          <PanchangInputCard 
+            onTap={onTap} 
+            title="Panchang"
+            initialDate={initialDate}
+            initialLocation={initialLocation}
+            initialLatitude={initialLat}
+            initialLongitude={initialLon}
+          />
 
           <PanchangCards data={todayData} />
           <PanchangCards data={ayanamsaData} title="Ayanamsa & Rasi" />

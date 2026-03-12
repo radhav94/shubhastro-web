@@ -208,13 +208,13 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className={styles.footerOuter}>
           <div className={styles.footer_bottom}>
-            <p>© 2001-{currentYear} Shubh Astro Pvt. Ltd. All rights reserved</p>
+            <p> © {currentYear} ShubhAstro Pvt. Ltd. All rights reserved</p>
             <ul>
               <li>
-                <Link to="/policy">Privacy Policy</Link>
+                <Link to="/privacy-policy">Privacy Policy</Link>
               </li>
               <li>
-                <Link to="/termandcondition">T&C</Link>
+                <Link to="/terms-conditions">T&C</Link>
               </li>
             </ul>
           </div>
