@@ -19,6 +19,9 @@ const TopHeader = () => {
   const [selectedLang, setSelectedLang] = useState('en');
   const token = getToken();
 
+  // Check if we're in iframe mode
+  const isIframeMode = new URLSearchParams(window.location.search).get('iframe') === 'true';
+
   const userId = localStorage.getItem("shubhtalk_customer_id");   
 
   // Fetch kundli profiles for name fallback
@@ -290,6 +293,62 @@ const TopHeader = () => {
       }, 200);
     }, 200);
   };
+
+  // If in iframe mode, show minimal header with only language and close button
+  if (isIframeMode) {
+    return (
+      <header className={styles.iframeHeader}>
+        <div className={styles.iframeHeaderContent}>
+          {/* Language Dropdown */}
+          <div className={styles.languageWrap}>
+            <span
+              className={styles.onHoverChangeLang}
+              onClick={() => setOpen((prev) => !prev)}
+            >
+              <span className={styles.languageName}>{activeLang}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="8" viewBox="0 0 14 8" fill="none">
+                <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_9128_57)"/>
+                <defs>
+                  <linearGradient id="paint0_linear_9128_57" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#F75801"/>
+                    <stop offset="1" stopColor="#D43400"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </span>
+
+            <div
+              className={`${styles.languageDropdown} ${
+                open ? styles.open : styles.close
+              } notranslate`}
+              translate="no"
+            >
+              {supportedLanguages.map((lang) => (
+                <p
+                  key={lang.code}
+                  className="notranslate"
+                  onClick={() => {
+                    handleLanguageChange(lang.code);
+                  }}
+                >
+                  {lang.name}
+                </p>
+              ))}
+            </div>
+          </div>
+
+          {/* Close Button */}
+          <button 
+            className={styles.iframeCloseBtn}
+            onClick={() => window.parent.postMessage({ type: 'CLOSE_KUNDLI_MODAL' }, '*')}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <>
