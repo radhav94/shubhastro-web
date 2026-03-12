@@ -19,7 +19,8 @@
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   animation: slideUp 0.3s ease-out;
 }
 
@@ -43,29 +44,41 @@
   }
 }
 
+.sheetHeader {
+  flex-shrink: 0;
+  position: relative;
+  background: white;
+  border-radius: 24px 24px 0 0;
+  padding: 0 24px 16px;
+}
+
 .sheetHandle {
   width: 40px;
   height: 4px;
   background: #ddd;
   border-radius: 2px;
-  margin: 12px auto;
+  margin: 12px auto 16px;
 }
 
 .sheetContent {
   padding: 0 24px 24px;
   position: relative;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .sheetTitle {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 700;
-  margin-bottom: 24px;
+  margin-bottom: 0;
   color: #000;
 }
 
 .closeBtn {
   position: absolute;
-  top: 0;
+  top: 50%;
+  transform: translateY(-50%);
   right: 24px;
   background: #0001;
   border: none;
@@ -80,6 +93,7 @@
   justify-content: center;
   border-radius: 50%;
   transition: 0.2s ease;
+  z-index: 2;
 
   &:hover {
     background: #f0f0f0;
@@ -235,7 +249,7 @@
 
   .sideSheet {
     border-radius: 20px !important;
-    width: 90%;
+    width: 31%;
     max-width: 1000px;
     max-height: 80vh;
     animation: fadeIn 0.3s ease-out !important;
@@ -244,27 +258,36 @@
     left: auto !important;
     transform: none !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sheetHeader {
+    border-radius: 20px 20px 0 0;
+    padding: 20px 40px 20px;
   }
 
   .sheetContent {
-    padding: 32px 40px 40px;
+    padding: 0 40px 40px;
   }
 
   .sheetTitle {
-    font-size: 28px;
-    margin-bottom: 28px;
+    font-size: 20px;
+    margin-bottom: 0;
     font-weight: 700;
     color: #000;
   }
 
   .closeBtn {
     display: flex;
-    top: 20px;
+    top: 50%;
+    transform: translateY(-50%);
     right: 32px;
-    font-size: 28px;
-    width: 36px;
-    height: 36px;
+    font-size: 24px;
+    width: 30px;
+    height: 30px;
     color: #888;
+    z-index: 2;
 
     &:hover {
       background: #f5f5f5;

@@ -27,19 +27,43 @@
 
 .inputBox {
   display: flex;
-  gap: 30px;
+  gap: 12px;
   width: 100%;
+  align-items: flex-end;
 
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 16px;
+    align-items: stretch;
   }
 }
 
 .inputControl {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  min-width: 0;
+  
+  @media (min-width: 769px) {
+    flex: 0 1 calc(40% - 8px);
+  }
+  
+  @media (max-width: 768px) {
+    flex: 1;
+  }
+}
+
+.submitButtonWrapper {
+  display: flex;
+  align-items: flex-end;
+  
+  @media (min-width: 769px) {
+    flex: 0 0 auto;
+    min-width: 120px;
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 }
 
 .label {

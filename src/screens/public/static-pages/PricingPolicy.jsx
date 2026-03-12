@@ -10,7 +10,7 @@ const PricingPolicy = () => {
 
       <h4 className={styles.subtitle}>Price Range</h4>
       <p className={styles.paragraph}>
-        At Shubhtalk.com we have customised pricing according to the services
+        At ShubhAstro.com we have customised pricing according to the services
         rendered by us. The details are provided to you beforehand according to
         the effort, efficiency and the output of the service. Typically, the
         range of transactions on our Android and iOS applications varies from
@@ -26,7 +26,7 @@ const PricingPolicy = () => {
 
       <h4 className={styles.subtitle}>Price Matching</h4>
       <p className={styles.paragraph}>
-        At Shubhtalk.com we are committed to offering you the best possible
+        At ShubhAstro.com we are committed to offering you the best possible
         prices. We will be glad to meet our competitor's pricing if you ever
         find a service that we offer, in the similar interest and providing same
         professionalism and features, available from a similar service provider.
@@ -54,14 +54,14 @@ const PricingPolicy = () => {
         cancellation.
       </p>
       <p className={styles.paragraph}>
-        Our service is offered for sale by Shubhtalk Services Private Limited
+        Our service is offered for sale by ShubhAstro Services Private Limited
         (Formerly Codeyeti Software Solutions Pvt. Ltd.) for your personal
         needs. Therefore, we reserve the right to refuse to sell to any person
         whom we believe may be misusing the service.
       </p>
       <p className={styles.paragraph}>
         Please feel free to reach us at{" "}
-        <a href="mailto:support@shubhtalk.in" className={styles.link}>
+        <a href="mailto:support@ShubhAstro.in" className={styles.link}>
           support@shubhastro.in
         </a>
       </p>

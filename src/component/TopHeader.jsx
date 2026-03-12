@@ -19,6 +19,9 @@ const TopHeader = () => {
   const [selectedLang, setSelectedLang] = useState('en');
   const token = getToken();
 
+  // Check if we're in iframe mode
+  const isIframeMode = new URLSearchParams(window.location.search).get('iframe') === 'true';
+
   const userId = localStorage.getItem("shubhtalk_customer_id");   
 
   // Fetch kundli profiles for name fallback
@@ -93,6 +96,24 @@ const TopHeader = () => {
     if (currentLang) {
       setActiveLang(currentLang.name);
     }
+
+    // Verify Google Translate widget is properly initialized
+    // This helps ensure consistent behavior across environments
+    const checkGoogleTranslateWidget = () => {
+      const widget = document.querySelector('.goog-te-combo');
+      if (widget && currentLangCode !== 'en') {
+        // Ensure widget matches cookie
+        if (widget.value !== currentLangCode) {
+          widget.value = currentLangCode;
+          widget.dispatchEvent(new Event('change'));
+        }
+      }
+    };
+
+    // Check after a short delay to allow Google Translate to initialize
+    const timer = setTimeout(checkGoogleTranslateWidget, 500);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   /* sync user */
@@ -169,60 +190,76 @@ const TopHeader = () => {
       return "en";
     };
 
-    // Clear Google Translate cookies completely
+    // Clear Google Translate cookies completely - enhanced for production
     const clearCookies = () => {
-      const domain = window.location.hostname;
+      const hostname = window.location.hostname;
       const cookiesToClear = ['googtrans', 'googtrans_backup'];
-      const paths = ['/', ''];
-      const domains = [
-        '',
-        `domain=${domain}`,
-        domain.split(".").length > 1 ? `domain=.${domain}` : null
-      ].filter(Boolean);
+      
+      // Get all possible domain variations
+      const domainParts = hostname.split('.');
+      const domains = [''];
+      
+      // Add current domain
+      domains.push(`domain=${hostname}`);
+      
+      // Add parent domains (e.g., .example.com for sub.example.com)
+      if (domainParts.length > 1) {
+        domains.push(`domain=.${hostname}`);
+        
+        // Also try parent domain if subdomain exists
+        if (domainParts.length > 2) {
+          const parentDomain = domainParts.slice(-2).join('.');
+          domains.push(`domain=.${parentDomain}`);
+        }
+      }
 
+      // Clear cookies for all combinations
       cookiesToClear.forEach(cookieName => {
-        paths.forEach(path => {
-          domains.forEach(domainStr => {
+        domains.forEach(domainStr => {
+          // Try both with and without path
+          ['/', ''].forEach(path => {
             const pathStr = path ? `path=${path};` : '';
             const domainPart = domainStr ? `${domainStr};` : '';
-            document.cookie = `${cookieName}=; ${pathStr} ${domainPart} expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
+            
+            // Set multiple expiry formats for better compatibility
+            document.cookie = `${cookieName}=; ${pathStr} ${domainPart} expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0;`;
+            document.cookie = `${cookieName}=; ${pathStr} ${domainPart} expires=Thu, 01 Jan 1970 00:00:00 UTC; max-age=0;`;
           });
         });
       });
     };
 
-    // Set Google Translate cookie
+    // Set Google Translate cookie - enhanced for production
     const setCookie = (lang) => {
-      const domain = window.location.hostname;
+      const hostname = window.location.hostname;
       const cookieValue = `/en/${lang}`;
+      const maxAge = 31536000; // 1 year
 
-      // Set cookie for all domain variations
-      document.cookie = `googtrans=${cookieValue}; path=/; max-age=31536000;`;
-      document.cookie = `googtrans=${cookieValue}; path=/; domain=${domain}; max-age=31536000;`;
-      if (domain.split(".").length > 1) {
-        document.cookie = `googtrans=${cookieValue}; path=/; domain=.${domain}; max-age=31536000;`;
-      }
-    };
-
-    // Force restore original content before switching
-    const restoreOriginalContent = () => {
-      // Remove all Google Translate elements
-      const gtElements = document.querySelectorAll('font[style*="vertical-align: inherit"]');
-      gtElements.forEach(el => {
-        const parent = el.parentNode;
-        if (parent) {
-          parent.replaceChild(document.createTextNode(el.textContent), el);
+      // Set cookie for current domain
+      document.cookie = `googtrans=${cookieValue}; path=/; max-age=${maxAge}; SameSite=Lax;`;
+      
+      // Set for explicit domain
+      document.cookie = `googtrans=${cookieValue}; path=/; domain=${hostname}; max-age=${maxAge}; SameSite=Lax;`;
+      
+      // Set for parent domain if applicable
+      const domainParts = hostname.split('.');
+      if (domainParts.length > 1) {
+        document.cookie = `googtrans=${cookieValue}; path=/; domain=.${hostname}; max-age=${maxAge}; SameSite=Lax;`;
+        
+        if (domainParts.length > 2) {
+          const parentDomain = domainParts.slice(-2).join('.');
+          document.cookie = `googtrans=${cookieValue}; path=/; domain=.${parentDomain}; max-age=${maxAge}; SameSite=Lax;`;
         }
-      });
-
-      // Reset the iframe if it exists
-      const iframe = document.querySelector('.goog-te-banner-frame');
-      if (iframe) {
-        iframe.style.display = 'none';
       }
     };
 
     const currentLang = getCurrentLang();
+    
+    // Prevent unnecessary reload if already on target language
+    if (currentLang === targetLang) {
+      setOpen(false);
+      return;
+    }
     
     // Update selected language state and UI immediately
     setSelectedLang(targetLang);
@@ -234,32 +271,84 @@ const TopHeader = () => {
     // Close dropdown
     setOpen(false);
 
-    // If switching to English, clear everything and reload
+    // Clear all cookies first (for both English and other languages)
+    clearCookies();
+
+    // If switching to English, just reload after clearing cookies
     if (targetLang === 'en') {
-      clearCookies();
-      restoreOriginalContent();
-      // Force reload to reset to original English content
+      // Use a longer timeout to ensure cookies are cleared
       setTimeout(() => {
         window.location.reload();
-      }, 100);
+      }, 200);
       return;
     }
 
-    // For all other language switches, use a consistent approach
-    // Clear cookies first
-    clearCookies();
-    
-    // Wait for cookies to clear, then set new language and reload
+    // For other languages, set cookie then reload
     setTimeout(() => {
       setCookie(targetLang);
       
-      // Always reload to ensure consistent translation
-      // This is more reliable than trying to trigger the widget
+      // Reload after setting cookie
       setTimeout(() => {
         window.location.reload();
-      }, 100);
-    }, 100);
+      }, 200);
+    }, 200);
   };
+
+  // If in iframe mode, show minimal header with only language and close button
+  if (isIframeMode) {
+    return (
+      <header className={styles.iframeHeader}>
+        <div className={styles.iframeHeaderContent}>
+          {/* Language Dropdown */}
+          <div className={styles.languageWrap}>
+            <span
+              className={styles.onHoverChangeLang}
+              onClick={() => setOpen((prev) => !prev)}
+            >
+              <span className={styles.languageName}>{activeLang}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="8" viewBox="0 0 14 8" fill="none">
+                <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_9128_57)"/>
+                <defs>
+                  <linearGradient id="paint0_linear_9128_57" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#F75801"/>
+                    <stop offset="1" stopColor="#D43400"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </span>
+
+            <div
+              className={`${styles.languageDropdown} ${
+                open ? styles.open : styles.close
+              } notranslate`}
+              translate="no"
+            >
+              {supportedLanguages.map((lang) => (
+                <p
+                  key={lang.code}
+                  className="notranslate"
+                  onClick={() => {
+                    handleLanguageChange(lang.code);
+                  }}
+                >
+                  {lang.name}
+                </p>
+              ))}
+            </div>
+          </div>
+
+          {/* Close Button */}
+          <button 
+            className={styles.iframeCloseBtn}
+            onClick={() => window.parent.postMessage({ type: 'CLOSE_KUNDLI_MODAL' }, '*')}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <>
