@@ -16,9 +16,6 @@ const NewAstrologerDetailsCard = ({
   
 
   const imageUrl =
-    astrologer?.imageUrl ||
-    // astrologer?.aadharCardImgUrl ||
-    // astrologer?.panCardImgUrl ||
     astrologer?.profileImgUrl ||
     getAstrologerDefaultImage(astrologer?.gender);
 
