@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
@@ -150,9 +150,9 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
         <p className={styles.terms}>
           By submitting, you agree to our{" "}
-          <a href="/terms-conditions" className={styles.termsLink}>
+          <Link to={PATH.privateRoutes.TERMSCONDITIONS.path} className={styles.termsLink}>
             Terms & Conditions
-          </a>
+          </Link>
         </p>
       </div>
     </div>

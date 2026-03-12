@@ -8,12 +8,12 @@ import ErrorText from "../../../ErrorText";
 import { color } from "framer-motion";
 import { appColors } from "../../../../utils/theme";
 
-const PanchangInputCard = ({ imageSrc, title, onTap }) => {
+const PanchangInputCard = ({ imageSrc, title, onTap, initialDate, initialLocation, initialLatitude, initialLongitude }) => {
   const [formData, setFormData] = useState({
-    dateOfBirth: "",
-    location: "",
-    latitude: "19.132",
-    longitude: "72.342",
+    dateOfBirth: initialDate || "",
+    location: initialLocation || "",
+    latitude: initialLatitude || "19.132",
+    longitude: initialLongitude || "72.342",
   });
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long", // Thursday
