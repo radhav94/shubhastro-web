@@ -236,11 +236,15 @@
   padding-bottom: 1rem;
   @media (width <= 767px) {
     position: fixed;
-    bottom: 0;
+    bottom: 88px;
     background: #fff;
-    padding: 16px;
+    padding: 16px 16px 2.1rem 16px;
     width: 100%;
     left: 0;
+    z-index: 99;
+  }
+  @media (width <= 360px) {
+    padding: 16px 16px 2rem 16px;
   }
 }
 
