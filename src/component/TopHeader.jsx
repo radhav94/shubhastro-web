@@ -159,6 +159,9 @@ const TopHeader = () => {
   };
 
   const displayName = (() => {
+    // If not logged in, always show Guest
+    if (!token) return "Guest";
+    
     // First priority: User's registered firstName
     if (user?.firstName) return user.firstName;
     
@@ -187,6 +190,11 @@ const TopHeader = () => {
 
   // Get user avatar display (initials or icon)
   const userAvatarDisplay = (() => {
+    // Only show initials if user is logged in (has token)
+    if (!token) {
+      return "";
+    }
+    
     // If user has registered name, show initials
     if (user?.firstName && user?.lastName) {
       return getInitials(user.firstName, user.lastName);

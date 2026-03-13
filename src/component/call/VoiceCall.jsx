@@ -33,7 +33,7 @@ import { capitalizeWords } from "../../utils/capitalize";
 const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 
 const AgoraVoiceCalling = ({ callData }) => {
-  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, setWaitingList, resetCallFlow } = useCall();
+  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, setWaitingList, resetCallFlow, isCallMinimized, setIsCallMinimized } = useCall();
   const navigate = useNavigate();
 
   if (!activeCall || activeCall.callType !== "audio") {
@@ -53,12 +53,22 @@ const AgoraVoiceCalling = ({ callData }) => {
   const clientRef = useRef(null);
   const micTrackRef = useRef(null);
   const cleanupRef = useRef(false);
+  const videoTrackRef = useRef(null);
+  const remoteUserRef = useRef(null);
+  const userLeftTimerRef = useRef(null);
+  const isRefreshingRef = useRef(false);
   const isUpgradingToVideo = useRef(false);
+  // Track if this mount is a refresh-resume (activeCall restored from sessionStorage)
+  const isResumeFromRefresh = useRef(!!sessionStorage.getItem("shubhtalk_active_call"));
+  // Ref to always hold the latest activeCall so socket handlers never use stale closures
+  const activeCallRef = useRef(activeCall);
 
   /* ================= STATE ================= */
   const [micOn, setMicOn] = useState(true);
   const [joined, setJoined] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
+  // Use context's isCallMinimized instead of local state
+  const isMinimized = isCallMinimized;
+  const setIsMinimized = setIsCallMinimized;
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
   const [speakerOn, setSpeakerOn] = useState(true);
@@ -69,6 +79,11 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [showRechargeButton, setShowRechargeButton] = useState(false);
 
   /* ================= CHAT NOTIFICATION ================= */
+  // Keep activeCallRef in sync so socket handlers always have current values
+  useEffect(() => {
+    activeCallRef.current = activeCall;
+  }, [activeCall]);
+
   const [chatNotification, setChatNotification] = useState(null);
   const notificationTimerRef = useRef(null);
 
@@ -140,15 +155,42 @@ const AgoraVoiceCalling = ({ callData }) => {
     setIsChatOpen(true);
   };
 
+  /* ================= PREVENT ACCIDENTAL REFRESH & DETECT REFRESH ================= */
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      isRefreshingRef.current = true;
+      console.log("[VoiceCall] 🔄 beforeunload fired — isRefreshing=true, roomId:", roomId);
+      // Show browser confirmation to prevent accidental refresh
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
   /* ================= START CALL ================= */
   useEffect(() => {
     cleanupRef.current = false;
 
+    const savedCall = sessionStorage.getItem("shubhtalk_active_call");
+    const savedSecs = sessionStorage.getItem("shubhtalk_call_seconds");
+    console.log("[VoiceCall] 🚀 Mount — roomId:", roomId, "isUserSide:", isUserSide);
+    console.log("[VoiceCall] 📦 sessionStorage activeCall:", savedCall ? "exists" : "null", "| seconds:", savedSecs);
+
     const startCall = async () => {
+      console.log("[VoiceCall] ⏳ Creating Agora client & joining channel:", roomId);
       const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
       clientRef.current = client;
 
       client.on("user-published", async (user, mediaType) => {
+        console.log("[VoiceCall] 📡 user-published — uid:", user.uid, "mediaType:", mediaType, "pendingTimer:", !!userLeftTimerRef.current);
+        // Cancel any pending end-call grace timer — remote user is back
+        if (userLeftTimerRef.current) {
+          clearTimeout(userLeftTimerRef.current);
+          userLeftTimerRef.current = null;
+          console.log("[VoiceCall] ✅ user-published: cancelled pending endCall grace timer");
+        }
+
         await client.subscribe(user, mediaType);
         if (mediaType === "audio") {
           user.audioTrack?.setVolume(speakerOn ? 100 : 0);
@@ -157,34 +199,83 @@ const AgoraVoiceCalling = ({ callData }) => {
       });
 
       client.on("user-unpublished", async (user, mediaType) => {
-        console.log("User unpublished:", mediaType);
-      });
-
-      client.on("user-left", () => {
-        // Don't end call if we're upgrading to video
-        if (!isUpgradingToVideo.current) {
-          endCall();
+        console.log("[VoiceCall] 📴 user-unpublished — uid:", user.uid, "mediaType:", mediaType);
+        if (mediaType === "video") {
+          user.videoTrack?.stop();
+          setIsRemoteVideo(false)
         }
       });
 
-      await client.join(APP_ID, roomId, agoraToken, null);
+      // Grace period so a page refresh doesn't kill the call
+      client.on("user-left", (user) => {
+        // Don't end call if we're upgrading to video
+        if (isUpgradingToVideo.current) return;
+
+        console.log("[VoiceCall] 👋 user-left — uid:", user.uid, "starting 30s grace timer");
+        if (userLeftTimerRef.current) clearTimeout(userLeftTimerRef.current);
+        userLeftTimerRef.current = setTimeout(() => {
+          console.log("[VoiceCall] ⏰ user-left grace timer expired — ending call");
+          endCall();
+        }, 30000); // 30s grace period for rejoin
+      });
+
+      client.on("user-joined", (user) => {
+        console.log("[VoiceCall] 🤝 user-joined — uid:", user.uid, "pendingTimer:", !!userLeftTimerRef.current);
+        // User reconnected — cancel the pending end-call
+        if (userLeftTimerRef.current) {
+          clearTimeout(userLeftTimerRef.current);
+          userLeftTimerRef.current = null;
+          console.log("[VoiceCall] ✅ user-joined: cancelled pending endCall grace timer");
+        }
+      });
+
+      await client.join(APP_ID, roomId, agoraToken, "");
+      console.log("[VoiceCall] ✅ Agora joined — channel:", roomId, "remoteUsers:", client.remoteUsers.length);
+
+      // Clear the resume flag now that we've successfully rejoined
+      if (isResumeFromRefresh.current) {
+        console.log("[VoiceCall] 🔄 Clearing isResumeFromRefresh flag (Agora joined successfully)");
+        setTimeout(() => {
+          isResumeFromRefresh.current = false;
+          console.log("[VoiceCall] ✅ isResumeFromRefresh cleared");
+        }, 5000);
+      }
 
       micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack();
       await client.publish([micTrackRef.current]);
+      console.log("[VoiceCall] 🎙️ Mic track published");
 
       setJoined(true);
       
-      // Set initial call seconds and start the countdown timer
-      const remainingMinutes = callData.remainingTime || activeCall?.remainingTime || 0;
-      const seconds = Number(remainingMinutes) * 60;
+      // Only set initial call seconds if not resuming from a refresh
+      const savedSeconds = sessionStorage.getItem("shubhtalk_call_seconds");
+      if (savedSeconds && Number(savedSeconds) > 0) {
+        console.log("[VoiceCall] 🔄 Resuming from refresh, seconds:", savedSeconds);
+        setCallSeconds(Number(savedSeconds));
+        sessionStorage.removeItem("shubhtalk_call_seconds");
+      } else {
+        const raw = callData.remainingTime || activeCall?.remainingTime || 0;
+        const rawNum = Number(raw) || 0;
+        // Backend may send remainingTime in minutes — convert to seconds
+        const seconds = rawNum > 0 ? Math.floor(rawNum * 60) : 0;
+        console.log("[VoiceCall] 🆕 Fresh call — raw remainingTime:", raw, "→ seconds:", seconds);
+        if (seconds > 0) {
+          setCallSeconds(seconds);
+        } else {
+          // remainingTime not available yet — timer will update when 'activity' event arrives
+          console.log("[VoiceCall] ⚠️ remainingTime is 0 — waiting for activity event");
+        }
+      }
       
-      setCallSeconds(seconds);
       startTimer();
     };
 
-    startCall();
+    startCall().catch((err) => console.error("[VoiceCall] ❌ startCall error:", err));
 
+    // On unmount: only release Agora resources
+    // Do NOT clear activeCall — if this is a refresh, we need it to persist
     return () => {
+      console.log("[VoiceCall] 🧹 useEffect cleanup (unmount) — isRefreshing:", isRefreshingRef.current);
       // Check if we're upgrading to video - if so, skip emitting call:end
       cleanup(isUpgradingToVideo.current);
     };
@@ -213,6 +304,12 @@ const AgoraVoiceCalling = ({ callData }) => {
   const cleanup = async (skipEmit = false) => {
     if (cleanupRef.current) return;
     cleanupRef.current = true;
+    console.log("[VoiceCall] 🧹 cleanup() — releasing all resources");
+
+    if (userLeftTimerRef.current) {
+      clearTimeout(userLeftTimerRef.current);
+      userLeftTimerRef.current = null;
+    }
 
     try {
       await micTrackRef.current?.stop();
@@ -237,9 +334,10 @@ const AgoraVoiceCalling = ({ callData }) => {
   const endCall = async () => {
     // Don't emit call:end if we're upgrading to video
     if (!isUpgradingToVideo.current) {
+      const currentCall = activeCallRef.current;
       setReviewData({
-        astrologerID: activeCall?.astrologerID,
-        fullName: activeCall?.callerName || callerName,
+        astrologerID: currentCall?.astrologerID,
+        fullName: currentCall?.callerName || callerName,
       });
 
       voiceSocket.emit("call:end", {
@@ -307,9 +405,10 @@ const AgoraVoiceCalling = ({ callData }) => {
     const handleCallEnded = () => {
       // Server already ended the call, don't emit call:end again
       if (!isUpgradingToVideo.current) {
+        const currentCall = activeCallRef.current;
         setReviewData({
-          astrologerID: activeCall?.astrologerID,
-          fullName: activeCall?.callerName || callerName,
+          astrologerID: currentCall?.astrologerID,
+          fullName: currentCall?.callerName || callerName,
         });
 
         // Refresh wallet balance after call ends

@@ -443,9 +443,9 @@ const AstrologerProfile = () => {
       remainingTime,
       isSwitch,
     }) => {
-      // If this is a switch from audio to video, let CallContext handle it
-      if (isSwitch && type === "video") {
-        console.log("🔄 Video upgrade accepted - CallContext will handle the switch");
+      // If there's an active audio call and this is a video acceptance, it's an upgrade — let CallContext handle it
+      if (type === "video" && activeCall && activeCall.callType === "audio") {
+        console.log("🔄 Video upgrade accepted - CallContext will handle the switch (isSwitch:", isSwitch, ")");
         resetCallFlow();
         localStorage.removeItem("waitingState");
         return;
@@ -1383,6 +1383,7 @@ const AstrologerProfile = () => {
       {/* Recharge Modal */}
       {hookOpenModal.recharge && (
         <RechargeModal
+         astrologer={data}
           isOpen={hookOpenModal.recharge}
           onClose={() =>
             hookSetOpenModal((prev) => ({ ...prev, recharge: false }))

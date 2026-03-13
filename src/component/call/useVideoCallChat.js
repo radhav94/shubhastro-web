@@ -42,13 +42,22 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astro
   useEffect(() => {
     if (!roomId || !userId || !astrologerId) return;
 
-    // Function to send initial messages
+    // Function to send initial messages (only once per room, survives reconnect)
     const sendInitialMessages = () => {
       if (hasInitializedRef.current) return;
       if (!kundliId) return;
       if (!voiceSocket.connected) return;
 
+      // Check if we already sent initial messages for this room (persists across remounts/reconnects)
+      const sentKey = `shubhtalk_chat_init_${roomId}`;
+      if (sessionStorage.getItem(sentKey)) {
+        console.log("[VideoCallChat] ⏭️ Initial messages already sent for room:", roomId, "— skipping");
+        hasInitializedRef.current = true;
+        return;
+      }
+
       hasInitializedRef.current = true;
+      sessionStorage.setItem(sentKey, "true");
       
       // Send greeting message
       setTimeout(() => {

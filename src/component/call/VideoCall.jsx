@@ -57,6 +57,11 @@ const VideoCalling = ({ callData }) => {
 
   const cleanupRef = useRef(false);
   const endCallRef = useRef(false);
+  const userLeftTimerRef = useRef(null);
+  const isRefreshingRef = useRef(false);
+
+  // Ref to always hold the latest activeCall so socket handlers never use stale closures
+  const activeCallRef = useRef(activeCall);
 
   const [joined, setJoined] = useState(false);
   const [micOn, setMicOn] = useState(true);
@@ -78,6 +83,11 @@ const VideoCalling = ({ callData }) => {
   // Fetch kundli profiles
   const { data: profilesData } = useGetAllKundlisQuery();
   const profiles = profilesData?.data || [];
+
+  // Keep activeCallRef in sync so socket handlers always have current values
+  useEffect(() => {
+    activeCallRef.current = activeCall;
+  }, [activeCall]);
 
   // Default avatar URL
   const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
@@ -128,6 +138,18 @@ const VideoCalling = ({ callData }) => {
     console.log("✅ Customer name:", name);
     return name;
   }, [user]);
+
+  /* ================= PREVENT ACCIDENTAL REFRESH & DETECT REFRESH ================= */
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      isRefreshingRef.current = true;
+      console.log("[VideoCall] 🔄 beforeunload fired — isRefreshing=true, roomId:", roomId);
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
 
   /* ================= LOCAL VIDEO ================= */
   const playLocalVideo = (container) => {
@@ -242,6 +264,14 @@ const VideoCalling = ({ callData }) => {
         clientRef.current = client;
 
         client.on("user-published", async (user, mediaType) => {
+          console.log("[VideoCall] 📡 user-published — uid:", user.uid, "mediaType:", mediaType);
+          // Cancel any pending end-call grace timer — remote user is back
+          if (userLeftTimerRef.current) {
+            clearTimeout(userLeftTimerRef.current);
+            userLeftTimerRef.current = null;
+            console.log("[VideoCall] ✅ user-published: cancelled pending endCall grace timer");
+          }
+
           try {
             await client.subscribe(user, mediaType);
 
@@ -260,14 +290,34 @@ const VideoCalling = ({ callData }) => {
         });
 
         client.on("user-unpublished", (user, mediaType) => {
+          console.log("[VideoCall] 📴 user-unpublished — uid:", user.uid, "mediaType:", mediaType);
           if (mediaType === "video") {
             setRemoteVideoEnabled(false);
           }
         });
 
-        client.on("user-left", safeEndCall);
+        // Grace period so a page refresh doesn't kill the call
+        client.on("user-left", (user) => {
+          console.log("[VideoCall] 👋 user-left — uid:", user.uid, "starting 15s grace timer");
+          if (userLeftTimerRef.current) clearTimeout(userLeftTimerRef.current);
+          userLeftTimerRef.current = setTimeout(() => {
+            console.log("[VideoCall] ⏰ user-left grace timer expired — ending call");
+            safeEndCall();
+          }, 30000); // 30s grace period for rejoin
+        });
+
+        client.on("user-joined", (user) => {
+          console.log("[VideoCall] 🤝 user-joined — uid:", user.uid);
+          // User reconnected — cancel the pending end-call
+          if (userLeftTimerRef.current) {
+            clearTimeout(userLeftTimerRef.current);
+            userLeftTimerRef.current = null;
+            console.log("[VideoCall] ✅ user-joined: cancelled pending endCall grace timer");
+          }
+        });
 
         await client.join(APP_ID, roomId, agoraToken, null);
+        console.log("[VideoCall] ✅ Agora joined — channel:", roomId);
 
         micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack();
         camTrackRef.current = await AgoraRTC.createCameraVideoTrack();
@@ -275,8 +325,27 @@ const VideoCalling = ({ callData }) => {
         await client.publish([micTrackRef.current, camTrackRef.current]);
 
         setJoined(true);
-        const seconds = Number(activeCall.remainingTime) * 60;
-        setCallSeconds(seconds);
+
+        // Only set initial call seconds if not resuming from a refresh
+        const savedSeconds = sessionStorage.getItem("shubhtalk_call_seconds");
+        if (savedSeconds && Number(savedSeconds) > 0) {
+          console.log("[VideoCall] 🔄 Resuming from refresh, seconds:", savedSeconds);
+          setCallSeconds(Number(savedSeconds));
+          sessionStorage.removeItem("shubhtalk_call_seconds");
+        } else if (callSeconds > 0) {
+          // callSeconds already set (e.g. from audio→video upgrade via CallContext)
+          console.log("[VideoCall] 🔄 Using existing callSeconds from upgrade:", callSeconds);
+        } else {
+          const raw = activeCall.remainingTime || 0;
+          const seconds = Math.floor(Number(raw) * 60);
+          console.log("[VideoCall] 🆕 Fresh call — remainingTime:", raw, "→ seconds:", seconds);
+          if (seconds > 0) {
+            setCallSeconds(seconds);
+          } else {
+            console.log("[VideoCall] ⚠️ remainingTime is 0 — waiting for activity event");
+          }
+        }
+
         startTimer();
       } catch (err) {
         console.error("Call start error:", err);
@@ -285,8 +354,29 @@ const VideoCalling = ({ callData }) => {
     };
 
     start();
+
+    // On unmount: only release Agora resources
+    // Do NOT clear activeCall — if this is a refresh, we need it to persist
     return () => {
-      cleanup();
+      console.log("[VideoCall] 🧹 useEffect cleanup (unmount) — isRefreshing:", isRefreshingRef.current);
+      cleanupRef.current = true;
+      if (userLeftTimerRef.current) {
+        clearTimeout(userLeftTimerRef.current);
+        userLeftTimerRef.current = null;
+      }
+      try {
+        micTrackRef.current?.stop();
+        micTrackRef.current?.close();
+        camTrackRef.current?.stop();
+        camTrackRef.current?.close();
+        clientRef.current?.leave();
+        clientRef.current?.removeAllListeners();
+      } catch (e) {
+        console.warn("[VideoCall] Video unmount cleanup error:", e);
+      }
+      micTrackRef.current = null;
+      camTrackRef.current = null;
+      clientRef.current = null;
     };
     // eslint-disable-next-line
   }, [roomId]);
@@ -357,6 +447,11 @@ const VideoCalling = ({ callData }) => {
     if (cleanupRef.current) return;
     cleanupRef.current = true;
 
+    if (userLeftTimerRef.current) {
+      clearTimeout(userLeftTimerRef.current);
+      userLeftTimerRef.current = null;
+    }
+
     try {
       if (micTrackRef.current) {
         micTrackRef.current.stop();
@@ -394,9 +489,12 @@ const VideoCalling = ({ callData }) => {
     if (endCallRef.current) return;
     endCallRef.current = true;
 
+    const currentCall = activeCallRef.current;
+    console.log("[VideoCall] 🔚 safeEndCall — roomId:", roomId, "activeCall:", currentCall ? { astrologerID: currentCall.astrologerID, callerName: currentCall.callerName } : "null");
+
     setReviewData({
-      astrologerID: activeCall?.astrologerID,
-      fullName: activeCall.callerName,
+      astrologerID: currentCall?.astrologerID,
+      fullName: currentCall?.callerName || callerName,
     });
 
     voiceSocket.emit("call:end", {
@@ -419,9 +517,12 @@ const VideoCalling = ({ callData }) => {
       if (endCallRef.current) return;
       endCallRef.current = true;
 
+      const currentCall = activeCallRef.current;
+      console.log("[VideoCall] 📞 call:ended received — roomId:", roomId, "activeCall:", currentCall ? { astrologerID: currentCall.astrologerID, callerName: currentCall.callerName } : "null");
+
       setReviewData({
-        astrologerID: activeCall?.astrologerID,
-        fullName: activeCall.callerName,
+        astrologerID: currentCall?.astrologerID,
+        fullName: currentCall?.callerName || callerName,
       });
 
       // Refresh wallet balance after call ends
@@ -434,6 +535,7 @@ const VideoCalling = ({ callData }) => {
 
     const handleDisconnect = () => {
       if (!endCallRef.current) {
+        console.log("[VideoCall] 🔌 disconnect — triggering safeEndCall");
         safeEndCall();
       }
     };

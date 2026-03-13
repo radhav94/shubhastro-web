@@ -12,6 +12,7 @@ import PrimaryLoader from '../../../component/UI/PrimaryLoader';
 import { formatted } from '../../../utils/dateFormat/date';
 import { zodiac } from './zodiac';
 import './Horoscope.css';
+import { useGetAllKundlisQuery } from '../../../services/appServices/kundliServicesNew';
 import overViewImg from "../../../assets/images/overall-Image.png";
 import financeImg from "../../../assets/images/finance.png";
 import scoreImg from "../../../assets/images/score.png";
@@ -96,6 +97,31 @@ const HoroscopeNew = () => {
     return 'Today';
   };
   
+  // Fetch user's Kundli profiles for default zodiac selection
+  const { data: kundliProfilesData } = useGetAllKundlisQuery();
+  const kundliProfiles = kundliProfilesData?.data || [];
+
+  // Helper function: Get default zodiac from Kundli profiles
+  const getDefaultZodiacFromKundli = () => {
+    if (kundliProfiles.length === 0) return null;
+    
+    // Priority 1: Find profile with relation = "Self" (case-insensitive)
+    const selfProfile = kundliProfiles.find(
+      (profile) => profile.relation?.toLowerCase() === 'self'
+    );
+    
+    // Priority 2: Use first available profile if no "Self" profile
+    const targetProfile = selfProfile || kundliProfiles[0];
+    const sunSign = targetProfile?.sunSign;
+    
+    // Validate that sunSign is a known zodiac sign
+    if (sunSign && signToNumber[sunSign.toLowerCase()]) {
+      return sunSign.toLowerCase();
+    }
+    
+    return null;
+  };
+  
   // Default to first sign if no sign in URL
   const [selectedZodiac, setSelectedZodiac] = useState(sign?.toLowerCase() || 'aries');
   const [tempSelectedZodiac, setTempSelectedZodiac] = useState(sign?.toLowerCase() || 'aries');
@@ -104,6 +130,9 @@ const HoroscopeNew = () => {
   const [cameFromOverview, setCameFromOverview] = useState(false);
   const [overviewCardIndex, setOverviewCardIndex] = useState(null);
   const [showZodiacModal, setShowZodiacModal] = useState(false);
+
+  // Track if we've already applied the Kundli-based default
+  const hasAppliedKundliDefault = useRef(false);
 
   // Refs for overview cards to scroll back on "Show Less"
   const overviewCardRefs = useRef([]);
@@ -120,6 +149,37 @@ const HoroscopeNew = () => {
       setTempSelectedZodiac(sign.toLowerCase());
     }
   }, [sign]);
+
+  // NEW LOGIC: Set default zodiac based on Kundli profile when page loads without a sign in URL
+  useEffect(() => {
+    // Only apply this logic if:
+    // 1. No sign in URL (user landed on /horoscopes/daily-horoscope without a sign)
+    // 2. We haven't already applied the Kundli default
+    // 3. Kundli profiles are loaded
+    if (!sign && !hasAppliedKundliDefault.current && kundliProfiles.length > 0) {
+      const defaultZodiac = getDefaultZodiacFromKundli();
+      
+      if (defaultZodiac) {
+        setSelectedZodiac(defaultZodiac);
+        setTempSelectedZodiac(defaultZodiac);
+        hasAppliedKundliDefault.current = true;
+        
+        // Update URL to reflect the selected zodiac
+        let newPath;
+        if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
+          newPath = `/horoscopes/daily-horoscope/${defaultZodiac}`;
+        } else if (pathname.includes('weekly-horoscope')) {
+          newPath = `/horoscopes/weekly-horoscope/${defaultZodiac}`;
+        } else if (pathname.includes('yearly-horoscope')) {
+          newPath = `/horoscopes/yearly-horoscope/${defaultZodiac}`;
+        } else {
+          newPath = `/horoscopes/daily-horoscope/${defaultZodiac}`;
+        }
+        
+        navigate(newPath, { replace: true });
+      }
+    }
+  }, [sign, kundliProfiles, pathname, navigate, getDefaultZodiacFromKundli]);
 
   // Update active tab when pathname changes
   useEffect(() => {

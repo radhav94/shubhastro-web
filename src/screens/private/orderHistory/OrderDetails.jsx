@@ -16,18 +16,32 @@ const OrderDetails = () => {
   const [activeTab, setActiveTab] = useState("Call");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+
+  // Get customer ID from localStorage
+  const shubhtalk_customer_id = localStorage.getItem("shubhtalk_customer_id");
   
   // Fetch astrologer details
   const { data: astrologerData, isLoading: isLoadingAstrologer } = useGetAstrologerByIdQuery(
-    { id: astrologerId },
-    { skip: !astrologerId }
+    { id: astrologerId }
+    
   );
   
   // Fetch chat messages from API with pagination
+  // OLD CODE (commented out for reference):
+  // const { data: chatData, isLoading: isLoadingMessages, error, isFetching } = useGetChatMessagesQuery({
+  //   astrologerId: astrologerId,
+  //   roomId: "",
+  //   page: page,
+  //   userId:"69b28da4b5aea2d31737ba1a",
+  // });
+  
+  // NEW CODE (with userId from localStorage):
   const { data: chatData, isLoading: isLoadingMessages, error, isFetching } = useGetChatMessagesQuery({
     astrologerId: astrologerId,
-    roomId: "",
+    roomId: "",//"room-3f139701-bd15-4818-94fe-380d412813c1",
     page: page,
+    userId: shubhtalk_customer_id, // Use customer ID from localStorage with fallback
+
   });
 
   // Reset pagination when astrologerId changes
@@ -127,6 +141,13 @@ const OrderDetails = () => {
 
   // Process astrologer data
   const astrologer = astrologerData?.data;
+
+  // console.log("Remedies::", {
+  //   astrologerId: astrologerId,
+  //   roomId: "",
+  //   page: page,
+  //   userId: shubhtalk_customer_id, // Use customer ID from localStorage with fallback
+  // })
   const astrologerInfo = astrologer ? {
     name: `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim(),
     experience: astrologer.experience ? `${astrologer.experience} Years` : "N/A",
@@ -136,6 +157,7 @@ const OrderDetails = () => {
   } : null;
 
   const renderTabContent = () => {
+    // Show loader while initial data is loading
     if (isLoadingMessages || isLoadingAstrologer) {
       return <PrimaryLoader />;
     }
@@ -158,6 +180,10 @@ const OrderDetails = () => {
 
     switch (activeTab) {
       case "Call":
+        // Show loader while Call tab data is loading
+        if (isLoadingMessages || isFetching) {
+          return <PrimaryLoader />;
+        }
         return (
           <OrderInfoCard
             orderId={`#${astrologerId.slice(-4)}`}
@@ -174,6 +200,10 @@ const OrderDetails = () => {
           />
         );
       case "Chat":
+        // Show loader while Chat tab data is loading
+        if (isLoadingMessages) {
+          return <PrimaryLoader />;
+        }
         return (
           <ChatWindow
             chatSessions={processedData.chatSessions}
@@ -183,6 +213,10 @@ const OrderDetails = () => {
           />
         );
       case "Video":
+        // Show loader while Video tab data is loading (if API is added in future)
+        if (isLoadingMessages || isFetching) {
+          return <PrimaryLoader />;
+        }
         return (
           <div className={styles.videoList}>
             <div className={styles.emptyState}>
@@ -191,6 +225,10 @@ const OrderDetails = () => {
           </div>
         );
       case "Remedies":
+        // Show loader while Remedies tab data is loading (if API is added in future)
+        if (isLoadingMessages || isFetching) {
+          return <PrimaryLoader />;
+        }
         return <RemediesTab remedies={[]} />;
       default:
         return null;

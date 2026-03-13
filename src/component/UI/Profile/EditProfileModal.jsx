@@ -153,14 +153,15 @@ const EditProfileModal = ({
   return (
     <div className={styles.modalOverlay} onClick={handleClose}>
       <div className={styles.sideSheet} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.sheetHandle}></div>
-
-        <div className={styles.sheetContent}>
+        <div className={styles.sheetHeader}>
+          <div className={styles.sheetHandle}></div>
           <button className={styles.closeBtn} onClick={handleClose}>
             ×
           </button>
           <h2 className={styles.sheetTitle}>{title}</h2>
+        </div>
 
+        <div className={styles.sheetContent}>
           <Formik
             initialValues={formData}
             validationSchema={validationSchema}

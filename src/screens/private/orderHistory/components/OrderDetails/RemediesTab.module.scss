@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-height: 300px; // Ensure minimum height for empty state
 }
 
 .remedyCard {
@@ -86,5 +87,62 @@
 
   &:active {
     transform: scale(0.98);
+  }
+}
+
+// Empty State Styles
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  min-height: 300px;
+
+  @media (min-width: 640px) {
+    padding: 64px 32px;
+  }
+}
+
+.emptyStateIcon {
+  width: 80px;
+  height: 80px;
+  background-color: #fef3e2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f97316;
+  margin-bottom: 20px;
+
+  @media (min-width: 640px) {
+    width: 96px;
+    height: 96px;
+    margin-bottom: 24px;
+  }
+}
+
+.emptyStateTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 8px 0;
+
+  @media (min-width: 640px) {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+}
+
+.emptyStateMessage {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.6;
+  max-width: 400px;
+
+  @media (min-width: 640px) {
+    font-size: 15px;
   }
 }
