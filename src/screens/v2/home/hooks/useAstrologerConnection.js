@@ -78,6 +78,10 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
     if (!userIdLocal) return;
 
     const handleChatRoom = (data) => {
+      console.log("[NormalFlow] 📥 chat:room received — server created chat room");
+      console.log("[NormalFlow]   → roomId:", data?.roomId);
+      console.log("[NormalFlow]   → waitingTime:", data?.waitingTime);
+      console.log("[NormalFlow]   → full data:", JSON.stringify(data));
       setChatRoomId(data?.roomId);
       setActiveChatRoomId(data?.roomId);
       setWaitingList(data?.waitingTime || 2);
@@ -91,9 +95,15 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           timestamp: Date.now(),
         })
       );
+      console.log("[NormalFlow] ✅ Chat waiting state set, waitingTime:", data?.waitingTime || 2);
     };
 
     const handleCallRoom = (data) => {
+      console.log("[NormalFlow] 📥 call:room received — server created call room");
+      console.log("[NormalFlow]   → roomId:", data?.roomId);
+      console.log("[NormalFlow]   → type:", data?.type);
+      console.log("[NormalFlow]   → waitingTime:", data?.waitingTime);
+      console.log("[NormalFlow]   → full data:", JSON.stringify(data));
       setCallRoomId(data?.roomId);
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
@@ -107,6 +117,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           timestamp: Date.now(),
         })
       );
+      console.log("[NormalFlow] ✅ Call waiting state set, waitingTime:", data?.waitingTime || 5);
     };
 
     const handleChatAccepted = async ({
@@ -115,12 +126,19 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       userId,
       ...data
     }) => {
+      console.log("[NormalFlow] ✅ chat:accepted received — astrologer accepted chat");
+      console.log("[NormalFlow]   → roomId:", roomId);
+      console.log("[NormalFlow]   → astrologerId:", astrologerId);
+      console.log("[NormalFlow]   → remainingTime:", data?.remainingTime);
+      console.log("[NormalFlow]   → full data:", JSON.stringify({ roomId, astrologerId, userId, ...data }));
       setWaitingList(false);
       localStorage.removeItem("waitingState");
 
       // Use external ref if provided, otherwise use local ref
       const astro = externalAstroRef?.current || activeAstroRef.current;
       const kundliId = localSelectedProfile;
+      console.log("[NormalFlow]   → astro from ref:", astro?._id, astro?.firstName);
+      console.log("[NormalFlow]   → kundliId:", kundliId);
 
       try {
         if (!roomId) throw new Error("Room ID missing");
@@ -137,6 +155,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           remainingTime: data?.remainingTime,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
+        console.log("[NormalFlow] ✅ activeChat set, navigating to chat page");
 
         navigate(`/chat-with-astrologers/${astrologerId}`, {
           state: {
@@ -151,7 +170,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           },
         });
       } catch (e) {
-        console.error("Chat accepted error:", e);
+        console.error("[NormalFlow] ❌ Chat accepted error:", e);
         Toast.error("Failed to start chat");
       }
     };
@@ -165,9 +184,18 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       isSwitch,
       ...rest
     }) => {
-      // If this is a switch from audio to video, let CallContext handle it
-      if (isSwitch && type === "video") {
-        console.log("🔄 Video upgrade accepted - CallContext will handle the switch");
+      console.log("[NormalFlow] ✅ call:accepted received");
+      console.log("[NormalFlow]   → roomId:", roomId);
+      console.log("[NormalFlow]   → type:", type);
+      console.log("[NormalFlow]   → remainingTime:", remainingTime);
+      console.log("[NormalFlow]   → astrologerId:", astrologerId);
+      console.log("[NormalFlow]   → isSwitch:", isSwitch);
+      console.log("[NormalFlow]   → agoraToken:", token ? "present (" + token.substring(0, 20) + "...)" : "MISSING");
+      console.log("[NormalFlow]   → full data:", JSON.stringify({ roomId, token: token ? "[redacted]" : null, type, remainingTime, astrologerId, isSwitch, ...rest }));
+
+      // If there's an active audio call and this is a video acceptance, it's an upgrade — let CallContext handle it
+      if (type === "video" && activeCall && activeCall.callType === "audio") {
+        console.log("[NormalFlow] 🔄 Video upgrade accepted — CallContext will handle the switch (isSwitch:", isSwitch, ")");
         resetCallFlow();
         localStorage.removeItem("waitingState");
         return;
@@ -180,22 +208,12 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       // Use external ref if provided, otherwise use local ref
       const astro = externalAstroRef?.current || activeAstroRef.current;
       const kundliId = localSelectedProfile;
-
-      console.log("🔍 Call Accepted - Full Socket Data:", {
-        roomId,
-        token,
-        type,
-        remainingTime,
-        astrologerId,
-        isSwitch,
-        ...rest
-      });
-      console.log("External Ref:", externalAstroRef?.current);
-      console.log("Astro from ref:", astro);
+      console.log("[NormalFlow]   → astro from ref:", astro?._id, astro?.firstName);
+      console.log("[NormalFlow]   → kundliId:", kundliId);
 
       try {
         if (!astro) {
-          console.error("❌ Astrologer data missing in ref");
+          console.error("[NormalFlow] ❌ Astrologer data missing in ref");
           Toast.error("Astrologer data missing");
           return;
         }
@@ -204,13 +222,12 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
         const astroId = astrologerId || astro._id;
         
         if (!astroId) {
-          console.error("❌ Astrologer ID missing");
+          console.error("[NormalFlow] ❌ Astrologer ID missing");
           Toast.error("Astrologer ID missing");
           return;
         }
 
-
-        setActiveCall({
+        const callPayload = {
           roomId,
           agoraToken: token,
           callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
@@ -221,19 +238,28 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           kundliId,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
-        });
+        };
+        console.log("[NormalFlow] 📦 Setting activeCall:", JSON.stringify({ ...callPayload, agoraToken: "[redacted]" }));
+        setActiveCall(callPayload);
         
-        console.log("✅ Active call set successfully");
+        console.log("[NormalFlow] ✅ Active call set successfully — VoiceCall/VideoCall component should render");
       } catch (error) {
-        console.error("Call accepted error:", error);
+        console.error("[NormalFlow] ❌ Call accepted error:", error);
         Toast.error(error.message || "Failed to start call");
       }
     };
 
     const handleRejected = (data) => {
+      console.log("[NormalFlow] ❌ call:rejected / chat:rejected received");
+      console.log("[NormalFlow]   → switchRejected:", data?.switchRejected);
+      console.log("[NormalFlow]   → type:", data?.type);
+      console.log("[NormalFlow]   → sessionEndReason:", data?.sessionData?.sessionEndReason);
+      console.log("[NormalFlow]   → message:", data?.message);
+      console.log("[NormalFlow]   → full data:", JSON.stringify(data));
+
       // Check if this is a video switch rejection during an active audio call
       if (data?.switchRejected && data?.type === "audio") {
-        console.log("🔄 Video switch rejected - audio call continues");
+        console.log("[NormalFlow] 🔄 Video switch rejected — audio call continues");
         // Don't reset anything - the audio call should continue
         return;
       }
@@ -244,6 +270,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
         data?.type === "chat"
           ? "Astrologer has rejected the chat request"
           : "Astrologer has rejected the call request";
+      console.log("[NormalFlow] 🛑 Showing error:", errorMsg);
       Toast.error(errorMsg);
 
       localStorage.removeItem("waitingState");
@@ -253,6 +280,9 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
     };
 
     const handleSocketError = (err) => {
+      console.log("[NormalFlow] ⚠️ Socket error event received");
+      console.log("[NormalFlow]   → message:", err?.message);
+      console.log("[NormalFlow]   → full data:", JSON.stringify(err));
       Toast.error(err?.message || "Connection error");
       localStorage.removeItem("waitingState");
       resetChatFlow();

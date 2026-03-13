@@ -63,8 +63,10 @@ const ChatWindow = () => {
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
   const { activeChat } = useChatContext();
 
-  // Check if there's an active video call
+  // Check if there's an active call (audio or video)
   const isVideoCallActive = activeCall && activeCall.callType === "video";
+  const isAudioCallActive = activeCall && activeCall.callType === "audio";
+  const isCallActive = !!activeCall;
   const isChatActive = activeChat && activeChat.roomId;
 
   // Get wallet balance
@@ -198,7 +200,19 @@ const ChatWindow = () => {
   };
 
   const handleChatEnd = () => {
-    if (remainingTime * 60 - chatSeconds < MIN_CHAT_SECONDS) {
+    const initialRemainingMinutes = activeChat?.remainingTime || remainingTime || 0;
+    const totalSessionSeconds = initialRemainingMinutes * 60;
+    const elapsedSeconds = totalSessionSeconds - chatSeconds;
+    
+    // Fallback: use wall-clock time if remainingTime unavailable
+    const chatStartTime = sessionStorage.getItem("shubhtalk_chat_start_time");
+    const wallClockElapsed = chatStartTime 
+      ? Math.floor((Date.now() - Number(chatStartTime)) / 1000)
+      : 0;
+    
+    const effectiveElapsed = totalSessionSeconds > 0 ? elapsedSeconds : wallClockElapsed;
+
+    if (effectiveElapsed < MIN_CHAT_SECONDS) {
       Toast.error("Chat cannot be ended before 1 minute");
       return false;
     }
@@ -465,7 +479,7 @@ const ChatWindow = () => {
             />
           </div>
 
-          {(!isMessageDisabled || isVideoCallActive) && (
+          {(!isMessageDisabled || isCallActive) && (
             <ChatInput
               value={message}
               onChange={(e) => {
@@ -473,7 +487,7 @@ const ChatWindow = () => {
                 sendTyping();
               }}
               onSend={handleSend}
-              isMessageDisabled={isMessageDisabled && !isVideoCallActive}
+              isMessageDisabled={isMessageDisabled && !isCallActive}
               onChatEnd={handleChatEnd}
               setOpen={setOpenFeedback}
               sendVoiceMessage={sendVoiceMessage}

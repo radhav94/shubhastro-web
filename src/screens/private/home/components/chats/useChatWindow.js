@@ -51,6 +51,9 @@ export default function useChat({
     setIsMessageDisabled(true);
     stopTimer();
     setActiveChat(null);
+    
+    // Clear chat start time
+    sessionStorage.removeItem("shubhtalk_chat_start_time");
 
     // Don't show chat feedback if call review is already open (chat→call switch scenario)
     // or if there's an active call (chat ended because user switched to call)
@@ -65,11 +68,23 @@ export default function useChat({
     if (!roomId || !userId || !astrologerId) return;
     socketService.connect({
       onConnected: () => {
-        if (Object.keys(activeChat || {}).length > 0) { //Check if chat is active
+        if (Object.keys(activeChat || {}).length > 0 || (activeCall && activeCall.astrologerId === astrologerId)) { //Check if chat is active or there's an active call with this astrologer
           startTimer(); //Start timer only when there is active chat
           setIsMessageDisabled(false);
+
+          // Store chat start time for elapsed time calculation (if not already set)
+          if (!sessionStorage.getItem("shubhtalk_chat_start_time")) {
+            sessionStorage.setItem("shubhtalk_chat_start_time", String(Date.now()));
+          }
+
+          // Check if initial messages were already sent for this room (persists across remounts/reconnects)
+          const sentKey = `shubhtalk_chat_init_${roomId}`;
+          const alreadySent = sessionStorage.getItem(sentKey);
+
           //Send msg first time only 
-          if (!refreshKey) {
+          if (!refreshKey && !alreadySent) {
+            sessionStorage.setItem(sentKey, "true");
+
             // Check if there's an AI initial query stored
             const aiInitialQuery = localStorage.getItem("aiInitialQuery");
 
@@ -89,6 +104,8 @@ export default function useChat({
             const baseUrl = window.location.origin;
             const kundliLink = `${baseUrl}/kundli/${profileIdToUse}`;
             setTimeout(() => sendMessage(kundliLink, 'kundli'), 300);
+          } else if (alreadySent) {
+            console.log("[ChatWindow] ⏭️ Initial messages already sent for room:", roomId, "— skipping");
           }
         }
       },
@@ -160,21 +177,43 @@ export default function useChat({
     };
   }, [roomId, activeChat, activeCall]);
 
-  // USER SEND
+  // USER SEND — prefer socketService, fallback to voiceSocket (which is already in the room after reconnect)
   const sendMessage = (text, type = "message") => {
-    const res = socketService.sendMessage({
-      message: text,
+    const payload = {
+      sender: "user",
+      kundliId,
       roomId,
       userId,
       astrologerId,
-      kundliId,
-      type
-    });
+      message: text,
+      type,
+    };
 
-    if (res?.error) {
-      setError(res.error);
+    // If socketService socket is connected, use it (normal flow)
+    if (socketService.socket?.connected) {
+      const res = socketService.sendMessage({
+        message: text,
+        roomId,
+        userId,
+        astrologerId,
+        kundliId,
+        type
+      });
+      if (res?.error) {
+        setError(res.error);
+      }
       return;
     }
+
+    // Fallback: use voiceSocket which is already connected & in the room after reconnect
+    if (voiceSocket.connected) {
+      console.log("[ChatWindow] 📤 socketService not connected, sending via voiceSocket");
+      voiceSocket.emit("chat:message", payload);
+      return;
+    }
+
+    setError("Socket not connected, try again.");
+    toast.error("Socket not connected, try again.");
   };
 
   // ASTRO SEND
