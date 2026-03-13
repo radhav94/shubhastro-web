@@ -95,7 +95,15 @@ const Explore = () => {
   // Helper function to format date
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
+    let date;
+    // Handle DD/MM/YYYY format (e.g. "13/03/2026")
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+      const [day, month, year] = dateString.split("/");
+      date = new Date(`${year}-${month}-${day}`);
+    } else {
+      date = new Date(dateString);
+    }
+    if (isNaN(date.getTime())) return "";
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
@@ -244,7 +252,7 @@ const Explore = () => {
             <SectionTitleWithDivider 
               title={(section.display_title || section.title || "EXPLORE BLOGS").toUpperCase()} 
             />
-            <ChevronRight size={24} className={styles.sectionArrow} />
+            <ChevronRight size={24} className={styles.sectionArrow} onClick={() => navigate('/blog')} style={{ cursor: 'pointer' }} />
           </div>
 
           <div className={styles.blogsScroll}>
@@ -267,7 +275,7 @@ const Explore = () => {
                     className={styles.blogBgImage}
                   />
                   <span className={styles.blogDate}>
-                    {formatDate(blog.publishDate || blog.date)}
+                    {formatDate(blog.publishDate || blog.date || blog.createdAt || blog.published_at)}
                   </span>
                 </div>
                 <h4 className={styles.blogTitle}>{blog.title}</h4>

@@ -26,9 +26,11 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
 
   // Format duration from billedMinutes
   const formatDuration = (minutes) => {
-    if (!minutes) return "0 Min 0 Secs";
+    if (!minutes) return "";
     const mins = Math.floor(minutes);
     const secs = Math.round((minutes - mins) * 60);
+    if (mins === 0 && secs === 0) return "";
+    if (secs === 0) return `${mins} Min`;
     return `${mins} Min ${secs} Secs`;
   };
 
@@ -40,31 +42,57 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
 
   return (
     <div className={styles.sessionCard}>
-      <Link
-        to={`/astrologer/${session.astrologerId}`}
-        className={styles.sessionCardLink}
-      >
-        <div className={styles.sessionImageWrapper}>
-          <img
-            src={
-              session.astrologerImage ||
-              getAstrologerDefaultImage(session.astrologerGender)
-            }
-            alt={session.astrologerName}
-            className={styles.sessionImage}
-            onError={(e) => {
-              e.target.style.display = "none";
-            }}
-          />
-        </div>
-      </Link>
-      <div className={styles.sessionInfo}>
+      {session._id ? (
         <Link
-          to={`/astrologer/${session.astrologerId}`}
-          className={styles.sessionNameLink}
+          to={`/astrologer/${session._id}`}
+          className={styles.sessionCardLink}
         >
-          <h3 className={styles.sessionName}>{session.astrologerName}</h3>
+          <div className={styles.sessionImageWrapper}>
+            <img
+              src={
+                session.profileImgUrl ||
+                session.imageUrl ||
+                session.astrologerImage ||
+                getAstrologerDefaultImage(session.gender || session.astrologerGender)
+              }
+              alt={session.astrologerName}
+              className={styles.sessionImage}
+              onError={(e) => {
+                e.target.src = getAstrologerDefaultImage(session.gender || session.astrologerGender);
+              }}
+            />
+          </div>
         </Link>
+      ) : (
+        <div className={styles.sessionCardLink}>
+          <div className={styles.sessionImageWrapper}>
+            <img
+              src={
+                session.profileImgUrl ||
+                session.imageUrl ||
+                session.astrologerImage ||
+                getAstrologerDefaultImage(session.gender || session.astrologerGender)
+              }
+              alt={session.astrologerName}
+              className={styles.sessionImage}
+              onError={(e) => {
+                e.target.src = getAstrologerDefaultImage(session.gender || session.astrologerGender);
+              }}
+            />
+          </div>
+        </div>
+      )}
+      <div className={styles.sessionInfo}>
+        {session._id ? (
+          <Link
+            to={`/astrologer/${session._id}`}
+            className={styles.sessionNameLink}
+          >
+            <h3 className={styles.sessionName}>{session.astrologerName}</h3>
+          </Link>
+        ) : (
+          <h3 className={styles.sessionName}>{session.astrologerName}</h3>
+        )}
         <div className={styles.sessionDateTime}>
           <div className={styles.sessionDetail}>
             <Calendar size={16} className={styles.sessionIconSvg} />
@@ -79,9 +107,11 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
             </span>
           </div>
         </div>
-        <p className={styles.sessionDuration}>
-          Duration : {formatDuration(session.billedMinutes)}
-        </p>
+        {formatDuration(session.billedMinutes) && (
+          <p className={styles.sessionDuration}>
+            Duration : {formatDuration(session.billedMinutes)}
+          </p>
+        )}
         <div className={styles.sessionActionButtons}>
           <div className={styles.sessionButtonWrapper}>
             <button
