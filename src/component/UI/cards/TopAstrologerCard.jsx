@@ -13,9 +13,8 @@ const TopAstrologerCard = ({ data, onConnect }) => {
 
   // Handle image - try multiple possible fields with gender-based fallback
   const imageUrl =
+    data?.profileImgUrl ||
     data?.imageUrl ||
-    data?.aadharCardImgUrl ||
-    data?.panCardImgUrl ||
     getAstrologerDefaultImage(data?.gender);
 
   return (

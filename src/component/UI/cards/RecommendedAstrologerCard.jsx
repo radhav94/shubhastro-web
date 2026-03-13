@@ -12,7 +12,7 @@ const RecommendedAstrologerCard = ({ data, onConnect }) => {
   const displayExperience = experience ? `${experience} years exp.` : "";
   
   // Try multiple image fields with fallback to gender-based default
-  const profileImage = imageUrl || aadharCardImgUrl || panCardImgUrl || getAstrologerDefaultImage(data?.gender);
+  const profileImage = data?.profileImgUrl || imageUrl || getAstrologerDefaultImage(data?.gender);
 
   return (
     <div className={styles.card}>

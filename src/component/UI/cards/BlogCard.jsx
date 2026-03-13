@@ -26,11 +26,10 @@ const BlogCard = ({ image, title, author, date, authorIcon }) => {
       return "";
     }
     
-    return parsedDate.toLocaleDateString("en-US", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    });
+    const day = parsedDate.toLocaleDateString("en-US", { day: "2-digit" });
+    const month = parsedDate.toLocaleDateString("en-US", { month: "short" });
+    const year = parsedDate.toLocaleDateString("en-US", { year: "numeric" });
+    return `${day} ${month} ${year}`;
   };
 
   return (

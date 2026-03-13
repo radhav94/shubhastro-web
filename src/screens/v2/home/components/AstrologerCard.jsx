@@ -10,11 +10,11 @@ const AstrologerCard = ({ astrologer, onConnect }) => {
       <Link to={`/astrologer/${astrologer?._id} `} className={styles.cardLink}>
         <div className={styles.astrologerImageWrapper}>
           <img
-            src={astrologer.imageUrl || getAstrologerDefaultImage(astrologer.gender)}
+            src={astrologer.profileImgUrl || getAstrologerDefaultImage(astrologer.gender)}
             alt={astrologer.firstName}
             className={styles.astrologerImg}
             onError={(e) => {
-              e.target.style.display = "none";
+              e.target.src = getAstrologerDefaultImage(astrologer.gender);
             }}
           />
           <div className={styles.ratingBadge}>
