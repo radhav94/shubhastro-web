@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
 import ChevronLeft from '../components/ui/ChevronLeft'
-import { Shuffle } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import styles from './TarotCardSelectionPage.module.css'
 import {
@@ -164,9 +163,6 @@ const TarotCardSelectionPage = () => {
         <div className={styles.header}>
           <button className={styles.backButton} onClick={() => navigate(-1)}>
             <ChevronLeft size={24} />
-          </button>
-          <button className={styles.shuffleButton} onClick={handleShuffle}>
-            <Shuffle size={24} />
           </button>
         </div>
       </div>
