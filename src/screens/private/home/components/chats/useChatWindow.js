@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import socketService from "../../../../../services/socketService";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import toast from "../../../../../component/toast";
@@ -23,6 +23,10 @@ export default function useChat({
   const [isTyping, setIsTyping] = useState(false);
   const [isMessageDisabled, setIsMessageDisabled] = useState(false);
 
+  // When the kundali iframe closes, the server may briefly think the user disconnected
+  // and fire session-end errors. We ignore those for a short grace period.
+  const ignoringSystemEndRef = useRef(false);
+
   // Fetch kundli profiles to get the "Self" profile
   const { data: profilesData } = useGetAllKundlisQuery();
   const profiles = profilesData?.data || [];
@@ -34,7 +38,16 @@ export default function useChat({
     setMessages((prev) => [...prev, msg]);
   };
 
-  const handleChatEndedFromServer = () => {
+  const handleChatEndedFromServer = (data) => {
+    // Ignore SYSTEM-initiated ends (e.g. triggered by Agora visibility change or iframe close).
+    // Only CUSTOMER or ASTROLOGER ends should actually close the chat.
+    if (data?.endedBy === 'SYSTEM') {
+      // Set grace period so onError also ignores transient session errors
+      ignoringSystemEndRef.current = true;
+      setTimeout(() => { ignoringSystemEndRef.current = false; }, 10000);
+      return;
+    }
+
     setIsMessageDisabled(true);
     stopTimer();
     setActiveChat(null);
@@ -97,6 +110,11 @@ export default function useChat({
         }
       },
       onError: (errMsg) => {
+        // If we're in the grace period after iframe close, ignore session-end errors
+        if (ignoringSystemEndRef.current &&
+            (errMsg === 'Chat no longer available' || errMsg === 'Chat has already ended' || errMsg === 'Session not found')) {
+          return;
+        }
         toast.error(errMsg || "Something went wrong");
         setError(errMsg);
         if (errMsg === 'Chat no longer available' || errMsg === 'Chat has already ended' || errMsg === 'Session not found') {

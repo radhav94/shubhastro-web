@@ -633,6 +633,10 @@
   font-size: clamp(12px, 3vw, 14px);
   color: #160115;
   flex-shrink: 0;
+  svg{
+    height: 10px;
+    width: 10px;
+  }
 }
 
 .horoscopeHeading {
@@ -1398,6 +1402,7 @@
   letter-spacing: 0.5px;
   color: #160115;
   text-transform: uppercase;
+  text-align: left;
   // margin: 0 0 12px 0;
 }
 
@@ -1407,7 +1412,7 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
-  margin: 0 auto;
+  margin: 6px auto 0 auto!important;
   svg path{
     fill-opacity: 1;
   }
@@ -4610,6 +4615,7 @@
   align-items: center;
   gap: 8px;
   width: 100%;
+  margin: 6px auto 0 auto!important;
 }
 
 .agenticDividerLine {

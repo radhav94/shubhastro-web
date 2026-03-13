@@ -378,7 +378,7 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .currentBadge {
-  // position: absolute;
+  position: absolute;
   display: inline-block;
   padding: 2px 8px;
   background-color: #f75801;
@@ -391,6 +391,9 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   margin-left: 8px;
   vertical-align: middle;
   width: fit-content;
+  @media (width <= 767px) {
+    position: unset;
+  }
 }
 
 .dashaTableArrow {

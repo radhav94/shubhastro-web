@@ -16,6 +16,42 @@
   }
 }
 
+/* Iframe Mode - Minimal Header */
+.iframeHeader {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.iframeHeaderContent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.iframeCloseBtn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #424242;
+  cursor: pointer;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: #F75801;
+  }
+}
+
 .mainLeftMain{
   display: flex;
 }
@@ -300,6 +336,7 @@
   position: relative;
   white-space: nowrap;
   border-bottom: 1px solid transparent;
+  cursor: pointer;
 }
 .quickNavText{
   margin-right: 10px;

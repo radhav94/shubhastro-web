@@ -69,7 +69,13 @@ const RelationalBlogsSection = ({ blogs = [], title, subtitle }) => {
                 {blog.publishDate || blog.createdAt || blog.date
                   ? (() => {
                       const dateValue = blog.publishDate || blog.createdAt || blog.date;
-                      const date = dayjs(dateValue);
+                      let date;
+                      if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateValue)) {
+                        const [day, month, year] = dateValue.split('/');
+                        date = dayjs(`${year}-${month}-${day}`);
+                      } else {
+                        date = dayjs(dateValue);
+                      }
                       return date.isValid() ? date.format("DD MMM YYYY") : dateValue;
                     })()
                   : ""}

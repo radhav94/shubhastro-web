@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useState, useMemo } from "react";
+import React, { useRef, useCallback, useState, useMemo, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Check, CheckCheck, ExternalLink } from "lucide-react";
 import { IoDocument, IoDownload } from "react-icons/io5";
@@ -55,6 +55,18 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
   const observerRef = useRef(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [kundliModal, setKundliModal] = useState(null);
+
+  // Listen for close message from iframe
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data?.type === 'CLOSE_KUNDLI_MODAL') {
+        setKundliModal(null);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   // Intersection Observer for infinite scroll
   const lastSessionRef = useCallback(
@@ -348,16 +360,8 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
             className={styles.kundliModalContent}
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              type="button"
-              className={styles.closeButton}
-              onClick={handleCloseModal}
-              aria-label="Close modal"
-            >
-              ×
-            </button>
             <iframe
-              src={kundliModal}
+              src={`${kundliModal}${kundliModal.includes('?') ? '&' : '?'}iframe=true`}
               title="Kundli"
               className={styles.kundliIframe}
             />

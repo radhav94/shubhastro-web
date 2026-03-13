@@ -33,11 +33,8 @@ const HomeLayout = () => {
   const isOnboardingPage = location.pathname === "/login";
   const isLivePage = location.pathname === "/live";
   
-  // Check if page is loaded in iframe via query parameter
-  const searchParams = new URLSearchParams(location.search);
-  const isInIframe = searchParams.get('iframe') === 'true';
-  
-  const showTopHeader = !isOnboardingPage && !isInIframe && !isLivePage;
+  // Always show TopHeader (it will handle iframe mode internally)
+  const showTopHeader = !isOnboardingPage && !isLivePage;
 
   return (
     <div className={styles.layout}>

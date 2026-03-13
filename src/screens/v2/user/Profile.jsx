@@ -241,7 +241,7 @@ const Profile = () => {
             isActive: true,
           },
           date: lastChat?.createdAt || new Date(),
-          duration: `${room.chatHistory?.length || 0} Messages`,
+          duration: `${room?.duration || 0} Min`,
           amount: room?.amount || 0,
           rate: room?.rate || 0,
           status: "completed",

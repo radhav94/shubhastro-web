@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useFetchAdvancePanchangQuery } from "../../../../redux/api/panchang/panchangApi";
 import SectionHeader from "./SectionHeader";
-import sun from "../../../../assets/images/sun.svg";
+import sun from "../../../../assets/images/sun.png";
 import sunriseIcon from "../../../../assets/images/sunrise-icon.svg";
 import sunsetIcon from "../../../../assets/images/sunset-icon.svg";
 import moonriseIcon from "../../../../assets/images/moonrise-icon.svg";
@@ -26,7 +26,35 @@ const PanchangSection = () => {
   const [activeTab, setActiveTab] = useState("today");
 
   const handleNavigateToPanchang = () => {
-    navigate("/panchang");
+    // Calculate the date based on active tab
+    const date = new Date();
+    let daysOffset = 0;
+    
+    switch (activeTab) {
+      case "tomorrow":
+        daysOffset = 1;
+        break;
+      case "dayAfter":
+        daysOffset = 2;
+        break;
+      default:
+        daysOffset = 0;
+    }
+    
+    date.setDate(date.getDate() + daysOffset);
+    
+    // Format date as YYYY-MM-DD for date input
+    const formattedDate = date.toISOString().split('T')[0];
+    
+    // Pass date and location data via navigation state
+    navigate("/panchang", {
+      state: {
+        date: formattedDate,
+        location: "Delhi, India",
+        latitude: 19.132,
+        longitude: 72.342,
+      }
+    });
   };
 
   // Helper function to pad numbers

@@ -114,10 +114,17 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId, title, subtitle }) => {
                 <div className={styles.content}>
                   <h3 className={styles.blogTitle}>{blog.title}</h3>
                   <p className={styles.blogDate}>
-                    {blog.publishDate
+                    {blog.publishDate || blog.createdAt || blog.date
                       ? (() => {
-                          const date = dayjs(blog.publishDate);
-                          return date.isValid() ? date.format("DD MMM YYYY") : blog.publishDate;
+                          const dateValue = blog.publishDate || blog.createdAt || blog.date;
+                          let date;
+                          if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateValue)) {
+                            const [day, month, year] = dateValue.split('/');
+                            date = dayjs(`${year}-${month}-${day}`);
+                          } else {
+                            date = dayjs(dateValue);
+                          }
+                          return date.isValid() ? date.format("DD MMM YYYY") : dateValue;
                         })()
                       : ""}
                   </p>
