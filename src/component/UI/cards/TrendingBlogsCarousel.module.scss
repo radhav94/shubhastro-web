@@ -37,6 +37,37 @@
     width: 40px;
     padding: 0;
     background: rgba(254, 254, 254, 0.20);
+    position: relative;
+  }
+}
+.shareBtnMain{
+  padding-right: 30px;
+    &:hover .shareIconSocial{
+        display: flex;
+    }
+}
+.shareIconSocial{
+  display: none;
+  position: absolute;
+  left: 50px;
+  gap: 10px;
+  span{
+    width: 40px;
+    height: 40px;
+    // border: 1px solid #fff;
+    background: rgba(254, 254, 254, 0.2);
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    svg{
+      width: 20px;
+      height: 20px;
+    }
+    @media (width <= 380px) {
+      width: 36px;
+      height: 36px;
+    }
   }
 }
 .title {
