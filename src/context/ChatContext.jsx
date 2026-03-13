@@ -65,7 +65,13 @@ export const ChatProvider = ({ children }) => {
 
 useEffect(() => {
   if (!userIdLocal) return;
-  
+
+  // Don't connect socket when running inside an iframe (e.g. kundali view from chat).
+  // The parent page already owns the socket connection. A second connection from the
+  // iframe would cause the server to see a duplicate, and when the iframe closes its
+  // socket disconnects — making the server think the user went offline.
+  if (window.self !== window.top) return;
+
   if (!voiceSocket.connected) {
     voiceSocket.io.opts.query = {
       userId: userIdLocal,

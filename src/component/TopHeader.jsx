@@ -701,6 +701,15 @@ const TopHeader = () => {
               Kundli
             </NavLink>
             <NavLink
+              to={PATH.privateRoutes.TAROT_CARD_V2.path}
+              onClick={() => setIsDrawerOpen(false)}
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Tarot
+            </NavLink>
+            <NavLink
               to="/matchmaking"
               onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>

@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 // components/IframeModal.jsx
 import { useEffect } from "react";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
@@ -22,13 +23,17 @@ const IframeModal = ({ open, src, onClose, loading }) => {
   // Add iframe=true query parameter to show minimal header
   const iframeSrc = src ? `${src}${src.includes('?') ? '&' : '?'}iframe=true` : '';
 
-  return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
+  return createPortal(
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <button className={styles.closeBtn} onClick={onClose}>
+          <IoClose size={22} />
+        </button>
         <PrimaryLoader isLoading={loading} />
         <iframe src={iframeSrc} title="Kundli" className={styles.iframe} />
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
