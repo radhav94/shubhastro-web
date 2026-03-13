@@ -78,7 +78,7 @@ const PanchangInputCard = ({ imageSrc, title, onTap, initialDate, initialLocatio
           </PrimaryText>
         )}
         <PrimaryText isCenter size_24 color={appColors.greyDark}>
-          {formData?.location || "Delhi, India"},&nbsp;
+          {formData?.location || initialLocation || "Mumbai, India"},&nbsp;
           {formData.dateOfBirth ? Userdob : today}{" "}
         </PrimaryText>
 
@@ -132,12 +132,8 @@ const PanchangInputCard = ({ imageSrc, title, onTap, initialDate, initialLocatio
               <PrimaryButton
                 width={"100%"}
                 title="Submit"
-                buttonStyles={{
-                  paddingTop: "12px",
-                  paddingBottom: "12px",
-                  background: "linear-gradient(90deg, #f75801 0%, #d43400 100%)",
-                }}
                 type="submit"
+                textColor="#ffffff"
               />
             </div>
           </div>

@@ -31,8 +31,17 @@ const TodayPanchang = () => {
   const location = useLocation();
   const pad = (num) => String(num).padStart(2, "0");
   
-  // Get initial date and location from navigation state
+  // Get initial date and location from navigation state OR URL query params
+  const searchParams = new URLSearchParams(window.location.search);
   const { date: initialDate, location: initialLocation, latitude: initialLat, longitude: initialLon } = location.state || {};
+  
+  // Fallback to query params if state is not available
+  const queryLat = searchParams.get('lat');
+  const queryLon = searchParams.get('lon');
+  
+  const finalLat = initialLat || queryLat || 19.132;
+  const finalLon = initialLon || queryLon || 72.342;
+  const finalLocation = initialLocation || "Mumbai, India";
   
   // Initialize with passed data or current date/location
   const now = initialDate ? new Date(initialDate) : new Date();
@@ -43,8 +52,8 @@ const TodayPanchang = () => {
     year: now.getFullYear(),
     hour: pad(now.getHours()),
     min: pad(now.getMinutes()),  
-    lat: initialLat || 19.132,
-    lon: initialLon || 72.342, 
+    lat: finalLat,
+    lon: finalLon, 
     tzone: 5.5,
   });
   
@@ -53,7 +62,7 @@ const TodayPanchang = () => {
 
   // Auto-trigger API call if date/location passed from navigation
   useEffect(() => {
-    if (initialDate && initialLat && initialLon) {
+    if (initialDate && (initialLat || queryLat) && (initialLon || queryLon)) {
       const date = new Date(initialDate);
       const pad = (val) => (val < 10 ? "0" + val : val);
       
@@ -63,12 +72,12 @@ const TodayPanchang = () => {
         year: date.getFullYear(),
         hour: pad(date.getHours()),
         min: pad(date.getMinutes()),
-        lat: Number(initialLat),
-        lon: Number(initialLon),
+        lat: Number(finalLat),
+        lon: Number(finalLon),
         tzone: 5.5,
       });
     }
-  }, [initialDate, initialLat, initialLon]);
+  }, [initialDate, finalLat, finalLon]);
 
   // -------------------- TODAY HIGHLIGHTS --------------------
   const todayData = [
@@ -387,9 +396,9 @@ const TodayPanchang = () => {
             onTap={onTap} 
             title="Panchang"
             initialDate={initialDate}
-            initialLocation={initialLocation}
-            initialLatitude={initialLat}
-            initialLongitude={initialLon}
+            initialLocation={finalLocation}
+            initialLatitude={finalLat}
+            initialLongitude={finalLon}
           />
 
           <PanchangCards data={todayData} />

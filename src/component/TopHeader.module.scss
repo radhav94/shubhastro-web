@@ -623,6 +623,27 @@
   transform: translateY(-1px);
 }
 
+.avatarText {
+  width: 40px;
+  height: 40px;
+  background: #fff;
+  border: 2px solid #fdefd8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  span{
+    font-size: 14px;
+    font-weight: 600;
+  }
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
+}
+
 
 /* Mobile responsive for Header - 375px */
 @media (max-width: 480px) {
