@@ -1383,6 +1383,7 @@ const AstrologerProfile = () => {
       {/* Recharge Modal */}
       {hookOpenModal.recharge && (
         <RechargeModal
+         astrologer={data}
           isOpen={hookOpenModal.recharge}
           onClose={() =>
             hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
