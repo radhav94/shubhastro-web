@@ -52,7 +52,7 @@ export default function useChat({
     if (!roomId || !userId || !astrologerId) return;
     socketService.connect({
       onConnected: () => {
-        if (Object.keys(activeChat || {}).length > 0) { //Check if chat is active
+        if (Object.keys(activeChat || {}).length > 0 || (activeCall && activeCall.astrologerId === astrologerId)) { //Check if chat is active or there's an active call with this astrologer
           startTimer(); //Start timer only when there is active chat
           setIsMessageDisabled(false);
 

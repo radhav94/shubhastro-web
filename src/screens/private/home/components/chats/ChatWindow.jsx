@@ -63,8 +63,10 @@ const ChatWindow = () => {
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
   const { activeChat } = useChatContext();
 
-  // Check if there's an active video call
+  // Check if there's an active call (audio or video)
   const isVideoCallActive = activeCall && activeCall.callType === "video";
+  const isAudioCallActive = activeCall && activeCall.callType === "audio";
+  const isCallActive = !!activeCall;
   const isChatActive = activeChat && activeChat.roomId;
 
   // Get wallet balance
@@ -477,7 +479,7 @@ const ChatWindow = () => {
             />
           </div>
 
-          {(!isMessageDisabled || isVideoCallActive) && (
+          {(!isMessageDisabled || isCallActive) && (
             <ChatInput
               value={message}
               onChange={(e) => {
@@ -485,7 +487,7 @@ const ChatWindow = () => {
                 sendTyping();
               }}
               onSend={handleSend}
-              isMessageDisabled={isMessageDisabled && !isVideoCallActive}
+              isMessageDisabled={isMessageDisabled && !isCallActive}
               onChatEnd={handleChatEnd}
               setOpen={setOpenFeedback}
               sendVoiceMessage={sendVoiceMessage}
