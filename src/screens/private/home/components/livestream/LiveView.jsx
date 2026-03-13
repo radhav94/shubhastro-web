@@ -15,6 +15,9 @@ import { useCall } from "../../../../../context/CallContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import Toast from "../../../../../component/toast";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
+import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
+import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
+import { PATH } from "../../../../../utils/routes/Paths";
 
 import { createPortal } from "react-dom";
 import { ChevronLeft } from "lucide-react";
@@ -59,7 +62,9 @@ const LiveView = (props) => {
     setActiveCall, 
     setCallSeconds, 
     resetCallFlow, 
-    setActiveCallRoomId 
+    setActiveCallRoomId,
+    setLastSelectedKundli,
+    setLastCallType
   } = useCall();
   
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
@@ -69,6 +74,13 @@ const LiveView = (props) => {
   const astrologerRef = useRef(null);
   
   const [createChatRoom] = useCreateChatRoomMutation();
+  const [getBalance] = useGetBalanceMutation();
+
+  // Fetch user's kundli profiles for validation
+  const { data: kundliData } = useGetAllKundlisQuery(undefined, {
+    skip: !token || !userIdLocal,
+  });
+  const profiles = kundliData?.data || [];
 
   // Normalize socket messages (message → text, userType → role, userName → sender)
   const normalizedMessages = messages?.map((m) => ({
@@ -146,38 +158,82 @@ const LiveView = (props) => {
     navigate("/live-landing");
   };
 
-  // Handle call initiation - directly start video call (DEMO MODE)
+  // Handle call initiation - uses real call flow (same as homepage astrologer listing)
   const handleDirectVideoCall = async () => {
-    // Set a demo room ID so cancel button works
-    setCallRoomId("demo-room-" + Date.now());
+    // 1. Check login
+    if (!token || !userIdLocal) {
+      Toast.error("Please login to continue");
+      navigate(PATH.publicRoutes.LOGIN.path);
+      return;
+    }
+
+    // 2. Check kundli profile exists
+    if (!profiles || profiles.length === 0) {
+      Toast.error("Please create your Kundli before starting a call.");
+      navigate(PATH.privateRoutes.PROFILE.path, { state: { requiresCreation: true } });
+      return;
+    }
+
+    // 3. Check not already on a call
+    if (activeCall) {
+      Toast.error("You are already on a call");
+      return;
+    }
+
+    // 4. Check astrologer info available
+    if (!astrologer?._id) {
+      Toast.error("Astrologer information not available");
+      return;
+    }
+
+    try {
+      // 5. Check wallet balance & astrologer availability
+      const result = await getBalance({ astrologerId: astrologer._id, type: "call" });
+
+      if (result?.data?.data?.status === false) {
+        Toast.error("Insufficient balance. Please recharge.");
+        return;
+      }
+
+      const availability = result?.data?.data?.availability;
+      const isActive = availability?.isActive === true;
+      const isActiveForVideo = Array.isArray(availability?.isActiveType)
+        ? availability.isActiveType.includes("video")
+        : false;
+
+      if (!isActive || !isActiveForVideo) {
+        Toast.error("Astrologer is not available for video call");
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking balance/availability:", error);
+      Toast.error("Failed to check astrologer availability");
+      return;
+    }
+
+    // 6. Select kundli (self first, then first profile)
+    const selfKundli = profiles.find(
+      (p) => p.relation?.toLowerCase() === "self"
+    );
+    const selectedKundli = selfKundli || profiles[0];
+    if (selectedKundli) {
+      setLastSelectedKundli(selectedKundli);
+    }
+
+    // 7. Store astrologer info and emit call:initiate via socket
+    setLastRequestedAstro(astrologer);
+    setLastCallType("video");
+    astrologerRef.current = astrologer;
+    localStorage.setItem("selectedAstroId", astrologer._id);
+
+    voiceSocket.emit("call:initiate", {
+      userId: userIdLocal,
+      astrologerId: astrologer._id,
+      type: "video",
+    });
+
     setShowWaitingModal(true);
-
-    // Store timeout ID so we can cancel it
-    const timeoutId = setTimeout(() => {
-      setShowWaitingModal(false);
-
-      // Create mock call data
-      const mockCallData = {
-        roomId: "demo-room-" + Date.now(),
-        chatRoomId: "demo-chat-" + Date.now(),
-        agoraToken: "demo-token-" + Date.now(),
-        callerName: astrologer?.astrologerName || astrologer?.firstName || "Demo Astrologer",
-        isUserSide: true,
-        callType: "video",
-        userId: userIdLocal || "demo-user",
-        astrologerId: astrologer?._id || "demo-astrologer",
-        astrologerID: "DEMO001",
-        remainingTime: 30 // 30 minutes
-      };
-
-      setActiveCall(mockCallData);
-      setCallSeconds(30 * 60); // 30 minutes in seconds
-      
-      Toast.success("Video call started (Demo Mode)");
-    }, 2000); // 2 second delay to show waiting modal
-
-    // Store timeout ID in ref so we can clear it on cancel
-    astrologerRef.current = { timeoutId };
+    Toast.success("Video call request sent");
   };
 
   // Handle call initiation from popup (with choice)
