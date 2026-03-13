@@ -5,6 +5,7 @@ const CallContext = createContext();
 
 export const CallProvider = ({ children }) => {
   const [activeCall, setActiveCall] = useState(null);
+  const [isCallMinimized, setIsCallMinimized] = useState(false); // Track if call UI is minimized
   const [lastRequestedAstro, setLastRequestedAstro] = useState(null);
   const [lastCallType, setLastCallType] = useState(null); // Store the last call type
   const [lastSelectedKundli, setLastSelectedKundli] = useState(null); // Store the last selected Kundli
@@ -123,6 +124,8 @@ export const CallProvider = ({ children }) => {
       value={{
         callApproval,
         activeCall,
+        isCallMinimized,
+        setIsCallMinimized,
         missedApproval,
         resetCallFlow,
         setCallApproval,

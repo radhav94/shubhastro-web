@@ -33,7 +33,7 @@ import { capitalizeWords } from "../../utils/capitalize";
 const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 
 const AgoraVoiceCalling = ({ callData }) => {
-  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, setWaitingList, resetCallFlow } = useCall();
+  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, setWaitingList, resetCallFlow, isCallMinimized, setIsCallMinimized } = useCall();
   const navigate = useNavigate();
 
   if (!activeCall || activeCall.callType !== "audio") {
@@ -58,7 +58,9 @@ const AgoraVoiceCalling = ({ callData }) => {
   /* ================= STATE ================= */
   const [micOn, setMicOn] = useState(true);
   const [joined, setJoined] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
+  // Use context's isCallMinimized instead of local state
+  const isMinimized = isCallMinimized;
+  const setIsMinimized = setIsCallMinimized;
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
   const [speakerOn, setSpeakerOn] = useState(true);
