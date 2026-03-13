@@ -55,8 +55,15 @@ export default function useChat({
         if (Object.keys(activeChat || {}).length > 0) { //Check if chat is active
           startTimer(); //Start timer only when there is active chat
           setIsMessageDisabled(false);
+
+          // Check if initial messages were already sent for this room (persists across remounts/reconnects)
+          const sentKey = `shubhtalk_chat_init_${roomId}`;
+          const alreadySent = sessionStorage.getItem(sentKey);
+
           //Send msg first time only 
-          if (!refreshKey) {
+          if (!refreshKey && !alreadySent) {
+            sessionStorage.setItem(sentKey, "true");
+
             // Check if there's an AI initial query stored
             const aiInitialQuery = localStorage.getItem("aiInitialQuery");
 
@@ -76,6 +83,8 @@ export default function useChat({
             const baseUrl = window.location.origin;
             const kundliLink = `${baseUrl}/kundli/${profileIdToUse}`;
             setTimeout(() => sendMessage(kundliLink, 'kundli'), 300);
+          } else if (alreadySent) {
+            console.log("[ChatWindow] ⏭️ Initial messages already sent for room:", roomId, "— skipping");
           }
         }
       },
@@ -142,21 +151,43 @@ export default function useChat({
     };
   }, [roomId, activeChat, activeCall]);
 
-  // USER SEND
+  // USER SEND — prefer socketService, fallback to voiceSocket (which is already in the room after reconnect)
   const sendMessage = (text, type = "message") => {
-    const res = socketService.sendMessage({
-      message: text,
+    const payload = {
+      sender: "user",
+      kundliId,
       roomId,
       userId,
       astrologerId,
-      kundliId,
-      type
-    });
+      message: text,
+      type,
+    };
 
-    if (res?.error) {
-      setError(res.error);
+    // If socketService socket is connected, use it (normal flow)
+    if (socketService.socket?.connected) {
+      const res = socketService.sendMessage({
+        message: text,
+        roomId,
+        userId,
+        astrologerId,
+        kundliId,
+        type
+      });
+      if (res?.error) {
+        setError(res.error);
+      }
       return;
     }
+
+    // Fallback: use voiceSocket which is already connected & in the room after reconnect
+    if (voiceSocket.connected) {
+      console.log("[ChatWindow] 📤 socketService not connected, sending via voiceSocket");
+      voiceSocket.emit("chat:message", payload);
+      return;
+    }
+
+    setError("Socket not connected, try again.");
+    toast.error("Socket not connected, try again.");
   };
 
   // ASTRO SEND

@@ -60,6 +60,9 @@ const VideoCalling = ({ callData }) => {
   const userLeftTimerRef = useRef(null);
   const isRefreshingRef = useRef(false);
 
+  // Ref to always hold the latest activeCall so socket handlers never use stale closures
+  const activeCallRef = useRef(activeCall);
+
   const [joined, setJoined] = useState(false);
   const [micOn, setMicOn] = useState(true);
   const [cameraOn, setCameraOn] = useState(true);
@@ -80,6 +83,11 @@ const VideoCalling = ({ callData }) => {
   // Fetch kundli profiles
   const { data: profilesData } = useGetAllKundlisQuery();
   const profiles = profilesData?.data || [];
+
+  // Keep activeCallRef in sync so socket handlers always have current values
+  useEffect(() => {
+    activeCallRef.current = activeCall;
+  }, [activeCall]);
 
   // Default avatar URL
   const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
@@ -322,10 +330,20 @@ const VideoCalling = ({ callData }) => {
         const savedSeconds = sessionStorage.getItem("shubhtalk_call_seconds");
         if (savedSeconds && Number(savedSeconds) > 0) {
           console.log("[VideoCall] 🔄 Resuming from refresh, seconds:", savedSeconds);
+          setCallSeconds(Number(savedSeconds));
+          sessionStorage.removeItem("shubhtalk_call_seconds");
+        } else if (callSeconds > 0) {
+          // callSeconds already set (e.g. from audio→video upgrade via CallContext)
+          console.log("[VideoCall] 🔄 Using existing callSeconds from upgrade:", callSeconds);
         } else {
-          const seconds = Number(activeCall.remainingTime) * 60;
-          console.log("[VideoCall] 🆕 Fresh call — remainingTime:", activeCall.remainingTime, "→ seconds:", seconds);
-          setCallSeconds(seconds);
+          const raw = activeCall.remainingTime || 0;
+          const seconds = Math.floor(Number(raw) * 60);
+          console.log("[VideoCall] 🆕 Fresh call — remainingTime:", raw, "→ seconds:", seconds);
+          if (seconds > 0) {
+            setCallSeconds(seconds);
+          } else {
+            console.log("[VideoCall] ⚠️ remainingTime is 0 — waiting for activity event");
+          }
         }
 
         startTimer();
@@ -471,9 +489,12 @@ const VideoCalling = ({ callData }) => {
     if (endCallRef.current) return;
     endCallRef.current = true;
 
+    const currentCall = activeCallRef.current;
+    console.log("[VideoCall] 🔚 safeEndCall — roomId:", roomId, "activeCall:", currentCall ? { astrologerID: currentCall.astrologerID, callerName: currentCall.callerName } : "null");
+
     setReviewData({
-      astrologerID: activeCall?.astrologerID,
-      fullName: activeCall.callerName,
+      astrologerID: currentCall?.astrologerID,
+      fullName: currentCall?.callerName || callerName,
     });
 
     voiceSocket.emit("call:end", {
@@ -496,9 +517,12 @@ const VideoCalling = ({ callData }) => {
       if (endCallRef.current) return;
       endCallRef.current = true;
 
+      const currentCall = activeCallRef.current;
+      console.log("[VideoCall] 📞 call:ended received — roomId:", roomId, "activeCall:", currentCall ? { astrologerID: currentCall.astrologerID, callerName: currentCall.callerName } : "null");
+
       setReviewData({
-        astrologerID: activeCall?.astrologerID,
-        fullName: activeCall.callerName,
+        astrologerID: currentCall?.astrologerID,
+        fullName: currentCall?.callerName || callerName,
       });
 
       // Refresh wallet balance after call ends
@@ -511,6 +535,7 @@ const VideoCalling = ({ callData }) => {
 
     const handleDisconnect = () => {
       if (!endCallRef.current) {
+        console.log("[VideoCall] 🔌 disconnect — triggering safeEndCall");
         safeEndCall();
       }
     };

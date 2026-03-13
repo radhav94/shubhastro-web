@@ -60,6 +60,8 @@ const AgoraVoiceCalling = ({ callData }) => {
   const isUpgradingToVideo = useRef(false);
   // Track if this mount is a refresh-resume (activeCall restored from sessionStorage)
   const isResumeFromRefresh = useRef(!!sessionStorage.getItem("shubhtalk_active_call"));
+  // Ref to always hold the latest activeCall so socket handlers never use stale closures
+  const activeCallRef = useRef(activeCall);
 
   /* ================= STATE ================= */
   const [micOn, setMicOn] = useState(true);
@@ -75,6 +77,11 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [showRechargeButton, setShowRechargeButton] = useState(false);
 
   /* ================= CHAT NOTIFICATION ================= */
+  // Keep activeCallRef in sync so socket handlers always have current values
+  useEffect(() => {
+    activeCallRef.current = activeCall;
+  }, [activeCall]);
+
   const [chatNotification, setChatNotification] = useState(null);
   const notificationTimerRef = useRef(null);
 
@@ -242,11 +249,20 @@ const AgoraVoiceCalling = ({ callData }) => {
       const savedSeconds = sessionStorage.getItem("shubhtalk_call_seconds");
       if (savedSeconds && Number(savedSeconds) > 0) {
         console.log("[VoiceCall] 🔄 Resuming from refresh, seconds:", savedSeconds);
+        setCallSeconds(Number(savedSeconds));
+        sessionStorage.removeItem("shubhtalk_call_seconds");
       } else {
-        const remainingMinutes = callData.remainingTime || activeCall?.remainingTime || 0;
-        const seconds = Number(remainingMinutes) * 60;
-        console.log("[VoiceCall] 🆕 Fresh call — remainingTime:", remainingMinutes, "→ seconds:", seconds);
-        setCallSeconds(seconds);
+        const raw = callData.remainingTime || activeCall?.remainingTime || 0;
+        const rawNum = Number(raw) || 0;
+        // Backend may send remainingTime in minutes — convert to seconds
+        const seconds = rawNum > 0 ? Math.floor(rawNum * 60) : 0;
+        console.log("[VoiceCall] 🆕 Fresh call — raw remainingTime:", raw, "→ seconds:", seconds);
+        if (seconds > 0) {
+          setCallSeconds(seconds);
+        } else {
+          // remainingTime not available yet — timer will update when 'activity' event arrives
+          console.log("[VoiceCall] ⚠️ remainingTime is 0 — waiting for activity event");
+        }
       }
       
       startTimer();
@@ -316,9 +332,10 @@ const AgoraVoiceCalling = ({ callData }) => {
   const endCall = async () => {
     // Don't emit call:end if we're upgrading to video
     if (!isUpgradingToVideo.current) {
+      const currentCall = activeCallRef.current;
       setReviewData({
-        astrologerID: activeCall?.astrologerID,
-        fullName: activeCall?.callerName || callerName,
+        astrologerID: currentCall?.astrologerID,
+        fullName: currentCall?.callerName || callerName,
       });
 
       voiceSocket.emit("call:end", {
@@ -386,9 +403,10 @@ const AgoraVoiceCalling = ({ callData }) => {
     const handleCallEnded = () => {
       // Server already ended the call, don't emit call:end again
       if (!isUpgradingToVideo.current) {
+        const currentCall = activeCallRef.current;
         setReviewData({
-          astrologerID: activeCall?.astrologerID,
-          fullName: activeCall?.callerName || callerName,
+          astrologerID: currentCall?.astrologerID,
+          fullName: currentCall?.callerName || callerName,
         });
 
         // Refresh wallet balance after call ends

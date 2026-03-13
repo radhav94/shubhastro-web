@@ -71,7 +71,7 @@ const ChatInput = ({
             onChange={onChange}
             disabled={isMessageDisabled}
             onKeyDown={(e) => e.key === "Enter" && onSend()}
-            placeholder="| Starts typing..."
+            placeholder=" Starts typing..."
           />
           
           <div className={styles.inputIcons}>
