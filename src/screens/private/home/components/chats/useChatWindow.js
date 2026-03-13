@@ -38,6 +38,9 @@ export default function useChat({
     setIsMessageDisabled(true);
     stopTimer();
     setActiveChat(null);
+    
+    // Clear chat start time
+    sessionStorage.removeItem("shubhtalk_chat_start_time");
 
     // Don't show chat feedback if call review is already open (chat→call switch scenario)
     // or if there's an active call (chat ended because user switched to call)
@@ -55,6 +58,11 @@ export default function useChat({
         if (Object.keys(activeChat || {}).length > 0 || (activeCall && activeCall.astrologerId === astrologerId)) { //Check if chat is active or there's an active call with this astrologer
           startTimer(); //Start timer only when there is active chat
           setIsMessageDisabled(false);
+
+          // Store chat start time for elapsed time calculation (if not already set)
+          if (!sessionStorage.getItem("shubhtalk_chat_start_time")) {
+            sessionStorage.setItem("shubhtalk_chat_start_time", String(Date.now()));
+          }
 
           // Check if initial messages were already sent for this room (persists across remounts/reconnects)
           const sentKey = `shubhtalk_chat_init_${roomId}`;
