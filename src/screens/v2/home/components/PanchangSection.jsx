@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useFetchAdvancePanchangQuery } from "../../../../redux/api/panchang/panchangApi";
 import SectionHeader from "./SectionHeader";
-import sun from "../../../../assets/images/sun.svg";
+import sun from "../../../../assets/images/sun.png";
 import sunriseIcon from "../../../../assets/images/sunrise-icon.svg";
 import sunsetIcon from "../../../../assets/images/sunset-icon.svg";
 import moonriseIcon from "../../../../assets/images/moonrise-icon.svg";
