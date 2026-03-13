@@ -38,7 +38,7 @@ export const useInitiateCall = () => {
     }
 
     // 💰 Balance check
-    const res = await getBalance({ astrologerId: astro._id, type: "call" });
+    const res = await getBalance({ astrologerId: astro._id, type: type });
     if (!res?.data?.data?.status || res?.data?.data?.availableAmount < res?.data?.data?.requiredAmount) {
       setOpenModal((prev) => ({ ...prev, recharge: true }));
       return;
