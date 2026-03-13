@@ -528,6 +528,14 @@
 
 .yearSection {
   margin-bottom: 2rem;
+
+  // Desktop: 2-column grid for consultation cards
+  @media (min-width: 1024px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
 }
 
 .yearTitle {
@@ -535,6 +543,11 @@
   font-weight: 600;
   color: #000;
   margin: 0 0 1rem 0;
+
+  // Desktop: span full width for year title
+  @media (min-width: 1024px) {
+    grid-column: 1 / -1;
+  }
 }
 
 .orderCard {

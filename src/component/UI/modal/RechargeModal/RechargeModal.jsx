@@ -11,12 +11,15 @@ const RechargeModal = ({
 }) => {
   const [showPlansModal, setShowPlansModal] = useState(false);
 
+  
+
   if (!isOpen) return null;
 
   const rate =
     connectionType === "chat"
       ? astrologer?.price?.chatRate?.amount
       : astrologer?.price?.callRate?.amount || 1;
+
 
   const minBalance = rate * 5;
   const astrologerName = astrologer?.firstName || "Astrologer";

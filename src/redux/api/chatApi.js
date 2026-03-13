@@ -18,9 +18,13 @@ export const chatApi = privateRequestNew.injectEndpoints({
     }),
 
     getChatMessages: builder.query({
-      query: ({ astrologerId = null, roomId = "", page = 1 }) => ({
+      query: ({ astrologerId = null, roomId = "", page = 1, userId = "" }) => ({
         url: "chat/messages",
-        params: { astrologerId, roomId, page },
+        params: { 
+          astrologerId, 
+          roomId, 
+          page,
+          userId },
       }),
       serializeQueryArgs: ({ endpointName, queryArgs }) => {
         // Serialize by astrologerId and roomId only, not page
@@ -37,7 +41,10 @@ export const chatApi = privateRequestNew.injectEndpoints({
             ...newItems,
             data: {
               ...newItems.data,
-              chatHistory: [...currentCache.data.chatHistory, ...newItems.data.chatHistory],
+              chatHistory: [
+                ...currentCache.data.chatHistory,
+                ...newItems.data.chatHistory,
+              ],
               pagination: newItems.data.pagination, // Use latest pagination info
             },
           };
@@ -57,4 +64,8 @@ export const chatApi = privateRequestNew.injectEndpoints({
   }),
 });
 
-export const { useGetChatMessagesQuery, useCreateChatRoomMutation ,useGetChatHistoryQuery} = chatApi;
+export const {
+  useGetChatMessagesQuery,
+  useCreateChatRoomMutation,
+  useGetChatHistoryQuery,
+} = chatApi;

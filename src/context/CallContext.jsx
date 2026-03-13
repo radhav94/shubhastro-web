@@ -13,6 +13,7 @@ const RECONNECTION_ENABLED = true;
 
 export const CallProvider = ({ children }) => {
   const [activeCall, setActiveCallState] = useState(null);
+  const [isCallMinimized, setIsCallMinimized] = useState(false); // Track if call UI is minimized
   const [lastRequestedAstro, setLastRequestedAstro] = useState(null);
   const [lastCallType, setLastCallType] = useState(null);
   const [lastSelectedKundli, setLastSelectedKundli] = useState(null);
@@ -402,6 +403,8 @@ export const CallProvider = ({ children }) => {
   const value = {
     activeCall,
     setActiveCall,
+    isCallMinimized,
+    setIsCallMinimized,
     lastRequestedAstro,
     setLastRequestedAstro,
     lastCallType,

@@ -15,6 +15,9 @@ import { useCall } from "../../../../../context/CallContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import Toast from "../../../../../component/toast";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
+import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
+import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
+import { PATH } from "../../../../../utils/routes/Paths";
 
 import { createPortal } from "react-dom";
 import { ChevronLeft } from "lucide-react";
@@ -59,7 +62,10 @@ const LiveView = (props) => {
     setActiveCall, 
     setCallSeconds, 
     resetCallFlow, 
-    setActiveCallRoomId 
+    setActiveCallRoomId,
+    setLastSelectedKundli,
+    setLastCallType,
+    isCallMinimized
   } = useCall();
   
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
@@ -69,6 +75,13 @@ const LiveView = (props) => {
   const astrologerRef = useRef(null);
   
   const [createChatRoom] = useCreateChatRoomMutation();
+  const [getBalance] = useGetBalanceMutation();
+
+  // Fetch user's kundli profiles for validation
+  const { data: kundliData } = useGetAllKundlisQuery(undefined, {
+    skip: !token || !userIdLocal,
+  });
+  const profiles = kundliData?.data || [];
 
   // Normalize socket messages (message → text, userType → role, userName → sender)
   const normalizedMessages = messages?.map((m) => ({
@@ -146,38 +159,84 @@ const LiveView = (props) => {
     navigate("/live-landing");
   };
 
-  // Handle call initiation - directly start video call (DEMO MODE)
-  const handleDirectVideoCall = async () => {
-    // Set a demo room ID so cancel button works
-    setCallRoomId("demo-room-" + Date.now());
+  // Handle call initiation - uses real call flow (same as homepage astrologer listing)
+  const handleDirectVoiceCall = async () => {
+    // 1. Check login
+    if (!token || !userIdLocal) {
+      Toast.error("Please login to continue");
+      navigate(PATH.publicRoutes.LOGIN.path);
+      return;
+    }
+
+    // 2. Check kundli profile exists
+    if (!profiles || profiles.length === 0) {
+      Toast.error("Please create your Kundli before starting a call.");
+      navigate(PATH.privateRoutes.PROFILE.path, { state: { requiresCreation: true } });
+      return;
+    }
+
+    // 3. Check not already on a call
+    if (activeCall) {
+      Toast.error("You are already on a call");
+      return;
+    }
+
+    // 4. Check astrologer info available
+    // Note: astrologer object from LiveListContext uses astrologerId, not _id
+    const astrologerId = astrologer?._id || astrologer?.astrologerId;
+    if (!astrologerId) {
+      Toast.error("Astrologer information not available");
+      return;
+    }
+
+    try {
+      // 5. Check wallet balance & astrologer availability
+      const result = await getBalance({ astrologerId, type: "call" });
+
+      if (result?.data?.data?.status === false) {
+        Toast.error("Insufficient balance. Please recharge.");
+        return;
+      }
+
+      const availability = result?.data?.data?.availability;
+      const isActive = availability?.isActive === true;
+      const isActiveForAudio = Array.isArray(availability?.isActiveType)
+        ? availability.isActiveType.includes("audio")
+        : false;
+
+      if (!isActive || !isActiveForAudio) {
+        Toast.error("Astrologer is not available for voice call");
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking balance/availability:", error);
+      Toast.error("Failed to check astrologer availability");
+      return;
+    }
+
+    // 6. Select kundli (self first, then first profile)
+    const selfKundli = profiles.find(
+      (p) => p.relation?.toLowerCase() === "self"
+    );
+    const selectedKundli = selfKundli || profiles[0];
+    if (selectedKundli) {
+      setLastSelectedKundli(selectedKundli);
+    }
+
+    // 7. Store astrologer info and emit call:initiate via socket
+    setLastRequestedAstro(astrologer);
+    setLastCallType("audio");
+    astrologerRef.current = astrologer;
+    localStorage.setItem("selectedAstroId", astrologerId);
+
+    voiceSocket.emit("call:initiate", {
+      userId: userIdLocal,
+      astrologerId,
+      type: "audio",
+    });
+
     setShowWaitingModal(true);
-
-    // Store timeout ID so we can cancel it
-    const timeoutId = setTimeout(() => {
-      setShowWaitingModal(false);
-
-      // Create mock call data
-      const mockCallData = {
-        roomId: "demo-room-" + Date.now(),
-        chatRoomId: "demo-chat-" + Date.now(),
-        agoraToken: "demo-token-" + Date.now(),
-        callerName: astrologer?.astrologerName || astrologer?.firstName || "Demo Astrologer",
-        isUserSide: true,
-        callType: "video",
-        userId: userIdLocal || "demo-user",
-        astrologerId: astrologer?._id || "demo-astrologer",
-        astrologerID: "DEMO001",
-        remainingTime: 30 // 30 minutes
-      };
-
-      setActiveCall(mockCallData);
-      setCallSeconds(30 * 60); // 30 minutes in seconds
-      
-      Toast.success("Video call started (Demo Mode)");
-    }, 2000); // 2 second delay to show waiting modal
-
-    // Store timeout ID in ref so we can clear it on cancel
-    astrologerRef.current = { timeoutId };
+    Toast.success("Voice call request sent");
   };
 
   // Handle call initiation from popup (with choice)
@@ -198,7 +257,9 @@ const LiveView = (props) => {
       return;
     }
 
-    if (!astrologer?._id) {
+    // Note: astrologer object from LiveListContext uses astrologerId, not _id
+    const astrologerId = astrologer?._id || astrologer?.astrologerId;
+    if (!astrologerId) {
       Toast.error("Astrologer information not available");
       return;
     }
@@ -213,7 +274,7 @@ const LiveView = (props) => {
     // Emit socket event to initiate call
     voiceSocket.emit("call:initiate", {
       userId: userIdLocal,
-      astrologerId: astrologer._id,
+      astrologerId,
       type, // "audio" | "video"
     });
 
@@ -267,9 +328,11 @@ const LiveView = (props) => {
 
       try {
         // Create chat room for the call
+        // Note: astro object may have _id or astrologerId depending on source
+        const astroId = astro._id || astro.astrologerId;
         const res = await createChatRoom({
           userId: userIdLocal,
-          astrologerId: astro._id,
+          astrologerId: astroId,
         });
 
         const chatRoomId = res?.data?.data;
@@ -284,7 +347,7 @@ const LiveView = (props) => {
           isUserSide: true,
           callType: type, // "audio" or "video"
           userId: userIdLocal,
-          astrologerId: astro._id,
+          astrologerId: astroId,
           astrologerID: astro?.astrologer_ID,
           remainingTime
         });
@@ -331,6 +394,12 @@ const LiveView = (props) => {
       voiceSocket.off("call:ended", handleCallEnded);
     };
   }, [userIdLocal, setActiveCall, setCallSeconds, resetCallFlow, setActiveCallRoomId, createChatRoom]);
+
+  // Hide LiveView when there's an active call that is NOT minimized
+  // Show LiveView when call is minimized so user can watch live stream
+  if (activeCall && !isCallMinimized) {
+    return null;
+  }
 
   return (
     <FixedLayer>
@@ -465,13 +534,12 @@ const LiveView = (props) => {
               {!isHost && (
                 <button 
                   className="call-price-btn"
-                  onClick={handleDirectVideoCall}
+                  onClick={handleDirectVoiceCall}
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                    <circle cx="18" cy="6" r="3" fill="currentColor" stroke="none"/>
                   </svg>
-                  <span>₹{astrologer?.videoCallRate || astrologer?.audioCallRate || 20}/ min</span>
+                  <span>₹{astrologer?.audioCallRate || 20}/ min</span>
                 </button>
               )}
             </div>
@@ -574,7 +642,7 @@ const LiveView = (props) => {
           {/* NEW BOTTOM ACTION BAR */}
           <div className="right-action-bar">
             {/* Timer */}
-            <button className="icon-btn" onClick={() => setShowCallPopup(true)}>
+            {/* <button className="icon-btn" onClick={() => setShowCallPopup(true)}>
               <div className="icon-circle">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="13" r="8"/>
@@ -583,7 +651,7 @@ const LiveView = (props) => {
                 </svg>
               </div>
               <span className="icon-label">20m</span>
-            </button>
+            </button> */}
 
             {/* Viewers */}
             <button className="icon-btn">
