@@ -6,7 +6,7 @@ import { IoClose } from "react-icons/io5";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { padZero } from "../../../../utils/dateFormat/dateTime";
 import Toast from "../../../../component/toast";
-import { setForm } from "../../../../redux/kundliform/formSlice";
+import { setForm as setKundliForm } from "../../../../redux/kundliform/formSlice";
 
 import {
   useGetAllKundlisQuery,
@@ -186,7 +186,7 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
           longitude: profileData.lon,
         };
 
-        dispatch(setForm(profilePayload));
+        dispatch(setKundliForm(profilePayload));
       }
     } catch (err) {
       console.error(err);
@@ -245,8 +245,8 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
         longitude: selectedKundli.lon || 0,
       };
 
-      console.log("📤 Dispatching setForm with payload:", profilePayload);
-      dispatch(setForm(profilePayload));
+      console.log("📤 Dispatching setKundliForm with payload:", profilePayload);
+      dispatch(setKundliForm(profilePayload));
 
       console.log("✅ Calling onSelect with kundli:", selectedKundli);
       onSelect(selectedKundli);
