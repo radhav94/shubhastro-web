@@ -1,14 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import ChevronLeft from '../components/ui/ChevronLeft'
 import { useNavigate } from 'react-router-dom'
-import TarotPopup from '../components/ui/TarotPopup'
 import styles from './TarotReadingPage.module.css'
 
 const TarotReadingPage = () => {
   const navigate = useNavigate()
   const [displayedCards, setDisplayedCards] = useState(8)
-  const [isPopupOpen, setIsPopupOpen] = useState(false)
-  const [selectedReading, setSelectedReading] = useState(null)
   const observerRef = useRef(null)
 
   const allTarotReadings = [
@@ -51,28 +48,12 @@ const TarotReadingPage = () => {
   }, [displayedCards, allTarotReadings.length])
 
   const handleCardClick = (reading) => {
-    setSelectedReading(reading)
-    setIsPopupOpen(true)
-  }
-
-  const handleClosePopup = () => {
-    setIsPopupOpen(false)
-    setSelectedReading(null)
-  }
-
-  const handleBeginReading = (cardsData) => {
-    console.log('Begin reading for:', selectedReading)
-    console.log('Cards data:', cardsData)
-    
-    // Navigate to regular card selection page for all readings including Love Triangle
     navigate('/tarot-card-selection', { 
       state: { 
-        reading: selectedReading,
-        cards: cardsData 
+        reading,
+        cards: [] 
       } 
     })
-    
-    setIsPopupOpen(false)
   }
 
   return (
@@ -212,13 +193,6 @@ const TarotReadingPage = () => {
       {displayedCards < allTarotReadings.length && (
         <div ref={observerRef} className={styles.loadingTrigger} />
       )}
-
-      <TarotPopup 
-        isOpen={isPopupOpen}
-        onClose={handleClosePopup}
-        onBeginReading={handleBeginReading}
-        reading={selectedReading}
-      />
     </div>
   )
 }
