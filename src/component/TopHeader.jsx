@@ -562,7 +562,7 @@ const TopHeader = () => {
                 </div>
               ) : (
                 <div className={styles.profileIcon} onClick={handleProfileClick}>
-                  <User size={20} />
+                  <User size={20} strokeWidth={0} fill="#d53400"/>
                 </div>
               )}
               <div className={styles.greetingText}>
