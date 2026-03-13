@@ -5,45 +5,45 @@ import styles from './ClothColorAnalysis.module.scss';
 import { analyzeClothColor } from '../../../../services/appServices/aiWowService';
 import { setClothColorResult, clearClothColorData } from '../../../../redux/aiwow/aiwowSlice';
 import { PATH } from '../../../../utils/routes/Paths';
+import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 
 const ClothColorAnalysis = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const clothImage = useSelector((state) => state.aiwow.clothColor.image);
   const formData = useSelector((state) => state.aiwow.clothColor.formData);
+
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
+    required: true,
+    showToast: true,
+    redirectPath: PATH.privateRoutes.AI_WOW?.path || '/aiwow',
+  });
+
   const [progress, setProgress] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [error, setError] = useState(null);
   
-  // Track component mount status to prevent navigation after unmount
   const isMountedRef = useRef(true);
-  // Store abort controller to cancel API request on unmount
   const abortControllerRef = useRef(null);
 
-  // Cleanup effect to prevent navigation after unmount and abort API request
   useEffect(() => {
     isMountedRef.current = true;
-
-    return () => {
-      isMountedRef.current = false;
-      console.log('ClothColorAnalysis unmounting - aborting API request');
-      
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        console.log('API request aborted');
-      }
-    };
+    return () => { isMountedRef.current = false; };
   }, []);
 
   useEffect(() => {
-    if (clothImage) {
-      performAnalysis(clothImage);
-    } else {
+    if (profileLoading) return;
+
+    if (!clothImage) {
       navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path);
       return;
     }
-  }, [clothImage, navigate]);
+
+    if (profile && !isAnalyzing && !analysisComplete && !error) {
+      performAnalysis(clothImage);
+    }
+  }, [clothImage, profile, profileLoading]);
 
   const performAnalysis = async (imageData) => {
     setIsAnalyzing(true);

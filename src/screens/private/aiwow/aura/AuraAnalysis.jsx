@@ -36,11 +36,7 @@ const AuraAnalysis = () => {
       isMountedRef.current = false;
       console.log('AuraAnalysis unmounting - aborting API request');
       
-      // Abort ongoing API request
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        console.log('API request aborted');
-      }
+      // Do NOT abort here — request should complete even if component unmounts
     };
   }, []);
 
