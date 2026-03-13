@@ -50,7 +50,7 @@ const PanchangSection = () => {
     navigate("/panchang", {
       state: {
         date: formattedDate,
-        location: "Delhi, India",
+        location: "Mumbai, India",
         latitude: 19.132,
         longitude: 72.342,
       }

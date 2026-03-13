@@ -173,6 +173,40 @@ const TopHeader = () => {
     // Last resort
     return "Guest";
   })();
+
+  // Get initials for avatar (first letter of first name + first letter of last name)
+  const getInitials = (firstName, lastName) => {
+    if (firstName && lastName) {
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    }
+    if (firstName) {
+      return firstName.charAt(0).toUpperCase();
+    }
+    return "";
+  };
+
+  // Get user avatar display (initials or icon)
+  const userAvatarDisplay = (() => {
+    // If user has registered name, show initials
+    if (user?.firstName && user?.lastName) {
+      return getInitials(user.firstName, user.lastName);
+    }
+    if (user?.firstName) {
+      return user.firstName.charAt(0).toUpperCase();
+    }
+    
+    // If primary kundli exists, show its initials
+    if (savedKundlis.length > 0 && savedKundlis[0]?.name) {
+      const nameParts = savedKundlis[0].name.split(" ");
+      if (nameParts.length >= 2) {
+        return getInitials(nameParts[0], nameParts[nameParts.length - 1]);
+      }
+      return nameParts[0].charAt(0).toUpperCase();
+    }
+    
+    // Default: return empty (will show User icon)
+    return "";
+  })();
         
 
   // Handle language change with Google Translate
@@ -522,9 +556,15 @@ const TopHeader = () => {
               </span>
             </div> */}
             <div className={styles.profileDetailMain}>
-              <div className={styles.profileIcon} onClick={handleProfileClick}>
-                <User size={24} strokeWidth={0} fill="#d53400" />
-              </div>
+              {userAvatarDisplay ? (
+                <div className={styles.avatarText} onClick={handleProfileClick}>
+                  <span>{userAvatarDisplay}</span>
+                </div>
+              ) : (
+                <div className={styles.profileIcon} onClick={handleProfileClick}>
+                  <User size={20} />
+                </div>
+              )}
               <div className={styles.greetingText}>
                 <span className={styles.namaste}>नमस्ते</span>
                 <span className={styles.userName}>{displayName}</span>

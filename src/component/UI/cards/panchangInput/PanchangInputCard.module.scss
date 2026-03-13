@@ -64,6 +64,26 @@
   @media (max-width: 768px) {
     width: 100%;
   }
+
+  button {
+    background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+    padding: 12px 24px;
+    border-radius: 6px;
+    border: none;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
 }
 
 .label {
