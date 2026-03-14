@@ -4,46 +4,45 @@ import { useSelector, useDispatch } from 'react-redux';
 import styles from './GemstoneAnalysis.module.scss';
 import { analyzeGemstone } from '../../../../services/appServices/aiWowService';
 import { setGemstoneResult, clearGemstoneData } from '../../../../redux/aiwow/aiwowSlice';
-import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
+import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 
 const GemstoneAnalysis = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const gemstoneImage = useSelector((state) => state.aiwow.gemstone.image);
+
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
+    required: true,
+    showToast: true,
+    redirectPath: PATH.privateRoutes.AI_WOW?.path || '/aiwow',
+  });
+
   const [progress, setProgress] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [error, setError] = useState(null);
   
-  // Track component mount status to prevent navigation after unmount
   const isMountedRef = useRef(true);
-  // Store abort controller to cancel API request on unmount
   const abortControllerRef = useRef(null);
 
-  // Cleanup effect to prevent navigation after unmount and abort API request
   useEffect(() => {
     isMountedRef.current = true;
-
-    return () => {
-      isMountedRef.current = false;
-      console.log('GemstoneAnalysis unmounting - aborting API request');
-      
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        console.log('API request aborted');
-      }
-    };
+    return () => { isMountedRef.current = false; };
   }, []);
 
   useEffect(() => {
-    if (gemstoneImage) {
-      performAnalysis(gemstoneImage);
-    } else {
+    if (profileLoading) return;
+
+    if (!gemstoneImage) {
       navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path);
       return;
     }
-  }, [navigate, gemstoneImage]);
+
+    if (profile && !isAnalyzing && !analysisComplete && !error) {
+      performAnalysis(gemstoneImage);
+    }
+  }, [gemstoneImage, profile, profileLoading]);
 
   const performAnalysis = async (imageData) => {
     setIsAnalyzing(true);

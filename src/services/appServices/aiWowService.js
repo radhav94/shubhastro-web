@@ -10,7 +10,9 @@ export const getProfileData = () => {
   
   try {
     const profile = JSON.parse(profileStr);
+    const kundliId = profile._id || profile.id || '';
     return {
+      kundliId,
       name: profile.name || '',
       gender: profile.identity?.toLowerCase() || 'male',
       day: String(profile.day || ''),

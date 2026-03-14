@@ -2,48 +2,47 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './SignatureAnalysis.module.scss';
-import { Toast } from '../../../../component';
 import { analyzeSignature } from '../../../../services/appServices/aiWowService';
 import { setSignatureResult, clearSignatureData } from '../../../../redux/aiwow/aiwowSlice';
 import { PATH } from '../../../../utils/routes/Paths';
+import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 
 const SignatureAnalysis = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const signatureImage = useSelector((state) => state.aiwow.signature.image);
+
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
+    required: true,
+    showToast: true,
+    redirectPath: PATH.privateRoutes.AI_WOW?.path || '/aiwow',
+  });
+
   const [progress, setProgress] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [error, setError] = useState(null);
   
-  // Track component mount status to prevent navigation after unmount
   const isMountedRef = React.useRef(true);
-  // Store abort controller to cancel API request on unmount
   const abortControllerRef = React.useRef(null);
 
-  // Cleanup effect to prevent navigation after unmount and abort API request
   useEffect(() => {
     isMountedRef.current = true;
-
-    return () => {
-      isMountedRef.current = false;
-      console.log('SignatureAnalysis unmounting - aborting API request');
-      
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        console.log('API request aborted');
-      }
-    };
+    return () => { isMountedRef.current = false; };
   }, []);
 
   useEffect(() => {
-    if (signatureImage) {
-      performAnalysis(signatureImage);
-    } else {
+    if (profileLoading) return;
+
+    if (!signatureImage) {
       navigate(PATH.privateRoutes.SIGNATURE_INSTRUCTIONS.path);
       return;
     }
-  }, [navigate, signatureImage]);
+
+    if (profile && !isAnalyzing && !analysisComplete && !error) {
+      performAnalysis(signatureImage);
+    }
+  }, [signatureImage, profile, profileLoading]);
 
   const performAnalysis = async (imageData) => {
     setIsAnalyzing(true);

@@ -2,16 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './PalmistryAnalysis.module.scss';
-import { Toast } from '../../../../component';
 import { analyzePalm } from '../../../../services/appServices/aiWowService';
 import { setPalmistryResult, setPalmistryResultId, clearPalmistryData } from '../../../../redux/aiwow/aiwowSlice';
 import { PATH } from '../../../../utils/routes/Paths';
+import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 
 const PalmistryAnalysis = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const palmImage = useSelector((state) => state.aiwow.palmistry.image);
   const selectedHand = useSelector((state) => state.aiwow.palmistry.selectedHand);
+
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
+    required: true,
+    showToast: true,
+    redirectPath: PATH.privateRoutes.AI_WOW?.path || '/aiwow',
+  });
+
   const [progress, setProgress] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
@@ -19,32 +26,27 @@ const PalmistryAnalysis = () => {
   
   // Track component mount status to prevent navigation after unmount
   const isMountedRef = React.useRef(true);
-  // Store abort controller to cancel API request on unmount
   const abortControllerRef = React.useRef(null);
 
-  // Cleanup effect to prevent navigation after unmount and abort API request
   useEffect(() => {
     isMountedRef.current = true;
-
     return () => {
       isMountedRef.current = false;
-      console.log('PalmistryAnalysis unmounting - aborting API request');
-      
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        console.log('API request aborted');
-      }
     };
   }, []);
 
   useEffect(() => {
-    if (palmImage && selectedHand) {
-      performAnalysis(palmImage, selectedHand);
-    } else {
+    if (profileLoading) return; // Wait for profile to load
+
+    if (!palmImage || !selectedHand) {
       navigate(PATH.privateRoutes.PALMISTRY_HAND_SELECTION.path);
       return;
     }
-  }, [palmImage, selectedHand, navigate]);
+
+    if (profile && !isAnalyzing && !analysisComplete && !error) {
+      performAnalysis(palmImage, selectedHand);
+    }
+  }, [palmImage, selectedHand, profile, profileLoading]);
 
   const performAnalysis = async (imageData, hand) => {
     setIsAnalyzing(true);
