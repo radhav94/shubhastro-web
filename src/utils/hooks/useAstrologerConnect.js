@@ -189,7 +189,7 @@ export const useAstrologerConnect = () => {
     try {
       // Check balance
       console.log("[NormalFlow] 💰 Checking balance for call type:", type);
-      const result = await getBalance({ astrologerId: astro?._id, type: "call" });
+      const result = await getBalance({ astrologerId: astro?._id, type: type });
       console.log("[NormalFlow] 💰 Balance API response:", JSON.stringify(result?.data?.data));
       
       // Check balance status
