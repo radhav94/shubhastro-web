@@ -6,12 +6,18 @@ export const aiwowApi = privateRequestNew.injectEndpoints({
       query: () => ({
         url: "homepage/?slug=ai-suites",
         method: "GET",
-        headers: {
-          "accept": "application/json",
-        },
+        headers: { accept: "application/json" },
+      }),
+    }),
+
+    getAiHistory: builder.query({
+      query: (kundliId) => ({
+        url: `ai-history?kundliId=${kundliId}`,
+        method: "GET",
+        headers: { accept: "application/json" },
       }),
     }),
   }),
 });
 
-export const { useGetAiWowPageDataQuery } = aiwowApi;
+export const { useGetAiWowPageDataQuery, useGetAiHistoryQuery } = aiwowApi;

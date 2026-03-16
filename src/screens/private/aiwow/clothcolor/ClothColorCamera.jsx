@@ -241,10 +241,7 @@ const ClothColorCamera = () => {
       {!capturedImage && (
         <button className={styles.switchBtn} onClick={switchCamera}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M20 5L20 9L16 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M4 19L4 15L8 15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M20 9C19.0376 7.27143 17.5699 5.85765 15.7893 4.93853C14.0087 4.01942 11.9913 3.63787 9.99998 3.84537C8.00867 4.05287 6.12489 4.83993 4.59998 6.1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M4 15C4.96244 16.7286 6.43007 18.1424 8.21066 19.0615C9.99125 19.9806 12.0087 20.3621 14 20.1546C15.9913 19.9471 17.8751 19.1601 19.4 17.9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M17 8L21 12M21 12L17 16M21 12H9M7 16L3 12M3 12L7 8M3 12H15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
       )}
