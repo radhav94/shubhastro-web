@@ -252,7 +252,7 @@ export const useRazorpayPayment = () => {
   /**
    * Handle successful payment
    */
-  const handlePaymentSuccess = useCallback(async (response, backendOrderId, planId, planData, onSuccess) => {
+  const handlePaymentSuccess = useCallback(async (response, backendOrderId, planId, _planData, onSuccess) => {
     try {
       clearPaymentTimeout();
       orderStatusUpdatedRef.current = true; // Mark as updated to prevent failure handlers
@@ -367,9 +367,27 @@ export const useRazorpayPayment = () => {
   }, []);
 
   /**
+   * Build the webhook callback URL with dynamic order params
+   */
+  const buildCallbackUrl = useCallback((backendOrderId, planId, returnUrl) => {
+    const base = `${window.location.origin}/payment/webhook`;
+    const params = new URLSearchParams();
+    if (backendOrderId) params.set("orderId", String(backendOrderId));
+    if (planId) params.set("planId", planId);
+    if (returnUrl) params.set("returnUrl", returnUrl);
+    return `${base}?${params.toString()}`;
+  }, []);
+
+  /**
    * Create Razorpay options
    */
   const createRazorpayOptions = useCallback((orderData, planData, handlers) => {
+    const callbackUrl = buildCallbackUrl(
+      orderData.backendOrderId,
+      planData.planId || orderData.orderData?.planId,
+      planData.returnUrl
+    );
+
     return {
       key: RAZORPAY_KEY_ID,
       amount: orderData.amount * 100, // Convert to paise
@@ -377,6 +395,7 @@ export const useRazorpayPayment = () => {
       name: "ShubhAstro",
       description: `Wallet Recharge - ₹${planData.actualPrice || orderData.amount}`,
       order_id: orderData?.orderData?.gatewayOrderId,
+      callback_url: callbackUrl, // Redirect URL for server-side payment flows (UPI intent, etc.)
       handler: handlers.onSuccess,
       prefill: getUserPrefillData(),
       theme: {
@@ -393,7 +412,7 @@ export const useRazorpayPayment = () => {
       },
       timeout: PAYMENT_TIMEOUT / 1000, // Convert to seconds
     };
-  }, [getUserPrefillData]);
+  }, [getUserPrefillData, buildCallbackUrl]);
 
   /**
    * Open Razorpay checkout

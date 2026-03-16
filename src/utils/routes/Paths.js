@@ -141,6 +141,7 @@ import OrderHistory from "../../screens/private/orderHistory/OrderHistory";
 import OrderDetails from "../../screens/private/orderHistory/OrderDetails";
 
 import FinalPay from "../../screens/private/payment/FinalPay";
+import PaymentWebhook from "../../screens/private/payment/PaymentWebhook";
 
 import ConsultantList from "../../screens/private/shop/consultant/ConsultantList";
 import PaymentScreen from "../../screens/private/shop/consultant/PaymentScreen";
@@ -912,6 +913,12 @@ export const PATH = {
     FinalPay: {
       path: "/recharge/payment",
       element: FinalPay,
+    },
+    PAYMENT_WEBHOOK: {
+      path: "/payment/webhook",
+      element: PaymentWebhook,
+      header: false,
+      footer: false,
     },
     ASTROLOGERS: {
       path: "/talk-to-astrologers/expert/:name",
