@@ -977,7 +977,7 @@ $floating-button-gap: 14px;
 .rechargeButton {
   // padding: $spacing-lg 24px;
   // padding: 5px;
-  width: 30px;
+  // width: 30px;
   border-radius: 24px;
   border: none;
   background: transparent;
@@ -993,11 +993,11 @@ $floating-button-gap: 14px;
   flex-shrink: 0;
 }
 
-.rechargeButton img {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
+// .rechargeButton img {
+//   width: 18px;
+//   height: 18px;
+//   flex-shrink: 0;
+// }
 
 .rechargeButton:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
@@ -1101,10 +1101,10 @@ $floating-button-gap: 14px;
     }
   }
 
-  .rechargeButton img {
-    width: 14px;
-    height: 14px;
-  }
+  // .rechargeButton img {
+  //   width: 14px;
+  //   height: 14px;
+  // }
 
   .backIcon {
     width: 36px;
@@ -1403,10 +1403,10 @@ $floating-button-gap: 14px;
   // }
 
   /* Larger arrow icon in recharge button */
-  .rechargeButton img {
-    width: 20px;
-    height: 20px;
-  }
+  // .rechargeButton img {
+  //   width: 20px;
+  //   height: 20px;
+  // }
 }
 
 /* ==================== WAITING POPUP ==================== */

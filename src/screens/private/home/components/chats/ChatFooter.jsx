@@ -1,4 +1,5 @@
 import styles from "./ChatWindow.module.scss";
+import walletIcon from "../../../../../assets/images/wallet-icon.svg";
 
 const ChatFooter = ({ remainingTime = 0, onRecharge, onChatEnd, isChatActive }) => {
   // Format time as HH:MM:SS or MM:SS
@@ -39,7 +40,7 @@ const ChatFooter = ({ remainingTime = 0, onRecharge, onChatEnd, isChatActive }) 
 
       {isChatActive && (
         <button className={styles.rechargeButton} onClick={onRecharge}>
-          <span>
+          {/* <span>
             <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34" fill="none">
               <path fillRule="evenodd" clipRule="evenodd" d="M5 0C2.23858 0 0 2.23858 0 5V28.3333C0 31.0948 2.23858 33.3333 5 33.3333H28.3333C31.0948 33.3333 33.3333 31.0948 33.3333 28.3333V11.6667C33.3333 9.48964 31.942 7.63757 30 6.95118V5C30 2.23858 27.7614 0 25 0H5ZM5 3.33333C4.07953 3.33333 3.33333 4.07953 3.33333 5C3.33333 5.92047 4.07953 6.66667 5 6.66667H26.6667V5C26.6667 4.07953 25.9205 3.33333 25 3.33333H5ZM25 16.6667C23.1591 16.6667 21.6667 18.1591 21.6667 20C21.6667 21.841 23.1591 23.3333 25 23.3333H28.3333C29.2538 23.3333 30 22.5871 30 21.6667V18.3333C30 17.4129 29.2538 16.6667 28.3333 16.6667H25Z" fill="url(#paint0_linear_8953_991)" />
               <defs>
@@ -49,7 +50,8 @@ const ChatFooter = ({ remainingTime = 0, onRecharge, onChatEnd, isChatActive }) 
                 </linearGradient>
               </defs>
             </svg>
-          </span>
+          </span> */}
+            <img src={walletIcon} alt="wallet icon" />
         </button>
       )}
     </div>

@@ -195,15 +195,15 @@
   }
 }
 
-.rechargeButton img {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  @media (width <= 767px) {
-    width: 14px;
-    height: 14px;
-  }
-}
+// .rechargeButton img {
+//   width: 18px;
+//   height: 18px;
+//   flex-shrink: 0;
+//   @media (width <= 767px) {
+//     width: 14px;
+//     height: 14px;
+//   }
+// }
 .rechargeNowBtn{
   display: flex;
   width: 180px;
