@@ -519,7 +519,7 @@ const TopHeader = () => {
               Horoscopes
             </NavLink> */}
             <NavLink
-              to="/live-landing"
+              to="/live"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -804,7 +804,7 @@ const TopHeader = () => {
               Horoscopes
             </NavLink>
             <NavLink
-              to="/live-landing"
+              to="/live"
               onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
