@@ -281,7 +281,7 @@ const VideoCallChat = ({
   return (
     <div className={styles.chatPanel}>
       <div className={styles.chatHeader}>
-        <h3>Chat</h3>
+        <h3>Attachment</h3>
         <button className={styles.closeButton} onClick={onClose}>
           <IoClose size={20} />
         </button>

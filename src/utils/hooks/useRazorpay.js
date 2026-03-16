@@ -374,9 +374,9 @@ export const useRazorpayPayment = () => {
       key: RAZORPAY_KEY_ID,
       amount: orderData.amount * 100, // Convert to paise
       currency: orderData.currency,
-      name: "ShubhTalk",
+      name: "ShubhAstro",
       description: `Wallet Recharge - ₹${planData.actualPrice || orderData.amount}`,
-      order_id: orderData.order_ID,
+      order_id: orderData?.orderData?.gatewayOrderId,
       handler: handlers.onSuccess,
       prefill: getUserPrefillData(),
       theme: {

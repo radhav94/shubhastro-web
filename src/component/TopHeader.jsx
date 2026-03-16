@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import styles from "./TopHeader.module.scss";
 import { PATH } from "../utils/routes/Paths";
@@ -43,6 +43,22 @@ const TopHeader = () => {
   // Fixed list of supported languages with English labels
   const [open, setOpen] = useState(false);
   const [activeLang, setActiveLang] = useState("English"); // default language name
+  const langRef = useRef(null);
+
+  // Close language dropdown on outside click (mobile)
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (langRef.current && !langRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    if (open) {
+      document.addEventListener("touchstart", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [open]);
 
   const supportedLanguages = [
     { code: 'en', name: 'English' },
@@ -368,12 +384,13 @@ const TopHeader = () => {
               {supportedLanguages.map((lang) => (
                 <p
                   key={lang.code}
-                  className="notranslate"
+                  className={`notranslate ${lang.code === selectedLang ? styles.activeLang : ''}`}
                   onClick={() => {
                     handleLanguageChange(lang.code);
                   }}
                 >
                   {lang.name}
+                  {lang.code === selectedLang && <span>✓</span>}
                 </p>
               ))}
             </div>
@@ -381,9 +398,10 @@ const TopHeader = () => {
 
           {/* Close Button */}
           <button 
-            className={styles.iframeCloseBtn}
+            className={`${styles.iframeCloseBtn} notranslate`}
             onClick={() => window.parent.postMessage({ type: 'CLOSE_KUNDLI_MODAL' }, '*')}
             aria-label="Close"
+            translate="no"
           >
             ✕
           </button>
@@ -501,7 +519,7 @@ const TopHeader = () => {
               Horoscopes
             </NavLink> */}
             <NavLink
-              to="/live-landing"
+              to="/live"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -513,7 +531,7 @@ const TopHeader = () => {
           <div className={styles.headerActions}>
 
             {/* language start */}
-            <div className={styles.languageWrap}>
+            <div className={styles.languageWrap} ref={langRef}>
               <span
                 className={styles.onHoverChangeLang}
                 onClick={() => setOpen((prev) => !prev)}
@@ -540,12 +558,13 @@ const TopHeader = () => {
                 {supportedLanguages.map((lang) => (
                   <p
                     key={lang.code}
-                    className="notranslate"
+                    className={`notranslate ${lang.code === selectedLang ? styles.activeLang : ''}`}
                     onClick={() => {
                       handleLanguageChange(lang.code);
                     }}
                   >
                     {lang.name}
+                    {lang.code === selectedLang && <span>✓</span>}
                   </p>
                 ))}
               </div>
@@ -785,7 +804,7 @@ const TopHeader = () => {
               Horoscopes
             </NavLink>
             <NavLink
-              to="/live-landing"
+              to="/live"
               onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`

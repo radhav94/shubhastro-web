@@ -85,7 +85,7 @@ const KundliProfileModal = ({ isOpen, onClose, onSelectProfile,setShowAddProfile
         <div className={styles.sheetHandle}></div>
         
         <div className={styles.sheetContent}>
-          <button className={styles.closeBtn} onClick={onClose}>×</button>
+          <button className={`${styles.closeBtn} notranslate`} onClick={onClose} translate="no">×</button>
           <h2 className={styles.sheetTitle}>Select Profile</h2>
           
           {isLoading ? (

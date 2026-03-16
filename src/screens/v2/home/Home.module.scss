@@ -2040,6 +2040,8 @@
 .sessionDateTime {
   display: flex;
   gap: 16px;
+  color: #424242;
+  font-weight: 400;
   @media screen and (width <= 767px) {
     flex-wrap: wrap;
     gap: 8px;
@@ -2070,14 +2072,14 @@
   font-family: "Poppins", sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: #999;
+  color: #424242;
 }
 
 .sessionDuration {
   font-family: "Poppins", sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: #666;
+  color: #424242;
   margin: 0;
 }
 

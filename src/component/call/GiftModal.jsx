@@ -181,6 +181,16 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
           {/* Handle */}
           <div className={styles.modalHandle}></div>
 
+          {/* Close Button */}
+          <button 
+            className={`${styles.closeBtn} notranslate`} 
+            onClick={onClose}
+            aria-label="Close"
+            translate="no"
+          >
+            ×
+          </button>
+
           {/* Header */}
           <div className={styles.modalHeader}>
             <h2 className={styles.modalTitle}>Send a Gift</h2>
