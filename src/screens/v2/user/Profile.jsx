@@ -1210,7 +1210,7 @@ const Profile = () => {
             <span className={styles.balanceLabel}>Balance</span>
           </div>
           <div className={styles.balanceAmount}>
-            ₹{isFetchingBalance ? "..." : balance || 0}
+            ₹{isFetchingBalance ? "..." : Number(balance || 0).toLocaleString("en-IN")}
           </div>
         </div>
 
@@ -1335,6 +1335,7 @@ const Profile = () => {
                 <p>Loading orders...</p>
               </div>
             ) : filteredOrders.length > 0 ? (
+              <>
               <div
                 key={orderHistoryTab}
                 className={styles.orderList}
@@ -1439,30 +1440,32 @@ const Profile = () => {
                     </div>
                   ))}
 
-                {/* Pagination Controls */}
-                {(() => {
-                  const isCall = orderHistoryTab === "call";
-                  const page = isCall ? callHistoryPage : chatHistoryPage;
-                  const totalPages = isCall ? (callPagination?.totalPages || 1) : (chatPagination?.totalPages || 1);
-                  const hasPrev = isCall ? hasPrevCallPage : hasPrevChatPage;
-                  const hasNext = isCall ? hasNextCallPage : hasNextChatPage;
-
-                  return totalPages > 1 ? (
-                    <Pagination
-                      pagination={{
-                        page,
-                        totalPages,
-                        hasNextPage: hasNext,
-                        hasPrevPage: hasPrev,
-                      }}
-                      onPageChange={(newPage) => {
-                        if (isCall) setCallHistoryPage(newPage);
-                        else setChatHistoryPage(newPage);
-                      }}
-                    />
-                  ) : null;
-                })()}
               </div>
+
+              {/* Pagination Controls - outside scrollable orderList */}
+              {(() => {
+                const isCall = orderHistoryTab === "call";
+                const page = isCall ? callHistoryPage : chatHistoryPage;
+                const totalPages = isCall ? (callPagination?.totalPages || 1) : (chatPagination?.totalPages || 1);
+                const hasPrev = isCall ? hasPrevCallPage : hasPrevChatPage;
+                const hasNext = isCall ? hasNextCallPage : hasNextChatPage;
+
+                return totalPages > 1 ? (
+                  <Pagination
+                    pagination={{
+                      page,
+                      totalPages,
+                      hasNextPage: hasNext,
+                      hasPrevPage: hasPrev,
+                    }}
+                    onPageChange={(newPage) => {
+                      if (isCall) setCallHistoryPage(newPage);
+                      else setChatHistoryPage(newPage);
+                    }}
+                  />
+                ) : null;
+              })()}
+              </>
             ) : (
               <div className={styles.emptyState}>
                 <p>

@@ -436,11 +436,26 @@
   overflow: auto;
 }
 
-/* Show on hover */
-.languageWrap:hover .languageDropdown {
+/* Show on hover (desktop only) */
+@media (min-width: 769px) {
+  .languageWrap:hover .languageDropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Show/hide via click (mobile) */
+.languageDropdown.open {
   opacity: 1;
   visibility: visible;
   transform: translateY(0) scale(1);
+}
+
+.languageDropdown.close {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(0.95);
 }
 
 /* Items */

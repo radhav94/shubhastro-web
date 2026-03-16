@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import styles from "./TopHeader.module.scss";
 import { PATH } from "../utils/routes/Paths";
@@ -43,6 +43,22 @@ const TopHeader = () => {
   // Fixed list of supported languages with English labels
   const [open, setOpen] = useState(false);
   const [activeLang, setActiveLang] = useState("English"); // default language name
+  const langRef = useRef(null);
+
+  // Close language dropdown on outside click (mobile)
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (langRef.current && !langRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    if (open) {
+      document.addEventListener("touchstart", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [open]);
 
   const supportedLanguages = [
     { code: 'en', name: 'English' },
@@ -514,7 +530,7 @@ const TopHeader = () => {
           <div className={styles.headerActions}>
 
             {/* language start */}
-            <div className={styles.languageWrap}>
+            <div className={styles.languageWrap} ref={langRef}>
               <span
                 className={styles.onHoverChangeLang}
                 onClick={() => setOpen((prev) => !prev)}
