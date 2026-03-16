@@ -23,6 +23,7 @@ const ResultHistoryCard = ({ item }) => {
 
   return (
     <div className={styles.card}>
+
       {/* Header */}
       <div className={styles.cardHeader}>
         <div className={styles.featureInfo}>
@@ -49,32 +50,16 @@ const ResultHistoryCard = ({ item }) => {
 
       {/* Footer */}
       <div className={styles.cardFooter}>
-        {isPaid ? (
-          <div className={styles.downloadWrap}>
-            <span className={styles.downloadHint}>Download your detailed analysis report</span>
-            <div className={styles.downloadBtnWrap}>
-              <button className={styles.downloadBtn} onClick={onDownload}>
-                <DownloadIcon />
-                Download
-              </button>
-              <span className={styles.paidRibbon}>Paid</span>
-            </div>
-          </div>
-        ) : (
-          <div className={styles.actionRow}>
-            <button className={styles.viewBtn} onClick={onViewResult}>
-              <EyeIcon />
-              View Result
+        <div className={styles.downloadWrap}>
+          <span className={styles.downloadHint}>Download your detailed analysis report</span>
+          <div className={styles.downloadBtnWrap}>
+            <button className={styles.downloadBtn} onClick={onDownload}>
+              <DownloadIcon />
+              Download
             </button>
-            <div className={styles.downloadWithPrice}>
-              {price && <span className={styles.priceBadge}>₹{price}</span>}
-              <button className={styles.downloadBtn} onClick={onDownload}>
-                <DownloadIcon />
-                Download
-              </button>
-            </div>
+            <span className={styles.paidRibbon}>Paid</span>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
