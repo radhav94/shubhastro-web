@@ -76,13 +76,13 @@ const MuhuratSection = () => {
             <div key={i} className={styles.muhuratCard}>
               <h4 className={styles.muhuratCardTitle}>{m.title}</h4>
               <div className={styles.muhuratTimeRow}>
-                <span className={styles.muhuratLabel}>Start</span>
+                <span className={`${styles.muhuratLabel} ${styles.start}`}>Start</span>
                 <span className={styles.muhuratTime}>
                   {formatTime(m.start)}
                 </span>
               </div>
               <div className={styles.muhuratTimeRow}>
-                <span className={styles.muhuratLabel}>End</span>
+                <span className={`${styles.muhuratLabel} ${styles.end}`}>End</span>
                 <span className={styles.muhuratTime}>
                   {formatTime(m.end)}
                 </span>
