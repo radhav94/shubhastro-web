@@ -368,12 +368,13 @@ const TopHeader = () => {
               {supportedLanguages.map((lang) => (
                 <p
                   key={lang.code}
-                  className="notranslate"
+                  className={`notranslate ${lang.code === selectedLang ? styles.activeLang : ''}`}
                   onClick={() => {
                     handleLanguageChange(lang.code);
                   }}
                 >
                   {lang.name}
+                  {lang.code === selectedLang && <span>✓</span>}
                 </p>
               ))}
             </div>
@@ -540,12 +541,13 @@ const TopHeader = () => {
                 {supportedLanguages.map((lang) => (
                   <p
                     key={lang.code}
-                    className="notranslate"
+                    className={`notranslate ${lang.code === selectedLang ? styles.activeLang : ''}`}
                     onClick={() => {
                       handleLanguageChange(lang.code);
                     }}
                   >
                     {lang.name}
+                    {lang.code === selectedLang && <span>✓</span>}
                   </p>
                 ))}
               </div>

@@ -99,12 +99,12 @@ const MySessionsSection = ({ onConnectClick }) => {
             </div>
           </div>
         </div>
-        <button
+        {/* <button
           className={styles.viewAllLink}
           onClick={() => navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)}
         >
           View All <ChevronRight size={20} />
-        </button>
+        </button> */}
       </div>
 
       <div className={styles.sessionsGrid}>
