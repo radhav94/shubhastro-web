@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
@@ -15,6 +15,7 @@ import LoginScreen from "./LoginScreen";
 const Onboarding = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
 
   // Start directly at LoginScreen (skip WelcomeScreen)
@@ -41,7 +42,16 @@ const Onboarding = () => {
     const userData = localStorage.getItem("userData");
     const redirectPath = localStorage.getItem("shubhtalk_redirect_after_login");
 
-    console.log("🔍 Onboarding mount check - token:", !!token, "userData:", !!userData, "redirectPath:", redirectPath);
+    console.log(
+      "🔍 Onboarding mount check - token:",
+      !!token,
+      "userData:",
+      !!userData,
+      "redirectPath:",
+      redirectPath,
+      "Location Data::",
+      location?.state?.from
+    );
 
     // Only redirect if user was already logged in before coming to this page
     // AND there's no redirect path (meaning they came here directly, not from a 401 error)
@@ -50,7 +60,9 @@ const Onboarding = () => {
         const parsedUserData = JSON.parse(userData);
         // Only redirect if user is already registered
         if (parsedUserData.isRegister) {
-          console.log("✅ User already logged in (no redirect path), redirecting to home");
+          console.log(
+            "✅ User already logged in (no redirect path), redirecting to home",
+          );
           navigate(PATH.privateRoutes.HOME.path || "/");
         }
       } catch (error) {
@@ -68,12 +80,12 @@ const Onboarding = () => {
       toast.error("Please complete your name in the first step");
       return;
     }
-    
+
     if (step > 1 && !formData.birthDate) {
       toast.error("Please complete your birth date in the second step");
       return;
     }
-    
+
     // Map the step index to the actual screen index
     // PersonalizeScreen = step 0 -> screen 3
     // BirthDetailsScreen = step 1 -> screen 4
@@ -154,26 +166,29 @@ const Onboarding = () => {
       totalSteps={3}
       onStepChange={handleStepChange}
     />,
-    <LoadingScreen key="loading" onComplete={() => {
-      // Check for redirect path after registration completion
-      const redirectPath = localStorage.getItem("shubhtalk_redirect_after_login");
+    <LoadingScreen
+      key="loading"
+      onComplete={() => {
+        // Check for redirect path after registration completion
+        const redirectPath = localStorage.getItem(
+          "shubhtalk_redirect_after_login",
+        );
 
-      if (redirectPath && redirectPath !== "/login") {
-        // Clear the redirect path
-        localStorage.removeItem("shubhtalk_redirect_after_login");
-        navigate(redirectPath);
-      } else {
-        // No redirect path, go to home
-        navigate(PATH.privateRoutes.HOME.path || "/");
-      }
-    }} />,
+        if (redirectPath && redirectPath !== "/login") {
+          // Clear the redirect path
+          localStorage.removeItem("shubhtalk_redirect_after_login");
+          navigate(redirectPath);
+        } else {
+          // No redirect path, go to home
+          navigate(PATH.privateRoutes.HOME.path || "/");
+        }
+      }}
+    />,
   ];
 
   return (
     <>
-      <div className={styles.onboardingContainer}>
-        {screens[currentStep]}
-      </div>
+      <div className={styles.onboardingContainer}>{screens[currentStep]}</div>
     </>
   );
 };
