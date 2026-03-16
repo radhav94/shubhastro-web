@@ -99,6 +99,12 @@
   }
 }
 
+.wrongHandMessage {
+  background: rgba(220, 38, 38, 0.85);
+  border: 1.5px solid #ef4444;
+  font-weight: 600;
+}
+
 .capturedImage {
   position: absolute;
   top: 0;

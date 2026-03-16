@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Hands } from "@mediapipe/hands";
 
-export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds }) => {
+export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isFrontCamera = true }) => {
   const [handsLoaded, setHandsLoaded] = useState(false);
   const [handDetected, setHandDetected] = useState(false);
   const [isPalmOpen, setIsPalmOpen] = useState(false);
   const [isInBounds, setIsInBounds] = useState(false);
+  const [detectedHandSide, setDetectedHandSide] = useState(null);
+  const [isTooFar, setIsTooFar] = useState(false);
   
   const handsRef = useRef(null);
   const rafRef = useRef(null);
@@ -64,32 +66,35 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds }) =
     let isValid = false;
     let palmOpen = false;
     let inBounds = false;
+    let handSide = null;
+    let tooFar = false;
 
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
       const landmarks = results.multiHandLandmarks[0];
-      
-      // Check if palm is open by analyzing finger positions
+
+      if (results.multiHandedness && results.multiHandedness.length > 0) {
+        const label = results.multiHandedness[0].label;
+        const rawSide = label.toLowerCase();
+        handSide = isFrontCamera
+          ? (rawSide === "right" ? "left" : "right")
+          : rawSide;
+      }
+
+      // Check hand size — too far if ratio < 0.05 (hand visible but tiny)
+      const { valid, ratio } = validateHand(landmarks, canvas.width, canvas.height);
+      tooFar = ratio > 0 && ratio < 0.05;
+      isValid = valid;
+
       palmOpen = isPalmOpenCheck(landmarks);
-      
-      // Check if hand is within capture box bounds
       inBounds = checkHandInBounds(landmarks, canvas.width, canvas.height);
-      
-      // Draw hand landmarks
       drawHand(ctx, landmarks, canvas.width, canvas.height, palmOpen && inBounds);
-      
-      // Validate hand detection
-      isValid = validateHand(landmarks, canvas.width, canvas.height);
     }
 
     setHandDetected(isValid);
     setIsPalmOpen(palmOpen);
     setIsInBounds(inBounds);
-    
-    console.log('📊 Detection States:', { 
-      handDetected: isValid, 
-      isPalmOpen: palmOpen, 
-      isInBounds: inBounds 
-    });
+    setDetectedHandSide(isValid ? handSide : null);
+    setIsTooFar(tooFar);
   };
 
   /* ------------------ CHECK HAND IN BOUNDS ------------------ */
@@ -171,25 +176,13 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds }) =
     return extendedCount >= 3;
   };
 
-  /* ------------------ VALIDATE HAND ------------------ */
   const validateHand = (landmarks, width, height) => {
-    // Calculate hand bounding box
     const xs = landmarks.map(l => l.x * width);
     const ys = landmarks.map(l => l.y * height);
-    
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
-    
-    const handWidth = maxX - minX;
-    const handHeight = maxY - minY;
-    const handArea = handWidth * handHeight;
-    const videoArea = width * height;
-    const ratio = handArea / videoArea;
-    
-    // Hand should be between 10% and 70% of frame
-    return ratio > 0.1 && ratio < 0.7;
+    const handWidth = Math.max(...xs) - Math.min(...xs);
+    const handHeight = Math.max(...ys) - Math.min(...ys);
+    const ratio = (handWidth * handHeight) / (width * height);
+    return { valid: ratio > 0.1 && ratio < 0.7, ratio };
   };
 
   /* ------------------ DRAW HAND ------------------ */
@@ -273,6 +266,8 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds }) =
     setHandDetected(false);
     setIsPalmOpen(false);
     setIsInBounds(false);
+    setDetectedHandSide(null);
+    setIsTooFar(false);
     
     if (canvasRef.current) {
       const ctx = canvasRef.current.getContext('2d');
@@ -285,6 +280,8 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds }) =
     handDetected,
     isPalmOpen,
     isInBounds,
+    detectedHandSide,
+    isTooFar,
     startDetection,
     stopDetection
   };
