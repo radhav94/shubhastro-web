@@ -210,6 +210,13 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
         resetCallFlow();
         return;
       }
+
+      // If there's an active video call and this is an audio acceptance, it's a downgrade — let CallContext handle it
+      if (type === "audio" && activeCall && activeCall.callType === "video") {
+        console.log("🔄 Audio downgrade accepted - CallContext will handle the switch (isSwitch:", isSwitch, ")");
+        resetCallFlow();
+        return;
+      }
       
       // Regular call acceptance
       resetCallFlow();
@@ -281,10 +288,10 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
 
     /* REJECTED */
     const handleCallRejected = (data) => {
-      // Check if this is a video switch rejection during an active audio call
-      if (data?.switchRejected && data?.type === "audio") {
-        console.log("🔄 Video switch rejected - audio call continues");
-        // Don't reset anything - the audio call should continue
+      // Check if this is a switch rejection during an active call
+      if (data?.switchRejected && (data?.type === "audio" || data?.type === "video")) {
+        console.log("🔄 Call switch rejected - current call continues");
+        // Don't reset anything - the current call should continue
         return;
       }
       

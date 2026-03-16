@@ -317,23 +317,29 @@ export const CallProvider = ({ children }) => {
 
     const handleCallUpgrade = (data) => {
       console.log("[CallContext] 🔄 call:accepted for upgrade:", JSON.stringify(data));
-      
+
       // Clear waiting list immediately for any call:accepted
       setWaitingList(null);
       
-      // Dispatch event to notify VoiceCall component before state update
-      window.dispatchEvent(new CustomEvent('call:upgrading-to-video', { 
-        detail: { roomId: data.roomId } 
-      }));
+      // Dispatch event to notify current call component before state update
+      if (data.type === "video") {
+        window.dispatchEvent(new CustomEvent('call:upgrading-to-video', { 
+          detail: { roomId: data.roomId } 
+        }));
+      } else if (data.type === "audio") {
+        window.dispatchEvent(new CustomEvent('call:downgrading-to-audio', { 
+          detail: { roomId: data.roomId } 
+        }));
+      }
       
-      // Save current callSeconds from ref (always fresh) before VoiceCall unmounts and stopTimer resets it
+      // Save current callSeconds from ref (always fresh) before component unmounts and stopTimer resets it
       const currentSeconds = callSecondsRef.current;
-      console.log("[CallContext] 🔄 Preserving callSeconds for video upgrade:", currentSeconds);
+      console.log("[CallContext] 🔄 Preserving callSeconds for call switch:", currentSeconds);
       
       // Update activeCall synchronously — no setTimeout to avoid race conditions
       // with screen-level call:accepted handlers
       setActiveCall((prevCall) => {
-        // Only upgrade if there's an active audio call
+        // Upgrade: audio → video
         if (prevCall && prevCall.callType === "audio" && data.type === "video") {
           console.log("✅ Upgrading call from audio to video");
           const upgraded = {
@@ -345,6 +351,19 @@ export const CallProvider = ({ children }) => {
           };
           console.log("[CallContext] 🔄 Upgraded activeCall:", JSON.stringify({ ...upgraded, agoraToken: "[redacted]" }));
           return upgraded;
+        }
+        // Downgrade: video → audio
+        if (prevCall && prevCall.callType === "video" && data.type === "audio") {
+          console.log("✅ Downgrading call from video to audio");
+          const downgraded = {
+            ...prevCall,
+            callType: "audio",
+            agoraToken: data.agoraToken || data.token || prevCall.agoraToken,
+            roomId: data.roomId || prevCall.roomId,
+            remainingTime: data.remainingTime || prevCall.remainingTime,
+          };
+          console.log("[CallContext] 🔄 Downgraded activeCall:", JSON.stringify({ ...downgraded, agoraToken: "[redacted]" }));
+          return downgraded;
         }
         return prevCall;
       });
