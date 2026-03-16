@@ -135,6 +135,29 @@ $font-primary: "Poppins", sans-serif;
   // }
 }
 
+// --- Grouped Detail Box (one grey container with multiple stacked rows) ---
+.detailGroupBox {
+  background: #fafafa;
+  border: 1px solid #e0e0e05c;
+  border-radius: 5px;
+  padding: 4px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 10px;
+}
+
+.detailGroupRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #e0e0e05c;
+  }
+}
+
 // --- Responsive Adjustments ---
 @media (min-width: 768px) {
   .accordionContent {
