@@ -160,6 +160,17 @@ const useChatSocket = ({
         return;
       }
 
+      if (err?.message === "Chat has already ended") {
+        // Chat is over — clear chat state so the window closes
+        Toast.error("Chat has already ended");
+        stopTimer();
+        setActiveChat(null);
+        setWaitingPopup(false);
+        setGlobalWaitingList(null);
+        setCallRoomId(null);
+        return;
+      }
+
       Toast.error(err?.message || "Connection error");
       setWaitingPopup(false);
       setGlobalWaitingList(null);
