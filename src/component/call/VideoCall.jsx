@@ -59,6 +59,7 @@ const VideoCalling = ({ callData }) => {
   const endCallRef = useRef(false);
   const userLeftTimerRef = useRef(null);
   const isRefreshingRef = useRef(false);
+  const isDowngradingToAudio = useRef(false);
 
   // Ref to always hold the latest activeCall so socket handlers never use stale closures
   const activeCallRef = useRef(activeCall);
@@ -298,6 +299,9 @@ const VideoCalling = ({ callData }) => {
 
         // Grace period so a page refresh doesn't kill the call
         client.on("user-left", (user) => {
+          // Don't end call if we're downgrading to audio
+          if (isDowngradingToAudio.current) return;
+
           console.log("[VideoCall] 👋 user-left — uid:", user.uid, "starting 15s grace timer");
           if (userLeftTimerRef.current) clearTimeout(userLeftTimerRef.current);
           userLeftTimerRef.current = setTimeout(() => {
@@ -358,7 +362,7 @@ const VideoCalling = ({ callData }) => {
     // On unmount: only release Agora resources
     // Do NOT clear activeCall — if this is a refresh, we need it to persist
     return () => {
-      console.log("[VideoCall] 🧹 useEffect cleanup (unmount) — isRefreshing:", isRefreshingRef.current);
+      console.log("[VideoCall] 🧹 useEffect cleanup (unmount) — isRefreshing:", isRefreshingRef.current, "isDowngrading:", isDowngradingToAudio.current);
       cleanupRef.current = true;
       if (userLeftTimerRef.current) {
         clearTimeout(userLeftTimerRef.current);
@@ -443,7 +447,7 @@ const VideoCalling = ({ callData }) => {
   }, [joined]);
 
   /* ================= CLEANUP ================= */
-  const cleanup = async () => {
+  const cleanup = async (skipEmit = false) => {
     if (cleanupRef.current) return;
     cleanupRef.current = true;
 
@@ -479,7 +483,10 @@ const VideoCalling = ({ callData }) => {
       }
 
       setJoined(false);
-      setActiveCall(null);
+      // Only set activeCall to null if not downgrading to audio
+      if (!skipEmit) {
+        setActiveCall(null);
+      }
       stopTimer();
     }
   };
@@ -489,25 +496,29 @@ const VideoCalling = ({ callData }) => {
     if (endCallRef.current) return;
     endCallRef.current = true;
 
-    const currentCall = activeCallRef.current;
-    console.log("[VideoCall] 🔚 safeEndCall — roomId:", roomId, "activeCall:", currentCall ? { astrologerID: currentCall.astrologerID, callerName: currentCall.callerName } : "null");
+    // Don't emit call:end if we're downgrading to audio
+    if (!isDowngradingToAudio.current) {
+      const currentCall = activeCallRef.current;
+      console.log("[VideoCall] 🔚 safeEndCall — roomId:", roomId, "activeCall:", currentCall ? { astrologerID: currentCall.astrologerID, callerName: currentCall.callerName } : "null");
 
-    setReviewData({
-      astrologerID: currentCall?.astrologerID,
-      fullName: currentCall?.callerName || callerName,
-    });
+      setReviewData({
+        astrologerID: currentCall?.astrologerID,
+        fullName: currentCall?.callerName || callerName,
+      });
 
-    voiceSocket.emit("call:end", {
-      roomId,
-      endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
-    });
+      voiceSocket.emit("call:end", {
+        roomId,
+        endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
+      });
 
-    // Refresh wallet balance after call ends
-    refreshWallet();
-    window.dispatchEvent(new Event("walletBalanceUpdated"));
+      // Refresh wallet balance after call ends
+      refreshWallet();
+      window.dispatchEvent(new Event("walletBalanceUpdated"));
 
-    setOpenReview(true);
-    await cleanup();
+      setOpenReview(true);
+    }
+    
+    await cleanup(isDowngradingToAudio.current);
   };
 
   /* ================= SOCKET ================= */
@@ -517,20 +528,23 @@ const VideoCalling = ({ callData }) => {
       if (endCallRef.current) return;
       endCallRef.current = true;
 
-      const currentCall = activeCallRef.current;
-      console.log("[VideoCall] 📞 call:ended received — roomId:", roomId, "activeCall:", currentCall ? { astrologerID: currentCall.astrologerID, callerName: currentCall.callerName } : "null");
+      if (!isDowngradingToAudio.current) {
+        const currentCall = activeCallRef.current;
+        console.log("[VideoCall] 📞 call:ended received — roomId:", roomId, "activeCall:", currentCall ? { astrologerID: currentCall.astrologerID, callerName: currentCall.callerName } : "null");
 
-      setReviewData({
-        astrologerID: currentCall?.astrologerID,
-        fullName: currentCall?.callerName || callerName,
-      });
+        setReviewData({
+          astrologerID: currentCall?.astrologerID,
+          fullName: currentCall?.callerName || callerName,
+        });
 
-      // Refresh wallet balance after call ends
-      refreshWallet();
-      window.dispatchEvent(new Event("walletBalanceUpdated"));
+        // Refresh wallet balance after call ends
+        refreshWallet();
+        window.dispatchEvent(new Event("walletBalanceUpdated"));
 
-      setOpenReview(true);
-      cleanup();
+        setOpenReview(true);
+      }
+      
+      cleanup(isDowngradingToAudio.current);
     };
 
     const handleDisconnect = () => {
@@ -547,17 +561,73 @@ const VideoCalling = ({ callData }) => {
       Toast.warning(msg.message);
     };
 
+    const handleCallRejected = (data) => {
+      // Check if this is an audio switch rejection
+      if (data?.switchRejected && data?.type === "video") {
+        console.log("🔄 Audio switch rejected - resuming video call");
+        
+        // Reset the downgrade flag since we're staying in video mode
+        isDowngradingToAudio.current = false;
+        
+        Toast.info(data?.message || "Audio call request rejected. Continuing with video call.");
+        return;
+      }
+      
+      // Regular call rejection
+      console.log("📞 Regular call rejection - ending call");
+      safeEndCall();
+    };
+
     voiceSocket.on("call:ended", handleCallEnded);
     voiceSocket.on("disconnect", handleDisconnect);
     voiceSocket.on("warning", handleWarning);
+    voiceSocket.on("call:rejected", handleCallRejected);
 
     return () => {
       voiceSocket.off("call:ended", handleCallEnded);
       voiceSocket.off("disconnect", handleDisconnect);
       voiceSocket.off("warning", handleWarning);
+      voiceSocket.off("call:rejected", handleCallRejected);
     };
     // eslint-disable-next-line
   }, []);
+
+  /* ================= DETECT CALL TYPE CHANGE (VIDEO -> AUDIO) ================= */
+  useEffect(() => {
+    const handleDowngradeEvent = (event) => {
+      if (event.detail.roomId === roomId) {
+        console.log("🔄 Received downgrade event, setting flag...");
+        isDowngradingToAudio.current = true;
+      }
+    };
+
+    window.addEventListener('call:downgrading-to-audio', handleDowngradeEvent);
+
+    return () => {
+      window.removeEventListener('call:downgrading-to-audio', handleDowngradeEvent);
+    };
+  }, [roomId]);
+
+  // Detect via activeCall change - catches any case where callType changes to audio
+  useEffect(() => {
+    if (activeCall && activeCall.callType === "audio" && activeCall.roomId === roomId) {
+      console.log("🔄 Detected activeCall changed to audio, setting downgrade flag...");
+      isDowngradingToAudio.current = true;
+    }
+  }, [activeCall, roomId]);
+
+  /* ================= SWITCH TO AUDIO ================= */
+  const switchToAudio = () => {
+    Toast.success("Switching to audio call...");
+
+    voiceSocket.emit("call:initiate", {
+      userId: activeCall.userId,
+      astrologerId: activeCall.astrologerId,
+      type: "audio",
+      isSwitch: true,
+      roomId: roomId,
+    });
+  };
 
   /* ================= BALANCE CHECK ================= */
   // useEffect(async() => {
@@ -890,14 +960,10 @@ const VideoCalling = ({ callData }) => {
   
                 <button 
                   className={styles.chateM}
-                  onClick={() => setCameraOn((p) => !p)}
+                  onClick={switchToAudio}
                 >
-                  {cameraOn ? (
-                    <img src={CallIcon} alt="audio" width="17" height="17" />
-                  ) : (
-                    <img src={VideocamIcon} alt="video" width="17" height="11" />
-                  )}
-                  {cameraOn ? "Audio" : "Video"}
+                  <img src={CallIcon} alt="audio" width="17" height="17" />
+                  Audio
                 </button>
   
                 <span class={styles.dividerLine}></span>
