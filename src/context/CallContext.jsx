@@ -318,6 +318,9 @@ export const CallProvider = ({ children }) => {
     const handleCallUpgrade = (data) => {
       console.log("[CallContext] 🔄 call:accepted for upgrade:", JSON.stringify(data));
       
+      // Clear waiting list immediately for any call:accepted
+      setWaitingList(null);
+      
       // Dispatch event to notify VoiceCall component before state update
       window.dispatchEvent(new CustomEvent('call:upgrading-to-video', { 
         detail: { roomId: data.roomId } 

@@ -122,7 +122,7 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
               <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
             </button>
             <p className={styles.sessionPriceText}>
-              <span className={styles.sessionPriceAmount}>₹{session.astrologer?.price?.chatRate?.amount || session.chatRate || 0}</span>/min
+              <span className={styles.sessionPriceAmount}>₹{session?.price?.chatRate?.amount || session?.chatRate || 0}</span>/min
             </p>
           </div>
           <div className={styles.sessionButtonWrapper}>
@@ -134,7 +134,7 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
               <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
             </button>
             <p className={styles.sessionPriceText}>
-              <span className={styles.sessionPriceAmount}>₹{session.astrologer?.price?.audioRate?.amount || session.callRate || 0}</span>/min
+              <span className={styles.sessionPriceAmount}>₹{session?.price?.audioRate?.amount || session?.callRate || 0}</span>/min
             </p>
           </div>
         </div>
