@@ -4643,7 +4643,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 12px;
-  margin-bottom: 16px;
+  // margin-bottom: 16px;
   @media (width <= 820px) {
     grid-template-columns: 1fr 1fr;
   }
