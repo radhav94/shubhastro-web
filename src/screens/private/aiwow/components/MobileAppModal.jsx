@@ -10,7 +10,7 @@ const MobileAppModal = ({ isOpen, onClose }) => {
         {/* Mobile handle bar */}
         <div className={styles.handleBar}></div>
         
-        <button className={styles.closeBtn} onClick={onClose}>×</button>
+        <button className={`${styles.closeBtn} notranslate`} onClick={onClose} translate="no">×</button>
         
         <div className={styles.iconWrapper}>
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none">

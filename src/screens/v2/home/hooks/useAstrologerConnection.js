@@ -30,6 +30,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
     resetCallFlow,
     setActiveCallRoomId,
     setActiveCall,
+    activeCall,
   } = useCall();
 
 

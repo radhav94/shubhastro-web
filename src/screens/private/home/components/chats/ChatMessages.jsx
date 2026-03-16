@@ -127,28 +127,44 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
     // Gift messages
     if (msg?.giftData) {
       const giftText = msg?.text || "";
-      const parts = giftText.split("a gift");
+      // Extract the recipient name from "X has sent a gift to Y"
+      const toMatch = giftText.match(/to\s+(.+)$/);
+      const recipientName = toMatch ? toMatch[1] : "Astrologer";
       
       return (
-        <div className={styles.giftMessage}>
-          <div className={styles.giftTextWithImage}>
-            <span>You have sent a gift</span>
-            <span>{parts[1]}</span>
+        <div className={styles.giftMessageCard}>
+          <div className={styles.giftHeader}>
+            <span className={styles.giftIcon}>🎁</span>
+            <span className={styles.giftHeaderText}>GIFT SENT</span>
           </div>
-          {msg.giftData?.giftImg && (
-            <div className={styles.giftPreviewContainer}>
+          <div className={styles.giftDivider}></div>
+          <div className={styles.giftQuote}>
+            <div className={styles.giftQuoteBorder}></div>
+            <p className={styles.giftQuoteText}>
+              "You have sent a gift to {recipientName}"
+            </p>
+          </div>
+          <div className={styles.giftPreviewCard}>
+            {msg.giftData?.giftImg && (
               <img 
                 src={msg.giftData.giftImg} 
                 alt={msg.giftData?.giftName || "Gift"}
                 className={styles.giftPreviewImg}
               />
+            )}
+            <div className={styles.giftPreviewInfo}>
               {msg.giftData?.giftName && (
                 <div className={styles.giftPreviewName}>
                   {msg.giftData.giftName}
                 </div>
               )}
+              {msg.giftData?.price && (
+                <div className={styles.giftPreviewPrice}>
+                  ₹{msg.giftData.price}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       );
     }
