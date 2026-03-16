@@ -200,17 +200,19 @@ const ChatWindow = () => {
   };
 
   const handleChatEnd = () => {
-    const initialRemainingMinutes = activeChat?.remainingTime || remainingTime || 0;
-    const totalSessionSeconds = initialRemainingMinutes * 60;
-    const elapsedSeconds = totalSessionSeconds - chatSeconds;
-    
-    // Fallback: use wall-clock time if remainingTime unavailable
-    const chatStartTime = sessionStorage.getItem("shubhtalk_chat_start_time");
+    // Primary: use wall-clock time from session start (persisted in localStorage)
+    const chatStartTime = localStorage.getItem("shubhtalk_chat_start_time");
     const wallClockElapsed = chatStartTime 
       ? Math.floor((Date.now() - Number(chatStartTime)) / 1000)
       : 0;
     
-    const effectiveElapsed = totalSessionSeconds > 0 ? elapsedSeconds : wallClockElapsed;
+    // Secondary: calculate from timer if wall-clock not available
+    const initialRemainingMinutes = activeChat?.remainingTime || remainingTime || 0;
+    const totalSessionSeconds = initialRemainingMinutes * 60;
+    const timerBasedElapsed = totalSessionSeconds > 0 ? totalSessionSeconds - chatSeconds : 0;
+    
+    // Use wall-clock as primary (more reliable), fall back to timer-based
+    const effectiveElapsed = wallClockElapsed > 0 ? wallClockElapsed : timerBasedElapsed;
 
     if (effectiveElapsed < MIN_CHAT_SECONDS) {
       Toast.error("Chat cannot be ended before 1 minute");

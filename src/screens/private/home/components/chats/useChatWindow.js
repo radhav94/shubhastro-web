@@ -53,7 +53,7 @@ export default function useChat({
     setActiveChat(null);
     
     // Clear chat start time
-    sessionStorage.removeItem("shubhtalk_chat_start_time");
+    localStorage.removeItem("shubhtalk_chat_start_time");
 
     // Don't show chat feedback if call review is already open (chat→call switch scenario)
     // or if there's an active call (chat ended because user switched to call)
@@ -73,8 +73,9 @@ export default function useChat({
           setIsMessageDisabled(false);
 
           // Store chat start time for elapsed time calculation (if not already set)
-          if (!sessionStorage.getItem("shubhtalk_chat_start_time")) {
-            sessionStorage.setItem("shubhtalk_chat_start_time", String(Date.now()));
+          // Use localStorage so it persists across page refreshes
+          if (!localStorage.getItem("shubhtalk_chat_start_time")) {
+            localStorage.setItem("shubhtalk_chat_start_time", String(Date.now()));
           }
 
           // Check if initial messages were already sent for this room (persists across remounts/reconnects)
