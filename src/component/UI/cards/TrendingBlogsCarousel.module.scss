@@ -51,15 +51,16 @@
   position: absolute;
   left: 50px;
   gap: 10px;
-  span{
+  span.socialIconWrapper{
     width: 40px;
     height: 40px;
-    // border: 1px solid #fff;
     background: rgba(254, 254, 254, 0.2);
     border-radius: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    cursor: pointer;
     svg{
       width: 20px;
       height: 20px;
@@ -69,6 +70,26 @@
       height: 36px;
     }
   }
+}
+.copiedText{
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: fadeInOut 2s ease forwards;
+}
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-4px); }
 }
 .title {
   display: flex;

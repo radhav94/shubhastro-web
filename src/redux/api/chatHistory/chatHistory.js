@@ -3,11 +3,13 @@ import { privateRequestNew } from "../../../services/appServices/privateRequestN
 export const chatHistory = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
     getUserChatMessages: builder.query({
-      query: (userId) => ({
+      query: ({ userId, page = page, limit = limit }) => ({
         url: "chat/messages",
         method: "GET",
         params: {
           userId,
+          page,
+          limit,
         },
       }),
     }),

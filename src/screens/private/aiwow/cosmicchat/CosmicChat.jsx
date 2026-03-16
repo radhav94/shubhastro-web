@@ -5,6 +5,7 @@ import { Toast } from '../../../../component';
 import { startCosmicChat, sendCosmicChatMessage } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
+import Footer from '../../../../layouts/Footer';
 
 const CosmicChat = () => {
   const navigate = useNavigate();
@@ -180,6 +181,7 @@ const CosmicChat = () => {
   }
 
   return (
+    <>
     <div className={styles.container}>
       {/* Header */}
       <header className={styles.headerWrap}>
@@ -287,6 +289,8 @@ const CosmicChat = () => {
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 
