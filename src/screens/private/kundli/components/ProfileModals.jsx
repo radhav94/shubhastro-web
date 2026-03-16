@@ -33,7 +33,7 @@ const ProfileModals = ({
                         <div className={styles.sheetHandle}></div>
 
                         <div className={styles.sheetContent}>
-                            <button className={styles.closeBtn} onClick={onCloseSelect}>×</button>
+                            <button className={`${styles.closeBtn} notranslate`} onClick={onCloseSelect} translate="no">×</button>
                             <h2 className={styles.sheetTitle}>Select Profile</h2>
 
                             <div className={styles.profileList}>
@@ -102,7 +102,7 @@ const ProfileModals = ({
                         <div className={styles.sheetHandle}></div>
 
                         <div className={styles.sheetContent}>
-                            <button className={styles.closeBtn} onClick={onCloseAdd}>×</button>
+                            <button className={`${styles.closeBtn} notranslate`} onClick={onCloseAdd} translate="no">×</button>
                             <h2 className={styles.sheetTitle}>Add Profile</h2>
 
                             <form onSubmit={onSubmitProfile} className={styles.profileForm}>
@@ -219,7 +219,7 @@ const ProfileModals = ({
                         <div className={styles.sheetHandle}></div>
 
                         <div className={styles.sheetContent}>
-                            <button className={styles.closeBtn} onClick={onCloseEdit}>×</button>
+                            <button className={`${styles.closeBtn} notranslate`} onClick={onCloseEdit} translate="no">×</button>
                             <h2 className={styles.sheetTitle}>Edit Profile</h2>
 
                             <form onSubmit={onSubmitEditProfile} className={styles.profileForm}>
