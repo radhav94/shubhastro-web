@@ -672,19 +672,19 @@
 }
 
 .backBtn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1.5px solid #F75801;
-  background: transparent;
+  background: rgb(255, 244, 236);
+  border: none;
+  color: #D43400;
+  cursor: pointer;
+  padding: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  color: #3D2817;
-  font-size: 24px;
-  transition: all 0.2s;
-  flex-shrink: 0;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #D43400;
+  transition: all 0.2s ease;
   svg path{
     stroke : #F75801;
   }
