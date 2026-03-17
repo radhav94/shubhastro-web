@@ -227,7 +227,7 @@ const VideoCallChat = ({
                 if (msg.text) setIframeSrc(msg.text);
               }}
             >
-              <GrReactjs /> {msg.kundliName || "View Kundli"}
+              <GrReactjs /> {msg.kundliName ? `${msg.kundliName}'s Kundli` : "View Kundli"}
             </span>
           </div>
         );
