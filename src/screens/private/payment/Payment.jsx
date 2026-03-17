@@ -5,11 +5,17 @@ import { useGetAllPlansQuery } from "../../../redux/api/plansApi/plansApi";
 import { getToken } from "../../../utils/token";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 
-const RechargePack = ({ actualPrice, discountedPrice, Active }) => (
+const RechargePack = ({ name, actualPrice, discountedPrice, offerPrice, Active }) => (
   <div className={styles.rechargeAmountWrapper}>
     <div className={`${styles.rechargeAmount} ${Active ? styles.active : ""}`}>
+      {name && <div className={styles.planName}>{name}</div>}
+      {offerPrice > actualPrice && (
+        <span className={styles.strikePrice}>₹ {offerPrice}</span>
+      )}
       <div className={styles.price}>₹ {actualPrice}</div>
-      <span className={styles.extra}>+ ₹ {discountedPrice} Extra</span>
+      {discountedPrice > 0 && (
+        <span className={styles.extra}>Save ₹ {discountedPrice}</span>
+      )}
     </div>
   </div>
 );
@@ -30,9 +36,7 @@ const Payment = () => {
   const { balance, isFetching, refreshWallet } = useWalletBalance();
 
   const { data } = useGetAllPlansQuery();
-  const allPlans = data?.data.filter((plan) =>
-    Object.keys(plan).includes("plan_id")
-  );
+  const allPlans = data?.data?.filter((plan) => plan?.device === 'web' || !plan?.device) ?? [];
 
   // Refresh wallet balance when component mounts
   useEffect(() => {
@@ -61,7 +65,7 @@ const Payment = () => {
           {allPlans?.map((pack) => (
             <Link
               to="/recharge/payment"
-              state={{ planId: pack?.plan_id, returnUrl }}
+              state={{ planId: pack?._id, returnUrl }}
               key={pack._id}
               className={styles.linkWrapper}
             >

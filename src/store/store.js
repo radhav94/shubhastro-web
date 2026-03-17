@@ -13,6 +13,7 @@ import {
 } from "../services/appServices/privateRequestNew";
 import { astroTarotApi } from "../redux/api/tarot/astroTarotApi";
 import { calculatorApi } from "../redux/api/baseApi/calculatorApi";
+import "../redux/api/plansApi/plansApi"; // inject endpoints into privateRequestNew
 export const store = configureStore({
   reducer: {
     auth: authReducer,
