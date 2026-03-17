@@ -923,7 +923,8 @@ const VideoCalling = ({ callData }) => {
         ) : (
           <>
             {/* Header */}
-            <div className={styles.header}>
+            <div className={styles.headerWrap}>
+              <div className={styles.header}>
               <button
                 className={styles.backBtn}
                 onClick={() => setIsMinimized(true)}
@@ -1013,6 +1014,7 @@ const VideoCalling = ({ callData }) => {
                 <span className={styles.walletIcon}>💰</span>
                 <span className={styles.walletAmount}>₹20</span>
               </div> */}
+            </div>
             </div>
             </div>
 

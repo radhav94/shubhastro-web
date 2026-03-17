@@ -655,7 +655,8 @@ const AgoraVoiceCalling = ({ callData }) => {
             </div>
           )}
           {/* Header */}
-          <div className={styles.header}>
+          <div className={styles.headerWrap}>
+            <div className={styles.header}>
             <button
               className={styles.backBtn}
               onClick={() => setIsMinimized(true)}
@@ -745,6 +746,7 @@ const AgoraVoiceCalling = ({ callData }) => {
               </div> */}
 
             </div>
+          </div>
           </div>
 
           {/* Action Buttons */}
