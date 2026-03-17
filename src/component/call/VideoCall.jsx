@@ -35,7 +35,8 @@ import { capitalizeWords } from "../../utils/capitalize";
 import VideocamIcon from "../../assets/chat/Videocam.svg";
 import CallIcon from "../../assets/chat/Call.svg";
 
-const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
+// const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
+const APP_ID = "cf5e31fa03584573aacaf42daebd493c";
 
 const VideoCalling = ({ callData }) => {
   const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer } = useCall();
@@ -84,6 +85,11 @@ const VideoCalling = ({ callData }) => {
   // Fetch kundli profiles
   const { data: profilesData } = useGetAllKundlisQuery();
   const profiles = profilesData?.data || [];
+
+  /* ================= NETWORK RECONNECTION STATE ================= */
+  const [isReconnecting, setIsReconnecting] = useState(false);
+  const reconnectTimeoutRef = useRef(null);
+  const RECONNECT_GRACE_PERIOD = 30000; // 30 seconds to reconnect
 
   // Keep activeCallRef in sync so socket handlers always have current values
   useEffect(() => {
@@ -547,11 +553,43 @@ const VideoCalling = ({ callData }) => {
       cleanup(isDowngradingToAudio.current);
     };
 
-    const handleDisconnect = () => {
-      if (!endCallRef.current) {
-        console.log("[VideoCall] 🔌 disconnect — triggering safeEndCall");
-        safeEndCall();
+    const handleDisconnect = (reason) => {
+      console.log("[VideoCall] 🔴 Socket disconnected — reason:", reason);
+      
+      // Don't start reconnection if we're downgrading to audio or intentionally ending
+      if (isDowngradingToAudio.current || cleanupRef.current || endCallRef.current) {
+        console.log("[VideoCall] Skipping reconnection (downgrading or cleanup in progress)");
+        return;
       }
+      
+      // Show reconnecting state to user
+      setIsReconnecting(true);
+      // Toast.info("Connection lost. Attempting to reconnect...");
+      
+      // Start grace period timer - only end call if we can't reconnect in time
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      
+      reconnectTimeoutRef.current = setTimeout(() => {
+        console.log("[VideoCall] ⏰ Reconnection grace period expired — ending call");
+        Toast.error("Unable to reconnect. Call ended.");
+        setIsReconnecting(false);
+        safeEndCall();
+      }, RECONNECT_GRACE_PERIOD);
+    };
+
+    // Handle socket reconnect - cancel the grace period timer
+    const handleSocketReconnect = () => {
+      console.log("[VideoCall] ✅ Socket reconnected");
+      
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+      
+      setIsReconnecting(false);
+      // Toast.success("Reconnected successfully!");
     };
 
     const handleWarning = (msg) => {
@@ -580,14 +618,22 @@ const VideoCalling = ({ callData }) => {
 
     voiceSocket.on("call:ended", handleCallEnded);
     voiceSocket.on("disconnect", handleDisconnect);
+    voiceSocket.on("connect", handleSocketReconnect);
     voiceSocket.on("warning", handleWarning);
     voiceSocket.on("call:rejected", handleCallRejected);
 
     return () => {
       voiceSocket.off("call:ended", handleCallEnded);
       voiceSocket.off("disconnect", handleDisconnect);
+      voiceSocket.off("connect", handleSocketReconnect);
       voiceSocket.off("warning", handleWarning);
       voiceSocket.off("call:rejected", handleCallRejected);
+      
+      // Clear reconnect timer on unmount
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
     };
     // eslint-disable-next-line
   }, []);
@@ -1262,6 +1308,47 @@ const VideoCalling = ({ callData }) => {
           }}
           title="Recharge to Continue Call"
         />
+
+        {/* Reconnection Overlay */}
+        {isReconnecting && (
+          <div className={styles.reconnectOverlay}>
+            <div className={styles.reconnectModal}>
+              <div className={styles.reconnectSpinner}>
+                <svg viewBox="0 0 50 50" className={styles.spinnerSvg}>
+                  <circle
+                    cx="25"
+                    cy="25"
+                    r="20"
+                    fill="none"
+                    stroke="#E5E7EB"
+                    strokeWidth="4"
+                  />
+                  <circle
+                    cx="25"
+                    cy="25"
+                    r="20"
+                    fill="none"
+                    stroke="url(#reconnectGradientVideo)"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray="80, 200"
+                    className={styles.spinnerCircle}
+                  />
+                  <defs>
+                    <linearGradient id="reconnectGradientVideo" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#F75801" />
+                      <stop offset="100%" stopColor="#D43400" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+              <h3 className={styles.reconnectTitle}>Connection lost...</h3>
+              <p className={styles.reconnectText}>
+                Please wait while we restore your connection...
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

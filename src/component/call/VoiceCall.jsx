@@ -30,8 +30,8 @@ import { getAstrologerDefaultImage } from "../../utils/appImages";
 import { capitalizeWords } from "../../utils/capitalize";
 import walletIcon from "../../assets/images/wallet-icon.svg";
 
-// const APP_ID = "5630460abdc141e3b2f8d9597752bd7d";
-const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
+const APP_ID = "cf5e31fa03584573aacaf42daebd493c";
+// const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 
 const AgoraVoiceCalling = ({ callData }) => {
   const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, setWaitingList, resetCallFlow, isCallMinimized, setIsCallMinimized } = useCall();
@@ -59,8 +59,8 @@ const AgoraVoiceCalling = ({ callData }) => {
   const userLeftTimerRef = useRef(null);
   const isRefreshingRef = useRef(false);
   const isUpgradingToVideo = useRef(false);
-  // Track if this mount is a refresh-resume (activeCall restored from sessionStorage)
-  const isResumeFromRefresh = useRef(!!sessionStorage.getItem("shubhtalk_active_call"));
+  // Track if this mount is a refresh-resume (activeCall restored from localStorage)
+  const isResumeFromRefresh = useRef(!!localStorage.getItem("shubhtalk_active_call"));
   // Ref to always hold the latest activeCall so socket handlers never use stale closures
   const activeCallRef = useRef(activeCall);
 
@@ -173,10 +173,10 @@ const AgoraVoiceCalling = ({ callData }) => {
   useEffect(() => {
     cleanupRef.current = false;
 
-    const savedCall = sessionStorage.getItem("shubhtalk_active_call");
+    const savedCall = localStorage.getItem("shubhtalk_active_call");
     const savedSecs = sessionStorage.getItem("shubhtalk_call_seconds");
     console.log("[VoiceCall] 🚀 Mount — roomId:", roomId, "isUserSide:", isUserSide);
-    console.log("[VoiceCall] 📦 sessionStorage activeCall:", savedCall ? "exists" : "null", "| seconds:", savedSecs);
+    console.log("[VoiceCall] 📦 localStorage activeCall:", savedCall ? "exists" : "null", "| sessionStorage seconds:", savedSecs);
 
     const startCall = async () => {
       console.log("[VoiceCall] ⏳ Creating Agora client & joining channel:", roomId);
