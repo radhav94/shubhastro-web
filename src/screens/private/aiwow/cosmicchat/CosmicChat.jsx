@@ -5,7 +5,7 @@ import { Toast } from '../../../../component';
 import { startCosmicChat, sendCosmicChatMessage } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
-import Footer from '../../../../layouts/Footer';
+// Footer removed - route has footer: false, chat input is fixed at bottom
 
 const CosmicChat = () => {
   const navigate = useNavigate();
@@ -289,7 +289,6 @@ const CosmicChat = () => {
         </div>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

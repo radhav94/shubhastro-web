@@ -79,7 +79,7 @@ const NewAstrologerDetailsCard = ({
 
         {/* Specialties */}
         <p className={styles.detailsSpecialties}>
-          {(astrologer?.expertise).join(" · ")}
+          {astrologer?.expertise?.join(" · ")}
         </p>
 
         {/* Languages */}
