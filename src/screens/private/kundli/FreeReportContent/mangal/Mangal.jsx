@@ -4,6 +4,7 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
 import styles from "./Mangal.module.scss";
 import { buildVedicParam } from "../../../../../utils/VedicParams.js/vedicParams";
+import stars from "../../../../../assets/images/stars.png";
 
 const Mangal = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
@@ -95,7 +96,7 @@ const Mangal = () => {
       {mangal.cancellation?.cancellationReason?.length > 0 && (
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>
-            <span className={styles.sectionIcon}>✨</span>
+            <span className={styles.sectionIcon}><img src={stars} width="20" alt="icon" /></span>
             Cancellation / Exception
           </h2>
           <div className={styles.factorsList}>

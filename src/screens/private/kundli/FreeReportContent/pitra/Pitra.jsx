@@ -5,6 +5,7 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import { useState } from "react";
 import styles from "./Pitra.module.scss";
 import { buildVedicParam } from "../../../../../utils/VedicParams.js/vedicParams";
+import namaste from "../../../../../assets/images/namaste.png";
 
 const Pitra = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
@@ -96,7 +97,7 @@ const Pitra = () => {
             onClick={() => setIsRemediesExpanded(!isRemediesExpanded)}
           >
             <h2 className={styles.sectionTitle}>
-              <span className={styles.sectionIcon}>🙏</span>
+              <span className={styles.sectionIcon}><img src={namaste} width="20" alt="icon" /></span>
               Remedies
             </h2>
             <span className={`${styles.dropdownArrow} ${isRemediesExpanded ? styles.expanded : ''}`}>

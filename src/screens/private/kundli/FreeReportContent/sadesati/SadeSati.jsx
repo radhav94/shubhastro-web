@@ -8,6 +8,7 @@ import styles from "./SadeSati.module.scss";
 import { GiStonePath, GiMeditation } from "react-icons/gi";
 import { MdOutlineTipsAndUpdates } from "react-icons/md";
 import { buildVedicParam } from "../../../../../utils/VedicParams.js/vedicParams";
+import namaste from "../../../../../assets/images/namaste.png";
 
 const SadeSati = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
@@ -83,7 +84,7 @@ const SadeSati = () => {
             onClick={() => setIsRemediesExpanded(!isRemediesExpanded)}
           >
             <h2 className={styles.sectionTitle}>
-              <span className={styles.sectionIcon}>🙏</span>
+              <span className={styles.sectionIcon}><img src={namaste} width="20" alt="icon" /></span>
               Recommended Remedies
             </h2>
             <span className={`${styles.dropdownArrow} ${isRemediesExpanded ? styles.expanded : ''}`}>

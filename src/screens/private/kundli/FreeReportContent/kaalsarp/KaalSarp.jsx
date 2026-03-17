@@ -5,6 +5,8 @@ import { useState } from "react";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
 import styles from "./KaalSarp.module.scss";
 import { buildVedicParam } from "../../../../../utils/VedicParams.js/vedicParams";
+import stars from "../../../../../assets/images/stars.png";
+import namaste from "../../../../../assets/images/namaste.png";
 
 const KaalSarp = () => {
   const formData = useSelector((state) => state?.form?.kundliPayload);
@@ -87,7 +89,7 @@ const KaalSarp = () => {
             onClick={() => setIsRemediesExpanded(!isRemediesExpanded)}
           >
             <h2 className={styles.sectionTitle}>
-              <span className={styles.sectionIcon}>🙏</span>
+              <span className={styles.sectionIcon}><img src={namaste} width="20" alt="icon" /></span>
               Remedies
             </h2>
             <span className={`${styles.dropdownArrow} ${isRemediesExpanded ? styles.expanded : ''}`}>
@@ -111,7 +113,7 @@ const KaalSarp = () => {
       {kaalsarp.aspects?.length > 0 && (
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>
-            <span className={styles.sectionIcon}>✨</span>
+            <span className={styles.sectionIcon}><img src={stars} width="20" alt="icon" /></span>
             Kaal Sarp Aspects
           </h2>
           <div className={styles.aspectsList}>
