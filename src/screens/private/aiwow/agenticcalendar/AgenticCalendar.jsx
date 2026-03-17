@@ -432,10 +432,12 @@ const AgenticCalendar = () => {
               <button className={styles.modalClose} onClick={() => setShowDatePicker(false)} aria-label="Close">✕</button>
             </div>
             <div className={styles.calendarNav}>
-              <button className={styles.calNavBtn} onClick={() => {
-                if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear((y) => y - 1); }
-                else setCalendarMonth((m) => m - 1);
-              }}>
+              <button className={styles.calNavBtn} 
+                disabled={calendarYear === new Date().getFullYear() && calendarMonth === new Date().getMonth()}
+                onClick={() => {
+                  if (calendarMonth === 0) { setCalendarMonth(11); setCalendarYear((y) => y - 1); }
+                  else setCalendarMonth((m) => m - 1);
+                }}>
                 <FiChevronLeft size={20} />
               </button>
               <span className={styles.calMonthLabel}>
@@ -462,13 +464,16 @@ const AgenticCalendar = () => {
                   cells.push(<span key={`p${i}`} className={`${styles.calDay} ${styles.calDayMuted}`}>{prevDays - i}</span>);
                 }
                 const today = new Date();
+                today.setHours(0, 0, 0, 0);
                 for (let d = 1; d <= daysInMonth; d++) {
                   const thisDate = new Date(calendarYear, calendarMonth, d);
+                  const isPast = thisDate < today;
                   const isToday = d === today.getDate() && calendarMonth === today.getMonth() && calendarYear === today.getFullYear();
                   const isSel = customDate && d === customDate.getDate() && calendarMonth === customDate.getMonth() && calendarYear === customDate.getFullYear();
                   cells.push(
-                    <button key={d} className={`${styles.calDay} ${isSel ? styles.calDaySelected : ''} ${isToday && !isSel ? styles.calDayToday : ''}`}
-                      onClick={() => { clearNavState(); setCustomDate(thisDate); setSelectedPeriod(null); setShowDatePicker(false); }}>
+                    <button key={d} className={`${styles.calDay} ${isSel ? styles.calDaySelected : ''} ${isToday && !isSel ? styles.calDayToday : ''} ${isPast ? styles.calDayDisabled : ''}`}
+                      disabled={isPast}
+                      onClick={() => { if (isPast) return; clearNavState(); setCustomDate(thisDate); setSelectedPeriod(null); setShowDatePicker(false); }}>
                       {d}
                     </button>
                   );

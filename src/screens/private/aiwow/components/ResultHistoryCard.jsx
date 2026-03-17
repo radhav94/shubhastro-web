@@ -59,6 +59,7 @@ const ResultHistoryCard = ({ item }) => {
               Download
             </button>
           </div>
+          <span className={styles.paidRibbon}>Paid</span>
         </div>
       </div>
     </div>

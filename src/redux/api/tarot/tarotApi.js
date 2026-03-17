@@ -21,22 +21,19 @@ export const tarotApi = vedicApi.injectEndpoints({
       }),
     }),
     getYesNoTarot: builder.query({
-      query: ({ card_name, direction, lang = "en" }) => ({
+      query: ({ card_name, lang = "en" }) => ({
         url: "tarot/yes-no",
         params: {
           card_name,
-          direction,
           lang,
         },
       }),
     }),
     getCareerTarot: builder.query({
-      query: ({ card_name, direction, lang = "en" }) => ({
+      query: ({ card_name, lang = "en" }) => ({
         url: "tarot/career-select",
         params: {
-          
           card_name,
-          direction,
           lang,
         },
       }),

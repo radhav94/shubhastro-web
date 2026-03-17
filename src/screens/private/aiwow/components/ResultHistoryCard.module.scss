@@ -46,7 +46,7 @@
 
 .featureName {
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
   color: #1a1a1a;
 }
 
@@ -86,7 +86,7 @@
 
 .analysisLabel {
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 600;
   color: #1a1a1a;
   margin: 0 0 6px 0;
 }
@@ -135,7 +135,6 @@
 }
 
 .downloadBtnWrap {
-  position: relative;
   flex-shrink: 0;
   margin-right: 40px;
   @media (width <= 767px) {
@@ -149,8 +148,8 @@
   right: 0px;
   background: linear-gradient(135deg, #F75801, #C93200);
   color: #fff;
-  font-size: 0.65rem;
-  font-weight: 700;
+  font-size: 0.78rem;
+  font-weight: 600;
   padding: 8px 10px 4px 14px;
   width: 60px;
   height: 60px;
