@@ -186,6 +186,7 @@ const OrderDetails = () => {
         status: "read",
         type: msg.type, // 'message', 'kundli', 'image', etc.
         createdAt: msg.createdAt,
+        kundliName: msg?.kundliName,
       }));
 
       // Sort messages within the room by time (oldest first)

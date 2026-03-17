@@ -177,7 +177,7 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
           className={styles.kundliLink}
         >
           <GrReactjs />
-          View Kundli
+          {msg.kundliName || "View Kundli"}
         </div>
       );
     }
