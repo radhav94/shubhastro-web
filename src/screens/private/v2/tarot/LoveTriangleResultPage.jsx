@@ -143,7 +143,8 @@ const LoveTriangleResultPage = () => {
             />
           )}
         </div>
-
+        
+        <div>
         {currentCard.name && (
           <h2 className={styles.cardName}>{currentCard.name}</h2>
         )}
@@ -170,6 +171,7 @@ const LoveTriangleResultPage = () => {
           Go Back
         </button>
       </div>
+    </div>
     </div>
   );
 };
