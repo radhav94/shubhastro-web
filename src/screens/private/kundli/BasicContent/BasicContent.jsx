@@ -46,16 +46,35 @@ const AccordionSection = ({ title, data = {}, defaultOpen = false }) => {
 
       {isOpen && (
         <div className={styles.accordionContent}>
+          {/* NEW design: group entries into boxes of 3, each box is one grey container with stacked rows */}
           {entries.length > 0 && (
             <div className={styles.detailsList}>
-              {entries.map(([key, value]) => (
-                <div key={key} className={styles.detailRow}>
-                  <span className={styles.detailLabel}>{formatKeyLabel(key)}</span>
-                  <span className={styles.detailValue}>{value}</span>
+              {Array.from({ length: Math.ceil(entries.length / 3) }, (_, groupIndex) => (
+                <div key={groupIndex} className={styles.detailGroupBox}>
+                  {entries.slice(groupIndex * 3, groupIndex * 3 + 3).map(([key, value]) => (
+                    <div key={key} className={styles.detailGroupRow}>
+                      <span className={styles.detailLabel}>{formatKeyLabel(key)}</span>
+                      <span className={styles.detailValue}>{value}</span>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
           )}
+
+          {/* OLD design: each entry in its own detailRow grey box */}
+          {/* {entries.length > 0 && (
+            <div className={styles.detailsList}>
+              {entries.map(([key, value]) => (
+                <div key={key} className={styles.detailRow}>
+                  <span className={styles.detailLabel}>
+                    {formatKeyLabel(key)}
+                  </span>
+                  <span className={styles.detailValue}>{value}</span>
+                </div>
+              ))}
+            </div>
+          )} */}
         </div>
       )}
     </div>
