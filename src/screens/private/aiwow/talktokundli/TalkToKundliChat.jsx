@@ -5,7 +5,6 @@ import { Toast } from '../../../../component';
 import { startKundliChat, sendKundliChatMessage } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
-import Footer from '../../../../layouts/Footer';
 
 const TalkToKundliChat = () => {
   const navigate = useNavigate();
@@ -177,7 +176,6 @@ const TalkToKundliChat = () => {
   }
 
   return (
-    <>
     <div className={styles.container}>
       {/* Header */}
       <header className={styles.headerWrap}>
@@ -284,8 +282,6 @@ const TalkToKundliChat = () => {
         </div>
       </div>
     </div>
-    <Footer />
-    </>
   );
 };
 
