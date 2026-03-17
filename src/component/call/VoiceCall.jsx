@@ -363,6 +363,11 @@ const AgoraVoiceCalling = ({ callData }) => {
     await cleanup();
   };
 
+  /* ================= NETWORK RECONNECTION STATE ================= */
+  const [isReconnecting, setIsReconnecting] = useState(false);
+  const reconnectTimeoutRef = useRef(null);
+  const RECONNECT_GRACE_PERIOD = 30000; // 30 seconds to reconnect
+
   /* ================= DETECT CALL TYPE CHANGE (AUDIO -> VIDEO) ================= */
   useEffect(() => {
     // Listen for upgrade event from CallContext
@@ -380,14 +385,62 @@ const AgoraVoiceCalling = ({ callData }) => {
       Toast.warning(msg.message);
     };
 
+    // Handle socket disconnect - don't end call immediately, wait for reconnection
+    const handleSocketDisconnect = (reason) => {
+      console.log("[VoiceCall] 🔴 Socket disconnected — reason:", reason);
+      
+      // Don't start reconnection if we're upgrading to video or intentionally ending
+      if (isUpgradingToVideo.current || cleanupRef.current) {
+        console.log("[VoiceCall] Skipping reconnection (upgrading or cleanup in progress)");
+        return;
+      }
+      
+      // Show reconnecting state to user
+      setIsReconnecting(true);
+      // Toast.info("Connection lost. Attempting to reconnect...");
+      
+      // Start grace period timer - only end call if we can't reconnect in time
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      
+      reconnectTimeoutRef.current = setTimeout(() => {
+        console.log("[VoiceCall] ⏰ Reconnection grace period expired — ending call");
+        Toast.error("Unable to reconnect. Call ended.");
+        setIsReconnecting(false);
+        endCall();
+      }, RECONNECT_GRACE_PERIOD);
+    };
+
+    // Handle socket reconnect - cancel the grace period timer
+    const handleSocketReconnect = () => {
+      console.log("[VoiceCall] ✅ Socket reconnected");
+      
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+      
+      setIsReconnecting(false);
+      // Toast.success("Reconnected successfully!");
+    };
+
     window.addEventListener('call:upgrading-to-video', handleUpgradeEvent);
-    voiceSocket.on("disconnect", endCall);
+    voiceSocket.on("disconnect", handleSocketDisconnect);
+    voiceSocket.on("connect", handleSocketReconnect);
     voiceSocket.on("warning", handleWarning);
 
     return () => {
       window.removeEventListener('call:upgrading-to-video', handleUpgradeEvent);
-      voiceSocket.off("disconnect", endCall);
+      voiceSocket.off("disconnect", handleSocketDisconnect);
+      voiceSocket.off("connect", handleSocketReconnect);
       voiceSocket.off("warning", handleWarning);
+      
+      // Clear reconnect timer on unmount
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
     };
   }, [roomId]);
 
@@ -796,7 +849,13 @@ const AgoraVoiceCalling = ({ callData }) => {
               )}
 
               <div className={styles.callTimer}>
-                {joined ? formatTime(callSeconds) : "Connecting…"}
+                {isReconnecting ? (
+                  <span className={styles.reconnecting}>Reconnecting...</span>
+                ) : joined ? (
+                  formatTime(callSeconds)
+                ) : (
+                  "Connecting…"
+                )}
               </div>
             </div>
 
@@ -912,6 +971,47 @@ const AgoraVoiceCalling = ({ callData }) => {
         }}
         title="Recharge to Continue Call"
       />
+
+      {/* Reconnection Overlay */}
+      {isReconnecting && (
+        <div className={styles.reconnectOverlay}>
+          <div className={styles.reconnectModal}>
+            <div className={styles.reconnectSpinner}>
+              <svg viewBox="0 0 50 50" className={styles.spinnerSvg}>
+                <circle
+                  cx="25"
+                  cy="25"
+                  r="20"
+                  fill="none"
+                  stroke="#E5E7EB"
+                  strokeWidth="4"
+                />
+                <circle
+                  cx="25"
+                  cy="25"
+                  r="20"
+                  fill="none"
+                  stroke="url(#reconnectGradient)"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeDasharray="80, 200"
+                  className={styles.spinnerCircle}
+                />
+                <defs>
+                  <linearGradient id="reconnectGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#F75801" />
+                    <stop offset="100%" stopColor="#D43400" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <h3 className={styles.reconnectTitle}>Connection lost...</h3>
+            <p className={styles.reconnectText}>
+              Please wait while we restore your connection...
+            </p>
+          </div>
+        </div>
+      )}
     </>
   );
 };

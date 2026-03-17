@@ -1,0 +1,247 @@
+.aiWowSection {
+  position: relative;
+  background: linear-gradient(135deg, #fde8e0 0%, #fcd5c8 40%, #f9c4b8 70%, #fbe0d8 100%);
+  border-radius: 24px;
+  padding: 28px 24px 20px;
+  margin-bottom: 24px;
+  overflow: hidden;
+
+  @media (max-width: 767px) {
+    padding: 20px 16px 16px;
+    border-radius: 18px;
+    margin-bottom: 16px;
+  }
+}
+
+.waveBg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  background: radial-gradient(ellipse at 80% 30%, rgba(255, 255, 255, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse at 90% 70%, rgba(248, 180, 160, 0.3) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fce8b2;
+  border: 1.5px solid #f5d78e;
+  padding: 8px 18px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.badgeIcon {
+  display: flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.badgeText {
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #1a1a1a;
+  text-transform: uppercase;
+}
+
+.heading {
+  font-family: "Poppins", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.2;
+  margin: 0 0 8px;
+
+  @media (max-width: 767px) {
+    font-size: 22px;
+  }
+}
+
+.headingHighlight {
+  color: #f75801;
+}
+
+.description {
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #4a4a4a;
+  line-height: 1.5;
+  margin: 0 0 20px;
+  max-width: 520px;
+
+  strong {
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  @media (max-width: 767px) {
+    font-size: 13px;
+  }
+}
+
+/* Suite label */
+.wowLabel {
+  margin-bottom: 16px;
+}
+
+.wowTitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: 0.5px;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+
+.wowDivider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin-top: 4px;
+}
+
+.titleDivider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin-top: 4px;
+}
+
+.dividerLine {
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.dividerMoon {
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+/* Feature grid */
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+.featureCard {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px 12px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 767px) {
+    padding: 16px 10px 12px;
+    border-radius: 12px;
+  }
+}
+
+.featureIconWrap {
+  width: 56px;
+  height: 56px;
+  background: #fff5ec;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @media (max-width: 767px) {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.featureIcon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+
+  @media (max-width: 767px) {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+.featureTitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  text-align: center;
+  margin: 0;
+  line-height: 1.3;
+
+  @media (max-width: 767px) {
+    font-size: 12px;
+  }
+}
+
+/* Expanded content */
+.expandedContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suiteBlock {
+  margin-bottom: 0;
+}
+
+/* Toggle arrow */
+.downArrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 8px auto 0;
+  color: #f75801;
+  font-size: 20px;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+.downArrowBounce {
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-6px);
+  }
+  60% {
+    transform: translateY(-3px);
+  }
+}

@@ -371,6 +371,7 @@ const TalkToAstrologer = () => {
   };
 
   const handleApplyFilters = (payload) => {
+    // console.log("handleApplyFilters::",payload)
     const {
       result: { result: filteredData },
       append = false,
@@ -557,7 +558,7 @@ const TalkToAstrologer = () => {
       resetCallFlow();
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
-      console.log(kundliId, "kundli");
+      // console.log(kundliId, "kundli");
 
       try {
         // const res = await createChatRoom({

@@ -17,6 +17,7 @@ import VimshottariTimelineSection from "../components/VimshottariTimelineSection
 import BirthPanchangSection from "../components/BirthPanchangSection";
 import MuhuratSection from "../components/MuhuratSection";
 import PlanEventsBanner from "../components/agenticCalendarSection";
+import AIWowSection from "../components/AIWowSection";
 
 /**
  * Maps display_type to corresponding React component
@@ -167,6 +168,9 @@ export const renderSection = (displayType, sectionData, handlers = {}, keyPrefix
       return (
         <PlanEventsBanner key={key} />
       );
+
+    case "ai-powered-astrology":
+      return <AIWowSection key={key} />;
 
     default:
       console.warn(`Unknown display_type: ${displayType}`);
