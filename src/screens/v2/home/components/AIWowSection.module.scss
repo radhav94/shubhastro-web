@@ -1,16 +1,46 @@
 .aiWowSection {
   position: relative;
-  background: linear-gradient(135deg, #fde8e0 0%, #fcd5c8 40%, #f9c4b8 70%, #fbe0d8 100%);
-  border-radius: 24px;
+  background: linear-gradient(90deg, #FFEDD4 0%, #FFD0D0 100%), #FFF;
+  border-radius: 13px;
   padding: 28px 24px 20px;
-  margin-bottom: 24px;
   overflow: hidden;
 
   @media (max-width: 767px) {
     padding: 20px 16px 16px;
-    border-radius: 18px;
+  }
+}
+.aiWowSectionWrap{
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  padding: 2px;
+   @media (max-width: 767px) {
     margin-bottom: 16px;
   }
+}
+.aiWowSectionWrap:before, .aiWowSectionWrap:before {
+  content: '';
+  z-index: -2;
+  text-align: center;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) rotate(0deg);
+  position: absolute;
+	width: 99999px;
+	height: 99999px;
+	background-repeat: no-repeat;
+	background-position: 0 0;
+  /*border color, change middle color*/
+	background-image: conic-gradient(rgba(0,0,0,0), #F75801, rgba(0,0,0,0) 25%);
+  /* change speed here */
+	animation: rotate 4s linear infinite;
+}
+
+@keyframes rotate {
+	100% {
+		transform: translate(-50%, -50%) rotate(1turn);
+	}
 }
 
 .waveBg {
@@ -28,9 +58,10 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #fce8b2;
-  border: 1.5px solid #f5d78e;
-  padding: 8px 18px;
+  border-radius: 20px;
+  border: 1px solid var(--primary-200, #FFD28E);
+  background: linear-gradient(90deg, #FFD28E 0%, var(--primary-100, #FFE4BA) 100%);
+  padding: 4px 16px;
   border-radius: 999px;
   margin-bottom: 16px;
 }
@@ -44,7 +75,7 @@
 .badgeText {
   font-family: "Poppins", sans-serif;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 1px;
   color: #1a1a1a;
   text-transform: uppercase;
@@ -52,14 +83,14 @@
 
 .heading {
   font-family: "Poppins", sans-serif;
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 26px;
+  font-weight: 600;
   color: #1a1a1a;
   line-height: 1.2;
   margin: 0 0 8px;
 
   @media (max-width: 767px) {
-    font-size: 22px;
+    font-size: 18px;
   }
 }
 
@@ -94,7 +125,7 @@
 .wowTitle {
   font-family: "Poppins", sans-serif;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   color: #1a1a1a;
   letter-spacing: 0.5px;
   margin: 0 0 6px;
@@ -135,8 +166,10 @@
   margin-bottom: 16px;
 
   @media (max-width: 600px) {
+    display: flex;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
+    overflow: auto;
   }
 }
 
@@ -151,6 +184,7 @@
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
 
   &:hover {
     transform: translateY(-2px);
@@ -160,6 +194,7 @@
   @media (max-width: 767px) {
     padding: 16px 10px 12px;
     border-radius: 12px;
+    min-width: 150px;
   }
 }
 
@@ -207,7 +242,7 @@
 .expandedContent {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0px;
 }
 
 .suiteBlock {

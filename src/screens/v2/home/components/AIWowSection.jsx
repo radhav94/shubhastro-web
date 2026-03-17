@@ -4,6 +4,7 @@ import { FaAngleDoubleDown, FaAngleDoubleUp } from "react-icons/fa";
 import { useGetAiWowPageDataQuery } from "../../../../redux/api/aiwow/aiwowApi";
 import MobileAppModal from "../../../private/aiwow/components/MobileAppModal";
 import styles from "./AIWowSection.module.scss";
+import wireBg from "../../../../assets/images/wire-bg.svg";
 
 const COLLAPSED_COUNT = 4;
 
@@ -81,9 +82,11 @@ const AIWowSection = () => {
   const collapsedFeatures = (firstSection?.content || []).slice(0, COLLAPSED_COUNT);
 
   return (
+    <div className={styles.aiWowSectionWrap}>
     <section className={styles.aiWowSection}>
-      <div className={styles.waveBg} />
-
+      <div className={styles.waveBg}>
+        <img src={wireBg} alt="img" />
+      </div>
       {/* Badge */}
       <div className={styles.badge}>
         <span className={styles.badgeIcon}>
@@ -158,6 +161,7 @@ const AIWowSection = () => {
         onClose={() => setShowMobileAppModal(false)}
       />
     </section>
+    </div>
   );
 };
 
