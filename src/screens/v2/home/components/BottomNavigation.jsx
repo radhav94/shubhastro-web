@@ -1,96 +1,63 @@
-import { Home, Compass, Radio, UserRound, Store } from "lucide-react";
+
 import { useNavigate, useLocation } from "react-router-dom";
 import styles from "../Home.module.scss";
+import { navItems } from "../../../../utils/menuList";
 
 const BottomNavigation = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const handleHomeClick = () => {
-        navigate("/");
-    };
+  // 🔹 Single navigation handler
+  const handleNavigation = (item) => {
+    if (item.isProtected) {
+      const token = localStorage.getItem("shubhtalk_customer_token");
+      if (!token) {
+        navigate("/login?skip=welcome");
+        return;
+      }
+    }
+    navigate(item.path);
+  };
 
-    const handleLiveClick = () => {
-        navigate("/live-landing");
-    };
+  // 🔹 Check active route
+  const isActive = (path) => location.pathname === path;
 
-    const handleExploreClick = () => {
-        navigate("/explore");
-    };
+  return (
+    <nav className={styles.bottomNav}>
+      {navItems.map((item, index) => {
+        const Icon = item.icon;
+        const active = isActive(item.path);
 
-    const handleShopClick = () => {
-        navigate("/shop");
-    };
+        return (
+          <button
+            key={index}
+            className={`${
+              item.isSpecial ? styles.liveItem : styles.navItem
+            } ${active ? styles.active : ""}`}
+            onClick={() => handleNavigation(item)}
+          >
+            {/* Special Live Button */}
+            {item.isSpecial ? (
+              <div className={styles.liveBtn}>
+                <Icon size={22} strokeWidth={2.5} />
+              </div>
+            ) : (
+              <div className={styles.iconCircle}>
+                <Icon size={22} />
+              </div>
+            )}
 
-    const handleProfileClick = () => {
-        const token = localStorage.getItem("shubhtalk_customer_token");
-        token ? navigate("/profile") : navigate("/login?skip=welcome");
-    };
+            <span className={styles.label}>{item.label}</span>
 
-    // Check active route
-    const isHome = location.pathname === "/";
-    const isExplore = location.pathname === "/explore";
-    const isLive = location.pathname === "/live-landing";
-    const isShop = location.pathname === "/shop";
-    const isProfile = location.pathname === "/profile";
-
-    return (
-        <nav className={styles.bottomNav}>
-            <button 
-                className={`${styles.navItem} ${isHome ? styles.active : ''}`}
-                onClick={handleHomeClick}
-            >
-                <div className={styles.iconCircle}>
-                    <Home size={22} />
-                </div>
-                <span className={styles.label}>Home</span>
-                {isHome && <span className={styles.activeLine} />}
-            </button>
-
-            <button 
-                className={`${styles.navItem} ${isExplore ? styles.active : ''}`}
-                onClick={handleExploreClick}
-            >
-                <div className={styles.iconCircle}>
-                    <Compass size={22} />
-                </div>
-                <span className={styles.label}>Explore</span>
-                {isExplore && <span className={styles.activeLine} />}
-            </button>
-
-            <button 
-                className={`${styles.liveItem} ${isLive ? styles.active : ''}`}
-                onClick={handleLiveClick}
-            >
-                <div className={styles.liveBtn}>
-                    <Radio size={22} strokeWidth={2.5} />
-                </div>
-                <span className={styles.label}>Live</span>
-            </button>
-
-            <button 
-                className={`${styles.navItem} ${isShop ? styles.active : ''}`}
-                onClick={handleShopClick}
-            >
-                <div className={styles.iconCircle}>
-                    <Store size={22} />
-                </div>
-                <span className={styles.label}>Shop</span>
-                {isShop && <span className={styles.activeLine} />}
-            </button>
-
-            <button 
-                className={`${styles.navItem} ${isProfile ? styles.active : ''}`}
-                onClick={handleProfileClick}
-            >
-                <div className={styles.iconCircle}>
-                    <UserRound size={22} />
-                </div>
-                <span className={styles.label}>Profile</span>
-                {isProfile && <span className={styles.activeLine} />}
-            </button>
-        </nav>
-    );
+            {/* Active Indicator (not for Live) */}
+            {!item.isSpecial && active && (
+              <span className={styles.activeLine} />
+            )}
+          </button>
+        );
+      })}
+    </nav>
+  );
 };
 
 export default BottomNavigation;
