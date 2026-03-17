@@ -502,6 +502,13 @@ const VideoCalling = ({ callData }) => {
     if (endCallRef.current) return;
     endCallRef.current = true;
 
+    // Clear reconnection timer if user manually ends call
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+    setIsReconnecting(false);
+
     // Don't emit call:end if we're downgrading to audio
     if (!isDowngradingToAudio.current) {
       const currentCall = activeCallRef.current;
@@ -512,10 +519,32 @@ const VideoCalling = ({ callData }) => {
         fullName: currentCall?.callerName || callerName,
       });
 
-      voiceSocket.emit("call:end", {
-        roomId,
-        endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
-      });
+      // Try to emit call:end - if socket is disconnected, it will be queued
+      // and sent when reconnected, or we rely on server timeout
+      if (voiceSocket.connected) {
+        voiceSocket.emit("call:end", {
+          roomId,
+          endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
+        });
+      } else {
+        console.log("[VideoCall] ⚠️ Socket disconnected, attempting to send call:end anyway");
+        // Emit anyway - socket.io will queue it if reconnection happens
+        voiceSocket.emit("call:end", {
+          roomId,
+          endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
+        });
+        
+        // Also try to reconnect socket briefly to send the event
+        if (!voiceSocket.connected) {
+          voiceSocket.connect();
+          // Give it a moment to connect and send
+          setTimeout(() => {
+            if (voiceSocket.connected) {
+              console.log("[VideoCall] ✅ Socket reconnected, call:end should be sent");
+            }
+          }, 2000);
+        }
+      }
 
       // Refresh wallet balance after call ends
       refreshWallet();
