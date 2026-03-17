@@ -1,3 +1,5 @@
+import { Home, Compass, Radio, UserRound, Store } from "lucide-react";
+
 export const MENU_LIST = [
   { title: "Home", path: "/" },
 
@@ -51,3 +53,33 @@ export const MENU_LIST = [
   { title: "Blogs", path: "/blog" },
   { title: "Recharge", path: "/recharge" },
 ];
+// 🔹 Config-driven navigation (scalable)
+  export const navItems = [
+    {
+      label: "Home",
+      icon: Home,
+      path: "/",
+    },
+    {
+      label: "Explore",
+      icon: Compass,
+      path: "/explore",
+    },
+    {
+      label: "Live",
+      icon: Radio,
+      path: "/live",
+      isSpecial: true,
+    },
+    {
+      label: "Shop",
+      icon: Store,
+      path: "/shop",
+    },
+    {
+      label: "Profile",
+      icon: UserRound,
+      path: "/profile",
+      isProtected: true,
+    },
+  ];

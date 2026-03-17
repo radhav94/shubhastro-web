@@ -1,5 +1,5 @@
 .resultPage {
-  min-height: 100vh;
+  /* min-height: 100vh; */
   background: #f5f5f5;
   display: flex;
   flex-direction: column;
@@ -15,7 +15,7 @@
   border-bottom: 1px solid #e0e0e0;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 1180px) {
   .headerWrap {
     top: 53px;
   }
@@ -69,6 +69,11 @@
   z-index: 99;
 }
 
+@media screen and (max-width: 1180px) {
+  .tabsWrap {
+    top: 124px;
+  }
+}
 @media screen and (max-width: 768px) {
   .tabsWrap {
     top: 99px;
@@ -104,22 +109,30 @@
 .content {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   padding: 32px 16px;
   padding-top: 140px;
   gap: 24px;
+  margin: 0 auto;
+  max-width: 1200px;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 820px) {
   .content {
-    padding-top: 120px;
+    padding-top: 150px;
+    flex-direction: column;
+  }
+}
+@media screen and (max-width: 767px) {
+  .content {
+    padding-top: 110px;
   }
 }
 
 .cardDisplay {
   width: 100%;
-  max-width: 320px;
+  max-width: 280px;
   display: flex;
   justify-content: center;
 }
@@ -132,17 +145,18 @@
 
 .readingSection {
   width: 100%;
-  max-width: 500px;
-  background: #f0f0f0;
+  /* max-width: 600px; */
+  background: #fff;
   border-radius: 16px;
-  padding: 24px;
+  padding: 16px;
+  margin: 16px 0;
 }
 
 .readingTitle {
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 600;
   color: #000;
-  margin: 0 0 16px 0;
+  margin: 0 0 5px 0;
 }
 
 .readingDescription {
@@ -167,6 +181,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  margin: 0 auto;
 }
 
 .goBackButton:hover {
@@ -175,9 +190,9 @@
 }
 
 @media (max-width: 768px) {
-  .tabsWrap {
+  /* .tabsWrap {
     padding: 6px 0;
-  }
+  } */
   .tabs{
     padding: 0px 16px;
   }
@@ -191,13 +206,13 @@
     width: 36px;
     height: 36px;
   }
-  .content {
+  /* .content {
     padding: 24px 16px;
     padding-top: 130px;
-  }
+  } */
 
   .cardDisplay {
-    max-width: 280px;
+    max-width: 250px;
   }
 
   .readingTitle {
@@ -216,7 +231,7 @@
 
 @media (max-width: 480px) {
   .cardDisplay {
-    max-width: 240px;
+    max-width: 210px;
   }
 
   .readingSection {
@@ -244,7 +259,7 @@
 
 .cardName {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 600;
   color: #000;
   margin: 0;
   text-align: center;
@@ -271,12 +286,12 @@
   gap: 10px;
   justify-content: center;
   width: 100%;
-  max-width: 500px;
-  margin: 8px 0;
+  /* max-width: 500px; */
+  margin: 8px auto;
 }
 
 .traitCapsule {
-  padding: 10px 20px;
+  padding: 6px 12px;
   background: rgba(255, 182, 193, 0.5);
   border-radius: 25px;
   backdrop-filter: blur(6px);
@@ -297,7 +312,7 @@
 
 @media (max-width: 768px) {
   .traitCapsule {
-    padding: 8px 16px;
+    /* padding: 8px 16px; */
     font-size: 13px;
   }
 }
@@ -308,7 +323,7 @@
   }
   
   .traitCapsule {
-    padding: 6px 14px;
+    /* padding: 6px 14px; */
     font-size: 12px;
   }
 }

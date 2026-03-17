@@ -12,15 +12,10 @@ const LoveTriangleResultPage = () => {
 
   const [activeTab, setActiveTab] = useState("you");
 
-  // Extract card names from selected cards
-  const cardSelf =
-    selectedCards?.you?.id || selectedCards?.you?.name || "the-hermit";
-  const cardLover1 =
-    selectedCards?.partner1?.id ||
-    selectedCards?.partner1?.name ||
-    "the-high-priestess";
-  const cardLover2 =
-    selectedCards?.partner2?.id || selectedCards?.partner2?.name || "the-devil";
+  // Extract card names from selected cards — id is string from shuffle API e.g. "the_star"
+  const cardSelf = selectedCards?.you?.id || "the-hermit";
+  const cardLover1 = selectedCards?.partner1?.id || "the-high-priestess";
+  const cardLover2 = selectedCards?.partner2?.id || "the-devil";
 
   // Fetch love triangle data from API
   const { data, isLoading, error } = useGetLoveTriangleTarotQuery(
@@ -148,7 +143,8 @@ const LoveTriangleResultPage = () => {
             />
           )}
         </div>
-
+        
+        <div>
         {currentCard.name && (
           <h2 className={styles.cardName}>{currentCard.name}</h2>
         )}
@@ -175,6 +171,7 @@ const LoveTriangleResultPage = () => {
           Go Back
         </button>
       </div>
+    </div>
     </div>
   );
 };

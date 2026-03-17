@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
@@ -15,6 +15,7 @@ import onboardingBg from "../../../assets/images/onboarding.png";
 const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [resendTimer, setResendTimer] = useState(20);
   const [loading, setLoading] = useState(false);
@@ -151,7 +152,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
               // toast.success("Welcome back!");
               setTimeout(() => {
                 console.log("🚀 Executing navigate to home");
-                navigate(PATH.privateRoutes.HOME.path || "/");
+                navigate(location?.state?.from || PATH.privateRoutes.HOME.path,{ replace: true });
               }, 500);
             }
           } else {

@@ -18,7 +18,6 @@ const YesNoTarot = () => {
 
         return {
           card_name: selected?.id,
-          direction: selected?.direction,
           lang,
         };
       }}

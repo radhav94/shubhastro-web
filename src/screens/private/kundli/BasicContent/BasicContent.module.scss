@@ -97,7 +97,7 @@ $font-primary: "Poppins", sans-serif;
 // --- Details List ---
 .detailsList {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   @media (width <= 767px) {
     grid-template-columns: repeat(1, 1fr);
@@ -133,6 +133,29 @@ $font-primary: "Poppins", sans-serif;
   // @media (min-width: 768px) {
   //   font-size: 15px;
   // }
+}
+
+// --- Grouped Detail Box (one grey container with multiple stacked rows) ---
+.detailGroupBox {
+  background: #fafafa;
+  border: 1px solid #e0e0e05c;
+  border-radius: 5px;
+  padding: 4px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 10px;
+}
+
+.detailGroupRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #e0e0e05c;
+  }
 }
 
 // --- Responsive Adjustments ---

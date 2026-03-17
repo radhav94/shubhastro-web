@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import ChevronLeft from '../components/ui/ChevronLeft'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { 
@@ -60,7 +60,8 @@ const TarotCardDetailPage = () => {
   )
 
   // For regular readings, use the generic API
-  const cardName = currentCard?.card_id || currentCard?.id || currentCard?.name || 'the-fool'
+  // card.id = slug like "the_lovers", card.name = display like "The Lovers"
+  const cardName = currentCard?.card_id || currentCard?.id || 'the-fool'
   const readingEndpoint = reading?.apiEndpoint || 'yes-no'
   
   const { 

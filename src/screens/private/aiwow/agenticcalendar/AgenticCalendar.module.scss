@@ -598,6 +598,7 @@
   &:hover { background: #fff5ec; }
 
   &.calDayMuted { color: #ccc; pointer-events: none; }
+  &.calDayDisabled { color: #ccc; pointer-events: none; opacity: 0.4; cursor: not-allowed; }
   &.calDayToday { font-weight: 600; color: #f75801; }
   &.calDaySelected {
     background: linear-gradient(135deg, #f75801 0%, #d43400 100%);

@@ -1,0 +1,189 @@
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
+  position: relative;
+}
+
+/* Header */
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.featureInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.iconWrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: #fff5f0;
+  border: 1.5px solid #ffd5c0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.iconFallback {
+  font-size: 1.4rem;
+  color: #F75801;
+}
+
+.featureName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* Status badges */
+.statusBadge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 14px;
+  border-radius: 50px;
+}
+
+.statusCompleted {
+  background: #e8faf0;
+  color: #1a9e5c;
+}
+
+.statusFailed {
+  background: #fff0f0;
+  color: #e53935;
+}
+
+.statusPending {
+  background: #fff8e1;
+  color: #f59e0b;
+}
+
+/* Body */
+.cardBody {
+  margin-bottom: 14px;
+}
+
+.date {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0 0 4px 0;
+}
+
+.analysisLabel {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 6px 0;
+}
+
+.summary {
+  font-size: 0.875rem;
+  color: #4b5563;
+  line-height: 1.55;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Footer */
+.cardFooter {
+  margin-top: 4px;
+}
+
+.downloadWrap {
+  background: #fff5f0;
+  border-radius: 14px;
+  border: 1.5px solid #ffd5c0;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+  @media (width <= 767px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.downloadHint {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  flex: 1;
+  line-height: 1.4;
+  @media (width <= 767px) {
+    width: 86%;
+  }
+}
+
+.downloadBtnWrap {
+  flex-shrink: 0;
+  margin-right: 40px;
+  @media (width <= 767px) {
+    margin-right:16px;
+  }
+}
+
+.paidRibbon {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  background: linear-gradient(135deg, #F75801, #C93200);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 8px 10px 4px 14px;
+  width: 60px;
+  height: 60px;
+  clip-path: polygon(100% 0, 100% 100%, 0 0);
+  pointer-events: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  border-radius: 0 12px 0 0;
+  z-index: 2;
+  @media (width <= 767px) {
+    width: 70px;
+    height: 70px;
+  }
+}
+
+.downloadBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #F75801 0%, #C93200 100%);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+}
