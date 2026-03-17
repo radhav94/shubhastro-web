@@ -153,6 +153,7 @@ export default function useChat({
         dateTime: data?.dateTime,
         type: data.type,
         giftData: giftData,
+        kundliName: data?.kundliName,
       });
     }
 

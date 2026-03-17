@@ -163,6 +163,7 @@ const ChatWindow = () => {
         }),
         dateTime: item.createdAt,
         giftData: giftData,
+        kundliName: item?.kundliName,
       };
     });
 
@@ -176,6 +177,7 @@ const ChatWindow = () => {
       date: msg.date || formatDate(new Date()),
       dateTime: msg.dateTime || new Date().toISOString(),
       giftData: msg?.giftData, // Include gift data from socket messages
+      kundliName: msg?.kundliName,
     }));
 
 
