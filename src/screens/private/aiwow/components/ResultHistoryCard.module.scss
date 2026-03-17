@@ -116,6 +116,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  position: relative;
+  @media (width <= 767px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .downloadHint {
@@ -124,24 +129,31 @@
   color: #1a1a1a;
   flex: 1;
   line-height: 1.4;
+  @media (width <= 767px) {
+    width: 86%;
+  }
 }
 
 .downloadBtnWrap {
   position: relative;
   flex-shrink: 0;
+  margin-right: 40px;
+  @media (width <= 767px) {
+    margin-right:16px;
+  }
 }
 
 .paidRibbon {
   position: absolute;
-  top: -21px;
-  right: -21px;
+  top: 0px;
+  right: 0px;
   background: linear-gradient(135deg, #F75801, #C93200);
   color: #fff;
   font-size: 0.65rem;
   font-weight: 700;
-  padding: 14px 4px 4px 14px;
-  width: 52px;
-  height: 52px;
+  padding: 8px 10px 4px 14px;
+  width: 60px;
+  height: 60px;
   clip-path: polygon(100% 0, 100% 100%, 0 0);
   pointer-events: none;
   display: flex;
@@ -149,6 +161,10 @@
   justify-content: flex-end;
   border-radius: 0 12px 0 0;
   z-index: 2;
+  @media (width <= 767px) {
+    width: 70px;
+    height: 70px;
+  }
 }
 
 .downloadBtn {
