@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: space-between;
   position: fixed;
-  top: 150px;
+  top: 185px;
   left: 0;
   right: 0;
   z-index: 98;
@@ -14,9 +14,11 @@
   max-width: 100%;
   padding: 8px 40px;
   @media (width <= 1200px) {
-    top: 168px;
+    top: 150px;
+    padding: 8px 16px;
   }
-  @media (width <= 1180px) {
+  @media (width <= 767px) {
+    top: 168px;
     padding: 0px 16px;
   }
 }
