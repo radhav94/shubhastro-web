@@ -501,9 +501,10 @@
 }
 
 .newDreamButton {
-  background: white;
-  color: #F75801;
-  border: 2px solid #F75801;
+  width: 37%;
+  margin: 16px auto 0;
+  background: linear-gradient(90deg, #f75801, #d43400);
+  color: #fff;
   padding: 1rem 1.5rem;
   border-radius: 0.75rem;
   font-size: 1rem;
@@ -524,6 +525,12 @@
 
   &:active {
     transform: translateY(0);
+  }
+  @media (width <= 767px) {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    border-radius: 50px;
   }
 }
 

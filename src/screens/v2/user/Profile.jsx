@@ -837,7 +837,9 @@ const Profile = () => {
           : profileToEdit.gender === "female"
             ? "Female"
             : "Others",
-      relation: profileToEdit.relation || "Self",
+      relation: profileToEdit.relation
+        ? profileToEdit.relation.charAt(0).toUpperCase() + profileToEdit.relation.slice(1).toLowerCase()
+        : "Self",
       birthDate: `${profileToEdit.year}-${String(profileToEdit.month).padStart(2, "0")}-${String(profileToEdit.day).padStart(2, "0")}`,
       birthTime: `${String(profileToEdit.hour).padStart(2, "0")}:${String(profileToEdit.min).padStart(2, "0")}`,
       birthPlace: profileToEdit.place,
