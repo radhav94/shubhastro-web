@@ -67,6 +67,22 @@
       transition: 0.25s ease;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 
+      .planName {
+        font-size: 12px;
+        font-weight: 600;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 4px;
+      }
+
+      .strikePrice {
+        font-size: 13px;
+        color: #aaa;
+        text-decoration: line-through;
+        display: block;
+      }
+
       .price {
         font-size: 22px;
         font-weight: 600;

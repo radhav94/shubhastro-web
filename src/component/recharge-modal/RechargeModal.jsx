@@ -239,10 +239,8 @@ const RechargeModal = ({
   // Don't render if not open
   if (!isOpen) return null;
 
-  // Calculate total amount for selected plan
-  const totalAmount = selectedPlan
-    ? selectedPlan.actualPrice + (selectedPlan.discountedPrice || 0)
-    : 0;
+  // API response: actualPrice = amount to pay, discountedPrice = discount given
+  const totalAmount = selectedPlan ? selectedPlan.actualPrice : 0;
 
   // Check if payment button should be disabled
   const isPayButtonDisabled = !selectedPlan || paymentLoading || isProcessing || paymentInProgressRef.current || !isLoaded;
@@ -367,7 +365,7 @@ const RechargeModal = ({
                 <PlanCard
                   key={plan._id || plan.plan_id}
                   plan={plan}
-                  isSelected={selectedPlan?.plan_id === plan.plan_id}
+                  isSelected={selectedPlan?._id === plan._id}
                   onSelect={handleSelectPlan}
                   disabled={paymentLoading || isProcessing || paymentInProgressRef.current}
                 />

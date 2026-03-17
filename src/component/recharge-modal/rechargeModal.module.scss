@@ -212,8 +212,24 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
+}
+
+.planName {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.strikePrice {
+  font-size: 13px;
+  font-weight: 400;
+  color: #9ca3af;
+  text-decoration: line-through;
 }
 
 .mainPrice {
