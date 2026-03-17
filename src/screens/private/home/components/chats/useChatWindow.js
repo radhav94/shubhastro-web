@@ -180,10 +180,10 @@ export default function useChat({
   }, [roomId, activeChat, activeCall]);
 
   // USER SEND — prefer socketService, fallback to voiceSocket (which is already in the room after reconnect)
-  const sendMessage = (text, type = "message") => {
+  const sendMessage = (text, type = "message", kundliID = null) => {
     const payload = {
       sender: "user",
-      kundliId,
+      kundliId : kundliID ?? kundliId,
       roomId,
       userId,
       astrologerId,
@@ -198,7 +198,7 @@ export default function useChat({
         roomId,
         userId,
         astrologerId,
-        kundliId,
+        kundliId: kundliID ?? kundliId,
         type
       });
       if (res?.error) {
