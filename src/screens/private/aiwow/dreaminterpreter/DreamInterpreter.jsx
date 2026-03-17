@@ -5,6 +5,7 @@ import { Toast } from '../../../../component';
 import { interpretDream } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
+import Footer from '../../../../layouts/Footer';
 
 const DreamInterpreter = () => {
   const navigate = useNavigate();
@@ -122,6 +123,7 @@ const DreamInterpreter = () => {
   }
 
   return (
+    <>
     <div className={styles.container}>
       {/* Header */}
       <header className={styles.headerWrap}>
@@ -444,6 +446,8 @@ const DreamInterpreter = () => {
         )}
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

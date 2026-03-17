@@ -46,8 +46,8 @@ const Payment = () => {
           <img
             src="https://images.astroyogi.com/astroyogi/wallet_blc.png"
             alt="Wallet"
-            width={51}
-            height={50}
+            width={45}
+            height={45}
           />
           Wallet Balance
           <span className={styles.dangerColor}>

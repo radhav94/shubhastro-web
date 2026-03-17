@@ -136,6 +136,7 @@ const HoroscopeNew = () => {
 
   // Refs for overview cards to scroll back on "Show Less"
   const overviewCardRefs = useRef([]);
+  const overviewRef = useRef(null);
 
   const tabs = ['Today', /* 'Daily', */ 'This Week', 'This Year'];
   
@@ -527,7 +528,7 @@ const HoroscopeNew = () => {
             ))}
           </div>
 
-          <div className="horoscope-content">
+          <div className="horoscope-content" ref={overviewRef}>
             <h2 className="content-title">
               {currentContent.title}
               {currentContent.score && !currentContent.isOverview && (
@@ -643,15 +644,12 @@ const HoroscopeNew = () => {
                   <span 
                     className="show-less-link"
                     onClick={() => {
-                      const savedIndex = overviewCardIndex;
                       setCameFromOverview(false);
                       setOverviewCardIndex(null);
                       setActiveCategory('overview');
-                      // Scroll to the card after state updates and re-render
+                      // Scroll to the very top of the page after re-render
                       setTimeout(() => {
-                        if (savedIndex !== null && overviewCardRefs.current[savedIndex]) {
-                          overviewCardRefs.current[savedIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                       }, 100);
                     }}
                   >

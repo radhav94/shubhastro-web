@@ -48,6 +48,7 @@ import {
   useDeleteKundliMutation,
   useEditKundliMutation,
 } from "../../../services/appServices/kundliServicesNew";
+import Pagination from "../../../component/pagination/Pagination";
 import { ProfileManager } from "../../../component/UI/Profile";
 import { registerUser } from "../../../services/appServices/authService";
 import { useSelector } from "react-redux";
@@ -157,7 +158,9 @@ const Profile = () => {
 
   // Call history pagination state
   const [callHistoryPage, setCallHistoryPage] = useState(1);
-  const [allLoadedCallOrders, setAllLoadedCallOrders] = useState([]);
+
+  // Chat history pagination state
+  const [chatHistoryPage, setChatHistoryPage] = useState(1);
 
   // Fetch call and chat history
   const {
@@ -170,8 +173,8 @@ const Profile = () => {
   );
   console.log("callHistoryData",callHistoryData?.data?.callHistory)
 
-  const { data: chatHistoryData, isLoading: isLoadingChats } =
-    useGetUserChatMessagesQuery(userId, {
+  const { data: chatHistoryData, isLoading: isLoadingChats, isFetching: isFetchingChats } =
+    useGetUserChatMessagesQuery({ userId, page: chatHistoryPage, limit: 30 }, {
       skip: !userId,
     });
 
@@ -179,9 +182,14 @@ const Profile = () => {
   // Get pagination info
   const callPagination = callHistoryData?.data?.pagination;
   const hasNextCallPage = callPagination?.hasNextPage || false;
+  const hasPrevCallPage = callPagination?.hasPreviousPage || false;
+
+  const chatPagination = chatHistoryData?.data?.pagination;
+  const hasNextChatPage = chatPagination?.hasNextPage || false;
+  const hasPrevChatPage = chatPagination?.hasPreviousPage || false;
 
   // Process order history data - current page call orders
-  const currentCallOrders = Array.isArray(callHistoryData?.data?.callHistory)
+  const callOrders = Array.isArray(callHistoryData?.data?.callHistory)
     ? callHistoryData.data.callHistory
         .filter((item) => item?.type !== "chat")
         .map((item, index) => ({
@@ -208,25 +216,11 @@ const Profile = () => {
         }))
     : [];
 
-  // Update loaded call orders when new data arrives
-  useEffect(() => {
-    if (currentCallOrders.length > 0) {
-      if (callHistoryPage === 1) {
-        setAllLoadedCallOrders(currentCallOrders);
-      } else {
-        setAllLoadedCallOrders((prev) => [...prev, ...currentCallOrders]);
-      }
-    }
-  }, [callHistoryData, callHistoryPage]);
-
-  // Use accumulated call orders
-  const callOrders = allLoadedCallOrders;
-
   const chatOrders = Array.isArray(chatHistoryData?.data?.chatHistory)
     ? chatHistoryData.data.chatHistory.map((room, index) => {
         const lastChat = room?.[room.length - 1];
         return {
-          id: `chat-${index}`,
+          id: `chat-${chatHistoryPage}-${index}`,
           type: "chat",
           // orderId: room.roomId?.slice(-6) || "NA",
           astrologer: {
@@ -408,31 +402,12 @@ const Profile = () => {
     }
   };
 
-  // Infinite scroll handler for call orders
-  const handleOrderScroll = (e) => {
-    const element = e.target;
-    const isAtBottom =
-      element.scrollHeight - element.scrollTop <= element.clientHeight + 50;
-
-    if (
-      isAtBottom &&
-      hasNextCallPage &&
-      !isFetchingCalls &&
-      orderHistoryTab === "call"
-    ) {
-      setCallHistoryPage((prev) => prev + 1);
-    }
-  };
-
-  // Reset call history page when switching TO call tab (not away from it)
+  // Reset pages when switching tabs
   useEffect(() => {
-    if (
-      orderHistoryTab === "call" &&
-      allLoadedCallOrders.length === 0 &&
-      !isLoadingCalls
-    ) {
-      // Only reset if we don't have data yet
+    if (orderHistoryTab === "call") {
       setCallHistoryPage(1);
+    } else {
+      setChatHistoryPage(1);
     }
   }, [orderHistoryTab]);
 
@@ -578,6 +553,14 @@ const Profile = () => {
         localStorage.removeItem("waitingState");
         return;
       }
+
+      // If there's an active video call and this is an audio acceptance, it's a downgrade — let CallContext handle it
+      if (type === "audio" && activeCall && activeCall.callType === "video") {
+        console.log("🔄 Audio downgrade accepted - CallContext will handle the switch (isSwitch:", isSwitch, ")");
+        resetCallFlow();
+        localStorage.removeItem("waitingState");
+        return;
+      }
       
       // Regular call acceptance
       resetCallFlow();
@@ -623,10 +606,10 @@ const Profile = () => {
     };
 
     const handleRejected = (data) => {
-      // Check if this is a video switch rejection during an active audio call
-      if (data?.switchRejected && data?.type === "audio") {
-        console.log("🔄 Video switch rejected - audio call continues");
-        // Don't reset anything - the audio call should continue
+      // Check if this is a switch rejection during an active call
+      if (data?.switchRejected && (data?.type === "audio" || data?.type === "video")) {
+        console.log("🔄 Call switch rejected - current call continues");
+        // Don't reset anything - the current call should continue
         return;
       }
       
@@ -1130,6 +1113,9 @@ const Profile = () => {
                 ? `${dayjs(`${primaryProfile.year}-${primaryProfile.month}-${primaryProfile.day}`).format("MMM DD, YYYY")} • ${String(primaryProfile.hour > 12 ? primaryProfile.hour - 12 : primaryProfile.hour === 0 ? 12 : primaryProfile.hour).padStart(2, "0")}:${String(primaryProfile.min).padStart(2, "0")} ${primaryProfile.hour >= 12 ? "PM" : "AM"}`
                 : " "}
             </p>
+            {user?.phoneNumber && (
+              <p className={styles.profileDetails}>{user.phoneNumber.startsWith("+") ? user.phoneNumber : `+${user.phoneNumber}`}</p>
+            )}
           </div>
         </div>
 
@@ -1232,7 +1218,7 @@ const Profile = () => {
             <span className={styles.balanceLabel}>Balance</span>
           </div>
           <div className={styles.balanceAmount}>
-            ₹{isFetchingBalance ? "..." : balance || 0}
+            ₹{isFetchingBalance ? "..." : Number(balance || 0).toLocaleString("en-IN")}
           </div>
         </div>
 
@@ -1352,17 +1338,24 @@ const Profile = () => {
               </button>
             </div>
 
-            {isLoadingCalls || isLoadingChats ? (
+            {(orderHistoryTab === "call" ? isLoadingCalls : isLoadingChats) ? (
               <div className={styles.loadingState}>
                 <p>Loading orders...</p>
               </div>
             ) : filteredOrders.length > 0 ? (
+              <>
               <div
-                key={orderHistoryTab} // Force re-render when tab changes
+                key={orderHistoryTab}
                 className={styles.orderList}
                 ref={orderListRef}
-                onScroll={handleOrderScroll}
               >
+                {/* Loading overlay for page transitions */}
+                {(orderHistoryTab === "call" ? isFetchingCalls : isFetchingChats) && (
+                  <div className={styles.loadingMore}>
+                    <p>Loading...</p>
+                  </div>
+                )}
+
                 {/* Orders by Year */}
                 {Object.keys(ordersByYear)
                   .sort((a, b) => b - a)
@@ -1455,13 +1448,32 @@ const Profile = () => {
                     </div>
                   ))}
 
-                {/* Loading more indicator */}
-                {isFetchingCalls && orderHistoryTab === "call" && (
-                  <div className={styles.loadingMore}>
-                    <p>Loading more...</p>
-                  </div>
-                )}
               </div>
+
+              {/* Pagination Controls - outside scrollable orderList */}
+              {(() => {
+                const isCall = orderHistoryTab === "call";
+                const page = isCall ? callHistoryPage : chatHistoryPage;
+                const totalPages = isCall ? (callPagination?.totalPages || 1) : (chatPagination?.totalPages || 1);
+                const hasPrev = isCall ? hasPrevCallPage : hasPrevChatPage;
+                const hasNext = isCall ? hasNextCallPage : hasNextChatPage;
+
+                return totalPages > 1 ? (
+                  <Pagination
+                    pagination={{
+                      page,
+                      totalPages,
+                      hasNextPage: hasNext,
+                      hasPrevPage: hasPrev,
+                    }}
+                    onPageChange={(newPage) => {
+                      if (isCall) setCallHistoryPage(newPage);
+                      else setChatHistoryPage(newPage);
+                    }}
+                  />
+                ) : null;
+              })()}
+              </>
             ) : (
               <div className={styles.emptyState}>
                 <p>

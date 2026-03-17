@@ -91,6 +91,15 @@ const useChatSocket = ({
         return;
       }
       
+      // If there's an active video call and this is an audio acceptance, it's a downgrade — let CallContext handle it
+      if (type === "audio" && activeCall && activeCall.callType === "video") {
+        console.log("🔄 Audio downgrade accepted - CallContext will handle the switch (isSwitch:", isSwitch, ")");
+        setWaitingPopup(false);
+        setGlobalWaitingList(null);
+        setCallRoomId(null);
+        return;
+      }
+      
       // Regular call acceptance (including direct video calls from chat)
       setActiveCall({
         roomId,
@@ -114,11 +123,11 @@ const useChatSocket = ({
     const handleCallRejected = (data) => {
       console.log("❌ call:rejected event received", data);
       
-      // Check if this is a video switch rejection during an active audio call
-      if (data?.switchRejected && data?.type === "audio") {
-        console.log("🔄 Video switch rejected - audio call continues");
-        Toast.info(data?.message || "Video call request rejected. Continuing with audio call.");
-        // Don't reset anything - the audio call should continue
+      // Check if this is a switch rejection during an active call
+      if (data?.switchRejected && (data?.type === "audio" || data?.type === "video")) {
+        console.log("🔄 Call switch rejected - current call continues");
+        Toast.info(data?.message || "Call switch request rejected. Continuing current call.");
+        // Don't reset anything - the current call should continue
         return;
       }
       
@@ -145,6 +154,17 @@ const useChatSocket = ({
       
       if (err?.message === "Call has already ended") {
         // Soft reset only
+        setWaitingPopup(false);
+        setGlobalWaitingList(null);
+        setCallRoomId(null);
+        return;
+      }
+
+      if (err?.message === "Chat has already ended") {
+        // Chat is over — clear chat state so the window closes
+        Toast.error("Chat has already ended");
+        stopTimer();
+        setActiveChat(null);
         setWaitingPopup(false);
         setGlobalWaitingList(null);
         setCallRoomId(null);

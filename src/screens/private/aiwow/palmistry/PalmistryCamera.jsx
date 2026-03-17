@@ -70,13 +70,19 @@ const PalmistryCamera = () => {
     handDetected,
     isPalmOpen,
     isInBounds,
+    detectedHandSide,
+    isTooFar,
     startDetection,
     stopDetection
   } = useHandDetection({ 
     videoRef, 
     canvasRef: detectionCanvasRef,
-    getCaptureBoxBounds: getCaptureBoxBounds // Pass function, not result
+    getCaptureBoxBounds,
+    isFrontCamera,
   });
+
+  // Wrong hand: hand detected but it's not the selected hand
+  const isWrongHand = handDetected && detectedHandSide !== null && detectedHandSide !== selectedHand;
 
   // Start detection when models are loaded and video is ready
   useEffect(() => {
@@ -378,12 +384,16 @@ const PalmistryCamera = () => {
                 <span>Palm</span>
               </div>
             </div>
-            {(!handDetected || !isPalmOpen || !isInBounds) && handsLoaded && (
-              <div className={styles.handDetectionMessage}>
+            {(!handDetected || !isPalmOpen || !isInBounds || isWrongHand || isTooFar) && handsLoaded && (
+              <div className={`${styles.handDetectionMessage} ${isWrongHand ? styles.wrongHandMessage : ''}`}>
                 <p>
-                  {!handDetected ? 'Show your palm to the camera' : 
-                   !isPalmOpen ? 'Open your palm fully' : 
-                   !isInBounds ? 'Move your hand inside the box' : ''}
+                  {isWrongHand
+                    ? `Wrong hand! Please show your ${selectedHand} hand`
+                    : isTooFar ? 'Move your hand closer to the camera'
+                    : !handDetected ? 'Move your hand closer to the camera'
+                    : !isPalmOpen ? 'Open your palm fully'
+                    : !isInBounds ? 'Move your hand inside the box'
+                    : ''}
                 </p>
               </div>
             )}
@@ -406,20 +416,22 @@ const PalmistryCamera = () => {
       <div className={styles.controls}>
         {!capturedImage ? (
           <button 
-            className={`${styles.captureButton} ${(!handDetected || !isPalmOpen || !isInBounds) && handsLoaded ? styles.disabled : ''}`} 
+            className={`${styles.captureButton} ${(!handDetected || !isPalmOpen || !isInBounds || isWrongHand || isTooFar) && handsLoaded ? styles.disabled : ''}`} 
             onClick={captureImage}
-            disabled={(!handDetected || !isPalmOpen || !isInBounds) && handsLoaded}
+            disabled={(!handDetected || !isPalmOpen || !isInBounds || isWrongHand || isTooFar) && handsLoaded}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!handDetected || !isPalmOpen || !isInBounds) && handsLoaded ? "0.5" : "1"}/>
-                <circle cx="20" cy="20" r="14" fill="white" opacity={(!handDetected || !isPalmOpen || !isInBounds) && handsLoaded ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!handDetected || !isPalmOpen || !isInBounds || isWrongHand || isTooFar) && handsLoaded ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="14" fill="white" opacity={(!handDetected || !isPalmOpen || !isInBounds || isWrongHand || isTooFar) && handsLoaded ? "0.5" : "1"}/>
               </svg>
             </div>
             <span className={styles.captureText}>
-              {!handsLoaded ? 'Loading...' : 
+              {!handsLoaded ? 'Loading...' :
+               isWrongHand ? `Use ${selectedHand} hand` :
+               isTooFar ? 'Move Closer' :
                (handDetected && isPalmOpen && isInBounds ? 'Capture' : 
-                !handDetected ? 'No Palm Detected' :
+                !handDetected ? 'Move Closer' :
                 !isPalmOpen ? 'Open Palm' :
                 'Move Inside Box')}
             </span>

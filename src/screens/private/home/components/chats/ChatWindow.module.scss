@@ -355,7 +355,7 @@ $floating-button-gap: 14px;
 
 .senderBubble {
   margin-left: auto;
-  background: $bg-sent-message;
+  background: #FFE4BA;
   color: $text-primary;
   border-radius: 18px 18px 4px 18px;
   padding-right: 60px; /* Extra space for timestamp */
@@ -562,6 +562,99 @@ $floating-button-gap: 14px;
 }
 
 /* Gift Messages */
+.giftMessageCard {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  min-width: 260px;
+}
+
+.giftHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+}
+
+.giftIcon {
+  font-size: 18px;
+}
+
+.giftHeaderText {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 0.5px;
+}
+
+.giftDivider {
+  height: 1px;
+  background: #e5e5e5;
+  margin: 0 16px;
+}
+
+.giftQuote {
+  display: flex;
+  align-items: stretch;
+  padding: 12px 16px;
+  background: #FFF8E1;
+  margin: 12px 16px;
+  border-radius: 8px;
+}
+
+.giftQuoteBorder {
+  width: 4px;
+  background: #F75801;
+  border-radius: 2px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.giftQuoteText {
+  font-size: 14px;
+  font-style: italic;
+  color: #333;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.giftPreviewCard {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 16px 16px;
+}
+
+.giftPreviewImg {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.giftPreviewInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.giftPreviewName {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.giftPreviewPrice {
+  font-size: 16px;
+  font-weight: 700;
+  color: #F75801;
+}
+
 .giftMessage {
   display: flex;
   flex-direction: column;
@@ -593,30 +686,14 @@ $floating-button-gap: 14px;
 
 .giftPreviewContainer {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
   margin-top: 4px;
   padding: 12px;
   background: rgba(247, 88, 1, 0.03);
   border-radius: 12px;
   border: 1px solid rgba(247, 88, 1, 0.1);
-}
-
-.giftPreviewImg {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 2px solid rgba(247, 88, 1, 0.15);
-}
-
-.giftPreviewName {
-  font-size: 13px;
-  font-weight: 600;
-  color: #F75801;
-  text-align: center;
 }
 
 .giftImageContainer {
@@ -977,7 +1054,7 @@ $floating-button-gap: 14px;
 .rechargeButton {
   // padding: $spacing-lg 24px;
   // padding: 5px;
-  width: 30px;
+  // width: 30px;
   border-radius: 24px;
   border: none;
   background: transparent;
@@ -993,11 +1070,11 @@ $floating-button-gap: 14px;
   flex-shrink: 0;
 }
 
-.rechargeButton img {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
+// .rechargeButton img {
+//   width: 18px;
+//   height: 18px;
+//   flex-shrink: 0;
+// }
 
 .rechargeButton:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
@@ -1101,10 +1178,10 @@ $floating-button-gap: 14px;
     }
   }
 
-  .rechargeButton img {
-    width: 14px;
-    height: 14px;
-  }
+  // .rechargeButton img {
+  //   width: 14px;
+  //   height: 14px;
+  // }
 
   .backIcon {
     width: 36px;
@@ -1305,12 +1382,16 @@ $floating-button-gap: 14px;
 
   /* Gift preview adjustments for mobile */
   .giftPreviewImg {
-    width: 100px;
-    height: 100px;
+    width: 70px;
+    height: 70px;
   }
 
   .giftPreviewName {
-    font-size: 12px;
+    font-size: 14px;
+  }
+
+  .giftPreviewPrice {
+    font-size: 13px;
   }
 
   .giftInlineImg {
@@ -1403,10 +1484,10 @@ $floating-button-gap: 14px;
   // }
 
   /* Larger arrow icon in recharge button */
-  .rechargeButton img {
-    width: 20px;
-    height: 20px;
-  }
+  // .rechargeButton img {
+  //   width: 20px;
+  //   height: 20px;
+  // }
 }
 
 /* ==================== WAITING POPUP ==================== */
