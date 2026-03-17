@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
-import { voiceSocket } from "../services/voiceSocketServices";
+import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
+import { voiceSocket, registerChatSession, clearChatSession } from "../services/voiceSocketServices";
 import { toast as rht } from "react-hot-toast";
 import ChatNotificationBanner from "../component/UI/ChatNotificationBanner/ChatNotificationBanner";
 
@@ -114,8 +114,15 @@ export const ChatProvider = ({ children }) => {
     setActiveChatState(chatData);
     if (chatData) {
       persistChatState(chatData);
+      // Register session for auto-reconnect on socket disconnect
+      registerChatSession({
+        roomId: chatData.roomId,
+        userId: chatData.userId,
+        astrologerId: chatData.astrologerId,
+      });
     } else {
       clearPersistedChatState();
+      clearChatSession();
     }
   }, [persistChatState, clearPersistedChatState]);
 
@@ -325,6 +332,25 @@ export const ChatProvider = ({ children }) => {
       console.log("[ChatReconnect]   → remainingTime:", data?.remainingTime);
       console.log("[ChatReconnect]   → reason:", data?.reason);
       console.log("[ChatReconnect]   → full data:", JSON.stringify(data));
+      
+      // Handle auto-reconnect response from voiceSocketServices
+      // This fires when socket reconnects and auto-emits chat:reconnect
+      if (data && data.active) {
+        console.log("[ChatContext] ✅ Auto-reconnect successful, chat still active");
+        // Update remaining time if provided
+        if (data.remainingTime) {
+          const secs = Math.floor(Number(data.remainingTime) * 60);
+          console.log("[ChatContext] ⏱️ Updating chatSeconds from reconnect:", secs);
+          resetTimer();
+          setChatSeconds(secs);
+          startTimer();
+        }
+      } else if (data && data.active === false) {
+        console.log("[ChatContext] ❌ Auto-reconnect failed, chat ended:", data?.reason);
+        // Chat ended during disconnect - clear state
+        setActiveChat(null);
+        stopTimer();
+      }
     };
 
     const logError = (data) => {
