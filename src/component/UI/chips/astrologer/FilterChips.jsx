@@ -2,6 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import styles from "./FilterChips.module.scss";
 import { useLazyFilterAstrologersQuery } from "../../../../redux/api/astrologer/astrologerApi";
 import { FaCheck } from "react-icons/fa";
+// NEW: Formik and Yup imports for search field validation
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+
+// NEW: Yup validation schema for search input — only alphabetic characters and spaces allowed
+const searchValidationSchema = Yup.object({
+  searchText: Yup.string().matches(/^[A-Za-z\s]*$/, "Only letters and spaces allowed"),
+});
 
 const FilterChips = ({
   onSelect,
@@ -13,8 +21,8 @@ const FilterChips = ({
   astroFilterTab = [],
   isFetchingFilterTab = false,
 }) => {
-  const [triggerFilter, { isLoading }] = useLazyFilterAstrologersQuery();
 
+  const [triggerFilter, { isLoading }] = useLazyFilterAstrologersQuery();
   const [active, setActive] = useState(selectedType);
   const [searchText, setSearchText] = useState("");
   const [filterModalOpen, setFilterModalOpen] = useState(false);
@@ -28,12 +36,21 @@ const FilterChips = ({
   const loadingMoreRef = useRef(false);
   const pageRef = useRef(1);
   const isFilterActiveRef = useRef(false);
-
+  // NEW: Debounce timer ref for search input
+  const debounceTimerRef = useRef(null);
   const [activeModalTab, setActiveModalTab] = useState("Skill");
-
   // Refs for auto-scroll functionality
   const filterTabsRef = useRef(null);
   const chipRefs = useRef({});
+
+  // NEW: Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   // Auto-scroll to active chip when selectedType changes from parent
   useEffect(() => {
@@ -86,28 +103,6 @@ const FilterChips = ({
     setActiveModalTab("Skill");
   };
 
-  // ✅ STATIC DATA (COMMENTED OUT - Replaced with dynamic API data)
-  // const filterButtons = [
-  //   { name: "All" },
-  //   { name: "Online" },
-  //   { name: "Tarot" },
-  //   { name: "Palmistry" },
-  //   { name: "Numerology" },
-  //   { name: "Face Reading" },
-  //   { name: "Vedic Astrology" },
-  //   { name: "Love" },
-  //   { name: "Education" },
-  //   { name: "Career" },
-  //   { name: "Marriage" },
-  //   { name: "Health" },
-  //   { name: "Wealth" },
-  //   { name: "Legal" },
-  //   { name: "Finance" },
-  //   { name: "Remedies" },
-  //   { name: "Parents" },
-  //   { name: "Palm reader" },
-  //   { name: "Tantra-magic" },
-  // ];
 
   // ✅ DYNAMIC DATA - Extract Skill list from API response
   // Handle both array and nested object response structures
@@ -135,21 +130,7 @@ const FilterChips = ({
     ...(skillFilterData?.list || []).map((skill) => ({ name: skill.title,slug:skill.slug })),
   ];
 
-  // ✅ STATIC DATA (COMMENTED OUT - Replaced with dynamic API data)
-  // const skills = [
-  //   "Face Reading",
-  //   "Kp",
-  //   "Life Coach",
-  //   "Nadi",
-  //   "Numerology",
-  //   "Palmistry",
-  //   "Prashana",
-  //   "Psychic",
-  //   "Signature Reading",
-  //   "Tarot",
-  //   "Vastu",
-  //   "Vedic",
-  // ];
+  
 
   // ✅ DYNAMIC DATA - Extract modal filter sections from API response
   const skillsData = filterTabData?.find((item) => item.title === "Skill");
@@ -189,6 +170,9 @@ const FilterChips = ({
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore, isLoading]);
+
+
+  // console.log("category::",selectedType+"/"+active)
 
   const loadMore = () => {
     if (!hasMore || loadingMoreRef.current || !isFilterActiveRef.current)
@@ -281,18 +265,64 @@ const FilterChips = ({
   // -------------------------
   // SEARCH HANDLER
   // -------------------------
-  const handleSearchClick = (e) => {
-    const value = e.target.value;
-    setSearchText(value);
 
-    if (value.length > 2) {
-      setActive("search");
-      clearAll();
-      isFilterActiveRef.current = true;
-      applyFilters({ searchValue: value, category: "search", pageNo: 1 });
-    } else if (value.length === 0) {
-      handleClick("all");
+  // OLD: Original search handler
+  // const handleSearchClick = (e) => {
+  //   const value = e.target.value;
+  //   setSearchText(value);
+  //
+  //   if (value.length > 2) {
+  //     setActive("search");
+  //     clearAll();
+  //     isFilterActiveRef.current = true;
+  //     applyFilters({ searchValue: value, category: "search", pageNo: 1 });
+  //   } else if (value.length === 0) {
+  //     handleClick("all");
+  //   }
+  // };
+
+
+
+  // NEW (v2): Refined debounced search handler with strict input validation
+  const handleDebouncedSearch = (e, setFieldValue) => {
+    const rawValue = e.target.value;
+
+    // STRICT VALIDATION: If rawValue contains any non-alphabetic or non-space character,
+    // reject the entire input immediately — do not call API or proceed further
+    if (/[^A-Za-z\s]/.test(rawValue)) {
+      return;
     }
+
+    // At this point rawValue is already clean (only A-Za-z and spaces)
+    const sanitizedValue = rawValue;
+
+    // Sync sanitized value to Formik field state and component state
+    setFieldValue("searchText", sanitizedValue);
+    setSearchText(sanitizedValue);
+
+    // Clear any pending debounce timer before setting a new one
+    clearTimeout(debounceTimerRef.current);
+
+    // If input is cleared to empty, immediately reset to "All" state (no debounce)
+    if (sanitizedValue.length === 0) {
+      handleClick("all");
+      return;
+    }
+
+    // Only trigger debounced API call when input exceeds 2 characters (search-first policy)
+   
+      debounceTimerRef.current = setTimeout(() => {
+        setActive("search");
+        clearAll();
+        isFilterActiveRef.current = true;
+        applyFilters({
+          searchValue: sanitizedValue,
+          category: "search",
+          pageNo: 1,
+        });
+      }, 500);
+    
+    // If 1-2 chars: update the input display but do NOT trigger any API call
   };
 
   const applyFiltersClick = () => {
@@ -364,6 +394,7 @@ const FilterChips = ({
     });
   };
 
+
   // -------------------------
   // RENDER
   // -------------------------
@@ -372,6 +403,7 @@ const FilterChips = ({
     <>
       <div className={styles.filterWrapper}>
         <div className={styles.inputFilter}>
+          {/* OLD: Original search input
           <div>
             <i className="fa fa-search" />
             <input
@@ -382,6 +414,30 @@ const FilterChips = ({
               onInput={handleSearchClick}
             />
           </div>
+          */}
+
+          {/* NEW: Formik-wrapped search input with validation */}
+          <Formik
+            initialValues={{ searchText: "" }}
+            validationSchema={searchValidationSchema}
+            onSubmit={() => {}}
+          >
+            {({ setFieldValue }) => (
+              <Form>
+                <div>
+                  <i className="fa fa-search" />
+                  <Field
+                    name="searchText"
+                    className={`${styles.chip} ${active === "search" ? styles.activeChip : ""}`}
+                    type="text"
+                    placeholder="Search Name"
+                    value={searchText}
+                    onInput={(e) => handleDebouncedSearch(e, setFieldValue)}
+                  />
+                </div>
+              </Form>
+            )}
+          </Formik>
 
           <button
             key={"filter"}
@@ -420,7 +476,7 @@ const FilterChips = ({
             <div className={styles.chip}>Loading filters...</div>
           ) : (
             filterButtons.map((btn) => {
-              const isActive = active === btn.name;
+              const isActive = active === btn.slug;
             
               return (
                 <div
@@ -521,7 +577,7 @@ const FilterChips = ({
                 {activeModalTab === "Gender" && (
                   <div className={styles.optionsList}>
                     {genders.map((g) => {
-                      console.log("Gender:",g)
+                      // console.log("Gender:",g)
                       const isSelected = selectedGender === g.slug;
 
                       return (

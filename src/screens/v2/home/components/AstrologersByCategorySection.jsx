@@ -13,7 +13,7 @@ const AstrologersByCategorySection = ({ data, title, showMore }) => {
   const handleCategoryClick = (category) => {
     // Navigate to astrologers filtered by category
     navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path, {
-      state: { selectedType: category.title.split(" ")[0] || "All" },
+      state: { selectedType: category?.slug || "All" },
     });
   };
 
