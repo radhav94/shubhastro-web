@@ -42,20 +42,24 @@ const BirthPanchangSection = () => {
   const panchang = profile.kundliSnapshotId?.panchang;
   if (!panchang) return null;
 
+  console.log(panchang,"876678")
   const panchangCards = [
-    { icon: "🌙", label: "TITHI", value: panchang.tithi || "--", sub: panchang.tithi ? "Krishna" : null },
+    { icon: "🌙", label: "TITHI", value: panchang?.tithi || "--", sub: panchang?.tithi},
     { icon: "⭐", label: "NAKSHATRA", value: panchang.nakshatra || profile.nakshatra || "--" },
     { icon: "🕉️", label: "YOGA", value: panchang.yoga || "--" },
     { icon: "⚡", label: "KARANA", value: panchang.karana || "--" },
     { icon: "📅", label: "VAAR", value: panchang.day_of_birth || "--" },
   ];
+  
 
   const sunSign = profile.sunSign || panchang.sunSign || "--";
   const moonSign = profile.moonSign || panchang.moonSign || "--";
   const moonNakshatra = profile.nakshatra || panchang.nakshatra || "--";
   const sunrise = formatTo12Hr(panchang.sunrise_at_birth) || "--";
   const sunset = formatTo12Hr(panchang.sunset_at_birth) || "--";
+  const profileName = profile?.name || panchang?.name ;
 
+  console.log(profile,"56789")
   return (
     <section className={styles.birthPanchangSection}>
       <div className={styles.birthPanchangHeader}>
@@ -98,7 +102,7 @@ const BirthPanchangSection = () => {
             <div className={styles.planetDetails}>
               <span className={styles.planetDetail}>Sign: <strong>{moonSign}</strong></span>
               <span className={styles.planetDetail}>Nakshatra: <strong>{moonNakshatra}</strong></span>
-              <span className={styles.planetDetail}>Paksha: <strong>Krishna</strong></span>
+              <span className={styles.planetDetail}>Paksha: <strong>{profileName}</strong></span>
             </div>
           </div>
         </div>
