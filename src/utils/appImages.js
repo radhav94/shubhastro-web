@@ -35,7 +35,7 @@ import KundliChartDefault from "../assets/default-img/kundli-chart.png";
 import TarotCardDefault from "../assets/default-img/tarot-card.png";
 import BlogsDefault from "../assets/default-img/blogs.png";
 import CardBlackDefault from "../assets/default-img/card_black.png";
-import MarriageDefault from "../assets/default-img/marriage.png";
+import DeafultCategory from "../assets/default-img/default-category-img.png";
 import NewBlogsDefault from "../assets/default-img/new-blogs.jpeg";
 import VedicKundliDefault from "../assets/default-img/vedic-kundli.svg";
 import AriesDefault from "../assets/default-img/aries-default.svg";
@@ -53,7 +53,7 @@ export const DefaultImages = {
   TarotCardDefault,
   BlogsDefault,
   CardBlackDefault,
-  MarriageDefault,
+  DeafultCategory,
   NewBlogsDefault,
   VedicKundliDefault,
   AriesDefault,

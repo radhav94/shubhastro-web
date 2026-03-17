@@ -27,19 +27,17 @@ const AstrologersByCategorySection = ({ data, title, showMore }) => {
             key={category.ID || category._id || index}
             className={styles.lifeAreaCard}
             style={{
-              background: category.secondary_colour || getCategoryColor(index)
+              background: category.secondary_colour || getCategoryColor(index),
             }}
             onClick={() => handleCategoryClick(category)}
           >
             <h3 className={styles.lifeAreaTitle}>{category.title}</h3>
 
-            {category.image_url && (
-              <img
-                src={category.image_url || DefaultImages.MarriageDefault}
-                alt={category.title}
-                className={styles.lifeAreaIconImg}
-              />
-            )}
+            <img
+              src={category?.image_url || DefaultImages.DeafultCategory}
+              alt={category.title}
+              className={styles.lifeAreaIconImg}
+            />
           </div>
         ))}
       </div>
