@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useRef, useEffect, useCallback } from "react";
-import { voiceSocket } from "../services/voiceSocketServices";
+import { voiceSocket, registerCallSession, clearCallSession } from "../services/voiceSocketServices";
 
 const CallContext = createContext();
 
@@ -114,8 +114,16 @@ export const CallProvider = ({ children }) => {
         const resolved = callDataOrUpdater(prev);
         if (resolved) {
           persistCallState(resolved);
+          // Register session for auto-reconnect on socket disconnect
+          registerCallSession({
+            roomId: resolved.roomId,
+            userId: resolved.userId,
+            astrologerId: resolved.astrologerId,
+            callType: resolved.callType,
+          });
         } else {
           clearPersistedCallState();
+          clearCallSession();
         }
         return resolved;
       });
@@ -123,8 +131,16 @@ export const CallProvider = ({ children }) => {
       setActiveCallState(callDataOrUpdater);
       if (callDataOrUpdater) {
         persistCallState(callDataOrUpdater);
+        // Register session for auto-reconnect on socket disconnect
+        registerCallSession({
+          roomId: callDataOrUpdater.roomId,
+          userId: callDataOrUpdater.userId,
+          astrologerId: callDataOrUpdater.astrologerId,
+          callType: callDataOrUpdater.callType,
+        });
       } else {
         clearPersistedCallState();
+        clearCallSession();
       }
     }
   }, [persistCallState, clearPersistedCallState]);
@@ -379,9 +395,41 @@ export const CallProvider = ({ children }) => {
     voiceSocket.on("activity", handleActivity);
     voiceSocket.on("call:accepted", handleCallUpgrade);
 
+    // Handle auto-reconnect response from voiceSocketServices
+    // This fires when socket reconnects and auto-emits call:reconnect
+    const handleAutoReconnected = (data) => {
+      console.log("[CallContext] 🔄 call:reconnected (auto-reconnect):", JSON.stringify(data));
+      
+      if (data && data.active) {
+        console.log("[CallContext] ✅ Auto-reconnect successful, call still active");
+        // Update remaining time if provided
+        if (data.remainingTime) {
+          const secs = Math.floor(Number(data.remainingTime) * 60);
+          console.log("[CallContext] ⏱️ Updating callSeconds from reconnect:", secs);
+          setCallSeconds(secs);
+          if (!timerRef.current) {
+            startTimer();
+          }
+        }
+        // Update call type if changed (e.g., audio→video upgrade happened during disconnect)
+        if (data.type && activeCall && data.type !== activeCall.callType) {
+          console.log("[CallContext] 🔄 Call type changed during disconnect:", activeCall.callType, "→", data.type);
+          setActiveCall((prev) => prev ? { ...prev, callType: data.type, agoraToken: data.agoraToken || prev.agoraToken } : prev);
+        }
+      } else {
+        console.log("[CallContext] ❌ Auto-reconnect failed, call ended:", data?.reason);
+        // Call ended during disconnect - clear state
+        setActiveCall(null);
+        stopTimer();
+      }
+    };
+
+    voiceSocket.on("call:reconnected", handleAutoReconnected);
+
     return () => {
       voiceSocket.off("activity", handleActivity);
       voiceSocket.off("call:accepted", handleCallUpgrade);
+      voiceSocket.off("call:reconnected", handleAutoReconnected);
     };
   }, [userIdLocal]);
 
