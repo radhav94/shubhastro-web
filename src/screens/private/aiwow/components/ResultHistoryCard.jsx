@@ -57,8 +57,8 @@ const ResultHistoryCard = ({ item }) => {
               <DownloadIcon />
               Download
             </button>
-            <span className={styles.paidRibbon}>Paid</span>
           </div>
+          <span className={styles.paidRibbon}>Paid</span>
         </div>
       </div>
     </div>
