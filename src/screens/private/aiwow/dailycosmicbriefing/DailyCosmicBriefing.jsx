@@ -5,6 +5,7 @@ import { getDailyCosmicBriefing } from '../../../../services/appServices/aiWowSe
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import Footer from '../../../../layouts/Footer';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const DailyCosmicBriefing = () => {
   const navigate = useNavigate();
@@ -197,6 +198,13 @@ const DailyCosmicBriefing = () => {
             </div>
           </div>
         )}
+
+        <button
+          className={styles.dailyBriefButton}
+          onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
+        >
+          Consult with Expert Astrologer
+        </button>
       </div>
     </div>
     <Footer />

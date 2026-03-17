@@ -1052,8 +1052,10 @@
 }
 
 .newAnalysisButton {
-  background: white;
-  color: #F75801;
+  width: 30%;
+  background: linear-gradient(90deg, #f75801, #d43400);
+  color: #fff;
+  margin: 16px auto 0;
   border: 2px solid #F75801;
   padding: 1rem 1.5rem;
   border-radius: 0.75rem;
@@ -1061,11 +1063,11 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-
-  &:hover {
-    background: #F75801;
-    color: white;
-    transform: translateY(-2px);
+  @media (width <= 767px) {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    border-radius: 50px;
   }
 }
 

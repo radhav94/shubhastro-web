@@ -17,6 +17,7 @@ import DeleteConfirmationModal from '../../../../component/UI/modal/deleteModal/
 import matchMakingImg from '../../../../assets/images/match-making-top-img.svg';
 import matchMakingImgBottom from '../../../../assets/images/match-making-bottom-img.svg';
 import Footer from '../../../../layouts/Footer';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const SmartMatchmaking = () => {
   const navigate = useNavigate();
@@ -679,8 +680,8 @@ const SmartMatchmaking = () => {
               </div>
             </div>
 
-            <button className={styles.newAnalysisButton} onClick={handleRetry}>
-              New Analysis
+            <button className={styles.newAnalysisButton} onClick={() => navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)}>
+              Consult With Expert Astrologer
             </button>
           </div>
           )}

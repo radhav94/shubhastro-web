@@ -7,6 +7,7 @@ import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliP
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { FiMapPin, FiCalendar, FiChevronLeft, FiChevronRight, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 import Footer from '../../../../layouts/Footer';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const DEFAULT_OCCASIONS = [
   'Marriage',
@@ -342,9 +343,9 @@ const AgenticCalendar = () => {
             )}
           </button>
 
-          {/* Results Accordion */}
+          {/* Results Grid (Desktop) / Accordion (Mobile) */}
           {analysis?.optimalTimings?.length > 0 && (
-            <div className={styles.resultsWrap} ref={resultsRef}>
+            <div className={`${styles.resultsWrap} ${analysis.optimalTimings.length === 2 ? styles.resultsTwo : ''}`} ref={resultsRef}>
               {analysis.optimalTimings.map((timing) => {
                 const name = timing.eventName;
                 const isExpanded = expandedOccasion === name;
@@ -368,57 +369,68 @@ const AgenticCalendar = () => {
                 const upcoming = slots.filter((s) => !isSlotPassed(s.time, timing.bestDate));
 
                 return (
-                  <div key={name} className={styles.accordion}>
-                    <button
-                      className={`${styles.accordionHeader} ${isExpanded ? styles.accordionOpen : ''}`}
+                  <div key={name} className={styles.resultCard}>
+                    {/* Card header - clickable only on mobile */}
+                    <div
+                      className={styles.resultCardHeader}
                       onClick={() => setExpandedOccasion(isExpanded ? null : name)}
                     >
                       <div className={styles.accordionTitle}>
                         <span>{name}</span>
                         {isCustom && <span className={styles.customTag}>Custom</span>}
                       </div>
-                      {isExpanded ? <FiChevronUp size={20} color="#f75801" /> : <FiChevronDown size={20} color="#f75801" />}
-                    </button>
+                      <span className={styles.mobileChevron}>
+                        {isExpanded ? <FiChevronUp size={20} color="#f75801" /> : <FiChevronDown size={20} color="#f75801" />}
+                      </span>
+                    </div>
 
-                    {isExpanded && (
-                      <div className={styles.accordionBody}>
-                        {passed.length > 0 && (
-                          <>
-                            <h4 className={styles.slotGroupTitle}>Earlier Today</h4>
-                            {passed.map((s, i) => (
-                              <div key={i} className={styles.slotRow}>
-                                <span className={styles.slotTime}>{s.time}</span>
-                                <span className={styles.passedBadge}>Passed</span>
-                              </div>
-                            ))}
-                          </>
-                        )}
-                        {upcoming.length > 0 && (
-                          <>
-                            <h4 className={styles.slotGroupTitle}>Upcoming</h4>
-                            {upcoming.map((s, i) => (
-                              <div key={i} className={`${styles.slotRow} ${s.best ? styles.slotBest : styles.slotUpcoming}`}>
-                                <span className={styles.slotTime}>{s.time}</span>
-                                {s.best && <span className={styles.bestBadge}>Best Time</span>}
-                              </div>
-                            ))}
-                          </>
-                        )}
-                        {passed.length === 0 && upcoming.length === 0 && timing.bestDate && (
-                          <div className={styles.slotRow + ' ' + styles.slotBest}>
-                            <span className={styles.slotTime}>
-                              {timing.bestDate} {timing.bestTimeRange && `• ${timing.bestTimeRange}`}
-                            </span>
-                            <span className={styles.bestBadge}>Best Time</span>
-                          </div>
-                        )}
-                        {timing.reason && <p className={styles.slotReason}>{timing.reason}</p>}
-                      </div>
-                    )}
+                    {/* Card body - always visible on desktop, toggle on mobile */}
+                    <div className={`${styles.resultCardBody} ${isExpanded ? styles.resultCardBodyOpen : ''}`}>
+                      {passed.length > 0 && (
+                        <>
+                          <h4 className={styles.slotGroupTitle}>Earlier Today</h4>
+                          {passed.map((s, i) => (
+                            <div key={i} className={styles.slotRow}>
+                              <span className={styles.slotTime}>{s.time}</span>
+                              <span className={styles.passedBadge}>Passed</span>
+                            </div>
+                          ))}
+                        </>
+                      )}
+                      {upcoming.length > 0 && (
+                        <>
+                          <h4 className={styles.slotGroupTitle}>Upcoming</h4>
+                          {upcoming.map((s, i) => (
+                            <div key={i} className={`${styles.slotRow} ${s.best ? styles.slotBest : styles.slotUpcoming}`}>
+                              <span className={styles.slotTime}>{s.time}</span>
+                              {s.best && <span className={styles.bestBadge}>Best Time</span>}
+                            </div>
+                          ))}
+                        </>
+                      )}
+                      {passed.length === 0 && upcoming.length === 0 && timing.bestDate && (
+                        <div className={styles.slotRow + ' ' + styles.slotBest}>
+                          <span className={styles.slotTime}>
+                            {timing.bestDate} {timing.bestTimeRange && `• ${timing.bestTimeRange}`}
+                          </span>
+                          <span className={styles.bestBadge}>Best Time</span>
+                        </div>
+                      )}
+                      {timing.reason && <p className={styles.slotReason}>{timing.reason}</p>}
+                    </div>
                   </div>
                 );
               })}
             </div>
+          )}
+
+          {analysis?.optimalTimings?.length > 0 && (
+            <button
+              className={styles.consultButton}
+              onClick={() => navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)}
+            >
+              Consult With Expert Astrologer
+            </button>
           )}
         </div>
       </div>

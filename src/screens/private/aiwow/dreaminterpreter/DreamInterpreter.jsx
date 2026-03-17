@@ -439,8 +439,8 @@ const DreamInterpreter = () => {
             )}
 
             {/* Action Button */}
-            <button className={styles.newDreamButton} onClick={handleNewDream}>
-              Interpret Another Dream
+            <button className={styles.newDreamButton} onClick={() => navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)}>
+              Consult with Expert Astrollger
             </button>
           </div>
         )}
