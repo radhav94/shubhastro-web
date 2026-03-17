@@ -99,11 +99,13 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
     setKundliModal(null);
   }, []);
 
+
   // Render message content based on type
   const renderMessageContent = useCallback(
     (message) => {
       const { type, message: content, fileSize } = message;
 
+      console.log("content Chat::",content)
       switch (type) {
         case MESSAGE_TYPES.IMAGE:
           return (
@@ -235,6 +237,8 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
     return emptyState;
   }
 
+  
+
   return (
     <div className={styles.chatWindow} ref={chatContainerRef}>
       {chatSessions.map((session, sessionIndex) => {
@@ -361,7 +365,7 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
             onClick={(e) => e.stopPropagation()}
           >
             <iframe
-              src={`${kundliModal}${kundliModal.includes('?') ? '&' : '?'}iframe=true`}
+              src={`${kundliModal}${kundliModal?.includes('?') ? '&' : '?'}iframe=true`}
               title="Kundli"
               className={styles.kundliIframe}
             />
