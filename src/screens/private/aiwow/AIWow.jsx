@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "./AIWow.module.scss";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -28,6 +28,8 @@ const AIWow = () => {
   const [activeTab, setActiveTab] = useState("aiwow");
   const [downloadModal, setDownloadModal] = useState({ open: false, featureId: null, featureName: "" });
   const [isDownloading, setIsDownloading] = useState(false);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [hasMoreHistory, setHasMoreHistory] = useState(true);
 
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
 
@@ -49,14 +51,51 @@ const AIWow = () => {
   const { data: chargesData } = useGetChargesQuery();
 
   const kundliId = selectedProfile?._id || selectedProfile?.id || "";
-  const { data: historyData, isLoading: isHistoryLoading } = useGetAiHistoryQuery(kundliId, {
-    skip: !kundliId,
-  });
+  const { data: historyData, isLoading: isHistoryLoading, isFetching: isHistoryFetching } = useGetAiHistoryQuery(
+    { kundliId, page: historyPage, limit: 10 },
+    { skip: !kundliId }
+  );
 
   const profiles = data?.data || [];
   const aiwowSections = aiwowData?.data?.list || [];
   const historyList = historyData?.data?.history || [];
   const charges = chargesData?.data || null;
+
+  // Check if more pages available
+  useEffect(() => {
+    if (historyData?.data?.pagination) {
+      const { page, totalPages } = historyData.data.pagination;
+      setHasMoreHistory(page < totalPages);
+    }
+  }, [historyData]);
+
+  // Reset page when profile changes
+  useEffect(() => {
+    setHistoryPage(1);
+    setHasMoreHistory(true);
+  }, [kundliId]);
+
+  // Ref to guard against multiple rapid scroll triggers
+  const isFetchingRef = useRef(false);
+
+  // Sync ref with RTK Query fetching state
+  useEffect(() => {
+    isFetchingRef.current = isHistoryFetching;
+  }, [isHistoryFetching]);
+
+  // Infinite scroll handler — uses window scroll
+  useEffect(() => {
+    if (activeTab !== "results") return;
+    const handleScroll = () => {
+      if (isFetchingRef.current || !hasMoreHistory) return;
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
+        isFetchingRef.current = true;
+        setHistoryPage((prev) => prev + 1);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [activeTab, hasMoreHistory]);
 
   // Find download cost from charges data by matching featureName to slug in charges
   const getDownloadCost = (featureName) => {
@@ -295,37 +334,43 @@ const AIWow = () => {
           {/* Result History Tab */}
           {activeTab === "results" && (
             <div className={styles.resultsList}>
-              {isHistoryLoading ? (
+              {isHistoryLoading && historyPage === 1 ? (
                 <PrimaryLoader />
               ) : historyList.length === 0 ? (
                 <div className={styles.resultsPlaceholder}>No history found</div>
               ) : (
-                historyList.map((item) => (
-                  <ResultHistoryCard
-                    key={item._id}
-                    item={{
-                      featureName: item.featureName || "AI Analysis",
-                      featureIcon: null,
-                      status: (item.status || "completed").toLowerCase(),
-                      date: item.createdAt
-                        ? new Date(item.createdAt).toLocaleString("en-IN", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true,
-                          })
-                        : "",
-                      summary: item.summary || "",
-                      isPaid: false,
-                      price: null,
-                      charges,
-                      onViewResult: () => handleViewResultPdf(item.featureId),
-                      onDownload: () => handleDownloadPdf(item.featureId, item.featureName),
-                    }}
-                  />
-                ))
+                <>
+                  {historyList.map((item) => (
+                    <ResultHistoryCard
+                      key={item._id}
+                      item={{
+                        featureName: item.featureName || "AI Analysis",
+                        featureIcon: null,
+                        status: (item.status || "completed").toLowerCase(),
+                        date: item.createdAt
+                          ? new Date(item.createdAt).toLocaleString("en-IN", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            })
+                          : "",
+                        summary: item.summary || "",
+                        isPaid: false,
+                        price: null,
+                        charges,
+                        onViewResult: () => handleViewResultPdf(item.featureId),
+                        onDownload: () => handleDownloadPdf(item.featureId, item.featureName),
+                      }}
+                    />
+                  ))}
+                  {isHistoryFetching && historyPage > 1 && (
+                    <div className={styles.loadingMore}>Loading more...</div>
+                  )}
+
+                </>
               )}
             </div>
           )}

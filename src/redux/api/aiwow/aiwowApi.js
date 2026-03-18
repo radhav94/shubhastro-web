@@ -11,11 +11,24 @@ export const aiwowApi = privateRequestNew.injectEndpoints({
     }),
 
     getAiHistory: builder.query({
-      query: (kundliId) => ({
-        url: `ai-history?kundliId=${kundliId}`,
+      query: ({ kundliId, page = 1, limit = 10 }) => ({
+        url: `ai-history?kundliId=${kundliId}&page=${page}&limit=${limit}`,
         method: "GET",
         headers: { accept: "application/json" },
       }),
+      serializeQueryArgs: ({ queryArgs }) => queryArgs.kundliId,
+      merge: (currentCache, newItems, { arg }) => {
+        if (arg.page === 1) return newItems;
+        return {
+          ...newItems,
+          data: {
+            ...newItems.data,
+            history: [...(currentCache?.data?.history || []), ...(newItems?.data?.history || [])],
+          },
+        };
+      },
+      forceRefetch: ({ currentArg, previousArg }) =>
+        currentArg?.page !== previousArg?.page,
     }),
 
     getCharges: builder.query({
