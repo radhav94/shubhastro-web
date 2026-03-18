@@ -61,8 +61,7 @@ const AIWow = () => {
   // Find download cost from charges data by matching featureName to slug in charges
   const getDownloadCost = (featureName) => {
     if (!charges || !featureName) return 0;
-    const firstWord = featureName.trim().split(/\s+/)[0];
-    const slug = firstWord + "-report";
+    const slug = featureName.trim().replace(/\s+/g, "-") + "-report";
     // charges is array of sections, each has a .list array with { slug, amount }
     for (const section of charges) {
       if (!Array.isArray(section?.list)) continue;
