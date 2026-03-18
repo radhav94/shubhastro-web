@@ -22,6 +22,9 @@ import Video from "../assets/icons/video.png";
 // Astrologers card icon
 import ChatMinutesIcon from "../assets/icons/experienceIcon.svg";
 import CallMinutesIcon from "../assets/icons/callMinutess.svg";
+import ActiveStarIcon from "../assets/icons/active-star.png";
+import InActiveStarIcon from "../assets/icons/inactive-star.png";
+
 
 // application all default images
 import AstrologerDefaultImg from "../assets/default-img/astrologer.svg";
@@ -101,7 +104,9 @@ export const AppIcons = {
   CopyLink,
   Video,
   ChatMinutesIcon,
-  CallMinutesIcon
+  CallMinutesIcon,
+  ActiveStarIcon,
+  InActiveStarIcon
 };
 
 //appImages

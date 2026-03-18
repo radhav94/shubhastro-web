@@ -216,8 +216,9 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
 
       // Use external ref if provided, otherwise use local ref
       const astro = externalAstroRef?.current || activeAstroRef.current;
+
       const kundliId = localSelectedProfile;
-      console.log("[NormalFlow]   → astro from ref:", astro?._id, astro?.firstName);
+      console.log("[NormalFlow]   → astro from ref:",astro, astro?._id, astro?.firstName);
       console.log("[NormalFlow]   → kundliId:", kundliId);
 
       try {
@@ -245,7 +246,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           userId: userIdLocal,
           astrologerId: astroId,
           kundliId,
-          astrologerID: astro?.astrologer_ID,
+          astrologerID: astro?.astrologerID,
           remainingTime,
         };
         console.log("[NormalFlow] 📦 Setting activeCall:", JSON.stringify({ ...callPayload, agoraToken: "[redacted]" }));
