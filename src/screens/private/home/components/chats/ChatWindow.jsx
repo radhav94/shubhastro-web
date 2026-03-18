@@ -229,7 +229,7 @@ const ChatWindow = () => {
       const baseUrl = window.location.origin;
 
       const kundliLink = `${baseUrl}/kundli/${kundli._id}`;
-      isUserSide ? sendMessage(kundliLink, 'kundli') : astroReply(kundliLink);
+      isUserSide ? sendMessage(kundliLink, 'kundli', kundli?._id) : astroReply(kundliLink);
 
       setMessage("");
       return;
@@ -379,6 +379,7 @@ const ChatWindow = () => {
   };
 
   const handleProfileManagerStartCall = (selectedProfile) => {
+    console.log('selectedProfile :>> ', selectedProfile);
     // Send the selected kundli profile
     handleSend(selectedProfile);
     setShowProfileManagerModal(false);
