@@ -132,8 +132,10 @@ const Home = () => {
     if (hasKundli) {
       // If kundli is available, directly initiate the connection based on type
       if (connectionType === "chat") {
+        console.log("Astrologer Chat:",astrologer)
         handleChatStart(astrologer);
       } else if (connectionType === "audio" || connectionType === "call") {
+        console.log("Astrologer Call:",astrologer)
         handleCallStart(astrologer, "audio");
       }
     } else {
