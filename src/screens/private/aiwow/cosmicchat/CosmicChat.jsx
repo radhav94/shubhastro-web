@@ -270,7 +270,7 @@ const CosmicChat = () => {
           <textarea
             ref={inputRef}
             className={styles.input}
-            placeholder="Ask about cosmic energies, transits, spiritual guidance..."
+            placeholder="Ask about cosmic energies..."
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={handleKeyDown}

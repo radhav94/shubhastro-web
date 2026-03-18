@@ -17,7 +17,16 @@ export const aiwowApi = privateRequestNew.injectEndpoints({
         headers: { accept: "application/json" },
       }),
     }),
+
+    getCharges: builder.query({
+      query: () => ({
+        url: "filters/get-filters/charges",
+        method: "GET",
+        headers: { accept: "application/json" },
+      }),
+      keepUnusedDataFor: 300, // cache 5 min — global data, rarely changes
+    }),
   }),
 });
 
-export const { useGetAiWowPageDataQuery, useGetAiHistoryQuery } = aiwowApi;
+export const { useGetAiWowPageDataQuery, useGetAiHistoryQuery, useGetChargesQuery } = aiwowApi;
