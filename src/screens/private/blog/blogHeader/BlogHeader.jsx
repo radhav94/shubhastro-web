@@ -49,6 +49,7 @@ const BlogHeader = () => {
                   image={blog.img}
                   title={blog.title}
                   date={blog.publishDate}
+                  blogId={blog.blogId || blog._id}
                 />
               </Link>
             ))}

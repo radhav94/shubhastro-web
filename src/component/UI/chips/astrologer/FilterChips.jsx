@@ -363,7 +363,7 @@ const FilterChips = ({
   const handleClick = (itemSlug) => {
     // Find the button by slug to get the name for active state
     const clickedButton = filterButtons.find(btn => btn.slug === itemSlug);
-    const itemName = clickedButton?.name || itemSlug;
+    const itemName = clickedButton?.slug || itemSlug;
     
     setActive(itemName);
     setPage(1);
