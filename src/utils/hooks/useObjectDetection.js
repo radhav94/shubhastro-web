@@ -133,76 +133,66 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
   const detectSignature = (imageData, width, height) => {
     const data = imageData.data;
     let darkPixels = 0;
-    let contrastPixels = 0;
     let edgePixels = 0;
     let skinTonePixels = 0;
-    const totalPixels = data.length / 4;
 
-    // Detect dark strokes (signature ink) and check for skin tones
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
-      const brightness = (r + g + b) / 3;
+    // Only analyze center region (where capture box is)
+    const startX = Math.floor(width * 0.15);
+    const endX = Math.floor(width * 0.85);
+    const startY = Math.floor(height * 0.25);
+    const endY = Math.floor(height * 0.75);
+    let sampledPixels = 0;
 
-      // Detect dark pixels (ink)
-      if (brightness < 120) darkPixels++;
+    for (let y = startY; y < endY; y++) {
+      for (let x = startX; x < endX; x++) {
+        const i = (y * width + x) * 4;
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const brightness = (r + g + b) / 3;
+        sampledPixels++;
 
-      // Detect skin tones (to reject faces)
-      // Skin tone detection: R > G > B, with specific ranges
-      if (r > 95 && g > 40 && b > 20 && 
-          r > g && g > b && 
-          Math.abs(r - g) > 15 &&
-          r - b > 15) {
-        skinTonePixels++;
+        if (brightness < 120) darkPixels++;
+
+        if (r > 95 && g > 40 && b > 20 && r > g && g > b && Math.abs(r - g) > 15 && r - b > 15) {
+          skinTonePixels++;
+        }
       }
     }
 
-    // Enhanced edge detection for signature strokes
-    for (let y = 1; y < height - 1; y += 2) {
-      for (let x = 1; x < width - 1; x += 2) {
+    // Edge detection in center region
+    for (let y = startY + 1; y < endY - 1; y += 2) {
+      for (let x = startX + 1; x < endX - 1; x += 2) {
         const i = (y * width + x) * 4;
         const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
         
-        // Check horizontal neighbor
         const rightI = (y * width + (x + 1)) * 4;
         const rightBrightness = (data[rightI] + data[rightI + 1] + data[rightI + 2]) / 3;
         
-        // Check vertical neighbor
         const downI = ((y + 1) * width + x) * 4;
         const downBrightness = (data[downI] + data[downI + 1] + data[downI + 2]) / 3;
         
-        // Strong edge detection for text
-        if (Math.abs(brightness - rightBrightness) > 50 || Math.abs(brightness - downBrightness) > 50) {
+        if (Math.abs(brightness - rightBrightness) > 40 || Math.abs(brightness - downBrightness) > 40) {
           edgePixels++;
         }
       }
     }
 
-    const darkRatio = darkPixels / totalPixels;
-    const edgeRatio = edgePixels / (totalPixels / 4);
-    const skinRatio = skinTonePixels / totalPixels;
+    const darkRatio = darkPixels / sampledPixels;
+    const edgeRatio = edgePixels / (sampledPixels / 4);
+    const skinRatio = skinTonePixels / sampledPixels;
 
-    console.log('Signature detection:', { 
-      darkRatio: darkRatio.toFixed(3), 
-      edgeRatio: edgeRatio.toFixed(3),
-      skinRatio: skinRatio.toFixed(3),
-      darkPixels, 
-      edgePixels,
-      skinTonePixels
-    });
-
-    // Strict detection: 
-    // - Must have dark ink (but not too much - not a dark background)
-    // - Must have strong edges (text has sharp edges)
-    // - Must NOT have significant skin tones (reject faces)
+    // Relaxed detection for signature on white/light paper:
+    // - Even small amount of dark ink counts (lowered from 0.05 to 0.01)
+    // - Edge ratio lowered (signature strokes are thin)
+    // - Still reject faces (skin tone check)
     const detected = 
-      darkRatio > 0.05 &&      // Has some dark ink
-      darkRatio < 0.5 &&       // But not too dark (not a dark background)
-      edgeRatio > 0.03 &&      // Has strong edges (text)
-      skinRatio < 0.15;        // No significant skin tones (not a face)
+      darkRatio > 0.01 &&      // Has some dark ink (even small signature)
+      darkRatio < 0.6 &&       // Not a completely dark background
+      edgeRatio > 0.01 &&      // Has some edges (ink strokes)
+      skinRatio < 0.2;         // No significant skin tones
 
-    const quality = detected ? Math.min(100, Math.round((darkRatio * 100 + edgeRatio * 200))) : 0;
+    const quality = detected ? Math.min(100, Math.round((darkRatio * 150 + edgeRatio * 250))) : 0;
 
     return { detected, quality };
   };
@@ -309,21 +299,8 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
   };
 
   /* ------------------ DRAW DETECTION OVERLAY ------------------ */
-  const drawDetectionOverlay = (ctx, width, height, detected) => {
-    if (!detected) return;
-
-    // Calculate center box dimensions (500px equivalent in video dimensions)
-    const boxWidth = Math.min(width * 0.7, 500 * (width / 500)); // 70% of width or 500px equivalent
-    const boxHeight = boxWidth * 0.5; // Maintain 2:1 aspect ratio
-    const boxX = (width - boxWidth) / 2;
-    const boxY = (height - boxHeight) / 2;
-
-    ctx.strokeStyle = '#22c55e';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
-
-    ctx.fillStyle = 'rgba(34, 197, 94, 0.15)';
-    ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+  const drawDetectionOverlay = () => {
+    // No overlay drawn — keep camera view clean
   };
 
   /* ------------------ START/STOP DETECTION ------------------ */

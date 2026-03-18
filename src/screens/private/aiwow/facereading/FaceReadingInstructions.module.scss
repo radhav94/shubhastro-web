@@ -17,8 +17,8 @@
   top: 88px;
   left: 0;
   right: 0;
-  z-index: 100;
-  @media screen and (width <= 768px) {
+  z-index: 2002;
+  @media screen and (width <= 1180px) {
     top: 53px;
   }
 }
@@ -46,6 +46,10 @@
   height: 40px;
   border: 1px solid #D43400;
   transition: all 0.2s ease;
+  position: relative;
+  z-index: 10;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   @media (width <= 767px) {
     width: 36px;
     height: 36px;
