@@ -39,6 +39,11 @@ body.modal-open {
   bottom: 160px;
   width: 300px;
 }
+@media (width <= 767px) {
+  .waiting-queue{
+  bottom: 210px;
+  }
+}
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
