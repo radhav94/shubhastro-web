@@ -161,7 +161,7 @@
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.3s ease;
-  // scroll-snap-align: center;
+  scroll-snap-align: start;
 
   // &:hover {
   //   transform: scale(1.02);

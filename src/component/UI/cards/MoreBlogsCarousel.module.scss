@@ -95,7 +95,7 @@
   pointer-events: none;
 }
 
-.dotsContainer button {
+.dotsContainer button,.btnShare {
   pointer-events: auto;
 }
 .relatedBlogCard {
@@ -251,7 +251,7 @@
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  // scroll-snap-align: center;
+  scroll-snap-align: start;
 
   // &:hover {
   //   transform: scale(1.02);
@@ -492,5 +492,172 @@
   @media (max-width: 768px) {
     width: 10px;
     height: 10px;
+  }
+}
+
+.dateShareRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 16px;
+
+  @media (max-width: 576px) {
+    margin-top: 8px;
+  }
+}
+
+.shareBtnMain {
+  position: relative;
+  &:hover .shareIconSocial {
+    display: flex;
+  }
+}
+
+.shareBtn {
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.shareIconSocial {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  padding-bottom: 8px;
+  gap: 6px;
+  z-index: 10;
+
+  span.socialIconWrapper {
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    &:hover {
+      background: #f0f0f0;
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+      color: #333;
+    }
+  }
+}
+
+.copiedText {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: fadeInOut 2s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+}
+
+// Overlay share button styles (More Blogs For You carousel)
+.btnShare {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+
+  button:first-child, button:last-child {
+    display: flex;
+    height: 40px;
+    padding: 0 25px;
+    justify-content: center;
+    align-items: center;
+    gap: var(--Spacing-1, 4px);
+    border-radius: 50px;
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+
+    @media (max-width: 767px) {
+      padding: 0 16px;
+      height: 36px;
+      font-size: 13px;
+    }
+  }
+
+  button:last-child {
+    width: 40px;
+    padding: 0;
+    background: rgba(254, 254, 254, 0.20);
+    position: relative;
+
+    @media (max-width: 767px) {
+      width: 36px;
+    }
+  }
+}
+
+.overlayShareBtnMain {
+  padding-right: 30px;
+
+  &:hover .overlayShareIcons {
+    display: flex;
+  }
+}
+
+.overlayShareIcons {
+  display: none;
+  position: absolute;
+  left: 50px;
+  gap: 10px;
+
+  span.overlaySocialIcon {
+    width: 40px;
+    height: 40px;
+    background: rgba(254, 254, 254, 0.2);
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+
+    svg {
+      width: 20px;
+      height: 20px;
+      color: #fff;
+    }
+
+    @media (max-width: 380px) {
+      width: 36px;
+      height: 36px;
+    }
   }
 }

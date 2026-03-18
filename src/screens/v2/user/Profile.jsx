@@ -168,13 +168,13 @@ const Profile = () => {
     isLoading: isLoadingCalls,
     isFetching: isFetchingCalls,
   } = useGetCallHistoryQuery(
-    { userId, page: callHistoryPage, limit: 30 },
+    { userId, page: callHistoryPage, limit: 10 },
     { skip: !userId },
   );
   console.log("callHistoryData",callHistoryData?.data?.callHistory)
 
   const { data: chatHistoryData, isLoading: isLoadingChats, isFetching: isFetchingChats } =
-    useGetUserChatMessagesQuery({ userId, page: chatHistoryPage, limit: 30 }, {
+    useGetUserChatMessagesQuery({ userId, page: chatHistoryPage, limit: 10 }, {
       skip: !userId,
     });
 
@@ -219,6 +219,7 @@ const Profile = () => {
   const chatOrders = Array.isArray(chatHistoryData?.data?.chatHistory)
     ? chatHistoryData.data.chatHistory.map((room, index) => {
         const lastChat = room?.[room.length - 1];
+        const chatDuration = Math.round(room?.totalDuration)
         return {
           id: `chat-${chatHistoryPage}-${index}`,
           type: "chat",
@@ -235,7 +236,7 @@ const Profile = () => {
             isActive: true,
           },
           date: lastChat?.createdAt || new Date(),
-          duration: `${room?.duration || 0} Min`,
+          duration: `${chatDuration || 0} Min`,
           amount: room?.amount || 0,
           rate: room?.rate || 0,
           status: "completed",
