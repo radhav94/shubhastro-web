@@ -54,29 +54,20 @@ const FilterChips = ({
 
   // Auto-scroll to active chip when selectedType changes from parent
   useEffect(() => {
-    if (
-      selectedType &&
-      selectedType !== "All" &&
-      chipRefs.current[selectedType]
-    ) {
-      const chipElement = chipRefs.current[selectedType];
-      const container = filterTabsRef.current;
-
-      if (chipElement && container) {
-        // Calculate scroll position to center the chip
-        const chipLeft = chipElement.offsetLeft;
-        const chipWidth = chipElement.offsetWidth;
-        const containerWidth = container.offsetWidth;
-        const scrollLeft = chipLeft - containerWidth / 2 + chipWidth / 2;
-
-        // Smooth scroll to the chip
-        container.scrollTo({
-          left: scrollLeft,
-          behavior: "smooth",
-        });
-      }
+    if (selectedType && selectedType !== "All") {
+      // Delay to ensure chips are rendered from API data
+      setTimeout(() => {
+        const chipElement = chipRefs.current[selectedType];
+        if (chipElement) {
+          chipElement.scrollIntoView({
+            behavior: "smooth",
+            inline: "center",
+            block: "nearest",
+          });
+        }
+      }, 200);
     }
-  }, [selectedType]);
+  }, [selectedType, astroFilterTab]);
 
   // Update active state when selectedType prop changes from parent (but not on every render)
   useEffect(() => {
@@ -481,7 +472,7 @@ const FilterChips = ({
               return (
                 <div
                   key={btn.name}
-                  ref={(el) => (chipRefs.current[btn.name] = el)}
+                  ref={(el) => (chipRefs.current[btn.slug] = el)}
                   className={`${styles.chip} ${isActive ? styles.activeChip : ""}`}
                   onClick={() => handleClick(btn.slug)}
                 >
