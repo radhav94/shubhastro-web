@@ -24,7 +24,7 @@ import BottomNavigation from "../screens/v2/home/components/BottomNavigation";
 const quickLinks = [
   { href: "/chat-with-astrologers", text: "Talk to Astrologer" },
   { href: "/chat-with-astrologers", text: "Chat with Astrologer" },
-  { href: "/shop", text: "Astromall" },
+  { href: "/astromall", text: "Astromall" },
   { href: "/tarot", text: "Tarot" },
   { href: "/blog", text: "Blog" },
   {
