@@ -1,0 +1,450 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+  background: #fafafa;
+  min-height: 100vh;
+
+  @media (max-width: 768px) {
+    padding: 0 14px 40px;
+  }
+}
+
+/* ── Top Nav ── */
+.topNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.backCircle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid #f75801;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f75801;
+  font-size: 18px;
+}
+
+.backLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.topRight {
+  display: flex;
+  gap: 10px;
+}
+
+.iconBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  color: #555;
+  cursor: pointer;
+  &:hover { border-color: #f75801; color: #f75801; }
+}
+
+/* ── Heading ── */
+.heading {
+  font-size: 17px;
+  font-weight: 700;
+  color: #222;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 18px;
+  display: inline-block;
+
+  &::after {
+    content: "";
+    display: block;
+    width: 50px;
+    height: 3px;
+    background: #f75801;
+    margin-top: 6px;
+    border-radius: 2px;
+  }
+}
+
+/* ── Search + Filter ── */
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.searchBox {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 10px 14px;
+
+  input {
+    border: none;
+    outline: none;
+    flex: 1;
+    font-size: 14px;
+    background: transparent;
+    &::placeholder { color: #bbb; }
+  }
+}
+
+.searchIcon {
+  color: #999;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.filterBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #f75801;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+  &:hover { background: #d43400; }
+}
+
+/* ── Pandit Grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+
+  @media (max-width: 1024px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 768px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 480px) { grid-template-columns: 1fr; }
+}
+
+/* ── Pandit Card ── */
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 16px 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.avatarWrap {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  margin-bottom: 12px;
+}
+
+.avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #f0f0f0;
+}
+
+.ratingBadge {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f75801;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.panditName {
+  font-size: 14px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 4px;
+}
+
+.exp {
+  font-size: 12px;
+  color: #888;
+  margin: 0 0 4px;
+}
+
+.skills {
+  font-size: 11px;
+  color: #999;
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+
+.langs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.langTag {
+  padding: 3px 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 14px;
+  font-size: 11px;
+  color: #666;
+  background: #fafafa;
+}
+
+.priceRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.priceGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.price {
+  font-size: 15px;
+  font-weight: 700;
+  color: #222;
+}
+
+.oldPrice {
+  font-size: 12px;
+  color: #bbb;
+  text-decoration: line-through;
+}
+
+.selectBtn {
+  padding: 8px 22px;
+  border: none;
+  border-radius: 8px;
+  background: #f75801;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { background: #d43400; box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3); }
+}
+
+/* ── Empty State ── */
+.empty {
+  text-align: center;
+  padding: 40px 0;
+  p {
+    font-size: 15px;
+    color: #999;
+  }
+}
+
+
+/* ── Responsive: Tablet ── */
+@media (max-width: 768px) {
+  .topNav {
+    padding: 12px 0;
+    margin-bottom: 16px;
+  }
+
+  .heading {
+    font-size: 15px;
+    margin-bottom: 14px;
+  }
+
+  .searchRow {
+    margin-bottom: 18px;
+  }
+
+  .card {
+    padding: 16px 14px 14px;
+  }
+
+  .avatarWrap {
+    width: 80px;
+    height: 80px;
+  }
+
+  .avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .panditName {
+    font-size: 13px;
+  }
+
+  .selectBtn {
+    padding: 7px 18px;
+    font-size: 12px;
+  }
+}
+
+/* ── Responsive: Mobile ── */
+@media (max-width: 480px) {
+  .page {
+    padding: 0 10px 32px;
+  }
+
+  .backCircle {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+
+  .backLabel {
+    font-size: 13px;
+  }
+
+  .iconBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+  }
+
+  .heading {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .searchRow {
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .searchBox {
+    width: 100%;
+    padding: 9px 12px;
+
+    input {
+      font-size: 13px;
+    }
+  }
+
+  .filterBtn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .card {
+    padding: 16px 12px 14px;
+    border-radius: 12px;
+  }
+
+  .avatarWrap {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 10px;
+  }
+
+  .avatar {
+    width: 70px;
+    height: 70px;
+  }
+
+  .ratingBadge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .panditName {
+    font-size: 13px;
+  }
+
+  .exp {
+    font-size: 11px;
+  }
+
+  .skills {
+    font-size: 10px;
+  }
+
+  .langTag {
+    padding: 2px 8px;
+    font-size: 10px;
+  }
+
+  .price {
+    font-size: 14px;
+  }
+
+  .oldPrice {
+    font-size: 11px;
+  }
+
+  .selectBtn {
+    padding: 7px 16px;
+    font-size: 12px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .priceRow {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .priceGroup {
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .empty p {
+    font-size: 14px;
+  }
+}

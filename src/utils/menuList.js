@@ -47,7 +47,7 @@ export const MENU_LIST = [
   },
   { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
   { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
-  { title: "Astromall", path: "/shop" },
+  { title: "Astromall", path: "/astromall" },
   { title: "Live", path: "/livestream" },
   // { title: "Shubhtalk Store", path: "/store" },
   { title: "Blogs", path: "/blog" },
@@ -72,9 +72,9 @@ export const MENU_LIST = [
       isSpecial: true,
     },
     {
-      label: "Shop",
+      label: "Astromall",
       icon: Store,
-      path: "/shop",
+      path: "/astromall",
     },
     {
       label: "Profile",

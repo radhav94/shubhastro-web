@@ -479,7 +479,7 @@ const TopHeader = () => {
               Blogs
             </NavLink> */}
             <NavLink
-              to="/shop"
+              to="/astromall"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
