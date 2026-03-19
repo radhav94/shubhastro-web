@@ -87,7 +87,7 @@ const ProfileManager = ({
   // Use external profiles list if provided (for non-logged-in users), otherwise use saved profiles
   const profiles = profilesList !== null ? profilesList : savedProfiles;
 
-  console.log(excludedProfileIds)
+  // console.log(excludedProfileIds)
 
   // Filter out excluded profiles
   const filteredProfiles = profiles.filter(

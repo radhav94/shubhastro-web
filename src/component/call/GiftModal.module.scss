@@ -9,6 +9,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
   z-index: 999999;
   animation: fadeIn 0.2s ease;
 }
@@ -32,7 +33,7 @@
   border-radius: 24px 24px 0 0;
   width: 100%;
   max-width: 600px;
-  max-height: 85vh;
+  max-height: min(85dvh, calc(100dvh - max(12px, env(safe-area-inset-bottom, 0px))));
   display: flex;
   flex-direction: column;
   animation: slideUp 0.3s ease;
@@ -446,7 +447,7 @@
 
 @media (max-width: 768px) {
   .modalContent {
-    max-height: 90vh;
+    max-height: min(78dvh, calc(100dvh - max(16px, env(safe-area-inset-bottom, 0px)) - 8px));
   }
 
   .modalHeader {
@@ -484,7 +485,7 @@
   }
 
   .modalFooter {
-    padding: 16px 20px;
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom, 0px));
   }
 
   .addMoneyBtn,
@@ -499,6 +500,10 @@
    =============================== */
 
 @media (max-width: 480px) {
+  .modalContent {
+    max-height: min(72dvh, calc(100dvh - max(20px, env(safe-area-inset-bottom, 0px)) - 8px));
+  }
+
   .giftGrid {
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
