@@ -33,6 +33,7 @@ import walletIcon from "../../assets/images/wallet-icon.svg";
 
 const APP_ID = "cf5e31fa03584573aacaf42daebd493c";
 // const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
+const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
 
 const AgoraVoiceCalling = ({ callData }) => {
   const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, setWaitingList, resetCallFlow, isCallMinimized, setIsCallMinimized } = useCall();
@@ -156,6 +157,17 @@ const AgoraVoiceCalling = ({ callData }) => {
 
     setShowProfileModal(false);
     setIsChatOpen(true);
+  };
+
+  const hasOngoingChat = () => {
+    if (activeChat?.roomId) return true;
+
+    try {
+      return !!JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || "null")?.roomId;
+    } catch (err) {
+      console.warn("[VoiceCall] Failed to read persisted chat state:", err);
+      return false;
+    }
   };
 
   /* ================= PREVENT ACCIDENTAL REFRESH & DETECT REFRESH ================= */
@@ -363,8 +375,8 @@ const AgoraVoiceCalling = ({ callData }) => {
       // Clear waiting list to prevent waiting popup from showing
       setWaitingList(null);
       
-      // Only show review if chat is not active
-      if (!activeChat?.roomId) {
+      // Don't show review when this call was started from an ongoing chat.
+      if (!hasOngoingChat()) {
         setOpenReview(true);
       }
     }
@@ -485,8 +497,8 @@ const AgoraVoiceCalling = ({ callData }) => {
         // Clear waiting list to prevent waiting popup from showing
         setWaitingList(null);
         
-        // Only show review if chat is not active
-        if (!activeChat?.roomId) {
+        // Don't show review when this call was started from an ongoing chat.
+        if (!hasOngoingChat()) {
           setOpenReview(true);
         }
       }

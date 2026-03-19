@@ -38,6 +38,7 @@ import CallIcon from "../../assets/chat/Call.svg";
 
 // const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 const APP_ID = "cf5e31fa03584573aacaf42daebd493c";
+const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
 
 const VideoCalling = ({ callData }) => {
   const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer } = useCall();
@@ -582,8 +583,8 @@ const VideoCalling = ({ callData }) => {
       refreshWallet();
       window.dispatchEvent(new Event("walletBalanceUpdated"));
 
-      // Only show review if chat is not active
-      if (!activeChat?.roomId) {
+      // Don't show review when this call was started from an ongoing chat.
+      if (!hasOngoingChat()) {
         setOpenReview(true);
       }
     }
@@ -611,8 +612,8 @@ const VideoCalling = ({ callData }) => {
         refreshWallet();
         window.dispatchEvent(new Event("walletBalanceUpdated"));
 
-        // Only show review if chat is not active
-        if (!activeChat?.roomId) {
+        // Don't show review when this call was started from an ongoing chat.
+        if (!hasOngoingChat()) {
           setOpenReview(true);
         }
       }
@@ -889,6 +890,17 @@ const VideoCalling = ({ callData }) => {
 
     // Open chat panel to show the sent kundli
     setIsChatOpen(true);
+  };
+
+  const hasOngoingChat = () => {
+    if (activeChat?.roomId) return true;
+
+    try {
+      return !!JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || "null")?.roomId;
+    } catch (err) {
+      console.warn("[VideoCall] Failed to read persisted chat state:", err);
+      return false;
+    }
   };
 
   const handleNavigateToChat = () => {
