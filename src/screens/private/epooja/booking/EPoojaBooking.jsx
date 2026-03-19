@@ -42,7 +42,7 @@ const EPoojaBooking = () => {
     <div className={styles.page}>
       {/* ── Top Nav ── */}
       <div className={styles.topNav}>
-        <button className={styles.backBtn} onClick={() => navigate(`/astromall/${slug}`, { state: pooja })}>
+        <button className={styles.backBtn} onClick={() => navigate(`/product-details/${slug}`, { state: pooja })}>
           <span className={styles.backCircle}><FiChevronLeft /></span>
           <span className={styles.backLabel}>{pooja?.title || pooja?.name || "Maha Rudraabhishek Pooja"}</span>
         </button>

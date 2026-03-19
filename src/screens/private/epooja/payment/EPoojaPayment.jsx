@@ -255,7 +255,7 @@ const EPoojaPayment = () => {
               <button className={styles.addAddressBtn} onClick={() => { setShowAddress(false); setShowNewAddress(true); }}>Add New Address +</button>
               <button className={styles.orderBtn} onClick={() => {
                 setShowAddress(false);
-                navigate("/astromall/checkout", { state: { address: ADDRESSES.find((a) => a._id === selectedAddress) } });
+                navigate("/checkout", { state: { address: ADDRESSES.find((a) => a._id === selectedAddress) } });
               }}>Order Here</button>
             </div>
           </div>
@@ -299,7 +299,7 @@ const EPoojaPayment = () => {
             </div>
             <button className={styles.saveAddressBtn} onClick={() => {
               setShowNewAddress(false);
-              navigate("/astromall/checkout", { state: { address: newAddr } });
+              navigate("/checkout", { state: { address: newAddr } });
             }}>Save Address &rsaquo;</button>
           </div>
         </div>

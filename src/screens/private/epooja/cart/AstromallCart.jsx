@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./AstromallCart.module.scss";
 import { FiChevronLeft, FiMinus, FiPlus, FiTrash2, FiShoppingCart, FiX, FiHome, FiBriefcase, FiEdit2 } from "react-icons/fi";
 import { useGetCartQuery, useUpdateCartItemMutation, useRemoveCartItemMutation, useGetAddressesQuery, useAddAddressMutation, useUpdateAddressMutation, useDeleteAddressMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
@@ -23,13 +23,18 @@ const getPrice = (item) => {
 const getId = (item) => item?.productId?._id || item?.product?._id || item?._id;
 const getRouteId = (item) => {
   const p = item?.productId || item?.product || item;
-  return p?.ID || p?.id || p?._id || "";
+  return p?.slug || p?.ID || p?.id || p?._id || "";
 };
 const getProductData = (item) => item?.productId || item?.product || item;
 
 const AstromallCart = () => {
   const navigate = useNavigate();
-  const { data: cartData, isLoading } = useGetCartQuery();
+  const location = useLocation();
+  const buyNowProduct = location.state?.buyNowProduct || null;
+  const isBuyNowMode = !!buyNowProduct;
+  const [buyNowQty, setBuyNowQty] = useState(location.state?.buyNowQty || 1);
+
+  const { data: cartData, isLoading } = useGetCartQuery(undefined, { skip: isBuyNowMode });
   const [updateCartItem] = useUpdateCartItemMutation();
   const [removeCartItem] = useRemoveCartItemMutation();
 
@@ -39,6 +44,7 @@ const AstromallCart = () => {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [editingAddress, setEditingAddress] = useState(null);
   const [newAddr, setNewAddr] = useState({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "", type: "home", country: "IN" });
+  const [addrErrors, setAddrErrors] = useState({});
 
   // Address API
   const { data: addressData, isLoading: addressLoading } = useGetAddressesQuery();
@@ -55,10 +61,25 @@ const AstromallCart = () => {
     }
   }, [addressList, selectedAddress]);
 
+  const validateAddress = () => {
+    const errs = {};
+    if (!newAddr.name.trim()) errs.name = "Name is required";
+    else if (!/^[a-zA-Z\s]+$/.test(newAddr.name.trim())) errs.name = "Name must contain only letters";
+    if (!newAddr.phone.trim()) errs.phone = "Phone is required";
+    else if (!/^\d{10}$/.test(newAddr.phone.trim())) errs.phone = "Enter a valid 10-digit phone number";
+    if (!newAddr.addressLine1.trim()) errs.addressLine1 = "Address line 1 is required";
+    if (!newAddr.pincode.trim()) errs.pincode = "Pincode is required";
+    else if (!/^\d{6}$/.test(newAddr.pincode.trim())) errs.pincode = "Enter a valid 6-digit pincode";
+    if (!newAddr.city.trim()) errs.city = "City is required";
+    else if (!/^[a-zA-Z\s]+$/.test(newAddr.city.trim())) errs.city = "City must contain only letters";
+    if (!newAddr.state.trim()) errs.state = "State is required";
+    else if (!/^[a-zA-Z\s]+$/.test(newAddr.state.trim())) errs.state = "State must contain only letters";
+    setAddrErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
   const handleAddAddress = async () => {
-    if (!newAddr.addressLine1.trim() || !newAddr.city.trim() || !newAddr.pincode.trim()) {
-      Toast.error("Please fill required fields"); return;
-    }
+    if (!validateAddress()) return;
     try {
       if (editingAddress) {
         const addrId = editingAddress._id || editingAddress.id;
@@ -70,7 +91,9 @@ const AstromallCart = () => {
       }
       setShowNewAddress(false);
       setEditingAddress(null);
+      setAddrErrors({});
       setNewAddr({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "", type: "home", country: "IN" });
+      setShowAddress(true);
     } catch (err) {
       Toast.error(err?.data?.message || "Failed to save address");
     }
@@ -100,11 +123,20 @@ const AstromallCart = () => {
   };
 
   const cartItems = cartData?.data?.items || cartData?.data?.cart?.items || cartData?.data || [];
-  const items = Array.isArray(cartItems) ? cartItems : [];
+  const regularItems = Array.isArray(cartItems) ? cartItems : [];
+  const items = isBuyNowMode
+    ? [{ productId: buyNowProduct, quantity: buyNowQty, _id: buyNowProduct?._id }]
+    : regularItems;
 
   const total = items.reduce((sum, item) => sum + getPrice(item) * (item?.quantity || 1), 0);
 
   const handleQtyChange = async (item, delta) => {
+    if (isBuyNowMode) {
+      const newQty = buyNowQty + delta;
+      if (newQty < 1) return;
+      setBuyNowQty(newQty);
+      return;
+    }
     const productId = getId(item);
     if (!productId) return;
     const newQty = (item?.quantity || 1) + delta;
@@ -117,6 +149,10 @@ const AstromallCart = () => {
   };
 
   const handleRemove = async (item) => {
+    if (isBuyNowMode) {
+      navigate("/astromall");
+      return;
+    }
     const productId = getId(item);
     if (!productId) return;
     try {
@@ -127,7 +163,7 @@ const AstromallCart = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !isBuyNowMode) {
     return <div className={styles.page}><div className={styles.loading}>Loading cart...</div></div>;
   }
 
@@ -158,7 +194,7 @@ const AstromallCart = () => {
         const qty = item?.quantity || 1;
         const price = getPrice(item);
         const routeId = getRouteId(item);
-        const goToDetail = () => navigate(`/astromall/${routeId}`, { state: getProductData(item) });
+        const goToDetail = () => navigate(`/product-details/${routeId}`, { state: getProductData(item) });
         return (
           <div key={item?._id || idx} className={styles.productCard}>
             <img src={getImg(item)} alt={getTitle(item)} className={styles.productImg} onClick={goToDetail} style={{ cursor: "pointer" }} onError={(e) => { e.target.src = DEFAULT_IMG; }} />
@@ -185,8 +221,16 @@ const AstromallCart = () => {
             <span className={styles.totalPrice}>₹{total.toLocaleString()}</span>
             <span className={styles.taxLabel}>Incl. of all taxes</span>
           </div>
-          <button className={styles.checkoutBtn} onClick={() => setShowAddress(true)}>
-            Proceed to Checkout
+          <button className={styles.checkoutBtn} onClick={() => {
+            if (!addressLoading && addressList.length === 0) {
+              setEditingAddress(null);
+              setNewAddr({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "", type: "home", country: "IN" });
+              setShowNewAddress(true);
+            } else {
+              setShowAddress(true);
+            }
+          }}>
+            {isBuyNowMode ? "Select Address" : "Proceed to Checkout"}
           </button>
         </div>
       )}
@@ -227,7 +271,11 @@ const AstromallCart = () => {
               <button className={styles.orderBtn} disabled={!selectedAddress} onClick={() => {
                 const chosen = addressList.find((a) => (a._id || a.id) === selectedAddress);
                 setShowAddress(false);
-                navigate("/astromall/checkout", { state: { address: chosen } });
+                if (isBuyNowMode) {
+                  navigate("/checkout", { state: { buyNowProduct: buyNowProduct, buyNowQty: buyNowQty, address: chosen } });
+                } else {
+                  navigate("/checkout", { state: { address: chosen } });
+                }
               }}>Order Here</button>
             </div>
           </div>
@@ -242,17 +290,20 @@ const AstromallCart = () => {
             <h2 className={styles.modalTitle}>{editingAddress ? "EDIT ADDRESS" : "ADD NEW ADDRESS"}</h2>
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Name</label>
-                <input type="text" placeholder="Full name" className={styles.formInput} value={newAddr.name} onChange={(e) => setNewAddr({ ...newAddr, name: e.target.value })} />
+                <label className={styles.formLabel}>Name *</label>
+                <input type="text" placeholder="Full name" className={`${styles.formInput} ${addrErrors.name ? styles.formInputError : ""}`} value={newAddr.name} onChange={(e) => { setNewAddr({ ...newAddr, name: e.target.value }); setAddrErrors({ ...addrErrors, name: "" }); }} />
+                {addrErrors.name && <p className={styles.formError}>{addrErrors.name}</p>}
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Phone</label>
-                <input type="text" placeholder="Phone number" className={styles.formInput} value={newAddr.phone} onChange={(e) => setNewAddr({ ...newAddr, phone: e.target.value })} />
+                <label className={styles.formLabel}>Phone *</label>
+                <input type="tel" placeholder="Phone number" maxLength={10} className={`${styles.formInput} ${addrErrors.phone ? styles.formInputError : ""}`} value={newAddr.phone} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); setNewAddr({ ...newAddr, phone: v }); setAddrErrors({ ...addrErrors, phone: "" }); }} />
+                {addrErrors.phone && <p className={styles.formError}>{addrErrors.phone}</p>}
               </div>
             </div>
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>Address line 1 *</label>
-              <input type="text" placeholder="Enter here" className={styles.formInput} value={newAddr.addressLine1} onChange={(e) => setNewAddr({ ...newAddr, addressLine1: e.target.value })} />
+              <input type="text" placeholder="Enter here" className={`${styles.formInput} ${addrErrors.addressLine1 ? styles.formInputError : ""}`} value={newAddr.addressLine1} onChange={(e) => { setNewAddr({ ...newAddr, addressLine1: e.target.value }); setAddrErrors({ ...addrErrors, addressLine1: "" }); }} />
+              {addrErrors.addressLine1 && <p className={styles.formError}>{addrErrors.addressLine1}</p>}
             </div>
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>Address line 2</label>
@@ -261,15 +312,18 @@ const AstromallCart = () => {
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Pincode *</label>
-                <input type="text" placeholder="Enter here" className={styles.formInput} value={newAddr.pincode} onChange={(e) => setNewAddr({ ...newAddr, pincode: e.target.value })} />
+                <input type="text" placeholder="Enter here" maxLength={6} className={`${styles.formInput} ${addrErrors.pincode ? styles.formInputError : ""}`} value={newAddr.pincode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); setNewAddr({ ...newAddr, pincode: v }); setAddrErrors({ ...addrErrors, pincode: "" }); }} />
+                {addrErrors.pincode && <p className={styles.formError}>{addrErrors.pincode}</p>}
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>City *</label>
-                <input type="text" placeholder="Enter here" className={styles.formInput} value={newAddr.city} onChange={(e) => setNewAddr({ ...newAddr, city: e.target.value })} />
+                <input type="text" placeholder="Enter here" className={`${styles.formInput} ${addrErrors.city ? styles.formInputError : ""}`} value={newAddr.city} onChange={(e) => { setNewAddr({ ...newAddr, city: e.target.value }); setAddrErrors({ ...addrErrors, city: "" }); }} />
+                {addrErrors.city && <p className={styles.formError}>{addrErrors.city}</p>}
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>State</label>
-                <input type="text" placeholder="Type here" className={styles.formInput} value={newAddr.state} onChange={(e) => setNewAddr({ ...newAddr, state: e.target.value })} />
+                <label className={styles.formLabel}>State *</label>
+                <input type="text" placeholder="Type here" className={`${styles.formInput} ${addrErrors.state ? styles.formInputError : ""}`} value={newAddr.state} onChange={(e) => { setNewAddr({ ...newAddr, state: e.target.value }); setAddrErrors({ ...addrErrors, state: "" }); }} />
+                {addrErrors.state && <p className={styles.formError}>{addrErrors.state}</p>}
               </div>
             </div>
             <div className={styles.formGroup}>

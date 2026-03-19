@@ -22,7 +22,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
             ? localStorage.getItem("shubhtalk_astro_token")
             : localStorage.getItem("shubhtalk_customer_token");
 
-          const res = await fetch(`${BASE_URL}/api/mall/products/id/${productId}`, {
+          const res = await fetch(`${BASE_URL}/api/mall/products/${productId}`, {
             headers: {
               accept: "application/json",
               ...(token ? { Authorization: `Bearer ${token}` } : {}),

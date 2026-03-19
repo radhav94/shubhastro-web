@@ -21,7 +21,7 @@ const getItemPrice = (item) => {
 };
 const getItemRouteId = (item) => {
   const p = item?.productId || item?.product || item;
-  return p?.ID || p?.id || p?._id || "";
+  return p?.slug || p?.ID || p?.id || p?._id || "";
 };
 
 const AstromallCartSidebar = () => {
@@ -96,7 +96,7 @@ const AstromallCartSidebar = () => {
                 const goToDetail = () => {
                   const p = item?.productId || item?.product || item;
                   setShowCart(false);
-                  navigate(`/astromall/${routeId}`, { state: p });
+                  navigate(`/product-details/${routeId}`, { state: p });
                 };
                 return (
                   <div key={item?._id || idx} className={styles.cartItem}>
@@ -122,7 +122,7 @@ const AstromallCartSidebar = () => {
                   <span>Total</span>
                   <span className={styles.cartTotalPrice}>₹{cartTotal.toLocaleString()}</span>
                 </div>
-                <button className={styles.cartCheckoutBtn} onClick={() => { setShowCart(false); navigate("/astromall/cart"); }}>
+                <button className={styles.cartCheckoutBtn} onClick={() => { setShowCart(false); navigate("/viewcart"); }}>
                   Go to Cart
                 </button>
               </div>
