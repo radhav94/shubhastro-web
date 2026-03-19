@@ -127,27 +127,36 @@ export const ChatProvider = ({ children }) => {
   }, [persistChatState, clearPersistedChatState]);
 
   /* ================= RECONNECTION (gated by RECONNECTION_ENABLED) ================= */
-  const reconnectToChat = useCallback(() => {
+  const reconnectToChat = useCallback((fallbackChat = null) => {
     if (!RECONNECTION_ENABLED) {
       console.log("[ChatReconnect] ⏭️ RECONNECTION_ENABLED is false, skipping");
       return;
     }
 
-    const savedChat = restoreChatState();
-    console.log("[ChatReconnect] 📦 Restored saved chat from localStorage:", savedChat ? {
-      roomId: savedChat.roomId,
-      userId: savedChat.userId,
-      astrologerId: savedChat.astrologerId,
-      remainingTime: savedChat.remainingTime,
+    const restoredChat = restoreChatState();
+    const reconnectChat = restoredChat || fallbackChat || activeChatRef.current;
+    console.log("[ChatReconnect] 📦 Restored saved chat from localStorage:", reconnectChat ? {
+      roomId: reconnectChat.roomId,
+      userId: reconnectChat.userId,
+      astrologerId: reconnectChat.astrologerId,
+      remainingTime: reconnectChat.remainingTime,
     } : "null");
 
-    if (!savedChat || !savedChat.roomId) {
+    if (!reconnectChat || !reconnectChat.roomId) {
       console.log("[ChatReconnect] ❌ No saved chat or missing roomId — clearing & aborting");
       clearPersistedChatState();
       return;
     }
 
-    console.log("[ChatReconnect] 🔄 Starting reconnection for room:", savedChat.roomId);
+    // Make sure the current in-memory chat is persisted and registered before reconnect.
+    persistChatState(reconnectChat);
+    registerChatSession({
+      roomId: reconnectChat.roomId,
+      userId: reconnectChat.userId,
+      astrologerId: reconnectChat.astrologerId,
+    });
+
+    console.log("[ChatReconnect] 🔄 Starting reconnection for room:", reconnectChat.roomId);
     console.log("[ChatReconnect] 🔌 Socket state: connected=", voiceSocket.connected, "id=", voiceSocket.id);
     setIsReconnecting(true);
 
@@ -192,9 +201,9 @@ export const ChatProvider = ({ children }) => {
 
     const doEmit = () => {
       const payload = {
-        roomId: savedChat.roomId,
-        userId: savedChat.userId,
-        astrologerId: savedChat.astrologerId,
+        roomId: reconnectChat.roomId,
+        userId: reconnectChat.userId,
+        astrologerId: reconnectChat.astrologerId,
       };
       console.log("[ChatReconnect] 📤 Emitting chat:reconnect");
       console.log("[ChatReconnect]   → socket.connected:", voiceSocket.connected);
@@ -236,9 +245,9 @@ export const ChatProvider = ({ children }) => {
 
       if (data && data.active) {
         console.log("[ChatReconnect] 🎉 Chat is still active — restoring state");
-        setActiveChatState({
-          ...savedChat,
-          remainingTime: data.remainingTime || savedChat.remainingTime,
+        setActiveChat({
+          ...reconnectChat,
+          remainingTime: data.remainingTime || reconnectChat.remainingTime,
         });
         if (data.remainingTime) {
           const secs = Number(data.remainingTime) * 60;
@@ -269,7 +278,7 @@ export const ChatProvider = ({ children }) => {
       cleanupAll();
       clearPersistedChatState();
     }, 30000);
-  }, [restoreChatState, clearPersistedChatState]);
+  }, [restoreChatState, clearPersistedChatState, persistChatState, setActiveChat]);
 
   /* ================= SOCKET CONNECTION & ACTIVITY ================= */
   useEffect(() => {
@@ -491,6 +500,7 @@ export const ChatProvider = ({ children }) => {
         resetTimer,
         setChatSeconds,
         isReconnecting,
+        reconnectToChat,
       }}
     >
       {children}

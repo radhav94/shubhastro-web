@@ -41,7 +41,7 @@ const APP_ID = "cf5e31fa03584573aacaf42daebd493c";
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
 
 const VideoCalling = ({ callData }) => {
-  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer } = useCall();
+  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, reconnectToCall } = useCall();
   const { activeChat } = useChatContext();
   const navigate = useNavigate();
 
@@ -594,7 +594,29 @@ const VideoCalling = ({ callData }) => {
 
   /* ================= SOCKET ================= */
   useEffect(() => {
-    const handleCallEnded = () => {
+    const handleCallEnded = (data) => {
+      if (data?.endedBy === "SYSTEM") {
+        if (isDowngradingToAudio.current || cleanupRef.current || endCallRef.current) {
+          return;
+        }
+
+        setIsReconnecting(true);
+
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+        }
+
+        reconnectTimeoutRef.current = setTimeout(() => {
+          console.log("[VideoCall] ⏰ SYSTEM reconnect grace period expired — ending call");
+          Toast.error("Unable to reconnect. Call ended.");
+          setIsReconnecting(false);
+          safeEndCall();
+        }, RECONNECT_GRACE_PERIOD);
+
+        reconnectToCall?.(activeCallRef.current);
+        return;
+      }
+
       // Server already ended the call, don't emit call:end again
       if (endCallRef.current) return;
       endCallRef.current = true;
@@ -619,6 +641,15 @@ const VideoCalling = ({ callData }) => {
       }
       
       cleanup(isDowngradingToAudio.current);
+    };
+
+    const handleCallReconnected = () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+
+      setIsReconnecting(false);
     };
 
     const handleDisconnect = (reason) => {
@@ -689,6 +720,7 @@ const VideoCalling = ({ callData }) => {
     voiceSocket.on("connect", handleSocketReconnect);
     voiceSocket.on("warning", handleWarning);
     voiceSocket.on("call:rejected", handleCallRejected);
+    voiceSocket.on("call:reconnected", handleCallReconnected);
 
     return () => {
       voiceSocket.off("call:ended", handleCallEnded);
@@ -696,6 +728,7 @@ const VideoCalling = ({ callData }) => {
       voiceSocket.off("connect", handleSocketReconnect);
       voiceSocket.off("warning", handleWarning);
       voiceSocket.off("call:rejected", handleCallRejected);
+      voiceSocket.off("call:reconnected", handleCallReconnected);
       
       // Clear reconnect timer on unmount
       if (reconnectTimeoutRef.current) {

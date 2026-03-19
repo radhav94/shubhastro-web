@@ -17,13 +17,14 @@ export default function useChat({
   astrologerName,
   refreshKey = 0
 }) {
-  const { startTimer, stopTimer, chatSeconds, setActiveChat, activeChat } = useChatContext();
+  const { startTimer, stopTimer, chatSeconds, setActiveChat, activeChat, reconnectToChat } = useChatContext();
   const { activeCall, openReview } = useCall();
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
   const [isMessageDisabled, setIsMessageDisabled] = useState(false);
-  const [hightLightText,setHighLightText] = useState("");
+  const systemReconnectInFlightRef = useRef(false);
+  const [hightLightText, setHighLightText] = useState("");
 
   // When the kundali iframe closes, the server may briefly think the user disconnected
   // and fire session-end errors. We ignore those for a short grace period.
@@ -43,12 +44,20 @@ export default function useChat({
   console.log("::",messages,"/",error)
 
   const handleChatEndedFromServer = (data) => {
-    // Ignore SYSTEM-initiated ends (e.g. triggered by Agora visibility change or iframe close).
-    // Only CUSTOMER or ASTROLOGER ends should actually close the chat.
+    // SYSTEM ends are treated as transient transport failures; attempt reconnect
+    // instead of tearing down the active chat session.
     if (data?.endedBy === 'SYSTEM') {
-      // Set grace period so onError also ignores transient session errors
       ignoringSystemEndRef.current = true;
       setTimeout(() => { ignoringSystemEndRef.current = false; }, 10000);
+
+      if (!systemReconnectInFlightRef.current) {
+        systemReconnectInFlightRef.current = true;
+        reconnectToChat?.(activeChat);
+        setTimeout(() => {
+          systemReconnectInFlightRef.current = false;
+        }, 10000);
+      }
+
       return;
     }
 
@@ -210,7 +219,7 @@ export default function useChat({
       voiceSocket.off("typing", handleTyping);
       voiceSocket.off("chat:ended", handleChatEndedFromServer);
     };
-  }, [roomId, activeChat, activeCall,hightLightText]);
+  }, [roomId, activeChat, activeCall, reconnectToChat, hightLightText]);
 
   // USER SEND — prefer socketService, fallback to voiceSocket (which is already in the room after reconnect)
   const sendMessage = (text, type = "message", kundliID = null) => {
