@@ -27,12 +27,17 @@ export const CallProvider = ({ children }) => {
   const [waitingList, setWaitingList] = useState(false);
   const [callSeconds, setCallSeconds] = useState(0);
   const timerRef = useRef(null);
+  const activeCallRef = useRef(null);
   // Ref to always hold the latest callSeconds for use in closures (e.g. handleCallUpgrade)
   const callSecondsRef = useRef(0);
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
   /* ================= TIMER ================= */
   // Keep ref in sync so closures always have the latest value
+  useEffect(() => {
+    activeCallRef.current = activeCall;
+  }, [activeCall]);
+
   useEffect(() => {
     callSecondsRef.current = callSeconds;
   }, [callSeconds]);
@@ -333,6 +338,23 @@ export const CallProvider = ({ children }) => {
 
     const handleCallUpgrade = (data) => {
       console.log("[CallContext] 🔄 call:accepted for upgrade:", JSON.stringify(data));
+
+      const currentCall = activeCallRef.current;
+      const isAudioToVideoUpgrade =
+        currentCall?.callType === "audio" && data.type === "video";
+      const isVideoToAudioDowngrade =
+        currentCall?.callType === "video" && data.type === "audio";
+
+      // Ignore chat -> call switches here. Those are handled by screen-level
+      // call:accepted listeners such as useChatSocket/useAstrologerConnection.
+      // Handling them here as an "upgrade" can clear the newly created call session
+      // because activeCall is still null at this point.
+      if (!isAudioToVideoUpgrade && !isVideoToAudioDowngrade) {
+        console.log(
+          "[CallContext] ⏭️ Ignoring call:accepted in CallContext (no active call-to-call switch)"
+        );
+        return;
+      }
 
       // Clear waiting list immediately for any call:accepted
       setWaitingList(null);

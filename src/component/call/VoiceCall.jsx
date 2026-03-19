@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./VoiceCall.module.scss";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
+import { useChat as useChatContext } from "../../context/ChatContext";
 import GiftModal from "./GiftModal";
 import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance";
 import RechargeModal from "../recharge-modal/RechargeModal";
@@ -35,6 +36,7 @@ const APP_ID = "cf5e31fa03584573aacaf42daebd493c";
 
 const AgoraVoiceCalling = ({ callData }) => {
   const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, setWaitingList, resetCallFlow, isCallMinimized, setIsCallMinimized } = useCall();
+  const { activeChat } = useChatContext();
   const navigate = useNavigate();
 
   if (!activeCall || activeCall.callType !== "audio") {
@@ -321,9 +323,17 @@ const AgoraVoiceCalling = ({ callData }) => {
     } finally {
       micTrackRef.current = null;
       clientRef.current = null;
-      
-      // Only set activeCall to null if not upgrading to video
-      if (!skipEmit) {
+
+      let persistedCallType = null;
+      try {
+        persistedCallType = JSON.parse(localStorage.getItem("shubhtalk_active_call") || "null")?.callType || null;
+      } catch (err) {
+        console.warn("[VoiceCall] Failed to read persisted call state during cleanup:", err);
+      }
+
+      // Preserve activeCall during audio -> video switches even if this component
+      // unmounts before the upgrade flag or ref has fully propagated.
+      if (!skipEmit && activeCallRef.current?.callType !== "video" && persistedCallType !== "video") {
         setActiveCall(null);
       }
       
@@ -353,7 +363,10 @@ const AgoraVoiceCalling = ({ callData }) => {
       // Clear waiting list to prevent waiting popup from showing
       setWaitingList(null);
       
-      setOpenReview(true);
+      // Only show review if chat is not active
+      if (!activeChat?.roomId) {
+        setOpenReview(true);
+      }
     }
     
     await cleanup(isUpgradingToVideo.current);
@@ -472,7 +485,10 @@ const AgoraVoiceCalling = ({ callData }) => {
         // Clear waiting list to prevent waiting popup from showing
         setWaitingList(null);
         
-        setOpenReview(true);
+        // Only show review if chat is not active
+        if (!activeChat?.roomId) {
+          setOpenReview(true);
+        }
       }
       
       cleanup(isUpgradingToVideo.current);

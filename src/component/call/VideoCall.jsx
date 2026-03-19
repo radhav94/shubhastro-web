@@ -20,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./VideoCalling.module.scss";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
+import { useChat as useChatContext } from "../../context/ChatContext";
 import VideoCallChat from "./VideoCallChat";
 import GiftModal from "./GiftModal";
 import { useGetBalanceMutation } from "../../redux/api/wallet/walletApi";
@@ -40,6 +41,7 @@ const APP_ID = "cf5e31fa03584573aacaf42daebd493c";
 
 const VideoCalling = ({ callData }) => {
   const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer } = useCall();
+  const { activeChat } = useChatContext();
   const navigate = useNavigate();
 
   if (!activeCall || activeCall.callType !== "video") return null;
@@ -258,6 +260,7 @@ const VideoCalling = ({ callData }) => {
   useEffect(() => {
     cleanupRef.current = false;
     endCallRef.current = false;
+    let didCancelStart = false;
 
     const start = async () => {
       try {
@@ -326,11 +329,28 @@ const VideoCalling = ({ callData }) => {
           }
         });
 
+        // On mobile Safari, camera/mic acquisition can take a few seconds during
+        // audio -> video upgrades. Acquire both tracks first so we don't join the
+        // video room and sit unpublished long enough for the remote side to end it.
+        const [micTrack, camTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
+        if (didCancelStart || cleanupRef.current || endCallRef.current) {
+          micTrack.stop();
+          micTrack.close();
+          camTrack.stop();
+          camTrack.close();
+          return;
+        }
+
+        micTrackRef.current = micTrack;
+        camTrackRef.current = camTrack;
+
         await client.join(APP_ID, roomId, agoraToken, null);
         console.log("[VideoCall] ✅ Agora joined — channel:", roomId);
 
-        micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack();
-        camTrackRef.current = await AgoraRTC.createCameraVideoTrack();
+        if (didCancelStart || cleanupRef.current || endCallRef.current) {
+          await client.leave();
+          return;
+        }
 
         await client.publish([micTrackRef.current, camTrackRef.current]);
 
@@ -358,6 +378,9 @@ const VideoCalling = ({ callData }) => {
 
         startTimer();
       } catch (err) {
+        if (didCancelStart || cleanupRef.current || endCallRef.current) {
+          return;
+        }
         console.error("Call start error:", err);
         safeEndCall();
       }
@@ -369,6 +392,7 @@ const VideoCalling = ({ callData }) => {
     // Do NOT clear activeCall — if this is a refresh, we need it to persist
     return () => {
       console.log("[VideoCall] 🧹 useEffect cleanup (unmount) — isRefreshing:", isRefreshingRef.current, "isDowngrading:", isDowngradingToAudio.current);
+      didCancelStart = true;
       cleanupRef.current = true;
       if (userLeftTimerRef.current) {
         clearTimeout(userLeftTimerRef.current);
@@ -489,8 +513,16 @@ const VideoCalling = ({ callData }) => {
       }
 
       setJoined(false);
-      // Only set activeCall to null if not downgrading to audio
-      if (!skipEmit) {
+      let persistedCallType = null;
+      try {
+        persistedCallType = JSON.parse(localStorage.getItem("shubhtalk_active_call") || "null")?.callType || null;
+      } catch (err) {
+        console.warn("[VideoCall] Failed to read persisted call state during cleanup:", err);
+      }
+
+      // Preserve activeCall during video -> audio switches even if the downgrade flag
+      // hasn't propagated to this component before unmount cleanup runs.
+      if (!skipEmit && activeCallRef.current?.callType !== "audio" && persistedCallType !== "audio") {
         setActiveCall(null);
       }
       stopTimer();
@@ -550,7 +582,10 @@ const VideoCalling = ({ callData }) => {
       refreshWallet();
       window.dispatchEvent(new Event("walletBalanceUpdated"));
 
-      setOpenReview(true);
+      // Only show review if chat is not active
+      if (!activeChat?.roomId) {
+        setOpenReview(true);
+      }
     }
     
     await cleanup(isDowngradingToAudio.current);
@@ -576,7 +611,10 @@ const VideoCalling = ({ callData }) => {
         refreshWallet();
         window.dispatchEvent(new Event("walletBalanceUpdated"));
 
-        setOpenReview(true);
+        // Only show review if chat is not active
+        if (!activeChat?.roomId) {
+          setOpenReview(true);
+        }
       }
       
       cleanup(isDowngradingToAudio.current);
