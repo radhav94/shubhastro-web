@@ -151,29 +151,38 @@ export const CallProvider = ({ children }) => {
   }, [persistCallState, clearPersistedCallState]);
 
   /* ================= RECONNECTION (gated by RECONNECTION_ENABLED) ================= */
-  const reconnectToCall = useCallback(() => {
+  const reconnectToCall = useCallback((fallbackCall = null) => {
     if (!RECONNECTION_ENABLED) {
       console.log("[CallReconnect] ⏭️ RECONNECTION_ENABLED is false, skipping");
       return;
     }
 
-    const savedCall = restoreCallState();
-    console.log("[CallReconnect] 📦 Restored saved call from localStorage:", savedCall ? {
-      roomId: savedCall.roomId,
-      userId: savedCall.userId,
-      astrologerId: savedCall.astrologerId,
-      callType: savedCall.callType,
-      hasAgoraToken: !!savedCall.agoraToken,
-      remainingTime: savedCall.remainingTime,
+    const restoredCall = restoreCallState();
+    const reconnectCall = restoredCall || fallbackCall || activeCallRef.current;
+    console.log("[CallReconnect] 📦 Restored saved call from localStorage:", reconnectCall ? {
+      roomId: reconnectCall.roomId,
+      userId: reconnectCall.userId,
+      astrologerId: reconnectCall.astrologerId,
+      callType: reconnectCall.callType,
+      hasAgoraToken: !!reconnectCall.agoraToken,
+      remainingTime: reconnectCall.remainingTime,
     } : "null");
 
-    if (!savedCall || !savedCall.roomId) {
+    if (!reconnectCall || !reconnectCall.roomId) {
       console.log("[CallReconnect] ❌ No saved call or missing roomId — clearing & aborting");
       clearPersistedCallState();
       return;
     }
 
-    console.log("[CallReconnect] 🔄 Starting reconnection for room:", savedCall.roomId);
+    persistCallState(reconnectCall);
+    registerCallSession({
+      roomId: reconnectCall.roomId,
+      userId: reconnectCall.userId,
+      astrologerId: reconnectCall.astrologerId,
+      callType: reconnectCall.callType,
+    });
+
+    console.log("[CallReconnect] 🔄 Starting reconnection for room:", reconnectCall.roomId);
     console.log("[CallReconnect] 🔌 Socket state: connected=", voiceSocket.connected, "id=", voiceSocket.id);
     setIsReconnecting(true);
 
@@ -219,10 +228,10 @@ export const CallProvider = ({ children }) => {
 
     const doEmit = () => {
       const payload = {
-        roomId: savedCall.roomId,
-        userId: savedCall.userId,
-        astrologerId: savedCall.astrologerId,
-        callType: savedCall.callType,
+        roomId: reconnectCall.roomId,
+        userId: reconnectCall.userId,
+        astrologerId: reconnectCall.astrologerId,
+        callType: reconnectCall.callType,
       };
       console.log("[CallReconnect] 📤 Emitting call:reconnect");
       console.log("[CallReconnect]   → socket.connected:", voiceSocket.connected);
@@ -267,19 +276,17 @@ export const CallProvider = ({ children }) => {
       if (data && data.active) {
         // Use the type from backend response — it reflects the ACTUAL current session type
         // This is critical for audio→video upgrades where savedCall may still say "audio"
-        const actualCallType = data.type || savedCall.callType;
+        const actualCallType = data.type || reconnectCall.callType;
         console.log("[CallReconnect] 🎉 Call is still active — restoring state");
-        console.log("[CallReconnect]   → savedCall.callType:", savedCall.callType, "→ actualCallType:", actualCallType);
+        console.log("[CallReconnect]   → savedCall.callType:", reconnectCall.callType, "→ actualCallType:", actualCallType);
         
         const restoredCall = {
-          ...savedCall,
+          ...reconnectCall,
           callType: actualCallType,
-          agoraToken: data.agoraToken || savedCall.agoraToken,
-          remainingTime: data.remainingTime || savedCall.remainingTime,
+          agoraToken: data.agoraToken || reconnectCall.agoraToken,
+          remainingTime: data.remainingTime || reconnectCall.remainingTime,
         };
-        setActiveCallState(restoredCall);
-        // Also persist the corrected state so next refresh is accurate
-        persistCallState(restoredCall);
+        setActiveCall(restoredCall);
         
         if (data.remainingTime) {
           const secs = Number(data.remainingTime) * 60;
@@ -304,7 +311,7 @@ export const CallProvider = ({ children }) => {
       cleanupAll();
       clearPersistedCallState();
     }, 30000);
-  }, [restoreCallState, clearPersistedCallState]);
+  }, [restoreCallState, clearPersistedCallState, persistCallState, setActiveCall]);
 
   /* ================= SOCKET CONNECTION ================= */
   useEffect(() => {
@@ -514,6 +521,7 @@ export const CallProvider = ({ children }) => {
     reviewData,
     setReviewData,
     isReconnecting,
+    reconnectToCall,
     waitingList,
     setWaitingList,
     callSeconds,

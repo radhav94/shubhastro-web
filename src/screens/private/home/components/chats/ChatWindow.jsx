@@ -61,7 +61,7 @@ const ChatWindow = () => {
   const [showProfileManagerModal, setShowProfileManagerModal] = useState(false);
   const [showGiftModal, setShowGiftModal] = useState(false);
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
-  const { activeChat } = useChatContext();
+  const { activeChat, isReconnecting } = useChatContext();
 
   // Check if there's an active call (audio or video)
   const isVideoCallActive = activeCall && activeCall.callType === "video";
@@ -525,6 +525,46 @@ const ChatWindow = () => {
             reviewerName={user?.firstName || "User"}
             loading={isLoading}
           />
+
+          {isReconnecting && (
+            <div className={styles.reconnectOverlay}>
+              <div className={styles.reconnectModal}>
+                <div className={styles.reconnectSpinner}>
+                  <svg viewBox="0 0 50 50" className={styles.spinnerSvg}>
+                    <circle
+                      cx="25"
+                      cy="25"
+                      r="20"
+                      fill="none"
+                      stroke="#E5E7EB"
+                      strokeWidth="4"
+                    />
+                    <circle
+                      cx="25"
+                      cy="25"
+                      r="20"
+                      fill="none"
+                      stroke="url(#reconnectGradientChat)"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeDasharray="80, 200"
+                      className={styles.spinnerCircle}
+                    />
+                    <defs>
+                      <linearGradient id="reconnectGradientChat" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#F75801" />
+                        <stop offset="100%" stopColor="#D43400" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <h3 className={styles.reconnectTitle}>Connection lost...</h3>
+                <p className={styles.reconnectText}>
+                  Please wait while we restore your chat connection...
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
