@@ -5,6 +5,7 @@ import toast from "../../../../../component/toast";
 import { useChat as useChatContext } from "../../../../../context/ChatContext"
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
 import { useCall } from "../../../../../context/CallContext";
+import { showErrorWithHighlight } from "../../../../../utils/showErrorWithHighlight";
 
 export default function useChat({
   userId,
@@ -23,6 +24,7 @@ export default function useChat({
   const [isTyping, setIsTyping] = useState(false);
   const [isMessageDisabled, setIsMessageDisabled] = useState(false);
   const systemReconnectInFlightRef = useRef(false);
+  const [hightLightText, setHighLightText] = useState("");
 
   // When the kundali iframe closes, the server may briefly think the user disconnected
   // and fire session-end errors. We ignore those for a short grace period.
@@ -38,6 +40,8 @@ export default function useChat({
   const addMessage = (msg) => {
     setMessages((prev) => [...prev, msg]);
   };
+
+  console.log("::",messages,"/",error)
 
   const handleChatEndedFromServer = (data) => {
     // SYSTEM ends are treated as transient transport failures; attempt reconnect
@@ -77,21 +81,28 @@ export default function useChat({
     if (!roomId || !userId || !astrologerId) return;
     socketService.connect({
       onConnected: () => {
-        if (Object.keys(activeChat || {}).length > 0 || (activeCall && activeCall.astrologerId === astrologerId)) { //Check if chat is active or there's an active call with this astrologer
+        if (
+          Object.keys(activeChat || {}).length > 0 ||
+          (activeCall && activeCall.astrologerId === astrologerId)
+        ) {
+          //Check if chat is active or there's an active call with this astrologer
           startTimer(); //Start timer only when there is active chat
           setIsMessageDisabled(false);
 
           // Store chat start time for elapsed time calculation (if not already set)
           // Use localStorage so it persists across page refreshes
           if (!localStorage.getItem("shubhtalk_chat_start_time")) {
-            localStorage.setItem("shubhtalk_chat_start_time", String(Date.now()));
+            localStorage.setItem(
+              "shubhtalk_chat_start_time",
+              String(Date.now()),
+            );
           }
 
           // Check if initial messages were already sent for this room (persists across remounts/reconnects)
           const sentKey = `shubhtalk_chat_init_${roomId}`;
           const alreadySent = sessionStorage.getItem(sentKey);
 
-          //Send msg first time only 
+          //Send msg first time only
           if (!refreshKey && !alreadySent) {
             sessionStorage.setItem(sentKey, "true");
 
@@ -108,38 +119,60 @@ export default function useChat({
             }
 
             // Find the kundli profile with relation "Self"
-            const selfProfile = profiles.find(profile => profile.relation === "Self");
+            const selfProfile = profiles.find(
+              (profile) => profile.relation === "Self",
+            );
             const profileIdToUse = selfProfile?._id || kundliId;
 
             const baseUrl = window.location.origin;
             const kundliLink = `${baseUrl}/kundli/${profileIdToUse}`;
-            setTimeout(() => sendMessage(kundliLink, 'kundli'), 300);
+            setTimeout(() => sendMessage(kundliLink, "kundli"), 300);
           } else if (alreadySent) {
-            console.log("[ChatWindow] ⏭️ Initial messages already sent for room:", roomId, "— skipping");
+            console.log(
+              "[ChatWindow] ⏭️ Initial messages already sent for room:",
+              roomId,
+              "— skipping",
+            );
           }
         }
       },
       onError: (errMsg) => {
         // If we're in the grace period after iframe close, ignore session-end errors
-        if (ignoringSystemEndRef.current &&
-            (errMsg === 'Chat no longer available' || errMsg === 'Chat has already ended' || errMsg === 'Session not found')) {
+        if (
+          ignoringSystemEndRef.current &&
+          (errMsg === "Chat no longer available" ||
+            errMsg === "Chat has already ended" ||
+            errMsg === "Session not found")
+        ) {
           return;
         }
-        toast.error(errMsg || "Something went wrong");
+
+        console.log("ErrMsg::",hightLightText)
+
+        showErrorWithHighlight(errMsg);
+
+        // toast.error(errMsg + " error" || "Something went wrong");
         setError(errMsg);
-        if (errMsg === 'Chat no longer available' || errMsg === 'Chat has already ended' || errMsg === 'Session not found') {
+        if (
+          errMsg === "Chat no longer available" ||
+          errMsg === "Chat has already ended" ||
+          errMsg === "Session not found"
+        ) {
           setIsMessageDisabled(true);
           stopTimer();
           setActiveChat(null);
         }
+        // setHighLightText("")
       },
       onWarn: (msg) => {
-        toast.warning(msg || "Something went wrong");
+        toast.warning(msg + " warning" || "Something went wrong");
       },
     });
 
     const handleAddMessage = (data) => {
       const isSenderUser = data.sender === "user";
+
+      console.log("handleAddMessage:",data)
       
       // Parse gift messages (detect by type === "gift")
       let messageText = data.message;
@@ -186,10 +219,12 @@ export default function useChat({
       voiceSocket.off("typing", handleTyping);
       voiceSocket.off("chat:ended", handleChatEndedFromServer);
     };
-  }, [roomId, activeChat, activeCall, reconnectToChat]);
+  }, [roomId, activeChat, activeCall, reconnectToChat, hightLightText]);
 
   // USER SEND — prefer socketService, fallback to voiceSocket (which is already in the room after reconnect)
   const sendMessage = (text, type = "message", kundliID = null) => {
+    console.log("sendMessage",text)
+    setHighLightText(text)
     const payload = {
       sender: "user",
       kundliId : kundliID ?? kundliId,
@@ -210,6 +245,7 @@ export default function useChat({
         kundliId: kundliID ?? kundliId,
         type
       });
+      console.log("Hi Bro",res)
       if (res?.error) {
         setError(res.error);
       }
@@ -251,6 +287,7 @@ export default function useChat({
 
   //  typing emit
   const sendTyping = () => {
+    console.log("sendTyping")
     socketService.sendTyping({ roomId, sender: userId });
   };
 

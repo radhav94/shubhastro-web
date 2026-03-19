@@ -1,0 +1,173 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 24px 16px;
+}
+
+.card {
+  text-align: center;
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 32px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+
+  h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 16px 0 4px;
+  }
+}
+
+.icon {
+  font-size: 56px;
+  color: #4caf50;
+}
+
+.sub {
+  font-size: 15px;
+  color: #777;
+  margin-bottom: 24px;
+}
+
+.details {
+  text-align: left;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #f5f5f5;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  span {
+    color: #999;
+  }
+
+  strong {
+    color: #333;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.primaryBtn {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 50px;
+  background: var(--orange_gradient, linear-gradient(90deg, #f75801 0%, #d43400 100%));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+  }
+}
+
+.secondaryBtn {
+  width: 100%;
+  padding: 13px;
+  border: 2px solid #eee;
+  border-radius: 50px;
+  background: #fff;
+  color: #555;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    border-color: #ccc;
+  }
+}
+
+
+/* ── Responsive: Tablet ── */
+@media (max-width: 768px) {
+  .card {
+    padding: 32px 24px;
+
+    h1 {
+      font-size: 22px;
+    }
+  }
+
+  .icon {
+    font-size: 48px;
+  }
+
+  .sub {
+    font-size: 14px;
+  }
+}
+
+/* ── Responsive: Mobile ── */
+@media (max-width: 480px) {
+  .wrapper {
+    padding: 16px 10px;
+    min-height: 50vh;
+  }
+
+  .card {
+    padding: 24px 16px;
+    border-radius: 12px;
+
+    h1 {
+      font-size: 20px;
+      margin: 12px 0 4px;
+    }
+  }
+
+  .icon {
+    font-size: 44px;
+  }
+
+  .sub {
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+
+  .details {
+    padding: 12px;
+    margin-bottom: 18px;
+  }
+
+  .row {
+    font-size: 13px;
+    padding: 6px 0;
+    flex-direction: column;
+    gap: 2px;
+
+    span {
+      font-size: 12px;
+    }
+  }
+
+  .primaryBtn {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .secondaryBtn {
+    padding: 12px;
+    font-size: 14px;
+  }
+}

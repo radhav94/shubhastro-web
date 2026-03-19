@@ -149,6 +149,14 @@ import PlayScreen from "../../screens/private/shop/detail/playscreen/PlayScreen"
 import ProductDetail from "../../screens/private/shop/detail/ProductDetail";
 import ProductList from "../../screens/private/shop/product/ProductList";
 
+import EPooja from "../../screens/private/epooja/EPooja";
+import EPoojaDetail from "../../screens/private/epooja/detail/EPoojaDetail";
+import EPoojaBooking from "../../screens/private/epooja/booking/EPoojaBooking";
+import BookingSuccess from "../../screens/private/epooja/booking/BookingSuccess";
+import EPoojaPayment from "../../screens/private/epooja/payment/EPoojaPayment";
+import EPoojaCheckout from "../../screens/private/epooja/checkout/EPoojaCheckout";
+import AstromallCart from "../../screens/private/epooja/cart/AstromallCart";
+
 import BuisnessBreakupTarot from "../../screens/private/tarot/buisnessBreakupTarot/BuisnessBreakupTarot";
 import CareerSelectTarot from "../../screens/private/tarot/careerSelectTarot/CareerSelectTarot";
 import DailyTarot from "../../screens/private/tarot/dailyTarot/DailyTarot";
@@ -904,6 +912,40 @@ export const PATH = {
     CONSULTANT_PAYMENT: {
       path: "/consultant/payment",
       element: PaymentScreen,
+    },
+
+    // E-Pooja Booking
+    E_POOJA: {
+      path: "/astromall",
+      element: EPooja,
+    },
+    ASTROMALL_CART: {
+      path: "/astromall/cart",
+      element: AstromallCart,
+    },
+    ASTROMALL_CART_PAYMENT: {
+      path: "/astromall/cart/payment",
+      element: EPoojaPayment,
+    },
+    ASTROMALL_CART_CHECKOUT: {
+      path: "/astromall/checkout",
+      element: EPoojaCheckout,
+    },
+    E_POOJA_DETAIL: {
+      path: "/astromall/:slug",
+      element: EPoojaDetail,
+    },
+    E_POOJA_BOOKING: {
+      path: "/astromall/:slug/book",
+      element: EPoojaBooking,
+    },
+    E_POOJA_PAYMENT: {
+      path: "/astromall/:slug/payment",
+      element: EPoojaPayment,
+    },
+    E_POOJA_BOOKING_SUCCESS: {
+      path: "/astromall/booking-success",
+      element: BookingSuccess,
     },
 
     RECHARGE: {
