@@ -760,6 +760,8 @@
   &::placeholder { color: #bbb; }
   &:focus { border-color: #f75801; }
 }
+.formInputError { border-color: #e53935; &:focus { border-color: #e53935; } }
+.formError { font-size: 11px; color: #e53935; margin-top: 3px; }
 .formRow { display: flex; gap: 12px; @media (max-width: 480px) { flex-direction: column; gap: 0; } }
 .saveAsGroup { margin-bottom: 20px; }
 .saveAsLabel { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 8px; }
@@ -801,7 +803,7 @@
 }
 
 .reviewFormStars {
-  text-align: center;
+  text-align: left;
   margin-bottom: 20px;
 }
 

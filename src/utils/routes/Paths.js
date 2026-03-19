@@ -920,7 +920,7 @@ export const PATH = {
       element: EPooja,
     },
     ASTROMALL_CART: {
-      path: "/astromall/cart",
+      path: "/viewcart",
       element: AstromallCart,
     },
     ASTROMALL_CART_PAYMENT: {
@@ -928,11 +928,11 @@ export const PATH = {
       element: EPoojaPayment,
     },
     ASTROMALL_CART_CHECKOUT: {
-      path: "/astromall/checkout",
+      path: "/checkout",
       element: EPoojaCheckout,
     },
     E_POOJA_DETAIL: {
-      path: "/astromall/:slug",
+      path: "/product-details/:slug",
       element: EPoojaDetail,
     },
     E_POOJA_BOOKING: {
@@ -944,7 +944,7 @@ export const PATH = {
       element: EPoojaPayment,
     },
     E_POOJA_BOOKING_SUCCESS: {
-      path: "/astromall/booking-success",
+      path: "/booking-success",
       element: BookingSuccess,
     },
 

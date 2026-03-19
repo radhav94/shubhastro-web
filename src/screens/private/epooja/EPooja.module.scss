@@ -219,8 +219,24 @@
   background: linear-gradient(transparent, rgba(0,0,0,0.75));
   color: #fff;
 
-  h3 { font-size: 16px; font-weight: 600; margin: 0 0 2px; }
-  p { font-size: 12px; margin: 0 0 4px; opacity: 0.85; }
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 2px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  p {
+    font-size: 12px;
+    margin: 0 0 4px;
+    opacity: 0.85;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
   span { font-size: 13px; font-weight: 600; color: #ffe83a; }
 }
 
@@ -475,6 +491,24 @@
   font-weight: 600;
   cursor: pointer;
   &:hover { background: #d43400; }
+}
+
+/* ── Category Slide Card (horizontal scroll) ── */
+.catSlideCard {
+  position: relative;
+  min-width: 220px;
+  height: 140px;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  transition: all 0.25s;
+  &:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
+  img { width: 100%; height: 100%; object-fit: cover; }
+
+  @media (max-width: 768px) { min-width: 180px; height: 120px; }
+  @media (max-width: 480px) { min-width: 160px; height: 100px; }
 }
 
 /* ── Category Grid ── */

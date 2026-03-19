@@ -211,7 +211,7 @@ const EPooja = () => {
           <SectionHeader title={title || "TOP DEALS FOR YOU"} onViewAll={showMore ? () => handleViewAll(tray) : undefined} />
           <HScrollRow>
             {items.map((d, i) => (
-              <div key={d.ID || i} className={styles.dealCard} onClick={() => navigate(`/astromall/${d.ID || d.slug}`, { state: d })}>
+              <div key={d.ID || i} className={styles.dealCard} onClick={() => navigate(`/product-details/${d.slug || d.ID}`, { state: d })}>
                 <img src={getImg(d)} alt={getTitle(d)} />
                 <div className={styles.dealBadges}>
                   {d.is_featured && <span className={styles.dealPopular}>Popular</span>}
@@ -233,16 +233,16 @@ const EPooja = () => {
       return (
         <section key={tray.ID || index} className={styles.section}>
           <SectionHeader title={title || "BROWSE BY CATEGORY"} onViewAll={showMore ? () => handleViewAll(tray) : undefined} />
-          <div className={styles.catGrid}>
+          <HScrollRow>
             {items.map((c, i) => (
-              <div key={c.ID || i} className={styles.catCard} onClick={() => navigate(`/astromall/${c.ID || c.slug}`, { state: c })} style={{ cursor: "pointer" }}>
+              <div key={c.ID || i} className={styles.catSlideCard} onClick={() => navigate(`/product-details/${c.slug || c.ID}`, { state: c })} style={{ cursor: "pointer" }}>
                 <img src={c.imgUrl || getImg(c)} alt={c.name || "Category"} />
                 <div className={styles.catOverlay}>
                   <h4>{c.name || "Category"}</h4>
                 </div>
               </div>
             ))}
-          </div>
+          </HScrollRow>
         </section>
       );
     }
@@ -271,7 +271,7 @@ const EPooja = () => {
         <SectionHeader title={title} onViewAll={showMore ? () => handleViewAll(tray) : undefined} />
         <HScrollRow>
           {items.map((s, i) => (
-            <div key={s.ID || i} className={styles.prodCard} onClick={() => navigate(`/astromall/${s.ID || s.slug}`, { state: s })} style={{ cursor: "pointer" }}>
+            <div key={s.ID || i} className={styles.prodCard} onClick={() => navigate(`/product-details/${s.slug || s.ID}`, { state: s })} style={{ cursor: "pointer" }}>
               {s.is_featured && <span className={styles.sugBadge}>Featured</span>}
               {!s.is_featured && <span className={styles.sugBadge}>Suggested</span>}
               <div className={styles.prodImg}><img src={getImg(s)} alt={getTitle(s)} /></div>
@@ -370,7 +370,7 @@ const EPooja = () => {
           {accumulated.length > 0 ? (
             <div className={styles.filteredGrid}>
               {accumulated.map((item, i) => (
-                <div key={item._id || item.ID || i} className={styles.filteredCard} onClick={() => navigate(`/astromall/${item.ID || item.slug}`, { state: item })}>
+                <div key={item._id || item.ID || i} className={styles.filteredCard} onClick={() => navigate(`/product-details/${item.slug || item.ID}`, { state: item })}>
                   {item.is_featured && <span className={styles.sugBadge}>Featured</span>}
                   <div className={styles.filteredImg}>
                     <img src={getImg(item)} alt={getTitle(item)} />

@@ -104,8 +104,18 @@ const EPoojaCheckout = () => {
             }
           }
         }
+        if (isBuyNowMode && buyNowProduct?._id) {
+          const inCart = rawCartItems.find((item) => {
+            const p = item?.productId || item?.product || item;
+            return String(p?._id) === String(buyNowProduct._id);
+          });
+          if (inCart) {
+            const pid = inCart?.productId?._id || inCart?.product?._id || inCart?._id;
+            if (pid) { try { await removeCartItem({ productId: pid }).unwrap(); } catch (_) { /* ignore */ } }
+          }
+        }
         Toast.success("Payment successful!");
-        navigate("/astromall/booking-success", { state: { total: grandTotal, address } });
+        navigate("/booking-success", { state: { total: grandTotal, address } });
       },
       prefill: {
         name: localStorage.getItem("shubhtalk_user_name") || "",
@@ -164,8 +174,18 @@ const EPoojaCheckout = () => {
             }
           }
         }
+        if (isBuyNowMode && buyNowProduct?._id) {
+          const inCart = rawCartItems.find((item) => {
+            const p = item?.productId || item?.product || item;
+            return String(p?._id) === String(buyNowProduct._id);
+          });
+          if (inCart) {
+            const pid = inCart?.productId?._id || inCart?.product?._id || inCart?._id;
+            if (pid) { try { await removeCartItem({ productId: pid }).unwrap(); } catch (_) { /* ignore */ } }
+          }
+        }
         Toast.success("Payment successful!");
-        navigate("/astromall/booking-success", { state: { total: grandTotal, address } });
+        navigate("/booking-success", { state: { total: grandTotal, address } });
       },
       prefill: {
         name: localStorage.getItem("shubhtalk_user_name") || "",
