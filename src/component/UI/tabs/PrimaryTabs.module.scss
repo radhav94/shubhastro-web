@@ -14,7 +14,12 @@
   //   padding: 0;
   // }
 }
-
+.directKundli{
+  padding-top: 260px;
+  @media (width <= 767px) {
+    padding-top: 224px;
+  }
+}
 .tabNav {
   display: flex;
   gap: 10px;

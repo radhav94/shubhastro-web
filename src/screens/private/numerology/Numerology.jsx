@@ -19,6 +19,7 @@ import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { ProfileManager } from "../../../component/UI/Profile";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
+import { DefaultImages } from "../../../utils/appImages";
 
 const NumerologyWeb = () => {
   const navigate = useNavigate();
@@ -453,7 +454,7 @@ const NumerologyWeb = () => {
             </Link>
           </div>
           <div className={styles.expertImage}>
-            {/* <img src={talkToPik} alt="pik" className={styles.footer_logo} /> */}
+            <img src={DefaultImages.AstrologerNumerologyDefault} alt="pik" className={styles.footer_logo} />
           </div>
         </div>
       </section>

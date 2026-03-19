@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "./AIWow.module.scss";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -7,12 +7,14 @@ import axios from "axios";
 import FeatureCard from "./components/FeatureCard";
 import MobileAppModal from "./components/MobileAppModal";
 import ResultHistoryCard from "./components/ResultHistoryCard";
+import DownloadReportModal from "./components/DownloadReportModal";
 import { ProfileManager } from "../../../component/UI/Profile";
 import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
-import { useGetAiWowPageDataQuery, useGetAiHistoryQuery } from "../../../redux/api/aiwow/aiwowApi";
+import { useGetAiWowPageDataQuery, useGetAiHistoryQuery, useGetChargesQuery } from "../../../redux/api/aiwow/aiwowApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
+import { useWalletBalance } from "../wallet/useWalletBalance";
 import Footer from "../../../layouts/Footer";
 import { PATH } from "../../../utils/routes/Paths";
 
@@ -24,6 +26,12 @@ const AIWow = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
   const [activeTab, setActiveTab] = useState("aiwow");
+  const [downloadModal, setDownloadModal] = useState({ open: false, featureId: null, featureName: "" });
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [hasMoreHistory, setHasMoreHistory] = useState(true);
+
+  const { balance: walletBalance, refreshWallet } = useWalletBalance();
 
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
 
@@ -39,15 +47,68 @@ const AIWow = () => {
 
   const { data: aiwowData } = useGetAiWowPageDataQuery();
 
+  // Charges data — fetched once, cached for 5 min by RTK Query
+  const { data: chargesData } = useGetChargesQuery();
+
   const kundliId = selectedProfile?._id || selectedProfile?.id || "";
-  const { data: historyData, isLoading: isHistoryLoading } = useGetAiHistoryQuery(kundliId, {
-    skip: !kundliId,
-  });
+  const { data: historyData, isLoading: isHistoryLoading, isFetching: isHistoryFetching } = useGetAiHistoryQuery(
+    { kundliId, page: historyPage, limit: 10 },
+    { skip: !kundliId }
+  );
 
   const profiles = data?.data || [];
   const aiwowSections = aiwowData?.data?.list || [];
   const historyList = historyData?.data?.history || [];
-  // console.log("=== AIWOW DEBUG ===", { activeTab, kundliId, historyData, historyList, isHistoryLoading });
+  const charges = chargesData?.data || null;
+
+  // Check if more pages available
+  useEffect(() => {
+    if (historyData?.data?.pagination) {
+      const { page, totalPages } = historyData.data.pagination;
+      setHasMoreHistory(page < totalPages);
+    }
+  }, [historyData]);
+
+  // Reset page when profile changes
+  useEffect(() => {
+    setHistoryPage(1);
+    setHasMoreHistory(true);
+  }, [kundliId]);
+
+  // Ref to guard against multiple rapid scroll triggers
+  const isFetchingRef = useRef(false);
+
+  // Sync ref with RTK Query fetching state
+  useEffect(() => {
+    isFetchingRef.current = isHistoryFetching;
+  }, [isHistoryFetching]);
+
+  // Infinite scroll handler — uses window scroll
+  useEffect(() => {
+    if (activeTab !== "results") return;
+    const handleScroll = () => {
+      if (isFetchingRef.current || !hasMoreHistory) return;
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
+        isFetchingRef.current = true;
+        setHistoryPage((prev) => prev + 1);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [activeTab, hasMoreHistory]);
+
+  // Find download cost from charges data by matching featureName to slug in charges
+  const getDownloadCost = (featureName) => {
+    if (!charges || !featureName) return 0;
+    const slug = featureName.trim().replace(/\s+/g, "-") + "-report";
+    // charges is array of sections, each has a .list array with { slug, amount }
+    for (const section of charges) {
+      if (!Array.isArray(section?.list)) continue;
+      const match = section.list.find((c) => c?.slug?.toLowerCase() === slug.toLowerCase());
+      if (match) return match.amount ?? 0;
+    }
+    return 0;
+  };
 
   useEffect(() => {
     if (isFetching) return;
@@ -106,10 +167,12 @@ const AIWow = () => {
     setShowProfileModal(true);
   };
 
-  const fetchPdfUrl = async (featureId) => {
+  const fetchPdfUrl = async (featureId, language) => {
     const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+    const params = new URLSearchParams({ historyId: featureId });
+    if (language) params.append("language", language);
     const response = await axios.get(
-      `${BASE_URL}/api/ai-history/pdf?historyId=${featureId}`,
+      `${BASE_URL}/api/ai-history/pdf?${params.toString()}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     const pdfUrl = response.data?.data?.pdfUrl;
@@ -118,23 +181,34 @@ const AIWow = () => {
   };
 
   const handleDownloadPdf = async (featureId, featureName) => {
+    // Open the download modal instead of directly downloading
+    refreshWallet();
+    setDownloadModal({ open: true, featureId, featureName });
+  };
+
+  const handleConfirmDownload = async (language) => {
+    const { featureId, featureName } = downloadModal;
+    setIsDownloading(true);
     try {
       toast.loading("Downloading PDF...", { id: "pdf-download" });
-      const pdfUrl = await fetchPdfUrl(featureId);
-      // Fetch blob from S3 URL to force download (cross-origin anchor download doesn't work)
+      const pdfUrl = await fetchPdfUrl(featureId, language);
       const res = await fetch(pdfUrl);
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = `${featureName || "ai-report"}.pdf`;
+      link.download = `${featureName || "ai-report"}-${language}.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();
       URL.revokeObjectURL(blobUrl);
       toast.success("PDF downloaded!", { id: "pdf-download" });
+      setDownloadModal({ open: false, featureId: null, featureName: "" });
+      refreshWallet();
     } catch {
       toast.error("Failed to download PDF", { id: "pdf-download" });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -260,36 +334,43 @@ const AIWow = () => {
           {/* Result History Tab */}
           {activeTab === "results" && (
             <div className={styles.resultsList}>
-              {isHistoryLoading ? (
+              {isHistoryLoading && historyPage === 1 ? (
                 <PrimaryLoader />
               ) : historyList.length === 0 ? (
                 <div className={styles.resultsPlaceholder}>No history found</div>
               ) : (
-                historyList.map((item) => (
-                  <ResultHistoryCard
-                    key={item._id}
-                    item={{
-                      featureName: item.featureName || "AI Analysis",
-                      featureIcon: null,
-                      status: (item.status || "completed").toLowerCase(),
-                      date: item.createdAt
-                        ? new Date(item.createdAt).toLocaleString("en-IN", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true,
-                          })
-                        : "",
-                      summary: item.summary || "",
-                      isPaid: false,
-                      price: null,
-                      onViewResult: () => handleViewResultPdf(item.featureId),
-                      onDownload: () => handleDownloadPdf(item.featureId, item.featureName),
-                    }}
-                  />
-                ))
+                <>
+                  {historyList.map((item) => (
+                    <ResultHistoryCard
+                      key={item._id}
+                      item={{
+                        featureName: item.featureName || "AI Analysis",
+                        featureIcon: null,
+                        status: (item.status || "completed").toLowerCase(),
+                        date: item.createdAt
+                          ? new Date(item.createdAt).toLocaleString("en-IN", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            })
+                          : "",
+                        summary: item.summary || "",
+                        isPaid: false,
+                        price: null,
+                        charges,
+                        onViewResult: () => handleViewResultPdf(item.featureId),
+                        onDownload: () => handleDownloadPdf(item.featureId, item.featureName),
+                      }}
+                    />
+                  ))}
+                  {isHistoryFetching && historyPage > 1 && (
+                    <div className={styles.loadingMore}>Loading more...</div>
+                  )}
+
+                </>
               )}
             </div>
           )}
@@ -307,6 +388,16 @@ const AIWow = () => {
         <MobileAppModal
           isOpen={showMobileAppModal}
           onClose={() => setShowMobileAppModal(false)}
+        />
+
+        <DownloadReportModal
+          isOpen={downloadModal.open}
+          onClose={() => setDownloadModal({ open: false, featureId: null, featureName: "" })}
+          onDownload={handleConfirmDownload}
+          featureName={downloadModal.featureName}
+          downloadCost={getDownloadCost(downloadModal.featureName)}
+          walletBalance={walletBalance ?? 0}
+          isDownloading={isDownloading}
         />
       </div>
       <Footer />

@@ -17,8 +17,8 @@
   top: 88px;
   left: 0;
   right: 0;
-  z-index: 100;
-  @media screen and (width <= 768px) {
+  z-index: 2002;
+  @media screen and (width <= 1180px) {
     top: 53px;
   }
 }

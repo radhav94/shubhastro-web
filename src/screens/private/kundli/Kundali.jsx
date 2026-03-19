@@ -713,7 +713,7 @@ const Kundali = () => {
   };
 
   return (
-    <div className={isDirectKundliView ? "" : ""} style={!isDirectKundliView ? { paddingTop: '224px' } : {}}>
+    <div className={!isDirectKundliView ? styles.directKundli : ""}>
       {/* Free Kundli Online Title - Hidden in direct kundli view */}
       {!isDirectKundliView && <KundliHeader />}
 

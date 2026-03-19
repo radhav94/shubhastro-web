@@ -94,6 +94,7 @@ const Blogs = ({ titleShow = true, data }) => {
               author={blog.author}
               date={blog.publishDate}
               authorIcon={blog.authorIcon}
+              blogId={blog.blogId || blog._id}
             />
           </Link>
         ))}

@@ -188,7 +188,7 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
               aria-label="View Kundli"
             >
               <GrReactjs />
-              View Kundli
+              {message?.kundliName ? `${message.kundliName}'s Kundli` : "View Kundli"}
             </button>
           );
 

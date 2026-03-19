@@ -64,7 +64,8 @@ const VideoCallChat = ({
         minute: "2-digit",
       }),
       dateTime: item.createdAt,
-      type: item?.type
+      type: item?.type,
+      kundliName: item?.kundliName,
     }));
 
     const socketMsgs = messages.map((msg, idx) => ({
@@ -74,7 +75,8 @@ const VideoCallChat = ({
       time: msg.time,
       date: msg.date || formatDate(new Date()),
       dateTime: msg.dateTime || new Date().toISOString(),
-      type: msg?.type
+      type: msg?.type,
+      kundliName: msg?.kundliName,
     }));
 
     return [...historyMsgs, ...socketMsgs].sort(
@@ -225,7 +227,7 @@ const VideoCallChat = ({
                 if (msg.text) setIframeSrc(msg.text);
               }}
             >
-              <GrReactjs /> View Kundli
+              <GrReactjs /> {msg.kundliName ? `${msg.kundliName}'s Kundli` : "View Kundli"}
             </span>
           </div>
         );

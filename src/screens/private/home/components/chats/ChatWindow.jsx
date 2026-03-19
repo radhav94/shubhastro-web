@@ -163,6 +163,7 @@ const ChatWindow = () => {
         }),
         dateTime: item.createdAt,
         giftData: giftData,
+        kundliName: item?.kundliName,
       };
     });
 
@@ -176,6 +177,7 @@ const ChatWindow = () => {
       date: msg.date || formatDate(new Date()),
       dateTime: msg.dateTime || new Date().toISOString(),
       giftData: msg?.giftData, // Include gift data from socket messages
+      kundliName: msg?.kundliName,
     }));
 
 
@@ -227,7 +229,7 @@ const ChatWindow = () => {
       const baseUrl = window.location.origin;
 
       const kundliLink = `${baseUrl}/kundli/${kundli._id}`;
-      isUserSide ? sendMessage(kundliLink, 'kundli') : astroReply(kundliLink);
+      isUserSide ? sendMessage(kundliLink, 'kundli', kundli?._id) : astroReply(kundliLink);
 
       setMessage("");
       return;
@@ -377,6 +379,7 @@ const ChatWindow = () => {
   };
 
   const handleProfileManagerStartCall = (selectedProfile) => {
+    console.log('selectedProfile :>> ', selectedProfile);
     // Send the selected kundli profile
     handleSend(selectedProfile);
     setShowProfileManagerModal(false);
