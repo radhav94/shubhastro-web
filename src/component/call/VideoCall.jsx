@@ -915,6 +915,7 @@ const VideoCalling = ({ callData }) => {
           top: position.y,
           left: position.x,
           display: isMinimized ? "block" : "none",
+          transform: 'scaleX(-1)'
         }}
         onMouseDown={startDrag}
         onTouchStart={startDrag}
@@ -1118,7 +1119,7 @@ const VideoCalling = ({ callData }) => {
             {/* Video Area */}
             <div className={styles.videoWrapper}>
               {/* Remote Video Container - Always rendered */}
-              <div ref={remoteVideoRef} className={styles.remoteVideoArea} />
+              <div ref={remoteVideoRef} className={styles.remoteVideoArea} style={{ transform: 'scaleX(-1)' }}/>
 
               {/* Avatar Overlay - Separate layer */}
               {!remoteVideoEnabled && (
