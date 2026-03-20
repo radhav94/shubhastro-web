@@ -3,7 +3,7 @@ import { useLocation, useNavigate, Navigate } from "react-router-dom";
 import styles from "./BookingSuccess.module.scss";
 import { FiCheckCircle } from "react-icons/fi";
 
-const AUTO_REDIRECT_SECONDS = 5;
+const AUTO_REDIRECT_SECONDS = 3;
 
 const BookingSuccess = () => {
   const navigate = useNavigate();

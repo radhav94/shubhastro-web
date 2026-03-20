@@ -232,10 +232,10 @@ const EPooja = () => {
     if (displayType === "browse-by-category") {
       return (
         <section key={tray.ID || index} className={styles.section}>
-          <SectionHeader title={title || "BROWSE BY CATEGORY"} onViewAll={showMore ? () => handleViewAll(tray) : undefined} />
+          <SectionHeader title={title || "BROWSE BY CATEGORY"} onViewAll={showMore ? () => navigate("/categories") : undefined} />
           <HScrollRow>
             {items.map((c, i) => (
-              <div key={c.ID || i} className={styles.catSlideCard} onClick={() => navigate(`/product-details/${c.slug || c.ID}`, { state: c })} style={{ cursor: "pointer" }}>
+              <div key={c.ID || i} className={styles.catSlideCard} onClick={() => navigate(`/category/${c.slug || c.ID}`, { state: { categoryId: c.ID, name: c.name, imgUrl: c.imgUrl } })} style={{ cursor: "pointer" }}>
                 <img src={c.imgUrl || getImg(c)} alt={c.name || "Category"} />
                 <div className={styles.catOverlay}>
                   <h4>{c.name || "Category"}</h4>

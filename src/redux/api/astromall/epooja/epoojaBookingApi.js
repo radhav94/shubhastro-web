@@ -409,6 +409,30 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
       providesTags: ["products"],
     }),
 
+    // GET product categories
+    getProductCategories: builder.query({
+      queryFn: async () => {
+        try {
+          const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+          const role = localStorage.getItem("shubhtalk_role");
+          const token = role === "ASTROLOGER"
+            ? localStorage.getItem("shubhtalk_astro_token")
+            : localStorage.getItem("shubhtalk_customer_token");
+
+          const res = await fetch(`${BASE_URL}/api/mall/product-categories`, {
+            headers: {
+              accept: "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          });
+          const json = await res.json();
+          return { data: json };
+        } catch (err) {
+          return { error: { status: "FETCH_ERROR", error: err.message } };
+        }
+      },
+    }),
+
     // Book E-Pooja
     bookEPooja: builder.mutation({
       query: (body) => ({
@@ -437,5 +461,6 @@ export const {
   useUpdateAddressMutation,
   useDeleteAddressMutation,
   useGetProductsQuery,
+  useGetProductCategoriesQuery,
   useBookEPoojaMutation,
 } = epoojaBookingApi;
