@@ -119,13 +119,25 @@ const PalmistryCamera = () => {
         return;
       }
 
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: facingMode },
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+      let mediaStream;
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: facingMode },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        });
+      } catch (constraintErr) {
+        if (constraintErr.name === 'OverconstrainedError') {
+          // Fallback for iOS — retry without resolution constraints
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: facingMode } }
+          });
+        } else {
+          throw constraintErr;
         }
-      });
+      }
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
@@ -341,6 +353,7 @@ const PalmistryCamera = () => {
               ref={videoRef}
               autoPlay
               playsInline
+              muted
               className={styles.video}
               style={{ transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}
             />
@@ -389,8 +402,8 @@ const PalmistryCamera = () => {
                 <p>
                   {isWrongHand
                     ? `Wrong hand! Please show your ${selectedHand} hand`
-                    : isTooFar ? 'Move your hand closer to the camera'
-                    : !handDetected ? 'Move your hand closer to the camera'
+                    : isTooFar ? `Move your ${selectedHand} hand closer to the camera`
+                    : !handDetected ? `Move your ${selectedHand} hand closer to the camera`
                     : !isPalmOpen ? 'Open your palm fully'
                     : !isInBounds ? 'Move your hand inside the box'
                     : ''}
@@ -429,9 +442,9 @@ const PalmistryCamera = () => {
             <span className={styles.captureText}>
               {!handsLoaded ? 'Loading...' :
                isWrongHand ? `Use ${selectedHand} hand` :
-               isTooFar ? 'Move Closer' :
+               isTooFar ? 'Move Hand Closer' :
                (handDetected && isPalmOpen && isInBounds ? 'Capture' : 
-                !handDetected ? 'Move Closer' :
+                !handDetected ? 'Move Hand Closer' :
                 !isPalmOpen ? 'Open Palm' :
                 'Move Inside Box')}
             </span>

@@ -70,13 +70,24 @@ const AuraCamera = () => {
         return;
       }
 
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: facingMode },
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+      let mediaStream;
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: facingMode },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        });
+      } catch (constraintErr) {
+        if (constraintErr.name === 'OverconstrainedError') {
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: facingMode } }
+          });
+        } else {
+          throw constraintErr;
         }
-      });
+      }
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
