@@ -196,13 +196,15 @@ const CustomerSupport = () => {
   return (
     <div className={styles.supportPage}>
       {/* Header */}
-      <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className={styles.title}>Customer Support</h1>
-        <div className={styles.headerSpacer}></div>
-      </div>
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={() => navigate(-1)}>
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className={styles.title}>Customer Support</h1>
+          <div className={styles.headerSpacer}></div>
+        </div>
+      </header>
 
       {/* Messages Container */}
       <div className={styles.messagesContainer}>

@@ -73,15 +73,17 @@ const PrivacySecurity = () => {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <button
-          className={styles.backButton}
-          onClick={handleBack}
-          aria-label="Go back"
-        >
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className={styles.title}>Privacy and Security</h1>
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button
+            className={styles.backButton}
+            onClick={handleBack}
+            aria-label="Go back"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className={styles.title}>Privacy and Security</h1>
+        </div>
       </header>
 
       <div className={styles.content}>

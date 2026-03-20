@@ -373,7 +373,7 @@
 
 .content {
   flex: 1;
-  padding: 20px;
+  padding: 16px;
   overflow-y: auto;
 }
 
@@ -388,7 +388,7 @@
 .subtitle {
   font-size: 15px;
   color: #999;
-  margin-bottom: 32px;
+  margin-bottom: 0px;
   line-height: 1.5;
 }
 
@@ -470,10 +470,13 @@
 }
 // Guidance Screen
 .guidanceScreen {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: #fff;
+  border-radius: 16px;
+  @media (width <= 767px) {
+    min-height: 100vh;
+  }
 }
 
 .optionsGrid {
@@ -485,7 +488,7 @@
 
 .optionCard {
   position: relative;
-  padding: 24px 16px;
+  padding: 16px;
   border-radius: 16px;
   border: 2px solid transparent;
   cursor: pointer;

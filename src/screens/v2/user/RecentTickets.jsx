@@ -52,12 +52,14 @@ const RecentTickets = () => {
   return (
     <div className={styles.ticketsPage}>
       {/* Header */}
-      <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className={styles.title}>Recent Tickets</h1>
-      </div>
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={() => navigate(-1)}>
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className={styles.title}>Recent Tickets</h1>
+        </div>
+      </header>
 
       {/* Tickets List */}
       <div className={styles.ticketsList}>

@@ -17,16 +17,26 @@
   }
 }
 
+.headerWrap{
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  position: fixed;
+  top: 96px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  @media screen and (width <= 1180px) {
+    top: 53px;
+  }
+}
 .header {
   display: flex;
+  // justify-content: space-between;
   align-items: center;
+  padding:6px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
   gap: 16px;
-  padding: 10px 20px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #f0f0f0;
-  position: sticky;
-  top: 0;
-  z-index: 10;
 }
 
 .backButton {
@@ -68,11 +78,22 @@
 .messagesContainer {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 100px;
+  min-width: 1200px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding-bottom: 20px;
+  margin: 0 auto;
+  padding: 62px 16px 16px 16px;
+  // padding-bottom: 20px;
+
+  @media (width <= 1180px) {
+    padding: 16px 16px 16px 16px;
+    width: 100%;
+    min-width: auto;
+  }
+  @media (width <= 768px) {
+    padding: 72px 16px 16px 16px;
+  }
 
   &::-webkit-scrollbar {
     width: 4px;
@@ -412,6 +433,7 @@
   border-top: 1px solid #e0e0e0;
   position: sticky;
   bottom: 0;
+  left: 0;
 
   @media (max-width: 1024px) {
     padding: 12px 40px;
@@ -563,9 +585,9 @@
     font-size: 16px;
   }
 
-  .messagesContainer {
-    padding: 12px;
-  }
+  // .messagesContainer {
+  //   padding: 12px;
+  // }
 
   .botMessage,
   .userMessage {

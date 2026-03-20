@@ -117,22 +117,24 @@ const FAQ = () => {
   return (
     <div className={styles.faqPage}>
       {/* Header */}
-      <div className={styles.header}>
-        <button 
-          className={styles.backButton} 
-          onClick={() => {
-            if (fromTab === "Support") {
-              navigate("/profile", { state: { activeTab: "Support" } });
-            } else {
-              navigate(-1);
-            }
-          }}
-        >
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className={styles.title}>FAQ's</h1>
-        <div className={styles.headerSpacer}></div>
-      </div>
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button 
+            className={styles.backButton} 
+            onClick={() => {
+              if (fromTab === "Support") {
+                navigate("/profile", { state: { activeTab: "Support" } });
+              } else {
+                navigate(-1);
+              }
+            }}
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className={styles.title}>FAQ's</h1>
+          <div className={styles.headerSpacer}></div>
+        </div>
+      </header>
 
       {/* Content */}
       <div className={styles.content}>
