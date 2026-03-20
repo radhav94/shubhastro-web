@@ -19,6 +19,11 @@ const getImg = (item) =>
 const getPrice = (item) => item?.price || item?.actualPrice || item?.selling_price || 0;
 const getOldPrice = (item) => item?.mrp || item?.originalPrice || item?.compare_price || 0;
 const getTitle = (item) => item?.title || item?.name || "Product";
+const getBrand = (item) => {
+  const b = item?.brand;
+  if (!b) return "";
+  return typeof b === "string" ? b : b.name || "";
+};
 
 const CategoryProducts = () => {
   const { slug } = useParams();
@@ -182,7 +187,7 @@ const CategoryProducts = () => {
                   <img src={getImg(item)} alt={getTitle(item)} />
                 </div>
                 <div className={styles.cardBody}>
-                  {item.brand && <p className={styles.brand}>🏷 {item.brand}</p>}
+                  {getBrand(item) && <p className={styles.brand}>🏷 {getBrand(item)}</p>}
                   <h4>{getTitle(item)}</h4>
                   <p className={styles.desc}>{item.short_description || ""}</p>
                   <p className={styles.price}>₹{getPrice(item)} {getOldPrice(item) ? <s>₹{getOldPrice(item)}</s> : null}</p>
