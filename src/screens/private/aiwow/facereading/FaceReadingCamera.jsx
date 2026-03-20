@@ -24,6 +24,7 @@ const FaceReadingCamera = () => {
     modelsLoaded,
     faceDetected,
     faceInCircle,
+    isTooFar,
     startDetection,
     stopDetection
   } = useFaceDetection({ 
@@ -103,13 +104,24 @@ const FaceReadingCamera = () => {
       }
 
       // Request camera permission
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: facingMode },
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+      let mediaStream;
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: facingMode },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        });
+      } catch (constraintErr) {
+        if (constraintErr.name === 'OverconstrainedError') {
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: facingMode } }
+          });
+        } else {
+          throw constraintErr;
         }
-      });
+      }
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
@@ -181,9 +193,8 @@ const FaceReadingCamera = () => {
     // Start camera with new mode will be handled by useEffect
   };
 
-  // On desktop, faceInCircle check can be unreliable due to object-fit: cover coordinate mismatch
-  // Use faceDetected as the capture gate — circle is a visual guide
-  const canCapture = faceDetected;
+  // Capture allowed only when face is detected, in circle, and not too far
+  const canCapture = faceDetected && faceInCircle && !isTooFar;
 
   const captureImage = () => {
     if (videoRef.current && canvasRef.current) {
@@ -364,7 +375,15 @@ const FaceReadingCamera = () => {
             </div>
             {!canCapture && modelsLoaded && (
               <div className={styles.faceDetectionMessage}>
-                <p>Position your face within the circle</p>
+                <p>
+                  {!faceDetected
+                    ? 'Move your face closer to the camera'
+                    : isTooFar
+                    ? 'Move your face closer to the camera'
+                    : !faceInCircle
+                    ? 'Position your face within the circle'
+                    : ''}
+                </p>
               </div>
             )}
           </>
@@ -389,7 +408,10 @@ const FaceReadingCamera = () => {
               </svg>
             </div>
             <span className={styles.captureText}>
-              {!modelsLoaded ? 'Loading...' : (canCapture ? 'Capture' : 'No Face Detected')}
+              {!modelsLoaded ? 'Loading...' : 
+               canCapture ? 'Capture' : 
+               !faceDetected || isTooFar ? 'Move Closer' : 
+               'Move Inside Circle'}
             </span>
           </button>
         ) : (

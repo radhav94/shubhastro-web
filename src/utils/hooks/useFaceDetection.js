@@ -5,6 +5,7 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [faceDetected, setFaceDetected] = useState(false);
   const [faceInCircle, setFaceInCircle] = useState(false);
+  const [isTooFar, setIsTooFar] = useState(false);
   
   const detectionStartedRef = useRef(false);
   const rafRef = useRef(null);
@@ -83,9 +84,35 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
         setFaceDetected(true);
         
         const { box } = detection;
+
+        // Check if face is too far (box too small relative to video)
+        const faceRatio = (box.width * box.height) / (video.videoWidth * video.videoHeight);
+        setIsTooFar(faceRatio < 0.02); // less than 2% of frame = too far
+
+        // Check if face is within the circle guide
+        if (getCircleBounds) {
+          const circleBounds = getCircleBounds();
+          if (circleBounds) {
+            const { centerX, centerY, radius } = circleBounds;
+            const scaleX = video.videoWidth / video.offsetWidth;
+            const scaleY = video.videoHeight / video.offsetHeight;
+            const scaledCX = centerX * scaleX;
+            const scaledCY = centerY * scaleY;
+            const scaledR = radius * Math.min(scaleX, scaleY);
+
+            // Check if face box center is within circle
+            const faceCX = box.x + box.width / 2;
+            const faceCY = box.y + box.height / 2;
+            const dist = Math.sqrt((faceCX - scaledCX) ** 2 + (faceCY - scaledCY) ** 2);
+            setFaceInCircle(dist + Math.max(box.width, box.height) / 2 <= scaledR * 1.2);
+          }
+        }
+
         drawBox(canvas, video, box, true);
       } else {
         setFaceDetected(false);
+        setFaceInCircle(false);
+        setIsTooFar(false);
         clearCanvas(canvas);
       }
     } catch (err) {
@@ -155,6 +182,7 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
     modelsLoaded,
     faceDetected,
     faceInCircle,
+    isTooFar,
     startDetection,
     stopDetection
   };
