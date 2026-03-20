@@ -343,7 +343,8 @@
 
 .acceptableStatus {
   display: flex;
-  justify-content: space-between;
+  gap : 10px;
+  // justify-content: space-between;
   align-items: center;
   background: #ffffff;
   border-radius: 8px;
@@ -383,8 +384,8 @@
 
 .infoRow {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  // justify-content: space-between;
+  align-items: center;
   padding: 8px 0;
   border-bottom: 1px solid #e5e7eb;
   

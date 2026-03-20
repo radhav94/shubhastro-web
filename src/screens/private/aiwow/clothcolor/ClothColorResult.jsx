@@ -81,7 +81,7 @@ const ClothColorResult = () => {
       }
     } else {
       Toast.error('No analysis results found');
-      navigate('/aiwow/cloth-color/instructions');
+      navigate('/aiwow/cloth-color/form', { replace: true });
       return;
     }
     
