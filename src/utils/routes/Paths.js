@@ -156,6 +156,8 @@ import BookingSuccess from "../../screens/private/epooja/booking/BookingSuccess"
 import EPoojaPayment from "../../screens/private/epooja/payment/EPoojaPayment";
 import EPoojaCheckout from "../../screens/private/epooja/checkout/EPoojaCheckout";
 import AstromallCart from "../../screens/private/epooja/cart/AstromallCart";
+import CategoryProducts from "../../screens/private/epooja/category/CategoryProducts";
+import AllCategories from "../../screens/private/epooja/category/AllCategories";
 
 import BuisnessBreakupTarot from "../../screens/private/tarot/buisnessBreakupTarot/BuisnessBreakupTarot";
 import CareerSelectTarot from "../../screens/private/tarot/careerSelectTarot/CareerSelectTarot";
@@ -946,6 +948,14 @@ export const PATH = {
     E_POOJA_BOOKING_SUCCESS: {
       path: "/booking-success",
       element: BookingSuccess,
+    },
+    ASTROMALL_CATEGORY: {
+      path: "/category/:slug",
+      element: CategoryProducts,
+    },
+    ASTROMALL_ALL_CATEGORIES: {
+      path: "/categories",
+      element: AllCategories,
     },
 
     RECHARGE: {
