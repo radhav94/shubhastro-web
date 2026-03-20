@@ -90,12 +90,12 @@ const LiveLanding = () => {
                 </button>
 
                 <div className={styles.tabs}>
-                    <button
+                    {/* <button
                         className={`${styles.tab} ${activeTab === "daily" ? styles.active : ""}`}
                         onClick={() => setActiveTab("daily")}
                     >
                         Daily Insights
-                    </button>
+                    </button> */}
                     <button
                         className={`${styles.tab} ${activeTab === "live" ? styles.active : ""}`}
                         onClick={() => {

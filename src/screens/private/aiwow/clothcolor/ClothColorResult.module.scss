@@ -179,7 +179,7 @@
 
 .infoRow {
   display: flex;
-  justify-content: space-between;
+  // justify-content: space-between;
   align-items: flex-start;
   padding: 8px 0;
   border-bottom: 1px solid #e5e7eb;
@@ -383,6 +383,20 @@
 
 .detectedColorsSection {
   margin-bottom: 20px;
+
+  @media (min-width: 1024px) {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+
+    .subTitle {
+      grid-column: 1 / -1;
+    }
+
+    .detectedColorItem {
+      margin-bottom: 0;
+    }
+  }
 }
 
 .detectedColorItem {
@@ -437,6 +451,20 @@
 
 .matchesSection {
   margin-bottom: 20px;
+
+  @media (min-width: 1024px) {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+
+    .subTitle {
+      grid-column: 1 / -1;
+    }
+
+    .matchItem {
+      margin-bottom: 0;
+    }
+  }
 }
 
 .matchItem {

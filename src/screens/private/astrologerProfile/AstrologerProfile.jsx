@@ -1271,7 +1271,7 @@ const AstrologerProfile = () => {
                 <div className={styles.optionInfo}>
                   <span className={styles.optionLabel}>Chat</span>
                   <span className={styles.optionPrice}>
-                    ₹{data?.price?.chatRate?.amount || 5}/ min
+                    ₹{data?.price?.chatRate?.amount || 0}/ min
                   </span>
                 </div>
               </div>
@@ -1286,7 +1286,7 @@ const AstrologerProfile = () => {
                 <div className={styles.optionInfo}>
                   <span className={styles.optionLabel}>Audio Call</span>
                   <span className={styles.optionPrice}>
-                    ₹{data?.price?.audioRate?.amount || 20}/ min
+                    ₹{data?.price?.audioRate?.amount || 0}/ min
                   </span>
                 </div>
               </div>
@@ -1301,7 +1301,7 @@ const AstrologerProfile = () => {
                 <div className={styles.optionInfo}>
                   <span className={styles.optionLabel}>Video Call</span>
                   <span className={styles.optionPrice}>
-                    ₹{data?.price?.videoCallRate?.amount || 60}/ min
+                    ₹{data?.price?.videoCallRate?.amount || 0}/ min
                   </span>
                 </div>
               </div>

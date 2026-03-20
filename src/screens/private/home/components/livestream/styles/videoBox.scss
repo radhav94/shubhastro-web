@@ -33,8 +33,9 @@
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 20px;
+  padding-left: 60px;
   background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -764,7 +765,7 @@
 
   .live-tab {
     font-size: 16px;
-    padding: 8px 12px;
+    padding: 8px 40px;
   }
 }
 
@@ -840,7 +841,7 @@
 
   .live-tab {
     font-size: 18px;
-    padding: 10px 16px;
+    padding: 10px 40px;
   }
 
   .host-avatar {

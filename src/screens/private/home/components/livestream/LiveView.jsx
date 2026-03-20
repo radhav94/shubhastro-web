@@ -420,7 +420,7 @@ const LiveView = (props) => {
             </button>
 
             <div className="live-tabs">
-              <button
+              {/* <button
                 className={`live-tab ${activeTab === "daily" ? "active" : ""}`}
                 onClick={() => {
                   setActiveTab("daily");
@@ -428,7 +428,7 @@ const LiveView = (props) => {
                 }}
               >
                 Daily Insights
-              </button>
+              </button> */}
               <button
                 className={`live-tab ${activeTab === "live" ? "active" : ""}`}
                 onClick={() => setActiveTab("live")}
