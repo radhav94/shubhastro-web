@@ -59,20 +59,34 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         isActiveType,
         isActive,
       }) => {
+        // OLD: isActive was always included in params, sending false/undefined values
+        // const params = new URLSearchParams({
+        //   astroName: searchText,
+        //   limit,
+        //   page,
+        //   gender: selectedGender || "",
+        //   isActive
+        // });
+
+        // NEW: Build params without isActive — it will be conditionally appended below
         const params = new URLSearchParams({
           astroName: searchText,
           limit,
           page,
-          gender: selectedGender || "",
+          
         });
 
+        if (selectedSort) {
+          params.append("gender", selectedSort);
+        }
         // ✅ NEW LOGIC: Handle selectedSkills array
         // If selectedSkills array has items, convert to comma-separated string and pass to skills field
         if (Array.isArray(selectedSkills) && selectedSkills.length > 0) {
           params.append("skills", selectedSkills.join(","));
         } 
         // If no selectedSkills but experties is provided, use experties for skills field
-        else if (experties) {
+        // NEW: Exclude "online" from skills — it's a status filter (isActive), not a skill
+        else if (experties && experties.toLowerCase() !== "online") {
           params.append("skills", experties);
         }
 
@@ -85,16 +99,22 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         if (selectedSort) {
           params.append("sort", selectedSort);
         }
+       
 
         // ✅ OLD SORTING LOGIC (COMMENTED OUT - Replaced with new sort field above)
         // sorting: selectedSort ? "true" : "false",
         // sortByPrice: selectedSort === "Sort By Price" ? "1" : "0",
         // sortByRating: selectedSort === "Sort By Rating" ? "1" : "0",
 
-        // Handle active status
+        // OLD: isActive was always included in URLSearchParams constructor above
         // if (isActive === true) {
         //   params.append("isActive", "true");
         // }
+
+        // NEW: Conditionally append isActive ONLY when true (Online filter selected)
+        if (isActive === true) {
+          params.append("isActive", "true");
+        }
 
         // // Handle active type
         // if (isActiveType) {
