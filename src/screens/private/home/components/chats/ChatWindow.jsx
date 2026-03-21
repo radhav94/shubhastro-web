@@ -61,6 +61,7 @@ const ChatWindow = () => {
   const [showProfileManagerModal, setShowProfileManagerModal] = useState(false);
   const [showGiftModal, setShowGiftModal] = useState(false);
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
   const { activeChat, isReconnecting } = useChatContext();
 
   // Check if there's an active call (audio or video)
@@ -189,6 +190,8 @@ const ChatWindow = () => {
   const { isInactive, resetTimer } = useInactivityTimer(120000);
 
   const handleDisconnect = () => {
+    if (isEnding) return;
+    setIsEnding(true);
     try {
       voiceSocket.emit("chat:end", { roomId, endedBy: "CUSTOMER" });
       
@@ -202,6 +205,7 @@ const ChatWindow = () => {
   };
 
   const handleChatEnd = () => {
+    if (isEnding) return false;
     // Primary: use wall-clock time from session start (persisted in localStorage)
     const chatStartTime = localStorage.getItem("shubhtalk_chat_start_time");
     const wallClockElapsed = chatStartTime 
@@ -262,7 +266,11 @@ const ChatWindow = () => {
 
       if (res.success) {
         Toast.success(res.message);
-        handleDisconnect();
+        // Only emit chat:end if the chat is still active to avoid
+        // "Chat has already ended" socket error
+        if (isChatActive && !isMessageDisabled) {
+          handleDisconnect();
+        }
       } else {
         Toast.error(res.message);
       }
@@ -444,6 +452,7 @@ const ChatWindow = () => {
             isVideoCallActive={isVideoCallActive}
             onChatEnd={handleChatEnd}
             isChatActive={isChatActive}
+            isEnding={isEnding}
           />
 
           {/* Call Buttons Below Header */}
