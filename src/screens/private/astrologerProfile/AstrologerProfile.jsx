@@ -63,7 +63,7 @@ const AstrologerProfile = () => {
     data: astrologerData,
     isLoading,
     error,
-  } = useGetAstrologerByIdQuery({ id }, { skip: !id });
+  } = useGetAstrologerByIdQuery({ id }, { skip: !id, pollingInterval: 10000 });
 
   const data = astrologerData?.data;
 
@@ -333,7 +333,7 @@ const AstrologerProfile = () => {
         `Consultation with ${astrologerName}`,
       );
       const eventDetails = encodeURIComponent(
-        `Reminder for consultation with ${astrologerName}\n\nSpecialties: ${displayData.specialities.join(", ")}\nLanguages: ${displayData.languagePreference.join(", ")}`,
+        `Reminder for consultation with ${astrologerName}\n\nSpecialties: ${displayData.specialities.join(", ")}\nLanguages: ${displayData.languagePreference.map((l) => (typeof l === "object" ? l.languageName : l)).join(", ")}`,
       );
       const eventLocation = encodeURIComponent(
         "ShubhTalk - Online Consultation",
@@ -616,8 +616,8 @@ const AstrologerProfile = () => {
         ? data.expertise
         : ["Relationships", "Finance", "Health"],
     languagePreference:
-      data?.languagePreference?.length > 0
-        ? data.languagePreference
+      data?.languagePreferences?.length > 0
+        ? data.languagePreferences
         : ["English", "Hindi"],
     experience: data?.experience ?? 20,
     totalConsultations: data?.totalConsultations ?? 1200,
@@ -907,7 +907,7 @@ const AstrologerProfile = () => {
                 <div className={styles.languages}>
                   {displayData.languagePreference.map((lang, i) => (
                     <span key={i} className={styles.languageTag}>
-                      {lang}
+                      {typeof lang === "object" ? lang.languageName : lang}
                     </span>
                   ))}
                 </div>
@@ -1232,11 +1232,23 @@ const AstrologerProfile = () => {
 
         {/* Right Sidebar - Available Now & Connect (Desktop Only) */}
         <aside className={styles.rightSidebar}>
-          {/* Available Now Card */}
-          <div className={styles.availableCard}>
-            <div className={styles.statusDot}></div>
-            <span className={styles.statusText}>Available Now</span>
-          </div>
+          {/* Available Now / Offline Card */}
+          {data?.isActive ? (
+            <div className={styles.availableCard}>
+              <div className={styles.statusDot}></div>
+              <span className={styles.statusText}>Available Now</span>
+            </div>
+          ) : (
+            <div className={styles.offlineCard}>
+              <div className={styles.offlineIcon}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                </svg>
+              </div>
+              <span className={styles.offlineText}>Offline</span>
+            </div>
+          )}
 
           {/* Connect Now Card */}
           <div className={styles.connectCard}>

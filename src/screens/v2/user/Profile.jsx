@@ -188,6 +188,13 @@ const Profile = () => {
   const hasNextChatPage = chatPagination?.hasNextPage || false;
   const hasPrevChatPage = chatPagination?.hasPreviousPage || false;
 
+
+
+  const formatDuration = (seconds = 0) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins} Min ${secs} Secs`;
+  };
   // Process order history data - current page call orders
   const callOrders = Array.isArray(callHistoryData?.data?.callHistory)
     ? callHistoryData.data.callHistory
@@ -219,7 +226,7 @@ const Profile = () => {
   const chatOrders = Array.isArray(chatHistoryData?.data?.chatHistory)
     ? chatHistoryData.data.chatHistory.map((room, index) => {
         const lastChat = room?.[room.length - 1];
-        const chatDuration = Math.round(room?.totalDuration)
+        // const chatDuration = Math.round(room?.totalDuration)
         return {
           id: `chat-${chatHistoryPage}-${index}`,
           type: "chat",
@@ -236,7 +243,7 @@ const Profile = () => {
             isActive: true,
           },
           date: lastChat?.createdAt || new Date(),
-          duration: `${chatDuration || 0} Min`,
+          duration: `${formatDuration(room?.totalDuration) || 0}`,
           amount: room?.amount || 0,
           rate: room?.rate || 0,
           status: "completed",

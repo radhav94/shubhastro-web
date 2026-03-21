@@ -424,6 +424,30 @@
     gap: 12px;
     position: sticky;
   }
+
+  .offlineCard {
+    background: #E8E8E8;
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+  }
+
+  .offlineIcon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .offlineText {
+    font-size: 16px;
+    font-weight: 600;
+    color: #666;
+  }
   
   .statusDot {
     width: 12px;
