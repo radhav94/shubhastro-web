@@ -57,6 +57,10 @@ const LiveStreamingContainer = ({ client }) => {
   // Ref to hold retryJoinRoom — breaks circular dep between handleAstrologerStatus and chat
   const retryJoinRef = useRef(null);
 
+  // Keep live state in a ref so the callback always reads fresh values
+  const liveRef = useRef(live);
+  useEffect(() => { liveRef.current = live; }, [live]);
+
   const handleAstrologerStatus = useCallback((data) => {
     const { status, roomId, hostId, hostName } = data;
 
@@ -70,11 +74,16 @@ const LiveStreamingContainer = ({ client }) => {
         astrologerId: hostId,
         astrologerName: hostName || "",
       });
-      setTimeout(() => {
-        liveList?.switchToChannel(roomId);
-        // Retry joining the chat room with the specific roomId
-        retryJoinRef.current?.(roomId);
-      }, 300);
+
+      // Only auto-switch if user has no active stream (host left / waiting screen)
+      // If user is watching a live stream, don't interrupt — just highlight the arrow
+      const currentLiveState = liveRef.current;
+      if (currentLiveState.hostLeft || !currentLiveState.remoteUsers?.length) {
+        setTimeout(() => {
+          liveList?.switchToChannel(roomId);
+          retryJoinRef.current?.(roomId);
+        }, 300);
+      }
     }
   }, [liveList]);
 
@@ -168,7 +177,7 @@ const LiveStreamingContainer = ({ client }) => {
         </button>
 
         <button
-          className="nav-btn"
+          className={`nav-btn${liveList.hasNewLive ? " nav-btn-highlight" : ""}`}
           onClick={liveList.goNextLive}
           aria-label="Next live"
         >
