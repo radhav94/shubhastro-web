@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./ChatWindow.module.scss";
 import { PrimaryText } from "../../../../../component";
 import AudioMessageWrapper from "./AudioMessageWrapper";
@@ -13,6 +14,7 @@ import { detectURL } from "../../../../../utils/helper/linkPreview";
 const ChatMessages = ({ messages, isTyping, messagesRef }) => {
   const [iframeSrc, setIframeSrc] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const navigate = useNavigate();
 
   const getFileExtension = (filename) => {
     return filename?.split('.').pop()?.toLowerCase() || '';
@@ -182,6 +184,40 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
       );
     }
 
+    // Product/Remedy suggestion messages
+    if (msg?.type === "products") {
+      const products = msg.suggestedProducts || [];
+      return (
+        <div className={styles.productsMessage}>
+          {msg.text && <p className={styles.productsNote}>{msg.text}</p>}
+          {products.map((p) => (
+            <div key={p.productId} className={styles.productItem} onClick={() => p.slug && navigate(`/product-details/${p.slug}`)}>
+              {(p.image || p.images?.[0]) && (
+                <img src={p.image || p.images?.[0]} alt={p.title} className={styles.productThumb} onError={(e) => { e.target.style.display = "none"; }} />
+              )}
+              <div className={styles.productMeta}>
+                <span className={styles.productName}>{p.title}</span>
+                {p.short_description && (
+                  <span className={styles.productDesc}>{p.short_description}</span>
+                )}
+                <span className={styles.productPrice}>
+                  ₹{p.price}
+                  {p.mrp && p.mrp > p.price && (
+                    <s className={styles.productMrp}>₹{p.mrp}</s>
+                  )}
+                  {p.mrp && p.mrp > p.price && (
+                    <span className={styles.productDiscount}>
+                      {Math.round(((p.mrp - p.price) / p.mrp) * 100)}% off
+                    </span>
+                  )}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
     // Check for external URLs in text messages
     const detectedURL = detectURL(msg.text);
     if (detectedURL && msg.type !== "kundli") {
@@ -208,7 +244,7 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
         {msg?.text}
       </PrimaryText>
     );
-  }, []);
+  }, [navigate]);
 
   return (
     <>

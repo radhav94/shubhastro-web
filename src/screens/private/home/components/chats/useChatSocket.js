@@ -3,6 +3,7 @@ import { Toast } from "../../../../../component";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import { useCall } from "../../../../../context/CallContext";
 import { useChat } from "../../../../../context/ChatContext";
+import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
 
 const useChatSocket = ({
   userId,
@@ -28,6 +29,7 @@ const useChatSocket = ({
 
   const [waitingPopup, setWaitingPopup] = useState(false);
   const [callRoomId, setCallRoomId] = useState(null);
+  const [getBalance] = useGetBalanceMutation();
 
   const connectSocket = () => {
     if (voiceSocket.connected) {
@@ -43,8 +45,33 @@ const useChatSocket = ({
     voiceSocket.connect();
   };
 
-  const handleAudioCall = () => {
+  const handleAudioCall = async () => {
     console.log("🎵 Audio Call Clicked", { userId, astrologerId, kundliId, activeCall, chatRoomId });
+
+    try {
+      const result = await getBalance({ astrologerId, type: "audio" });
+      const balanceData = result?.data?.data || {};
+
+      if (balanceData?.status === false) {
+        Toast.error(result?.data?.data?.message || "Insufficient balance for audio call");
+        return;
+      }
+
+      const isActive = balanceData?.isActive === true || balanceData?.availability?.isActive === true;
+      const activeTypes = balanceData?.isActiveType || balanceData?.availability?.isActiveType;
+      const isActiveForCall = Array.isArray(activeTypes)
+        ? activeTypes.includes("audio")
+        : balanceData?.isActiveForCall === true;
+
+      if (!isActive || !isActiveForCall) {
+        Toast.error("Astrologer is not available for voice call");
+        return;
+      }
+    } catch (error) {
+      console.error("Balance check failed for audio call:", error);
+      Toast.error("Failed to check availability");
+      return;
+    }
 
     console.log("🎵 Emitting call:initiate for audio with isSwitch and roomId");
     voiceSocket.emit("call:initiate", {
@@ -56,8 +83,33 @@ const useChatSocket = ({
     });
   };
 
-  const handleVideoCall = () => {
+  const handleVideoCall = async () => {
     console.log("📹 Video Call Clicked", { userId, astrologerId, kundliId, activeCall, chatRoomId });
+
+    try {
+      const result = await getBalance({ astrologerId, type: "video" });
+      const balanceData = result?.data?.data || {};
+
+      if (balanceData?.status === false) {
+        Toast.error(result?.data?.data?.message || "Insufficient balance for video call");
+        return;
+      }
+
+      const isActive = balanceData?.isActive === true || balanceData?.availability?.isActive === true;
+      const activeTypes = balanceData?.isActiveType || balanceData?.availability?.isActiveType;
+      const isActiveForVideo = Array.isArray(activeTypes)
+        ? activeTypes.includes("video")
+        : balanceData?.isActiveForVideo === true;
+
+      if (!isActive || !isActiveForVideo) {
+        Toast.error("Astrologer is not available for video call");
+        return;
+      }
+    } catch (error) {
+      console.error("Balance check failed for video call:", error);
+      Toast.error("Failed to check availability");
+      return;
+    }
 
     console.log("📹 Emitting call:initiate for video with isSwitch and roomId");
     voiceSocket.emit("call:initiate", {
