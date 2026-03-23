@@ -6,27 +6,38 @@ import { useGetCartQuery, useRemoveCartItemMutation } from "../../../../redux/ap
 import Toast from "../../../../component/toast";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
 
+import phonepeLogo from "../../../../assets/icons/upi/phonepe.svg";
+import credLogo from "../../../../assets/icons/upi/cred.svg";
+import paytmLogo from "../../../../assets/icons/upi/paytm.svg";
+import gpayLogo from "../../../../assets/icons/upi/gpay.svg";
+import bhimLogo from "../../../../assets/icons/upi/bhim.svg";
+import amazonpayLogo from "../../../../assets/icons/upi/amazonpay.svg";
+import upiLogo from "../../../../assets/icons/upi/UPI.svg";
+import debitlogo from "../../../../assets/icons/upi/debit.svg";
+import netbankinglogo from "../../../../assets/icons/upi/netbanking.svg";
+import walletlogo from "../../../../assets/icons/upi/wallet.svg";
+
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_SJVwTGtUhFpODR";
 const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js";
 const GST_RATE = 0.18;
 
 const UPI_APPS = [
-  { _id: "phonepe", name: "Phonepe", color: "#5f259f", letter: "P", rzpApp: "phonepe", scheme: "phonepe" },
-  { _id: "cred", name: "Cred UPI", color: "#1a1a2e", letter: "C", rzpApp: "cred", scheme: "credpay" },
-  { _id: "paytm", name: "Paytm", color: "#00baf2", letter: "paytm", rzpApp: "paytm", scheme: "paytmmp" },
+  { _id: "phonepe", name: "Phonepe", logo: phonepeLogo, rzpApp: "phonepe", scheme: "phonepe" },
+  { _id: "cred", name: "Cred UPI", logo: credLogo, rzpApp: "cred", scheme: "credpay" },
+  { _id: "paytm", name: "Paytm", logo: paytmLogo, rzpApp: "paytm", scheme: "paytmmp" },
 ];
 
 const OTHER_UPI_APPS = [
-  { _id: "gpay", name: "Google Pay", color: "#4285f4", letter: "G", rzpApp: "google_pay", scheme: "gpay" },
-  { _id: "bhim", name: "BHIM UPI", color: "#00897b", letter: "B", rzpApp: "bhim", scheme: "upi" },
-  { _id: "amazonpay", name: "Amazon Pay", color: "#ff9900", letter: "A", rzpApp: "amazonpay", scheme: "amazonpay" },
+  { _id: "gpay", name: "Google Pay", logo: gpayLogo, rzpApp: "google_pay", scheme: "gpay" },
+  { _id: "bhim", name: "BHIM UPI", logo: bhimLogo, rzpApp: "bhim", scheme: "upi" },
+  { _id: "amazonpay", name: "Amazon Pay", logo: amazonpayLogo, rzpApp: "amazonpay", scheme: "amazonpay" },
 ];
 
 const PAYMENT_METHODS = [
-  { _id: "upi", name: "UPI", icon: "UPI", color: "#4caf50" },
-  { _id: "card", name: "Credit/Debit", icon: "💳", color: "#1976d2" },
-  { _id: "netbanking", name: "Net Banking", icon: "🏛", color: "#ff9800" },
-  { _id: "wallet", name: "Wallet", icon: "👛", color: "#e91e63" },
+  { _id: "upi", name: "UPI", logo: upiLogo, color: "#4caf50" },
+  { _id: "card", name: "Credit/Debit", logo: debitlogo, color: "#1976d2" },
+  { _id: "netbanking", name: "Net Banking", logo: netbankinglogo, color: "#ff9800" },
+  { _id: "wallet", name: "Wallet", logo: walletlogo, color: "#e91e63" },
 ];
 
 const getItemTitle = (item) => {
@@ -270,16 +281,14 @@ const EPoojaCheckout = () => {
             <div className={styles.upiApps}>
               {UPI_APPS.map((app) => (
                 <div key={app._id} className={styles.upiApp} onClick={() => handleUpiAppPay(app)} style={{ cursor: "pointer" }}>
-                  <div className={styles.upiIcon} style={{ background: app.color }}>
-                    <span>{app.letter === "paytm" ? "paytm" : app.letter}</span>
-                  </div>
+                  <img src={app.logo} alt={app.name} className={styles.upiIconImg} width={48} height={48} />
                   <span className={styles.upiName}>{app.name}</span>
                 </div>
               ))}
             </div>
             <div className={styles.otherUpiWrap}>
               <button className={styles.otherUpiBtn} onClick={() => setShowOtherUpi(!showOtherUpi)}>
-                <span className={styles.upiLabel}>UPI</span>
+                <img src={upiLogo} alt="UPI" className={styles.upiLabelImg} width={28} height={28} />
                 Pay with other UPI apps
                 <FiChevronRight className={`${styles.chevron} ${showOtherUpi ? styles.chevronOpen : ""}`} />
               </button>
@@ -288,7 +297,7 @@ const EPoojaCheckout = () => {
                   {OTHER_UPI_APPS.map((app) => (
                     <button key={app._id} className={styles.otherUpiItem} onClick={() => { setShowOtherUpi(false); handleUpiAppPay(app); }}>
                       <span className={styles.otherUpiLeft}>
-                        <span className={styles.otherUpiIcon} style={{ background: app.color }}>{app.letter}</span>
+                        <img src={app.logo} alt={app.name} className={styles.otherUpiIconImg} width={32} height={32} />
                         <span className={styles.otherUpiName}>{app.name}</span>
                       </span>
                       <FiChevronRight size={14} color="#999" />
@@ -303,7 +312,10 @@ const EPoojaCheckout = () => {
           <div className={styles.methodList}>
             {PAYMENT_METHODS.map((m) => (
               <label key={m._id} className={`${styles.methodCard} ${selectedMethod === m._id ? styles.methodActive : ""}`}>
-                <span className={styles.methodIcon} style={{ background: m.color }}>{m.icon}</span>
+                {m.logo
+                  ? <img src={m.logo} alt={m.name} className={styles.methodIconImg} width={32} height={32} />
+                  : <span className={styles.methodIcon} style={{ background: m.color }}>{m.icon}</span>
+                }
                 <span className={styles.methodName}>{m.name}</span>
                 <input type="radio" name="payMethod" checked={selectedMethod === m._id} onChange={() => setSelectedMethod(m._id)} className={styles.methodRadio} />
               </label>
