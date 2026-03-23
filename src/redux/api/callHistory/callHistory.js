@@ -14,8 +14,15 @@ export const callHistoryApi = privateRequestNew.injectEndpoints({
       }),
       providesTags: ["CallHistory"],
     }),
+
+    getCallRecordings: builder.query({
+      query: (astrologerId) => ({
+        url: `callSessions/recordings/inbox/${astrologerId}`,
+        method: "GET",
+      }),
+    }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
-export const { useGetCallHistoryQuery } = callHistoryApi;
+export const { useGetCallHistoryQuery, useGetCallRecordingsQuery } = callHistoryApi;
