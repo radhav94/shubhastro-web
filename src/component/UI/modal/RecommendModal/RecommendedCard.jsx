@@ -18,7 +18,7 @@ const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall, mode }) => {
       : astro?.languagePreference?.slice(0, 2).join(", ") || "";
 
   // Get expertise
-  const expertise = astro?.expertise?.slice(0, 2).join(", ") || "";
+  const expertise = astro?.expertise?.slice(0, 2).map((e) => (typeof e === "object" ? e.title : e)).join(", ") || "";
 
   // Get price based on mode
   const price =

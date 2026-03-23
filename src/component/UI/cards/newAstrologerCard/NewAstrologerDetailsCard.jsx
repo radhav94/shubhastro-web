@@ -79,7 +79,7 @@ const NewAstrologerDetailsCard = ({
 
         {/* Specialties */}
         <p className={styles.detailsSpecialties}>
-          {astrologer?.expertise?.join(" · ")}
+          {astrologer?.expertise?.map((e) => (typeof e === "object" ? e.title : e)).join(" · ")}
         </p>
 
         {/* Languages */}
