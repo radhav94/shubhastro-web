@@ -1,4 +1,5 @@
 import { useRef, useLayoutEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { IoAttach, IoClose } from "react-icons/io5";
 import styles from "./VideoCallChat.module.scss";
 import { useGetChatHistoryQuery } from "../../redux/api/chatApi";
@@ -20,6 +21,7 @@ const VideoCallChat = ({
 }) => {
   const messagesRef = useRef(null);
   const [iframeSrc, setIframeSrc] = useState(null);
+  const navigate = useNavigate();
 
   const { astrologerId, userId, isUserSide, kundliId, chatRoomId, astrologerName } = videoCallData || {};
 
@@ -66,6 +68,7 @@ const VideoCallChat = ({
       dateTime: item.createdAt,
       type: item?.type,
       kundliName: item?.kundliName,
+      suggestedProducts: item?.suggestedProducts,
     }));
 
     const socketMsgs = messages.map((msg, idx) => ({
@@ -77,6 +80,7 @@ const VideoCallChat = ({
       dateTime: msg.dateTime || new Date().toISOString(),
       type: msg?.type,
       kundliName: msg?.kundliName,
+      suggestedProducts: msg?.suggestedProducts,
     }));
 
     return [...historyMsgs, ...socketMsgs].sort(
@@ -229,6 +233,30 @@ const VideoCallChat = ({
             >
               <GrReactjs /> {msg.kundliName ? `${msg.kundliName}'s Kundli` : "View Kundli"}
             </span>
+          </div>
+        );
+      } else if (msg.type === "products") {
+        isSpecialMessage = true;
+        const products = msg.suggestedProducts || [];
+        content = (
+          <div className={styles.productsMessage}>
+            {msg.text && <p className={styles.productsNote}>{msg.text}</p>}
+            {products.map((p) => (
+              <div key={p.productId} className={styles.productItem} onClick={() => p.slug && navigate(`/product-details/${p.slug}`)}>
+                {(p.image || p.images?.[0]) && (
+                  <img src={p.image || p.images?.[0]} alt={p.title} className={styles.productThumb} onError={(e) => { e.target.style.display = "none"; }} />
+                )}
+                <div className={styles.productMeta}>
+                  <span className={styles.productName}>{p.title}</span>
+                  <span className={styles.productPrice}>
+                    ₹{p.price}
+                    {p.mrp && p.mrp > p.price && (
+                      <s className={styles.productMrp}>₹{p.mrp}</s>
+                    )}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         );
       } else if (msg.type === "image") {

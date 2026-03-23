@@ -30,6 +30,7 @@ import ChatNotificationBanner from "../UI/ChatNotificationBanner/ChatNotificatio
 import { getAstrologerDefaultImage } from "../../utils/appImages";
 import { capitalizeWords } from "../../utils/capitalize";
 import walletIcon from "../../assets/images/wallet-icon.svg";
+import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
 
 const APP_ID = "cf5e31fa03584573aacaf42daebd493c";
 // const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
@@ -81,6 +82,9 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [showRechargeButton, setShowRechargeButton] = useState(false);
+  const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
+  const [suggestedRemedyData, setSuggestedRemedyData] = useState({ suggestedProducts: [], messages: [] });
+  const [hasNewRemedy, setHasNewRemedy] = useState(false);
 
   /* ================= CHAT NOTIFICATION ================= */
   // Keep activeCallRef in sync so socket handlers always have current values
@@ -94,7 +98,7 @@ const AgoraVoiceCalling = ({ callData }) => {
   const showChatNotification = useCallback((data) => {
     if (data.sender === "user") return;
     
-    const messageText = data.type === "gift" ? "🎁 Sent a gift" : (data.message || data.response || "New message");
+    const messageText = data.type === "gift" ? "🎁 Sent a gift" : data.type === "products" ? "💊 Suggested a remedy" : (data.message || data.response || "New message");
     const astroImage = astrologerImage || lastRequestedAstro?.imageUrl || lastRequestedAstro?.aadharCardImgUrl || lastRequestedAstro?.panCardImgUrl || null;
     const astroGender = lastRequestedAstro?.gender || null;
     setChatNotification({
@@ -114,8 +118,21 @@ const AgoraVoiceCalling = ({ callData }) => {
 
   useEffect(() => {
     voiceSocket.on("message:recieved", showChatNotification);
+    
+    const handleProductMessage = (data) => {
+      if (data?.type === "products" && data?.suggestedProducts?.length > 0) {
+        setSuggestedRemedyData((prev) => ({
+          suggestedProducts: [...prev.suggestedProducts, ...data.suggestedProducts],
+          messages: data.message ? [...prev.messages, data.message] : prev.messages,
+        }));
+        setHasNewRemedy(true);
+      }
+    };
+    voiceSocket.on("message:recieved", handleProductMessage);
+
     return () => {
       voiceSocket.off("message:recieved", showChatNotification);
+      voiceSocket.off("message:recieved", handleProductMessage);
       if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
     };
   }, [showChatNotification]);
@@ -867,8 +884,16 @@ const AgoraVoiceCalling = ({ callData }) => {
             <button className={styles.actionBtn} onClick={toggleChat}>
               <span>Attach File</span>
             </button>
-            <button className={styles.actionBtn}>
+            <button
+              className={styles.actionBtn}
+              onClick={() => {
+                setIsRemedyPanelOpen(true);
+                setHasNewRemedy(false);
+              }}
+              style={{ position: 'relative' }}
+            >
               <span>Suggested Remedy</span>
+              {hasNewRemedy && <span className={styles.notificationDot} />}
             </button>
             <button
               className={styles.actionBtn}
@@ -976,6 +1001,17 @@ const AgoraVoiceCalling = ({ callData }) => {
             onClose={() => setIsChatOpen(false)}
             videoCallData={chatData}
             sendMessageRef={sendChatMessageRef}
+          />
+
+          {/* Suggested Remedy Panel */}
+          <SuggestedRemedyPanel
+            isOpen={isRemedyPanelOpen}
+            onClose={() => setIsRemedyPanelOpen(false)}
+            remedyData={suggestedRemedyData}
+            onProductClick={() => {
+              setIsRemedyPanelOpen(false);
+              setIsMinimized(true);
+            }}
           />
 
           {/* Profile Listing Modal */}
