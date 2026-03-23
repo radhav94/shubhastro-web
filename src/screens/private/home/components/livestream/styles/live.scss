@@ -180,6 +180,24 @@
   transform: scale(1.05);
 }
 
+/* Highlight pulse when a new astrologer goes live */
+.nav-btn-highlight {
+  background: rgba(255, 165, 0, 0.7);
+  box-shadow: 0 0 12px rgba(255, 165, 0, 0.6);
+  animation: navPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes navPulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(255, 165, 0, 0.5);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(255, 165, 0, 0.9);
+    transform: scale(1.12);
+  }
+}
+
 .slide-placeholder {
   position: absolute;
   inset: 0;

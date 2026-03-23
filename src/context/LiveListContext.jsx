@@ -6,6 +6,7 @@ export const LiveListProvider = ({ children, lives: initialLives, autoStartIndex
   const [lives, setLives] = useState(initialLives);
   const [currentIndex, setCurrentIndex] = useState(autoStartIndex);
   const [direction, setDirection] = useState("up");
+  const [hasNewLive, setHasNewLive] = useState(false);
 
   // Sync if parent passes new lives (initial load)
   const [prevInitial, setPrevInitial] = useState(initialLives);
@@ -20,11 +21,13 @@ export const LiveListProvider = ({ children, lives: initialLives, autoStartIndex
   const goNextLive = () => {
     setDirection("up");
     setCurrentIndex((i) => Math.min(i + 1, lives.length - 1));
+    setHasNewLive(false);
   };
 
   const goPrevLive = () => {
     setDirection("down");
     setCurrentIndex((i) => Math.max(i - 1, 0));
+    setHasNewLive(false);
   };
 
   // Remove a live by roomId/channel and clamp index
@@ -40,6 +43,7 @@ export const LiveListProvider = ({ children, lives: initialLives, autoStartIndex
   const addLive = useCallback((liveEntry) => {
     setLives((prev) => {
       if (prev.some((l) => l.channel === liveEntry.channel)) return prev;
+      setHasNewLive(true);
       return [...prev, liveEntry];
     });
   }, []);
@@ -59,6 +63,7 @@ export const LiveListProvider = ({ children, lives: initialLives, autoStartIndex
         lives,
         currentIndex,
         direction,
+        hasNewLive,
         getCurrentChannel,
         getCurrentLive,
         goNextLive,
