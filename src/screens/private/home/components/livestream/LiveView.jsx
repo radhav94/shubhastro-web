@@ -52,7 +52,7 @@ const LiveView = (props) => {
 
   const [showGifts, setShowGifts] = useState(false);
   const [showCallPopup, setShowCallPopup] = useState(false);
-  const [activeTab, setActiveTab] = useState("live");
+  
   const [showChatModal, setShowChatModal] = useState(false);
   const [showWaitingModal, setShowWaitingModal] = useState(false);
 
@@ -151,12 +151,8 @@ const LiveView = (props) => {
       // Intentional leave — clear saved session so refresh doesn't reconnect
       clearViewerSession();
       handleLeave?.();
-      navigate(-1);
+      navigate(PATH.privateRoutes.HOME.path);
     }
-  };
-
-  const handleDailyInsightsClick = () => {
-    navigate("/live-landing");
   };
 
   // Handle call initiation - uses real call flow (same as homepage astrologer listing)
@@ -418,24 +414,7 @@ const LiveView = (props) => {
             <button className="live-back-button" onClick={handleCloseLive}>
               <ChevronLeft size={24} />
             </button>
-
-            <div className="live-tabs">
-              {/* <button
-                className={`live-tab ${activeTab === "daily" ? "active" : ""}`}
-                onClick={() => {
-                  setActiveTab("daily");
-                  handleDailyInsightsClick();
-                }}
-              >
-                Daily Insights
-              </button> */}
-              <button
-                className={`live-tab ${activeTab === "live" ? "active" : ""}`}
-                onClick={() => setActiveTab("live")}
-              >
-                Live Readings
-              </button>
-            </div>
+            <span className="live-header-title">Live Readings</span>
           </div>
 
           {/* Astrologer Info Bar */}
@@ -446,7 +425,7 @@ const LiveView = (props) => {
                 <div className="host-name">
                   {astrologer?.astrologerName || "Astrologer"}
                 </div>
-                <div className="host-subtitle">Shubhtalk • Verified</div>
+                <div className="host-subtitle">ShubhAstro</div>
               </div>
             </div>
 
@@ -649,17 +628,18 @@ const LiveView = (props) => {
 
           {/* NEW BOTTOM ACTION BAR */}
           <div className="right-action-bar">
-            {/* Timer */}
-            {/* <button className="icon-btn" onClick={() => setShowCallPopup(true)}>
+            {/* Timer / Stopwatch */}
+            <button className="icon-btn">
               <div className="icon-circle">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="13" r="8"/>
                   <path d="M12 9v4l2 2"/>
-                  <path d="M8 4h8"/>
+                  <path d="M8 3h8"/>
+                  <path d="M12 3v2"/>
                 </svg>
               </div>
               <span className="icon-label">20m</span>
-            </button> */}
+            </button>
 
             {/* Viewers */}
             <button className="icon-btn">
@@ -688,27 +668,16 @@ const LiveView = (props) => {
               </button>
             )}
 
-            {/* Share */}
+            {/* Share (curved reply arrow) */}
             <button className="icon-btn" onClick={() => setShowSharePopup(true)}>
               <div className="icon-circle">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 12c0-1.2 0-1.8.2-2.3.2-.5.6-.9 1.1-1.1.5-.2 1.1-.2 2.3-.2h10.8c1.2 0 1.8 0 2.3.2.5.2.9.6 1.1 1.1.2.5.2 1.1.2 2.3v6c0 1.2 0 1.8-.2 2.3-.2.5-.6.9-1.1 1.1-.5.2-1.1.2-2.3.2H6.6c-1.2 0-1.8 0-2.3-.2-.5-.2-.9-.6-1.1-1.1C3 19.8 3 19.2 3 18v-6z"/>
-                  <path d="M7 8.5V7c0-1.9 0-2.8.4-3.5.3-.6.9-1.1 1.5-1.4C9.6 2 10.5 2 12.4 2h.2c1.9 0 2.8 0 3.5.4.6.3 1.1.9 1.4 1.5.4.7.4 1.6.4 3.5v1.5"/>
+                  <path d="M15 5l5 5-5 5"/>
+                  <path d="M20 10H8.5A5.5 5.5 0 0 0 3 15.5v.5"/>
                 </svg>
               </div>
-              <span className="icon-label">Share</span>
+              <span className="icon-label">{viewerCount > 1000 ? `${(viewerCount/1000).toFixed(1)}k` : viewerCount}</span>
             </button>
-
-            {/* Call Button - Only for non-hosts
-            {!isHost && (
-              <button className="icon-btn" onClick={() => setShowCallPopup(true)}>
-                <div className="icon-circle">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                  </svg>
-                </div>
-              </button>
-            )} */}
 
             {/* End Live - Only for hosts */}
             {isHost && (

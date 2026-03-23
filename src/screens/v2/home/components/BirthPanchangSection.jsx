@@ -42,7 +42,6 @@ const BirthPanchangSection = () => {
   const panchang = profile.kundliSnapshotId?.panchang;
   if (!panchang) return null;
 
-  console.log(panchang,"876678")
   const panchangCards = [
     { icon: "🌙", label: "TITHI", value: panchang?.tithi || "--", sub: panchang?.tithi},
     { icon: "⭐", label: "NAKSHATRA", value: panchang.nakshatra || profile.nakshatra || "--" },
@@ -59,7 +58,7 @@ const BirthPanchangSection = () => {
   const sunset = formatTo12Hr(panchang.sunset_at_birth) || "--";
   const profileName = profile?.name || panchang?.name ;
 
-  console.log(profile,"56789")
+  
   return (
     <section className={styles.birthPanchangSection}>
       <div className={styles.birthPanchangHeader}>

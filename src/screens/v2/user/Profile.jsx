@@ -243,7 +243,7 @@ const Profile = () => {
             isActive: true,
           },
           date: lastChat?.createdAt || new Date(),
-          duration: `${formatDuration(room?.totalDuration) || 0}`,
+          duration: `${formatDuration(Math.round(room?.totalDuration)) || 0}`,
           amount: room?.amount || 0,
           rate: room?.rate || 0,
           status: "completed",
