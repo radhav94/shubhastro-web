@@ -783,6 +783,34 @@
   }
 }
 
+.vaBtn {
+  height: 40px;
+  padding: 0px 16px;
+  border-radius: 32px;
+  background: transparent;
+  color: #F75801;
+  border: 1.5px solid #F75801;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  font-family: "Poppins", sans-serif;
+  @media (width <= 767px) {
+    padding: 6px 14px;
+    font-size: 11px;
+  }
+
+  &:hover {
+    background: rgba(247, 88, 1, 0.08);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
 .shareBtn {
   width: 40px;
   height: 40px;

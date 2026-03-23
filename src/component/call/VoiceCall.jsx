@@ -865,7 +865,7 @@ const AgoraVoiceCalling = ({ callData }) => {
           {/* Action Buttons */}
           <div className={`${styles.actionButtons}`}>
             <button className={styles.actionBtn} onClick={toggleChat}>
-              <span>Attach File</span>
+              <span>Virtual Assistant</span>
             </button>
             <button className={styles.actionBtn}>
               <span>Suggested Remedy</span>
