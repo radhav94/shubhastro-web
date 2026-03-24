@@ -264,10 +264,7 @@ const OrderDetails = () => {
           </div>
         );
       case "Remedies":
-        if (isLoadingMessages || isFetching) {
-          return <PrimaryLoader />;
-        }
-        return <RemediesTab remedies={[]} />;
+        return <RemediesTab astrologerId={astrologerId} />;
       default:
         return null;
     }
