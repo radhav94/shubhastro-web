@@ -44,7 +44,7 @@
 
 .live-back-button {
   position: absolute;
-  left: 20px;
+  left: 6px;
   top: 50%;
   transform: translateY(-50%);
   background: transparent;
@@ -581,7 +581,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px;
+  padding: 16px;
   background: #ffffff00;
   // border-top: 1px solid #e5e5e5;
   flex-shrink: 0;
@@ -739,7 +739,7 @@
   }
 
   .live-back-button {
-    left: 15px;
+    // left: 6px;
     width: 36px;
     height: 36px;
   }
@@ -807,7 +807,7 @@
   }
 
   .live-back-button {
-    left: 20px;
+    // left: 20px;
     width: 36px;
     height: 36px;
     
