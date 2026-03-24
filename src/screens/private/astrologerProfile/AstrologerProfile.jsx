@@ -54,6 +54,7 @@ import SendGiftImage from "../../../assets/images/send-gift.png";
 import AstrologerShopImage from "../../../assets/images/astrologer-shop.png";
 import AstrologerNumerologyDefault from "../../../assets/default-img/astrologer-numerology.png";
 import GiftModal from "../../../component/call/GiftModal";
+import VirtualAssistant from "../../../component/virtualAssistant/VirtualAssistant";
 
 const AstrologerProfile = () => {
   const { id } = useParams();
@@ -97,6 +98,7 @@ const AstrologerProfile = () => {
 
   const [showFullAbout, setShowFullAbout] = useState(false);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
+  const [isVAOpen, setIsVAOpen] = useState(false);
 
   const { data: followingData } = useCheckFollowingStatusQuery(
     { astrologerId: data?._id },
@@ -738,6 +740,12 @@ const AstrologerProfile = () => {
             <h2 className={styles.headerTitle}>Profile</h2>
           </div>
           <div className={styles.headerActions}>
+            <button
+              className={styles.vaBtn}
+              onClick={() => setIsVAOpen(true)}
+            >
+              Virtual Assistant
+            </button>
             <button
               className={`${styles.followBtn} ${isFollowing ? styles.following : ""}`}
               onClick={handleFollow}
@@ -1429,6 +1437,14 @@ const AstrologerProfile = () => {
         onClose={() => setIsGiftModalOpen(false)}
         astrologerId={data?._id}
         astrologerName={`${data?.firstName || ""} ${data?.lastName || ""}`}
+      />
+
+      {/* Virtual Assistant Chat */}
+      <VirtualAssistant
+        astrologerId={data?._id}
+        astrologerName={`${data?.firstName || ""} ${data?.lastName || ""}`.trim()}
+        isOpen={isVAOpen}
+        setIsOpen={setIsVAOpen}
       />
     </div>
   );

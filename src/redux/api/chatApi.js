@@ -62,6 +62,16 @@ export const chatApi = privateRequestNew.injectEndpoints({
       }),
     }),
 
+    // Virtual Assistant - send message
+    sendVirtualAssistantMessage: builder.mutation({
+      query: ({ astrologerId, type, sender, message }) => ({
+        url: "chat/messages/create",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: { astrologerId, type, sender, message },
+      }),
+    }),
+
     getSuggestedRemedies: builder.query({
       query: ({ astrologerId }) => ({
         url: `chat/messages/remedies/inbox/${astrologerId}`,
@@ -74,5 +84,6 @@ export const {
   useGetChatMessagesQuery,
   useCreateChatRoomMutation,
   useGetChatHistoryQuery,
+  useSendVirtualAssistantMessageMutation,
   useGetSuggestedRemediesQuery,
 } = chatApi;
