@@ -124,9 +124,7 @@ export default function useChat({
             );
             const profileIdToUse = selfProfile?._id || kundliId;
 
-            const baseUrl = window.location.origin;
-            const kundliLink = `${baseUrl}/kundli/${profileIdToUse}`;
-            setTimeout(() => sendMessage(kundliLink, "kundli"), 300);
+            setTimeout(() => sendMessage(profileIdToUse, "kundli"), 300);
           } else if (alreadySent) {
             console.log(
               "[ChatWindow] ⏭️ Initial messages already sent for room:",
@@ -197,6 +195,7 @@ export default function useChat({
         giftData: giftData,
         kundliName: data?.kundliName,
         suggestedProducts: data?.suggestedProducts,
+        kundliId: data?.kundliId,
       });
     }
 

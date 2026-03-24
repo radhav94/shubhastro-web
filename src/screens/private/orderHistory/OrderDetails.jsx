@@ -101,6 +101,7 @@ const OrderDetails = () => {
         type: msg.type,
         createdAt: msg.createdAt,
         kundliName: msg?.kundliName,
+        kundliId: msg?.kundliId,
       }));
 
       messages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));

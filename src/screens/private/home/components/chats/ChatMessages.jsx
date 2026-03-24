@@ -173,9 +173,13 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
 
     // Kundli messages
     if (msg?.type === "kundli") {
+      const kundliLink = msg.kundliId
+        ? `${window.location.origin}/kundli/${msg.kundliId}`
+        : null;
+        console.log(kundliLink,"78909876789")
       return (
         <div
-          onClick={() => setIframeSrc(msg.text)}
+          onClick={() => kundliLink && setIframeSrc(kundliLink)}
           className={styles.kundliLink}
         >
           <GrReactjs />

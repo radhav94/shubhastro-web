@@ -69,6 +69,7 @@ const VideoCallChat = ({
       type: item?.type,
       kundliName: item?.kundliName,
       suggestedProducts: item?.suggestedProducts,
+      kundliId: item?.kundliId,
     }));
 
     const socketMsgs = messages.map((msg, idx) => ({
@@ -81,6 +82,7 @@ const VideoCallChat = ({
       type: msg?.type,
       kundliName: msg?.kundliName,
       suggestedProducts: msg?.suggestedProducts,
+      kundliId: msg?.kundliId,
     }));
 
     return [...historyMsgs, ...socketMsgs].sort(
@@ -224,11 +226,14 @@ const VideoCallChat = ({
         );
       } else if (msg.type === "kundli") {
         isSpecialMessage = true;
+        const kundliLink = msg.kundliId
+          ? `${window.location.origin}/kundli/${msg.kundliId}`
+          : null;
         content = (
           <div className={styles.KundliMessage}>
             <span
               onClick={() => {
-                if (msg.text) setIframeSrc(msg.text);
+                if (kundliLink) setIframeSrc(kundliLink);
               }}
             >
               <GrReactjs /> {msg.kundliName ? `${msg.kundliName}'s Kundli` : "View Kundli"}
