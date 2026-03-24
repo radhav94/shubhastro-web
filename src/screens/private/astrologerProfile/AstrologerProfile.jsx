@@ -302,10 +302,16 @@ const AstrologerProfile = () => {
     try {
       const astrologerName =
         `${displayData.firstName} ${displayData.lastName}`.trim();
-      const availability = displayData.availability[0]; // Get first available slot
-      
-      // Parse the time slot (e.g., "11 AM - 4 PM")
-      const timeSlot = availability.time.split(' - ')[0]; // Get start time
+
+      // Find the next available day from weekly schedule
+      const nextAvailable = displayData.weeklySchedule.find((item) => item.time);
+      if (!nextAvailable) {
+        toast.error("No available consultation hours to set a reminder for.");
+        return;
+      }
+
+      // Parse the time slot (e.g., "8:00 am - 7:08 pm")
+      const timeSlot = nextAvailable.time.split(' - ')[0]; // Get start time
       
       // Get today's date
       const today = new Date();
@@ -315,13 +321,13 @@ const AstrologerProfile = () => {
 
       // Parse time and convert to 24-hour format
       const parseTime = (timeStr) => {
-        const [time, period] = timeStr.split(" ");
+        const [time, period] = timeStr.trim().split(" ");
         let [hours, minutes = "00"] = time.split(":");
         hours = parseInt(hours);
 
-        if (period === "PM" && hours !== 12) {
+        if (period === "pm" && hours !== 12) {
           hours += 12;
-        } else if (period === "AM" && hours === 12) {
+        } else if (period === "am" && hours === 12) {
           hours = 0;
         }
 
@@ -572,33 +578,48 @@ const AstrologerProfile = () => {
   // Get top astrologers list from the API response
   const topAstrologers = topAstrologersData?.data?.topTenAstrologer || [];
 
-  // Helper function to format availability slots
+  // Helper: convert 24h "HH:MM" or "H:MM" to 12h "h:mm am/pm"
+  const formatTimeTo12h = (timeStr) => {
+    if (!timeStr) return "";
+    const [h, m] = timeStr.split(":").map(Number);
+    const period = h >= 12 ? "pm" : "am";
+    const hour12 = h % 12 || 12;
+    return `${hour12}:${String(m).padStart(2, "0")} ${period}`;
+  };
+
+  // Build full weekly schedule from API availability
+  const formatWeeklyAvailability = (availability) => {
+    const allDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    const dayMap = {};
+    if (availability?.length) {
+      availability.forEach((item) => {
+        const key = item.day.charAt(0).toUpperCase() + item.day.slice(1).toLowerCase();
+        if (item.slots?.length) {
+          dayMap[key] = item.slots
+            .map((s) => `${formatTimeTo12h(s.start)} - ${formatTimeTo12h(s.end)}`)
+            .join(", ");
+        }
+      });
+    }
+    return allDays.map((day) => ({
+      day,
+      time: dayMap[day] || null,
+    }));
+  };
+
+  // Legacy helper for today's slots (used by Set Reminder)
   const formatAvailability = (availability) => {
     if (!availability || availability.length === 0) {
-      return [
-        { day: "Monday - Friday", time: "11 AM - 4 PM" },
-        { day: "Evening", time: "7 PM - 10 PM" },
-      ];
+      return [{ day: "Offline", time: "Offline" }];
     }
-
-    // Get today's day
-    const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
-
-    // Find today's availability or use first available day
-    const todaySlots =
-      availability.find((a) => a.day === today) || availability[0];
-
-    if (!todaySlots || !todaySlots.slots || todaySlots.slots.length === 0) {
-      return [
-        { day: "Monday - Friday", time: "11 AM - 4 PM" },
-        { day: "Evening", time: "7 PM - 10 PM" },
-      ];
+    const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+    const todaySlots = availability.find((a) => a.day?.toLowerCase() === today);
+    if (!todaySlots?.slots?.length) {
+      return [{ day: "Offline", time: "Offline" }];
     }
-
-    // Format slots
     return todaySlots.slots.map((slot) => ({
       day: todaySlots.day,
-      time: `${slot.start} - ${slot.end}`,
+      time: `${formatTimeTo12h(slot.start)} - ${formatTimeTo12h(slot.end)}`,
     }));
   };
 
@@ -626,6 +647,7 @@ const AstrologerProfile = () => {
     rating: data?.rating ?? 4.5,
     totalRatings: data?.totalRatings ?? 1020,
     availability: formatAvailability(data?.availability),
+    weeklySchedule: formatWeeklyAvailability(data?.availability),
     metrics: {
       chatMinutes: data?.metrics?.chatMinutes ?? 0,
       audioMinutes: data?.metrics?.audioMinutes ?? 0,
@@ -966,15 +988,6 @@ const AstrologerProfile = () => {
               <div className={styles.hoursHeader}>
                 <img src={TimeIcon} alt="Time" className={styles.clockIcon} />
                 <span className={styles.hoursTitle}>Consultation Hours</span>
-              </div>
-              <div className={styles.hoursContent}>
-                <div className={styles.timeSlots}>
-                  {displayData.availability.map((slot, index) => (
-                    <div key={index} className={styles.timeSlot}>
-                      {slot.time}
-                    </div>
-                  ))}
-                </div>
                 <button
                   className={styles.reminderBtn}
                   onClick={handleSetReminder}
@@ -986,6 +999,16 @@ const AstrologerProfile = () => {
                   />
                   Set Reminder
                 </button>
+              </div>
+              <div className={styles.weeklySchedule}>
+                {displayData.weeklySchedule.map((item, index) => (
+                  <div key={index} className={styles.scheduleRow}>
+                    <span className={styles.scheduleDay}>{item.day}:</span>
+                    <span className={`${styles.scheduleTime} ${!item.time ? styles.offline : ""}`}>
+                      {item.time || "Offline"}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -1333,26 +1356,26 @@ const AstrologerProfile = () => {
             <div className={styles.hoursHeader}>
               <img src={TimeIcon} alt="Time" className={styles.clockIcon} />
               <span className={styles.hoursTitle}>Consultation Hours</span>
+              <button className={styles.reminderBtn} onClick={handleSetReminder}>
+                <img
+                  src={NotificationIcon}
+                  alt="Notification"
+                  className={styles.notificationIcon}
+                />
+                Set Reminder
+              </button>
             </div>
 
-            <div className={styles.todayLabel}>Todays availability</div>
-
-            <div className={styles.timeSlots}>
-              {displayData.availability.map((slot, index) => (
-                <div key={index} className={styles.timeSlot}>
-                  {slot.time}
+            <div className={styles.weeklySchedule}>
+              {displayData.weeklySchedule.map((item, index) => (
+                <div key={index} className={styles.scheduleRow}>
+                  <span className={styles.scheduleDay}>{item.day}:</span>
+                  <span className={`${styles.scheduleTime} ${!item.time ? styles.offline : ""}`}>
+                    {item.time || "Offline"}
+                  </span>
                 </div>
               ))}
             </div>
-
-            <button className={styles.reminderBtn} onClick={handleSetReminder}>
-              <img
-                src={NotificationIcon}
-                alt="Notification"
-                className={styles.notificationIcon}
-              />
-              Set Reminder
-            </button>
           </div>
         </aside>
       </div>

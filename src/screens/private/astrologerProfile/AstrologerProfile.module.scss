@@ -548,27 +548,74 @@
     border-radius: 20px;
     padding: 16px;
     position: sticky;
-    // margin-top: 20px;
+    overflow: hidden;
   }
   
   .hoursHeader {
     display: flex;
     align-items: center;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-bottom: 12px;
+    row-gap: 10px;
   }
   
   .clockIcon {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     object-fit: contain;
     color: #F75801;
+    flex-shrink: 0;
   }
   
   .hoursTitle {
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 600;
     color: #2C2C2C;
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .weeklySchedule {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .scheduleRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    &:first-child {
+      padding-top: 0;
+    }
+  }
+
+  .scheduleDay {
+    font-size: 13px;
+    font-weight: 500;
+    color: #2C2C2C;
+    flex-shrink: 0;
+  }
+
+  .scheduleTime {
+    font-size: 13px;
+    font-weight: 500;
+    color: #2C2C2C;
+    text-align: right;
+
+    &.offline {
+      color: #999999;
+      font-weight: 400;
+    }
   }
   
   .todayLabel {
@@ -579,11 +626,8 @@
   }
   
   .timeSlots {
-    // display: flex;
-    // flex-direction: row;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
     gap: 12px;
     margin-bottom: 10px;
     font-size: 14px;
@@ -608,24 +652,26 @@
   }
   
   .reminderBtn {
-    width: 100%;
-    padding: 6px 12px;
+    padding: 5px 10px;
     background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
     color: #FFFFFF;
     border: none;
     border-radius: 50px;
-    font-size: 16px;
+    font-size: 11px;
     font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 5px;
     cursor: pointer;
     transition: all 0.2s;
+    white-space: nowrap;
+    margin-left: auto;
+    flex-shrink: 0;
     
     .notificationIcon {
-      width: 18px;
-      height: 18px;
+      width: 13px;
+      height: 13px;
       object-fit: contain;
       filter: brightness(0) invert(1);
     }
@@ -1035,22 +1081,25 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 0px;
+  margin-bottom: 12px;
 }
 
 .clockIcon {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   color: #D4A574;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
 .hoursTitle {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
   color: #1A1A1A;
+  flex: 1;
+  min-width: 0;
   @media (width <= 767px) {
-    font-size: 14px;
+    font-size: 16px;
   }
 }
 
@@ -1064,6 +1113,57 @@
   @media (width <= 767px) {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+.weeklySchedule {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+.scheduleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 4px;
+  }
+
+  &:first-child {
+    padding-top: 4px;
+  }
+}
+
+.scheduleDay {
+  font-size: 16px;
+  font-weight: 500;
+  color: #2C2C2C;
+  flex-shrink: 0;
+
+  @media (width <= 767px) {
+    font-size: 15px;
+  }
+}
+
+.scheduleTime {
+  font-size: 16px;
+  font-weight: 500;
+  color: #2C2C2C;
+  text-align: right;
+
+  &.offline {
+    color: #999999;
+    font-weight: 400;
+  }
+
+  @media (width <= 767px) {
+    font-size: 15px;
   }
 }
 
@@ -1085,7 +1185,7 @@
 }
 
 .reminderBtn {
-  padding: 12px 24px;
+  padding: 10px 18px;
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   color: #FFFFFF;
   border: none;
@@ -1098,12 +1198,13 @@
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
-  
+  margin-left: auto;
+  flex-shrink: 0;
+
   @media (width <= 767px) {
-    padding: 10px 20px;
-    width: 100%;
-    justify-content: center;
+    padding: 8px 14px;
     font-size: 13px;
+    gap: 6px;
   }
 
   .notificationIcon {
