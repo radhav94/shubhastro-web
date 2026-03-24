@@ -23,6 +23,7 @@ const ChatAstrologerCard = ({ data, onConnect }) => {
 
   // Use expertise field instead of specialities
   const expertiseList = (data?.expertise || [])
+    .map((e) => (typeof e === "object" ? e.title : e))
     .slice(0, 3)
     .map(formatExpertise);
 

@@ -33,6 +33,7 @@
     "firebase": "^12.6.0",
     "formik": "^2.4.6",
     "framer-motion": "^12.23.19",
+    "hls.js": "^1.6.15",
     "lucide-react": "^0.544.0",
     "mediabunny": "^1.35.1",
     "prop-types": "^15.8.1",

@@ -501,7 +501,8 @@
 
 .scoreHeader {
   display: flex;
-  justify-content: space-between;
+  gap:10px;
+  // justify-content: ;
   align-items: center;
   margin-bottom: 12px;
 }

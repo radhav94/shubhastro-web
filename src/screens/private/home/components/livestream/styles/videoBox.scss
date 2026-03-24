@@ -66,26 +66,11 @@
   }
 }
 
-.live-tabs {
-  display: flex;
-  gap: 40px;
-  align-items: center;
-}
-
-.live-tab {
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.6);
+.live-header-title {
+  color: #fff;
   font-family: "Poppins", sans-serif;
   font-size: 20px;
   font-weight: 600;
-  padding: 10px 20px;
-  cursor: pointer;
-  position: relative;
-
-  &.active {
-    color: #fff;
-  }
 }
 
 
@@ -759,13 +744,10 @@
     height: 36px;
   }
 
-  .live-tabs {
-    gap: 20px;
-  }
-
-  .live-tab {
+  .live-header-title {
     font-size: 16px;
-    padding: 8px 40px;
+    position: relative;
+    left: 40px;
   }
 }
 
@@ -835,13 +817,10 @@
     }
   }
 
-  .live-tabs {
-    gap: 32px;
-  }
-
-  .live-tab {
+  .live-header-title {
     font-size: 18px;
-    padding: 10px 40px;
+    position: relative;
+    left: 40px;
   }
 
   .host-avatar {

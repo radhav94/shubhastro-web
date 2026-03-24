@@ -609,11 +609,11 @@ const AstrologerProfile = () => {
       getAstrologerDefaultImage(data?.gender),
     specialities:
       data?.specialties?.length > 0
-        ? data.specialties
+        ? data.specialties.map((s) => (typeof s === "object" ? s.title || s.name : s))
         : ["Vedic Kundli", "Tarot", "Palmistry"],
     expertise:
       data?.expertise?.length > 0
-        ? data.expertise
+        ? data.expertise.map((e) => (typeof e === "object" ? e.title : e))
         : ["Relationships", "Finance", "Health"],
     languagePreference:
       data?.languagePreferences?.length > 0
