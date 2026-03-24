@@ -157,7 +157,10 @@ const OrderInfoCard = ({
                   </rect>
                 </svg>
               ) : (
-                <Phone size={28} color="#111827" />
+                <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+                  <circle cx="22" cy="22" r="20" fill="#fff" stroke="#F97316" strokeWidth="2" />
+                  <polygon points="18,14 32,22 18,30" fill="#F97316" />
+                </svg>
               )}
             </div>
 
