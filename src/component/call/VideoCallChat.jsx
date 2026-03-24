@@ -274,7 +274,7 @@ const VideoCallChat = ({
           </div>
         );
       } else {
-        if (msg.type !== "message") isSpecialMessage = true;
+        if (msg.type !== "message" && msg.type !== "gift") isSpecialMessage = true;
         content = (
           <div className={styles.fileMessage}>
             <a
