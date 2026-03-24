@@ -46,3 +46,11 @@
   color: #6b7280;
   font-size: 14px;
 }
+
+.recordingsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0;
+  background-color: #f3f4f6;
+}
