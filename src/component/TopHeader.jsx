@@ -396,15 +396,6 @@ const TopHeader = () => {
             </div>
           </div>
 
-          {/* Close Button */}
-          <button 
-            className={`${styles.iframeCloseBtn} notranslate`}
-            onClick={() => window.parent.postMessage({ type: 'CLOSE_KUNDLI_MODAL' }, '*')}
-            aria-label="Close"
-            translate="no"
-          >
-            ✕
-          </button>
         </div>
       </header>
     );

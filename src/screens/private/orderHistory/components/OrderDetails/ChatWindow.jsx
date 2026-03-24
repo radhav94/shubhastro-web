@@ -5,6 +5,7 @@ import { IoDocument, IoDownload } from "react-icons/io5";
 import { FiFile } from "react-icons/fi";
 import { GrReactjs } from "react-icons/gr";
 import AudioMessageWrapper from "../../../home/components/chats/AudioMessageWrapper";
+import IframeModal from "../../../home/components/chats/IframeModal";
 import styles from "./ChatWindow.module.scss";
 
 // Constants
@@ -55,18 +56,6 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
   const observerRef = useRef(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [kundliModal, setKundliModal] = useState(null);
-
-  // Listen for close message from iframe
-  useEffect(() => {
-    const handleMessage = (event) => {
-      if (event.data?.type === 'CLOSE_KUNDLI_MODAL') {
-        setKundliModal(null);
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
 
   // Intersection Observer for infinite scroll
   const lastSessionRef = useCallback(
@@ -179,11 +168,14 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
           );
         }
 
-        case MESSAGE_TYPES.KUNDLI:
+        case MESSAGE_TYPES.KUNDLI: {
+          const kundliLink = message?.kundliId
+            ? `${window.location.origin}/kundli/${message.kundliId}`
+            : null;
           return (
             <button
               type="button"
-              onClick={() => handleKundliClick(content)}
+              onClick={() => kundliLink && handleKundliClick(kundliLink)}
               className={styles.kundliLink}
               aria-label="View Kundli"
             >
@@ -191,6 +183,7 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
               {message?.kundliName ? `${message.kundliName}'s Kundli` : "View Kundli"}
             </button>
           );
+        }
 
         default: {
           // Check for external URLs in text messages
@@ -352,26 +345,11 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
       )}
 
       {/* Kundli Modal */}
-      {kundliModal && (
-        <div
-          className={styles.kundliModal}
-          onClick={handleCloseModal}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Kundli viewer"
-        >
-          <div
-            className={styles.kundliModalContent}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <iframe
-              src={`${kundliModal}${kundliModal?.includes('?') ? '&' : '?'}iframe=true`}
-              title="Kundli"
-              className={styles.kundliIframe}
-            />
-          </div>
-        </div>
-      )}
+      <IframeModal
+        open={!!kundliModal}
+        src={kundliModal}
+        onClose={() => setKundliModal(null)}
+      />
     </div>
   );
 };

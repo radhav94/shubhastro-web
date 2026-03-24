@@ -166,6 +166,7 @@ const ChatWindow = () => {
         giftData: giftData,
         kundliName: item?.kundliName,
         suggestedProducts: item?.suggestedProducts,
+        kundliId: item?.kundliId,
       };
     });
 
@@ -181,6 +182,7 @@ const ChatWindow = () => {
       giftData: msg?.giftData, // Include gift data from socket messages
       kundliName: msg?.kundliName,
       suggestedProducts: msg?.suggestedProducts,
+      kundliId: msg?.kundliId,
     }));
 
 
@@ -232,10 +234,7 @@ const ChatWindow = () => {
 
   const handleSend = (kundli = null) => {
     if (kundli?._id) {
-      const baseUrl = window.location.origin;
-
-      const kundliLink = `${baseUrl}/kundli/${kundli._id}`;
-      isUserSide ? sendMessage(kundliLink, 'kundli', kundli?._id) : astroReply(kundliLink);
+      isUserSide ? sendMessage(kundli._id, 'kundli', kundli?._id) : astroReply(kundli._id);
 
       setMessage("");
       return;
