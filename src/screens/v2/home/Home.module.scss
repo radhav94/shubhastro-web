@@ -1965,7 +1965,7 @@
 }
 
 .sessionCard {
-  min-width: 430px;
+  max-width: 380px;
   background: #ffffff;
   border-radius: 12px;
   padding: 0;
@@ -1977,9 +1977,10 @@
     box-shadow 0.2s;
   overflow: hidden;
   min-height: 180px;
+  flex-shrink: 0;
 
   @media screen and (width <= 767px) {
-    min-width: 300px;
+    max-width: 300px;
   }
 }
 
