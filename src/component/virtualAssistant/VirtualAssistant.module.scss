@@ -1,0 +1,557 @@
+/* ==================== VARIABLES ==================== */
+$primary-gradient: linear-gradient(135deg, #F75801 0%, #D43400 100%);
+$bg-user: #FFF4E6;
+$bg-assistant: #FFFFFF;
+$text-primary: #333;
+$text-secondary: #666;
+$text-time: #999;
+$border-color: #eee;
+$shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+/* ==================== LAUNCHER ==================== */
+.launcher {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  z-index: 9990;
+  height: 48px;
+  padding: 0 18px;
+  border-radius: 24px;
+  border: none;
+  background: $primary-gradient;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(247, 88, 1, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: scale(1.04);
+    box-shadow: 0 6px 24px rgba(247, 88, 1, 0.5);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  @media (max-width: 767px) {
+    bottom: 80px;
+    right: 16px;
+    height: 44px;
+    padding: 0 14px;
+  }
+}
+
+.launcherText {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ==================== CHAT WINDOW ==================== */
+.chatWindow {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  z-index: 9991;
+  width: 370px;
+  height: 520px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: $shadow;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.25s ease-out;
+
+  * {
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 767px) {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    bottom: 0;
+    right: 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== HEADER ==================== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: $primary-gradient;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.headerInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.headerDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #4caf50;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  flex-shrink: 0;
+}
+
+.headerName {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.headerStatus {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.closeBtn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.35);
+  }
+}
+
+/* ==================== MESSAGES AREA ==================== */
+.messagesArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fafafa;
+}
+
+/* ==================== MESSAGE ROWS ==================== */
+.msgRow {
+  display: flex;
+  animation: fadeIn 0.2s ease;
+}
+
+.userRow {
+  justify-content: flex-end;
+}
+
+.assistantRow {
+  justify-content: flex-start;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==================== BUBBLES ==================== */
+.bubble {
+  max-width: 78%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  position: relative;
+  word-break: break-word;
+}
+
+.userBubble {
+  background: $bg-user;
+  border-bottom-right-radius: 4px;
+}
+
+.assistantBubble {
+  background: $bg-assistant;
+  border: 1px solid $border-color;
+  border-bottom-left-radius: 4px;
+}
+
+.failedBubble {
+  opacity: 0.7;
+  border: 1px dashed #e53935;
+}
+
+.msgText {
+  margin: 0;
+  font-size: 14px;
+  color: $text-primary;
+  line-height: 1.45;
+}
+
+.msgImage {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: block;
+  object-fit: cover;
+}
+
+.msgMeta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.msgTime {
+  font-size: 11px;
+  color: $text-time;
+  font-weight: 500;
+}
+
+.checkmark {
+  color: #4caf50;
+  font-size: 14px;
+}
+
+.retryBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #e53935;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 0;
+  margin-top: 2px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* ==================== EMPTY & SKELETON ==================== */
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #bbb;
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.skeletonBubble {
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+
+  &.left {
+    width: 65%;
+    align-self: flex-start;
+  }
+
+  &.right {
+    width: 55%;
+    align-self: flex-end;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ==================== PREVIEW BAR ==================== */
+.previewBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #f5f5f5;
+  border-top: 1px solid $border-color;
+  flex-shrink: 0;
+}
+
+.previewImg {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.previewCancel {
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* ==================== INPUT BAR ==================== */
+.inputBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-top: 1px solid $border-color;
+  background: #fff;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.attachBtn {
+  background: none;
+  border: none;
+  color: #F75801;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #FFF3E6;
+  }
+}
+
+.textInput {
+  flex: 1;
+  min-width: 0;
+  width: 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 24px;
+  padding: 8px 14px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: #F75801;
+  }
+
+  &::placeholder {
+    color: #bbb;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.sendBtn {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 50%;
+  border: none;
+  background: $primary-gradient;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.2s;
+  flex-shrink: 0;
+
+  &:hover {
+    transform: scale(1.06);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* ==================== KUNDLI LINK ==================== */
+.kundliLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #F75801;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  svg {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+}
+
+/* ==================== AUDIO MESSAGE ==================== */
+.audioMessage {
+  audio {
+    max-width: 100%;
+    height: 36px;
+    border-radius: 18px;
+  }
+}
+
+/* ==================== VIDEO MESSAGE ==================== */
+.videoMessage {
+  .msgVideo {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    display: block;
+  }
+}
+
+/* ==================== PRODUCTS MESSAGE ==================== */
+.productsMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.productsNote {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: $text-primary;
+  line-height: 1.4;
+}
+
+.productItem {
+  display: flex;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #f9f9f9;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #f0f0f0;
+  }
+}
+
+.productThumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.productMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.productName {
+  font-size: 13px;
+  font-weight: 600;
+  color: $text-primary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.productPrice {
+  font-size: 13px;
+  font-weight: 600;
+  color: #F75801;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.productMrp {
+  font-size: 12px;
+  color: $text-time;
+  font-weight: 400;
+}
+
+/* ==================== ATTACHMENT LINK ==================== */
+.attachmentLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #F75801;
+  font-size: 13px;
+  text-decoration: none;
+  word-break: break-all;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+/* ==================== IMAGE MODAL ==================== */
+.imageModal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.modalImage {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 8px;
+  object-fit: contain;
+}

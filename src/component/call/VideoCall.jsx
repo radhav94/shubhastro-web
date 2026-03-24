@@ -1198,7 +1198,7 @@ const VideoCalling = ({ callData }) => {
             <div className={styles.actionButtons}>
               <button className={styles.actionBtn} onClick={toggleChat}>
                 {/* <IoAttach size={16} /> */}
-                <span>Attach File</span>
+                <span>Virtual Assistant</span>
               </button>
               <button
                 className={styles.actionBtn}
