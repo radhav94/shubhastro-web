@@ -61,6 +61,12 @@ export const chatApi = privateRequestNew.injectEndpoints({
         url: `chat/messages/inbox/${userId}`,
       }),
     }),
+
+    getSuggestedRemedies: builder.query({
+      query: ({ astrologerId }) => ({
+        url: `chat/messages/remedies/inbox/${astrologerId}`,
+      }),
+    }),
   }),
 });
 
@@ -68,4 +74,5 @@ export const {
   useGetChatMessagesQuery,
   useCreateChatRoomMutation,
   useGetChatHistoryQuery,
+  useGetSuggestedRemediesQuery,
 } = chatApi;

@@ -321,11 +321,7 @@ const OrderDetails = () => {
           </div>
         );
       case "Remedies":
-        // Show loader while Remedies tab data is loading (if API is added in future)
-        if (isLoadingMessages || isFetching) {
-          return <PrimaryLoader />;
-        }
-        return <RemediesTab remedies={[]} />;
+        return <RemediesTab astrologerId={astrologerId} />;
       default:
         return null;
     }
