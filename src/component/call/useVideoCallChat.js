@@ -91,6 +91,7 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astro
         dateTime: data?.dateTime,
         type: data?.type,
         kundliName: data?.kundliName,
+        suggestedProducts: data?.suggestedProducts,
       });
     };
 

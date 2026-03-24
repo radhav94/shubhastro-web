@@ -196,6 +196,7 @@ export default function useChat({
         type: data.type,
         giftData: giftData,
         kundliName: data?.kundliName,
+        suggestedProducts: data?.suggestedProducts,
       });
     }
 

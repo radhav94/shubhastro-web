@@ -77,11 +77,7 @@ const getImg = (item) =>
 const getPrice = (item) => item?.price || item?.actualPrice || item?.selling_price || 0;
 const getOldPrice = (item) => item?.mrp || item?.originalPrice || item?.compare_price || 0;
 const getTitle = (item) => item?.title || item?.name || "Product";
-const getBrand = (item) => {
-  const b = item?.brand;
-  if (!b) return "";
-  return typeof b === "string" ? b : b.name || "";
-};
+const getBrand = (item) => typeof item?.brand === "object" ? item?.brand?.name : item?.brand;
 
 // ═══════════════════════════════════════
 // MAIN
@@ -281,7 +277,7 @@ const EPooja = () => {
               {!s.is_featured && <span className={styles.sugBadge}>Suggested</span>}
               <div className={styles.prodImg}><img src={getImg(s)} alt={getTitle(s)} /></div>
               <div className={styles.prodBody}>
-                {getBrand(s) && <p className={styles.prodConsultant}>🏷 {getBrand(s)}</p>}
+                {s.brand && <p className={styles.prodConsultant}>🏷 {getBrand(s)}</p>}
                 <h4>{getTitle(s)}</h4>
                 <p className={styles.prodDesc}>{s.short_description || ""}</p>
                 <p className={styles.prodPrice}>₹{getPrice(s)} {getOldPrice(s) ? <s>₹{getOldPrice(s)}</s> : null}</p>
@@ -381,7 +377,7 @@ const EPooja = () => {
                     <img src={getImg(item)} alt={getTitle(item)} />
                   </div>
                   <div className={styles.prodBody}>
-                    {getBrand(item) && <p className={styles.prodConsultant}>🏷 {getBrand(item)}</p>}
+                    {item.brand && <p className={styles.prodConsultant}>🏷 {getBrand(item)}</p>}
                     <h4>{getTitle(item)}</h4>
                     <p className={styles.prodDesc}>{item.short_description || ""}</p>
                     <p className={styles.prodPrice}>

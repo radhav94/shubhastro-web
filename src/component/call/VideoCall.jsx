@@ -35,6 +35,7 @@ import ChatNotificationBanner from "../UI/ChatNotificationBanner/ChatNotificatio
 import { capitalizeWords } from "../../utils/capitalize";
 import VideocamIcon from "../../assets/chat/Videocam.svg";
 import CallIcon from "../../assets/chat/Call.svg";
+import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
 
 // const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 const APP_ID = "cf5e31fa03584573aacaf42daebd493c";
@@ -81,6 +82,9 @@ const VideoCalling = ({ callData }) => {
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
   const [remoteVideoEnabled, setRemoteVideoEnabled] = useState(true);
   const [selectedProfile, setSelectedProfile] = useState(null);
+  const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
+  const [suggestedRemedyData, setSuggestedRemedyData] = useState({ suggestedProducts: [], messages: [] });
+  const [hasNewRemedy, setHasNewRemedy] = useState(false);
 
   const [getBalance] = useGetBalanceMutation();
   const { balance, isFetching, refreshWallet } = useWalletBalance();
@@ -109,7 +113,7 @@ const VideoCalling = ({ callData }) => {
   const showChatNotification = useCallback((data) => {
     if (data.sender === "user") return;
     
-    const messageText = data.type === "gift" ? "🎁 Sent a gift" : (data.message || data.response || "New message");
+    const messageText = data.type === "gift" ? "🎁 Sent a gift" : data.type === "products" ? "💊 Suggested a remedy" : (data.message || data.response || "New message");
     const astroImage = lastRequestedAstro?.imageUrl || lastRequestedAstro?.aadharCardImgUrl || lastRequestedAstro?.panCardImgUrl || null;
     const astroGender = lastRequestedAstro?.gender || null;
     setChatNotification({
@@ -128,8 +132,21 @@ const VideoCalling = ({ callData }) => {
 
   useEffect(() => {
     voiceSocket.on("message:recieved", showChatNotification);
+
+    const handleProductMessage = (data) => {
+      if (data?.type === "products" && data?.suggestedProducts?.length > 0) {
+        setSuggestedRemedyData((prev) => ({
+          suggestedProducts: [...prev.suggestedProducts, ...data.suggestedProducts],
+          messages: data.message ? [...prev.messages, data.message] : prev.messages,
+        }));
+        setHasNewRemedy(true);
+      }
+    };
+    voiceSocket.on("message:recieved", handleProductMessage);
+
     return () => {
       voiceSocket.off("message:recieved", showChatNotification);
+      voiceSocket.off("message:recieved", handleProductMessage);
       if (notificationTimerRef.current) clearTimeout(notificationTimerRef.current);
     };
   }, [showChatNotification]);
@@ -1183,9 +1200,17 @@ const VideoCalling = ({ callData }) => {
                 {/* <IoAttach size={16} /> */}
                 <span>Virtual Assistant</span>
               </button>
-              <button className={styles.actionBtn}>
+              <button
+                className={styles.actionBtn}
+                onClick={() => {
+                  setIsRemedyPanelOpen(true);
+                  setHasNewRemedy(false);
+                }}
+                style={{ position: 'relative' }}
+              >
                 {/* <IoSparkles size={16} /> */}
                 <span>Suggested Remedy</span>
+                {hasNewRemedy && <span className={styles.notificationDot} />}
               </button>
               <button
                 className={styles.actionBtn}
@@ -1369,6 +1394,17 @@ const VideoCalling = ({ callData }) => {
           onClose={() => setIsChatOpen(false)}
           videoCallData={chatData}
           sendMessageRef={sendChatMessageRef}
+        />
+
+        {/* Suggested Remedy Panel */}
+        <SuggestedRemedyPanel
+          isOpen={isRemedyPanelOpen}
+          onClose={() => setIsRemedyPanelOpen(false)}
+          remedyData={suggestedRemedyData}
+          onProductClick={() => {
+            setIsRemedyPanelOpen(false);
+            setIsMinimized(true);
+          }}
         />
 
         {/* Gift Modal */}
