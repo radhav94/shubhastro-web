@@ -1,17 +1,28 @@
 import { useState, useRef, useCallback } from "react";
-import { IoClose, IoSend, IoImageOutline, IoRefresh } from "react-icons/io5";
-import { IoChatbubbleEllipses } from "react-icons/io5";
-import { IoCheckmarkDone } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
+import {
+  IoClose,
+  IoSend,
+  IoImageOutline,
+  IoRefresh,
+  IoChatbubbleEllipses,
+  IoCheckmarkDone,
+  IoDownload,
+} from "react-icons/io5";
+import { GrReactjs } from "react-icons/gr";
 import styles from "./VirtualAssistant.module.scss";
 import useVirtualAssistant from "./useVirtualAssistant";
 import dayjs from "dayjs";
+import IframeModal from "../../screens/private/home/components/chats/IframeModal";
 
 const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen }) => {
   const [text, setText] = useState("");
   const [preview, setPreview] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [iframeSrc, setIframeSrc] = useState(null);
   const fileRef = useRef(null);
+  const navigate = useNavigate();
 
   const {
     messages,
@@ -124,6 +135,80 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen }) =
                               "https://via.placeholder.com/200x150?text=Image+Error";
                           }}
                         />
+                      ) : msg.type === "kundli" ? (
+                        <div
+                          className={styles.kundliLink}
+                          onClick={() => setIframeSrc(msg.message)}
+                        >
+                          <GrReactjs />
+                          {msg.kundliName
+                            ? `${msg.kundliName}'s Kundli`
+                            : "View Kundli"}
+                        </div>
+                      ) : msg.type === "audio" ? (
+                        <div className={styles.audioMessage}>
+                          <audio controls src={msg.message} preload="metadata" />
+                        </div>
+                      ) : msg.type === "video" ? (
+                        <div className={styles.videoMessage}>
+                          <video
+                            controls
+                            src={msg.message}
+                            preload="metadata"
+                            className={styles.msgVideo}
+                          />
+                        </div>
+                      ) : msg.type === "products" ? (
+                        <div className={styles.productsMessage}>
+                          {msg.message && (
+                            <p className={styles.productsNote}>{msg.message}</p>
+                          )}
+                          {(msg.suggestedProducts || []).map((p) => (
+                            <div
+                              key={p.productId}
+                              className={styles.productItem}
+                              onClick={() =>
+                                p.slug &&
+                                navigate(`/product-details/${p.slug}`)
+                              }
+                            >
+                              {(p.image || p.images?.[0]) && (
+                                <img
+                                  src={p.image || p.images?.[0]}
+                                  alt={p.title}
+                                  className={styles.productThumb}
+                                  onError={(e) => {
+                                    e.target.style.display = "none";
+                                  }}
+                                />
+                              )}
+                              <div className={styles.productMeta}>
+                                <span className={styles.productName}>
+                                  {p.title}
+                                </span>
+                                <span className={styles.productPrice}>
+                                  ₹{p.price}
+                                  {p.mrp && p.mrp > p.price && (
+                                    <s className={styles.productMrp}>
+                                      ₹{p.mrp}
+                                    </s>
+                                  )}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : msg.type === "attachment" ? (
+                        <a
+                          href={msg.message}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.attachmentLink}
+                          download
+                        >
+                          <IoDownload size={16} />
+                          {msg.message?.split("/").pop() || "Download File"}
+                        </a>
                       ) : (
                         <p className={styles.msgText}>{msg.message}</p>
                       )}
@@ -208,6 +293,13 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen }) =
           <img src={imagePreview} alt="Preview" className={styles.modalImage} />
         </div>
       )}
+
+      {/* Kundli Iframe Modal */}
+      <IframeModal
+        open={!!iframeSrc}
+        src={iframeSrc}
+        onClose={() => setIframeSrc(null)}
+      />
     </>
   );
 };

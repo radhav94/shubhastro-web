@@ -411,6 +411,132 @@ $shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   }
 }
 
+/* ==================== KUNDLI LINK ==================== */
+.kundliLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #F75801;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  svg {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+}
+
+/* ==================== AUDIO MESSAGE ==================== */
+.audioMessage {
+  audio {
+    max-width: 100%;
+    height: 36px;
+    border-radius: 18px;
+  }
+}
+
+/* ==================== VIDEO MESSAGE ==================== */
+.videoMessage {
+  .msgVideo {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    display: block;
+  }
+}
+
+/* ==================== PRODUCTS MESSAGE ==================== */
+.productsMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.productsNote {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: $text-primary;
+  line-height: 1.4;
+}
+
+.productItem {
+  display: flex;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #f9f9f9;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #f0f0f0;
+  }
+}
+
+.productThumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.productMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.productName {
+  font-size: 13px;
+  font-weight: 600;
+  color: $text-primary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.productPrice {
+  font-size: 13px;
+  font-weight: 600;
+  color: #F75801;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.productMrp {
+  font-size: 12px;
+  color: $text-time;
+  font-weight: 400;
+}
+
+/* ==================== ATTACHMENT LINK ==================== */
+.attachmentLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #F75801;
+  font-size: 13px;
+  text-decoration: none;
+  word-break: break-all;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
 /* ==================== IMAGE MODAL ==================== */
 .imageModal {
   position: fixed;
