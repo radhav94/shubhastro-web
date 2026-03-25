@@ -166,6 +166,30 @@
   }
 }
 
+.freeRibbon {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 8px 10px 4px 14px;
+  width: 60px;
+  height: 60px;
+  clip-path: polygon(100% 0, 100% 100%, 0 0);
+  pointer-events: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  border-radius: 0 12px 0 0;
+  z-index: 2;
+  @media (width <= 767px) {
+    width: 70px;
+    height: 70px;
+  }
+}
+
 .downloadBtn {
   display: flex;
   align-items: center;
