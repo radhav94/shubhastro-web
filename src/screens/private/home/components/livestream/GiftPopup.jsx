@@ -4,7 +4,7 @@ import { useSendGiftMutation } from "../../../../../redux/api/gift/giftApi";
 import { useWalletBalance } from "../../../wallet/useWalletBalance";
 import toast from "../../../../../component/toast";
 
-const GiftPopup = ({ show, onClose, giftList }) => {
+const GiftPopup = ({ show, onClose, giftList, astrologerId }) => {
   if (!show) return null;
   const [selected, setSelected] = useState(null);
   const [sendGift, { isLoading: isSending }] = useSendGiftMutation();
@@ -20,7 +20,7 @@ const GiftPopup = ({ show, onClose, giftList }) => {
     try {
       await sendGift({
         giftId: selected._id,
-        astrologerId: "69257999580767eaf53c0895",
+        astrologerId,
       }).unwrap();
 
       refreshWallet();
