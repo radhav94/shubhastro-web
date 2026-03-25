@@ -73,6 +73,7 @@ const LiveView = (props) => {
   const [callRoomId, setCallRoomId] = useState(null);
   const [callWaitingList, setCallWaitingList] = useState(null);
   const astrologerRef = useRef(null);
+  const prevMessageCountRef = useRef(0);
   
   const [createChatRoom] = useCreateChatRoomMutation();
   const [getBalance] = useGetBalanceMutation();
@@ -130,6 +131,16 @@ const LiveView = (props) => {
       setShowCallPopup(false);
     }
   }, [roomReady, ROLE]);
+
+  useEffect(() => {
+    const messageCount = displayMessages.length;
+
+    if (messageCount > prevMessageCountRef.current) {
+      setShowChatModal(true);
+    }
+
+    prevMessageCountRef.current = messageCount;
+  }, [displayMessages.length]);
 
   const isHost = ROLE === "host";
   const viewerCount = participantCount || (remoteUsers?.length || 0) + 1;
