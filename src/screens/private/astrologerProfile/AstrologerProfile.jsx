@@ -653,17 +653,29 @@ const AstrologerProfile = () => {
       audioMinutes: data?.metrics?.audioMinutes ?? 0,
       videoMinutes: data?.metrics?.videoMinutes ?? 0,
     },
+    
     description:
       data?.description ||
       "With years of dedicated practice, I've guided thousands of individuals across love, career, health, and life direction. My work combines classical Vedic principles with deep intuitive understanding, helping clients receive...",
-    gallery:
-      data?.gallery?.length > 0
-        ? data.gallery
-        : [
-            "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+1",
-            "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+2",
-            "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+3",
-          ],
+    // OLD: dummy/static gallery data
+    // gallery:
+    //   data?.gallery?.length > 0
+    //     ? data.gallery
+    //     : [
+    //         "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+1",
+    //         "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+2",
+    //         "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Video+3",
+    //       ],
+    // NEW: dynamic gallery from achievements (achievementImgUrl) and education (certificateImgUrl)
+    // Only include items where display === true, filter out null/undefined URLs
+    gallery: [
+      ...(data?.achievements || [])
+        .filter((item) => item?.display === true && item?.achievementImgUrl)
+        .map((item) => item.achievementImgUrl),
+      ...(data?.education || [])
+        .filter((item) => item?.display === true && item?.certificateImgUrl)
+        .map((item) => item.certificateImgUrl),
+    ],
     reviews:
       reviews.length > 0
         ? reviews.map((r) => ({
@@ -1080,11 +1092,11 @@ const AstrologerProfile = () => {
                           e.target.src = AstrologerNumerologyDefault;
                         }}
                       />
-                      <div className={styles.playButton}>
+                      {/* <div className={styles.playButton}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="13" viewBox="0 0 12 13" fill="none">
                           <path d="M0.490356 6.06335L0.490356 3.73566C0.490356 0.845659 2.53689 -0.337802 5.04113 1.1072L7.06151 2.27104L9.08189 3.43489C11.5861 4.87989 11.5861 7.24681 9.08189 8.69181L7.06151 9.85566L5.04113 11.0195C2.53689 12.4645 0.490356 11.281 0.490356 8.39104L0.490356 6.06335Z" stroke="#FEFEFE" stroke-width="0.980769" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                      </div>
+                      </div> */}
                     </div>
                   ))}
                 </div>
