@@ -42,7 +42,7 @@ const APP_ID = "cf5e31fa03584573aacaf42daebd493c";
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
 
 const VideoCalling = ({ callData }) => {
-  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, reconnectToCall } = useCall();
+  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, reconnectToCall, setWaitingList } = useCall();
   const { activeChat } = useChatContext();
   const navigate = useNavigate();
 
@@ -722,6 +722,7 @@ const VideoCalling = ({ callData }) => {
         
         // Reset the downgrade flag since we're staying in video mode
         isDowngradingToAudio.current = false;
+        setWaitingList(null);
         
         Toast.info(data?.message || "Audio call request rejected. Continuing with video call.");
         return;
@@ -777,12 +778,14 @@ const VideoCalling = ({ callData }) => {
     if (activeCall && activeCall.callType === "audio" && activeCall.roomId === roomId) {
       console.log("🔄 Detected activeCall changed to audio, setting downgrade flag...");
       isDowngradingToAudio.current = true;
+      setWaitingList(null);
     }
   }, [activeCall, roomId]);
 
   /* ================= SWITCH TO AUDIO ================= */
   const switchToAudio = () => {
     Toast.success("Switching to audio call...");
+    setWaitingList(5);
 
     voiceSocket.emit("call:initiate", {
       userId: activeCall.userId,

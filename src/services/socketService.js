@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
 class SocketService {
   socket = null;
+  _lastConnectErrorAt = 0;
 
   connect({ onConnected, onDisconnected, onError, onWarn }) {
     this.socket = io(BASE_URL, {
@@ -15,6 +16,7 @@ class SocketService {
     });
 
     this.socket.on("connect", () => {
+      this._lastConnectErrorAt = 0;
       onConnected?.();
     });
 
@@ -22,8 +24,12 @@ class SocketService {
       onDisconnected?.(reason);
     });
 
-    this.socket.on("connect_error", (err) => {
-      onError?.("Unable to connect to server");
+    this.socket.on("connect_error", () => {
+      const now = Date.now();
+      if (now - this._lastConnectErrorAt > 15000) {
+        this._lastConnectErrorAt = now;
+        onError?.("Unable to connect to server");
+      }
     });
 
     this.socket.on("error", (err) => {

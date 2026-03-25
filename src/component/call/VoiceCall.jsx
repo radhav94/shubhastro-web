@@ -401,9 +401,9 @@ const AgoraVoiceCalling = ({ callData }) => {
     await cleanup(isUpgradingToVideo.current);
   };
 
-  const handleCallCanceled = async () => {
-    await cleanup();
-  };
+  // const handleCallCanceled = async () => {
+  //   await cleanup();
+  // };
 
   /* ================= NETWORK RECONNECTION STATE ================= */
   const [isReconnecting, setIsReconnecting] = useState(false);
@@ -492,6 +492,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     if (activeCall && activeCall.callType === "video" && activeCall.roomId === roomId) {
       console.log("🔄 Detected activeCall changed to video, setting upgrade flag...");
       isUpgradingToVideo.current = true;
+      setWaitingList(null);
     }
   }, [activeCall, roomId]);
 
@@ -561,6 +562,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         
         // Reset the upgrade flag since we're staying in audio mode
         isUpgradingToVideo.current = false;
+        setWaitingList(null);
         
         // Show toast notification
         Toast.info(data?.message || "Video call request rejected. Continuing with audio call.");
@@ -575,13 +577,13 @@ const AgoraVoiceCalling = ({ callData }) => {
     };
 
     voiceSocket.on("call:ended", handleCallEnded);
-    voiceSocket.on("call:canceled", handleCallCanceled);
+    // voiceSocket.on("call:canceled", handleCallCanceled);
     voiceSocket.on("call:rejected", handleCallRejected);
     voiceSocket.on("call:reconnected", handleCallReconnected);
 
     return () => {
       voiceSocket.off("call:ended", handleCallEnded);
-      voiceSocket.off("call:canceled", handleCallCanceled);
+      // voiceSocket.off("call:canceled", handleCallCanceled);
       voiceSocket.off("call:rejected", handleCallRejected);
       voiceSocket.off("call:reconnected", handleCallReconnected);
     };
@@ -674,6 +676,7 @@ const AgoraVoiceCalling = ({ callData }) => {
 
       // Balance is sufficient, proceed with video call
       Toast.success("Switching to video call...");
+      setWaitingList(5);
 
       voiceSocket.emit("call:initiate", {
         userId: activeCall.userId,

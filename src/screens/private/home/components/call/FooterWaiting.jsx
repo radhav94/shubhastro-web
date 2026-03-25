@@ -4,7 +4,7 @@ import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
 
 export const FooterWaiting = () => {
-  const { waitingList, resetCallFlow, activeCallRoomId, setCallApproval, setWaitingList, lastRequestedAstro } = useCall();
+  const { waitingList, resetCallFlow, activeCall, activeCallRoomId, setCallApproval, setWaitingList, lastRequestedAstro } = useCall();
 
   useEffect(() => {
     const handleAstrologerIncoming = (data) => {
@@ -19,6 +19,16 @@ export const FooterWaiting = () => {
   }, [])
 
   const astrologerName = lastRequestedAstro?.firstName;
+
+  const handleCancel = () => {
+    voiceSocket.emit("call:cancel", {roomId: activeCallRoomId, canceledBy: "CUSTOMER"});
+    // During a switch (activeCall exists), only clear waiting state — don't reset the timer
+    if (activeCall) {
+      setWaitingList(null);
+    } else {
+      resetCallFlow();
+    }
+  };
 
   return (
     <>
@@ -38,10 +48,7 @@ export const FooterWaiting = () => {
       </div>
 
       <button
-        onClick={() => {
-          voiceSocket.emit("call:cancel", {roomId : activeCallRoomId, canceledBy : "CUSTOMER"});
-          resetCallFlow();
-        }}
+        onClick={handleCancel}
         className="rounded-xl border border-red-500/40 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm text-red-400 hover:bg-red-500/10 transition flex-shrink-0"
       >
         Cancel

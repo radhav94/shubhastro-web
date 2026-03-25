@@ -124,16 +124,23 @@ voiceSocket.on("disconnect", (reason) => {
   }
 });
 
+let _lastVoiceConnectErrorAt = 0;
+
 voiceSocket.on("reconnect_attempt", (attemptNumber) => {
   console.log("[VoiceSocket] 🔄 Reconnect attempt:", attemptNumber);
 });
 
 voiceSocket.on("reconnect", (attemptNumber) => {
+  _lastVoiceConnectErrorAt = 0;
   console.log("[VoiceSocket] ✅ Reconnected after", attemptNumber, "attempts");
 });
 
 voiceSocket.on("reconnect_error", (err) => {
-  console.log("[VoiceSocket] ❌ Reconnect error:", err.message);
+  const now = Date.now();
+  if (now - _lastVoiceConnectErrorAt > 15000) {
+    _lastVoiceConnectErrorAt = now;
+    console.log("[VoiceSocket] ❌ Reconnect error:", err.message);
+  }
 });
 
 voiceSocket.on("reconnect_failed", () => {
@@ -142,7 +149,11 @@ voiceSocket.on("reconnect_failed", () => {
 });
 
 voiceSocket.on("connect_error", (err) => {
-  console.log("[VoiceSocket] ❌ Connect error:", err.message);
+  const now = Date.now();
+  if (now - _lastVoiceConnectErrorAt > 15000) {
+    _lastVoiceConnectErrorAt = now;
+    console.log("[VoiceSocket] ❌ Connect error:", err.message);
+  }
 });
 
 // Log all call-related incoming events
