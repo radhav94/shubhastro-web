@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import socketService from "../../../../../services/socketService";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import toast from "../../../../../component/toast";
@@ -7,7 +6,6 @@ import { useChat as useChatContext } from "../../../../../context/ChatContext"
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
 import { useCall } from "../../../../../context/CallContext";
 import { showErrorWithHighlight } from "../../../../../utils/showErrorWithHighlight";
-import { PATH } from "../../../../../utils/routes/Paths";
 
 export default function useChat({
   userId,
@@ -21,7 +19,6 @@ export default function useChat({
 }) {
   const { startTimer, stopTimer, chatSeconds, setActiveChat, activeChat, reconnectToChat } = useChatContext();
   const { activeCall, openReview } = useCall();
-  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
@@ -70,12 +67,6 @@ export default function useChat({
     
     // Clear chat start time
     localStorage.removeItem("shubhtalk_chat_start_time");
-
-    // Customer ended the chat — navigate home directly
-    if (data?.endedBy === 'CUSTOMER') {
-      navigate(PATH.privateRoutes.HOME.path, { replace: true });
-      return;
-    }
 
     // Don't show chat feedback if call review is already open (chat→call switch scenario)
     // or if there's an active call (chat ended because user switched to call)
