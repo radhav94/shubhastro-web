@@ -7,6 +7,7 @@ import {
   Filter,
   ArrowUpDown,
   Phone,
+  Video,
   MessageCircle,
   Star,
   Trash2,
@@ -202,6 +203,7 @@ const Profile = () => {
         .map((item, index) => ({
           id: `call-${callHistoryPage}-${index}`,
           type: "call",
+          sessionType: item?.type || "audio",
           astrologer: {
             name: item?.receiverName || "Unknown",
             image: "https://i.pravatar.cc/100",
@@ -1425,7 +1427,7 @@ const Profile = () => {
 
                             <button className={styles.orderTypeIcon}>
                               {order.type === "call" ? (
-                                <Phone size={20} />
+                                order.sessionType === "video" ? <Video size={20} /> : <Phone size={20} />
                               ) : (
                                 <MessageCircle size={20} />
                               )}
