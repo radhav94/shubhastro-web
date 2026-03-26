@@ -415,14 +415,6 @@ const OrderDetails = () => {
           return await handleCallStart(astro, type);
         }}
       />
-
-      {isWaiting && (
-        <WaitingModal
-          callRoomId={waitingRoomId}
-          resetCallState={resetWaitingState}
-          connectionType={connectionType}
-        />
-      )}
     </div>
   );
 };

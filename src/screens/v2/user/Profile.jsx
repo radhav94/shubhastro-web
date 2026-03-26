@@ -206,7 +206,7 @@ const Profile = () => {
           sessionType: item?.type || "audio",
           astrologer: {
             name: item?.receiverName || "Unknown",
-            image: "https://i.pravatar.cc/100",
+            image: item?.astrologerProfileImgUrl || "",
             _id: item?.receiverId,
             astrologer_ID: item?.astrologer_ID || item?.receiverAstrologerId,
             firstName: item?.receiverName?.split(" ")[0] || "Unknown",
@@ -237,7 +237,7 @@ const Profile = () => {
             name: room.astrologerFirstName
               ? `${room.astrologerFirstName} ${room.astrologerLastName || ""}`
               : "Unknown",
-            image: "https://i.pravatar.cc/150",
+            image: room.astrologerProfileImgUrl || "",
             _id: room.astrologerId,
             astrologer_ID: room.astrologer_ID || room.astrologerAstrologerId,
             firstName: room.astrologerFirstName || "Unknown",
@@ -1392,9 +1392,11 @@ const Profile = () => {
                                 }} 
                                 style={{ cursor: 'pointer' }}
                               >
-                                <span>
-                                  {getInitials(order.astrologer.name)}
-                                </span>
+                                {order.astrologer.image ? (
+                                  <img src={order.astrologer.image} alt={order.astrologer.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                                ) : (
+                                  <span>{getInitials(order.astrologer.name)}</span>
+                                )}
                               </div>
                               <div className={styles.orderInfo}>
                                 <h5 
