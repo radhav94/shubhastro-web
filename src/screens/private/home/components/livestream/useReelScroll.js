@@ -20,6 +20,10 @@ export const useReelScroll = ({
       // allow scroll in inputs
       if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
 
+      // allow scroll inside messages overlay
+      const messagesOverlay = el.querySelector(".inline-messages-overlay");
+      if (messagesOverlay && messagesOverlay.contains(e.target)) return;
+
       e.preventDefault();
 
       deltaAcc.current += e.deltaY;

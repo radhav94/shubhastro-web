@@ -58,8 +58,6 @@ const LiveView = (props) => {
 
   const [showGifts, setShowGifts] = useState(false);
   const [showCallPopup, setShowCallPopup] = useState(false);
-  
-  const [showChatModal, setShowChatModal] = useState(false);
   const [showWaitingModal, setShowWaitingModal] = useState(false);
 
   const { 
@@ -151,8 +149,7 @@ const LiveView = (props) => {
   useEffect(() => {
     if (!hostLeft || ROLE === "host") return;
 
-    // Close chat modal when astrologer ends the live
-    setShowChatModal(false);
+    // Close popups when astrologer ends the live
     setShowGifts(false);
     setShowCallPopup(false);
   }, [hostLeft, ROLE]);
@@ -160,20 +157,23 @@ const LiveView = (props) => {
   // Also close popups when the socket room ends (roomReady → false)
   useEffect(() => {
     if (roomReady === false && ROLE !== "host") {
-      setShowChatModal(false);
       setShowGifts(false);
       setShowCallPopup(false);
     }
   }, [roomReady, ROLE]);
 
+  // Track previous message count
   useEffect(() => {
-    const messageCount = displayMessages.length;
+    prevMessageCountRef.current = displayMessages.length;
+  }, [displayMessages.length]);
 
-    if (messageCount > prevMessageCountRef.current) {
-      setShowChatModal(true);
+  const messagesOverlayRef = useRef(null);
+
+  // Auto-scroll inline messages overlay when new messages arrive
+  useEffect(() => {
+    if (messagesOverlayRef.current) {
+      messagesOverlayRef.current.scrollTop = messagesOverlayRef.current.scrollHeight;
     }
-
-    prevMessageCountRef.current = messageCount;
   }, [displayMessages.length]);
 
   const isHost = ROLE === "host";
@@ -560,18 +560,44 @@ const LiveView = (props) => {
 
           {/* CHAT */}
           <div className="chat-panel">
+            {/* Inline Messages Overlay */}
+            <div className="inline-messages-overlay" ref={messagesOverlayRef}>
+              {displayMessages.map((m, index) => (
+                <div key={m.id || index} className={`inline-message ${m.role === "host" ? "inline-host-message" : ""}`}>
+                  <span className="inline-initial">
+                    {(m.sender || (m.role === "host" ? "A" : "U")).charAt(0).toUpperCase()}
+                  </span>
+                  <div className="inline-message-body">
+                    {m.sender && (
+                      <span className="inline-sender">{m.sender}</span>
+                    )}
+                    <span className="inline-text">{m.text}</span>
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+
             {/* Chat Input */}
             <div className="chat-input-row">
-              <div className="input-wrapper" onClick={() => setShowChatModal(true)}>
+              <div className="input-wrapper">
                 <input
                   type="text"
                   placeholder="Ask a question..."
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  onFocus={() => setShowChatModal(true)}
-                  readOnly
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSend(e);
+                    }
+                  }}
                 />
-                <button type="button" className="send-icon-btn">
+                <button
+                  type="button"
+                  className="send-icon-btn"
+                  onClick={(e) => handleSend(e)}
+                >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="22" y1="2" x2="11" y2="13"/>
                     <polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -593,67 +619,6 @@ const LiveView = (props) => {
             </div>
           </div>
 
-          {/* Chat Modal */}
-          {showChatModal && (
-            <div className="chat-modal-overlay" onClick={() => setShowChatModal(false)}>
-              <div className="chat-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="chat-modal-handle"></div>
-                
-                <div className="chat-modal-messages">
-                  {displayMessages.length === 0 && (
-                    <div className="chat-empty-state">
-                      <span>💬</span>
-                      <p>No messages yet. Be the first to say something!</p>
-                    </div>
-                  )}
-                  {displayMessages.map((m, index) => (
-                    <div key={m.id || index} className={`chat-modal-message ${m.role === "host" ? "host-message" : ""}`}>
-                      <div className="message-avatar">
-                        <div className="avatar-circle">
-                          {m.role === "host" ? "🕉️" : "👤"}
-                        </div>
-                      </div>
-                      <div className="message-content">
-                        {m.sender && (
-                          <span className="message-sender">{m.sender}</span>
-                        )}
-                        <p className="message-text">{m.text}</p>
-                      </div>
-                    </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
-
-                <div className="chat-modal-input">
-                  <input
-                    type="text"
-                    placeholder="Share your thoughts..."
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleSend(e);
-                      }
-                    }}
-                    autoFocus
-                  />
-                  <button 
-                    type="button" 
-                    className="modal-send-btn"
-                    onClick={(e) => {
-                      handleSend(e);
-                    }}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="22" y1="2" x2="11" y2="13"/>
-                      <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
           <GiftPopup
             show={showGifts}
             onClose={() => setShowGifts(false)}
