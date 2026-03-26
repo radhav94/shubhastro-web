@@ -176,7 +176,7 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
       const kundliLink = msg.kundliId
         ? `${window.location.origin}/kundli/${msg.kundliId}`
         : null;
-        console.log(kundliLink,"78909876789")
+        // console.log(kundliLink,"78909876789")
       return (
         <div
           onClick={() => kundliLink && setIframeSrc(kundliLink)}
