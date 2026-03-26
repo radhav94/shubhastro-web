@@ -131,6 +131,10 @@ import tarotCard from "../assets/images/tarotCard.png";
 import cosmicMoon from "../assets/images/daily-insight-1.png";
 import cosmicChronicles from "../assets/images/daily-insight-2.png";
 import cosmicUnity from "../assets/images/daily-insight-3.png";
+import LiveGift from "../assets/images/livegift.png";
+import LiveShare from "../assets/images/liveshare.png";
+import LiveClock from "../assets/images/liveclock.png";
+import LikesIconContainer from "../assets/images/Likes Icon Container.png";
 
 export const AppImages = {
   Hero,
@@ -153,6 +157,10 @@ export const AppImages = {
   cosmicMoon,
   cosmicChronicles,
   cosmicUnity,
+  LiveGift,
+  LiveShare,
+  LiveClock,
+  LikesIconContainer,
 };
 
 //svgs

@@ -137,6 +137,14 @@
   background: radial-gradient(circle at center, rgba(0, 0, 0, 0.7), transparent);
 }
 
+/* FOLLOW BAR */
+.follow-bar {
+  position: absolute;
+  top: 85px;
+  right: 14px;
+  z-index: 101;
+}
+
 /* TOP BAR */
 .top-bar {
   position: absolute;
@@ -185,6 +193,30 @@
   color: #fff;
   font-size: 11px;
   text-shadow: 0px 0px 2px black;
+}
+
+.follow-btn {
+  padding: 5px 16px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #ff8c00, #ffa940);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255, 140, 0, 0.4);
+
+  &.following {
+    background: linear-gradient(135deg, #e07800, #ff9a20);
+    box-shadow: 0 2px 8px rgba(224, 120, 0, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
 
 .live-status {

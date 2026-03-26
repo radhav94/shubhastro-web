@@ -22,6 +22,12 @@ import { PATH } from "../../../../../utils/routes/Paths";
 import { createPortal } from "react-dom";
 import { ChevronLeft } from "lucide-react";
 import { clearViewerSession } from "../../../../../utils/liveSessionStorage";
+import { AppImages } from "../../../../../utils/appImages";
+import {
+  useCheckFollowingStatusQuery,
+  useFollowAstrologerByIdMutation,
+  useUnfollowAstrologerByIdMutation,
+} from "../../../../../redux/api/astrologer/followAstrologerApi";
 
 const FixedLayer = ({ children }) => {
   return createPortal(children, document.body);
@@ -73,9 +79,38 @@ const LiveView = (props) => {
   const [callRoomId, setCallRoomId] = useState(null);
   const [callWaitingList, setCallWaitingList] = useState(null);
   const astrologerRef = useRef(null);
+  const prevMessageCountRef = useRef(0);
   
   const [createChatRoom] = useCreateChatRoomMutation();
   const [getBalance] = useGetBalanceMutation();
+
+  // Follow/unfollow astrologer
+  const astrologerId = astrologer?._id || astrologer?.astrologerId;
+  const { data: followingData } = useCheckFollowingStatusQuery(
+    { astrologerId },
+    { skip: !astrologerId }
+  );
+  const isFollowing = followingData?.data?.some(
+    (item) => item.astrologerId === astrologerId && item.isFollowing === true
+  ) || false;
+  const [followAstrologer, { isLoading: followLoading }] = useFollowAstrologerByIdMutation();
+  const [unfollowAstrologer, { isLoading: unfollowLoading }] = useUnfollowAstrologerByIdMutation();
+
+  const handleFollow = async () => {
+    if (!astrologerId) return;
+    try {
+      if (!isFollowing) {
+        await followAstrologer({ astrologerId }).unwrap();
+        Toast.success(`You are now following ${astrologer?.astrologerName || "this astrologer"}`);
+      } else {
+        await unfollowAstrologer({ astrologerId }).unwrap();
+        Toast.success(`Unfollowed ${astrologer?.astrologerName || "this astrologer"}`);
+      }
+    } catch (err) {
+      console.error("Follow/Unfollow error:", err);
+      Toast.error("Something went wrong");
+    }
+  };
 
   // Fetch user's kundli profiles for validation
   const { data: kundliData } = useGetAllKundlisQuery(undefined, {
@@ -130,6 +165,16 @@ const LiveView = (props) => {
       setShowCallPopup(false);
     }
   }, [roomReady, ROLE]);
+
+  useEffect(() => {
+    const messageCount = displayMessages.length;
+
+    if (messageCount > prevMessageCountRef.current) {
+      setShowChatModal(true);
+    }
+
+    prevMessageCountRef.current = messageCount;
+  }, [displayMessages.length]);
 
   const isHost = ROLE === "host";
   const viewerCount = participantCount || (remoteUsers?.length || 0) + 1;
@@ -417,15 +462,31 @@ const LiveView = (props) => {
             <span className="live-header-title">Live Readings</span>
           </div>
 
+          {/* Follow Button */}
+          {!isHost && (
+            <div className="follow-bar">
+              <button
+                className={`follow-btn ${isFollowing ? "following" : ""}`}
+                onClick={handleFollow}
+                disabled={followLoading || unfollowLoading}
+              >
+                {followLoading || unfollowLoading
+                  ? "..."
+                  : isFollowing
+                  ? "Following"
+                  : "+ Follow"}
+              </button>
+            </div>
+          )}
+
           {/* Astrologer Info Bar */}
           <div className="top-bar">
             <div className="host-info">
               <div className="host-avatar">🕉️</div>
-              <div>
+              <div className="host-text">
                 <div className="host-name">
                   {astrologer?.astrologerName || "Astrologer"}
                 </div>
-                <div className="host-subtitle">ShubhAstro</div>
               </div>
             </div>
 
@@ -526,7 +587,7 @@ const LiveView = (props) => {
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                   </svg>
-                  <span>₹{astrologer?.audioCallRate || 20}/ min</span>
+                  <span>₹{astrologer?.audioCallRate || 0}/ min</span>
                 </button>
               )}
             </div>
@@ -597,6 +658,7 @@ const LiveView = (props) => {
             show={showGifts}
             onClose={() => setShowGifts(false)}
             giftList={giftList?.data}
+            astrologerId={astrologer?._id || astrologer?.astrologerId}
           />
           <SharePopup
             show={showSharePopup}
@@ -631,38 +693,24 @@ const LiveView = (props) => {
             {/* Timer / Stopwatch */}
             <button className="icon-btn">
               <div className="icon-circle">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="13" r="8"/>
-                  <path d="M12 9v4l2 2"/>
-                  <path d="M8 3h8"/>
-                  <path d="M12 3v2"/>
-                </svg>
+                <img src={AppImages.LiveClock} alt="Timer" width="28" height="28" />
               </div>
               <span className="icon-label">20m</span>
             </button>
 
             {/* Viewers */}
-            <button className="icon-btn">
+            <div className="icon-btn" style={{ cursor: "default" }}>
               <div className="icon-circle">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
+                <img src={AppImages.LikesIconContainer} alt="Viewers" width="28" height="28" />
               </div>
               <span className="icon-label">{viewerCount > 1000 ? `${(viewerCount/1000).toFixed(1)}k` : viewerCount}</span>
-            </button>
+            </div>
 
             {/* Send Gift */}
             {!isHost && (
               <button className="icon-btn" onClick={() => setShowGifts(true)}>
                 <div className="icon-circle">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 12 20 22 4 22 4 12"/>
-                    <rect x="2" y="7" width="20" height="5"/>
-                    <line x1="12" y1="22" x2="12" y2="7"/>
-                    <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
-                    <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
-                  </svg>
+                  <img src={AppImages.LiveGift} alt="Send gift" width="28" height="28" />
                 </div>
                 <span className="icon-label">Send gift</span>
               </button>
@@ -671,10 +719,7 @@ const LiveView = (props) => {
             {/* Share (curved reply arrow) */}
             <button className="icon-btn" onClick={() => setShowSharePopup(true)}>
               <div className="icon-circle">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M15 5l5 5-5 5"/>
-                  <path d="M20 10H8.5A5.5 5.5 0 0 0 3 15.5v.5"/>
-                </svg>
+                <img src={AppImages.LiveShare} alt="Share" width="28" height="28" />
               </div>
               <span className="icon-label">{viewerCount > 1000 ? `${(viewerCount/1000).toFixed(1)}k` : viewerCount}</span>
             </button>
