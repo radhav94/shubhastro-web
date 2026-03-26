@@ -315,8 +315,12 @@ const ChatWindow = () => {
   };
 
   const sendFiles = async (blob, meta) => {
+    // Extract file extension from original name for proper S3 key
+    const ext = meta?.name?.split('.').pop();
+    const fileType = ext && ext !== meta?.name ? `application/${ext}` : blob.type;
+    
     const signedUrl = await getS3SignedUrl({
-      fileType: blob.type,
+      fileType,
     }).unwrap();
 
     const uploadUrl = signedUrl.uploadUrl;
