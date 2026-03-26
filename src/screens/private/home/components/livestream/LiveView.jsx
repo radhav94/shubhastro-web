@@ -178,6 +178,7 @@ const LiveView = (props) => {
   }, [displayMessages.length]);
 
   const isHost = ROLE === "host";
+  const isAstrologerLive = remoteUsers?.length > 0 && !hostLeft;
   const viewerCount = participantCount || (remoteUsers?.length || 0) + 1;
 
   const {
@@ -463,8 +464,8 @@ const LiveView = (props) => {
             <span className="live-header-title">Live Readings</span>
           </div>
 
-          {/* Follow Button */}
-          {!isHost && (
+          {/* Follow Button - only show when astrologer is live */}
+          {!isHost && isAstrologerLive && (
             <div className="follow-bar">
               <button
                 className={`follow-btn ${isFollowing ? "following" : ""}`}
@@ -480,7 +481,8 @@ const LiveView = (props) => {
             </div>
           )}
 
-          {/* Astrologer Info Bar */}
+          {/* Astrologer Info Bar - only show when astrologer is live */}
+          {isAstrologerLive && (
           <div className="top-bar">
             <div className="host-info">
               <div className="host-avatar">🕉️</div>
@@ -505,6 +507,7 @@ const LiveView = (props) => {
               </div>
             </div> */}
           </div>
+          )}
 
           {/* LIVE INDEX INDICATOR */}
           {!isHost && liveListCtx && <div className="live-counter"></div>}
@@ -559,7 +562,8 @@ const LiveView = (props) => {
             </div>
           )}
 
-          {/* CHAT */}
+          {/* CHAT - only show when astrologer is live */}
+          {isAstrologerLive && (
           <div className="chat-panel">
             {/* Chat Input */}
             <div className="chat-input-row">
@@ -593,6 +597,7 @@ const LiveView = (props) => {
               )}
             </div>
           </div>
+          )}
 
           {/* Chat Modal */}
           {showChatModal && (
@@ -689,7 +694,8 @@ const LiveView = (props) => {
             />
           )}
 
-          {/* NEW BOTTOM ACTION BAR */}
+          {/* NEW BOTTOM ACTION BAR - only show when astrologer is live */}
+          {isAstrologerLive && (
           <div className="right-action-bar">
             {/* Timer / Stopwatch */}
             <button className="icon-btn">
@@ -740,6 +746,7 @@ const LiveView = (props) => {
               </button>
             )}
           </div>
+          )}
         </div>
       </div>
     </FixedLayer>
