@@ -123,10 +123,18 @@ const EPoojaCheckout = () => {
     try {
       const res = await createMallOrder(payload).unwrap();
       console.log("[EPoojaCheckout] Create order response:", JSON.stringify(res));
-      // Prioritize numeric ID field used in update URL (e.g. /api/mall/orders/59)
-      orderIdRef.current = res?.data?.order?.ID || res?.data?.ID || res?.order?.ID || res?.ID || res?.data?.order?._id || res?.data?._id || res?.order?._id || res?._id || generatedId;
+      // Prioritize _id (MongoDB ObjectId) for update URL (e.g. /api/mall/orders/69c50cb5...)
+      orderIdRef.current = res?.data?.order?._id || res?.data?._id || res?.order?._id || res?._id
+        || res?.data?.order?.id || res?.data?.id || res?.order?.id || res?.id
+        || generatedId;
       console.log("[EPoojaCheckout] Using orderId:", orderIdRef.current);
-      return orderIdRef.current;
+
+      // Extract Razorpay gateway order ID for checkout (starts with "order_")
+      const gatewayOrderId = res?.data?.order?.gatewayOrderId || res?.data?.gatewayOrderId || res?.order?.gatewayOrderId || res?.gatewayOrderId
+        || res?.data?.order?.razorpay_order_id || res?.data?.razorpay_order_id || res?.order?.razorpay_order_id || res?.razorpay_order_id;
+      console.log("[EPoojaCheckout] Razorpay gatewayOrderId:", gatewayOrderId);
+
+      return { orderId: orderIdRef.current, gatewayOrderId };
     } catch (err) {
       console.error("[EPoojaCheckout] Failed to create order:", err);
       return null;
@@ -181,11 +189,16 @@ const EPoojaCheckout = () => {
     setIsProcessing(true);
 
     // Step 1: Create order with pending status
-    const orderId = await createOrder();
-    if (!orderId) {
+    const orderResult = await createOrder();
+    if (!orderResult) {
       setIsProcessing(false);
       Toast.error("Failed to create order. Please try again.");
       return;
+    }
+
+    const { gatewayOrderId } = orderResult;
+    if (!gatewayOrderId) {
+      console.warn("[EPoojaCheckout] No gatewayOrderId returned from backend. Razorpay order_id will be missing.");
     }
 
     const amountInPaise = Math.round(grandTotal * 100);
@@ -195,6 +208,7 @@ const EPoojaCheckout = () => {
       currency: "INR",
       name: "ShubhTalk",
       description: items.length === 1 ? getItemTitle(items[0]) : `${items.length} items from AstroMall`,
+      ...(gatewayOrderId && { order_id: gatewayOrderId }),
       handler: async () => {
         setIsProcessing(false);
         // Step 2: Update order to paid with actual payment method

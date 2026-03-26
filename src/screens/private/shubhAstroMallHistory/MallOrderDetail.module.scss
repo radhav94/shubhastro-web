@@ -1,0 +1,361 @@
+.container {
+  min-height: 100vh;
+  background-color: #f8f8f8;
+  padding-bottom: 70px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.topSpacer {
+  height: 100px;
+  @media (max-width: 1180px) { height: 65px; }
+  @media (max-width: 767px) { height: 58px; }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 88px;
+  z-index: 100;
+
+  @media (max-width: 1180px) { top: 55px; }
+  @media (max-width: 767px) { top: 48px; }
+}
+
+.backBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #f75801;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #f75801;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 14px;
+}
+
+.body {
+  padding: 0 12px 20px;
+}
+
+.section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: center;
+  margin: 0 0 14px;
+  letter-spacing: 0.5px;
+
+  &::after {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 2px;
+    background: #F75801;
+    margin: 6px auto 0;
+    border-radius: 2px;
+  }
+}
+
+/* ── Order Details rows ── */
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f5f5f5;
+  gap: 12px;
+
+  &:last-of-type { border-bottom: none; }
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+  flex-shrink: 0;
+}
+
+.value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+  text-align: right;
+  word-break: break-all;
+}
+
+.addressBlock {
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.addressText {
+  font-size: 13px;
+  color: #333;
+  margin: 4px 0 2px;
+  line-height: 1.5;
+}
+
+.addressName {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+}
+
+/* ── Product cards ── */
+.productList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.productCard {
+  display: flex;
+  gap: 12px;
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.productImg {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f0ebe3;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.imgPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f0ebe3 0%, #e8ddd3 100%);
+}
+
+.productInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+
+  h4 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a1a;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.itemId {
+  font-size: 11px;
+  color: #888;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.meta {
+  display: flex;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+.chip {
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 14px;
+  background: #fff;
+  color: #555;
+  border: 1px solid #eee;
+}
+
+.price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #F75801;
+  margin: 0;
+}
+
+.taxNote {
+  font-size: 11px;
+  font-weight: 400;
+  color: #888;
+}
+
+/* ── Price breakdown ── */
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+  color: #555;
+  gap: 12px;
+}
+
+.priceLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.totalRow {
+  font-weight: 700;
+  font-size: 14px;
+  color: #1a1a1a;
+  padding-top: 10px;
+  margin-top: 4px;
+  border-top: 1px solid #eee;
+}
+
+.downloadBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 11px;
+  border: 1.5px solid #F75801;
+  border-radius: 10px;
+  background: #fff;
+  color: #F75801;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover { background: #fff5f0; }
+}
+
+/* ── Bottom bar ── */
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+  padding: 12px 16px;
+  background: #fff;
+  border-top: 1px solid #eee;
+  z-index: 100;
+}
+
+.orderAgainBtn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: #F75801;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover { background: #d43400; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .container { padding-bottom: 80px; }
+  .header { padding: 12px 14px; }
+  .title { font-size: 15px; }
+  .body { padding: 0 8px 16px; }
+  .section { padding: 14px 12px; margin-top: 10px; border-radius: 10px; }
+  .sectionTitle { font-size: 12px; }
+  .detailRow { padding: 8px 0; }
+  .label { font-size: 12px; }
+  .value { font-size: 12px; }
+  .productCard { padding: 10px; gap: 10px; }
+  .productImg { width: 60px; height: 60px; border-radius: 8px; }
+  .nameRow h4 { font-size: 12px; }
+  .itemId { font-size: 10px; }
+  .chip { font-size: 10px; padding: 2px 8px; }
+  .price { font-size: 13px; }
+  .taxNote { font-size: 10px; }
+  .priceRow { font-size: 12px; }
+  .totalRow { font-size: 13px; }
+  .downloadBtn { padding: 10px; font-size: 12px; }
+  .bottomBar { padding: 10px 12px; }
+  .orderAgainBtn { padding: 12px; font-size: 14px; border-radius: 10px; }
+  .addressText { font-size: 12px; }
+  .addressName { font-size: 11px; }
+}
+
+@media (max-width: 360px) {
+  .header { padding: 10px 12px; gap: 8px; }
+  .title { font-size: 14px; }
+  .body { padding: 0 6px 12px; }
+  .section { padding: 12px 10px; margin-top: 8px; }
+  .productImg { width: 52px; height: 52px; }
+  .nameRow h4 { font-size: 11px; }
+  .price { font-size: 12px; }
+}
+
+@media (min-width: 768px) {
+  .container { max-width: 640px; }
+  .body { padding: 0 16px 24px; }
+  .section { padding: 20px; }
+  .productImg { width: 80px; height: 80px; }
+  .nameRow h4 { font-size: 14px; }
+  .bottomBar { max-width: 640px; }
+}
+
+@media (min-width: 1024px) {
+  .container { max-width: 720px; }
+  .bottomBar { max-width: 720px; }
+}
