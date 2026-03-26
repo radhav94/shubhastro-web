@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useMemo, useState } from "react";
+import { useRef, useLayoutEffect, useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoAttach, IoClose } from "react-icons/io5";
 import styles from "./VideoCallChat.module.scss";
@@ -10,20 +10,37 @@ import dayjs from "dayjs";
 import { useVideoCallChat } from "./useVideoCallChat";
 import { GrReactjs } from "react-icons/gr";
 import IframeModal from "../../screens/private/home/components/chats/IframeModal";
+// OLD: KundliSelectModal for kundli selection
+// import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
+// NEW: ProfileManager for kundli listing and selection — auto-selects self, not ideal for user choice
+// import { ProfileManager } from "../UI/Profile";
+// RESTORED: KundliSelectModal — shows proper list for user to choose from (matches ChatInput.jsx)
+import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
 
 const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 
-const VideoCallChat = ({
-  isOpen,
-  onClose,
-  videoCallData,
-  sendMessageRef
-}) => {
+const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
   const messagesRef = useRef(null);
   const [iframeSrc, setIframeSrc] = useState(null);
   const navigate = useNavigate();
+  const [kundliModalOpen, setKundliModalOpen] = useState(false);
+  const [attachMenuOpen, setAttachMenuOpen] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraPreview, setCameraPreview] = useState(null);
+  const [isSending, setIsSending] = useState(false);
+  const [facingMode, setFacingMode] = useState('environment');
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const canvasRef = useRef(null);
 
-  const { astrologerId, userId, isUserSide, kundliId, chatRoomId, astrologerName } = videoCallData || {};
+  const {
+    astrologerId,
+    userId,
+    isUserSide,
+    kundliId,
+    chatRoomId,
+    astrologerName,
+  } = videoCallData || {};
 
   // Always call hooks - use the custom hook for chat functionality
   const { messages, sendMessage: sendChatMessage } = useVideoCallChat({
@@ -32,7 +49,7 @@ const VideoCallChat = ({
     roomId: chatRoomId,
     kundliId,
     isActive: isOpen,
-    astrologerName
+    astrologerName,
   });
 
   // Expose sendMessage function via ref
@@ -48,7 +65,7 @@ const VideoCallChat = ({
   // Get chat history
   const { data } = useGetChatHistoryQuery(
     { userId: astrologerId },
-    { refetchOnMountOrArgChange: true }
+    { refetchOnMountOrArgChange: true },
   );
   const history = data?.data || [];
 
@@ -86,7 +103,7 @@ const VideoCallChat = ({
     }));
 
     return [...historyMsgs, ...socketMsgs].sort(
-      (a, b) => new Date(a.dateTime) - new Date(b.dateTime)
+      (a, b) => new Date(a.dateTime) - new Date(b.dateTime),
     );
   }, [history, messages, isUserSide, isOpen, videoCallData]);
 
@@ -98,6 +115,29 @@ const VideoCallChat = ({
     if (!container) return;
     container.scrollTop = container.scrollHeight;
   }, [finalMsgs, isOpen, videoCallData]);
+
+  // Camera stream management - MUST be before early return (React hooks rule)
+  useEffect(() => {
+    if (!cameraOpen) return;
+    let active = true;
+    const startStream = async () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: false });
+        if (!active) { stream.getTracks().forEach((t) => t.stop()); return; }
+        streamRef.current = stream;
+        if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.play(); }
+      } catch (err) {
+        console.error("Camera error:", err);
+        if (active) { Toast.error("Camera access denied"); setCameraOpen(false); }
+      }
+    };
+    startStream();
+    return () => { active = false; };
+  }, [cameraOpen, facingMode]);
 
   // Early return after ALL hooks are called
   if (!isOpen || !videoCallData) return null;
@@ -113,6 +153,44 @@ const VideoCallChat = ({
   //   setMessage(e.target.value);
   //   sendTyping();
   // };
+
+  // OLD: broken kundli handler — referenced undefined `toast` and `onSend`
+  // const handleChatAfterKundliSelect = async (kundli) => {
+  //     setKundliModalOpen(false);
+  //     if (!kundli?._id) return toast.error("Kundli not selected properly");
+  //     onSend(kundli);
+  //   };
+
+  // OLD: ProfileManager handler — auto-selected self kundli
+  // const handleKundliSelect = (selectedProfile) => {
+  //   setKundliModalOpen(false);
+  //   if (!selectedProfile?._id) { Toast.error("Kundli not selected properly"); return; }
+  //   sendChatMessage(selectedProfile._id, "kundli");
+  // };
+
+  // NEW: KundliSelectModal handler — user picks from list, sends kundli link with correct kundliId
+  const handleChatAfterKundliSelect = (kundli) => {
+    setKundliModalOpen(false);
+    if (!kundli?._id) { Toast.error("Kundli not selected properly"); return; }
+    const kundliLink = `${window.location.origin}/kundli/${kundli._id}`;
+    // Pass kundli._id as third arg so the socket payload uses the selected kundli's ID (not session default)
+    sendChatMessage(kundliLink, "kundli", kundli._id);
+  };
+
+  // NEW: handle attach menu option selection (aligned with ChatInput.jsx)
+  const handleAttachOption = async (type) => {
+    setAttachMenuOpen(false);
+    if (type === "kundali") { setKundliModalOpen(true); return; }
+    if (type === "camera") { setCameraOpen(true); return; }
+    try {
+      const accept = type === "photo" ? "image/*" : ".pdf,.doc,.docx,.xls,.xlsx";
+      const { blob } = await openFileSelector(accept);
+      const attachType = getAttachType(blob.type);
+      await sendFiles(blob, attachType);
+    } catch {
+      console.log("File selection cancelled");
+    }
+  };
 
   const sendFiles = async (blob, attachType) => {
     try {
@@ -147,29 +225,64 @@ const VideoCallChat = ({
   };
 
   const getAttachType = (mimeType) => {
-    if (mimeType.startsWith('image/')) {
-      return 'image';
-    } else if (mimeType.startsWith('video/')) {
-      return 'video';
-    } else if (mimeType.startsWith('audio/')) {
-      return 'audio';
+    if (mimeType.startsWith("image/")) {
+      return "image";
+    } else if (mimeType.startsWith("video/")) {
+      return "video";
+    } else if (mimeType.startsWith("audio/")) {
+      return "audio";
     } else {
-      return 'attachment';
+      return "attachment";
     }
   };
 
-  const handleAttachClick = async () => {
-    // console.log("Attach button clicked");
+  // OLD: directly opened file selector on attach click
+  // const handleAttachClick = async () => {
+  //   try {
+  //     const { blob, type } = await openFileSelector(
+  //       "image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx",
+  //     );
+  //     const attachType = getAttachType(type);
+  //     await sendFiles(blob, attachType);
+  //   } catch (err) {
+  //     console.log("File selection cancelled or failed:", err);
+  //   }
+  // };
+
+  // Camera helper functions
+  const stopStream = () => {
+    if (streamRef.current) { streamRef.current.getTracks().forEach((t) => t.stop()); streamRef.current = null; }
+    if (videoRef.current) { videoRef.current.srcObject = null; }
+  };
+  const handleCameraClose = () => { stopStream(); setCameraOpen(false); };
+  const handleSwitchCamera = () => setFacingMode((prev) => (prev === "environment" ? "user" : "environment"));
+  const handleCapture = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      stopStream();
+      setCameraOpen(false);
+      setCameraPreview({ url, blob });
+    }, "image/jpeg", 0.92);
+  };
+  const handleCameraPreviewSend = async () => {
+    if (!cameraPreview || isSending) return;
+    setIsSending(true);
     try {
-      const { blob, type } = await openFileSelector(
-        "image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx"
-      );
-      // console.log("File selected:", { name, type, size });
-      const attachType = getAttachType(type);
-      await sendFiles(blob, attachType);
-    } catch (err) {
-      console.log("File selection cancelled or failed:", err);
-    }
+      await sendFiles(cameraPreview.blob, "image");
+      URL.revokeObjectURL(cameraPreview.url);
+      setCameraPreview(null);
+    } finally { setIsSending(false); }
+  };
+  const handleCameraRetake = () => {
+    URL.revokeObjectURL(cameraPreview?.url);
+    setCameraPreview(null);
+    setCameraOpen(true);
   };
 
   const renderMessage = (msg, index) => {
@@ -182,7 +295,12 @@ const VideoCallChat = ({
         content = (
           <div className={styles.voiceMessage}>
             <button className={styles.playButton}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
                 <path d="M8 5v14l11-7z" />
               </svg>
             </button>
@@ -226,9 +344,12 @@ const VideoCallChat = ({
         );
       } else if (msg.type === "kundli") {
         isSpecialMessage = true;
+        // Build kundli link: prefer kundliId, fall back to msg.text (which contains the full URL)
         const kundliLink = msg.kundliId
           ? `${window.location.origin}/kundli/${msg.kundliId}`
-          : null;
+          : msg.text && msg.text.includes("/kundli/")
+            ? msg.text
+            : null;
         content = (
           <div className={styles.KundliMessage}>
             <span
@@ -236,7 +357,8 @@ const VideoCallChat = ({
                 if (kundliLink) setIframeSrc(kundliLink);
               }}
             >
-              <GrReactjs /> {msg.kundliName ? `${msg.kundliName}'s Kundli` : "View Kundli"}
+              <GrReactjs />{" "}
+              {msg.kundliName ? `${msg.kundliName}'s Kundli` : "View Kundli"}
             </span>
           </div>
         );
@@ -247,9 +369,20 @@ const VideoCallChat = ({
           <div className={styles.productsMessage}>
             {msg.text && <p className={styles.productsNote}>{msg.text}</p>}
             {products.map((p) => (
-              <div key={p.productId} className={styles.productItem} onClick={() => p.slug && navigate(`/product-details/${p.slug}`)}>
+              <div
+                key={p.productId}
+                className={styles.productItem}
+                onClick={() => p.slug && navigate(`/product-details/${p.slug}`)}
+              >
                 {(p.image || p.images?.[0]) && (
-                  <img src={p.image || p.images?.[0]} alt={p.title} className={styles.productThumb} onError={(e) => { e.target.style.display = "none"; }} />
+                  <img
+                    src={p.image || p.images?.[0]}
+                    alt={p.title}
+                    className={styles.productThumb}
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                    }}
+                  />
                 )}
                 <div className={styles.productMeta}>
                   <span className={styles.productName}>{p.title}</span>
@@ -273,13 +406,14 @@ const VideoCallChat = ({
                 src={msg.text}
                 alt={msg.text}
                 className={styles.imageAttachment}
-                onClick={() => window.open(msg.text, '_blank')}
+                onClick={() => window.open(msg.text, "_blank")}
               />
             </div>
           </div>
         );
       } else {
-        if (msg.type !== "message" && msg.type !== "gift") isSpecialMessage = true;
+        if (msg.type !== "message" && msg.type !== "gift")
+          isSpecialMessage = true;
         content = (
           <div className={styles.fileMessage}>
             <a
@@ -290,7 +424,6 @@ const VideoCallChat = ({
             >
               📎 {msg.text}
             </a>
-
           </div>
         );
       }
@@ -299,17 +432,19 @@ const VideoCallChat = ({
     }
 
     return (
-      <>{isSpecialMessage && (<div
-        key={index}
-        className={`${styles.message} ${msg.isSender ? styles.sent : styles.received
-          }`}
-      >
-        <div className={styles.messageContent}>
-          {content}
-        </div>
-        <div className={styles.messageTime}>{msg.time}</div>
-      </div>)}</>
-
+      <>
+        {isSpecialMessage && (
+          <div
+            key={index}
+            className={`${styles.message} ${
+              msg.isSender ? styles.sent : styles.received
+            }`}
+          >
+            <div className={styles.messageContent}>{content}</div>
+            <div className={styles.messageTime}>{msg.time}</div>
+          </div>
+        )}
+      </>
     );
   };
 
@@ -342,29 +477,280 @@ const VideoCallChat = ({
         <button
           type="button"
           className={styles.attachButton}
-          onClick={handleAttachClick}
+          onClick={()=>setAttachMenuOpen(true)}
           title="Attach file"
         >
-          <IoAttach size={18} />
+          <IoAttach size={25} /> Attach File
         </button>
 
-        {/* <input
-          className={styles.messageInput}
-          value={message}
-          onChange={handleMessageChange}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder="Type a message..."
-        />
+        {/* Attach File Modal */}
+        {attachMenuOpen && (
+          <div
+            className={styles.attachOverlay}
+            onClick={() => setAttachMenuOpen(false)}
+          >
+            <div
+              className={styles.attachSheet}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={styles.attachHeader}>
+                <div>
+                  <h3 className={styles.attachTitle}>Attach File</h3>
+                  <p className={styles.attachSubtitle}>
+                    Please attach the file you would like to include.
+                  </p>
+                </div>
+                <button
+                  className={styles.attachClose}
+                  onClick={() => setAttachMenuOpen(false)}
+                >
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <circle
+                      cx="11"
+                      cy="11"
+                      r="10"
+                      stroke="#F75801"
+                      strokeWidth="1.5"
+                    />
+                    <path
+                      d="M7.5 7.5L14.5 14.5M14.5 7.5L7.5 14.5"
+                      stroke="#F75801"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className={styles.attachOptions}>
+                {[
+                  {
+                    key: "camera",
+                    label: "Camera",
+                    icon: (
+                      <svg
+                        width="26"
+                        height="26"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M23 19C23 19.5304 22.7893 20.0391 22.4142 20.4142C22.0391 20.7893 21.5304 21 21 21H3C2.46957 21 1.96086 20.7893 1.58579 20.4142C1.21071 20.0391 1 19.5304 1 19V8C1 7.46957 1.21071 6.96086 1.58579 6.58579C1.96086 6.21071 2.46957 6 3 6H7L9 3H15L17 6H21C21.5304 6 22.0391 6.21071 22.4142 6.58579C22.7893 6.96086 23 7.46957 23 8V19Z"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <circle
+                          cx="12"
+                          cy="13"
+                          r="4"
+                          stroke="white"
+                          strokeWidth="2"
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    key: "photo",
+                    label: "Photo",
+                    icon: (
+                      <svg
+                        width="26"
+                        height="26"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <rect
+                          x="3"
+                          y="3"
+                          width="18"
+                          height="18"
+                          rx="3"
+                          stroke="white"
+                          strokeWidth="2"
+                        />
+                        <circle cx="8.5" cy="8.5" r="1.5" fill="white" />
+                        <path
+                          d="M21 15L16 10L5 21"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    key: "document",
+                    label: "Document",
+                    icon: (
+                      <svg
+                        width="26"
+                        height="26"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M14 2V8H20"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <line
+                          x1="8"
+                          y1="13"
+                          x2="16"
+                          y2="13"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        <line
+                          x1="8"
+                          y1="17"
+                          x2="16"
+                          y2="17"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    ),
+                  },
+                  {
+                    key: "kundali",
+                    label: "Kundali",
+                    icon: (
+                      <svg
+                        width="26"
+                        height="26"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <text
+                          x="3"
+                          y="19"
+                          fontSize="18"
+                          fill="white"
+                          fontFamily="serif"
+                        >
+                          卐
+                        </text>
+                      </svg>
+                    ),
+                  },
+                ].map(({ key, label, icon }) => (
+                  <button
+                    key={key}
+                    className={styles.attachOption}
+                    onClick={() => handleAttachOption(key)}
+                  >
+                    <div className={styles.attachIconCircle}>{icon}</div>
+                    <span className={styles.attachOptionLabel}>{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
-        <button 
-          className={styles.sendButton} 
-          onClick={() => handleSend()}
-          disabled={!message.trim()}
-        >
-          <IoSend size={18} />
-        </button> */}
+        {/* <input ... /> and <button ... /> commented out above */}
       </div>
-      {/* 👇 Modal */}
+
+      {/* Live Camera View */}
+      {cameraOpen && (
+        <div className={styles.cameraPreviewOverlay}>
+          <div className={styles.cameraPreviewContainer}>
+            <video ref={videoRef} className={styles.cameraPreviewImg} autoPlay playsInline muted />
+            <button className={styles.cameraSwitchBtn} onClick={handleSwitchCamera}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M20 7L16 3L12 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M16 3V15C16 16.1046 15.1046 17 14 17H4" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M4 17L8 21L12 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M8 21V9C8 7.89543 8.89543 7 10 7H20" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+            <div className={styles.cameraPreviewActions}>
+              <button className={styles.cameraRetakeBtn} onClick={handleCameraClose}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                Cancel
+              </button>
+              <button className={styles.cameraShutterBtn} onClick={handleCapture}>
+                <span className={styles.cameraShutterInner} />
+              </button>
+              <div style={{ width: 100 }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Photo Preview after capture */}
+      {cameraPreview && (
+        <div className={styles.cameraPreviewOverlay}>
+          <div className={styles.cameraPreviewContainer}>
+            <img src={cameraPreview.url} alt="Preview" className={styles.cameraPreviewImg} />
+            <div className={styles.cameraPreviewActions}>
+              <button className={styles.cameraRetakeBtn} onClick={handleCameraRetake}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M1 4V10H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M3.51 15C4.96 18.57 8.35 21 12.27 21C17.1 21 21 17.1 21 12.27C21 7.44 17.1 3.54 12.27 3.54C9.18 3.54 6.46 5.07 4.8 7.42L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Retake
+              </button>
+              <button className={styles.cameraSendBtn} onClick={handleCameraPreviewSend} disabled={isSending}>
+                {isSending ? (
+                  <span className={styles.sendingDots}><span /><span /><span /></span>
+                ) : (
+                  <>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Send
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden canvas for camera capture */}
+      <canvas ref={canvasRef} style={{ display: "none" }} />
+
+      {/* OLD: ProfileManager — auto-selected self kundli */}
+      {/* <ProfileManager
+        isOpen={kundliModalOpen}
+        onClose={() => setKundliModalOpen(false)}
+        title="Select Kundli"
+        startCallMode={true}
+        callModeBtnTitle="Send Kundli"
+        onStartCall={handleKundliSelect}
+        enabledOperations={{
+          list: true,
+          add: true,
+          edit: false,
+          delete: false,
+        }}
+      /> */}
+
+      {/* RESTORED: KundliSelectModal — proper list selection (matches ChatInput.jsx) */}
+      <KundliSelectModal
+        isOpen={kundliModalOpen}
+        onClose={() => setKundliModalOpen(false)}
+        onSelect={handleChatAfterKundliSelect}
+      />
+
       <IframeModal
         open={!!iframeSrc}
         src={iframeSrc}
