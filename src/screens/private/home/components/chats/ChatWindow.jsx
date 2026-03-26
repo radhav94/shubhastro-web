@@ -55,7 +55,7 @@ const ChatWindow = () => {
   } = state || {};
   // console.log('kundliId in chat', kundliId)
 
-  const { activeCall } = useCall();
+  const { activeCall, isCallMinimized } = useCall();
   const [openFeedback, setOpenFeedback] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showProfileManagerModal, setShowProfileManagerModal] = useState(false);
@@ -65,7 +65,7 @@ const ChatWindow = () => {
   const { activeChat, isReconnecting } = useChatContext();
 
   // Check if there's an active call (audio or video)
-  const isVideoCallActive = activeCall && activeCall.callType === "video";
+  const isVideoCallActive = activeCall && activeCall.callType === "video" && !isCallMinimized;
   const isAudioCallActive = activeCall && activeCall.callType === "audio";
   const isCallActive = !!activeCall;
   const isChatActive = activeChat && activeChat.roomId;
@@ -210,6 +210,14 @@ const ChatWindow = () => {
 
   const handleChatEnd = () => {
     if (isEnding) return false;
+    
+    // Check if a call/video call is active — prevent ending chat
+    if (isCallActive) {
+      const callType = activeCall?.callType === "video" ? "Video Call" : "Voice Call";
+      Toast.error(`${callType} is active. Please end the ${callType} first before ending the chat.`);
+      return false;
+    }
+    
     // Primary: use wall-clock time from session start (persisted in localStorage)
     const chatStartTime = localStorage.getItem("shubhtalk_chat_start_time");
     const wallClockElapsed = chatStartTime 
