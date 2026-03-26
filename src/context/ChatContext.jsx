@@ -119,6 +119,7 @@ export const ChatProvider = ({ children }) => {
         roomId: chatData.roomId,
         userId: chatData.userId,
         astrologerId: chatData.astrologerId,
+        callType: chatData.callType || "chat",
       });
     } else {
       clearPersistedChatState();
@@ -154,6 +155,7 @@ export const ChatProvider = ({ children }) => {
       roomId: reconnectChat.roomId,
       userId: reconnectChat.userId,
       astrologerId: reconnectChat.astrologerId,
+      callType: reconnectChat.callType || "chat",
     });
 
     console.log("[ChatReconnect] 🔄 Starting reconnection for room:", reconnectChat.roomId);
@@ -204,6 +206,7 @@ export const ChatProvider = ({ children }) => {
         roomId: reconnectChat.roomId,
         userId: reconnectChat.userId,
         astrologerId: reconnectChat.astrologerId,
+        callType: reconnectChat.callType || "chat",
       };
       console.log("[ChatReconnect] 📤 Emitting chat:reconnect");
       console.log("[ChatReconnect]   → socket.connected:", voiceSocket.connected);
@@ -346,6 +349,13 @@ export const ChatProvider = ({ children }) => {
       // This fires when socket reconnects and auto-emits chat:reconnect
       if (data && data.active) {
         console.log("[ChatContext] ✅ Auto-reconnect successful, chat still active");
+        if (activeChatRef.current) {
+          setActiveChat({
+            ...activeChatRef.current,
+            remainingTime: data.remainingTime || activeChatRef.current.remainingTime,
+          });
+        }
+
         // Update remaining time if provided
         if (data.remainingTime) {
           const secs = Math.floor(Number(data.remainingTime) * 60);

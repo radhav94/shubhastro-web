@@ -36,6 +36,57 @@ const CALL_EVENTS = [
 let activeCallSession = null;
 let activeChatSession = null;
 let isReconnecting = false;
+let hasConnectedOnce = false;
+let lastRecoverySocketId = null;
+
+const hasActiveSessions = () => !!(activeCallSession || activeChatSession);
+
+const resetRecoveryMarker = () => {
+  lastRecoverySocketId = null;
+};
+
+const emitSessionRecovery = (trigger) => {
+  if (!voiceSocket.connected) {
+    console.log("[VoiceSocket] ⏭️ Skipping session recovery, socket is not connected");
+    return;
+  }
+
+  if (!hasActiveSessions()) {
+    console.log("[VoiceSocket] ⏭️ Skipping session recovery, no active sessions");
+    isReconnecting = false;
+    return;
+  }
+
+  if (lastRecoverySocketId === voiceSocket.id) {
+    console.log("[VoiceSocket] ⏭️ Session recovery already emitted for socket:", voiceSocket.id);
+    return;
+  }
+
+  console.log("[VoiceSocket] 🔄 Recovering active sessions after:", trigger);
+  lastRecoverySocketId = voiceSocket.id;
+
+  if (activeCallSession?.roomId) {
+    console.log("[VoiceSocket] 📤 Emitting call:reconnect for room:", activeCallSession.roomId);
+    voiceSocket.emit("call:reconnect", {
+      roomId: activeCallSession.roomId,
+      userId: activeCallSession.userId,
+      astrologerId: activeCallSession.astrologerId,
+      callType: activeCallSession.callType,
+    });
+  }
+
+  if (activeChatSession?.roomId) {
+    console.log("[VoiceSocket] 📤 Emitting chat:reconnect for room:", activeChatSession.roomId);
+    voiceSocket.emit("chat:reconnect", {
+      roomId: activeChatSession.roomId,
+      userId: activeChatSession.userId,
+      astrologerId: activeChatSession.astrologerId,
+      callType: activeChatSession.callType || "chat",
+    });
+  }
+
+  isReconnecting = false;
+};
 
 /**
  * Register an active call session for automatic reconnection
@@ -56,10 +107,13 @@ export const clearCallSession = () => {
 
 /**
  * Register an active chat session for automatic reconnection
- * @param {Object} session - { roomId, userId, astrologerId }
+ * @param {Object} session - { roomId, userId, astrologerId, callType }
  */
 export const registerChatSession = (session) => {
-  activeChatSession = session;
+  activeChatSession = {
+    ...session,
+    callType: session?.callType || "chat",
+  };
   console.log("[VoiceSocket] 📝 Registered chat session:", session?.roomId);
 };
 
@@ -83,42 +137,22 @@ export const getReconnectionState = () => ({
 // Log connection lifecycle
 voiceSocket.on("connect", () => {
   console.log("[VoiceSocket] 🟢 Connected — id:", voiceSocket.id);
-  
-  // Auto-reconnect active sessions when socket reconnects
-  if (isReconnecting) {
-    console.log("[VoiceSocket] 🔄 Socket reconnected, attempting session recovery...");
-    
-    // Reconnect call session if active
-    if (activeCallSession && activeCallSession.roomId) {
-      console.log("[VoiceSocket] 📤 Emitting call:reconnect for room:", activeCallSession.roomId);
-      voiceSocket.emit("call:reconnect", {
-        roomId: activeCallSession.roomId,
-        userId: activeCallSession.userId,
-        astrologerId: activeCallSession.astrologerId,
-        callType: activeCallSession.callType,
-      });
-    }
-    
-    // Reconnect chat session if active
-    if (activeChatSession && activeChatSession.roomId) {
-      console.log("[VoiceSocket] 📤 Emitting chat:reconnect for room:", activeChatSession.roomId);
-      voiceSocket.emit("chat:reconnect", {
-        roomId: activeChatSession.roomId,
-        userId: activeChatSession.userId,
-        astrologerId: activeChatSession.astrologerId,
-      });
-    }
-    
-    isReconnecting = false;
+
+  if (!hasConnectedOnce) {
+    hasConnectedOnce = true;
+    lastRecoverySocketId = voiceSocket.id;
+    return;
   }
+
+  emitSessionRecovery(isReconnecting ? "socket reconnect" : "subsequent connect");
 });
 
 voiceSocket.on("disconnect", (reason) => {
   console.log("[VoiceSocket] 🔴 Disconnected — reason:", reason);
-  
-  // Mark as reconnecting if we have active sessions
-  // This will trigger reconnect events when socket reconnects
-  if (activeCallSession || activeChatSession) {
+
+  resetRecoveryMarker();
+
+  if (hasActiveSessions()) {
     isReconnecting = true;
     console.log("[VoiceSocket] ⏳ Will attempt session recovery on reconnect");
   }
@@ -126,16 +160,22 @@ voiceSocket.on("disconnect", (reason) => {
 
 let _lastVoiceConnectErrorAt = 0;
 
-voiceSocket.on("reconnect_attempt", (attemptNumber) => {
+voiceSocket.io.on("reconnect_attempt", (attemptNumber) => {
+  if (hasActiveSessions()) {
+    isReconnecting = true;
+  }
   console.log("[VoiceSocket] 🔄 Reconnect attempt:", attemptNumber);
 });
 
-voiceSocket.on("reconnect", (attemptNumber) => {
+voiceSocket.io.on("reconnect", (attemptNumber) => {
   _lastVoiceConnectErrorAt = 0;
   console.log("[VoiceSocket] ✅ Reconnected after", attemptNumber, "attempts");
 });
 
-voiceSocket.on("reconnect_error", (err) => {
+voiceSocket.io.on("reconnect_error", (err) => {
+  if (hasActiveSessions()) {
+    isReconnecting = true;
+  }
   const now = Date.now();
   if (now - _lastVoiceConnectErrorAt > 15000) {
     _lastVoiceConnectErrorAt = now;
@@ -143,18 +183,39 @@ voiceSocket.on("reconnect_error", (err) => {
   }
 });
 
-voiceSocket.on("reconnect_failed", () => {
+voiceSocket.io.on("reconnect_failed", () => {
   console.log("[VoiceSocket] ❌ Reconnect failed after all attempts");
   isReconnecting = false;
+  resetRecoveryMarker();
 });
 
 voiceSocket.on("connect_error", (err) => {
+  if (hasActiveSessions()) {
+    isReconnecting = true;
+  }
   const now = Date.now();
   if (now - _lastVoiceConnectErrorAt > 15000) {
     _lastVoiceConnectErrorAt = now;
     console.log("[VoiceSocket] ❌ Connect error:", err.message);
   }
 });
+
+if (typeof window !== "undefined") {
+  window.addEventListener("online", () => {
+    if (!hasActiveSessions()) return;
+
+    console.log("[VoiceSocket] 🌐 Browser is back online");
+    resetRecoveryMarker();
+    isReconnecting = true;
+
+    if (!voiceSocket.connected) {
+      voiceSocket.connect();
+      return;
+    }
+
+    emitSessionRecovery("browser online");
+  });
+}
 
 // Log all call-related incoming events
 CALL_EVENTS.forEach((event) => {
@@ -171,4 +232,3 @@ voiceSocket.emit = (event, ...args) => {
   }
   return _originalEmit(event, ...args);
 };
-
