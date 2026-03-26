@@ -13,6 +13,7 @@ import { useGetAllGiftsQuery } from "../../../../../redux/api/gift/giftApi";
 import { useLiveList } from "../../../../../context/LiveListContext";
 import { useCall } from "../../../../../context/CallContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
+import WaitingModal from "../../../../../component/UI/modal/waitingModal/WaitingModal";
 import Toast from "../../../../../component/toast";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
 import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
@@ -681,13 +682,13 @@ const LiveView = (props) => {
           />
 
           {/* Waiting Modal */}
-          {/* {showWaitingModal && (
+          {showWaitingModal && (
             <WaitingModal
               callRoomId={callRoomId}
               resetCallState={resetCallState}
               connectionType="video"
             />
-          )} */}
+          )}
 
           {/* NEW BOTTOM ACTION BAR */}
           <div className="right-action-bar">
