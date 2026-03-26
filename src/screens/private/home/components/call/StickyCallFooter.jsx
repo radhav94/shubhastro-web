@@ -42,14 +42,14 @@ const StickyCallFooter = () => {
   // Hide only on detail page
   if (onTalkDetailPage) return null;
 
-  // Don't show if there's an active call (call UI is already visible)
-  if (activeCall) return null;
+  // Don't show if there's an active call and no waiting state (call UI is already visible)
+  if (activeCall && !waitingList) return null;
 
   if (!waitingList && !callApproval && !missedApproval)
     return null;
   
   return (
-    <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-slideUp waiting-queue">
+    <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 animate-slideUp waiting-queue ${activeCall ? 'z-[100000]' : 'z-50'}`}>
       <div className="flex items-center gap-4 rounded-2xl bg-zinc-900/95 px-5 py-4 shadow-2xl backdrop-blur-md border border-zinc-800">
         {waitingList && <FooterWaiting />}
 

@@ -28,6 +28,7 @@ const AIWow = () => {
   const [activeTab, setActiveTab] = useState("aiwow");
   const [downloadModal, setDownloadModal] = useState({ open: false, featureId: null, featureName: "" });
   const [isDownloading, setIsDownloading] = useState(false);
+  const [paidToFreeIds, setPaidToFreeIds] = useState({});
   const [historyPage, setHistoryPage] = useState(1);
   const [hasMoreHistory, setHasMoreHistory] = useState(true);
 
@@ -180,10 +181,35 @@ const AIWow = () => {
     return pdfUrl;
   };
 
-  const handleDownloadPdf = async (featureId, featureName) => {
-    // Open the download modal instead of directly downloading
-    refreshWallet();
-    setDownloadModal({ open: true, featureId, featureName });
+  const handleDownloadPdf = async (item) => {
+    // Check if PDF already exists: key is `{featureType}PdfPath`
+    const pdfKey = `${item.featureType}PdfPath`;
+    const existingPdfUrl = item[pdfKey];
+    
+    if (existingPdfUrl || paidToFreeIds[item.featureId]) {
+      // Free — directly download existing PDF
+      try {
+        toast.loading("Downloading PDF...", { id: "pdf-download" });
+        const url = existingPdfUrl || await fetchPdfUrl(item.featureId);
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = `${item.featureName || "ai-report"}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(blobUrl);
+        toast.success("PDF downloaded!", { id: "pdf-download" });
+      } catch {
+        toast.error("Failed to download PDF", { id: "pdf-download" });
+      }
+    } else {
+      // Paid — open the download modal
+      refreshWallet();
+      setDownloadModal({ open: true, featureId: item.featureId, featureName: item.featureName });
+    }
   };
 
   const handleConfirmDownload = async (language) => {
@@ -203,6 +229,8 @@ const AIWow = () => {
       link.remove();
       URL.revokeObjectURL(blobUrl);
       toast.success("PDF downloaded!", { id: "pdf-download" });
+      // Mark this feature as free locally so ribbon updates
+      setPaidToFreeIds(prev => ({ ...prev, [featureId]: true }));
       setDownloadModal({ open: false, featureId: null, featureName: "" });
       refreshWallet();
     } catch {
@@ -358,11 +386,11 @@ const AIWow = () => {
                             })
                           : "",
                         summary: item.summary || "",
-                        isPaid: false,
+                        isPaid: !item[`${item.featureType}PdfPath`] && !paidToFreeIds[item.featureId],
                         price: null,
                         charges,
                         onViewResult: () => handleViewResultPdf(item.featureId),
-                        onDownload: () => handleDownloadPdf(item.featureId, item.featureName),
+                        onDownload: () => handleDownloadPdf(item),
                       }}
                     />
                   ))}
@@ -398,6 +426,7 @@ const AIWow = () => {
           downloadCost={getDownloadCost(downloadModal.featureName)}
           walletBalance={walletBalance ?? 0}
           isDownloading={isDownloading}
+          showLanguageSelection={false}
         />
       </div>
       <Footer />

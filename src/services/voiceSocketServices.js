@@ -158,6 +158,8 @@ voiceSocket.on("disconnect", (reason) => {
   }
 });
 
+let _lastVoiceConnectErrorAt = 0;
+
 voiceSocket.io.on("reconnect_attempt", (attemptNumber) => {
   if (hasActiveSessions()) {
     isReconnecting = true;
@@ -166,6 +168,7 @@ voiceSocket.io.on("reconnect_attempt", (attemptNumber) => {
 });
 
 voiceSocket.io.on("reconnect", (attemptNumber) => {
+  _lastVoiceConnectErrorAt = 0;
   console.log("[VoiceSocket] ✅ Reconnected after", attemptNumber, "attempts");
 });
 
@@ -173,7 +176,11 @@ voiceSocket.io.on("reconnect_error", (err) => {
   if (hasActiveSessions()) {
     isReconnecting = true;
   }
-  console.log("[VoiceSocket] ❌ Reconnect error:", err.message);
+  const now = Date.now();
+  if (now - _lastVoiceConnectErrorAt > 15000) {
+    _lastVoiceConnectErrorAt = now;
+    console.log("[VoiceSocket] ❌ Reconnect error:", err.message);
+  }
 });
 
 voiceSocket.io.on("reconnect_failed", () => {
@@ -186,7 +193,11 @@ voiceSocket.on("connect_error", (err) => {
   if (hasActiveSessions()) {
     isReconnecting = true;
   }
-  console.log("[VoiceSocket] ❌ Connect error:", err.message);
+  const now = Date.now();
+  if (now - _lastVoiceConnectErrorAt > 15000) {
+    _lastVoiceConnectErrorAt = now;
+    console.log("[VoiceSocket] ❌ Connect error:", err.message);
+  }
 });
 
 if (typeof window !== "undefined") {

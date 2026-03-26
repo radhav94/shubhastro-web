@@ -32,6 +32,9 @@ import KundliHeader from "./components/KundliHeader";
 import KundliInfoContent from "./components/KundliInfoContent";
 import styles from "../../../component/UI/tabs/PrimaryTabs.module.scss";
 import { ProfileManager } from "../../../component/UI/Profile";
+import DownloadReportModal from "../aiwow/components/DownloadReportModal";
+import { useWalletBalance } from "../wallet/useWalletBalance";
+import { useGetChargesQuery } from "../../../redux/api/aiwow/aiwowApi";
 
 
 const Kundali = () => {
@@ -45,6 +48,11 @@ const Kundali = () => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const [shouldRetryDownload, setShouldRetryDownload] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [localDownloadedLangs, setLocalDownloadedLangs] = useState({});
+
+  const { balance: walletBalance, refreshWallet } = useWalletBalance();
+  const { data: chargesData } = useGetChargesQuery();
   
   // Sync activeTabIndex with query params on mount and when params change
   useEffect(() => {
@@ -244,11 +252,11 @@ const Kundali = () => {
   const astroDetails = data?.response;
 
   // Function to handle PDF download
-  const handlePdfDownload = async () => {
-    if (isDownloadingPdf) return; // Prevent multiple clicks
-    
-    // Get language from Google Translate cookie
-    const getCurrentLang = () => {
+  const handlePdfDownload = async (selectedLanguage) => {
+    if (isDownloadingPdf) return;
+
+    // Use passed language or fallback to Google Translate cookie
+    const lang = selectedLanguage || (() => {
       const cookie = document.cookie
         .split("; ")
         .find((row) => row.startsWith("googtrans="));
@@ -258,9 +266,7 @@ const Kundali = () => {
         return parts[2] || "en";
       }
       return "en";
-    };
-
-    const selectedLanguage = getCurrentLang();
+    })();
     
     // Fetch PDF without wallet balance check
     if (selectedProfile?._id) {
@@ -268,7 +274,7 @@ const Kundali = () => {
       try {
         const result = await getKundliPdf({ 
           kundliId: selectedProfile._id,
-          language: selectedLanguage 
+          language: lang 
         }).unwrap();
         
         if (result?.success && result?.data) {
@@ -392,49 +398,31 @@ const Kundali = () => {
       label: (
         <div
           className={styles.downloadButton}
-          onClick={async (e) => {
+          onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            await handlePdfDownload();
+            if (!selectedProfile?._id) {
+              Toast.error("Please select a profile first");
+              return;
+            }
+            setShowDownloadModal(true);
           }}
         >
-          {isDownloadingPdf ? (
-            <>
-              <svg 
-                width="18" 
-                height="18" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2.5" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-                style={{ animation: 'spin 1s linear infinite' }}
-              >
-                <circle cx="12" cy="12" r="10" opacity="0.25" />
-                <path d="M12 2a10 10 0 0 1 10 10" />
-              </svg>
-              Downloading...
-            </>
-          ) : (
-            <>
-              <svg 
-                width="18" 
-                height="18" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2.5" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              Download Report
-            </>
-          )}
+          <svg 
+            width="18" 
+            height="18" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2.5" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Download Report
         </div>
       ),
       content: (
@@ -543,6 +531,7 @@ const Kundali = () => {
     
     setSelectedProfile(profile);
     setShowSelectProfile(false);
+    setLocalDownloadedLangs({});
     
     // Reset to Basic tab (index 0)
     setActiveTabIndex(0);
@@ -831,6 +820,66 @@ const Kundali = () => {
         title="Edit Profile"
         initialData={getEditInitialData()}
       /> */}
+
+      {/* Download Report Modal */}
+      <DownloadReportModal
+        isOpen={showDownloadModal}
+        onClose={() => setShowDownloadModal(false)}
+        onDownload={async (language) => {
+          // Check if this language PDF is already generated
+          const freshProfile = profiles.find(p => p._id === selectedProfile?._id);
+          const reports = freshProfile?.kundli_report || selectedProfile?.kundli_report || [];
+          const existing = Array.isArray(reports) && reports.find(r => r?.language === language && r?.file_url);
+          if (existing) {
+            // Free — open existing PDF directly and close modal
+            setShowDownloadModal(false);
+            Toast.success("Opening PDF in new tab...");
+            window.open(existing.file_url, '_blank', 'noopener,noreferrer');
+          } else {
+            // Paid — keep modal open, show downloading state
+            await handlePdfDownload(language);
+            // After successful download, mark this language as free locally
+            setLocalDownloadedLangs(prev => ({ ...prev, [language]: true }));
+            refreshWallet();
+            setShowDownloadModal(false);
+          }
+        }}
+        featureName="Kundli Report"
+        downloadCost={(() => {
+          const charges = chargesData?.data || [];
+          const slug = "Kundli-report";
+          for (const section of charges) {
+            if (!Array.isArray(section?.list)) continue;
+            const match = section.list.find((c) => c?.slug?.toLowerCase() === slug.toLowerCase());
+            if (match) return match.amount || 0;
+          }
+          return 0;
+        })()}
+        walletBalance={walletBalance ?? 0}
+        isDownloading={isDownloadingPdf}
+        languages={[
+          { id: "en", label: "English", sub: "English" },
+          { id: "hi", label: "Hindi", sub: "हिंदी" },
+          { id: "mr", label: "Marathi", sub: "मराठी" },
+          { id: "gu", label: "Gujarati", sub: "ગુજરાતી" },
+          { id: "bn", label: "Bengali", sub: "বাংলা" },
+        ]}
+        generatedLanguages={(() => {
+          const freshProfile = profiles.find(p => p._id === selectedProfile?._id);
+          const reports = freshProfile?.kundli_report || selectedProfile?.kundli_report || [];
+          const map = {};
+          if (Array.isArray(reports)) {
+            reports.forEach(r => {
+              if (r?.language && r?.file_url) map[r.language] = r.file_url;
+            });
+          }
+          // Merge locally tracked downloads
+          Object.keys(localDownloadedLangs).forEach(lang => {
+            if (!map[lang]) map[lang] = true;
+          });
+          return map;
+        })()}
+      />
     </div>
   );
 };

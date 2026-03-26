@@ -52,14 +52,15 @@ const ResultHistoryCard = ({ item }) => {
       <div className={styles.cardFooter}>
         <div className={styles.downloadWrap}>
           <span className={styles.downloadHint}>Download your detailed analysis report</span>
-            <span className={styles.paidRibbon}>Paid</span>
+          <span className={isPaid ? styles.paidRibbon : styles.freeRibbon}>
+            {isPaid ? "Paid" : "Free"}
+          </span>
           <div className={styles.downloadBtnWrap}>
             <button className={styles.downloadBtn} onClick={onDownload}>
               <DownloadIcon />
               Download
             </button>
           </div>
-          <span className={styles.paidRibbon}>Paid</span>
         </div>
       </div>
     </div>

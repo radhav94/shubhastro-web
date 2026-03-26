@@ -15,7 +15,8 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astro
   };
 
   // Send message via voiceSocket
-  const sendViaSocket = (message, type = "message") => {
+  // Updated: accept optional kundliIdOverride to send correct kundliId for selected kundli
+  const sendViaSocket = (message, type = "message", kundliIdOverride = null) => {
     if (!voiceSocket.connected) {
       Toast.error("Socket not connected");
       return { error: "Socket not connected" };
@@ -24,7 +25,7 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astro
     try {
       voiceSocket.emit("chat:message", {
         sender: "user",
-        kundliId,
+        kundliId: kundliIdOverride || kundliId,
         roomId,
         userId,
         astrologerId,
@@ -91,6 +92,7 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astro
         dateTime: data?.dateTime,
         type: data?.type,
         kundliName: data?.kundliName,
+        kundliId: data?.kundliId,
         suggestedProducts: data?.suggestedProducts,
       });
     };
@@ -113,8 +115,9 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astro
   }, [roomId, userId, astrologerId, kundliId, astrologerName]);
 
  
-  const sendMessage = (text, type) => {
-    const res = sendViaSocket(text, type);
+  // Updated: accept optional kundliIdOverride parameter
+  const sendMessage = (text, type, kundliIdOverride = null) => {
+    const res = sendViaSocket(text, type, kundliIdOverride);
 
     if (res?.error) {
       setError(res.error);
