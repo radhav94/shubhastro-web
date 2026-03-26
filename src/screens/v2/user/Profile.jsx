@@ -44,6 +44,7 @@ import styles from "./Profile.module.scss";
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
 import { Toast } from "../../../component/index";
 import StickyReview from "../../private/home/components/call/StickyReview";
+import MallHistoryContent from "../../private/shubhAstroMallHistory/MallHistoryContent";
 import {
   useCreateKundliMutation,
   useDeleteKundliMutation,
@@ -1076,7 +1077,7 @@ const Profile = () => {
     navigate("/");
   };
 
-  const tabs = ["Profile", "Order History", "Transactions", "Support"];
+  const tabs = ["Profile", "Order History", "ShubhAstro Mall History", "Transactions", "Support"];
 
   // Get initials for avatar
   const getInitials = (name) => {
@@ -1503,6 +1504,10 @@ const Profile = () => {
               </div>
             )}
           </div>
+        )}
+
+        {activeTab === "ShubhAstro Mall History" && (
+          <MallHistoryContent />
         )}
 
         {activeTab === "Transactions" && (

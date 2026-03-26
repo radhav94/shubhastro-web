@@ -60,14 +60,20 @@ const HScrollRow = ({ children }) => {
 };
 
 // ─── Helper: get image/price/title from API item ───
-const getImg = (item) =>
-  item?.banner_image?.original ||
-  item?.banner_image?.small ||
-  (item?.images?.length ? item.images[0] : null) ||
-  item?.imgUrl ||
-  item?.image ||
-  item?.thumbnail ||
-  "https://images.unsplash.com/photo-1604608672516-f1b9b1d37076?w=400&q=80";
+const getImg = (item) => {
+  const fallback = "https://images.unsplash.com/photo-1604608672516-f1b9b1d37076?w=400&q=80";
+  const raw =
+    item?.banner_image?.original ||
+    item?.banner_image?.small ||
+    (item?.images?.length ? item.images[0] : null) ||
+    item?.imgUrl ||
+    item?.image ||
+    item?.thumbnail ||
+    fallback;
+  if (typeof raw === "string") return raw;
+  if (raw && typeof raw === "object") return raw.original || raw.small || raw.url || raw.src || fallback;
+  return fallback;
+};
 const getPrice = (item) => item?.price || item?.actualPrice || item?.selling_price || 0;
 const getOldPrice = (item) => item?.mrp || item?.originalPrice || item?.compare_price || 0;
 const getTitle = (item) => item?.title || item?.name || "Product";
@@ -96,21 +102,8 @@ const EPooja = () => {
   // A key that changes whenever the filter criteria (not page) change
   const filterKey = `${debouncedSearch}|${activeTab}|${sort}`;
 
-  // ── Build filter params ──
-  const filterParams = {
-    page,
-    limit: LIMIT,
-    ...(debouncedSearch && { search: debouncedSearch }),
-    ...(activeTab !== "all" && { category: activeTab }),
-    ...(sort && { sort }),
-  };
-
   // ── API Calls ──
   const { data: apiData, isLoading: homepageLoading } = useGetAstromallPageDataQuery({ page: 1, limit: 20 });
-  const { data: productsData, isLoading: productsLoading, isFetching: productsFetching } = useGetProductsQuery(
-    filterParams,
-    { skip: !isFiltering, refetchOnMountOrArgChange: true }
-  );
   const { data: categoriesData } = useGetProductCategoriesQuery();
   const [addToCart] = useAddToCartMutation();
 
@@ -121,9 +114,25 @@ const EPooja = () => {
     const mapped = list.map((c) => ({
       label: c.name || c.title || "",
       slug: c.slug || c._id || c.ID || "",
+      id: c.ID || c._id || "",
     })).filter((t) => t.label && t.slug);
     return [ALL_TAB, ...mapped];
   })();
+
+  // ── Build filter params ──
+  const activeCategoryId = categoryTabs.find((t) => t.slug === activeTab)?.id;
+  const filterParams = {
+    page,
+    limit: LIMIT,
+    ...(debouncedSearch && { search: debouncedSearch }),
+    ...(activeTab !== "all" && activeCategoryId && { category: activeCategoryId }),
+    ...(sort && { sort }),
+  };
+
+  const { data: productsData, isLoading: productsLoading, isFetching: productsFetching } = useGetProductsQuery(
+    filterParams,
+    { skip: !isFiltering, refetchOnMountOrArgChange: true }
+  );
 
   const trays = apiData?.data?.list || apiData?.data || [];
 

@@ -1,0 +1,157 @@
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { ChevronLeft, Download } from "lucide-react";
+import styles from "./MallOrderDetail.module.scss";
+
+const GST_RATE = 0.18;
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+};
+
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true });
+};
+
+const MallOrderDetail = () => {
+  const { orderId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const order = location.state?.order || null;
+
+  const handleBack = () => {
+    navigate("/profile", { state: { activeTab: "ShubhAstro Mall History" } });
+  };
+
+  const items = order?.items || [];
+  const subtotal = items.reduce((sum, item) => sum + (item.subtotal || item.price * (item.quantity || 1)), 0);
+  const gst = Math.round(subtotal * GST_RATE * 100) / 100;
+  const total = order?.final_amount || order?.total_amount || Math.round((subtotal + gst) * 100) / 100;
+  const shipping = order?.shipping_address || {};
+  const orderNum = order?.order_number || order?.ID || orderId;
+  const purchasedOn = order?.createdAt || order?.orderDate || order?.purchasedOn;
+  const status = order?.order_status || "pending";
+
+  if (!order) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.topSpacer} />
+        <div className={styles.header}>
+          <button className={styles.backBtn} onClick={handleBack}><ChevronLeft size={22} /></button>
+          <div><h2 className={styles.title}>Order Details</h2></div>
+        </div>
+        <div className={styles.loading}>Order not found</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.topSpacer} />
+      {/* Header */}
+      <div className={styles.header}>
+        <button className={styles.backBtn} onClick={handleBack}><ChevronLeft size={22} /></button>
+        <div>
+          <h2 className={styles.title}>Order #{orderNum}</h2>
+          <p className={styles.subtitle}>{items.length} item{items.length !== 1 ? "s" : ""}</p>
+        </div>
+      </div>
+
+      <div className={styles.body}>
+        {/* Order Details */}
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>ORDER DETAILS</h3>
+          <div className={styles.detailRow}>
+            <span className={styles.label}>Order ID</span>
+            <span className={styles.value}>#{orderNum}</span>
+          </div>
+          <div className={styles.detailRow}>
+            <span className={styles.label}>Purchased on</span>
+            <span className={styles.value}>{formatDate(purchasedOn)}</span>
+          </div>
+
+          {/* Delivery Address */}
+          {shipping.name && (
+            <>
+              <div className={styles.addressBlock}>
+                <span className={styles.label}>Delivery Address</span>
+                <p className={styles.addressText}>
+                  {[shipping.address, shipping.city, shipping.state].filter(Boolean).join(", ")}
+                  {shipping.pincode ? ` ${shipping.pincode}` : ""}
+                </p>
+                <p className={styles.addressName}>{shipping.name}{shipping.phone ? ` · ${shipping.phone}` : ""}</p>
+              </div>
+            </>
+          )}
+        </section>
+
+        {/* Product Details */}
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>PRODUCTS DETAILS</h3>
+          <div className={styles.productList}>
+            {items.map((item, idx) => {
+              const img = item.product_image || "";
+              const name = item.product_name || "Product";
+              const qty = item.quantity || 1;
+              const price = item.price || 0;
+              const lineTotal = item.subtotal || price * qty;
+              return (
+                <div key={item.product_id || idx} className={styles.productCard}>
+                  <div className={styles.productImg}>
+                    {img ? <img src={img} alt={name} /> : <div className={styles.imgPlaceholder} />}
+                  </div>
+                  <div className={styles.productInfo}>
+                    <div className={styles.nameRow}>
+                      <h4>{name}</h4>
+                      <span className={styles.itemId}>#{item.product_id}</span>
+                    </div>
+                    <div className={styles.meta}>
+                      <span className={styles.chip}>Qty: {qty}</span>
+                    </div>
+                    <p className={styles.price}>
+                      ₹{lineTotal.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}{" "}
+                      <span className={styles.taxNote}>Incl. of all taxes</span>
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Price Breakdown */}
+        <section className={styles.section}>
+          <h3 className={styles.sectionTitle}>PRICE BREAKDOWN</h3>
+          {items.map((item, idx) => (
+            <div key={idx} className={styles.priceRow}>
+              <span className={styles.priceLabel}>{item.product_name || "Product"}</span>
+              <span>₹{(item.subtotal || item.price * (item.quantity || 1)).toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</span>
+            </div>
+          ))}
+          <div className={styles.priceRow}>
+            <span>GST (18%)</span>
+            <span>₹{gst.toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</span>
+          </div>
+          <div className={`${styles.priceRow} ${styles.totalRow}`}>
+            <span>Total Amount</span>
+            <span>₹{total.toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</span>
+          </div>
+
+          <button className={styles.downloadBtn}>
+            <Download size={16} /> Download Invoice
+          </button>
+        </section>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className={styles.bottomBar}>
+        <button className={styles.orderAgainBtn}>Order Again</button>
+      </div>
+    </div>
+  );
+};
+
+export default MallOrderDetail;

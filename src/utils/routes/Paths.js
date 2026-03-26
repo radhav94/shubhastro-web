@@ -140,6 +140,8 @@ import SingleChatHistory from "../../screens/private/orderHistory/components/Cha
 import OrderHistory from "../../screens/private/orderHistory/OrderHistory";
 import OrderDetails from "../../screens/private/orderHistory/OrderDetails";
 
+import MallOrderDetail from "../../screens/private/shubhAstroMallHistory/MallOrderDetail";
+
 import FinalPay from "../../screens/private/payment/FinalPay";
 import PaymentWebhook from "../../screens/private/payment/PaymentWebhook";
 
@@ -1075,6 +1077,12 @@ export const PATH = {
     UserCallHistory: {
       path: "/order-history/call",
       element: SingleCallHistory,
+    },
+    MallOrderDetail: {
+      path: "/mall-order/:orderId",
+      element: MallOrderDetail,
+      header: false,
+      footer: false,
     },
     EXPLORE: {
       path: "/explore",
