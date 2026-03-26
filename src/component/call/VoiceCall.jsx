@@ -378,6 +378,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       setReviewData({
         astrologerID: currentCall?.astrologerID,
         fullName: currentCall?.callerName || callerName,
+        roomId,
       });
 
       voiceSocket.emit("call:end", {
@@ -528,6 +529,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         setReviewData({
           astrologerID: currentCall?.astrologerID,
           fullName: currentCall?.callerName || callerName,
+          roomId,
         });
 
         // Refresh wallet balance after call ends

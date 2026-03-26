@@ -261,7 +261,7 @@ export const PATH = {
     },
 
     AUDIENCE_LIVE_STREAMING: {
-      path: "/live",
+      path: ["/live", "/live/:channelId"],
       element: LivePlayerPage,
       // header: false,
       footer: false,

@@ -31,7 +31,7 @@ const HomeLayout = () => {
   // Hide TopHeader on onboarding page or when header is disabled
 
   const isOnboardingPage = location.pathname === "/login";
-  const isLivePage = location.pathname === "/live";
+  const isLivePage = location.pathname.startsWith("/live");
   
   // Always show TopHeader (it will handle iframe mode internally)
   const showTopHeader = !isOnboardingPage && !isLivePage;

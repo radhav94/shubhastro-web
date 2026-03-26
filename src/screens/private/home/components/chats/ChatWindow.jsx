@@ -271,6 +271,7 @@ const ChatWindow = () => {
         rating,
         review,
         isAnonymous,
+        roomId,
       }).unwrap();
 
       if (res.success) {

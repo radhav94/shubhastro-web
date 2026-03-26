@@ -13,6 +13,7 @@ import { useGetAllGiftsQuery } from "../../../../../redux/api/gift/giftApi";
 import { useLiveList } from "../../../../../context/LiveListContext";
 import { useCall } from "../../../../../context/CallContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
+import WaitingModal from "../../../../../component/UI/modal/waitingModal/WaitingModal";
 import Toast from "../../../../../component/toast";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
 import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
@@ -183,6 +184,7 @@ const LiveView = (props) => {
     messagesEndRef,
     showSharePopup,
     setShowSharePopup,
+    shareUrl,
     handleSend,
     handleCopyLink,
     shareToWhatsapp,
@@ -628,7 +630,7 @@ const LiveView = (props) => {
           <SharePopup
             show={showSharePopup}
             onClose={() => setShowSharePopup(false)}
-            url={window.location.href}
+            url={shareUrl}
             shareToWhatsapp={shareToWhatsapp}
             shareToGmail={shareToGmail}
             handleCopyLink={handleCopyLink}
@@ -645,20 +647,20 @@ const LiveView = (props) => {
           />
 
           {/* Waiting Modal */}
-          {/* {showWaitingModal && (
+          {showWaitingModal && (
             <WaitingModal
               callRoomId={callRoomId}
               resetCallState={resetCallState}
               connectionType="video"
             />
-          )} */}
+          )}
 
           {/* NEW BOTTOM ACTION BAR */}
           <div className="right-action-bar">
             {/* Timer / Stopwatch */}
             <button className="icon-btn">
               <div className="icon-circle">
-                <img src={AppImages.LiveClock} alt="Timer" width="28" height="28" />
+                <img src={AppImages.LiveIcon} alt="Timer" width="28" height="28" />
               </div>
               <span className="icon-label">20m</span>
             </button>

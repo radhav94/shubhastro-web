@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styles from "./OrderDetails.module.scss";
 import OrderHeader from "./components/OrderDetails/OrderHeader";
@@ -7,16 +7,37 @@ import OrderInfoCard from "./components/OrderDetails/OrderInfoCard";
 import ChatWindow from "./components/OrderDetails/ChatWindow";
 import RemediesTab from "./components/OrderDetails/RemediesTab";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
-import { useGetChatHistoryQuery } from "../../../redux/api/chatApi";
+import { Toast } from "../../../component";
+import { useGetChatHistoryQuery, useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
 import { useGetCallRecordingsQuery } from "../../../redux/api/callHistory/callHistory";
+import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
+import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
+import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
+import { useChat } from "../../../context/ChatContext";
+import { useCall } from "../../../context/CallContext";
+import { voiceSocket } from "../../../services/voiceSocketServices";
 
 const OrderDetails = () => {
   const { astrologerId } = useParams();
   const navigate = useNavigate();
+  const userId = localStorage.getItem("shubhtalk_customer_id");
   const [activeTab, setActiveTab] = useState("Call");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
+  const [connectionType, setConnectionType] = useState(null);
+  const [chatRoomIdLocal, setChatRoomIdLocal] = useState(null);
+  const [callRoomIdLocal, setCallRoomIdLocal] = useState(null);
+
+  const { handleChatStart, handleCallStart } = useAstrologerConnect();
+  const { setWaitingList, resetChatFlow, setActiveChatRoomId, setActiveChat, setChatSeconds, waitingList: chatWaiting } = useChat();
+  const { setWaitingList: setCallWaitingList, resetCallFlow, setActiveCallRoomId, setActiveCall, waitingList: callWaiting } = useCall();
+  const [createChatRoom] = useCreateChatRoomMutation();
+  const activeAstroRef = useRef(null);
+
+  const isWaiting = !!(chatWaiting || callWaiting);
+  const waitingRoomId = chatRoomIdLocal || callRoomIdLocal;
 
   const { data: astrologerData, isLoading: isLoadingAstrologer } = useGetAstrologerByIdQuery(
     { id: astrologerId }
@@ -142,6 +163,102 @@ const OrderDetails = () => {
     };
   }, [chatData]);
 
+  // Socket listeners for connect flow (same as Profile.jsx)
+  useEffect(() => {
+    if (!userId) return;
+
+    const handleChatRoom = (data) => {
+      setChatRoomIdLocal(data?.roomId);
+      setActiveChatRoomId(data?.roomId);
+      setWaitingList(data?.waitingTime || 2);
+      setConnectionType("chat");
+    };
+
+    const handleCallRoom = (data) => {
+      setCallRoomIdLocal(data?.roomId);
+      setActiveCallRoomId(data?.roomId);
+      setCallWaitingList(data?.waitingTime || 5);
+      setConnectionType(data?.type || "audio");
+    };
+
+    const handleChatAccepted = async ({ roomId, astrologerId: astroId, userId: uid, ...data }) => {
+      setWaitingList(false);
+      const astro = activeAstroRef.current || astrologerData?.data;
+      try {
+        if (!roomId) throw new Error("Room ID missing");
+        setActiveChat({
+          roomId, chatRoomId: roomId,
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          isUserSide: true, userId: uid, astrologerId: astroId,
+          astrologerName: data?.astrologer?.firstName || "",
+          remainingTime: data?.remainingTime,
+        });
+        setChatSeconds(Number(data?.remainingTime) * 60);
+        navigate(`/chat-with-astrologers/${astroId}`, {
+          state: { userId: uid, astrologerId: astroId, fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(), roomId, isUserSide: true },
+        });
+      } catch (e) {
+        Toast.error("Failed to start chat");
+      }
+    };
+
+    const handleCallAccepted = async ({ roomId, token, type, remainingTime }) => {
+      resetCallFlow();
+      const astro = activeAstroRef.current || astrologerData?.data;
+      try {
+        if (!astro) { Toast.error("Astrologer data missing"); return; }
+        const res = await createChatRoom({ userId, astrologerId: astro._id });
+        const chatRoomId = res?.data?.data;
+        setActiveCall({
+          roomId, chatRoomId, agoraToken: token,
+          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          isUserSide: true, callType: type, userId, astrologerId: astro._id,
+          astrologerID: astro?.astrologer_ID, remainingTime,
+        });
+      } catch (error) {
+        Toast.error("Failed to start call");
+      }
+    };
+
+    const handleRejected = () => {
+      Toast.error("Astrologer has rejected the request");
+      resetChatFlow();
+      resetCallFlow();
+      setConnectionType(null);
+    };
+
+    voiceSocket.on("chat:room", handleChatRoom);
+    voiceSocket.on("call:room", handleCallRoom);
+    voiceSocket.on("chat:accepted", handleChatAccepted);
+    voiceSocket.on("call:accepted", handleCallAccepted);
+    voiceSocket.on("chat:rejected", handleRejected);
+    voiceSocket.on("call:rejected", handleRejected);
+
+    return () => {
+      voiceSocket.off("chat:room", handleChatRoom);
+      voiceSocket.off("call:room", handleCallRoom);
+      voiceSocket.off("chat:accepted", handleChatAccepted);
+      voiceSocket.off("call:accepted", handleCallAccepted);
+      voiceSocket.off("chat:rejected", handleRejected);
+      voiceSocket.off("call:rejected", handleRejected);
+    };
+  }, [userId, astrologerData]);
+
+  const resetWaitingState = useCallback(() => {
+    if (connectionType === "chat" && chatRoomIdLocal) {
+      voiceSocket.emit("chat:cancel", { roomId: chatRoomIdLocal });
+    } else if (callRoomIdLocal) {
+      voiceSocket.emit("call:cancel", { roomId: callRoomIdLocal });
+    }
+    setWaitingList(false);
+    setCallWaitingList(false);
+    setChatRoomIdLocal(null);
+    setCallRoomIdLocal(null);
+    setConnectionType(null);
+    resetChatFlow();
+    resetCallFlow();
+  }, [chatRoomIdLocal, callRoomIdLocal, connectionType]);
+
   const handleBack = () => {
     navigate(-1);
   };
@@ -151,7 +268,7 @@ const OrderDetails = () => {
   const astrologerInfo = astrologer ? {
     name: `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim(),
     experience: astrologer.experience ? `${astrologer.experience} Years` : "N/A",
-    image: astrologer.profileImage || "https://via.placeholder.com/40",
+    image: astrologer.profileImgUrl || astrologer.profileImgUrl || "https://via.placeholder.com/40",
     isOnline: astrologer.isActive || false,
     astrologer_ID: astrologer.astrologer_ID,
   } : null;
@@ -220,6 +337,8 @@ const OrderDetails = () => {
                 amount={rec.amount || 0}
                 recordingUrl={rec.recordingUrl}
                 type="audio"
+                initialRating={rec.rating ?? null}
+                onConsultAgain={() => setIsConnectPopupOpen(true)}
               />
             ))}
           </div>
@@ -260,6 +379,8 @@ const OrderDetails = () => {
                 type="video"
                 astrologerName={astrologerInfo.name}
                 astrologerImage={astrologerInfo.image}
+                initialRating={rec.rating ?? null}
+                onConsultAgain={() => setIsConnectPopupOpen(true)}
               />
             ))}
           </div>
@@ -278,6 +399,22 @@ const OrderDetails = () => {
       )}
       <OrderTabs activeTab={activeTab} onTabChange={setActiveTab} />
       <div className={styles.tabContent}>{renderTabContent()}</div>
+
+      <ConnectAstrologerPopup
+        isOpen={isConnectPopupOpen}
+        onClose={() => setIsConnectPopupOpen(false)}
+        astrologer={astrologer}
+        onChatStart={async (astro) => {
+          activeAstroRef.current = astro;
+          setIsConnectPopupOpen(false);
+          return await handleChatStart(astro);
+        }}
+        onCallStart={async (astro, type) => {
+          activeAstroRef.current = astro;
+          setIsConnectPopupOpen(false);
+          return await handleCallStart(astro, type);
+        }}
+      />
     </div>
   );
 };
