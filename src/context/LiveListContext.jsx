@@ -15,6 +15,13 @@ export const LiveListProvider = ({ children, lives: initialLives, autoStartIndex
     setLives(initialLives);
   }
 
+  // Sync autoStartIndex when parent updates it (e.g. URL changed to a different room)
+  const [prevAutoStart, setPrevAutoStart] = useState(autoStartIndex);
+  if (autoStartIndex !== prevAutoStart) {
+    setPrevAutoStart(autoStartIndex);
+    setCurrentIndex(autoStartIndex);
+  }
+
   const getCurrentChannel = () => lives[currentIndex]?.channel;
   const getCurrentLive = () => lives[currentIndex] || null;
 
