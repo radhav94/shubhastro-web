@@ -20,7 +20,7 @@ const TopAstrologerCard = ({ data, onConnect }) => {
   return (
     <div className={styles.topAstrologerCard}>
       <Link
-        to={`/astrologer/${data?.astrologerId || data?._id} `}
+        to={`/astrologer/${data?._id}`}
         className={styles.cardLink}
       >
         <div className={styles.imageContainer}>

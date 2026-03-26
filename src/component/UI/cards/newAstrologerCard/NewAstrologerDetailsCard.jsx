@@ -32,7 +32,7 @@ const NewAstrologerDetailsCard = ({
               alt={`${astrologer?.firstName} ${astrologer?.lastName}`}
               onClick={() =>
                 navigate(
-                  `/astrologer/${astrologer?.astrologerId || astrologer?._id}`,
+                  `/astrologer/${astrologer?._id}`,
                 )
               }
               className={styles.detailsImage}
@@ -58,7 +58,7 @@ const NewAstrologerDetailsCard = ({
 
       <div className={styles.detailsInfo}>
         <Link
-          to={`/astrologer/${astrologer?.astrologerId || astrologer?._id}`}
+          to={`/astrologer/${astrologer?._id}`}
           className={styles.detailsNameLink}
         >
           <h3 className={styles.detailsName}>

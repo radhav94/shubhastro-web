@@ -23,7 +23,7 @@ const AstrologerCard = ({
     <div className={styles.card}>
       <div className={!isLayoutClassic? styles.topSection1 : styles.topSection} onClick={onProfile}>
         <div className={!isLayoutClassic ? styles.avatarWrapper1 : styles.avatarWrapper}>
-          <Link to={`/astrologer/${data?.astrologerId || data?._id}`}>        
+          <Link to={`/astrologer/${data?._id}`}>        
             <img
               src={data?.imageUrl || getAstrologerDefaultImage(data?.gender)}
               alt={data?.firstName}
@@ -43,7 +43,7 @@ const AstrologerCard = ({
 
         <div className={styles.info}>
           <div className={styles.infoHeader}>
-            <Link to={`/astrologer/${data?.astrologerId || data?._id}`}>
+            <Link to={`/astrologer/${data?._id}`}>
               <PrimaryText size_14 isExtraBold color={appColors.tri}>
                 {data?.firstName} {data?.lastName}
               </PrimaryText>

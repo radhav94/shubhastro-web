@@ -34,7 +34,7 @@ const RecommendedAstrologerCard = ({ data, onConnect }) => {
         </div>
         <h3 
           className={styles.name}
-          onClick={() => navigate(`/astrologer/${data?.astrologerId || data?._id}`)}
+          onClick={() => navigate(`/astrologer/${data?._id}`)}
           style={{ cursor: 'pointer' }}
         >
           {fullName}
