@@ -15,8 +15,10 @@ const OrderInfoCard = ({
   type = "audio",
   astrologerName,
   astrologerImage,
+  onConsultAgain,
+  initialRating = null,
 }) => {
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(initialRating);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showVideoModal, setShowVideoModal] = useState(false);
@@ -124,7 +126,7 @@ const OrderInfoCard = ({
         <div className={styles.cardWrapper}>
           {orderId && (
             <div className={styles.cardHeader}>
-              <h3 className={styles.orderId}>#{orderId}</h3>
+              <h3 className={styles.orderId}>#{String(orderId).slice(-4)}</h3>
               <button className={styles.menuButton} aria-label="More options">
                 <MoreVertical size={20} />
               </button>
@@ -182,10 +184,10 @@ const OrderInfoCard = ({
 
           <div className={styles.ratingSection}>
             <div className={styles.ratingRow}>
-              <span className={styles.ratingLabel}>Add Rating</span>
-              <RatingStars rating={rating} onRatingChange={handleRatingChange} />
+              <span className={styles.ratingLabel}>{rating === null || rating === undefined ? "Add Rating" : "Your Rating"}</span>
+              <RatingStars rating={rating ?? 0} onRatingChange={rating === null || rating === undefined ? handleRatingChange : undefined} />
             </div>
-            <div className={styles.consultAgain}>Tell us your experience</div>
+            <div className={styles.consultAgain} onClick={onConsultAgain}>Consult Again</div>
           </div>
         </div>
       </div>
@@ -222,10 +224,10 @@ const OrderInfoCard = ({
 
         <div className={styles.ratingSection}>
           <div className={styles.ratingRow}>
-            <span className={styles.ratingLabel}>Your Rating</span>
-            <RatingStars rating={rating} onRatingChange={handleRatingChange} />
+            <span className={styles.ratingLabel}>{rating === null || rating === undefined ? "Add Rating" : "Your Rating"}</span>
+            <RatingStars rating={rating ?? 0} onRatingChange={rating === null || rating === undefined ? handleRatingChange : undefined} />
           </div>
-          <div className={styles.consultAgain}>Consult Again</div>
+          <div className={styles.consultAgain} onClick={onConsultAgain}>Consult Again</div>
         </div>
       </div>
 

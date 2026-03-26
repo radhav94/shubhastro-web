@@ -41,7 +41,7 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
     //  GET ASTROLOGER BY ID
     getAstrologerById: builder.query({
       query: ({ id }) => ({
-        url: `astrologers/astrologer?astrologerId=${id}&change=true`,
+        url: `astrologers/astrologer?astrologerId=${id}&change=false`,
         method: "GET",
       }),
     }),
