@@ -56,7 +56,7 @@ const ChatAstrologerCard = ({ data, onConnect }) => {
           src={imageUrl}
           alt={`${data?.firstName} ${data?.lastName}`}
           onClick={() =>
-            navigate(`/astrologer/${data?.astrologerId || data?._id}`)
+            navigate(`/astrologer/${data?._id}`)
           }
           className={styles.astrologerImage}
           onError={(e) => {
@@ -73,7 +73,7 @@ const ChatAstrologerCard = ({ data, onConnect }) => {
         <h3
           className={styles.name}
           onClick={() =>
-            navigate(`/astrologer/${data?.astrologerId || data?._id}`)
+            navigate(`/astrologer/${data?._id}`)
           }
           style={{ cursor: "pointer" }}
         >

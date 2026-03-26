@@ -15,7 +15,7 @@ const NewAstrologerCard = ({
       className={`${styles.astrologerCard} ${className}`.trim()} 
       style={style}
     >
-      <Link to={`/astrologer/${astrologer?._id} `} className={styles.cardLink}>
+      <Link to={`/astrologer/${astrologer?._id}`} className={styles.cardLink}>
         <div className={styles.astrologerImageWrapper}>
           <img
             src={astrologer.profileImgUrl || getAstrologerDefaultImage(astrologer.gender)}
