@@ -3,17 +3,11 @@ import { useNavigate } from "react-router-dom";
 import styles from "./EPooja.module.scss";
 import { FiChevronLeft, FiChevronRight, FiSearch, FiX, FiChevronDown } from "react-icons/fi";
 import Toast from "../../../component/toast";
-import { useGetAstromallPageDataQuery, useAddToCartMutation, useGetProductsQuery } from "../../../redux/api/astromall/epooja/epoojaBookingApi";
+import { useGetAstromallPageDataQuery, useAddToCartMutation, useGetProductsQuery, useGetProductCategoriesQuery } from "../../../redux/api/astromall/epooja/epoojaBookingApi";
 import AstromallCartSidebar from "./components/AstromallCartSidebar";
 
-// ─── FALLBACK TABS ───
-const DEFAULT_TABS = [
-  { label: "All Products", slug: "all" },
-  { label: "Crystals", slug: "crystals" },
-  { label: "E Pooja", slug: "e-pooja" },
-  { label: "Gemstones", slug: "gemstones" },
-  { label: "Sapphires", slug: "sapphires" },
-];
+// ─── FALLBACK TABS (used while categories load) ───
+const ALL_TAB = { label: "All Products", slug: "all" };
 
 const SORT_OPTIONS = [
   { label: "Relevance", value: "" },
@@ -92,7 +86,7 @@ const EPooja = () => {
   const [page, setPage] = useState(1);
   const [accumulated, setAccumulated] = useState([]);
   const prevFilterKey = useRef("");
-  const LIMIT = 20;
+  const LIMIT = 10;
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -117,33 +111,57 @@ const EPooja = () => {
     filterParams,
     { skip: !isFiltering, refetchOnMountOrArgChange: true }
   );
+  const { data: categoriesData } = useGetProductCategoriesQuery();
   const [addToCart] = useAddToCartMutation();
 
+  // ── Build category tabs from API ──
+  const categoryTabs = (() => {
+    const raw = categoriesData?.data?.categories || categoriesData?.data || [];
+    const list = Array.isArray(raw) ? raw : [];
+    const mapped = list.map((c) => ({
+      label: c.name || c.title || "",
+      slug: c.slug || c._id || c.ID || "",
+    })).filter((t) => t.label && t.slug);
+    return [ALL_TAB, ...mapped];
+  })();
+
   const trays = apiData?.data?.list || apiData?.data || [];
+
+  // ── Accumulate products for load-more pagination ──
+  const processedRef = useRef(null);
 
   // ── Reset page when filter criteria change ──
   useEffect(() => {
     if (prevFilterKey.current !== filterKey) {
       setPage(1);
       setAccumulated([]);
+      processedRef.current = null;
       prevFilterKey.current = filterKey;
     }
   }, [filterKey]);
 
-  // ── Accumulate products for load-more pagination ──
   useEffect(() => {
     if (!productsData?.data) return;
-    const items = productsData.data.products || productsData.data.list || productsData.data || [];
-    const arr = Array.isArray(items) ? items : [];
+    // Avoid reprocessing the same data
+    if (processedRef.current === productsData.data) return;
+    processedRef.current = productsData.data;
+
+    const raw = productsData.data;
+    const items = Array.isArray(raw.data) ? raw.data
+      : Array.isArray(raw.products) ? raw.products
+      : Array.isArray(raw.list) ? raw.list
+      : Array.isArray(raw) ? raw
+      : [];
     if (page === 1) {
-      setAccumulated(arr);
+      setAccumulated(items);
     } else {
-      setAccumulated((prev) => [...prev, ...arr]);
+      setAccumulated((prev) => [...prev, ...items]);
     }
-  }, [productsData]); // only re-run when API data actually changes
+  }, [productsData, page]);
 
   const totalProducts = productsData?.data?.total || productsData?.data?.totalCount || 0;
-  const hasMore = accumulated.length < totalProducts;
+  const totalPages = productsData?.data?.pages || 0;
+  const hasMore = totalPages > 1 ? page < totalPages : accumulated.length < totalProducts;
 
   const isLoggedIn = () => {
     const role = localStorage.getItem("shubhtalk_role");
@@ -248,6 +266,39 @@ const EPooja = () => {
       );
     }
 
+    // ── shop-by-purpose ──
+    if (displayType === "shop-by-purpose") {
+      const showArrows = items.length >= 7;
+      return (
+        <section key={tray.ID || index} className={styles.section}>
+          <SectionHeader title={title || "SHOP BY PURPOSE"} onViewAll={showMore ? () => handleViewAll(tray) : undefined} />
+          {showArrows ? (
+            <HScrollRow>
+              {items.map((item, i) => (
+                <div key={item.ID || i} className={styles.purposeCard} onClick={() => navigate(`/purpose/${item.slug || item.title?.toLowerCase() || ""}`)}>
+                  <img src={item.image_url || getImg(item)} alt={item.title || "Purpose"} />
+                  <div className={styles.purposeOverlay}>
+                    <h4>{item.title || ""}</h4>
+                  </div>
+                </div>
+              ))}
+            </HScrollRow>
+          ) : (
+            <div className={styles.hScrollRow}>
+              {items.map((item, i) => (
+                <div key={item.ID || i} className={styles.purposeCard} onClick={() => navigate(`/purpose/${item.slug || item.title?.toLowerCase() || ""}`)}>
+                  <img src={item.image_url || getImg(item)} alt={item.title || "Purpose"} />
+                  <div className={styles.purposeOverlay}>
+                    <h4>{item.title || ""}</h4>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      );
+    }
+
     // ── consult-to-expert-astrologer (static expert cards) ──
     if (displayType === "consult-to-expert-astrologer") {
       return (
@@ -329,7 +380,7 @@ const EPooja = () => {
 
       {/* ── Category Tabs ── */}
       <div className={styles.tabs}>
-        {DEFAULT_TABS.map((t) => (
+        {categoryTabs.map((t) => (
           <button key={t.slug} className={`${styles.tab} ${activeTab === t.slug ? styles.tabActive : ""}`} onClick={() => handleTabChange(t.slug)}>
             {t.label}
           </button>

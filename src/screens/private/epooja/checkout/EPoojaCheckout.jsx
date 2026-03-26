@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./EPoojaCheckout.module.scss";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { useGetCartQuery, useRemoveCartItemMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
+import { useGetCartQuery, useRemoveCartItemMutation, useCreateMallOrderMutation, useUpdateMallOrderMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
 
@@ -63,9 +63,13 @@ const EPoojaCheckout = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [buyNowQty] = useState(buyNowQtyFromState);
+  const actualPaymentMethodRef = useRef(null);
 
   const { data: cartData, isLoading } = useGetCartQuery();
   const [removeCartItem] = useRemoveCartItemMutation();
+  const [createMallOrder] = useCreateMallOrderMutation();
+  const [updateMallOrder] = useUpdateMallOrderMutation();
+  const orderIdRef = useRef(null);
   const cartItems = cartData?.data?.items || cartData?.data?.cart?.items || cartData?.data || [];
   const rawCartItems = Array.isArray(cartItems) ? cartItems : [];
 
@@ -76,6 +80,84 @@ const EPoojaCheckout = () => {
   const subtotal = items.reduce((sum, item) => sum + getItemPrice(item) * (item?.quantity || 1), 0);
   const gst = Math.round(subtotal * GST_RATE * 100) / 100;
   const grandTotal = Math.round((subtotal + gst) * 100) / 100;
+
+  // Shared: build shipping address from state
+  const buildShippingAddress = useCallback(() => {
+    if (!address) return undefined;
+    return {
+      name: address.name || "",
+      phone: address.phone || "",
+      address: address.addressLine1 || address.address || address.line1 || "",
+      city: address.city || "",
+      state: address.state || "",
+      pincode: Number(address.pincode || address.pin) || 0,
+    };
+  }, [address]);
+
+  // Step 1: Create order with pending status BEFORE opening Razorpay
+  const createOrder = useCallback(async () => {
+    const orderItems = items.map((item) => {
+      const p = item?.productId || item?.product || item;
+      return {
+        productId: String(p?._id || p?.id || ""),
+        quantity: item?.quantity || 1,
+      };
+    });
+
+    const generatedId = `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const shippingAddress = buildShippingAddress();
+
+    const payload = {
+      ID: generatedId,
+      items: orderItems,
+      shipping_charge: 0,
+      discount: 0,
+      payment_method: "online",
+      payment_status: "pending",
+      order_status: "pending",
+      final_amount: grandTotal,
+      ...(shippingAddress && { shipping_address: shippingAddress }),
+      notes: "",
+    };
+
+    try {
+      const res = await createMallOrder(payload).unwrap();
+      console.log("[EPoojaCheckout] Create order response:", JSON.stringify(res));
+      // Prioritize numeric ID field used in update URL (e.g. /api/mall/orders/59)
+      orderIdRef.current = res?.data?.order?.ID || res?.data?.ID || res?.order?.ID || res?.ID || res?.data?.order?._id || res?.data?._id || res?.order?._id || res?._id || generatedId;
+      console.log("[EPoojaCheckout] Using orderId:", orderIdRef.current);
+      return orderIdRef.current;
+    } catch (err) {
+      console.error("[EPoojaCheckout] Failed to create order:", err);
+      return null;
+    }
+  }, [items, grandTotal, buildShippingAddress, createMallOrder]);
+
+  // Step 2: Update order after payment success or failure
+  const updateOrder = useCallback(async (paymentStatus, paymentMethod) => {
+    const orderId = orderIdRef.current;
+    if (!orderId) return;
+
+    const shippingAddress = buildShippingAddress();
+
+    const payload = {
+      orderId,
+      payment_status: paymentStatus,
+      order_status: paymentStatus === "paid" ? "confirmed" : "failed",
+      payment_method: paymentMethod || "online",
+      shipping_charge: 0,
+      discount: 0,
+      final_amount: grandTotal,
+      ...(shippingAddress && { shipping_address: shippingAddress }),
+      notes: "",
+    };
+
+    try {
+      await updateMallOrder(payload).unwrap();
+    } catch (err) {
+      console.error("[EPoojaCheckout] Failed to update order:", err);
+    }
+  }, [grandTotal, buildShippingAddress, updateMallOrder]);
 
   // Load Razorpay script
   useEffect(() => {
@@ -90,13 +172,21 @@ const EPoojaCheckout = () => {
     document.body.appendChild(script);
   }, []);
 
-  const openRazorpay = useCallback((prefillMethod) => {
+  const openRazorpay = useCallback(async (prefillMethod) => {
     if (!isLoaded || !window.Razorpay) {
       Toast.error("Payment gateway not loaded. Please refresh.");
       return;
     }
     if (isProcessing) return;
     setIsProcessing(true);
+
+    // Step 1: Create order with pending status
+    const orderId = await createOrder();
+    if (!orderId) {
+      setIsProcessing(false);
+      Toast.error("Failed to create order. Please try again.");
+      return;
+    }
 
     const amountInPaise = Math.round(grandTotal * 100);
     const options = {
@@ -107,6 +197,10 @@ const EPoojaCheckout = () => {
       description: items.length === 1 ? getItemTitle(items[0]) : `${items.length} items from AstroMall`,
       handler: async () => {
         setIsProcessing(false);
+        // Step 2: Update order to paid with actual payment method
+        const method = actualPaymentMethodRef.current || selectedMethod || "online";
+        actualPaymentMethodRef.current = null;
+        await updateOrder("paid", method);
         if (!isBuyNowMode && rawCartItems.length > 0) {
           for (const item of rawCartItems) {
             const productId = item?.productId?._id || item?.product?._id || item?._id;
@@ -136,28 +230,36 @@ const EPoojaCheckout = () => {
       },
       theme: { color: "#f75801" },
       modal: {
-        ondismiss: () => { setIsProcessing(false); Toast.info("Payment cancelled"); },
+        ondismiss: () => {
+          setIsProcessing(false);
+          updateOrder("failed", selectedMethod);
+          Toast.info("Payment cancelled");
+        },
       },
     };
 
     try {
       const rzp = new window.Razorpay(options);
-      rzp.on("payment.failed", (response) => {
+      rzp.on("payment.authorized", (resp) => {
+        actualPaymentMethodRef.current = resp?.method || null;
+      });
+      rzp.on("payment.failed", (resp) => {
         setIsProcessing(false);
-        Toast.error(response?.error?.description || "Payment failed");
+        updateOrder("failed", resp?.error?.metadata?.payment_method || selectedMethod);
+        Toast.error(resp?.error?.description || "Payment failed");
       });
       rzp.open();
     } catch (err) {
       setIsProcessing(false);
       Toast.error("Could not open payment gateway. Please try again.");
     }
-  }, [isLoaded, isProcessing, grandTotal, items, navigate, address, isBuyNowMode, rawCartItems, removeCartItem, selectedMethod]);
+  }, [isLoaded, isProcessing, grandTotal, items, navigate, address, isBuyNowMode, rawCartItems, removeCartItem, selectedMethod, createOrder, updateOrder]);
 
   const handleProceedToPay = useCallback(() => {
     openRazorpay(selectedMethod);
   }, [openRazorpay, selectedMethod]);
 
-  const handleUpiAppPay = useCallback((app) => {
+  const handleUpiAppPay = useCallback(async (app) => {
     if (!isLoaded || !window.Razorpay) {
       Toast.error("Payment gateway not loaded. Please refresh.");
       return;
@@ -165,6 +267,14 @@ const EPoojaCheckout = () => {
     if (isProcessing) return;
     setIsProcessing(true);
     setSelectedMethod("upi");
+
+    // Step 1: Create order with pending status
+    const orderId = await createOrder();
+    if (!orderId) {
+      setIsProcessing(false);
+      Toast.error("Failed to create order. Please try again.");
+      return;
+    }
 
     const amountInPaise = Math.round(grandTotal * 100);
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -177,6 +287,10 @@ const EPoojaCheckout = () => {
       description: items.length === 1 ? getItemTitle(items[0]) : `${items.length} items from AstroMall`,
       handler: async () => {
         setIsProcessing(false);
+        // Step 2: Update order to paid with actual payment method
+        const method = actualPaymentMethodRef.current || "upi";
+        actualPaymentMethodRef.current = null;
+        await updateOrder("paid", method);
         if (!isBuyNowMode && rawCartItems.length > 0) {
           for (const item of rawCartItems) {
             const productId = item?.productId?._id || item?.product?._id || item?._id;
@@ -206,7 +320,10 @@ const EPoojaCheckout = () => {
       },
       theme: { color: "#f75801" },
       modal: {
-        ondismiss: () => { setIsProcessing(false); },
+        ondismiss: () => {
+          setIsProcessing(false);
+          updateOrder("failed", "upi");
+        },
       },
     };
 
@@ -230,16 +347,20 @@ const EPoojaCheckout = () => {
 
     try {
       const rzp = new window.Razorpay(options);
-      rzp.on("payment.failed", (response) => {
+      rzp.on("payment.authorized", (resp) => {
+        actualPaymentMethodRef.current = resp?.method || null;
+      });
+      rzp.on("payment.failed", (resp) => {
         setIsProcessing(false);
-        Toast.error(response?.error?.description || "Payment failed");
+        updateOrder("failed", resp?.error?.metadata?.payment_method || "upi");
+        Toast.error(resp?.error?.description || "Payment failed");
       });
       rzp.open();
     } catch (err) {
       setIsProcessing(false);
       Toast.error("Could not open payment gateway. Please try again.");
     }
-  }, [isLoaded, isProcessing, grandTotal, items, navigate, address, isBuyNowMode, rawCartItems, removeCartItem]);
+  }, [isLoaded, isProcessing, grandTotal, items, navigate, address, isBuyNowMode, rawCartItems, removeCartItem, createOrder, updateOrder]);
 
   if (!isBuyNowMode && isLoading) {
     return <div className={styles.page}><div style={{ textAlign: "center", padding: "80px 0", color: "#999" }}>Loading...</div></div>;

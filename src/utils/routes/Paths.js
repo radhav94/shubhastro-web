@@ -158,6 +158,7 @@ import EPoojaCheckout from "../../screens/private/epooja/checkout/EPoojaCheckout
 import AstromallCart from "../../screens/private/epooja/cart/AstromallCart";
 import CategoryProducts from "../../screens/private/epooja/category/CategoryProducts";
 import AllCategories from "../../screens/private/epooja/category/AllCategories";
+import PurposeProducts from "../../screens/private/epooja/purpose/PurposeProducts";
 
 import BuisnessBreakupTarot from "../../screens/private/tarot/buisnessBreakupTarot/BuisnessBreakupTarot";
 import CareerSelectTarot from "../../screens/private/tarot/careerSelectTarot/CareerSelectTarot";
@@ -956,6 +957,10 @@ export const PATH = {
     ASTROMALL_ALL_CATEGORIES: {
       path: "/categories",
       element: AllCategories,
+    },
+    ASTROMALL_PURPOSE: {
+      path: "/purpose/:slug",
+      element: PurposeProducts,
     },
 
     RECHARGE: {

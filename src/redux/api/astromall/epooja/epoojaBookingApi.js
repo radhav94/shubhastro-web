@@ -433,6 +433,81 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
       },
     }),
 
+    // Create mall order (before payment — status: pending)
+    createMallOrder: builder.mutation({
+      queryFn: async (body) => {
+        try {
+          const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+          const role = localStorage.getItem("shubhtalk_role");
+          const token = role === "ASTROLOGER"
+            ? localStorage.getItem("shubhtalk_astro_token")
+            : localStorage.getItem("shubhtalk_customer_token");
+
+          const url = `${BASE_URL}/api/mall/orders`;
+          const bodyStr = JSON.stringify(body);
+
+          console.log(
+            `[createMallOrder] curl -X 'POST' \\\n  '${url}' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  ${token ? `-H 'Authorization: Bearer ${token}' \\\n  ` : ""}-d '${bodyStr}'`
+          );
+
+          const res = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              accept: "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: bodyStr,
+          });
+          const json = await res.json();
+          console.log("[createMallOrder] Response:", res.status, json);
+          if (json?.success) return { data: json };
+          return { error: { status: res.status, data: json } };
+        } catch (err) {
+          console.error("[createMallOrder] Error:", err);
+          return { error: { status: "FETCH_ERROR", error: err.message } };
+        }
+      },
+      invalidatesTags: ["cart"],
+    }),
+
+    // Update mall order (after payment success/failure)
+    updateMallOrder: builder.mutation({
+      queryFn: async ({ orderId, ...body }) => {
+        try {
+          const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+          const role = localStorage.getItem("shubhtalk_role");
+          const token = role === "ASTROLOGER"
+            ? localStorage.getItem("shubhtalk_astro_token")
+            : localStorage.getItem("shubhtalk_customer_token");
+
+          const url = `${BASE_URL}/api/mall/orders/${orderId}`;
+          const bodyStr = JSON.stringify(body);
+
+          console.log(
+            `[updateMallOrder] curl -X 'PUT' \\\n  '${url}' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  ${token ? `-H 'Authorization: Bearer ${token}' \\\n  ` : ""}-d '${bodyStr}'`
+          );
+
+          const res = await fetch(url, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              accept: "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: bodyStr,
+          });
+          const json = await res.json();
+          console.log("[updateMallOrder] Response:", res.status, json);
+          if (json?.success) return { data: json };
+          return { error: { status: res.status, data: json } };
+        } catch (err) {
+          console.error("[updateMallOrder] Error:", err);
+          return { error: { status: "FETCH_ERROR", error: err.message } };
+        }
+      },
+    }),
+
     // Book E-Pooja
     bookEPooja: builder.mutation({
       query: (body) => ({
@@ -462,5 +537,7 @@ export const {
   useDeleteAddressMutation,
   useGetProductsQuery,
   useGetProductCategoriesQuery,
+  useCreateMallOrderMutation,
+  useUpdateMallOrderMutation,
   useBookEPoojaMutation,
 } = epoojaBookingApi;
