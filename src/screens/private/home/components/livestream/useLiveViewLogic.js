@@ -12,7 +12,12 @@ export const useLiveViewLogic = (props) => {
   const messagesEndRef = useRef(null);
   const [showSharePopup, setShowSharePopup] = useState(false);
 
-  const shareUrl = window.location.href;
+  // Build share URL using the channel (not astrologerId) so the recipient
+  // lands directly on the correct Agora stream.
+  const channel = props.channel || "";
+  const shareUrl = channel
+    ? `${window.location.origin}/live/${channel}`
+    : `${window.location.origin}/live`;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -60,6 +65,7 @@ export const useLiveViewLogic = (props) => {
   return {
     messagesEndRef,
     showSharePopup, setShowSharePopup,
+    shareUrl,
     handleSend,
     handleCopyLink,
     shareToWhatsapp,

@@ -134,6 +134,7 @@ import cosmicUnity from "../assets/images/daily-insight-3.png";
 import LiveGift from "../assets/images/livegift.png";
 import LiveShare from "../assets/images/liveshare.png";
 import LiveClock from "../assets/images/liveclock.png";
+import LiveIcon from "../assets/images/Icon.png";
 import LikesIconContainer from "../assets/images/Likes Icon Container.png";
 
 export const AppImages = {
@@ -160,6 +161,7 @@ export const AppImages = {
   LiveGift,
   LiveShare,
   LiveClock,
+  LiveIcon,
   LikesIconContainer,
 };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./AstrologerProfile.module.scss";
 import { FaPlay, FaStar, FaChevronRight } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
@@ -29,6 +29,8 @@ import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import { useTalkToAstrologer } from "../talkToAstrologer/useTalkToAstrologer";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { useGetAstrologerReviewsQuery } from "../../../redux/api/review/reviewApi";
+import { useGetCallHistoryQuery } from "../../../redux/api/callHistory/callHistory";
+import { useGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chatHistory";
 import StickyReview from "../home/components/call/StickyReview";
 import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
@@ -148,6 +150,39 @@ const AstrologerProfile = () => {
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
   const token = getToken();
   const { balance } = useWalletBalance();
+
+  // Fetch call & chat history to find last roomId for this astrologer
+  const { data: callHistoryData } = useGetCallHistoryQuery(
+    { userId: userIdLocal, page: 1, limit: 30 },
+    { skip: !userIdLocal },
+  );
+  const { data: chatHistoryData } = useGetUserChatMessagesQuery(
+    { userId: userIdLocal, page: 1, limit: 30 },
+    { skip: !userIdLocal },
+  );
+
+  // Find the most recent roomId for this astrologer from call/chat history
+  const lastRoomId = useMemo(() => {
+    const astrologerId = data?._id;
+    if (!astrologerId) return null;
+
+    const callEntry = callHistoryData?.data?.callHistory?.find(
+      (item) => item?.receiverId === astrologerId,
+    );
+    const chatEntry = chatHistoryData?.data?.chatHistory?.find(
+      (room) => room?.astrologerId === astrologerId,
+    );
+
+    // Pick the most recent one
+    const callTime = callEntry?.timestamp ? new Date(callEntry.timestamp) : null;
+    const lastChat = chatEntry?.[chatEntry.length - 1];
+    const chatTime = lastChat?.createdAt ? new Date(lastChat.createdAt) : null;
+
+    if (callTime && chatTime) {
+      return callTime > chatTime ? callEntry.roomId : chatEntry.roomId;
+    }
+    return callEntry?.roomId || chatEntry?.roomId || null;
+  }, [data?._id, callHistoryData, chatHistoryData]);
   
   // Use the astrologer connect hook
   const {
@@ -291,9 +326,11 @@ const AstrologerProfile = () => {
 
 
   const handleOpenReviewModal = () => {
+    console.log(data,"123")
     setReviewData({
       astrologerID: data?.astrologer_ID,
       fullName: `${data?.firstName || ""} ${data?.lastName || ""}`.trim(),
+      roomId: lastRoomId,
     });
     setOpenReview(true);
   };

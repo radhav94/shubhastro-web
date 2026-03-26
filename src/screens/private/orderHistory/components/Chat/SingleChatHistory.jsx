@@ -30,6 +30,7 @@ const SingleChatHistory = () => {
       rating,
       review,
       isAnonymous,
+      roomId,
     };
 
     try {

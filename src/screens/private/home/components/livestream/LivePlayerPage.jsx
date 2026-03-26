@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import InteractiveLiveStreaming from "./InteractiveLiveStreaming";
 import { LiveListProvider } from "../../../../../context/LiveListContext";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 import { restoreViewerSession } from "../../../../../utils/liveSessionStorage";
 
 const LivePlayerPage = () => {
+  const { channelId } = useParams();
   const [lives, setLives] = useState([]);
   const [autoStartIndex, setAutoStartIndex] = useState(0);
 
@@ -29,27 +31,37 @@ const LivePlayerPage = () => {
 
       let liveList = Object.values(map);
 
-      // If we have a saved session channel, ensure it's in the list
-      // and auto-start on that channel (reconnect after refresh)
-      if (savedSession?.channel) {
-        const savedChannel = savedSession.channel;
-        const existsInList = liveList.some((l) => l.channel === savedChannel);
+      // Determine which channel to auto-start on:
+      // 1. URL param (direct link / new tab) — always a channel/room ID
+      // 2. Then saved session (reconnect after refresh)
+      let targetChannel = null;
 
+      if (channelId) {
+        targetChannel = channelId;
+        const existsInList = liveList.some((l) => l.channel === channelId);
+        if (!existsInList) {
+          // Channel not in API list yet — add placeholder so player can attempt to join
+          liveList = [{ channel: channelId }, ...liveList];
+        }
+      } else if (savedSession?.channel) {
+        targetChannel = savedSession.channel;
+        const existsInList = liveList.some(
+          (l) => l.channel === savedSession.channel
+        );
         if (!existsInList && savedSession.astrologer) {
-          // Stream might still be active but API hasn't returned it yet
-          // Add it from saved session so we can attempt reconnect
           liveList = [
             {
-              channel: savedChannel,
+              channel: savedSession.channel,
               uid: savedSession.uid,
               astrologer: savedSession.astrologer,
             },
             ...liveList,
           ];
         }
+      }
 
-        // Find the index of the saved channel to auto-start there
-        const idx = liveList.findIndex((l) => l.channel === savedChannel);
+      if (targetChannel) {
+        const idx = liveList.findIndex((l) => l.channel === targetChannel);
         if (idx >= 0) {
           setAutoStartIndex(idx);
         }
@@ -57,7 +69,7 @@ const LivePlayerPage = () => {
 
       setLives(liveList);
     });
-  }, []);
+  }, [channelId]);
 
   return (
     <LiveListProvider
