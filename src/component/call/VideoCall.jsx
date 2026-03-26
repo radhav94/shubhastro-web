@@ -42,7 +42,7 @@ const APP_ID = "cf5e31fa03584573aacaf42daebd493c";
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
 
 const VideoCalling = ({ callData }) => {
-  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, reconnectToCall } = useCall();
+  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, reconnectToCall, isCallMinimized, setIsCallMinimized } = useCall();
   const { activeChat } = useChatContext();
   const navigate = useNavigate();
 
@@ -73,7 +73,9 @@ const VideoCalling = ({ callData }) => {
   const [micOn, setMicOn] = useState(true);
   const [cameraOn, setCameraOn] = useState(true);
   const [speakerOn, setSpeakerOn] = useState(true);
-  const [isMinimized, setIsMinimized] = useState(false);
+  // Use context's isCallMinimized instead of local state
+  const isMinimized = isCallMinimized;
+  const setIsMinimized = setIsCallMinimized;
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
@@ -1064,7 +1066,7 @@ const VideoCalling = ({ callData }) => {
       {/* FULL VIEW */}
       <div
         className={styles.videoContainer}
-        style={{ visibility: isMinimized ? "hidden" : "visible" }}
+        style={{ display: isMinimized ? "none" : undefined }}
       >
         {/* Chat Notification Banner */}
         {chatNotification && (
