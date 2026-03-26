@@ -23,6 +23,7 @@ const StickyReview = () => {
         rating,
         review,
         isAnonymous,
+        roomId: reviewData?.roomId,
       }).unwrap();
 
       if (res.success) {

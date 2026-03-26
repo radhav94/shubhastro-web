@@ -725,11 +725,12 @@ const Profile = () => {
   };
 
   // Handle rate consultation button click
-  const handleRateConsultation = (astrologer) => {
+  const handleRateConsultation = (astrologer, roomId) => {
     console.log("astrologerssss",astrologer)
     setReviewData({
       astrologerID: astrologer.astrologer_ID || astrologer._id,
       fullName: `${astrologer.firstName} ${astrologer.lastName || ""}`.trim(),
+      roomId,
     });
     setOpenReview(true);
   };
@@ -1437,7 +1438,7 @@ const Profile = () => {
                               className={styles.rateButton}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleRateConsultation(order.astrologer);
+                                handleRateConsultation(order.astrologer, order.roomId);
                               }}
                             >
                               Rate Consultation
