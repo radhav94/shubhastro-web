@@ -1,0 +1,68 @@
+import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
+
+export const supportApi = privateRequestNew.injectEndpoints({
+  endpoints: (builder) => ({
+    getSupportQuestions: builder.query({
+      query: (role = "user") => ({
+        url: `support/questions/main`,
+        params: { role },
+      }),
+    }),
+    getSubQuestions: builder.query({
+      query: ({ mainQuestionId, role = "user" }) => ({
+        url: `support/questions/sub`,
+        params: { mainQuestionId, role },
+      }),
+    }),
+    getUserSessions: builder.query({
+      query: ({ page = 1, limit = 3 } = {}) => ({
+        url: `sessions/getAllUserSessions`,
+        params: { page, limit },
+      }),
+    }),
+    getSupportAnswer: builder.query({
+      query: (questionId) => ({
+        url: `support/answers`,
+        params: { questionId },
+      }),
+    }),
+    createSupportTicket: builder.mutation({
+      query: (body) => ({
+        url: `support/tickets`,
+        method: "POST",
+        body,
+        headers: { "Content-Type": "application/json" },
+      }),
+    }),
+    getMyTickets: builder.query({
+      query: ({ page = 1, limit = 10 } = {}) => ({
+        url: `support/tickets/my`,
+        params: { page, limit },
+      }),
+    }),
+    getTicketById: builder.query({
+      query: (ticketId) => ({
+        url: `support/tickets/${ticketId}`,
+      }),
+    }),
+    rateTicket: builder.mutation({
+      query: ({ ticketId, rating, feedback }) => ({
+        url: `support/tickets/${ticketId}/rate`,
+        method: "POST",
+        body: { rating, feedback },
+        headers: { "Content-Type": "application/json" },
+      }),
+    }),
+  }),
+});
+
+export const {
+  useGetSupportQuestionsQuery,
+  useLazyGetSubQuestionsQuery,
+  useLazyGetUserSessionsQuery,
+  useLazyGetSupportAnswerQuery,
+  useCreateSupportTicketMutation,
+  useGetMyTicketsQuery,
+  useGetTicketByIdQuery,
+  useRateTicketMutation,
+} = supportApi;
