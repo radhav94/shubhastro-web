@@ -28,7 +28,7 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraPreview, setCameraPreview] = useState(null);
   const [isSending, setIsSending] = useState(false);
-  const [facingMode, setFacingMode] = useState('environment');
+  const [facingMode, setFacingMode] = useState("environment");
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const canvasRef = useRef(null);
@@ -126,17 +126,31 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
         streamRef.current = null;
       }
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: false });
-        if (!active) { stream.getTracks().forEach((t) => t.stop()); return; }
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode },
+          audio: false,
+        });
+        if (!active) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
         streamRef.current = stream;
-        if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.play(); }
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+        }
       } catch (err) {
         console.error("Camera error:", err);
-        if (active) { Toast.error("Camera access denied"); setCameraOpen(false); }
+        if (active) {
+          Toast.error("Camera access denied");
+          setCameraOpen(false);
+        }
       }
     };
     startStream();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [cameraOpen, facingMode]);
 
   // Early return after ALL hooks are called
@@ -171,7 +185,10 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
   // NEW: KundliSelectModal handler — user picks from list, sends kundli link with correct kundliId
   const handleChatAfterKundliSelect = (kundli) => {
     setKundliModalOpen(false);
-    if (!kundli?._id) { Toast.error("Kundli not selected properly"); return; }
+    if (!kundli?._id) {
+      Toast.error("Kundli not selected properly");
+      return;
+    }
     const kundliLink = `${window.location.origin}/kundli/${kundli._id}`;
     // Pass kundli._id as third arg so the socket payload uses the selected kundli's ID (not session default)
     sendChatMessage(kundliLink, "kundli", kundli._id);
@@ -180,10 +197,17 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
   // NEW: handle attach menu option selection (aligned with ChatInput.jsx)
   const handleAttachOption = async (type) => {
     setAttachMenuOpen(false);
-    if (type === "kundali") { setKundliModalOpen(true); return; }
-    if (type === "camera") { setCameraOpen(true); return; }
+    if (type === "kundali") {
+      setKundliModalOpen(true);
+      return;
+    }
+    if (type === "camera") {
+      setCameraOpen(true);
+      return;
+    }
     try {
-      const accept = type === "photo" ? "image/*" : ".pdf,.doc,.docx,.xls,.xlsx";
+      const accept =
+        type === "photo" ? "image/*" : ".pdf,.doc,.docx,.xls,.xlsx";
       const { blob } = await openFileSelector(accept);
       const attachType = getAttachType(blob.type);
       await sendFiles(blob, attachType);
@@ -251,11 +275,20 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
 
   // Camera helper functions
   const stopStream = () => {
-    if (streamRef.current) { streamRef.current.getTracks().forEach((t) => t.stop()); streamRef.current = null; }
-    if (videoRef.current) { videoRef.current.srcObject = null; }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
   };
-  const handleCameraClose = () => { stopStream(); setCameraOpen(false); };
-  const handleSwitchCamera = () => setFacingMode((prev) => (prev === "environment" ? "user" : "environment"));
+  const handleCameraClose = () => {
+    stopStream();
+    setCameraOpen(false);
+  };
+  const handleSwitchCamera = () =>
+    setFacingMode((prev) => (prev === "environment" ? "user" : "environment"));
   const handleCapture = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -263,12 +296,16 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext("2d").drawImage(video, 0, 0);
-    canvas.toBlob((blob) => {
-      const url = URL.createObjectURL(blob);
-      stopStream();
-      setCameraOpen(false);
-      setCameraPreview({ url, blob });
-    }, "image/jpeg", 0.92);
+    canvas.toBlob(
+      (blob) => {
+        const url = URL.createObjectURL(blob);
+        stopStream();
+        setCameraOpen(false);
+        setCameraPreview({ url, blob });
+      },
+      "image/jpeg",
+      0.92,
+    );
   };
   const handleCameraPreviewSend = async () => {
     if (!cameraPreview || isSending) return;
@@ -277,7 +314,9 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
       await sendFiles(cameraPreview.blob, "image");
       URL.revokeObjectURL(cameraPreview.url);
       setCameraPreview(null);
-    } finally { setIsSending(false); }
+    } finally {
+      setIsSending(false);
+    }
   };
   const handleCameraRetake = () => {
     URL.revokeObjectURL(cameraPreview?.url);
@@ -288,7 +327,6 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
   const renderMessage = (msg, index) => {
     let isSpecialMessage = false;
     let content = msg.text;
-
     try {
       if (msg.type === "audio") {
         isSpecialMessage = true;
@@ -411,6 +449,19 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
             </div>
           </div>
         );
+      } else if (msg.type === "attachment") {
+        isSpecialMessage = true;
+        content = (
+          <a
+            href={msg.text}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-sm underline font-semibold"
+          >
+            <span className="text-lg">📎</span>
+            <span className="truncate max-w-[180px]">Download Attachment</span>
+          </a>
+        );
       } else {
         if (msg.type !== "message" && msg.type !== "gift")
           isSpecialMessage = true;
@@ -422,7 +473,7 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
               rel="noopener noreferrer"
               className={styles.fileLink}
             >
-              📎 {msg.text}
+              📎 Download Attachment
             </a>
           </div>
         );
@@ -477,7 +528,7 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
         <button
           type="button"
           className={styles.attachButton}
-          onClick={()=>setAttachMenuOpen(true)}
+          onClick={() => setAttachMenuOpen(true)}
           title="Attach file"
         >
           <IoAttach size={25} /> Attach File
@@ -669,23 +720,65 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
       {cameraOpen && (
         <div className={styles.cameraPreviewOverlay}>
           <div className={styles.cameraPreviewContainer}>
-            <video ref={videoRef} className={styles.cameraPreviewImg} autoPlay playsInline muted />
-            <button className={styles.cameraSwitchBtn} onClick={handleSwitchCamera}>
+            <video
+              ref={videoRef}
+              className={styles.cameraPreviewImg}
+              autoPlay
+              playsInline
+              muted
+            />
+            <button
+              className={styles.cameraSwitchBtn}
+              onClick={handleSwitchCamera}
+            >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M20 7L16 3L12 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M16 3V15C16 16.1046 15.1046 17 14 17H4" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M4 17L8 21L12 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M8 21V9C8 7.89543 8.89543 7 10 7H20" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                <path
+                  d="M20 7L16 3L12 7"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M16 3V15C16 16.1046 15.1046 17 14 17H4"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M4 17L8 21L12 17"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M8 21V9C8 7.89543 8.89543 7 10 7H20"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
               </svg>
             </button>
             <div className={styles.cameraPreviewActions}>
-              <button className={styles.cameraRetakeBtn} onClick={handleCameraClose}>
+              <button
+                className={styles.cameraRetakeBtn}
+                onClick={handleCameraClose}
+              >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <path
+                    d="M18 6L6 18M6 6l12 12"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
                 </svg>
                 Cancel
               </button>
-              <button className={styles.cameraShutterBtn} onClick={handleCapture}>
+              <button
+                className={styles.cameraShutterBtn}
+                onClick={handleCapture}
+              >
                 <span className={styles.cameraShutterInner} />
               </button>
               <div style={{ width: 100 }} />
@@ -698,23 +791,62 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
       {cameraPreview && (
         <div className={styles.cameraPreviewOverlay}>
           <div className={styles.cameraPreviewContainer}>
-            <img src={cameraPreview.url} alt="Preview" className={styles.cameraPreviewImg} />
+            <img
+              src={cameraPreview.url}
+              alt="Preview"
+              className={styles.cameraPreviewImg}
+            />
             <div className={styles.cameraPreviewActions}>
-              <button className={styles.cameraRetakeBtn} onClick={handleCameraRetake}>
+              <button
+                className={styles.cameraRetakeBtn}
+                onClick={handleCameraRetake}
+              >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M1 4V10H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M3.51 15C4.96 18.57 8.35 21 12.27 21C17.1 21 21 17.1 21 12.27C21 7.44 17.1 3.54 12.27 3.54C9.18 3.54 6.46 5.07 4.8 7.42L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path
+                    d="M1 4V10H7"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M3.51 15C4.96 18.57 8.35 21 12.27 21C17.1 21 21 17.1 21 12.27C21 7.44 17.1 3.54 12.27 3.54C9.18 3.54 6.46 5.07 4.8 7.42L1 10"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
                 Retake
               </button>
-              <button className={styles.cameraSendBtn} onClick={handleCameraPreviewSend} disabled={isSending}>
+              <button
+                className={styles.cameraSendBtn}
+                onClick={handleCameraPreviewSend}
+                disabled={isSending}
+              >
                 {isSending ? (
-                  <span className={styles.sendingDots}><span /><span /><span /></span>
+                  <span className={styles.sendingDots}>
+                    <span />
+                    <span />
+                    <span />
+                  </span>
                 ) : (
                   <>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                      <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path
+                        d="M22 2L11 13"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M22 2L15 22L11 13L2 9L22 2Z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                     Send
                   </>
