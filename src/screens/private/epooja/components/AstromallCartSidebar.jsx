@@ -8,14 +8,22 @@ import Toast from "../../../../component/toast";
 const DEFAULT_IMG = "https://images.unsplash.com/photo-1625072290979-cac544181be8?w=800&q=80";
 
 const getItemImage = (item) => {
+  // Prefer variant snapshot image, then product images
+  const snap = item?.variantSnapshot;
+  if (snap?.images?.length) return snap.images[0];
   const p = item?.productId || item?.product || item;
   return p?.banner_image?.original || p?.banner_image?.small || (p?.images?.length ? p.images[0] : null) || p?.imgUrl || p?.image || p?.thumbnail || DEFAULT_IMG;
 };
 const getItemTitle = (item) => {
   const p = item?.productId || item?.product || item;
-  return p?.title || p?.name || "Product";
+  const variantTitle = item?.variantSnapshot?.title;
+  const productTitle = p?.title || p?.name || "Product";
+  return variantTitle ? `${productTitle} — ${variantTitle}` : productTitle;
 };
 const getItemPrice = (item) => {
+  // currentPrice from cart API is the most accurate
+  if (item?.currentPrice) return item.currentPrice;
+  if (item?.priceAtAdd) return item.priceAtAdd;
   const p = item?.productId || item?.product || item;
   return p?.price || p?.selling_price || 0;
 };
@@ -35,7 +43,7 @@ const AstromallCartSidebar = () => {
   const cartItems = cartData?.data?.items || cartData?.data?.cart?.items || cartData?.data || [];
   const items = Array.isArray(cartItems) ? cartItems : [];
 
-  const cartTotal = items.reduce((sum, item) => {
+  const cartTotal = cartData?.data?.totalAmount || items.reduce((sum, item) => {
     return sum + getItemPrice(item) * (item?.quantity || 1);
   }, 0);
 

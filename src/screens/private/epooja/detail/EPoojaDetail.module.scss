@@ -211,6 +211,68 @@
   font-size: 18px;
   font-weight: 700;
   color: #222;
+  margin: 0;
+}
+
+.mrp {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* ── Variant Selector ── */
+.variantWrap {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.variantBtn {
+  padding: 8px 14px;
+  border: 1.5px solid #ddd;
+  border-radius: 20px;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { border-color: #f75801; color: #f75801; }
+}
+
+.variantActive {
+  border-color: #f75801;
+  background: #fff5f0;
+  color: #f75801;
+}
+
+.variantSpecs {
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: #555;
+  p { margin: 2px 0; }
+}
+
+/* ── Action Row ── */
+.actionRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+
+  @media (max-width: 480px) {
+    gap: 12px;
+  }
+}
+
+/* ── Video ── */
+.video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  border-radius: 12px;
+  margin-bottom: 28px;
 }
 
 /* ── Quantity Selector ── */
