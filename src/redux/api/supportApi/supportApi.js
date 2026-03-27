@@ -4,7 +4,7 @@ export const supportApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
     getSupportQuestions: builder.query({
       query: (role = "user") => ({
-        url: `support/questions/main`,
+        url: `support/topics`,
         params: { role },
       }),
     }),
@@ -14,9 +14,20 @@ export const supportApi = privateRequestNew.injectEndpoints({
         params: { mainQuestionId, role },
       }),
     }),
+    getSubTopics: builder.query({
+      query: (topicId) => ({
+        url: `support/topics/${topicId}`,
+      }),
+    }),
     getUserSessions: builder.query({
       query: ({ page = 1, limit = 3 } = {}) => ({
         url: `sessions/getAllUserSessions`,
+        params: { page, limit },
+      }),
+    }),
+    getSupportEntitySessions: builder.query({
+      query: ({ entityType, page = 1, limit = 3 } = {}) => ({
+        url: `support/entities/${entityType}`,
         params: { page, limit },
       }),
     }),
@@ -59,7 +70,9 @@ export const supportApi = privateRequestNew.injectEndpoints({
 export const {
   useGetSupportQuestionsQuery,
   useLazyGetSubQuestionsQuery,
+  useLazyGetSubTopicsQuery,
   useLazyGetUserSessionsQuery,
+  useLazyGetSupportEntitySessionsQuery,
   useLazyGetSupportAnswerQuery,
   useCreateSupportTicketMutation,
   useGetMyTicketsQuery,

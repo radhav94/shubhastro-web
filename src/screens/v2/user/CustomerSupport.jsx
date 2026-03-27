@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Send, Mic, Check, Calendar, Clock, Phone, MessageSquare, Video } from "lucide-react";
-import { useGetSupportQuestionsQuery, useLazyGetSubQuestionsQuery, useLazyGetUserSessionsQuery, useLazyGetSupportAnswerQuery, useCreateSupportTicketMutation } from "../../../redux/api/supportApi/supportApi";
+import { ChevronLeft, Send, Mic, Check, Phone, MessageSquare } from "lucide-react";
+import { useGetSupportQuestionsQuery, useLazyGetSubTopicsQuery, useLazyGetSupportEntitySessionsQuery, useCreateSupportTicketMutation } from "../../../redux/api/supportApi/supportApi";
+import EntityCard from "./entityCards/EntityCard";
+import entityCardStyles from "./entityCards/EntityCards.module.scss";
 import styles from "./CustomerSupport.module.scss";
 
 const CustomerSupport = () => {
@@ -16,9 +18,8 @@ const CustomerSupport = () => {
     useGetSupportQuestionsQuery("user");
   const quickActions = supportData?.data || [];
 
-  const [fetchSessions] = useLazyGetUserSessionsQuery();
-  const [fetchSubQuestions] = useLazyGetSubQuestionsQuery();
-  const [fetchAnswer] = useLazyGetSupportAnswerQuery();
+  const [fetchSessions] = useLazyGetSupportEntitySessionsQuery();
+  const [fetchSubTopics] = useLazyGetSubTopicsQuery();
   const [createTicket] = useCreateSupportTicketMutation();
 
   const [sessions, setSessions] = useState([]);
@@ -36,6 +37,15 @@ const CustomerSupport = () => {
   const [ticketContactMethod, setTicketContactMethod] = useState("");
   const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
   const [ticketCreated, setTicketCreated] = useState(false);
+  const [selectedEntity, setSelectedEntity] = useState(null);
+  const [currentConnectVia, setCurrentConnectVia] = useState([]);
+  const [currentEntityType, setCurrentEntityType] = useState("");
+
+  // Extract entity list from different API response shapes
+  const extractEntityList = (data) => {
+    const list = data?.sessions || data?.astrologers || data?.orders || [];
+    return Array.isArray(list) ? list : [];
+  };
 
   const concerns = [
     "Customer support issue",
@@ -62,7 +72,7 @@ const CustomerSupport = () => {
   }, [messages]);
 
   const handleQuickAction = async (action) => {
-    const label = action.question || action.label;
+    const label = action.topic || action.question || action.label;
 
     const userMessage = {
       id: `user-${Date.now()}`,
@@ -74,49 +84,81 @@ const CustomerSupport = () => {
     if (action.requiresEntityList) {
       setCurrentTopicName(label);
       setMessages((prev) => [...prev, userMessage]);
-      setIsLoadingSessions(true);
 
       try {
-        const res = await fetchSessions({ page: 1, limit: 3 }).unwrap();
-        const list = res?.data?.recentSessions || [];
-        setSessions(list);
-        setSessionsPage(1);
-        setHasMoreSessions(res?.data?.pagination?.hasNextPage ?? false);
+        const topicRes = await fetchSubTopics(action._id).unwrap();
+        const topicDetail = topicRes?.data || {};
+        const subQuestionList = topicDetail.supportingQuestionList || [];
+        const connectVia = topicDetail.connectVia || action.connectVia || [];
 
-        const botResponse = {
-          id: `bot-${Date.now()}`,
-          type: "bot",
-          text: "Sure 😊 Let us know which order can we help you with",
-          timestamp: new Date(),
-          showOrders: true,
-        };
-        setMessages((prev) => [...prev, botResponse]);
-      } catch {
-        const errorResponse = {
-          id: `bot-${Date.now()}`,
-          type: "bot",
-          text: "Sorry, we couldn't load your sessions. Please try again.",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, errorResponse]);
-      } finally {
-        setIsLoadingSessions(false);
-      }
-    } else {
-      setCurrentTopicName(label);
-      setMessages((prev) => [...prev, userMessage]);
+        if (subQuestionList.length > 0) {
+          const subQuestions = subQuestionList.map((q, i) => ({
+            _id: `${action._id}-sub-${i}`,
+            question: q,
+          }));
 
-      try {
-        const res = await fetchSubQuestions({ mainQuestionId: action._id, role: "user" }).unwrap();
-        const subQuestions = res?.data || [];
-
-        if (subQuestions.length > 0) {
           const botResponse = {
             id: `bot-${Date.now()}`,
             type: "bot",
             text: "Please select your concern",
             timestamp: new Date(),
             subQuestions,
+            connectVia,
+            showSessionsAfter: true,
+            entityType: topicDetail.entityType,
+          };
+          setMessages((prev) => [...prev, botResponse]);
+        }
+      } catch {
+        const errorResponse = {
+          id: `bot-${Date.now()}`,
+          type: "bot",
+          text: "Sorry, something went wrong. Please try again.",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, errorResponse]);
+      }
+    } else {
+      setCurrentTopicName(label);
+      setMessages((prev) => [...prev, userMessage]);
+
+      try {
+        const res = await fetchSubTopics(action._id).unwrap();
+        const topicDetail = res?.data || {};
+
+        // Get sub-questions from web platform
+        const webPlatform = topicDetail.platform?.find((p) => p.type === "web");
+        const subQuestionList = webPlatform?.supportingQuestionList || [];
+        const connectVia = topicDetail.connectVia || action.connectVia || [];
+
+        if (subQuestionList.length > 0) {
+          const subQuestions = subQuestionList.map((q, i) => ({
+            _id: `${action._id}-sub-${i}`,
+            question: q,
+          }));
+
+          const botResponse = {
+            id: `bot-${Date.now()}`,
+            type: "bot",
+            text: "Please select your concern",
+            timestamp: new Date(),
+            subQuestions,
+            connectVia,
+          };
+          setMessages((prev) => [...prev, botResponse]);
+        } else if (connectVia.length > 0) {
+          const escalationOptions = connectVia.map((method) => ({
+            _id: `${action._id}-esc-${method}`,
+            text: `Connect with our executive via ${method.toUpperCase()}`,
+            contactMethod: method,
+          }));
+
+          const botResponse = {
+            id: `bot-${Date.now()}`,
+            type: "bot",
+            text: "How would you like to connect with us?",
+            timestamp: new Date(),
+            escalationOptions,
           };
           setMessages((prev) => [...prev, botResponse]);
         }
@@ -130,11 +172,11 @@ const CustomerSupport = () => {
     const nextPage = sessionsPage + 1;
     setIsLoadingSessions(true);
     try {
-      const res = await fetchSessions({ page: nextPage, limit: 3 }).unwrap();
-      const list = res?.data?.recentSessions || [];
-      setSessions((prev) => [...prev, ...list]);
+      const res = await fetchSessions({ entityType: currentEntityType, page: nextPage, limit: 3 }).unwrap();
+      const list = res?.data?.sessions || res?.data || [];
+      setSessions((prev) => [...prev, ...(Array.isArray(list) ? list : [])]);
       setSessionsPage(nextPage);
-      setHasMoreSessions(res?.data?.pagination?.hasNextPage ?? false);
+      setHasMoreSessions((res?.data?.pagination?.page || 1) < (res?.data?.pagination?.totalPages || 1));
     } catch {
       // silently fail
     } finally {
@@ -173,6 +215,29 @@ const CustomerSupport = () => {
     setShowTicketModal(true);
   };
 
+  const handleSessionSelect = (item) => {
+    const entityId = currentEntityType === "astrologers" || currentEntityType === "astrologer"
+      ? (item.astrologerId || item._id)
+      : item._id;
+
+    const userMessage = {
+      id: `user-${Date.now()}`,
+      type: "user",
+      timestamp: new Date(),
+      selectedSession: item,
+    };
+    setMessages((prev) => [...prev, userMessage]);
+
+    setSelectedEntity({
+      entity: currentEntityType,
+      entityId,
+    });
+    setTicketContactMethod(currentConnectVia[0] || "chat");
+    setTicketIssue("");
+
+    setTimeout(() => setShowTicketModal(true), 300);
+  };
+
   const handleTicketSubmit = async () => {
     if (!ticketIssue.trim()) return;
     setIsSubmittingTicket(true);
@@ -180,7 +245,13 @@ const CustomerSupport = () => {
     try {
       await createTicket({
         topicName: currentTopicName,
-        concernText: currentConcernText,
+        ...(selectedEntity ? {
+          entity: selectedEntity.entity,
+          entityId: selectedEntity.entityId,
+        } : {
+          concernText: currentConcernText,
+        }),
+        platform: "web",
         issue: ticketIssue.trim(),
         contactMethod: ticketContactMethod,
       }).unwrap();
@@ -188,6 +259,7 @@ const CustomerSupport = () => {
       setShowTicketModal(false);
       setTicketIssue("");
       setTicketCreated(true);
+      setSelectedEntity(null);
 
       const botResponse = {
         id: `bot-${Date.now()}`,
@@ -207,9 +279,10 @@ const CustomerSupport = () => {
   const handleTicketCancel = () => {
     setShowTicketModal(false);
     setTicketIssue("");
+    setSelectedEntity(null);
   };
 
-  const handleSubQuestionSelect = async (sub) => {
+  const handleSubQuestionSelect = async (sub, connectVia, showSessionsAfter, entityType) => {
     setCurrentConcernText(sub.question);
     const userMessage = {
       id: `user-${Date.now()}`,
@@ -219,24 +292,40 @@ const CustomerSupport = () => {
     };
     setMessages((prev) => [...prev, userMessage]);
 
-    try {
-      const res = await fetchAnswer(sub._id).unwrap();
-      const answers = res?.data || [];
+    if (showSessionsAfter && entityType) {
+      setCurrentEntityType(entityType);
+      setIsLoadingSessions(true);
+      try {
+        const res = await fetchSessions({ entityType, page: 1, limit: 3 }).unwrap();
+        const list = extractEntityList(res?.data);
+        setSessions(list);
+        setSessionsPage(1);
+        setHasMoreSessions((res?.data?.pagination?.page || 1) < (res?.data?.pagination?.totalPages || 1));
 
-      const regularAnswers = answers.filter((a) => !a.isEscalation);
-      const escalationOptions = answers.filter((a) => a.isEscalation);
-
-      // Show regular answers as bot text
-      if (regularAnswers.length > 0) {
         const botResponse = {
           id: `bot-${Date.now()}`,
           type: "bot",
-          text: regularAnswers.map((a) => a.text).join("\n\n"),
+          text: "Sure 😊 Let us know which session this is about",
           timestamp: new Date(),
-          escalationOptions: escalationOptions.length > 0 ? escalationOptions : null,
+          showOrders: true,
+          connectVia,
         };
+        setCurrentConnectVia(connectVia);
         setMessages((prev) => [...prev, botResponse]);
-      } else if (escalationOptions.length > 0) {
+      } catch {
+        // silently fail
+      } finally {
+        setIsLoadingSessions(false);
+      }
+    } else {
+      // Non-entity topic — show escalation options
+      if (connectVia?.length > 0) {
+        const escalationOptions = connectVia.map((method) => ({
+          _id: `esc-${method}-${Date.now()}`,
+          text: `Connect with our executive via ${method.toUpperCase()}`,
+          contactMethod: method,
+        }));
+
         const botResponse = {
           id: `bot-${Date.now()}`,
           type: "bot",
@@ -246,8 +335,6 @@ const CustomerSupport = () => {
         };
         setMessages((prev) => [...prev, botResponse]);
       }
-    } catch {
-      // silently fail
     }
   };
 
@@ -312,15 +399,6 @@ const CustomerSupport = () => {
     });
   };
 
-  const getSessionIcon = (type) => {
-    switch (type) {
-      case "audio": return <Phone size={16} />;
-      case "video": return <Video size={16} />;
-      case "chat": return <MessageSquare size={16} />;
-      default: return <Phone size={16} />;
-    }
-  };
-
   return (
     <div className={styles.supportPage}>
       {/* Header */}
@@ -355,7 +433,7 @@ const CustomerSupport = () => {
                             className={styles.quickActionButton}
                             onClick={() => handleQuickAction(action)}
                           >
-                            {action.question || action.label}
+                            {action.topic || action.question || action.label}
                           </button>
                         ))
                       )}
@@ -369,7 +447,7 @@ const CustomerSupport = () => {
                         <button
                           key={sub._id}
                           className={styles.quickActionButton}
-                          onClick={() => handleSubQuestionSelect(sub)}
+                          onClick={() => handleSubQuestionSelect(sub, message.connectVia, message.showSessionsAfter, message.entityType)}
                         >
                           {sub.question}
                         </button>
@@ -413,40 +491,16 @@ const CustomerSupport = () => {
                   {formatTime(message.timestamp)}
                 </span>
 
-                {/* Session History Cards outside bubble */}
+                {/* Entity Cards */}
                 {message.showOrders && (
                   <div className={styles.orderHistory}>
-                    {sessions.map((session, index) => (
-                      <div
-                        key={session._id + "-" + index}
-                        className={styles.orderCard}
-                      >
-                        <img
-                          src={session.profileImgUrl || session.imageUrl}
-                          alt={session.astrologerName}
-                          className={styles.orderImage}
-                        />
-                        <div className={styles.orderDetails}>
-                          <h3 className={styles.orderName}>
-                            {session.astrologerName}
-                          </h3>
-                          <div className={styles.orderMeta}>
-                            <span className={styles.orderMetaItem}>
-                              <Calendar size={12} /> {new Date(session.startTime).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                            </span>
-                            <span className={styles.orderMetaItem}>
-                              <Clock size={12} /> {new Date(session.startTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
-                            </span>
-                          </div>
-                          <p className={styles.orderDuration}>
-                            Duration : {session.billedMinutes} M {((new Date(session.endTime) - new Date(session.startTime)) / 1000 % 60).toFixed(0)} S
-                          </p>
-                          <p className={styles.orderAmount}>₹{session.billedAmount}</p>
-                        </div>
-                        <span className={styles.sessionTypeIcon}>
-                          {getSessionIcon(session.sessiontype)}
-                        </span>
-                      </div>
+                    {sessions.map((item, index) => (
+                      <EntityCard
+                        key={item._id || item.astrologerId || index}
+                        entityType={currentEntityType}
+                        item={item}
+                        onClick={handleSessionSelect}
+                      />
                     ))}
                     {isLoadingSessions && (
                       <p className={styles.loadingText}>Loading...</p>
@@ -468,14 +522,26 @@ const CustomerSupport = () => {
               </div>
             ) : (
               <div className={styles.userMessage}>
-                <div className={styles.userBubble}>
-                  <p className={styles.messageText}>
-                    {message.selectedOrder ? message.selectedOrder.astrologerName : message.text}
-                  </p>
-                </div>
-                <span className={styles.userTime}>
-                  {formatTime(message.timestamp)} <Check size={12} />
-                </span>
+                {message.selectedSession ? (
+                  <div className={entityCardStyles.selectedCard}>
+                    <EntityCard
+                      entityType={currentEntityType}
+                      item={message.selectedSession}
+                    />
+                    <span className={styles.userTime}>
+                      {formatTime(message.timestamp)} <Check size={12} />
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <div className={styles.userBubble}>
+                      <p className={styles.messageText}>{message.text}</p>
+                    </div>
+                    <span className={styles.userTime}>
+                      {formatTime(message.timestamp)} <Check size={12} />
+                    </span>
+                  </>
+                )}
               </div>
             )}
           </div>

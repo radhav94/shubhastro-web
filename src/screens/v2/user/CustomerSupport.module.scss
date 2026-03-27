@@ -166,6 +166,19 @@
   margin-top: 2px;
 }
 
+.selectedSessionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  max-width: 360px;
+
+  .orderCard {
+    background: #FFE4BA;
+    cursor: default;
+  }
+}
+
 // Quick actions (inside bubble)
 .quickActions {
   display: flex;
