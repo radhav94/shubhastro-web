@@ -94,35 +94,16 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
 
     // Attachment/Document messages
     if (msg?.type === "attachment") {
-      const fileName = getFileName(msg.text);
-      const fileExt = getFileExtension(fileName);
-      
       return (
-        <div className={styles.attachmentMessage}>
-          <div className={styles.attachmentIcon}>
-            {fileExt === 'pdf' ? (
-              <IoDocument size={24} />
-            ) : (
-              <FiFile size={24} />
-            )}
-          </div>
-          <div className={styles.attachmentInfo}>
-            <div className={styles.attachmentName}>{fileName}</div>
-            {msg.fileSize && (
-              <div className={styles.attachmentSize}>
-                {formatFileSize(msg.fileSize)}
-              </div>
-            )}
-          </div>
-          <a
-            href={msg.text}
-            download={fileName}
-            className={styles.downloadButton}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <IoDownload size={20} />
-          </a>
-        </div>
+        <a
+          href={msg.text}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-sm underline font-semibold"
+        >
+          <span className="text-lg">📎</span>
+          <span className="truncate max-w-[180px]">Download Attachment</span>
+        </a>
       );
     }
 

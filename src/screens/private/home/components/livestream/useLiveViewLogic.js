@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import toast from "react-hot-toast";
 
 export const useLiveViewLogic = (props) => {
   const {
@@ -31,7 +32,7 @@ export const useLiveViewLogic = (props) => {
 
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(shareUrl);
-    alert("Copied!");
+    toast.success("Link copied");
     setShowSharePopup(false);
   };
 
