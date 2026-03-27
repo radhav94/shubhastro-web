@@ -129,6 +129,7 @@ export const CallProvider = ({ children }) => {
         } else {
           clearPersistedCallState();
           clearCallSession();
+          setIsCallMinimized(false);
         }
         return resolved;
       });
@@ -146,6 +147,7 @@ export const CallProvider = ({ children }) => {
       } else {
         clearPersistedCallState();
         clearCallSession();
+        setIsCallMinimized(false);
       }
     }
   }, [persistCallState, clearPersistedCallState]);
