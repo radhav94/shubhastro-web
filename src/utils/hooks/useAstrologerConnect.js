@@ -126,11 +126,14 @@ export const useAstrologerConnect = () => {
         console.log("[NormalFlow] 💰 Balance API response:", JSON.stringify(result?.data?.data));
         
         // Check balance status
-        if (result?.data?.data?.status === false) {
+        const checkBalanceStatus = result?.data?.data?.status;
+
+        if (checkBalanceStatus === false) {
           console.log("[NormalFlow] ❌ Insufficient balance — opening recharge modal");
           setOpenModal((prev) => ({ ...prev, recharge: true }));
           return false;
-        }
+        } else if (checkBalanceStatus === undefined)
+          return false;
         
         // Check if astrologer is online for chat
         // API returns availability fields flat in data (not nested under .availability)
