@@ -17,7 +17,7 @@
   }
 }
 
-.headerWrap{
+.headerWrap {
   background: white;
   border-bottom: 1px solid #e0e0e0;
   position: fixed;
@@ -25,15 +25,16 @@
   left: 0;
   right: 0;
   z-index: 10;
+
   @media screen and (width <= 1180px) {
     top: 53px;
   }
 }
+
 .header {
   display: flex;
-  // justify-content: space-between;
   align-items: center;
-  padding:6px 16px;
+  padding: 6px 16px;
   max-width: 1200px;
   margin: 0 auto;
   gap: 16px;
@@ -41,8 +42,8 @@
 
 .backButton {
   background: none;
-  border: 1px solid #ff6b35;
-  color: #ff6b35;
+  border: 1px solid #E56329;
+  color: #E56329;
   cursor: pointer;
   padding: 8px;
   display: flex;
@@ -56,10 +57,6 @@
 
   &:hover {
     background: #fef5f2;
-  }
-
-  &:active {
-    transform: scale(0.95);
   }
 }
 
@@ -75,24 +72,25 @@
   width: 36px;
 }
 
+// Messages
 .messagesContainer {
   flex: 1;
   overflow-y: auto;
-  min-width: 1200px;
+  max-width: 1200px;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   margin: 0 auto;
-  padding: 62px 16px 16px 16px;
-  // padding-bottom: 20px;
+  padding: 62px 16px 80px 16px;
 
   @media (width <= 1180px) {
-    padding: 16px 16px 16px 16px;
-    width: 100%;
+    padding: 16px 16px 80px 16px;
     min-width: auto;
   }
+
   @media (width <= 768px) {
-    padding: 72px 16px 16px 16px;
+    padding: 72px 16px 80px 16px;
   }
 
   &::-webkit-scrollbar {
@@ -105,163 +103,114 @@
   }
 }
 
+// Bot message
 .botMessage {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
+  gap: 4px;
   max-width: 85%;
-}
 
-.userMessage {
-  display: flex;
-  justify-content: flex-end;
-  max-width: 85%;
-  margin-left: auto;
-
-  .messageContent {
-    background: #fff3e0;
-    border-radius: 16px 16px 0 16px;
+  @media (max-width: 768px) {
+    max-width: 90%;
   }
 }
 
-.userOrderCard {
-  background: #fff3e0;
-  border-radius: 16px 16px 0 16px;
-  padding: 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: 320px;
-}
-
-.userOrderCardInner {
+.botBubble {
   background: white;
-  border-radius: 12px;
-  padding: 12px;
-  display: flex;
-  gap: 12px;
-}
-
-.userOrderImage {
-  width: 56px;
-  height: 56px;
-  border-radius: 8px;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.userOrderDetails {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.userOrderName {
-  font-size: 14px;
-  font-weight: 600;
-  margin: 0;
-  color: #333;
-}
-
-.userOrderMeta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.userOrderMetaItem {
-  font-size: 11px;
-  color: #ff6b35;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.userOrderDuration {
-  font-size: 11px;
-  color: #666;
-  margin: 0;
-}
-
-.userOrderAmount {
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-}
-
-.userOrderTime {
-  font-size: 10px;
-  color: #999;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  justify-content: flex-end;
-  padding: 0 4px;
-}
-
-.messageContent {
-  background: white;
-  padding: 10px 14px;
+  padding: 12px 14px;
   border-radius: 16px 16px 16px 0;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
+.botTime {
+  font-size: 10px;
+  color: #999;
+  padding-left: 4px;
+}
+
 .messageText {
-  margin: 0 0 4px 0;
+  margin: 0;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.5;
   color: #333;
 }
 
-.messageTime {
+// User message
+.userMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: auto;
+  max-width: 85%;
+
+  @media (max-width: 768px) {
+    max-width: 90%;
+  }
+}
+
+.userBubble {
+  background: #FFE4BA;
+  padding: 10px 16px;
+  border-radius: 16px 16px 0 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.userTime {
   font-size: 10px;
   color: #999;
   display: flex;
   align-items: center;
   gap: 4px;
-  justify-content: flex-end;
+  padding-right: 4px;
+  margin-top: 2px;
 }
 
+.selectedSessionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  max-width: 360px;
+
+  .orderCard {
+    background: #FFE4BA;
+    cursor: default;
+  }
+}
+
+// Quick actions (inside bubble)
 .quickActions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  max-width: 320px;
+  gap: 2px;
+  margin-top: 8px;
 }
 
 .quickActionButton {
-  background: white;
+  background: none;
   border: none;
-  padding: 12px 16px;
-  border-radius: 8px;
+  padding: 6px 0;
   text-align: left;
   font-size: 14px;
-  color: #ff6b35;
+  color: #E56329;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: opacity 0.2s;
+  line-height: 1.4;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  }
-
-  &:active {
-    transform: translateY(0);
+    opacity: 0.7;
   }
 }
 
+// Session cards
 .orderHistory {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  max-width: 320px;
+  max-width: 360px;
+  margin-top: 4px;
 }
 
 .orderCard {
@@ -270,19 +219,13 @@
   padding: 12px;
   display: flex;
   gap: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-  }
+  position: relative;
 }
 
 .orderImage {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   border-radius: 8px;
   object-fit: cover;
   flex-shrink: 0;
@@ -292,7 +235,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
+  min-width: 0;
 }
 
 .orderName {
@@ -305,12 +249,12 @@
 .orderMeta {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .orderMetaItem {
   font-size: 11px;
-  color: #ff6b35;
+  color: #E56329;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -324,54 +268,75 @@
 
 .orderAmount {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   color: #333;
   margin: 0;
 }
 
-.viewMoreButton {
-  background: white;
-  border: none;
-  padding: 10px;
-  border-radius: 8px;
+.sessionTypeIcon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #FFE4BA;
+  color: #E56329;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.loadingText {
   font-size: 13px;
-  color: #ff6b35;
+  color: #999;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.viewMoreButton {
+  background: none;
+  border: none;
+  padding: 6px 0;
+  font-size: 13px;
+  color: #E56329;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  text-align: left;
+  transition: opacity 0.2s;
 
   &:hover {
-    background: #fff3e0;
+    opacity: 0.7;
   }
 }
 
-.concernsList {
+// Escalation actions
+.escalationActions {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 100%;
-  max-width: 320px;
+  margin-top: 12px;
 }
 
-.concernButton {
-  background: white;
+.escalationButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #E56329;
+  color: white;
   border: none;
-  padding: 12px 16px;
+  padding: 10px 16px;
   border-radius: 8px;
-  text-align: left;
   font-size: 13px;
-  color: #ff6b35;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: background 0.2s;
 
   &:hover {
-    background: #fff3e0;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    background: #c9521f;
   }
 }
 
+// End chat
 .endChatButton {
   width: 100%;
   max-width: 320px;
@@ -391,49 +356,18 @@
   }
 }
 
-.reportUserContainer {
-  padding: 12px 16px;
-  background: white;
-  border-top: 1px solid #e0e0e0;
-}
-
-.reportUserButton {
-  width: 100%;
-  background: #fff3e0;
-  border: none;
-  padding: 12px 16px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 14px;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #ffe0b2;
-  }
-}
-
-.reportBadge {
-  background: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  color: #666;
-}
-
+// Input area
 .inputArea {
   display: flex;
   align-items: center;
-  gap: 8px;
   padding: 12px 100px;
   background: white;
   border-top: 1px solid #e0e0e0;
-  position: sticky;
+  position: fixed;
   bottom: 0;
   left: 0;
+  right: 0;
+  z-index: 10;
 
   @media (max-width: 1024px) {
     padding: 12px 40px;
@@ -445,22 +379,31 @@
 
   @media (max-width: 480px) {
     padding: 10px 12px;
-    gap: 6px;
+  }
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  border: 1px solid #e0e0e0;
+  border-radius: 24px;
+  padding: 4px 4px 4px 16px;
+  background: white;
+  transition: border-color 0.2s;
+
+  &:focus-within {
+    border-color: #E56329;
   }
 }
 
 .input {
   flex: 1;
-  border: 1px solid #e0e0e0;
-  border-radius: 24px;
-  padding: 10px 16px;
+  border: none;
+  padding: 6px 0;
   font-size: 14px;
   outline: none;
-  transition: border-color 0.2s;
-
-  &:focus {
-    border-color: #ff6b35;
-  }
+  background: transparent;
 
   &::placeholder {
     color: #999;
@@ -469,10 +412,10 @@
 
 .micButton,
 .sendButton {
-  background: #ff6b35;
+  background: #E56329;
   border: none;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -481,10 +424,10 @@
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
+  margin-left: 4px;
 
   &:hover {
-    background: #e55a2b;
-    transform: scale(1.05);
+    background: #c9521f;
   }
 
   &:active {
@@ -560,7 +503,7 @@
 }
 
 .submitRatingButton {
-  background: #ff6b35;
+  background: #E56329;
   border: none;
   padding: 12px 32px;
   border-radius: 8px;
@@ -571,32 +514,101 @@
   transition: all 0.2s;
 
   &:hover {
-    background: #e55a2b;
+    background: #c9521f;
   }
 }
 
-// Responsive
-@media (max-width: 768px) {
-  .header {
-    padding: 12px 16px;
+// Ticket Modal
+.ticketModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.ticketModalContent {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 420px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ticketModalTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.ticketTextarea {
+  width: 100%;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+  min-height: 100px;
+
+  &:focus {
+    border-color: #E56329;
   }
 
-  .title {
-    font-size: 16px;
+  &::placeholder {
+    color: #999;
+  }
+}
+
+.ticketModalActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.ticketCancelButton {
+  padding: 10px 24px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+}
+
+.ticketSubmitButton {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #E56329;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #c9521f;
   }
 
-  // .messagesContainer {
-  //   padding: 12px;
-  // }
-
-  .botMessage,
-  .userMessage {
-    max-width: 90%;
-  }
-
-  .quickActions,
-  .orderHistory,
-  .concernsList {
-    max-width: 100%;
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }

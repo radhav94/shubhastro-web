@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Send, Mic, Check, Calendar, Clock } from "lucide-react";
+import { ChevronLeft, Send, Mic, Check, Phone, MessageSquare } from "lucide-react";
+import { useGetSupportQuestionsQuery, useLazyGetSubTopicsQuery, useLazyGetSupportEntitySessionsQuery, useCreateSupportTicketMutation } from "../../../redux/api/supportApi/supportApi";
+import EntityCard from "./entityCards/EntityCard";
+import entityCardStyles from "./entityCards/EntityCards.module.scss";
 import styles from "./CustomerSupport.module.scss";
 
 const CustomerSupport = () => {
@@ -11,47 +14,38 @@ const CustomerSupport = () => {
   const [selectedRating, setSelectedRating] = useState(0);
   const messagesEndRef = useRef(null);
 
-  // Quick action categories
-  const quickActions = [
-    { id: 1, label: "Session & Booking Issues" },
-    { id: 2, label: "Payment & Earnings Help" },
-    { id: 3, label: "Profile & Verification Support" },
-    { id: 4, label: "Customer Complaint Alerts" },
-    { id: 5, label: "Technical Assistance" },
-    { id: 6, label: "Report a User" },
-    { id: 7, label: "Reschedule & Availability Help" },
-  ];
+  const { data: supportData, isLoading: isLoadingQuestions } =
+    useGetSupportQuestionsQuery("user");
+  const quickActions = supportData?.data || [];
 
-  // Sample order history data
-  const orderHistory = [
-    {
-      id: 1,
-      name: "Reeta Sanyal",
-      date: "Oct 17, 2025",
-      time: "04:38 PM",
-      duration: "5 M 30 S",
-      amount: 200,
-      image: "https://i.pravatar.cc/100?img=1",
-    },
-    {
-      id: 2,
-      name: "Vaibhav Ranjan",
-      date: "Oct 17, 2025",
-      time: "04:38 PM",
-      duration: "5 M 30 S",
-      amount: 200,
-      image: "https://i.pravatar.cc/100?img=2",
-    },
-    {
-      id: 3,
-      name: "Jasmine",
-      date: "Oct 17, 2025",
-      time: "04:38 PM",
-      duration: "5 M 30 S",
-      amount: 200,
-      image: "https://i.pravatar.cc/100?img=3",
-    },
-  ];
+  const [fetchSessions] = useLazyGetSupportEntitySessionsQuery();
+  const [fetchSubTopics] = useLazyGetSubTopicsQuery();
+  const [createTicket] = useCreateSupportTicketMutation();
+
+  const [sessions, setSessions] = useState([]);
+  const [sessionsPage, setSessionsPage] = useState(1);
+  const [hasMoreSessions, setHasMoreSessions] = useState(true);
+  const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+
+  // Track flow context for ticket creation
+  const [currentTopicName, setCurrentTopicName] = useState("");
+  const [currentConcernText, setCurrentConcernText] = useState("");
+
+  // Ticket modal state
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [ticketIssue, setTicketIssue] = useState("");
+  const [ticketContactMethod, setTicketContactMethod] = useState("");
+  const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
+  const [ticketCreated, setTicketCreated] = useState(false);
+  const [selectedEntity, setSelectedEntity] = useState(null);
+  const [currentConnectVia, setCurrentConnectVia] = useState([]);
+  const [currentEntityType, setCurrentEntityType] = useState("");
+
+  // Extract entity list from different API response shapes
+  const extractEntityList = (data) => {
+    const list = data?.sessions || data?.astrologers || data?.orders || [];
+    return Array.isArray(list) ? list : [];
+  };
 
   const concerns = [
     "Customer support issue",
@@ -77,33 +71,116 @@ const CustomerSupport = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleQuickAction = (action) => {
-    if (action.label === "Report a User") {
-      const userMessage = {
-        id: `user-${Date.now()}`,
-        type: "user",
-        text: "Report a User",
-        timestamp: new Date(),
-      };
+  const handleQuickAction = async (action) => {
+    const label = action.topic || action.question || action.label;
 
-      const botResponse = {
-        id: `bot-${Date.now()}`,
-        type: "bot",
-        text: "Sure 😊 Let us know which order can we help you with",
-        timestamp: new Date(),
-        showOrders: true,
-      };
+    const userMessage = {
+      id: `user-${Date.now()}`,
+      type: "user",
+      text: label,
+      timestamp: new Date(),
+    };
 
-      setMessages((prev) => [...prev, userMessage, botResponse]);
-    } else {
-      const userMessage = {
-        id: `user-${Date.now()}`,
-        type: "user",
-        text: action.label,
-        timestamp: new Date(),
-      };
-
+    if (action.requiresEntityList) {
+      setCurrentTopicName(label);
       setMessages((prev) => [...prev, userMessage]);
+
+      try {
+        const topicRes = await fetchSubTopics(action._id).unwrap();
+        const topicDetail = topicRes?.data || {};
+        const subQuestionList = topicDetail.supportingQuestionList || [];
+        const connectVia = topicDetail.connectVia || action.connectVia || [];
+
+        if (subQuestionList.length > 0) {
+          const subQuestions = subQuestionList.map((q, i) => ({
+            _id: `${action._id}-sub-${i}`,
+            question: q,
+          }));
+
+          const botResponse = {
+            id: `bot-${Date.now()}`,
+            type: "bot",
+            text: "Please select your concern",
+            timestamp: new Date(),
+            subQuestions,
+            connectVia,
+            showSessionsAfter: true,
+            entityType: topicDetail.entityType,
+          };
+          setMessages((prev) => [...prev, botResponse]);
+        }
+      } catch {
+        const errorResponse = {
+          id: `bot-${Date.now()}`,
+          type: "bot",
+          text: "Sorry, something went wrong. Please try again.",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, errorResponse]);
+      }
+    } else {
+      setCurrentTopicName(label);
+      setMessages((prev) => [...prev, userMessage]);
+
+      try {
+        const res = await fetchSubTopics(action._id).unwrap();
+        const topicDetail = res?.data || {};
+
+        // Get sub-questions from web platform
+        const webPlatform = topicDetail.platform?.find((p) => p.type === "web");
+        const subQuestionList = webPlatform?.supportingQuestionList || [];
+        const connectVia = topicDetail.connectVia || action.connectVia || [];
+
+        if (subQuestionList.length > 0) {
+          const subQuestions = subQuestionList.map((q, i) => ({
+            _id: `${action._id}-sub-${i}`,
+            question: q,
+          }));
+
+          const botResponse = {
+            id: `bot-${Date.now()}`,
+            type: "bot",
+            text: "Please select your concern",
+            timestamp: new Date(),
+            subQuestions,
+            connectVia,
+          };
+          setMessages((prev) => [...prev, botResponse]);
+        } else if (connectVia.length > 0) {
+          const escalationOptions = connectVia.map((method) => ({
+            _id: `${action._id}-esc-${method}`,
+            text: `Connect with our executive via ${method.toUpperCase()}`,
+            contactMethod: method,
+          }));
+
+          const botResponse = {
+            id: `bot-${Date.now()}`,
+            type: "bot",
+            text: "How would you like to connect with us?",
+            timestamp: new Date(),
+            escalationOptions,
+          };
+          setMessages((prev) => [...prev, botResponse]);
+        }
+      } catch {
+        // silently fail
+      }
+    }
+  };
+
+  const handleViewMore = async () => {
+    const nextPage = sessionsPage + 1;
+    setIsLoadingSessions(true);
+    try {
+      const res = await fetchSessions({ entityType: currentEntityType, page: nextPage, limit: 3 }).unwrap();
+      const list = res?.data?.sessions || res?.data || [];
+      setSessions((prev) => [...prev, ...(Array.isArray(list) ? list : [])]);
+      setSessionsPage(nextPage);
+      setHasMoreSessions((res?.data?.pagination?.page || 1) < (res?.data?.pagination?.totalPages || 1));
+    } catch {
+      // silently fail
+    } finally {
+      setIsLoadingSessions(false);
     }
   };
 
@@ -130,6 +207,135 @@ const CustomerSupport = () => {
       };
       setMessages((prev) => [...prev, botResponse]);
     }, 1000);
+  };
+
+  const handleEscalation = (option) => {
+    setTicketContactMethod(option.contactMethod);
+    setTicketIssue("");
+    setShowTicketModal(true);
+  };
+
+  const handleSessionSelect = (item) => {
+    const entityId = currentEntityType === "astrologers" || currentEntityType === "astrologer"
+      ? (item.astrologerId || item._id)
+      : item._id;
+
+    const userMessage = {
+      id: `user-${Date.now()}`,
+      type: "user",
+      timestamp: new Date(),
+      selectedSession: item,
+    };
+    setMessages((prev) => [...prev, userMessage]);
+
+    setSelectedEntity({
+      entity: currentEntityType,
+      entityId,
+    });
+    setTicketContactMethod(currentConnectVia[0] || "chat");
+    setTicketIssue("");
+
+    setTimeout(() => setShowTicketModal(true), 300);
+  };
+
+  const handleTicketSubmit = async () => {
+    if (!ticketIssue.trim()) return;
+    setIsSubmittingTicket(true);
+
+    try {
+      await createTicket({
+        topicName: currentTopicName,
+        ...(selectedEntity ? {
+          entity: selectedEntity.entity,
+          entityId: selectedEntity.entityId,
+        } : {
+          concernText: currentConcernText,
+        }),
+        platform: "web",
+        issue: ticketIssue.trim(),
+        contactMethod: ticketContactMethod,
+      }).unwrap();
+
+      setShowTicketModal(false);
+      setTicketIssue("");
+      setTicketCreated(true);
+      setSelectedEntity(null);
+
+      const botResponse = {
+        id: `bot-${Date.now()}`,
+        type: "bot",
+        text: "Your ticket has been submitted successfully. Our team will reach out to you shortly.",
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, botResponse]);
+    } catch {
+      // error handled by privateRequestNew
+    } finally {
+      setIsSubmittingTicket(false);
+    }
+  };
+
+  const handleTicketCancel = () => {
+    setShowTicketModal(false);
+    setTicketIssue("");
+    setSelectedEntity(null);
+  };
+
+  const handleSubQuestionSelect = async (sub, connectVia, showSessionsAfter, entityType) => {
+    setCurrentConcernText(sub.question);
+    const userMessage = {
+      id: `user-${Date.now()}`,
+      type: "user",
+      text: sub.question,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, userMessage]);
+
+    if (showSessionsAfter && entityType) {
+      setCurrentEntityType(entityType);
+      setIsLoadingSessions(true);
+      try {
+        const res = await fetchSessions({ entityType, page: 1, limit: 3 }).unwrap();
+        const list = extractEntityList(res?.data);
+        setSessions(list);
+        setSessionsPage(1);
+        setHasMoreSessions((res?.data?.pagination?.page || 1) < (res?.data?.pagination?.totalPages || 1));
+
+        const botResponse = {
+          id: `bot-${Date.now()}`,
+          type: "bot",
+          text: "Sure 😊 Let us know which session this is about",
+          timestamp: new Date(),
+          showOrders: true,
+          connectVia,
+        };
+        setCurrentConnectVia(connectVia);
+        setMessages((prev) => [...prev, botResponse]);
+      } catch {
+        // silently fail
+      } finally {
+        setIsLoadingSessions(false);
+      }
+    } else {
+      // Non-entity topic — show escalation options
+      if (connectVia?.length > 0) {
+        const escalationOptions = connectVia.map((method) => ({
+          _id: `esc-${method}-${Date.now()}`,
+          text: `Connect with our executive via ${method.toUpperCase()}`,
+          contactMethod: method,
+        }));
+
+        const botResponse = {
+          id: `bot-${Date.now()}`,
+          type: "bot",
+          text: "How would you like to connect with us?",
+          timestamp: new Date(),
+          escalationOptions,
+        };
+        setMessages((prev) => [...prev, botResponse]);
+      }
+    }
   };
 
   const handleOrderSelect = (order) => {
@@ -198,7 +404,7 @@ const CustomerSupport = () => {
       {/* Header */}
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <button className={styles.backButton} onClick={() => navigate("/profile", { state: { activeTab: "Support" } })}>
             <ChevronLeft size={24} />
           </button>
           <h1 className={styles.title}>Customer Support</h1>
@@ -212,75 +418,98 @@ const CustomerSupport = () => {
           <div key={message.id}>
             {message.type === "bot" ? (
               <div className={styles.botMessage}>
-                <div className={styles.messageContent}>
+                <div className={styles.botBubble}>
                   <p className={styles.messageText}>{message.text}</p>
-                  <span className={styles.messageTime}>
-                    {formatTime(message.timestamp)}
-                  </span>
+
+                  {/* Quick Actions inside bubble */}
+                  {message.id === "bot-1" && (
+                    <div className={styles.quickActions}>
+                      {isLoadingQuestions ? (
+                        <p className={styles.messageText}>Loading options...</p>
+                      ) : (
+                        quickActions.map((action) => (
+                          <button
+                            key={action._id || action.id}
+                            className={styles.quickActionButton}
+                            onClick={() => handleQuickAction(action)}
+                          >
+                            {action.topic || action.question || action.label}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+
+                  {/* Sub Questions inside bubble */}
+                  {message.subQuestions?.length > 0 && (
+                    <div className={styles.quickActions}>
+                      {message.subQuestions.map((sub) => (
+                        <button
+                          key={sub._id}
+                          className={styles.quickActionButton}
+                          onClick={() => handleSubQuestionSelect(sub, message.connectVia, message.showSessionsAfter, message.entityType)}
+                        >
+                          {sub.question}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Concerns inside bubble */}
+                  {message.showConcerns && (
+                    <div className={styles.quickActions}>
+                      {concerns.map((concern, index) => (
+                        <button
+                          key={index}
+                          className={styles.quickActionButton}
+                          onClick={() => handleConcernSelect(concern)}
+                        >
+                          {concern}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Escalation options */}
+                  {message.escalationOptions?.length > 0 && (
+                    <div className={styles.escalationActions}>
+                      {message.escalationOptions.map((option) => (
+                        <button
+                          key={option._id}
+                          className={styles.escalationButton}
+                          onClick={() => handleEscalation(option)}
+                        >
+                          {option.contactMethod === "call" ? <Phone size={14} /> : <MessageSquare size={14} />}
+                          {option.text}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                {/* Quick Actions */}
-                {message.id === "bot-1" && (
-                  <div className={styles.quickActions}>
-                    {quickActions.map((action) => (
-                      <button
-                        key={action.id}
-                        className={styles.quickActionButton}
-                        onClick={() => handleQuickAction(action)}
-                      >
-                        {action.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <span className={styles.botTime}>
+                  {formatTime(message.timestamp)}
+                </span>
 
-                {/* Order History Cards */}
+                {/* Entity Cards */}
                 {message.showOrders && (
                   <div className={styles.orderHistory}>
-                    {orderHistory.map((order) => (
-                      <div
-                        key={order.id}
-                        className={styles.orderCard}
-                        onClick={() => handleOrderSelect(order)}
-                      >
-                        <img
-                          src={order.image}
-                          alt={order.name}
-                          className={styles.orderImage}
-                        />
-                        <div className={styles.orderDetails}>
-                          <h3 className={styles.orderName}>{order.name}</h3>
-                          <div className={styles.orderMeta}>
-                            <span className={styles.orderMetaItem}>
-                              <Calendar size={12} /> {order.date}
-                            </span>
-                            <span className={styles.orderMetaItem}>
-                              <Clock size={12} /> {order.time}
-                            </span>
-                          </div>
-                          <p className={styles.orderDuration}>
-                            Duration: {order.duration}
-                          </p>
-                          <p className={styles.orderAmount}>₹{order.amount}</p>
-                        </div>
-                      </div>
+                    {sessions.map((item, index) => (
+                      <EntityCard
+                        key={item._id || item.astrologerId || index}
+                        entityType={currentEntityType}
+                        item={item}
+                        onClick={handleSessionSelect}
+                      />
                     ))}
-                    <button className={styles.viewMoreButton}>View More</button>
-                  </div>
-                )}
-
-                {/* Concerns List */}
-                {message.showConcerns && (
-                  <div className={styles.concernsList}>
-                    {concerns.map((concern, index) => (
-                      <button
-                        key={index}
-                        className={styles.concernButton}
-                        onClick={() => handleConcernSelect(concern)}
-                      >
-                        {concern}
+                    {isLoadingSessions && (
+                      <p className={styles.loadingText}>Loading...</p>
+                    )}
+                    {hasMoreSessions && !isLoadingSessions && (
+                      <button className={styles.viewMoreButton} onClick={handleViewMore}>
+                        View More
                       </button>
-                    ))}
+                    )}
                   </div>
                 )}
 
@@ -293,45 +522,25 @@ const CustomerSupport = () => {
               </div>
             ) : (
               <div className={styles.userMessage}>
-                {message.selectedOrder ? (
-                  <div className={styles.userOrderCard}>
-                    <div className={styles.userOrderCardInner}>
-                      <img
-                        src={message.selectedOrder.image}
-                        alt={message.selectedOrder.name}
-                        className={styles.userOrderImage}
-                      />
-                      <div className={styles.userOrderDetails}>
-                        <h3 className={styles.userOrderName}>
-                          {message.selectedOrder.name}
-                        </h3>
-                        <div className={styles.userOrderMeta}>
-                          <span className={styles.userOrderMetaItem}>
-                            <Calendar size={12} /> {message.selectedOrder.date}
-                          </span>
-                          <span className={styles.userOrderMetaItem}>
-                            <Clock size={12} /> {message.selectedOrder.time}
-                          </span>
-                        </div>
-                        <p className={styles.userOrderDuration}>
-                          Duration: {message.selectedOrder.duration}
-                        </p>
-                        <p className={styles.userOrderAmount}>
-                          ₹{message.selectedOrder.amount}
-                        </p>
-                      </div>
-                    </div>
-                    <span className={styles.userOrderTime}>
+                {message.selectedSession ? (
+                  <div className={entityCardStyles.selectedCard}>
+                    <EntityCard
+                      entityType={currentEntityType}
+                      item={message.selectedSession}
+                    />
+                    <span className={styles.userTime}>
                       {formatTime(message.timestamp)} <Check size={12} />
                     </span>
                   </div>
                 ) : (
-                  <div className={styles.messageContent}>
-                    <p className={styles.messageText}>{message.text}</p>
-                    <span className={styles.messageTime}>
+                  <>
+                    <div className={styles.userBubble}>
+                      <p className={styles.messageText}>{message.text}</p>
+                    </div>
+                    <span className={styles.userTime}>
                       {formatTime(message.timestamp)} <Check size={12} />
                     </span>
-                  </div>
+                  </>
                 )}
               </div>
             )}
@@ -341,22 +550,26 @@ const CustomerSupport = () => {
       </div>
 
       {/* Input Area */}
-      <div className={styles.inputArea}>
-        <input
-          type="text"
-          placeholder="Please text ..."
-          value={inputMessage}
-          onChange={(e) => setInputMessage(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-          className={styles.input}
-        />
-        <button className={styles.micButton}>
-          <Mic size={20} />
-        </button>
-        <button className={styles.sendButton} onClick={handleSendMessage}>
-          <Send size={20} />
-        </button>
-      </div>
+      {!ticketCreated && (
+        <div className={styles.inputArea}>
+          <div className={styles.inputWrapper}>
+            <input
+              type="text"
+              placeholder="Start typing..."
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+              className={styles.input}
+            />
+            <button className={styles.micButton}>
+              <Mic size={16} />
+            </button>
+            <button className={styles.sendButton} onClick={handleSendMessage}>
+              <Send size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Rating Modal */}
       {showRatingModal && (
@@ -377,6 +590,38 @@ const CustomerSupport = () => {
             <button className={styles.submitRatingButton} onClick={handleRatingSubmit}>
               Submit
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Ticket Modal */}
+      {showTicketModal && (
+        <div className={styles.ticketModal}>
+          <div className={styles.ticketModalContent}>
+            <h3 className={styles.ticketModalTitle}>Describe your issue</h3>
+            <textarea
+              className={styles.ticketTextarea}
+              placeholder="Please describe your issue in detail..."
+              value={ticketIssue}
+              onChange={(e) => setTicketIssue(e.target.value)}
+              rows={4}
+            />
+            <div className={styles.ticketModalActions}>
+              <button
+                className={styles.ticketCancelButton}
+                onClick={handleTicketCancel}
+                disabled={isSubmittingTicket}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.ticketSubmitButton}
+                onClick={handleTicketSubmit}
+                disabled={!ticketIssue.trim() || isSubmittingTicket}
+              >
+                {isSubmittingTicket ? "Submitting..." : "Submit"}
+              </button>
+            </div>
           </div>
         </div>
       )}

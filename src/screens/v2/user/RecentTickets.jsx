@@ -1,99 +1,89 @@
+import { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useGetMyTicketsQuery } from "../../../redux/api/supportApi/supportApi";
 import styles from "./RecentTickets.module.scss";
 
 const RecentTickets = () => {
   const navigate = useNavigate();
+  const [page, setPage] = useState(1);
 
-  // Sample ticket data
-  const tickets = [
-    {
-      id: 1896,
-      status: "ongoing",
-      date: "Oct 01, 2025",
-      time: "04:36 PM",
-      topic: "Booking and Consultation",
-    },
-    {
-      id: 1895,
-      status: "resolved",
-      date: "Oct 01, 2025",
-      time: "04:36 PM",
-      topic: "Booking and Consultation",
-    },
-    {
-      id: 1896,
-      status: "ongoing",
-      date: "Oct 01, 2025",
-      time: "04:36 PM",
-      topic: "Booking and Consultation",
-    },
-    {
-      id: 1896,
-      status: "ongoing",
-      date: "Oct 01, 2025",
-      time: "04:36 PM",
-      topic: "Booking and Consultation",
-    },
-    {
-      id: 1890,
-      status: "resolved",
-      date: "Oct 01, 2025",
-      time: "04:36 PM",
-      topic: "Booking and Consultation",
-    },
-  ];
+  const { data: ticketsData, isLoading } = useGetMyTicketsQuery({ page, limit: 10 });
+  const tickets = ticketsData?.data?.tickets || ticketsData?.data || [];
+  const pagination = ticketsData?.data?.pagination;
 
   const handleTicketClick = (ticket) => {
-    // Navigate to ticket details
-    navigate(`/recent-tickets/${ticket.id}`);
+    navigate(`/recent-tickets/${ticket._id || ticket.id}`);
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+  };
+
+  const formatTime = (dateStr) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
   };
 
   return (
     <div className={styles.ticketsPage}>
-      {/* Header */}
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <button className={styles.backButton} onClick={() => navigate("/profile", { state: { activeTab: "Support" } })}>
             <ChevronLeft size={24} />
           </button>
           <h1 className={styles.title}>Recent Tickets</h1>
         </div>
       </header>
 
-      {/* Tickets List */}
       <div className={styles.ticketsList}>
-        {tickets.map((ticket, index) => (
-          <div
-            key={`${ticket.id}-${index}`}
-            className={styles.ticketCard}
-            onClick={() => handleTicketClick(ticket)}
-          >
-            <div className={styles.ticketHeader}>
-              <span className={styles.ticketId}>#{ticket.id}</span>
-              <span
-                className={`${styles.statusBadge} ${
-                  ticket.status === "ongoing"
-                    ? styles.statusOngoing
-                    : styles.statusResolved
-                }`}
-              >
-                {ticket.status === "ongoing" ? "● Ongoing" : "● Resolved"}
-              </span>
-            </div>
+        {isLoading ? (
+          <p className={styles.loadingText}>Loading tickets...</p>
+        ) : tickets.length === 0 ? (
+          <p className={styles.emptyText}>No tickets found</p>
+        ) : (
+          tickets.map((ticket, index) => (
+            <div
+              key={ticket._id || `${ticket.id}-${index}`}
+              className={styles.ticketCard}
+              onClick={() => handleTicketClick(ticket)}
+            >
+              <div className={styles.ticketHeader}>
+                <span className={styles.ticketId}>{ticket.ticketId}</span>
+                <span
+                  className={`${styles.statusBadge} ${
+                    ticket.status === "resolved" || ticket.status === "closed"
+                      ? styles.statusResolved
+                      : styles.statusOngoing
+                  }`}
+                >
+                  {ticket.status === "resolved" || ticket.status === "closed" ? "● Resolved" : "● " + ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1)}
+                </span>
+              </div>
+              <hr className={styles.ticketDivider} />
 
-            <div className={styles.ticketMeta}>
-              <span className={styles.ticketDate}>
-                {ticket.date} • {ticket.time}
-              </span>
-            </div>
+              <div className={styles.ticketMeta}>
+                <span className={styles.ticketDate}>
+                  {formatDate(ticket.createdAt)} • {formatTime(ticket.createdAt)}
+                </span>
+              </div>
 
-            <div className={styles.ticketTopic}>
-              <span className={styles.topicLabel}>Topic:</span>{" "}
-              <span className={styles.topicText}>{ticket.topic}</span>
+              <div className={styles.ticketTopic}>
+                <span className={styles.topicLabel}>Topic:</span>{" "}
+                <span className={styles.topicText}>{ticket.topicName || ticket.topic}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
+
+        {pagination?.hasNextPage && (
+          <button className={styles.loadMoreButton} onClick={() => setPage((p) => p + 1)}>
+            Load More
+          </button>
+        )}
       </div>
     </div>
   );
