@@ -296,8 +296,15 @@ const Profile = () => {
     }
   }, [savedKundlis]);
 
-  // Helper: Get primary profile (prioritize 'self' relation, otherwise first profile)
-  const primaryProfile = savedKundlis.find(profile => profile.relation?.toLowerCase() === 'Self') || savedKundlis[0];
+  // Helper: Get primary profile (prioritize Redux selectedKundli, then 'self' relation, otherwise first profile)
+  const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
+  const primaryProfile = (() => {
+    if (selectedKundli?._id) {
+      const found = savedKundlis.find(p => p._id === selectedKundli._id);
+      if (found) return found;
+    }
+    return savedKundlis.find(profile => profile.relation?.toLowerCase() === 'self') || savedKundlis[0];
+  })();
 
   // Capitalize first letter of each word
   const capitalizeWords = (str) => {
@@ -311,6 +318,11 @@ const Profile = () => {
     // Get user name with fallback to first Kundli name
  
   const userName = (() => {
+    // Top priority: If a kundli is explicitly selected from dropdown, show its name
+    if (selectedKundli?._id && primaryProfile?.name) {
+      return capitalizeWords(primaryProfile.name);
+    }
+
     // First priority: User's registered name
     if (user?.firstName && user?.lastName) {
       return capitalizeWords(`${user.firstName} ${user.lastName}`);
@@ -1084,6 +1096,11 @@ const Profile = () => {
 
   // Get user avatar display (initials or emoji)
   const userAvatarDisplay = (() => {
+    // If a kundli is explicitly selected from dropdown, show its initials
+    if (selectedKundli?._id && primaryProfile?.name) {
+      return getInitials(primaryProfile.name);
+    }
+
     // If user has registered name, show initials
     if (user?.firstName && user?.lastName) {
       return getInitials(`${user.firstName} ${user.lastName}`);
