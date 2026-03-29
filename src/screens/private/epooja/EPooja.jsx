@@ -60,9 +60,12 @@ const HScrollRow = ({ children }) => {
 };
 
 // ─── Helper: get image/price/title from API item ───
+const getFirstVariant = (item) => item?.variants?.find((v) => v.isActive) || item?.variants?.[0] || null;
 const getImg = (item) => {
   const fallback = "https://images.unsplash.com/photo-1604608672516-f1b9b1d37076?w=400&q=80";
+  const variant = getFirstVariant(item);
   const raw =
+    (variant?.images?.length ? variant.images[0] : null) ||
     item?.banner_image?.original ||
     item?.banner_image?.small ||
     (item?.images?.length ? item.images[0] : null) ||
@@ -74,8 +77,14 @@ const getImg = (item) => {
   if (raw && typeof raw === "object") return raw.original || raw.small || raw.url || raw.src || fallback;
   return fallback;
 };
-const getPrice = (item) => item?.price || item?.actualPrice || item?.selling_price || 0;
-const getOldPrice = (item) => item?.mrp || item?.originalPrice || item?.compare_price || 0;
+const getPrice = (item) => {
+  const variant = getFirstVariant(item);
+  return variant?.price || item?.price || item?.actualPrice || item?.selling_price || 0;
+};
+const getOldPrice = (item) => {
+  const variant = getFirstVariant(item);
+  return variant?.mrp || item?.mrp || item?.originalPrice || item?.compare_price || 0;
+};
 const getTitle = (item) => item?.title || item?.name || "Product";
 const getBrand = (item) => typeof item?.brand === "object" ? item?.brand?.name : item?.brand;
 
@@ -190,7 +199,10 @@ const EPooja = () => {
     const productId = item?._id;
     if (!productId) { Toast.error("Unable to add — product ID missing"); return; }
     try {
-      await addToCart({ productId, quantity: 1 }).unwrap();
+      const payload = { productId, quantity: 1 };
+      const firstVariant = item?.variants?.find((v) => v.isActive);
+      if (firstVariant?._id) payload.variantId = firstVariant._id;
+      await addToCart(payload).unwrap();
       Toast.success(`${getTitle(item)} added to cart`);
     } catch (err) {
       Toast.error(err?.data?.message || "Failed to add to cart");
@@ -340,7 +352,7 @@ const EPooja = () => {
                 {s.brand && <p className={styles.prodConsultant}>🏷 {getBrand(s)}</p>}
                 <h4>{getTitle(s)}</h4>
                 <p className={styles.prodDesc}>{s.short_description || ""}</p>
-                <p className={styles.prodPrice}>₹{getPrice(s)} {getOldPrice(s) ? <s>₹{getOldPrice(s)}</s> : null}</p>
+                <p className={styles.prodPrice}>₹{getPrice(s)} {getOldPrice(s) > getPrice(s) ? <s>₹{getOldPrice(s)}</s> : null}</p>
                 <button className={styles.addCartBtn} onClick={(e) => handleAddToCart(e, s)}>+ Add to cart</button>
               </div>
             </div>
@@ -440,9 +452,7 @@ const EPooja = () => {
                     {item.brand && <p className={styles.prodConsultant}>🏷 {getBrand(item)}</p>}
                     <h4>{getTitle(item)}</h4>
                     <p className={styles.prodDesc}>{item.short_description || ""}</p>
-                    <p className={styles.prodPrice}>
-                      ₹{getPrice(item)} {getOldPrice(item) ? <s>₹{getOldPrice(item)}</s> : null}
-                    </p>
+                    <p className={styles.prodPrice}>₹{getPrice(item)} {getOldPrice(item) > getPrice(item) ? <s>₹{getOldPrice(item)}</s> : null}</p>
                     <button className={styles.addCartBtn} onClick={(e) => handleAddToCart(e, item)}>+ Add to cart</button>
                   </div>
                 </div>

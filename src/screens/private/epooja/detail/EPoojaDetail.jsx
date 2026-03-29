@@ -65,6 +65,15 @@ const EPoojaDetail = () => {
   // IDs — MongoDB _id needed for cart/review APIs
   const mongoId = product?._id || null;
 
+  // Variant state
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  useEffect(() => {
+    if (product?.variants?.length) {
+      const activeVariant = product.variants.find(v => v.isActive);
+      setSelectedVariant(activeVariant || product.variants[0]);
+    }
+  }, [product]);
+
   // Fetch reviews — only when we have a valid MongoDB _id
   const { data: reviewsData, isLoading: reviewsLoading } = useGetProductReviewsQuery(
     { productId: mongoId, page: 1, limit: 10 },
@@ -263,8 +272,10 @@ const EPoojaDetail = () => {
   const handleAddToCart = async () => {
     if (!isLoggedIn()) { redirectToLogin(); return; }
     if (!mongoId) { Toast.error("Loading product details, please wait..."); return; }
+    if (!selectedVariant) { Toast.error("Please select a variant"); return; }
+    if (selectedVariant?.stock === 0) { Toast.error("This variant is out of stock"); return; }
     try {
-      await addToCart({ productId: mongoId, quantity: qty }).unwrap();
+      await addToCart({ productId: mongoId, variantId: selectedVariant._id, quantity: qty }).unwrap();
       Toast.success(`${title} added to cart`);
     } catch (err) {
       Toast.error(err?.data?.message || "Failed to add to cart");
@@ -286,7 +297,8 @@ const EPoojaDetail = () => {
   // Extract all fields from API response
   const DEFAULT_IMG = "https://images.unsplash.com/photo-1625072290979-cac544181be8?w=800&q=80";
   const bannerImg = product?.banner_image?.original || product?.banner_image?.small || null;
-  const rawImages = product?.images || [];
+  const variantImages = selectedVariant?.images?.length ? selectedVariant.images : [];
+  const rawImages = variantImages.length > 0 ? variantImages : (product?.images || []);
   const allImages = [bannerImg, ...rawImages, product?.imgUrl, product?.image, product?.thumbnail].filter(Boolean);
   const galleryImages = allImages.length > 0 ? [...new Set(allImages)] : [DEFAULT_IMG];
   const [activeImg, setActiveImg] = useState(0);
@@ -295,8 +307,8 @@ const EPoojaDetail = () => {
   const image = galleryImages[activeImg] || galleryImages[0];
 
   const title = product?.title || product?.name || "";
-  const price = product?.price || product?.selling_price || product?.mrp || 0;
-  const mrp = product?.mrp || product?.compare_price || 0;
+  const price = selectedVariant?.price || product?.price || product?.selling_price || product?.mrp || 0;
+  const mrp = selectedVariant?.mrp || product?.mrp || product?.compare_price || 0;
   const description = product?.short_description || product?.description || product?.long_description || "";
   const ratingRaw = product?.rating;
   const productRating = typeof ratingRaw === "object" ? (ratingRaw?.average || 0) : (ratingRaw || 0);
@@ -388,30 +400,81 @@ const EPoojaDetail = () => {
 
           <div className={styles.ratingLine}>
             <StarRating rating={rating} size={18} />
-            <span className={styles.revCount}>· {reviewCount.toLocaleString()} Reviews</span>
+            <span className={styles.revCount}>({reviewCount.toLocaleString()} reviews)</span>
           </div>
 
           {description && <p className={styles.desc}>{description}</p>}
 
-          {/* Price + Qty + Buttons — single row */}
+          {/* Price */}
           <div className={styles.priceRow}>
-            <span className={styles.price}>
-              ₹{price} {mrp > price ? <s style={{ color: "#999", fontSize: 14 }}>₹{mrp}</s> : null}
-            </span>
+            <p className={styles.price}>₹{price}</p>
+            {mrp > price && <p className={styles.mrp}>₹{mrp}</p>}
+          </div>
+
+          {/* Variant Selector */}
+          {product?.variants?.length > 0 && (
+            <div className={styles.variantWrap}>
+              {product.variants.map((variant) => (
+                <button
+                  key={variant._id}
+                  className={`${styles.variantBtn} ${selectedVariant?._id === variant._id ? styles.variantActive : ""}`}
+                  onClick={() => setSelectedVariant(variant)}
+                >
+                  {variant.title}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Variant Attributes */}
+          {selectedVariant?.attributes?.length > 0 && (
+            <div className={styles.variantSpecs}>
+              {selectedVariant.attributes.map((attr, i) => (
+                <p key={i}><strong>{attr.name}:</strong> {attr.value}</p>
+              ))}
+            </div>
+          )}
+
+          {/* Qty + Buttons */}
+          <div className={styles.actionRow}>
             <div className={styles.qtyRow}>
               <button className={styles.qtyBtn} onClick={() => handleQtyChange(qty - 1)} aria-label="Decrease quantity"><FiMinus /></button>
               <span className={styles.qtyVal}>{qty}</span>
               <button className={`${styles.qtyBtn} ${styles.qtyBtnPlus}`} onClick={() => handleQtyChange(qty + 1)} aria-label="Increase quantity"><FiPlus /></button>
             </div>
             <div className={styles.btnGroup}>
-              <button className={styles.cartBtn} onClick={handleAddToCart} disabled={isAddingToCart}>
-                {isAddingToCart ? "Adding..." : "Add to Cart"}
+              <button className={styles.cartBtn} onClick={handleAddToCart} disabled={isAddingToCart || selectedVariant?.stock === 0}>
+                {selectedVariant?.stock === 0 ? "Out of Stock" : isAddingToCart ? "Adding..." : "Add to Cart"}
               </button>
-              <button className={styles.bookBtn} onClick={handleBuyNow} disabled={isAddingToCart}>
+              <button className={styles.bookBtn} onClick={handleBuyNow} disabled={isAddingToCart || selectedVariant?.stock === 0}>
                 Buy Now
               </button>
             </div>
           </div>
+
+          {/* Video */}
+          {product?.video_url && (() => {
+            let embedUrl = product.video_url;
+            // youtu.be/ID or youtu.be/ID?si=...
+            const shortMatch = embedUrl.match(/youtu\.be\/([^?&]+)/);
+            if (shortMatch) {
+              embedUrl = `https://www.youtube.com/embed/${shortMatch[1]}`;
+            } else if (embedUrl.includes("shorts/")) {
+              embedUrl = embedUrl.replace("shorts/", "embed/");
+            } else {
+              // youtube.com/watch?v=ID
+              const watchMatch = embedUrl.match(/[?&]v=([^&]+)/);
+              if (watchMatch) embedUrl = `https://www.youtube.com/embed/${watchMatch[1]}`;
+            }
+            return (
+              <iframe
+                src={embedUrl}
+                className={styles.video}
+                title="Product video"
+                allowFullScreen
+              />
+            );
+          })()}
 
           {/* FAQ */}
           {faqs.length > 0 && (
