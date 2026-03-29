@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import styles from "./TopHeader.module.scss";
 import { PATH } from "../utils/routes/Paths";
 import { User } from "lucide-react";
@@ -11,13 +12,19 @@ import { useWalletBalance } from "../screens/private/wallet/useWalletBalance";
 import { getToken } from "../utils/token";
 import { useGetAllKundlisQuery } from "../services/appServices/kundliServicesNew";
 import useRequireAuth from "../utils/hooks/useRequireAuth"; 
+import { ProfileManager } from "./UI/Profile";
+import { setSelectedKundli, clearSelectedKundli } from "../redux/kundli/kundliSlice";
 const TopHeader = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const requireAuth = useRequireAuth();
   const [user, setUser] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState('en');
+  const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const token = getToken();
+
+  const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
 
   // Check if we're in iframe mode
   const isIframeMode = new URLSearchParams(window.location.search).get('iframe') === 'true';
@@ -157,6 +164,12 @@ const TopHeader = () => {
     requireAuth() && navigate("/profile");
   };
 
+  const handleKundliSelect = (profile) => {
+    setKundliModalOpen(false);
+    if (!profile?._id) return;
+    dispatch(setSelectedKundli(profile));
+  };
+
   const formatAmount = (amount) => {
     // Handle non-numeric values
     if (typeof amount !== "number") {
@@ -177,6 +190,9 @@ const TopHeader = () => {
   const displayName = (() => {
     // If not logged in, always show Guest
     if (!token) return "Guest";
+
+    // Top priority: selected Kundli first name
+    if (selectedKundli?.name) return selectedKundli.name.split(" ")[0];
     
     // First priority: User's registered firstName
     if (user?.firstName) return user.firstName;
@@ -209,6 +225,15 @@ const TopHeader = () => {
     // Only show initials if user is logged in (has token)
     if (!token) {
       return "";
+    }
+
+    // If a kundli is selected from the header, show its initials
+    if (selectedKundli?.name) {
+      const nameParts = selectedKundli.name.split(" ");
+      if (nameParts.length >= 2) {
+        return getInitials(nameParts[0], nameParts[nameParts.length - 1]);
+      }
+      return nameParts[0].charAt(0).toUpperCase();
     }
     
     // If user has registered name, show initials
@@ -583,10 +608,32 @@ const TopHeader = () => {
                   <User size={20} strokeWidth={0} fill="#d53400"/>
                 </div>
               )}
-              <div className={styles.greetingText}>
+              {/* Kundli selector replaces greeting */}
+              {!!token && (
+                <span
+                  className={styles.onHoverChangeLang}
+                  onClick={() => setKundliModalOpen(true)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <span className={styles.languageName}>
+                    {selectedKundli?.name?.split(" ")[0] || displayName}
+                  </span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none">
+                    <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_kundli_greeting)"/>
+                    <defs>
+                      <linearGradient id="paint0_linear_kundli_greeting" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#F75801"/>
+                        <stop offset="1" stopColor="#D43400"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </span>
+              )}
+              {/* Original greeting block (commented out) */}
+              {/* <div className={styles.greetingText}>
                 <span className={styles.namaste}>नमस्ते</span>
                 <span className={styles.userName}>{displayName}</span>
-              </div>
+              </div> */}
             </div>
           </div>
         {/* </div> */}
@@ -806,6 +853,23 @@ const TopHeader = () => {
           </div>
         </>
       )}
+
+      {/* Kundli Selection Modal */}
+      <ProfileManager
+        isOpen={kundliModalOpen}
+        onClose={() => setKundliModalOpen(false)}
+        title="Select Kundli"
+        startCallMode={true}
+        callModeBtnTitle="Select Kundli"
+        onStartCall={handleKundliSelect}
+        selectedProfileId={selectedKundli?._id}
+        enabledOperations={{
+          list: true,
+          add: true,
+          edit: false,
+          delete: false,
+        }}
+      />
     </>
   );
 };
