@@ -546,29 +546,6 @@ const TopHeader = () => {
               
           <div className={styles.headerActions}>
 
-            {/* Kundli selector - visible only when logged in */}
-            {!!token && (
-              <div className={styles.languageWrap}>
-                <span
-                  className={styles.onHoverChangeLang}
-                  onClick={() => setKundliModalOpen(true)}
-                >
-                  <span className={styles.languageName}>
-                    {selectedKundli?.name ? selectedKundli.name.split(" ")[0] : "Select Kundli"}
-                  </span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="8" viewBox="0 0 14 8" fill="none">
-                    <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_kundli)"/>
-                    <defs>
-                      <linearGradient id="paint0_linear_kundli" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
-                        <stop stopColor="#F75801"/>
-                        <stop offset="1" stopColor="#D43400"/>
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </span>
-              </div>
-            )}
-
             {/* language start */}
             <div className={styles.languageWrap} ref={langRef}>
               <span
@@ -631,10 +608,32 @@ const TopHeader = () => {
                   <User size={20} strokeWidth={0} fill="#d53400"/>
                 </div>
               )}
-              <div className={styles.greetingText}>
+              {/* Kundli selector replaces greeting */}
+              {!!token && (
+                <span
+                  className={styles.onHoverChangeLang}
+                  onClick={() => setKundliModalOpen(true)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <span className={styles.languageName}>
+                    {selectedKundli?.name?.split(" ")[0] || displayName}
+                  </span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none">
+                    <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_kundli_greeting)"/>
+                    <defs>
+                      <linearGradient id="paint0_linear_kundli_greeting" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#F75801"/>
+                        <stop offset="1" stopColor="#D43400"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </span>
+              )}
+              {/* Original greeting block (commented out) */}
+              {/* <div className={styles.greetingText}>
                 <span className={styles.namaste}>नमस्ते</span>
                 <span className={styles.userName}>{displayName}</span>
-              </div>
+              </div> */}
             </div>
           </div>
         {/* </div> */}
