@@ -1,6 +1,9 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
 import authReducer from "../redux/auth/authSlice";
 import formReducer from "../redux/kundliform/formSlice";
+import kundliReducer from "../redux/kundli/kundliSlice";
 import aiwowReducer from "../redux/aiwow/aiwowSlice";
 import { baseApi } from "../redux/api/baseApi/baseApi";
 import { pythonApi } from "../redux/api/baseApi/pythonApi";
@@ -15,23 +18,43 @@ import { astroTarotApi } from "../redux/api/tarot/astroTarotApi";
 import { calculatorApi } from "../redux/api/baseApi/calculatorApi";
 import "../redux/api/plansApi/plansApi"; // inject endpoints into privateRequestNew
 import "../redux/api/supportApi/supportApi"; // inject support endpoints
+
+const persistConfig = {
+  key: "root",
+  storage,
+  whitelist: ["auth", "kundli"], // persist auth and kundli slices
+};
+
+const rootReducer = combineReducers({
+  auth: authReducer,
+  form: formReducer,
+  kundli: kundliReducer,
+  aiwow: aiwowReducer,
+  [baseApi.reducerPath]: baseApi.reducer,
+  [privateRequestNew.reducerPath]: privateRequestNew.reducer,
+  [localReuqqestApi.reducerPath]: localReuqqestApi.reducer,
+  [pythonApi.reducerPath]: pythonApi.reducer,
+  [horoscopeApi.reducerPath]: horoscopeApi.reducer,
+  [vedicApi.reducerPath]: vedicApi.reducer,
+  [astroTarotApi.reducerPath]: astroTarotApi.reducer,
+  [geoApi.reducerPath]: geoApi.reducer,
+  [calculatorApi.reducerPath]: calculatorApi.reducer,
+});
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
 export const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    form: formReducer,
-    aiwow: aiwowReducer,
-    [baseApi.reducerPath]: baseApi.reducer,
-    [privateRequestNew.reducerPath]: privateRequestNew.reducer,
-    [localReuqqestApi.reducerPath]: localReuqqestApi.reducer,
-    [pythonApi.reducerPath]: pythonApi.reducer,
-    [horoscopeApi.reducerPath]: horoscopeApi.reducer,
-    [vedicApi.reducerPath]: vedicApi.reducer,
-    [astroTarotApi.reducerPath]: astroTarotApi.reducer,
-    [geoApi.reducerPath]: geoApi.reducer,
-    [calculatorApi.reducerPath]: calculatorApi.reducer,
-  },
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware()
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [
+          "persist/PERSIST",
+          "persist/REHYDRATE",
+          "persist/REGISTER",
+        ],
+      },
+    })
       .concat(geoApi.middleware)
       .concat(baseApi.middleware)
       .concat(privateRequestNew.middleware)
@@ -42,3 +65,5 @@ export const store = configureStore({
       .concat(astroTarotApi.middleware)
       .concat(calculatorApi.middleware),
 });
+
+export const persistor = persistStore(store);
