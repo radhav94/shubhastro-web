@@ -8,7 +8,7 @@ const formatTime = (time) => {
   const [clock, meridiem] = time.split(" ");
   if (!clock) return time;
   const [hh, mm] = clock.split(":");
-  return `${hh}:${mm} ${meridiem || ""}`.trim();
+  return `${hh}:${mm} ${meridiem || ""}`.trim(); 
 };
 
 const MuhuratSection = () => {

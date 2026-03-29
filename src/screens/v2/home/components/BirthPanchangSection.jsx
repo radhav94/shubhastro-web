@@ -7,13 +7,14 @@ const formatTo12Hr = (time) => {
   if (!time || time === "--") return "--";
   const [hh, mm] = time.split(":");
   const h = parseInt(hh, 10);
-  const period = h >= 12 ? "PM" : "AM";
+  const period = h >= 12 ? "PM" : "AM"; 
   const h12 = h % 12 || 12;
   return `${String(h12).padStart(2, "0")}:${mm} ${period}`;
 };
 
 const BirthPanchangSection = () => {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
 
   const { data: profilesData, isLoading } = useGetAllKundlisQuery(undefined, {
     skip: !isLoggedIn,
@@ -22,8 +23,11 @@ const BirthPanchangSection = () => {
   if (!isLoggedIn) return null;
 
   const profiles = profilesData?.data || [];
-  // Prefer "Self" relation, fallback to first profile
-  const profile = profiles.find((p) => p.relation === "Self") || profiles[0];
+  // Priority: selected Kundli from Redux → "Self" relation → first profile
+  const selfProfile = profiles.find((p) => p.relation === "Self") || profiles[0];
+  const profile = selectedKundli?._id
+    ? profiles.find((p) => p._id === selectedKundli._id) || selfProfile
+    : selfProfile;
 
   if (isLoading) {
     return (

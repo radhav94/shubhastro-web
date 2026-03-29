@@ -31,7 +31,7 @@ const PanchangSection = () => {
     let daysOffset = 0;
     
     switch (activeTab) {
-      case "tomorrow":
+      case "tomorrow": 
         daysOffset = 1;
         break;
       case "dayAfter":

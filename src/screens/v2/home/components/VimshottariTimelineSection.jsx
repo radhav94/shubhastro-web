@@ -13,6 +13,7 @@ const VimshottariTimelineSection = () => {
   
   // Check if user is logged in
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
 
   // Get user's kundli profiles
   const { data: profilesData, isLoading: profilesLoading } = useGetAllKundlisQuery(undefined, {
@@ -20,8 +21,11 @@ const VimshottariTimelineSection = () => {
   });
   const profiles = profilesData?.data || [];
 
-  // Get the first profile (default)
-  const defaultProfile = profiles.length > 0 ? profiles[0] : null;
+  // Priority: selected Kundli from Redux → first profile
+  const fallbackProfile = profiles.length > 0 ? profiles[0] : null;
+  const defaultProfile = selectedKundli?._id
+    ? profiles.find((p) => p._id === selectedKundli._id) || fallbackProfile
+    : fallbackProfile;
 
   // Only prepare API parameters if we have a valid profile
   const apiParams = defaultProfile ? {
