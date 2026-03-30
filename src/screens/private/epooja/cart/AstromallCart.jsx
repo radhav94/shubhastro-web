@@ -6,6 +6,7 @@ import { useGetCartQuery, useUpdateCartItemMutation, useRemoveCartItemMutation, 
 import Toast from "../../../../component/toast";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
 import { DefaultImages } from "../../../../utils/appImages";
+import ProductImage from "../../../../component/UI/ProductImage";
 
 const DEFAULT_IMG = DefaultImages.AstromallProductDefault;
 
@@ -208,7 +209,7 @@ const AstromallCart = () => {
         const goToDetail = () => navigate(`/product-details/${routeId}`, { state: getProductData(item) });
         return (
           <div key={item?._id || idx} className={styles.productCard}>
-            <img src={getImg(item)} alt={getTitle(item)} className={styles.productImg} onClick={goToDetail} style={{ cursor: "pointer" }} onError={(e) => { if (!e.target.src.includes("astromall-product-default")) e.target.src = DEFAULT_IMG; }} />
+            <ProductImage src={getImg(item)} alt={getTitle(item)} className={styles.productImg} onClick={goToDetail} style={{ cursor: "pointer" }} />
             <div className={styles.productInfo}>
               <h3 onClick={goToDetail} style={{ cursor: "pointer" }}>{getTitle(item)}</h3>
               <div className={styles.qtyRow}>

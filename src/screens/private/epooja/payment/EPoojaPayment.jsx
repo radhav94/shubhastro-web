@@ -7,6 +7,7 @@ import { useGetCartQuery, useUpdateCartItemMutation, useRemoveCartItemMutation, 
 import Toast from "../../../../component/toast";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
 import { DefaultImages } from "../../../../utils/appImages";
+import ProductImage from "../../../../component/UI/ProductImage";
 
 const DEFAULT_IMG = DefaultImages.AstromallProductDefault;
 
@@ -138,11 +139,10 @@ const EPoojaPayment = () => {
         const itemTotal = price * qty;
         return (
           <div key={item?._id || idx} className={styles.productCard}>
-            <img
+            <ProductImage
               src={getItemImage(item)}
               alt={getItemTitle(item)}
               className={styles.productImg}
-              onError={(e) => { if (!e.target.src.includes("astromall-product-default")) e.target.src = DEFAULT_IMG; }}
             />
             <div className={styles.productInfo}>
               <div className={styles.productHeader}>
@@ -215,7 +215,7 @@ const EPoojaPayment = () => {
               return (
                 <div key={p?._id || idx} className={styles.sugCard}>
                   <div className={styles.sugImgWrap}>
-                    <img src={sImg} alt={sTitle} onError={(e) => { if (!e.target.src.includes("astromall-product-default")) e.target.src = DEFAULT_IMG; }} />
+                    <ProductImage src={sImg} alt={sTitle} />
                     <span className={styles.sugBadge}>Suggested</span>
                   </div>
                   <div className={styles.sugBody}>

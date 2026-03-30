@@ -75,6 +75,9 @@ const EPoojaDetail = () => {
     }
   }, [product]);
 
+  // Reset gallery index when variant changes
+  useEffect(() => { setActiveImg(0); }, [selectedVariant?._id]);
+
   // Fetch reviews — only when we have a valid MongoDB _id
   const { data: reviewsData, isLoading: reviewsLoading } = useGetProductReviewsQuery(
     { productId: mongoId, page: 1, limit: 10 },
@@ -304,20 +307,36 @@ const EPoojaDetail = () => {
     return null;
   };
   const bannerImg = resolveImg(product?.banner_image) || null;
-  const variantImages = selectedVariant?.images?.length ? selectedVariant.images : [];
-  const rawImages = variantImages.length > 0 ? variantImages : (product?.images || []);
-  const allImages = [bannerImg, ...rawImages.map(resolveImg), resolveImg(product?.imgUrl), resolveImg(product?.image), resolveImg(product?.thumbnail)].filter(Boolean);
+  const hasVariantImages = selectedVariant?.images?.length > 0;
+  const allImages = hasVariantImages
+    ? selectedVariant.images.map(resolveImg).filter(Boolean)
+    : [bannerImg, ...(product?.images || []).map(resolveImg), resolveImg(product?.imgUrl), resolveImg(product?.image), resolveImg(product?.thumbnail)].filter(Boolean);
   const uniqueImages = allImages.length > 0 ? [...new Set(allImages)] : [];
-  const [brokenImgs, setBrokenImgs] = useState(new Set());
-  const galleryImages = uniqueImages.filter((src) => !brokenImgs.has(src));
-  const showDefault = galleryImages.length === 0;
+
+  // Pre-validate images: check which URLs actually load
+  const [validatedImages, setValidatedImages] = useState(null); // null = still checking
+  useEffect(() => {
+    if (uniqueImages.length === 0) { setValidatedImages([]); return; }
+    let cancelled = false;
+    const checks = uniqueImages.map((src) => new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(src);
+      img.onerror = () => resolve(null);
+      img.src = src;
+    }));
+    Promise.all(checks).then((results) => {
+      if (!cancelled) setValidatedImages(results.filter(Boolean));
+    });
+    return () => { cancelled = true; };
+  }, [uniqueImages.join(",")]);
+
+  const galleryImages = validatedImages || [];
+  const showDefault = validatedImages !== null && galleryImages.length === 0;
   const [activeImg, setActiveImg] = useState(0);
   const [zoomed, setZoomed] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
   const safeIdx = activeImg >= galleryImages.length ? 0 : activeImg;
-  const image = showDefault ? DEFAULT_IMG : (galleryImages[safeIdx] || DEFAULT_IMG);
-  const handleImgError = (src) => { setBrokenImgs((prev) => new Set(prev).add(src)); };
-
+  const image = (validatedImages === null) ? null : (showDefault ? DEFAULT_IMG : (galleryImages[safeIdx] || DEFAULT_IMG));
   const title = product?.title || product?.name || "";
   const price = selectedVariant?.price || product?.price || product?.selling_price || product?.mrp || 0;
   const mrp = selectedVariant?.mrp || product?.mrp || product?.compare_price || 0;
@@ -384,13 +403,16 @@ const EPoojaDetail = () => {
             onMouseEnter={() => setZoomed(true)}
             onMouseLeave={() => setZoomed(false)}
           >
-            <img
-              src={image}
-              alt={title}
-              className={styles.mainImage}
-              style={zoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
-              onError={() => { if (!showDefault) handleImgError(galleryImages[safeIdx]); }}
-            />
+            {image ? (
+              <img
+                src={image}
+                alt={title}
+                className={styles.mainImage}
+                style={zoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
+              />
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#999" }}>Loading...</div>
+            )}
           </div>
           {galleryImages.length > 1 && (
             <div className={styles.thumbRow}>
@@ -401,7 +423,6 @@ const EPoojaDetail = () => {
                   alt={`${title} ${i + 1}`}
                   className={`${styles.thumbImg} ${safeIdx === i ? styles.thumbActive : ""}`}
                   onClick={() => setActiveImg(i)}
-                  onError={() => handleImgError(img)}
                 />
               ))}
             </div>
