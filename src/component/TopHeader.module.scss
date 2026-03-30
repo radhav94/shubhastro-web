@@ -244,7 +244,7 @@
 .profileDetailMain{
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
 }
 .namaste {
   font-size: 0.7rem;
@@ -393,7 +393,7 @@
 }
 
 .languageWrap {
-  right: 50px;
+  // right: 50px;
   position: relative;
   display: inline-block;
 }
@@ -409,8 +409,15 @@
   padding: 4px 10px;
   border: 1px solid #fed0bf;
 }
-
-.languageName {
+.profileWrapName{
+  display: flex;
+  color: #424242;
+  font-size: 12px;
+  font-weight: 500;
+  align-items: center;
+  gap: 6px;
+}
+.languageName,.profileName {
   color: #424242;
   font-size: 12px;
   font-weight: 500;

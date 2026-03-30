@@ -614,11 +614,11 @@ const TopHeader = () => {
               {/* Kundli selector replaces greeting */}
               {!!token && (
                 <span
-                  className={styles.onHoverChangeLang}
+                  className={styles.profileWrapName}
                   onClick={() => setKundliModalOpen(true)}
                   style={{ cursor: "pointer" }}
                 >
-                  <span className={styles.languageName}>
+                  <span className={styles.languageNamee}>
                     {selectedKundli?.name?.split(" ")[0] || displayName}
                   </span>
                   <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none">
