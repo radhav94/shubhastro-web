@@ -1,17 +1,14 @@
 import { ChevronLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
-import { useGetTicketByIdQuery, useRateTicketMutation } from "../../../redux/api/supportApi/supportApi";
+import { useGetTicketByIdQuery } from "../../../redux/api/supportApi/supportApi";
+import RatingCard from "./RatingCard";
 import styles from "./TicketDetails.module.scss";
 
 const TicketDetails = () => {
   const navigate = useNavigate();
   const { ticketId } = useParams();
-  const [rating, setRating] = useState(0);
-  const [rated, setRated] = useState(false);
 
   const { data: ticketData, isLoading } = useGetTicketByIdQuery(ticketId);
-  const [rateTicket, { isLoading: isRating }] = useRateTicketMutation();
   const ticket = ticketData?.data || {};
 
   const formatTime = (dateStr) => {
@@ -25,16 +22,6 @@ const TicketDetails = () => {
   };
 
   const isResolved = ticket.status === "resolved" || ticket.status === "closed";
-
-  const handleRating = async (star) => {
-    setRating(star);
-    try {
-      await rateTicket({ ticketId: ticket._id || ticketId, rating: star, feedback: "" }).unwrap();
-      setRated(true);
-    } catch {
-      // error handled by privateRequestNew
-    }
-  };
 
   if (isLoading) {
     return (
@@ -125,30 +112,7 @@ const TicketDetails = () => {
 
       {/* Rating Card - sticky bottom */}
       <div className={styles.ratingCardFixed}>
-        <div className={styles.ratingCard}>
-          <div className={styles.starsContainer}>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                className={styles.starButton}
-                onClick={() => !rated && !isRating && handleRating(star)}
-                disabled={rated || isRating}
-              >
-                <svg
-                  width="48"
-                  height="48"
-                  viewBox="0 0 48 48"
-                  fill={star <= rating ? "#FF9D7E" : "#FFD4C4"}
-                >
-                  <path d="M24 4L28.944 18.528H44.472L32.264 27.472L37.208 42L24 33.056L10.792 42L15.736 27.472L3.528 18.528H19.056L24 4Z" />
-                </svg>
-              </button>
-            ))}
-          </div>
-          <p className={styles.ratingText}>
-            {rated ? "Thank you for your feedback!" : "Please Rate your Experience"}
-          </p>
-        </div>
+        <RatingCard ticketId={ticket._id || ticketId} />
       </div>
     </div>
   );
