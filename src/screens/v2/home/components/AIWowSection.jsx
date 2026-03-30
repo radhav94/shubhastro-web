@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaAngleDoubleDown, FaAngleDoubleUp } from "react-icons/fa";
 import { useGetAiWowPageDataQuery } from "../../../../redux/api/aiwow/aiwowApi";
+import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
 import MobileAppModal from "../../../private/aiwow/components/MobileAppModal";
 import styles from "./AIWowSection.module.scss";
 import wireBg from "../../../../assets/images/wire-bg.svg";
+import { useSelector } from "react-redux";
 
 const COLLAPSED_COUNT = 4;
 
@@ -56,6 +58,21 @@ const AIWowSection = () => {
   const [expanded, setExpanded] = useState(false);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
   const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
+
+  const { data: profilesData } = useGetAllKundlisQuery(undefined, {
+    skip: !isLoggedIn,
+  });
+  const profiles = profilesData?.data || [];
+  const selfProfile = profiles.find((p) => p.relation === "Self") || profiles[0];
+
+  const greetingName = (() => {
+    if (!isLoggedIn) return "Guest";
+    if (selectedKundli?.name) return selectedKundli.name;
+    if (selfProfile?.name) return selfProfile.name;
+    return "Guest";
+  })();
 
   const sections = aiwowData?.data?.list || [];
   const activeSections = sections
@@ -100,7 +117,8 @@ const AIWowSection = () => {
         <img src={wireBg} alt="img" />
       </div>
       
-      <h1 className={styles.AIWowUserName}>Hello, John Doe!</h1>
+      {/* <h1 className={styles.AIWowUserName}>Hello, John Doe!</h1> */}
+      <h1 className={styles.AIWowUserName}>Hello, {greetingName}!</h1>
       <h2 className={styles.heading}>
         Experience Astrology <span className={styles.headingHighlight}>Powered by AI</span>
       </h2>

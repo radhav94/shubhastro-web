@@ -1245,7 +1245,7 @@ const Profile = () => {
             <span className={styles.balanceLabel}>Balance</span>
           </div>
           <div className={styles.balanceAmount}>
-            ₹{isFetchingBalance ? "..." : Number(balance || 0).toLocaleString("en-IN")}
+            ₹{Number(balance || 0).toLocaleString("en-IN")}
           </div>
         </div>
 
