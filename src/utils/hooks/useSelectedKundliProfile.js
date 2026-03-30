@@ -9,6 +9,7 @@ import { Toast } from '../../component';
 /**
  * Custom hook to manage selected Kundli profile with localStorage persistence
  * Handles profile retrieval from Redux store or localStorage with proper error handling
+ * Syncs with header's selected Kundli (state.kundli.selectedKundli) as top priority
  * 
  * @param {Object} options - Configuration options
  * @param {boolean} options.required - If true, redirects to AIWow page when profile is missing (default: true)
@@ -29,8 +30,10 @@ const useSelectedKundliProfile = (options = {}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   
-  // Get profile from Redux store
+  // Get profile from Redux store (aiwow slice)
   const profileFromStore = useSelector((state) => state.aiwow?.selectedKundliProfile);
+  // Get profile selected from header (kundli slice) — this takes priority
+  const headerSelectedKundli = useSelector((state) => state.kundli?.selectedKundli);
   const token = useSelector((state) => state.auth?.token);
 
   // Fetch all profiles as fallback when no profile is explicitly selected
@@ -130,7 +133,21 @@ const useSelectedKundliProfile = (options = {}) => {
     setError(null);
 
     try {
-      // First, try to get from Redux store
+      // Top priority: header's selected Kundli (state.kundli.selectedKundli)
+      if (headerSelectedKundli) {
+        const validation = validateProfile(headerSelectedKundli);
+        
+        if (validation.valid) {
+          // Sync header selection to aiwow slice and localStorage
+          dispatch(setSelectedKundliProfile(headerSelectedKundli));
+          saveProfileToLocalStorage(headerSelectedKundli);
+          setProfile(headerSelectedKundli);
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Second: try aiwow Redux store
       if (profileFromStore) {
         const validation = validateProfile(profileFromStore);
         
@@ -205,6 +222,7 @@ const useSelectedKundliProfile = (options = {}) => {
     }
   }, [
     profileFromStore,
+    headerSelectedKundli,
     allProfilesData,
     profilesQueryLoading,
     validateProfile,

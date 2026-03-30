@@ -13,6 +13,7 @@ import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServi
 import { useGetAiWowPageDataQuery, useGetAiHistoryQuery, useGetChargesQuery } from "../../../redux/api/aiwow/aiwowApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
+import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import Footer from "../../../layouts/Footer";
@@ -35,6 +36,7 @@ const AIWow = () => {
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
 
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
+  const headerSelectedKundli = useSelector((state) => state.kundli.selectedKundli);
 
   const role = localStorage.getItem("shubhtalk_role");
   const token =
@@ -118,6 +120,14 @@ const AIWow = () => {
       localStorage.removeItem("selectedKundliProfile");
       return;
     }
+
+    // If header has a selected kundli, sync AIWow to it
+    if (headerSelectedKundli?._id && profiles.some((p) => p._id === headerSelectedKundli._id)) {
+      dispatch(setSelectedKundliProfile(headerSelectedKundli));
+      localStorage.setItem("selectedKundliProfile", JSON.stringify(headerSelectedKundli));
+      return;
+    }
+
     const saved = localStorage.getItem("selectedKundliProfile");
     let parsed = null;
     try {
@@ -132,7 +142,7 @@ const AIWow = () => {
     const first = profiles[0];
     dispatch(setSelectedKundliProfile(first));
     localStorage.setItem("selectedKundliProfile", JSON.stringify(first));
-  }, [profiles, isFetching, dispatch]);
+  }, [profiles, isFetching, dispatch, headerSelectedKundli]);
 
   useEffect(() => {
     if (location.hash) {
@@ -146,6 +156,7 @@ const AIWow = () => {
 
   const handleProfileSelect = (profile) => {
     dispatch(setSelectedKundliProfile(profile));
+    dispatch(setSelectedKundli(profile));
     localStorage.setItem("selectedKundliProfile", JSON.stringify(profile));
     setShowProfileModal(false);
   };

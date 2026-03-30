@@ -14,6 +14,7 @@ import { useGetAllKundlisQuery } from "../services/appServices/kundliServicesNew
 import useRequireAuth from "../utils/hooks/useRequireAuth"; 
 import { ProfileManager } from "./UI/Profile";
 import { setSelectedKundli, clearSelectedKundli } from "../redux/kundli/kundliSlice";
+import { setSelectedKundliProfile } from "../redux/aiwow/aiwowSlice";
 const TopHeader = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -168,6 +169,8 @@ const TopHeader = () => {
     setKundliModalOpen(false);
     if (!profile?._id) return;
     dispatch(setSelectedKundli(profile));
+    dispatch(setSelectedKundliProfile(profile));
+    localStorage.setItem("selectedKundliProfile", JSON.stringify(profile));
   };
 
   const formatAmount = (amount) => {
