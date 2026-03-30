@@ -6,6 +6,7 @@ import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { useGetEPoojaDetailQuery, useGetProductReviewsQuery, useAddToCartMutation, useGetCartQuery, useUpdateCartItemMutation, useCreateProductReviewMutation, useUpdateProductReviewMutation, useDeleteProductReviewMutation, useGetAddressesQuery, useAddAddressMutation, useUpdateAddressMutation, useDeleteAddressMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
+import { DefaultImages } from "../../../../utils/appImages";
 
 const StarRating = ({ rating = 0, size = 18 }) => {
   const stars = [];
@@ -73,6 +74,9 @@ const EPoojaDetail = () => {
       setSelectedVariant(activeVariant || product.variants[0]);
     }
   }, [product]);
+
+  // Reset gallery index when variant changes
+  useEffect(() => { setActiveImg(0); }, [selectedVariant?._id]);
 
   // Fetch reviews — only when we have a valid MongoDB _id
   const { data: reviewsData, isLoading: reviewsLoading } = useGetProductReviewsQuery(
@@ -295,12 +299,39 @@ const EPoojaDetail = () => {
   };
 
   // Extract all fields from API response
-  const DEFAULT_IMG = "https://images.unsplash.com/photo-1625072290979-cac544181be8?w=800&q=80";
-  const bannerImg = product?.banner_image?.original || product?.banner_image?.small || null;
-  const variantImages = selectedVariant?.images?.length ? selectedVariant.images : [];
-  const rawImages = variantImages.length > 0 ? variantImages : (product?.images || []);
-  const allImages = [bannerImg, ...rawImages, product?.imgUrl, product?.image, product?.thumbnail].filter(Boolean);
-  const galleryImages = allImages.length > 0 ? [...new Set(allImages)] : [DEFAULT_IMG];
+  const DEFAULT_IMG = DefaultImages.AstromallProductDefault;
+  const resolveImg = (img) => {
+    if (!img) return null;
+    if (typeof img === "string") return img;
+    if (typeof img === "object") return img.original || img.small || img.url || img.src || null;
+    return null;
+  };
+  const bannerImg = resolveImg(product?.banner_image) || null;
+  const hasVariantImages = selectedVariant?.images?.length > 0;
+  const allImages = hasVariantImages
+    ? selectedVariant.images.map(resolveImg).filter(Boolean)
+    : [bannerImg, ...(product?.images || []).map(resolveImg), resolveImg(product?.imgUrl), resolveImg(product?.image), resolveImg(product?.thumbnail)].filter(Boolean);
+  const uniqueImages = allImages.length > 0 ? [...new Set(allImages)] : [];
+
+  // Pre-validate images: check which URLs actually load
+  const [validatedImages, setValidatedImages] = useState(null); // null = still checking
+  useEffect(() => {
+    if (uniqueImages.length === 0) { setValidatedImages([]); return; }
+    let cancelled = false;
+    const checks = uniqueImages.map((src) => new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(src);
+      img.onerror = () => resolve(null);
+      img.src = src;
+    }));
+    Promise.all(checks).then((results) => {
+      if (!cancelled) setValidatedImages(results.filter(Boolean));
+    });
+    return () => { cancelled = true; };
+  }, [uniqueImages.join(",")]);
+
+  const galleryImages = validatedImages || [];
+  const showDefault = validatedImages !== null && galleryImages.length === 0;
 
   // Build video embed URL if available
   const { videoEmbedUrl, videoThumb } = (() => {
@@ -325,8 +356,8 @@ const EPoojaDetail = () => {
   const isVideoActive = activeImg === videoIndex;
   const [zoomed, setZoomed] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
-  const image = galleryImages[activeImg] || galleryImages[0];
-
+  const safeIdx = activeImg >= galleryImages.length ? 0 : activeImg;
+  const image = (validatedImages === null) ? null : (showDefault ? DEFAULT_IMG : (galleryImages[safeIdx] || DEFAULT_IMG));
   const title = product?.title || product?.name || "";
   const price = selectedVariant?.price || product?.price || product?.selling_price || product?.mrp || 0;
   const mrp = selectedVariant?.mrp || product?.mrp || product?.compare_price || 0;
@@ -404,22 +435,26 @@ const EPoojaDetail = () => {
               onMouseEnter={() => setZoomed(true)}
               onMouseLeave={() => setZoomed(false)}
             >
-              <img
-                src={image}
-                alt={title}
-                className={styles.mainImage}
-                style={zoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
-              />
+              {image ? (
+                <img
+                  src={image}
+                  alt={title}
+                  className={styles.mainImage}
+                  style={zoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
+                />
+              ) : (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#999" }}>Loading...</div>
+              )}
             </div>
           )}
           {totalGalleryItems > 1 && (
             <div className={styles.thumbRow}>
               {galleryImages.map((img, i) => (
                 <img
-                  key={i}
+                  key={img}
                   src={img}
                   alt={`${title} ${i + 1}`}
-                  className={`${styles.thumbImg} ${activeImg === i ? styles.thumbActive : ""}`}
+                  className={`${styles.thumbImg} ${!isVideoActive && safeIdx === i ? styles.thumbActive : ""}`}
                   onClick={() => setActiveImg(i)}
                 />
               ))}

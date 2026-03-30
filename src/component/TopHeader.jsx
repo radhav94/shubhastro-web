@@ -862,9 +862,10 @@ const TopHeader = () => {
         isOpen={kundliModalOpen}
         onClose={() => setKundliModalOpen(false)}
         title="Select Kundli"
-        startCallMode={true}
-        callModeBtnTitle="Select Kundli"
-        onStartCall={handleKundliSelect}
+        // startCallMode={true}
+        // callModeBtnTitle="Select Kundli"
+        // onStartCall={handleKundliSelect}
+        onProfileSelect={handleKundliSelect}
         selectedProfileId={selectedKundli?._id}
         enabledOperations={{
           list: true,

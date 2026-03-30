@@ -6,16 +6,53 @@ import { useGetProductsQuery, useAddToCartMutation } from "../../../../redux/api
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
 import Toast from "../../../../component/toast";
 
+import { DefaultImages } from "../../../../utils/appImages";
+import ProductImage from "../../../../component/UI/ProductImage";
+
 const LIMIT = 8;
 
-const getImg = (item) =>
-  item?.banner_image?.original ||
-  item?.banner_image?.small ||
-  (item?.images?.length ? item.images[0] : null) ||
-  item?.imgUrl || item?.image || item?.thumbnail ||
-  "https://images.unsplash.com/photo-1604608672516-f1b9b1d37076?w=400&q=80";
-const getPrice = (item) => item?.price || item?.actualPrice || item?.selling_price || 0;
-const getOldPrice = (item) => item?.mrp || item?.originalPrice || item?.compare_price || 0;
+const PRODUCT_FALLBACK = DefaultImages.AstromallProductDefault;
+const getFirstVariant = (item) => item?.variants?.find((v) => v.isActive) || item?.variants?.[0] || null;
+const resolveImg = (img) => {
+  if (!img) return null;
+  if (typeof img === "string") return img;
+  if (typeof img === "object") return img.original || img.small || img.url || img.src || null;
+  return null;
+};
+const getImg = (item) => {
+  if (item?.images?.length) {
+    for (const img of item.images) {
+      const resolved = resolveImg(img);
+      if (resolved) return resolved;
+    }
+  }
+  const banner = resolveImg(item?.banner_image);
+  if (banner) return banner;
+  const imgUrl = resolveImg(item?.imgUrl);
+  if (imgUrl) return imgUrl;
+  const image = resolveImg(item?.image);
+  if (image) return image;
+  const thumbnail = resolveImg(item?.thumbnail);
+  if (thumbnail) return thumbnail;
+
+  const variant = getFirstVariant(item);
+  if (variant?.images?.length) {
+    for (const img of variant.images) {
+      const resolved = resolveImg(img);
+      if (resolved) return resolved;
+    }
+  }
+
+  return PRODUCT_FALLBACK;
+};
+const getPrice = (item) => {
+  const variant = getFirstVariant(item);
+  return variant?.price || item?.price || item?.actualPrice || item?.selling_price || 0;
+};
+const getOldPrice = (item) => {
+  const variant = getFirstVariant(item);
+  return variant?.mrp || item?.mrp || item?.originalPrice || item?.compare_price || 0;
+};
 const getTitle = (item) => item?.title || item?.name || "Product";
 const getBrand = (item) => {
   const b = item?.brand;
@@ -145,7 +182,7 @@ const PurposeProducts = () => {
               <div key={item._id || item.ID || i} className={styles.card} onClick={() => navigate(`/product-details/${item.slug || item.ID}`, { state: item })}>
                 {item.is_featured && <span className={styles.badge}>Featured</span>}
                 <div className={styles.cardImg}>
-                  <img src={getImg(item)} alt={getTitle(item)} />
+                  <ProductImage src={getImg(item)} alt={getTitle(item)} />
                 </div>
                 <div className={styles.cardBody}>
                   {getBrand(item) && <p className={styles.brand}>🏷 {getBrand(item)}</p>}

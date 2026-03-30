@@ -318,6 +318,12 @@
     background: #fff5ec;
     transform: translateY(-1px);
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
   
   @media (min-width: 1024px) {
     // padding: 11px 20px;
@@ -363,6 +369,12 @@
     width: 16px;
     height: 16px;
     filter: brightness(0) invert(1);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
   }
   
   @media (min-width: 1024px) {
@@ -510,6 +522,12 @@
       background: #FFE8D1;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    &.connectOptionDisabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
     }
   }
   
@@ -1901,6 +1919,12 @@
     background: #FFE8D1;
     transform: scale(0.98);
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
 }
 
 .mobileCallBtn {
@@ -1910,6 +1934,12 @@
   &:active {
     transform: scale(0.98);
     box-shadow: 0 2px 8px rgba(247, 88, 1, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
   }
 }
 
@@ -2036,4 +2066,41 @@
   //   margin: 0 16px 12px;
   //   border-radius: 12px;
   // }
+}
+
+// Image Preview Lightbox
+.imagePreviewOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  cursor: pointer;
+}
+
+.imagePreviewClose {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 36px;
+  cursor: pointer;
+  line-height: 1;
+  z-index: 1;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.imagePreviewImg {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 8px;
+  cursor: default;
 }

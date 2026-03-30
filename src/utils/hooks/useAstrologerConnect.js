@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { PATH } from "../routes/Paths";
 import { getToken } from "../token";
 import { voiceSocket } from "../../services/voiceSocketServices";
@@ -13,6 +14,8 @@ import Toast from "../../component/toast";
 export const useAstrologerConnect = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  // Get the kundli selected by user in the header dropdown
+  const headerSelectedKundli = useSelector((state) => state.kundli.selectedKundli);
   const token = getToken();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
@@ -62,18 +65,21 @@ export const useAstrologerConnect = () => {
    * @returns {object|null} - Selected kundli profile or null
    */
   const getSelectedKundli = useCallback(() => {
+    // Priority: header-selected kundli first
+    if (headerSelectedKundli?._id) {
+      return headerSelectedKundli;
+    }
+
     if (!profiles || profiles.length === 0) {
       return null;
     }
 
-    // Try to find a kundli with relation "self" (case-insensitive)
     const selfKundli = profiles.find(
       (profile) => profile.relation?.toLowerCase() === "self"
     );
 
-    // Return self kundli if found, otherwise return the first kundli
     return selfKundli || profiles[0];
-  }, [profiles]);
+  }, [profiles, headerSelectedKundli]);
 
   /**
    * Validates if user can connect (logged in + has kundli)
@@ -244,23 +250,25 @@ export const useAstrologerConnect = () => {
     console.log("[NormalFlow]   → astrologer:", selectedAstrologer?._id);
     console.log("[NormalFlow]   → connectionType:", connectionType || "chat");
 
-    // NEW LOGIC: Select kundli with priority - "self" relation first, then first kundli
+    // Priority: 1) Header-selected kundli, 2) "self" relation, 3) first kundli
     let selectedKundli = null;
-    if (profiles && profiles.length > 0) {
-      // Try to find a kundli with relation "self" (case-insensitive)
+    if (headerSelectedKundli?._id) {
+      // Use the kundli user explicitly selected in the header
+      selectedKundli = headerSelectedKundli;
+      console.log("[NormalFlow] 📋 Using header-selected Kundli:", selectedKundli.name, "ID:", selectedKundli._id);
+    } else if (profiles && profiles.length > 0) {
       const selfKundli = profiles.find(
         (profile) => profile.relation?.toLowerCase() === "self"
       );
-      // Use self kundli if found, otherwise use the first kundli
       selectedKundli = selfKundli || profiles[0];
-      
-      if (selectedKundli) {
-        kundliRef.current = selectedKundli._id;
-        setLastSelectedKundli(selectedKundli);
-        console.log("[NormalFlow] 📋 Selected Kundli:", selectedKundli.relation || "Unknown", "ID:", selectedKundli._id);
-      }
+      console.log("[NormalFlow] 📋 Fallback Kundli:", selectedKundli.relation || "Unknown", "ID:", selectedKundli._id);
     } else {
       console.log("[NormalFlow] ⚠️ No kundli profiles available");
+    }
+
+    if (selectedKundli) {
+      kundliRef.current = selectedKundli._id;
+      setLastSelectedKundli(selectedKundli);
     }
 
     if (!selectedAstrologer?._id) {

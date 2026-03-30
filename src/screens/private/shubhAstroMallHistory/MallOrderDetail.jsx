@@ -1,6 +1,8 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeft, Download } from "lucide-react";
 import styles from "./MallOrderDetail.module.scss";
+import { DefaultImages } from "../../../utils/appImages";
+import ProductImage from "../../../component/UI/ProductImage";
 
 const GST_RATE = 0.18;
 
@@ -101,7 +103,7 @@ const MallOrderDetail = () => {
               return (
                 <div key={item.product_id || idx} className={styles.productCard}>
                   <div className={styles.productImg}>
-                    {img ? <img src={img} alt={name} /> : <div className={styles.imgPlaceholder} />}
+                    <ProductImage src={img} alt={name} />
                   </div>
                   <div className={styles.productInfo}>
                     <div className={styles.nameRow}>

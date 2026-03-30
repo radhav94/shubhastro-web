@@ -79,7 +79,7 @@ const NewAstrologerDetailsCard = ({
 
         {/* Specialties */}
         <p className={styles.detailsSpecialties}>
-          {astrologer?.expertise?.map((e) => (typeof e === "object" ? e.title : e)).join(" · ")}
+          {astrologer?.expertise?.slice(0, 2)?.map((e) => (typeof e === "object" ? e.title : e)).join(" · ")}{astrologer?.expertise?.length > 2 ? " ..." : ""}
         </p>
 
         {/* Languages */}
@@ -97,6 +97,7 @@ const NewAstrologerDetailsCard = ({
             <button
               className={styles.detailsChatBtn}
               onClick={() => onConnect(astrologer, "chat")}
+              disabled={!astrologer?.price?.chatRate?.amount}
             >
               <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
             </button>
@@ -111,7 +112,8 @@ const NewAstrologerDetailsCard = ({
           <div className={styles.detailsButtonWrapper}>
             <button
               className={styles.detailsCallBtn}
-               onClick={() => onConnect(astrologer, "audio")}
+              onClick={() => onConnect(astrologer, "audio")}
+              disabled={!astrologer?.price?.audioRate?.amount}
             >
               <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
             </button>
