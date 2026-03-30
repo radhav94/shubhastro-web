@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Filter, ArrowUpDown, X } from "lucide-react";
 import { useGetMallOrderHistoryQuery } from "../../../../redux/api/mallOrder/mallOrderApi";
 import styles from "./OrderHistoryTab.module.scss";
+import ProductImage from "../../../../component/UI/ProductImage";
 
 const SORT_OPTIONS = [
   { value: "newest", label: "Newest First" },
@@ -302,7 +303,7 @@ const OrderHistoryTab = () => {
                   <div className={styles.itemImagesRow}>
                     {itemImages.map((src, i) => (
                       <div key={i} className={styles.itemThumb}>
-                        <img src={src} alt={`Item ${i + 1}`} />
+                        <ProductImage src={src} alt={`Item ${i + 1}`} />
                       </div>
                     ))}
                   </div>

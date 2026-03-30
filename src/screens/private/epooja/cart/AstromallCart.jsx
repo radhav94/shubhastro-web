@@ -5,8 +5,10 @@ import { FiChevronLeft, FiMinus, FiPlus, FiTrash2, FiShoppingCart, FiX, FiHome, 
 import { useGetCartQuery, useUpdateCartItemMutation, useRemoveCartItemMutation, useGetAddressesQuery, useAddAddressMutation, useUpdateAddressMutation, useDeleteAddressMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
+import { DefaultImages } from "../../../../utils/appImages";
+import ProductImage from "../../../../component/UI/ProductImage";
 
-const DEFAULT_IMG = "https://images.unsplash.com/photo-1625072290979-cac544181be8?w=800&q=80";
+const DEFAULT_IMG = DefaultImages.AstromallProductDefault;
 
 const getImg = (item) => {
   // Prefer variant snapshot image, then product images
@@ -207,7 +209,7 @@ const AstromallCart = () => {
         const goToDetail = () => navigate(`/product-details/${routeId}`, { state: getProductData(item) });
         return (
           <div key={item?._id || idx} className={styles.productCard}>
-            <img src={getImg(item)} alt={getTitle(item)} className={styles.productImg} onClick={goToDetail} style={{ cursor: "pointer" }} onError={(e) => { e.target.src = DEFAULT_IMG; }} />
+            <ProductImage src={getImg(item)} alt={getTitle(item)} className={styles.productImg} onClick={goToDetail} style={{ cursor: "pointer" }} />
             <div className={styles.productInfo}>
               <h3 onClick={goToDetail} style={{ cursor: "pointer" }}>{getTitle(item)}</h3>
               <div className={styles.qtyRow}>

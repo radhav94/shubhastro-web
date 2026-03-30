@@ -43,6 +43,7 @@ import NewBlogsDefault from "../assets/default-img/new-blogs.jpeg";
 import VedicKundliDefault from "../assets/default-img/vedic-kundli.svg";
 import AriesDefault from "../assets/default-img/aries-default.svg";
 import TalkToDefaultAstrologer from "../assets/default-img/talk-to-defaultastrollger.png";
+import AstromallProductDefault from "../assets/default-img/astromall-product-default.svg";
 
 export const DefaultImages = {
   AstrologerDefaultImg,
@@ -61,6 +62,7 @@ export const DefaultImages = {
   VedicKundliDefault,
   AriesDefault,
   TalkToDefaultAstrologer,
+  AstromallProductDefault,
 };
 
 /**
