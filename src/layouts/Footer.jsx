@@ -19,6 +19,7 @@ import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { logout } from "../redux/auth/authSlice";
 import BottomNavigation from "../screens/v2/home/components/BottomNavigation";
+import { clearSelectedKundli } from "../redux/kundli/kundliSlice";
 
 // Data for links - easy to manage and update
 const quickLinks = [
@@ -91,6 +92,7 @@ const Footer = () => {
   const handleLogout = () => {
     // Dispatch Redux logout action
     dispatch(logout());
+    dispatch(clearSelectedKundli())
 
     const role = localStorage.getItem("shubhtalk_role");
 

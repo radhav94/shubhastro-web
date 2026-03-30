@@ -7,6 +7,7 @@ import { PrimaryText } from "../../component";
 import { PATH } from "../../utils/routes/Paths";
 import { getUserFromStorage } from "../../utils/authStorage";
 import { logout } from "../../redux/auth/authSlice";
+import { clearSelectedKundli } from "../../redux/kundli/kundliSlice";
 
 const SideBar = ({ open, onClose }) => {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ const SideBar = ({ open, onClose }) => {
   const handleLogout = () => {
     // Dispatch Redux logout action
     dispatch(logout());
+     dispatch(clearSelectedKundli())
     
     const role = localStorage.getItem("shubhtalk_role");
 
