@@ -324,10 +324,16 @@
   // align-items: center;
   gap: 1rem;
   // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
   @media (width <= 767px) {
       border-radius: 12px;
   }
 
+}
+
+.profileCardSelected {
+  border-color: #d43400;
 }
 
 .avatarCircle {

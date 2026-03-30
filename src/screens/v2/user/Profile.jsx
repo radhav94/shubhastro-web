@@ -40,6 +40,7 @@ import { useGetAstroDetailsQuery } from "../../../redux/api/kundli/kundliApi";
 import { buildVedicParam } from "../../../utils/VedicParams.js/vedicParams";
 import { PATH } from "../../../utils/routes/Paths";
 import { logout, updateRegistrationStatus } from "../../../redux/auth/authSlice";
+import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import styles from "./Profile.module.scss";
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
 import { Toast } from "../../../component/index";
@@ -1281,7 +1282,12 @@ const Profile = () => {
             ) : savedKundlis.length > 0 ? (
               <>
                 {savedKundlis.map((kundli, index) => (
-                  <div key={kundli._id} className={styles.profileCard}>
+                  <div
+                    key={kundli._id}
+                    className={`${styles.profileCard} ${selectedKundli?._id === kundli._id ? styles.profileCardSelected : ""}`}
+                    onClick={() => dispatch(setSelectedKundli(kundli))}
+                    style={{ cursor: "pointer" }}
+                  >
                     <div className={styles.avatarCircle}>
                       <span>{getInitials(kundli.name)}</span>
                     </div>
@@ -1292,7 +1298,7 @@ const Profile = () => {
                         <div className={styles.profileActions}>
                           <button
                             className={styles.iconButton}
-                            onClick={() => handleEditClick(kundli)}
+                            onClick={(e) => { e.stopPropagation(); handleEditClick(kundli); }}
                             type="button"
                           >
                             <LuPencilLine size={18} />
@@ -1300,7 +1306,7 @@ const Profile = () => {
                           {kundli?.relation !== "Self" && kundli?.relation !== "self" && (
                             <button
                               className={styles.iconButton}
-                              onClick={() => handleDeleteClick(kundli)}
+                              onClick={(e) => { e.stopPropagation(); handleDeleteClick(kundli); }}
                               type="button"
                             >
                               <Trash2 size={18} />

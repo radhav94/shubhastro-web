@@ -32,10 +32,9 @@ export const useProfileManager = (dispatch) => {
   } = useGetAllKundlisQuery(undefined, {
     skip: !token,
   });
-  const [createKundli, { isLoading: isCreating }] = token
-    ? useCreateKundliMutation()
-    : [null, { isLoading: false }];
-  const [deleteKundli] = token ? useDeleteKundliMutation() : [null];
+  // Always call hooks unconditionally (Rules of Hooks)
+  const [createKundli, { isLoading: isCreating }] = useCreateKundliMutation();
+  const [deleteKundli] = useDeleteKundliMutation();
 
   const profiles = data?.data || [];
 
@@ -208,7 +207,7 @@ export const useProfileManager = (dispatch) => {
     }
 
     // If user is not logged in, just set the profile locally without saving to backend
-    if (!token || !createKundli) {
+    if (!token) {
       const payload = buildKundliPayload(formData);
       setSelectedProfile(payload);
       setShowAddProfile(false);
@@ -264,7 +263,7 @@ export const useProfileManager = (dispatch) => {
     }
 
     // If user is not logged in, just update the profile locally without saving to backend
-    if (!token || !createKundli || !deleteKundli) {
+    if (!token) {
       const payload = buildKundliPayload(editFormData);
       setSelectedProfile(payload);
       setShowEditProfile(false);
