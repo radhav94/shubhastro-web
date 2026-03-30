@@ -160,12 +160,16 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
     }
   };
 
+  const [giftHidden, setGiftHidden] = useState(false);
+
   const handleAddMoney = () => {
+    setGiftHidden(true);
     setIsWalletModalOpen(true);
   };
 
   const handleWalletClose = () => {
     setIsWalletModalOpen(false);
+    setGiftHidden(false);
     refreshWallet();
     
     // Dispatch custom event to notify other components
@@ -176,6 +180,7 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
 
   return (
     <>
+      {!giftHidden && (
       <div className={styles.modalOverlay} onClick={onClose}>
         <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
           {/* Handle */}
@@ -315,6 +320,7 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
           </div>
         </div>
       </div>
+      )}
 
       {/* Wallet Modal */}
       <WalletModal
