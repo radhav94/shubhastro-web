@@ -70,12 +70,10 @@ const ProfileManager = ({
   // Get token
   const token = getToken();
 
-  // RTK Query hooks - Only use mutations when user is logged in
-  const [createKundli, { isLoading: isCreating }] = token
-    ? useCreateKundliMutation()
-    : [null, { isLoading: false }];
-  const [deleteKundli] = token ? useDeleteKundliMutation() : [null];
-  const [editKundli] = token ? useEditKundliMutation() : [null];
+  // RTK Query hooks - Always call unconditionally (Rules of Hooks)
+  const [createKundli, { isLoading: isCreating }] = useCreateKundliMutation();
+  const [deleteKundli] = useDeleteKundliMutation();
+  const [editKundli] = useEditKundliMutation();
 
   // Fetch profiles
   const { data } = useGetAllKundlisQuery(undefined, {
@@ -215,7 +213,7 @@ const ProfileManager = ({
       }
 
       // Only call API if user is logged in
-      if (token && createKundli) {
+      if (token) {
         const result = await createKundli(payload).unwrap();
         Toast.success("Profile added successfully");
         
@@ -275,7 +273,7 @@ const ProfileManager = ({
       const payload = buildKundliPayload(formData);
 
       // Only call API if user is logged in
-      if (token && editKundli) {
+      if (token) {
         // Call editKundli with id and payload
         await editKundli({
           id: profileToEdit.kundli_ID,
@@ -349,7 +347,7 @@ const ProfileManager = ({
       }
 
       // Only call API if user is logged in
-      if (token && deleteKundli) {
+      if (token) {
         console.log("✅ Calling deleteKundli API with ID:", profileToDelete);
         await deleteKundli(profileToDelete).unwrap();
         Toast.success("Profile deleted successfully");
