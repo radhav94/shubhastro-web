@@ -40,8 +40,8 @@ const WalletModal = ({ isOpen, onClose }) => {
     }
   ];
 
-  const handleRecharge = (amount) => {
-    setSelectedAmount(amount);
+  const handleRecharge = (amount, index) => {
+    setSelectedAmount(index);
     setCustomAmount("");
   };
 
@@ -51,7 +51,7 @@ const WalletModal = ({ isOpen, onClose }) => {
   };
 
   const handleAddMoney = () => {
-    const amount = customAmount || selectedAmount;
+    const amount = customAmount || (selectedAmount !== null ? rechargeAmounts[selectedAmount].amount : null);
     if (amount && amount > 0) {
       onClose();
       navigate(`/recharge?amount=${amount}`);
@@ -97,8 +97,8 @@ const WalletModal = ({ isOpen, onClose }) => {
               {rechargeAmounts.map((item, index) => (
                 <div
                   key={index}
-                  className={`${styles.rechargeItem} ${selectedAmount === item.amount ? styles.selected : ''}`}
-                  onClick={() => handleRecharge(item.amount)}
+                  className={`${styles.rechargeItem} ${selectedAmount === index ? styles.selected : ''}`}
+                  onClick={() => handleRecharge(item.amount, index)}
                 >
                   <div className={styles.rechargeAmount}>₹{item.amount}</div>
                   <div className={styles.rechargeExtra}>{item.extra}</div>
