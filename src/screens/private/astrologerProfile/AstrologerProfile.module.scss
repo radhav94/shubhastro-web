@@ -2037,3 +2037,40 @@
   //   border-radius: 12px;
   // }
 }
+
+// Image Preview Lightbox
+.imagePreviewOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  cursor: pointer;
+}
+
+.imagePreviewClose {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 36px;
+  cursor: pointer;
+  line-height: 1;
+  z-index: 1;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.imagePreviewImg {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 8px;
+  cursor: default;
+}

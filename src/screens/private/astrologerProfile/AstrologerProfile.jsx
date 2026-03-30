@@ -101,6 +101,7 @@ const AstrologerProfile = () => {
   const [showFullAbout, setShowFullAbout] = useState(false);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
   const [isVAOpen, setIsVAOpen] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const { data: followingData } = useCheckFollowingStatusQuery(
     { astrologerId: data?._id },
@@ -1121,10 +1122,15 @@ const AstrologerProfile = () => {
               {displayData.gallery.length > 0 && (
                 <div className={styles.videoGallery}>
                   {displayData.gallery.slice(0, 3).map((video, index) => (
-                    <div key={index} className={styles.videoThumbnail}>
+                    <div
+                      key={index}
+                      className={styles.videoThumbnail}
+                      onClick={() => setImagePreview(video || AstrologerNumerologyDefault)}
+                      style={{ cursor: "pointer" }}
+                    >
                       <img
                         src={video || AstrologerNumerologyDefault}
-                        alt={`Video ${index + 1}`}
+                        alt={`Gallery ${index + 1}`}
                         onError={(e) => {
                           e.target.src = AstrologerNumerologyDefault;
                         }}
@@ -1518,6 +1524,33 @@ const AstrologerProfile = () => {
         isOpen={isVAOpen}
         setIsOpen={setIsVAOpen}
       />
+
+      {/* Image Preview Lightbox */}
+      {imagePreview && (
+        <div
+          className={styles.imagePreviewOverlay}
+          onClick={() => setImagePreview(null)}
+          onKeyDown={(e) => e.key === "Escape" && setImagePreview(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image preview"
+          tabIndex={-1}
+        >
+          <button
+            className={styles.imagePreviewClose}
+            onClick={() => setImagePreview(null)}
+            aria-label="Close preview"
+          >
+            &times;
+          </button>
+          <img
+            src={imagePreview}
+            alt="Preview"
+            className={styles.imagePreviewImg}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };
