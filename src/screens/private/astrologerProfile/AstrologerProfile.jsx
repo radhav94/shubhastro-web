@@ -929,6 +929,7 @@ const AstrologerProfile = () => {
                       <button
                         className={styles.chatBtn}
                         onClick={() => handleChatStart(astrologer, "chat")}
+                        disabled={!astrologer?.price?.chatRate?.amount}
                       >
                         <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
                       </button>
@@ -942,6 +943,7 @@ const AstrologerProfile = () => {
                       <button
                         className={styles.callBtn}
                         onClick={() => handleCallStart(astrologer, "audio")}
+                        disabled={!astrologer?.price?.audioRate?.amount}
                       >
                         <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
                       </button>
@@ -1360,8 +1362,8 @@ const AstrologerProfile = () => {
 
             <div className={styles.connectOptions}>
               <div
-                className={styles.connectOption}
-                onClick={() => handleChatStart(data)}
+                className={`${styles.connectOption} ${!data?.price?.chatRate?.amount ? styles.connectOptionDisabled : ''}`}
+                onClick={() => data?.price?.chatRate?.amount && handleChatStart(data)}
               >
                 <div className={styles.optionIcon}>
                   <BiMessageDetail />
@@ -1375,8 +1377,8 @@ const AstrologerProfile = () => {
               </div>
 
               <div
-                className={styles.connectOption}
-                onClick={() => handleCallStart(data, "audio")}
+                className={`${styles.connectOption} ${!data?.price?.audioRate?.amount ? styles.connectOptionDisabled : ''}`}
+                onClick={() => data?.price?.audioRate?.amount && handleCallStart(data, "audio")}
               >
                 <div className={styles.optionIcon}>
                   <BiPhone />
@@ -1390,8 +1392,8 @@ const AstrologerProfile = () => {
               </div>
 
               <div
-                className={styles.connectOption}
-                onClick={() => handleCallStart(data, "video")}
+                className={`${styles.connectOption} ${!data?.price?.videoCallRate?.amount ? styles.connectOptionDisabled : ''}`}
+                onClick={() => data?.price?.videoCallRate?.amount && handleCallStart(data, "video")}
               >
                 <div className={styles.optionIcon}>
                   <BiVideo />
@@ -1441,21 +1443,23 @@ const AstrologerProfile = () => {
         <button
           className={styles.mobileChatBtn}
           onClick={() => handleChatStart(data)}
+          disabled={!data?.price?.chatRate?.amount}
         >
           <BiMessageDetail />
           <div className={styles.btnContent}>
             <span className={styles.btnLabel}>Chat</span>
-            <span className={styles.btnPrice}>₹{data?.price?.chatRate?.amount || 5}/min</span>
+            <span className={styles.btnPrice}>₹{data?.price?.chatRate?.amount || 0}/min</span>
           </div>
         </button>
         <button
           className={styles.mobileCallBtn}
           onClick={() => handleCallStart(data, "audio")}
+          disabled={!data?.price?.audioRate?.amount}
         >
           <BiPhone />
           <div className={styles.btnContent}>
             <span className={styles.btnLabel}>Call</span>
-            <span className={styles.btnPrice}>₹{data?.price?.audioRate?.amount || 20}/min</span>
+            <span className={styles.btnPrice}>₹{data?.price?.audioRate?.amount || 0}/min</span>
           </div>
         </button>
       </div>
