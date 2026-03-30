@@ -19,24 +19,26 @@ const ensureString = (msg) => {
   return String(msg || 'An error occurred');
 };
 
-const success = (msg) => {
-  return rht.success(ensureString(msg), options);
+let activeToastId = null;
+
+const showToast = (fn, msg, opts) => {
+  rht.dismiss(activeToastId);
+  activeToastId = fn(ensureString(msg), opts);
+  return activeToastId;
 };
 
-const error = (msg) => {
-  return rht.error(ensureString(msg), options);
-};
+const success = (msg) => showToast(rht.success, msg, options);
 
-const warning = (msg) => {
-  return rht(ensureString(msg), { ...options, icon: "⚠️" });
-};
+const error = (msg) => showToast(rht.error, msg, options);
 
-const info = (msg) => {
-  return rht(ensureString(msg), { ...options, icon: "ℹ️" });
-};
+const warning = (msg) => showToast(rht, msg, { ...options, icon: "⚠️" });
+
+const info = (msg) => showToast(rht, msg, { ...options, icon: "ℹ️" });
 
 const promise = (myPromise, msgObj) => {
-  return rht.promise(myPromise, msgObj, options);
+  rht.dismiss(activeToastId);
+  activeToastId = rht.promise(myPromise, msgObj, options);
+  return activeToastId;
 };
 
 const toast = {

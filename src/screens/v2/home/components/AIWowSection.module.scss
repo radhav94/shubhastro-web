@@ -1,3 +1,10 @@
+.aiWowMain{
+  position: relative;
+  margin-bottom: 24px;
+   @media (max-width: 767px) {
+    margin-bottom: 16px;
+  }
+}
 .aiWowSection {
   position: relative;
   background: linear-gradient(90deg, #FFEDD4 0%, #FFD0D0 100%), #FFF;
@@ -13,11 +20,8 @@
   position: relative;
   overflow: hidden;
   border-radius: 16px;
-  margin-bottom: 24px;
   padding: 2px;
-   @media (max-width: 767px) {
-    margin-bottom: 16px;
-  }
+  margin-top: -18px;
 }
 .aiWowSectionWrap:before, .aiWowSectionWrap:before {
   content: '';
@@ -53,17 +57,20 @@
     radial-gradient(ellipse at 90% 70%, rgba(248, 180, 160, 0.3) 0%, transparent 50%);
   pointer-events: none;
 }
-
 .badge {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   border-radius: 20px;
   border: 1px solid var(--primary-200, #FFD28E);
   background: linear-gradient(90deg, #FFD28E 0%, var(--primary-100, #FFE4BA) 100%);
   padding: 4px 16px;
   border-radius: 999px;
-  margin-bottom: 16px;
+  margin: 0 auto;
+  width: fit-content;
+  position: relative;
+  z-index: 9;
 }
 
 .badgeIcon {
@@ -131,7 +138,18 @@
   margin: 0 0 6px;
   text-transform: uppercase;
 }
-
+.AIWowUserName{
+  color: #030303;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  margin-bottom: 14px;
+  @media (width <= 767px) {
+    margin-top: 6px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+  }
+}
 .wowDivider {
   display: flex;
   align-items: center;

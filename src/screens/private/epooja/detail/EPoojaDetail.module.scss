@@ -150,6 +150,49 @@
   opacity: 1;
 }
 
+.thumbVideo {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  &:hover { opacity: 1; }
+
+  &.thumbActive {
+    border-color: #f75801;
+    opacity: 1;
+  }
+}
+
+.thumbVideoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.playIcon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  font-size: 18px;
+}
+
+.galleryVideo {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 12px;
+}
+
 .rightCol {
   flex: 1;
   min-width: 0;
@@ -981,6 +1024,11 @@
   }
 
   .thumbImg {
+    width: 50px;
+    height: 50px;
+  }
+
+  .thumbVideo {
     width: 50px;
     height: 50px;
   }

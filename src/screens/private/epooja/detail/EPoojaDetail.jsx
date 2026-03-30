@@ -332,7 +332,28 @@ const EPoojaDetail = () => {
 
   const galleryImages = validatedImages || [];
   const showDefault = validatedImages !== null && galleryImages.length === 0;
+
+  // Build video embed URL if available
+  const { videoEmbedUrl, videoThumb } = (() => {
+    if (!product?.video_url) return { videoEmbedUrl: null, videoThumb: null };
+    let url = product.video_url;
+    let videoId = null;
+    const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
+    if (shortMatch) videoId = shortMatch[1];
+    const shortsMatch = !videoId && url.match(/shorts\/([^?&]+)/);
+    if (shortsMatch) videoId = shortsMatch[1];
+    const watchMatch = !videoId && url.match(/[?&]v=([^?&]+)/);
+    if (watchMatch) videoId = watchMatch[1];
+    const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+    const thumb = videoId ? `https://img.youtube.com/vi/${videoId}/0.jpg` : null;
+    return { videoEmbedUrl: embedUrl, videoThumb: thumb };
+  })();
+
+  // Total gallery items = images + video (if exists)
+  const totalGalleryItems = galleryImages.length + (videoEmbedUrl ? 1 : 0);
+  const videoIndex = videoEmbedUrl ? galleryImages.length : -1;
   const [activeImg, setActiveImg] = useState(0);
+  const isVideoActive = activeImg === videoIndex;
   const [zoomed, setZoomed] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
   const safeIdx = activeImg >= galleryImages.length ? 0 : activeImg;
@@ -394,37 +415,65 @@ const EPoojaDetail = () => {
       <div className={styles.twoCol}>
         {/* LEFT — Image Gallery */}
         <div className={styles.leftCol}>
-          <div
-            className={`${styles.mainImageWrap} ${zoomed ? styles.mainImageZoomed : ""}`}
-            onMouseMove={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              setZoomPos({ x: ((e.clientX - rect.left) / rect.width) * 100, y: ((e.clientY - rect.top) / rect.height) * 100 });
-            }}
-            onMouseEnter={() => setZoomed(true)}
-            onMouseLeave={() => setZoomed(false)}
-          >
-            {image ? (
-              <img
-                src={image}
-                alt={title}
-                className={styles.mainImage}
-                style={zoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
+          {isVideoActive ? (
+            <div className={styles.mainImageWrap}>
+              <iframe
+                src={`${videoEmbedUrl}?autoplay=1`}
+                className={styles.galleryVideo}
+                title="Product video"
+                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               />
-            ) : (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#999" }}>Loading...</div>
-            )}
-          </div>
-          {galleryImages.length > 1 && (
+            </div>
+          ) : (
+            <div
+              className={`${styles.mainImageWrap} ${zoomed ? styles.mainImageZoomed : ""}`}
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                setZoomPos({ x: ((e.clientX - rect.left) / rect.width) * 100, y: ((e.clientY - rect.top) / rect.height) * 100 });
+              }}
+              onMouseEnter={() => setZoomed(true)}
+              onMouseLeave={() => setZoomed(false)}
+            >
+              {image ? (
+                <img
+                  src={image}
+                  alt={title}
+                  className={styles.mainImage}
+                  style={zoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
+                />
+              ) : (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#999" }}>Loading...</div>
+              )}
+            </div>
+          )}
+          {totalGalleryItems > 1 && (
             <div className={styles.thumbRow}>
               {galleryImages.map((img, i) => (
                 <img
                   key={img}
                   src={img}
                   alt={`${title} ${i + 1}`}
-                  className={`${styles.thumbImg} ${safeIdx === i ? styles.thumbActive : ""}`}
+                  className={`${styles.thumbImg} ${!isVideoActive && safeIdx === i ? styles.thumbActive : ""}`}
                   onClick={() => setActiveImg(i)}
                 />
               ))}
+              {videoEmbedUrl && (
+                <div
+                  className={`${styles.thumbVideo} ${isVideoActive ? styles.thumbActive : ""}`}
+                  onClick={() => setActiveImg(videoIndex)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Play product video"
+                >
+                  <img
+                    src={videoThumb || galleryImages[0]}
+                    alt="Video"
+                    className={styles.thumbVideoImg}
+                  />
+                  <span className={styles.playIcon}>▶</span>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -486,30 +535,6 @@ const EPoojaDetail = () => {
               </button>
             </div>
           </div>
-
-          {/* Video */}
-          {product?.video_url && (() => {
-            let embedUrl = product.video_url;
-            // youtu.be/ID or youtu.be/ID?si=...
-            const shortMatch = embedUrl.match(/youtu\.be\/([^?&]+)/);
-            if (shortMatch) {
-              embedUrl = `https://www.youtube.com/embed/${shortMatch[1]}`;
-            } else if (embedUrl.includes("shorts/")) {
-              embedUrl = embedUrl.replace("shorts/", "embed/");
-            } else {
-              // youtube.com/watch?v=ID
-              const watchMatch = embedUrl.match(/[?&]v=([^&]+)/);
-              if (watchMatch) embedUrl = `https://www.youtube.com/embed/${watchMatch[1]}`;
-            }
-            return (
-              <iframe
-                src={embedUrl}
-                className={styles.video}
-                title="Product video"
-                allowFullScreen
-              />
-            );
-          })()}
 
           {/* FAQ */}
           {faqs.length > 0 && (

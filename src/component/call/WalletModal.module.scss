@@ -27,6 +27,7 @@
    =============================== */
 
 .modalContent {
+  position: relative;
   background: #fff;
   border-radius: 24px 24px 0 0;
   width: 100%;
@@ -51,6 +52,29 @@
    MODAL HANDLE
    =============================== */
 
+.closeBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 1;
+  line-height: 1;
+
+  &:hover {
+    color: #333;
+  }
+}
+
 .modalHandle {
   width: 40px;
   height: 4px;
@@ -67,7 +91,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px 16px;
+  padding: 20px 48px 16px 24px;
   border-bottom: none;
 }
 

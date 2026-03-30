@@ -1384,7 +1384,7 @@
 .leftColumnMain{
   height: 1200px;
 }
-.sectionHeader,.blogsHeaderLeft {
+.sectionHeader{
   text-align: center;
   margin-bottom: 16px;
   width: fit-content;
@@ -2937,9 +2937,9 @@
   // }
 
   /* Horoscope Card - Tablet */
-  .horoscopeSection {
-    margin-bottom: 32px;
-  }
+  // .horoscopeSection {
+  //   margin-bottom: 32px;
+  // }
 
   // .horoscopeCard {
   //   min-height: 140px;
@@ -3616,7 +3616,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   gap: 16px;
   @media screen and (width <= 767px) {
     margin-bottom: 12px;

@@ -82,11 +82,7 @@ const AIWowSection = () => {
   const collapsedFeatures = (firstSection?.content || []).slice(0, COLLAPSED_COUNT);
 
   return (
-    <div className={styles.aiWowSectionWrap}>
-    <section className={styles.aiWowSection}>
-      <div className={styles.waveBg}>
-        <img src={wireBg} alt="img" />
-      </div>
+    <div className={styles.aiWowMain}>
       {/* Badge */}
       <div className={styles.badge}>
         <span className={styles.badgeIcon}>
@@ -98,7 +94,13 @@ const AIWowSection = () => {
         </span>
         <span className={styles.badgeText}>AI-POWERED ASTROLOGY</span>
       </div>
-
+    <div className={styles.aiWowSectionWrap}>
+    <section className={styles.aiWowSection}>
+      <div className={styles.waveBg}>
+        <img src={wireBg} alt="img" />
+      </div>
+      
+      <h1 className={styles.AIWowUserName}>Hello, John Doe!</h1>
       <h2 className={styles.heading}>
         Experience Astrology <span className={styles.headingHighlight}>Powered by AI</span>
       </h2>
@@ -161,6 +163,7 @@ const AIWowSection = () => {
         onClose={() => setShowMobileAppModal(false)}
       />
     </section>
+    </div>
     </div>
   );
 };
