@@ -4,6 +4,7 @@ import { ChevronLeft, Send, Mic, Check, Phone, MessageSquare } from "lucide-reac
 import { useGetSupportQuestionsQuery, useLazyGetSubTopicsQuery, useLazyGetSupportEntitySessionsQuery, useCreateSupportTicketMutation } from "../../../redux/api/supportApi/supportApi";
 import EntityCard from "./entityCards/EntityCard";
 import entityCardStyles from "./entityCards/EntityCards.module.scss";
+import RatingCard from "./RatingCard";
 import styles from "./CustomerSupport.module.scss";
 
 const CustomerSupport = () => {
@@ -147,20 +148,10 @@ const CustomerSupport = () => {
           };
           setMessages((prev) => [...prev, botResponse]);
         } else if (connectVia.length > 0) {
-          const escalationOptions = connectVia.map((method) => ({
-            _id: `${action._id}-esc-${method}`,
-            text: `Connect with our executive via ${method.toUpperCase()}`,
-            contactMethod: method,
-          }));
-
-          const botResponse = {
-            id: `bot-${Date.now()}`,
-            type: "bot",
-            text: "How would you like to connect with us?",
-            timestamp: new Date(),
-            escalationOptions,
-          };
-          setMessages((prev) => [...prev, botResponse]);
+          // Directly open issue modal instead of showing escalation options
+          setTicketContactMethod(connectVia[0] || "chat");
+          setTicketIssue("");
+          setShowTicketModal(true);
         }
       } catch {
         // silently fail
@@ -243,7 +234,7 @@ const CustomerSupport = () => {
     setIsSubmittingTicket(true);
 
     try {
-      await createTicket({
+      const result = await createTicket({
         topicName: currentTopicName,
         ...(selectedEntity ? {
           entity: selectedEntity.entity,
@@ -256,6 +247,7 @@ const CustomerSupport = () => {
         contactMethod: ticketContactMethod,
       }).unwrap();
 
+      const newTicketId = result?.data?._id || result?.data?.ticketId || null;
       setShowTicketModal(false);
       setTicketIssue("");
       setTicketCreated(true);
@@ -266,6 +258,8 @@ const CustomerSupport = () => {
         type: "bot",
         text: "Your ticket has been submitted successfully. Our team will reach out to you shortly.",
         timestamp: new Date(),
+        showTicketActions: true,
+        ticketId: newTicketId,
       };
 
       setMessages((prev) => [...prev, botResponse]);
@@ -318,22 +312,11 @@ const CustomerSupport = () => {
         setIsLoadingSessions(false);
       }
     } else {
-      // Non-entity topic — show escalation options
+      // Non-entity topic — directly open issue modal
       if (connectVia?.length > 0) {
-        const escalationOptions = connectVia.map((method) => ({
-          _id: `esc-${method}-${Date.now()}`,
-          text: `Connect with our executive via ${method.toUpperCase()}`,
-          contactMethod: method,
-        }));
-
-        const botResponse = {
-          id: `bot-${Date.now()}`,
-          type: "bot",
-          text: "How would you like to connect with us?",
-          timestamp: new Date(),
-          escalationOptions,
-        };
-        setMessages((prev) => [...prev, botResponse]);
+        setTicketContactMethod(connectVia[0] || "chat");
+        setTicketIssue("");
+        setShowTicketModal(true);
       }
     }
   };
@@ -483,6 +466,21 @@ const CustomerSupport = () => {
                           {option.text}
                         </button>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Ticket success actions: View Ticket + Rating */}
+                  {message.showTicketActions && (
+                    <div className={styles.ticketActions}>
+                      {message.ticketId && (
+                        <button
+                          className={styles.viewTicketButton}
+                          onClick={() => navigate(`/recent-tickets/${message.ticketId}`)}
+                        >
+                          View Ticket Details
+                        </button>
+                      )}
+                      <RatingCard ticketId={message.ticketId} />
                     </div>
                   )}
                 </div>
