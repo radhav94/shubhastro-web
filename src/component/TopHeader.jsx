@@ -866,8 +866,8 @@ const TopHeader = () => {
         enabledOperations={{
           list: true,
           add: true,
-          edit: false,
-          delete: false,
+          edit: true,
+          delete: true,
         }}
       />
     </>

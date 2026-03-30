@@ -54,6 +54,7 @@ import Pagination from "../../../component/pagination/Pagination";
 import { ProfileManager } from "../../../component/UI/Profile";
 import { registerUser } from "../../../services/appServices/authService";
 import { useSelector } from "react-redux";
+import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -1072,6 +1073,7 @@ const Profile = () => {
    
     // Dispatch Redux logout action
     dispatch(logout());
+     dispatch(clearSelectedKundli())
     
     // Clear all authentication related data from localStorage
     localStorage.clear();

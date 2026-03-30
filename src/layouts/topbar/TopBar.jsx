@@ -14,6 +14,7 @@ import { PrimaryText } from "../../component";
 import { getUserFromStorage } from "../../utils/authStorage";
 import { useDispatch } from "react-redux";
 import { clearFormAndCache } from "../../redux/actions/clearFormAndCache";
+import { clearSelectedKundli } from "../../redux/kundli/kundliSlice";
 
 const TopBar = () => {
   const navigate = useNavigate();
@@ -43,6 +44,7 @@ const TopBar = () => {
 
   const handleLogout = () => {
     dispatch(clearFormAndCache());
+     dispatch(clearSelectedKundli())
     navigate("/");
   };
 
