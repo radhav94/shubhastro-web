@@ -5,6 +5,7 @@ import { FiChevronLeft, FiChevronRight, FiSearch, FiX, FiChevronDown } from "rea
 import Toast from "../../../component/toast";
 import { useGetAstromallPageDataQuery, useAddToCartMutation, useGetProductsQuery, useGetProductCategoriesQuery } from "../../../redux/api/astromall/epooja/epoojaBookingApi";
 import AstromallCartSidebar from "./components/AstromallCartSidebar";
+import { DefaultImages } from "../../../utils/appImages";
 
 // ─── FALLBACK TABS (used while categories load) ───
 const ALL_TAB = { label: "All Products", slug: "all" };
@@ -60,9 +61,10 @@ const HScrollRow = ({ children }) => {
 };
 
 // ─── Helper: get image/price/title from API item ───
+const PRODUCT_FALLBACK = DefaultImages.AstromallProductDefault;
 const getFirstVariant = (item) => item?.variants?.find((v) => v.isActive) || item?.variants?.[0] || null;
 const getImg = (item) => {
-  const fallback = "https://images.unsplash.com/photo-1604608672516-f1b9b1d37076?w=400&q=80";
+  const fallback = PRODUCT_FALLBACK;
   const variant = getFirstVariant(item);
   const raw =
     (variant?.images?.length ? variant.images[0] : null) ||
@@ -252,7 +254,7 @@ const EPooja = () => {
           <HScrollRow>
             {items.map((d, i) => (
               <div key={d.ID || i} className={styles.dealCard} onClick={() => navigate(`/product-details/${d.slug || d.ID}`, { state: d })}>
-                <img src={getImg(d)} alt={getTitle(d)} />
+                <img src={getImg(d)} alt={getTitle(d)} onError={(e) => { e.target.src = PRODUCT_FALLBACK; }} />
                 <div className={styles.dealBadges}>
                   {d.is_featured && <span className={styles.dealPopular}>Popular</span>}
                 </div>
@@ -347,7 +349,7 @@ const EPooja = () => {
             <div key={s.ID || i} className={styles.prodCard} onClick={() => navigate(`/product-details/${s.slug || s.ID}`, { state: s })} style={{ cursor: "pointer" }}>
               {s.is_featured && <span className={styles.sugBadge}>Featured</span>}
               {!s.is_featured && <span className={styles.sugBadge}>Suggested</span>}
-              <div className={styles.prodImg}><img src={getImg(s)} alt={getTitle(s)} /></div>
+              <div className={styles.prodImg}><img src={getImg(s)} alt={getTitle(s)} onError={(e) => { e.target.src = PRODUCT_FALLBACK; }} /></div>
               <div className={styles.prodBody}>
                 {s.brand && <p className={styles.prodConsultant}>🏷 {getBrand(s)}</p>}
                 <h4>{getTitle(s)}</h4>
@@ -446,7 +448,7 @@ const EPooja = () => {
                 <div key={item._id || item.ID || i} className={styles.filteredCard} onClick={() => navigate(`/product-details/${item.slug || item.ID}`, { state: item })}>
                   {item.is_featured && <span className={styles.sugBadge}>Featured</span>}
                   <div className={styles.filteredImg}>
-                    <img src={getImg(item)} alt={getTitle(item)} />
+                    <img src={getImg(item)} alt={getTitle(item)} onError={(e) => { e.target.src = PRODUCT_FALLBACK; }} />
                   </div>
                   <div className={styles.prodBody}>
                     {item.brand && <p className={styles.prodConsultant}>🏷 {getBrand(item)}</p>}

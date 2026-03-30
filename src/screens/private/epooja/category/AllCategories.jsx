@@ -4,6 +4,7 @@ import styles from "./AllCategories.module.scss";
 import { FiChevronLeft } from "react-icons/fi";
 import { useGetProductCategoriesQuery } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
+import { DefaultImages } from "../../../../utils/appImages";
 
 const AllCategories = () => {
   const navigate = useNavigate();
@@ -115,7 +116,7 @@ const AllCategories = () => {
               className={styles.card}
               onClick={() => handleCategoryClick(c)}
             >
-              <img src={c.imgUrl || c.image || "https://images.unsplash.com/photo-1604608672516-f1b9b1d37076?w=400&q=80"} alt={c.name || "Category"} />
+              <img src={c.imgUrl || c.image || DefaultImages.AstromallProductDefault} alt={c.name || "Category"} />
               <div className={styles.overlay}>
                 <h4>{c.name || "Category"}</h4>
               </div>

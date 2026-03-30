@@ -6,8 +6,9 @@ import { FaStar } from "react-icons/fa";
 import { useGetCartQuery, useUpdateCartItemMutation, useRemoveCartItemMutation, useAddToCartMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
+import { DefaultImages } from "../../../../utils/appImages";
 
-const DEFAULT_IMG = "https://images.unsplash.com/photo-1625072290979-cac544181be8?w=800&q=80";
+const DEFAULT_IMG = DefaultImages.AstromallProductDefault;
 
 // ─── DUMMY COUPONS (no API yet) ───
 const COUPONS = [
@@ -141,7 +142,7 @@ const EPoojaPayment = () => {
               src={getItemImage(item)}
               alt={getItemTitle(item)}
               className={styles.productImg}
-              onError={(e) => { e.target.src = DEFAULT_IMG; }}
+              onError={(e) => { if (!e.target.src.includes("astromall-product-default")) e.target.src = DEFAULT_IMG; }}
             />
             <div className={styles.productInfo}>
               <div className={styles.productHeader}>
@@ -214,7 +215,7 @@ const EPoojaPayment = () => {
               return (
                 <div key={p?._id || idx} className={styles.sugCard}>
                   <div className={styles.sugImgWrap}>
-                    <img src={sImg} alt={sTitle} onError={(e) => { e.target.src = DEFAULT_IMG; }} />
+                    <img src={sImg} alt={sTitle} onError={(e) => { if (!e.target.src.includes("astromall-product-default")) e.target.src = DEFAULT_IMG; }} />
                     <span className={styles.sugBadge}>Suggested</span>
                   </div>
                   <div className={styles.sugBody}>

@@ -54,7 +54,7 @@ const ProductDetail = () => {
       return {
         id: p._id,
         name: p.title,
-        image: "https://images.unsplash.com/photo-1625072290979-cac544181be8",
+        image: DefaultImages.AstromallProductDefault,
         price: p.price,
         description: p.description,
         benefit: p.benefit,

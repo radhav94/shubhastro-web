@@ -6,6 +6,7 @@ import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { useGetEPoojaDetailQuery, useGetProductReviewsQuery, useAddToCartMutation, useGetCartQuery, useUpdateCartItemMutation, useCreateProductReviewMutation, useUpdateProductReviewMutation, useDeleteProductReviewMutation, useGetAddressesQuery, useAddAddressMutation, useUpdateAddressMutation, useDeleteAddressMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
+import { DefaultImages } from "../../../../utils/appImages";
 
 const StarRating = ({ rating = 0, size = 18 }) => {
   const stars = [];
@@ -295,16 +296,27 @@ const EPoojaDetail = () => {
   };
 
   // Extract all fields from API response
-  const DEFAULT_IMG = "https://images.unsplash.com/photo-1625072290979-cac544181be8?w=800&q=80";
-  const bannerImg = product?.banner_image?.original || product?.banner_image?.small || null;
+  const DEFAULT_IMG = DefaultImages.AstromallProductDefault;
+  const resolveImg = (img) => {
+    if (!img) return null;
+    if (typeof img === "string") return img;
+    if (typeof img === "object") return img.original || img.small || img.url || img.src || null;
+    return null;
+  };
+  const bannerImg = resolveImg(product?.banner_image) || null;
   const variantImages = selectedVariant?.images?.length ? selectedVariant.images : [];
   const rawImages = variantImages.length > 0 ? variantImages : (product?.images || []);
-  const allImages = [bannerImg, ...rawImages, product?.imgUrl, product?.image, product?.thumbnail].filter(Boolean);
-  const galleryImages = allImages.length > 0 ? [...new Set(allImages)] : [DEFAULT_IMG];
+  const allImages = [bannerImg, ...rawImages.map(resolveImg), resolveImg(product?.imgUrl), resolveImg(product?.image), resolveImg(product?.thumbnail)].filter(Boolean);
+  const uniqueImages = allImages.length > 0 ? [...new Set(allImages)] : [];
+  const [brokenImgs, setBrokenImgs] = useState(new Set());
+  const galleryImages = uniqueImages.filter((src) => !brokenImgs.has(src));
+  const showDefault = galleryImages.length === 0;
   const [activeImg, setActiveImg] = useState(0);
   const [zoomed, setZoomed] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
-  const image = galleryImages[activeImg] || galleryImages[0];
+  const safeIdx = activeImg >= galleryImages.length ? 0 : activeImg;
+  const image = showDefault ? DEFAULT_IMG : (galleryImages[safeIdx] || DEFAULT_IMG);
+  const handleImgError = (src) => { setBrokenImgs((prev) => new Set(prev).add(src)); };
 
   const title = product?.title || product?.name || "";
   const price = selectedVariant?.price || product?.price || product?.selling_price || product?.mrp || 0;
@@ -377,17 +389,19 @@ const EPoojaDetail = () => {
               alt={title}
               className={styles.mainImage}
               style={zoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
+              onError={() => { if (!showDefault) handleImgError(galleryImages[safeIdx]); }}
             />
           </div>
           {galleryImages.length > 1 && (
             <div className={styles.thumbRow}>
               {galleryImages.map((img, i) => (
                 <img
-                  key={i}
+                  key={img}
                   src={img}
                   alt={`${title} ${i + 1}`}
-                  className={`${styles.thumbImg} ${activeImg === i ? styles.thumbActive : ""}`}
+                  className={`${styles.thumbImg} ${safeIdx === i ? styles.thumbActive : ""}`}
                   onClick={() => setActiveImg(i)}
+                  onError={() => handleImgError(img)}
                 />
               ))}
             </div>

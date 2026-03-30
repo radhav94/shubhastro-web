@@ -5,9 +5,10 @@ import { FiChevronLeft } from "react-icons/fi";
 import { useGetProductsQuery, useAddToCartMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
 import Toast from "../../../../component/toast";
+import { DefaultImages } from "../../../../utils/appImages";
 
 const LIMIT = 8;
-
+const PRODUCT_FALLBACK = DefaultImages.AstromallProductDefault;
 const getFirstVariant = (item) => item?.variants?.find((v) => v.isActive) || item?.variants?.[0] || null;
 const getImg = (item) => {
   const variant = getFirstVariant(item);
@@ -18,7 +19,7 @@ const getImg = (item) => {
     item?.imgUrl ||
     item?.image ||
     item?.thumbnail ||
-    "https://images.unsplash.com/photo-1604608672516-f1b9b1d37076?w=400&q=80";
+    PRODUCT_FALLBACK;
 };
 const getPrice = (item) => {
   const variant = getFirstVariant(item);
@@ -193,7 +194,7 @@ const CategoryProducts = () => {
               <div key={item._id || item.ID || i} className={styles.card} onClick={() => navigate(`/product-details/${item.slug || item.ID}`, { state: item })}>
                 {item.is_featured && <span className={styles.badge}>Featured</span>}
                 <div className={styles.cardImg}>
-                  <img src={getImg(item)} alt={getTitle(item)} />
+                  <img src={getImg(item)} alt={getTitle(item)} onError={(e) => { e.target.src = PRODUCT_FALLBACK; }} />
                 </div>
                 <div className={styles.cardBody}>
                   {item.brand && <p className={styles.brand}>🏷 {getBrand(item)}</p>}
