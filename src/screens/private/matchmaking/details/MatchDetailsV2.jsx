@@ -36,7 +36,7 @@ const MatchDetailsV2 = () => {
 
   const handleTalkToExpert = () => {
     navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path, {
-      state: { selectedType: "Marriage" }
+      state: { selectedType: "love-relationships" }
     });
   };
 
