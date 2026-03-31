@@ -6,7 +6,7 @@ import {
 import { useGetS3SignedUrlMutation } from "../../redux/api/s3SignedApi";
 import toast from "../toast";
 
-export default function useVirtualAssistant({ astrologerId }) {
+export default function useVirtualAssistant({ astrologerId, isOpen }) {
   const [optimisticMsgs, setOptimisticMsgs] = useState([]);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
@@ -40,6 +40,11 @@ export default function useVirtualAssistant({ astrologerId }) {
   useEffect(() => {
     scrollToBottom();
   }, [messages.length, scrollToBottom]);
+
+  // Scroll to bottom when chat window opens
+  useEffect(() => {
+    if (isOpen) scrollToBottom();
+  }, [isOpen, scrollToBottom]);
 
   const sendText = useCallback(
     async (text) => {

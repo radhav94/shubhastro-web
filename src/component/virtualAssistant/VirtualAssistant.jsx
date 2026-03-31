@@ -32,7 +32,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen }) =
     sendImage,
     retryMessage,
     messagesEndRef,
-  } = useVirtualAssistant({ astrologerId });
+  } = useVirtualAssistant({ astrologerId, isOpen });
 
   const handleSend = useCallback(() => {
     if (previewFile) {
