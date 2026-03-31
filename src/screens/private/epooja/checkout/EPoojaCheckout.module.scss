@@ -298,6 +298,7 @@
   border-radius: 12px;
   padding: 16px 18px;
   margin-bottom: 24px;
+  position: relative;
 }
 .addressBoxTitle {
   font-size: 13px;
@@ -571,4 +572,205 @@
     padding: 6px 16px;
     font-size: 12px;
   }
+}
+
+/* ── Change Address Button ── */
+.changeAddrBtn {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: none;
+  border: 1px solid #f75801;
+  border-radius: 6px;
+  color: #f75801;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { background: #fff5f0; }
+}
+
+/* ── Overlay + Modal ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+}
+.modalLarge { max-width: 600px; }
+.modalClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #555;
+  cursor: pointer;
+  &:hover { background: #eee; color: #333; }
+}
+.modalTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 20px;
+  text-transform: uppercase;
+}
+.modalActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* ── Address List (modal) ── */
+.addressList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.addressCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 10px;
+  transition: all 0.2s;
+  &:hover { border-color: #f75801; }
+}
+.addressActive { border-color: #f75801; background: #fff8f5; }
+.addressIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #555;
+  flex-shrink: 0;
+}
+.addressInfo { flex: 1; min-width: 0; }
+.addressType { font-size: 14px; font-weight: 600; color: #333; display: block; }
+.addressText { font-size: 12px; color: #888; margin: 4px 0 0; line-height: 1.4; }
+.addressRadio { width: 18px; height: 18px; accent-color: #f75801; cursor: pointer; flex-shrink: 0; }
+.addrActionBtn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  color: #bbb;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  &:hover { color: #f75801; background: #fff5f0; }
+}
+.addAddressBtn {
+  flex: 1;
+  padding: 12px;
+  border: 2px dashed #f75801;
+  border-radius: 10px;
+  background: #fff;
+  color: #f75801;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { background: #fff5f0; }
+}
+.orderBtn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #f75801;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { background: #d43400; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+/* ── Form Styles (address modal) ── */
+.formGroup { margin-bottom: 14px; flex: 1; }
+.formLabel { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 6px; }
+.formInput {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+  &::placeholder { color: #bbb; }
+  &:focus { border-color: #f75801; }
+}
+.formInputError { border-color: #e53935; &:focus { border-color: #e53935; } }
+.formError { font-size: 11px; color: #e53935; margin-top: 3px; }
+.formRow {
+  display: flex;
+  gap: 12px;
+  @media (max-width: 480px) { flex-direction: column; gap: 0; }
+}
+.saveAsGroup { margin-bottom: 20px; }
+.saveAsLabel { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 8px; }
+.saveAsTags { display: flex; gap: 10px; }
+.saveAsTag {
+  padding: 7px 22px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 20px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { border-color: #f75801; color: #f75801; }
+}
+.saveAsActive { border-color: #f75801; color: #f75801; background: #fff5f0; }
+.saveAddressBtn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #f75801;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { background: #d43400; box-shadow: 0 4px 14px rgba(247, 88, 1, 0.3); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
 }

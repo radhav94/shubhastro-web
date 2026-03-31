@@ -8,14 +8,24 @@ import Toast from "../../../../component/toast";
 
 const LIMIT = 8;
 
-const getImg = (item) =>
-  item?.banner_image?.original ||
-  item?.banner_image?.small ||
-  (item?.images?.length ? item.images[0] : null) ||
-  item?.imgUrl || item?.image || item?.thumbnail ||
-  "https://images.unsplash.com/photo-1604608672516-f1b9b1d37076?w=400&q=80";
-const getPrice = (item) => item?.price || item?.actualPrice || item?.selling_price || 0;
-const getOldPrice = (item) => item?.mrp || item?.originalPrice || item?.compare_price || 0;
+const getFirstVariant = (item) => item?.variants?.find((v) => v.isActive) || item?.variants?.[0] || null;
+const getImg = (item) => {
+  const variant = getFirstVariant(item);
+  return (variant?.images?.length ? variant.images[0] : null) ||
+    item?.banner_image?.original ||
+    item?.banner_image?.small ||
+    (item?.images?.length ? item.images[0] : null) ||
+    item?.imgUrl || item?.image || item?.thumbnail ||
+    "https://images.unsplash.com/photo-1604608672516-f1b9b1d37076?w=400&q=80";
+};
+const getPrice = (item) => {
+  const variant = getFirstVariant(item);
+  return variant?.price || item?.price || item?.actualPrice || item?.selling_price || 0;
+};
+const getOldPrice = (item) => {
+  const variant = getFirstVariant(item);
+  return variant?.mrp || item?.mrp || item?.originalPrice || item?.compare_price || 0;
+};
 const getTitle = (item) => item?.title || item?.name || "Product";
 const getBrand = (item) => {
   const b = item?.brand;
@@ -100,10 +110,13 @@ const PurposeProducts = () => {
       navigate("/login?skip=welcome");
       return;
     }
-    const productId = item?._id;
+    const productId = item?._id || item?.ID;
     if (!productId) { Toast.error("Unable to add — product ID missing"); return; }
+    const firstVariant = item?.variants?.find((v) => v.isActive) || item?.variants?.[0];
+    if (!firstVariant?._id) { Toast.error("No variant available for this product"); return; }
+    if (firstVariant?.stock === 0) { Toast.error("This variant is out of stock"); return; }
     try {
-      await addToCart({ productId, quantity: 1 }).unwrap();
+      await addToCart({ productId, variantId: firstVariant._id, quantity: 1 }).unwrap();
       Toast.success(`${getTitle(item)} added to cart`);
     } catch (err) {
       Toast.error(err?.data?.message || "Failed to add to cart");
