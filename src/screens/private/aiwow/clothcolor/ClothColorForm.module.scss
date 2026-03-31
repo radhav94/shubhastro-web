@@ -61,9 +61,15 @@
 }
 
 .content {
-  padding: 24px 16px;
-  max-width: 600px;
+  padding: 16px;
+  max-width: 900px;
   margin: 0 auto;
+  @media (width <= 768px) {
+    max-width: 600px;
+  }
+  @media (width <= 767px) {
+    padding-bottom: 15dvh;
+  }
 }
 
 .profileInfo {
@@ -167,9 +173,12 @@
 }
 
 .intentionsGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  @media (width <= 768px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
 }
 
 .intentionCard {
@@ -232,6 +241,17 @@
   transition: all 0.2s;
   margin-top: 8px;
   box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
+  width: 50%;
+  margin: 0 auto;
+  @media (width <= 767px) {
+    position: fixed;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    width: calc(100% - 32px);
+    margin: 0 auto;
+    box-shadow: 0px 64px 0px 77px #fff;
+  }
   
   &:hover {
     background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);

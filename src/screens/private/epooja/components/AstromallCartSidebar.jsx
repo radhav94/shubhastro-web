@@ -4,8 +4,10 @@ import styles from "./AstromallCartSidebar.module.scss";
 import { FiShoppingCart, FiX, FiTrash2, FiPlus, FiMinus } from "react-icons/fi";
 import { useGetCartQuery, useUpdateCartItemMutation, useRemoveCartItemMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
+import { DefaultImages } from "../../../../utils/appImages";
+import ProductImage from "../../../../component/UI/ProductImage";
 
-const DEFAULT_IMG = "https://images.unsplash.com/photo-1625072290979-cac544181be8?w=800&q=80";
+const DEFAULT_IMG = DefaultImages.AstromallProductDefault;
 
 const getItemImage = (item) => {
   // Prefer variant snapshot image, then product images
@@ -118,7 +120,7 @@ const AstromallCartSidebar = () => {
                 };
                 return (
                   <div key={item?._id || idx} className={styles.cartItem}>
-                    <img src={getItemImage(item)} alt={getItemTitle(item)} className={styles.cartItemImg} onClick={goToDetail} style={{ cursor: "pointer" }} onError={(e) => { e.target.src = DEFAULT_IMG; }} />
+                    <ProductImage src={getItemImage(item)} alt={getItemTitle(item)} className={styles.cartItemImg} onClick={goToDetail} style={{ cursor: "pointer" }} />
                     <div className={styles.cartItemInfo}>
                       <h4 className={styles.cartItemName} onClick={goToDetail} style={{ cursor: "pointer" }}>{getItemTitle(item)}</h4>
                       <div className={styles.qtyRow}>

@@ -10,6 +10,8 @@ import {
 } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
+import { DefaultImages } from "../../../../utils/appImages";
+import ProductImage from "../../../../component/UI/ProductImage";
 
 import phonepeLogo from "../../../../assets/icons/upi/phonepe.svg";
 import credLogo from "../../../../assets/icons/upi/cred.svg";
@@ -22,7 +24,7 @@ import debitlogo from "../../../../assets/icons/upi/debit.svg";
 import netbankinglogo from "../../../../assets/icons/upi/netbanking.svg";
 import walletlogo from "../../../../assets/icons/upi/wallet.svg";
 
-const DEFAULT_IMG = "https://images.unsplash.com/photo-1625072290979-cac544181be8?w=800&q=80";
+const DEFAULT_IMG = DefaultImages.AstromallProductDefault;
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_SJVwTGtUhFpODR";
 const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js";
 
@@ -440,7 +442,7 @@ const AstromallCart = () => {
           const goToDetail = () => navigate(`/product-details/${routeId}`, { state: getProductData(item) });
           return (
             <div key={item?._id || idx} className={styles.productCard}>
-              <img src={getImg(item)} alt={getTitle(item)} className={styles.productImg} onClick={goToDetail} style={{ cursor: "pointer" }} onError={(e) => { e.target.src = DEFAULT_IMG; }} />
+              <ProductImage src={getImg(item)} alt={getTitle(item)} className={styles.productImg} onClick={goToDetail} style={{ cursor: "pointer" }} />
               <div className={styles.productInfo}>
                 <h3 onClick={goToDetail} style={{ cursor: "pointer" }}>{getTitle(item)}</h3>
                 <div className={styles.qtyRow}>

@@ -38,7 +38,7 @@ import CallIcon from "../../assets/chat/Call.svg";
 import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
 
 // const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
-const APP_ID = "cf5e31fa03584573aacaf42daebd493c";
+const APP_ID = "8575e5681f7142f4bced0b83332caa15";
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
 
 const VideoCalling = ({ callData }) => {

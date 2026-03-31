@@ -1268,7 +1268,7 @@ const AstrologerProfile = () => {
             </div>
 
             {/* Astrologer Shop */}
-            <div className={styles.shopSection}>
+            {/* <div className={styles.shopSection}>
               <div className={styles.shopHeader}>
                 <h3 className={styles.sectionTitle}>
                   Check out Astrologers Shop
@@ -1313,7 +1313,7 @@ const AstrologerProfile = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
         {/* End Center Column */}

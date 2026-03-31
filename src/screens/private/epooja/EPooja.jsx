@@ -5,6 +5,8 @@ import { FiChevronLeft, FiChevronRight, FiSearch, FiX, FiChevronDown } from "rea
 import Toast from "../../../component/toast";
 import { useGetAstromallPageDataQuery, useAddToCartMutation, useGetProductsQuery, useGetProductCategoriesQuery } from "../../../redux/api/astromall/epooja/epoojaBookingApi";
 import AstromallCartSidebar from "./components/AstromallCartSidebar";
+import { DefaultImages } from "../../../utils/appImages";
+import ProductImage from "../../../component/UI/ProductImage";
 
 // ─── FALLBACK TABS (used while categories load) ───
 const ALL_TAB = { label: "All Products", slug: "all" };
@@ -60,22 +62,42 @@ const HScrollRow = ({ children }) => {
 };
 
 // ─── Helper: get image/price/title from API item ───
+const PRODUCT_FALLBACK = DefaultImages.AstromallProductDefault;
 const getFirstVariant = (item) => item?.variants?.find((v) => v.isActive) || item?.variants?.[0] || null;
+const resolveImg = (img) => {
+  if (!img) return null;
+  if (typeof img === "string") return img;
+  if (typeof img === "object") return img.original || img.small || img.url || img.src || null;
+  return null;
+};
 const getImg = (item) => {
-  const fallback = "https://images.unsplash.com/photo-1604608672516-f1b9b1d37076?w=400&q=80";
+  // Step 1: Check product-level images first
+  if (item?.images?.length) {
+    for (const img of item.images) {
+      const resolved = resolveImg(img);
+      if (resolved) return resolved;
+    }
+  }
+  const banner = resolveImg(item?.banner_image);
+  if (banner) return banner;
+  const imgUrl = resolveImg(item?.imgUrl);
+  if (imgUrl) return imgUrl;
+  const image = resolveImg(item?.image);
+  if (image) return image;
+  const thumbnail = resolveImg(item?.thumbnail);
+  if (thumbnail) return thumbnail;
+
+  // Step 2: If no product images, check variant images
   const variant = getFirstVariant(item);
-  const raw =
-    (variant?.images?.length ? variant.images[0] : null) ||
-    item?.banner_image?.original ||
-    item?.banner_image?.small ||
-    (item?.images?.length ? item.images[0] : null) ||
-    item?.imgUrl ||
-    item?.image ||
-    item?.thumbnail ||
-    fallback;
-  if (typeof raw === "string") return raw;
-  if (raw && typeof raw === "object") return raw.original || raw.small || raw.url || raw.src || fallback;
-  return fallback;
+  if (variant?.images?.length) {
+    for (const img of variant.images) {
+      const resolved = resolveImg(img);
+      if (resolved) return resolved;
+    }
+  }
+
+  // Step 3: Default
+  return PRODUCT_FALLBACK;
 };
 const getPrice = (item) => {
   const variant = getFirstVariant(item);
@@ -252,7 +274,7 @@ const EPooja = () => {
           <HScrollRow>
             {items.map((d, i) => (
               <div key={d.ID || i} className={styles.dealCard} onClick={() => navigate(`/product-details/${d.slug || d.ID}`, { state: d })}>
-                <img src={getImg(d)} alt={getTitle(d)} />
+                <ProductImage src={getImg(d)} alt={getTitle(d)} />
                 <div className={styles.dealBadges}>
                   {d.is_featured && <span className={styles.dealPopular}>Popular</span>}
                 </div>
@@ -276,7 +298,7 @@ const EPooja = () => {
           <HScrollRow>
             {items.map((c, i) => (
               <div key={c.ID || i} className={styles.catSlideCard} onClick={() => navigate(`/category/${c.slug || c.ID}`, { state: { categoryId: c.ID, name: c.name, imgUrl: c.imgUrl } })} style={{ cursor: "pointer" }}>
-                <img src={c.imgUrl || getImg(c)} alt={c.name || "Category"} />
+                <ProductImage src={c.imgUrl || getImg(c)} alt={c.name || "Category"} />
                 <div className={styles.catOverlay}>
                   <h4>{c.name || "Category"}</h4>
                 </div>
@@ -297,7 +319,7 @@ const EPooja = () => {
             <HScrollRow>
               {items.map((item, i) => (
                 <div key={item.ID || i} className={styles.purposeCard} onClick={() => navigate(`/purpose/${item.slug || item.title?.toLowerCase() || ""}`)}>
-                  <img src={item.image_url || getImg(item)} alt={item.title || "Purpose"} />
+                  <ProductImage src={item.image_url || getImg(item)} alt={item.title || "Purpose"} />
                   <div className={styles.purposeOverlay}>
                     <h4>{item.title || ""}</h4>
                   </div>
@@ -308,7 +330,7 @@ const EPooja = () => {
             <div className={styles.hScrollRow}>
               {items.map((item, i) => (
                 <div key={item.ID || i} className={styles.purposeCard} onClick={() => navigate(`/purpose/${item.slug || item.title?.toLowerCase() || ""}`)}>
-                  <img src={item.image_url || getImg(item)} alt={item.title || "Purpose"} />
+                  <ProductImage src={item.image_url || getImg(item)} alt={item.title || "Purpose"} />
                   <div className={styles.purposeOverlay}>
                     <h4>{item.title || ""}</h4>
                   </div>
@@ -347,7 +369,7 @@ const EPooja = () => {
             <div key={s.ID || i} className={styles.prodCard} onClick={() => navigate(`/product-details/${s.slug || s.ID}`, { state: s })} style={{ cursor: "pointer" }}>
               {s.is_featured && <span className={styles.sugBadge}>Featured</span>}
               {!s.is_featured && <span className={styles.sugBadge}>Suggested</span>}
-              <div className={styles.prodImg}><img src={getImg(s)} alt={getTitle(s)} /></div>
+              <div className={styles.prodImg}><ProductImage src={getImg(s)} alt={getTitle(s)} /></div>
               <div className={styles.prodBody}>
                 {s.brand && <p className={styles.prodConsultant}>🏷 {getBrand(s)}</p>}
                 <h4>{getTitle(s)}</h4>
@@ -446,7 +468,7 @@ const EPooja = () => {
                 <div key={item._id || item.ID || i} className={styles.filteredCard} onClick={() => navigate(`/product-details/${item.slug || item.ID}`, { state: item })}>
                   {item.is_featured && <span className={styles.sugBadge}>Featured</span>}
                   <div className={styles.filteredImg}>
-                    <img src={getImg(item)} alt={getTitle(item)} />
+                    <ProductImage src={getImg(item)} alt={getTitle(item)} />
                   </div>
                   <div className={styles.prodBody}>
                     {item.brand && <p className={styles.prodConsultant}>🏷 {getBrand(item)}</p>}
