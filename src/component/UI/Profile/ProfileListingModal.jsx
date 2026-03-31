@@ -170,7 +170,7 @@ const ProfileListingModal = ({
                           </svg>
                         </button>
                       )}
-                      {showDeleteButton && formatted.relation !== "Self" && (
+                      {showDeleteButton && formatted.relation?.toLowerCase() !== "self" && (
                         <button
                           className={styles.deleteBtn}
                           onClick={(e) => handleDeleteClick(e, profile._id)}
