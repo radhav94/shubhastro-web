@@ -8,8 +8,18 @@ import styles from "../Home.module.scss";
 const QuickActions = ({ data = [], title }) => {
     const navigate = useNavigate();
 
+    // Define desired display order by slug
+    const slugOrder = ["free-kundli", "talk-to-astrologer", "daily-horoscope"];
+
     // Map API data to quick actions format
-    const quickActions = data.length > 0 ? data.map((item, index) => {
+    const quickActions = data.length > 0 ? [...data]
+        .sort((a, b) => {
+            const indexA = slugOrder.indexOf(a.slug);
+            const indexB = slugOrder.indexOf(b.slug);
+            // Items not in slugOrder go to the end
+            return (indexA === -1 ? slugOrder.length : indexA) - (indexB === -1 ? slugOrder.length : indexB);
+        })
+        .map((item, index) => {
         // Determine path based on slug
         let path = PATH.privateRoutes.Chat_With_ASTROLOGER.path;
         if (item.slug === "talk-to-astrologer") {
