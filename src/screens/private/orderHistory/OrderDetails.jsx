@@ -32,7 +32,7 @@ const OrderDetails = () => {
 
   const { handleChatStart, handleCallStart } = useAstrologerConnect();
   const { setWaitingList, resetChatFlow, setActiveChatRoomId, setActiveChat, setChatSeconds, waitingList: chatWaiting } = useChat();
-  const { setWaitingList: setCallWaitingList, resetCallFlow, setActiveCallRoomId, setActiveCall, waitingList: callWaiting } = useCall();
+  const { setWaitingList: setCallWaitingList, resetCallFlow, setActiveCallRoomId, setActiveCall, setOpenReview, setReviewData, waitingList: callWaiting } = useCall();
   const [createChatRoom] = useCreateChatRoomMutation();
   const activeAstroRef = useRef(null);
 
@@ -48,10 +48,19 @@ const OrderDetails = () => {
     { refetchOnMountOrArgChange: true }
   );
 
-  const { data: recordingsData, isLoading: isLoadingRecordings } = useGetCallRecordingsQuery(
+  const { data: recordingsData, isLoading: isLoadingRecordings, refetch: refetchRecordings } = useGetCallRecordingsQuery(
     astrologerId,
     { skip: !astrologerId }
   );
+
+  // Refetch recordings when a review is submitted
+  useEffect(() => {
+    const handleReviewSubmitted = () => {
+      refetchRecordings();
+    };
+    window.addEventListener("reviewSubmitted", handleReviewSubmitted);
+    return () => window.removeEventListener("reviewSubmitted", handleReviewSubmitted);
+  }, [refetchRecordings]);
 
   // Split recordings into call (audio) and video
   const { callRecordings, videoRecordings } = React.useMemo(() => {
@@ -292,6 +301,16 @@ const OrderDetails = () => {
     });
   };
 
+  const handleRateConsultation = (roomId) => {
+    if (!astrologer) return;
+    setReviewData({
+      astrologerID: astrologer.astrologer_ID || astrologer._id,
+      fullName: `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim(),
+      roomId,
+    });
+    setOpenReview(true);
+  };
+
   const renderTabContent = () => {
     if (isLoadingMessages || isLoadingAstrologer) {
       return <PrimaryLoader />;
@@ -338,6 +357,8 @@ const OrderDetails = () => {
                 recordingUrl={rec.recordingUrl}
                 type="audio"
                 initialRating={rec.rating ?? null}
+                roomId={rec.roomId || rec.sessionId}
+                onRateConsultation={handleRateConsultation}
                 onConsultAgain={() => setIsConnectPopupOpen(true)}
               />
             ))}
@@ -380,6 +401,8 @@ const OrderDetails = () => {
                 astrologerName={astrologerInfo.name}
                 astrologerImage={astrologerInfo.image}
                 initialRating={rec.rating ?? null}
+                roomId={rec.roomId || rec.sessionId}
+                onRateConsultation={handleRateConsultation}
                 onConsultAgain={() => setIsConnectPopupOpen(true)}
               />
             ))}

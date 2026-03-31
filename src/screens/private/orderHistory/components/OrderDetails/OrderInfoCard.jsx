@@ -17,8 +17,9 @@ const OrderInfoCard = ({
   astrologerImage,
   onConsultAgain,
   initialRating = null,
+  roomId,
+  onRateConsultation,
 }) => {
-  const [rating, setRating] = useState(initialRating);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showVideoModal, setShowVideoModal] = useState(false);
@@ -26,10 +27,6 @@ const OrderInfoCard = ({
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
   const videoHlsRef = useRef(null);
-
-  const handleRatingChange = (newRating) => {
-    setRating(newRating);
-  };
 
   // Attach HLS to a media element
   const attachHls = (media, url, refObj) => {
@@ -184,8 +181,16 @@ const OrderInfoCard = ({
 
           <div className={styles.ratingSection}>
             <div className={styles.ratingRow}>
-              <span className={styles.ratingLabel}>{rating === null || rating === undefined ? "Add Rating" : "Your Rating"}</span>
-              <RatingStars rating={rating ?? 0} onRatingChange={rating === null || rating === undefined ? handleRatingChange : undefined} />
+              {initialRating != null ? (
+                <>
+                  <span className={styles.ratingLabel}>Your Rating</span>
+                  <RatingStars rating={initialRating} />
+                </>
+              ) : (
+                <button className={styles.rateButton} onClick={(e) => { e.stopPropagation(); onRateConsultation?.(roomId); }}>
+                  Rate Consultation
+                </button>
+              )}
             </div>
             <div className={styles.consultAgain} onClick={onConsultAgain}>Consult Again</div>
           </div>
@@ -224,8 +229,16 @@ const OrderInfoCard = ({
 
         <div className={styles.ratingSection}>
           <div className={styles.ratingRow}>
-            <span className={styles.ratingLabel}>{rating === null || rating === undefined ? "Add Rating" : "Your Rating"}</span>
-            <RatingStars rating={rating ?? 0} onRatingChange={rating === null || rating === undefined ? handleRatingChange : undefined} />
+            {initialRating != null ? (
+              <>
+                <span className={styles.ratingLabel}>Your Rating</span>
+                <RatingStars rating={initialRating} />
+              </>
+            ) : (
+              <button className={styles.rateButton} onClick={(e) => { e.stopPropagation(); onRateConsultation?.(roomId); }}>
+                Rate Consultation
+              </button>
+            )}
           </div>
           <div className={styles.consultAgain} onClick={onConsultAgain}>Consult Again</div>
         </div>
