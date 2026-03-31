@@ -113,30 +113,34 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
           </p>
         )}
         <div className={styles.sessionActionButtons}>
-          <div className={styles.sessionButtonWrapper}>
-            <button
-              className={styles.sessionChatBtn}
-              onClick={(e) => handleButtonClick(e,session, "chat")}
-              disabled={isLoading}
-            >
-              <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
-            </button>
-            <p className={styles.sessionPriceText}>
-              <span className={styles.sessionPriceAmount}>₹{session?.price?.chatRate?.amount || session?.chatRate || 0}</span>/min
-            </p>
-          </div>
-          <div className={styles.sessionButtonWrapper}>
-            <button
-              className={styles.sessionCallBtn}
-              onClick={(e) => handleButtonClick(e,session, "call")}
-              disabled={isLoading}
-            >
-              <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
-            </button>
-            <p className={styles.sessionPriceText}>
-              <span className={styles.sessionPriceAmount}>₹{session?.price?.audioRate?.amount || session?.callRate || 0}</span>/min
-            </p>
-          </div>
+          {(!session?.isActiveType?.length || session.isActiveType.includes("all") || session.isActiveType.includes("chat")) && (
+            <div className={styles.sessionButtonWrapper}>
+              <button
+                className={styles.sessionChatBtn}
+                onClick={(e) => handleButtonClick(e,session, "chat")}
+                disabled={isLoading}
+              >
+                <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+              </button>
+              <p className={styles.sessionPriceText}>
+                <span className={styles.sessionPriceAmount}>₹{session?.price?.chatRate?.amount || session?.chatRate || 0}</span>/min
+              </p>
+            </div>
+          )}
+          {(!session?.isActiveType?.length || session.isActiveType.includes("all") || session.isActiveType.includes("audio")) && (
+            <div className={styles.sessionButtonWrapper}>
+              <button
+                className={styles.sessionCallBtn}
+                onClick={(e) => handleButtonClick(e,session, "call")}
+                disabled={isLoading}
+              >
+                <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
+              </button>
+              <p className={styles.sessionPriceText}>
+                <span className={styles.sessionPriceAmount}>₹{session?.price?.audioRate?.amount || session?.callRate || 0}</span>/min
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
