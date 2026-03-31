@@ -81,6 +81,9 @@ const LivePlayerPage = () => {
         astrologerId: l.astrologer?._id,
         rating: l.astrologer?.rating,
         expertise: l.astrologer?.expertise,
+        imageUrl: l.astrologer?.profileImgUrl || l.astrologer?.imageUrl,
+        audioCallRate: l.astrologer?.price?.audioRate?.amount,
+        videoCallRate: l.astrologer?.price?.videoCallRate?.amount,
         uid: l.uid,
       }))}
       autoStartIndex={autoStartIndex}

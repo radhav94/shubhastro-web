@@ -29,6 +29,7 @@ import {
   useFollowAstrologerByIdMutation,
   useUnfollowAstrologerByIdMutation,
 } from "../../../../../redux/api/astrologer/followAstrologerApi";
+import { useGetAstrologerByIdQuery } from "../../../../../redux/api/astrologer/astrologerApi";
 
 const FixedLayer = ({ children }) => {
   return createPortal(children, document.body);
@@ -60,6 +61,7 @@ const LiveView = (props) => {
   const [showGifts, setShowGifts] = useState(false);
   const [showCallPopup, setShowCallPopup] = useState(false);
   const [showWaitingModal, setShowWaitingModal] = useState(false);
+  const [roomEnded, setRoomEnded] = useState(false);
 
   const { 
     activeCall, 
@@ -85,6 +87,14 @@ const LiveView = (props) => {
 
   // Follow/unfollow astrologer
   const astrologerId = astrologer?._id || astrologer?.astrologerId;
+
+  // Fetch full astrologer details (profile pic, call rates)
+  const { data: astrologerFullData } = useGetAstrologerByIdQuery(
+    { id: astrologerId },
+    { skip: !astrologerId }
+  );
+  const fullAstro = astrologerFullData?.data;
+
   const { data: followingData } = useCheckFollowingStatusQuery(
     { astrologerId },
     { skip: !astrologerId }
@@ -155,11 +165,14 @@ const LiveView = (props) => {
     setShowCallPopup(false);
   }, [hostLeft, ROLE]);
 
-  // Also close popups when the socket room ends (roomReady → false)
+  // Track when socket room ends / starts
   useEffect(() => {
     if (roomReady === false && ROLE !== "host") {
+      setRoomEnded(true);
       setShowGifts(false);
       setShowCallPopup(false);
+    } else if (roomReady === true) {
+      setRoomEnded(false);
     }
   }, [roomReady, ROLE]);
 
@@ -178,7 +191,7 @@ const LiveView = (props) => {
   }, [displayMessages.length]);
 
   const isHost = ROLE === "host";
-  const isAstrologerLive = remoteUsers?.length > 0 && !hostLeft;
+  const isAstrologerLive = remoteUsers?.length > 0 && !hostLeft && !roomEnded;
   const viewerCount = participantCount || (remoteUsers?.length || 0) + 1;
 
   const {
@@ -430,6 +443,7 @@ const LiveView = (props) => {
     };
 
     const handleCallEnded = () => {
+      setActiveCall(null);
       resetCallState();
     };
 
@@ -486,7 +500,11 @@ const LiveView = (props) => {
           {isAstrologerLive && (
           <div className="top-bar">
             <div className="host-info">
-              <div className="host-avatar">🕉️</div>
+              {fullAstro?.profileImgUrl ? (
+                <img className="host-avatar-img" src={fullAstro.profileImgUrl} alt={astrologer?.astrologerName || "Astrologer"} />
+              ) : (
+                <div className="host-avatar">🕉️</div>
+              )}
               <div className="host-text">
                 <div className="host-name">
                   {astrologer?.astrologerName || "Astrologer"}
@@ -619,7 +637,7 @@ const LiveView = (props) => {
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                   </svg>
-                  <span>₹{astrologer?.audioCallRate || 0}/ min</span>
+                  <span>₹{fullAstro?.price?.audioRate?.amount || astrologer?.audioCallRate || 0}/ min</span>
                 </button>
               )}
             </div>

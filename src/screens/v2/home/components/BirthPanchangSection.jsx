@@ -1,15 +1,22 @@
 import { useSelector } from "react-redux";
 import { Calendar } from "lucide-react";
+import { skipToken } from "@reduxjs/toolkit/query";
 import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
+import { useGetPlanetsQuery } from "../../../../redux/api/kundli/kundliApi";
 import styles from "../Home.module.scss";
 
-const formatTo12Hr = (time) => {
-  if (!time || time === "--") return "--";
-  const [hh, mm] = time.split(":");
-  const h = parseInt(hh, 10);
-  const period = h >= 12 ? "PM" : "AM"; 
+const formatDate = (day, month, year) => {
+  if (!day || !month || !year) return "--";
+  return `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}/${year}`;
+};
+
+const formatTime = (hour, min) => {
+  if (hour === undefined || min === undefined) return "--";
+  const h = Number(hour);
+  const m = Number(min);
+  const period = h >= 12 ? "PM" : "AM";
   const h12 = h % 12 || 12;
-  return `${String(h12).padStart(2, "0")}:${mm} ${period}`;
+  return `${String(h12).padStart(2, "0")}:${String(m).padStart(2, "0")} ${period}`;
 };
 
 const BirthPanchangSection = () => {
@@ -20,16 +27,32 @@ const BirthPanchangSection = () => {
     skip: !isLoggedIn,
   });
 
-  if (!isLoggedIn) return null;
-
   const profiles = profilesData?.data || [];
-  // Priority: selected Kundli from Redux → "Self" relation → first profile
   const selfProfile = profiles.find((p) => p.relation === "Self") || profiles[0];
   const profile = selectedKundli?._id
     ? profiles.find((p) => p._id === selectedKundli._id) || selfProfile
     : selfProfile;
 
-  if (isLoading) {
+  // Build vedic API params from profile (same as Kundli page)
+  const vedicParams = profile
+    ? {
+        dob: `${String(profile.day).padStart(2, "0")}/${String(profile.month).padStart(2, "0")}/${profile.year}`,
+        tob: `${String(profile.hour).padStart(2, "0")}:${String(profile.min).padStart(2, "0")}`,
+        lat: profile.lat,
+        lon: profile.lon,
+        tz: profile.tzone,
+        lang: "en",
+      }
+    : null;
+
+  const { data: planetsData, isLoading: planetsLoading } = useGetPlanetsQuery(
+    vedicParams || skipToken,
+    { skip: !isLoggedIn || !vedicParams }
+  );
+
+  if (!isLoggedIn) return null;
+
+  if (isLoading || planetsLoading) {
     return (
       <section className={styles.birthPanchangSection}>
         <div className={styles.birthPanchangHeader}>
@@ -43,72 +66,68 @@ const BirthPanchangSection = () => {
 
   if (!profile) return null;
 
-  const panchang = profile.kundliSnapshotId?.panchang;
+  // Use vedic API response (same source as Kundli page Basic tab)
+  const birthDetails = planetsData?.response;
+  const panchang = birthDetails?.panchang;
+
   if (!panchang) return null;
 
-  const panchangCards = [
-    { icon: "🌙", label: "TITHI", value: panchang?.tithi || "--", sub: panchang?.tithi},
-    { icon: "⭐", label: "NAKSHATRA", value: panchang.nakshatra || profile.nakshatra || "--" },
-    { icon: "🕉️", label: "YOGA", value: panchang.yoga || "--" },
-    { icon: "⚡", label: "KARANA", value: panchang.karana || "--" },
-    { icon: "📅", label: "VAAR", value: panchang.day_of_birth || "--" },
+  const basicDetails = [
+    { label: "Name", value: profile.name || "--" },
+    { label: "Place", value: profile.place || "--" },
+    { label: "Nakshatra Pada", value: birthDetails?.nakshatra_pada ?? "--" },
+    { label: "Date", value: formatDate(profile.day, profile.month, profile.year) },
+    { label: "Rasi", value: birthDetails?.rasi || "--" },
+    { label: "Day Of Birth", value: panchang.day_of_birth || "--" },
+    { label: "Time", value: formatTime(profile.hour, profile.min) },
+    { label: "Nakshatra", value: birthDetails?.nakshatra || "--" },
+    { label: "Day Lord", value: panchang.day_lord || "--" },
+    { label: "Hora Lord", value: panchang.hora_lord || "--" },
+    { label: "Tithi", value: panchang.tithi || "--" },
+    { label: "Ayanamsha", value: panchang.ayanamsa ? panchang.ayanamsa.toFixed(5) : "--" },
+    { label: "Sunrise", value: panchang.sunrise_at_birth || "--" },
+    { label: "Yoga", value: panchang.yoga || "--" },
+    { label: "Ayanamsha Type", value: panchang.ayanamsa_name || "--" },
+    { label: "Sunset", value: panchang.sunset_at_birth || "--" },
+    { label: "Karana", value: panchang.karana || "--" },
   ];
-  
 
-  const sunSign = profile.sunSign || panchang.sunSign || "--";
-  const moonSign = profile.moonSign || panchang.moonSign || "--";
-  const moonNakshatra = profile.nakshatra || panchang.nakshatra || "--";
-  const sunrise = formatTo12Hr(panchang.sunrise_at_birth) || "--";
-  const sunset = formatTo12Hr(panchang.sunset_at_birth) || "--";
-  const profileName = profile?.name || panchang?.name ;
+  // Split into two blocks: first 9 items (3×3) and remaining
+  const block1 = basicDetails.slice(0, 9);
+  const block2 = basicDetails.slice(9);
 
-  
+  // Group a flat array into columns (column-wise distribution)
+  const groupIntoCols = (items) => {
+    const numCols = 3;
+    const cols = [[], [], []];
+    items.forEach((item, i) => {
+      cols[i % numCols].push(item);
+    });
+    return cols.filter((c) => c.length);
+  };
+
   return (
     <section className={styles.birthPanchangSection}>
       <div className={styles.birthPanchangHeader}>
         <Calendar size={18} />
         <h2>Birth Panchang</h2>
       </div>
-
       <div className={styles.birthPanchangContent}>
-        <div className={styles.birthPanchangCards}>
-          {panchangCards.map((card) => (
-            <div key={card.label} className={styles.birthPanchangCard}>
-              <div className={styles.bpCardLabel}>
-                <span className={styles.bpCardIcon}>{card.icon}</span>
-                <span>{card.label}</span>
+        {/* <h3 className={styles.bpSectionTitle}>Basic Details</h3> */}
+        {[block1, block2].map((block, bi) => (
+          <div key={bi} className={styles.bpDetailsList}>
+            {groupIntoCols(block).map((group, gi) => (
+              <div key={gi} className={styles.bpDetailGroup}>
+                {group.map((item) => (
+                  <div key={item.label} className={styles.bpDetailRow}>
+                    <span className={styles.bpDetailLabel}>{item.label}</span>
+                    <span className={styles.bpDetailValue}>{item.value}</span>
+                  </div>
+                ))}
               </div>
-              <div className={styles.bpCardValue}>{card.value}</div>
-              {card.sub && <div className={styles.bpCardSub}>{card.sub}</div>}
-            </div>
-          ))}
-        </div>
-
-        <div className={styles.birthPanchangPlanets}>
-          <div className={styles.birthPlanetCard}>
-            <div className={styles.planetHeader}>
-              <span className={styles.planetIcon}>☀️</span>
-              <span className={styles.planetName}>Sun</span>
-            </div>
-            <div className={styles.planetDetails}>
-              <span className={styles.planetDetail}>Sign: <strong>{sunSign}</strong></span>
-              <span className={styles.planetDetail}>☼ <strong>{sunrise}</strong></span>
-              <span className={styles.planetDetail}>☽ <strong>{sunset}</strong></span>
-            </div>
+            ))}
           </div>
-
-          <div className={styles.birthPlanetCard}>
-            <div className={styles.planetHeader}>
-              <span className={styles.planetIcon}>🌙</span>
-              <span className={styles.planetName}>Moon</span>
-            </div>
-            <div className={styles.planetDetails}>
-              <span className={styles.planetDetail}>Sign: <strong>{moonSign}</strong></span>
-              <span className={styles.planetDetail}>Nakshatra: <strong>{moonNakshatra}</strong></span>
-              <span className={styles.planetDetail}>Paksha: <strong>{profileName}</strong></span>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
     </section>
   );
