@@ -62,6 +62,7 @@ const LiveView = (props) => {
   const [showCallPopup, setShowCallPopup] = useState(false);
   const [showWaitingModal, setShowWaitingModal] = useState(false);
   const [roomEnded, setRoomEnded] = useState(false);
+  const [wasRoomReady, setWasRoomReady] = useState(false);
 
   const { 
     activeCall, 
@@ -167,14 +168,16 @@ const LiveView = (props) => {
 
   // Track when socket room ends / starts
   useEffect(() => {
-    if (roomReady === false && ROLE !== "host") {
+    if (roomReady === true) {
+      setWasRoomReady(true);
+      setRoomEnded(false);
+    } else if (roomReady === false && wasRoomReady && ROLE !== "host") {
+      // Only mark as ended if the room was previously ready (avoids false positive on initial mount)
       setRoomEnded(true);
       setShowGifts(false);
       setShowCallPopup(false);
-    } else if (roomReady === true) {
-      setRoomEnded(false);
     }
-  }, [roomReady, ROLE]);
+  }, [roomReady, ROLE, wasRoomReady]);
 
   // Track previous message count
   useEffect(() => {
@@ -467,6 +470,16 @@ const LiveView = (props) => {
     return null;
   }
 
+  console.log("🔍 LiveView render state:", {
+    isHost,
+    remoteUsersCount: remoteUsers?.length,
+    hostLeft,
+    roomEnded,
+    roomReady,
+    wasRoomReady,
+    channel: props.channel,
+  });
+
   return (
     <FixedLayer>
       <div className="video-box">
@@ -543,28 +556,24 @@ const LiveView = (props) => {
               />
             )}
 
-            {/* AUDIENCE VIDEO */}
+            {/* AUDIENCE VIDEO — only show when room hasn't ended */}
             {!isHost &&
-              remoteUsers.length > 0 &&
+              remoteUsers.length > 0 && !roomEnded &&
               remoteUsers.map((user) => (
                 <RemoteUser key={user.uid} user={user} />
               ))}
 
-            {/* WAITING (never joined yet) */}
-            {!isHost && remoteUsers.length === 0 && !hostLeft && (
-              <div className="waiting-wrapper">
-                <div className="waiting-text">
-                  🔮 Waiting for astrologer to go live…
-                </div>
+            {/* WAITING (no video yet, room not ended) */}
+            {!isHost && remoteUsers.length === 0 && !hostLeft && !roomEnded && (
+              <div className="waiting-text">
+                🔮 Waiting for astrologer to go live…
               </div>
             )}
 
-            {/* ENDED — no other astrologers online */}
-            {!isHost && hostLeft && (
-              <div className="waiting-wrapper ended">
-                <div className="waiting-text">
-                  🔮 Waiting for astrologer to go live…
-                </div>
+            {/* ENDED — astrologer has left or room ended */}
+            {!isHost && (hostLeft || roomEnded) && (
+              <div className="waiting-text">
+                🔮 Waiting for astrologer to go live…
               </div>
             )}
           </div>
