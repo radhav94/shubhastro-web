@@ -117,6 +117,9 @@ const Kundali = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState(null);
 
+  // Listen to header profile changes from Redux (kundli.selectedKundli)
+  const headerSelectedKundli = useSelector((state) => state.kundli.selectedKundli);
+
   // Token & Auth
   const role = localStorage.getItem("shubhtalk_role");
   const token =
@@ -166,6 +169,15 @@ const Kundali = () => {
       setSelectedProfile(profiles[0]);
     }
   }, [kundliId, profiles, selectedProfile, isFetching]);
+
+  // Sync with header profile selection (same pattern as AIWow)
+  useEffect(() => {
+    if (!headerSelectedKundli?._id) return;
+    // Only sync if the header selection differs from current local selection
+    if (headerSelectedKundli._id !== selectedProfile?._id && profiles.some(p => p._id === headerSelectedKundli._id)) {
+      setSelectedProfile(headerSelectedKundli);
+    }
+  }, [headerSelectedKundli, profiles]);
 
   // Clear selected profile when user changes (on refresh after login)
   useEffect(() => {
