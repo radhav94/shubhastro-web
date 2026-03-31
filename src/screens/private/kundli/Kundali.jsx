@@ -26,6 +26,7 @@ import {
   useLazyGetKundliPdfQuery,
 } from "../../../services/appServices/kundliServicesNew";
 import { setForm } from "../../../redux/kundliform/formSlice";
+import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { Toast } from "../../../component";
 import ProfileSelector from "./components/ProfileSelector";
 import KundliHeader from "./components/KundliHeader";
@@ -229,6 +230,7 @@ const Kundali = () => {
       };
 
       dispatch(setForm(profilePayload));
+      dispatch(setSelectedKundli(selectedProfile));
     }
   }, [selectedProfile, dispatch]);
 

@@ -46,6 +46,9 @@ const LiveStreamingContainer = ({ client }) => {
           lastName: currentLive.astrologerName?.split(" ").slice(1).join(" ") || "",
           rating: currentLive.rating,
           expertise: currentLive.expertise,
+          imageUrl: currentLive.imageUrl,
+          audioCallRate: currentLive.audioCallRate,
+          videoCallRate: currentLive.videoCallRate,
         },
       });
     }
