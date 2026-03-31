@@ -137,10 +137,13 @@ const PurposeProducts = () => {
       navigate("/login?skip=welcome");
       return;
     }
-    const productId = item?._id;
+    const productId = item?._id || item?.ID;
     if (!productId) { Toast.error("Unable to add — product ID missing"); return; }
+    const firstVariant = item?.variants?.find((v) => v.isActive) || item?.variants?.[0];
+    if (!firstVariant?._id) { Toast.error("No variant available for this product"); return; }
+    if (firstVariant?.stock === 0) { Toast.error("This variant is out of stock"); return; }
     try {
-      await addToCart({ productId, quantity: 1 }).unwrap();
+      await addToCart({ productId, variantId: firstVariant._id, quantity: 1 }).unwrap();
       Toast.success(`${getTitle(item)} added to cart`);
     } catch (err) {
       Toast.error(err?.data?.message || "Failed to add to cart");

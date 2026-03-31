@@ -110,7 +110,14 @@ const EPoojaDetail = () => {
   const cartItemsList = Array.isArray(cartItems) ? cartItems : [];
   const cartMatch = cartItemsList.find((item) => {
     const p = item?.productId || item?.product || item;
-    return p?._id === product?._id || String(p?._id) === String(product?._id);
+    const sameProduct = p?._id === product?._id || String(p?._id) === String(product?._id);
+    if (!sameProduct) return false;
+    // Also match by variant if available
+    const cartVariantId = item?.variantId?._id || item?.variantId || item?.variantSnapshot?._id || "";
+    if (selectedVariant?._id && cartVariantId) {
+      return String(cartVariantId) === String(selectedVariant._id);
+    }
+    return true;
   });
   const isInCart = !!cartMatch;
 
@@ -122,8 +129,9 @@ const EPoojaDetail = () => {
     if (newQty < 1) return;
     setQty(newQty);
     if (isInCart) {
-      const productId = cartMatch?.productId?._id || cartMatch?.product?._id || cartMatch?._id;
-      if (productId) updateCartItem({ productId, quantity: newQty });
+      const productId = cartMatch?.productId?._id || cartMatch?.product?._id || cartMatch?._id || product?._id;
+      const variantId = cartMatch?.variantId?._id || cartMatch?.variantId || cartMatch?.variantSnapshot?._id || selectedVariant?._id;
+      if (productId && variantId) updateCartItem({ productId, variantId, quantity: newQty });
     }
   };
 
@@ -276,7 +284,7 @@ const EPoojaDetail = () => {
   const handleAddToCart = async () => {
     if (!isLoggedIn()) { redirectToLogin(); return; }
     if (!mongoId) { Toast.error("Loading product details, please wait..."); return; }
-    if (!selectedVariant) { Toast.error("Please select a variant"); return; }
+    if (!selectedVariant?._id) { Toast.error("Please select a variant"); return; }
     if (selectedVariant?.stock === 0) { Toast.error("This variant is out of stock"); return; }
     try {
       await addToCart({ productId: mongoId, variantId: selectedVariant._id, quantity: qty }).unwrap();
@@ -289,6 +297,8 @@ const EPoojaDetail = () => {
   const handleBuyNow = () => {
     if (!isLoggedIn()) { redirectToLogin(); return; }
     if (!mongoId) { Toast.error("Loading product details, please wait..."); return; }
+    if (!selectedVariant?._id) { Toast.error("Please select a variant"); return; }
+    if (selectedVariant?.stock === 0) { Toast.error("This variant is out of stock"); return; }
     if (!addressLoading && addressList.length === 0) {
       setEditingAddress(null);
       setNewAddr({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "", type: "home", country: "IN" });
@@ -484,7 +494,7 @@ const EPoojaDetail = () => {
 
           <div className={styles.ratingLine}>
             <StarRating rating={rating} size={18} />
-            <span className={styles.revCount}>({reviewCount.toLocaleString()} reviews)</span>
+            <span className={styles.revCount}>({Number(reviewCount || 0).toLocaleString()} reviews)</span>
           </div>
 
           {description && <p className={styles.desc}>{description}</p>}
@@ -631,7 +641,7 @@ const EPoojaDetail = () => {
               <button className={styles.orderBtn} disabled={!selectedAddress} onClick={() => {
                 const chosen = addressList.find((a) => (a._id || a.id) === selectedAddress);
                 setShowAddress(false);
-                navigate("/checkout", { state: { buyNowProduct: product, buyNowQty: qty, address: chosen } });
+                navigate("/checkout", { state: { buyNowProduct: product, buyNowVariant: selectedVariant, buyNowQty: qty, address: chosen } });
               }}>Order Here</button>
             </div>
           </div>

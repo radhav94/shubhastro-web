@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./EPoojaCheckout.module.scss";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { useGetCartQuery, useRemoveCartItemMutation, useCreateMallOrderMutation, useUpdateMallOrderMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
+import detailStyles from "../detail/EPoojaDetail.module.scss";
+import { FiChevronLeft, FiChevronRight, FiX, FiHome, FiBriefcase, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { useGetCartQuery, useRemoveCartItemMutation, useCreateMallOrderMutation, useUpdateMallOrderMutation, useGetAddressesQuery, useAddAddressMutation, useUpdateAddressMutation, useDeleteAddressMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
 
@@ -19,7 +20,6 @@ import walletlogo from "../../../../assets/icons/upi/wallet.svg";
 
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_SJVwTGtUhFpODR";
 const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js";
-const GST_RATE = 0.18;
 
 const UPI_APPS = [
   { _id: "phonepe", name: "Phonepe", logo: phonepeLogo, rzpApp: "phonepe", scheme: "phonepe" },
@@ -42,17 +42,39 @@ const PAYMENT_METHODS = [
 
 const getItemTitle = (item) => {
   const p = item?.productId || item?.product || item;
-  return p?.title || p?.name || "Product";
+  const variantTitle = item?.variantSnapshot?.title;
+  const productTitle = p?.title || p?.name || "Product";
+  return variantTitle ? `${productTitle} — ${variantTitle}` : productTitle;
 };
 const getItemPrice = (item) => {
+  // Cart API fields (most reliable for cart items)
+  if (item?.currentPrice) return item.currentPrice;
+  if (item?.priceAtAdd) return item.priceAtAdd;
+  if (item?.price) return item.price;
+  // Try variant snapshot price
+  if (item?.variantSnapshot?.price) return item.variantSnapshot.price;
+  // Try variantId if populated as object
+  if (item?.variantId?.price) return item.variantId.price;
   const p = item?.productId || item?.product || item;
+  // Try variant price from product data
+  const variant = p?.variants?.find((v) => v.isActive) || p?.variants?.[0];
+  if (variant?.price) return variant.price;
   return p?.price || p?.selling_price || 0;
+};
+const getItemGstPercent = (item) => {
+  // Check item-level GST first
+  if (item?.gst !== undefined && item?.gst !== null) return item.gst;
+  if (item?.variantSnapshot?.gst !== undefined) return item.variantSnapshot.gst;
+  if (item?.variantId?.gst !== undefined) return item.variantId.gst;
+  const p = item?.productId || item?.product || item;
+  return p?.gst || 0;
 };
 const EPoojaCheckout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const address = location.state?.address || null;
+  const [chosenAddress, setChosenAddress] = useState(location.state?.address || null);
   const buyNowProduct = location.state?.buyNowProduct || null;
+  const buyNowVariant = location.state?.buyNowVariant || null;
   const buyNowQtyFromState = location.state?.buyNowQty || 1;
 
   const isBuyNowMode = !!buyNowProduct;
@@ -65,8 +87,94 @@ const EPoojaCheckout = () => {
   const [buyNowQty] = useState(buyNowQtyFromState);
   const actualPaymentMethodRef = useRef(null);
 
+  // Address modal state
+  const [showAddress, setShowAddress] = useState(false);
+  const [showNewAddress, setShowNewAddress] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [editingAddress, setEditingAddress] = useState(null);
+  const [newAddr, setNewAddr] = useState({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "", type: "home", country: "IN" });
+  const [addrErrors, setAddrErrors] = useState({});
+
+  // Address API
+  const { data: addressData, isLoading: addressLoading } = useGetAddressesQuery();
+  const [addAddressApi, { isLoading: isAddingAddress }] = useAddAddressMutation();
+  const [updateAddressApi, { isLoading: isUpdatingAddress }] = useUpdateAddressMutation();
+  const [deleteAddressApi] = useDeleteAddressMutation();
+  const addresses = addressData?.data || addressData?.data?.addresses || [];
+  const addressList = Array.isArray(addresses) ? addresses : [];
+
+  useEffect(() => {
+    if (addressList.length > 0 && !selectedAddress) {
+      // Pre-select the current chosen address, or default
+      const currentId = chosenAddress?._id || chosenAddress?.id;
+      if (currentId && addressList.find((a) => (a._id || a.id) === currentId)) {
+        setSelectedAddress(currentId);
+      } else {
+        const def = addressList.find((a) => a.isDefault) || addressList[0];
+        setSelectedAddress(def?._id || def?.id);
+      }
+    }
+  }, [addressList, selectedAddress, chosenAddress]);
+
+  const validateAddress = () => {
+    const errs = {};
+    if (!newAddr.name.trim()) errs.name = "Name is required";
+    else if (!/^[a-zA-Z\s]+$/.test(newAddr.name.trim())) errs.name = "Name must contain only letters";
+    if (!newAddr.phone.trim()) errs.phone = "Phone is required";
+    else if (!/^\d{10}$/.test(newAddr.phone.trim())) errs.phone = "Enter a valid 10-digit phone number";
+    if (!newAddr.addressLine1.trim()) errs.addressLine1 = "Address line 1 is required";
+    if (!newAddr.pincode.trim()) errs.pincode = "Pincode is required";
+    else if (!/^\d{6}$/.test(newAddr.pincode.trim())) errs.pincode = "Enter a valid 6-digit pincode";
+    if (!newAddr.city.trim()) errs.city = "City is required";
+    else if (!/^[a-zA-Z\s]+$/.test(newAddr.city.trim())) errs.city = "City must contain only letters";
+    if (!newAddr.state.trim()) errs.state = "State is required";
+    else if (!/^[a-zA-Z\s]+$/.test(newAddr.state.trim())) errs.state = "State must contain only letters";
+    setAddrErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleAddAddress = async () => {
+    if (!validateAddress()) return;
+    try {
+      if (editingAddress) {
+        await updateAddressApi({ addressId: editingAddress._id || editingAddress.id, ...newAddr }).unwrap();
+        Toast.success("Address updated");
+      } else {
+        await addAddressApi(newAddr).unwrap();
+        Toast.success("Address added");
+      }
+      setShowNewAddress(false);
+      setEditingAddress(null);
+      setAddrErrors({});
+      setNewAddr({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "", type: "home", country: "IN" });
+      setShowAddress(true);
+    } catch (err) {
+      Toast.error(err?.data?.message || "Failed to save address");
+    }
+  };
+
+  const openEditAddress = (addr) => {
+    setEditingAddress(addr);
+    setNewAddr({ name: addr.name || "", phone: addr.phone || "", addressLine1: addr.addressLine1 || "", addressLine2: addr.addressLine2 || "", city: addr.city || "", state: addr.state || "", pincode: addr.pincode || "", landmark: addr.landmark || "", type: addr.type || "home", country: addr.country || "IN" });
+    setShowAddress(false);
+    setShowNewAddress(true);
+  };
+
+  const handleDeleteAddress = async (addrId) => {
+    if (!addrId || !window.confirm("Are you sure you want to delete this address?")) return;
+    try {
+      await deleteAddressApi({ addressId: addrId }).unwrap();
+      Toast.success("Address deleted");
+      if (selectedAddress === addrId) setSelectedAddress(null);
+      if ((chosenAddress?._id || chosenAddress?.id) === addrId) setChosenAddress(null);
+    } catch (err) {
+      Toast.error(err?.data?.message || "Failed to delete address");
+    }
+  };
+
   const { data: cartData, isLoading } = useGetCartQuery();
   const [removeCartItem] = useRemoveCartItemMutation();
+  const getCartItemVariantId = (item) => item?.variantId?._id || item?.variantId || item?.variantSnapshot?._id || "";
   const [createMallOrder] = useCreateMallOrderMutation();
   const [updateMallOrder] = useUpdateMallOrderMutation();
   const orderIdRef = useRef(null);
@@ -74,48 +182,66 @@ const EPoojaCheckout = () => {
   const rawCartItems = Array.isArray(cartItems) ? cartItems : [];
 
   const items = isBuyNowMode
-    ? [{ productId: buyNowProduct, quantity: buyNowQty, _id: buyNowProduct?._id || "buynow" }]
+    ? [{ productId: buyNowProduct, variantId: buyNowVariant?._id || "", variantSnapshot: buyNowVariant, quantity: buyNowQty, _id: buyNowProduct?._id || "buynow" }]
     : rawCartItems;
 
-  const subtotal = items.reduce((sum, item) => sum + getItemPrice(item) * (item?.quantity || 1), 0);
-  const gst = Math.round(subtotal * GST_RATE * 100) / 100;
+  // Use cart-level totals from API when available (most reliable), fall back to manual calculation
+  const cartApiTotalAmount = cartData?.data?.totalAmount || cartData?.data?.cart?.totalAmount || cartData?.data?.total_amount || 0;
+  const cartApiGst = cartData?.data?.totalGst || cartData?.data?.cart?.totalGst || cartData?.data?.gst_amount || cartData?.data?.cart?.gst_amount || 0;
+
+  const manualSubtotal = items.reduce((sum, item) => sum + getItemPrice(item) * (item?.quantity || 1), 0);
+  const manualGst = items.reduce((sum, item) => {
+    const lineTotal = getItemPrice(item) * (item?.quantity || 1);
+    const gstPercent = getItemGstPercent(item);
+    return sum + Math.round(lineTotal * gstPercent / 100 * 100) / 100;
+  }, 0);
+
+  const subtotal = isBuyNowMode ? manualSubtotal : (cartApiTotalAmount || manualSubtotal);
+  const gst = isBuyNowMode ? manualGst : (cartApiGst || manualGst);
   const grandTotal = Math.round((subtotal + gst) * 100) / 100;
 
   // Shared: build shipping address from state
   const buildShippingAddress = useCallback(() => {
-    if (!address) return undefined;
+    if (!chosenAddress) return undefined;
     return {
-      name: address.name || "",
-      phone: address.phone || "",
-      address: address.addressLine1 || address.address || address.line1 || "",
-      city: address.city || "",
-      state: address.state || "",
-      pincode: Number(address.pincode || address.pin) || 0,
+      name: chosenAddress.name || "",
+      phone: chosenAddress.phone || "",
+      address: chosenAddress.addressLine1 || chosenAddress.address || chosenAddress.line1 || "",
+      city: chosenAddress.city || "",
+      state: chosenAddress.state || "",
+      pincode: Number(chosenAddress.pincode || chosenAddress.pin) || 0,
     };
-  }, [address]);
+  }, [chosenAddress]);
 
   // Step 1: Create order with pending status BEFORE opening Razorpay
   const createOrder = useCallback(async () => {
     const orderItems = items.map((item) => {
       const p = item?.productId || item?.product || item;
+      // Extract variantId from cart item data, variant snapshot, or fall back to first active variant
+      const variantId = item?.variantId?._id || item?.variantId
+        || item?.variantSnapshot?._id
+        || item?.variant?._id || item?.variant
+        || (p?.variants?.find((v) => v.isActive) || p?.variants?.[0])?._id
+        || "";
       return {
-        productId: String(p?._id || p?.id || ""),
+        productId: String(p?._id || p?.id || p?.ID || ""),
+        variantId: String(variantId),
         quantity: item?.quantity || 1,
       };
     });
 
-    const generatedId = `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const shippingAddress = buildShippingAddress();
+    const cartId = cartData?.data?.cartId || cartData?.data?.cart?._id || cartData?.data?._id || "";
 
     const payload = {
-      ID: generatedId,
       items: orderItems,
+      ...(cartId && { cartId }),
+      sub_total: subtotal,
+      gst_amount: gst,
       shipping_charge: 0,
-      discount: 0,
+      cod_charge: 0,
+      total_amount: grandTotal,
       payment_method: "online",
-      payment_status: "pending",
-      order_status: "pending",
-      final_amount: grandTotal,
       ...(shippingAddress && { shipping_address: shippingAddress }),
       notes: "",
     };
@@ -123,10 +249,8 @@ const EPoojaCheckout = () => {
     try {
       const res = await createMallOrder(payload).unwrap();
       console.log("[EPoojaCheckout] Create order response:", JSON.stringify(res));
-      // Prioritize _id (MongoDB ObjectId) for update URL (e.g. /api/mall/orders/69c50cb5...)
       orderIdRef.current = res?.data?.order?._id || res?.data?._id || res?.order?._id || res?._id
-        || res?.data?.order?.id || res?.data?.id || res?.order?.id || res?.id
-        || generatedId;
+        || res?.data?.order?.id || res?.data?.id || res?.order?.id || res?.id;
       console.log("[EPoojaCheckout] Using orderId:", orderIdRef.current);
 
       // Extract Razorpay gateway order ID for checkout (starts with "order_")
@@ -139,7 +263,7 @@ const EPoojaCheckout = () => {
       console.error("[EPoojaCheckout] Failed to create order:", err);
       return null;
     }
-  }, [items, grandTotal, buildShippingAddress, createMallOrder]);
+  }, [items, grandTotal, subtotal, gst, cartData, buildShippingAddress, createMallOrder]);
 
   // Step 2: Update order after payment success or failure
   const updateOrder = useCallback(async (paymentStatus, paymentMethod) => {
@@ -153,9 +277,11 @@ const EPoojaCheckout = () => {
       payment_status: paymentStatus,
       order_status: paymentStatus === "paid" ? "confirmed" : "failed",
       payment_method: paymentMethod || "online",
+      sub_total: subtotal,
+      gst_amount: gst,
       shipping_charge: 0,
-      discount: 0,
-      final_amount: grandTotal,
+      cod_charge: 0,
+      total_amount: grandTotal,
       ...(shippingAddress && { shipping_address: shippingAddress }),
       notes: "",
     };
@@ -165,7 +291,7 @@ const EPoojaCheckout = () => {
     } catch (err) {
       console.error("[EPoojaCheckout] Failed to update order:", err);
     }
-  }, [grandTotal, buildShippingAddress, updateMallOrder]);
+  }, [grandTotal, subtotal, gst, buildShippingAddress, updateMallOrder]);
 
   // Load Razorpay script
   useEffect(() => {
@@ -218,8 +344,9 @@ const EPoojaCheckout = () => {
         if (!isBuyNowMode && rawCartItems.length > 0) {
           for (const item of rawCartItems) {
             const productId = item?.productId?._id || item?.product?._id || item?._id;
+            const variantId = getCartItemVariantId(item);
             if (productId) {
-              try { await removeCartItem({ productId }).unwrap(); } catch (_) { /* ignore */ }
+              try { await removeCartItem({ productId, variantId }).unwrap(); } catch (_) { /* ignore */ }
             }
           }
         }
@@ -230,11 +357,12 @@ const EPoojaCheckout = () => {
           });
           if (inCart) {
             const pid = inCart?.productId?._id || inCart?.product?._id || inCart?._id;
-            if (pid) { try { await removeCartItem({ productId: pid }).unwrap(); } catch (_) { /* ignore */ } }
+            const vid = getCartItemVariantId(inCart);
+            if (pid) { try { await removeCartItem({ productId: pid, variantId: vid }).unwrap(); } catch (_) { /* ignore */ } }
           }
         }
         Toast.success("Payment successful!");
-        navigate("/booking-success", { state: { total: grandTotal, address } });
+        navigate("/booking-success", { state: { total: grandTotal, address: chosenAddress } });
       },
       prefill: {
         name: localStorage.getItem("shubhtalk_user_name") || "",
@@ -267,7 +395,7 @@ const EPoojaCheckout = () => {
       setIsProcessing(false);
       Toast.error("Could not open payment gateway. Please try again.");
     }
-  }, [isLoaded, isProcessing, grandTotal, items, navigate, address, isBuyNowMode, rawCartItems, removeCartItem, selectedMethod, createOrder, updateOrder]);
+  }, [isLoaded, isProcessing, grandTotal, items, navigate, chosenAddress, isBuyNowMode, rawCartItems, removeCartItem, selectedMethod, createOrder, updateOrder]);
 
   const handleProceedToPay = useCallback(() => {
     openRazorpay(selectedMethod);
@@ -283,13 +411,14 @@ const EPoojaCheckout = () => {
     setSelectedMethod("upi");
 
     // Step 1: Create order with pending status
-    const orderId = await createOrder();
-    if (!orderId) {
+    const orderResult = await createOrder();
+    if (!orderResult) {
       setIsProcessing(false);
       Toast.error("Failed to create order. Please try again.");
       return;
     }
 
+    const { gatewayOrderId } = orderResult;
     const amountInPaise = Math.round(grandTotal * 100);
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -299,6 +428,7 @@ const EPoojaCheckout = () => {
       currency: "INR",
       name: "ShubhTalk",
       description: items.length === 1 ? getItemTitle(items[0]) : `${items.length} items from AstroMall`,
+      ...(gatewayOrderId && { order_id: gatewayOrderId }),
       handler: async () => {
         setIsProcessing(false);
         // Step 2: Update order to paid with actual payment method
@@ -308,8 +438,9 @@ const EPoojaCheckout = () => {
         if (!isBuyNowMode && rawCartItems.length > 0) {
           for (const item of rawCartItems) {
             const productId = item?.productId?._id || item?.product?._id || item?._id;
+            const variantId = getCartItemVariantId(item);
             if (productId) {
-              try { await removeCartItem({ productId }).unwrap(); } catch (_) { /* ignore */ }
+              try { await removeCartItem({ productId, variantId }).unwrap(); } catch (_) { /* ignore */ }
             }
           }
         }
@@ -320,11 +451,12 @@ const EPoojaCheckout = () => {
           });
           if (inCart) {
             const pid = inCart?.productId?._id || inCart?.product?._id || inCart?._id;
-            if (pid) { try { await removeCartItem({ productId: pid }).unwrap(); } catch (_) { /* ignore */ } }
+            const vid = getCartItemVariantId(inCart);
+            if (pid) { try { await removeCartItem({ productId: pid, variantId: vid }).unwrap(); } catch (_) { /* ignore */ } }
           }
         }
         Toast.success("Payment successful!");
-        navigate("/booking-success", { state: { total: grandTotal, address } });
+        navigate("/booking-success", { state: { total: grandTotal, address: chosenAddress } });
       },
       prefill: {
         name: localStorage.getItem("shubhtalk_user_name") || "",
@@ -374,7 +506,7 @@ const EPoojaCheckout = () => {
       setIsProcessing(false);
       Toast.error("Could not open payment gateway. Please try again.");
     }
-  }, [isLoaded, isProcessing, grandTotal, items, navigate, address, isBuyNowMode, rawCartItems, removeCartItem, createOrder, updateOrder]);
+  }, [isLoaded, isProcessing, grandTotal, items, navigate, chosenAddress, isBuyNowMode, rawCartItems, removeCartItem, createOrder, updateOrder]);
 
   if (!isBuyNowMode && isLoading) {
     return <div className={styles.page}><div style={{ textAlign: "center", padding: "80px 0", color: "#999" }}>Loading...</div></div>;
@@ -482,7 +614,7 @@ const EPoojaCheckout = () => {
             </div>
 
             <div className={styles.priceRow}>
-              <span>GST (18%)</span>
+              <span>GST</span>
               <span>₹{gst.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
 
@@ -491,22 +623,31 @@ const EPoojaCheckout = () => {
               <span>₹{grandTotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
 
-            <p className={styles.gstNote}>*All prices are inclusive of applicable GST @18%</p>
+            <p className={styles.gstNote}>*All prices are inclusive of applicable GST</p>
           </div>
 
-          {address && (
+          {chosenAddress && (
             <div className={styles.addressBox}>
               <h3 className={styles.addressBoxTitle}>Delivery Address</h3>
               <p className={styles.addressBoxText}>
-                {address.name && <strong>{address.name}{address.type ? ` (${address.type})` : ""}: </strong>}
-                {!address.name && address.type && <strong>{address.type}: </strong>}
-                {address.addressLine1 || address.address || address.line1}
-                {(address.addressLine2 || address.line2) ? `, ${address.addressLine2 || address.line2}` : ""}
-                {address.landmark ? `, ${address.landmark}` : ""}
-                {(address.pincode || address.pin) ? ` - ${address.pincode || address.pin}` : ""}
-                {address.city ? `, ${address.city}` : ""}
-                {address.state ? `, ${address.state}` : ""}
+                {chosenAddress.name && <strong>{chosenAddress.name}{chosenAddress.type ? ` (${chosenAddress.type})` : ""}: </strong>}
+                {!chosenAddress.name && chosenAddress.type && <strong>{chosenAddress.type}: </strong>}
+                {chosenAddress.addressLine1 || chosenAddress.address || chosenAddress.line1}
+                {(chosenAddress.addressLine2 || chosenAddress.line2) ? `, ${chosenAddress.addressLine2 || chosenAddress.line2}` : ""}
+                {chosenAddress.landmark ? `, ${chosenAddress.landmark}` : ""}
+                {(chosenAddress.pincode || chosenAddress.pin) ? ` - ${chosenAddress.pincode || chosenAddress.pin}` : ""}
+                {chosenAddress.city ? `, ${chosenAddress.city}` : ""}
+                {chosenAddress.state ? `, ${chosenAddress.state}` : ""}
               </p>
+              <button className={styles.changeAddrBtn} onClick={() => setShowAddress(true)}>Change</button>
+            </div>
+          )}
+
+          {!chosenAddress && (
+            <div className={styles.addressBox}>
+              <h3 className={styles.addressBoxTitle}>Delivery Address</h3>
+              <p className={styles.addressBoxText} style={{ color: "#999" }}>No address selected</p>
+              <button className={styles.changeAddrBtn} onClick={() => setShowAddress(true)}>Select Address</button>
             </div>
           )}
 
@@ -524,6 +665,68 @@ const EPoojaCheckout = () => {
           </div>
         </div>
       </div>
+
+      {/* ── Address Selection Modal ── */}
+      {showAddress && (
+        <div className={detailStyles.overlay} onClick={() => setShowAddress(false)}>
+          <div className={detailStyles.modal} onClick={(e) => e.stopPropagation()}>
+            <button className={detailStyles.modalClose} onClick={() => setShowAddress(false)} aria-label="Close"><FiX /></button>
+            <h2 className={detailStyles.modalTitle}>SELECT ADDRESS</h2>
+            <div className={detailStyles.addressList}>
+              {addressLoading && <p style={{ textAlign: "center", color: "#999", padding: "16px 0" }}>Loading addresses...</p>}
+              {!addressLoading && addressList.length === 0 && <p style={{ textAlign: "center", color: "#aaa", padding: "16px 0" }}>No saved addresses</p>}
+              {!addressLoading && addressList.map((a) => {
+                const addrId = a._id || a.id;
+                const addrType = a.type || "home";
+                return (
+                  <div key={addrId} className={`${detailStyles.addressCard} ${selectedAddress === addrId ? detailStyles.addressActive : ""}`} onClick={() => setSelectedAddress(addrId)} style={{ cursor: "pointer" }}>
+                    <span className={detailStyles.addressIcon}>{addrType === "home" ? <FiHome /> : <FiBriefcase />}</span>
+                    <div className={detailStyles.addressInfo}>
+                      <span className={detailStyles.addressType}>{a.name || addrType}{a.phone ? ` · ${a.phone}` : ""}</span>
+                      <p className={detailStyles.addressText}>{[a.addressLine1, a.addressLine2, a.landmark].filter(Boolean).join(", ")}<br />{[a.city, a.state, a.pincode].filter(Boolean).join(", ")}</p>
+                    </div>
+                    <button className={detailStyles.reviewActionBtn} onClick={(e) => { e.stopPropagation(); openEditAddress(a); }} aria-label="Edit address"><FiEdit2 size={14} /></button>
+                    <button className={detailStyles.reviewActionBtn} onClick={(e) => { e.stopPropagation(); handleDeleteAddress(addrId); }} aria-label="Delete address"><FiTrash2 size={14} /></button>
+                    <input type="radio" name="address" checked={selectedAddress === addrId} readOnly className={detailStyles.addressRadio} />
+                  </div>
+                );
+              })}
+            </div>
+            <div className={detailStyles.modalActions}>
+              <button className={detailStyles.addAddressBtn} onClick={() => { setShowAddress(false); setEditingAddress(null); setNewAddr({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "", type: "home", country: "IN" }); setShowNewAddress(true); }}>Add New Address +</button>
+              <button className={detailStyles.orderBtn} disabled={!selectedAddress} onClick={() => {
+                const chosen = addressList.find((a) => (a._id || a.id) === selectedAddress);
+                setChosenAddress(chosen);
+                setShowAddress(false);
+              }}>Order Here</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Add/Edit Address Modal ── */}
+      {showNewAddress && (
+        <div className={detailStyles.overlay} onClick={() => setShowNewAddress(false)}>
+          <div className={`${detailStyles.modal} ${detailStyles.modalLarge}`} onClick={(e) => e.stopPropagation()}>
+            <button className={detailStyles.modalClose} onClick={() => setShowNewAddress(false)} aria-label="Close"><FiX /></button>
+            <h2 className={detailStyles.modalTitle}>{editingAddress ? "EDIT ADDRESS" : "ADD NEW ADDRESS"}</h2>
+            <div className={detailStyles.formRow}>
+              <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>Name *</label><input type="text" placeholder="Full name" className={`${detailStyles.formInput} ${addrErrors.name ? detailStyles.formInputError : ""}`} value={newAddr.name} onChange={(e) => { setNewAddr({ ...newAddr, name: e.target.value }); setAddrErrors({ ...addrErrors, name: "" }); }} />{addrErrors.name && <p className={detailStyles.formError}>{addrErrors.name}</p>}</div>
+              <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>Phone *</label><input type="tel" placeholder="Phone number" maxLength={10} className={`${detailStyles.formInput} ${addrErrors.phone ? detailStyles.formInputError : ""}`} value={newAddr.phone} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); setNewAddr({ ...newAddr, phone: v }); setAddrErrors({ ...addrErrors, phone: "" }); }} />{addrErrors.phone && <p className={detailStyles.formError}>{addrErrors.phone}</p>}</div>
+            </div>
+            <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>Address line 1 *</label><input type="text" placeholder="Enter here" className={`${detailStyles.formInput} ${addrErrors.addressLine1 ? detailStyles.formInputError : ""}`} value={newAddr.addressLine1} onChange={(e) => { setNewAddr({ ...newAddr, addressLine1: e.target.value }); setAddrErrors({ ...addrErrors, addressLine1: "" }); }} />{addrErrors.addressLine1 && <p className={detailStyles.formError}>{addrErrors.addressLine1}</p>}</div>
+            <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>Address line 2</label><input type="text" placeholder="Enter here" className={detailStyles.formInput} value={newAddr.addressLine2} onChange={(e) => setNewAddr({ ...newAddr, addressLine2: e.target.value })} /></div>
+            <div className={detailStyles.formRow}>
+              <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>Pincode *</label><input type="text" placeholder="Enter here" maxLength={6} className={`${detailStyles.formInput} ${addrErrors.pincode ? detailStyles.formInputError : ""}`} value={newAddr.pincode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); setNewAddr({ ...newAddr, pincode: v }); setAddrErrors({ ...addrErrors, pincode: "" }); }} />{addrErrors.pincode && <p className={detailStyles.formError}>{addrErrors.pincode}</p>}</div>
+              <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>City *</label><input type="text" placeholder="Enter here" className={`${detailStyles.formInput} ${addrErrors.city ? detailStyles.formInputError : ""}`} value={newAddr.city} onChange={(e) => { setNewAddr({ ...newAddr, city: e.target.value }); setAddrErrors({ ...addrErrors, city: "" }); }} />{addrErrors.city && <p className={detailStyles.formError}>{addrErrors.city}</p>}</div>
+              <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>State *</label><input type="text" placeholder="Type here" className={`${detailStyles.formInput} ${addrErrors.state ? detailStyles.formInputError : ""}`} value={newAddr.state} onChange={(e) => { setNewAddr({ ...newAddr, state: e.target.value }); setAddrErrors({ ...addrErrors, state: "" }); }} />{addrErrors.state && <p className={detailStyles.formError}>{addrErrors.state}</p>}</div>
+            </div>
+            <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>Landmark</label><input type="text" placeholder="Near..." className={detailStyles.formInput} value={newAddr.landmark} onChange={(e) => setNewAddr({ ...newAddr, landmark: e.target.value })} /></div>
+            <div className={detailStyles.saveAsGroup}><span className={detailStyles.saveAsLabel}>Save Address as</span><div className={detailStyles.saveAsTags}><button className={`${detailStyles.saveAsTag} ${newAddr.type === "home" ? detailStyles.saveAsActive : ""}`} onClick={() => setNewAddr({ ...newAddr, type: "home" })}>Home</button><button className={`${detailStyles.saveAsTag} ${newAddr.type === "work" ? detailStyles.saveAsActive : ""}`} onClick={() => setNewAddr({ ...newAddr, type: "work" })}>Work</button></div></div>
+            <button className={detailStyles.saveAddressBtn} onClick={handleAddAddress} disabled={isAddingAddress || isUpdatingAddress}>{(isAddingAddress || isUpdatingAddress) ? "Saving..." : (editingAddress ? "Update Address ›" : "Save Address ›")}</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

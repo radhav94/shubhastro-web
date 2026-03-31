@@ -76,6 +76,12 @@ const CategoryProducts = () => {
 
   const statusFalse = productsData?.data?.status === false;
 
+  // Reset page and accumulated data when category changes
+  useEffect(() => {
+    setPage(1);
+    setAccumulated([]);
+  }, [categoryId]);
+
   useEffect(() => {
     if (!productsData) return;
     const d = productsData?.data;
@@ -129,13 +135,13 @@ const CategoryProducts = () => {
       navigate("/login?skip=welcome");
       return;
     }
-    const productId = item?._id;
+    const productId = item?._id || item?.ID;
     if (!productId) { Toast.error("Unable to add — product ID missing"); return; }
+    const firstVariant = item?.variants?.find((v) => v.isActive) || item?.variants?.[0];
+    if (!firstVariant?._id) { Toast.error("No variant available for this product"); return; }
+    if (firstVariant?.stock === 0) { Toast.error("This variant is out of stock"); return; }
     try {
-      const payload = { productId, quantity: 1 };
-      const firstVariant = item?.variants?.find((v) => v.isActive);
-      if (firstVariant?._id) payload.variantId = firstVariant._id;
-      await addToCart(payload).unwrap();
+      await addToCart({ productId, variantId: firstVariant._id, quantity: 1 }).unwrap();
       Toast.success(`${getTitle(item)} added to cart`);
     } catch (err) {
       Toast.error(err?.data?.message || "Failed to add to cart");
