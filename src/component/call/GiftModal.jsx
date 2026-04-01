@@ -7,7 +7,7 @@ import {
 import toast from "../toast";
 import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance";
 import { IoChevronForward } from "react-icons/io5";
-import WalletModal from "./WalletModal";
+import RechargeModal from "../recharge-modal/RechargeModal";
 import WalletIcon from "../../assets/icons/wallet-2.svg";
 import AstrologerShopImage from "../../assets/images/astrologer-shop.png";
 import { getUserFromStorage } from "../../utils/authStorage";
@@ -62,7 +62,7 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
   const { data, isLoading } = useGetAllGiftsQuery();
   const [sendGift, { isLoading: isSending }] = useSendGiftMutation();
   const [selected, setSelected] = useState(null);
-  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
   const { balance, refreshWallet } = useWalletBalance();
   
   const user = getUserFromStorage();
@@ -164,11 +164,16 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
 
   const handleAddMoney = () => {
     setGiftHidden(true);
-    setIsWalletModalOpen(true);
+    setIsRechargeModalOpen(true);
   };
 
-  const handleWalletClose = () => {
-    setIsWalletModalOpen(false);
+  const handleRechargeClose = () => {
+    setIsRechargeModalOpen(false);
+    setGiftHidden(false);
+  };
+
+  const handleRechargeSuccess = () => {
+    setIsRechargeModalOpen(false);
     setGiftHidden(false);
     refreshWallet();
     
@@ -322,10 +327,12 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
       </div>
       )}
 
-      {/* Wallet Modal */}
-      <WalletModal
-        isOpen={isWalletModalOpen}
-        onClose={handleWalletClose}
+      {/* Recharge Modal */}
+      <RechargeModal
+        isOpen={isRechargeModalOpen}
+        onClose={handleRechargeClose}
+        onSuccess={handleRechargeSuccess}
+        title="Recharge Wallet"
       />
     </>
   );

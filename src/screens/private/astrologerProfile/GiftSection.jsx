@@ -5,16 +5,16 @@ import {
   useGetAllGiftsQuery,
   useSendGiftMutation,
 } from "../../../redux/api/gift/giftApi";
-import { useNavigate } from "react-router-dom";
 import toast from "../../../component/toast";
 import { useWalletBalance } from "../wallet/useWalletBalance";
+import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 
 const GiftSection = ({ astrologer }) => {
   const { data, isLoading } = useGetAllGiftsQuery();
   const [sendGift, { isLoading: isSending }] = useSendGiftMutation();
-  const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
   const [disableSend, setDisableSend] = useState(false);
+  const [isRechargeOpen, setIsRechargeOpen] = useState(false);
   const gifts = data?.data || [];
   const { balance, refreshWallet } = useWalletBalance();
 
@@ -34,7 +34,13 @@ const GiftSection = ({ astrologer }) => {
     }
   };
 
-  const handleRecharge = () => navigate("/recharge");
+  const handleRecharge = () => setIsRechargeOpen(true);
+
+  const handleRechargeSuccess = () => {
+    setIsRechargeOpen(false);
+    refreshWallet();
+    window.dispatchEvent(new Event("walletBalanceUpdated"));
+  };
 
   useEffect(() => {
     if (selected && selected?.price > balance) {
@@ -93,6 +99,13 @@ const GiftSection = ({ astrologer }) => {
             : `Send Gift ${selected ? `• ₹${selected?.price}` : ""}`}
         </button>
       </div>
+
+      <RechargeModal
+        isOpen={isRechargeOpen}
+        onClose={() => setIsRechargeOpen(false)}
+        onSuccess={handleRechargeSuccess}
+        title="Recharge Wallet"
+      />
     </div>
   );
 };

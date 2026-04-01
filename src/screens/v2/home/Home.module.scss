@@ -3924,6 +3924,25 @@
   }
 }
 
+.dashaProfileName {
+  display: inline;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+
+  svg {
+    color: #ff6b35;
+    flex-shrink: 0;
+  }
+
+  @media screen and (width <= 767px) {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+}
+
 /* Dasha Cards Grid (for 4 or less cards) */
 .dashaCardsGrid {
   display: grid;
