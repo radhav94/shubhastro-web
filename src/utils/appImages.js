@@ -218,6 +218,14 @@ import GemstoneInstruction from "../assets/aiwow/gemstone-1.png";
 import ClothColorInstruction from "../assets/aiwow/cloth-color-1.png";
 import AuraInstruction from "../assets/aiwow/face-reading-1.png"; // Using face reading image as placeholder
 
+// AI WOW Gender-specific Instruction Images
+import AuraMale from "../assets/aiwow/aura-male.png";
+import AuraFemale from "../assets/aiwow/aura-female.png";
+import ClothMale from "../assets/aiwow/cloth-male.png";
+import ClothFemale from "../assets/aiwow/cloth-female.png";
+import FaceMale from "../assets/aiwow/face-male.png";
+import FaceFemale from "../assets/aiwow/face-female.png";
+
 const aiWowIcons = {
   vastu: VastuIcon,
   gemstone: GemstoneIcon,
@@ -247,10 +255,21 @@ const aiWowInstructions = {
   aura: AuraInstruction,
 };
 
+const aiWowGenderedInstructions = {
+  aura: { male: AuraMale, female: AuraFemale },
+  clothColor: { male: ClothMale, female: ClothFemale },
+  faceReading: { male: FaceMale, female: FaceFemale },
+};
+
 export const getAIWowIcon = (iconName) => {
   return aiWowIcons[iconName] || null;
 };
 
-export const getAIWowInstructionImage = (featureName) => {
+export const getAIWowInstructionImage = (featureName, gender) => {
+  if (gender && aiWowGenderedInstructions[featureName]) {
+    const genderKey = gender.toLowerCase();
+    const gendered = aiWowGenderedInstructions[featureName];
+    if (gendered[genderKey]) return gendered[genderKey];
+  }
   return aiWowInstructions[featureName] || null;
 };
