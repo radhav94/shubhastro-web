@@ -146,17 +146,35 @@ const EPoojaDetail = () => {
   // When user picks an attribute value, find the matching variant
   const handleAttrSelect = (dimName, value) => {
     const next = { ...selectedAttrs, [dimName]: value };
-    setSelectedAttrs(next);
-    // Prefer active variant, fall back to any variant
-    const match = activeVariants.find((v) =>
-      Object.entries(next).every(([k, val]) =>
-        getAttrsEntries(v).some(([ak, av]) => ak === k && av === val)
-      )
-    ) || allVariants.find((v) =>
+    // Try exact match among active variants first
+    let match = activeVariants.find((v) =>
       Object.entries(next).every(([k, val]) =>
         getAttrsEntries(v).some(([ak, av]) => ak === k && av === val)
       )
     );
+    // If no active variant matches all selections, find the first active variant
+    // that matches the newly selected dimension and reset other attrs accordingly
+    if (!match) {
+      match = activeVariants.find((v) =>
+        getAttrsEntries(v).some(([ak, av]) => ak === dimName && av === value)
+      );
+      if (match) {
+        const resetAttrs = {};
+        getAttrsEntries(match).forEach(([k, val]) => { resetAttrs[k] = val; });
+        setSelectedAttrs(resetAttrs);
+        setSelectedVariant(match);
+        return;
+      }
+    }
+    // Final fallback to any variant (inactive) if nothing active exists for this value
+    if (!match) {
+      match = allVariants.find((v) =>
+        Object.entries(next).every(([k, val]) =>
+          getAttrsEntries(v).some(([ak, av]) => ak === k && av === val)
+        )
+      );
+    }
+    setSelectedAttrs(next);
     if (match) setSelectedVariant(match);
   };
 
