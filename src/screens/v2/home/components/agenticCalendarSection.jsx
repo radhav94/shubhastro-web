@@ -26,7 +26,8 @@ const PlanEventsBanner = () => {
   const [customInput, setCustomInput] = useState("");
   const [selectedPeriod, setSelectedPeriod] = useState("Today");
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [customDate, setCustomDate] = useState(null);
+  const [customFromDate, setCustomFromDate] = useState(null);
+  const [customToDate, setCustomToDate] = useState(null);
   const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
 
@@ -71,7 +72,8 @@ const PlanEventsBanner = () => {
       state: {
         occasions: selectedOccasions,
         period: selectedPeriod,
-        customDate: customDate ? customDate.toISOString() : null,
+        customDate: customFromDate ? customFromDate.toISOString() : null,
+        customToDate: customToDate ? customToDate.toISOString() : null,
       },
     });
   };
@@ -181,18 +183,20 @@ const PlanEventsBanner = () => {
               key={period}
               className={`${styles.periodChip} ${selectedPeriod === period ? styles.periodSelected : ""
                 }`}
-              onClick={() => { setSelectedPeriod(period); setCustomDate(null); }}
+              onClick={() => { setSelectedPeriod(period); setCustomFromDate(null); setCustomToDate(null); }}
             >
               {period}
             </button>
           ))}
           <button
-            className={`${styles.dateChip} ${customDate ? styles.periodSelected : ""}`}
+            className={`${styles.dateChip} ${customFromDate ? styles.periodSelected : ""}`}
             onClick={() => setShowDatePicker(true)}
           >
             <FiCalendar size={14} />
-            {customDate
-              ? customDate.toLocaleDateString("en-US", { day: "numeric", month: "short" })
+            {customFromDate
+              ? customToDate && customToDate.getTime() !== customFromDate.getTime()
+                ? `${customFromDate.toLocaleDateString("en-US", { day: "numeric", month: "short" })} - ${customToDate.toLocaleDateString("en-US", { day: "numeric", month: "short" })}`
+                : customFromDate.toLocaleDateString("en-US", { day: "numeric", month: "short" })
               : "Date"}
           </button>
         </div>
@@ -212,7 +216,7 @@ const PlanEventsBanner = () => {
         <div className={styles.customModalOverlay} onClick={() => setShowDatePicker(false)}>
           <div className={styles.customModal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.customModalHeader}>
-              <h4 className={styles.customModalTitle}>Select Custom Date</h4>
+              <h4 className={styles.customModalTitle}>Select Date Range</h4>
               <button
                 className={styles.customModalClose}
                 onClick={() => setShowDatePicker(false)}
@@ -221,11 +225,17 @@ const PlanEventsBanner = () => {
                 ✕
               </button>
             </div>
+            <p className={styles.dateRangeHint}>
+              {!customFromDate || (customFromDate && customToDate)
+                ? "Tap to select start date"
+                : `From: ${customFromDate.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })} — Now select end date`}
+            </p>
 
             {/* Calendar Header */}
             <div className={styles.calendarNav}>
               <button
                 className={styles.calendarNavBtn}
+                disabled={calendarYear === new Date().getFullYear() && calendarMonth === new Date().getMonth()}
                 onClick={() => {
                   if (calendarMonth === 0) {
                     setCalendarMonth(11);
@@ -283,19 +293,38 @@ const PlanEventsBanner = () => {
 
                 // Current month days
                 const today = new Date();
+                today.setHours(0, 0, 0, 0);
                 for (let d = 1; d <= daysInMonth; d++) {
                   const thisDate = new Date(calendarYear, calendarMonth, d);
+                  thisDate.setHours(0, 0, 0, 0);
+                  const isPast = thisDate < today;
                   const isToday = d === today.getDate() && calendarMonth === today.getMonth() && calendarYear === today.getFullYear();
-                  const isSelected = customDate && d === customDate.getDate() && calendarMonth === customDate.getMonth() && calendarYear === customDate.getFullYear();
+                  const isFrom = customFromDate && thisDate.getTime() === new Date(customFromDate.getFullYear(), customFromDate.getMonth(), customFromDate.getDate()).getTime();
+                  const isTo = customToDate && thisDate.getTime() === new Date(customToDate.getFullYear(), customToDate.getMonth(), customToDate.getDate()).getTime();
+                  const isInRange = customFromDate && customToDate && thisDate > customFromDate && thisDate < customToDate;
 
                   cells.push(
                     <button
                       key={d}
-                      className={`${styles.calendarDay} ${isSelected ? styles.calendarDaySelected : ""} ${isToday && !isSelected ? styles.calendarDayToday : ""}`}
+                      className={`${styles.calendarDay} ${isFrom || isTo ? styles.calendarDaySelected : ""} ${isInRange ? styles.calendarDayInRange : ""} ${isToday && !isFrom && !isTo ? styles.calendarDayToday : ""} ${isPast ? styles.calendarDayDisabled : ""}`}
+                      disabled={isPast}
                       onClick={() => {
-                        setCustomDate(thisDate);
-                        setSelectedPeriod(null);
-                        setShowDatePicker(false);
+                        if (isPast) return;
+                        if (!customFromDate || (customFromDate && customToDate)) {
+                          // Start new range
+                          setCustomFromDate(thisDate);
+                          setCustomToDate(null);
+                        } else {
+                          // Set end date
+                          if (thisDate < customFromDate) {
+                            setCustomToDate(customFromDate);
+                            setCustomFromDate(thisDate);
+                          } else {
+                            setCustomToDate(thisDate);
+                          }
+                          setSelectedPeriod(null);
+                          setShowDatePicker(false);
+                        }
                       }}
                     >
                       {d}
