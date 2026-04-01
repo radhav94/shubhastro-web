@@ -1808,6 +1808,9 @@
   gap: 16px;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
+  @media (width <= 820px) {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
   @media (width <= 767px) {
     grid-template-columns: 1fr 1fr;
   }
