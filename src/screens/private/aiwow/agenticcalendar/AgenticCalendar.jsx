@@ -36,7 +36,8 @@ const AgenticCalendar = () => {
   const [customInput, setCustomInput] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('Today');
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [customDate, setCustomDate] = useState(null);
+  const [customFromDate, setCustomFromDate] = useState(null);
+  const [customToDate, setCustomToDate] = useState(null);
   const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
 
@@ -60,7 +61,9 @@ const AgenticCalendar = () => {
     }
     if (navState.period) setSelectedPeriod(navState.period);
     if (navState.customDate) {
-      setCustomDate(new Date(navState.customDate));
+      const d = new Date(navState.customDate);
+      setCustomFromDate(d);
+      setCustomToDate(navState.customToDate ? new Date(navState.customToDate) : d);
       setSelectedPeriod(null);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -124,13 +127,49 @@ const AgenticCalendar = () => {
       setIsLoading(true);
       setAnalysis(null);
       setExpandedOccasion(null);
-      const dateObj = customDate || new Date();
-      const yyyy = dateObj.getFullYear();
-      const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const dd = String(dateObj.getDate()).padStart(2, '0');
+
+      const today = new Date();
+      const formatDate = (d) => {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      };
+
+      let fromDate, toDate;
+
+      if (customFromDate) {
+        fromDate = formatDate(customFromDate);
+        toDate = customToDate ? formatDate(customToDate) : fromDate;
+      } else if (selectedPeriod === 'Today') {
+        fromDate = formatDate(today);
+        toDate = fromDate;
+      } else if (selectedPeriod === 'Tomorrow') {
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        fromDate = formatDate(tomorrow);
+        toDate = fromDate;
+      } else if (selectedPeriod === 'This Week') {
+        fromDate = formatDate(today);
+        // End of week (Sunday)
+        const dayOfWeek = today.getDay(); // 0=Sun, 6=Sat
+        const daysUntilSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+        const weekEnd = new Date(today);
+        weekEnd.setDate(weekEnd.getDate() + daysUntilSunday);
+        toDate = formatDate(weekEnd);
+      } else if (selectedPeriod === 'This Month') {
+        fromDate = formatDate(today);
+        const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        toDate = formatDate(monthEnd);
+      } else {
+        // Fallback
+        fromDate = formatDate(today);
+        toDate = fromDate;
+      }
 
       const result = await analyzeCalendarEvents(selectedOccasions, {
-        date: `${yyyy}-${mm}-${dd}`,
+        fromDate,
+        toDate,
         kundliId: profile?._id,
       });
       if (result.success) {
@@ -299,20 +338,22 @@ const AgenticCalendar = () => {
               <button
                 key={p}
                 className={`${styles.periodChip} ${selectedPeriod === p ? styles.periodActive : ''} ${locked ? styles.periodDisabled : ''}`}
-                onClick={() => { if (locked) return; clearNavState(); setSelectedPeriod(p); setCustomDate(null); }}
+                onClick={() => { if (locked) return; clearNavState(); setSelectedPeriod(p); setCustomFromDate(null); setCustomToDate(null); }}
                 disabled={locked}
               >
                 {p}
               </button>
             ))}
             <button
-              className={`${styles.dateChip} ${customDate ? styles.periodActive : ''} ${locked ? styles.periodDisabled : ''}`}
+              className={`${styles.dateChip} ${customFromDate ? styles.periodActive : ''} ${locked ? styles.periodDisabled : ''}`}
               onClick={() => { if (locked) return; setShowDatePicker(true); }}
               disabled={locked}
             >
               <FiCalendar size={14} />
-              {customDate
-                ? customDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })
+              {customFromDate
+                ? customToDate && customToDate.getTime() !== customFromDate.getTime()
+                  ? `${customFromDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })} - ${customToDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`
+                  : customFromDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })
                 : 'Date'}
             </button>
           </div>
@@ -346,7 +387,18 @@ const AgenticCalendar = () => {
           {/* Results Grid (Desktop) / Accordion (Mobile) */}
           {analysis?.optimalTimings?.length > 0 && (
             <div className={`${styles.resultsWrap} ${analysis.optimalTimings.length === 2 ? styles.resultsTwo : ''}`} ref={resultsRef}>
-              {analysis.optimalTimings.map((timing) => {
+              {[...analysis.optimalTimings]
+                .sort((a, b) => {
+                  // Sort by date ascending, then by best time ascending
+                  const dateA = a.bestDate || '';
+                  const dateB = b.bestDate || '';
+                  if (dateA !== dateB) return dateA.localeCompare(dateB);
+                  // Same date — sort by time
+                  const timeA = a.bestTimeRange || '';
+                  const timeB = b.bestTimeRange || '';
+                  return timeA.localeCompare(timeB);
+                })
+                .map((timing) => {
                 const name = timing.eventName;
                 const isExpanded = expandedOccasion === name;
                 const isCustom = customOccasions.includes(name);
@@ -378,6 +430,12 @@ const AgenticCalendar = () => {
                       <div className={styles.accordionTitle}>
                         <span>{name}</span>
                         {isCustom && <span className={styles.customTag}>Custom</span>}
+                        {timing.bestDate && (
+                          <span className={styles.cardDate}>
+                            <FiCalendar size={12} />
+                            {new Date(timing.bestDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        )}
                       </div>
                       <span className={styles.mobileChevron}>
                         {isExpanded ? <FiChevronUp size={20} color="#f75801" /> : <FiChevronDown size={20} color="#f75801" />}
@@ -440,9 +498,14 @@ const AgenticCalendar = () => {
         <div className={styles.overlay} onClick={() => setShowDatePicker(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h4 className={styles.modalTitle}>Select Custom Date</h4>
+              <h4 className={styles.modalTitle}>Select Date Range</h4>
               <button className={styles.modalClose} onClick={() => setShowDatePicker(false)} aria-label="Close">✕</button>
             </div>
+            <p className={styles.dateRangeHint}>
+              {!customFromDate || (customFromDate && customToDate)
+                ? 'Tap to select start date'
+                : `From: ${customFromDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })} — Now select end date`}
+            </p>
             <div className={styles.calendarNav}>
               <button className={styles.calNavBtn} 
                 disabled={calendarYear === new Date().getFullYear() && calendarMonth === new Date().getMonth()}
@@ -479,13 +542,34 @@ const AgenticCalendar = () => {
                 today.setHours(0, 0, 0, 0);
                 for (let d = 1; d <= daysInMonth; d++) {
                   const thisDate = new Date(calendarYear, calendarMonth, d);
+                  thisDate.setHours(0, 0, 0, 0);
                   const isPast = thisDate < today;
                   const isToday = d === today.getDate() && calendarMonth === today.getMonth() && calendarYear === today.getFullYear();
-                  const isSel = customDate && d === customDate.getDate() && calendarMonth === customDate.getMonth() && calendarYear === customDate.getFullYear();
+                  const isFrom = customFromDate && thisDate.getTime() === new Date(customFromDate.getFullYear(), customFromDate.getMonth(), customFromDate.getDate()).getTime();
+                  const isTo = customToDate && thisDate.getTime() === new Date(customToDate.getFullYear(), customToDate.getMonth(), customToDate.getDate()).getTime();
+                  const isInRange = customFromDate && customToDate && thisDate > customFromDate && thisDate < customToDate;
                   cells.push(
-                    <button key={d} className={`${styles.calDay} ${isSel ? styles.calDaySelected : ''} ${isToday && !isSel ? styles.calDayToday : ''} ${isPast ? styles.calDayDisabled : ''}`}
+                    <button key={d} className={`${styles.calDay} ${isFrom || isTo ? styles.calDaySelected : ''} ${isInRange ? styles.calDayInRange : ''} ${isToday && !isFrom && !isTo ? styles.calDayToday : ''} ${isPast ? styles.calDayDisabled : ''}`}
                       disabled={isPast}
-                      onClick={() => { if (isPast) return; clearNavState(); setCustomDate(thisDate); setSelectedPeriod(null); setShowDatePicker(false); }}>
+                      onClick={() => {
+                        if (isPast) return;
+                        clearNavState();
+                        if (!customFromDate || (customFromDate && customToDate)) {
+                          // Start new range
+                          setCustomFromDate(thisDate);
+                          setCustomToDate(null);
+                        } else {
+                          // Set end date
+                          if (thisDate < customFromDate) {
+                            setCustomToDate(customFromDate);
+                            setCustomFromDate(thisDate);
+                          } else {
+                            setCustomToDate(thisDate);
+                          }
+                          setSelectedPeriod(null);
+                          setShowDatePicker(false);
+                        }
+                      }}>
                       {d}
                     </button>
                   );

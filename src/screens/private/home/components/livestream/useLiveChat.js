@@ -110,8 +110,7 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     socket.on("live:error", (data) => {
       console.warn("LiveChat → Error:", data.message);
       if (data.code === "ROOM_NOT_FOUND") {
-        // Room doesn't exist yet — astrologer hasn't created it.
-        // Notify container to re-check live list from API.
+        // Room doesn't exist — stop retrying this room.
         setRoomReady(false);
         currentRoomRef.current = null;
         onRoomNotFound?.(roomId);

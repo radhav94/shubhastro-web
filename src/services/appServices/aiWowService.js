@@ -1002,10 +1002,11 @@ export const analyzeSmartMatchmaking = async (userA, userB) => {
  * @param {Array<string>} events - List of events to analyze
  * @returns {Promise} API response with timing recommendations
  */
-export const analyzeCalendarEvents = async (events, { date, kundliId } = {}) => {
+export const analyzeCalendarEvents = async (events, { fromDate, toDate, kundliId } = {}) => {
   try {
     const payload = { events };
-    if (date) payload.date = date;
+    if (fromDate) payload.fromDate = fromDate;
+    if (toDate) payload.toDate = toDate;
     if (kundliId) payload.kundliId = kundliId;
 
     const response = await privatePost(

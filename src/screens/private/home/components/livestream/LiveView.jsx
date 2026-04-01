@@ -63,13 +63,25 @@ const LiveView = (props) => {
   const [showWaitingModal, setShowWaitingModal] = useState(false);
   const [roomEnded, setRoomEnded] = useState(false);
   const [wasRoomReady, setWasRoomReady] = useState(false);
+  const [connectingTimedOut, setConnectingTimedOut] = useState(false);
 
   // Reset ended state when switching to a new channel
   useEffect(() => {
     if (!props.channel) return;
     setRoomEnded(false);
     setWasRoomReady(false);
+    setConnectingTimedOut(false);
   }, [props.channel]);
+
+  // If no remote users appear within 10s of connecting, show "waiting" instead of "connecting"
+  useEffect(() => {
+    if (remoteUsers?.length > 0 || hostLeft || roomEnded) {
+      setConnectingTimedOut(false);
+      return;
+    }
+    const timer = setTimeout(() => setConnectingTimedOut(true), 10000);
+    return () => clearTimeout(timer);
+  }, [remoteUsers?.length, hostLeft, roomEnded, props.channel]);
 
   const { 
     activeCall, 
@@ -573,7 +585,9 @@ const LiveView = (props) => {
             {/* CONNECTING — Agora joining or waiting for remote media */}
             {!isHost && remoteUsers.length === 0 && !hostLeft && !roomEnded && (
               <div className="waiting-text">
-                🔮 Connecting to live stream…
+                {connectingTimedOut
+                  ? '🔮 Waiting for astrologer to start streaming…'
+                  : '🔮 Connecting to live stream…'}
               </div>
             )}
 
