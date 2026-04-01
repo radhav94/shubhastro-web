@@ -694,8 +694,8 @@ const AstrologerProfile = () => {
     },
     
     description:
-      data?.description ||
-      "With years of dedicated practice, I've guided thousands of individuals across love, career, health, and life direction. My work combines classical Vedic principles with deep intuitive understanding, helping clients receive...",
+      data?.achievements[0]?.achievementName ||
+      "",
     // OLD: dummy/static gallery data
     // gallery:
     //   data?.gallery?.length > 0
@@ -813,10 +813,7 @@ const AstrologerProfile = () => {
             <h2 className={styles.headerTitle}>Profile</h2>
           </div>
           <div className={styles.headerActions}>
-            <button
-              className={styles.vaBtn}
-              onClick={() => setIsVAOpen(true)}
-            >
+            <button className={styles.vaBtn} onClick={() => setIsVAOpen(true)}>
               Virtual Assistant
             </button>
             <button
@@ -865,14 +862,18 @@ const AstrologerProfile = () => {
             </div>
             <div className={styles.astrologersGrid}>
               {topAstrologers.slice(0, 3).map((astrologer) => (
-                <div 
-                  key={astrologer._id}
-                  className={styles.astrologerCard}
-                >
-                  <Link to={`/astrologer/${astrologer?._id}`} className={styles.cardLink}>
+                <div key={astrologer._id} className={styles.astrologerCard}>
+                  <Link
+                    to={`/astrologer/${astrologer?._id}`}
+                    className={styles.cardLink}
+                  >
                     <div className={styles.astrologerImageWrapper}>
                       <img
-                        src={astrologer.imageUrl || astrologer?.profileImgUrl || getAstrologerDefaultImage(astrologer.gender)}
+                        src={
+                          astrologer.imageUrl ||
+                          astrologer?.profileImgUrl ||
+                          getAstrologerDefaultImage(astrologer.gender)
+                        }
                         alt={astrologer.firstName}
                         className={styles.astrologerImg}
                         onError={(e) => {
@@ -880,7 +881,7 @@ const AstrologerProfile = () => {
                         }}
                       />
                     </div>
-                    
+
                     <div className={styles.rightSideContent}>
                       <div className={styles.ratingBadge}>
                         <span className={styles.star}>
@@ -903,13 +904,19 @@ const AstrologerProfile = () => {
                             </g>
                             <defs>
                               <clipPath id="clip0_4961_937">
-                                <rect width="11.8251" height="12.0879" fill="white" />
+                                <rect
+                                  width="11.8251"
+                                  height="12.0879"
+                                  fill="white"
+                                />
                               </clipPath>
                             </defs>
                           </svg>
                         </span>
                         <span className={styles.ratingText}>
-                          {astrologer.rating ? Number(astrologer.rating).toFixed(1) : '0.0'}
+                          {astrologer.rating
+                            ? Number(astrologer.rating).toFixed(1)
+                            : "0.0"}
                         </span>
                       </div>
                       <h3 className={styles.astrologerNames}>
@@ -926,7 +933,8 @@ const AstrologerProfile = () => {
                     </div>
                   </Link>
                   <div className={styles.actionButtons}>
-                    {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("chat")) && (
+                    {(astrologer?.isActiveType?.includes("all") ||
+                      astrologer?.isActiveType?.includes("chat")) && (
                       <div className={styles.buttonWrapper}>
                         <button
                           className={styles.chatBtn}
@@ -938,11 +946,13 @@ const AstrologerProfile = () => {
                         <p className={styles.priceText}>
                           <span className={styles.priceAmount}>
                             ₹{astrologer?.price?.chatRate?.amount || 0}
-                          </span>/min
+                          </span>
+                          /min
                         </p>
                       </div>
                     )}
-                    {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("audio")) && (
+                    {(astrologer?.isActiveType?.includes("all") ||
+                      astrologer?.isActiveType?.includes("audio")) && (
                       <div className={styles.buttonWrapper}>
                         <button
                           className={styles.callBtn}
@@ -954,13 +964,13 @@ const AstrologerProfile = () => {
                         <p className={styles.priceText}>
                           <span className={styles.priceAmount}>
                             ₹{astrologer?.price?.audioRate?.amount || 0}
-                          </span>/min
+                          </span>
+                          /min
                         </p>
                       </div>
                     )}
                   </div>
                 </div>
-                
               ))}
             </div>
           </section>
@@ -1061,7 +1071,9 @@ const AstrologerProfile = () => {
                 {displayData.weeklySchedule.map((item, index) => (
                   <div key={index} className={styles.scheduleRow}>
                     <span className={styles.scheduleDay}>{item.day}:</span>
-                    <span className={`${styles.scheduleTime} ${!item.time ? styles.offline : ""}`}>
+                    <span
+                      className={`${styles.scheduleTime} ${!item.time ? styles.offline : ""}`}
+                    >
                       {item.time || "Offline"}
                     </span>
                   </div>
@@ -1111,15 +1123,23 @@ const AstrologerProfile = () => {
             {/* About Section */}
             <div className={styles.aboutSection}>
               <h3 className={styles.aboutTitle}>About</h3>
+
               <p
-                className={`${styles.aboutText} ${showFullAbout ? styles.expanded : ""}`}
+                className={`${styles.aboutText} ${
+                  showFullAbout ? styles.expanded : ""
+                }`}
               >
-                {displayData.description}
+                {showFullAbout
+                  ? displayData.description
+                  : displayData.description?.length > 100
+                    ? displayData.description.slice(0, 100) + "..."
+                    : displayData.description}
               </p>
-              {displayData.description.length > 150 && (
+
+              {displayData.description?.length > 100 && (
                 <button
                   className={styles.readMoreBtn}
-                  onClick={() => setShowFullAbout(!showFullAbout)}
+                  onClick={() => setShowFullAbout((prev) => !prev)}
                 >
                   {showFullAbout ? "Read Less" : "Read More"}
                 </button>
@@ -1132,7 +1152,9 @@ const AstrologerProfile = () => {
                     <div
                       key={index}
                       className={styles.videoThumbnail}
-                      onClick={() => setImagePreview(video || AstrologerNumerologyDefault)}
+                      onClick={() =>
+                        setImagePreview(video || AstrologerNumerologyDefault)
+                      }
                       style={{ cursor: "pointer" }}
                     >
                       <img
@@ -1334,7 +1356,17 @@ const AstrologerProfile = () => {
           ) : (
             <div className={styles.offlineCard}>
               <div className={styles.offlineIcon}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#999"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
                   <line x1="1" y1="1" x2="23" y2="23" />
                 </svg>
@@ -1344,81 +1376,95 @@ const AstrologerProfile = () => {
           )}
 
           {/* Connect Now Card */}
-          {(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat") || data?.isActiveType?.includes("audio") || data?.isActiveType?.includes("video")) && (
-          <div className={styles.connectCard}>
-            <h3 className={styles.connectTitle}>CONNECT NOW</h3>
-            <div className={styles.titleDivider}>
-              <div className={styles.dividerLine}></div>
-              <span className={styles.dividerMoon}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="4"
-                  height="5"
-                  viewBox="0 0 4 5"
-                  fill="none"
-                >
-                  <path
-                    d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z"
-                    fill="#0002"
-                  />
-                </svg>
-              </span>
-              <div className={styles.dividerLine}></div>
+          {(data?.isActiveType?.includes("all") ||
+            data?.isActiveType?.includes("chat") ||
+            data?.isActiveType?.includes("audio") ||
+            data?.isActiveType?.includes("video")) && (
+            <div className={styles.connectCard}>
+              <h3 className={styles.connectTitle}>CONNECT NOW</h3>
+              <div className={styles.titleDivider}>
+                <div className={styles.dividerLine}></div>
+                <span className={styles.dividerMoon}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="4"
+                    height="5"
+                    viewBox="0 0 4 5"
+                    fill="none"
+                  >
+                    <path
+                      d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z"
+                      fill="#0002"
+                    />
+                  </svg>
+                </span>
+                <div className={styles.dividerLine}></div>
+              </div>
+
+              <div className={styles.connectOptions}>
+                {(data?.isActiveType?.includes("all") ||
+                  data?.isActiveType?.includes("chat")) && (
+                  <div
+                    className={`${styles.connectOption} ${!data?.price?.chatRate?.amount ? styles.connectOptionDisabled : ""}`}
+                    onClick={() =>
+                      data?.price?.chatRate?.amount && handleChatStart(data)
+                    }
+                  >
+                    <div className={styles.optionIcon}>
+                      <BiMessageDetail />
+                    </div>
+                    <div className={styles.optionInfo}>
+                      <span className={styles.optionLabel}>Chat</span>
+                      <span className={styles.optionPrice}>
+                        ₹{data?.price?.chatRate?.amount || 0}/ min
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {(data?.isActiveType?.includes("all") ||
+                  data?.isActiveType?.includes("audio")) && (
+                  <div
+                    className={`${styles.connectOption} ${!data?.price?.audioRate?.amount ? styles.connectOptionDisabled : ""}`}
+                    onClick={() =>
+                      data?.price?.audioRate?.amount &&
+                      handleCallStart(data, "audio")
+                    }
+                  >
+                    <div className={styles.optionIcon}>
+                      <BiPhone />
+                    </div>
+                    <div className={styles.optionInfo}>
+                      <span className={styles.optionLabel}>Audio Call</span>
+                      <span className={styles.optionPrice}>
+                        ₹{data?.price?.audioRate?.amount || 0}/ min
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {(data?.isActiveType?.includes("all") ||
+                  data?.isActiveType?.includes("video")) && (
+                  <div
+                    className={`${styles.connectOption} ${!data?.price?.videoCallRate?.amount ? styles.connectOptionDisabled : ""}`}
+                    onClick={() =>
+                      data?.price?.videoCallRate?.amount &&
+                      handleCallStart(data, "video")
+                    }
+                  >
+                    <div className={styles.optionIcon}>
+                      <BiVideo />
+                    </div>
+                    <div className={styles.optionInfo}>
+                      <span className={styles.optionLabel}>Video Call</span>
+                      <span className={styles.optionPrice}>
+                        ₹{data?.price?.videoCallRate?.amount || 0}/ min
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-
-            <div className={styles.connectOptions}>
-              {(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat")) && (
-                <div
-                  className={`${styles.connectOption} ${!data?.price?.chatRate?.amount ? styles.connectOptionDisabled : ''}`}
-                  onClick={() => data?.price?.chatRate?.amount && handleChatStart(data)}
-                >
-                  <div className={styles.optionIcon}>
-                    <BiMessageDetail />
-                  </div>
-                  <div className={styles.optionInfo}>
-                    <span className={styles.optionLabel}>Chat</span>
-                    <span className={styles.optionPrice}>
-                      ₹{data?.price?.chatRate?.amount || 0}/ min
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("audio")) && (
-                <div
-                  className={`${styles.connectOption} ${!data?.price?.audioRate?.amount ? styles.connectOptionDisabled : ''}`}
-                  onClick={() => data?.price?.audioRate?.amount && handleCallStart(data, "audio")}
-                >
-                  <div className={styles.optionIcon}>
-                    <BiPhone />
-                  </div>
-                  <div className={styles.optionInfo}>
-                    <span className={styles.optionLabel}>Audio Call</span>
-                    <span className={styles.optionPrice}>
-                      ₹{data?.price?.audioRate?.amount || 0}/ min
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("video")) && (
-                <div
-                  className={`${styles.connectOption} ${!data?.price?.videoCallRate?.amount ? styles.connectOptionDisabled : ''}`}
-                  onClick={() => data?.price?.videoCallRate?.amount && handleCallStart(data, "video")}
-                >
-                  <div className={styles.optionIcon}>
-                    <BiVideo />
-                  </div>
-                  <div className={styles.optionInfo}>
-                    <span className={styles.optionLabel}>Video Call</span>
-                    <span className={styles.optionPrice}>
-                      ₹{data?.price?.videoCallRate?.amount || 0}/ min
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
           )}
 
           {/* Consultation Hours Card */}
@@ -1426,7 +1472,10 @@ const AstrologerProfile = () => {
             <div className={styles.hoursHeader}>
               <img src={TimeIcon} alt="Time" className={styles.clockIcon} />
               <span className={styles.hoursTitle}>Consultation Hours</span>
-              <button className={styles.reminderBtn} onClick={handleSetReminder}>
+              <button
+                className={styles.reminderBtn}
+                onClick={handleSetReminder}
+              >
                 <img
                   src={NotificationIcon}
                   alt="Notification"
@@ -1440,7 +1489,9 @@ const AstrologerProfile = () => {
               {displayData.weeklySchedule.map((item, index) => (
                 <div key={index} className={styles.scheduleRow}>
                   <span className={styles.scheduleDay}>{item.day}:</span>
-                  <span className={`${styles.scheduleTime} ${!item.time ? styles.offline : ""}`}>
+                  <span
+                    className={`${styles.scheduleTime} ${!item.time ? styles.offline : ""}`}
+                  >
                     {item.time || "Offline"}
                   </span>
                 </div>
@@ -1453,7 +1504,8 @@ const AstrologerProfile = () => {
 
       {/* Mobile Bottom Bar - Chat & Call */}
       <div className={styles.mobileBottomBar}>
-        {(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat")) && (
+        {(data?.isActiveType?.includes("all") ||
+          data?.isActiveType?.includes("chat")) && (
           <button
             className={styles.mobileChatBtn}
             onClick={() => handleChatStart(data)}
@@ -1462,11 +1514,14 @@ const AstrologerProfile = () => {
             <BiMessageDetail />
             <div className={styles.btnContent}>
               <span className={styles.btnLabel}>Chat</span>
-              <span className={styles.btnPrice}>₹{data?.price?.chatRate?.amount || 0}/min</span>
+              <span className={styles.btnPrice}>
+                ₹{data?.price?.chatRate?.amount || 0}/min
+              </span>
             </div>
           </button>
         )}
-        {(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("audio")) && (
+        {(data?.isActiveType?.includes("all") ||
+          data?.isActiveType?.includes("audio")) && (
           <button
             className={styles.mobileCallBtn}
             onClick={() => handleCallStart(data, "audio")}
@@ -1475,7 +1530,9 @@ const AstrologerProfile = () => {
             <BiPhone />
             <div className={styles.btnContent}>
               <span className={styles.btnLabel}>Call</span>
-              <span className={styles.btnPrice}>₹{data?.price?.audioRate?.amount || 0}/min</span>
+              <span className={styles.btnPrice}>
+                ₹{data?.price?.audioRate?.amount || 0}/min
+              </span>
             </div>
           </button>
         )}
@@ -1510,7 +1567,7 @@ const AstrologerProfile = () => {
       {/* Recharge Modal */}
       {hookOpenModal.recharge && (
         <RechargeModal
-         astrologer={data}
+          astrologer={data}
           isOpen={hookOpenModal.recharge}
           onClose={() =>
             hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
