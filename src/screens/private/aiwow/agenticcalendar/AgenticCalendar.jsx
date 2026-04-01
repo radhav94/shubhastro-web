@@ -282,10 +282,10 @@ const AgenticCalendar = () => {
           <p className={styles.bannerSubtitle}>
             Get astrologically optimal timing recommendations for your important life events
           </p>
-          <div className={styles.bannerLocation}>
+          {/* <div className={styles.bannerLocation}>
             <FiMapPin size={14} />
             <span>Based On: Mumbai</span>
-          </div>
+          </div> */}
         </div>
 
         {/* Select Your Occasion */}

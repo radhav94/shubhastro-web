@@ -20,7 +20,7 @@
 .modalContent {
   background: #FFFFFF;
   border-radius: 24px;
-  padding: 40px 32px;
+  padding: 16px;
   max-width: 480px;
   width: 100%;
   position: relative;
@@ -105,7 +105,7 @@
 }
 
 .iconWrapper {
-  margin: 0 auto 24px;
+  margin: 0 auto 5px;
   display: flex;
   justify-content: center;
 
@@ -126,7 +126,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0 0 8px;
+  margin: 0px;
 
   @media (max-width: 768px) {
     font-size: 22px;
@@ -137,11 +137,11 @@
   font-size: 16px;
   font-weight: 500;
   color: #F75801;
-  margin: 0 0 20px;
+  margin: 0 0 10px;
 
   @media (max-width: 768px) {
     font-size: 14px;
-    margin: 0 0 16px;
+    margin: 0 0 10px;
   }
 }
 
@@ -149,12 +149,10 @@
   font-size: 15px;
   line-height: 1.6;
   color: #666;
-  margin: 0 0 28px;
-  padding: 0 10px;
+  margin: 0 0 16px;
 
   @media (max-width: 768px) {
     font-size: 14px;
-    margin: 0 0 20px;
     padding: 0 5px;
   }
 }
@@ -162,15 +160,9 @@
 .features {
   background: linear-gradient(135deg, #FFF5EB 0%, #FFE8D6 100%);
   border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 28px;
+  padding: 5px 16px;
+  margin-bottom: 16px;
   border: 1px solid rgba(247, 88, 1, 0.1);
-
-  @media (max-width: 768px) {
-    padding: 16px;
-    margin-bottom: 20px;
-    border-radius: 12px;
-  }
 }
 
 .featureItem {

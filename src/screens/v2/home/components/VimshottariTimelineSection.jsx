@@ -199,7 +199,7 @@ const VimshottariTimelineSection = () => {
       <section className={styles.vimshottariSection}>
         <div className={styles.vimshottariHeader}>
           <h2 className={styles.vimshottariTitle}>
-            YOUR DASHA TIMELINE
+            YOUR DASHA TIMELINE{defaultProfile?.name && (<span className={styles.dashaProfileName}> - {defaultProfile.name}</span>)}
             <div className={styles.titleUnderline}></div>
           </h2>
         </div>
@@ -218,7 +218,7 @@ const VimshottariTimelineSection = () => {
     <section className={styles.vimshottariSection}>
       <div className={styles.vimshottariHeader}>
         <h2 className={styles.vimshottariTitle}>
-          YOUR DASHA TIMELINE
+          YOUR DASHA TIMELINE{defaultProfile?.name && (<span className={styles.dashaProfileName}> - {defaultProfile.name}</span>)}
           <div className={styles.titleDivider}>
             <div className={styles.dividerLine}>
               <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">

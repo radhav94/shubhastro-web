@@ -117,10 +117,10 @@ const PlanEventsBanner = () => {
             <br />
             for your key life events.
           </p>
-          <div className={styles.planEventsLocation}>
+          {/* <div className={styles.planEventsLocation}>
             <FiMapPin size={16} />
             <span>Based On: Mumbai</span>
-          </div>
+          </div> */}
         </div>
         <div className={styles.planEventsArrow}>
           <FiChevronRight size={22} />
@@ -311,11 +311,9 @@ const PlanEventsBanner = () => {
                       onClick={() => {
                         if (isPast) return;
                         if (!customFromDate || (customFromDate && customToDate)) {
-                          // Start new range
                           setCustomFromDate(thisDate);
                           setCustomToDate(null);
                         } else {
-                          // Set end date
                           if (thisDate < customFromDate) {
                             setCustomToDate(customFromDate);
                             setCustomFromDate(thisDate);
