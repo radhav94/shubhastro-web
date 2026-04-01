@@ -71,6 +71,10 @@ const LivePlayerPage = () => {
     });
   }, [channelId]);
 
+  if (lives.length === 0) {
+    return null; // Wait for API to load live list before mounting the player
+  }
+
   return (
     <LiveListProvider
       lives={lives.map((l) => ({

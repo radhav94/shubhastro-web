@@ -4,7 +4,7 @@ import { clearViewerSession } from "../../../../../utils/liveSessionStorage";
 
 const SOCKET_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
-export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onStreamEnded, onSessionStarted, onSessionEnded }) => {
+export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onStreamEnded, onSessionStarted, onSessionEnded, onRoomNotFound }) => {
   const socketRef = useRef(null);
   const currentRoomRef = useRef(null);
   const [roomReady, setRoomReady] = useState(false);
@@ -93,28 +93,38 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
 
     socket.on("live:room_ended", (data) => {
       console.log("LiveChat → Room ended:", data);
-      setRoomReady(false);
-      setMessages([]);
-      setParticipantCount(0);
-      currentRoomRef.current = null;
-      clearViewerSession();
-      onStreamEnded?.({ reason: data?.reason || "ended", endedAt: data?.endedAt });
+      const endedRoom = data?.roomId;
+      // Only clear state if the ended room is the one we're currently in.
+      // If we already switched to another room (e.g. via astrologer_status),
+      // don't nuke the new room's connection.
+      if (!endedRoom || endedRoom === currentRoomRef.current) {
+        setRoomReady(false);
+        setMessages([]);
+        setParticipantCount(0);
+        currentRoomRef.current = null;
+        clearViewerSession();
+      }
+      onStreamEnded?.({ reason: data?.reason || "ended", endedAt: data?.endedAt, roomId: endedRoom });
     });
 
     socket.on("live:error", (data) => {
       console.warn("LiveChat → Error:", data.message);
       if (data.code === "ROOM_NOT_FOUND") {
         // Room doesn't exist yet — astrologer hasn't created it.
-        // Don't navigate away; just reset and wait for live:astrologer_status.
+        // Notify container to re-check live list from API.
         setRoomReady(false);
         currentRoomRef.current = null;
+        onRoomNotFound?.(roomId);
       } else if (data.code === "ROOM_ENDED") {
-        setRoomReady(false);
-        setMessages([]);
-        setParticipantCount(0);
-        currentRoomRef.current = null;
-        clearViewerSession();
-        onStreamEnded?.({ reason: data.code });
+        const endedRoom = data?.roomId;
+        if (!endedRoom || endedRoom === currentRoomRef.current) {
+          setRoomReady(false);
+          setMessages([]);
+          setParticipantCount(0);
+          currentRoomRef.current = null;
+          clearViewerSession();
+        }
+        onStreamEnded?.({ reason: data.code, roomId: endedRoom });
       }
     });
 

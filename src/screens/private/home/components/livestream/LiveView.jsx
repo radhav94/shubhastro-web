@@ -64,6 +64,13 @@ const LiveView = (props) => {
   const [roomEnded, setRoomEnded] = useState(false);
   const [wasRoomReady, setWasRoomReady] = useState(false);
 
+  // Reset ended state when switching to a new channel
+  useEffect(() => {
+    if (!props.channel) return;
+    setRoomEnded(false);
+    setWasRoomReady(false);
+  }, [props.channel]);
+
   const { 
     activeCall, 
     setLastRequestedAstro, 
@@ -208,13 +215,13 @@ const LiveView = (props) => {
     shareToGmail,
   } = useLiveViewLogic(props);
 
-  const handleCloseLive = () => {
+  const handleCloseLive = async () => {
     if (isHost) {
       setCalling(false);
     } else {
       // Intentional leave — clear saved session so refresh doesn't reconnect
       clearViewerSession();
-      handleLeave?.();
+      await handleLeave?.();
       navigate(PATH.privateRoutes.HOME.path);
     }
   };
@@ -563,15 +570,15 @@ const LiveView = (props) => {
                 <RemoteUser key={user.uid} user={user} />
               ))}
 
-            {/* WAITING (no video yet, room not ended) */}
+            {/* CONNECTING — Agora joining or waiting for remote media */}
             {!isHost && remoteUsers.length === 0 && !hostLeft && !roomEnded && (
               <div className="waiting-text">
-                🔮 Waiting for astrologer to go live…
+                🔮 Connecting to live stream…
               </div>
             )}
 
             {/* ENDED — astrologer has left or room ended */}
-            {!isHost && (hostLeft || roomEnded) && (
+            {!isHost && (hostLeft || roomEnded) && remoteUsers.length === 0 && (
               <div className="waiting-text">
                 🔮 Waiting for astrologer to go live…
               </div>
