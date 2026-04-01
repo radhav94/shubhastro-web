@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from './FaceReadingInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
@@ -10,6 +10,8 @@ const FaceReadingInstructions = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
+  const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
+  const gender = selectedProfile?.identity?.toLowerCase() || selectedProfile?.gender?.toLowerCase() || 'male';
 
   const handleCamera = () => {
     navigate('/aiwow/face-reading/camera');
@@ -50,7 +52,7 @@ const FaceReadingInstructions = () => {
       <div className={styles.middleContent}>
         <div className={styles.imageWrapper}>
           <img 
-            src={getAIWowInstructionImage('faceReading')} 
+            src={getAIWowInstructionImage('faceReading', gender)} 
             alt="Face example" 
             className={styles.faceImage}
           />
