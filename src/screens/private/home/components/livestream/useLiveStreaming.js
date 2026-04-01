@@ -1,11 +1,9 @@
 // src/components/LiveStreaming/useLiveStreaming.js
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
-  useJoin,
   usePublish,
   useLocalMicrophoneTrack,
   useLocalCameraTrack,
-  useIsConnected,
   useRemoteUsers,
 } from "agora-rtc-react";
 
@@ -21,143 +19,161 @@ import {
 } from "../../../../../utils/liveSessionStorage";
 
 const APP_ID = "8575e5681f7142f4bced0b83332caa15";
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1500;
 
 export const useLiveStreaming = (client, ROLE, channel) => {
-  const [calling, setCalling] = useState(true);
-  const [token, setToken] = useState(null);
-  const [uid, setUid] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
   const [hostLeft, setHostLeft] = useState(false);
   const [isReconnect, setIsReconnect] = useState(false);
+  const [calling, setCalling] = useState(true);
+  const [uid, setUid] = useState(null);
 
-  const isConnected = useIsConnected();
   const [micOn, setMic] = useState(true);
   const [cameraOn, setCamera] = useState(true);
 
-  console.log("channellll:", channel);
+  const joinedChannelRef = useRef(null);
 
-  // Set Agora SDK role (frontend role)
+  // Set Agora SDK role
   useEffect(() => {
     if (client) {
-      client.setClientRole(ROLE); // "host" | "audience"
+      client.setClientRole(ROLE);
     }
   }, [client, ROLE]);
 
-  // Channel switch handler
+  // Helper: leave Agora channel safely
+  const leaveChannel = useCallback(async () => {
+    try {
+      if (client && client.connectionState !== "DISCONNECTED") {
+        await client.leave();
+        console.log("Agora: left channel cleanly");
+      }
+    } catch (err) {
+      console.warn("Agora: leave error (non-critical):", err.message);
+    }
+    joinedChannelRef.current = null;
+    setIsConnected(false);
+  }, [client]);
+
+  // Main effect: leave → fetch token → join (with UID_CONFLICT retry)
   useEffect(() => {
-    if (!channel) return;
+    if (!channel || !client || ROLE !== "audience") return;
 
-    // Clear stale token from previous channel
-    setToken(null);
-    setUid(null);
-    setCalling(false);
-    const t = setTimeout(() => setCalling(true), 100);
-    return () => clearTimeout(t);
-  }, [channel]);
+    let cancelled = false;
 
-  // Fetch viewer token — reconnect from sessionStorage or fresh join
-  useEffect(() => {
-    if (!channel) return;
+    const joinChannel = async () => {
+      // 1. Reset UI state
+      setHostLeft(false);
+      setIsConnected(false);
 
-    const fetchToken = async () => {
-      try {
-        if (ROLE === "audience") {
-          // Check sessionStorage for an existing session on this channel
+      // 2. Leave any previous channel
+      await leaveChannel();
+      if (cancelled) return;
+
+      // 3. Fetch token and join with retry on UID_CONFLICT
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        if (cancelled) return;
+
+        try {
+          // Decide token strategy
+          let tokenData = null;
           const saved = restoreViewerSession();
+          const isRefresh = attempt === 0 && saved?.token && saved?.channel === channel;
 
-          if (saved?.token && saved?.channel === channel) {
-            console.log("Reconnecting to stream with saved session:", saved.channel);
-            setToken(saved.token);
-            setUid(saved.uid);
-            setIsReconnect(true);
-
-            // Try to get a fresh token for the existing channel (handles expiry)
+          if (isRefresh) {
+            // Try reconnect token first (page refresh scenario)
             try {
               const res = await getReconnectToken(channel);
-              const data = res?.data?.data;
-              if (data?.token) {
-                setToken(data.token);
-                setUid(data.uid ?? saved.uid);
+              tokenData = res?.data?.data;
+              if (tokenData?.token) {
+                setIsReconnect(true);
                 saveViewerSession({
-                  token: data.token,
+                  token: tokenData.token,
                   channel,
-                  uid: data.uid ?? saved.uid,
+                  uid: tokenData.uid ?? saved.uid,
                   chatRoomId: saved.chatRoomId,
                   astrologer: saved.astrologer,
                 });
               }
-            } catch (reconnectErr) {
-              // If reconnect-token endpoint fails (stream ended, 404, etc.)
-              // fall back to the saved token — Agora join will fail gracefully
-              // or try a fresh join
-              console.warn("Reconnect token failed, trying fresh join:", reconnectErr);
-              try {
-                const res = await getViewerToken(channel);
-                const data = res?.data?.data;
-                if (data?.token) {
-                  setToken(data.token);
-                  setUid(data.uid);
-                  setIsReconnect(false);
-                  saveViewerSession({
-                    token: data.token,
-                    channel,
-                    uid: data.uid,
-                    astrologer: saved.astrologer,
-                  });
-                }
-              } catch (freshErr) {
-                console.error("Fresh token also failed — stream may have ended", freshErr);
-                clearViewerSession();
-              }
+            } catch {
+              console.warn("Reconnect token failed, using fresh token");
+              tokenData = null;
             }
+          }
+
+          // Fresh token (first visit, or reconnect failed, or retry)
+          if (!tokenData?.token) {
+            clearViewerSession();
+            const res = await getViewerToken(channel);
+            tokenData = res?.data?.data;
+            if (tokenData?.token) {
+              setIsReconnect(false);
+              saveViewerSession({
+                token: tokenData.token,
+                channel,
+                uid: tokenData.uid,
+              });
+            }
+          }
+
+          if (cancelled) return;
+
+          if (!tokenData?.token) {
+            console.warn("No viewer token — stream may not be active");
             return;
           }
 
-          // Fresh join — no saved session for this channel
-          const res = await getViewerToken(channel);
-          const viewerToken = res?.data?.data?.token;
-          const viewerUid = res?.data?.data?.uid;
-          const backendRole = res?.data?.data?.role;
-
-          console.log("Backend Role:", backendRole);
-          console.log("Viewer Token:", viewerToken);
-          console.log("Viewer UID:", viewerUid);
-
-          if (!viewerToken) {
-            console.warn("No viewer token received — stream may not be active");
-            setToken(null);
-            setUid(null);
-            return;
-          }
-
-          setToken(viewerToken);
-          setUid(viewerUid);
-          setIsReconnect(false);
-
-          // Persist session for reconnect on refresh
-          saveViewerSession({
-            token: viewerToken,
+          // 4. Actually join the Agora channel
+          const joinUid = await client.join(
+            APP_ID,
             channel,
-            uid: viewerUid,
-          });
-        } else {
-          // Host flow
-          setToken(null);
-          setUid(null);
+            tokenData.token,
+            tokenData.uid ?? null
+          );
+
+          if (cancelled) {
+            // We joined but the effect was cancelled — leave immediately
+            await leaveChannel();
+            return;
+          }
+
+          // Success
+          joinedChannelRef.current = channel;
+          setUid(joinUid);
+          setIsConnected(true);
+          console.log("Agora: joined channel", channel, "as UID", joinUid);
+          return; // exit retry loop
+
+        } catch (err) {
+          const isUidConflict = err?.code === "UID_CONFLICT" ||
+            err?.message?.includes("UID_CONFLICT");
+
+          if (isUidConflict && attempt < MAX_RETRIES - 1) {
+            console.warn(`UID_CONFLICT on attempt ${attempt + 1}, retrying in ${RETRY_DELAY}ms...`);
+            clearViewerSession();
+            // Leave again in case partial join happened
+            await leaveChannel();
+            await new Promise((r) => setTimeout(r, RETRY_DELAY));
+          } else {
+            console.error("Agora join failed:", err.message || err);
+            return;
+          }
         }
-      } catch (err) {
-        console.error("Failed to get viewer token", err);
-        // Clear token so Agora doesn't try to join with stale/invalid credentials
-        setToken(null);
-        setUid(null);
       }
     };
 
-    fetchToken();
-  }, [channel, ROLE]);
+    joinChannel();
 
-  // Agora token renewal — handle expiry during long streams
+    return () => {
+      cancelled = true;
+      // Leave on cleanup (channel change or unmount)
+      leaveChannel();
+    };
+  }, [channel, client, ROLE, leaveChannel]);
+
+  // Token renewal for long streams
   useEffect(() => {
-    if (!client || ROLE !== "audience") return;
+    if (!client || ROLE !== "audience" || !isConnected) return;
 
     const handleTokenWillExpire = async () => {
       console.log("Agora token will expire soon, refreshing...");
@@ -166,12 +182,9 @@ export const useLiveStreaming = (client, ROLE, channel) => {
         const newToken = res?.data?.data?.token;
         if (newToken) {
           await client.renewToken(newToken);
-          // Update saved session with new token
           const saved = restoreViewerSession();
-          if (saved) {
-            saveViewerSession({ ...saved, token: newToken });
-          }
-          console.log("Agora token renewed successfully");
+          if (saved) saveViewerSession({ ...saved, token: newToken });
+          console.log("Agora token renewed");
         }
       } catch (err) {
         console.error("Failed to refresh Agora token", err);
@@ -186,9 +199,7 @@ export const useLiveStreaming = (client, ROLE, channel) => {
         if (newToken) {
           await client.renewToken(newToken);
           const saved = restoreViewerSession();
-          if (saved) {
-            saveViewerSession({ ...saved, token: newToken });
-          }
+          if (saved) saveViewerSession({ ...saved, token: newToken });
         }
       } catch (err) {
         console.error("Failed to refresh expired Agora token", err);
@@ -203,7 +214,7 @@ export const useLiveStreaming = (client, ROLE, channel) => {
       client.off("token-privilege-will-expire", handleTokenWillExpire);
       client.off("token-privilege-did-expire", handleTokenDidExpire);
     };
-  }, [client, ROLE, channel, uid]);
+  }, [client, ROLE, channel, uid, isConnected]);
 
   // Track host left / returned
   useEffect(() => {
@@ -227,29 +238,9 @@ export const useLiveStreaming = (client, ROLE, channel) => {
     };
   }, [client, ROLE, channel]);
 
-  useEffect(() => {
-    setHostLeft(false);
-  }, [channel]);
-
-  // Join Agora channel
-  useJoin(
-    {
-      appid: APP_ID,
-      channel,
-      token: ROLE === "audience" ? token : null,
-      uid: ROLE === "audience" ? uid : null,
-      role: ROLE,
-    },
-    calling && !!channel && (ROLE === "host" || (!!token && !!uid))
-  );
-
   // Local tracks (host only)
-  const { localMicrophoneTrack } = useLocalMicrophoneTrack(
-    micOn && ROLE === "host"
-  );
-  const { localCameraTrack } = useLocalCameraTrack(
-    cameraOn && ROLE === "host"
-  );
+  const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn && ROLE === "host");
+  const { localCameraTrack } = useLocalCameraTrack(cameraOn && ROLE === "host");
 
   const remoteUsers = useRemoteUsers();
 
@@ -260,11 +251,12 @@ export const useLiveStreaming = (client, ROLE, channel) => {
       : []
   );
 
-  // Clear session on intentional leave
-  const handleLeave = useCallback(() => {
+  // Intentional leave (back button)
+  const handleLeave = useCallback(async () => {
     clearViewerSession();
     setCalling(false);
-  }, []);
+    await leaveChannel();
+  }, [leaveChannel]);
 
   return {
     calling,
