@@ -4485,6 +4485,7 @@
     font-weight: 600;
     margin: 0;
     letter-spacing: 0.3px;
+    flex: 1;
   }
 }
 
@@ -4500,6 +4501,18 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.birthPanchangArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  flex-shrink: 0;
 }
 
 .birthPanchangCards {

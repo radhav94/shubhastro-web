@@ -1,5 +1,6 @@
 import { useSelector } from "react-redux";
-import { Calendar } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Calendar, ChevronRight } from "lucide-react";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
 import { useGetPlanetsQuery } from "../../../../redux/api/kundli/kundliApi";
@@ -20,6 +21,7 @@ const formatTime = (hour, min) => {
 };
 
 const BirthPanchangSection = () => {
+  const navigate = useNavigate();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
 
@@ -57,9 +59,9 @@ const BirthPanchangSection = () => {
       <section className={styles.birthPanchangSection}>
         <div className={styles.birthPanchangHeader}>
           <Calendar size={18} />
-          <h2>Birth Panchang</h2>
+          <h2>Birth Details</h2>
         </div>
-        <div className={styles.birthPanchangLoading}>Loading birth panchang...</div>
+        <div className={styles.birthPanchangLoading}>Loading birth details...</div>
       </section>
     );
   }
@@ -107,10 +109,13 @@ const BirthPanchangSection = () => {
   };
 
   return (
-    <section className={styles.birthPanchangSection}>
+    <section className={styles.birthPanchangSection} onClick={() => navigate("/kundli")} style={{ cursor: "pointer" }}>
       <div className={styles.birthPanchangHeader}>
         <Calendar size={18} />
-        <h2>Birth Panchang</h2>
+        <h2>Birth Details</h2>
+        <div className={styles.birthPanchangArrow}>
+          <ChevronRight size={22} />
+        </div>
       </div>
       <div className={styles.birthPanchangContent}>
         {/* <h3 className={styles.bpSectionTitle}>Basic Details</h3> */}
