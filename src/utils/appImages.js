@@ -18,6 +18,7 @@ import Gmail from "../assets/icons/gmail.png";
 import whatsapp from "../assets/icons/whatsapp.png";
 import CopyLink from "../assets/icons/link.png";
 import Video from "../assets/icons/video.png";
+import RupeeCoin from "../assets/icons/Rupee Coin.png";
 
 // Astrologers card icon
 import ChatMinutesIcon from "../assets/icons/experienceIcon.svg";
@@ -108,7 +109,8 @@ export const AppIcons = {
   ChatMinutesIcon,
   CallMinutesIcon,
   ActiveStarIcon,
-  InActiveStarIcon
+  InActiveStarIcon,
+  RupeeCoin
 };
 
 //appImages

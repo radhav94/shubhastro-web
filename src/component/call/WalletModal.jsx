@@ -2,17 +2,17 @@ import { useState } from "react";
 import styles from "./WalletModal.module.scss";
 import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance";
 import { useRechargePlans } from "../recharge-modal/useRechargePlans";
-import { useNavigate } from "react-router-dom";
+import RechargeModal from "../recharge-modal/RechargeModal";
 import { IoChevronForward } from "react-icons/io5";
 import WalletIcon from "../../assets/icons/wallet-2.svg";
 import WalletComboImage from "../../assets/images/wallet-popular-combo.png";
 
 const WalletModal = ({ isOpen, onClose }) => {
-  const { balance } = useWalletBalance();
+  const { balance, refreshWallet } = useWalletBalance();
   const { plans, isLoading: plansLoading } = useRechargePlans();
-  const navigate = useNavigate();
   const [customAmount, setCustomAmount] = useState("");
   const [selectedAmount, setSelectedAmount] = useState(null);
+  const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
 
   const coupons = [
     {
@@ -31,7 +31,7 @@ const WalletModal = ({ isOpen, onClose }) => {
     }
   ];
 
-  const handleRecharge = (plan, index) => {
+  const handleRecharge = (_plan, index) => {
     setSelectedAmount(index);
     setCustomAmount("");
   };
@@ -42,16 +42,23 @@ const WalletModal = ({ isOpen, onClose }) => {
   };
 
   const handleAddMoney = () => {
-    const amount = customAmount || (selectedAmount !== null ? plans[selectedAmount]?.actualPrice : null);
-    if (amount && amount > 0) {
-      onClose();
-      navigate(`/recharge?amount=${amount}`);
-    }
+    setIsRechargeModalOpen(true);
+  };
+
+  const handleRechargeSuccess = () => {
+    setIsRechargeModalOpen(false);
+    refreshWallet();
+    window.dispatchEvent(new Event("walletBalanceUpdated"));
+  };
+
+  const handleRechargeClose = () => {
+    setIsRechargeModalOpen(false);
   };
 
   if (!isOpen) return null;
 
   return (
+    <>
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         {/* Handle */}
@@ -153,6 +160,15 @@ const WalletModal = ({ isOpen, onClose }) => {
         </div>
       </div>
     </div>
+
+    {/* Recharge Modal - opens Razorpay inline instead of navigating away */}
+    <RechargeModal
+      isOpen={isRechargeModalOpen}
+      onClose={handleRechargeClose}
+      onSuccess={handleRechargeSuccess}
+      title="Recharge to Continue Chat"
+    />
+    </>
   );
 };
 
