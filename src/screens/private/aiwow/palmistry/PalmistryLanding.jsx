@@ -23,12 +23,12 @@ const PalmistryLanding = () => {
     },
     {
       icon: CakeIcon,
-      title: 'Age Prediction',
-      description: 'Estimate the age of individuals based on the characteristics of their palm features.',
+      title: 'Career and Life',
+      description: 'Gain insights into your career path and life journey based on key personal and astrological indicators.',
     },
     {
       icon: LoveIcon,
-      title: 'Compatibility Assessment',
+      title: 'Relationship',
       description: 'Evaluate relationship compatibility by analysing the palm prints of two individuals.',
     },
   ];

@@ -224,7 +224,7 @@ const AuraResult = () => {
                           <h4 className={styles.dominantColorName}>
                             {dominantColor.color}
                           </h4>
-                          <p className={styles.dominantPercentage}>{dominantColor.percentage}%</p>
+                          {/* <p className={styles.dominantPercentage}>{dominantColor.percentage}%</p> */}
                         </div>
                       </div>
                       <p className={styles.dominantMeaning}>{dominantColor.meaning}</p>
@@ -374,12 +374,9 @@ const AuraResult = () => {
               {energyLevel.overall && (
                 <div className={styles.energyCard}>
                   <h3 className={styles.cardTitle}>⚡ Overall Energy Level</h3>
-                  <div className={styles.energyContent}>
-                    <div className={styles.energyInfo}>
-                      <p className={styles.energyLabel}>85%</p>
-                    </div>
+                  {/* <div className={styles.energyContent}>
                     <p className={styles.energyPercentage}>{energyLevel.overall}%</p>
-                  </div>
+                  </div> */}
                   <p className={styles.energyDescription}>{energyLevel.description}</p>
                 </div>
               )}

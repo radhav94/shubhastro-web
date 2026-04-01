@@ -18,8 +18,8 @@ const FaceReadingLanding = () => {
     },
     {
       icon: CakeIcon,
-      title: 'Age Estimation',
-      description: 'Estimate age based on facial features with surprising accuracy.',
+      title: 'Facial features',
+      description: 'Analyze facial features to uncover personality traits, emotional patterns, and insights about an individuals character.'
     },
     {
       icon: FlowerIcon,
