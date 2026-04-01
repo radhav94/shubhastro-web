@@ -386,7 +386,7 @@
 
 .sheetTitle {
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 24px;
   color: #000;
 }
@@ -866,7 +866,7 @@
   .sheetTitle {
     font-size: 28px;
     margin-bottom: 28px;
-    font-weight: 700;
+    font-weight: 600;
     color: #000;
   }
 
@@ -980,7 +980,7 @@
 
 .cardTitle {
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   color: #303030;
   margin: 0 0 8px 0;
@@ -1079,7 +1079,7 @@
 }
 
 .expertTitle {
-  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-size: clamp(1.1rem, 4vw, 2rem);
   font-weight: 500;
   color: #fff;
   margin: 0 0 16px 0;
@@ -1108,12 +1108,20 @@
 
 .expertImage {
   width: 150px;
-  height: 146px;
+  height: 150px;
   background: #d9d9d9;
   border-radius: 12px;
   flex-shrink: 0;
+  overflow: hidden;
+  img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
   @media (width <= 767px) {
     width: 100px;
+    height: 100px;
   }
 }
 
@@ -1278,7 +1286,7 @@
 
 .meansTitle {
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 600;
   color: #000;
   text-align: center;
   margin: 0 0 32px 0;
