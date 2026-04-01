@@ -68,15 +68,113 @@ const EPoojaDetail = () => {
 
   // Variant state
   const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedAttrs, setSelectedAttrs] = useState({});
+
+  // Helper: get variant identifier — handles both old (_id/skuCode) and new (id/sku) formats
+  const getVid = (v) => v?._id || v?.id || v?.skuCode || v?.sku || "";
+
+  // Helper: safely get attributes as {name: value} entries from a variant
+  // Old format: [{name, value}] array  |  New format: {type: "gemstone", size: "5-ratti"} object
+  const getAttrsEntries = (v) => {
+    const a = v?.attributes;
+    if (!a) return [];
+    if (Array.isArray(a)) return a.map((x) => [x.name, x.value]).filter(([k, val]) => k && val);
+    if (typeof a === "object") return Object.entries(a).filter(([k, val]) => k && val);
+    return [];
+  };
+
+  // Helper: is variant in stock
+  const isVariantInStock = (v) => {
+    if (v?.inStock === false) return false;
+    if (v?.isActive === false) return false;
+    if (v?.stock === 0) return false;
+    return true;
+  };
+
+  // Build attribute dimensions from variantConfig (new) or by scanning variants (old)
+  const activeVariants = (product?.variants || []).filter(isVariantInStock);
+  const allVariants = product?.variants || [];
+
+  const attrDimensions = (() => {
+    // New format: use variantConfig directly
+    if (Array.isArray(product?.variantConfig) && product.variantConfig.length > 0) {
+      return product.variantConfig.map((c) => ({
+        name: c.name,
+        values: c.values || [],
+      }));
+    }
+    // Old format: scan variant attributes
+    if (!allVariants.length) return [];
+    const dimMap = {};
+    allVariants.forEach((v) => {
+      getAttrsEntries(v).forEach(([name, value]) => {
+        if (!dimMap[name]) dimMap[name] = new Set();
+        dimMap[name].add(value);
+      });
+    });
+    return Object.entries(dimMap).map(([name, valuesSet]) => ({
+      name,
+      values: [...valuesSet],
+    }));
+  })();
+
+  // Track passed variant key for same-product different-variant navigation
+  const passedVariantKey = stateData?._selectedVariant?._id || stateData?._selectedVariant?.id || stateData?._selectedVariant?.sku || "";
+
   useEffect(() => {
     if (product?.variants?.length) {
-      const activeVariant = product.variants.find(v => v.isActive);
-      setSelectedVariant(activeVariant || product.variants[0]);
+      const passedVariant = stateData?._selectedVariant;
+      let initial = null;
+      if (passedVariant) {
+        initial = product.variants.find((v) =>
+          (passedVariant._id && v._id === passedVariant._id) ||
+          (passedVariant.id && v.id === passedVariant.id) ||
+          (passedVariant.skuCode && v.skuCode === passedVariant.skuCode) ||
+          (passedVariant.sku && v.sku === passedVariant.sku)
+        );
+      }
+      if (!initial) {
+        initial = activeVariants[0] || product.variants[0];
+      }
+      setSelectedVariant(initial);
+      const attrs = {};
+      getAttrsEntries(initial).forEach(([k, val]) => { attrs[k] = val; });
+      setSelectedAttrs(attrs);
     }
-  }, [product]);
+  }, [product, passedVariantKey]);
+
+  // When user picks an attribute value, find the matching variant
+  const handleAttrSelect = (dimName, value) => {
+    const next = { ...selectedAttrs, [dimName]: value };
+    setSelectedAttrs(next);
+    // Prefer active variant, fall back to any variant
+    const match = activeVariants.find((v) =>
+      Object.entries(next).every(([k, val]) =>
+        getAttrsEntries(v).some(([ak, av]) => ak === k && av === val)
+      )
+    ) || allVariants.find((v) =>
+      Object.entries(next).every(([k, val]) =>
+        getAttrsEntries(v).some(([ak, av]) => ak === k && av === val)
+      )
+    );
+    if (match) setSelectedVariant(match);
+  };
+
+  // Which attribute values are available (have at least one in-stock variant)
+  const getAvailableValues = (dimName) => {
+    const otherSelections = { ...selectedAttrs };
+    delete otherSelections[dimName];
+    return activeVariants
+      .filter((v) =>
+        Object.entries(otherSelections).every(([k, val]) =>
+          getAttrsEntries(v).some(([ak, av]) => ak === k && av === val)
+        )
+      )
+      .flatMap((v) => getAttrsEntries(v).filter(([ak]) => ak === dimName).map(([, av]) => av));
+  };
 
   // Reset gallery index when variant changes
-  useEffect(() => { setActiveImg(0); }, [selectedVariant?._id]);
+  useEffect(() => { setActiveImg(0); }, [getVid(selectedVariant)]);
 
   // Fetch reviews — only when we have a valid MongoDB _id
   const { data: reviewsData, isLoading: reviewsLoading } = useGetProductReviewsQuery(
@@ -102,7 +200,7 @@ const EPoojaDetail = () => {
   // Add to cart
   const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
   const [updateCartItem] = useUpdateCartItemMutation();
-  const [qty, setQty] = useState(1);
+  const [qty, setQty] = useState(stateData?._cartQty || 1);
 
   // Sync qty with cart data
   const { data: cartData } = useGetCartQuery();
@@ -112,26 +210,40 @@ const EPoojaDetail = () => {
     const p = item?.productId || item?.product || item;
     const sameProduct = p?._id === product?._id || String(p?._id) === String(product?._id);
     if (!sameProduct) return false;
-    // Also match by variant if available
-    const cartVariantId = item?.variantId?._id || item?.variantId || item?.variantSnapshot?._id || "";
-    if (selectedVariant?._id && cartVariantId) {
-      return String(cartVariantId) === String(selectedVariant._id);
-    }
-    return true;
+    const cartVid = item?.variantId?._id || item?.variantId?.id || (typeof item?.variantId === "string" ? item.variantId : "") || item?.variantSnapshot?._id || item?.variantSnapshot?.id || "";
+    const cartSku = item?.variantSnapshot?.skuCode || item?.variantSnapshot?.sku || item?.variantId?.skuCode || item?.variantId?.sku || "";
+    const selVid = selectedVariant?._id || selectedVariant?.id || "";
+    const selSku = selectedVariant?.skuCode || selectedVariant?.sku || "";
+    if (selVid && cartVid && String(cartVid) === String(selVid)) return true;
+    if (selSku && cartSku && String(cartSku) === String(selSku)) return true;
+    if (!selVid && !selSku) return true;
+    return false;
   });
   const isInCart = !!cartMatch;
 
+  // Sync qty: cart quantity if variant is in cart, otherwise reset to 1
   useEffect(() => {
-    if (cartMatch?.quantity) setQty(cartMatch.quantity);
-  }, [cartMatch?.quantity]);
+    if (cartMatch?.quantity) {
+      setQty(cartMatch.quantity);
+    } else {
+      setQty(1);
+    }
+  }, [getVid(selectedVariant), cartMatch?.quantity]);
 
-  const handleQtyChange = (newQty) => {
+  const handleQtyChange = async (newQty) => {
     if (newQty < 1) return;
     setQty(newQty);
     if (isInCart) {
       const productId = cartMatch?.productId?._id || cartMatch?.product?._id || cartMatch?._id || product?._id;
-      const variantId = cartMatch?.variantId?._id || cartMatch?.variantId || cartMatch?.variantSnapshot?._id || selectedVariant?._id;
-      if (productId && variantId) updateCartItem({ productId, variantId, quantity: newQty });
+      const variantId = cartMatch?.variantId?._id || cartMatch?.variantId?.id || (typeof cartMatch?.variantId === "string" ? cartMatch.variantId : "") || cartMatch?.variantSnapshot?._id || "";
+      if (productId && variantId) {
+        try {
+          await updateCartItem({ productId, variantId, quantity: newQty }).unwrap();
+        } catch (err) {
+          setQty(newQty - 1 >= 1 ? newQty - 1 : 1);
+          Toast.error(err?.data?.message || "Failed to update quantity");
+        }
+      }
     }
   };
 
@@ -284,10 +396,19 @@ const EPoojaDetail = () => {
   const handleAddToCart = async () => {
     if (!isLoggedIn()) { redirectToLogin(); return; }
     if (!mongoId) { Toast.error("Loading product details, please wait..."); return; }
-    if (!selectedVariant?._id) { Toast.error("Please select a variant"); return; }
-    if (selectedVariant?.stock === 0) { Toast.error("This variant is out of stock"); return; }
+    const vid = getVid(selectedVariant);
+    if (!vid) { Toast.error("Please select a variant"); return; }
+    if (!isVariantInStock(selectedVariant)) { Toast.error("This variant is out of stock"); return; }
     try {
-      await addToCart({ productId: mongoId, variantId: selectedVariant._id, quantity: qty }).unwrap();
+      if (isInCart) {
+        const cartVid = cartMatch?.variantId?._id || cartMatch?.variantId?.id || (typeof cartMatch?.variantId === "string" ? cartMatch.variantId : "") || "";
+        if (cartVid) {
+          await updateCartItem({ productId: mongoId, variantId: cartVid, quantity: qty }).unwrap();
+          Toast.success(`${title} quantity updated`);
+          return;
+        }
+      }
+      await addToCart({ productId: mongoId, variantId: vid, skuCode: selectedVariant?.skuCode || selectedVariant?.sku || "", quantity: qty }).unwrap();
       Toast.success(`${title} added to cart`);
     } catch (err) {
       Toast.error(err?.data?.message || "Failed to add to cart");
@@ -297,8 +418,9 @@ const EPoojaDetail = () => {
   const handleBuyNow = () => {
     if (!isLoggedIn()) { redirectToLogin(); return; }
     if (!mongoId) { Toast.error("Loading product details, please wait..."); return; }
-    if (!selectedVariant?._id) { Toast.error("Please select a variant"); return; }
-    if (selectedVariant?.stock === 0) { Toast.error("This variant is out of stock"); return; }
+    const vid = getVid(selectedVariant);
+    if (!vid) { Toast.error("Please select a variant"); return; }
+    if (!isVariantInStock(selectedVariant)) { Toast.error("This variant is out of stock"); return; }
     if (!addressLoading && addressList.length === 0) {
       setEditingAddress(null);
       setNewAddr({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "", type: "home", country: "IN" });
@@ -317,10 +439,21 @@ const EPoojaDetail = () => {
     return null;
   };
   const bannerImg = resolveImg(product?.banner_image) || null;
-  const hasVariantImages = selectedVariant?.images?.length > 0;
+  // New format: variant.image is a single string; Old format: variant.images is an array
+  const variantImg = selectedVariant?.image ? resolveImg(selectedVariant.image) : null;
+  const variantImgs = selectedVariant?.images?.length > 0 ? selectedVariant.images.map(resolveImg).filter(Boolean) : [];
+  const hasVariantImages = !!(variantImg || variantImgs.length > 0);
+  // Collect all variant images as fallback
+  const allVariantImages = (product?.variants || [])
+    .flatMap((v) => {
+      const imgs = [];
+      if (v.image) { const r = resolveImg(v.image); if (r) imgs.push(r); }
+      if (v.images?.length) imgs.push(...v.images.map(resolveImg).filter(Boolean));
+      return imgs;
+    });
   const allImages = hasVariantImages
-    ? selectedVariant.images.map(resolveImg).filter(Boolean)
-    : [bannerImg, ...(product?.images || []).map(resolveImg), resolveImg(product?.imgUrl), resolveImg(product?.image), resolveImg(product?.thumbnail)].filter(Boolean);
+    ? (variantImg ? [variantImg, ...variantImgs] : variantImgs)
+    : [bannerImg, ...(product?.images || []).map(resolveImg), resolveImg(product?.imgUrl), resolveImg(product?.image), resolveImg(product?.thumbnail), ...allVariantImages].filter(Boolean);
   const uniqueImages = allImages.length > 0 ? [...new Set(allImages)] : [];
 
   // Pre-validate images: check which URLs actually load
@@ -375,7 +508,7 @@ const EPoojaDetail = () => {
   const ratingRaw = product?.rating;
   const productRating = typeof ratingRaw === "object" ? (ratingRaw?.average || 0) : (ratingRaw || 0);
   const productReviewCount = (typeof ratingRaw === "object" ? ratingRaw?.totalReviews : null) || product?.reviewCount || product?.review_count || 0;
-  const faqs = (product?.quesandans || product?.faqs || []).map((q) => ({ q: q.question || q.q, a: q.answer || q.a }));
+  const faqs = (product?.faq || product?.quesandans || product?.faqs || []).map((q) => ({ q: q.question || q.q, a: q.answer || q.a }));
   const apiReviews = reviewsData?.data?.data?.reviews || reviewsData?.data?.reviews || reviewsData?.data?.data?.list || reviewsData?.data?.list || (Array.isArray(reviewsData?.data) ? reviewsData.data : []) || (Array.isArray(reviewsData?.data?.data) ? reviewsData.data.data : []);
   const totalReviewCount = reviewsData?.data?.data?.pagination?.total || reviewsData?.data?.pagination?.total || reviewsData?.pagination?.total || reviewsData?.data?.data?.total || reviewsData?.data?.total || apiReviews?.length || productReviewCount;
 
@@ -505,42 +638,67 @@ const EPoojaDetail = () => {
             {mrp > price && <p className={styles.mrp}>₹{mrp}</p>}
           </div>
 
-          {/* Variant Selector */}
-          {product?.variants?.length > 0 && (
-            <div className={styles.variantWrap}>
-              {product.variants.map((variant) => (
-                <button
-                  key={variant._id}
-                  className={`${styles.variantBtn} ${selectedVariant?._id === variant._id ? styles.variantActive : ""}`}
-                  onClick={() => setSelectedVariant(variant)}
-                >
-                  {variant.title}
-                </button>
-              ))}
+          {/* Variant Selector — Grouped by Attribute */}
+          {attrDimensions.length > 0 && (
+            <div className={styles.attrSelector}>
+              {attrDimensions.map((dim) => {
+                const isTypeDim = dim.name.toLowerCase() === "type";
+                const available = new Set(getAvailableValues(dim.name));
+                return (
+                  <div key={dim.name} className={styles.attrGroup}>
+                    <span className={styles.attrLabel}>{dim.name}</span>
+                    <div className={styles.attrOptions}>
+                      {dim.values.map((val) => {
+                        const isSelected = selectedAttrs[dim.name] === val;
+                        const isAvailable = isTypeDim ? true : available.has(val);
+                        return (
+                          <button
+                            key={val}
+                            className={`${styles.attrBtn} ${isSelected ? styles.attrBtnActive : ""} ${!isAvailable ? styles.attrBtnDisabled : ""}`}
+                            onClick={() => isAvailable && handleAttrSelect(dim.name, val)}
+                            disabled={!isAvailable}
+                          >
+                            {val}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
 
-          {/* Variant Attributes */}
-          {selectedVariant?.attributes?.length > 0 && (
-            <div className={styles.variantSpecs}>
-              {selectedVariant.attributes.map((attr, i) => (
-                <p key={i}><strong>{attr.name}:</strong> {attr.value}</p>
-              ))}
+          {/* Fallback: flat variant buttons when no attributes/config exist */}
+          {attrDimensions.length === 0 && activeVariants.filter((v) => v.title).length > 1 && (
+            <div className={styles.variantWrap}>
+              {activeVariants.map((variant, idx) => {
+                if (!variant.title) return null;
+                return (
+                  <button
+                    key={getVid(variant) || `v-${idx}`}
+                    className={`${styles.variantBtn} ${selectedVariant === variant || getVid(selectedVariant) === getVid(variant) ? styles.variantActive : ""}`}
+                    onClick={() => setSelectedVariant(variant)}
+                  >
+                    {variant.title}
+                  </button>
+                );
+              })}
             </div>
           )}
 
           {/* Qty + Buttons */}
           <div className={styles.actionRow}>
             <div className={styles.qtyRow}>
-              <button className={styles.qtyBtn} onClick={() => handleQtyChange(qty - 1)} aria-label="Decrease quantity"><FiMinus /></button>
+              <button className={styles.qtyBtn} onClick={() => handleQtyChange(qty - 1)} disabled={qty <= 1} aria-label="Decrease quantity"><FiMinus /></button>
               <span className={styles.qtyVal}>{qty}</span>
               <button className={`${styles.qtyBtn} ${styles.qtyBtnPlus}`} onClick={() => handleQtyChange(qty + 1)} aria-label="Increase quantity"><FiPlus /></button>
             </div>
             <div className={styles.btnGroup}>
-              <button className={styles.cartBtn} onClick={handleAddToCart} disabled={isAddingToCart || selectedVariant?.stock === 0}>
-                {selectedVariant?.stock === 0 ? "Out of Stock" : isAddingToCart ? "Adding..." : "Add to Cart"}
+              <button className={styles.cartBtn} onClick={handleAddToCart} disabled={isAddingToCart || !isVariantInStock(selectedVariant)}>
+                {!isVariantInStock(selectedVariant) ? "Out of Stock" : isAddingToCart ? "Adding..." : "Add to Cart"}
               </button>
-              <button className={styles.bookBtn} onClick={handleBuyNow} disabled={isAddingToCart || selectedVariant?.stock === 0}>
+              <button className={styles.bookBtn} onClick={handleBuyNow} disabled={isAddingToCart || !isVariantInStock(selectedVariant)}>
                 Buy Now
               </button>
             </div>

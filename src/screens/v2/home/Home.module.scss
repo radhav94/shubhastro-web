@@ -4485,6 +4485,7 @@
     font-weight: 600;
     margin: 0;
     letter-spacing: 0.3px;
+    flex: 1;
   }
 }
 
@@ -4500,6 +4501,18 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.birthPanchangArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  flex-shrink: 0;
 }
 
 .birthPanchangCards {
@@ -5213,6 +5226,14 @@
 }
 
 /* Calendar */
+.dateRangeHint {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  margin: 0 0 8px;
+  padding: 0 16px;
+}
+
 .calendarNav {
   display: flex;
   align-items: center;
@@ -5285,6 +5306,18 @@
     background: linear-gradient(135deg, #f75801 0%, #d43400 100%);
     color: #fff;
     font-weight: 600;
+  }
+
+  &.calendarDayDisabled {
+    color: #ccc;
+    pointer-events: none;
+    cursor: default;
+  }
+
+  &.calendarDayInRange {
+    background: rgba(247, 88, 1, 0.12);
+    color: #f75801;
+    font-weight: 500;
   }
 }
 

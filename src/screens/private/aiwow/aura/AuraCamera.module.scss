@@ -92,9 +92,12 @@
 }
 
 .capturedImage {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .overlay {
@@ -104,50 +107,128 @@
   right: 0;
   bottom: 0;
   pointer-events: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.blurTop,
+.blurBottom,
+.blurLeft,
+.blurRight {
+  position: absolute;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.blurTop {
+  display: none;
+}
+
+.blurBottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  
+  @media (min-width: 768px) {
+    height: calc(100vh - min(70vw * 5 / 4, 600px * 5 / 4));
+  }
+}
+
+.blurLeft {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc((100vw - min(98vw, 700px)) / 2);
+  
+  @media (min-width: 768px) {
+    width: calc((100vw - min(70vw, 600px)) / 2);
+  }
+}
+
+.blurRight {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: calc((100vw - min(98vw, 700px)) / 2);
+  
+  @media (min-width: 768px) {
+    width: calc((100vw - min(70vw, 600px)) / 2);
+  }
+}
+
+.captureArea {
+  position: relative;
+  width: 98%;
+  max-width: 700px;
+  aspect-ratio: 4/5;
+  z-index: 2;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    max-width: none;
+    height: calc(100% - 50px);
+    aspect-ratio: auto;
+  }
+  
+  @media (min-width: 769px) {
+    width: 70%;
+    max-width: 600px;
+  }
 }
 
 .frameCorner {
   position: absolute;
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   border: 4px solid;
   transition: border-color 0.3s ease;
 
   @media (min-width: 768px) {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
+    border-width: 5px;
   }
 
   &.detected {
-    border-color: #22c55e; // Green when face detected
+    border-color: #22c55e;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
   }
 
   &.notDetected {
-    border-color: #ef4444; // Red when no face detected
+    border-color: #F75801;
+    box-shadow: 0 0 20px rgba(247, 88, 1, 0.5);
   }
 
   &[style*="top"][style*="left"] {
     border-right: none;
     border-bottom: none;
-    border-top-left-radius: 0.5rem;
+    border-top-left-radius: 0.75rem;
   }
 
   &[style*="top"][style*="right"] {
     border-left: none;
     border-bottom: none;
-    border-top-right-radius: 0.5rem;
+    border-top-right-radius: 0.75rem;
   }
 
   &[style*="bottom"][style*="left"] {
     border-right: none;
     border-top: none;
-    border-bottom-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.75rem;
   }
 
   &[style*="bottom"][style*="right"] {
     border-left: none;
     border-top: none;
-    border-bottom-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.75rem;
   }
 }
 

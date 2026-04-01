@@ -15,7 +15,6 @@ import {
   restoreViewerSession,
   saveViewerSession,
 } from "../../../../../utils/liveSessionStorage";
-import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 
 const LiveStreamingContainer = ({ client }) => {
   const location = useLocation();
@@ -130,54 +129,16 @@ const LiveStreamingContainer = ({ client }) => {
     liveList?.removeLive(roomId);
   }, [liveList]);
 
-  // Room not found — re-fetch live list and switch to an active astrologer
-  const handleRoomNotFound = useCallback(async (staleRoomId) => {
-    console.log("Room not found, re-checking live list...", staleRoomId);
-    try {
-      const res = await getAstrologerLiveList();
-      const data = res.data?.data || [];
+  // Track rooms that returned ROOM_NOT_FOUND to prevent retry loops
+  const roomNotFoundRef = useRef(new Set());
 
-      // Dedupe
-      const map = {};
-      data.forEach((item) => {
-        if (!map[item.channel] || map[item.channel].lastActive < item.lastActive) {
-          map[item.channel] = item;
-        }
-      });
-      const freshLives = Object.values(map);
-
-      if (freshLives.length > 0) {
-        // Remove the stale channel and add fresh ones
-        if (staleRoomId) liveList?.removeLive(staleRoomId);
-
-        freshLives.forEach((l) => {
-          liveList?.addLive({
-            channel: l.channel,
-            astrologerId: l.astrologer?._id,
-            astrologerName: `${l.astrologer?.firstName || ""} ${l.astrologer?.lastName || ""}`.trim(),
-            rating: l.astrologer?.rating,
-            expertise: l.astrologer?.expertise,
-            imageUrl: l.astrologer?.profileImgUrl,
-            audioCallRate: l.astrologer?.price?.audioRate?.amount,
-            videoCallRate: l.astrologer?.price?.videoCallRate?.amount,
-          });
-        });
-
-        // Switch to the first available live
-        const firstLive = freshLives[0];
-        liveList?.switchToChannel(firstLive.channel);
-        retryJoinRef.current?.(firstLive.channel);
-      } else {
-        // No one is live — navigate to live landing
-        clearViewerSession();
-        navigate("/live", { replace: true });
-      }
-    } catch (err) {
-      console.error("Failed to re-check live list:", err);
-      clearViewerSession();
-      navigate("/live", { replace: true });
-    }
-  }, [liveList, navigate]);
+  // Room not found on chat socket — don't disrupt Agora stream.
+  // The chat room may not exist yet on the server while Agora video works fine.
+  // Just log it and let the retry effect handle reconnection when the room appears.
+  const handleRoomNotFound = useCallback((staleRoomId) => {
+    console.log("Chat room not found (non-critical):", staleRoomId);
+    roomNotFoundRef.current.add(staleRoomId);
+  }, []);
 
   const chat = useLiveChat({
     roomId: channel,
@@ -191,8 +152,10 @@ const LiveStreamingContainer = ({ client }) => {
   });
 
   // When astrologer goes live and the channel matches, retry joining the chat room
+  // Don't retry if the room was already reported as not found
   useEffect(() => {
     if (!channel || !chat.isConnected || chat.roomReady) return;
+    if (roomNotFoundRef.current.has(channel)) return;
     chat.retryJoinRoom();
   }, [channel, chat.isConnected, chat.roomReady]);
 

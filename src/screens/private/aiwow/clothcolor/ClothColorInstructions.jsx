@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from './ClothColorInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
@@ -10,6 +10,8 @@ const ClothColorInstructions = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
+  const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
+  const gender = selectedProfile?.identity?.toLowerCase() || selectedProfile?.gender?.toLowerCase() || 'male';
 
   const handleCamera = () => {
     navigate('/aiwow/cloth-color/camera');
@@ -50,7 +52,7 @@ const ClothColorInstructions = () => {
         <div className={styles.middleContent}>
           <div className={styles.imageWrapper}>
             <img 
-              src={getAIWowInstructionImage('clothColor')} 
+              src={getAIWowInstructionImage('clothColor', gender)} 
               alt="Clothes example" 
               className={styles.clothesImage}
             />

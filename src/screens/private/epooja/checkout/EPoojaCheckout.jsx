@@ -69,9 +69,54 @@ const getItemGstPercent = (item) => {
   const p = item?.productId || item?.product || item;
   return p?.gst || 0;
 };
+
+// Extract variant attributes from cart item + enriched product data
+const getCheckoutVariantAttrs = (item, enrichedVariants = {}) => {
+  const seen = new Set();
+  const attrs = [];
+  const add = (name, value) => {
+    const key = name?.toString().toLowerCase();
+    if (key && value && !seen.has(key)) { seen.add(key); attrs.push({ name, value }); }
+  };
+  const vid = item?.variantId?._id || item?.variantId?.id || (typeof item?.variantId === "string" ? item.variantId : "") || item?.variantSnapshot?._id || item?.variantSnapshot?.id || "";
+  const enriched = enrichedVariants[vid];
+  const sources = [enriched, item?.variantSnapshot, typeof item?.variantId === "object" ? item.variantId : null].filter(Boolean);
+  for (const src of sources) {
+    const a = src.attributes;
+    if (Array.isArray(a)) a.forEach((x) => add(x.name, x.value));
+    else if (a && typeof a === "object") Object.entries(a).forEach(([k, v]) => add(k, v));
+    ["type", "size", "weight", "color", "material"].forEach((k) => { if (src[k]) add(k, src[k]); });
+    if (attrs.length > 0) break;
+  }
+  const vTitle = enriched?.title || item?.variantSnapshot?.title || (typeof item?.variantId === "object" ? item.variantId?.title : null);
+  if (attrs.length === 0 && vTitle) add("variant", vTitle);
+  return attrs;
+};
+
+const fetchCheckoutProductDetail = async (idOrSlug) => {
+  try {
+    const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+    const role = localStorage.getItem("shubhtalk_role");
+    const token = role === "ASTROLOGER" ? localStorage.getItem("shubhtalk_astro_token") : localStorage.getItem("shubhtalk_customer_token");
+    const res = await fetch(`${BASE_URL}/api/mall/products/${idOrSlug}`, {
+      headers: { accept: "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    });
+    const json = await res.json();
+    return (json?.success || json?.status === true) ? json?.data : null;
+  } catch { return null; }
+};
+
 const EPoojaCheckout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Block direct URL access — must come from cart or buy now flow
+  useEffect(() => {
+    if (!location.state) {
+      navigate("/viewcart", { replace: true });
+    }
+  }, []);
+
   const [chosenAddress, setChosenAddress] = useState(location.state?.address || null);
   const buyNowProduct = location.state?.buyNowProduct || null;
   const buyNowVariant = location.state?.buyNowVariant || null;
@@ -174,7 +219,7 @@ const EPoojaCheckout = () => {
 
   const { data: cartData, isLoading } = useGetCartQuery();
   const [removeCartItem] = useRemoveCartItemMutation();
-  const getCartItemVariantId = (item) => item?.variantId?._id || item?.variantId || item?.variantSnapshot?._id || "";
+  const getCartItemVariantId = (item) => item?.variantId?._id || item?.variantId?.id || (typeof item?.variantId === "string" ? item.variantId : "") || item?.variantSnapshot?._id || item?.variantSnapshot?.id || "";
   const [createMallOrder] = useCreateMallOrderMutation();
   const [updateMallOrder] = useUpdateMallOrderMutation();
   const orderIdRef = useRef(null);
@@ -182,8 +227,38 @@ const EPoojaCheckout = () => {
   const rawCartItems = Array.isArray(cartItems) ? cartItems : [];
 
   const items = isBuyNowMode
-    ? [{ productId: buyNowProduct, variantId: buyNowVariant?._id || "", variantSnapshot: buyNowVariant, quantity: buyNowQty, _id: buyNowProduct?._id || "buynow" }]
+    ? [{ productId: buyNowProduct, variantId: buyNowVariant?._id || buyNowVariant?.id || buyNowVariant?.skuCode || buyNowVariant?.sku || "", variantSnapshot: buyNowVariant, quantity: buyNowQty, _id: buyNowProduct?._id || "buynow" }]
     : rawCartItems;
+
+  // Enriched variant map for showing type/size in price breakdown
+  const [enrichedVariants, setEnrichedVariants] = useState({});
+  useEffect(() => {
+    if (!items.length) return;
+    let cancelled = false;
+    const run = async () => {
+      const pidSet = new Set();
+      items.forEach((item) => {
+        const p = item?.productId || item?.product || item;
+        const pid = p?.slug || p?._id || p?.id || (typeof item?.productId === "string" ? item.productId : "");
+        if (pid) pidSet.add(pid);
+      });
+      const ids = [...pidSet];
+      const results = await Promise.all(ids.map((id) => fetchCheckoutProductDetail(id)));
+      if (cancelled) return;
+      const vMap = {};
+      ids.forEach((id, i) => {
+        const product = results[i];
+        if (!product?.variants?.length) return;
+        product.variants.forEach((v) => {
+          const vid = v._id || v.id || v.skuCode || v.sku;
+          if (vid) vMap[vid] = v;
+        });
+      });
+      setEnrichedVariants(vMap);
+    };
+    run();
+    return () => { cancelled = true; };
+  }, [items.length]);
 
   // Use cart-level totals from API when available (most reliable), fall back to manual calculation
   const cartApiTotalAmount = cartData?.data?.totalAmount || cartData?.data?.cart?.totalAmount || cartData?.data?.total_amount || 0;
@@ -218,10 +293,9 @@ const EPoojaCheckout = () => {
     const orderItems = items.map((item) => {
       const p = item?.productId || item?.product || item;
       // Extract variantId from cart item data, variant snapshot, or fall back to first active variant
-      const variantId = item?.variantId?._id || item?.variantId
-        || item?.variantSnapshot?._id
-        || item?.variant?._id || item?.variant
-        || (p?.variants?.find((v) => v.isActive) || p?.variants?.[0])?._id
+      const variantId = item?.variantId?._id || item?.variantId?.id || (typeof item?.variantId === "string" ? item.variantId : "")
+        || item?.variantSnapshot?._id || item?.variantSnapshot?.id || item?.variantSnapshot?.sku
+        || item?.variant?._id || item?.variant?.id || (typeof item?.variant === "string" ? item.variant : "")
         || "";
       return {
         productId: String(p?._id || p?.id || p?.ID || ""),
@@ -596,7 +670,8 @@ const EPoojaCheckout = () => {
 
           <div className={styles.priceCard}>
             {items.map((item, idx) => {
-              const title = getItemTitle(item);
+              const p = item?.productId || item?.product || item;
+              const title = p?.title || p?.name || "Product";
               const price = getItemPrice(item);
               const qty = item?.quantity || 1;
               const lineTotal = price * qty;

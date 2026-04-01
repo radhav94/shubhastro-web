@@ -394,6 +394,18 @@
   font-size: 15px;
   font-weight: 600;
   color: #1a1a1a;
+  flex-wrap: wrap;
+}
+
+.cardDate {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  width: 100%;
+  margin-top: 2px;
 }
 
 .customTag {
@@ -637,6 +649,19 @@
     color: #fff;
     font-weight: 600;
   }
+  &.calDayInRange {
+    background: rgba(247, 88, 1, 0.12);
+    color: #f75801;
+    font-weight: 500;
+  }
+}
+
+.dateRangeHint {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  margin: 0 0 8px;
+  padding: 0 16px;
 }
 
 /* Get Timing Recommendations Button */
