@@ -121,11 +121,14 @@ const AIWow = () => {
       return;
     }
 
-    // If header has a selected kundli, sync AIWow to it
-    if (headerSelectedKundli?._id && profiles.some((p) => p._id === headerSelectedKundli._id)) {
-      dispatch(setSelectedKundliProfile(headerSelectedKundli));
-      localStorage.setItem("selectedKundliProfile", JSON.stringify(headerSelectedKundli));
-      return;
+    // If header has a selected kundli, sync AIWow to it (use fresh data from profiles)
+    if (headerSelectedKundli?._id) {
+      const freshProfile = profiles.find((p) => p._id === headerSelectedKundli._id);
+      if (freshProfile) {
+        dispatch(setSelectedKundliProfile(freshProfile));
+        localStorage.setItem("selectedKundliProfile", JSON.stringify(freshProfile));
+        return;
+      }
     }
 
     const saved = localStorage.getItem("selectedKundliProfile");
@@ -135,9 +138,13 @@ const AIWow = () => {
     } catch {
       localStorage.removeItem("selectedKundliProfile");
     }
-    if (parsed && profiles.some((p) => p._id === parsed._id)) {
-      dispatch(setSelectedKundliProfile(parsed));
-      return;
+    if (parsed) {
+      const freshProfile = profiles.find((p) => p._id === parsed._id);
+      if (freshProfile) {
+        dispatch(setSelectedKundliProfile(freshProfile));
+        localStorage.setItem("selectedKundliProfile", JSON.stringify(freshProfile));
+        return;
+      }
     }
     const first = profiles[0];
     dispatch(setSelectedKundliProfile(first));
