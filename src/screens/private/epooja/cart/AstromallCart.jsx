@@ -45,11 +45,20 @@ const PAYMENT_METHODS = [
   { _id: "wallet", name: "Wallet", logo: walletlogo },
 ];
 
-const getImg = (item) => {
+const getImg = (item, enrichedVariant) => {
+  // 1. Enriched variant images (fetched from product API)
+  if (enrichedVariant?.images?.length) return enrichedVariant.images[0];
+  // 2. Variant snapshot images
   const snap = item?.variantSnapshot;
   if (snap?.images?.length) return snap.images[0];
+  // 3. Populated variantId images
+  if (typeof item?.variantId === "object" && item.variantId?.images?.length) return item.variantId.images[0];
+  // 4. Product images
   const p = item?.productId || item?.product || item;
-  return p?.banner_image?.original || p?.banner_image?.small || (p?.images?.length ? p.images[0] : null) || p?.imgUrl || p?.image || p?.thumbnail || DEFAULT_IMG;
+  if (p?.images?.length) return p.images[0];
+  if (p?.banner_image?.original) return p.banner_image.original;
+  if (p?.banner_image?.small) return p.banner_image.small;
+  return p?.imgUrl || p?.image || p?.thumbnail || DEFAULT_IMG;
 };
 const getTitle = (item) => {
   const p = item?.productId || item?.product || item;
@@ -71,12 +80,45 @@ const getGstPercent = (item) => {
   return p?.gst || 0;
 };
 const getId = (item) => item?.productId?._id || item?.product?._id || item?._id;
-const getVariantId = (item) => item?.variantId?._id || item?.variantId || item?.variantSnapshot?._id || "";
+const getVariantId = (item) => item?.variantId?._id || item?.variantId?.id || (typeof item?.variantId === "string" ? item.variantId : "") || item?.variantSnapshot?._id || item?.variantSnapshot?.id || "";
 const getRouteId = (item) => {
   const p = item?.productId || item?.product || item;
+  if (typeof p === "string") return p;
   return p?.slug || p?.ID || p?.id || p?._id || "";
 };
-const getProductData = (item) => item?.productId || item?.product || item;
+const getProductData = (item) => {
+  const p = item?.productId || item?.product || item;
+  return typeof p === "string" ? { _id: p } : p;
+};
+
+// Extract variant attributes from cart item + enriched product data
+const getCartVariantAttrs = (item, enrichedVariants = {}) => {
+  const seen = new Set();
+  const attrs = [];
+  const add = (name, value) => {
+    const key = name?.toString().toLowerCase();
+    if (key && value && !seen.has(key)) { seen.add(key); attrs.push({ name, value }); }
+  };
+
+  // Try enriched variant first (fetched from product API)
+  const vid = item?.variantId?._id || item?.variantId?.id || (typeof item?.variantId === "string" ? item.variantId : "") || item?.variantSnapshot?._id || item?.variantSnapshot?.id || "";
+  const enriched = enrichedVariants[vid];
+  const sources = [enriched, item?.variantSnapshot, typeof item?.variantId === "object" ? item.variantId : null].filter(Boolean);
+
+  for (const src of sources) {
+    const a = src.attributes;
+    if (Array.isArray(a)) a.forEach((x) => add(x.name, x.value));
+    else if (a && typeof a === "object") Object.entries(a).forEach(([k, v]) => add(k, v));
+    ["type", "size", "weight", "color", "material"].forEach((k) => { if (src[k]) add(k, src[k]); });
+    if (attrs.length > 0) break; // use first source that has data
+  }
+
+  // Fallback: variant title
+  const vTitle = enriched?.title || item?.variantSnapshot?.title || (typeof item?.variantId === "object" ? item.variantId?.title : null);
+  if (attrs.length === 0 && vTitle) add("variant", vTitle);
+
+  return attrs;
+};
 
 // Fetch fresh product detail from API
 const fetchProductDetail = async (productIdOrSlug) => {
@@ -163,8 +205,38 @@ const AstromallCart = () => {
   const cartItems = cartData?.data?.items || cartData?.data?.cart?.items || cartData?.data || [];
   const regularItems = Array.isArray(cartItems) ? cartItems : [];
   const items = isBuyNowMode
-    ? [{ productId: buyNowProduct, variantId: buyNowVariant?._id || "", variantSnapshot: buyNowVariant, quantity: buyNowQty, _id: buyNowProduct?._id || "buynow" }]
+    ? [{ productId: buyNowProduct, variantId: buyNowVariant?._id || buyNowVariant?.id || buyNowVariant?.skuCode || buyNowVariant?.sku || "", variantSnapshot: buyNowVariant, quantity: buyNowQty, _id: buyNowProduct?._id || "buynow" }]
     : regularItems;
+
+  // Enriched variant map for showing type/size
+  const [enrichedVariants, setEnrichedVariants] = useState({});
+  useEffect(() => {
+    if (!items.length) return;
+    let cancelled = false;
+    const run = async () => {
+      const pidSet = new Set();
+      items.forEach((item) => {
+        const p = item?.productId || item?.product || item;
+        const pid = p?.slug || p?._id || p?.id || (typeof item?.productId === "string" ? item.productId : "");
+        if (pid) pidSet.add(pid);
+      });
+      const ids = [...pidSet];
+      const results = await Promise.all(ids.map((id) => fetchProductDetail(id)));
+      if (cancelled) return;
+      const vMap = {};
+      ids.forEach((id, i) => {
+        const product = results[i];
+        if (!product?.variants?.length) return;
+        product.variants.forEach((v) => {
+          const vid = v._id || v.id || v.skuCode || v.sku;
+          if (vid) vMap[vid] = v;
+        });
+      });
+      setEnrichedVariants(vMap);
+    };
+    run();
+    return () => { cancelled = true; };
+  }, [items.length]);
 
   const total = isBuyNowMode
     ? items.reduce((sum, item) => sum + getPrice(item) * (item?.quantity || 1), 0)
@@ -298,12 +370,13 @@ const AstromallCart = () => {
   };
 
   const proceedToCheckout = useCallback(async (address) => {
-    setChosenAddress(address); setShowAddress(false);
-    const valid = await validateCartProducts();
-    if (!valid) return;
-    setCheckoutStep("checkout");
-    setTimeout(() => checkoutRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-  }, [validateCartProducts]);
+    setShowAddress(false);
+    if (isBuyNowMode) {
+      navigate("/checkout", { state: { buyNowProduct, buyNowVariant, buyNowQty, address } });
+    } else {
+      navigate("/checkout", { state: { address } });
+    }
+  }, [isBuyNowMode, buyNowProduct, buyNowVariant, buyNowQty, navigate]);
 
   const buildShippingAddress = useCallback(() => {
     if (!chosenAddress) return undefined;
@@ -313,7 +386,7 @@ const AstromallCart = () => {
   const createOrder = useCallback(async () => {
     const orderItems = items.map((item) => {
       const p = item?.productId || item?.product || item;
-      const variantId = item?.variantId?._id || item?.variantId || item?.variantSnapshot?._id || item?.variant?._id || item?.variant || (p?.variants?.find((v) => v.isActive) || p?.variants?.[0])?._id || "";
+      const variantId = item?.variantId?._id || item?.variantId?.id || (typeof item?.variantId === "string" ? item.variantId : "") || item?.variantSnapshot?._id || item?.variantSnapshot?.id || item?.variantSnapshot?.sku || item?.variant?._id || item?.variant?.id || (typeof item?.variant === "string" ? item.variant : "") || "";
       return { productId: String(p?._id || p?.id || p?.ID || ""), variantId: String(variantId), quantity: item?.quantity || 1 };
     });
     const shippingAddress = buildShippingAddress();
@@ -439,12 +512,28 @@ const AstromallCart = () => {
         {items.length === 0 && (<div className={styles.emptyCart}><FiShoppingCart size={48} color="#ccc" /><p>Your cart is empty</p><button className={styles.browseBtn} onClick={() => navigate("/astromall")}>Browse Products</button></div>)}
         {items.map((item, idx) => {
           const qty = item?.quantity || 1, price = getPrice(item), routeId = getRouteId(item);
-          const goToDetail = () => navigate(`/product-details/${routeId}`, { state: getProductData(item) });
+          const cartVid = getVariantId(item);
+          const enrichedV = enrichedVariants[cartVid];
+          const variantInfo = getCartVariantAttrs(item, enrichedVariants);
+          const goToDetail = () => {
+            if (!routeId) return;
+            const p = getProductData(item);
+            const variantData = item?.variantSnapshot || (typeof item?.variantId === "object" ? item.variantId : null);
+            const variantIdStr = item?.variantId?._id || item?.variantId?.id || (typeof item?.variantId === "string" ? item.variantId : "") || item?.variantSnapshot?._id || item?.variantSnapshot?.id || "";
+            navigate(`/product-details/${routeId}`, { state: { ...p, _selectedVariant: variantData ? { ...variantData, _id: variantData._id || variantIdStr } : variantIdStr ? { _id: variantIdStr } : undefined, _cartQty: qty } });
+          };
           return (
             <div key={item?._id || idx} className={styles.productCard}>
-              <ProductImage src={getImg(item)} alt={getTitle(item)} className={styles.productImg} onClick={goToDetail} style={{ cursor: "pointer" }} />
+              <ProductImage src={getImg(item, enrichedV)} alt={getTitle(item)} className={styles.productImg} onClick={goToDetail} style={{ cursor: "pointer" }} />
               <div className={styles.productInfo}>
                 <h3 onClick={goToDetail} style={{ cursor: "pointer" }}>{getTitle(item)}</h3>
+                {variantInfo.length > 0 && (
+                  <div className={styles.variantAttrs}>
+                    {variantInfo.map((a, i) => (
+                      <span key={i} className={styles.variantAttr}><strong>{a.name}:</strong> {a.value}{i < variantInfo.length - 1 ? "," : ""}</span>
+                    ))}
+                  </div>
+                )}
                 <div className={styles.qtyRow}>
                   <button className={styles.qtyBtn} onClick={() => handleQtyChange(item, -1)} aria-label="Decrease"><FiMinus /></button>
                   <span className={styles.qtyVal}>{String(qty).padStart(2, "0")}</span>
@@ -458,10 +547,17 @@ const AstromallCart = () => {
         {items.length > 0 && (
           <div className={styles.bottomBar}>
             <div className={styles.totalCol}><span className={styles.totalPrice}>₹{total.toLocaleString()}</span><span className={styles.taxLabel}>Incl. of all taxes</span></div>
-            <button className={styles.checkoutBtn} disabled={isValidating} onClick={() => {
-              if (!addressLoading && addressList.length === 0) { setEditingAddress(null); setNewAddr({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "", type: "home", country: "IN" }); setShowNewAddress(true); }
-              else { setShowAddress(true); }
-            }}>{isValidating ? "Verifying..." : (isBuyNowMode ? "Select Address" : "Proceed to Checkout")}</button>
+            <button className={styles.checkoutBtn} disabled={isValidating} onClick={async () => {
+              const valid = await validateCartProducts();
+              if (!valid) return;
+              if (!addressLoading && addressList.length === 0) {
+                setEditingAddress(null);
+                setNewAddr({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "", type: "home", country: "IN" });
+                setShowNewAddress(true);
+              } else {
+                setShowAddress(true);
+              }
+            }}>{isValidating ? "Verifying..." : "Proceed to Checkout"}</button>
           </div>
         )}
       </>)}
@@ -495,7 +591,7 @@ const AstromallCart = () => {
             <div className={styles.rightCol}>
               <h2 className={styles.sectionTitle}>PRICE BREAKDOWN</h2>
               <div className={styles.priceCard}>
-                {items.map((item, idx) => { const title = getTitle(item), price = getLivePrice(item), qty = item?.quantity || 1; return (<div key={item?._id || idx} className={styles.priceRow}><span>{title}{qty > 1 ? ` × ${qty}` : ""}</span><span>₹{(price * qty).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>); })}
+                {items.map((item, idx) => { const title = getTitle(item), price = getLivePrice(item), qty = item?.quantity || 1, vInfo = getCartVariantAttrs(item, enrichedVariants); return (<div key={item?._id || idx} className={styles.priceRow}><span>{title}{qty > 1 ? ` × ${qty}` : ""}{vInfo.length > 0 && <span className={styles.priceRowAttrs}>{vInfo.map((a, i) => <span key={i}><strong>{a.name}:</strong> {a.value}{i < vInfo.length - 1 ? ", " : ""}</span>)}</span>}</span><span>₹{(price * qty).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>); })}
                 <div className={`${styles.priceRow} ${styles.priceSubtotal}`}><span>Subtotal</span><span>₹{subtotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
                 <div className={styles.priceRow}><span>GST</span><span>₹{gst.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
                 <div className={`${styles.priceRow} ${styles.priceTotal}`}><span>Total Amount</span><span>₹{grandTotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>

@@ -123,7 +123,7 @@ const EPoojaPayment = () => {
     }
   };
 
-  const getItemVariantId = (item) => item?.variantId?._id || item?.variantId || item?.variantSnapshot?._id || "";
+  const getItemVariantId = (item) => item?.variantId?._id || item?.variantId?.id || (typeof item?.variantId === "string" ? item.variantId : "") || item?.variantSnapshot?._id || item?.variantSnapshot?.id || "";
 
   const handleQtyChange = async (item, delta) => {
     const productId = item?.productId?._id || item?.product?._id || item?._id;
@@ -156,10 +156,11 @@ const EPoojaPayment = () => {
   const handleAddSuggested = async (product) => {
     const productId = product?._id || product?.id || product?.ID;
     if (!productId) return;
-    const firstVariant = product?.variants?.find((v) => v.isActive) || product?.variants?.[0];
+    const firstVariant = product?.variants?.find((v) => v.isActive !== false && v.inStock !== false) || product?.variants?.[0];
     try {
       const payload = { productId, quantity: 1 };
-      if (firstVariant?._id) payload.variantId = firstVariant._id;
+      const fvId = firstVariant?._id || firstVariant?.id || firstVariant?.skuCode || firstVariant?.sku;
+      if (fvId) payload.variantId = fvId;
       await addToCart(payload).unwrap();
       Toast.success(`${product?.title || product?.name || "Item"} added to cart`);
     } catch (err) {
