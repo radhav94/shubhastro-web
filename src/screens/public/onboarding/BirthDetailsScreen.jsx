@@ -94,7 +94,7 @@ const BirthDetailsScreen = ({
                 <Field
                   type="date"
                   name="birthDate"
-                  className={styles.input}
+                  className={`${styles.input} ${styles.iosFix}`}
                   placeholder="DD/MM/YYYY"
                   max={new Date().toISOString().split('T')[0]}
                 />
@@ -111,7 +111,7 @@ const BirthDetailsScreen = ({
                   type="time"
                   name="birthTime"
                   onClick={(e) => e.target.showPicker?.()}
-                  className={styles.input}
+                  className={`${styles.input} ${styles.iosFix}`}
                   placeholder="Select here"
                   disabled={values.unknownBirthTime}
                 />

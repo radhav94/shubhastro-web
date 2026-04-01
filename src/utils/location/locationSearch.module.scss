@@ -1,6 +1,54 @@
 .wrapper {
   position: relative;
 }
+/* Fix iOS input width + layout */
+.iosFix {
+  width: 100%;
+  min-width: 0;
+  display: block;
+  box-sizing: border-box;
+}
+
+/* Remove iOS default styling */
+input[type="date"]{
+  background-image: url("../../assets/icons/date-icon.png");
+}
+input[type="time"]{
+  background-image: url("../../assets/icons/time-icon.png");
+}
+input[type="date"],
+input[type="time"] {
+  height: 48px;
+  line-height: 48px;   
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #fff;
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: center right 16px;
+}
+
+/* Fix inner content alignment (important for iOS) */
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value {
+  text-align: left;
+  height: 48px;
+  line-height: 48px;
+}
+
+/* Chrome, Edge, Safari */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+/* Optional: remove extra spacing */
+input[type="date"],
+input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
 
 .input {
   width: 100%;
@@ -8,7 +56,7 @@
   padding: 0 12px;
   border-radius: 8px;
   border: 1px solid #ddd;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .dropdown {
