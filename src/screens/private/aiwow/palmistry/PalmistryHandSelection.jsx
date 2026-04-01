@@ -64,7 +64,7 @@ const PalmistryHandSelection = () => {
               </svg>
             </div>
             <h3 className={styles.handLabel}>Left Hand</h3>
-            <p className={styles.handDescription}>Potential & Past</p>
+            {/* <p className={styles.handDescription}>Potential & Past</p> */}
             {selectedHand === 'left' && (
               <div className={styles.checkmark}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -96,7 +96,7 @@ const PalmistryHandSelection = () => {
               </svg>
             </div>
             <h3 className={styles.handLabel}>Right Hand</h3>
-            <p className={styles.handDescription}>Present & Future</p>
+            {/* <p className={styles.handDescription}>Present & Future</p> */}
             {selectedHand === 'right' && (
               <div className={styles.checkmark}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
