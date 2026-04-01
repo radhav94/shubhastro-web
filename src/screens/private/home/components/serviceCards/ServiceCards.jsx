@@ -30,7 +30,13 @@ const ServiceCards = () => {
   const bannerSection = data?.data?.list?.find(
     (item) => item.display_type === "complementary-services",
   );
-  const services = bannerSection?.content || [];
+  const preferredOrder = ["free-kundli", "generate-my-kundli", "talk-to-astrologer", "explore-daily-horoscope", "daily-horoscope"];
+  const rawServices = bannerSection?.content || [];
+  const services = [...rawServices].sort((a, b) => {
+    const idxA = preferredOrder.indexOf(a.slug);
+    const idxB = preferredOrder.indexOf(b.slug);
+    return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+  });
 
   const slugRoutes = {
     "free-kundli": PATH.privateRoutes.KUNDLI.path,

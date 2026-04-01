@@ -519,6 +519,159 @@
   &:hover { color: #f75801; background: #fff5f0; }
 }
 
+/* ── Validation Banner ── */
+.validatingBar {
+  text-align: center; padding: 12px; background: #fff8e1; color: #f57f17;
+  border-radius: 10px; font-size: 14px; font-weight: 500; margin-bottom: 16px;
+}
+.issuesBanner {
+  background: #fff; border: 1.5px solid #ff9800; border-radius: 12px;
+  padding: 16px 18px; margin-bottom: 20px;
+}
+.issuesHeader {
+  display: flex; align-items: center; gap: 8px; font-size: 14px;
+  font-weight: 700; color: #e65100; margin-bottom: 10px;
+}
+.issueRow {
+  font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f5f5f5;
+  &:last-of-type { border-bottom: none; }
+}
+.issueError { color: #d32f2f; }
+.issueWarn { color: #e65100; }
+.backToCartBtn {
+  margin-top: 12px; padding: 10px 20px; border: 2px solid #f75801;
+  border-radius: 8px; background: #fff; color: #f75801; font-size: 13px;
+  font-weight: 600; cursor: pointer; transition: all 0.2s;
+  &:hover { background: #fff5f0; }
+}
+
+/* ── Checkout: Two Column Layout ── */
+.twoCol {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  @media (max-width: 768px) { flex-direction: column; gap: 28px; }
+}
+.leftCol { flex: 1; min-width: 0; }
+.rightCol { flex: 0 0 380px; @media (max-width: 768px) { flex: none; width: 100%; } }
+
+/* ── UPI Card ── */
+.upiCard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 28px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.upiApps { display: flex; gap: 20px; margin-bottom: 16px; }
+.upiApp { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.upiIconImg { width: 50px; height: 50px; border-radius: 12px; object-fit: contain; }
+.upiName { font-size: 11px; color: #555; }
+.otherUpiWrap { position: relative; }
+.otherUpiBtn {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 12px 0 0; border: none; border-top: 1px solid #f0f0f0;
+  background: none; font-size: 13px; color: #555; cursor: pointer;
+  &:hover { color: #f75801; }
+}
+.upiLabelImg { width: 42px; height: 42px; border-radius: 8px; object-fit: contain; }
+.chevron { margin-left: auto; font-size: 16px; color: #f75801; transition: transform 0.2s; }
+.chevronOpen { transform: rotate(90deg); }
+.otherUpiList { display: flex; flex-direction: column; border-top: 1px solid #f0f0f0; margin-top: 8px; }
+.otherUpiItem {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 8px; border: none; background: none; font-size: 13px;
+  color: #333; cursor: pointer; border-bottom: 1px solid #f5f5f5;
+  &:hover { background: #fef5f0; color: #f75801; }
+  &:last-child { border-bottom: none; }
+}
+.otherUpiLeft { display: flex; align-items: center; gap: 10px; }
+.otherUpiIconImg { width: 42px; height: 42px; border-radius: 8px; object-fit: contain; flex-shrink: 0; }
+.otherUpiName { font-weight: 500; }
+
+/* ── Payment Methods ── */
+.methodList { display: flex; flex-direction: column; gap: 10px; }
+.methodCard {
+  display: flex; align-items: center; gap: 14px; padding: 16px 18px;
+  background: #fff; border: 1.5px solid #e8e8e8; border-radius: 12px;
+  cursor: pointer; transition: all 0.2s;
+  &:hover { border-color: #f75801; }
+}
+.methodActive { border-color: #f75801; }
+.methodIconImg { width: 42px; height: 42px; border-radius: 8px; object-fit: contain; }
+.methodName { flex: 1; font-size: 14px; font-weight: 500; color: #333; }
+.methodRadio { width: 18px; height: 18px; accent-color: #f75801; cursor: pointer; }
+
+/* ── Price Breakdown ── */
+.priceCard {
+  background: #fff; border: 1.5px solid #f75801; border-radius: 14px;
+  padding: 20px; margin-bottom: 24px;
+}
+.priceRow {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; font-size: 14px; color: #555;
+  border-bottom: 1px solid #f5f5f5;
+  &:last-of-type { border-bottom: none; }
+}
+.priceTotal { font-weight: 700; color: #222; font-size: 15px; }
+.priceSubtotal {
+  border-top: 1.5px solid #eee; font-weight: 600; color: #333;
+  margin-top: 4px; padding-top: 12px;
+}
+.gstNote { font-size: 11px; color: #999; margin: 8px 0 0; }
+
+/* ── Address Box (checkout) ── */
+.addressBox {
+  background: #fff; border: 1px solid #e8e8e8; border-radius: 12px;
+  padding: 16px 18px; margin-bottom: 24px; position: relative;
+}
+.addressBoxTitle { font-size: 13px; font-weight: 700; color: #222; margin: 0 0 6px; text-transform: uppercase; }
+.addressBoxText { font-size: 13px; color: #666; margin: 0; line-height: 1.5; strong { color: #333; } }
+.changeAddrBtn {
+  position: absolute; top: 16px; right: 18px;
+  background: none; border: 1px solid #f75801; border-radius: 6px;
+  color: #f75801; font-size: 12px; font-weight: 600; padding: 4px 12px;
+  cursor: pointer; transition: all 0.2s;
+  &:hover { background: #fff5f0; }
+}
+
+/* ── Coupon ── */
+.sectionTitleCenter {
+  font-size: 15px; font-weight: 700; color: #222; text-transform: uppercase;
+  letter-spacing: 0.5px; margin: 0 0 16px; text-align: center;
+  &::after {
+    content: ""; display: block; width: 45px; height: 3px;
+    background: #f75801; margin: 6px auto 0; border-radius: 2px;
+  }
+}
+.couponRow { display: flex; gap: 10px; margin-bottom: 20px; }
+.couponInput {
+  flex: 1; padding: 11px 14px; border: 1px solid #e0e0e0; border-radius: 8px;
+  font-size: 14px; outline: none;
+  &::placeholder { color: #bbb; }
+  &:focus { border-color: #f75801; }
+}
+.applyBtn {
+  padding: 11px 24px; border: none; border-radius: 8px; background: #f75801;
+  color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+  white-space: nowrap; transition: background 0.2s;
+  &:hover { background: #d43400; }
+}
+
+/* ── Secured + Pay ── */
+.securedBox {
+  background: #fff; border: 1.5px solid #f0f0f0; border-radius: 14px;
+  padding: 20px; text-align: center;
+}
+.securedText { font-size: 13px; color: #555; margin: 0 0 14px; strong { color: #222; } }
+.payBtn {
+  width: 100%; padding: 14px; border: none; border-radius: 10px;
+  background: #f75801; color: #fff; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  &:hover { background: #d43400; box-shadow: 0 4px 14px rgba(247,88,1,0.3); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
 
 /* ── Responsive: Tablet ── */
 @media (max-width: 768px) {
@@ -551,6 +704,11 @@
   .checkoutBtn {
     padding: 12px 28px;
   }
+
+  .upiApps { gap: 14px; }
+  .upiIconImg { width: 44px; height: 44px; }
+  .priceCard { padding: 16px; }
+  .methodCard { padding: 14px; }
 }
 
 /* ── Responsive: Mobile ── */
@@ -677,4 +835,25 @@
     padding: 6px 16px;
     font-size: 12px;
   }
+
+  .upiCard { padding: 16px; border-radius: 12px; }
+  .upiApps { gap: 12px; flex-wrap: wrap; }
+  .upiIconImg { width: 40px; height: 40px; border-radius: 10px; }
+  .upiName { font-size: 10px; }
+  .otherUpiBtn { font-size: 12px; }
+  .methodCard { padding: 12px 14px; gap: 10px; }
+  .methodIconImg { width: 36px; height: 36px; border-radius: 8px; }
+  .methodName { font-size: 13px; }
+  .priceCard { padding: 16px; border-radius: 12px; }
+  .priceRow { font-size: 13px; padding: 8px 0; }
+  .priceTotal { font-size: 14px; }
+  .addressBox { padding: 14px; }
+  .addressBoxTitle { font-size: 12px; }
+  .addressBoxText { font-size: 12px; }
+  .couponRow { flex-direction: column; }
+  .couponInput { width: 100%; }
+  .applyBtn { width: 100%; text-align: center; }
+  .securedBox { padding: 16px; border-radius: 12px; }
+  .securedText { font-size: 12px; }
+  .payBtn { font-size: 14px; padding: 13px; }
 }

@@ -126,9 +126,9 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
       invalidatesTags: ["cart"],
     }),
 
-    // Update cart item quantity — PUT /api/mall/cart/:productId
+    // Update cart item quantity — PUT /api/mall/cart/:productId/:variantId
     updateCartItem: builder.mutation({
-      queryFn: async ({ productId, quantity }) => {
+      queryFn: async ({ productId, variantId, quantity }) => {
         try {
           const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
           const role = localStorage.getItem("shubhtalk_role");
@@ -136,7 +136,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
             ? localStorage.getItem("shubhtalk_astro_token")
             : localStorage.getItem("shubhtalk_customer_token");
 
-          const res = await fetch(`${BASE_URL}/api/mall/cart/${productId}`, {
+          const res = await fetch(`${BASE_URL}/api/mall/cart/${productId}/${variantId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -157,9 +157,9 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
       invalidatesTags: ["cart"],
     }),
 
-    // Remove item from cart
+    // Remove item from cart — DELETE /api/mall/cart/:productId/:variantId
     removeCartItem: builder.mutation({
-      queryFn: async ({ productId }) => {
+      queryFn: async ({ productId, variantId }) => {
         try {
           const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
           const role = localStorage.getItem("shubhtalk_role");
@@ -167,7 +167,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
             ? localStorage.getItem("shubhtalk_astro_token")
             : localStorage.getItem("shubhtalk_customer_token");
 
-          const res = await fetch(`${BASE_URL}/api/mall/cart/${productId}`, {
+          const res = await fetch(`${BASE_URL}/api/mall/cart/${productId}/${variantId}`, {
             method: "DELETE",
             headers: {
               accept: "application/json",

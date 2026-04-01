@@ -26,7 +26,10 @@ const getItemPrice = (item) => {
   // currentPrice from cart API is the most accurate
   if (item?.currentPrice) return item.currentPrice;
   if (item?.priceAtAdd) return item.priceAtAdd;
+  if (item?.variantSnapshot?.price) return item.variantSnapshot.price;
   const p = item?.productId || item?.product || item;
+  const variant = p?.variants?.find((v) => v.isActive) || p?.variants?.[0];
+  if (variant?.price) return variant.price;
   return p?.price || p?.selling_price || 0;
 };
 const getItemRouteId = (item) => {
@@ -49,11 +52,18 @@ const AstromallCartSidebar = () => {
     return sum + getItemPrice(item) * (item?.quantity || 1);
   }, 0);
 
+  const getItemIds = (item) => {
+    const p = item?.productId || item?.product || item;
+    const productId = p?._id || p?.ID || item?.productId;
+    const variantId = item?.variantId?._id || item?.variantId || item?.variantSnapshot?._id || "";
+    return { productId, variantId };
+  };
+
   const handleRemove = async (item) => {
-    const productId = item?.productId?._id || item?.product?._id || item?._id;
+    const { productId, variantId } = getItemIds(item);
     if (!productId) return;
     try {
-      await removeCartItem({ productId }).unwrap();
+      await removeCartItem({ productId, variantId }).unwrap();
       Toast.success("Item removed");
     } catch (err) {
       Toast.error(err?.data?.message || "Failed to remove");
@@ -61,11 +71,11 @@ const AstromallCartSidebar = () => {
   };
 
   const handleUpdateQty = async (item, newQty) => {
-    const productId = item?.productId?._id || item?.product?._id || item?._id;
+    const { productId, variantId } = getItemIds(item);
     if (!productId) return;
     if (newQty < 1) return;
     try {
-      await updateCartItem({ productId, quantity: newQty }).unwrap();
+      await updateCartItem({ productId, variantId, quantity: newQty }).unwrap();
     } catch (err) {
       Toast.error(err?.data?.message || "Failed to update quantity");
     }

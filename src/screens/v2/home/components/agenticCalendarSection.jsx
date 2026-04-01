@@ -115,10 +115,10 @@ const PlanEventsBanner = () => {
             <br />
             for your key life events.
           </p>
-          <div className={styles.planEventsLocation}>
+          {/* <div className={styles.planEventsLocation}>
             <FiMapPin size={16} />
             <span>Based On: Mumbai</span>
-          </div>
+          </div> */}
         </div>
         <div className={styles.planEventsArrow}>
           <FiChevronRight size={22} />
@@ -226,6 +226,7 @@ const PlanEventsBanner = () => {
             <div className={styles.calendarNav}>
               <button
                 className={styles.calendarNavBtn}
+                disabled={calendarYear === new Date().getFullYear() && calendarMonth === new Date().getMonth()}
                 onClick={() => {
                   if (calendarMonth === 0) {
                     setCalendarMonth(11);
@@ -283,16 +284,20 @@ const PlanEventsBanner = () => {
 
                 // Current month days
                 const today = new Date();
+                today.setHours(0, 0, 0, 0);
                 for (let d = 1; d <= daysInMonth; d++) {
                   const thisDate = new Date(calendarYear, calendarMonth, d);
+                  const isPast = thisDate < today;
                   const isToday = d === today.getDate() && calendarMonth === today.getMonth() && calendarYear === today.getFullYear();
                   const isSelected = customDate && d === customDate.getDate() && calendarMonth === customDate.getMonth() && calendarYear === customDate.getFullYear();
 
                   cells.push(
                     <button
                       key={d}
-                      className={`${styles.calendarDay} ${isSelected ? styles.calendarDaySelected : ""} ${isToday && !isSelected ? styles.calendarDayToday : ""}`}
+                      className={`${styles.calendarDay} ${isSelected ? styles.calendarDaySelected : ""} ${isToday && !isSelected ? styles.calendarDayToday : ""} ${isPast ? styles.calendarDayMuted : ""}`}
+                      disabled={isPast}
                       onClick={() => {
+                        if (isPast) return;
                         setCustomDate(thisDate);
                         setSelectedPeriod(null);
                         setShowDatePicker(false);

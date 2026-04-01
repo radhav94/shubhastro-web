@@ -71,6 +71,10 @@ const LivePlayerPage = () => {
     });
   }, [channelId]);
 
+  if (lives.length === 0) {
+    return null; // Wait for API to load live list before mounting the player
+  }
+
   return (
     <LiveListProvider
       lives={lives.map((l) => ({
@@ -81,6 +85,9 @@ const LivePlayerPage = () => {
         astrologerId: l.astrologer?._id,
         rating: l.astrologer?.rating,
         expertise: l.astrologer?.expertise,
+        imageUrl: l.astrologer?.profileImgUrl || l.astrologer?.imageUrl,
+        audioCallRate: l.astrologer?.price?.audioRate?.amount,
+        videoCallRate: l.astrologer?.price?.videoCallRate?.amount,
         uid: l.uid,
       }))}
       autoStartIndex={autoStartIndex}

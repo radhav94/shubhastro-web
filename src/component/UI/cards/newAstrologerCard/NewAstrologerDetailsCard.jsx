@@ -93,38 +93,42 @@ const NewAstrologerDetailsCard = ({
 
         {/* Action Buttons */}
         <div className={styles.detailsActionButtons}>
-          <div className={styles.detailsButtonWrapper}>
-            <button
-              className={styles.detailsChatBtn}
-              onClick={() => onConnect(astrologer, "chat")}
-              disabled={!astrologer?.price?.chatRate?.amount}
-            >
-              <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
-            </button>
-            <p className={styles.detailsPriceText}>
-              ₹
-              <span className={styles.detailsPriceAmount}>
-                {astrologer?.price?.chatRate?.amount || 0}
-              </span>
-              /min
-            </p>
-          </div>
-          <div className={styles.detailsButtonWrapper}>
-            <button
-              className={styles.detailsCallBtn}
-              onClick={() => onConnect(astrologer, "audio")}
-              disabled={!astrologer?.price?.audioRate?.amount}
-            >
-              <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
-            </button>
-            <p className={styles.detailsPriceText}>
-              ₹
-              <span className={styles.detailsPriceAmount}>
-                {astrologer?.price?.audioRate?.amount || 0}
-              </span>
-              /min
-            </p>
-          </div>
+          {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("chat")) && (
+            <div className={styles.detailsButtonWrapper}>
+              <button
+                className={styles.detailsChatBtn}
+                onClick={() => onConnect(astrologer, "chat")}
+                disabled={!astrologer?.price?.chatRate?.amount}
+              >
+                <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+              </button>
+              <p className={styles.detailsPriceText}>
+                ₹
+                <span className={styles.detailsPriceAmount}>
+                  {astrologer?.price?.chatRate?.amount || 0}
+                </span>
+                /min
+              </p>
+            </div>
+          )}
+          {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("audio")) && (
+            <div className={styles.detailsButtonWrapper}>
+              <button
+                className={styles.detailsCallBtn}
+                onClick={() => onConnect(astrologer, "audio")}
+                disabled={!astrologer?.price?.audioRate?.amount}
+              >
+                <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
+              </button>
+              <p className={styles.detailsPriceText}>
+                ₹
+                <span className={styles.detailsPriceAmount}>
+                  {astrologer?.price?.audioRate?.amount || 0}
+                </span>
+                /min
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

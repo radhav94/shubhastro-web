@@ -15,6 +15,7 @@ import {
   restoreViewerSession,
   saveViewerSession,
 } from "../../../../../utils/liveSessionStorage";
+import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 
 const LiveStreamingContainer = ({ client }) => {
   const location = useLocation();
@@ -46,6 +47,9 @@ const LiveStreamingContainer = ({ client }) => {
           lastName: currentLive.astrologerName?.split(" ").slice(1).join(" ") || "",
           rating: currentLive.rating,
           expertise: currentLive.expertise,
+          imageUrl: currentLive.imageUrl,
+          audioCallRate: currentLive.audioCallRate,
+          videoCallRate: currentLive.videoCallRate,
         },
       });
     }
@@ -88,14 +92,24 @@ const LiveStreamingContainer = ({ client }) => {
   }, [liveList]);
 
   // Handle stream ended (room not found, room ended, host disconnected)
-  const handleStreamEnded = useCallback(({ reason }) => {
-    console.log("Stream ended, reason:", reason);
+  const handleStreamEnded = useCallback(({ reason, roomId: endedRoomId }) => {
+    console.log("Stream ended, reason:", reason, "roomId:", endedRoomId);
     clearViewerSession();
 
-    // If there are other lives, move to next; otherwise navigate away
+    const targetRoom = endedRoomId || channel;
+
+    // If we already switched to a different channel (e.g. astrologer_status
+    // triggered a channel switch before room_ended arrived), skip removal —
+    // the ended room was likely already removed by handleAstrologerStatus.
+    if (targetRoom && targetRoom !== channel) {
+      console.log("Stream ended for a room we already left, ignoring:", targetRoom);
+      return;
+    }
+
+    // If there are other lives, remove the ended one; otherwise navigate away
     if (liveList && liveList.lives.length > 1) {
-      liveList.removeLive(channel);
-    } else {
+      liveList.removeLive(targetRoom);
+    } else if (liveList && liveList.lives.length <= 1) {
       navigate("/live", { replace: true });
     }
   }, [liveList, channel, navigate]);
@@ -116,6 +130,55 @@ const LiveStreamingContainer = ({ client }) => {
     liveList?.removeLive(roomId);
   }, [liveList]);
 
+  // Room not found — re-fetch live list and switch to an active astrologer
+  const handleRoomNotFound = useCallback(async (staleRoomId) => {
+    console.log("Room not found, re-checking live list...", staleRoomId);
+    try {
+      const res = await getAstrologerLiveList();
+      const data = res.data?.data || [];
+
+      // Dedupe
+      const map = {};
+      data.forEach((item) => {
+        if (!map[item.channel] || map[item.channel].lastActive < item.lastActive) {
+          map[item.channel] = item;
+        }
+      });
+      const freshLives = Object.values(map);
+
+      if (freshLives.length > 0) {
+        // Remove the stale channel and add fresh ones
+        if (staleRoomId) liveList?.removeLive(staleRoomId);
+
+        freshLives.forEach((l) => {
+          liveList?.addLive({
+            channel: l.channel,
+            astrologerId: l.astrologer?._id,
+            astrologerName: `${l.astrologer?.firstName || ""} ${l.astrologer?.lastName || ""}`.trim(),
+            rating: l.astrologer?.rating,
+            expertise: l.astrologer?.expertise,
+            imageUrl: l.astrologer?.profileImgUrl,
+            audioCallRate: l.astrologer?.price?.audioRate?.amount,
+            videoCallRate: l.astrologer?.price?.videoCallRate?.amount,
+          });
+        });
+
+        // Switch to the first available live
+        const firstLive = freshLives[0];
+        liveList?.switchToChannel(firstLive.channel);
+        retryJoinRef.current?.(firstLive.channel);
+      } else {
+        // No one is live — navigate to live landing
+        clearViewerSession();
+        navigate("/live", { replace: true });
+      }
+    } catch (err) {
+      console.error("Failed to re-check live list:", err);
+      clearViewerSession();
+      navigate("/live", { replace: true });
+    }
+  }, [liveList, navigate]);
+
   const chat = useLiveChat({
     roomId: channel,
     userId: userIdLocal,
@@ -124,6 +187,7 @@ const LiveStreamingContainer = ({ client }) => {
     onStreamEnded: handleStreamEnded,
     onSessionStarted: handleSessionStarted,
     onSessionEnded: handleSessionEnded,
+    onRoomNotFound: handleRoomNotFound,
   });
 
   // When astrologer goes live and the channel matches, retry joining the chat room

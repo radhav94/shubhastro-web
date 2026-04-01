@@ -1,27 +1,18 @@
 import { useState } from "react";
 import styles from "./WalletModal.module.scss";
 import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance";
-import { useNavigate } from "react-router-dom";
+import { useRechargePlans } from "../recharge-modal/useRechargePlans";
+import RechargeModal from "../recharge-modal/RechargeModal";
 import { IoChevronForward } from "react-icons/io5";
 import WalletIcon from "../../assets/icons/wallet-2.svg";
 import WalletComboImage from "../../assets/images/wallet-popular-combo.png";
 
 const WalletModal = ({ isOpen, onClose }) => {
-  const { balance } = useWalletBalance();
-  const navigate = useNavigate();
+  const { balance, refreshWallet } = useWalletBalance();
+  const { plans, isLoading: plansLoading } = useRechargePlans();
   const [customAmount, setCustomAmount] = useState("");
   const [selectedAmount, setSelectedAmount] = useState(null);
-
-  const rechargeAmounts = [
-    { amount: 50, extra: "15% Extra" },
-    { amount: 100, extra: "15% Extra" },
-    { amount: 200, extra: "15% Extra" },
-    { amount: 250, extra: "15% Extra" },
-    { amount: 50, extra: "15% Extra" },
-    { amount: 50, extra: "15% Extra" },
-    { amount: 50, extra: "15% Extra" },
-    { amount: 50, extra: "15% Extra" },
-  ];
+  const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
 
   const coupons = [
     {
@@ -40,7 +31,7 @@ const WalletModal = ({ isOpen, onClose }) => {
     }
   ];
 
-  const handleRecharge = (amount, index) => {
+  const handleRecharge = (_plan, index) => {
     setSelectedAmount(index);
     setCustomAmount("");
   };
@@ -51,16 +42,23 @@ const WalletModal = ({ isOpen, onClose }) => {
   };
 
   const handleAddMoney = () => {
-    const amount = customAmount || (selectedAmount !== null ? rechargeAmounts[selectedAmount].amount : null);
-    if (amount && amount > 0) {
-      onClose();
-      navigate(`/recharge?amount=${amount}`);
-    }
+    setIsRechargeModalOpen(true);
+  };
+
+  const handleRechargeSuccess = () => {
+    setIsRechargeModalOpen(false);
+    refreshWallet();
+    window.dispatchEvent(new Event("walletBalanceUpdated"));
+  };
+
+  const handleRechargeClose = () => {
+    setIsRechargeModalOpen(false);
   };
 
   if (!isOpen) return null;
 
   return (
+    <>
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         {/* Handle */}
@@ -93,18 +91,27 @@ const WalletModal = ({ isOpen, onClose }) => {
           {/* Popular Recharges */}
           <div className={styles.section}>
             <h3 className={styles.sectionTitle}>Popular Recharges</h3>
-            <div className={styles.rechargeGrid}>
-              {rechargeAmounts.map((item, index) => (
-                <div
-                  key={index}
-                  className={`${styles.rechargeItem} ${selectedAmount === index ? styles.selected : ''}`}
-                  onClick={() => handleRecharge(item.amount, index)}
-                >
-                  <div className={styles.rechargeAmount}>₹{item.amount}</div>
-                  <div className={styles.rechargeExtra}>{item.extra}</div>
-                </div>
-              ))}
-            </div>
+            {plansLoading ? (
+              <p style={{ textAlign: "center", padding: "16px", color: "#999" }}>Loading plans...</p>
+            ) : (
+              <div className={styles.rechargeGrid}>
+                {plans.map((plan, index) => (
+                  <div
+                    key={plan._id || index}
+                    className={`${styles.rechargeItem} ${selectedAmount === index ? styles.selected : ''}`}
+                    onClick={() => handleRecharge(plan, index)}
+                  >
+                    <div className={styles.rechargeAmount}>₹{plan.actualPrice}</div>
+                    {plan.discountedPrice > 0 && (
+                      <div className={styles.rechargeExtra}>Save ₹{plan.discountedPrice}</div>
+                    )}
+                    {plan.name && !plan.discountedPrice && (
+                      <div className={styles.rechargeExtra}>{plan.name}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Available Coupons */}
@@ -153,6 +160,15 @@ const WalletModal = ({ isOpen, onClose }) => {
         </div>
       </div>
     </div>
+
+    {/* Recharge Modal - opens Razorpay inline instead of navigating away */}
+    <RechargeModal
+      isOpen={isRechargeModalOpen}
+      onClose={handleRechargeClose}
+      onSuccess={handleRechargeSuccess}
+      title="Recharge to Continue Chat"
+    />
+    </>
   );
 };
 
