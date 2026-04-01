@@ -97,13 +97,16 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
 
     // Add item to cart
     addToCart: builder.mutation({
-      queryFn: async ({ productId, quantity = 1, variantId }) => {
+      queryFn: async ({ productId, quantity = 1, variantId, skuCode }) => {
         try {
           const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
             : localStorage.getItem("shubhtalk_customer_token");
+
+          const body = { productId, quantity, variantId };
+          if (skuCode) body.skuCode = skuCode;
 
           const res = await fetch(`${BASE_URL}/api/mall/cart`, {
             method: "POST",
@@ -112,7 +115,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
               accept: "application/json",
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
-            body: JSON.stringify({ productId, quantity, variantId }),
+            body: JSON.stringify(body),
           });
           const json = await res.json();
           if (json?.success) {

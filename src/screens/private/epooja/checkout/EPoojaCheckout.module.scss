@@ -266,12 +266,19 @@
 .priceRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 10px 0;
   font-size: 14px;
   color: #555;
   border-bottom: 1px solid #f5f5f5;
   &:last-of-type { border-bottom: none; }
+}
+.priceRowAttrs {
+  display: block;
+  font-size: 11px;
+  color: #222;
+  margin-top: 2px;
+  text-transform: capitalize;
 }
 .priceTotal {
   font-weight: 700;
@@ -279,10 +286,8 @@
   font-size: 15px;
 }
 .priceSubtotal {
-  border-top: 1.5px solid #eee;
   font-weight: 600;
   color: #333;
-  margin-top: 4px;
   padding-top: 12px;
 }
 .gstNote {

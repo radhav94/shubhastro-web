@@ -296,6 +296,77 @@
   p { margin: 2px 0; }
 }
 
+/* ── Attribute-based Variant Selector ── */
+.attrSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 28px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #eee;
+}
+
+.attrGroup {
+  padding: 18px 22px;
+  background: #f9f9f9;
+  &:nth-child(even) { background: #fff; }
+}
+
+.attrLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #222;
+  text-transform: capitalize;
+  letter-spacing: 0.3px;
+  margin-bottom: 12px;
+}
+
+.attrOptions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.attrBtn {
+  padding: 10px 20px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 64px;
+  text-align: center;
+  text-transform: capitalize;
+
+  &:hover:not(:disabled) {
+    border-color: #f75801;
+    color: #f75801;
+    box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
+  }
+}
+
+.attrBtnActive {
+  border-color: #f75801;
+  color: #f75801;
+  background: #fff;
+  font-weight: 600;
+  box-shadow: 0 0 0 1.5px #f75801, 0 2px 8px rgba(247, 88, 1, 0.12);
+}
+
+.attrBtnDisabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: #f5f5f5;
+  color: #bbb;
+  text-decoration: line-through;
+  border-color: #e8e8e8;
+}
+
 /* ── Action Row ── */
 .actionRow {
   display: flex;

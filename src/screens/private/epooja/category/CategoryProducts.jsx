@@ -137,11 +137,12 @@ const CategoryProducts = () => {
     }
     const productId = item?._id || item?.ID;
     if (!productId) { Toast.error("Unable to add — product ID missing"); return; }
-    const firstVariant = item?.variants?.find((v) => v.isActive) || item?.variants?.[0];
-    if (!firstVariant?._id) { Toast.error("No variant available for this product"); return; }
-    if (firstVariant?.stock === 0) { Toast.error("This variant is out of stock"); return; }
+    const firstVariant = item?.variants?.find((v) => v.isActive !== false && v.inStock !== false) || item?.variants?.[0];
+    const fvId = firstVariant?._id || firstVariant?.id || firstVariant?.skuCode || firstVariant?.sku;
+    if (!fvId) { Toast.error("No variant available for this product"); return; }
+    if (firstVariant?.stock === 0 || firstVariant?.inStock === false) { Toast.error("This variant is out of stock"); return; }
     try {
-      await addToCart({ productId, variantId: firstVariant._id, quantity: 1 }).unwrap();
+      await addToCart({ productId, variantId: fvId, skuCode: firstVariant?.skuCode || firstVariant?.sku || "", quantity: 1 }).unwrap();
       Toast.success(`${getTitle(item)} added to cart`);
     } catch (err) {
       Toast.error(err?.data?.message || "Failed to add to cart");
