@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { 
   useFetchDailyQuery, 
   useFetchWeeklyQuery, 
@@ -104,7 +105,10 @@ const HoroscopeNew = () => {
   const headerSelectedKundli = useSelector((state) => state.kundli?.selectedKundli);
 
   // Fetch user's Kundli profiles for default zodiac selection
-  const { data: kundliProfilesData } = useGetAllKundlisQuery();
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const { data: kundliProfilesData } = useGetAllKundlisQuery(undefined, {
+    skip: !isLoggedIn,
+  });
   const kundliProfiles = kundliProfilesData?.data || [];
 
   // Determine the active profile: header-selected > Self > first profile
