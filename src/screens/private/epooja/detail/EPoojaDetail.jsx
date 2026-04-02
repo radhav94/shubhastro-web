@@ -20,15 +20,15 @@ const StarRating = ({ rating = 0, size = 18 }) => {
   return <span className={styles.starsRow}>{stars}</span>;
 };
 
-const FaqItem = ({ q, a }) => {
-  const [open, setOpen] = useState(false);
+const FaqItem = ({ q, a, defaultOpen = false }) => {
+  const [open, setOpen] = useState(defaultOpen);
   return (
     <div className={styles.faqCard}>
       <button className={styles.faqBtn} onClick={() => setOpen(!open)} aria-expanded={open}>
         <span>{q}</span>
         {open ? <FiMinus className={styles.faqIcon} /> : <FiPlus className={styles.faqIcon} />}
       </button>
-      {open && <p className={styles.faqAnswer}>{a}</p>}
+      {open && (typeof a === 'string' ? <p className={styles.faqAnswer}>{a}</p> : <div className={styles.faqAnswer}>{a}</div>)}
     </div>
   );
 };
@@ -722,6 +722,28 @@ const EPoojaDetail = () => {
             </div>
           </div>
 
+          {/* Specifications */}
+          {product?.specifications?.length > 0 && (
+            <div className={styles.faqSection}>
+              <FaqItem
+                q="Specifications"
+                defaultOpen
+                a={
+                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <tbody>
+                      {product.specifications.map((spec, i) => (
+                        <tr key={i} style={{ borderBottom: "1px solid #f0f0f0" }}>
+                          <td style={{ padding: "8px 12px", fontSize: "14px", fontWeight: 600, color: "#555", width: "40%" }}>{spec.key}</td>
+                          <td style={{ padding: "8px 12px", fontSize: "14px", color: "#222" }}>{spec.value}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                }
+              />
+            </div>
+          )}
+
           {/* FAQ */}
           {faqs.length > 0 && (
             <div className={styles.faqSection}>
@@ -832,18 +854,18 @@ const EPoojaDetail = () => {
             <h2 className={styles.modalTitle}>{editingAddress ? "EDIT ADDRESS" : "ADD NEW ADDRESS"}</h2>
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Name *</label>
+                <label className={styles.formLabel}>Name <span style={{color:'#dc2626'}}>*</span></label>
                 <input type="text" placeholder="Full name" className={`${styles.formInput} ${addrErrors.name ? styles.formInputError : ""}`} value={newAddr.name} onChange={(e) => { setNewAddr({ ...newAddr, name: e.target.value }); setAddrErrors({ ...addrErrors, name: "" }); }} />
                 {addrErrors.name && <p className={styles.formError}>{addrErrors.name}</p>}
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Phone *</label>
+                <label className={styles.formLabel}>Phone <span style={{color:'#dc2626'}}>*</span></label>
                 <input type="tel" placeholder="Phone number" maxLength={10} className={`${styles.formInput} ${addrErrors.phone ? styles.formInputError : ""}`} value={newAddr.phone} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); setNewAddr({ ...newAddr, phone: v }); setAddrErrors({ ...addrErrors, phone: "" }); }} />
                 {addrErrors.phone && <p className={styles.formError}>{addrErrors.phone}</p>}
               </div>
             </div>
             <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Address line 1 *</label>
+              <label className={styles.formLabel}>Address line 1 <span style={{color:'#dc2626'}}>*</span></label>
               <input type="text" placeholder="Enter here" className={`${styles.formInput} ${addrErrors.addressLine1 ? styles.formInputError : ""}`} value={newAddr.addressLine1} onChange={(e) => { setNewAddr({ ...newAddr, addressLine1: e.target.value }); setAddrErrors({ ...addrErrors, addressLine1: "" }); }} />
               {addrErrors.addressLine1 && <p className={styles.formError}>{addrErrors.addressLine1}</p>}
             </div>
@@ -853,17 +875,17 @@ const EPoojaDetail = () => {
             </div>
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Pincode *</label>
+                <label className={styles.formLabel}>Pincode <span style={{color:'#dc2626'}}>*</span></label>
                 <input type="text" placeholder="Enter here" maxLength={6} className={`${styles.formInput} ${addrErrors.pincode ? styles.formInputError : ""}`} value={newAddr.pincode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); setNewAddr({ ...newAddr, pincode: v }); setAddrErrors({ ...addrErrors, pincode: "" }); }} />
                 {addrErrors.pincode && <p className={styles.formError}>{addrErrors.pincode}</p>}
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>City *</label>
+                <label className={styles.formLabel}>City <span style={{color:'#dc2626'}}>*</span></label>
                 <input type="text" placeholder="Enter here" className={`${styles.formInput} ${addrErrors.city ? styles.formInputError : ""}`} value={newAddr.city} onChange={(e) => { setNewAddr({ ...newAddr, city: e.target.value }); setAddrErrors({ ...addrErrors, city: "" }); }} />
                 {addrErrors.city && <p className={styles.formError}>{addrErrors.city}</p>}
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>State *</label>
+                <label className={styles.formLabel}>State <span style={{color:'#dc2626'}}>*</span></label>
                 <input type="text" placeholder="Type here" className={`${styles.formInput} ${addrErrors.state ? styles.formInputError : ""}`} value={newAddr.state} onChange={(e) => { setNewAddr({ ...newAddr, state: e.target.value }); setAddrErrors({ ...addrErrors, state: "" }); }} />
                 {addrErrors.state && <p className={styles.formError}>{addrErrors.state}</p>}
               </div>
@@ -877,6 +899,7 @@ const EPoojaDetail = () => {
               <div className={styles.saveAsTags}>
                 <button className={`${styles.saveAsTag} ${newAddr.type === "home" ? styles.saveAsActive : ""}`} onClick={() => setNewAddr({ ...newAddr, type: "home" })}>Home</button>
                 <button className={`${styles.saveAsTag} ${newAddr.type === "work" ? styles.saveAsActive : ""}`} onClick={() => setNewAddr({ ...newAddr, type: "work" })}>Work</button>
+                <button className={`${styles.saveAsTag} ${newAddr.type === "other" ? styles.saveAsActive : ""}`} onClick={() => setNewAddr({ ...newAddr, type: "other" })}>Other</button>
               </div>
             </div>
             <button className={styles.saveAddressBtn} onClick={handleAddAddress} disabled={isAddingAddress || isUpdatingAddress}>
@@ -905,7 +928,7 @@ const EPoojaDetail = () => {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Your Review *</label>
+              <label className={styles.formLabel}>Your Review <span style={{color:'#dc2626'}}>*</span></label>
               <textarea placeholder="Share your experience..." className={`${styles.formTextarea} ${reviewErrors.comment ? styles.formInputError : ""}`} rows={4} value={reviewForm.comment} onChange={(e) => { setReviewForm({ ...reviewForm, comment: e.target.value }); setReviewErrors({ ...reviewErrors, comment: "" }); }} />
               {reviewErrors.comment && <p className={styles.formError}>{reviewErrors.comment}</p>}
             </div>

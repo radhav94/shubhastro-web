@@ -70,7 +70,7 @@ const LoveTriangleResultPage = () => {
   const cardData = {
     you: {
       name: apiResponse?.self?.name || "Card Self",
-      title: apiResponse.card_self_title || "Your Card",
+      title: apiResponse.card_self_title || "",
       description:
         apiResponse.self.description ||
         apiResponse.card_self ||
@@ -80,7 +80,7 @@ const LoveTriangleResultPage = () => {
     },
     partner1: {
       name: apiResponse.lover1.name || "Card Lover 1",
-      title: apiResponse.lover1.title || "Partner 1 Card",
+      title: apiResponse.lover1.title || "",
       description:
         apiResponse.lover1.description ||
         apiResponse.lover1 ||
@@ -90,7 +90,7 @@ const LoveTriangleResultPage = () => {
     },
     partner2: {
       name: apiResponse.lover2.name || "Card Lover 2",
-      title: apiResponse.card_lover2_title || "Partner 2 Card",
+      title: apiResponse.card_lover2_title || "",
       description:
         apiResponse.lover2.description ||
         apiResponse.card_lover2 ||
@@ -164,6 +164,7 @@ const LoveTriangleResultPage = () => {
           {currentCard.title && (
             <h2 className={styles.readingTitle}>{currentCard.title}</h2>
           )}
+          <h3 className={styles.sectionTitle}>📖 Reading and Guidance</h3>
           <p className={styles.readingDescription}>{currentCard.description}</p>
         </div>
 
