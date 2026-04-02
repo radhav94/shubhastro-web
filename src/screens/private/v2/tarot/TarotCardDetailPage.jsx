@@ -192,7 +192,15 @@ const TarotCardDetailPage = () => {
           )}
 
           {displayData.answer && (
-            <p className={styles.answer}>Answer: {displayData.answer}</p>
+            <p className={styles.answer}>
+              Answer:{' '}
+              <span style={{
+                color: displayData.answer.toLowerCase() === 'yes' ? '#16a34a' : '#dc2626',
+                fontWeight: 700,
+              }}>
+                {displayData.answer}
+              </span>
+            </p>
           )}
 
           {/* Traits Capsules */}
@@ -258,12 +266,40 @@ const TarotCardDetailPage = () => {
                   )}
                   
                   {displayData.description && (
-                    <p className={styles.readingDescription}>{displayData.description}</p>
+                    <div className={styles.meaningSection}>
+                      <h3 className={styles.sectionTitle}>📖 Reading and Guidance</h3>
+                      <p className={styles.readingDescription}>{displayData.description}</p>
+                    </div>
+                  )}
+
+                  {displayData.careerPaths && displayData.careerPaths.length > 0 && (
+                    <div className={styles.meaningSection}>
+                      <h3 className={styles.sectionTitle}>🎯 Career Paths</h3>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
+                        {displayData.careerPaths.map((path, idx) => (
+                          <span
+                            key={idx}
+                            style={{
+                              background: "linear-gradient(90deg, #f75801, #d43400)",
+                              color: "#fff",
+                              padding: "6px 14px",
+                              borderRadius: "20px",
+                              fontSize: "13px",
+                              fontWeight: "500",
+                            }}
+                          >
+                            {path}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   )}
 
                   {displayData.meaning && (
                     <div className={styles.meaningSection}>
-                      <h3 className={styles.sectionTitle}>Meaning</h3>
+                      <h3 className={styles.sectionTitle}>
+                        {readingEndpoint === 'yes-no' ? '🔮 Answer' : 'Meaning'}
+                      </h3>
                       <p className={styles.readingDescription}>{displayData.meaning}</p>
                     </div>
                   )}

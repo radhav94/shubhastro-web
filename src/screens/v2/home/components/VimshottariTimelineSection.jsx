@@ -175,7 +175,8 @@ const VimshottariTimelineSection = () => {
   const handleSeeFullDasha = () => {
     if (defaultProfile && defaultProfile._id) {
       // Navigate to /kundli/:kundliId?tab=dasha to open Dasha tab (index 5)
-      navigate(`/kundli/${defaultProfile._id}?tab=dasha`);
+      //navigate(`/kundli/${defaultProfile._id}?tab=dasha`);
+      navigate(`/kundli?tab=dasha`);
     } else {
       // If no profile, navigate to kundli page to create one
       navigate('/kundli');

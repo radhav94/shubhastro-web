@@ -112,7 +112,30 @@ const Prediction = ({ params, skipToken }) => {
               className="w-full flex justify-between items-center px-4 py-3 text-left"
             >
               <p className="text-base font-semibold text-gray-800">
-                {specifications?.dasha || "Prediction"}
+                {(() => {
+                  const sd = specifications?.start_date;
+                  const ed = specifications?.end_date;
+                  if (!sd || !ed) return specifications?.dasha || "Prediction";
+
+                  const ordinal = (d) => {
+                    const s = ["th","st","nd","rd"];
+                    const v = d % 100;
+                    return d + (s[(v-20)%10] || s[v] || s[0]);
+                  };
+                  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+                  try {
+                    const start = new Date(sd);
+                    const end = new Date(ed);
+
+                    const startStr = `${ordinal(start.getDate())} ${months[start.getMonth()]} ${start.getFullYear()}`;
+                    const endStr = `${ordinal(end.getDate())} ${months[end.getMonth()]} ${end.getFullYear()}`;
+
+                    return `${startStr} - ${endStr}`;
+                  } catch {
+                    return specifications?.dasha || "Prediction";
+                  }
+                })()}
               </p>
               <span className="text-sm text-gray-400">
                 <img
