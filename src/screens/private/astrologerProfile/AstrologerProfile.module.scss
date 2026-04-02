@@ -430,7 +430,7 @@
   .availableCard {
     background: linear-gradient(90deg, #4CAF50 0%, #45A049 100%);
     border-radius: 16px;
-    padding: 16px;
+    padding: 12px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -438,7 +438,7 @@
   }
 
   .offlineCard {
-    background: #E8E8E8;
+    background: #EEE;
     border-radius: 16px;
     padding: 16px;
     display: flex;
@@ -532,8 +532,8 @@
   }
   
   .optionIcon {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     background: #F75801;
     border-radius: 50%;
     display: flex;
@@ -542,12 +542,16 @@
     color: #FFFFFF;
     font-size: 24px;
     flex-shrink: 0;
+    svg{
+      width: 20px;
+      height: 20px;
+    }
   }
   
   .optionInfo {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 0px;
   }
   
   .optionLabel {
@@ -928,7 +932,7 @@
   align-items: flex-start;
   gap: 12px;
   width: 100%;
-  min-height: 120px;
+  height: auto;
   @media (width <= 767px) {
     border-radius: 12px;
   }
@@ -1033,21 +1037,21 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 3px;
   flex: 1;
 }
 
 .statIcon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   color: #D4A574;
   stroke-width: 1.5;
   margin-bottom: 8px;
   opacity: 0.85;
   object-fit: contain;
   @media (width <= 767px) {
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
   }
 }
 
@@ -1256,15 +1260,15 @@
 }
 
 .minuteIcon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   color: #D4A574;
   margin-bottom: 8px;
   opacity: 0.85;
   object-fit: contain;
   @media (width <= 767px) {
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
   }
 }
 
@@ -1675,7 +1679,7 @@
 }
 
 .reviewerName {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 500;
   color: #1A1A1A;
   margin: 0;

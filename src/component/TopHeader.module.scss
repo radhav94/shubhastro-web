@@ -409,9 +409,10 @@
   align-items: center;
   gap: 5px;
   background-color: #fff;
-  border-radius: 7px;
+  border-radius: 40px;
   padding: 4px 10px;
   border: 1px solid rgba(189, 189, 189, 0.50);
+  height: 40px;
 }
 .profileWrapName{
   display: flex;
@@ -421,6 +422,7 @@
   align-items: center;
   gap: 6px;
   margin-right: 6px;
+  height: 30px;
   >span{
     max-width: 100px;
     @include line-clamp(1);
