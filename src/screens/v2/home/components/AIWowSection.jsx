@@ -7,6 +7,7 @@ import MobileAppModal from "../../../private/aiwow/components/MobileAppModal";
 import styles from "./AIWowSection.module.scss";
 import wireBg from "../../../../assets/images/wire-bg.svg";
 import { useSelector } from "react-redux";
+import useRequireAuth from "../../../../utils/hooks/useRequireAuth";
 
 const COLLAPSED_COUNT = 4;
 
@@ -60,6 +61,7 @@ const AIWowSection = () => {
   const { data: aiwowData } = useGetAiWowPageDataQuery();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
+  const requireAuth = useRequireAuth();
 
   const { data: profilesData } = useGetAllKundlisQuery(undefined, {
     skip: !isLoggedIn,
@@ -87,6 +89,7 @@ const AIWowSection = () => {
   const remainingSections = activeSections.slice(1);
 
   const handleCardClick = (slug) => {
+    if (!requireAuth()) return;
     if (slug === "ar-vastu-scanner") {
       setShowMobileAppModal(true);
     } else {

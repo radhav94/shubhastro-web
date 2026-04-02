@@ -3,9 +3,33 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
-import { Heart, Rocket, DollarSign, Plus, User, HelpCircle } from "lucide-react";
+import { Heart, Rocket, DollarSign, Plus, User, HelpCircle, Eye } from "lucide-react";
 import { registerUser } from "../../../services/appServices/authService";
 import { useCreateKundliMutation } from "../../../services/appServices/kundliServicesNew";
+import { useGetExpertiseFiltersQuery } from "../../../redux/api/astrologer/astrologerApi";
+
+// Static mapping for icon and color by slug (API doesn't provide these)
+const slugStyleMap = {
+  "face-reading": { icon: Eye, color: "#FFF4E0" },
+  "love-relationships": { icon: Heart, color: "#FFE5F0" },
+  "career-growth": { icon: Rocket, color: "#E5E0FF" },
+  "wealth-finances": { icon: DollarSign, color: "#E5F9E5" },
+  "health-well-being": { icon: Plus, color: "#E0F2FF" },
+  "self-understanding": { icon: User, color: "#FFE5F0" },
+  "others": { icon: HelpCircle, color: "#FFF4E0" },
+};
+
+const defaultStyle = { icon: HelpCircle, color: "#F0F0F0" };
+
+// Fallback options if API fails
+const fallbackOptions = [
+  { id: "love-relationships", label: "Love & Relationships", icon: Heart, color: "#FFE5F0" },
+  { id: "career-growth", label: "Career & Growth", icon: Rocket, color: "#E5E0FF" },
+  { id: "wealth-finances", label: "Wealth & Finances", icon: DollarSign, color: "#E5F9E5" },
+  { id: "health-well-being", label: "Health & Well-Being", icon: Plus, color: "#E0F2FF" },
+  { id: "self-understanding", label: "Self-understanding", icon: User, color: "#FFE5F0" },
+  { id: "others", label: "Others", icon: HelpCircle, color: "#FFF4E0" },
+];
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -18,19 +42,20 @@ const validationSchema = Yup.object({
 const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep = 2, totalSteps = 3, onStepChange }) => {
   const [loading, setLoading] = useState(false);
   const [createKundli] = useCreateKundliMutation();
+  const { data: filtersData } = useGetExpertiseFiltersQuery();
+
+  // Extract skill options from API response, fallback to static
+  const skillList = filtersData?.data?.find(f => f.title === "Skill")?.list;
+  const options = skillList
+    ? skillList.map(item => {
+        const style = slugStyleMap[item.slug] || defaultStyle;
+        return { id: item.slug, label: item.title, icon: style.icon, color: style.color };
+      })
+    : fallbackOptions;
 
   const initialValues = {
     guidance: formData.guidance || [],
   };
-
-  const options = [
-    { id: "love", label: "Love & Relationships", icon: Heart, color: "#FFE5F0" },
-    { id: "career", label: "Career & Growth", icon: Rocket, color: "#E5E0FF" },
-    { id: "wealth", label: "Wealth & Finances", icon: DollarSign, color: "#E5F9E5" },
-    { id: "health", label: "Health & Well-Being", icon: Plus, color: "#E0F2FF" },
-    { id: "self", label: "Self-understanding", icon: User, color: "#FFE5F0" },
-    { id: "others", label: "Others", icon: HelpCircle, color: "#FFF4E0" },
-  ];
 
   const handleSubmit = async (values) => {
     setLoading(true);
@@ -147,7 +172,7 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
               place: formData.birthPlace,
               lat: formData.latitude,
               lon: formData.longitude,
-              tzone: 5.5,
+              tzone: formData.timezone ?? 5.5,
             };
 
             console.log("📤 Kundali payload:", kundliPayload);

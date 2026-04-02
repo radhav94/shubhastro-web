@@ -34,6 +34,6 @@ export const buildKundliPayload = (formData) => {
     place: formData.birthPlace,
     lat: Number(formData.latitude),
     lon: Number(formData.longitude),
-    tzone: 5.5,
+    tzone: Number(formData.timezone) || 5.5,
   };
 };
