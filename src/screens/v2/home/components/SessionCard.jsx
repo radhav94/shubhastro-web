@@ -7,6 +7,8 @@ import {
 } from "../../../../utils/appImages";
 
 const SessionCard = ({ session, onCallAgain, isLoading }) => {
+  const isOnline = session?.isActive === true;
+
   // Format date from startTime
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -34,14 +36,20 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
     return `${mins} Min ${secs} Secs`;
   };
 
-  const handleButtonClick = (e,astrologer, connectionType) => {
+  const handleButtonClick = (e, astrologer, connectionType) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!isOnline) return;
     onCallAgain(astrologer, connectionType);
   };
 
   return (
-    <div className={styles.sessionCard}>
+    <div className={`${styles.sessionCard} ${!isOnline ? styles.sessionCardOffline : ''}`}>
+      {/* Online/Offline badge */}
+      <div className={`${styles.sessionStatusBadge} ${isOnline ? styles.sessionStatusOnline : styles.sessionStatusOffline}`}>
+        <span className={styles.sessionStatusDot} />
+        <span>{isOnline ? 'Online' : 'Offline'}</span>
+      </div>
       {session._id ? (
         <Link
           to={`/astrologer/${session._id}`}
@@ -113,12 +121,12 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
           </p>
         )}
         <div className={styles.sessionActionButtons}>
-          {(!session?.isActiveType?.length || session.isActiveType.includes("all") || session.isActiveType.includes("chat")) && (
+          {(session?.isActiveType?.includes("all") || session?.isActiveType?.includes("chat")) && (
             <div className={styles.sessionButtonWrapper}>
               <button
                 className={styles.sessionChatBtn}
-                onClick={(e) => handleButtonClick(e,session, "chat")}
-                disabled={isLoading}
+                onClick={(e) => handleButtonClick(e, session, "chat")}
+                disabled={isLoading || !isOnline}
               >
                 <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
               </button>
@@ -127,12 +135,12 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
               </p>
             </div>
           )}
-          {(!session?.isActiveType?.length || session.isActiveType.includes("all") || session.isActiveType.includes("audio")) && (
+          {(session?.isActiveType?.includes("all") || session?.isActiveType?.includes("audio")) && (
             <div className={styles.sessionButtonWrapper}>
               <button
                 className={styles.sessionCallBtn}
-                onClick={(e) => handleButtonClick(e,session, "call")}
-                disabled={isLoading}
+                onClick={(e) => handleButtonClick(e, session, "call")}
+                disabled={isLoading || !isOnline}
               >
                 <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
               </button>
