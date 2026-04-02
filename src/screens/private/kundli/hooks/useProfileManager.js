@@ -48,6 +48,7 @@ export const useProfileManager = (dispatch) => {
     unknownBirthTime: false,
     latitude: null,
     longitude: null,
+    timezone: 5.5,
   });
 
   const [editFormData, setEditFormData] = useState({
@@ -60,6 +61,7 @@ export const useProfileManager = (dispatch) => {
     unknownBirthTime: false,
     latitude: null,
     longitude: null,
+    timezone: 5.5,
   });
 
   // Auto-select profile if Redux has data and profiles are loaded
@@ -151,6 +153,7 @@ export const useProfileManager = (dispatch) => {
         unknownBirthTime: false,
         latitude: selectedProfile.lat,
         longitude: selectedProfile.lon,
+        timezone: selectedProfile.tzone ?? 5.5,
       });
     }
     setShowEditProfile(true);
@@ -172,6 +175,7 @@ export const useProfileManager = (dispatch) => {
       unknownBirthTime: false,
       latitude: profile.lat,
       longitude: profile.lon,
+      timezone: profile.tzone ?? 5.5,
     });
     setSelectedProfile(profile);
     setShowSelectProfile(false);
@@ -194,7 +198,7 @@ export const useProfileManager = (dispatch) => {
       place: data.birthPlace,
       lat: data.latitude || 0,
       lon: data.longitude || 0,
-      tzone: 5.5,
+      tzone: data.timezone ?? 5.5,
     };
   };
 
@@ -222,6 +226,7 @@ export const useProfileManager = (dispatch) => {
         unknownBirthTime: false,
         latitude: null,
         longitude: null,
+        timezone: 5.5,
       });
       return;
     }
@@ -247,6 +252,7 @@ export const useProfileManager = (dispatch) => {
         unknownBirthTime: false,
         latitude: null,
         longitude: null,
+        timezone: 5.5,
       });
     } catch (err) {
       console.error(err);

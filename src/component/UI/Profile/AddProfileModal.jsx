@@ -32,6 +32,7 @@ const AddProfileModal = ({
     unknownBirthTime: false,
     latitude: null,
     longitude: null,
+    timezone: 5.5,
   });
 
   // Check if a "Self" profile already exists
@@ -98,6 +99,7 @@ const AddProfileModal = ({
       unknownBirthTime: false,
       latitude: null,
       longitude: null,
+      timezone: 5.5,
     });
     onClose();
   };
@@ -307,6 +309,7 @@ const AddProfileModal = ({
                       setFieldValue("birthPlace", place.address);
                       setFieldValue("latitude", place.lat);
                       setFieldValue("longitude", place.lng);
+                      setFieldValue("timezone", place.timezone ?? 5.5);
                     }}
                   />
                   <ErrorMessage name="birthPlace" component="div" className={styles.errorText} />

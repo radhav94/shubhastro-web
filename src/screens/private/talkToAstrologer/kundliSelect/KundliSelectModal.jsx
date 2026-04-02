@@ -117,7 +117,7 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
       place: data.birthPlace,
       lat: data.latitude || 0,
       lon: data.longitude || 0,
-      tzone: 5.5,
+      tzone: data.timezone ?? 5.5,
       birthDate: data.birthDate,
       birthTime: data.unknownBirthTime ? "" : data.birthTime,
     };
