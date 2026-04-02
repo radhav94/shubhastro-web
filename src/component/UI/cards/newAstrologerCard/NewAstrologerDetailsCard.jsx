@@ -13,14 +13,19 @@ const NewAstrologerDetailsCard = ({
   className = "",
   style = {},
 }) => {
-  
+  const isOnline = astrologer?.isActive === true;
 
   const imageUrl =
     astrologer?.profileImgUrl ||
     getAstrologerDefaultImage(astrologer?.gender);
 
   return (
-    <div className={`${styles.detailsCard} ${className}`.trim()} style={style}>
+    <div className={`${styles.detailsCard} ${!isOnline ? styles.offlineDetailsCard : ''} ${className}`.trim()} style={style}>
+      {/* Online/Offline badge */}
+      <div className={`${styles.statusBadge} ${isOnline ? styles.online : styles.offline}`}>
+        <span className={styles.statusDot} />
+        <span>{isOnline ? 'Online' : 'Offline'}</span>
+      </div>
       <Link
         to={`/astrologer/${astrologer._id}`}
         className={styles.detailsImageLink}
@@ -97,8 +102,8 @@ const NewAstrologerDetailsCard = ({
             <div className={styles.detailsButtonWrapper}>
               <button
                 className={styles.detailsChatBtn}
-                onClick={() => onConnect(astrologer, "chat")}
-                disabled={!astrologer?.price?.chatRate?.amount}
+                onClick={() => isOnline && onConnect(astrologer, "chat")}
+                disabled={!isOnline || !astrologer?.price?.chatRate?.amount}
               >
                 <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
               </button>
@@ -115,8 +120,8 @@ const NewAstrologerDetailsCard = ({
             <div className={styles.detailsButtonWrapper}>
               <button
                 className={styles.detailsCallBtn}
-                onClick={() => onConnect(astrologer, "audio")}
-                disabled={!astrologer?.price?.audioRate?.amount}
+                onClick={() => isOnline && onConnect(astrologer, "audio")}
+                disabled={!isOnline || !astrologer?.price?.audioRate?.amount}
               >
                 <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
               </button>
