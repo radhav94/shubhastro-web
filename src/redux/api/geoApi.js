@@ -12,7 +12,7 @@ export const geoApi = createApi({
       query: (city) =>
         `api/astro/v3-json/utilities/geo-search-advanced?city=${encodeURIComponent(
           city.trim()
-        )}&api_key=e19fcd25-34b1-52eb-9c7b-4270f71cbd87`,
+        )}`,
       transformResponse: (response) => response?.response ?? [],
     }),
   }),
