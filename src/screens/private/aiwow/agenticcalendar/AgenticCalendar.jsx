@@ -387,98 +387,107 @@ const AgenticCalendar = () => {
           {/* Results Grid (Desktop) / Accordion (Mobile) */}
           {analysis?.optimalTimings?.length > 0 && (
             <div className={`${styles.resultsWrap} ${analysis.optimalTimings.length === 2 ? styles.resultsTwo : ''}`} ref={resultsRef}>
-              {[...analysis.optimalTimings]
-                .sort((a, b) => {
-                  // Sort by date ascending, then by best time ascending
+              {(() => {
+                // Group timings by eventName
+                const sorted = [...analysis.optimalTimings].sort((a, b) => {
                   const dateA = a.bestDate || '';
                   const dateB = b.bestDate || '';
                   if (dateA !== dateB) return dateA.localeCompare(dateB);
-                  // Same date — sort by time
                   const timeA = a.bestTimeRange || '';
                   const timeB = b.bestTimeRange || '';
                   return timeA.localeCompare(timeB);
-                })
-                .map((timing) => {
-                const name = timing.eventName;
-                const isExpanded = expandedOccasion === name;
-                const isCustom = customOccasions.includes(name);
+                });
 
-                // Build time slots from API data
-                const slots = [];
-                if (timing.bestTimeRange) {
-                  slots.push({ time: timing.bestTimeRange, best: true });
-                }
-                if (timing.alternateTimeRange) {
-                  slots.push({ time: timing.alternateTimeRange, best: false });
-                }
-                // If API returns timeSlots array
-                if (timing.timeSlots?.length) {
-                  timing.timeSlots.forEach((s) => slots.push(s));
-                }
+                const grouped = sorted.reduce((acc, item) => {
+                  if (!acc[item.eventName]) acc[item.eventName] = [];
+                  acc[item.eventName].push(item);
+                  return acc;
+                }, {});
 
-                // Split into passed and upcoming
-                const passed = slots.filter((s) => isSlotPassed(s.time, timing.bestDate));
-                const upcoming = slots.filter((s) => !isSlotPassed(s.time, timing.bestDate));
+                return Object.entries(grouped).map(([name, timings]) => {
+                  const isExpanded = expandedOccasion === name;
+                  const isCustom = customOccasions.includes(name);
 
-                return (
-                  <div key={name} className={styles.resultCard}>
-                    {/* Card header - clickable only on mobile */}
-                    <div
-                      className={styles.resultCardHeader}
-                      onClick={() => setExpandedOccasion(isExpanded ? null : name)}
-                    >
-                      <div className={styles.accordionTitle}>
-                        <span>{name}</span>
-                        {isCustom && <span className={styles.customTag}>Custom</span>}
-                        {timing.bestDate && (
-                          <span className={styles.cardDate}>
-                            <FiCalendar size={12} />
-                            {new Date(timing.bestDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
-                          </span>
-                        )}
-                      </div>
-                      <span className={styles.mobileChevron}>
-                        {isExpanded ? <FiChevronUp size={20} color="#f75801" /> : <FiChevronDown size={20} color="#f75801" />}
-                      </span>
-                    </div>
-
-                    {/* Card body - always visible on desktop, toggle on mobile */}
-                    <div className={`${styles.resultCardBody} ${isExpanded ? styles.resultCardBodyOpen : ''}`}>
-                      {passed.length > 0 && (
-                        <>
-                          <h4 className={styles.slotGroupTitle}>Earlier Today</h4>
-                          {passed.map((s, i) => (
-                            <div key={i} className={styles.slotRow}>
-                              <span className={styles.slotTime}>{s.time}</span>
-                              <span className={styles.passedBadge}>Passed</span>
-                            </div>
-                          ))}
-                        </>
-                      )}
-                      {upcoming.length > 0 && (
-                        <>
-                          <h4 className={styles.slotGroupTitle}>Upcoming</h4>
-                          {upcoming.map((s, i) => (
-                            <div key={i} className={`${styles.slotRow} ${s.best ? styles.slotBest : styles.slotUpcoming}`}>
-                              <span className={styles.slotTime}>{s.time}</span>
-                              {s.best && <span className={styles.bestBadge}>Best Time</span>}
-                            </div>
-                          ))}
-                        </>
-                      )}
-                      {passed.length === 0 && upcoming.length === 0 && timing.bestDate && (
-                        <div className={styles.slotRow + ' ' + styles.slotBest}>
-                          <span className={styles.slotTime}>
-                            {timing.bestDate} {timing.bestTimeRange && `• ${timing.bestTimeRange}`}
-                          </span>
-                          <span className={styles.bestBadge}>Best Time</span>
+                  return (
+                    <div key={name} className={styles.resultCard}>
+                      {/* Card header */}
+                      <div
+                        className={styles.resultCardHeader}
+                        onClick={() => setExpandedOccasion(isExpanded ? null : name)}
+                      >
+                        <div className={styles.accordionTitle}>
+                          <span>{name}</span>
+                          {isCustom && <span className={styles.customTag}>Custom</span>}
                         </div>
-                      )}
-                      {timing.reason && <p className={styles.slotReason}>{timing.reason}</p>}
+                        <span className={styles.mobileChevron}>
+                          {isExpanded ? <FiChevronUp size={20} color="#f75801" /> : <FiChevronDown size={20} color="#f75801" />}
+                        </span>
+                      </div>
+
+                      {/* Card body - all entries for this event */}
+                      <div className={`${styles.resultCardBody} ${isExpanded ? styles.resultCardBodyOpen : ''}`}>
+                        {timings.map((timing, tIdx) => {
+                          const slots = [];
+                          if (timing.bestTimeRange) {
+                            slots.push({ time: timing.bestTimeRange, best: true });
+                          }
+                          if (timing.alternateTimeRange) {
+                            slots.push({ time: timing.alternateTimeRange, best: false });
+                          }
+                          if (timing.timeSlots?.length) {
+                            timing.timeSlots.forEach((s) => slots.push(s));
+                          }
+
+                          const passed = slots.filter((s) => isSlotPassed(s.time, timing.bestDate));
+                          const upcoming = slots.filter((s) => !isSlotPassed(s.time, timing.bestDate));
+
+                          return (
+                            <div key={tIdx}>
+                              {timing.bestDate && (
+                                <span className={styles.cardDate}>
+                                  <FiCalendar size={12} />
+                                  {new Date(timing.bestDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                                </span>
+                              )}
+                              {passed.length > 0 && (
+                                <>
+                                  <h4 className={styles.slotGroupTitle}>Earlier Today</h4>
+                                  {passed.map((s, i) => (
+                                    <div key={i} className={styles.slotRow}>
+                                      <span className={styles.slotTime}>{s.time}</span>
+                                      <span className={styles.passedBadge}>Passed</span>
+                                    </div>
+                                  ))}
+                                </>
+                              )}
+                              {upcoming.length > 0 && (
+                                <>
+                                  <h4 className={styles.slotGroupTitle}>Upcoming</h4>
+                                  {upcoming.map((s, i) => (
+                                    <div key={i} className={`${styles.slotRow} ${s.best ? styles.slotBest : styles.slotUpcoming}`}>
+                                      <span className={styles.slotTime}>{s.time}</span>
+                                      {s.best && <span className={styles.bestBadge}>Best Time</span>}
+                                    </div>
+                                  ))}
+                                </>
+                              )}
+                              {passed.length === 0 && upcoming.length === 0 && timing.bestDate && (
+                                <div className={styles.slotRow + ' ' + styles.slotBest}>
+                                  <span className={styles.slotTime}>
+                                    {timing.bestDate} {timing.bestTimeRange && `• ${timing.bestTimeRange}`}
+                                  </span>
+                                  <span className={styles.bestBadge}>Best Time</span>
+                                </div>
+                              )}
+                              {timing.reason && <p className={styles.slotReason}>{timing.reason}</p>}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                });
+              })()}
             </div>
           )}
 
