@@ -130,8 +130,35 @@ const Kundali = () => {
   
   const isLoggedIn = !!token;
 
-  // Temporary profiles for non-logged-in users
-  const [tempProfiles, setTempProfiles] = useState([]);
+  // Temporary profiles for non-logged-in users (persisted in sessionStorage)
+  const [tempProfiles, setTempProfiles] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("tempKundliProfiles");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+
+  // Sync tempProfiles to sessionStorage
+  useEffect(() => {
+    if (!isLoggedIn) {
+      sessionStorage.setItem("tempKundliProfiles", JSON.stringify(tempProfiles));
+    }
+  }, [tempProfiles, isLoggedIn]);
+
+  // Clear temp profiles when user logs in
+  useEffect(() => {
+    if (isLoggedIn) {
+      sessionStorage.removeItem("tempKundliProfiles");
+      setTempProfiles([]);
+    }
+  }, [isLoggedIn]);
+
+  // Clear temp profiles when navigating away
+  useEffect(() => {
+    return () => {
+      sessionStorage.removeItem("tempKundliProfiles");
+    };
+  }, []);
 
   // Get current user ID
   const currentUserId = role === "ASTROLOGER"
@@ -154,31 +181,41 @@ const Kundali = () => {
   const isDirectKundliView = !!kundliId;
 
   // Auto-select profile based on kundliId or first profile
+  const selectedProfileRef = useRef(selectedProfile);
+  selectedProfileRef.current = selectedProfile;
+
+  const profilesRef = useRef(profiles);
+  profilesRef.current = profiles;
+
   useEffect(() => {
+    const currentProfiles = profilesRef.current;
     // If kundliId is present in URL, try to find and select that profile
-    if (kundliId && profiles.length && !isFetching) {
-      const matchedProfile = profiles.find(p => p._id === kundliId);
-      if (matchedProfile && selectedProfile?._id !== matchedProfile._id) {
+    if (kundliId && currentProfiles.length && !isFetching) {
+      const matchedProfile = currentProfiles.find(p => p._id === kundliId);
+      if (matchedProfile && selectedProfileRef.current?._id !== matchedProfile._id) {
         setSelectedProfile(matchedProfile);
-      } else if (!matchedProfile && !selectedProfile) {
-        // Profile not found - show error via toast
+      } else if (!matchedProfile && !selectedProfileRef.current) {
         Toast.error("Kundli profile not found");
       }
     } 
     // Otherwise, auto-select first profile if available
-    else if (!kundliId && profiles.length && !selectedProfile && !isFetching) {
-      setSelectedProfile(profiles[0]);
+    else if (!kundliId && currentProfiles.length && !selectedProfileRef.current && !isFetching) {
+      setSelectedProfile(currentProfiles[0]);
     }
-  }, [kundliId, profiles, selectedProfile, isFetching]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kundliId, profiles.length, isFetching]);
 
   // Sync with header profile selection (same pattern as AIWow)
   useEffect(() => {
     if (!headerSelectedKundli?._id) return;
-    // Only sync if the header selection differs from current local selection
-    if (headerSelectedKundli._id !== selectedProfile?._id && profiles.some(p => p._id === headerSelectedKundli._id)) {
-      setSelectedProfile(headerSelectedKundli);
+    if (headerSelectedKundli._id === selectedProfileRef.current?._id) return;
+    // Find the fresh profile from our profiles list
+    const match = profilesRef.current.find(p => p._id === headerSelectedKundli._id);
+    if (match) {
+      setSelectedProfile(match);
     }
-  }, [headerSelectedKundli, profiles]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [headerSelectedKundli?._id]);
 
   // Clear selected profile when user changes (on refresh after login)
   useEffect(() => {
