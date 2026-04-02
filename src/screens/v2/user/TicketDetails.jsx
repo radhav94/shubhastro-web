@@ -1,14 +1,19 @@
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, MessageSquareText, AlertCircle, ChevronRight, Send } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useGetTicketByIdQuery } from "../../../redux/api/supportApi/supportApi";
+import { motion } from "framer-motion";
+import { useGetTicketByIdQuery, useReplyToTicketMutation } from "../../../redux/api/supportApi/supportApi";
 import RatingCard from "./RatingCard";
 import styles from "./TicketDetails.module.scss";
 
 const TicketDetails = () => {
   const navigate = useNavigate();
   const { ticketId } = useParams();
+  const [replyText, setReplyText] = useState("");
+  const chatEndRef = useRef(null);
 
-  const { data: ticketData, isLoading } = useGetTicketByIdQuery(ticketId);
+  const { data: ticketData, isLoading, refetch } = useGetTicketByIdQuery(ticketId);
+  const [replyToTicket, { isLoading: isSending }] = useReplyToTicketMutation();
   const ticket = ticketData?.data || {};
 
   const formatTime = (dateStr) => {
@@ -22,6 +27,29 @@ const TicketDetails = () => {
   };
 
   const isResolved = ticket.status === "resolved" || ticket.status === "closed";
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [ticket.messages]);
+
+  const handleSendReply = async () => {
+    const text = replyText.trim();
+    if (!text || isSending) return;
+    try {
+      await replyToTicket({ ticketId: ticket._id || ticketId, message: text }).unwrap();
+      setReplyText("");
+      refetch();
+    } catch {
+      // handled by privateRequestNew
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendReply();
+    }
+  };
 
   if (isLoading) {
     return (
@@ -51,69 +79,135 @@ const TicketDetails = () => {
       </div>
 
       <div className={styles.chatContainer}>
-        {ticket.topicName && (
-          <div className={`${styles.messageWrapper} ${styles.receivedWrapper}`}>
-            <div className={`${styles.message} ${styles.receivedMessage}`}>
-              <p className={styles.messageText}>Topic: {ticket.topicName}</p>
-              {ticket.concernText && (
-                <p className={styles.messageText}>Concern: {ticket.concernText}</p>
-              )}
-              <div className={styles.messageFooter}>
-                <span className={styles.messageTime}>{formatTime(ticket.createdAt)}</span>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* First message card */}
+        {(() => {
+          const firstMsg = ticket.messages?.[0];
+          const initMsg = firstMsg?.initialMessage;
+          const entityDetails = initMsg?.entityDetails;
+          const concernText = initMsg?.concernText || ticket.concernText;
+          const subTopic = initMsg?.subTopic;
+          const astrologerName = entityDetails?.astrologerName || entityDetails?.name;
+          const astrologerImg = entityDetails?.profileImgUrl;
 
-        {ticket.issue && (
-          <div className={`${styles.messageWrapper} ${styles.sentWrapper}`}>
-            <div className={`${styles.message} ${styles.sentMessage}`}>
-              <p className={styles.messageText}>{ticket.issue}</p>
-              <div className={styles.messageFooter}>
-                <span className={styles.messageTime}>{formatTime(ticket.createdAt)}</span>
-              </div>
-            </div>
-          </div>
-        )}
+          return (
+            <motion.div
+              className={`${styles.messageWrapper} ${styles.sentWrapper} ${styles.fmWrapper}`}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+              <div className={styles.firstMessageCard}>
+                <div className={styles.fmHeader}>
+                  <div className={styles.fmHeaderIcon}>
+                    <AlertCircle size={18} />
+                  </div>
+                  <div className={styles.fmHeaderText}>
+                    <p className={styles.fmTopic}>{ticket.topicName || initMsg?.topic}</p>
+                    {subTopic && <span className={styles.fmSubTopic}>{subTopic}</span>}
+                    {concernText && <span className={styles.fmConcernChip}>{concernText}</span>}
+                  </div>
+                </div>
 
-        {ticket.messages?.map((message, index) => (
-          <div
+                <div className={styles.fmBody}>
+                  {astrologerName && (
+                    <div className={styles.fmAstrologer}>
+                      {astrologerImg ? (
+                        <img src={astrologerImg} alt={astrologerName} className={styles.fmAstrologerImg} />
+                      ) : (
+                        <div className={styles.fmAstrologerAvatar}>
+                          {astrologerName.charAt(0)}
+                        </div>
+                      )}
+                      <div className={styles.fmAstrologerInfo}>
+                        <span className={styles.fmAstrologerName}>{astrologerName}</span>
+                        <span className={styles.fmAstrologerLabel}>Astrologer</span>
+                      </div>
+                      <ChevronRight size={16} className={styles.fmAstrologerArrow} />
+                    </div>
+                  )}
+
+                  {ticket.issue && (
+                    <div className={styles.fmIssueWrap}>
+                      <MessageSquareText size={14} className={styles.fmIssueIcon} />
+                      <p className={styles.fmIssue}>{ticket.issue}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <span className={styles.fmTime}>{formatTime(firstMsg?.createdAt || ticket.createdAt)}</span>
+            </motion.div>
+          );
+        })()}
+
+        {/* Remaining messages (skip first since it's rendered above) */}
+        {ticket.messages?.slice(1).map((message, index) => (
+          <motion.div
             key={message._id || index}
             className={`${styles.messageWrapper} ${
-              message.senderType === "user" ? styles.sentWrapper : styles.receivedWrapper
-            }`}
+              message.isUserMessage ? styles.sentWrapper : styles.receivedWrapper
+            } ${styles.msgOuter}`}
+            initial={{ opacity: 0, x: message.isUserMessage ? 30 : -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.35, delay: 0.15 * (index + 1), ease: "easeOut" }}
           >
             <div
               className={`${styles.message} ${
-                message.senderType === "user" ? styles.sentMessage : styles.receivedMessage
+                message.isUserMessage ? styles.sentMessage : styles.receivedMessage
               }`}
             >
-              <p className={styles.messageText}>{message.text}</p>
-              <div className={styles.messageFooter}>
-                <span className={styles.messageTime}>{formatTime(message.createdAt)}</span>
-              </div>
+              <p className={styles.messageText}>{message.messageText || message.text}</p>
             </div>
-          </div>
+            <span className={styles.msgTime}>{formatTime(message.createdAt)}</span>
+          </motion.div>
         ))}
 
-        {ticket.contactMethod && (
-          <div className={`${styles.messageWrapper} ${styles.receivedWrapper}`}>
-            <div className={`${styles.message} ${styles.receivedMessage}`}>
-              <p className={styles.messageText}>
-                Preferred contact: {ticket.contactMethod === "chat" ? "Chat" : "Call"}
-              </p>
-              <div className={styles.messageFooter}>
-                <span className={styles.messageTime}>{formatTime(ticket.createdAt)}</span>
-              </div>
-            </div>
-          </div>
-        )}
+        <div ref={chatEndRef} />
       </div>
 
-      {/* Rating Card - sticky bottom */}
-      <div className={styles.ratingCardFixed}>
-        <RatingCard ticketId={ticket._id || ticketId} />
-      </div>
+      {/* Bottom section - Rating for resolved, Input for open */}
+      <motion.div
+        className={styles.bottomFixed}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+      >
+        {isResolved ? (
+          ticket.rating > 0 ? (
+            <div className={styles.ratedDisplay}>
+              <div className={styles.ratedStars}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <svg key={star} width="44" height="44" viewBox="0 0 48 48" fill={star <= ticket.rating ? "#ff6b35" : "#e0e0e0"}>
+                    <path d="M24 4L28.944 18.528H44.472L32.264 27.472L37.208 42L24 33.056L10.792 42L15.736 27.472L3.528 18.528H19.056L24 4Z" />
+                  </svg>
+                ))}
+              </div>
+              <p className={styles.ratedText}>Thank you for your feedback!</p>
+            </div>
+          ) : (
+            <RatingCard ticketId={ticket._id || ticketId} existingRating={0} />
+          )
+        ) : (
+          <div className={styles.replyBar}>
+            <input
+              type="text"
+              className={styles.replyInput}
+              placeholder="Type your reply..."
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={isSending}
+            />
+            <button
+              className={styles.sendButton}
+              onClick={handleSendReply}
+              disabled={!replyText.trim() || isSending}
+              aria-label="Send reply"
+            >
+              <Send size={20} />
+            </button>
+          </div>
+        )}
+      </motion.div>
     </div>
   );
 };

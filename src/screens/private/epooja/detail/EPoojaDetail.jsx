@@ -253,8 +253,8 @@ const EPoojaDetail = () => {
     setQty(newQty);
     if (isInCart) {
       const productId = cartMatch?.productId?._id || cartMatch?.product?._id || cartMatch?._id || product?._id;
-      const variantId = cartMatch?.variantId?._id || cartMatch?.variantId?.id || (typeof cartMatch?.variantId === "string" ? cartMatch.variantId : "") || cartMatch?.variantSnapshot?._id || "";
-      if (productId && variantId) {
+      const variantId = cartMatch?.variantId?._id || cartMatch?.variantId?.id || (typeof cartMatch?.variantId === "string" && cartMatch.variantId ? cartMatch.variantId : "") || cartMatch?.variantSnapshot?._id || getVid(selectedVariant) || "";
+      if (productId) {
         try {
           await updateCartItem({ productId, variantId, quantity: newQty }).unwrap();
         } catch (err) {
@@ -419,12 +419,10 @@ const EPoojaDetail = () => {
     if (!isVariantInStock(selectedVariant)) { Toast.error("This variant is out of stock"); return; }
     try {
       if (isInCart) {
-        const cartVid = cartMatch?.variantId?._id || cartMatch?.variantId?.id || (typeof cartMatch?.variantId === "string" ? cartMatch.variantId : "") || "";
-        if (cartVid) {
-          await updateCartItem({ productId: mongoId, variantId: cartVid, quantity: qty }).unwrap();
-          Toast.success(`${title} quantity updated`);
-          return;
-        }
+        const cartVid = cartMatch?.variantId?._id || cartMatch?.variantId?.id || (typeof cartMatch?.variantId === "string" && cartMatch.variantId ? cartMatch.variantId : "") || vid;
+        await updateCartItem({ productId: mongoId, variantId: cartVid, quantity: qty }).unwrap();
+        Toast.success(`${title} quantity updated`);
+        return;
       }
       await addToCart({ productId: mongoId, variantId: vid, skuCode: selectedVariant?.skuCode || selectedVariant?.sku || "", quantity: qty }).unwrap();
       Toast.success(`${title} added to cart`);

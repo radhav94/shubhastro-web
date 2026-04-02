@@ -64,6 +64,14 @@ export const supportApi = privateRequestNew.injectEndpoints({
         headers: { "Content-Type": "application/json" },
       }),
     }),
+    replyToTicket: builder.mutation({
+      query: ({ ticketId, message }) => ({
+        url: `support/tickets/${ticketId}/message`,
+        method: "POST",
+        body: { message, isUserMessage: true },
+        headers: { "Content-Type": "application/json" },
+      }),
+    }),
   }),
 });
 
@@ -78,4 +86,5 @@ export const {
   useGetMyTicketsQuery,
   useGetTicketByIdQuery,
   useRateTicketMutation,
+  useReplyToTicketMutation,
 } = supportApi;
