@@ -478,7 +478,7 @@
   border-radius: 50%;
   background: white;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 12px rgba(247, 88, 1, 0.2);
@@ -504,7 +504,7 @@
 }
 
 .scoreMax {
-  font-size: 0.875rem;
+  font-size: 1.3rem;
   color: #9ca3af;
   font-weight: 600;
 }
@@ -635,6 +635,41 @@
   @media (min-width: 640px) {
     grid-template-columns: repeat(4,1fr);
   }
+}
+
+.ashtakootGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+
+  @media (max-width: 639px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.ashtakootItem {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  text-align: center;
+  padding: 0.5rem 0.25rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+}
+
+.ashtakootLabel {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.125rem;
+}
+
+.ashtakootValue {
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 600;
 }
 
 .insightItem {
@@ -1333,7 +1368,7 @@
 }
 
 .scoreValue {
-  font-size: 0.75rem;
+  font-size: 1.5rem;
   color: #1f2937;
   font-weight: 600;
   text-align: right;

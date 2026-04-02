@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import { ChevronDown } from 'lucide-react';
 import styles from './SmartMatchmaking.module.scss';
 import { Toast } from '../../../../component';
@@ -18,9 +19,11 @@ import matchMakingImg from '../../../../assets/images/match-making-top-img.svg';
 import matchMakingImgBottom from '../../../../assets/images/match-making-bottom-img.svg';
 import Footer from '../../../../layouts/Footer';
 import { PATH } from '../../../../utils/routes/Paths';
+import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 
 const SmartMatchmaking = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [showSelectProfile, setShowSelectProfile] = useState(false);
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -34,6 +37,8 @@ const SmartMatchmaking = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
+
+   console.log(result,"56789")
   // Get token using reusable function
   const token = getToken();
 
@@ -46,12 +51,32 @@ const SmartMatchmaking = () => {
 
   const profiles = data?.data || [];
 
-  // Auto-select first profile as primary
+  // Listen to header profile changes from Redux
+  const headerSelectedKundli = useSelector((state) => state.kundli.selectedKundli);
+
+  // Auto-select: prefer Redux global profile, fallback to first
   useEffect(() => {
-    if (profiles.length && !primaryProfile) {
-      setPrimaryProfile(profiles[0]);
+    if (!profiles.length) return;
+    if (primaryProfile) return;
+
+    if (headerSelectedKundli?._id) {
+      const found = profiles.find(p => p._id === headerSelectedKundli._id);
+      if (found) {
+        setPrimaryProfile(found);
+        return;
+      }
     }
+
+    setPrimaryProfile(profiles[0]);
   }, [profiles, primaryProfile]);
+
+  // Sync primary profile when changed elsewhere (e.g. Kundli screen)
+  useEffect(() => {
+    if (!headerSelectedKundli?._id) return;
+    if (headerSelectedKundli._id !== primaryProfile?._id && profiles.some(p => p._id === headerSelectedKundli._id)) {
+      setPrimaryProfile(headerSelectedKundli);
+    }
+  }, [headerSelectedKundli, profiles]);
 
   // Filtered profiles list
   const filteredProfiles = profiles.filter((p) => {
@@ -68,6 +93,7 @@ const SmartMatchmaking = () => {
     if (selectingType === "PRIMARY") {
       if (profile._id === partnerProfile?._id) return;
       setPrimaryProfile(profile);
+      dispatch(setSelectedKundli(profile));
     }
 
     if (selectingType === "PARTNER") {
@@ -176,6 +202,7 @@ const SmartMatchmaking = () => {
         const newProfile = result.data;
         if (selectingType === "PRIMARY") {
           setPrimaryProfile(newProfile);
+          dispatch(setSelectedKundli(newProfile));
         } else if (selectingType === "PARTNER") {
           setPartnerProfile(newProfile);
         }
@@ -209,6 +236,7 @@ const SmartMatchmaking = () => {
       if (result?.data) {
         if (primaryProfile?._id === profileToEdit._id) {
           setPrimaryProfile(result.data);
+          dispatch(setSelectedKundli(result.data));
         }
         if (partnerProfile?._id === profileToEdit._id) {
           setPartnerProfile(result.data);
@@ -450,8 +478,8 @@ const SmartMatchmaking = () => {
                 {/* Overall Score Card */}
                 <div className={styles.scoreCard}>
                   <div className={styles.scoreCircle}>
-                    <div className={styles.scoreValue}>{result?.overallScore || 0}</div>
-                    <div className={styles.scoreMax}>/ 100</div>
+                    <div className={styles.scoreValue}>{result?.ashtakootScore || 0}</div>
+                    <div className={styles.scoreMax}>/{result?.ashtakootMaxScore}</div>
                   </div>
                   <div className={styles.scoreInfo}>
                     <h2 className={styles.compatibilityLevel}>{result?.compatibilityLevel || 'N/A'}</h2>
@@ -524,6 +552,45 @@ const SmartMatchmaking = () => {
                       {result?.astrologyInsights?.dominantPlanets?.join(', ') || 'N/A'}
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+             {/* Ashtakoot Details */}
+            <div className={styles.insightsCard}>
+              <h3 className={styles.cardTitle}>Ashtakoot Details</h3>
+              <div className={styles.ashtakootGrid}>
+                <div className={styles.ashtakootItem}>
+                  <div className={styles.ashtakootLabel}>Varna</div>
+                  <div className={styles.ashtakootValue}>{result?.astrologyInsights?.ashtakootDetails?.varna ?? '0'}/1</div>
+                </div>
+                <div className={styles.ashtakootItem}>
+                  <div className={styles.ashtakootLabel}>Vasya</div>
+                  <div className={styles.ashtakootValue}>{result?.astrologyInsights?.ashtakootDetails?.vasya ?? '0'}/2</div>
+                </div>
+                <div className={styles.ashtakootItem}>
+                  <div className={styles.ashtakootLabel}>Tara</div>
+                  <div className={styles.ashtakootValue}>{result?.astrologyInsights?.ashtakootDetails?.tara ?? '0'}/3</div>
+                </div>
+                <div className={styles.ashtakootItem}>
+                  <div className={styles.ashtakootLabel}>Yoni</div>
+                  <div className={styles.ashtakootValue}>{result?.astrologyInsights?.ashtakootDetails?.yoni ?? '0'}/4</div>
+                </div>
+                <div className={styles.ashtakootItem}>
+                  <div className={styles.ashtakootLabel}>Graha Maitri</div>
+                  <div className={styles.ashtakootValue}>{result?.astrologyInsights?.ashtakootDetails?.grahamaitri ?? '0'}/5</div>
+                </div>
+                <div className={styles.ashtakootItem}>
+                  <div className={styles.ashtakootLabel}>Gana</div>
+                  <div className={styles.ashtakootValue}>{result?.astrologyInsights?.ashtakootDetails?.gana ?? '0'}/6</div>
+                </div>
+                <div className={styles.ashtakootItem}>
+                  <div className={styles.ashtakootLabel}>Bhakoot</div>
+                  <div className={styles.ashtakootValue}>{result?.astrologyInsights?.ashtakootDetails?.bhakoot ?? '0'}/7</div>
+                </div>
+                <div className={styles.ashtakootItem}>
+                  <div className={styles.ashtakootLabel}>Nadi</div>
+                  <div className={styles.ashtakootValue}>{result?.astrologyInsights?.ashtakootDetails?.nadi ?? '0'}/8</div>
                 </div>
               </div>
             </div>
