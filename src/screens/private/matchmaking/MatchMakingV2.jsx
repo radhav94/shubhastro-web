@@ -1,5 +1,6 @@
 import styles from "./MatchMakingV2.module.scss";
 import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { ChevronLeft, ChevronDown, Heart } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -18,9 +19,11 @@ import bondIcon from "../../../assets/icons/destiny-icon.svg";
 import matchMakingImg from "../../../assets/images/match-making-top-img.svg";
 import matchMakingImgBottom from "../../../assets/images/match-making-bottom-img.svg";
 import { ProfileManager } from "../../../component/UI/Profile";
+import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 
 const MatchMaking = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   /* -------------------- STATE -------------------- */
   const [showSelectProfile, setShowSelectProfile] = useState(false);
@@ -43,6 +46,9 @@ const MatchMaking = () => {
       : localStorage.getItem("shubhtalk_customer_token");
 
   const isLoggedIn = !!token;
+
+  // Listen to header profile changes from Redux (kundli.selectedKundli)
+  const headerSelectedKundli = useSelector((state) => state.kundli.selectedKundli);
 
   // Get current user ID
   const currentUserId =
@@ -113,17 +119,39 @@ const MatchMaking = () => {
         setPrimaryProfile(boyProfile);
         setPartnerProfile(girlProfile);
         setSelectedProfile(boyProfile);
+        dispatch(setSelectedKundli(boyProfile));
       }
     }
   }, [location.state, profiles]);
 
   /* -------------------- AUTO SELECT -------------------- */
   useEffect(() => {
-    if (profiles.length && !primaryProfile && !isFetching) {
-      setPrimaryProfile(profiles[0]);
-      setSelectedProfile(profiles[0]);
+    if (!profiles.length || isFetching) return;
+    if (primaryProfile) return;
+
+    // Prefer the globally selected profile from Redux
+    if (headerSelectedKundli?._id) {
+      const found = profiles.find(p => p._id === headerSelectedKundli._id);
+      if (found) {
+        setPrimaryProfile(found);
+        setSelectedProfile(found);
+        return;
+      }
     }
+
+    // Fallback to first profile
+    setPrimaryProfile(profiles[0]);
+    setSelectedProfile(profiles[0]);
   }, [profiles, primaryProfile, isFetching]);
+
+  // Sync primary profile when profile is changed elsewhere (e.g. Kundli screen)
+  useEffect(() => {
+    if (!headerSelectedKundli?._id) return;
+    if (headerSelectedKundli._id !== primaryProfile?._id && profiles.some(p => p._id === headerSelectedKundli._id)) {
+      setPrimaryProfile(headerSelectedKundli);
+      setSelectedProfile(headerSelectedKundli);
+    }
+  }, [headerSelectedKundli, profiles]);
 
   // Clear selected profiles when user changes (on refresh after login)
   useEffect(() => {
@@ -191,6 +219,7 @@ const MatchMaking = () => {
       if (profile._id === partnerProfile?._id) return; // prevent selecting same as partner
       setPrimaryProfile(profile);
       setSelectedProfile(profile);
+      dispatch(setSelectedKundli(profile));
     }
 
     if (selectingType === "PARTNER") {
@@ -235,6 +264,7 @@ const MatchMaking = () => {
         if (primaryProfile?._id === profileToEdit._id) {
           setPrimaryProfile(result.data);
           setSelectedProfile(result.data);
+          dispatch(setSelectedKundli(result.data));
         }
         if (partnerProfile?._id === profileToEdit._id) {
           setPartnerProfile(result.data);
@@ -451,6 +481,7 @@ const MatchMaking = () => {
           if (selectingType === "PRIMARY") {
             setPrimaryProfile(newProfile);
             setSelectedProfile(newProfile);
+            dispatch(setSelectedKundli(newProfile));
           } else if (selectingType === "PARTNER") {
             setPartnerProfile(newProfile);
           }
@@ -475,6 +506,7 @@ const MatchMaking = () => {
         if (selectingType === "PRIMARY") {
           setPrimaryProfile(tempProfile);
           setSelectedProfile(tempProfile);
+          dispatch(setSelectedKundli(tempProfile));
         } else if (selectingType === "PARTNER") {
           setPartnerProfile(tempProfile);
         }
