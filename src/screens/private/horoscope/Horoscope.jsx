@@ -1,7 +1,6 @@
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
 import { 
   useFetchDailyQuery, 
   useFetchWeeklyQuery, 
