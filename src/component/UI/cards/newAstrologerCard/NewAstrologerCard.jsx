@@ -9,12 +9,19 @@ const NewAstrologerCard = ({
   className = "", 
   style = {} 
 }) => {
+  const isOnline = astrologer?.isActive === true;
   
   return (
     <div 
-      className={`${styles.astrologerCard} ${className}`.trim()} 
+      className={`${styles.astrologerCard} ${!isOnline ? styles.offlineCard : ''} ${className}`.trim()} 
       style={style}
     >
+      {/* Online/Offline badge */}
+      <div className={`${styles.statusBadge} ${isOnline ? styles.online : styles.offline}`}>
+        <span className={styles.statusDot} />
+        <span>{isOnline ? 'Online' : 'Offline'}</span>
+      </div>
+
       <Link to={`/astrologer/${astrologer?._id}`} className={styles.cardLink}>
         <div className={styles.astrologerImageWrapper}>
           <img
@@ -71,7 +78,8 @@ const NewAstrologerCard = ({
           <div className={styles.buttonWrapper}>
             <button
               className={styles.chatBtn}
-              onClick={() => onConnect(astrologer, "chat")}
+              onClick={() => isOnline && onConnect(astrologer, "chat")}
+              disabled={!isOnline}
             >
               <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
             </button>
@@ -84,7 +92,8 @@ const NewAstrologerCard = ({
           <div className={styles.buttonWrapper}>
             <button
               className={styles.callBtn}
-              onClick={() => onConnect(astrologer, "audio")}
+              onClick={() => isOnline && onConnect(astrologer, "audio")}
+              disabled={!isOnline}
             >
               <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
             </button>
