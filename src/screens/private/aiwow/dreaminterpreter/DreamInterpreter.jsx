@@ -53,8 +53,10 @@ const DreamInterpreter = () => {
         place: profile.place,
         lat: profile.lat || 0,
         lon: profile.lon || 0,
-        tzone: profile.timezone || 5.5
+        tzone: profile.tzone || 5.5
       };
+
+      console.log('dreamData :>> ', dreamData);
 
       // Add tags if provided
       if (tags.trim()) {

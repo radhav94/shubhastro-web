@@ -36,7 +36,7 @@ const DailyCosmicBriefing = () => {
         place: profile.place,
         lat: profile.latitude || 0,
         lon: profile.longitude || 0,
-        tzone: profile.timezone || 5.5
+        tzone: profile.tzone || 5.5
       };
 
       // Determine zodiac sign from profile or calculate

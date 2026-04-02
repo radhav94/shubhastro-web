@@ -24,7 +24,7 @@ export const getProfileData = () => {
       place: profile.place || '',
       lat: String(profile.lat || '0'),
       lon: String(profile.lon || '0'),
-      tzone: String(profile.timezone || '5.5'),
+      tzone: String(profile.tzone || '5.5'),
     };
   } catch (error) {
     console.error('Error parsing profile data:', error);
