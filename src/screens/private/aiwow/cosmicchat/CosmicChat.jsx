@@ -56,7 +56,7 @@ const CosmicChat = () => {
         place: profile.place,
         lat: String(profile.latitude || '0'),
         lon: String(profile.longitude || '0'),
-        tzone: profile.timezone || 5.5
+        tzone: profile.tzone || 5.5
       };
 
       const result = await startCosmicChat(kundliData);

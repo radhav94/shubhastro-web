@@ -196,7 +196,7 @@ const MatchMaking = () => {
       place: formData.boyData.place.address.trim(),
       lat: Number(formData.boyData.place.lat),
       lon: Number(formData.boyData.place.lng),
-      tzone: 5.5,
+      tzone: formData.boyData.place.timezone ?? 5.5,
     };
 
     const girlPayload = {
@@ -211,7 +211,7 @@ const MatchMaking = () => {
       place: formData.girlData.place.address.trim(),
       lat: Number(formData.girlData.place.lat),
       lon: Number(formData.girlData.place.lng),
-      tzone: 5.5,
+      tzone: formData.girlData.place.timezone ?? 5.5,
     };
 
     // -----------------------------------------------------

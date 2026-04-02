@@ -34,7 +34,7 @@ const KarmicDebtTracker = () => {
         place: profile.place || '',
         lat: profile.lat || 0,
         lon: profile.lon || 0,
-        tzone: profile.timezone || 5.5
+        tzone: profile.tzone || 5.5
       };
 
       const result = await analyzeKarmicDebt(data);

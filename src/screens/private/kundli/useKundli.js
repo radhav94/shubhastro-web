@@ -126,7 +126,7 @@ export const useKundli = () => {
         min: Number(e.minute),
         lat: Number(e.latitude),
         lon: Number(e.longitude),
-        tzone: 5.5,
+        tzone: Number(e.timezone) || 5.5,
       };
       const ashtakVargaData = {
         birth_day: Number(e.day),

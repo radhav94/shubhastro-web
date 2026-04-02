@@ -41,7 +41,7 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
     //  GET ASTROLOGER BY ID
     getAstrologerById: builder.query({
       query: ({ id }) => ({
-        url: `astrologers/astrologer?astrologerId=${id}&change=false`,
+        url: `astrologers/astrologer?astrologerId=${id}&change=true`,
         method: "GET",
       }),
     }),
@@ -146,6 +146,14 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         url: "astrologers/recommendation",
       }),
     }),
+
+    getExpertiseFilters: builder.query({
+      query: () => ({
+        url: "filters/get-filters/expertise",
+        method: "GET",
+        headers: { accept: "application/json" },
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -157,4 +165,5 @@ export const {
   useGetAstrologerByIdQuery,
   useLazyFilterAstrologersQuery,
   useGetRecommendedAstrologersQuery,
+  useGetExpertiseFiltersQuery,
 } = astrologerApi;
