@@ -48,6 +48,9 @@
       @media (max-width: 768px) {
         min-width: 160px;
       }
+      @media (max-width: 767px) {
+        min-width: 100%;
+      }
     }
   }
 }
