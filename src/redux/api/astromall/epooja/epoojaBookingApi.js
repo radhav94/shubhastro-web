@@ -519,6 +519,34 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
         body,
       }),
     }),
+
+    // Validate coupon code
+    validateCoupon: builder.mutation({
+      queryFn: async ({ code, cart_total }) => {
+        try {
+          const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+          const role = localStorage.getItem("shubhtalk_role");
+          const token = role === "ASTROLOGER"
+            ? localStorage.getItem("shubhtalk_astro_token")
+            : localStorage.getItem("shubhtalk_customer_token");
+
+          const res = await fetch(`${BASE_URL}/api/mall/coupons/validate`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              accept: "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({ code, cart_total }),
+          });
+          const json = await res.json();
+          if (json?.success) return { data: json };
+          return { error: { status: res.status, data: json } };
+        } catch (err) {
+          return { error: { status: "FETCH_ERROR", error: err.message } };
+        }
+      },
+    }),
   }),
 });
 
@@ -543,4 +571,5 @@ export const {
   useCreateMallOrderMutation,
   useUpdateMallOrderMutation,
   useBookEPoojaMutation,
+  useValidateCouponMutation,
 } = epoojaBookingApi;

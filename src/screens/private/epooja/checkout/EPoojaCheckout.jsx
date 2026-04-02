@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./EPoojaCheckout.module.scss";
 import detailStyles from "../detail/EPoojaDetail.module.scss";
 import { FiChevronLeft, FiChevronRight, FiX, FiHome, FiBriefcase, FiEdit2, FiTrash2 } from "react-icons/fi";
-import { useGetCartQuery, useRemoveCartItemMutation, useCreateMallOrderMutation, useUpdateMallOrderMutation, useGetAddressesQuery, useAddAddressMutation, useUpdateAddressMutation, useDeleteAddressMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
+import { useGetCartQuery, useRemoveCartItemMutation, useCreateMallOrderMutation, useUpdateMallOrderMutation, useGetAddressesQuery, useAddAddressMutation, useUpdateAddressMutation, useDeleteAddressMutation, useValidateCouponMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
 
@@ -127,6 +127,8 @@ const EPoojaCheckout = () => {
   const [selectedMethod, setSelectedMethod] = useState("upi");
   const [showOtherUpi, setShowOtherUpi] = useState(false);
   const [coupon, setCoupon] = useState("");
+  const [couponData, setCouponData] = useState(null); // { discount, discount_type, message, ... }
+  const [couponError, setCouponError] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [buyNowQty] = useState(buyNowQtyFromState);
@@ -222,6 +224,7 @@ const EPoojaCheckout = () => {
   const getCartItemVariantId = (item) => item?.variantId?._id || item?.variantId?.id || (typeof item?.variantId === "string" ? item.variantId : "") || item?.variantSnapshot?._id || item?.variantSnapshot?.id || "";
   const [createMallOrder] = useCreateMallOrderMutation();
   const [updateMallOrder] = useUpdateMallOrderMutation();
+  const [validateCoupon, { isLoading: isCouponLoading }] = useValidateCouponMutation();
   const orderIdRef = useRef(null);
   const cartItems = cartData?.data?.items || cartData?.data?.cart?.items || cartData?.data || [];
   const rawCartItems = Array.isArray(cartItems) ? cartItems : [];
@@ -273,7 +276,33 @@ const EPoojaCheckout = () => {
 
   const subtotal = isBuyNowMode ? manualSubtotal : (cartApiTotalAmount || manualSubtotal);
   const gst = isBuyNowMode ? manualGst : (cartApiGst || manualGst);
-  const grandTotal = Math.round((subtotal + gst) * 100) / 100;
+  const discount = couponData?.discount_amount || 0;
+  const grandTotal = Math.round((subtotal + gst - discount) * 100) / 100;
+
+  // Coupon handlers
+  const handleApplyCoupon = async () => {
+    if (!coupon.trim()) {
+      setCouponError("Please enter a coupon code");
+      return;
+    }
+    setCouponError("");
+    try {
+      const res = await validateCoupon({ code: coupon.trim(), cart_total: subtotal }).unwrap();
+      setCouponData(res?.data || res);
+      setCouponError("");
+      Toast.success(res?.message || "Coupon applied successfully");
+    } catch (err) {
+      const msg = err?.data?.message || err?.data?.error || "Invalid coupon code";
+      setCouponError(msg);
+      setCouponData(null);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setCoupon("");
+    setCouponData(null);
+    setCouponError("");
+  };
 
   // Shared: build shipping address from state
   const buildShippingAddress = useCallback(() => {
@@ -315,6 +344,7 @@ const EPoojaCheckout = () => {
       shipping_charge: 0,
       cod_charge: 0,
       total_amount: grandTotal,
+      ...(couponData && { coupon: { code: couponData.code, discount_amount: couponData.discount_amount } }),
       payment_method: "online",
       ...(shippingAddress && { shipping_address: shippingAddress }),
       notes: "",
@@ -337,7 +367,7 @@ const EPoojaCheckout = () => {
       console.error("[EPoojaCheckout] Failed to create order:", err);
       return null;
     }
-  }, [items, grandTotal, subtotal, gst, cartData, buildShippingAddress, createMallOrder]);
+  }, [items, grandTotal, subtotal, gst, cartData, buildShippingAddress, createMallOrder, couponData]);
 
   // Step 2: Update order after payment success or failure
   const updateOrder = useCallback(async (paymentStatus, paymentMethod) => {
@@ -693,6 +723,13 @@ const EPoojaCheckout = () => {
               <span>₹{gst.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
 
+            {discount > 0 && (
+              <div className={`${styles.priceRow} ${styles.priceDiscount}`}>
+                <span>Coupon Discount</span>
+                <span>− ₹{discount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+            )}
+
             <div className={`${styles.priceRow} ${styles.priceTotal}`}>
               <span>Total Amount</span>
               <span>₹{grandTotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -728,9 +765,21 @@ const EPoojaCheckout = () => {
 
           <h2 className={styles.sectionTitleCenter}>APPLY COUPON</h2>
           <div className={styles.couponRow}>
-            <input type="text" placeholder="Enter Coupon Code" className={styles.couponInput} value={coupon} onChange={(e) => setCoupon(e.target.value)} />
-            <button className={styles.applyBtn}>Apply</button>
+            <input type="text" placeholder="Enter Coupon Code" className={styles.couponInput} value={coupon} onChange={(e) => { setCoupon(e.target.value.toUpperCase()); setCouponError(""); }} disabled={!!couponData} />
+            {couponData ? (
+              <button className={styles.removeBtn} onClick={handleRemoveCoupon}>Remove</button>
+            ) : (
+              <button className={styles.applyBtn} onClick={handleApplyCoupon} disabled={isCouponLoading}>
+                {isCouponLoading ? "Applying..." : "Apply"}
+              </button>
+            )}
           </div>
+          {couponError && <p className={styles.couponError}>{couponError}</p>}
+          {couponData && (
+            <p className={styles.couponSuccess}>
+              🎉 Coupon applied — you save ₹{discount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+          )}
 
           <div className={styles.securedBox}>
             <p className={styles.securedText}>Secured by <strong>Trusted Indian Banks</strong> ✅</p>
