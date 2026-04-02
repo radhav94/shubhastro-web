@@ -109,10 +109,12 @@ const OrderInfoCard = ({
     };
   }, []);
 
-  const formatDuration = (sec) => {
-    if (!sec && sec !== 0) return "0 Min 0 Secs";
-    const mins = Math.floor(sec / 60);
-    const secs = sec % 60;
+  const formatDuration = (val) => {
+    if (!val && val !== 0) return "0 Min 0 Secs";
+    // Backend sends duration in minutes (e.g. 1 = 1 min, 2.5 = 2 min 30 sec)
+    const totalSeconds = Math.round(val * 60);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
     return `${mins} Min ${secs} Secs`;
   };
 
