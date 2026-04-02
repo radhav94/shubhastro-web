@@ -147,7 +147,7 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
               place: formData.birthPlace,
               lat: formData.latitude,
               lon: formData.longitude,
-              tzone: 5.5,
+              tzone: formData.timezone ?? 5.5,
             };
 
             console.log("📤 Kundali payload:", kundliPayload);

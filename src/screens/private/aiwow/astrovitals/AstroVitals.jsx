@@ -112,7 +112,7 @@ const AstroVitals = () => {
         place: profile.place,
         lat: String(profile.latitude || 0),
         lon: String(profile.longitude || 0),
-        tzone: String(profile.timezone || 5.5)
+        tzone: String(profile.tzone || 5.5)
       };
 
       // Add optional metrics

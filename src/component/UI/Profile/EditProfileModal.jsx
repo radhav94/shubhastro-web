@@ -25,6 +25,7 @@ const EditProfileModal = ({
     unknownBirthTime: false,
     latitude: null,
     longitude: null,
+    timezone: 5.5,
   });
 
   // Check if a "Self" profile exists (excluding the current profile being edited)
@@ -101,6 +102,7 @@ const EditProfileModal = ({
         unknownBirthTime: initialData.unknownBirthTime || false,
         latitude: initialData.latitude || null,
         longitude: initialData.longitude || null,
+        timezone: initialData.timezone ?? 5.5,
       });
     }
   }, [initialData, isOpen]);
@@ -317,6 +319,7 @@ const EditProfileModal = ({
                       setFieldValue("birthPlace", place.address);
                       setFieldValue("latitude", place.lat);
                       setFieldValue("longitude", place.lng);
+                      setFieldValue("timezone", place.timezone ?? 5.5);
                     }}
                   />
                   <ErrorMessage name="birthPlace" component="div" className={styles.errorText} />

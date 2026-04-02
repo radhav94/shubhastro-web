@@ -30,6 +30,7 @@ const LocationSearch = ({ value, onChange, onPlaceSelect }) => {
         address: item.full_name,
         lat: Number(item.coordinates[0]),
         lng: Number(item.coordinates[1]),
+        timezone: item.tz != null ? Number(item.tz) : 5.5,
       });
       selectionMade.current = true; // prevent further API calls until user types again
       setOpen(false);

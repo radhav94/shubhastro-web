@@ -60,7 +60,7 @@ const AddProfile = () => {
       place: formData.placeOfBirth,
       lat: formData.latitude || 0,
       lon: formData.longitude || 0,
-      tzone: 5.5,
+      tzone: formData.timezone ?? 5.5,
     }
   }
 
