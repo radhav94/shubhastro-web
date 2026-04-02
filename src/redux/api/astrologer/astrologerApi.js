@@ -146,6 +146,14 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         url: "astrologers/recommendation",
       }),
     }),
+
+    getExpertiseFilters: builder.query({
+      query: () => ({
+        url: "filters/get-filters/expertise",
+        method: "GET",
+        headers: { accept: "application/json" },
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -157,4 +165,5 @@ export const {
   useGetAstrologerByIdQuery,
   useLazyFilterAstrologersQuery,
   useGetRecommendedAstrologersQuery,
+  useGetExpertiseFiltersQuery,
 } = astrologerApi;
