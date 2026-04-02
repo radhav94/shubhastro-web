@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import styles from "./Numerology.module.scss";
 import PrimaryText from "../../../component/PrimaryText";
 import { PATH } from "../../../utils/routes/Paths";
@@ -20,9 +21,11 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { ProfileManager } from "../../../component/UI/Profile";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { DefaultImages } from "../../../utils/appImages";
+import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 
 const NumerologyWeb = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const requireAuth = useRequireAuth();
 
   // ✅ Authentication check - redirect to login if not authenticated
@@ -33,7 +36,22 @@ const NumerologyWeb = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState(null);
   const [profileToEdit, setProfileToEdit] = useState(null);
-  const [selectedProfile, setSelectedProfile] = useState(null);
+  const [selectedProfile, setSelectedProfileLocal] = useState(null);
+
+  // Sync with Redux selectedKundli
+  const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
+
+  const setSelectedProfile = (profile) => {
+    setSelectedProfileLocal(profile);
+    dispatch(setSelectedKundli(profile));
+  };
+
+  // Sync from Redux when selectedKundli changes externally (e.g. from Kundli screen)
+  useEffect(() => {
+    if (selectedKundli && selectedKundli._id !== selectedProfile?._id) {
+      setSelectedProfileLocal(selectedKundli);
+    }
+  }, [selectedKundli]);
 
   // Get token
   const role = localStorage.getItem("shubhtalk_role");
@@ -69,7 +87,12 @@ const NumerologyWeb = () => {
   // Auto-select first profile on load - only after data is fetched
   useEffect(() => {
     if (profiles.length > 0 && !selectedProfile && !isFetching) {
-      setSelectedProfile(profiles[0]);
+      // If Redux already has a selected profile, use that
+      if (selectedKundli && profiles.some((p) => p._id === selectedKundli._id)) {
+        setSelectedProfileLocal(selectedKundli);
+      } else {
+        setSelectedProfile(profiles[0]);
+      }
     }
   }, [profiles, selectedProfile, isFetching]);
 
