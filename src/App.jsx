@@ -128,10 +128,11 @@ function App() {
         errorElement: routeErrorElement,
         children: [
           ...flattenRoutes(PATH.privateRoutes).map((child) => {
-            // Numerology and ProductDetail routes require authentication
+            // ProductDetail route requires authentication
+            // Numerology route — commented out to allow public access
+            // child.path === "/numerology" ||
+            // child.path === PATH.privateRoutes.NUMEROLOGY?.path ||
             if (
-              child.path === "/numerology" ||
-              child.path === PATH.privateRoutes.NUMEROLOGY?.path ||
               child.path === "/shop/:slug/:productSlug" ||
               child.path === PATH.privateRoutes.PRODUCT_DETAIL?.path
             ) {
