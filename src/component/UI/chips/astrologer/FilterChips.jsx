@@ -23,7 +23,10 @@ const FilterChips = ({
 }) => {
 
   const [triggerFilter, { isLoading }] = useLazyFilterAstrologersQuery();
-  const [active, setActive] = useState(selectedType);
+  const [active, setActive] = useState(
+    selectedType === "All" ? "all" : selectedType
+  );
+  const [activeChips, setActiveChips] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState([]);
@@ -36,6 +39,12 @@ const FilterChips = ({
   const loadingMoreRef = useRef(false);
   const pageRef = useRef(1);
   const isFilterActiveRef = useRef(false);
+  // Refs to hold latest filter state for pagination (avoids stale closures)
+  const searchTextRef = useRef("");
+  const selectedSkillsRef = useRef([]);
+  const expertiesRef = useRef("");
+  const selectedGenderRef = useRef("");
+  const selectedSortRef = useRef("");
   // NEW: Debounce timer ref for search input
   const debounceTimerRef = useRef(null);
   const [activeModalTab, setActiveModalTab] = useState("Skill");
@@ -51,6 +60,13 @@ const FilterChips = ({
       }
     };
   }, []);
+
+  // Keep refs in sync with state for pagination
+  useEffect(() => { searchTextRef.current = searchText; }, [searchText]);
+  useEffect(() => { selectedSkillsRef.current = selectedSkills; }, [selectedSkills]);
+  useEffect(() => { expertiesRef.current = experties; }, [experties]);
+  useEffect(() => { selectedGenderRef.current = selectedGender; }, [selectedGender]);
+  useEffect(() => { selectedSortRef.current = selectedSort; }, [selectedSort]);
 
   // Auto-scroll to active chip when selectedType changes from parent
   useEffect(() => {
@@ -170,7 +186,14 @@ const FilterChips = ({
       return;
 
     const nextPage = pageRef.current + 1;
-    applyFilters({ pageNo: nextPage, append: true });
+    // Use refs for latest filter values to avoid stale closures
+    applyFilters({
+      pageNo: nextPage,
+      append: true,
+      searchValue: searchTextRef.current,
+      skills: selectedSkillsRef.current,
+      experties: expertiesRef.current,
+    });
   };
 
   // -------------------------
@@ -310,20 +333,31 @@ const FilterChips = ({
     // Clear any pending debounce timer before setting a new one
     clearTimeout(debounceTimerRef.current);
 
-    // If input is cleared to empty, immediately reset to "All" state (no debounce)
+    // If input is cleared to empty, check if skills are still active
     if (sanitizedValue.length === 0) {
-      handleClick("all");
+      if (activeChips.length > 0) {
+        // Skills still selected — just re-apply with skills only
+        isFilterActiveRef.current = true;
+        applyFilters({
+          pageNo: 1,
+          skills: selectedSkills,
+          ignoreSearch: true,
+          append: false,
+        });
+      } else {
+        handleClick("all");
+      }
       return;
     }
 
     // Only trigger debounced API call when input exceeds 2 characters (search-first policy)
    
       debounceTimerRef.current = setTimeout(() => {
-        setActive("search");
-        clearAll();
+        setActive(activeChips.length > 0 ? "" : "search");
         isFilterActiveRef.current = true;
         applyFilters({
           searchValue: sanitizedValue,
+          skills: selectedSkills,
           category: "search",
           pageNo: 1,
         });
@@ -343,7 +377,6 @@ const FilterChips = ({
     isFilterActiveRef.current = true;
 
     applyFilters({
-      ignoreSearch: true,
       category: "filter",
       pageNo: 1,
       append: false,
@@ -365,38 +398,97 @@ const FilterChips = ({
     setSelectedSkills([]);
     setSelectedGender("");
     setSelectedSort("");
+    setActiveChips([]);
   };
 
   const handleClick = (itemSlug) => {
-    // Find the button by slug to get the name for active state
     const clickedButton = filterButtons.find(btn => btn.slug === itemSlug);
     const itemName = clickedButton?.slug || itemSlug;
-    
-    setActive(itemName);
+
     setPage(1);
     pageRef.current = 1;
     setHasMore(true);
 
-    setEexperties("");
-    setSelectedSkills([]);
-    setSelectedGender("");
-    setSelectedSort("");
-    setSearchText("");
-
-    if (itemSlug === "all" || itemName === "All") {
+    // "All" resets everything
+    if (itemSlug === "all") {
+      setActive("all");
+      setActiveChips([]);
+      setEexperties("");
+      setSelectedSkills([]);
+      setSelectedGender("");
+      setSelectedSort("");
+      setSearchText("");
       isFilterActiveRef.current = false;
-      setShowFilterAstrologer(false); // Show TOP ASTROLOGERS when "All" is selected
+      setShowFilterAstrologer(false);
       onSelect?.(null);
       return;
     }
 
-    setEexperties(itemSlug);
+    // "Online" is exclusive — clears skill chips
+    if (itemSlug === "online") {
+      setActive("online");
+      setActiveChips([]);
+      setEexperties("online");
+      setSelectedSkills([]);
+      setSelectedGender("");
+      setSelectedSort("");
+      setSearchText("");
+      isFilterActiveRef.current = true;
+
+      applyFilters({
+        pageNo: 1,
+        experties: "online",
+        ignoreSearch: true,
+        append: false,
+      });
+      return;
+    }
+
+    // Skill chips — multi-select toggle (preserve searchText)
+    let newChips;
+    if (activeChips.includes(itemSlug)) {
+      newChips = activeChips.filter((c) => c !== itemSlug);
+    } else {
+      newChips = [...activeChips, itemSlug];
+    }
+
+    // If all chips deselected and no search, revert to "All"
+    if (newChips.length === 0 && !searchText) {
+      setActive("all");
+      setActiveChips([]);
+      setEexperties("");
+      setSelectedSkills([]);
+      isFilterActiveRef.current = false;
+      setShowFilterAstrologer(false);
+      onSelect?.(null);
+      return;
+    }
+
+    // If all chips deselected but search is active, keep search mode
+    if (newChips.length === 0 && searchText) {
+      setActiveChips([]);
+      setSelectedSkills([]);
+      setEexperties("");
+      isFilterActiveRef.current = true;
+      applyFilters({
+        pageNo: 1,
+        searchValue: searchText,
+        skills: [],
+        category: "search",
+        append: false,
+      });
+      return;
+    }
+
+    setActive("");
+    setActiveChips(newChips);
+    setSelectedSkills(newChips);
+    setEexperties("");
     isFilterActiveRef.current = true;
 
     applyFilters({
       pageNo: 1,
-      experties: itemSlug,
-      ignoreSearch: true,
+      skills: newChips,
       append: false,
     });
   };
@@ -483,7 +575,7 @@ const FilterChips = ({
             <div className={styles.chip}>Loading filters...</div>
           ) : (
             filterButtons.map((btn) => {
-              const isActive = active === btn.slug;
+              const isActive = active === btn.slug || activeChips.includes(btn.slug);
             
               return (
                 <div
