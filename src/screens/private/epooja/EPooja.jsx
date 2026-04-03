@@ -63,7 +63,14 @@ const HScrollRow = ({ children }) => {
 
 // ─── Helper: get image/price/title from API item ───
 const PRODUCT_FALLBACK = DefaultImages.AstromallProductDefault;
-const getFirstVariant = (item) => item?.variants?.find((v) => v.isActive) || item?.variants?.[0] || null;
+const getFirstVariant = (item) => {
+  const variants = item?.variants || [];
+  // Prefer the first variant that is both active and in stock
+  const inStock = variants.find((v) => v.isActive !== false && v.inStock !== false && v.stock !== 0);
+  if (inStock) return inStock;
+  // Fallback: first active variant, then first variant overall
+  return variants.find((v) => v.isActive) || variants[0] || null;
+};
 const resolveImg = (img) => {
   if (!img) return null;
   if (typeof img === "string") return img;
@@ -220,7 +227,7 @@ const EPooja = () => {
     }
     const productId = item?._id || item?.ID;
     if (!productId) { Toast.error("Unable to add — product ID missing"); return; }
-    const firstVariant = item?.variants?.find((v) => v.isActive !== false && v.inStock !== false) || item?.variants?.[0];
+    const firstVariant = getFirstVariant(item);
     const fvId = firstVariant?._id || firstVariant?.id || firstVariant?.skuCode || firstVariant?.sku;
     if (!fvId) { Toast.error("No variant available for this product"); return; }
     if (firstVariant?.stock === 0 || firstVariant?.inStock === false) { Toast.error("This variant is out of stock"); return; }
