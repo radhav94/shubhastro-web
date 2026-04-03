@@ -269,6 +269,11 @@ const AIWow = () => {
     }
   };
 
+  const handleResultHistory = () =>{
+    if (!requireAuth()) return null;
+    setActiveTab("results")
+  }
+
   return (
     <>
       <div className={styles.container}>
@@ -329,7 +334,7 @@ const AIWow = () => {
             <button
               type="button"
               className={`${styles.tab} ${activeTab === "results" ? styles.tabActive : ""}`}
-              onClick={() => setActiveTab("results")}
+              onClick={handleResultHistory}
             >
               Result History
             </button>

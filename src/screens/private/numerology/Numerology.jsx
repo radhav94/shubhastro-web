@@ -21,15 +21,15 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { ProfileManager } from "../../../component/UI/Profile";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { DefaultImages } from "../../../utils/appImages";
-import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
+import { setSelectedKundli, clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 
 const NumerologyWeb = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const requireAuth = useRequireAuth();
 
-  // ✅ Authentication check - redirect to login if not authenticated
-  if (!requireAuth()) return null;
+  // Authentication check — commented out to allow public access
+  // if (!requireAuth()) return null;
   const [showSelectProfile, setShowSelectProfile] = useState(false);
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -66,6 +66,41 @@ const NumerologyWeb = () => {
       ? localStorage.getItem("shubhtalk_astro_id")
       : localStorage.getItem("shubhtalk_customer_id");
 
+  const isLoggedIn = !!token;
+
+  // Temporary profiles for non-logged-in users (session-based)
+  const [tempProfiles, setTempProfiles] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("tempNumerologyProfiles");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+
+  // Sync tempProfiles to sessionStorage
+  useEffect(() => {
+    if (!isLoggedIn) {
+      sessionStorage.setItem("tempNumerologyProfiles", JSON.stringify(tempProfiles));
+    }
+  }, [tempProfiles, isLoggedIn]);
+
+  // Clear temp profiles when user logs in
+  useEffect(() => {
+    if (isLoggedIn) {
+      sessionStorage.removeItem("tempNumerologyProfiles");
+      setTempProfiles([]);
+    }
+  }, [isLoggedIn]);
+
+  // Clear temp profiles when navigating away
+  useEffect(() => {
+    return () => {
+      if (!isLoggedIn) {
+        sessionStorage.removeItem("tempNumerologyProfiles");
+        dispatch(clearSelectedKundli());
+      }
+    };
+  }, [isLoggedIn, dispatch]);
+
   // API Hooks
   const { data, isLoading, refetch, isFetching } = useGetAllKundlisQuery(
     undefined,
@@ -80,13 +115,14 @@ const NumerologyWeb = () => {
     { data: numerologyData, isLoading: isLoadingNumerology },
   ] = useLazyGetNumerologyPredictionQuery();
 
-  // Get profiles from API
-  const profiles = data?.data || [];
+  // Combine saved profiles with temporary profiles
+  const savedProfiles = data?.data || [];
+  const profiles = isLoggedIn ? savedProfiles : tempProfiles;
   const numerologyResponse = numerologyData?.response || null;
 
   // Auto-select first profile on load - only after data is fetched
   useEffect(() => {
-    if (profiles.length > 0 && !selectedProfile && !isFetching) {
+    if (profiles.length > 0 && !selectedProfile) {
       // If Redux already has a selected profile, use that
       if (selectedKundli && profiles.some((p) => p._id === selectedKundli._id)) {
         setSelectedProfileLocal(selectedKundli);
@@ -94,7 +130,7 @@ const NumerologyWeb = () => {
         setSelectedProfile(profiles[0]);
       }
     }
-  }, [profiles, selectedProfile, isFetching]);
+  }, [profiles.length, selectedProfile]);
 
   // Clear selected profile when user changes (on refresh after login)
   useEffect(() => {
@@ -123,6 +159,19 @@ const NumerologyWeb = () => {
   }, [selectedProfile, getNumerologyPrediction]);
 
   const handleSelectProfile = (profile) => {
+    if (!isLoggedIn && profile._id?.startsWith('temp_')) {
+      // Check if this is an update to an existing temp profile
+      const existingIdx = tempProfiles.findIndex((p) => p._id === profile._id);
+      if (existingIdx >= 0) {
+        // Update existing temp profile
+        setTempProfiles((prev) =>
+          prev.map((p) => (p._id === profile._id ? profile : p))
+        );
+      } else {
+        // Add new temp profile
+        setTempProfiles((prev) => [...prev, profile]);
+      }
+    }
     setSelectedProfile(profile);
     setShowSelectProfile(false);
   };
@@ -220,18 +269,18 @@ const NumerologyWeb = () => {
     const timeObj = data.birthTime ? data.birthTime.split(":") : ["0", "0"];
 
     return {
-      name: data.name,
-      gender: data.identity.toLowerCase(),
+      name: data?.name,
+      gender: data?.identity.toLowerCase(),
       day: dateObj.getDate(),
       month: dateObj.getMonth() + 1,
       year: dateObj.getFullYear(),
-      hour: data.unknownBirthTime ? "00" : String(parseInt(timeObj[0])).padStart(2, "0"),
-      min: data.unknownBirthTime ? "00" : String(parseInt(timeObj[1])).padStart(2, "0"),
+      hour: data?.unknownBirthTime ? "00" : String(parseInt(timeObj[0])).padStart(2, "0"),
+      min: data?.unknownBirthTime ? "00" : String(parseInt(timeObj[1])).padStart(2, "0"),
       second: "00",
-      place: data.birthPlace,
-      lat: data.latitude || 0,
-      lon: data.longitude || 0,
-      tzone: data.timezone ?? 5.5,
+      place: data?.birthPlace,
+      lat: data?.latitude,
+      lon: data?.longitude,
+      tzone: data?.timezone,
     };
   };
 
@@ -260,22 +309,32 @@ const NumerologyWeb = () => {
         throw new Error("Duplicate profile");
       }
 
-      const result = await createKundli(payload).unwrap();
-      Toast.success("Profile added successfully");
+      if (isLoggedIn) {
+        const result = await createKundli(payload).unwrap();
+        Toast.success("Profile added successfully");
+        await refetch();
 
-      await refetch();
-
-      // Auto-select the newly created profile
-      if (result?.data) {
-        setSelectedProfile(result.data);
+        if (result?.data) {
+          setSelectedProfile(result.data);
+        }
+      } else {
+        // Non-logged-in user: create temporary profile
+        const tempProfile = {
+          ...payload,
+          _id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        };
+        setTempProfiles((prev) => [...prev, tempProfile]);
+        Toast.success("Profile added");
+        setSelectedProfile(tempProfile);
       }
 
       setShowAddProfile(false);
     } catch (err) {
-      console.error(err);
-      const errorMessage =
-        err?.data?.message || err?.message || "Failed to add profile";
-      Toast.error(errorMessage);
+      if (err?.message !== "Duplicate profile") {
+        const errorMessage =
+          err?.data?.message || err?.message || "Failed to add profile";
+        Toast.error(errorMessage);
+      }
       throw err;
     }
   };
@@ -396,6 +455,23 @@ const NumerologyWeb = () => {
           Based on your name and birth date, your numerology chart highlights
           key patterns shaping your life journey.
         </p>
+        {!numerologyResponse && (
+          <div className={styles.infoSection}>
+            <h2 className={styles.infoHeading}>Numerology: All That You Need to Know</h2>
+            <p className={styles.infoParagraph}>
+              In the last few decades, Numerology has gained much popularity.
+              But what is Numerology?
+            </p>
+            <p className={styles.infoParagraph}>
+              It is a divination tool that attaches a series of numbers to an
+              individual's name and takes into account the date of birth to
+              derive their true nature from it. Numerology draws meaning from
+              numbers and number combinations in your life. This tool can help
+              you reveal truths about who you really are and the underlying
+              patterns of the universe.
+            </p>
+          </div>
+        )}
       </section>
 
       {/* NUMEROLOGY CARDS */}
@@ -438,21 +514,27 @@ const NumerologyWeb = () => {
 
         <div className={styles.meansCarousel}>
           <div className={styles.meansCard}>
-            <div className={styles.meansIcon}> */}{/* Icon placeholder */}{/* </div>
+            <div className={styles.meansIcon}> */}
+      {/* Icon placeholder */}
+      {/* </div>
             <p className={styles.meansText}>
               Strong potential for leadership-led growth
             </p>
           </div>
 
           <div className={styles.meansCard}>
-            <div className={styles.meansIcon}> */}{/* Icon placeholder */}{/* </div>
+            <div className={styles.meansIcon}> */}
+      {/* Icon placeholder */}
+      {/* </div>
             <p className={styles.meansText}>
               Natural ability to inspire and motivate others
             </p>
           </div>
 
           <div className={styles.meansCard}>
-            <div className={styles.meansIcon}> */}{/* Icon placeholder */}{/* </div>
+            <div className={styles.meansIcon}> */}
+      {/* Icon placeholder */}
+      {/* </div>
             <p className={styles.meansText}>
               Excellent communication and creative skills
             </p>
@@ -477,7 +559,11 @@ const NumerologyWeb = () => {
             </Link>
           </div>
           <div className={styles.expertImage}>
-            <img src={DefaultImages.AstrologerNumerologyDefault} alt="pik" className={styles.footer_logo} />
+            <img
+              src={DefaultImages.AstrologerNumerologyDefault}
+              alt="pik"
+              className={styles.footer_logo}
+            />
           </div>
         </div>
       </section>
@@ -515,8 +601,8 @@ const NumerologyWeb = () => {
             </Link>
           </div>
           <div className={styles.expertImage}> */}
-            {/* Placeholder for guidance image */}
-          {/* </div>
+      {/* Placeholder for guidance image */}
+      {/* </div>
         </div>
       </section> */}
 
@@ -631,7 +717,6 @@ const NumerologyWeb = () => {
         <button className={styles.primaryBtnLarge}>Calculate My Numbers</button>
       </section> */}
 
-      
       {/* Profile Manager - Handles all profile operations */}
       <ProfileManager
         isOpen={showSelectProfile}
@@ -639,11 +724,21 @@ const NumerologyWeb = () => {
         onProfileSelect={handleSelectProfile}
         selectedProfileId={selectedProfile?._id}
         title="Select Profile"
+        profilesList={profiles}
+        onDeleteProfile={(profileId) => {
+          if (!isLoggedIn) {
+            setTempProfiles((prev) => prev.filter((p) => p._id !== profileId));
+            if (selectedProfile?._id === profileId) {
+              setSelectedProfileLocal(null);
+              dispatch(clearSelectedKundli());
+            }
+          }
+        }}
         enabledOperations={{
           list: true,
           add: true,
           edit: true,
-          delete: true,
+          delete: !isLoggedIn ? true : true,
         }}
       />
 
