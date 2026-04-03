@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 import InteractiveLiveStreaming from "./InteractiveLiveStreaming";
 import { LiveListProvider } from "../../../../../context/LiveListContext";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
@@ -7,10 +8,26 @@ import { restoreViewerSession } from "../../../../../utils/liveSessionStorage";
 
 const LivePlayerPage = () => {
   const { channelId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isLoggedIn } = useSelector((state) => state.auth);
   const [lives, setLives] = useState([]);
   const [autoStartIndex, setAutoStartIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Redirect guest users to login
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/login?skip=welcome", {
+        state: { from: location.pathname },
+        replace: true,
+      });
+    }
+  }, [isLoggedIn, navigate, location.pathname]);
 
   useEffect(() => {
+    if (!isLoggedIn) return;
+    setIsLoading(true);
     const savedSession = restoreViewerSession();
 
     getAstrologerLiveList().then((res) => {
@@ -68,11 +85,18 @@ const LivePlayerPage = () => {
       }
 
       setLives(liveList);
+      setIsLoading(false);
+    }).catch(() => {
+      setIsLoading(false);
     });
-  }, [channelId]);
+  }, [channelId, isLoggedIn]);
 
-  if (lives.length === 0) {
-    return null; // Wait for API to load live list before mounting the player
+  if (!isLoggedIn) {
+    return null;
+  }
+
+  if (isLoading) {
+    return null;
   }
 
   return (
