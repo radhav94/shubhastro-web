@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const userId = "647791";
-const apiKey = "028d305879f503481d151369c052e93b371a5376";
+const userId = import.meta.env.VITE_TAROT_API_USER_ID;
+const apiKey = import.meta.env.VITE_TAROT_API_KEY;
 const auth = `Basic ${btoa(userId + ":" + apiKey)}`;
 
 export const astroTarotApi = createApi({

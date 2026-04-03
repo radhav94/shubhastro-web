@@ -25,7 +25,7 @@ import netbankinglogo from "../../../../assets/icons/upi/netbanking.svg";
 import walletlogo from "../../../../assets/icons/upi/wallet.svg";
 
 const DEFAULT_IMG = DefaultImages.AstromallProductDefault;
-const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_SJVwTGtUhFpODR";
+const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID;
 const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js";
 
 const UPI_APPS = [
