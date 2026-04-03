@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { 
   useFetchDailyQuery, 
+  useFetchTomorrowQuery,
   useFetchWeeklyQuery, 
   useFetchYearlyQuery
 } from '../../../redux/api/horoscope/zodiacApi';
@@ -152,7 +153,7 @@ const HoroscopeNew = () => {
   const overviewCardRefs = useRef([]);
   const overviewRef = useRef(null);
 
-  const tabs = ['Today', /* 'Daily', */ 'This Week', 'This Year'];
+  const tabs = ['Today', 'Tomorrow', /* 'Daily', */ 'This Week', 'This Year'];
   
   // Categories will be dynamically generated from API response
   const [categories, setCategories] = useState([]);
@@ -220,6 +221,10 @@ const HoroscopeNew = () => {
   const { data: dailyData, isLoading: dailyLoading } = useFetchDailyQuery(signNumber, {
     skip: activeTab !== 'Today' && activeTab !== 'Daily'
   });
+
+  const { data: tomorrowData, isLoading: tomorrowLoading } = useFetchTomorrowQuery(signNumber, {
+    skip: activeTab !== 'Tomorrow'
+  });
   
   const { data: weeklyData, isLoading: weeklyLoading } = useFetchWeeklyQuery(signNumber, {
     skip: activeTab !== 'This Week'
@@ -229,11 +234,12 @@ const HoroscopeNew = () => {
     skip: activeTab !== 'This Year'
   });
 
-  const isLoading = dailyLoading || weeklyLoading || yearlyLoading;
+  const isLoading = dailyLoading || tomorrowLoading || weeklyLoading || yearlyLoading;
 
   // Get current data based on active tab
   const getCurrentData = () => {
     if (activeTab === 'Today' || activeTab === 'Daily') return dailyData;
+    if (activeTab === 'Tomorrow') return tomorrowData;
     if (activeTab === 'This Week') return weeklyData;
     if (activeTab === 'This Year') return yearlyData;
     return null;
@@ -261,9 +267,14 @@ const HoroscopeNew = () => {
         console.log('Yearly Category IDs:', yearlyCategories.map(c => c.id));
       }
     } else if (((activeTab === 'Today' || activeTab === 'Daily') && dailyData?.response?.bot_response) || 
+               (activeTab === 'Tomorrow' && tomorrowData?.response?.bot_response) ||
                (activeTab === 'This Week' && weeklyData?.response?.bot_response)) {
-      // For daily/weekly, get categories from bot_response
-      const bot = (activeTab === 'Today' || activeTab === 'Daily') ? dailyData.response.bot_response : weeklyData.response.bot_response;
+      // For daily/tomorrow/weekly, get categories from bot_response
+      const bot = (activeTab === 'Today' || activeTab === 'Daily') 
+        ? dailyData.response.bot_response 
+        : activeTab === 'Tomorrow'
+          ? tomorrowData.response.bot_response
+          : weeklyData.response.bot_response;
       const dailyWeeklyCategories = Object.keys(bot).map(key => ({
         id: key,
         label: key.replace(/_/g, ' ').split(' ').map(word => 
@@ -280,7 +291,7 @@ const HoroscopeNew = () => {
     if (!activeCategory || !newCategories.find(c => c.id === activeCategory)) {
       setActiveCategory('overview');
     }
-  }, [activeTab, dailyData, weeklyData, yearlyData, activeCategory]);
+  }, [activeTab, dailyData, tomorrowData, weeklyData, yearlyData, activeCategory]);
 
   // Get content for active category
   const getContent = () => {
@@ -355,7 +366,7 @@ const HoroscopeNew = () => {
 
         return {
           title: `${selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)} ${activeTab} Overview`,
-          subtitle: (activeTab === 'Today' || activeTab === 'Daily') ? formatted : 'Sunday - Saturday',
+          subtitle: (activeTab === 'Today' || activeTab === 'Daily') ? formatted : activeTab === 'Tomorrow' ? 'Tomorrow' : 'Sunday - Saturday',
           content: '',
           luckyColor: response.lucky_color,
           luckyColorCode: response.lucky_color_code,
@@ -403,7 +414,7 @@ const HoroscopeNew = () => {
     
     return {
       title: categories.find(c => c.id === activeCategory)?.label || activeCategory,
-      subtitle: (activeTab === 'Today' || activeTab === 'Daily') ? formatted : 'Sunday - Saturday',
+      subtitle: (activeTab === 'Today' || activeTab === 'Daily') ? formatted : activeTab === 'Tomorrow' ? 'Tomorrow' : 'Sunday - Saturday',
       content: categoryData?.split_response || 'Content coming soon.',
       score: categoryData?.score,
       luckyColor: response.lucky_color,
@@ -422,6 +433,8 @@ const HoroscopeNew = () => {
     // Navigate to corresponding route
     // Both "Today" and "Daily" go to daily-horoscope
     if (tab === 'Today' || tab === 'Daily') {
+      navigate(`/horoscopes/daily-horoscope/${selectedZodiac}`);
+    } else if (tab === 'Tomorrow') {
       navigate(`/horoscopes/daily-horoscope/${selectedZodiac}`);
     } else if (tab === 'This Week') {
       navigate(`/horoscopes/weekly-horoscope/${selectedZodiac}`);
@@ -565,7 +578,7 @@ const HoroscopeNew = () => {
             </h2>
             
             {/* Lucky Details - Only for Daily and Weekly, not in Overview */}
-            {!currentContent.isOverview && (activeTab === 'Today' || activeTab === 'This Week') && currentContent.luckyColor && (
+            {!currentContent.isOverview && (activeTab === 'Today' || activeTab === 'Tomorrow' || activeTab === 'This Week') && currentContent.luckyColor && (
               <div className="lucky-details">
                 <h3 className="lucky-title">Lucky Details</h3>
                 <p className="lucky-item">
@@ -592,7 +605,7 @@ const HoroscopeNew = () => {
             {currentContent.isOverview && currentContent.overviewSections ? (
               <div className="overview-sections">
                 {/* Lucky Details for Overview in Daily/Weekly */}
-                {(activeTab === 'Today' || activeTab === 'Daily' || activeTab === 'This Week') && currentContent.luckyColor && (
+                {(activeTab === 'Today' || activeTab === 'Daily' || activeTab === 'Tomorrow' || activeTab === 'This Week') && currentContent.luckyColor && (
                   <div className="lucky-details">
                     <h3 className="lucky-title">Lucky Details</h3>
                     <p className="lucky-item">
