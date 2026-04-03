@@ -8,7 +8,7 @@ const LocationSearch = ({ value, onChange, onPlaceSelect }) => {
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
-    googleMapsApiKey: "AIzaSyDGJr4IEbfQBhtnL9I2Gjon4_aA78_dQlc",
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
     libraries,
   });
 
