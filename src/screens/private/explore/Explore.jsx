@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ChevronLeft, Edit, ChevronRight } from "lucide-react";
 import styles from "./Explore.module.scss";
 import { 
@@ -56,6 +56,7 @@ const Explore = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const requireAuth = useRequireAuth();
+  const { isLoggedIn } = useSelector((state) => state.auth);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [showSelectProfile, setShowSelectProfile] = useState(false);
 
@@ -459,8 +460,11 @@ const Explore = () => {
       
       // Kundli Reports and Remedies For You - Requires auth + kundali
       if (cardTitle.includes("Kundli") || cardTitle.includes("Remedies")) {
-        // Check authentication first
-        if (!requireAuth()) return;
+        // If not logged in, redirect to kundali page directly
+        if (!isLoggedIn) {
+          navigate(redirectUrl || "/kundli");
+          return;
+        }
         
         // Check if kundali profile exists
         if (!profiles || profiles.length === 0) {
@@ -482,8 +486,11 @@ const Explore = () => {
     // Requires auth + kundali check
     const kundliCards = ["Vedic Kundli", "Vedic Kundali", "Dasha", "Ashtakvarga Chart", "Ashtakvarga", "KP Chart", "KP"];
     if (kundliCards.includes(card.title)) {
-      // Check authentication first
-      if (!requireAuth()) return;
+      // If not logged in, redirect to kundali page directly
+      if (!isLoggedIn) {
+        navigate(redirectUrl || "/kundli");
+        return;
+      }
       
       // Check if kundali profile exists
       if (!profiles || profiles.length === 0) {
