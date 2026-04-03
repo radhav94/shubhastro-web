@@ -159,6 +159,13 @@
   margin: 0 0 5px 0;
 }
 
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
+  margin: 0 0 8px 0;
+}
+
 .readingDescription {
   font-size: 15px;
   color: #333;
