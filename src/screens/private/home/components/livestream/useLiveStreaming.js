@@ -18,7 +18,7 @@ import {
   clearViewerSession,
 } from "../../../../../utils/liveSessionStorage";
 
-const APP_ID = "8575e5681f7142f4bced0b83332caa15";
+const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1500;
 

@@ -57,6 +57,7 @@ import AstrologerShopImage from "../../../assets/images/astrologer-shop.png";
 import AstrologerNumerologyDefault from "../../../assets/default-img/astrologer-numerology.png";
 import GiftModal from "../../../component/call/GiftModal";
 import VirtualAssistant from "../../../component/virtualAssistant/VirtualAssistant";
+import { useGetChatHistoryQuery } from "../../../redux/api/chatApi";
 
 const AstrologerProfile = () => {
   const { id } = useParams();
@@ -850,9 +851,11 @@ const AstrologerProfile = () => {
             <h2 className={styles.headerTitle}>Profile</h2>
           </div>
           <div className={styles.headerActions}>
-            <button className={styles.vaBtn} onClick={() => setIsVAOpen(true)}>
-              Virtual Assistant
-            </button>
+            {hasChatHistory && (
+              <button className={styles.vaBtn} onClick={() => setIsVAOpen(true)}>
+                Virtual Assistant
+              </button>
+            )}
             <button
               className={`${styles.followBtn} ${isFollowing ? styles.following : ""}`}
               onClick={handleFollow}

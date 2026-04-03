@@ -585,7 +585,7 @@ const LiveView = (props) => {
             {/* CONNECTING — Agora joining or waiting for remote media */}
             {!isHost && remoteUsers.length === 0 && !hostLeft && !roomEnded && (
               <div className="waiting-text">
-                {connectingTimedOut
+                {!props.channel || connectingTimedOut
                   ? '🔮 Waiting for astrologer to start streaming…'
                   : '🔮 Connecting to live stream…'}
               </div>

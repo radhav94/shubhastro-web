@@ -1,7 +1,7 @@
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { calculatorApi } from "../baseApi/calculatorApi";
 
-const api_key = "e19fcd25-34b1-52eb-9c7b-4270f71cbd87";
+const api_key = import.meta.env.VITE_VEDIC_ASTRO_API_KEY;
 const formatDate = (dateString) => {
   if (!dateString) return "";
   const [year, month, day] = dateString.split("-");
