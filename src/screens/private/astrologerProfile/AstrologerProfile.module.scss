@@ -1630,6 +1630,29 @@
   flex-direction: column;
   gap: 16px;
   margin-bottom: 28px;
+
+  &.scrollable {
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 4px;
+
+    &::-webkit-scrollbar {
+      width: 5px;
+    }
+    &::-webkit-scrollbar-track {
+      background: #fff;
+      border-radius: 10px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #fff;
+      border-radius: 10px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: #fff;
+    }
+    scrollbar-width: thin;
+    scrollbar-color: #fff;
+  }
 }
 
 .reviewCard {
