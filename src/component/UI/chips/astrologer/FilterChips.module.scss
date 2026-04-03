@@ -96,7 +96,7 @@
 
   &:hover {
     background: #fff9e5;
-    border-color: #ffd54f;
+    border-color: orangered;
   }
 
   .chipIcon {
@@ -104,7 +104,7 @@
   }
 
   &.activeChip {
-    border-color: #ffa726 !important;
+    border-color: orangered !important;
     background: #fff3e0 !important;
     color: #2c2c2c !important;
     font-weight: 600;

@@ -76,8 +76,8 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
           
         });
 
-        if (selectedSort) {
-          params.append("gender", selectedSort);
+        if (selectedGender) {
+          params.append("gender", selectedGender.toLowerCase());
         }
         // ✅ NEW LOGIC: Handle selectedSkills array
         // If selectedSkills array has items, convert to comma-separated string and pass to skills field
