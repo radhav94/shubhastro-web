@@ -111,6 +111,17 @@ const AstrologerProfile = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [fetchMoreReviews] = useLazyGetAstrologerReviewsQuery();
 
+    const { data: vaChatHistoryData } = useGetChatHistoryQuery(
+
+    { userId: data?._id },
+
+    { skip: !data?._id || !getToken() }
+
+  );
+
+  const hasChatHistory = (vaChatHistoryData?.data?.length || 0) > 0;
+
+
   const { data: followingData } = useCheckFollowingStatusQuery(
     { astrologerId: data?._id },
     { skip: !data?._id }
