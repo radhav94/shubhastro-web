@@ -279,6 +279,7 @@ const AddProfileModal = ({
                     type="date"
                     name="birthDate"
                     max={new Date().toISOString().split("T")[0]}
+                    onClick={(e) => e.target.showPicker?.()}
                   />
                   <ErrorMessage name="birthDate" component="div" className={styles.errorText} />
                 </div>
@@ -289,6 +290,7 @@ const AddProfileModal = ({
                     type="time"
                     name="birthTime"
                     disabled={values.unknownBirthTime}
+                    onClick={(e) => !values.unknownBirthTime && e.target.showPicker?.()}
                   />
                   <ErrorMessage name="birthTime" component="div" className={styles.errorText} />
                   <label className={styles.checkboxLabel}>

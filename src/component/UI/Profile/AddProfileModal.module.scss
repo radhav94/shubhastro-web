@@ -140,6 +140,13 @@
   input[type="date"],
   input[type="time"] {
     cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+
+    &::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      opacity: 1;
+    }
   }
 }
 
