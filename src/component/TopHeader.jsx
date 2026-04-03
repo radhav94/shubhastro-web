@@ -38,6 +38,17 @@ const TopHeader = () => {
   });
   const savedKundlis = kundliData?.data || [];      
 
+  // Auto-select first (self) profile after fresh login when no profile is selected
+  useEffect(() => {
+    if (token && savedKundlis.length > 0 && !selectedKundli) {
+      const firstProfile = savedKundlis[0];
+      if (firstProfile?._id) {
+        dispatch(setSelectedKundli(firstProfile));
+        dispatch(setSelectedKundliProfile(firstProfile));
+        localStorage.setItem("selectedKundliProfile", JSON.stringify(firstProfile));
+      }
+    }
+  }, [token, savedKundlis, selectedKundli, dispatch]);
 
   const {
     balance,
@@ -727,6 +738,14 @@ const TopHeader = () => {
             >
               Horoscopes
             </NavLink>
+            <NavLink
+              to="/panchang"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Panchang
+            </NavLink>
             {/* <NavLink
               to="/live-landing"
               className={({ isActive }) =>
@@ -843,6 +862,15 @@ const TopHeader = () => {
               }
             >
               Horoscopes
+            </NavLink>
+            <NavLink
+              to="/panchang"
+              onClick={() => setIsDrawerOpen(false)}
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Panchang
             </NavLink>
             <NavLink
               to="/live"
