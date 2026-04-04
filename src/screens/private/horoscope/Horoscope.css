@@ -236,7 +236,7 @@
   height: 140px;
   object-fit: contain;
   flex-shrink: 0;
-  background-color: antiquewhite;
+  /* background-color: antiquewhite; */
   border-radius: 10px;
 }
 

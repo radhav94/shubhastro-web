@@ -143,7 +143,7 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
 
     getRecommendedAstrologers: builder.query({
       query: () => ({
-        url: "astrologers/recommendation",
+        url: "astrologers/recommendation?limit=12",
       }),
     }),
 
