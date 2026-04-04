@@ -140,6 +140,7 @@ import LiveShare from "../assets/images/liveshare.png";
 import LiveClock from "../assets/images/liveclock.png";
 import LiveIcon from "../assets/images/Icon.png";
 import LikesIconContainer from "../assets/images/Likes Icon Container.png";
+import FilterIcon from "../assets/icons/Filter Icon.png"
 
 export const AppImages = {
   Hero,
@@ -167,6 +168,7 @@ export const AppImages = {
   LiveClock,
   LiveIcon,
   LikesIconContainer,
+  FilterIcon
 };
 
 //svgs

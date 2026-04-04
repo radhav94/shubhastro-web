@@ -5,6 +5,7 @@ import { FaCheck } from "react-icons/fa";
 // NEW: Formik and Yup imports for search field validation
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import { AppIcons, AppImages } from "../../../../utils/appImages";
 
 // NEW: Yup validation schema for search input — only alphabetic characters and spaces allowed
 const searchValidationSchema = Yup.object({
@@ -367,9 +368,11 @@ const FilterChips = ({
   };
 
   const applyFiltersClick = () => {
-    // Only set active to "filter" if there are actually filters selected
+    // Sync activeChips with modal's selectedSkills
+    setActiveChips(selectedSkills);
+
     if (selectedSkills.length > 0 || selectedGender || selectedSort) {
-      setActive("filter");
+      setActive(selectedSkills.length > 0 ? "" : "filter");
     }
     setPage(1);
     pageRef.current = 1;
@@ -540,33 +543,10 @@ const FilterChips = ({
 
           <button
             key={"filter"}
-            className={`${styles.chip} ${active === "filter" ? styles.activeChip : ""}`}
+            className={styles.chip}
             onClick={() => setFilterModalOpen(true)}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-            >
-              <path
-                d="M3.6 1.39999H12.4C13.1333 1.39999 13.7333 1.99999 13.7333 2.73333V4.19999C13.7333 4.73333 13.4 5.39999 13.0667 5.73333L10.2 8.26666C9.8 8.59999 9.53333 9.26666 9.53333 9.79999V12.6667C9.53333 13.0667 9.26666 13.6 8.93333 13.8L8 14.4C7.13333 14.9333 5.93333 14.3333 5.93333 13.2667V9.73333C5.93333 9.26666 5.66666 8.66666 5.4 8.33333L2.86666 5.66666C2.53333 5.33333 2.26666 4.73333 2.26666 4.33333V2.79999C2.26666 1.99999 2.86666 1.39999 3.6 1.39999Z"
-                stroke="white"
-                strokeWidth="1.2"
-                strokeMiterlimit="10"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M7.28667 1.39999L4 6.66666"
-                stroke="white"
-                strokeWidth="1.2"
-                strokeMiterlimit="10"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <img src={AppImages.FilterIcon} alt="filter-icon" />
             Filter
           </button>
         </div>
@@ -574,7 +554,22 @@ const FilterChips = ({
           {isFetchingFilterTab ? (
             <div className={styles.chip}>Loading filters...</div>
           ) : (
-            filterButtons.map((btn) => {
+            [...filterButtons]
+              .sort((a, b) => {
+                const pinned = ['all', 'online'];
+                const aPinned = pinned.includes(a.slug);
+                const bPinned = pinned.includes(b.slug);
+                // Pinned chips always stay first in original order
+                if (aPinned && bPinned) return pinned.indexOf(a.slug) - pinned.indexOf(b.slug);
+                if (aPinned) return -1;
+                if (bPinned) return 1;
+                // Among non-pinned: active chips come before inactive
+                const aActive = activeChips.includes(a.slug);
+                const bActive = activeChips.includes(b.slug);
+                if (aActive === bActive) return 0;
+                return aActive ? -1 : 1;
+              })
+              .map((btn) => {
               const isActive = active === btn.slug || activeChips.includes(btn.slug);
             
               return (

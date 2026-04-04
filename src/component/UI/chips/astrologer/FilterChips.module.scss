@@ -81,8 +81,8 @@
 .chip {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
+  gap: 5px;
+  padding: 10px 25px;
   border: 1px solid #e0e0e0;
   border-radius: 24px;
   background: #ffffff;
@@ -93,6 +93,7 @@
   white-space: nowrap;
   transition: all 0.2s ease;
   color: #666666;
+  justify-content: center;
 
   &:hover {
     background: #fff9e5;
