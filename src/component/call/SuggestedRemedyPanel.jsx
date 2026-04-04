@@ -57,17 +57,19 @@ const SuggestedRemedyPanel = ({ isOpen, onClose, remedyData, onProductClick }) =
                   {product.short_description && (
                     <p className={styles.productDesc}>{product.short_description}</p>
                   )}
-                  <div className={styles.priceRow}>
-                    <span className={styles.price}>₹{product.price}</span>
-                    {product.mrp && product.mrp > product.price && (
-                      <span className={styles.mrp}>₹{product.mrp}</span>
-                    )}
-                    {product.mrp && product.mrp > product.price && (
-                      <span className={styles.discount}>
-                        {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% off
-                      </span>
-                    )}
-                  </div>
+                  {(product.price != null) && (
+                    <div className={styles.priceRow}>
+                      <span className={styles.price}>₹{product.price}</span>
+                      {product.mrp && product.mrp > product.price && (
+                        <span className={styles.mrp}>₹{product.mrp}</span>
+                      )}
+                      {product.mrp && product.mrp > product.price && (
+                        <span className={styles.discount}>
+                          {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% off
+                        </span>
+                      )}
+                    </div>
+                  )}
                   {product.category?.length > 0 && (
                     <div className={styles.categories}>
                       {product.category.map((cat) => (
@@ -76,6 +78,9 @@ const SuggestedRemedyPanel = ({ isOpen, onClose, remedyData, onProductClick }) =
                         </span>
                       ))}
                     </div>
+                  )}
+                  {product.slug && (
+                    <span className={styles.viewProduct}>View Product →</span>
                   )}
                 </div>
               </div>
