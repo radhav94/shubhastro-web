@@ -263,9 +263,8 @@ const ChatWindow = () => {
 
   const user = getUserFromStorage();
   const [addAstrologerReview, { isLoading }] = useAddAstrologerReviewMutation();
-  const handleReviewSubmit = async ({ rating, review, anonymous }) => {
+  const handleReviewSubmit = async ({ rating, review, isAnonymous }) => {
     try {
-      const isAnonymous = anonymous;
       const res = await addAstrologerReview({
         astrologerID: astroID,
         rating,

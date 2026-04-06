@@ -105,7 +105,6 @@ const FeedbackModal = ({
         <label className={styles.checkbox}>
           <input
             type="checkbox"
-            value={isAnonymous}
             checked={isAnonymous}
             onChange={(e) => setAnonymous(e.target.checked)}
           />
