@@ -58,7 +58,7 @@
   
   @media (min-width: 769px) {
     flex: 0 0 auto;
-    min-width: 120px;
+    // min-width: 120px;
   }
   
   @media (max-width: 768px) {
@@ -74,6 +74,7 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    height: 48px;
 
     &:hover {
       transform: translateY(-1px);

@@ -116,12 +116,10 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   border: 1px solid #ddd;
   padding: 8px 4px;
   width: auto;
-  // word-wrap: break-word;
   text-align: center;
   font-size: 0.8rem;
   @media (width <= 767px) {
     padding: 8px 8px;
-    font-size: 0.8rem;
     white-space: nowrap;
   }
 }

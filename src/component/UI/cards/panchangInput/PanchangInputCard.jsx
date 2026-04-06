@@ -73,7 +73,7 @@ const PanchangInputCard = ({ imageSrc, title, onTap, initialDate, initialLocatio
 
       <div className={styles.rightSide}>
         {title && (
-          <PrimaryText isCenter isExtraBold size_32>
+          <PrimaryText isCenter isSemiBold size_32>
             {title}
           </PrimaryText>
         )}
