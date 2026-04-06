@@ -140,6 +140,7 @@ import LiveShare from "../assets/images/liveshare.png";
 import LiveClock from "../assets/images/liveclock.png";
 import LiveIcon from "../assets/images/Icon.png";
 import LikesIconContainer from "../assets/images/Likes Icon Container.png";
+import FilterIcon from "../assets/icons/Filter Icon.png"
 
 export const AppImages = {
   Hero,
@@ -167,6 +168,7 @@ export const AppImages = {
   LiveClock,
   LiveIcon,
   LikesIconContainer,
+  FilterIcon
 };
 
 //svgs
@@ -183,7 +185,7 @@ import Sagittarius from "../assets/svg/sagittarius.svg";
 import Capricorn from "../assets/svg/capricorn.svg";
 import Aquarius from "../assets/svg/aquarius.svg";
 import Pisces from "../assets/svg/pisces.svg";
-import Experience from "../assets/icons/experience.svg"
+import Experience from "../assets/icons/experience.svg";
 
 export const appSvgs = {
   Aries,

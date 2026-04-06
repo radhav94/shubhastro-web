@@ -28,7 +28,7 @@ import { getToken } from "../../../utils/token";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import { useTalkToAstrologer } from "../talkToAstrologer/useTalkToAstrologer";
 import { useWalletBalance } from "../wallet/useWalletBalance";
-import { useGetAstrologerReviewsQuery } from "../../../redux/api/review/reviewApi";
+import { useGetAstrologerReviewsQuery, useLazyGetAstrologerReviewsQuery } from "../../../redux/api/review/reviewApi";
 import { useGetCallHistoryQuery } from "../../../redux/api/callHistory/callHistory";
 import { useGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chatHistory";
 import StickyReview from "../home/components/call/StickyReview";
@@ -104,11 +104,23 @@ const AstrologerProfile = () => {
   const [isVAOpen, setIsVAOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
 
-  const { data: vaChatHistoryData } = useGetChatHistoryQuery(
+  // Reviews pagination state
+  const [allReviews, setAllReviews] = useState([]);
+  const [reviewPage, setReviewPage] = useState(1);
+  const [reviewTotalPages, setReviewTotalPages] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [fetchMoreReviews] = useLazyGetAstrologerReviewsQuery();
+
+    const { data: vaChatHistoryData } = useGetChatHistoryQuery(
+
     { userId: data?._id },
+
     { skip: !data?._id || !getToken() }
+
   );
+
   const hasChatHistory = (vaChatHistoryData?.data?.length || 0) > 0;
+
 
   const { data: followingData } = useCheckFollowingStatusQuery(
     { astrologerId: data?._id },
@@ -616,6 +628,36 @@ const AstrologerProfile = () => {
 
   const reviews = reviewsData?.data?.getDetail || [];
   const totalReviews = reviewsData?.data?.totalRecords || 0;
+
+  // Sync initial reviews from API into allReviews
+  useEffect(() => {
+    if (reviewsData?.data) {
+      setAllReviews(reviewsData.data.getDetail || []);
+      setReviewPage(1);
+      setReviewTotalPages(reviewsData.data.totalPages || 1);
+    }
+  }, [reviewsData]);
+
+  const handleLoadMoreReviews = async () => {
+    if (loadingMore || reviewPage >= reviewTotalPages) return;
+    const nextPage = reviewPage + 1;
+    setLoadingMore(true);
+    try {
+      const res = await fetchMoreReviews({
+        astrologerID: data?.astrologer_ID,
+        page: nextPage,
+        limit: 10,
+      }).unwrap();
+      const newReviews = res?.data?.getDetail || [];
+      setAllReviews((prev) => [...prev, ...newReviews]);
+      setReviewPage(nextPage);
+      setReviewTotalPages(res?.data?.totalPages || reviewTotalPages);
+    } catch (err) {
+      console.error("Failed to load more reviews:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   // Use the overall rating from API data (not calculated from limited reviews)
   const averageRating = data?.rating || 0;
@@ -1262,9 +1304,9 @@ const AstrologerProfile = () => {
 
               {reviewsLoading ? (
                 <div className={styles.reviewsLoading}>Loading reviews...</div>
-              ) : reviews.length > 0 ? (
-                <div className={styles.reviewsList}>
-                  {reviews.slice(0, 4).map((review) => (
+              ) : allReviews.length > 0 ? (
+                <div className={`${styles.reviewsList} ${allReviews.length > 4 ? styles.scrollable : ''}`}>
+                  {(allReviews.length <= 4 ? allReviews : allReviews).map((review) => (
                     <div key={review._id} className={styles.reviewCard}>
                       <div className={styles.reviewHeader}>
                         <span className={styles.reviewDate}>
@@ -1288,10 +1330,23 @@ const AstrologerProfile = () => {
                       )}
                     </div>
                   ))}
+                  {loadingMore && (
+                    <div className={styles.reviewsLoading}>Loading more...</div>
+                  )}
                 </div>
               ) : (
                 <div className={styles.noReviews}>
                   No reviews yet. Be the first to review!
+                </div>
+              )}
+              {allReviews.length >= 4 && reviewPage < reviewTotalPages && !loadingMore && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+                  <span
+                    onClick={handleLoadMoreReviews}
+                    style={{ color: '#F75801', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}
+                  >
+                    View More →
+                  </span>
                 </div>
               )}
 

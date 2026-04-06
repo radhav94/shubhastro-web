@@ -15,6 +15,22 @@ export const zodiacApi = vedicApi.injectEndpoints({
         },
       }),
     }),
+    fetchTomorrow: builder.query({
+      query: (zodiac) => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return {
+          url: "western/daily-horoscope",
+          params: {
+            zodiac,
+            date: tomorrow.toLocaleDateString("en-GB"),
+            split: true,
+            type: "big",
+            lang: "en",
+          },
+        };
+      },
+    }),
     fetchWeekly: builder.query({
       query: (zodiac) => ({
         url: "western/weekly-horoscope",
@@ -64,6 +80,7 @@ export const zodiacApi = vedicApi.injectEndpoints({
 
 export const {
   useFetchDailyQuery,
+  useFetchTomorrowQuery,
   useFetchPreviosQuery,
   useFetchNextQuery,
   useFetchMonthQuery,
