@@ -2,6 +2,35 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { appSvgs } from "../../../utils/appImages";
 
+// Zodiac sign images (Property 1=*.png)
+import ariesImg from "../../../assets/images/Property 1=aries.png";
+import taurusImg from "../../../assets/images/Property 1=tarus.png";
+import geminiImg from "../../../assets/images/Property 1=gemini.png";
+import cancerImg from "../../../assets/images/Property 1=cancer.png";
+import leoImg from "../../../assets/images/Property 1=leo.png";
+import virgoImg from "../../../assets/images/Property 1=virgo.png";
+import libraImg from "../../../assets/images/Property 1=libra.png";
+import scorpioImg from "../../../assets/images/Property 1=scorpio.png";
+import sagittariusImg from "../../../assets/images/Property 1=Sagittarius.png";
+import capricornImg from "../../../assets/images/Property 1=capricon.png";
+import aquariusImg from "../../../assets/images/Property 1=aquarious.png";
+import piscesImg from "../../../assets/images/Property 1=pisces.png";
+
+export const zodiacSignImages = {
+  aries: ariesImg,
+  taurus: taurusImg,
+  gemini: geminiImg,
+  cancer: cancerImg,
+  leo: leoImg,
+  virgo: virgoImg,
+  libra: libraImg,
+  scorpio: scorpioImg,
+  sagittarius: sagittariusImg,
+  capricorn: capricornImg,
+  aquarius: aquariusImg,
+  pisces: piscesImg,
+};
+
 const {
   Aries,
   Taurus,
@@ -34,6 +63,7 @@ export const zodiac = () => {
         name: "Aries",
         range: "Mar 21 - Apr 19",
         img: Aries,
+        signImg: ariesImg,
         bannerImg:
           "https://images.astroyogi.com/strapicmsprod/assets/Traits_ee14f625a9.webp",
         link: "/horoscopes/daily/aries-free-horoscope.aspx",
@@ -48,6 +78,7 @@ export const zodiac = () => {
         name: "Taurus",
         range: "Apr 20 - May 20",
         img: Taurus,
+        signImg: taurusImg,
         bannerImg:
           "https://images.astroyogi.com/strapicmsprod/assets/Seasons_b0619d2142.webp",
         link: "/horoscopes/daily/taurus-free-horoscope.aspx",
@@ -62,6 +93,7 @@ export const zodiac = () => {
         name: "Gemini",
         range: "May 21 - Jun 20",
         img: Gemini,
+        signImg: geminiImg,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/gemini-free-horoscope.aspx",
         overview:
@@ -75,6 +107,7 @@ export const zodiac = () => {
         name: "Cancer",
         range: "Jun 21 - Jul 22",
         img: Cancer,
+        signImg: cancerImg,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/cancer-free-horoscope.aspx",
         overview:
@@ -88,6 +121,7 @@ export const zodiac = () => {
         name: "Leo",
         range: "Jul 23 - Aug 22",
         img: Leo,
+        signImg: leoImg,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/leo-free-horoscope.aspx",
         overview:
@@ -101,6 +135,7 @@ export const zodiac = () => {
         name: "Virgo",
         range: "Aug 23 - Sep 22",
         img: Virgo,
+        signImg: virgoImg,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/virgo-free-horoscope.aspx",
         overview:
@@ -114,6 +149,7 @@ export const zodiac = () => {
         name: "Libra",
         range: "Sep 23 - Oct 22",
         img: Libra,
+        signImg: libraImg,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/libra-free-horoscope.aspx",
         overview:
@@ -127,6 +163,7 @@ export const zodiac = () => {
         name: "Scorpio",
         range: "Oct 23 - Nov 21",
         img: Scorpio,
+        signImg: scorpioImg,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/scorpio-free-horoscope.aspx",
         overview:
@@ -140,6 +177,7 @@ export const zodiac = () => {
         name: "Sagittarius",
         range: "Nov 22 - Dec 21",
         img: Sagittarius,
+        signImg: sagittariusImg,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/sagittarius-free-horoscope.aspx",
         overview:
@@ -153,6 +191,7 @@ export const zodiac = () => {
         name: "Capricorn",
         range: "Dec 22 - Jan 19",
         img: Capricorn,
+        signImg: capricornImg,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/capricorn-free-horoscope.aspx",
         overview:
@@ -166,6 +205,7 @@ export const zodiac = () => {
         name: "Aquarius",
         range: "Jan 20 - Feb 18",
         img: Aquarius,
+        signImg: aquariusImg,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/aquarius-free-horoscope.aspx",
         overview:
@@ -179,6 +219,7 @@ export const zodiac = () => {
         name: "Pisces",
         range: "Feb 19 - Mar 20",
         img: Pisces,
+        signImg: piscesImg,
         bannerImg: defaultImg,
         link: "/horoscopes/daily/pisces-free-horoscope.aspx",
         overview:

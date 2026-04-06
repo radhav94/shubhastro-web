@@ -306,6 +306,10 @@ export const PATH = {
         path: ["/horoscopes/yearly-horoscope/:sign", "/horoscopes/yearly-horoscope"],
         element: HoroscopeNew,
       },
+      TOMORROW_NEW: {
+        path: ["/horoscopes/tomorrow-horoscope-new/:sign", "/horoscopes/tomorrow-horoscope-new"],
+        element: HoroscopeNew,
+      },
       TODAY_NEW: {
         path: ["/horoscopes/todays-horoscope/:sign", "/horoscopes/todays-horoscope"],
         element: HoroscopeNew,
