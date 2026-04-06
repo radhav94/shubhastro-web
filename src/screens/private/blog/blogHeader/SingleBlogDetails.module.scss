@@ -8,7 +8,7 @@
   border-bottom: 1px solid #e0e0e0;
   z-index: 1000;
   
-  @media (max-width: 768px) {
+  @media (max-width: 1180px) {
     top: 53px; // Adjust for mobile TopHeader height
   }
 }
@@ -61,14 +61,14 @@
 .singleBlogWrapper {
   max-width: 1200px;
   padding: 0 16px;
-  margin: 0 auto;
-  padding-top: 40px; // TopHeader (88px) + Blog Header (60px)
+  margin: 70px auto 0 auto;
+  // padding-top: 40px; // TopHeader (88px) + Blog Header (60px)
 
-  @media (max-width: 900px) {
-    padding: 0 16px;
-    margin: 16px auto;
-    padding-top: 30px; // TopHeader (76px) + Blog Header (60px)
-  }
+  // @media (max-width: 900px) {
+  //   padding: 0 16px;
+  //   margin: 16px auto;
+  //   padding-top: 30px; // TopHeader (76px) + Blog Header (60px)
+  // }
 }
 
 .bannerImage {
