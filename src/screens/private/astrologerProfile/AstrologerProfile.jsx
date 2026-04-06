@@ -1321,9 +1321,11 @@ const AstrologerProfile = () => {
                         </div>
                       </div>
                       <h4 className={styles.reviewerName}>
-                        {review.customerName
-                          ?.toLowerCase()
-                          .replace(/\b\w/g, (c) => c.toUpperCase())}
+                        {review.isAnonymous
+                          ? "Anonymous"
+                          : review.customerName
+                              ?.toLowerCase()
+                              .replace(/\b\w/g, (c) => c.toUpperCase())}
                       </h4>
                       {review.review && (
                         <p className={styles.reviewText}>{review.review}</p>

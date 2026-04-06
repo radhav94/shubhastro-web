@@ -3,19 +3,19 @@ import { privateRequestNew } from "../../../services/appServices/privateRequestN
 export const reviewApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
     addAstrologerReview: builder.mutation({
-      query: ({ astrologerID, rating, review, isAnonymous, roomId }) => ({
+      query: ({ astrologerID, rating, review, isAnonymous = false, roomId }) => ({
         url: "review/addAstrologerReview",
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: {
+        body: JSON.stringify({
           astrologerID,
           rating,
           review,
           isAnonymous,
           roomId
-        },
+        }),
       }),
       invalidatesTags: (result, error, { astrologerID }) => [
         { type: 'AstrologerReviews', id: astrologerID }
