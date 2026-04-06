@@ -27,7 +27,7 @@
   transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
   @media screen and (width <= 767px) {
-    min-width: 150px;
+    min-width: 145px;
   }
   &:hover{
     transform: translateY(-2px);
