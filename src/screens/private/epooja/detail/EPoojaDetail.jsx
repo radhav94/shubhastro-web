@@ -219,6 +219,7 @@ const EPoojaDetail = () => {
   const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
   const [updateCartItem] = useUpdateCartItemMutation();
   const [qty, setQty] = useState(stateData?._cartQty || 1);
+  const [stockLimited, setStockLimited] = useState(false);
 
   // Sync qty with cart data
   const { data: cartData } = useGetCartQuery();
@@ -248,20 +249,29 @@ const EPoojaDetail = () => {
     }
   }, [getVid(selectedVariant), cartMatch?.quantity]);
 
+  // Reset stock limit only when variant changes
+  useEffect(() => {
+    setStockLimited(false);
+  }, [getVid(selectedVariant)]);
+
   const handleQtyChange = async (newQty) => {
     if (newQty < 1) return;
-    setQty(newQty);
     if (isInCart) {
       const productId = cartMatch?.productId?._id || cartMatch?.product?._id || cartMatch?._id || product?._id;
       const variantId = cartMatch?.variantId?._id || cartMatch?.variantId?.id || (typeof cartMatch?.variantId === "string" && cartMatch.variantId ? cartMatch.variantId : "") || cartMatch?.variantSnapshot?._id || getVid(selectedVariant) || "";
       if (productId) {
         try {
           await updateCartItem({ productId, variantId, quantity: newQty }).unwrap();
+          setQty(newQty);
+          if (newQty < qty) setStockLimited(false);
         } catch (err) {
-          setQty(newQty - 1 >= 1 ? newQty - 1 : 1);
-          Toast.error(err?.data?.message || "Failed to update quantity");
+          const msg = err?.data?.message || "";
+          if (msg === "Insufficient stock") setStockLimited(true);
+          Toast.error(msg || "Failed to update quantity");
         }
       }
+    } else {
+      setQty(newQty);
     }
   };
 
@@ -708,7 +718,7 @@ const EPoojaDetail = () => {
             <div className={styles.qtyRow}>
               <button className={styles.qtyBtn} onClick={() => handleQtyChange(qty - 1)} disabled={qty <= 1} aria-label="Decrease quantity"><FiMinus /></button>
               <span className={styles.qtyVal}>{qty}</span>
-              <button className={`${styles.qtyBtn} ${styles.qtyBtnPlus}`} onClick={() => handleQtyChange(qty + 1)} aria-label="Increase quantity"><FiPlus /></button>
+              <button className={`${styles.qtyBtn} ${styles.qtyBtnPlus}`} onClick={() => handleQtyChange(qty + 1)} disabled={stockLimited} aria-label="Increase quantity"><FiPlus /></button>
             </div>
             <div className={styles.btnGroup}>
               <button className={styles.cartBtn} onClick={handleAddToCart} disabled={isAddingToCart || !isVariantInStock(selectedVariant)}>

@@ -157,7 +157,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
           return { error: { status: "FETCH_ERROR", error: err.message } };
         }
       },
-      invalidatesTags: ["cart"],
+      invalidatesTags: (_result, error) => (error ? [] : ["cart"]),
     }),
 
     // Remove item from cart — DELETE /api/mall/cart/:productId/:variantId

@@ -163,6 +163,7 @@ const AstromallCart = () => {
   const [isValidating, setIsValidating] = useState(false);
   const [validationIssues, setValidationIssues] = useState([]);
   const [validatedProducts, setValidatedProducts] = useState({});
+  const [stockLimitedItems, setStockLimitedItems] = useState({});
 
   const [createMallOrder] = useCreateMallOrderMutation();
   const [updateMallOrder] = useUpdateMallOrderMutation();
@@ -357,9 +358,18 @@ const AstromallCart = () => {
   const handleQtyChange = async (item, delta) => {
     if (isBuyNowMode) { const nq = buyNowQty + delta; if (nq >= 1) setBuyNowQty(nq); return; }
     const productId = getId(item); if (!productId) return;
+    const variantId = getVariantId(item);
+    const itemKey = `${productId}_${variantId}`;
     const newQty = (item?.quantity || 1) + delta; if (newQty < 1) return;
-    try { await updateCartItem({ productId, variantId: getVariantId(item), quantity: newQty }).unwrap(); }
-    catch (err) { Toast.error(err?.data?.message || "Failed to update"); }
+    try {
+      await updateCartItem({ productId, variantId, quantity: newQty }).unwrap();
+      if (delta < 0) setStockLimitedItems((prev) => { const next = { ...prev }; delete next[itemKey]; return next; });
+    }
+    catch (err) {
+      const msg = err?.data?.message || "";
+      if (msg === "Insufficient stock") setStockLimitedItems((prev) => ({ ...prev, [itemKey]: true }));
+      Toast.error(msg || "Failed to update");
+    }
   };
 
   const handleRemove = async (item) => {
@@ -513,6 +523,7 @@ const AstromallCart = () => {
         {items.map((item, idx) => {
           const qty = item?.quantity || 1, price = getPrice(item), routeId = getRouteId(item);
           const cartVid = getVariantId(item);
+          const itemKey = `${getId(item)}_${cartVid}`;
           const enrichedV = enrichedVariants[cartVid];
           const variantInfo = getCartVariantAttrs(item, enrichedVariants);
           const goToDetail = () => {
@@ -537,7 +548,7 @@ const AstromallCart = () => {
                 <div className={styles.qtyRow}>
                   <button className={styles.qtyBtn} onClick={() => handleQtyChange(item, -1)} aria-label="Decrease"><FiMinus /></button>
                   <span className={styles.qtyVal}>{String(qty).padStart(2, "0")}</span>
-                  <button className={`${styles.qtyBtn} ${styles.qtyBtnPlus}`} onClick={() => handleQtyChange(item, 1)} aria-label="Increase"><FiPlus /></button>
+                  <button className={`${styles.qtyBtn} ${styles.qtyBtnPlus}`} onClick={() => handleQtyChange(item, 1)} disabled={stockLimitedItems[itemKey]} aria-label="Increase"><FiPlus /></button>
                 </div>
               </div>
               <button className={styles.removeBtn} onClick={() => handleRemove(item)} aria-label="Remove"><FiTrash2 size={18} /></button>
