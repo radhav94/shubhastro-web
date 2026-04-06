@@ -94,6 +94,7 @@ const AstromallCartSidebar = () => {
   const navigate = useNavigate();
   const [showCart, setShowCart] = useState(false);
   const [enrichedVariants, setEnrichedVariants] = useState({});
+  const [stockLimitedItems, setStockLimitedItems] = useState({});
 
   const { data: cartData, isLoading } = useGetCartQuery();
   const [removeCartItem] = useRemoveCartItemMutation();
@@ -177,10 +178,15 @@ const AstromallCartSidebar = () => {
     const { productId, variantId } = getItemIds(item);
     if (!productId) return;
     if (newQty < 1) return;
+    const prevQty = item?.quantity || 1;
+    const itemKey = `${productId}_${variantId}`;
     try {
       await updateCartItem({ productId, variantId, quantity: newQty }).unwrap();
+      if (newQty < prevQty) setStockLimitedItems((prev) => { const next = { ...prev }; delete next[itemKey]; return next; });
     } catch (err) {
-      Toast.error(err?.data?.message || "Failed to update quantity");
+      const msg = err?.data?.message || "";
+      if (msg === "Insufficient stock") setStockLimitedItems((prev) => ({ ...prev, [itemKey]: true }));
+      Toast.error(msg || "Failed to update quantity");
     }
   };
 
@@ -224,6 +230,8 @@ const AstromallCartSidebar = () => {
                   setShowCart(false);
                   navigate(`/product-details/${routeId}`, { state: { ...(typeof p === "object" ? p : { _id: p }), _selectedVariant: variantData ? { ...variantData, _id: variantData._id || variantIdStr } : variantIdStr ? { _id: variantIdStr } : undefined, _cartQty: qty } });
                 };
+                const { productId: pId, variantId: vId } = getItemIds(item);
+                const sidebarItemKey = `${pId}_${vId}`;
                 return (
                   <div key={item?._id || idx} className={styles.cartItem}>
                     <ProductImage src={getItemImage(item, enrichedV)} alt={getItemTitle(item)} className={styles.cartItemImg} onClick={goToDetail} style={{ cursor: "pointer" }} />
@@ -239,7 +247,7 @@ const AstromallCartSidebar = () => {
                       <div className={styles.qtyRow}>
                         <button className={styles.qtyBtn} onClick={() => handleUpdateQty(item, qty - 1)} disabled={qty <= 1} aria-label="Decrease quantity"><FiMinus size={12} /></button>
                         <span className={styles.qtyVal}>{qty}</span>
-                        <button className={`${styles.qtyBtn} ${styles.qtyBtnPlus}`} onClick={() => handleUpdateQty(item, qty + 1)} aria-label="Increase quantity"><FiPlus size={12} /></button>
+                        <button className={`${styles.qtyBtn} ${styles.qtyBtnPlus}`} onClick={() => handleUpdateQty(item, qty + 1)} disabled={stockLimitedItems[sidebarItemKey]} aria-label="Increase quantity"><FiPlus size={12} /></button>
                         <span className={styles.cartItemPrice}>₹{(itemPrice * qty).toLocaleString()}</span>
                       </div>
                     </div>
