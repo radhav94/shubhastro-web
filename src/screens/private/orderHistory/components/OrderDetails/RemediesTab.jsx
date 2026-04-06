@@ -9,7 +9,7 @@ const getBrand = (brand) =>
   typeof brand === "object" ? brand?.name : brand;
 
 const getImage = (product) =>
-  product?.image || product?.images?.[0] || null;
+  product?.variantImage || product?.image || product?.images?.[0] || null;
 
 const RemediesTab = ({ astrologerId }) => {
   const navigate = useNavigate();
@@ -17,6 +17,19 @@ const RemediesTab = ({ astrologerId }) => {
     { astrologerId },
     { skip: !astrologerId }
   );
+
+  const handleProductClick = (product) => {
+    if (!product.slug) return;
+    navigate(`/product-details/${product.slug}`, {
+      state: {
+        _selectedVariant: product.variantId ? {
+          _id: product.variantId,
+          skuCode: product.variantSkuCode,
+          sku: product.variantSkuCode,
+        } : undefined,
+      },
+    });
+  };
 
   if (isLoading) return <PrimaryLoader isLoading />;
 
@@ -68,30 +81,27 @@ const RemediesTab = ({ astrologerId }) => {
           </span>
 
           <div className={styles.productList}>
-            {entry.suggestedProducts.map((product) => {
+            {(entry.suggestedProducts || []).map((product, idx) => {
               const img = getImage(product);
-              const brand = getBrand(product.brand);
+              const brand = getBrand(product?.brand);
+              const price = product.variantPrice ?? product.price;
+              const mrp = product.variantMrp || product.mrp;
               const discount =
-                product.mrp && product.mrp > product.price
-                  ? Math.round(
-                      ((product.mrp - product.price) / product.mrp) * 100
-                    )
+                mrp && price != null && mrp > price
+                  ? Math.round(((mrp - price) / mrp) * 100)
                   : 0;
 
               return (
                 <div
-                  key={product.productId || product._id}
+                  key={product.variantId || product.productId || product._id || idx}
                   className={styles.productCard}
-                  onClick={() =>
-                    product.slug &&
-                    navigate(`/product-details/${product.slug}`)
-                  }
+                  onClick={() => handleProductClick(product)}
                 >
                   {img && (
                     <div className={styles.productImageWrap}>
                       <img
                         src={img}
-                        alt={product.title}
+                        alt={product.title || "Product"}
                         className={styles.productImage}
                         onError={(e) => {
                           e.target.style.display = "none";
@@ -100,7 +110,10 @@ const RemediesTab = ({ astrologerId }) => {
                     </div>
                   )}
                   <div className={styles.productInfo}>
-                    <h4 className={styles.productTitle}>{product.title}</h4>
+                    <h4 className={styles.productTitle}>{product.title || "Suggested Product"}</h4>
+                    {product.variantTitle && (
+                      <span className={styles.productVariant}>{product.variantTitle}</span>
+                    )}
                     {brand && (
                       <span className={styles.productBrand}>{brand}</span>
                     )}
@@ -109,17 +122,19 @@ const RemediesTab = ({ astrologerId }) => {
                         {product.short_description}
                       </p>
                     )}
-                    <div className={styles.priceRow}>
-                      <span className={styles.price}>₹{product.price}</span>
-                      {product.mrp && product.mrp > product.price && (
-                        <s className={styles.mrp}>₹{product.mrp}</s>
-                      )}
-                      {discount > 0 && (
-                        <span className={styles.discount}>
-                          {discount}% off
-                        </span>
-                      )}
-                    </div>
+                    {price != null && (
+                      <div className={styles.priceRow}>
+                        <span className={styles.price}>₹{price}</span>
+                        {mrp && mrp > price && (
+                          <s className={styles.mrp}>₹{mrp}</s>
+                        )}
+                        {discount > 0 && (
+                          <span className={styles.discount}>
+                            {discount}% off
+                          </span>
+                        )}
+                      </div>
+                    )}
                     {product.category?.length > 0 && (
                       <div className={styles.categories}>
                         {product.category.map((cat) => (
