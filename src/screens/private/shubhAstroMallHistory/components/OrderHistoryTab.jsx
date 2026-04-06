@@ -259,13 +259,23 @@ const OrderHistoryTab = () => {
               ? new Date(orderDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })
               : "";
 
-            // Collect first image from each item
-            const itemImages = items.map((itm) => {
+            // Collect first image from each variant across all items (empty string kept for default fallback)
+            const itemImages = items.flatMap((itm) => {
+              const variants = itm.variants || [];
+              if (variants.length > 0) {
+                return variants.map((v) => {
+                  const img = v.images?.[0] || "";
+                  if (typeof img === "string") return img;
+                  if (img && typeof img === "object") return img.original || img.small || img.url || img.src || "";
+                  return "";
+                });
+              }
+              // Fallback: product-level image
               const raw = itm.product_image || (itm.images?.length ? itm.images[0] : null) || itm.image || "";
-              if (typeof raw === "string") return raw;
-              if (raw && typeof raw === "object") return raw.original || raw.small || raw.url || raw.src || "";
-              return "";
-            }).filter(Boolean);
+              if (typeof raw === "string") return [raw];
+              if (raw && typeof raw === "object") return [raw.original || raw.small || raw.url || raw.src || ""];
+              return [""];
+            });
 
             return (
               <div
@@ -298,12 +308,12 @@ const OrderHistoryTab = () => {
                   )}
                 </div>
 
-                {/* Item images row */}
+                {/* Item images row — one per variant, default shown on error */}
                 {itemImages.length > 0 && (
                   <div className={styles.itemImagesRow}>
                     {itemImages.map((src, i) => (
                       <div key={i} className={styles.itemThumb}>
-                        <ProductImage src={src} alt={`Item ${i + 1}`} />
+                        <ProductImage src={src || ""} alt={`Item ${i + 1}`} />
                       </div>
                     ))}
                   </div>
