@@ -173,6 +173,7 @@ const HoroscopeNew = () => {
   const [cameFromOverview, setCameFromOverview] = useState(false);
   const [overviewCardIndex, setOverviewCardIndex] = useState(null);
   const [showZodiacModal, setShowZodiacModal] = useState(false);
+  const [selectedPhase, setSelectedPhase] = useState('phase_1');
 
   // Track if we've already applied the Kundli-based default
   const hasAppliedKundliDefault = useRef(false);
@@ -340,35 +341,24 @@ const HoroscopeNew = () => {
     // OVERVIEW - Show all categories with titles
     if (activeCategory === 'overview') {
       if (activeTab === 'This Year') {
-        // Yearly overview - all categories from all phases
-        const phases = ['phase_1', 'phase_2', 'phase_3', 'phase_4'];
+        // Yearly overview - show categories for selected phase
+        const phaseData = response[selectedPhase];
         const allCategories = categories.filter(c => c.id !== 'overview');
         
         const overviewContent = allCategories.map(category => {
-          const categoryData = phases
-            .map(phase => response[phase]?.[category.id])
-            .filter(Boolean);
-          
-          if (categoryData.length === 0) return null;
-          
-          const avgScore = Math.round(
-            categoryData.reduce((sum, d) => sum + (d.score || 0), 0) / categoryData.length
-          );
-          
-          const predictions = categoryData
-            .map((data, idx) => `Quarter ${idx + 1}: ${data.prediction}`)
-            .join('\n\n');
+          const categoryData = phaseData?.[category.id];
+          if (!categoryData) return null;
           
           return {
             title: category.label,
-            score: avgScore,
-            content: predictions
+            score: categoryData.score,
+            content: categoryData.prediction
           };
         }).filter(Boolean);
 
         return {
           title: `${selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)} ${activeTab} Overview`,
-          subtitle: new Date().getFullYear().toString(),
+          subtitle: phaseData?.period || new Date().getFullYear().toString(),
           content: '',
           luckyColor: null,
           luckyColorCode: null,
@@ -407,28 +397,15 @@ const HoroscopeNew = () => {
 
     // SPECIFIC CATEGORY
     if (activeTab === 'This Year') {
-      // Yearly data structure
-      const phases = ['phase_1', 'phase_2', 'phase_3', 'phase_4'];
-      const allPhaseData = phases
-        .map(phase => response[phase]?.[activeCategory])
-        .filter(Boolean);
+      // Yearly data - show selected phase only
+      const phaseData = response[selectedPhase];
+      const categoryData = phaseData?.[activeCategory];
       
-      const content = allPhaseData
-        .map((data, idx) => {
-          const phaseName = `Quarter ${idx + 1}: ${response[phases[idx]]?.period}`;
-          return `${phaseName}\n${data.prediction}`;
-        })
-        .join('\n\n');
-      
-      const avgScore = allPhaseData.length > 0 
-        ? Math.round(allPhaseData.reduce((sum, d) => sum + (d.score || 0), 0) / allPhaseData.length)
-        : null;
-
       return {
         title: categories.find(c => c.id === activeCategory)?.label || activeCategory,
-        subtitle: new Date().getFullYear().toString(),
-        content: content || 'Yearly predictions coming soon.',
-        score: avgScore,
+        subtitle: phaseData?.period || new Date().getFullYear().toString(),
+        content: categoryData?.prediction || 'Yearly predictions coming soon.',
+        score: categoryData?.score || null,
         luckyColor: null,
         luckyColorCode: null,
         luckyNumber: null,
@@ -457,6 +434,7 @@ const HoroscopeNew = () => {
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setCameFromOverview(false);
+    setSelectedPhase('phase_1');
     
     // Navigate to corresponding route
     // Both "Today" and "Daily" go to daily-horoscope
@@ -576,6 +554,25 @@ const HoroscopeNew = () => {
               ))}
             </div>
           </div>
+
+          {activeTab === 'This Year' && yearlyData?.response && (
+            <div className="time-tabs-wrapper">
+              <div className="time-tabs">
+                {['phase_1', 'phase_2', 'phase_3', 'phase_4'].map((phase, idx) => {
+                  const period = yearlyData.response[phase]?.period;
+                  return (
+                    <button
+                      key={phase}
+                      className={`time-tab ${selectedPhase === phase ? 'active' : ''}`}
+                      onClick={() => setSelectedPhase(phase)}
+                    >
+                      {period || `Q${idx + 1}`}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="category-cards">
             {categories.map((category) => (
