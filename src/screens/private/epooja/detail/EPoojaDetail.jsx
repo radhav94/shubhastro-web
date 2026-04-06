@@ -65,7 +65,7 @@ const EPoojaDetail = () => {
   const apiSuccess = !!(apiData?.success || apiData?.status === true);
   const product = (apiSuccess && apiData?.data) ? apiData.data : (stateData || {});
 
-  console.log("Product Details:", apiData?.data);
+  // console.log("Product Details:", apiData?.data);
 
   // IDs — MongoDB _id needed for cart/review APIs
   const mongoId = product?._id || null;

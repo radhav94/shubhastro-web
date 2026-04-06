@@ -5,7 +5,7 @@ import styles from './TarotReadingPage.module.css'
 
 const TarotReadingPage = () => {
   const navigate = useNavigate()
-  const [displayedCards, setDisplayedCards] = useState(8)
+  const [displayedCards, setDisplayedCards] = useState(10)
   const observerRef = useRef(null)
 
   const allTarotReadings = [
