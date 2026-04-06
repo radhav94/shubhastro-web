@@ -8,7 +8,6 @@ import {
   useFetchYearlyQuery
 } from '../../../redux/api/horoscope/zodiacApi';
 import { signToNumber, zodiacDateRanges } from './utils';
-import { appSvgs } from '../../../utils/appImages';
 import PrimaryLoader from '../../../component/UI/PrimaryLoader';
 import { formatted } from '../../../utils/dateFormat/date';
 import { zodiac } from './zodiac';
@@ -28,6 +27,35 @@ import careerImg from "../../../assets/images/career.png";
 import relationImg from "../../../assets/images/relation.png";
 import statusImg from "../../../assets/images/status.png";
 import physiqueImg from "../../../assets/images/physique.png";
+
+// Zodiac sign images (Property 1=*.png)
+import ariesImg from "../../../assets/images/Property 1=aries.png";
+import taurusImg from "../../../assets/images/Property 1=tarus.png";
+import geminiImg from "../../../assets/images/Property 1=gemini.png";
+import cancerImg from "../../../assets/images/Property 1=cancer.png";
+import leoImg from "../../../assets/images/Property 1=leo.png";
+import virgoImg from "../../../assets/images/Property 1=virgo.png";
+import libraImg from "../../../assets/images/Property 1=libra.png";
+import scorpioImg from "../../../assets/images/Property 1=scorpio.png";
+import sagittariusImg from "../../../assets/images/Property 1=Sagittarius.png";
+import capricornImg from "../../../assets/images/Property 1=capricon.png";
+import aquariusImg from "../../../assets/images/Property 1=aquarious.png";
+import piscesImg from "../../../assets/images/Property 1=pisces.png";
+
+const zodiacSignImages = {
+  aries: ariesImg,
+  taurus: taurusImg,
+  gemini: geminiImg,
+  cancer: cancerImg,
+  leo: leoImg,
+  virgo: virgoImg,
+  libra: libraImg,
+  scorpio: scorpioImg,
+  sagittarius: sagittariusImg,
+  capricorn: capricornImg,
+  aquarius: aquariusImg,
+  pisces: piscesImg,
+};
 
 const HoroscopeNew = () => {
   const navigate = useNavigate();
@@ -476,9 +504,9 @@ const HoroscopeNew = () => {
     z => z.name.toLowerCase() === selectedZodiac.toLowerCase()
   );
 
-  // Get zodiac image from appSvgs
+  // Get zodiac image dynamically based on selected sign
   const capitalizedSign = selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1);
-  const zodiacImage = appSvgs[capitalizedSign];
+  const zodiacImage = zodiacSignImages[selectedZodiac.toLowerCase()];
 
   // Truncate text to 200 words
   const truncateToWords = (text, wordLimit) => {
