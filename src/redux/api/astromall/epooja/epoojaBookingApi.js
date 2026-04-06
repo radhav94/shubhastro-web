@@ -12,29 +12,22 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     }),
 
     // GET Single Product Detail by ID
-    // Note: Backend returns 404 status but with valid data, so we bypass the base error handler
+    // Note: Backend may return 404 status but with valid data
     getEPoojaDetail: builder.query({
-      queryFn: async (productId) => {
-        try {
-          const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
-          const role = localStorage.getItem("shubhtalk_role");
-          const token = role === "ASTROLOGER"
-            ? localStorage.getItem("shubhtalk_astro_token")
-            : localStorage.getItem("shubhtalk_customer_token");
-
-          const res = await fetch(`${BASE_URL}/api/mall/products/${productId}`, {
-            headers: {
-              accept: "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-          });
-          const json = await res.json();
-          // Always return as data so the component can inspect success/status
-          return { data: json };
-        } catch (err) {
-          return { data: { success: false, status: false, message: err.message } };
-        }
-      },
+      query: (productId) => ({
+        url: `mall/products/${productId}`,
+        method: "GET",
+        // Treat all responses as successful so RTK doesn't reject on 404
+        validateStatus: (response) => response.status === 200 || response.status === 404,
+      }),
+      // Transform to normalize the response
+      transformResponse: (response) => response,
+      transformErrorResponse: (response) => ({
+        success: false,
+        status: false,
+        message: response?.data?.message || "Failed to fetch product",
+      }),
+      keepUnusedDataFor: 0,
     }),
 
     // GET Pandits/Consultants for a pooja

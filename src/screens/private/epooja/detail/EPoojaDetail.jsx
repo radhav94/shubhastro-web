@@ -59,9 +59,13 @@ const EPoojaDetail = () => {
   const stateData = location.state;
 
   // Always fetch product detail from API to ensure we have the MongoDB _id
-  const { data: apiData, isLoading } = useGetEPoojaDetailQuery(slug);
+  const { data: apiData, isLoading } = useGetEPoojaDetailQuery(slug, {
+    refetchOnMountOrArgChange: true,
+  });
   const apiSuccess = !!(apiData?.success || apiData?.status === true);
   const product = (apiSuccess && apiData?.data) ? apiData.data : (stateData || {});
+
+  console.log("Product Details:", apiData?.data);
 
   // IDs — MongoDB _id needed for cart/review APIs
   const mongoId = product?._id || null;
