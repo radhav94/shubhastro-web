@@ -10,7 +10,7 @@ import {
 import { signToNumber, zodiacDateRanges } from './utils';
 import PrimaryLoader from '../../../component/UI/PrimaryLoader';
 import { formatted } from '../../../utils/dateFormat/date';
-import { zodiac } from './zodiac';
+import { zodiac, zodiacSignImages } from './zodiac';
 import './Horoscope.css';
 import { useGetAllKundlisQuery } from '../../../services/appServices/kundliServicesNew';
 import { useSelector } from 'react-redux';
@@ -27,35 +27,6 @@ import careerImg from "../../../assets/images/career.png";
 import relationImg from "../../../assets/images/relation.png";
 import statusImg from "../../../assets/images/status.png";
 import physiqueImg from "../../../assets/images/physique.png";
-
-// Zodiac sign images (Property 1=*.png)
-import ariesImg from "../../../assets/images/Property 1=aries.png";
-import taurusImg from "../../../assets/images/Property 1=tarus.png";
-import geminiImg from "../../../assets/images/Property 1=gemini.png";
-import cancerImg from "../../../assets/images/Property 1=cancer.png";
-import leoImg from "../../../assets/images/Property 1=leo.png";
-import virgoImg from "../../../assets/images/Property 1=virgo.png";
-import libraImg from "../../../assets/images/Property 1=libra.png";
-import scorpioImg from "../../../assets/images/Property 1=scorpio.png";
-import sagittariusImg from "../../../assets/images/Property 1=Sagittarius.png";
-import capricornImg from "../../../assets/images/Property 1=capricon.png";
-import aquariusImg from "../../../assets/images/Property 1=aquarious.png";
-import piscesImg from "../../../assets/images/Property 1=pisces.png";
-
-const zodiacSignImages = {
-  aries: ariesImg,
-  taurus: taurusImg,
-  gemini: geminiImg,
-  cancer: cancerImg,
-  leo: leoImg,
-  virgo: virgoImg,
-  libra: libraImg,
-  scorpio: scorpioImg,
-  sagittarius: sagittariusImg,
-  capricorn: capricornImg,
-  aquarius: aquariusImg,
-  pisces: piscesImg,
-};
 
 const HoroscopeNew = () => {
   const navigate = useNavigate();
@@ -119,7 +90,9 @@ const HoroscopeNew = () => {
   
   // Determine initial tab based on URL path
   const getInitialTab = () => {
-    if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
+    if (pathname.includes('tomorrow-horoscope')) {
+      return 'Tomorrow';
+    } else if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
       return 'Today';
     } else if (pathname.includes('weekly-horoscope')) {
       return 'This Week';
@@ -178,6 +151,9 @@ const HoroscopeNew = () => {
   // Track if we've already applied the Kundli-based default
   const hasAppliedKundliDefault = useRef(false);
 
+  // Track the previous profile ID to detect actual profile switches from header
+  const prevProfileId = useRef(activeProfile?._id || null);
+
   // Refs for overview cards to scroll back on "Show Less"
   const overviewCardRefs = useRef([]);
   const overviewRef = useRef(null);
@@ -204,7 +180,9 @@ const HoroscopeNew = () => {
       
       // Update URL to reflect the selected zodiac
       let newPath;
-      if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
+      if (pathname.includes('tomorrow-horoscope')) {
+        newPath = `/horoscopes/tomorrow-horoscope-new/${profileSunSign}`;
+      } else if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
         newPath = `/horoscopes/daily-horoscope/${profileSunSign}`;
       } else if (pathname.includes('weekly-horoscope')) {
         newPath = `/horoscopes/weekly-horoscope/${profileSunSign}`;
@@ -218,15 +196,23 @@ const HoroscopeNew = () => {
     }
   }, [sign, profileSunSign, pathname, navigate]);
 
-  // React to profile sun sign changes (e.g. user switches profile from header)
+  // React to profile sun sign changes ONLY when user switches profile from header
   useEffect(() => {
+    const currentProfileId = activeProfile?._id || null;
+    
+    // Skip if profile hasn't actually changed (initial load or same profile)
+    if (currentProfileId === prevProfileId.current) return;
+    prevProfileId.current = currentProfileId;
+
     if (!profileSunSign || !signToNumber[profileSunSign] || profileSunSign === selectedZodiac) return;
 
     setSelectedZodiac(profileSunSign);
     setTempSelectedZodiac(profileSunSign);
 
     let newPath;
-    if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
+    if (pathname.includes('tomorrow-horoscope')) {
+      newPath = `/horoscopes/tomorrow-horoscope-new/${profileSunSign}`;
+    } else if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
       newPath = `/horoscopes/daily-horoscope/${profileSunSign}`;
     } else if (pathname.includes('weekly-horoscope')) {
       newPath = `/horoscopes/weekly-horoscope/${profileSunSign}`;
@@ -236,7 +222,7 @@ const HoroscopeNew = () => {
       newPath = `/horoscopes/daily-horoscope/${profileSunSign}`;
     }
     navigate(newPath, { replace: true });
-  }, [profileSunSign]);
+  }, [activeProfile?._id, profileSunSign]);
 
   // Update active tab when pathname changes
   useEffect(() => {
@@ -441,7 +427,7 @@ const HoroscopeNew = () => {
     if (tab === 'Today' || tab === 'Daily') {
       navigate(`/horoscopes/daily-horoscope/${selectedZodiac}`);
     } else if (tab === 'Tomorrow') {
-      navigate(`/horoscopes/daily-horoscope/${selectedZodiac}`);
+      navigate(`/horoscopes/tomorrow-horoscope-new/${selectedZodiac}`);
     } else if (tab === 'This Week') {
       navigate(`/horoscopes/weekly-horoscope/${selectedZodiac}`);
     } else if (tab === 'This Year') {
@@ -459,7 +445,9 @@ const HoroscopeNew = () => {
     
     // Construct the new path based on current tab
     let newPath;
-    if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
+    if (pathname.includes('tomorrow-horoscope')) {
+      newPath = `/horoscopes/tomorrow-horoscope-new/${tempSelectedZodiac}`;
+    } else if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
       newPath = `/horoscopes/daily-horoscope/${tempSelectedZodiac}`;
     } else if (pathname.includes('weekly-horoscope')) {
       newPath = `/horoscopes/weekly-horoscope/${tempSelectedZodiac}`;

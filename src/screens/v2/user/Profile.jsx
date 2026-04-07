@@ -1399,7 +1399,7 @@ const Profile = () => {
                         <div 
                           key={order.id} 
                           className={styles.orderCard}
-                          onClick={() => navigate(`/profile/order-history/${order.astrologer._id}`)}
+                          onClick={() => navigate(`/profile/order-history/${order.astrologer._id}`, { state: { tab: order.type === "chat" ? "Chat" : order.sessionType === "video" ? "Video" : "Call" } })}
                           style={{ cursor: 'pointer' }}
                         >
                           <div className={styles.orderCardTop}>

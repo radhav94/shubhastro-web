@@ -268,7 +268,7 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
                 )}
 
                 {/* Popular Combos */}
-                {displayCombos.length > 0 && (
+                {/* {displayCombos.length > 0 && (
                   <div className={styles.giftSection}>
                     <div className={styles.sectionHeader}>
                       <h3 className={styles.sectionTitle}>Popular Combos</h3>
@@ -302,7 +302,7 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
                       ))}
                     </div>
                   </div>
-                )}
+                )} */}
               </>
             )}
           </div>
