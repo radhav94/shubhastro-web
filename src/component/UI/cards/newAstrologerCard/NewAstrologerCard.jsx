@@ -74,34 +74,30 @@ const NewAstrologerCard = ({
         )}
       </Link>
       <div className={styles.actionButtons}>
-        {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("chat")) && (
-          <div className={styles.buttonWrapper}>
-            <button
-              className={styles.chatBtn}
-              onClick={() => isOnline && onConnect(astrologer, "chat")}
-              disabled={!isOnline}
-            >
-              <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
-            </button>
-            <p className={styles.priceText}>
-              <span className={styles.priceAmount}>₹{astrologer?.price?.chatRate?.amount || 0}</span>/min
-            </p>
-          </div>
-        )}
-        {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("audio")) && (
-          <div className={styles.buttonWrapper}>
-            <button
-              className={styles.callBtn}
-              onClick={() => isOnline && onConnect(astrologer, "audio")}
-              disabled={!isOnline}
-            >
-              <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
-            </button>
-            <p className={styles.priceText}>
-              <span className={styles.priceAmount}>₹{astrologer?.price?.audioRate?.amount || 0}</span>/min
-            </p>
-          </div>
-        )}
+        <div className={styles.buttonWrapper}>
+          <button
+            className={styles.chatBtn}
+            onClick={() => isOnline && onConnect(astrologer, "chat")}
+            disabled={!isOnline}
+          >
+            <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+          </button>
+          <p className={styles.priceText}>
+            <span className={styles.priceAmount}>₹{astrologer?.price?.chatRate?.amount || 0}</span>/min
+          </p>
+        </div>
+        <div className={styles.buttonWrapper}>
+          <button
+            className={styles.callBtn}
+            onClick={() => isOnline && onConnect(astrologer, "audio")}
+            disabled={!isOnline}
+          >
+            <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
+          </button>
+          <p className={styles.priceText}>
+            <span className={styles.priceAmount}>₹{astrologer?.price?.audioRate?.amount || 0}</span>/min
+          </p>
+        </div>
       </div>
     </div>
   );
