@@ -205,6 +205,32 @@
   text-shadow: 0px 0px 2px black;
 }
 
+.host-duration {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  font-weight: 500;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ff4444;
+    box-shadow: 0 0 6px rgba(255, 68, 68, 0.8);
+    animation: livePulse 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 .follow-btn {
   padding: 5px 16px;
   border-radius: 999px;
@@ -430,6 +456,9 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 10px;
+  padding: 4px 10px 6px;
 }
 
 .inline-sender {
@@ -1138,6 +1167,13 @@
   stroke: #fff;
   stroke-width: 2.5;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Ensure images inside icon-circle don't overflow and hide the label */
+.icon-circle img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
 }
 
 .icon-label {

@@ -56,6 +56,7 @@ const LiveView = (props) => {
     astrologer,
     handleLeave,
     roomReady,
+    liveStartedAt,
   } = props;
 
   const [showGifts, setShowGifts] = useState(false);
@@ -64,6 +65,7 @@ const LiveView = (props) => {
   const [roomEnded, setRoomEnded] = useState(false);
   const [wasRoomReady, setWasRoomReady] = useState(false);
   const [connectingTimedOut, setConnectingTimedOut] = useState(false);
+  const [liveDuration, setLiveDuration] = useState("00:00");
 
   // Reset ended state when switching to a new channel
   useEffect(() => {
@@ -82,6 +84,22 @@ const LiveView = (props) => {
     const timer = setTimeout(() => setConnectingTimedOut(true), 10000);
     return () => clearTimeout(timer);
   }, [remoteUsers?.length, hostLeft, roomEnded, props.channel]);
+
+  // Live duration timer — ticks every second while stream is active
+  useEffect(() => {
+    if (!liveStartedAt) return;
+    const tick = () => {
+      const elapsed = Math.floor((Date.now() - liveStartedAt) / 1000);
+      const hrs = Math.floor(elapsed / 3600);
+      const mins = Math.floor((elapsed % 3600) / 60);
+      const secs = elapsed % 60;
+      const pad = (n) => String(n).padStart(2, "0");
+      setLiveDuration(hrs > 0 ? `${pad(hrs)}:${pad(mins)}:${pad(secs)}` : `${pad(mins)}:${pad(secs)}`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [liveStartedAt]);
 
   const { 
     activeCall, 
@@ -231,7 +249,6 @@ const LiveView = (props) => {
     if (isHost) {
       setCalling(false);
     } else {
-      // Intentional leave — clear saved session so refresh doesn't reconnect
       clearViewerSession();
       await handleLeave?.();
       navigate(PATH.privateRoutes.HOME.path);
@@ -541,6 +558,7 @@ const LiveView = (props) => {
                 <div className="host-name">
                   {astrologer?.astrologerName || "Astrologer"}
                 </div>
+                <div className="host-duration">Live {liveDuration}</div>
               </div>
             </div>
 
@@ -716,13 +734,16 @@ const LiveView = (props) => {
               <div className="icon-circle">
                 <img src={AppImages.LiveIcon} alt="Timer" width="28" height="28" />
               </div>
-              <span className="icon-label">20m</span>
+              <span className="icon-label">{liveDuration}</span>
             </button>
 
             {/* Viewers */}
-            <div className="icon-btn" style={{ cursor: "default" }}>
+            <div className="icon-btn viewer-icon-btn" style={{ cursor: "default" }}>
               <div className="icon-circle">
-                <img src={AppImages.LikesIconContainer} alt="Viewers" width="28" height="28" />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
               </div>
               <span className="icon-label">{viewerCount > 1000 ? `${(viewerCount/1000).toFixed(1)}k` : viewerCount}</span>
             </div>

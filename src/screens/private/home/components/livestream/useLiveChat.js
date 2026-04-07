@@ -13,6 +13,7 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
   const [chatInput, setChatInput] = useState("");
   const [participantCount, setParticipantCount] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
+  const [liveStartedAt, setLiveStartedAt] = useState(null);
 
   // 1. Socket connection — stays alive independent of roomId
   useEffect(() => {
@@ -58,6 +59,12 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     socket.on("live:joined", (data) => {
       console.log("LiveChat → Joined room:", data);
       setParticipantCount(data.participantCount);
+      // Capture when the live session started (from server or fallback to now)
+      if (data.startedAt) {
+        setLiveStartedAt(new Date(data.startedAt).getTime());
+      } else {
+        setLiveStartedAt((prev) => prev || Date.now());
+      }
       setRoomReady(true);
     });
 
@@ -101,6 +108,7 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
         setRoomReady(false);
         setMessages([]);
         setParticipantCount(0);
+        setLiveStartedAt(null);
         currentRoomRef.current = null;
         clearViewerSession();
       }
@@ -120,6 +128,7 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
           setRoomReady(false);
           setMessages([]);
           setParticipantCount(0);
+          setLiveStartedAt(null);
           currentRoomRef.current = null;
           clearViewerSession();
         }
@@ -259,5 +268,6 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     isConnected,
     roomReady,
     retryJoinRoom,
+    liveStartedAt,
   };
 };

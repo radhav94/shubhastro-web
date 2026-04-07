@@ -87,6 +87,7 @@ const VideoCalling = ({ callData }) => {
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
   const [suggestedRemedyData, setSuggestedRemedyData] = useState({ suggestedProducts: [], messages: [] });
   const [hasNewRemedy, setHasNewRemedy] = useState(false);
+  const [showEndCallConfirm, setShowEndCallConfirm] = useState(false);
 
   const [getBalance] = useGetBalanceMutation();
   const { balance, isFetching, refreshWallet } = useWalletBalance();
@@ -612,6 +613,20 @@ const VideoCalling = ({ callData }) => {
     await cleanup(isDowngradingToAudio.current);
   };
 
+  // Gated end call — show confirmation only when this is the last active session
+  const requestEndCall = () => {
+    if (hasOngoingChat()) {
+      safeEndCall();
+    } else {
+      setShowEndCallConfirm(true);
+    }
+  };
+
+  const confirmEndCall = () => {
+    setShowEndCallConfirm(false);
+    safeEndCall();
+  };
+
   /* ================= SOCKET ================= */
   useEffect(() => {
     const handleCallEnded = (data) => {
@@ -1062,7 +1077,7 @@ const VideoCalling = ({ callData }) => {
           <button onClick={() => setSpeakerOn((p) => !p)}>
             {speakerOn ? <IoVolumeHigh size={18} /> : <IoVolumeMute size={18} />}
           </button>
-          <button className={styles.endBtnMini} onClick={safeEndCall}>
+          <button className={styles.endBtnMini} onClick={requestEndCall}>
             ✕
           </button>
         </div>
@@ -1156,7 +1171,7 @@ const VideoCalling = ({ callData }) => {
               <div className={styles.groupBtnsRight}>
                 <div class={styles.callTimerBottom}>Call Ends in <span class={styles.timerRed}>{formatTime(callSeconds)}</span></div>
   
-                <button className={styles.chateEnd} onClick={safeEndCall}>
+                <button className={styles.chateEnd} onClick={requestEndCall}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <g clip-path="url(#clip0_8989_310)">
                       <path d="M7.11979 8.87333C7.79636 9.5505 8.56101 10.1335 9.39313 10.6067L10.2398 9.76C10.4211 9.58076 10.6499 9.45723 10.8992 9.40406C11.1485 9.35089 11.4078 9.3703 11.6465 9.46C12.2513 9.6857 12.8797 9.84225 13.5198 9.92667C13.8402 9.97195 14.1331 10.1322 14.3441 10.3775C14.5551 10.6228 14.6696 10.9365 14.6665 11.26V13.26C14.6672 13.4457 14.6292 13.6294 14.5548 13.7996C14.4804 13.9697 14.3713 14.1224 14.2345 14.2479C14.0977 14.3734 13.9362 14.469 13.7603 14.5285C13.5844 14.588 13.398 14.61 13.2131 14.5933C11.1617 14.3704 9.19113 13.6694 7.45979 12.5467C6.65664 12.0367 5.91214 11.4398 5.23979 10.7667M3.45979 8.54C2.33703 6.80867 1.63603 4.83811 1.41313 2.78667C1.39647 2.60231 1.41838 2.41651 1.47746 2.24108C1.53654 2.06566 1.63151 1.90446 1.7563 1.76775C1.8811 1.63103 2.033 1.5218 2.20232 1.44701C2.37164 1.37222 2.55469 1.33351 2.73979 1.33333H4.73979C5.06333 1.33015 5.37699 1.44472 5.6223 1.65569C5.86761 1.86666 6.02784 2.15963 6.07313 2.48C6.15754 3.12004 6.31409 3.74848 6.53979 4.35333C6.62949 4.59195 6.6489 4.85127 6.59573 5.10059C6.54256 5.3499 6.41903 5.57874 6.23979 5.76L5.39313 6.60667" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1338,7 +1353,7 @@ const VideoCalling = ({ callData }) => {
                 <div className={styles.controlItem}>
                   <button
                     className={`${styles.controlBtn} ${styles.endCallBtn}`}
-                    onClick={safeEndCall}
+                    onClick={requestEndCall}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <path d="M19.23 15.26L16.69 14.97C16.08 14.9 15.48 15.11 15.05 15.54L13.21 17.38C10.38 15.94 8.06004 13.63 6.62004 10.79L8.47004 8.94001C8.90004 8.51001 9.11004 7.91001 9.04004 7.30001L8.75004 4.78001C8.63004 3.77001 7.78004 3.01001 6.76004 3.01001H5.03004C3.90004 3.01001 2.96004 3.95001 3.03004 5.08001C3.56004 13.62 10.39 20.44 18.92 20.97C20.05 21.04 20.99 20.1 20.99 18.97V17.24C21 16.23 20.24 15.38 19.23 15.26Z" fill="currentColor" />
@@ -1506,6 +1521,26 @@ const VideoCalling = ({ callData }) => {
           </div>
         )}
       </div>
+
+      {/* End Call Confirmation Modal */}
+      {showEndCallConfirm && (
+        <div className={styles.endCallConfirmOverlay} onClick={() => setShowEndCallConfirm(false)}>
+          <div className={styles.endCallConfirmModal} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.endCallConfirmTitle}>End Video Call?</h3>
+            <p className={styles.endCallConfirmText}>
+              Are you sure you want to end this call with {callerName || "the astrologer"}?
+            </p>
+            <div className={styles.endCallConfirmActions}>
+              <button className={styles.endCallBtnCancel} onClick={() => setShowEndCallConfirm(false)}>
+                Continue
+              </button>
+              <button className={styles.endCallBtnConfirm} onClick={confirmEndCall}>
+                End Call
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

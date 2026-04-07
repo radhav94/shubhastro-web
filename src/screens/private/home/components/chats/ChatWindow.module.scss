@@ -2000,3 +2000,83 @@ $floating-button-gap: 14px;
     transform: scale(0.92);
   }
 }
+
+/* ==================== END CHAT CONFIRMATION MODAL ==================== */
+.endChatConfirmOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: endChatFadeIn 0.2s ease;
+}
+
+@keyframes endChatFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.endChatConfirmModal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 20px 20px;
+  width: 88%;
+  max-width: 340px;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  animation: endChatSlideUp 0.25s ease;
+}
+
+@keyframes endChatSlideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.endChatConfirmTitle {
+  color: #1a1a1a;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  font-family: "Poppins", sans-serif;
+}
+
+.endChatConfirmText {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
+.endChatConfirmActions {
+  display: flex;
+  gap: 12px;
+}
+
+.endChatBtnCancel,
+.endChatBtnConfirm {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.endChatBtnCancel {
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #e0e0e0;
+}
+
+.endChatBtnConfirm {
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: #fff;
+}
