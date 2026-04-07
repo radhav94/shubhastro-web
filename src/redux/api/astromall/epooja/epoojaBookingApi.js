@@ -513,6 +513,14 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
       }),
     }),
 
+    // GET Product Suggestions by slug
+    getProductSuggestions: builder.query({
+      query: (slug) => ({
+        url: `mall/product/suggestion/${slug}`,
+        method: "GET",
+      }),
+    }),
+
     // Validate coupon code
     validateCoupon: builder.mutation({
       queryFn: async ({ code, cart_total }) => {
@@ -561,6 +569,7 @@ export const {
   useDeleteAddressMutation,
   useGetProductsQuery,
   useGetProductCategoriesQuery,
+  useGetProductSuggestionsQuery,
   useCreateMallOrderMutation,
   useUpdateMallOrderMutation,
   useBookEPoojaMutation,

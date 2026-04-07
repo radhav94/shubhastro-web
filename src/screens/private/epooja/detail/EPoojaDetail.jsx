@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import styles from "./EPoojaDetail.module.scss";
-import { FiChevronLeft, FiPlus, FiMinus, FiCalendar, FiX, FiHome, FiBriefcase, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiPlus, FiMinus, FiCalendar, FiX, FiHome, FiBriefcase, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
-import { useGetEPoojaDetailQuery, useGetProductReviewsQuery, useAddToCartMutation, useGetCartQuery, useUpdateCartItemMutation, useCreateProductReviewMutation, useUpdateProductReviewMutation, useDeleteProductReviewMutation, useGetAddressesQuery, useAddAddressMutation, useUpdateAddressMutation, useDeleteAddressMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
+import { useGetEPoojaDetailQuery, useGetProductReviewsQuery, useAddToCartMutation, useGetCartQuery, useUpdateCartItemMutation, useCreateProductReviewMutation, useUpdateProductReviewMutation, useDeleteProductReviewMutation, useGetAddressesQuery, useAddAddressMutation, useUpdateAddressMutation, useDeleteAddressMutation, useGetProductSuggestionsQuery } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
 import { DefaultImages } from "../../../../utils/appImages";
@@ -52,6 +52,57 @@ const InteractiveStars = ({ value = 0, onChange, size = 28 }) => {
   );
 };
 
+const SuggestionCard = ({ item, images, variantPrice, variantMrp, showStrike, tagLabel, onNavigate, onAddToCart }) => {
+  const [imgIdx, setImgIdx] = useState(0);
+  const hasMultiple = images.length > 1;
+
+  return (
+    <div className={styles.suggestionCard} onClick={onNavigate}>
+      <div className={styles.suggSlider}>
+        {item.is_featured && (
+          <span className={styles.suggBadge}>✦ Most Popular</span>
+        )}
+        <img src={images[imgIdx]} alt={item.title} className={styles.suggSliderImg} />
+        {hasMultiple && (
+          <>
+            <button
+              className={`${styles.suggArrow} ${styles.suggArrowLeft}`}
+              onClick={(e) => { e.stopPropagation(); setImgIdx((i) => (i === 0 ? images.length - 1 : i - 1)); }}
+              aria-label="Previous image"
+            >
+              <FiChevronLeft size={14} />
+            </button>
+            <button
+              className={`${styles.suggArrow} ${styles.suggArrowRight}`}
+              onClick={(e) => { e.stopPropagation(); setImgIdx((i) => (i === images.length - 1 ? 0 : i + 1)); }}
+              aria-label="Next image"
+            >
+              <FiChevronRight size={14} />
+            </button>
+            <div className={styles.suggDots}>
+              {images.map((_, i) => (
+                <span key={i} className={`${styles.suggDot} ${i === imgIdx ? styles.suggDotActive : ""}`} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+      <p className={styles.suggName}>{item.title}</p>
+      {tagLabel && <p className={styles.suggCategory}>{tagLabel}</p>}
+      <div className={styles.suggPriceRow}>
+        <span className={styles.suggPrice}>₹{variantPrice || variantMrp || 0}</span>
+        {showStrike && <span className={styles.suggMrp}>₹{variantMrp}</span>}
+      </div>
+      <button
+        className={styles.suggCartBtn}
+        onClick={(e) => { e.stopPropagation(); onAddToCart(); }}
+      >
+        + Add to cart
+      </button>
+    </div>
+  );
+};
+
 const EPoojaDetail = () => {
   const navigate = useNavigate();
   const { slug } = useParams();
@@ -62,6 +113,9 @@ const EPoojaDetail = () => {
   const { data: apiData, isLoading } = useGetEPoojaDetailQuery(slug, {
     refetchOnMountOrArgChange: true,
   });
+
+  // Fetch product suggestions
+  const { data: suggestionsData } = useGetProductSuggestionsQuery(slug);
   const apiSuccess = !!(apiData?.success || apiData?.status === true);
   const product = (apiSuccess && apiData?.data) ? apiData.data : (stateData || {});
 
@@ -814,6 +868,54 @@ const EPoojaDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* ── Popular Add Ons ── */}
+      {suggestionsData?.data?.length > 0 && (
+        <div className={styles.suggestionsSection}>
+          <h3 className={styles.suggestionsTitle}>POPULAR ADD ONS</h3>
+          <div className={styles.suggestionsGrid}>
+            {suggestionsData.data.map((item) => {
+              const firstVariant = item.variants?.[0];
+              const variantPrice = firstVariant?.price;
+              const variantMrp = firstVariant?.mrp;
+              const showStrike = variantMrp && variantPrice && variantMrp > variantPrice;
+              const tagLabel = item.tags?.[0]?.name || item.category?.[0]?.name || "";
+
+              // Collect all unique images for slider
+              const allImgs = [];
+              if (item.images?.length) allImgs.push(...item.images);
+              (item.variants || []).forEach((v) => {
+                (v.images || []).forEach((img) => {
+                  if (img && !allImgs.includes(img)) allImgs.push(img);
+                });
+              });
+              if (item.banner_image && !allImgs.includes(item.banner_image)) allImgs.push(item.banner_image);
+              const cardImages = allImgs.length > 0 ? allImgs : [DefaultImages.AstromallProductDefault];
+
+              return (
+                <SuggestionCard
+                  key={item._id}
+                  item={item}
+                  images={cardImages}
+                  variantPrice={variantPrice}
+                  variantMrp={variantMrp}
+                  showStrike={showStrike}
+                  tagLabel={tagLabel}
+                  firstVariant={firstVariant}
+                  onNavigate={() => navigate(`/product-details/${item.slug || item._id}`, { state: item })}
+                  onAddToCart={() => {
+                    if (!isLoggedIn()) { redirectToLogin(); return; }
+                    const vid = firstVariant?._id || firstVariant?.id || "";
+                    addToCart({ productId: item._id, quantity: 1, variantId: vid, skuCode: firstVariant?.skuCode || "" }).unwrap()
+                      .then((res) => { if (res?.success) Toast.success("Added to cart"); })
+                      .catch(() => {});
+                  }}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ── Address Modal ── */}
       {showAddress && (
