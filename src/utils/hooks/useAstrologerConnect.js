@@ -163,6 +163,15 @@ export const useAstrologerConnect = () => {
           Toast.error("Astrologer is not available for chat");
           return false;
         }
+
+        // Check if astrologer is currently on a live stream
+        const chatLiveStatus = balanceData?.astrologerLiveStatus;
+        if (chatLiveStatus?.isLive) {
+          console.log("[NormalFlow] ❌ Astrologer is on live stream — blocking chat");
+          Toast.error("Currently unavailable during live stream.");
+          return false;
+        }
+
         console.log("[NormalFlow] ✅ Balance & availability OK for chat");
       } catch (error) {
         console.error("[NormalFlow] ❌ Balance/availability check error:", error);
@@ -233,6 +242,15 @@ export const useAstrologerConnect = () => {
         Toast.error(`Astrologer is not available for ${callTypeLabel}`);
         return false;
       }
+
+      // Check if astrologer is currently on a live stream
+      const liveStatus = balanceData?.astrologerLiveStatus;
+      if (liveStatus?.isLive) {
+        console.log("[NormalFlow] ❌ Astrologer is on live stream — blocking call");
+        Toast.error("Currently unavailable during live stream.");
+        return false;
+      }
+
       console.log("[NormalFlow] ✅ Balance & availability OK for", type);
     } catch (error) {
       console.error("[NormalFlow] ❌ Balance/availability check error:", error);
