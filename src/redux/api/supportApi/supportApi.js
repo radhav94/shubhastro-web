@@ -65,10 +65,10 @@ export const supportApi = privateRequestNew.injectEndpoints({
       }),
     }),
     replyToTicket: builder.mutation({
-      query: ({ ticketId, message }) => ({
+      query: ({ ticketId, message, isUserMessage = true, attachments }) => ({
         url: `support/tickets/${ticketId}/message`,
         method: "POST",
-        body: { message, isUserMessage: true },
+        body: { message, isUserMessage, ...(attachments?.length ? { attachments } : {}) },
         headers: { "Content-Type": "application/json" },
       }),
     }),

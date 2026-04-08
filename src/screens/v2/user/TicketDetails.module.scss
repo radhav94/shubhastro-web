@@ -430,11 +430,11 @@
 
 .replyBar {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
   background: white;
-  border-radius: 28px;
-  padding: 6px 6px 6px 18px;
+  border-radius: 16px;
+  padding: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   width: 100%;
   max-width: 768px;
@@ -444,6 +444,13 @@
   &:focus-within {
     border-color: #ff6b35;
   }
+}
+
+.replyInputRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 10px;
 }
 
 .replyInput {
@@ -458,6 +465,85 @@
   &::placeholder {
     color: #bbb;
   }
+}
+
+.attachButton {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: color 0.2s;
+
+  &:hover { color: #ff6b35; }
+  &:disabled { opacity: 0.5; cursor: default; }
+}
+
+.uploadingDot {
+  font-size: 16px;
+  color: #ff6b35;
+}
+
+.attachmentPreview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+.attachmentChip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff5ec;
+  border: 1px solid #ffe0c7;
+  border-radius: 8px;
+  padding: 4px 8px;
+  max-width: 200px;
+}
+
+.attachmentName {
+  font-size: 12px;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachmentRemove {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  flex-shrink: 0;
+
+  &:hover { color: #ef4444; }
+}
+
+.msgAttachments {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.msgAttachImg {
+  max-width: 200px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.msgAttachFile {
+  font-size: 13px;
+  color: #ff6b35;
+  text-decoration: none;
+
+  &:hover { text-decoration: underline; }
 }
 
 .sendButton {
