@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import styles from "./ZodiacCarousel.module.scss";
 import { IoArrowBackOutline, IoArrowForwardOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
-import { zodiac } from "../zodiac";
+import { zodiac, zodiacSignImages } from "../zodiac";
 import { PrimaryText } from "../../../../component";
 import { DefaultImages } from "../../../../utils/appImages";
 
@@ -80,7 +80,7 @@ const ZodiacCarousel = () => {
                 to={`/horoscopes/daily-horoscope/${sign.name.toLowerCase()}`}
                 className={styles.imgCircle}
               >
-                <img src={sign.img || DefaultImages?.AriesDefault} alt={sign.name} />
+                <img src={zodiacSignImages[sign.name.toLowerCase()] || sign.img || DefaultImages?.AriesDefault} alt={sign.name} />
               </Link>
               <h3 className={styles.name}>{sign.name.toUpperCase()}</h3>
               <p className={styles.range}>{sign.range.toUpperCase()}</p>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import styles from "./OrderDetails.module.scss";
 import OrderHeader from "./components/OrderDetails/OrderHeader";
 import OrderTabs from "./components/OrderDetails/OrderTabs";
@@ -21,8 +21,9 @@ import { voiceSocket } from "../../../services/voiceSocketServices";
 const OrderDetails = () => {
   const { astrologerId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const userId = localStorage.getItem("shubhtalk_customer_id");
-  const [activeTab, setActiveTab] = useState("Call");
+  const [activeTab, setActiveTab] = useState(location.state?.tab || "Call");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);

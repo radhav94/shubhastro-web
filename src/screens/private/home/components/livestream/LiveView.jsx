@@ -763,7 +763,7 @@ const LiveView = (props) => {
               <div className="icon-circle">
                 <img src={AppImages.LiveShare} alt="Share" width="28" height="28" />
               </div>
-              <span className="icon-label">{viewerCount > 1000 ? `${(viewerCount/1000).toFixed(1)}k` : viewerCount}</span>
+              {/* <span className="icon-label">{viewerCount > 1000 ? `${(viewerCount/1000).toFixed(1)}k` : viewerCount}</span> */}
             </button>
 
             {/* End Live - Only for hosts */}
