@@ -759,25 +759,47 @@ const LiveView = (props) => {
           <div className="chat-panel">
             {/* Inline Messages Overlay */}
             <div className="inline-messages-overlay" ref={messagesOverlayRef}>
-              {displayMessages.map((m, index) => (
-                m.isSystem ? (
-                  <div key={m.id || index} className="inline-message inline-system-message">
-                    <span className="inline-system-text">{m.text}</span>
+              {displayMessages.map((m, index) => {
+                // System messages (join) — green arrow style
+                if (m.isSystem) {
+                  return (
+                    <div key={m.id || index} className="inline-message" style={{ opacity: 0.6 }}>
+                      <span className="inline-initial" style={{ background: "#22c55e", fontSize: 10 }}>▶</span>
+                      <div className="inline-message-body">
+                        <span className="inline-text" style={{ fontStyle: "italic", fontSize: 11 }}>{m.text}</span>
+                      </div>
+                    </div>
+                  );
+                }
+                // Gift messages — orange gradient style
+                if (m.isGift) {
+                  return (
+                    <div key={m.id || index} className={`inline-message inline-gift-message`}>
+                      <span className="inline-initial" style={{ background: "linear-gradient(135deg, #f75801, #d43400)" }}>🎁</span>
+                      <div className="inline-message-body">
+                        {m.sender && (
+                          <span className="inline-sender" style={{ color: "#f75801" }}>{m.sender}</span>
+                        )}
+                        <span className="inline-text">{m.text}</span>
+                      </div>
+                    </div>
+                  );
+                }
+                // Regular messages
+                return (
+                  <div key={m.id || index} className={`inline-message ${m.role === "host" ? "inline-host-message" : ""}`}>
+                    <span className="inline-initial">
+                      {(m.sender || (m.role === "host" ? "A" : "U")).charAt(0).toUpperCase()}
+                    </span>
+                    <div className="inline-message-body">
+                      {m.sender && (
+                        <span className="inline-sender">{m.sender}</span>
+                      )}
+                      <span className="inline-text">{m.text}</span>
+                    </div>
                   </div>
-                ) : (
-                <div key={m.id || index} className={`inline-message ${m.role === "host" ? "inline-host-message" : ""} ${m.isGift ? "inline-gift-message" : ""}`}>
-                  <span className="inline-initial">
-                    {m.isGift ? "🎁" : (m.sender || (m.role === "host" ? "A" : "U")).charAt(0).toUpperCase()}
-                  </span>
-                  <div className="inline-message-body">
-                    {m.sender && (
-                      <span className="inline-sender">{m.sender}</span>
-                    )}
-                    <span className="inline-text">{m.text}</span>
-                  </div>
-                </div>
-                )
-              ))}
+                );
+              })}
               <div ref={messagesEndRef} />
             </div>
 

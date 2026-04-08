@@ -525,17 +525,20 @@
 }
 
 .inline-gift-message .inline-message-body {
-  background: linear-gradient(135deg, rgba(247, 88, 1, 0.3), rgba(212, 52, 0, 0.2));
-  border: 1px solid rgba(247, 88, 1, 0.4);
+  background: rgba(247, 88, 1, 0.18);
 }
 
 .inline-gift-message .inline-initial {
-  background: transparent;
-  font-size: 18px;
+  background: linear-gradient(135deg, #f75801, #d43400);
+  font-size: 12px;
+}
+
+.inline-gift-message .inline-sender {
+  color: #f75801;
 }
 
 .inline-gift-message .inline-text {
-  color: #FFD700;
+  color: #fff;
   font-weight: 500;
 }
 
