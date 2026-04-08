@@ -243,6 +243,7 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
       userName,
       message: msg,
       userType: "audience",
+      type: "message",
     };
     console.log("LiveChat → Sending message:", payload);
     socketRef.current.emit("live:send_message", payload);
@@ -259,5 +260,6 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     isConnected,
     roomReady,
     retryJoinRoom,
+    socketRef,
   };
 };

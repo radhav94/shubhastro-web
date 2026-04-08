@@ -3,19 +3,27 @@ import "./GiftPopup.scss";
 import { useSendGiftMutation } from "../../../../../redux/api/gift/giftApi";
 import { useWalletBalance } from "../../../wallet/useWalletBalance";
 import toast from "../../../../../component/toast";
+import { getUserFromStorage } from "../../../../../utils/authStorage";
 
-const GiftPopup = ({ show, onClose, giftList, astrologerId }) => {
+const GiftPopup = ({ show, onClose, giftList, astrologerId, astrologerName, socketRef, roomId, userId, userName }) => {
   if (!show) return null;
   const [selected, setSelected] = useState(null);
   const [sendGift, { isLoading: isSending }] = useSendGiftMutation();
   const { balance, refreshWallet } = useWalletBalance();
+  const user = getUserFromStorage();
+
   const handleClose = () => {
-    setSelected(null); // reset state
-    onClose(); // close popup from parent
+    setSelected(null);
+    onClose();
   };
 
   const handleSend = async () => {
     if (!selected) return;
+
+    if (selected.price > balance) {
+      toast.error("Insufficient balance");
+      return;
+    }
 
     try {
       await sendGift({
@@ -24,11 +32,43 @@ const GiftPopup = ({ show, onClose, giftList, astrologerId }) => {
       }).unwrap();
 
       refreshWallet();
-      toast.success("Gift sent successfully");
+      window.dispatchEvent(new Event("walletBalanceUpdated"));
 
-      handleClose(); //  close popup after success
+      // Emit gift message to live stream chat
+      if (socketRef?.current?.connected && roomId && userId) {
+        let senderName = userName;
+        if (!senderName) {
+          if (user?.firstName && user?.lastName && user.firstName.toLowerCase() !== user.lastName.toLowerCase()) {
+            senderName = `${user.firstName} ${user.lastName}`;
+          } else {
+            senderName = user?.firstName || user?.phoneNumber || "User";
+          }
+        }
+
+        const giftMessage = JSON.stringify({
+          text: `${senderName} sent a ${selected.giftName}`,
+          giftData: {
+            giftName: selected.giftName,
+            giftImg: selected.giftImg,
+            price: selected.price,
+          },
+        });
+
+        socketRef.current.emit("live:send_message", {
+          roomId,
+          userId,
+          userName: senderName,
+          message: giftMessage,
+          userType: "audience",
+          type: "gift",
+        });
+      }
+
+      toast.success("Gift sent successfully");
+      handleClose();
     } catch (error) {
       console.error("Error sending gift:", error);
+      toast.error("Failed to send gift");
     }
   };
 
@@ -41,7 +81,7 @@ const GiftPopup = ({ show, onClose, giftList, astrologerId }) => {
         </div>
 
         <div className="gift-grid">
-          {giftList.map((gift) => (
+          {giftList?.map((gift) => (
             <div
               key={gift._id}
               className={`gift-item ${
@@ -58,10 +98,10 @@ const GiftPopup = ({ show, onClose, giftList, astrologerId }) => {
 
         <button
           className="gift-send-btn"
-          disabled={!selected}
+          disabled={!selected || isSending}
           onClick={handleSend}
         >
-          Send
+          {isSending ? "Sending..." : "Send"}
         </button>
       </div>
     </div>
