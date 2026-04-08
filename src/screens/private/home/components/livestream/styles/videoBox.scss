@@ -473,6 +473,32 @@
   color: #F75801;
 }
 
+.inline-gift-message .inline-message-body {
+  background: linear-gradient(135deg, rgba(247, 88, 1, 0.3), rgba(212, 52, 0, 0.2));
+  border: 1px solid rgba(247, 88, 1, 0.4);
+}
+
+.inline-gift-message .inline-initial {
+  background: transparent;
+  font-size: 18px;
+}
+
+.inline-gift-message .inline-text {
+  color: #FFD700;
+  font-weight: 500;
+}
+
+.inline-system-message {
+  justify-content: center;
+  padding: 2px 0;
+}
+
+.inline-system-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
 .inline-text {
   font-size: 15px;
   color: #fff;

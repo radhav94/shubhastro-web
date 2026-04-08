@@ -80,10 +80,22 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
 
     socket.on("live:user_joined", (data) => {
       setParticipantCount(data.participantCount);
+      setMessages((prev) => [...prev, {
+        id: `join_${Date.now()}_${data.userId}`,
+        type: "system",
+        text: `${data.userName || "Someone"} joined`,
+        timestamp: new Date().toISOString(),
+      }]);
     });
 
     socket.on("live:user_left", (data) => {
       setParticipantCount(data.participantCount);
+      setMessages((prev) => [...prev, {
+        id: `leave_${Date.now()}_${data.userId}`,
+        type: "system",
+        text: `${data.userName || "Someone"} left`,
+        timestamp: new Date().toISOString(),
+      }]);
     });
 
     // Broadcast: a new live session started somewhere
