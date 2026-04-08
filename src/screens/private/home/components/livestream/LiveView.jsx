@@ -175,15 +175,37 @@ const LiveView = (props) => {
   const profiles = kundliData?.data || [];
 
   // Normalize socket messages (message → text, userType → role, userName → sender)
-  // Filter out gift type messages from chat display
   const normalizedMessages = messages
-    ?.filter((m) => m.type !== "gift")
-    .map((m) => ({
-      ...m,
-      text: m.text || (typeof m.message === "string" ? m.message : m.message?.text || ""),
-      role: m.role || m.userType,
-      sender: m.sender || m.userName,
-    })) || [];
+    ?.map((m) => {
+      // Handle gift messages
+      if (m.type === "gift") {
+        const giftData = typeof m.message === "object" ? m.message : null;
+        const giftName = giftData?.giftData?.giftName || "a gift";
+        const senderName = m.sender || m.userName || "Someone";
+        return {
+          ...m,
+          text: `🎁 ${senderName} sent ${giftName}`,
+          role: m.role || m.userType,
+          sender: senderName,
+          isGift: true,
+        };
+      }
+      // Handle system messages (join/leave)
+      if (m.type === "system") {
+        return {
+          ...m,
+          role: "system",
+          sender: null,
+          isSystem: true,
+        };
+      }
+      return {
+        ...m,
+        text: m.text || (typeof m.message === "string" ? m.message : m.message?.text || ""),
+        role: m.role || m.userType,
+        sender: m.sender || m.userName,
+      };
+    }) || [];
   const displayMessages = normalizedMessages;
 
   const liveListCtx = useLiveList();
@@ -678,9 +700,14 @@ const LiveView = (props) => {
             {/* Inline Messages Overlay */}
             <div className="inline-messages-overlay" ref={messagesOverlayRef}>
               {displayMessages.map((m, index) => (
-                <div key={m.id || index} className={`inline-message ${m.role === "host" ? "inline-host-message" : ""}`}>
+                m.isSystem ? (
+                  <div key={m.id || index} className="inline-message inline-system-message">
+                    <span className="inline-system-text">{m.text}</span>
+                  </div>
+                ) : (
+                <div key={m.id || index} className={`inline-message ${m.role === "host" ? "inline-host-message" : ""} ${m.isGift ? "inline-gift-message" : ""}`}>
                   <span className="inline-initial">
-                    {(m.sender || (m.role === "host" ? "A" : "U")).charAt(0).toUpperCase()}
+                    {m.isGift ? "🎁" : (m.sender || (m.role === "host" ? "A" : "U")).charAt(0).toUpperCase()}
                   </span>
                   <div className="inline-message-body">
                     {m.sender && (
@@ -689,6 +716,7 @@ const LiveView = (props) => {
                     <span className="inline-text">{m.text}</span>
                   </div>
                 </div>
+                )
               ))}
               <div ref={messagesEndRef} />
             </div>
