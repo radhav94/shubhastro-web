@@ -9,10 +9,18 @@ const SuggestedRemedyPanel = ({ isOpen, onClose, remedyData, onProductClick }) =
   const products = remedyData?.suggestedProducts || [];
   const messages = remedyData?.messages || [];
 
-  const handleProductClick = (slug) => {
-    if (!slug) return;
+  const handleProductClick = (product) => {
+    if (!product.slug) return;
     onProductClick?.();
-    navigate(`/product-details/${slug}`);
+    navigate(`/product-details/${product.slug}`, {
+      state: {
+        _selectedVariant: product.variantId ? {
+          _id: product.variantId,
+          skuCode: product.variantSkuCode,
+          sku: product.variantSkuCode,
+        } : undefined,
+      },
+    });
   };
 
   return (
@@ -35,20 +43,23 @@ const SuggestedRemedyPanel = ({ isOpen, onClose, remedyData, onProductClick }) =
 
         {products.length > 0 ? (
           <div className={styles.productList}>
-            {products.map((product) => (
-              <div key={product.productId || product._id} className={styles.productCard} onClick={() => handleProductClick(product.slug)}>
-                {(product.image || product.images?.[0]) && (
+            {products.map((product, idx) => (
+              <div key={product.variantId || product.productId || product._id || idx} className={styles.productCard} onClick={() => handleProductClick(product)}>
+                {(product.variantImage || product.image || product.images?.[0]) && (
                   <div className={styles.productImageWrap}>
                     <img
-                      src={product.image || product.images?.[0]}
-                      alt={product.title}
+                      src={product.variantImage || product.image || product.images?.[0]}
+                      alt={product.title || "Product"}
                       className={styles.productImage}
                       onError={(e) => { e.target.style.display = "none"; }}
                     />
                   </div>
                 )}
                 <div className={styles.productInfo}>
-                  <h4 className={styles.productTitle}>{product.title}</h4>
+                  <h4 className={styles.productTitle}>{product.title || "Suggested Product"}</h4>
+                  {product.variantTitle && (
+                    <span className={styles.productVariant}>{product.variantTitle}</span>
+                  )}
                   {product.brand && (
                     <span className={styles.productBrand}>
                       {typeof product.brand === "object" ? product.brand?.name : product.brand}
@@ -57,16 +68,16 @@ const SuggestedRemedyPanel = ({ isOpen, onClose, remedyData, onProductClick }) =
                   {product.short_description && (
                     <p className={styles.productDesc}>{product.short_description}</p>
                   )}
-                  {(product.price != null) && (
+                  {(product.variantPrice != null || product.price != null) && (
                     <div className={styles.priceRow}>
-                      <span className={styles.price}>₹{product.price}</span>
-                      {product.mrp && product.mrp > product.price && (
-                        <span className={styles.mrp}>₹{product.mrp}</span>
-                      )}
-                      {product.mrp && product.mrp > product.price && (
-                        <span className={styles.discount}>
-                          {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% off
-                        </span>
+                      <span className={styles.price}>₹{product.variantPrice ?? product.price}</span>
+                      {(product.variantMrp || product.mrp) && (product.variantMrp || product.mrp) > (product.variantPrice ?? product.price) && (
+                        <>
+                          <span className={styles.mrp}>₹{product.variantMrp || product.mrp}</span>
+                          <span className={styles.discount}>
+                            {Math.round((((product.variantMrp || product.mrp) - (product.variantPrice ?? product.price)) / (product.variantMrp || product.mrp)) * 100)}% off
+                          </span>
+                        </>
                       )}
                     </div>
                   )}

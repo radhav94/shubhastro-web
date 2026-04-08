@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./AstrologerProfile.module.scss";
 import { FaPlay, FaStar, FaChevronRight } from "react-icons/fa";
+import { Radio } from "lucide-react";
 import { IoMdTime } from "react-icons/io";
 import {
   IoChevronBack,
@@ -58,6 +59,7 @@ import AstrologerNumerologyDefault from "../../../assets/default-img/astrologer-
 import GiftModal from "../../../component/call/GiftModal";
 import VirtualAssistant from "../../../component/virtualAssistant/VirtualAssistant";
 import { useGetChatHistoryQuery } from "../../../redux/api/chatApi";
+import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 
 const AstrologerProfile = () => {
   const { id } = useParams();
@@ -70,6 +72,16 @@ const AstrologerProfile = () => {
   } = useGetAstrologerByIdQuery({ id }, { skip: !id, pollingInterval: 10000 });
 
   const data = astrologerData?.data;
+
+  // Live status
+  const isLive = data?.astrologerLiveStatus?.isLive || false;
+  const liveRoomId = data?.astrologerLiveStatus?.roomId;
+
+  const handleJoinLive = () => {
+    if (liveRoomId) {
+      navigate(`/live/${liveRoomId}`);
+    }
+  };
 
   // Fetch top astrologers for left sidebar (desktop only)
   const { data: topAstrologersData } = useGetAstrologersQuery({
@@ -143,6 +155,7 @@ const AstrologerProfile = () => {
 
   // State
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
 
   const { activeCall, setActiveCall, setOpenReview, setReviewData } = useCall();
   
@@ -271,7 +284,7 @@ const AstrologerProfile = () => {
     setIsConnectPopupOpen(true);
   };
 
-  const handleChatStart = async (astro) => {
+  const handleChatStart = async (astro, isEmergency = false) => {
     if (!token) {
       navigate("/login", { state: { from: location.pathname } });
       return;
@@ -286,11 +299,11 @@ const AstrologerProfile = () => {
     }
     
     activeCallAstroRef.current = astro;
-    const result = await hookHandleChatStart(astro);
+    const result = await hookHandleChatStart(astro, true, isEmergency);
     return result;
   };
 
-  const handleCallStart = async (astro, type) => {
+  const handleCallStart = async (astro, type, isEmergency = false) => {
     if (!token) {
       navigate("/login", { state: { from: location.pathname } });
       return;
@@ -305,7 +318,7 @@ const AstrologerProfile = () => {
     }
     
     activeCallAstroRef.current = astro;
-    const result = await hookHandleCallStart(astro, type);
+    const result = await hookHandleCallStart(astro, type, isEmergency);
     return result;
   };
 
@@ -481,6 +494,7 @@ const AstrologerProfile = () => {
           astrologerId: astrologerId,
           astrologerName: data?.astrologer?.firstName || "",
           remainingTime: data?.remainingTime,
+          isEmergency: data?.isEmergency || false,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 
@@ -507,6 +521,7 @@ const AstrologerProfile = () => {
       type,
       remainingTime,
       isSwitch,
+      ...rest
     }) => {
       // If there's an active audio call and this is a video acceptance, it's an upgrade — let CallContext handle it
       if (type === "video" && activeCall && activeCall.callType === "audio") {
@@ -556,6 +571,7 @@ const AstrologerProfile = () => {
           astrologerId: astro._id,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
+          isEmergency: rest?.isEmergency || false,
         });
       } catch (error) {
         console.error("Call accepted error:", error);
@@ -1032,6 +1048,16 @@ const AstrologerProfile = () => {
           <div className={styles.profileContentMain}>
             {/* Profile Card */}
             <div className={styles.profileCard}>
+              {data?.astrologerLiveStatus?.isLive && (
+                <button
+                  className={styles.liveIndicator}
+                  onClick={() => navigate(`/live/${data?.astrologerLiveStatus?.roomId || data?._id}`)}
+                  aria-label="Astrologer is live, click to watch"
+                >
+                  <span className={styles.liveDot}></span>
+                  LIVE
+                </button>
+              )}
               <div className={styles.profileImageWrapper}>
                 <img
                   src={displayData.imageUrl}
@@ -1060,6 +1086,30 @@ const AstrologerProfile = () => {
                   ))}
                 </div>
               </div>
+            </div>
+
+            {/* Mobile Status Indicator */}
+            <div className={styles.mobileStatusBar}>
+              {isLive ? (
+                <div className={styles.mobileStatusLive} onClick={handleJoinLive}>
+                  <Radio size={20} />
+                  <span>Live Now</span>
+                </div>
+              ) : data?.isActive ? (
+                <div className={styles.mobileStatusAvailable}>
+                  <div className={styles.mobileStatusDot}></div>
+                  <span>Available Now</span>
+                </div>
+              ) : (
+                <div className={styles.mobileStatusOffline}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="none">
+                    <rect width="32" height="32" rx="16" fill="#E0E0E0"/>
+                    <path d="M8.34093 7.78665C8.27892 7.72514 8.19507 7.69071 8.10773 7.69089C8.02038 7.69107 7.93667 7.72584 7.87491 7.7876C7.81315 7.84936 7.77838 7.93307 7.7782 8.02042C7.77802 8.10776 7.81245 8.19161 7.87396 8.25362L12.0833 12.4597H12.0537C11.1357 12.4621 10.2527 12.8127 9.58315 13.4408C8.91357 14.0688 8.50724 14.9276 8.44616 15.8436C7.91479 15.9992 7.45737 16.3412 7.15783 16.8069C6.8583 17.2726 6.73676 17.8306 6.81551 18.3787C6.89426 18.9268 7.16802 19.428 7.58656 19.7905C8.00509 20.153 8.54032 20.3524 9.09401 20.3521H19.9758L23.6589 24.0386C23.7213 24.0997 23.8051 24.134 23.8924 24.134C23.9797 24.134 24.0636 24.0997 24.1259 24.0386C24.1875 23.9765 24.2221 23.8926 24.2221 23.8051C24.2221 23.7176 24.1875 23.6337 24.1259 23.5716L8.34093 7.78665Z" fill="#BDBDBD"/>
+                    <path d="M23.1163 15.1497C23.355 14.1247 23.2354 13.0488 22.7774 12.1013C22.3194 11.1537 21.5507 10.3916 20.5992 9.94179C19.6478 9.492 18.5709 9.38168 17.548 9.62918C16.5251 9.87669 15.6178 10.4671 14.9772 11.3021C14.6598 11.1658 14.3119 11.1164 13.9691 11.1592C13.6264 11.202 13.3012 11.3353 13.0271 11.5455L21.8338 20.3521H22.577C23.2276 20.3526 23.8553 20.1118 24.3387 19.6762C24.822 19.2407 25.1267 18.6414 25.1938 17.9942C25.2609 17.3471 25.0856 16.698 24.7019 16.1726C24.3181 15.6472 23.7532 15.2827 23.1163 15.1497Z" fill="#BDBDBD"/>
+                  </svg>
+                  <span>Offline</span>
+                </div>
+              )}
             </div>
 
             {/* Stats Section */}
@@ -1413,8 +1463,24 @@ const AstrologerProfile = () => {
 
         {/* Right Sidebar - Available Now & Connect (Desktop Only) */}
         <aside className={styles.rightSidebar}>
-          {/* Available Now / Offline Card */}
-          {data?.isActive ? (
+          {/* Available Now / Offline / Live Card */}
+          {isLive ? (
+            <div className={styles.liveCard} onClick={handleJoinLive}>
+              <div className={styles.liveLeft}>
+                <svg className={styles.liveIcon} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="16" cy="16" r="4" fill="white"/>
+                  <path d="M10.5 21.5C8.5 19.5 7.5 17 7.5 14.5C7.5 12 8.5 9.5 10.5 7.5" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M21.5 7.5C23.5 9.5 24.5 12 24.5 14.5C24.5 17 23.5 19.5 21.5 21.5" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M13 19C11.5 17.5 11 16 11 14.5C11 13 11.5 11.5 13 10" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M19 10C20.5 11.5 21 13 21 14.5C21 16 20.5 17.5 19 19" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                <span className={styles.liveText}>Live Now</span>
+              </div>
+              <button className={styles.joinLiveSidebarBtn} onClick={handleJoinLive}>
+                Join
+              </button>
+            </div>
+          ) : data?.isActive ? (
             <div className={styles.availableCard}>
               <div className={styles.statusDot}></div>
               <span className={styles.statusText}>Available Now</span>
@@ -1436,7 +1502,7 @@ const AstrologerProfile = () => {
           {(data?.isActiveType?.includes("all") ||
             data?.isActiveType?.includes("chat") ||
             data?.isActiveType?.includes("audio") ||
-            data?.isActiveType?.includes("video")) && (
+            data?.isActiveType?.includes("video")) ? (
             <div className={styles.connectCard}>
               <h3 className={styles.connectTitle}>CONNECT NOW</h3>
               <div className={styles.titleDivider}>
@@ -1458,13 +1524,17 @@ const AstrologerProfile = () => {
                 <div className={styles.dividerLine}></div>
               </div>
 
+              {isLive && (
+                <p className={styles.liveNotice}>Astrologer is currently live. Chat & calls are unavailable.</p>
+              )}
+
               <div className={styles.connectOptions}>
                 {(data?.isActiveType?.includes("all") ||
                   data?.isActiveType?.includes("chat")) && (
                   <div
-                    className={`${styles.connectOption} ${!data?.price?.chatRate?.amount ? styles.connectOptionDisabled : ""}`}
+                    className={`${styles.connectOption} ${(!data?.price?.chatRate?.amount || isLive) ? styles.connectOptionDisabled : ""}`}
                     onClick={() =>
-                      data?.price?.chatRate?.amount && handleChatStart(data)
+                      !isLive && data?.price?.chatRate?.amount && handleChatStart(data)
                     }
                   >
                     <div className={styles.optionIcon}>
@@ -1482,9 +1552,9 @@ const AstrologerProfile = () => {
                 {(data?.isActiveType?.includes("all") ||
                   data?.isActiveType?.includes("audio")) && (
                   <div
-                    className={`${styles.connectOption} ${!data?.price?.audioRate?.amount ? styles.connectOptionDisabled : ""}`}
+                    className={`${styles.connectOption} ${(!data?.price?.audioRate?.amount || isLive) ? styles.connectOptionDisabled : ""}`}
                     onClick={() =>
-                      data?.price?.audioRate?.amount &&
+                      !isLive && data?.price?.audioRate?.amount &&
                       handleCallStart(data, "audio")
                     }
                   >
@@ -1503,9 +1573,9 @@ const AstrologerProfile = () => {
                 {(data?.isActiveType?.includes("all") ||
                   data?.isActiveType?.includes("video")) && (
                   <div
-                    className={`${styles.connectOption} ${!data?.price?.videoCallRate?.amount ? styles.connectOptionDisabled : ""}`}
+                    className={`${styles.connectOption} ${(!data?.price?.videoCallRate?.amount || isLive) ? styles.connectOptionDisabled : ""}`}
                     onClick={() =>
-                      data?.price?.videoCallRate?.amount &&
+                      !isLive && data?.price?.videoCallRate?.amount &&
                       handleCallStart(data, "video")
                     }
                   >
@@ -1522,7 +1592,20 @@ const AstrologerProfile = () => {
                 )}
               </div>
             </div>
-          )}
+          ) : data?.isEmergencyAvailable && (data?.emergencyPrice?.chatRate?.amount > 0 || data?.emergencyPrice?.audioRate?.amount > 0) ? (
+            <div className={styles.connectCard}>
+              <h3 className={styles.connectTitle}>EMERGENCY SESSION</h3>
+              <div className={styles.connectOptions}>
+                <button
+                  className={styles.emergencySingleBtn}
+                  onClick={() => setShowEmergencyModal(true)}
+                  style={{ width: '100%', padding: '12px', border: 'none', borderRadius: '50px', background: 'linear-gradient(90deg, #F75801 0%, #D43400 100%)', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Try Emergency Session
+                </button>
+              </div>
+            </div>
+          ) : null}
 
           {/* Consultation Hours Card */}
           <div className={styles.consultationCard}>
@@ -1560,15 +1643,15 @@ const AstrologerProfile = () => {
       {/* End 3-Column Layout */}
 
       {/* Mobile Bottom Bar - Chat & Call */}
-      <div className={styles.mobileBottomBar}>
+      {data?.isActive && !isLive && <div className={styles.mobileBottomBar}>
         {(data?.isActiveType?.includes("all") ||
-          data?.isActiveType?.includes("chat")) && (
+          data?.isActiveType?.includes("chat")) ? (
           <button
             className={styles.mobileChatBtn}
             onClick={() => handleChatStart(data)}
             disabled={!data?.price?.chatRate?.amount}
           >
-            <BiMessageDetail />
+            <img src={ChatMinutesIcon} alt="Chat" className={styles.mobileBtnIcon} />
             <div className={styles.btnContent}>
               <span className={styles.btnLabel}>Chat</span>
               <span className={styles.btnPrice}>
@@ -1576,15 +1659,15 @@ const AstrologerProfile = () => {
               </span>
             </div>
           </button>
-        )}
+        ) : null}
         {(data?.isActiveType?.includes("all") ||
-          data?.isActiveType?.includes("audio")) && (
+          data?.isActiveType?.includes("audio")) ? (
           <button
             className={styles.mobileCallBtn}
             onClick={() => handleCallStart(data, "audio")}
             disabled={!data?.price?.audioRate?.amount}
           >
-            <BiPhone />
+            <img src={CallMinutesIcon} alt="Call" className={styles.mobileBtnIcon} />
             <div className={styles.btnContent}>
               <span className={styles.btnLabel}>Call</span>
               <span className={styles.btnPrice}>
@@ -1592,8 +1675,26 @@ const AstrologerProfile = () => {
               </span>
             </div>
           </button>
+        ) : null}
+        {!(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat") || data?.isActiveType?.includes("audio")) &&
+          data?.isEmergencyAvailable && (data?.emergencyPrice?.chatRate?.amount > 0 || data?.emergencyPrice?.audioRate?.amount > 0) && (
+          <button
+            className={styles.mobileCallBtn}
+            onClick={() => setShowEmergencyModal(true)}
+            style={{ flex: 1 }}
+          >
+            Try Emergency Session
+          </button>
         )}
-      </div>
+      </div>}
+
+      <EmergencySessionModal
+        isOpen={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+        astrologer={data}
+        onChatNow={(astro) => handleChatStart(astro, true)}
+        onCallNow={(astro) => handleCallStart(astro, "audio", true)}
+      />
 
       {/* Modals */}
       {/* ConnectAstrologerPopup - No longer needed, direct connection from sidebar */}

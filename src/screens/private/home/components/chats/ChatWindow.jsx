@@ -62,6 +62,7 @@ const ChatWindow = () => {
   const [showGiftModal, setShowGiftModal] = useState(false);
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
+  const [showEndChatConfirm, setShowEndChatConfirm] = useState(false);
   const { activeChat, isReconnecting } = useChatContext();
 
   // Check if there's an active call (audio or video)
@@ -236,8 +237,15 @@ const ChatWindow = () => {
       Toast.error("Chat cannot be ended before 1 minute");
       return false;
     }
+
+    // Show confirmation popup instead of ending directly
+    setShowEndChatConfirm(true);
+    return false;
+  };
+
+  const confirmEndChat = () => {
+    setShowEndChatConfirm(false);
     handleDisconnect();
-    return true;
   };
 
   const handleSend = (kundli = null) => {
@@ -638,6 +646,26 @@ const ChatWindow = () => {
         onSuccess={handleRechargeSuccess}
         title="Recharge to Continue Chat"
       />
+
+      {/* End Chat Confirmation Modal */}
+      {showEndChatConfirm && (
+        <div className={styles.endChatConfirmOverlay} onClick={() => setShowEndChatConfirm(false)}>
+          <div className={styles.endChatConfirmModal} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.endChatConfirmTitle}>End Chat?</h3>
+            <p className={styles.endChatConfirmText}>
+              Are you sure you want to end this chat session with {fullName || "the astrologer"}?
+            </p>
+            <div className={styles.endChatConfirmActions}>
+              <button className={styles.endChatBtnCancel} onClick={() => setShowEndChatConfirm(false)}>
+                Continue Chat
+              </button>
+              <button className={styles.endChatBtnConfirm} onClick={confirmEndChat}>
+                End Chat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

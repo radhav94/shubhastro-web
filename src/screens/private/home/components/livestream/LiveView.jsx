@@ -56,6 +56,8 @@ const LiveView = (props) => {
     astrologer,
     handleLeave,
     roomReady,
+    liveStartedAt,
+    isHostMuted,
   } = props;
 
   const [showGifts, setShowGifts] = useState(false);
@@ -64,6 +66,7 @@ const LiveView = (props) => {
   const [roomEnded, setRoomEnded] = useState(false);
   const [wasRoomReady, setWasRoomReady] = useState(false);
   const [connectingTimedOut, setConnectingTimedOut] = useState(false);
+  const [liveDuration, setLiveDuration] = useState("00:00");
 
   // Reset ended state when switching to a new channel
   useEffect(() => {
@@ -71,6 +74,7 @@ const LiveView = (props) => {
     setRoomEnded(false);
     setWasRoomReady(false);
     setConnectingTimedOut(false);
+    setLiveDuration("00:00");
   }, [props.channel]);
 
   // If no remote users appear within 10s of connecting, show "waiting" instead of "connecting"
@@ -82,6 +86,29 @@ const LiveView = (props) => {
     const timer = setTimeout(() => setConnectingTimedOut(true), 10000);
     return () => clearTimeout(timer);
   }, [remoteUsers?.length, hostLeft, roomEnded, props.channel]);
+
+  // Live duration timer — ticks every second while stream is active
+  // Use startedAt from REST API (api/users/live-users)
+  const effectiveStartedAt = astrologer?.startedAt ? Number(astrologer.startedAt) : null;
+
+  useEffect(() => {
+    if (!effectiveStartedAt) return;
+    const tick = () => {
+      const elapsed = Math.floor((Date.now() - effectiveStartedAt) / 1000);
+      const hrs = Math.floor(elapsed / 3600);
+      const mins = Math.floor((elapsed % 3600) / 60);
+      const secs = elapsed % 60;
+      const pad = (n) => String(n).padStart(2, "0");
+      if (hrs > 0) {
+        setLiveDuration(`${pad(hrs)}:${pad(mins)}:${pad(secs)}`);
+      } else {
+        setLiveDuration(`${pad(mins)}:${pad(secs)}`);
+      }
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [effectiveStartedAt]);
 
   const { 
     activeCall, 
@@ -148,12 +175,15 @@ const LiveView = (props) => {
   const profiles = kundliData?.data || [];
 
   // Normalize socket messages (message → text, userType → role, userName → sender)
-  const normalizedMessages = messages?.map((m) => ({
-    ...m,
-    text: m.text || m.message,
-    role: m.role || m.userType,
-    sender: m.sender || m.userName,
-  })) || [];
+  // Filter out gift type messages from chat display
+  const normalizedMessages = messages
+    ?.filter((m) => m.type !== "gift")
+    .map((m) => ({
+      ...m,
+      text: m.text || (typeof m.message === "string" ? m.message : m.message?.text || ""),
+      role: m.role || m.userType,
+      sender: m.sender || m.userName,
+    })) || [];
   const displayMessages = normalizedMessages;
 
   const liveListCtx = useLiveList();
@@ -231,7 +261,6 @@ const LiveView = (props) => {
     if (isHost) {
       setCalling(false);
     } else {
-      // Intentional leave — clear saved session so refresh doesn't reconnect
       clearViewerSession();
       await handleLeave?.();
       navigate(PATH.privateRoutes.HOME.path);
@@ -541,6 +570,7 @@ const LiveView = (props) => {
                 <div className="host-name">
                   {astrologer?.astrologerName || "Astrologer"}
                 </div>
+                <div className="host-duration">Live {liveDuration}</div>
               </div>
             </div>
 
@@ -581,6 +611,37 @@ const LiveView = (props) => {
               remoteUsers.map((user) => (
                 <RemoteUser key={user.uid} user={user} />
               ))}
+
+            {/* MUTE BANNER — show when astrologer mutes audio */}
+            {!isHost && isHostMuted && remoteUsers.length > 0 && !roomEnded && (
+              <div style={{
+                position: "absolute",
+                top: 130,
+                left: "50%",
+                transform: "translateX(-50%)",
+                background: "rgba(33, 33, 33, 0.44)",
+                color: "#fff",
+                padding: "8px 14px",
+                borderRadius: "20px",
+                fontSize: "10px",
+                fontWeight: 500,
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                zIndex: 20,
+                whiteSpace: "nowrap",
+                backdropFilter: "blur(4px)",
+              }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
+                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2c0 .76-.13 1.49-.35 2.17" />
+                  <line x1="12" y1="19" x2="12" y2="23" />
+                  <line x1="8" y1="23" x2="16" y2="23" />
+                </svg>
+                Astrologer is on mute
+              </div>
+            )}
 
             {/* CONNECTING — Agora joining or waiting for remote media */}
             {!isHost && remoteUsers.length === 0 && !hostLeft && !roomEnded && (
@@ -679,6 +740,11 @@ const LiveView = (props) => {
             onClose={() => setShowGifts(false)}
             giftList={giftList?.data}
             astrologerId={astrologer?._id || astrologer?.astrologerId}
+            astrologerName={astrologer?.firstName || astrologer?.name}
+            socketRef={props.socketRef}
+            roomId={props.channel}
+            userId={userIdLocal}
+            userName={localStorage.getItem("shubhtalk_customer_name") || "User"}
           />
           <SharePopup
             show={showSharePopup}
@@ -711,18 +777,21 @@ const LiveView = (props) => {
           {/* NEW BOTTOM ACTION BAR - only show when astrologer is live */}
           {isAstrologerLive && (
           <div className="right-action-bar">
-            {/* Timer / Stopwatch */}
-            <button className="icon-btn">
+            {/* Timer / Stopwatch - commented out, using host-info bar timer instead */}
+            {/* <button className="icon-btn">
               <div className="icon-circle">
                 <img src={AppImages.LiveIcon} alt="Timer" width="28" height="28" />
               </div>
-              <span className="icon-label">20m</span>
-            </button>
+              <span className="icon-label">{liveDuration}</span>
+            </button> */}
 
             {/* Viewers */}
-            <div className="icon-btn" style={{ cursor: "default" }}>
+            <div className="icon-btn viewer-icon-btn" style={{ cursor: "default" }}>
               <div className="icon-circle">
-                <img src={AppImages.LikesIconContainer} alt="Viewers" width="28" height="28" />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
               </div>
               <span className="icon-label">{viewerCount > 1000 ? `${(viewerCount/1000).toFixed(1)}k` : viewerCount}</span>
             </div>

@@ -186,7 +186,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       setCallWaitingList(data?.waitingTime || 5);
     };
 
-    const handleCallAccepted = async ({ roomId, token, type, remainingTime, isSwitch }) => {
+    const handleCallAccepted = async ({ roomId, token, type, remainingTime, isSwitch, ...rest }) => {
       // If there's an active audio call and this is a video acceptance, it's an upgrade — let CallContext handle it
       if (type === "video" && activeCall && activeCall.callType === "audio") {
         console.log("🔄 Video upgrade accepted - CallContext will handle the switch (isSwitch:", isSwitch, ")");
@@ -219,6 +219,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           kundliId,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
+          isEmergency: rest?.isEmergency || false,
         });
         setCallSeconds(Number(remainingTime) * 60);
       } catch {
@@ -249,6 +250,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           kundliId,
           astrologerName: data?.astrologer?.firstName || "",
           remainingTime: data?.remainingTime,
+          isEmergency: data?.isEmergency || false,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 

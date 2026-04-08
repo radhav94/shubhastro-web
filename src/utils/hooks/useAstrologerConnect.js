@@ -107,10 +107,11 @@ export const useAstrologerConnect = () => {
   }, [token, userIdLocal, profiles, navigate]);
 
   // Chat handler
-  const handleChatStart = useCallback(async (astro, checkBalance = true) => {
+  const handleChatStart = useCallback(async (astro, checkBalance = true, isEmergency = false) => {
     console.log("[NormalFlow] 💬 handleChatStart called");
     console.log("[NormalFlow]   → astrologer:", astro?._id, astro?.firstName, astro?.lastName);
     console.log("[NormalFlow]   → checkBalance:", checkBalance);
+    console.log("[NormalFlow]   → isEmergency:", isEmergency);
     
     // Validate profile and kundli before proceeding
     if (!validateBeforeConnection()) {
@@ -128,7 +129,7 @@ export const useAstrologerConnect = () => {
     if (checkBalance) {
       try {
         console.log("[NormalFlow] 💰 Checking balance for chat...");
-        const result = await getBalance({ astrologerId: astro?._id });
+        const result = await getBalance({ astrologerId: astro?._id, ...(isEmergency && { isEmergency: true }) });
         console.log("[NormalFlow] 💰 Balance API response:", JSON.stringify(result?.data?.data));
         
         // Check balance status
@@ -157,11 +158,20 @@ export const useAstrologerConnect = () => {
           rawKeys: Object.keys(balanceData),
         });
         
-        if (!isActive || !isActiveForChat) {
+        if (!isEmergency && (!isActive || !isActiveForChat)) {
           console.log("[NormalFlow] ❌ Astrologer not available for chat");
           Toast.error("Astrologer is not available for chat");
           return false;
         }
+
+        // Check if astrologer is currently on a live stream
+        const chatLiveStatus = balanceData?.astrologerLiveStatus;
+        if (chatLiveStatus?.isLive) {
+          console.log("[NormalFlow] ❌ Astrologer is on live stream — blocking chat");
+          Toast.error("Currently unavailable during live stream.");
+          return false;
+        }
+
         console.log("[NormalFlow] ✅ Balance & availability OK for chat");
       } catch (error) {
         console.error("[NormalFlow] ❌ Balance/availability check error:", error);
@@ -173,15 +183,16 @@ export const useAstrologerConnect = () => {
     // Open kundli selection
     // setOpenModal((prev) => ({ ...prev, kundli: true }));
     console.log("[NormalFlow] ➡️ Proceeding to handleAfterKundliSelect (chat)");
-    handleAfterKundliSelect(astro, null) // Pass null for chat
+    handleAfterKundliSelect(astro, null, isEmergency)
     return true;
   }, [getBalance, setLastRequestedAstro, validateBeforeConnection]);
 
   // Call handler
-  const handleCallStart = useCallback(async (astro, type) => {
+  const handleCallStart = useCallback(async (astro, type, isEmergency = false) => {
     console.log("[NormalFlow] 📞 handleCallStart called");
     console.log("[NormalFlow]   → astrologer:", astro?._id, astro?.firstName, astro?.lastName);
     console.log("[NormalFlow]   → callType:", type);
+    console.log("[NormalFlow]   → isEmergency:", isEmergency);
     
     // Validate profile and kundli before proceeding
     if (!validateBeforeConnection()) {
@@ -198,7 +209,7 @@ export const useAstrologerConnect = () => {
     try {
       // Check balance
       console.log("[NormalFlow] 💰 Checking balance for call type:", type);
-      const result = await getBalance({ astrologerId: astro?._id, type: type });
+      const result = await getBalance({ astrologerId: astro?._id, type: type, ...(isEmergency && { isEmergency: true }) });
       console.log("[NormalFlow] 💰 Balance API response:", JSON.stringify(result?.data?.data));
       
       // Check balance status
@@ -225,12 +236,21 @@ export const useAstrologerConnect = () => {
         rawKeys: Object.keys(balanceData),
       });
       
-      if (!isActive || !isActiveForCallType) {
+      if (!isEmergency && (!isActive || !isActiveForCallType)) {
         const callTypeLabel = type === "audio" ? "voice call" : "video call";
         console.log("[NormalFlow] ❌ Astrologer not available for", callTypeLabel);
         Toast.error(`Astrologer is not available for ${callTypeLabel}`);
         return false;
       }
+
+      // Check if astrologer is currently on a live stream
+      const liveStatus = balanceData?.astrologerLiveStatus;
+      if (liveStatus?.isLive) {
+        console.log("[NormalFlow] ❌ Astrologer is on live stream — blocking call");
+        Toast.error("Currently unavailable during live stream.");
+        return false;
+      }
+
       console.log("[NormalFlow] ✅ Balance & availability OK for", type);
     } catch (error) {
       console.error("[NormalFlow] ❌ Balance/availability check error:", error);
@@ -240,15 +260,16 @@ export const useAstrologerConnect = () => {
 
     // setOpenModal((prev) => ({ ...prev, kundli: true }));
     console.log("[NormalFlow] ➡️ Proceeding to handleAfterKundliSelect (call type:", type, ")");
-    handleAfterKundliSelect(astro, type) // Pass type directly
+    handleAfterKundliSelect(astro, type, isEmergency)
     return true;
   }, [getBalance, setLastRequestedCallAstro, validateBeforeConnection]);
 
   // After kundli selection
-  const handleAfterKundliSelect = useCallback(async (selectedAstrologer, connectionType = null) => {
+  const handleAfterKundliSelect = useCallback(async (selectedAstrologer, connectionType = null, isEmergency = false) => {
     console.log("[NormalFlow] 🎯 handleAfterKundliSelect called");
     console.log("[NormalFlow]   → astrologer:", selectedAstrologer?._id);
     console.log("[NormalFlow]   → connectionType:", connectionType || "chat");
+    console.log("[NormalFlow]   → isEmergency:", isEmergency);
 
     // Priority: 1) Header-selected kundli, 2) "self" relation, 3) first kundli
     let selectedKundli = null;
@@ -307,6 +328,7 @@ export const useAstrologerConnect = () => {
           userId: userIdLocal,
           astrologerId: astro._id,
           type: connectionType,
+          ...(isEmergency && { isEmergency: true }),
         };
         console.log("[NormalFlow] 📤 Emitting call:initiate");
         console.log("[NormalFlow]   → payload:", JSON.stringify(payload));
@@ -317,6 +339,7 @@ export const useAstrologerConnect = () => {
         const payload = {
           userId: userIdLocal,
           astrologerId: astro._id,
+          ...(isEmergency && { isEmergency: true }),
         };
         console.log("[NormalFlow] 📤 Emitting chat:initiate");
         console.log("[NormalFlow]   → payload:", JSON.stringify(payload));
