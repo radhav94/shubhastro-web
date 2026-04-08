@@ -14,6 +14,7 @@ import { useGetCallRecordingsQuery } from "../../../redux/api/callHistory/callHi
 import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
+import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import { useChat } from "../../../context/ChatContext";
 import { useCall } from "../../../context/CallContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
@@ -27,6 +28,7 @@ const OrderDetails = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [connectionType, setConnectionType] = useState(null);
   const [chatRoomIdLocal, setChatRoomIdLocal] = useState(null);
   const [callRoomIdLocal, setCallRoomIdLocal] = useState(null);
@@ -304,8 +306,17 @@ const OrderDetails = () => {
     });
   };
 
+  const handleConsultAgain = () => {
+    if (!astrologer?.isActive && astrologer?.isEmergencyAvailable) {
+      setShowEmergencyModal(true);
+    } else {
+      setIsConnectPopupOpen(true);
+    }
+  };
+
   const handleRateConsultation = (roomId) => {
     if (!astrologer) return;
+
     setReviewData({
       astrologerID: astrologer.astrologer_ID || astrologer._id,
       fullName: `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim(),
@@ -362,7 +373,7 @@ const OrderDetails = () => {
                 initialRating={rec.rating ?? null}
                 roomId={rec.roomId || rec.sessionId}
                 onRateConsultation={handleRateConsultation}
-                onConsultAgain={() => setIsConnectPopupOpen(true)}
+                onConsultAgain={handleConsultAgain}
               />
             ))}
           </div>
@@ -406,7 +417,7 @@ const OrderDetails = () => {
                 initialRating={rec.rating ?? null}
                 roomId={rec.roomId || rec.sessionId}
                 onRateConsultation={handleRateConsultation}
-                onConsultAgain={() => setIsConnectPopupOpen(true)}
+                onConsultAgain={handleConsultAgain}
               />
             ))}
           </div>
@@ -433,12 +444,40 @@ const OrderDetails = () => {
         onChatStart={async (astro) => {
           activeAstroRef.current = astro;
           setIsConnectPopupOpen(false);
-          return await handleChatStart(astro);
+          const result = await handleChatStart(astro);
+          if (result?.emergencyAvailable) {
+            setShowEmergencyModal(true);
+          }
+          return result;
         }}
         onCallStart={async (astro, type) => {
           activeAstroRef.current = astro;
           setIsConnectPopupOpen(false);
-          return await handleCallStart(astro, type);
+          const result = await handleCallStart(astro, type);
+          if (result?.emergencyAvailable) {
+            setShowEmergencyModal(true);
+          }
+          return result;
+        }}
+        onEmergencyAvailable={() => {
+          setIsConnectPopupOpen(false);
+          setShowEmergencyModal(true);
+        }}
+      />
+
+      <EmergencySessionModal
+        isOpen={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+        astrologer={astrologer}
+        onChatNow={(astro) => {
+          setShowEmergencyModal(false);
+          activeAstroRef.current = astro;
+          handleChatStart(astro, true, true);
+        }}
+        onCallNow={(astro) => {
+          setShowEmergencyModal(false);
+          activeAstroRef.current = astro;
+          handleCallStart(astro, "audio", true);
         }}
       />
     </div>

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { MessageSquare, Phone, Video, X } from "lucide-react";
 import styles from "./ConnectAstrologerPopup.module.css";
 
@@ -8,7 +9,17 @@ const ConnectAstrologerPopup = ({
   onChatStart,
   onCallStart,
   isEmergency = false,
+  onEmergencyAvailable,
 }) => {
+
+  // Auto-redirect to emergency modal if astrologer is offline but emergency is available
+  useEffect(() => {
+    if (!isOpen || !astrologer || isEmergency) return;
+    if (astrologer.isActive === false && astrologer.isEmergencyAvailable && onEmergencyAvailable) {
+      onClose();
+      onEmergencyAvailable(astrologer);
+    }
+  }, [isOpen, astrologer?.isActive, astrologer?.isEmergencyAvailable]);
 
   if (!isOpen) return null;
   const handleOverlayClick = (e) => {
@@ -32,17 +43,24 @@ const ConnectAstrologerPopup = ({
     if (type === "call" && !isCallAvailable) return;
     if (type === "video" && !isVideoAvailable) return;
 
-    let success = false;
+    let result = false;
 
     if (type === "chat") {
-      success = await onChatStart(astrologer, true, isEmergency);
+      result = await onChatStart(astrologer, true, isEmergency);
     } else if (type === "call") {
-      success = await onCallStart(astrologer, "audio", isEmergency);
+      result = await onCallStart(astrologer, "audio", isEmergency);
     } else if (type === "video") {
-      success = await onCallStart(astrologer, "video", isEmergency);
+      result = await onCallStart(astrologer, "video", isEmergency);
     }
 
-    if (success) {
+    // If astrologer is offline but emergency is available, notify parent
+    if (result?.emergencyAvailable) {
+      onClose();
+      onEmergencyAvailable?.(astrologer);
+      return;
+    }
+
+    if (result) {
       onClose();
     }
   };

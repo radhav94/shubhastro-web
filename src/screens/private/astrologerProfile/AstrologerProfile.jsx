@@ -290,7 +290,6 @@ const AstrologerProfile = () => {
       return;
     }
     
-    // Check if already in waiting state
     if (WaitingList || callWaitingList) {
       toast.error(
         "You are already waiting for an astrologer. Please cancel the current request first.",
@@ -300,6 +299,10 @@ const AstrologerProfile = () => {
     
     activeCallAstroRef.current = astro;
     const result = await hookHandleChatStart(astro, true, isEmergency);
+    if (result?.emergencyAvailable) {
+      setShowEmergencyModal(true);
+      return;
+    }
     return result;
   };
 
@@ -309,7 +312,6 @@ const AstrologerProfile = () => {
       return;
     }
     
-    // Check if already in waiting state
     if (WaitingList || callWaitingList) {
       toast.error(
         "You are already waiting for an astrologer. Please cancel the current request first.",
@@ -319,6 +321,10 @@ const AstrologerProfile = () => {
     
     activeCallAstroRef.current = astro;
     const result = await hookHandleCallStart(astro, type, isEmergency);
+    if (result?.emergencyAvailable) {
+      setShowEmergencyModal(true);
+      return;
+    }
     return result;
   };
 
@@ -1005,7 +1011,7 @@ const AstrologerProfile = () => {
                       <div className={styles.buttonWrapper}>
                         <button
                           className={styles.chatBtn}
-                          onClick={() => handleChatStart(astrologer, "chat")}
+                          onClick={() => handleChatStart(astrologer)}
                           disabled={!astrologer?.price?.chatRate?.amount}
                         >
                           <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
