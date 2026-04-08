@@ -175,13 +175,13 @@ const Profile = () => {
     isLoading: isLoadingCalls,
     isFetching: isFetchingCalls,
   } = useGetCallHistoryQuery(
-    { userId, page: callHistoryPage, limit: 10 },
+    { userId, page: callHistoryPage, limit: 12 },
     { skip: !userId },
   );
   console.log("callHistoryData",callHistoryData?.data?.callHistory)
 
   const { data: chatHistoryData, isLoading: isLoadingChats, isFetching: isFetchingChats } =
-    useGetUserChatMessagesQuery({ userId, page: chatHistoryPage, limit: 10 }, {
+    useGetUserChatMessagesQuery({ userId, page: chatHistoryPage, limit: 12 }, {
       skip: !userId,
     });
 

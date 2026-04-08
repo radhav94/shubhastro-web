@@ -17,6 +17,11 @@ const NewAstrologerDetailsCard = ({
 }) => {
   const isOnline = astrologer?.isActive === true;
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const activeTypes = astrologer?.isActiveType || [];
+  const chatPrice = astrologer?.price?.chatRate?.amount || 0;
+  const callPrice = astrologer?.price?.audioRate?.amount || 0;
+  const chatEnabled = isOnline && (activeTypes.includes("all") || activeTypes.includes("chat")) && chatPrice > 0;
+  const callEnabled = isOnline && (activeTypes.includes("all") || activeTypes.includes("audio")) && callPrice > 0;
 
   const hasEmergency = astrologer?.isEmergencyAvailable && (
     astrologer?.emergencyPrice?.chatRate?.amount > 0 || 
@@ -109,8 +114,8 @@ const NewAstrologerDetailsCard = ({
           <div className={styles.detailsButtonWrapper}>
             <button
               className={styles.detailsChatBtn}
-              onClick={() => isOnline && onConnect(astrologer, "chat")}
-              disabled={!isOnline}
+              onClick={() => chatEnabled && onConnect(astrologer, "chat")}
+              disabled={!chatEnabled}
             >
               <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
             </button>
@@ -125,8 +130,8 @@ const NewAstrologerDetailsCard = ({
           <div className={styles.detailsButtonWrapper}>
             <button
               className={styles.detailsCallBtn}
-              onClick={() => isOnline && onConnect(astrologer, "audio")}
-              disabled={!isOnline}
+              onClick={() => callEnabled && onConnect(astrologer, "audio")}
+              disabled={!callEnabled}
             >
               <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
             </button>

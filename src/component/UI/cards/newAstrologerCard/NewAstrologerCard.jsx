@@ -13,6 +13,11 @@ const NewAstrologerCard = ({
 }) => {
   const isOnline = astrologer?.isActive === true;
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const activeTypes = astrologer?.isActiveType || [];
+  const chatPrice = astrologer?.price?.chatRate?.amount || 0;
+  const callPrice = astrologer?.price?.audioRate?.amount || 0;
+  const chatEnabled = isOnline && (activeTypes.includes("all") || activeTypes.includes("chat")) && chatPrice > 0;
+  const callEnabled = isOnline && (activeTypes.includes("all") || activeTypes.includes("audio")) && callPrice > 0;
 
   const hasEmergency = astrologer?.isEmergencyAvailable && (
     astrologer?.emergencyPrice?.chatRate?.amount > 0 || 
@@ -85,25 +90,25 @@ const NewAstrologerCard = ({
         <div className={styles.buttonWrapper}>
           <button
             className={styles.chatBtn}
-            onClick={() => isOnline && onConnect(astrologer, "chat")}
-            disabled={!isOnline}
+            onClick={() => chatEnabled && onConnect(astrologer, "chat")}
+            disabled={!chatEnabled}
           >
             <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
           </button>
           <p className={styles.priceText}>
-            <span className={styles.priceAmount}>₹{astrologer?.price?.chatRate?.amount || 0}</span>/min
+            <span className={styles.priceAmount}>₹{chatPrice}</span>/min
           </p>
         </div>
         <div className={styles.buttonWrapper}>
           <button
             className={styles.callBtn}
-            onClick={() => isOnline && onConnect(astrologer, "audio")}
-            disabled={!isOnline}
+            onClick={() => callEnabled && onConnect(astrologer, "audio")}
+            disabled={!callEnabled}
           >
             <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
           </button>
           <p className={styles.priceText}>
-            <span className={styles.priceAmount}>₹{astrologer?.price?.audioRate?.amount || 0}</span>/min
+            <span className={styles.priceAmount}>₹{callPrice}</span>/min
           </p>
         </div>
       </div>

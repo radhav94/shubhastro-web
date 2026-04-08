@@ -436,8 +436,8 @@ const Explore = () => {
         // Explore Your Destiny section
         "Tarot": "/tarot",
         "Numerology": "/numerology",
-        "Gemstones": "/gemstones",
-        "Gemstone": "/gemstones",
+        "Gemstones": "/aiwow/gemstone-authenticity",
+        "Gemstone": "/aiwow/gemstone-authenticity",
       };
       
       redirectUrl = titleToRouteMap[card.title] || card.redirect_url || card.redirectUrl || card.url || card.link;
