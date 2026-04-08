@@ -67,3 +67,137 @@
   color: hsla(0, 1%, 33%, 0.418);
   margin-bottom: 1rem;
 }
+
+// Popular Add Ons Section
+.suggestionsSection {
+  padding: 24px 40px;
+  @media screen and (max-width: 772px) {
+    padding: 20px 16px;
+  }
+}
+
+.suggestionsTitle {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+  color: #1a1a1a;
+}
+
+.suggestionsGrid {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.suggestionCard {
+  min-width: 170px;
+  max-width: 180px;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f0f0f0;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #555;
+  font-weight: 500;
+  width: fit-content;
+  margin-bottom: 8px;
+}
+
+.badgeIcon {
+  font-size: 10px;
+}
+
+.suggestionImgWrap {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+}
+
+.suggestionName {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.suggestionCategory {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.suggestionPriceRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.suggestionPrice {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.suggestionMrp {
+  font-size: 13px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.addToCartBtn {
+  width: 100%;
+  padding: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 24px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: auto;
+
+  &:hover {
+    border-color: #999;
+    background: #fafafa;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
