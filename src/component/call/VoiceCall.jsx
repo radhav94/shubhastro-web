@@ -9,7 +9,7 @@ import {
   IoVolumeMute,
   IoCallSharp,
 } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./VoiceCall.module.scss";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
@@ -40,6 +40,8 @@ const AgoraVoiceCalling = ({ callData }) => {
   const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, setWaitingList, resetCallFlow, isCallMinimized, setIsCallMinimized, reconnectToCall } = useCall();
   const { activeChat } = useChatContext();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isOnLivePage = location.pathname.startsWith("/live");
 
   if (!activeCall || activeCall.callType !== "audio") {
     return null;
@@ -749,7 +751,7 @@ const AgoraVoiceCalling = ({ callData }) => {
   return (
     <>
       {/* MINI VIEW */}
-      {isMinimized && (
+      {isMinimized && !isOnLivePage && (
         <div
           className={styles.miniCall}
           style={{ top: position.y, left: position.x }}

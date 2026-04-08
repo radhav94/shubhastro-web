@@ -16,7 +16,7 @@ import {
   IoChatbubbleEllipses,
   IoCall,
 } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./VideoCalling.module.scss";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
@@ -45,6 +45,8 @@ const VideoCalling = ({ callData }) => {
   const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, reconnectToCall, isCallMinimized, setIsCallMinimized,setWaitingList } = useCall();
   const { activeChat } = useChatContext();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isOnLivePage = location.pathname.startsWith("/live");
 
   if (!activeCall || activeCall.callType !== "video") return null;
 
@@ -1037,7 +1039,7 @@ const VideoCalling = ({ callData }) => {
         style={{
           top: position.y,
           left: position.x,
-          display: isMinimized ? "block" : "none",
+          display: isMinimized && !isOnLivePage ? "block" : "none",
           transform: 'scaleX(-1)'
         }}
         onMouseDown={startDrag}

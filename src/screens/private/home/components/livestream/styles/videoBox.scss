@@ -199,6 +199,13 @@
   text-shadow: 0px 0px 2px black;
 }
 
+.host-name-truncate {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .host-subtitle {
   color: #fff;
   font-size: 11px;
@@ -229,6 +236,50 @@
 @keyframes livePulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
+}
+
+/* Minimized call pill on live stream */
+.live-call-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.live-call-pill-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  color: #f57c00;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.5px;
+}
+
+.live-call-pill-end {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ef5350;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.15s;
+
+  &:hover {
+    background: #c62828;
+    transform: scale(1.05);
+  }
 }
 
 .follow-btn {
