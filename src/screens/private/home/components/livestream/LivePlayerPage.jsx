@@ -113,6 +113,7 @@ const LivePlayerPage = () => {
         audioCallRate: l.astrologer?.price?.audioRate?.amount,
         videoCallRate: l.astrologer?.price?.videoCallRate?.amount,
         uid: l.uid,
+        startedAt: l.startedAt,
       }))}
       autoStartIndex={autoStartIndex}
     >

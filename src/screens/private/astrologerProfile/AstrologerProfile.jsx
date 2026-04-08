@@ -1032,6 +1032,16 @@ const AstrologerProfile = () => {
           <div className={styles.profileContentMain}>
             {/* Profile Card */}
             <div className={styles.profileCard}>
+              {data?.astrologerLiveStatus?.isLive && (
+                <button
+                  className={styles.liveIndicator}
+                  onClick={() => navigate(`/live/${data?.astrologerLiveStatus?.roomId || data?._id}`)}
+                  aria-label="Astrologer is live, click to watch"
+                >
+                  <span className={styles.liveDot}></span>
+                  LIVE
+                </button>
+              )}
               <div className={styles.profileImageWrapper}>
                 <img
                   src={displayData.imageUrl}

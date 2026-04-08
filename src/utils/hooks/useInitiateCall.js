@@ -44,6 +44,13 @@ export const useInitiateCall = () => {
       return;
     }
 
+    // 🔴 Check if astrologer is currently on a live stream
+    const liveStatus = res?.data?.data?.astrologerLiveStatus;
+    if (liveStatus?.isLive) {
+      Toast.error("Currently unavailable during live stream.");
+      return;
+    }
+
     // 📞 Already on call
     if (activeCall) {
       return Toast.error("You are already on a call");

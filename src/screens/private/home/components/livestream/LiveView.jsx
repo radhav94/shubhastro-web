@@ -86,20 +86,27 @@ const LiveView = (props) => {
   }, [remoteUsers?.length, hostLeft, roomEnded, props.channel]);
 
   // Live duration timer — ticks every second while stream is active
+  // Use startedAt from REST API (api/users/live-users)
+  const effectiveStartedAt = astrologer?.startedAt ? new Date(astrologer.startedAt).getTime() : null;
+
   useEffect(() => {
-    if (!liveStartedAt) return;
+    if (!effectiveStartedAt) return;
     const tick = () => {
-      const elapsed = Math.floor((Date.now() - liveStartedAt) / 1000);
+      const elapsed = Math.floor((Date.now() - effectiveStartedAt) / 1000);
       const hrs = Math.floor(elapsed / 3600);
       const mins = Math.floor((elapsed % 3600) / 60);
       const secs = elapsed % 60;
       const pad = (n) => String(n).padStart(2, "0");
-      setLiveDuration(hrs > 0 ? `${pad(hrs)}:${pad(mins)}:${pad(secs)}` : `${pad(mins)}:${pad(secs)}`);
+      if (hrs > 0) {
+        setLiveDuration(`${pad(hrs)}:${pad(mins)} h`);
+      } else {
+        setLiveDuration(`${pad(mins)}:${pad(secs)} m`);
+      }
     };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [liveStartedAt]);
+  }, [effectiveStartedAt]);
 
   const { 
     activeCall, 
@@ -729,13 +736,13 @@ const LiveView = (props) => {
           {/* NEW BOTTOM ACTION BAR - only show when astrologer is live */}
           {isAstrologerLive && (
           <div className="right-action-bar">
-            {/* Timer / Stopwatch */}
-            <button className="icon-btn">
+            {/* Timer / Stopwatch - commented out, using host-info bar timer instead */}
+            {/* <button className="icon-btn">
               <div className="icon-circle">
                 <img src={AppImages.LiveIcon} alt="Timer" width="28" height="28" />
               </div>
               <span className="icon-label">{liveDuration}</span>
-            </button>
+            </button> */}
 
             {/* Viewers */}
             <div className="icon-btn viewer-icon-btn" style={{ cursor: "default" }}>
