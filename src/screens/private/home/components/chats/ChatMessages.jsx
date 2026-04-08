@@ -175,27 +175,43 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
       return (
         <div className={styles.productsMessage}>
           {msg.text && <p className={styles.productsNote}>{msg.text}</p>}
-          {products.map((p) => (
-            <div key={p.productId} className={styles.productItem} onClick={() => p.slug && navigate(`/product-details/${p.slug}`)}>
-              {(p.image || p.images?.[0]) && (
-                <img src={p.image || p.images?.[0]} alt={p.title} className={styles.productThumb} onError={(e) => { e.target.style.display = "none"; }} />
+          {products.map((p, idx) => (
+            <div key={p.variantId || p.productId || idx} className={styles.productItem} onClick={() => {
+              if (!p?.slug) return;
+              navigate(`/product-details/${p.slug}`, {
+                state: {
+                  _selectedVariant: p.variantId ? {
+                    _id: p.variantId,
+                    skuCode: p.variantSkuCode,
+                    sku: p.variantSkuCode,
+                  } : undefined,
+                },
+              });
+            }}>
+              {(p.variantImage || p.image || p.images?.[0]) && (
+                <img src={p.variantImage || p.image || p.images?.[0]} alt={p.title || "Product"} className={styles.productThumb} onError={(e) => { e.target.style.display = "none"; }} />
               )}
               <div className={styles.productMeta}>
-                <span className={styles.productName}>{p.title}</span>
+                <span className={styles.productName}>{p.title || "Suggested Product"}</span>
+                {p.variantTitle && (
+                  <span className={styles.productVariant}>{p.variantTitle}</span>
+                )}
                 {p.short_description && (
                   <span className={styles.productDesc}>{p.short_description}</span>
                 )}
-                <span className={styles.productPrice}>
-                  ₹{p.price}
-                  {p.mrp && p.mrp > p.price && (
-                    <s className={styles.productMrp}>₹{p.mrp}</s>
-                  )}
-                  {p.mrp && p.mrp > p.price && (
-                    <span className={styles.productDiscount}>
-                      {Math.round(((p.mrp - p.price) / p.mrp) * 100)}% off
-                    </span>
-                  )}
-                </span>
+                {(p.variantPrice != null || p.price != null) && (
+                  <span className={styles.productPrice}>
+                    ₹{p.variantPrice ?? p.price}
+                    {(p.variantMrp || p.mrp) && (p.variantMrp || p.mrp) > (p.variantPrice ?? p.price) && (
+                      <>
+                        <s className={styles.productMrp}>₹{p.variantMrp || p.mrp}</s>
+                        <span className={styles.productDiscount}>
+                          {Math.round((((p.variantMrp || p.mrp) - (p.variantPrice ?? p.price)) / (p.variantMrp || p.mrp)) * 100)}% off
+                        </span>
+                      </>
+                    )}
+                  </span>
+                )}
               </div>
             </div>
           ))}

@@ -542,6 +542,7 @@ const Profile = () => {
           kundliId,
           astrologerName: data?.astrologer?.firstName || "",
           remainingTime: data?.remainingTime,
+          isEmergency: data?.isEmergency || false,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 
@@ -570,6 +571,7 @@ const Profile = () => {
       type,
       remainingTime,
       isSwitch,
+      ...rest
     }) => {
       // If there's an active audio call and this is a video acceptance, it's an upgrade — let CallContext handle it
       if (type === "video" && activeCall && activeCall.callType === "audio") {
@@ -623,6 +625,7 @@ const Profile = () => {
           kundliId,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
+          isEmergency: rest?.isEmergency || false,
         });
       } catch (error) {
         console.error("Call accepted error:", error);
@@ -1394,7 +1397,7 @@ const Profile = () => {
                   .map((year) => (
                     <div key={year} className={styles.yearSection}>
                       <h4 className={styles.yearTitle}>{year}</h4>
-
+                      <div className={styles.orderCardMain}>
                       {ordersByYear[year].map((order) => (
                         <div 
                           key={order.id} 
@@ -1479,6 +1482,7 @@ const Profile = () => {
                           </div>
                         </div>
                       ))}
+                      </div>
                     </div>
                   ))}
 

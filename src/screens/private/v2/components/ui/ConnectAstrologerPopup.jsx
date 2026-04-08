@@ -7,6 +7,7 @@ const ConnectAstrologerPopup = ({
   astrologer,
   onChatStart,
   onCallStart,
+  isEmergency = false,
 }) => {
 
   if (!isOpen) return null;
@@ -16,15 +17,17 @@ const ConnectAstrologerPopup = ({
     }
   };
 
-  // Check if service is available (if price data exists, check amount; if no price data, assume available)
-  const isChatAvailable = astrologer?.price ? astrologer.price.chatRate?.amount > 0 : true;
-  const isCallAvailable = astrologer?.price ? astrologer.price.audioRate?.amount > 0 : true;
-  const isVideoAvailable = astrologer?.price ? astrologer.price.videoCallRate?.amount > 0 : true;
+  // Use emergency pricing if in emergency mode
+  const pricing = isEmergency ? astrologer?.emergencyPrice : astrologer?.price;
+
+  // Check if service is available
+  const isChatAvailable = pricing ? pricing.chatRate?.amount > 0 : true;
+  const isCallAvailable = pricing ? pricing.audioRate?.amount > 0 : true;
+  const isVideoAvailable = pricing ? pricing.videoCallRate?.amount > 0 : true;
 
   const handleConnect = async (type) => {
     if (!astrologer) return;
 
-    // Prevent action if service is not available
     if (type === "chat" && !isChatAvailable) return;
     if (type === "call" && !isCallAvailable) return;
     if (type === "video" && !isVideoAvailable) return;
@@ -32,11 +35,11 @@ const ConnectAstrologerPopup = ({
     let success = false;
 
     if (type === "chat") {
-      success = await onChatStart(astrologer);
+      success = await onChatStart(astrologer, true, isEmergency);
     } else if (type === "call") {
-      success = await onCallStart(astrologer, "audio");
+      success = await onCallStart(astrologer, "audio", isEmergency);
     } else if (type === "video") {
-      success = await onCallStart(astrologer, "video");
+      success = await onCallStart(astrologer, "video", isEmergency);
     }
 
     if (success) {
@@ -51,7 +54,7 @@ const ConnectAstrologerPopup = ({
 
         <div className={styles.header}>
           <h2 className={styles.title}>
-            Connect with {astrologer?.firstName || "Astrologer"}
+            {isEmergency ? "Emergency Connect" : "Connect with"} {astrologer?.firstName || "Astrologer"}
           </h2>
           <button className={styles.closeButton} onClick={onClose}>
             <X size={24} />
@@ -68,7 +71,7 @@ const ConnectAstrologerPopup = ({
               <MessageSquare size={32} strokeWidth={2} />
             </div>
             <h3 className={styles.optionTitle}>Chat</h3>
-            <p className={styles.optionPrice}>₹{astrologer?.price?.chatRate?.amount || 0}/{astrologer?.price?.chatRate?.unit || 'minute'}</p>
+            <p className={styles.optionPrice}>₹{pricing?.chatRate?.amount || 0}/{pricing?.chatRate?.unit || 'minute'}</p>
           </div>
 
           {/* Call Option */}
@@ -80,7 +83,7 @@ const ConnectAstrologerPopup = ({
               <Phone size={32} strokeWidth={2} />
             </div>
             <h3 className={styles.optionTitle}>Call</h3>
-            <p className={styles.optionPrice}>₹{astrologer?.price?.audioRate?.amount || 0}/{astrologer?.price?.audioRate?.unit || 'minute'}</p>
+            <p className={styles.optionPrice}>₹{pricing?.audioRate?.amount || 0}/{pricing?.audioRate?.unit || 'minute'}</p>
           </div>
 
           {/* Video Call Option */}
@@ -92,7 +95,7 @@ const ConnectAstrologerPopup = ({
               <Video size={32} strokeWidth={2} />
             </div>
             <h3 className={styles.optionTitle}>Video call</h3>
-            <p className={styles.optionPrice}>₹{astrologer?.price?.videoCallRate?.amount || 0}/{astrologer?.price?.videoCallRate?.unit || 'minute'}</p>
+            <p className={styles.optionPrice}>₹{pricing?.videoCallRate?.amount || 0}/{pricing?.videoCallRate?.unit || 'minute'}</p>
           </div>
         </div>
       </div>

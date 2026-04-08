@@ -48,6 +48,15 @@
       background: inherit;
     }
   }
+
+  .emergencyBtn {
+    opacity: 1;
+    cursor: pointer;
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+  }
 }
 
 .statusBadge {
@@ -295,6 +304,40 @@
   }
 }
 
+.emergencyBtn {
+  background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    background: linear-gradient(90deg, #b91c1c 0%, #991b1b 100%) !important;
+  }
+}
+
+.emergencyButtonWrapper {
+  width: 100%;
+}
+
+.emergencySingleBtn {
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+  }
+}
+
 .priceText {
   font-family: "Poppins", sans-serif;
   font-size: 12px;
@@ -377,6 +420,15 @@
       transform: none;
       box-shadow: none;
       background: inherit;
+    }
+  }
+
+  .emergencyBtn {
+    opacity: 1;
+    cursor: pointer;
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
     }
   }
 }

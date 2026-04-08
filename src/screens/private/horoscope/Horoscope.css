@@ -246,6 +246,8 @@
   display: flex;
   border-bottom: 1px solid #e8e8e8;
   gap: 0;
+  overflow: auto;
+  margin-top: 5px;
 }
 
 .time-tab {
@@ -261,7 +263,7 @@
   transition: all 0.2s ease;
   white-space: nowrap;
   position: relative;
-  margin-bottom: -1px;
+  /* margin-bottom: -1px; */
 }
 .time-tab.active {
   color: #F75801;
