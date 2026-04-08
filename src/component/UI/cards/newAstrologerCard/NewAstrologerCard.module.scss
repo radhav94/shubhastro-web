@@ -42,16 +42,13 @@
   .callBtn {
     opacity: 0.5;
     cursor: not-allowed;
-    &:hover {
-      transform: none;
-      box-shadow: none;
-      background: inherit;
-    }
+    // pointer-events: none;
   }
 
   .emergencyBtn {
     opacity: 1;
     cursor: pointer;
+    pointer-events: auto;
     &:hover {
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
@@ -258,9 +255,15 @@
     img{display: none;}
   }
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: #fff5ec;
     transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
   }
 }
 
@@ -298,9 +301,15 @@
     img{display: none;}
   }
 
-  &:hover {
+  &:hover:not(:disabled) {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
   }
 }
 
@@ -416,16 +425,13 @@
   .detailsCallBtn {
     opacity: 0.5;
     cursor: not-allowed;
-    &:hover {
-      transform: none;
-      box-shadow: none;
-      background: inherit;
-    }
+    // pointer-events: none;
   }
 
   .emergencyBtn {
     opacity: 1;
     cursor: pointer;
+    pointer-events: auto;
     &:hover {
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
