@@ -29,6 +29,7 @@ import { useCall } from "../../../context/CallContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import ConnectAstrologerPopup from "../../private/v2/components/ui/ConnectAstrologerPopup";
+import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
@@ -84,6 +85,7 @@ const Profile = () => {
 
   // Connect popup state
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
   const [selectedAstrologerId, setSelectedAstrologerId] = useState(null);
   const [callRoomId, setCallRoomId] = useState(null);
@@ -91,14 +93,15 @@ const Profile = () => {
   const [connectionType, setConnectionType] = useState(null);
   const activeAstroRef = useRef(null);
 
-  // Fetch latest astrologer details when selected (for dynamic pricing)
+  // Fetch latest astrologer details when selected
   const {
     data: latestAstrologerData,
     isLoading: isLoadingAstrologer,
     isFetching: isFetchingAstrologer,
+    refetch: refetchAstrologer,
   } = useGetAstrologerByIdQuery(
     { id: selectedAstrologerId },
-    { skip: !selectedAstrologerId }
+    { skip: !selectedAstrologerId, refetchOnMountOrArgChange: true }
   );
 
   // Update activeAstroRef when latest astrologer data is fetched
@@ -729,7 +732,6 @@ const Profile = () => {
   // Handle connect button click
   const handleConnectClick = (astrologer) => {
     console.log("astrologer", astrologer);
-    // Check if already in waiting state
     if (WaitingList || callWaitingList) {
       Toast.error(
         "You are already waiting for an astrologer. Please cancel the current request first.",
@@ -737,11 +739,15 @@ const Profile = () => {
       return;
     }
 
-    // Set the astrologer ID to trigger fetching latest details
     setSelectedAstrologerId(astrologer._id);
-    setSelectedAstrologer(astrologer); // Keep basic info for immediate display
+    setSelectedAstrologer(astrologer);
     activeAstroRef.current = astrologer;
     setIsConnectPopupOpen(true);
+
+    // Force refetch if same astrologer is selected again
+    if (selectedAstrologerId === astrologer._id) {
+      refetchAstrologer();
+    }
   };
 
   // Handle rate consultation button click
@@ -1573,6 +1579,50 @@ const Profile = () => {
                             ₹{transaction?.billing?.user?.debitAmount}
                           </span>
                         </div>
+                        <button
+                          className={styles.downloadInvoiceBtn}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const url = `https://devapi-shubhtalk.epicon.in/api/transactions/invoice?transactionId=${transaction._id}`;
+                            console.log("[Invoice] Fetching:", url);
+                            console.log("[Invoice] Transaction ID:", transaction._id);
+                            try {
+                              const token = localStorage.getItem("shubhtalk_customer_token");
+                              console.log("[Invoice] Token:", token ? "present" : "MISSING");
+                              const res = await fetch(url, {
+                                headers: {
+                                  accept: "application/json",
+                                  Authorization: `Bearer ${token}`,
+                                },
+                              });
+                              console.log("[Invoice] Status:", res.status);
+                              if (!res.ok) {
+                                console.log("[Invoice] API returned", res.status);
+                                Toast.error("Invoice not available for this transaction");
+                                return;
+                              }
+                              const data = await res.json();
+                              console.log("[Invoice] Response:", JSON.stringify(data));
+                              const pdfUrl = data?.data?.pdfUrl || data?.data?.url || data?.data || data?.pdfUrl || data?.url;
+                              if (pdfUrl) {
+                                console.log("[Invoice] Opening PDF:", pdfUrl);
+                                window.open(pdfUrl, "_blank");
+                              } else {
+                                console.log("[Invoice] No PDF URL found in response");
+                                Toast.error("Invoice not available");
+                              }
+                            } catch (err) {
+                              console.error("[Invoice] Error:", err);
+                              Toast.error("Failed to download invoice");
+                            }
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                          </svg>
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -1753,6 +1803,26 @@ const Profile = () => {
         isLoadingAstrologer={isLoadingAstrologer || isFetchingAstrologer}
         onChatStart={handleChatStart}
         onCallStart={handleCallStart}
+        onEmergencyAvailable={() => {
+          setIsConnectPopupOpen(false);
+          setShowEmergencyModal(true);
+        }}
+      />
+
+      <EmergencySessionModal
+        isOpen={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+        astrologer={latestAstrologerData?.data || selectedAstrologer}
+        onChatNow={(astro) => {
+          setShowEmergencyModal(false);
+          activeAstroRef.current = astro;
+          handleChatStart(astro, true);
+        }}
+        onCallNow={(astro) => {
+          setShowEmergencyModal(false);
+          activeAstroRef.current = astro;
+          handleCallStart(astro, "audio", true);
+        }}
       />
 
 

@@ -37,19 +37,23 @@
 }
 
 .backButton {
-  background: none;
-  border: 1px solid #ff6b35;
-  color: #ff6b35;
+  background: rgb(255, 244, 236);
+  border: none;
+  color: #D43400;
   cursor: pointer;
-  padding: 8px;
+  padding: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s;
+  border-radius: 8px;
   width: 40px;
   height: 40px;
-  flex-shrink: 0;
+  border: 1px solid #D43400;
+  transition: all 0.2s ease;
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
 
   &:hover {
     background: #fef5f2;

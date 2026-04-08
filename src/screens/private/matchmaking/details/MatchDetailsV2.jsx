@@ -140,12 +140,12 @@ const MatchDetailsV2 = () => {
   return (
     <div className="bg-[#F7F7F7] min-h-screen flex flex-col items-center font-sans">
       {/* Header with Back Button and Title */}
-      <div className="w-full bg-white sticky top-0 z-50 shadow-sm">
-        <div className="w-full px-4 py-3 md:py-4">
+      <div className={styles.headerWrap}>
+        <div className={styles.header}>
           <div className="flex items-center gap-4">
             <button 
               onClick={handleBack}
-              className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 hover:shadow-md transition-shadow"
+              className={styles.backButton}
               aria-label="Go back"
             >
               <ChevronLeft size={24} className="text-[#FF6A3D]" />
@@ -155,8 +155,8 @@ const MatchDetailsV2 = () => {
         </div>
       </div>
 
-      <div className="w-full p-4">{/* Total Score Card */}
-      <div className="bg-white w-full md:max-w-6xl mx-auto rounded-xl shadow-md p-6 mb-4 text-center">
+      <div className={styles.containerCom}>{/* Total Score Card */}
+      <div className="bg-white mx-auto rounded-xl shadow-md p-6 mb-4 text-center">
         {/* Score Box */}
         <KundliSummary score={matchingDetails?.score} total={36} />
         {/* Description */}
@@ -165,7 +165,7 @@ const MatchDetailsV2 = () => {
         </div>
       </div>
       {/* Mutual Influence Cards */}
-      <div className="w-full p-6 flex flex-col items-center">
+      <div className="w-full">
 
         <div className={styles.compatibilityTitle}>
           <h1>Compatibility Breakdown</h1>
@@ -188,7 +188,7 @@ const MatchDetailsV2 = () => {
           </div>
         </div>
 
-        <div className="w-full md:max-w-8xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="w-full md:max-w-8xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
           <DynamicTable
               data={response}
             />

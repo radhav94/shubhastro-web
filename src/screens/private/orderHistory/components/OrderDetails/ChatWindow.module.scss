@@ -1,6 +1,6 @@
 .chatWindow {
   background-color: #f3f4f6;
-  padding: 20px 20px 40px;
+  padding: 0px 20px 40px;
   min-height: 400px;
 
   @media (max-width: 639px) {
@@ -18,11 +18,10 @@
 }
 
 .chatSession {
-  margin-bottom: 40px;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
+  background-color: #fff;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 1rem;
 }
 
 .sessionHeader {

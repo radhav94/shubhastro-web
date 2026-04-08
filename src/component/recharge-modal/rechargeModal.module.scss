@@ -25,7 +25,7 @@
   background: #ffffff;
   border-radius: 20px;
   width: 100%;
-  max-width: 720px;
+  max-width: 900px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -471,6 +471,11 @@
 .emptyIcon { margin-bottom: 16px; opacity: 0.5; }
 .emptyMessage { font-size: 16px; color: #9ca3af; margin: 0; }
 
+@media (width <= 820px) {
+  .plansContainer {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
 
 // ─── Responsive: Mobile (max-width: 640px) ───
 @media (max-width: 640px) {
@@ -535,7 +540,7 @@
 
   // Mobile: 4 columns
   .plansContainer {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
   }
 
@@ -610,9 +615,9 @@
 
 // ─── Responsive: Tablet (641px – 1024px) ───
 @media (min-width: 641px) and (max-width: 1024px) {
-  .plansContainer {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  // .plansContainer {
+  //   grid-template-columns: repeat(3, 1fr);
+  // }
 
   .loadingContainer {
     grid-template-columns: repeat(3, 1fr);

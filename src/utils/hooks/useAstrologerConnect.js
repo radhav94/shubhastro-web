@@ -159,6 +159,12 @@ export const useAstrologerConnect = () => {
         });
         
         if (!isEmergency && (!isActive || !isActiveForChat)) {
+          // Check if emergency is available — must be explicitly true
+          const isEmergencyAvailable = balanceData?.availability?.isEmergencyAvailable === true || balanceData?.isEmergencyAvailable === true;
+          if (isEmergencyAvailable) {
+            console.log("[NormalFlow] 🚨 Astrologer offline but emergency available");
+            return { emergencyAvailable: true, astrologer: astro };
+          }
           console.log("[NormalFlow] ❌ Astrologer not available for chat");
           Toast.error("Astrologer is not available for chat");
           return false;
@@ -237,6 +243,12 @@ export const useAstrologerConnect = () => {
       });
       
       if (!isEmergency && (!isActive || !isActiveForCallType)) {
+        // Check if emergency is available — must be explicitly true
+        const isEmergencyAvailable = balanceData?.availability?.isEmergencyAvailable === true || balanceData?.isEmergencyAvailable === true;
+        if (isEmergencyAvailable) {
+          console.log("[NormalFlow] 🚨 Astrologer offline but emergency available");
+          return { emergencyAvailable: true, astrologer: astro, callType: type };
+        }
         const callTypeLabel = type === "audio" ? "voice call" : "video call";
         console.log("[NormalFlow] ❌ Astrologer not available for", callTypeLabel);
         Toast.error(`Astrologer is not available for ${callTypeLabel}`);
