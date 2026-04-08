@@ -17,13 +17,11 @@ const MySessionsSection = ({ onConnectClick }) => {
   });
   const sessions = data?.data?.recentSessions || [];
 
-  const handleCallAgain = (session,connectionType) => {
+  const handleCallAgain = (session, connectionType, isEmergency = false) => {
     if (onConnectClick) {
-      // If session has full astrologer object, use it
       if (session.astrologer) {
-        onConnectClick(session.astrologer,connectionType);
+        onConnectClick(session.astrologer, connectionType, isEmergency);
       } else if (session.astrologerId || session.astrologerName) {
-        // Otherwise, construct astrologer object from session data
         const astrologer = {
           _id: session._id,
           firstName:
@@ -32,11 +30,9 @@ const MySessionsSection = ({ onConnectClick }) => {
             "Astrologer",
           lastName: session.astrologerName?.split(" ").slice(1).join(" ") || "",
           imageUrl: session.astrologerImage,
-          isActive:session.isActive,
+          isActive: session.isActive,
         };
-        onConnectClick(astrologer,connectionType);
-      } else {
-        console.error("Session data missing astrologer information:", session);
+        onConnectClick(astrologer, connectionType, isEmergency);
       }
     }
   };

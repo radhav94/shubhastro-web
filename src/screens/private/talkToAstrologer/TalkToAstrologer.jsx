@@ -35,6 +35,7 @@ import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
 import ChatAstrologerCard from "../../../component/UI/cards/ChatAstrologerCard";
 import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
+import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 // COMMENTED OUT: Replaced with NewAstrologerCard
 // import RecommendedAstrologerCard from "../../../component/UI/cards/RecommendedAstrologerCard";
 // import TopAstrologerCard from "../../../component/UI/cards/TopAstrologerCard";
@@ -60,6 +61,7 @@ const TalkToAstrologer = () => {
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showRecommend, setShowRecommend] = useState(true);
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [showFilterAstrologer, setShowFilterAstrologer] = useState(false);
 
   const { data: astroFilterTab, isFetchingFilterTab } = useGetAstrologerFilterCategoryTabQuery();
@@ -433,9 +435,8 @@ const TalkToAstrologer = () => {
 
   // Handle connect button click - reused from Home page
   // Receives connectionType (chat or audio) from NewAstrologerCard
-  const handleConnectClick = (astrologer, connectionType, isEmergency = false) => {
-    // Check if user is logged in
-     if (!requireAuth()) return;
+  const handleConnectClick = async (astrologer, connectionType, isEmergency = false) => {
+    if (!requireAuth()) return;
 
     if (WaitingList || callWaitingList) {
       Toast.error(
@@ -447,26 +448,21 @@ const TalkToAstrologer = () => {
     setSelectedAstrologer(astrologer);
     activeCallAstroRef.current = astrologer;
 
-    // NEW FLOW: Check if kundli is available and directly initiate connection
     if (hasKundli) {
+      let result;
       if (connectionType === "chat") {
-        hookHandleChatStart(astrologer, true, isEmergency);
+        result = await hookHandleChatStart(astrologer, true, isEmergency);
       } else if (connectionType === "audio") {
-        hookHandleCallStart(astrologer, "audio", isEmergency);
+        result = await hookHandleCallStart(astrologer, "audio", isEmergency);
+      }
+      if (result?.emergencyAvailable) {
+        setShowEmergencyModal(true);
+        return;
       }
     } else {
       setPendingConnectionType(connectionType);
       hookSetOpenModal((prev) => ({ ...prev, kundli: true }));
     }
-
-    // OLD FLOW (commented out for reference):
-    // This was the inline logic that directly called hookHandleChatStart/hookHandleCallStart
-    // without checking login status or waiting list
-    // if (type === "chat") {
-    //   hookHandleChatStart(astrologer, true);
-    // } else if (type === "audio") {
-    //   hookHandleCallStart(astrologer, "audio");
-    // }
   };
 
   /* ------------------- SOCKET CALL FLOW (ADDED ONLY) ------------------- */
@@ -1111,6 +1107,18 @@ const TalkToAstrologer = () => {
         astrologer={selectedAstrologer}
         onChatStart={hookHandleChatStart}
         onCallStart={hookHandleCallStart}
+        onEmergencyAvailable={() => {
+          setIsConnectPopupOpen(false);
+          setShowEmergencyModal(true);
+        }}
+      />
+
+      <EmergencySessionModal
+        isOpen={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+        astrologer={selectedAstrologer}
+        onChatNow={(astro) => handleConnectClick(astro, "chat", true)}
+        onCallNow={(astro) => handleConnectClick(astro, "audio", true)}
       />
     </div>
   );

@@ -1,8 +1,10 @@
-import { ChevronLeft, MessageSquareText, AlertCircle, ChevronRight, Send } from "lucide-react";
+import { ChevronLeft, MessageSquareText, AlertCircle, ChevronRight, Send, Paperclip, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useGetTicketByIdQuery, useReplyToTicketMutation } from "../../../redux/api/supportApi/supportApi";
+import { useGetS3SignedUrlMutation } from "../../../redux/api/s3SignedApi";
+import { Toast } from "../../../component/index";
 import RatingCard from "./RatingCard";
 import styles from "./TicketDetails.module.scss";
 
@@ -10,10 +12,14 @@ const TicketDetails = () => {
   const navigate = useNavigate();
   const { ticketId } = useParams();
   const [replyText, setReplyText] = useState("");
+  const [attachments, setAttachments] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
   const chatEndRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const { data: ticketData, isLoading, refetch } = useGetTicketByIdQuery(ticketId);
   const [replyToTicket, { isLoading: isSending }] = useReplyToTicketMutation();
+  const [getS3SignedUrl] = useGetS3SignedUrlMutation();
   const ticket = ticketData?.data || {};
 
   const formatTime = (dateStr) => {
@@ -34,14 +40,59 @@ const TicketDetails = () => {
 
   const handleSendReply = async () => {
     const text = replyText.trim();
-    if (!text || isSending) return;
+    if ((!text && attachments.length === 0) || isSending) return;
     try {
-      await replyToTicket({ ticketId: ticket._id || ticketId, message: text }).unwrap();
+      const body = { message: text || "Attachment", isUserMessage: true };
+      if (attachments.length > 0) {
+        body.attachments = attachments;
+      }
+      await replyToTicket({ ticketId: ticket._id || ticketId, ...body }).unwrap();
       setReplyText("");
+      setAttachments([]);
       refetch();
     } catch {
       // handled by privateRequestNew
     }
+  };
+
+  const handleFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+
+    if (file.size > 10 * 1024 * 1024) {
+      Toast.error("File size must be under 10MB");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const fileType = ext ? `application/${ext}` : file.type;
+      const signedUrl = await getS3SignedUrl({ fileType }).unwrap();
+      const uploadUrl = signedUrl.uploadUrl;
+      const fileUrl = uploadUrl.split("?")[0];
+
+      const res = await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+      if (!res.ok) throw new Error("Upload failed");
+
+      setAttachments((prev) => [
+        ...prev,
+        { url: fileUrl, fileName: file.name, fileType: file.type, fileSize: file.size },
+      ]);
+    } catch {
+      Toast.error("Failed to upload file");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeAttachment = (index) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleKeyDown = (e) => {
@@ -156,6 +207,21 @@ const TicketDetails = () => {
               }`}
             >
               <p className={styles.messageText}>{message.messageText || message.text}</p>
+              {message.attachments?.length > 0 && (
+                <div className={styles.msgAttachments}>
+                  {message.attachments.map((att, ai) => (
+                    att.fileType?.startsWith("image/") ? (
+                      <a key={ai} href={att.url} target="_blank" rel="noreferrer">
+                        <img src={att.url} alt={att.fileName} className={styles.msgAttachImg} />
+                      </a>
+                    ) : (
+                      <a key={ai} href={att.url} target="_blank" rel="noreferrer" className={styles.msgAttachFile}>
+                        📎 {att.fileName}
+                      </a>
+                    )
+                  ))}
+                </div>
+              )}
             </div>
             <span className={styles.msgTime}>{formatTime(message.createdAt)}</span>
           </motion.div>
@@ -188,23 +254,54 @@ const TicketDetails = () => {
           )
         ) : (
           <div className={styles.replyBar}>
-            <input
-              type="text"
-              className={styles.replyInput}
-              placeholder="Type your reply..."
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={isSending}
-            />
-            <button
-              className={styles.sendButton}
-              onClick={handleSendReply}
-              disabled={!replyText.trim() || isSending}
-              aria-label="Send reply"
-            >
-              <Send size={20} />
-            </button>
+            {attachments.length > 0 && (
+              <div className={styles.attachmentPreview}>
+                {attachments.map((att, i) => (
+                  <div key={i} className={styles.attachmentChip}>
+                    <span className={styles.attachmentName}>{att.fileName}</span>
+                    <button className={styles.attachmentRemove} onClick={() => removeAttachment(i)}><X size={14} /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className={styles.replyInputRow}>
+              <button
+                className={styles.attachButton}
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                aria-label="Attach file"
+              >
+                {isUploading ? (
+                  <span className={styles.uploadingDot}>...</span>
+                ) : (
+                  <Paperclip size={20} />
+                )}
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                accept="image/*,.pdf,.doc,.docx"
+                onChange={handleFileSelect}
+              />
+              <input
+                type="text"
+                className={styles.replyInput}
+                placeholder="Type your reply..."
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={isSending}
+              />
+              <button
+                className={styles.sendButton}
+                onClick={handleSendReply}
+                disabled={(!replyText.trim() && attachments.length === 0) || isSending}
+                aria-label="Send reply"
+              >
+                <Send size={20} />
+              </button>
+            </div>
           </div>
         )}
       </motion.div>

@@ -7,6 +7,7 @@ import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect"
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import { useAstrologerConnection } from "./hooks/useAstrologerConnection";
 import ConnectAstrologerPopup from "../../private/v2/components/ui/ConnectAstrologerPopup";
+import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import ProfileModals from "../../private/kundli/components/ProfileModals";
 import BottomNavigation from "./components/BottomNavigation";
 import { renderSection, sortSectionsByOrder } from "./utils/sectionMapper";
@@ -20,6 +21,7 @@ const Home = () => {
   // COMMENTED OUT: No longer using ConnectAstrologerPopup
   // const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   
   // NEW: Store the connection type when opening ProfileManager
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
@@ -114,9 +116,8 @@ const Home = () => {
   };
 
   // Handle connect button click - now receives connectionType (chat or audio)
-  const handleConnectClick = (astrologer, connectionType) => {
-    // Check if user is logged in
-     if (!requireAuth()) return;
+  const handleConnectClick = async (astrologer, connectionType, isEmergency = false) => {
+    if (!requireAuth()) return;
     
     if (WaitingList || callWaitingList) {
       Toast.error(
@@ -128,30 +129,21 @@ const Home = () => {
     setSelectedAstrologer(astrologer);
     setAstrologerRef(astrologer);
 
-    // NEW FLOW: Check if kundli is available and directly initiate connection
     if (hasKundli) {
-      // If kundli is available, directly initiate the connection based on type
+      let result;
       if (connectionType === "chat") {
-        console.log("Astrologer Chat:",astrologer)
-        handleChatStart(astrologer);
+        result = await handleChatStart(astrologer, true, isEmergency);
       } else if (connectionType === "audio" || connectionType === "call") {
-        console.log("Astrologer Call:",astrologer)
-        handleCallStart(astrologer, "audio");
+        result = await handleCallStart(astrologer, "audio", isEmergency);
+      }
+      if (result?.emergencyAvailable) {
+        setShowEmergencyModal(true);
+        return;
       }
     } else {
-      // If no kundli, store the connection type and open ProfileManager to add kundli
       setPendingConnectionType(connectionType);
       hookSetOpenModal((prev) => ({ ...prev, kundli: true }));
     }
-
-    // OLD FLOW (commented out for reference):
-    // if (hasKundli) {
-    //   // If kundli is available, show the ConnectAstrologerPopup to select Call/Chat/Video
-    //   setIsConnectPopupOpen(true);
-    // } else {
-    //   // If no kundli, open ProfileManager to add kundli
-    //   hookSetOpenModal((prev) => ({ ...prev, kundli: true }));
-    // }
   };
 
   // COMMENTED OUT: No longer using ConnectAstrologerPopup
@@ -310,6 +302,21 @@ const Home = () => {
         }
         astrologer={selectedAstrologer || hookSelectedAstrologer}
         connectionType={connectionType}
+      />
+
+      {/* Emergency Session Modal */}
+      <EmergencySessionModal
+        isOpen={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+        astrologer={selectedAstrologer}
+        onChatNow={(astro) => {
+          setShowEmergencyModal(false);
+          handleChatStart(astro, true, true);
+        }}
+        onCallNow={(astro) => {
+          setShowEmergencyModal(false);
+          handleCallStart(astro, "audio", true);
+        }}
       />
     </div>
   );
