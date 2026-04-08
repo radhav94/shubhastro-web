@@ -1910,14 +1910,17 @@
   @media (width <= 1024px) {
     display: flex;
     position: fixed;
-    bottom: 120px; /* Above the bottom navigation (88px height) */
+    bottom: 0px; /* Above the bottom navigation (88px height) */
     left: 0;
     right: 0;
     background: #FFFFFF;
     padding: 8px 8px;
     gap: 12px;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    // box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     z-index: 1001; /* Higher than bottom navigation (1000) */
+  }
+  @media (width <= 767px) {
+    bottom: 87px;
   }
 }
 

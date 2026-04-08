@@ -149,12 +149,15 @@ const LiveView = (props) => {
   const profiles = kundliData?.data || [];
 
   // Normalize socket messages (message → text, userType → role, userName → sender)
-  const normalizedMessages = messages?.map((m) => ({
-    ...m,
-    text: m.text || m.message,
-    role: m.role || m.userType,
-    sender: m.sender || m.userName,
-  })) || [];
+  // Filter out gift type messages from chat display
+  const normalizedMessages = messages
+    ?.filter((m) => m.type !== "gift")
+    .map((m) => ({
+      ...m,
+      text: m.text || (typeof m.message === "string" ? m.message : m.message?.text || ""),
+      role: m.role || m.userType,
+      sender: m.sender || m.userName,
+    })) || [];
   const displayMessages = normalizedMessages;
 
   const liveListCtx = useLiveList();
@@ -711,6 +714,11 @@ const LiveView = (props) => {
             onClose={() => setShowGifts(false)}
             giftList={giftList?.data}
             astrologerId={astrologer?._id || astrologer?.astrologerId}
+            astrologerName={astrologer?.firstName || astrologer?.name}
+            socketRef={props.socketRef}
+            roomId={props.channel}
+            userId={userIdLocal}
+            userName={localStorage.getItem("shubhtalk_customer_name") || "User"}
           />
           <SharePopup
             show={showSharePopup}
