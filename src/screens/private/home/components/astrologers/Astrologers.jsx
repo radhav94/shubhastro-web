@@ -19,6 +19,7 @@ import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi
 import { useChat } from "../../../../../context/ChatContext";
 import { useAstrologerConnect } from "../../../../../utils/hooks/useAstrologerConnect";
 import ConnectAstrologerPopup from "../../../v2/components/ui/ConnectAstrologerPopup";
+import EmergencySessionModal from "../../../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import ProfileModals from "../../../kundli/components/ProfileModals";
 import { useProfileManager } from "../../../kundli/hooks/useProfileManager";
 
@@ -105,6 +106,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
   const [localSelectedProfile, setLocalSelectedProfile] = useState(null);
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
 
   // 🔹 ADDED: arrow disable states
   const [isAtStart, setIsAtStart] = useState(true);
@@ -437,6 +439,24 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
         astrologer={selectedAstrologer}
         onChatStart={hookHandleChatStart}
         onCallStart={hookHandleCallStart}
+        onEmergencyAvailable={() => {
+          setIsConnectPopupOpen(false);
+          setShowEmergencyModal(true);
+        }}
+      />
+
+      <EmergencySessionModal
+        isOpen={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+        astrologer={selectedAstrologer}
+        onChatNow={(astro) => {
+          setShowEmergencyModal(false);
+          hookHandleChatStart(astro, true, true);
+        }}
+        onCallNow={(astro) => {
+          setShowEmergencyModal(false);
+          hookHandleCallStart(astro, "audio", true);
+        }}
       />
     </div>
   );
