@@ -481,7 +481,7 @@
 .orderList {
   // max-height: 600px;
   // overflow-y: auto;
-  padding-right: 0.5rem;
+  // padding-right: 0.5rem;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -1045,9 +1045,12 @@
 
 // Others Section
 .othersSection {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  @media (width <= 767px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .othersTitle {
@@ -1055,6 +1058,7 @@
   font-weight: 600;
   color: #000;
   margin: 0 0 0 0;
+  grid-column: 1 / -1; 
 }
 
 .otherCard {
