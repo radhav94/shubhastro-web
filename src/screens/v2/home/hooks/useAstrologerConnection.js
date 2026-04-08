@@ -154,6 +154,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           kundliId,
           astrologerName: data?.astrologer?.firstName || "",
           remainingTime: data?.remainingTime,
+          isEmergency: data?.isEmergency || false,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
         console.log("[NormalFlow] ✅ activeChat set, navigating to chat page");
@@ -248,6 +249,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           kundliId,
           astrologerID: astro?.astrologerID,
           remainingTime,
+          isEmergency: rest?.isEmergency || false,
         };
         console.log("[NormalFlow] 📦 Setting activeCall:", JSON.stringify({ ...callPayload, agoraToken: "[redacted]" }));
         setActiveCall(callPayload);
