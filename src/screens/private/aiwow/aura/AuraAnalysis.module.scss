@@ -144,10 +144,16 @@
 .messageSection {
   text-align: center;
   margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @media (width <= 767px) {
+    flex-direction: column;
+  }
 }
 
 .sparkleIcon {
-  margin-bottom: 1rem;
+  // margin-bottom: 1rem;
   animation: rotate 3s linear infinite;
 }
 

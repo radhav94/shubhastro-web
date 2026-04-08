@@ -81,6 +81,7 @@ const LiveStreamingContainer = ({ client }) => {
         channel: roomId,
         astrologerId: hostId,
         astrologerName: hostName || "",
+        startedAt: Date.now(),
       });
 
       // Only auto-switch if user has no active stream (host left / waiting screen)
@@ -125,6 +126,7 @@ const LiveStreamingContainer = ({ client }) => {
       channel: roomId,
       astrologerId: hostId,
       astrologerName: hostName || "",
+      startedAt: Date.now(),
     });
   }, [liveList]);
 

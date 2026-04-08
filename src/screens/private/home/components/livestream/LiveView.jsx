@@ -56,6 +56,7 @@ const LiveView = (props) => {
     astrologer,
     handleLeave,
     roomReady,
+    liveStartedAt,
     isHostMuted,
   } = props;
 
@@ -65,6 +66,7 @@ const LiveView = (props) => {
   const [roomEnded, setRoomEnded] = useState(false);
   const [wasRoomReady, setWasRoomReady] = useState(false);
   const [connectingTimedOut, setConnectingTimedOut] = useState(false);
+  const [liveDuration, setLiveDuration] = useState("00:00");
 
   // Reset ended state when switching to a new channel
   useEffect(() => {
@@ -72,6 +74,7 @@ const LiveView = (props) => {
     setRoomEnded(false);
     setWasRoomReady(false);
     setConnectingTimedOut(false);
+    setLiveDuration("00:00");
   }, [props.channel]);
 
   // If no remote users appear within 10s of connecting, show "waiting" instead of "connecting"
@@ -83,6 +86,29 @@ const LiveView = (props) => {
     const timer = setTimeout(() => setConnectingTimedOut(true), 10000);
     return () => clearTimeout(timer);
   }, [remoteUsers?.length, hostLeft, roomEnded, props.channel]);
+
+  // Live duration timer — ticks every second while stream is active
+  // Use startedAt from REST API (api/users/live-users)
+  const effectiveStartedAt = astrologer?.startedAt ? Number(astrologer.startedAt) : null;
+
+  useEffect(() => {
+    if (!effectiveStartedAt) return;
+    const tick = () => {
+      const elapsed = Math.floor((Date.now() - effectiveStartedAt) / 1000);
+      const hrs = Math.floor(elapsed / 3600);
+      const mins = Math.floor((elapsed % 3600) / 60);
+      const secs = elapsed % 60;
+      const pad = (n) => String(n).padStart(2, "0");
+      if (hrs > 0) {
+        setLiveDuration(`${pad(hrs)}:${pad(mins)}:${pad(secs)}`);
+      } else {
+        setLiveDuration(`${pad(mins)}:${pad(secs)}`);
+      }
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [effectiveStartedAt]);
 
   const { 
     activeCall, 
@@ -235,7 +261,6 @@ const LiveView = (props) => {
     if (isHost) {
       setCalling(false);
     } else {
-      // Intentional leave — clear saved session so refresh doesn't reconnect
       clearViewerSession();
       await handleLeave?.();
       navigate(PATH.privateRoutes.HOME.path);
@@ -545,6 +570,7 @@ const LiveView = (props) => {
                 <div className="host-name">
                   {astrologer?.astrologerName || "Astrologer"}
                 </div>
+                <div className="host-duration">Live {liveDuration}</div>
               </div>
             </div>
 
@@ -751,18 +777,21 @@ const LiveView = (props) => {
           {/* NEW BOTTOM ACTION BAR - only show when astrologer is live */}
           {isAstrologerLive && (
           <div className="right-action-bar">
-            {/* Timer / Stopwatch */}
-            <button className="icon-btn">
+            {/* Timer / Stopwatch - commented out, using host-info bar timer instead */}
+            {/* <button className="icon-btn">
               <div className="icon-circle">
                 <img src={AppImages.LiveIcon} alt="Timer" width="28" height="28" />
               </div>
-              <span className="icon-label">20m</span>
-            </button>
+              <span className="icon-label">{liveDuration}</span>
+            </button> */}
 
             {/* Viewers */}
-            <div className="icon-btn" style={{ cursor: "default" }}>
+            <div className="icon-btn viewer-icon-btn" style={{ cursor: "default" }}>
               <div className="icon-circle">
-                <img src={AppImages.LikesIconContainer} alt="Viewers" width="28" height="28" />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
               </div>
               <span className="icon-label">{viewerCount > 1000 ? `${(viewerCount/1000).toFixed(1)}k` : viewerCount}</span>
             </div>
