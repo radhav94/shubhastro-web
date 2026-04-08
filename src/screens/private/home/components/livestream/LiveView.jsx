@@ -453,7 +453,7 @@ const LiveView = (props) => {
     if (activeCall?.roomId) {
       voiceSocket.emit("call:end", {
         roomId: activeCall.roomId,
-        userId: userIdLocal,
+        endedBy: "CUSTOMER",
       });
     }
     setActiveCall(null);
