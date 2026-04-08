@@ -1394,7 +1394,7 @@ const Profile = () => {
                   .map((year) => (
                     <div key={year} className={styles.yearSection}>
                       <h4 className={styles.yearTitle}>{year}</h4>
-
+                      <div className={styles.orderCardMain}>
                       {ordersByYear[year].map((order) => (
                         <div 
                           key={order.id} 
@@ -1479,6 +1479,7 @@ const Profile = () => {
                           </div>
                         </div>
                       ))}
+                      </div>
                     </div>
                   ))}
 
