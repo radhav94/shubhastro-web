@@ -28,13 +28,13 @@ const HomeLayout = () => {
   const showHeader = currentRoute ? currentRoute.handle.header : false;
   const showFooter = currentRoute ? currentRoute.handle.footer : true;
 
-  // Hide TopHeader on onboarding page or when header is disabled
+  // Hide header/footer in webview mode (?type=webview)
+  const isWebview = new URLSearchParams(location.search).get("type") === "webview";
 
   const isOnboardingPage = location.pathname === "/login";
   const isLivePage = location.pathname.startsWith("/live");
   
-  // Always show TopHeader (it will handle iframe mode internally)
-  const showTopHeader = !isOnboardingPage && !isLivePage;
+  const showTopHeader = !isOnboardingPage && !isLivePage && !isWebview;
 
   return (
     <div className={styles.layout}>
@@ -56,9 +56,9 @@ const HomeLayout = () => {
 
       {/* Scrollable Content */}
       <div className={styles.contentWrapper}>
-        <div className={showHeader ? styles.topGap : ""}></div>
+        <div className={showHeader && !isWebview ? styles.topGap : ""}></div>
 
-        {showHeader && <Breadcrumb />}
+        {showHeader && !isWebview && <Breadcrumb />}
 
         <Suspense fallback={<CircleSpinner />}>
           <div className={styles.outletDiv}>
@@ -67,7 +67,7 @@ const HomeLayout = () => {
         </Suspense>
       </div>
 
-      {showFooter && (
+      {showFooter && !isWebview && (
         <div className={styles.footerWrapper}>
           <Footer />
         </div>
