@@ -10,6 +10,7 @@ const FAQ = () => {
   const [expandedQuestion, setExpandedQuestion] = useState(null);
 
   const fromTab = location.state?.fromTab;
+  const isWebview = new URLSearchParams(location.search).get("type") === "webview";
 
   const categories = [
     { id: 1, label: "Account & Profile" },
@@ -117,6 +118,7 @@ const FAQ = () => {
   return (
     <div className={styles.faqPage}>
       {/* Header */}
+      {!isWebview && (
       <header className={styles.headerWrap}>
         <div className={styles.header}>
           <button 
@@ -135,6 +137,7 @@ const FAQ = () => {
           <div className={styles.headerSpacer}></div>
         </div>
       </header>
+      )}
 
       {/* Content */}
       <div className={styles.content}>
