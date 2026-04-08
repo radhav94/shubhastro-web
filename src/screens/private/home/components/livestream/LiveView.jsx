@@ -73,6 +73,7 @@ const LiveView = (props) => {
     setRoomEnded(false);
     setWasRoomReady(false);
     setConnectingTimedOut(false);
+    setLiveDuration("00:00");
   }, [props.channel]);
 
   // If no remote users appear within 10s of connecting, show "waiting" instead of "connecting"
@@ -87,7 +88,7 @@ const LiveView = (props) => {
 
   // Live duration timer — ticks every second while stream is active
   // Use startedAt from REST API (api/users/live-users)
-  const effectiveStartedAt = astrologer?.startedAt ? new Date(astrologer.startedAt).getTime() : null;
+  const effectiveStartedAt = astrologer?.startedAt ? Number(astrologer.startedAt) : null;
 
   useEffect(() => {
     if (!effectiveStartedAt) return;
@@ -98,9 +99,9 @@ const LiveView = (props) => {
       const secs = elapsed % 60;
       const pad = (n) => String(n).padStart(2, "0");
       if (hrs > 0) {
-        setLiveDuration(`${pad(hrs)}:${pad(mins)} h`);
+        setLiveDuration(`${pad(hrs)}:${pad(mins)}:${pad(secs)}`);
       } else {
-        setLiveDuration(`${pad(mins)}:${pad(secs)} m`);
+        setLiveDuration(`${pad(mins)}:${pad(secs)}`);
       }
     };
     tick();
