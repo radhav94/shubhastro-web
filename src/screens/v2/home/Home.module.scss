@@ -2098,6 +2098,12 @@
   color: #1a1a1a;
   margin: 0;
   line-height: 1.2;
+  width: calc(100% - 70px);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;  
+  line-clamp: 3;
+  overflow: hidden;
 }
 
 .sessionDateTime {
@@ -3180,9 +3186,9 @@
   //   padding: 24px;
   // }
 
-  .sessionName {
-    font-size: 19px;
-  }
+  // .sessionName {
+  //   font-size: 19px;
+  // }
 
   /* Cosmic Insight - Tablet */
   .cosmicInsightSection {
