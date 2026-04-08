@@ -56,6 +56,7 @@ const LiveView = (props) => {
     astrologer,
     handleLeave,
     roomReady,
+    isHostMuted,
   } = props;
 
   const [showGifts, setShowGifts] = useState(false);
@@ -581,6 +582,37 @@ const LiveView = (props) => {
               remoteUsers.map((user) => (
                 <RemoteUser key={user.uid} user={user} />
               ))}
+
+            {/* MUTE BANNER — show when astrologer mutes audio */}
+            {!isHost && isHostMuted && remoteUsers.length > 0 && !roomEnded && (
+              <div style={{
+                position: "absolute",
+                top: 130,
+                left: "50%",
+                transform: "translateX(-50%)",
+                background: "rgba(33, 33, 33, 0.44)",
+                color: "#fff",
+                padding: "8px 14px",
+                borderRadius: "20px",
+                fontSize: "10px",
+                fontWeight: 500,
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                zIndex: 20,
+                whiteSpace: "nowrap",
+                backdropFilter: "blur(4px)",
+              }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
+                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2c0 .76-.13 1.49-.35 2.17" />
+                  <line x1="12" y1="19" x2="12" y2="23" />
+                  <line x1="8" y1="23" x2="16" y2="23" />
+                </svg>
+                Astrologer is on mute
+              </div>
+            )}
 
             {/* CONNECTING — Agora joining or waiting for remote media */}
             {!isHost && remoteUsers.length === 0 && !hostLeft && !roomEnded && (
