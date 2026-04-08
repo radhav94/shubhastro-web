@@ -114,13 +114,22 @@ const LiveView = (props) => {
     activeCall, 
     setLastRequestedAstro, 
     setActiveCall, 
-    setCallSeconds, 
+    setCallSeconds,
+    callSeconds,
     resetCallFlow, 
     setActiveCallRoomId,
     setLastSelectedKundli,
     setLastCallType,
-    isCallMinimized
+    isCallMinimized,
+    setIsCallMinimized,
   } = useCall();
+
+  // Auto-minimize call if user is on live stream (handles page refresh)
+  useEffect(() => {
+    if (activeCall) {
+      setIsCallMinimized(true);
+    }
+  }, [activeCall, setIsCallMinimized]);
   
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
   const token = localStorage.getItem("shubhtalk_customer_token");
@@ -134,6 +143,9 @@ const LiveView = (props) => {
 
   // Follow/unfollow astrologer
   const astrologerId = astrologer?._id || astrologer?.astrologerId;
+
+  // Check if the active call belongs to the current live stream astrologer
+  const isCallForCurrentAstrologer = activeCall && isCallMinimized && activeCall.astrologerId === astrologerId;
 
   // Fetch full astrologer details (profile pic, call rates)
   const { data: astrologerFullData } = useGetAstrologerByIdQuery(
@@ -426,6 +438,30 @@ const LiveView = (props) => {
     Toast.info("Call request cancelled");
   };
 
+  // Format call seconds to mm:ss or hh:mm:ss
+  const formatCallTime = (seconds) => {
+    const s = Math.max(0, seconds);
+    const hrs = Math.floor(s / 3600);
+    const mins = Math.floor((s % 3600) / 60);
+    const secs = s % 60;
+    const pad = (n) => String(n).padStart(2, "0");
+    return hrs > 0 ? `${pad(hrs)}:${pad(mins)}:${pad(secs)}` : `${pad(mins)}:${pad(secs)}`;
+  };
+
+  // End active call from minimized view
+  const handleEndActiveCall = () => {
+    if (activeCall?.roomId) {
+      voiceSocket.emit("call:end", {
+        roomId: activeCall.roomId,
+        userId: userIdLocal,
+      });
+    }
+    setActiveCall(null);
+    setIsCallMinimized(false);
+    setCallSeconds(0);
+    resetCallFlow();
+  };
+
   // Socket event handlers
   useEffect(() => {
     if (!userIdLocal) return;
@@ -477,6 +513,7 @@ const LiveView = (props) => {
         if (!chatRoomId) throw new Error("Failed to create chat room");
 
         // Set active call in context - this will trigger VideoCall or VoiceCall component
+        // Auto-minimize since user is on live stream
         setActiveCall({
           roomId,
           chatRoomId,
@@ -489,6 +526,7 @@ const LiveView = (props) => {
           astrologerID: astro?.astrologer_ID,
           remainingTime
         });
+        setIsCallMinimized(true);
         
         setCallSeconds(Number(remainingTime) * 60);
         Toast.success(`${type === "video" ? "Video" : "Voice"} call started`);
@@ -589,11 +627,33 @@ const LiveView = (props) => {
                 <div className="host-avatar">🕉️</div>
               )}
               <div className="host-text">
-                <div className="host-name">
+                <div className="host-name host-name-truncate">
                   {astrologer?.astrologerName || "Astrologer"}
                 </div>
-                <div className="host-duration">Live {liveDuration}</div>
+                <div className="host-duration">
+                  {isCallForCurrentAstrologer
+                    ? `Call ${formatCallTime(callSeconds)}`
+                    : `Live ${liveDuration}`
+                  }
+                </div>
               </div>
+              {/* Minimized call pill - right after name */}
+              {isCallForCurrentAstrologer && (
+                <div className="live-call-pill">
+                  <span className="live-call-pill-avatar">
+                    {(activeCall.callerName || "A").split(" ").map(w => w.charAt(0).toUpperCase()).join("").slice(0, 2)}
+                  </span>
+                  <button
+                    className="live-call-pill-end"
+                    onClick={handleEndActiveCall}
+                    aria-label="End call"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
+                      <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.956.956 0 0 1-.29-.7c0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.73-1.68-1.36-2.66-1.85a.993.993 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+                    </svg>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* <div className="live-status">
@@ -638,7 +698,7 @@ const LiveView = (props) => {
             {!isHost && isHostMuted && remoteUsers.length > 0 && !roomEnded && (
               <div style={{
                 position: "absolute",
-                top: 130,
+                top: 180,
                 left: "50%",
                 transform: "translateX(-50%)",
                 background: "rgba(33, 33, 33, 0.44)",
