@@ -433,7 +433,7 @@ const TalkToAstrologer = () => {
 
   // Handle connect button click - reused from Home page
   // Receives connectionType (chat or audio) from NewAstrologerCard
-  const handleConnectClick = (astrologer, connectionType) => {
+  const handleConnectClick = (astrologer, connectionType, isEmergency = false) => {
     // Check if user is logged in
      if (!requireAuth()) return;
 
@@ -449,14 +449,12 @@ const TalkToAstrologer = () => {
 
     // NEW FLOW: Check if kundli is available and directly initiate connection
     if (hasKundli) {
-      // If kundli is available, directly initiate the connection based on type
       if (connectionType === "chat") {
-        hookHandleChatStart(astrologer);
+        hookHandleChatStart(astrologer, true, isEmergency);
       } else if (connectionType === "audio") {
-        hookHandleCallStart(astrologer, "audio");
+        hookHandleCallStart(astrologer, "audio", isEmergency);
       }
     } else {
-      // If no kundli, store the connection type and open ProfileManager to add kundli
       setPendingConnectionType(connectionType);
       hookSetOpenModal((prev) => ({ ...prev, kundli: true }));
     }
@@ -539,6 +537,7 @@ const TalkToAstrologer = () => {
       type,
       remainingTime,
       isSwitch,
+      ...rest
     }) => {
       // If there's an active audio call and this is a video acceptance, it's an upgrade — let CallContext handle it
       if (type === "video" && activeCall && activeCall.callType === "audio") {
@@ -582,6 +581,7 @@ const TalkToAstrologer = () => {
           astrologerID: astro?.astrologer_ID,
           remainingTime,
           experience: astro?.experience,
+          isEmergency: rest?.isEmergency || false,
         });
       } catch {
         Toast.error("Failed to start call");
@@ -611,6 +611,7 @@ const TalkToAstrologer = () => {
           kundliId,
           astrologerName: data?.astrologer?.firstName || "",
           remainingTime: data?.remainingTime,
+          isEmergency: data?.isEmergency || false,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 

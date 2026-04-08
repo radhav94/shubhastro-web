@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Star, BookOpen } from "lucide-react";
 import styles from "./NewAstrologerCard.module.scss";
 import { Link } from "react-router-dom";
@@ -6,6 +7,7 @@ import {
   getAstrologerDefaultImage,
   appSvgs,
 } from "../../../../utils/appImages";
+import EmergencySessionModal from "../../modal/EmergencySessionModal/EmergencySessionModal";
 
 const NewAstrologerDetailsCard = ({
   astrologer,
@@ -14,6 +16,12 @@ const NewAstrologerDetailsCard = ({
   style = {},
 }) => {
   const isOnline = astrologer?.isActive === true;
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+
+  const hasEmergency = astrologer?.isEmergencyAvailable && (
+    astrologer?.emergencyPrice?.chatRate?.amount > 0 || 
+    astrologer?.emergencyPrice?.audioRate?.amount > 0
+  );
 
   const imageUrl =
     astrologer?.profileImgUrl ||
@@ -98,44 +106,42 @@ const NewAstrologerDetailsCard = ({
 
         {/* Action Buttons */}
         <div className={styles.detailsActionButtons}>
-          {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("chat")) && (
-            <div className={styles.detailsButtonWrapper}>
-              <button
-                className={styles.detailsChatBtn}
-                onClick={() => isOnline && onConnect(astrologer, "chat")}
-                disabled={!isOnline || !astrologer?.price?.chatRate?.amount}
-              >
-                <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+          {isOnline ? (
+            <>
+              {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("chat")) && (
+                <div className={styles.detailsButtonWrapper}>
+                  <button className={styles.detailsChatBtn} onClick={() => onConnect(astrologer, "chat")} disabled={!astrologer?.price?.chatRate?.amount}>
+                    <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+                  </button>
+                  <p className={styles.detailsPriceText}>₹<span className={styles.detailsPriceAmount}>{astrologer?.price?.chatRate?.amount || 0}</span>/min</p>
+                </div>
+              )}
+              {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("audio")) && (
+                <div className={styles.detailsButtonWrapper}>
+                  <button className={styles.detailsCallBtn} onClick={() => onConnect(astrologer, "audio")} disabled={!astrologer?.price?.audioRate?.amount}>
+                    <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
+                  </button>
+                  <p className={styles.detailsPriceText}>₹<span className={styles.detailsPriceAmount}>{astrologer?.price?.audioRate?.amount || 0}</span>/min</p>
+                </div>
+              )}
+            </>
+          ) : hasEmergency ? (
+            <div className={styles.emergencyButtonWrapper}>
+              <button className={styles.emergencySingleBtn} onClick={() => setShowEmergencyModal(true)}>
+                Try Emergency Session
               </button>
-              <p className={styles.detailsPriceText}>
-                ₹
-                <span className={styles.detailsPriceAmount}>
-                  {astrologer?.price?.chatRate?.amount || 0}
-                </span>
-                /min
-              </p>
             </div>
-          )}
-          {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("audio")) && (
-            <div className={styles.detailsButtonWrapper}>
-              <button
-                className={styles.detailsCallBtn}
-                onClick={() => isOnline && onConnect(astrologer, "audio")}
-                disabled={!isOnline || !astrologer?.price?.audioRate?.amount}
-              >
-                <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
-              </button>
-              <p className={styles.detailsPriceText}>
-                ₹
-                <span className={styles.detailsPriceAmount}>
-                  {astrologer?.price?.audioRate?.amount || 0}
-                </span>
-                /min
-              </p>
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
+
+      <EmergencySessionModal
+        isOpen={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+        astrologer={astrologer}
+        onChatNow={(astro) => onConnect(astro, "chat", true)}
+        onCallNow={(astro) => onConnect(astro, "audio", true)}
+      />
     </div>
   );
 };

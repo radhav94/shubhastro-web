@@ -25,6 +25,7 @@ const useChatSocket = ({
   const {
     stopTimer,
     setActiveChat,
+    activeChat,
   } = useChat();
 
   const [waitingPopup, setWaitingPopup] = useState(false);
@@ -49,7 +50,7 @@ const useChatSocket = ({
     console.log("🎵 Audio Call Clicked", { userId, astrologerId, kundliId, activeCall, chatRoomId });
 
     try {
-      const result = await getBalance({ astrologerId, type: "audio" });
+      const result = await getBalance({ astrologerId, type: "audio", ...(activeChat?.isEmergency && { isEmergency: true }) });
       const balanceData = result?.data?.data || {};
 
       if (balanceData?.status === false) {
@@ -63,7 +64,7 @@ const useChatSocket = ({
         ? activeTypes.includes("audio")
         : balanceData?.isActiveForCall === true;
 
-      if (!isActive || !isActiveForCall) {
+      if (!activeChat?.isEmergency && (!isActive || !isActiveForCall)) {
         Toast.error("Astrologer is not available for voice call");
         return;
       }
@@ -80,6 +81,7 @@ const useChatSocket = ({
       type: "audio",
       isSwitch: true,
       roomId: chatRoomId,
+      ...(activeChat?.isEmergency && { isEmergency: true }),
     });
   };
 
@@ -87,7 +89,7 @@ const useChatSocket = ({
     console.log("📹 Video Call Clicked", { userId, astrologerId, kundliId, activeCall, chatRoomId });
 
     try {
-      const result = await getBalance({ astrologerId, type: "video" });
+      const result = await getBalance({ astrologerId, type: "video", ...(activeChat?.isEmergency && { isEmergency: true }) });
       const balanceData = result?.data?.data || {};
 
       if (balanceData?.status === false) {
@@ -101,7 +103,7 @@ const useChatSocket = ({
         ? activeTypes.includes("video")
         : balanceData?.isActiveForVideo === true;
 
-      if (!isActive || !isActiveForVideo) {
+      if (!activeChat?.isEmergency && (!isActive || !isActiveForVideo)) {
         Toast.error("Astrologer is not available for video call");
         return;
       }
@@ -118,6 +120,7 @@ const useChatSocket = ({
       type: "video",
       isSwitch: true,
       roomId: chatRoomId,
+      ...(activeChat?.isEmergency && { isEmergency: true }),
     });
   };
 

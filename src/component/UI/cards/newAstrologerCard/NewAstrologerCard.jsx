@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { BookOpen } from "lucide-react";
 import styles from "./NewAstrologerCard.module.scss";
 import { Link } from "react-router-dom";
 import { AppIcons, getAstrologerDefaultImage } from "../../../../utils/appImages";
+import EmergencySessionModal from "../../modal/EmergencySessionModal/EmergencySessionModal";
 
 const NewAstrologerCard = ({ 
   astrologer, 
@@ -10,6 +12,12 @@ const NewAstrologerCard = ({
   style = {} 
 }) => {
   const isOnline = astrologer?.isActive === true;
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+
+  const hasEmergency = astrologer?.isEmergencyAvailable && (
+    astrologer?.emergencyPrice?.chatRate?.amount > 0 || 
+    astrologer?.emergencyPrice?.audioRate?.amount > 0
+  );
   
   return (
     <div 
@@ -74,35 +82,45 @@ const NewAstrologerCard = ({
         )}
       </Link>
       <div className={styles.actionButtons}>
-        {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("chat")) && (
-          <div className={styles.buttonWrapper}>
-            <button
-              className={styles.chatBtn}
-              onClick={() => isOnline && onConnect(astrologer, "chat")}
-              disabled={!isOnline}
-            >
-              <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+        {isOnline ? (
+          <>
+            {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("chat")) && (
+              <div className={styles.buttonWrapper}>
+                <button className={styles.chatBtn} onClick={() => onConnect(astrologer, "chat")}>
+                  <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+                </button>
+                <p className={styles.priceText}>
+                  <span className={styles.priceAmount}>₹{astrologer?.price?.chatRate?.amount || 0}</span>/min
+                </p>
+              </div>
+            )}
+            {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("audio")) && (
+              <div className={styles.buttonWrapper}>
+                <button className={styles.callBtn} onClick={() => onConnect(astrologer, "audio")}>
+                  <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
+                </button>
+                <p className={styles.priceText}>
+                  <span className={styles.priceAmount}>₹{astrologer?.price?.audioRate?.amount || 0}</span>/min
+                </p>
+              </div>
+            )}
+          </>
+        ) : hasEmergency ? (
+          <div className={styles.emergencyButtonWrapper}>
+            <button className={styles.emergencySingleBtn} onClick={() => setShowEmergencyModal(true)}>
+              Try Emergency Session
             </button>
-            <p className={styles.priceText}>
-              <span className={styles.priceAmount}>₹{astrologer?.price?.chatRate?.amount || 0}</span>/min
-            </p>
           </div>
-        )}
-        {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("audio")) && (
-          <div className={styles.buttonWrapper}>
-            <button
-              className={styles.callBtn}
-              onClick={() => isOnline && onConnect(astrologer, "audio")}
-              disabled={!isOnline}
-            >
-              <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
-            </button>
-            <p className={styles.priceText}>
-              <span className={styles.priceAmount}>₹{astrologer?.price?.audioRate?.amount || 0}</span>/min
-            </p>
-          </div>
-        )}
+        ) : null}
       </div>
+
+      <EmergencySessionModal
+        isOpen={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+        astrologer={astrologer}
+        onChatNow={(astro) => onConnect(astro, "chat", true)}
+        onCallNow={(astro) => onConnect(astro, "audio", true)}
+      />
     </div>
   );
 };

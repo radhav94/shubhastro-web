@@ -58,6 +58,7 @@ import AstrologerNumerologyDefault from "../../../assets/default-img/astrologer-
 import GiftModal from "../../../component/call/GiftModal";
 import VirtualAssistant from "../../../component/virtualAssistant/VirtualAssistant";
 import { useGetChatHistoryQuery } from "../../../redux/api/chatApi";
+import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 
 const AstrologerProfile = () => {
   const { id } = useParams();
@@ -143,6 +144,7 @@ const AstrologerProfile = () => {
 
   // State
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
 
   const { activeCall, setActiveCall, setOpenReview, setReviewData } = useCall();
   
@@ -271,7 +273,7 @@ const AstrologerProfile = () => {
     setIsConnectPopupOpen(true);
   };
 
-  const handleChatStart = async (astro) => {
+  const handleChatStart = async (astro, isEmergency = false) => {
     if (!token) {
       navigate("/login", { state: { from: location.pathname } });
       return;
@@ -286,11 +288,11 @@ const AstrologerProfile = () => {
     }
     
     activeCallAstroRef.current = astro;
-    const result = await hookHandleChatStart(astro);
+    const result = await hookHandleChatStart(astro, true, isEmergency);
     return result;
   };
 
-  const handleCallStart = async (astro, type) => {
+  const handleCallStart = async (astro, type, isEmergency = false) => {
     if (!token) {
       navigate("/login", { state: { from: location.pathname } });
       return;
@@ -305,7 +307,7 @@ const AstrologerProfile = () => {
     }
     
     activeCallAstroRef.current = astro;
-    const result = await hookHandleCallStart(astro, type);
+    const result = await hookHandleCallStart(astro, type, isEmergency);
     return result;
   };
 
@@ -481,6 +483,7 @@ const AstrologerProfile = () => {
           astrologerId: astrologerId,
           astrologerName: data?.astrologer?.firstName || "",
           remainingTime: data?.remainingTime,
+          isEmergency: data?.isEmergency || false,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 
@@ -507,6 +510,7 @@ const AstrologerProfile = () => {
       type,
       remainingTime,
       isSwitch,
+      ...rest
     }) => {
       // If there's an active audio call and this is a video acceptance, it's an upgrade — let CallContext handle it
       if (type === "video" && activeCall && activeCall.callType === "audio") {
@@ -556,6 +560,7 @@ const AstrologerProfile = () => {
           astrologerId: astro._id,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
+          isEmergency: rest?.isEmergency || false,
         });
       } catch (error) {
         console.error("Call accepted error:", error);
@@ -1436,7 +1441,7 @@ const AstrologerProfile = () => {
           {(data?.isActiveType?.includes("all") ||
             data?.isActiveType?.includes("chat") ||
             data?.isActiveType?.includes("audio") ||
-            data?.isActiveType?.includes("video")) && (
+            data?.isActiveType?.includes("video")) ? (
             <div className={styles.connectCard}>
               <h3 className={styles.connectTitle}>CONNECT NOW</h3>
               <div className={styles.titleDivider}>
@@ -1522,7 +1527,20 @@ const AstrologerProfile = () => {
                 )}
               </div>
             </div>
-          )}
+          ) : data?.isEmergencyAvailable && (data?.emergencyPrice?.chatRate?.amount > 0 || data?.emergencyPrice?.audioRate?.amount > 0) ? (
+            <div className={styles.connectCard}>
+              <h3 className={styles.connectTitle}>EMERGENCY SESSION</h3>
+              <div className={styles.connectOptions}>
+                <button
+                  className={styles.emergencySingleBtn}
+                  onClick={() => setShowEmergencyModal(true)}
+                  style={{ width: '100%', padding: '12px', border: 'none', borderRadius: '50px', background: 'linear-gradient(90deg, #F75801 0%, #D43400 100%)', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Try Emergency Session
+                </button>
+              </div>
+            </div>
+          ) : null}
 
           {/* Consultation Hours Card */}
           <div className={styles.consultationCard}>
@@ -1562,7 +1580,7 @@ const AstrologerProfile = () => {
       {/* Mobile Bottom Bar - Chat & Call */}
       <div className={styles.mobileBottomBar}>
         {(data?.isActiveType?.includes("all") ||
-          data?.isActiveType?.includes("chat")) && (
+          data?.isActiveType?.includes("chat")) ? (
           <button
             className={styles.mobileChatBtn}
             onClick={() => handleChatStart(data)}
@@ -1576,9 +1594,9 @@ const AstrologerProfile = () => {
               </span>
             </div>
           </button>
-        )}
+        ) : null}
         {(data?.isActiveType?.includes("all") ||
-          data?.isActiveType?.includes("audio")) && (
+          data?.isActiveType?.includes("audio")) ? (
           <button
             className={styles.mobileCallBtn}
             onClick={() => handleCallStart(data, "audio")}
@@ -1592,8 +1610,26 @@ const AstrologerProfile = () => {
               </span>
             </div>
           </button>
+        ) : null}
+        {!(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat") || data?.isActiveType?.includes("audio")) &&
+          data?.isEmergencyAvailable && (data?.emergencyPrice?.chatRate?.amount > 0 || data?.emergencyPrice?.audioRate?.amount > 0) && (
+          <button
+            className={styles.mobileCallBtn}
+            onClick={() => setShowEmergencyModal(true)}
+            style={{ flex: 1 }}
+          >
+            Try Emergency Session
+          </button>
         )}
       </div>
+
+      <EmergencySessionModal
+        isOpen={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+        astrologer={data}
+        onChatNow={(astro) => handleChatStart(astro, true)}
+        onCallNow={(astro) => handleCallStart(astro, "audio", true)}
+      />
 
       {/* Modals */}
       {/* ConnectAstrologerPopup - No longer needed, direct connection from sidebar */}

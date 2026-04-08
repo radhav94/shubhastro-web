@@ -202,6 +202,7 @@ const OrderDetails = () => {
           isUserSide: true, userId: uid, astrologerId: astroId,
           astrologerName: data?.astrologer?.firstName || "",
           remainingTime: data?.remainingTime,
+          isEmergency: data?.isEmergency || false,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
         navigate(`/chat-with-astrologers/${astroId}`, {
@@ -212,7 +213,7 @@ const OrderDetails = () => {
       }
     };
 
-    const handleCallAccepted = async ({ roomId, token, type, remainingTime }) => {
+    const handleCallAccepted = async ({ roomId, token, type, remainingTime, ...rest }) => {
       resetCallFlow();
       const astro = activeAstroRef.current || astrologerData?.data;
       try {
@@ -224,6 +225,7 @@ const OrderDetails = () => {
           callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true, callType: type, userId, astrologerId: astro._id,
           astrologerID: astro?.astrologer_ID, remainingTime,
+          isEmergency: rest?.isEmergency || false,
         });
       } catch (error) {
         Toast.error("Failed to start call");
