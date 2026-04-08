@@ -106,32 +106,38 @@ const NewAstrologerDetailsCard = ({
 
         {/* Action Buttons */}
         <div className={styles.detailsActionButtons}>
-          {isOnline ? (
-            <>
-              {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("chat")) && (
-                <div className={styles.detailsButtonWrapper}>
-                  <button className={styles.detailsChatBtn} onClick={() => onConnect(astrologer, "chat")} disabled={!astrologer?.price?.chatRate?.amount}>
-                    <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
-                  </button>
-                  <p className={styles.detailsPriceText}>₹<span className={styles.detailsPriceAmount}>{astrologer?.price?.chatRate?.amount || 0}</span>/min</p>
-                </div>
-              )}
-              {(astrologer?.isActiveType?.includes("all") || astrologer?.isActiveType?.includes("audio")) && (
-                <div className={styles.detailsButtonWrapper}>
-                  <button className={styles.detailsCallBtn} onClick={() => onConnect(astrologer, "audio")} disabled={!astrologer?.price?.audioRate?.amount}>
-                    <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
-                  </button>
-                  <p className={styles.detailsPriceText}>₹<span className={styles.detailsPriceAmount}>{astrologer?.price?.audioRate?.amount || 0}</span>/min</p>
-                </div>
-              )}
-            </>
-          ) : hasEmergency ? (
-            <div className={styles.emergencyButtonWrapper}>
-              <button className={styles.emergencySingleBtn} onClick={() => setShowEmergencyModal(true)}>
-                Try Emergency Session
-              </button>
-            </div>
-          ) : null}
+          <div className={styles.detailsButtonWrapper}>
+            <button
+              className={styles.detailsChatBtn}
+              onClick={() => isOnline && onConnect(astrologer, "chat")}
+              disabled={!isOnline}
+            >
+              <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+            </button>
+            <p className={styles.detailsPriceText}>
+              ₹
+              <span className={styles.detailsPriceAmount}>
+                {astrologer?.price?.chatRate?.amount || 0}
+              </span>
+              /min
+            </p>
+          </div>
+          <div className={styles.detailsButtonWrapper}>
+            <button
+              className={styles.detailsCallBtn}
+              onClick={() => isOnline && onConnect(astrologer, "audio")}
+              disabled={!isOnline}
+            >
+              <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
+            </button>
+            <p className={styles.detailsPriceText}>
+              ₹
+              <span className={styles.detailsPriceAmount}>
+                {astrologer?.price?.audioRate?.amount || 0}
+              </span>
+              /min
+            </p>
+          </div>
         </div>
       </div>
 

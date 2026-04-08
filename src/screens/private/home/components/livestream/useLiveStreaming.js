@@ -244,6 +244,9 @@ export const useLiveStreaming = (client, ROLE, channel) => {
 
   const remoteUsers = useRemoteUsers();
 
+  // Detect if host (first remote user) has muted their audio
+  const isHostMuted = remoteUsers.length > 0 && !remoteUsers[0].hasAudio;
+
   // Publish tracks (host only)
   usePublish(
     isConnected && ROLE === "host" && localMicrophoneTrack && localCameraTrack
@@ -272,6 +275,7 @@ export const useLiveStreaming = (client, ROLE, channel) => {
     uid,
     hostLeft,
     isReconnect,
+    isHostMuted,
     handleLeave,
   };
 };
