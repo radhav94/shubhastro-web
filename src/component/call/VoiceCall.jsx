@@ -686,6 +686,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         type: "video",
         isSwitch: true,
         roomId: roomId,
+        ...(activeCall?.isEmergency && { isEmergency: true }),
       });
 
     } catch (error) {

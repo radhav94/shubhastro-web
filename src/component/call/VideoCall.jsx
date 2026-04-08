@@ -797,6 +797,7 @@ const VideoCalling = ({ callData }) => {
       type: "audio",
       isSwitch: true,
       roomId: roomId,
+      ...(activeCall?.isEmergency && { isEmergency: true }),
     });
   };
 

@@ -6,9 +6,9 @@ export const walletApi = privateRequestNew.injectEndpoints({
       query: () => "wallets/all"
     }),
     getBalance: builder.mutation({
-      query: ({ astrologerId, type = "chat" }) => ({
+      query: ({ astrologerId, type = "chat", isEmergency }) => ({
         url: "wallets/preSessionBalanceCheck",
-        params: { astrologerId, type }, 
+        params: { astrologerId, type, ...(isEmergency && { isEmergency: true }) }, 
       }),
     }),
     creditWallet: builder.mutation({

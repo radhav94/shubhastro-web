@@ -203,6 +203,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
       type,
       remainingTime,
       isSwitch,
+      ...rest
     }) => {
       // If there's an active audio call and this is a video acceptance, it's an upgrade — let CallContext handle it
       if (type === "video" && activeCall && activeCall.callType === "audio") {
@@ -236,6 +237,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
           kundliId,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
+          isEmergency: rest?.isEmergency || false,
         });
       } catch {
         Toast.error("Failed to start call");
@@ -265,6 +267,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
           kundliId,
           astrologerName: data?.astrologer?.firstName || "",
           remainingTime: data?.remainingTime,
+          isEmergency: data?.isEmergency || false,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 

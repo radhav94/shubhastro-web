@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Star, BookOpen } from "lucide-react";
 import styles from "./NewAstrologerCard.module.scss";
 import { Link } from "react-router-dom";
@@ -6,6 +7,7 @@ import {
   getAstrologerDefaultImage,
   appSvgs,
 } from "../../../../utils/appImages";
+import EmergencySessionModal from "../../modal/EmergencySessionModal/EmergencySessionModal";
 
 const NewAstrologerDetailsCard = ({
   astrologer,
@@ -14,6 +16,12 @@ const NewAstrologerDetailsCard = ({
   style = {},
 }) => {
   const isOnline = astrologer?.isActive === true;
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+
+  const hasEmergency = astrologer?.isEmergencyAvailable && (
+    astrologer?.emergencyPrice?.chatRate?.amount > 0 || 
+    astrologer?.emergencyPrice?.audioRate?.amount > 0
+  );
 
   const imageUrl =
     astrologer?.profileImgUrl ||
@@ -132,6 +140,14 @@ const NewAstrologerDetailsCard = ({
           </div>
         </div>
       </div>
+
+      <EmergencySessionModal
+        isOpen={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+        astrologer={astrologer}
+        onChatNow={(astro) => onConnect(astro, "chat", true)}
+        onCallNow={(astro) => onConnect(astro, "audio", true)}
+      />
     </div>
   );
 };
