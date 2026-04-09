@@ -68,11 +68,6 @@ const LiveStreamingContainer = ({ client }) => {
     const { status, roomId, hostId, hostName } = data;
 
     if (status === "ended") {
-      // If this is the last live stream, reload the page
-      if (liveList?.lives.length <= 1) {
-        window.location.replace("/live");
-        return;
-      }
       liveList?.removeLive(roomId);
     }
 
@@ -111,11 +106,9 @@ const LiveStreamingContainer = ({ client }) => {
       return;
     }
 
-    // If there are other lives, remove the ended one; otherwise reload the page
-    if (liveList && liveList.lives.length > 1) {
+    // If there are other lives, remove the ended one
+    if (liveList) {
       liveList.removeLive(targetRoom);
-    } else if (liveList && liveList.lives.length <= 1) {
-      window.location.replace("/live");
     }
   }, [liveList, channel, navigate]);
 
@@ -133,11 +126,6 @@ const LiveStreamingContainer = ({ client }) => {
   // Broadcast: a live session ended (from any astrologer)
   const handleSessionEnded = useCallback((data) => {
     const { roomId } = data;
-    // If this is the last live stream, reload the page
-    if (liveList?.lives.length <= 1) {
-      window.location.replace("/live");
-      return;
-    }
     liveList?.removeLive(roomId);
   }, [liveList]);
 
