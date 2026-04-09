@@ -406,15 +406,15 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
         content = (
           <div className={styles.productsMessage}>
             {msg.text && <p className={styles.productsNote}>{msg.text}</p>}
-            {products.map((p) => (
+            {products.map((p, idx) => (
               <div
-                key={p.productId}
+                key={p.productId || idx}
                 className={styles.productItem}
                 onClick={() => p.slug && navigate(`/product-details/${p.slug}`)}
               >
-                {(p.image || p.images?.[0]) && (
+                {(p.variantImage || p.image || p.images?.[0]) && (
                   <img
-                    src={p.image || p.images?.[0]}
+                    src={p.variantImage || p.image || p.images?.[0]}
                     alt={p.title}
                     className={styles.productThumb}
                     onError={(e) => {
@@ -424,12 +424,40 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
                 )}
                 <div className={styles.productMeta}>
                   <span className={styles.productName}>{p.title}</span>
-                  <span className={styles.productPrice}>
-                    ₹{p.price}
-                    {p.mrp && p.mrp > p.price && (
-                      <s className={styles.productMrp}>₹{p.mrp}</s>
-                    )}
-                  </span>
+                  {p.variantTitle && (
+                    <span className={styles.productVariant}>{p.variantTitle}</span>
+                  )}
+                  {p.brand && (
+                    <span className={styles.productBrand}>
+                      {typeof p.brand === "object" ? p.brand?.name : p.brand}
+                    </span>
+                  )}
+                  {p.short_description && (
+                    <span className={styles.productDesc}>{p.short_description}</span>
+                  )}
+                  {(p.variantPrice != null || p.price != null) && (
+                    <span className={styles.productPrice}>
+                      ₹{p.variantPrice ?? p.price}
+                      {(p.variantMrp || p.mrp) && (p.variantMrp || p.mrp) > (p.variantPrice ?? p.price) && (
+                        <>
+                          <s className={styles.productMrp}>₹{p.variantMrp || p.mrp}</s>
+                          <span className={styles.productDiscount}>
+                            {Math.round((((p.variantMrp || p.mrp) - (p.variantPrice ?? p.price)) / (p.variantMrp || p.mrp)) * 100)}% off
+                          </span>
+                        </>
+                      )}
+                    </span>
+                  )}
+                  {p.category?.length > 0 && (
+                    <div className={styles.productCategories}>
+                      {p.category.map((cat) => (
+                        <span key={cat.ID} className={styles.productCategoryTag}>{cat.name}</span>
+                      ))}
+                    </div>
+                  )}
+                  {p.slug && (
+                    <span className={styles.viewProductLink}>View Product →</span>
+                  )}
                 </div>
               </div>
             ))}
