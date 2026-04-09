@@ -332,27 +332,16 @@ const LiveView = (props) => {
     }
 
     try {
-      // 5. Check wallet balance & astrologer availability
+      // 5. Check wallet balance only — astrologer is already live, no need to check availability
       const result = await getBalance({ astrologerId, type: "call" });
 
       if (result?.data?.data?.status === false) {
         Toast.error("Insufficient balance. Please recharge.");
         return;
       }
-
-      const availability = result?.data?.data?.availability;
-      const isActive = availability?.isActive === true;
-      const isActiveForAudio = Array.isArray(availability?.isActiveType)
-        ? availability.isActiveType.includes("audio")
-        : false;
-
-      if (!isActive || !isActiveForAudio) {
-        Toast.error("Astrologer is not available for voice call");
-        return;
-      }
     } catch (error) {
-      console.error("Error checking balance/availability:", error);
-      Toast.error("Failed to check astrologer availability");
+      console.error("Error checking balance:", error);
+      Toast.error("Failed to check wallet balance");
       return;
     }
 
