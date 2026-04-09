@@ -14,8 +14,8 @@ const NewAstrologerCard = ({
   const isOnline = astrologer?.isActive === true;
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const activeTypes = astrologer?.isActiveType || [];
-  const chatPrice = astrologer?.price?.chatRate?.amount || 0;
-  const callPrice = astrologer?.price?.audioRate?.amount || 0;
+  const chatPrice = Number(astrologer?.price?.chatRate?.amount) || 0;
+  const callPrice = Number(astrologer?.price?.audioRate?.amount) || 0;
   const chatEnabled = isOnline && (activeTypes.includes("all") || activeTypes.includes("chat")) && chatPrice > 0;
   const callEnabled = isOnline && (activeTypes.includes("all") || activeTypes.includes("audio")) && callPrice > 0;
 
@@ -87,30 +87,43 @@ const NewAstrologerCard = ({
         )}
       </Link>
       <div className={styles.actionButtons}>
-        <div className={styles.buttonWrapper}>
-          <button
-            className={styles.chatBtn}
-            onClick={() => chatEnabled && onConnect(astrologer, "chat")}
-            disabled={!chatEnabled}
-          >
-            <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
-          </button>
-          <p className={styles.priceText}>
-            <span className={styles.priceAmount}>₹{chatPrice}</span>/min
-          </p>
-        </div>
-        <div className={styles.buttonWrapper}>
-          <button
-            className={styles.callBtn}
-            onClick={() => callEnabled && onConnect(astrologer, "audio")}
-            disabled={!callEnabled}
-          >
-            <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
-          </button>
-          <p className={styles.priceText}>
-            <span className={styles.priceAmount}>₹{callPrice}</span>/min
-          </p>
-        </div>
+        {!isOnline && hasEmergency ? (
+          <div className={styles.emergencyButtonWrapper}>
+            <button
+              className={styles.emergencySingleBtn}
+              onClick={() => setShowEmergencyModal(true)}
+            >
+              Start Emergency Session
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className={styles.buttonWrapper}>
+              <button
+                className={styles.chatBtn}
+                onClick={() => chatEnabled && onConnect(astrologer, "chat")}
+                disabled={!chatEnabled}
+              >
+                <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+              </button>
+              <p className={styles.priceText}>
+                <span className={styles.priceAmount}>₹{chatPrice}</span>/min
+              </p>
+            </div>
+            <div className={styles.buttonWrapper}>
+              <button
+                className={styles.callBtn}
+                onClick={() => callEnabled && onConnect(astrologer, "audio")}
+                disabled={!callEnabled}
+              >
+                <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
+              </button>
+              <p className={styles.priceText}>
+                <span className={styles.priceAmount}>₹{callPrice}</span>/min
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       <EmergencySessionModal
