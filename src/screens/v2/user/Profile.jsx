@@ -1439,6 +1439,17 @@ const Profile = () => {
               </div>
             ) : filteredOrders.length > 0 ? (
               <>
+                {/* Filter button - always visible */}
+                <div className={styles.headerContainer}>
+                  <h4 className={styles.yearTitle}></h4>
+                  <button
+                    className={styles.filterButton}
+                    onClick={() => setFilterModalOpen(true)}
+                  >
+                    <FilterIcon size={16} />
+                    <span>Filter</span>
+                  </button>
+                </div>
                 <div
                   key={orderHistoryTab}
                   className={styles.orderList}
@@ -1460,13 +1471,7 @@ const Profile = () => {
                       <div key={year} className={styles.yearSection}>
                         <div className={styles.headerContainer}>
                           <h4 className={styles.yearTitle}>{year}</h4>
-                          <button
-                            className={styles.filterButton}
-                            onClick={() => setFilterModalOpen(true)}
-                          >
-                            <FilterIcon size={16} />
-                            <span>Filter</span>
-                          </button>
+                          {/* Filter button moved outside the loop */}
                         </div>
                         <div className={styles.orderCardMain}>
                           {ordersByYear[year].map((order) => (
@@ -1623,17 +1628,30 @@ const Profile = () => {
                 })()}
               </>
             ) : (
-              <div className={styles.emptyState}>
-                <p>
-                  No {orderHistoryTab === "call" ? "call" : "chat"} orders yet
-                </p>
-                <button
-                  className={styles.exploreButton}
-                  onClick={() => navigate("/chat-with-astrologers")}
-                >
-                  Explore Astrologers
-                </button>
-              </div>
+              <>
+                {/* Filter button - visible even in empty state */}
+                <div className={styles.headerContainer}>
+                  <h4 className={styles.yearTitle}></h4>
+                  <button
+                    className={styles.filterButton}
+                    onClick={() => setFilterModalOpen(true)}
+                  >
+                    <FilterIcon size={16} />
+                    <span>Filter</span>
+                  </button>
+                </div>
+                <div className={styles.emptyState}>
+                  <p>
+                    No {orderHistoryTab === "call" ? "call" : "chat"} orders yet
+                  </p>
+                  <button
+                    className={styles.exploreButton}
+                    onClick={() => navigate("/chat-with-astrologers")}
+                  >
+                    Explore Astrologers
+                  </button>
+                </div>
+              </>
             )}
           </div>
         )}
