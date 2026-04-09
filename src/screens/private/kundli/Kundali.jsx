@@ -334,6 +334,7 @@ const Kundali = () => {
           // Fetch the PDF as a blob to create a dummy URL
           try {
             const response = await fetch(result.data);
+            if (!response.ok) throw new Error("Fetch failed");
             const blob = await response.blob();
             
             // Create a blob URL (this will show as blob:http://... in the browser)
@@ -368,8 +369,8 @@ const Kundali = () => {
             }, 1000); // Revoke after 1 second
             
           } catch (fetchError) {
-            console.error("Failed to fetch PDF:", fetchError);
-            // Fallback to direct URL if blob creation fails
+            console.error("Failed to fetch PDF as blob, opening directly:", fetchError);
+            // Fallback to direct URL if blob creation fails (CORS etc.)
             window.open(result.data, '_blank', 'noopener,noreferrer');
           }
         } else {
@@ -382,12 +383,12 @@ const Kundali = () => {
         if (error?.status === 400) {
           Toast.error(error?.data?.message || "Insufficient balance. Redirecting to recharge...");
           setTimeout(() => {
-            // Pass current URL as returnUrl to redirect back after payment
             const currentUrl = window.location.pathname + window.location.search;
             navigate(`/recharge?returnUrl=${encodeURIComponent(currentUrl)}`);
           }, 1500);
         } else {
-          Toast.error(error?.data?.message || "Failed to load PDF");
+          const msg = error?.data?.message || error?.message || "Failed to generate PDF. Please try again.";
+          Toast.error(msg);
         }
       } finally {
         setIsDownloadingPdf(false);
