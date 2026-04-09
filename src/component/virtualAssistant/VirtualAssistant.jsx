@@ -198,7 +198,27 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen }) =
                             </div>
                           ))}
                         </div>
-                      ) : msg.type === "attachment" ? (
+                      ) : msg.type === "gift" ? (() => {
+                        let giftInfo = null;
+                        let giftText = msg.message;
+                        try {
+                          const parsed = JSON.parse(msg.message);
+                          giftText = parsed.text;
+                          giftInfo = parsed.giftData;
+                        } catch {}
+                        return (
+                          <div style={{ textAlign: "center" }}>
+                            <p className={styles.msgText} style={{ marginBottom: 8 }}>{giftText}</p>
+                            {giftInfo && (
+                              <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", background: "#fff5ec", borderRadius: 12, padding: "10px 16px", gap: 4 }}>
+                                {giftInfo.giftImg && <img src={giftInfo.giftImg} alt={giftInfo.giftName} style={{ width: 48, height: 48, objectFit: "contain" }} />}
+                                {giftInfo.giftName && <span style={{ fontSize: 13, fontWeight: 600, color: "#333" }}>{giftInfo.giftName}</span>}
+                                {giftInfo.price && <span style={{ fontSize: 12, color: "#f75801", fontWeight: 500 }}>₹{giftInfo.price}</span>}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })() : msg.type === "attachment" ? (
                         <a
                           href={msg.message}
                           target="_blank"

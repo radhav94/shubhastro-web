@@ -442,7 +442,7 @@ const DreamInterpreter = () => {
 
             {/* Action Button */}
             <button className={styles.newDreamButton} onClick={() => navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)}>
-              Consult with Expert Astrollger
+              Consult with Expert Astrologer
             </button>
           </div>
         )}
