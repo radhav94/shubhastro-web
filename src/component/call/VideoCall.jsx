@@ -15,6 +15,7 @@ import {
   IoVolumeMute,
   IoChatbubbleEllipses,
   IoCall,
+  IoWallet,
 } from "react-icons/io5";
 import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./VideoCalling.module.scss";
@@ -1190,8 +1191,7 @@ const VideoCalling = ({ callData }) => {
   
                 <span class={styles.dividerLine}></span>
   
-                {showRechargeButton && (
-                  <button 
+                <button 
                     className={styles.rechargeButton}
                     onClick={() => {
                       setIsMinimized(true);
@@ -1208,7 +1208,6 @@ const VideoCalling = ({ callData }) => {
                       </defs>
                     </svg>
                   </button>
-                )}
 
               {/* <div className={styles.walletBadge}>
                 <span className={styles.walletIcon}>💰</span>
