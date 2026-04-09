@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { io } from "socket.io-client";
 import { clearViewerSession } from "../../../../../utils/liveSessionStorage";
+import Toast from "../../../../../component/toast";
 
 const SOCKET_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
@@ -139,6 +140,8 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
           clearViewerSession();
         }
         onStreamEnded?.({ reason: data.code, roomId: endedRoom });
+      } else if (data.code === "CONTENT_BLOCKED") {
+        Toast.error(data.message || "Message contains inappropriate content");
       }
     });
 
