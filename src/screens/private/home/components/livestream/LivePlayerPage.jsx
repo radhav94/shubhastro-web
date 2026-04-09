@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import InteractiveLiveStreaming from "./InteractiveLiveStreaming";
 import { LiveListProvider } from "../../../../../context/LiveListContext";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
-import { restoreViewerSession } from "../../../../../utils/liveSessionStorage";
+import { restoreViewerSession, clearViewerSession } from "../../../../../utils/liveSessionStorage";
 
 const LivePlayerPage = () => {
   const { channelId } = useParams();
@@ -61,19 +61,16 @@ const LivePlayerPage = () => {
           liveList = [{ channel: channelId }, ...liveList];
         }
       } else if (savedSession?.channel) {
-        targetChannel = savedSession.channel;
+        // Only restore saved session if the channel is still live (exists in API response)
         const existsInList = liveList.some(
           (l) => l.channel === savedSession.channel
         );
-        if (!existsInList && savedSession.astrologer) {
-          liveList = [
-            {
-              channel: savedSession.channel,
-              uid: savedSession.uid,
-              astrologer: savedSession.astrologer,
-            },
-            ...liveList,
-          ];
+        if (existsInList) {
+          targetChannel = savedSession.channel;
+        } else {
+          // Saved channel is no longer live — clear stale session so useLiveStreaming
+          // fetches a fresh viewer token instead of trying reconnect-token
+          clearViewerSession();
         }
       }
 
