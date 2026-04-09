@@ -705,10 +705,18 @@ const EPoojaCheckout = () => {
               const price = getItemPrice(item);
               const qty = item?.quantity || 1;
               const lineTotal = price * qty;
+              const gstPercent = getItemGstPercent(item);
+              const itemGstAmount = Math.round(lineTotal * gstPercent / 100 * 100) / 100;
               return (
-                <div key={item?._id || idx} className={styles.priceRow}>
-                  <span>{title}{qty > 1 ? ` × ${qty}` : ""}</span>
-                  <span>₹{lineTotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <div key={item?._id || idx} style={{ background: "#fafafa", borderRadius: 8, padding: "12px", marginBottom: 10 }}>
+                  <div className={styles.priceRow} style={{ marginBottom: 0 }}>
+                    <span>{title}{qty > 1 ? ` × ${qty}` : ""}</span>
+                    <span>₹{lineTotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#999", marginTop: "6px" }}>
+                    <span>GST ({gstPercent}%)</span>
+                    <span>₹{itemGstAmount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
                 </div>
               );
             })}
