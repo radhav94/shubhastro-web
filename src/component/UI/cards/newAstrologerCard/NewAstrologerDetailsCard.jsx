@@ -18,8 +18,8 @@ const NewAstrologerDetailsCard = ({
   const isOnline = astrologer?.isActive === true;
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const activeTypes = astrologer?.isActiveType || [];
-  const chatPrice = astrologer?.price?.chatRate?.amount || 0;
-  const callPrice = astrologer?.price?.audioRate?.amount || 0;
+  const chatPrice = Number(astrologer?.price?.chatRate?.amount) || 0;
+  const callPrice = Number(astrologer?.price?.audioRate?.amount) || 0;
   const chatEnabled = isOnline && (activeTypes.includes("all") || activeTypes.includes("chat")) && chatPrice > 0;
   const callEnabled = isOnline && (activeTypes.includes("all") || activeTypes.includes("audio")) && callPrice > 0;
 
@@ -48,11 +48,6 @@ const NewAstrologerDetailsCard = ({
             <img
               src={imageUrl}
               alt={`${astrologer?.firstName} ${astrologer?.lastName}`}
-              onClick={() =>
-                navigate(
-                  `/astrologer/${astrologer?._id}`,
-                )
-              }
               className={styles.detailsImage}
               onError={(e) => {
                 e.target.src = getAstrologerDefaultImage(astrologer?.gender);
@@ -111,38 +106,51 @@ const NewAstrologerDetailsCard = ({
 
         {/* Action Buttons */}
         <div className={styles.detailsActionButtons}>
-          <div className={styles.detailsButtonWrapper}>
-            <button
-              className={styles.detailsChatBtn}
-              onClick={() => chatEnabled && onConnect(astrologer, "chat")}
-              disabled={!chatEnabled}
-            >
-              <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
-            </button>
-            <p className={styles.detailsPriceText}>
-              ₹
-              <span className={styles.detailsPriceAmount}>
-                {astrologer?.price?.chatRate?.amount || 0}
-              </span>
-              /min
-            </p>
-          </div>
-          <div className={styles.detailsButtonWrapper}>
-            <button
-              className={styles.detailsCallBtn}
-              onClick={() => callEnabled && onConnect(astrologer, "audio")}
-              disabled={!callEnabled}
-            >
-              <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
-            </button>
-            <p className={styles.detailsPriceText}>
-              ₹
-              <span className={styles.detailsPriceAmount}>
-                {astrologer?.price?.audioRate?.amount || 0}
-              </span>
-              /min
-            </p>
-          </div>
+          {!isOnline && hasEmergency ? (
+            <div className={styles.emergencyButtonWrapper}>
+              <button
+                className={styles.emergencySingleBtn}
+                onClick={() => setShowEmergencyModal(true)}
+              >
+                Start Emergency Session
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className={styles.detailsButtonWrapper}>
+                <button
+                  className={styles.detailsChatBtn}
+                  onClick={() => chatEnabled && onConnect(astrologer, "chat")}
+                  disabled={!chatEnabled}
+                >
+                  <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+                </button>
+                <p className={styles.detailsPriceText}>
+                  ₹
+                  <span className={styles.detailsPriceAmount}>
+                    {astrologer?.price?.chatRate?.amount || 0}
+                  </span>
+                  /min
+                </p>
+              </div>
+              <div className={styles.detailsButtonWrapper}>
+                <button
+                  className={styles.detailsCallBtn}
+                  onClick={() => callEnabled && onConnect(astrologer, "audio")}
+                  disabled={!callEnabled}
+                >
+                  <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
+                </button>
+                <p className={styles.detailsPriceText}>
+                  ₹
+                  <span className={styles.detailsPriceAmount}>
+                    {astrologer?.price?.audioRate?.amount || 0}
+                  </span>
+                  /min
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

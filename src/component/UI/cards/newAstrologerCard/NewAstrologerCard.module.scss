@@ -36,13 +36,10 @@
 }
 
 .offlineCard {
-  opacity: 0.65;
-
   .chatBtn,
   .callBtn {
     opacity: 0.5;
     cursor: not-allowed;
-    // pointer-events: none;
   }
 
   .emergencyBtn {
@@ -263,7 +260,6 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    pointer-events: none;
   }
 }
 
@@ -309,7 +305,6 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    pointer-events: none;
   }
 }
 
@@ -419,7 +414,7 @@
 }
 
 .offlineDetailsCard {
-  opacity: 0.65;
+  // opacity: 0.65;
 
   .detailsChatBtn,
   .detailsCallBtn {
@@ -658,7 +653,7 @@
   }
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 }
@@ -705,7 +700,7 @@
   }
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 }

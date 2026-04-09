@@ -332,27 +332,16 @@ const LiveView = (props) => {
     }
 
     try {
-      // 5. Check wallet balance & astrologer availability
+      // 5. Check wallet balance only — astrologer is already live, no need to check availability
       const result = await getBalance({ astrologerId, type: "call" });
 
       if (result?.data?.data?.status === false) {
         Toast.error("Insufficient balance. Please recharge.");
         return;
       }
-
-      const availability = result?.data?.data?.availability;
-      const isActive = availability?.isActive === true;
-      const isActiveForAudio = Array.isArray(availability?.isActiveType)
-        ? availability.isActiveType.includes("audio")
-        : false;
-
-      if (!isActive || !isActiveForAudio) {
-        Toast.error("Astrologer is not available for voice call");
-        return;
-      }
     } catch (error) {
-      console.error("Error checking balance/availability:", error);
-      Toast.error("Failed to check astrologer availability");
+      console.error("Error checking balance:", error);
+      Toast.error("Failed to check wallet balance");
       return;
     }
 
@@ -760,13 +749,16 @@ const LiveView = (props) => {
             {/* Inline Messages Overlay */}
             <div className="inline-messages-overlay" ref={messagesOverlayRef}>
               {displayMessages.map((m, index) => {
-                // System messages (join) — green arrow style
+                // System messages (join) — show first letter like regular messages
                 if (m.isSystem) {
+                  const name = m.text?.split(" ")?.[0] || "U";
                   return (
-                    <div key={m.id || index} className="inline-message" style={{ opacity: 0.6 }}>
-                      <span className="inline-initial" style={{ background: "#22c55e", fontSize: 10 }}>▶</span>
+                    <div key={m.id || index} className="inline-message" style={{ opacity: 0.7 }}>
+                      <span className="inline-initial" style={{ background: "#22c55e" }}>
+                        {name.charAt(0).toUpperCase()}
+                      </span>
                       <div className="inline-message-body">
-                        <span className="inline-text" style={{ fontStyle: "italic", fontSize: 11 }}>{m.text}</span>
+                        <span className="inline-text" style={{ fontStyle: "italic", fontSize: 12 }}>{m.text}</span>
                       </div>
                     </div>
                   );

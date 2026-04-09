@@ -56,6 +56,7 @@ import VideoMinutesIcon from "../../../assets/icons/videoMinutes.svg";
 import SendGiftImage from "../../../assets/images/send-gift.png";
 import AstrologerShopImage from "../../../assets/images/astrologer-shop.png";
 import AstrologerNumerologyDefault from "../../../assets/default-img/astrologer-numerology.png";
+import iconSet from "../../../assets/images/Vector.png";
 import GiftModal from "../../../component/call/GiftModal";
 import VirtualAssistant from "../../../component/virtualAssistant/VirtualAssistant";
 import { useGetChatHistoryQuery } from "../../../redux/api/chatApi";
@@ -765,7 +766,7 @@ const AstrologerProfile = () => {
     },
     
     description:
-      data?.achievements[0]?.achievementName ||
+      data?.achievements?.[0]?.achievementName ||
       "",
     // OLD: dummy/static gallery data
     // gallery:
@@ -1526,66 +1527,83 @@ const AstrologerProfile = () => {
               <div className={styles.dividerLine}></div>
             </div>
 
-            <div className={styles.connectOptions}>
-              <div
-                className={`${styles.connectOption} ${(!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat")) || !data?.price?.chatRate?.amount) ? styles.connectOptionDisabled : ""}`}
-                onClick={() =>
-                  data?.isActive &&
-                  (data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat")) &&
-                  data?.price?.chatRate?.amount && handleChatStart(data)
-                }
-              >
-                <div className={styles.optionIcon}>
-                  <BiMessageDetail />
-                </div>
-                <div className={styles.optionInfo}>
-                  <span className={styles.optionLabel}>Chat</span>
-                  <span className={styles.optionPrice}>
-                    ₹{data?.price?.chatRate?.amount || 0}/ min
-                  </span>
-                </div>
+            {!data?.isActive && data?.isEmergencyAvailable && (
+              data?.emergencyPrice?.chatRate?.amount > 0 || data?.emergencyPrice?.audioRate?.amount > 0
+            ) ? (
+              <div className={styles.emergencySection}>
+                <button
+                  className={styles.emergencyBtn}
+                  onClick={() => setShowEmergencyModal(true)}
+                >
+                  <img src={iconSet} alt="emergency" className={styles.emergencyIcon} />
+                  Start Emergency Session
+                </button>
+                <p className={styles.emergencyDesc}>
+                  Astrologer is offline, only emergency sessions available.
+                </p>
               </div>
+            ) : (
+              <div className={styles.connectOptions}>
+                <div
+                  className={`${styles.connectOption} ${(!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat")) || !data?.price?.chatRate?.amount) ? styles.connectOptionDisabled : ""}`}
+                  onClick={() =>
+                    data?.isActive &&
+                    (data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat")) &&
+                    data?.price?.chatRate?.amount && handleChatStart(data)
+                  }
+                >
+                  <div className={styles.optionIcon}>
+                    <BiMessageDetail />
+                  </div>
+                  <div className={styles.optionInfo}>
+                    <span className={styles.optionLabel}>Chat</span>
+                    <span className={styles.optionPrice}>
+                      ₹{data?.price?.chatRate?.amount || 0}/ min
+                    </span>
+                  </div>
+                </div>
 
-              <div
-                className={`${styles.connectOption} ${(!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("audio")) || !data?.price?.audioRate?.amount) ? styles.connectOptionDisabled : ""}`}
-                onClick={() =>
-                  data?.isActive &&
-                  (data?.isActiveType?.includes("all") || data?.isActiveType?.includes("audio")) &&
-                  data?.price?.audioRate?.amount &&
-                  handleCallStart(data, "audio")
-                }
-              >
-                <div className={styles.optionIcon}>
-                  <BiPhone />
+                <div
+                  className={`${styles.connectOption} ${(!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("audio")) || !data?.price?.audioRate?.amount) ? styles.connectOptionDisabled : ""}`}
+                  onClick={() =>
+                    data?.isActive &&
+                    (data?.isActiveType?.includes("all") || data?.isActiveType?.includes("audio")) &&
+                    data?.price?.audioRate?.amount &&
+                    handleCallStart(data, "audio")
+                  }
+                >
+                  <div className={styles.optionIcon}>
+                    <BiPhone />
+                  </div>
+                  <div className={styles.optionInfo}>
+                    <span className={styles.optionLabel}>Audio Call</span>
+                    <span className={styles.optionPrice}>
+                      ₹{data?.price?.audioRate?.amount || 0}/ min
+                    </span>
+                  </div>
                 </div>
-                <div className={styles.optionInfo}>
-                  <span className={styles.optionLabel}>Audio Call</span>
-                  <span className={styles.optionPrice}>
-                    ₹{data?.price?.audioRate?.amount || 0}/ min
-                  </span>
-                </div>
-              </div>
 
-              <div
-                className={`${styles.connectOption} ${(!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("video")) || !data?.price?.videoCallRate?.amount) ? styles.connectOptionDisabled : ""}`}
-                onClick={() =>
-                  data?.isActive &&
-                  (data?.isActiveType?.includes("all") || data?.isActiveType?.includes("video")) &&
-                  data?.price?.videoCallRate?.amount &&
-                  handleCallStart(data, "video")
-                }
-              >
-                <div className={styles.optionIcon}>
-                  <BiVideo />
-                </div>
-                <div className={styles.optionInfo}>
-                  <span className={styles.optionLabel}>Video Call</span>
-                  <span className={styles.optionPrice}>
-                    ₹{data?.price?.videoCallRate?.amount || 0}/ min
-                  </span>
+                <div
+                  className={`${styles.connectOption} ${(!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("video")) || !data?.price?.videoCallRate?.amount) ? styles.connectOptionDisabled : ""}`}
+                  onClick={() =>
+                    data?.isActive &&
+                    (data?.isActiveType?.includes("all") || data?.isActiveType?.includes("video")) &&
+                    data?.price?.videoCallRate?.amount &&
+                    handleCallStart(data, "video")
+                  }
+                >
+                  <div className={styles.optionIcon}>
+                    <BiVideo />
+                  </div>
+                  <div className={styles.optionInfo}>
+                    <span className={styles.optionLabel}>Video Call</span>
+                    <span className={styles.optionPrice}>
+                      ₹{data?.price?.videoCallRate?.amount || 0}/ min
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Consultation Hours Card */}
@@ -1625,32 +1643,46 @@ const AstrologerProfile = () => {
 
       {/* Mobile Bottom Bar - Chat & Call */}
       <div className={styles.mobileBottomBar}>
-        <button
-          className={styles.mobileChatBtn}
-          onClick={() => handleChatStart(data)}
-          disabled={!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat")) || !data?.price?.chatRate?.amount}
-        >
-          <img src={ChatMinutesIcon} alt="Chat" className={styles.mobileBtnIcon} />
-          <div className={styles.btnContent}>
-            <span className={styles.btnLabel}>Chat</span>
-            <span className={styles.btnPrice}>
-              ₹{data?.price?.chatRate?.amount || 0}/min
-            </span>
-          </div>
-        </button>
-        <button
-          className={styles.mobileCallBtn}
-          onClick={() => handleCallStart(data, "audio")}
-          disabled={!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("audio")) || !data?.price?.audioRate?.amount}
-        >
-          <img src={CallMinutesIcon} alt="Call" className={styles.mobileBtnIcon} />
-          <div className={styles.btnContent}>
-            <span className={styles.btnLabel}>Call</span>
-            <span className={styles.btnPrice}>
-              ₹{data?.price?.audioRate?.amount || 0}/min
-            </span>
-          </div>
-        </button>
+        {!data?.isActive && data?.isEmergencyAvailable && (
+          data?.emergencyPrice?.chatRate?.amount > 0 || data?.emergencyPrice?.audioRate?.amount > 0
+        ) ? (
+          <button
+            className={styles.mobileEmergencyBtn}
+            onClick={() => setShowEmergencyModal(true)}
+          >
+            <img src={iconSet} alt="emergency" className={styles.mobileEmergencyIcon} />
+            Start Emergency Session
+          </button>
+        ) : (
+          <>
+            <button
+              className={styles.mobileChatBtn}
+              onClick={() => handleChatStart(data)}
+              disabled={!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat")) || !data?.price?.chatRate?.amount}
+            >
+              <img src={ChatMinutesIcon} alt="Chat" className={styles.mobileBtnIcon} />
+              <div className={styles.btnContent}>
+                <span className={styles.btnLabel}>Chat</span>
+                <span className={styles.btnPrice}>
+                  ₹{data?.price?.chatRate?.amount || 0}/min
+                </span>
+              </div>
+            </button>
+            <button
+              className={styles.mobileCallBtn}
+              onClick={() => handleCallStart(data, "audio")}
+              disabled={!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("audio")) || !data?.price?.audioRate?.amount}
+            >
+              <img src={CallMinutesIcon} alt="Call" className={styles.mobileBtnIcon} />
+              <div className={styles.btnContent}>
+                <span className={styles.btnLabel}>Call</span>
+                <span className={styles.btnPrice}>
+                  ₹{data?.price?.audioRate?.amount || 0}/min
+                </span>
+              </div>
+            </button>
+          </>
+        )}
       </div>
 
       <EmergencySessionModal
