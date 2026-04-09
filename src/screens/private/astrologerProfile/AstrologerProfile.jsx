@@ -158,7 +158,7 @@ const AstrologerProfile = () => {
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
 
-  const { activeCall, setActiveCall, setOpenReview, setReviewData } = useCall();
+  const { activeCall, setActiveCall, setOpenReview, setReviewData, lastSelectedKundli } = useCall();
   
   const {
     waitingList: WaitingList,
@@ -488,6 +488,7 @@ const AstrologerProfile = () => {
       localStorage.removeItem("waitingState");
 
       const astro = activeCallAstroRef.current;
+      const kundliId = lastSelectedKundli?._id;
 
       try {
         if (!roomId) throw new Error("Room ID missing");
@@ -499,6 +500,7 @@ const AstrologerProfile = () => {
           isUserSide: true,
           userId: userId,
           astrologerId: astrologerId,
+          kundliId,
           astrologerName: data?.astrologer?.firstName || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
@@ -512,6 +514,7 @@ const AstrologerProfile = () => {
             fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
             roomId,
             isUserSide: true,
+            kundliId,
             astrologerName: data?.astrologer?.firstName || "",
             astroID: data?.astrologer?.astrologer_ID,
           },
@@ -576,6 +579,7 @@ const AstrologerProfile = () => {
           callType: type,
           userId: userIdLocal,
           astrologerId: astro._id,
+          kundliId: lastSelectedKundli?._id,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
           isEmergency: rest?.isEmergency || false,
