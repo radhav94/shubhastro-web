@@ -754,7 +754,7 @@ const AstrologerProfile = () => {
         ? data.languagePreferences
         : ["English", "Hindi"],
     experience: data?.experience ?? 20,
-    totalConsultations: data?.totalConsultations ?? 1200,
+    totalConsultations: data?.consultations ?? 1200,
     rating: data?.rating ?? 4.5,
     totalRatings: data?.totalRatings ?? 1020,
     availability: formatAvailability(data?.availability),
@@ -1505,8 +1505,8 @@ const AstrologerProfile = () => {
             </div>
           )}
 
-          {/* Connect Now Card — always visible, buttons disabled when offline */}
-          <div className={styles.connectCard}>
+          {/* Connect Now Card — hidden when astrologer is live streaming */}
+          {!isLive && <div className={styles.connectCard}>
             <h3 className={styles.connectTitle}>CONNECT NOW</h3>
             <div className={styles.titleDivider}>
               <div className={styles.dividerLine}></div>
@@ -1604,7 +1604,7 @@ const AstrologerProfile = () => {
                 </div>
               </div>
             )}
-          </div>
+          </div>}
 
           {/* Consultation Hours Card */}
           <div className={styles.consultationCard}>
@@ -1643,7 +1643,15 @@ const AstrologerProfile = () => {
 
       {/* Mobile Bottom Bar - Chat & Call */}
       <div className={styles.mobileBottomBar}>
-        {!data?.isActive && data?.isEmergencyAvailable && (
+        {isLive ? (
+          <button
+            className={styles.mobileJoinLiveBtn}
+            onClick={handleJoinLive}
+          >
+            <Radio size={18} />
+            <span>Join Live Session</span>
+          </button>
+        ) : !data?.isActive && data?.isEmergencyAvailable && (
           data?.emergencyPrice?.chatRate?.amount > 0 || data?.emergencyPrice?.audioRate?.amount > 0
         ) ? (
           <button
