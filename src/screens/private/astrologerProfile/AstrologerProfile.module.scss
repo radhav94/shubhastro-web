@@ -881,10 +881,13 @@
   gap: 12px;
   align-items: center;
   flex-shrink: 0;
+  @media (width <= 767px) {
+    gap: 6px;
+  }
 }
 
 .followBtn {
-  height: 40px;
+  height: 36px;
   padding: 0px 16px;
   border-radius: 32px;
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
@@ -897,8 +900,8 @@
   white-space: nowrap;
   font-family: "Poppins", sans-serif;
   @media (width <= 767px) {
-    padding: 6px 20px;
-    font-size: 12px;
+    padding: 0px 12px;
+    font-size: 11px;
   }
 
   &:hover {
@@ -923,7 +926,7 @@
 }
 
 .vaBtn {
-  height: 40px;
+  height: 36px;
   padding: 0px 16px;
   border-radius: 32px;
   background: transparent;
@@ -936,7 +939,7 @@
   white-space: nowrap;
   font-family: "Poppins", sans-serif;
   @media (width <= 767px) {
-    padding: 6px 14px;
+    padding: 0px 8px;
     font-size: 11px;
   }
 
@@ -980,8 +983,8 @@
 }
 
 .shareBtn {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: #fffaf2;
   border: none;
@@ -1010,8 +1013,8 @@
   }
 
   &:hover {
-    background: #F5EFE3;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: rgba(247, 88, 1, 0.08);
+    transform: translateY(-1px);
   }
 
   &:active {
@@ -1159,11 +1162,11 @@
 }
 
 .languageTag {
-  padding: 6px 12px;
-  background: #FFF5EC;
+  padding: 2px 8px;
+  background: #fff5ec;
   border-radius: 16px;
   font-size: 13px;
-  color: #E56329;
+  color: #e56329;
   font-weight: 400;
 }
 
@@ -1226,11 +1229,10 @@
   font-size: 1rem;
   color: #101010;
   font-weight: 400;
-  margin-top: 4px;
+  // margin-top: 4px;
   opacity: 0.6;
   @media (width <= 460px) {
-    font-size: 14px;
-    margin-top: 0;
+    font-size: 12px;
   }
 }
 
@@ -1318,6 +1320,8 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .clockIcon {
@@ -1503,11 +1507,10 @@
   color: #101010;
   text-align: center;
   font-weight: 400;
-  margin-top: 4px;
+  // margin-top: 4px;
   opacity: 0.6;
   @media (width <= 460px) {
     font-size: 12px;
-    margin-top: 0;
   }
 }
 
