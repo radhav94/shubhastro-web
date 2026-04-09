@@ -1040,7 +1040,6 @@ const VideoCalling = ({ callData }) => {
           top: position.y,
           left: position.x,
           display: isMinimized && !isOnLivePage ? "block" : "none",
-          transform: 'scaleX(-1)'
         }}
         onMouseDown={startDrag}
         onTouchStart={startDrag}
@@ -1056,7 +1055,7 @@ const VideoCalling = ({ callData }) => {
           {/* Mini Video Container - Always rendered */}
           <div
             ref={localVideoMiniRef}
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: "100%", height: "100%", transform: "scaleX(-1)" }}
           />
           {/* Avatar Overlay - Separate layer */}
           {!cameraOn && (
