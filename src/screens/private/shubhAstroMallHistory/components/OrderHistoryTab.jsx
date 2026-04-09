@@ -319,14 +319,14 @@ const OrderHistoryTab = () => {
                   </div>
                 )}
 
-                <div className={styles.cardFooter}>
+                {/* <div className={styles.cardFooter}>
                   <button
                     className={styles.reorderBtn}
                     onClick={(e) => e.stopPropagation()}
                   >
                     Order Again
                   </button>
-                </div>
+                </div> */}
               </div>
             );
           })}
