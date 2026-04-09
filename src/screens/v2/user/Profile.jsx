@@ -11,9 +11,11 @@ import {
   MessageCircle,
   Star,
   Trash2,
+  FilterIcon,
 } from "lucide-react";
 import { TiUserDelete } from "react-icons/ti";
 import { LuPencilLine } from "react-icons/lu";
+import { FaCheck } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useState, useRef, useEffect } from "react";
@@ -73,6 +75,13 @@ const Profile = () => {
     navigationState.activeTab || "Profile"
   );
   const [orderHistoryTab, setOrderHistoryTab] = useState("call"); // Sub-tab for order history
+
+  // Filter modal state
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const [filterActiveTab, setFilterActiveTab] = useState("Sort");
+  const [filterSortOrder, setFilterSortOrder] = useState("desc");
+  const [filterMonth, setFilterMonth] = useState("");
+  const [filterYear, setFilterYear] = useState("");
   const transactionListRef = useRef(null);
   const orderListRef = useRef(null); // Ref for order history scroll
   const user = getUserFromStorage();
@@ -169,19 +178,38 @@ const Profile = () => {
   // Chat history pagination state
   const [chatHistoryPage, setChatHistoryPage] = useState(1);
 
+  // Filter state for applied filters (used in API calls)
+  const [appliedSortOrder, setAppliedSortOrder] = useState("");
+  const [appliedMonth, setAppliedMonth] = useState("");
+  const [appliedYear, setAppliedYear] = useState("");
+
   // Fetch call and chat history
   const {
     data: callHistoryData,
     isLoading: isLoadingCalls,
     isFetching: isFetchingCalls,
   } = useGetCallHistoryQuery(
-    { userId, page: callHistoryPage, limit: 12 },
+    {
+      userId,
+      page: callHistoryPage,
+      limit: 12,
+      ...(appliedSortOrder && { sortOrder: appliedSortOrder }),
+      ...(appliedMonth && { month: appliedMonth }),
+      ...(appliedYear && { year: appliedYear }),
+    },
     { skip: !userId },
   );
-  console.log("callHistoryData",callHistoryData?.data?.callHistory)
+  // console.log("callHistoryData",callHistoryData?.data?.callHistory)
 
   const { data: chatHistoryData, isLoading: isLoadingChats, isFetching: isFetchingChats } =
-    useGetUserChatMessagesQuery({ userId, page: chatHistoryPage, limit: 12 }, {
+    useGetUserChatMessagesQuery({
+      userId,
+      page: chatHistoryPage,
+      limit: 12,
+      ...(appliedSortOrder && { sortOrder: appliedSortOrder }),
+      ...(appliedMonth && { month: appliedMonth }),
+      ...(appliedYear && { year: appliedYear }),
+    }, {
       skip: !userId,
     });
 
@@ -430,13 +458,20 @@ const Profile = () => {
     }
   };
 
-  // Reset pages when switching tabs
+  // Reset pages and filters when switching tabs
   useEffect(() => {
     if (orderHistoryTab === "call") {
       setCallHistoryPage(1);
     } else {
       setChatHistoryPage(1);
     }
+    // Reset applied filters on tab switch
+    setFilterSortOrder("desc");
+    setFilterMonth("");
+    setFilterYear("");
+    setAppliedSortOrder("");
+    setAppliedMonth("");
+    setAppliedYear("");
   }, [orderHistoryTab]);
 
   // Restore waiting state from localStorage on mount
@@ -1150,7 +1185,11 @@ const Profile = () => {
                 : " "}
             </p>
             {user?.phoneNumber && (
-              <p className={styles.profileDetails}>{user.phoneNumber.startsWith("+") ? user.phoneNumber : `+${user.phoneNumber}`}</p>
+              <p className={styles.profileDetails}>
+                {user.phoneNumber.startsWith("+")
+                  ? user.phoneNumber
+                  : `+${user.phoneNumber}`}
+              </p>
             )}
           </div>
         </div>
@@ -1307,20 +1346,27 @@ const Profile = () => {
                         <div className={styles.profileActions}>
                           <button
                             className={styles.iconButton}
-                            onClick={(e) => { e.stopPropagation(); handleEditClick(kundli); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditClick(kundli);
+                            }}
                             type="button"
                           >
                             <LuPencilLine size={18} />
                           </button>
-                          {kundli?.relation !== "Self" && kundli?.relation !== "self" && (
-                            <button
-                              className={styles.iconButton}
-                              onClick={(e) => { e.stopPropagation(); handleDeleteClick(kundli); }}
-                              type="button"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          )}
+                          {kundli?.relation !== "Self" &&
+                            kundli?.relation !== "self" && (
+                              <button
+                                className={styles.iconButton}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteClick(kundli);
+                                }}
+                                type="button"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            )}
                         </div>
                       </div>
 
@@ -1329,8 +1375,16 @@ const Profile = () => {
                         {dayjs(
                           `${kundli.year}-${kundli.month}-${kundli.day}`,
                         ).format("DD MMM YYYY")}{" "}
-                        • {String(kundli.hour > 12 ? kundli.hour - 12 : kundli.hour === 0 ? 12 : kundli.hour).padStart(2, "0")}:
-                        {String(kundli.min).padStart(2, "0")} {kundli.hour >= 12 ? "PM" : "AM"}
+                        •{" "}
+                        {String(
+                          kundli.hour > 12
+                            ? kundli.hour - 12
+                            : kundli.hour === 0
+                              ? 12
+                              : kundli.hour,
+                        ).padStart(2, "0")}
+                        :{String(kundli.min).padStart(2, "0")}{" "}
+                        {kundli.hour >= 12 ? "PM" : "AM"}
                       </p>
                       <p className={styles.profileCardLocation}>
                         {kundli.place}
@@ -1385,138 +1439,188 @@ const Profile = () => {
               </div>
             ) : filteredOrders.length > 0 ? (
               <>
-              <div
-                key={orderHistoryTab}
-                className={styles.orderList}
-                ref={orderListRef}
-              >
-                {/* Loading overlay for page transitions */}
-                {(orderHistoryTab === "call" ? isFetchingCalls : isFetchingChats) && (
-                  <div className={styles.loadingMore}>
-                    <p>Loading...</p>
-                  </div>
-                )}
+                <div
+                  key={orderHistoryTab}
+                  className={styles.orderList}
+                  ref={orderListRef}
+                >
+                  {/* Loading overlay for page transitions */}
+                  {(orderHistoryTab === "call"
+                    ? isFetchingCalls
+                    : isFetchingChats) && (
+                    <div className={styles.loadingMore}>
+                      <p>Loading...</p>
+                    </div>
+                  )}
 
-                {/* Orders by Year */}
-                {Object.keys(ordersByYear)
-                  .sort((a, b) => b - a)
-                  .map((year) => (
-                    <div key={year} className={styles.yearSection}>
-                      <h4 className={styles.yearTitle}>{year}</h4>
-                      <div className={styles.orderCardMain}>
-                      {ordersByYear[year].map((order) => (
-                        <div 
-                          key={order.id} 
-                          className={styles.orderCard}
-                          onClick={() => navigate(`/profile/order-history/${order.astrologer._id}`, { state: { tab: order.type === "chat" ? "Chat" : order.sessionType === "video" ? "Video" : "Call" } })}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          <div className={styles.orderCardTop}>
-                            <div className={styles.orderLeft}>
-                              <div 
-                                className={styles.astrologerAvatar} 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(`/astrologer/${order.astrologer._id}`);
-                                }} 
-                                style={{ cursor: 'pointer' }}
-                              >
-                                {order.astrologer.image ? (
-                                  <img src={order.astrologer.image} alt={order.astrologer.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                                ) : (
-                                  <span>{getInitials(order.astrologer.name)}</span>
-                                )}
+                  {/* Orders by Year */}
+                  {Object.keys(ordersByYear)
+                    .sort((a, b) => b - a)
+                    .map((year) => (
+                      <div key={year} className={styles.yearSection}>
+                        <div className={styles.headerContainer}>
+                          <h4 className={styles.yearTitle}>{year}</h4>
+                          <button
+                            className={styles.filterButton}
+                            onClick={() => setFilterModalOpen(true)}
+                          >
+                            <FilterIcon size={16} />
+                            <span>Filter</span>
+                          </button>
+                        </div>
+                        <div className={styles.orderCardMain}>
+                          {ordersByYear[year].map((order) => (
+                            <div
+                              key={order.id}
+                              className={styles.orderCard}
+                              onClick={() =>
+                                navigate(
+                                  `/profile/order-history/${order.astrologer._id}`,
+                                  {
+                                    state: {
+                                      tab:
+                                        order.type === "chat"
+                                          ? "Chat"
+                                          : order.sessionType === "video"
+                                            ? "Video"
+                                            : "Call",
+                                    },
+                                  },
+                                )
+                              }
+                              style={{ cursor: "pointer" }}
+                            >
+                              <div className={styles.orderCardTop}>
+                                <div className={styles.orderLeft}>
+                                  <div
+                                    className={styles.astrologerAvatar}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate(
+                                        `/astrologer/${order.astrologer._id}`,
+                                      );
+                                    }}
+                                    style={{ cursor: "pointer" }}
+                                  >
+                                    {order.astrologer.image ? (
+                                      <img
+                                        src={order.astrologer.image}
+                                        alt={order.astrologer.name}
+                                        style={{
+                                          width: "100%",
+                                          height: "100%",
+                                          borderRadius: "50%",
+                                          objectFit: "cover",
+                                        }}
+                                      />
+                                    ) : (
+                                      <span>
+                                        {getInitials(order.astrologer.name)}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className={styles.orderInfo}>
+                                    <h5
+                                      className={styles.astrologerName}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(
+                                          `/astrologer/${order.astrologer._id}`,
+                                        );
+                                      }}
+                                      style={{ cursor: "pointer" }}
+                                    >
+                                      {order.astrologer.name}
+                                    </h5>
+                                    <div className={styles.orderMeta}>
+                                      <span className={styles.orderDate}>
+                                        📅{" "}
+                                        {dayjs(order.date).format(
+                                          "MMM DD, YYYY",
+                                        )}
+                                      </span>
+                                      <span className={styles.orderTime}>
+                                        🕐 {dayjs(order.date).format("hh:mm A")}
+                                      </span>
+                                    </div>
+                                    <p className={styles.orderDuration}>
+                                      Duration : {order.duration}
+                                    </p>
+                                    <p className={styles.orderAmount}>
+                                      ₹{order.amount}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <button className={styles.orderTypeIcon}>
+                                  {order.type === "call" ? (
+                                    order.sessionType === "video" ? (
+                                      <Video size={20} />
+                                    ) : (
+                                      <Phone size={20} />
+                                    )
+                                  ) : (
+                                    <MessageCircle size={20} />
+                                  )}
+                                </button>
                               </div>
-                              <div className={styles.orderInfo}>
-                                <h5 
-                                  className={styles.astrologerName}
+
+                              <div className={styles.orderCardBottom}>
+                                <button
+                                  className={styles.rateButton}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    navigate(`/astrologer/${order.astrologer._id}`);
+                                    handleRateConsultation(
+                                      order.astrologer,
+                                      order.roomId,
+                                    );
                                   }}
-                                  style={{ cursor: 'pointer' }}
                                 >
-                                  {order.astrologer.name}
-                                </h5>
-                                <div className={styles.orderMeta}>
-                                  <span className={styles.orderDate}>
-                                    📅{" "}
-                                    {dayjs(order.date).format("MMM DD, YYYY")}
-                                  </span>
-                                  <span className={styles.orderTime}>
-                                    🕐 {dayjs(order.date).format("hh:mm A")}
-                                  </span>
-                                </div>
-                                <p className={styles.orderDuration}>
-                                  Duration : {order.duration}
-                                </p>
-                                <p className={styles.orderAmount}>
-                                  ₹{order.amount}
-                                </p>
+                                  Rate Consultation
+                                </button>
+                                <div className={styles.buttonSeparator}></div>
+                                <button
+                                  className={styles.consultAgainButton}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleConnectClick(order.astrologer);
+                                  }}
+                                >
+                                  Consult Again
+                                </button>
                               </div>
                             </div>
-
-                            <button className={styles.orderTypeIcon}>
-                              {order.type === "call" ? (
-                                order.sessionType === "video" ? <Video size={20} /> : <Phone size={20} />
-                              ) : (
-                                <MessageCircle size={20} />
-                              )}
-                            </button>
-                          </div>
-
-                          <div className={styles.orderCardBottom}>
-                            <button
-                              className={styles.rateButton}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRateConsultation(order.astrologer, order.roomId);
-                              }}
-                            >
-                              Rate Consultation
-                            </button>
-                            <div className={styles.buttonSeparator}></div>
-                            <button
-                              className={styles.consultAgainButton}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleConnectClick(order.astrologer);
-                              }}
-                            >
-                              Consult Again
-                            </button>
-                          </div>
+                          ))}
                         </div>
-                      ))}
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                </div>
 
-              </div>
+                {/* Pagination Controls - outside scrollable orderList */}
+                {(() => {
+                  const isCall = orderHistoryTab === "call";
+                  const page = isCall ? callHistoryPage : chatHistoryPage;
+                  const totalPages = isCall
+                    ? callPagination?.totalPages || 1
+                    : chatPagination?.totalPages || 1;
+                  const hasPrev = isCall ? hasPrevCallPage : hasPrevChatPage;
+                  const hasNext = isCall ? hasNextCallPage : hasNextChatPage;
 
-              {/* Pagination Controls - outside scrollable orderList */}
-              {(() => {
-                const isCall = orderHistoryTab === "call";
-                const page = isCall ? callHistoryPage : chatHistoryPage;
-                const totalPages = isCall ? (callPagination?.totalPages || 1) : (chatPagination?.totalPages || 1);
-                const hasPrev = isCall ? hasPrevCallPage : hasPrevChatPage;
-                const hasNext = isCall ? hasNextCallPage : hasNextChatPage;
-
-                return totalPages > 1 ? (
-                  <Pagination
-                    pagination={{
-                      page,
-                      totalPages,
-                      hasNextPage: hasNext,
-                      hasPrevPage: hasPrev,
-                    }}
-                    onPageChange={(newPage) => {
-                      if (isCall) setCallHistoryPage(newPage);
-                      else setChatHistoryPage(newPage);
-                    }}
-                  />
-                ) : null;
-              })()}
+                  return totalPages > 1 ? (
+                    <Pagination
+                      pagination={{
+                        page,
+                        totalPages,
+                        hasNextPage: hasNext,
+                        hasPrevPage: hasPrev,
+                      }}
+                      onPageChange={(newPage) => {
+                        if (isCall) setCallHistoryPage(newPage);
+                        else setChatHistoryPage(newPage);
+                      }}
+                    />
+                  ) : null;
+                })()}
               </>
             ) : (
               <div className={styles.emptyState}>
@@ -1534,9 +1638,7 @@ const Profile = () => {
           </div>
         )}
 
-        {activeTab === "ShubhAstro Mall History" && (
-          <MallHistoryContent />
-        )}
+        {activeTab === "ShubhAstro Mall History" && <MallHistoryContent />}
 
         {activeTab === "Transactions" && (
           <div className={styles.transactionsContent}>
@@ -1585,10 +1687,18 @@ const Profile = () => {
                             e.stopPropagation();
                             const url = `https://devapi-shubhtalk.epicon.in/api/transactions/invoice?transactionId=${transaction._id}`;
                             console.log("[Invoice] Fetching:", url);
-                            console.log("[Invoice] Transaction ID:", transaction._id);
+                            console.log(
+                              "[Invoice] Transaction ID:",
+                              transaction._id,
+                            );
                             try {
-                              const token = localStorage.getItem("shubhtalk_customer_token");
-                              console.log("[Invoice] Token:", token ? "present" : "MISSING");
+                              const token = localStorage.getItem(
+                                "shubhtalk_customer_token",
+                              );
+                              console.log(
+                                "[Invoice] Token:",
+                                token ? "present" : "MISSING",
+                              );
                               const res = await fetch(url, {
                                 headers: {
                                   accept: "application/json",
@@ -1597,18 +1707,33 @@ const Profile = () => {
                               });
                               console.log("[Invoice] Status:", res.status);
                               if (!res.ok) {
-                                console.log("[Invoice] API returned", res.status);
-                                Toast.error("Invoice not available for this transaction");
+                                console.log(
+                                  "[Invoice] API returned",
+                                  res.status,
+                                );
+                                Toast.error(
+                                  "Invoice not available for this transaction",
+                                );
                                 return;
                               }
                               const data = await res.json();
-                              console.log("[Invoice] Response:", JSON.stringify(data));
-                              const pdfUrl = data?.data?.pdfUrl || data?.data?.url || data?.data || data?.pdfUrl || data?.url;
+                              console.log(
+                                "[Invoice] Response:",
+                                JSON.stringify(data),
+                              );
+                              const pdfUrl =
+                                data?.data?.pdfUrl ||
+                                data?.data?.url ||
+                                data?.data ||
+                                data?.pdfUrl ||
+                                data?.url;
                               if (pdfUrl) {
                                 console.log("[Invoice] Opening PDF:", pdfUrl);
                                 window.open(pdfUrl, "_blank");
                               } else {
-                                console.log("[Invoice] No PDF URL found in response");
+                                console.log(
+                                  "[Invoice] No PDF URL found in response",
+                                );
                                 Toast.error("Invoice not available");
                               }
                             } catch (err) {
@@ -1617,7 +1742,16 @@ const Profile = () => {
                             }
                           }}
                         >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                             <polyline points="7 10 12 15 17 10" />
                             <line x1="12" y1="15" x2="12" y2="3" />
@@ -1665,7 +1799,11 @@ const Profile = () => {
             <div className={styles.supportGrid}>
               <div
                 className={styles.supportGridCard}
-                onClick={() => navigate("/customer-support", { state: { fromTab: "Support" } })}
+                onClick={() =>
+                  navigate("/customer-support", {
+                    state: { fromTab: "Support" },
+                  })
+                }
               >
                 <div className={styles.supportGridIcon}>
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
@@ -1684,7 +1822,9 @@ const Profile = () => {
 
               <div
                 className={styles.supportGridCard}
-                onClick={() => navigate("/faq", { state: { fromTab: "Support" } })}
+                onClick={() =>
+                  navigate("/faq", { state: { fromTab: "Support" } })
+                }
               >
                 <div className={styles.supportGridIcon}>
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
@@ -1702,7 +1842,11 @@ const Profile = () => {
 
               <div
                 className={styles.supportGridCard}
-                onClick={() => navigate(PATH.privateRoutes.RECENT_TICKETS.path, { state: { fromTab: "Support" } })}
+                onClick={() =>
+                  navigate(PATH.privateRoutes.RECENT_TICKETS.path, {
+                    state: { fromTab: "Support" },
+                  })
+                }
               >
                 <div className={styles.supportGridIcon}>
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
@@ -1743,7 +1887,9 @@ const Profile = () => {
 
               <div
                 className={styles.otherCard}
-                onClick={() => navigate("/feedback", { state: { fromTab: "Support" } })}
+                onClick={() =>
+                  navigate("/feedback", { state: { fromTab: "Support" } })
+                }
               >
                 <div className={styles.otherCardLeft}>
                   <h4 className={styles.otherCardTitle}>App Feedback</h4>
@@ -1760,7 +1906,11 @@ const Profile = () => {
 
               <div
                 className={styles.otherCard}
-                onClick={() => navigate("/community-guidelines", { state: { fromTab: "Support" } })}
+                onClick={() =>
+                  navigate("/community-guidelines", {
+                    state: { fromTab: "Support" },
+                  })
+                }
               >
                 <div className={styles.otherCardLeft}>
                   <h4 className={styles.otherCardTitle}>
@@ -1825,7 +1975,6 @@ const Profile = () => {
         }}
       />
 
-
       {/* Add Profile Modal */}
       <AddProfileModal
         isOpen={showAddProfileModal}
@@ -1859,6 +2008,143 @@ const Profile = () => {
 
       {/* Sticky Review Modal */}
       <StickyReview />
+
+      {/* Filter Modal */}
+      {filterModalOpen && (
+        <div className={styles.filterModalOverlay} onClick={() => setFilterModalOpen(false)}>
+          <div className={styles.filterModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.filterModalHeader}>
+              <h3 className={styles.filterModalTitle}>Filters</h3>
+              <button className={styles.filterModalClose} onClick={() => setFilterModalOpen(false)}>✕</button>
+            </div>
+
+            <div className={styles.filterModalBody}>
+              <div className={styles.filterTabs}>
+                {["Sort", "Month", "Year"].map((tab) => (
+                  <button
+                    key={tab}
+                    className={`${styles.filterTab} ${filterActiveTab === tab ? styles.filterTabActive : ""}`}
+                    onClick={() => setFilterActiveTab(tab)}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              <div className={styles.filterOptions}>
+                {filterActiveTab === "Sort" && (
+                  <>
+                    <div className={styles.filterOptionHeader}>
+                      <span>Sort Order</span>
+                    </div>
+                    {[
+                      { label: "Newest First", value: "desc" },
+                      { label: "Oldest First", value: "asc" },
+                    ].map((opt) => (
+                      <div
+                        key={opt.value}
+                        className={styles.filterOptionItem}
+                        onClick={() => setFilterSortOrder(opt.value)}
+                      >
+                        <FaCheck
+                          size={14}
+                          className={filterSortOrder === opt.value ? styles.filterCheckActive : styles.filterCheckInactive}
+                          style={{ opacity: filterSortOrder === opt.value ? 1 : 0.2 }}
+                        />
+                        <span className={styles.filterOptionLabel}>{opt.label}</span>
+                      </div>
+                    ))}
+                  </>
+                )}
+
+                {filterActiveTab === "Month" && (
+                  <>
+                    <div className={styles.filterOptionHeader}>
+                      <span>Select Month</span>
+                      {filterMonth && (
+                        <span className={styles.filterClearLink} onClick={() => setFilterMonth("")}>Clear</span>
+                      )}
+                    </div>
+                    {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((m, idx) => (
+                      <div
+                        key={m}
+                        className={styles.filterOptionItem}
+                        onClick={() => setFilterMonth(filterMonth === String(idx + 1) ? "" : String(idx + 1))}
+                      >
+                        <FaCheck
+                          size={14}
+                          className={filterMonth === String(idx + 1) ? styles.filterCheckActive : styles.filterCheckInactive}
+                          style={{ opacity: filterMonth === String(idx + 1) ? 1 : 0.2 }}
+                        />
+                        <span className={styles.filterOptionLabel}>{m}</span>
+                      </div>
+                    ))}
+                  </>
+                )}
+
+                {filterActiveTab === "Year" && (
+                  <>
+                    <div className={styles.filterOptionHeader}>
+                      <span>Select Year</span>
+                      {filterYear && (
+                        <span className={styles.filterClearLink} onClick={() => setFilterYear("")}>Clear</span>
+                      )}
+                    </div>
+                    {Array.from({ length: 5 }, (_, i) => String(new Date().getFullYear() - i)).map((y) => (
+                      <div
+                        key={y}
+                        className={styles.filterOptionItem}
+                        onClick={() => setFilterYear(filterYear === y ? "" : y)}
+                      >
+                        <FaCheck
+                          size={14}
+                          className={filterYear === y ? styles.filterCheckActive : styles.filterCheckInactive}
+                          style={{ opacity: filterYear === y ? 1 : 0.2 }}
+                        />
+                        <span className={styles.filterOptionLabel}>{y}</span>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className={styles.filterModalFooter}>
+              <button
+                className={styles.filterResetBtn}
+                onClick={() => {
+                  setFilterSortOrder("desc");
+                  setFilterMonth("");
+                  setFilterYear("");
+                  setAppliedSortOrder("");
+                  setAppliedMonth("");
+                  setAppliedYear("");
+                  setFilterModalOpen(false);
+                  // Reset to page 1
+                  if (orderHistoryTab === "call") setCallHistoryPage(1);
+                  else setChatHistoryPage(1);
+                }}
+              >
+                Reset
+              </button>
+              <button
+                className={styles.filterApplyBtn}
+                onClick={() => {
+                  setAppliedSortOrder(filterSortOrder === "desc" ? "" : filterSortOrder);
+                  setAppliedMonth(filterMonth);
+                  setAppliedYear(filterYear);
+                  // Reset to page 1 on filter apply
+                  if (orderHistoryTab === "call") setCallHistoryPage(1);
+                  else setChatHistoryPage(1);
+                  setFilterModalOpen(false);
+                }}
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
