@@ -12,10 +12,11 @@ import {
   Star,
   Trash2,
   FilterIcon,
+  UserPlus,
 } from "lucide-react";
 import { TiUserDelete } from "react-icons/ti";
 import { LuPencilLine } from "react-icons/lu";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaUser } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useState, useRef, useEffect } from "react";
@@ -37,6 +38,7 @@ import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrolo
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
 import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
+import { useGetFollowedAstrologersQuery } from "../../../redux/api/astrologer/followedAstrologersApi";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { useGetAstroDetailsQuery } from "../../../redux/api/kundli/kundliApi";
@@ -420,6 +422,10 @@ const Profile = () => {
 
   // Fetch wallet balance
   const { balance, isFetching: isFetchingBalance } = useWalletBalance();
+
+  // Fetch followed astrologers count
+  const { data: followedData } = useGetFollowedAstrologersQuery({ page: 1, limit: 1 });
+  const followedCount = followedData?.pagination?.totalDocs ?? 0;
 
   // Fetch transactions data with pagination - only when on Transactions tab
   const shouldFetch = activeTab === "Transactions";
@@ -1304,6 +1310,26 @@ const Profile = () => {
           Recharge Wallet
           <ChevronLeft size={20} style={{ transform: "rotate(180deg)" }} />
         </button>
+      </div>
+
+      {/* Astrologer You Follow Link */}
+      <div
+        className={styles.profileLink}
+        onClick={() => navigate("/followed-astrologers")}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && navigate("/followed-astrologers")}
+      >
+        <div className={styles.profileLinkRow}>
+          <div className={styles.profileLinkLeft}>
+            <div className={styles.profileLinkIcon}>
+              <FaUser size={18} />
+            </div>
+            <p className={styles.profileLinkText}>{followedCount} (Following)</p>
+          </div>
+          <ChevronLeft size={18} className={styles.profileLinkArrow} style={{ transform: "rotate(180deg)", color: "#f75801" }} />
+        </div>
+        <div className={styles.profileLinkDivider} />
       </div>
 
       {/* Tabs */}
