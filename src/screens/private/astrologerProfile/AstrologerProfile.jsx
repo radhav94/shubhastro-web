@@ -1539,8 +1539,12 @@ const AstrologerProfile = () => {
                   className={styles.emergencyBtn}
                   onClick={() => setShowEmergencyModal(true)}
                 >
-                  <img src={iconSet} alt="emergency" className={styles.emergencyIcon} />
-                  Start Emergency Session
+                  Emergency Session{(() => {
+                    const eChatRate = Number(data?.emergencyPrice?.chatRate?.amount) || 0;
+                    const eCallRate = Number(data?.emergencyPrice?.audioRate?.amount) || 0;
+                    const minRate = eChatRate > 0 && eCallRate > 0 ? Math.min(eChatRate, eCallRate) : eChatRate || eCallRate;
+                    return minRate > 0 ? ` - ₹${minRate}/min` : '';
+                  })()}
                 </button>
                 <p className={styles.emergencyDesc}>
                   Astrologer is offline, only emergency sessions available.
@@ -1662,8 +1666,12 @@ const AstrologerProfile = () => {
             className={styles.mobileEmergencyBtn}
             onClick={() => setShowEmergencyModal(true)}
           >
-            <img src={iconSet} alt="emergency" className={styles.mobileEmergencyIcon} />
-            Start Emergency Session
+            Emergency Session{(() => {
+              const eChatRate = Number(data?.emergencyPrice?.chatRate?.amount) || 0;
+              const eCallRate = Number(data?.emergencyPrice?.audioRate?.amount) || 0;
+              const minRate = eChatRate > 0 && eCallRate > 0 ? Math.min(eChatRate, eCallRate) : eChatRate || eCallRate;
+              return minRate > 0 ? ` - ₹${minRate}/min` : '';
+            })()}
           </button>
         ) : (
           <>
