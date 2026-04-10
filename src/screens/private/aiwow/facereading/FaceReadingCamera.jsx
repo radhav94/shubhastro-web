@@ -45,7 +45,7 @@ const FaceReadingCamera = () => {
     const centerY = videoRect.height / 2;
     
     // Circle radius based on screen size
-    let radius = 250; // 500px diameter / 2
+    let radius = 310; // 620px diameter / 2
     if (window.innerWidth <= 768) {
       radius = 210; // 420px diameter / 2
     }
