@@ -90,15 +90,16 @@ const BirthDetailsScreen = ({
 
             <div className={styles.formGroup}>
               <label>Birth Date<span className={styles.required}>*</span></label>
-              <div className={`${styles.inputWrapper} ${touched.birthDate && errors.birthDate ? styles.error : ""}`}>
+              {/* <div className={`${styles.inputWrapper} ${touched.birthDate && errors.birthDate ? styles.error : ""}`}> */}
                 <Field
                   type="date"
                   name="birthDate"
                   className={`${styles.input} ${styles.iosFix}`}
                   placeholder="DD/MM/YYYY"
+                  onClick={(e) => e.target.showPicker?.()}
                   max={new Date().toISOString().split('T')[0]}
                 />
-              </div>
+              {/* </div> */}
               <ErrorMessage name="birthDate">
                 {(msg) => <span className={styles.errorText}>{msg}</span>}
               </ErrorMessage>

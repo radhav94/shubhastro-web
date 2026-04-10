@@ -343,30 +343,15 @@ const Kundali = () => {
             // Open the blob URL in a new tab
             const newWindow = window.open(blobUrl, '_blank', 'noopener,noreferrer');
             
-            // Add beforeunload event to the new window to show alert on close
-            // Note: Modern browsers show a generic "Leave site?" message for security
+            // Revoke blob URL when the new tab is closed
             if (newWindow) {
-              // Wait a bit for the window to load
-              setTimeout(() => {
-                try {
-                  newWindow.addEventListener('beforeunload', (e) => {
-                    // Trigger the browser's native confirmation dialog
-                    e.preventDefault();
-                    // Modern browsers ignore custom messages and show generic "Leave site?" prompt
-                    return '';
-                  });
-                } catch (error) {
-                  console.log('Could not add beforeunload listener:', error);
+              const checkClosed = setInterval(() => {
+                if (newWindow.closed) {
+                  clearInterval(checkClosed);
+                  URL.revokeObjectURL(blobUrl);
                 }
-              }, 500);
+              }, 2000);
             }
-            
-            // Revoke the blob URL immediately after opening
-            // The PDF will still display in the opened window, but the URL becomes invalid
-            // This prevents the user from copying and reusing the URL
-            setTimeout(() => {
-              URL.revokeObjectURL(blobUrl);
-            }, 1000); // Revoke after 1 second
             
           } catch (fetchError) {
             console.error("Failed to fetch PDF as blob, opening directly:", fetchError);

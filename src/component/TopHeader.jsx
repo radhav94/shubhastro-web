@@ -64,7 +64,7 @@ const TopHeader = () => {
   const [activeLang, setActiveLang] = useState("English"); // default language name
   const langRef = useRef(null);
 
-  // Close language dropdown on outside click (mobile)
+  // Close language dropdown on outside click (desktop + mobile)
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (langRef.current && !langRef.current.contains(e.target)) {
@@ -72,9 +72,11 @@ const TopHeader = () => {
       }
     };
     if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
       document.addEventListener("touchstart", handleClickOutside);
     }
     return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [open]);
