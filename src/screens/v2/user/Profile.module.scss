@@ -1763,7 +1763,7 @@
 
 // Override addProfileButton to match sticky button style
 .addProfileButton {
-    width: 30%;
+    // width: 30%;
     background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
     border-radius: 50px;
     padding: 1rem 1.5rem;
@@ -1776,6 +1776,7 @@
     color: #fff;
     margin: 0 auto;
     grid-column: 1 / -1; 
+    margin-top: 10px;
     @media (width <= 767px) {
       width: 100%;
     }
