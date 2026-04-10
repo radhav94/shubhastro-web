@@ -90,7 +90,7 @@ export const privateRequestNew = createApi({
 
     return result;
   },
-  tagTypes: ["Kundlis", "VirtualAssistant"], //  Required
+  tagTypes: ["Kundlis", "VirtualAssistant", "Following", "FollowedAstrologers"], //  Required
 
   endpoints: () => ({}), // EMPTY — endpoints later inject honge
 });
