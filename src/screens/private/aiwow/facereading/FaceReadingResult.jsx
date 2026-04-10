@@ -307,7 +307,7 @@ const FaceReadingResult = () => {
                           <h3 className={styles.strength}>{value.level || 'N/A'}</h3>
                         </div>
                         <div className={styles.headerRight}>
-                          <div className={styles.percentage}>{value.score || 0}%</div>
+                          {/* <div className={styles.percentage}>{value.score || 0}%</div> */}
                           <span className={styles.guidanceArrow}>
                             {expandedGuidance === `personality-${key}` ? '▲' : '▼'}
                           </span>
@@ -482,7 +482,7 @@ const FaceReadingResult = () => {
                     </button>
                     <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-element' ? styles.expanded : ''}`}>
                       <p className={styles.cosmicPlanet}>
-                        {cosmicConnections.elementalEnergy.element} - {cosmicConnections.elementalEnergy.percentage}%
+                        {cosmicConnections.elementalEnergy.element}
                       </p>
                       {cosmicConnections.elementalEnergy.characteristics && (
                         <div className={styles.chipContainer}>
