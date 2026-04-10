@@ -15,6 +15,7 @@ import {
   IoVolumeMute,
   IoChatbubbleEllipses,
   IoCall,
+  IoWallet,
 } from "react-icons/io5";
 import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./VideoCalling.module.scss";
@@ -1040,7 +1041,6 @@ const VideoCalling = ({ callData }) => {
           top: position.y,
           left: position.x,
           display: isMinimized && !isOnLivePage ? "block" : "none",
-          transform: 'scaleX(-1)'
         }}
         onMouseDown={startDrag}
         onTouchStart={startDrag}
@@ -1056,7 +1056,7 @@ const VideoCalling = ({ callData }) => {
           {/* Mini Video Container - Always rendered */}
           <div
             ref={localVideoMiniRef}
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: "100%", height: "100%", transform: "scaleX(-1)" }}
           />
           {/* Avatar Overlay - Separate layer */}
           {!cameraOn && (
@@ -1191,8 +1191,7 @@ const VideoCalling = ({ callData }) => {
   
                 <span class={styles.dividerLine}></span>
   
-                {showRechargeButton && (
-                  <button 
+                <button 
                     className={styles.rechargeButton}
                     onClick={() => {
                       setIsMinimized(true);
@@ -1209,7 +1208,6 @@ const VideoCalling = ({ callData }) => {
                       </defs>
                     </svg>
                   </button>
-                )}
 
               {/* <div className={styles.walletBadge}>
                 <span className={styles.walletIcon}>💰</span>

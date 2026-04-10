@@ -763,13 +763,16 @@ const LiveView = (props) => {
             {/* Inline Messages Overlay */}
             <div className="inline-messages-overlay" ref={messagesOverlayRef}>
               {displayMessages.map((m, index) => {
-                // System messages (join) — green arrow style
+                // System messages (join) — show first letter like regular messages
                 if (m.isSystem) {
+                  const name = m.text?.split(" ")?.[0] || "U";
                   return (
-                    <div key={m.id || index} className="inline-message" style={{ opacity: 0.6 }}>
-                      <span className="inline-initial" style={{ background: "#22c55e", fontSize: 10 }}>▶</span>
+                    <div key={m.id || index} className="inline-message" style={{ opacity: 0.7 }}>
+                      <span className="inline-initial" style={{ background: "#22c55e" }}>
+                        {name.charAt(0).toUpperCase()}
+                      </span>
                       <div className="inline-message-body">
-                        <span className="inline-text" style={{ fontStyle: "italic", fontSize: 11 }}>{m.text}</span>
+                        <span className="inline-text" style={{ fontStyle: "italic", fontSize: 12 }}>{m.text}</span>
                       </div>
                     </div>
                   );
