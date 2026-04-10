@@ -22,7 +22,7 @@ const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1500;
 
-export const useLiveStreaming = (client, ROLE, channel) => {
+export const useLiveStreaming = (client, ROLE, channel, rejoinKey = 0) => {
   const [isConnected, setIsConnected] = useState(false);
   const [hostLeft, setHostLeft] = useState(false);
   const [isReconnect, setIsReconnect] = useState(false);
@@ -65,6 +65,12 @@ export const useLiveStreaming = (client, ROLE, channel) => {
       // 1. Reset UI state
       setHostLeft(false);
       setIsConnected(false);
+
+      // If this is a forced rejoin (same roomId restarted), clear old session
+      // so we get a fresh viewer token instead of trying reconnect
+      if (rejoinKey > 0) {
+        clearViewerSession();
+      }
 
       // 2. Leave any previous channel
       await leaveChannel();
@@ -169,7 +175,7 @@ export const useLiveStreaming = (client, ROLE, channel) => {
       // Leave on cleanup (channel change or unmount)
       leaveChannel();
     };
-  }, [channel, client, ROLE, leaveChannel]);
+  }, [channel, client, ROLE, leaveChannel, rejoinKey]);
 
   // Token renewal for long streams
   useEffect(() => {
@@ -221,6 +227,8 @@ export const useLiveStreaming = (client, ROLE, channel) => {
     if (!client || ROLE !== "audience") return;
 
     const handleUserLeft = (user) => {
+      // Only process if we're still in the same channel (avoid stale events from old channel)
+      if (!joinedChannelRef.current || joinedChannelRef.current !== channel) return;
       console.log("Host left channel:", user.uid);
       setHostLeft(true);
     };

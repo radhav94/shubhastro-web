@@ -5,6 +5,12 @@ import styles from './TarotCardSelectionPage.module.css'
 import { useGetTarotShuffleDataQuery } from '../../../../redux/api/tarot/tarotApi'
 import toast from 'react-hot-toast'
 
+const DISPLAY_CARD_COUNT = 10
+const MAX_RECENT = 3
+
+// Module-level so it survives component remounts
+let recentPickedIds = []
+
 const TarotCardSelectionPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -22,52 +28,90 @@ const TarotCardSelectionPage = () => {
   const [selectedCards, setSelectedCards] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [isShuffling, setIsShuffling] = useState(false)
-  const [cards, setCards] = useState([])
+  const [animationReady, setAnimationReady] = useState(false)
   const containerRef = useRef(null)
+
+  // Track which positions have been tapped (for visual highlight)
+  const [selectedPositions, setSelectedPositions] = useState([])
 
   const { data: shuffleData } = useGetTarotShuffleDataQuery(
     { shuffle_type: 'major', lang: 'en' },
     { refetchOnMountOrArgChange: true }
   )
 
-  // When API data arrives, run the original 3-phase shuffle animation
+  const allCards = shuffleData?.response || []
+
+  // Run shuffle animation on mount
   useEffect(() => {
-    if (shuffleData?.response?.length > 0) {
-      const rawCards = shuffleData.response
-
-      // Phase 1: set cards and collapse to center stack
-      setCards(rawCards)
+    if (allCards.length > 0) {
       setIsShuffling(true)
-
-      // Phase 2: after 500ms, Fisher-Yates shuffle the array
       const t1 = setTimeout(() => {
-        const shuffled = [...rawCards]
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-        }
-        setCards(shuffled)
-
-        // Phase 3: 50ms later remove shuffling → CSS transition fans cards out
-        const t2 = setTimeout(() => setIsShuffling(false), 50)
+        const t2 = setTimeout(() => {
+          setIsShuffling(false)
+          setAnimationReady(true)
+        }, 50)
         return () => clearTimeout(t2)
       }, 500)
-
       return () => clearTimeout(t1)
     }
-  }, [shuffleData])
+  }, [allCards.length])
 
-  const handleCardClick = (card) => {
-    if (isShuffling) return
+  const pickRandomCard = (currentSessionPicks) => {
+    // Combine module-level recent + cards already picked in this session
+    const excludeIds = [
+      ...recentPickedIds,
+      ...currentSessionPicks.map((c) => c.id),
+    ]
+
+    const available = allCards.filter(
+      (card) => !excludeIds.includes(card?.id)
+    )
+    const pool = available.length > 0 ? available : allCards
+
+    const randomIndex = Math.floor(Math.random() * pool.length)
+    const picked = pool[randomIndex]
+
+    // Update module-level sliding window
+    if (picked?.id) {
+      recentPickedIds = [...recentPickedIds, picked.id].slice(-MAX_RECENT)
+    }
+
+    console.log('--- TAROT PICK ---')
+    console.log('Excluded IDs:', excludeIds)
+    console.log('Pool size:', pool.length)
+    console.log('Picked:', picked?.id)
+    console.log('Recent IDs now:', [...recentPickedIds])
+
+    return picked
+  }
+
+  const handleCardClick = (positionIndex) => {
+    if (isShuffling || !animationReady) return
+    if (allCards.length === 0) return
 
     if (isMultiCardReading) {
-      if (selectedCards.find(c => c.id === card.id)) {
-        setSelectedCards(selectedCards.filter(c => c.id !== card.id))
-      } else if (selectedCards.length < maxCards) {
-        setSelectedCards([...selectedCards, card])
+      // Check if this position is already selected
+      if (selectedPositions.includes(positionIndex)) {
+        // Deselect: remove this position and its corresponding card
+        const posIdx = selectedPositions.indexOf(positionIndex)
+        setSelectedPositions((prev) => prev.filter((p) => p !== positionIndex))
+        setSelectedCards((prev) => prev.filter((_, i) => i !== posIdx))
+        return
+      }
+
+      if (selectedCards.length >= maxCards) return
+
+      const picked = pickRandomCard(selectedCards)
+      if (picked) {
+        setSelectedPositions((prev) => [...prev, positionIndex])
+        setSelectedCards((prev) => [...prev, picked])
       }
     } else {
-      navigate('/tarot-card', { state: { card, reading } })
+      // Single card reading — pick random and navigate
+      const picked = pickRandomCard([])
+      if (picked) {
+        navigate('/tarot-card', { state: { card: picked, reading } })
+      }
     }
   }
 
@@ -110,6 +154,9 @@ const TarotCardSelectionPage = () => {
     }
   }
 
+  // Generate placeholder positions for the fan
+  const placeholders = Array.from({ length: DISPLAY_CARD_COUNT }, (_, i) => i)
+
   return (
     <div className={styles.selectionPage}>
       <div className={styles.headerWrap}>
@@ -144,11 +191,11 @@ const TarotCardSelectionPage = () => {
         <p className={styles.tapText}>Tap to pick</p>
 
         <div className={styles.cardsContainer} ref={containerRef}>
-          {cards.map((card, index) => {
-            const isSelected = isMultiCardReading && selectedCards.find(c => c.id === card.id)
-            const totalCards = cards.length
+          {placeholders.map((posIndex) => {
+            const isSelected = isMultiCardReading && selectedPositions.includes(posIndex)
+            const totalCards = DISPLAY_CARD_COUNT
             const centerIndex = (totalCards - 1) / 2
-            const offset = index - centerIndex
+            const offset = posIndex - centerIndex
             const normalizedOffset = centerIndex !== 0 ? offset / centerIndex : 0
 
             const screenWidth = window.innerWidth
@@ -176,21 +223,21 @@ const TarotCardSelectionPage = () => {
             }
 
             const transform = isShuffling
-              ? `translateX(0px) translateY(0px) rotate(${(index - centerIndex) * 2}deg)`
+              ? `translateX(0px) translateY(0px) rotate(${(posIndex - centerIndex) * 2}deg)`
               : `translateX(${spread}px) translateY(${curveHeight + selectedLift}px) rotate(${angle}deg)`
 
             return (
               <div
-                key={card.id}
+                key={posIndex}
                 className={`${styles.card} ${isSelected ? styles.selectedCard : ''} ${isShuffling ? styles.shuffling : ''}`}
-                style={{ transform, zIndex: index }}
-                onClick={() => handleCardClick(card)}
+                style={{ transform, zIndex: posIndex }}
+                onClick={() => handleCardClick(posIndex)}
               >
                 <div className={styles.cardBack}>
                   <img src="/images/black-back-card.jpg" alt="Tarot Card Back" />
                   {isSelected && (
                     <div className={styles.selectedBadge}>
-                      {selectedCards.findIndex(c => c.id === card.id) + 1}
+                      {selectedPositions.indexOf(posIndex) + 1}
                     </div>
                   )}
                 </div>

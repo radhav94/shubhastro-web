@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useRef } from "react";
 
 const LiveListContext = createContext(null);
 
@@ -7,6 +7,8 @@ export const LiveListProvider = ({ children, lives: initialLives, autoStartIndex
   const [currentIndex, setCurrentIndex] = useState(autoStartIndex);
   const [direction, setDirection] = useState("up");
   const [hasNewLive, setHasNewLive] = useState(false);
+  // Increments when the current channel needs a forced rejoin (e.g. same roomId restarted)
+  const [rejoinKey, setRejoinKey] = useState(0);
 
   // Sync if parent passes new lives (initial load)
   const [prevInitial, setPrevInitial] = useState(initialLives);
@@ -37,8 +39,14 @@ export const LiveListProvider = ({ children, lives: initialLives, autoStartIndex
     setHasNewLive(false);
   };
 
+  // Track recently removed channels so we can detect same-roomId restarts
+  const recentlyRemovedRef = useRef(new Set());
+
   // Remove a live by roomId/channel and clamp index
   const removeLive = useCallback((roomId) => {
+    recentlyRemovedRef.current.add(roomId);
+    // Clean up after 10s to avoid memory leak
+    setTimeout(() => recentlyRemovedRef.current.delete(roomId), 10000);
     setLives((prev) => {
       const next = prev.filter((l) => l.channel !== roomId);
       setCurrentIndex((i) => Math.min(i, Math.max(next.length - 1, 0)));
@@ -50,6 +58,12 @@ export const LiveListProvider = ({ children, lives: initialLives, autoStartIndex
   const addLive = useCallback((liveEntry) => {
     setLives((prev) => {
       if (prev.some((l) => l.channel === liveEntry.channel)) return prev;
+      // If this channel was recently removed and re-added (same roomId restart),
+      // bump rejoinKey so useLiveStreaming re-runs its join effect
+      if (recentlyRemovedRef.current.has(liveEntry.channel)) {
+        recentlyRemovedRef.current.delete(liveEntry.channel);
+        setRejoinKey((k) => k + 1);
+      }
       setHasNewLive(true);
       return [...prev, liveEntry];
     });
@@ -71,6 +85,7 @@ export const LiveListProvider = ({ children, lives: initialLives, autoStartIndex
         currentIndex,
         direction,
         hasNewLive,
+        rejoinKey,
         getCurrentChannel,
         getCurrentLive,
         goNextLive,

@@ -5,10 +5,11 @@ import styles from "../card/TarotCards.module.scss";
 const CommonTarot = ({
   title,
   shuffleType = "major",
+  cardsCount = 22,
   subTitle = "",
   ResultComponent,
   apiHook,
-  buildParams, 
+  buildParams,
   lang = "en",
 }) => {
   const [selected, setSelected] = useState(null);
@@ -16,7 +17,6 @@ const CommonTarot = ({
   const [shuffleKey, setShuffleKey] = useState(0);
   const resultRef = useRef(null);
 
-  // dynamically prepare params
   const queryParams = buildParams({
     selected,
     lang,
@@ -44,7 +44,6 @@ const CommonTarot = ({
   const handleReset = () => {
     setSelected(null);
     setRevealed(false);
-    // increases key → tarot cards reshuffle
     setShuffleKey((prev) => prev + 1);
   };
 
@@ -53,12 +52,12 @@ const CommonTarot = ({
       <TarotCard
         title={title}
         subtitle={subTitle}
+        cardsCount={cardsCount}
         onSelect={handleCardSelect}
         shuffleType={shuffleType}
         shuffleKey={shuffleKey}
       />
 
-      {/* Reveal Button */}
       {selected && !revealed && (
         <div className={styles.revealSection}>
           <p className={styles.selectedMessage}>✨ You have selected a card ✨</p>
@@ -76,7 +75,6 @@ const CommonTarot = ({
         </div>
       )}
 
-      {/* Result */}
       {revealed && data && (
         <div ref={resultRef} className={styles.resultContainer}>
           <ResultComponent card={data?.response} onReset={handleReset} />

@@ -26,11 +26,12 @@ const LiveStreamingContainer = ({ client }) => {
   const direction = liveList?.direction || "up";
 
   const channel = liveList?.getCurrentChannel();
+  const rejoinKey = liveList?.rejoinKey || 0;
   const ROLE = location.pathname.includes("/astrologer-dashboard/live-streaming")
     ? "host"
     : "audience";
 
-  const live = useLiveStreaming(client, ROLE, channel);
+  const live = useLiveStreaming(client, ROLE, channel, rejoinKey);
 
   // Persist astrologer info in sessionStorage so refresh can restore it
   useEffect(() => {

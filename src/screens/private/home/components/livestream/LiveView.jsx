@@ -69,12 +69,19 @@ const LiveView = (props) => {
   const [liveDuration, setLiveDuration] = useState("00:00");
 
   // Reset ended state when switching to a new channel
+  // Use a counter to invalidate stale roomReady changes from old channels
+  const [channelGeneration, setChannelGeneration] = useState(0);
+  const channelGenRef = useRef(0);
+
   useEffect(() => {
     if (!props.channel) return;
     setRoomEnded(false);
     setWasRoomReady(false);
     setConnectingTimedOut(false);
     setLiveDuration("00:00");
+    const gen = channelGenRef.current + 1;
+    channelGenRef.current = gen;
+    setChannelGeneration(gen);
   }, [props.channel]);
 
   // If no remote users appear within 10s of connecting, show "waiting" instead of "connecting"
@@ -250,17 +257,24 @@ const LiveView = (props) => {
   }, [hostLeft, ROLE]);
 
   // Track when socket room ends / starts
+  // Use channelGeneration to ignore stale roomReady=false from old channels
+  // that arrive after we've already switched to a new channel.
+  const roomReadyGenRef = useRef(0);
+
   useEffect(() => {
     if (roomReady === true) {
+      roomReadyGenRef.current = channelGeneration;
       setWasRoomReady(true);
       setRoomEnded(false);
     } else if (roomReady === false && wasRoomReady && ROLE !== "host") {
-      // Only mark as ended if the room was previously ready (avoids false positive on initial mount)
-      setRoomEnded(true);
-      setShowGifts(false);
-      setShowCallPopup(false);
+      // Only mark as ended if this roomReady=false belongs to the current channel
+      if (roomReadyGenRef.current === channelGeneration) {
+        setRoomEnded(true);
+        setShowGifts(false);
+        setShowCallPopup(false);
+      }
     }
-  }, [roomReady, ROLE, wasRoomReady]);
+  }, [roomReady, ROLE, wasRoomReady, channelGeneration]);
 
   // Track previous message count
   useEffect(() => {

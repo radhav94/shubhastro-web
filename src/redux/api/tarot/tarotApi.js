@@ -124,5 +124,5 @@ export const tarotApi = vedicApi.injectEndpoints({
   }),
 });
 
-export const { useGetTarotShuffleDataQuery, useGetTarotDailyDataQuery, useGetYesNoTarotQuery, useGetCareerTarotQuery, useGetFlirtTarotQuery, useGetEroticLoveTarotQuery, useGetMadeForEachOtherQuery, useGetInDepthLoveTarotQuery, useGetLoveTriangleTarotQuery, useGetRomanticBreakupQuery, useGetBusinessBreakupQuery, useGetTarotCardDetailsQuery } =
+export const { useGetTarotShuffleDataQuery, useLazyGetTarotShuffleDataQuery, useGetTarotDailyDataQuery, useGetYesNoTarotQuery, useGetCareerTarotQuery, useGetFlirtTarotQuery, useGetEroticLoveTarotQuery, useGetMadeForEachOtherQuery, useGetInDepthLoveTarotQuery, useGetLoveTriangleTarotQuery, useGetRomanticBreakupQuery, useGetBusinessBreakupQuery, useGetTarotCardDetailsQuery } =
   tarotApi;
