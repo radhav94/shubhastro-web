@@ -395,7 +395,8 @@ export const useRazorpayPayment = () => {
       name: "ShubhAstro",
       description: `Wallet Recharge - ₹${planData.actualPrice || orderData.amount}`,
       order_id: orderData?.orderData?.gatewayOrderId,
-      callback_url: callbackUrl, // Redirect URL for server-side payment flows (UPI intent, etc.)
+      // NOTE: callback_url removed — using handler only for reliable cross-platform support.
+      // callback_url causes Android UPI intent flows to not redirect back properly.
       handler: handlers.onSuccess,
       prefill: getUserPrefillData(),
       theme: {

@@ -144,6 +144,27 @@ const AgoraVoiceCalling = ({ callData }) => {
   const { refreshWallet } = useWalletBalance();
   const [getBalance, { isLoading: isCheckingBalance }] = useGetBalanceMutation();
 
+  /* ================= MINI CALL OVERLAY BRIDGE ================= */
+  useEffect(() => {
+    const onToggleMic = () => setMicOn((m) => !m);
+    const onToggleSpeaker = () => setSpeakerOn((s) => !s);
+    window.addEventListener("mini-call-toggle-mic", onToggleMic);
+    window.addEventListener("mini-call-toggle-speaker", onToggleSpeaker);
+    return () => {
+      window.removeEventListener("mini-call-toggle-mic", onToggleMic);
+      window.removeEventListener("mini-call-toggle-speaker", onToggleSpeaker);
+    };
+  }, []);
+
+  // Sync mic/speaker state to MiniCallOverlay
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("mini-call-mic-sync", { detail: micOn }));
+  }, [micOn]);
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("mini-call-speaker-sync", { detail: speakerOn }));
+  }, [speakerOn]);
+
   // Fetch kundli profiles
   const { data: profilesData } = useGetAllKundlisQuery();
   const profiles = profilesData?.data || [];
