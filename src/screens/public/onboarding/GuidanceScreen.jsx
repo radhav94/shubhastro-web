@@ -23,6 +23,7 @@ const defaultStyle = { icon: HelpCircle, color: "#F0F0F0" };
 
 // Fallback options if API fails
 const fallbackOptions = [
+  { id: "face-reading", label: "Face Reading", icon: Eye, color: "#FFF4E0" },
   { id: "love-relationships", label: "Love & Relationships", icon: Heart, color: "#FFE5F0" },
   { id: "career-growth", label: "Career & Growth", icon: Rocket, color: "#E5E0FF" },
   { id: "wealth-finances", label: "Wealth & Finances", icon: DollarSign, color: "#E5F9E5" },
@@ -31,12 +32,9 @@ const fallbackOptions = [
   { id: "others", label: "Others", icon: HelpCircle, color: "#FFF4E0" },
 ];
 
-// Validation schema
+// Validation schema — no min/max constraints, guidance is optional
 const validationSchema = Yup.object({
-  guidance: Yup.array()
-    .of(Yup.string())
-    .min(0, "Please select at least one area of guidance")
-    .max(6, "You can select up to 6 areas"),
+  guidance: Yup.array().of(Yup.string()),
 });
 
 const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep = 2, totalSteps = 3, onStepChange }) => {
@@ -205,6 +203,8 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
           error.response?.data?.message || "Failed to register. Please try again."
         );
       }
+    } finally {
+      // Always reset loading regardless of success/failure
       setLoading(false);
     }
   };
