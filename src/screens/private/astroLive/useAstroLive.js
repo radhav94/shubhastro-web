@@ -6,8 +6,13 @@ export const useAstrLive = () => {
   const data = appData;
   const navigate = useNavigate();
 
-  const onWatchNow = (data) => {
-    navigate(PATH.privateRoutes.STREAMING.path, { state: { data } });
+  const onWatchNow = (item) => {
+    const currentIndex = data.findIndex(
+      (e) => e.AstrologerLoginId === item.AstrologerLoginId
+    );
+    navigate(PATH.privateRoutes.STREAMING.path, {
+      state: { data: item, list: data, currentIndex },
+    });
   };
 
   return [data, onWatchNow];

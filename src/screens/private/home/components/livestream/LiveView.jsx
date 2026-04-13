@@ -582,7 +582,9 @@ const LiveView = (props) => {
           userId: userIdLocal,
           astrologerId: astroId,
           astrologerID: astro?.astrologer_ID,
-          remainingTime
+          remainingTime,
+          origin: "live",
+          liveChannel: props.channel,
         });
         setIsCallMinimized(true);
         

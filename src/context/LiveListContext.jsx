@@ -29,13 +29,13 @@ export const LiveListProvider = ({ children, lives: initialLives, autoStartIndex
 
   const goNextLive = () => {
     setDirection("up");
-    setCurrentIndex((i) => Math.min(i + 1, lives.length - 1));
+    setCurrentIndex((i) => (i + 1) % lives.length);
     setHasNewLive(false);
   };
 
   const goPrevLive = () => {
     setDirection("down");
-    setCurrentIndex((i) => Math.max(i - 1, 0));
+    setCurrentIndex((i) => (i - 1 + lives.length) % lives.length);
     setHasNewLive(false);
   };
 

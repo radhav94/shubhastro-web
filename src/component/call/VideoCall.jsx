@@ -88,6 +88,13 @@ const VideoCalling = ({ callData }) => {
   const [remoteVideoEnabled, setRemoteVideoEnabled] = useState(true);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
+
+  // Auto-minimize when call originated from live and user is not on live page
+  useEffect(() => {
+    if (activeCall?.origin === "live" && !isOnLivePage && !isMinimized) {
+      setIsMinimized(true);
+    }
+  }, [activeCall?.origin, isOnLivePage, isMinimized, setIsMinimized]);
   const [suggestedRemedyData, setSuggestedRemedyData] = useState({ suggestedProducts: [], messages: [] });
   const [hasNewRemedy, setHasNewRemedy] = useState(false);
   const [showEndCallConfirm, setShowEndCallConfirm] = useState(false);
@@ -1049,7 +1056,14 @@ const VideoCalling = ({ callData }) => {
           <span>
             {capitalizeWords(callerName) || "Video Call"} • {formatTime(callSeconds)}
           </span>
-          <button onClick={() => setIsMinimized(false)}>⤢</button>
+          <button onClick={() => {
+            if (activeCall?.origin === "live") {
+              const channel = activeCall.liveChannel;
+              navigate(channel ? `/live/${channel}` : "/live");
+            } else {
+              setIsMinimized(false);
+            }
+          }}>⤢</button>
         </div>
 
         <div className={styles.miniVideo}>

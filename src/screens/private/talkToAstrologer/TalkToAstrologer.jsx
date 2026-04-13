@@ -503,6 +503,8 @@ const TalkToAstrologer = () => {
     kundliRef.current = null;
 
     setActiveCall(null);
+    resetChatFlow();
+    resetCallFlow();
   };
 
   useEffect(() => {

@@ -7,12 +7,22 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { useState, useRef, useEffect } from "react";
 import { AppImages } from "../../../../utils/appImages";
 import { useLocation, useNavigate } from "react-router-dom";
+import { appData } from "../../../../utils/constanats/appData";
 
 const Streaming = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { data } = location.state || {};
+  const { data, list: stateList, currentIndex: stateIndex } = location.state || {};
+
+  // Fallback to full appData if list wasn't passed via navigation state
+  const list = stateList?.length > 0 ? stateList : appData;
+  const initialIndex = stateList?.length > 0
+    ? (stateIndex ?? 0)
+    : list.findIndex((e) => e.AstrologerLoginId === data?.AstrologerLoginId);
+
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(initialIndex >= 0 ? initialIndex : 0);
+  const activeData = list[activeIndex] || data;
   const [messages, setMessages] = useState([
     {
       sender: "Chirag",
@@ -110,6 +120,36 @@ const Streaming = () => {
     navigate(-1);
   };
 
+  const hasPrev = list.length > 0 && activeIndex > 0;
+  const hasNext = list.length > 0 && activeIndex < list.length - 1;
+
+  const goToPrev = () => {
+    if (hasPrev) setActiveIndex((i) => i - 1);
+  };
+
+  const goToNext = () => {
+    if (hasNext) setActiveIndex((i) => i + 1);
+  };
+
+  // Keyboard arrow navigation (Up = prev, Down = next)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Skip if user is typing in the chat input
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        e.stopPropagation();
+        setActiveIndex((i) => (i > 0 ? i - 1 : i));
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        e.stopPropagation();
+        setActiveIndex((i) => (i < list.length - 1 ? i + 1 : i));
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => document.removeEventListener("keydown", handleKeyDown, true);
+  }, [list.length]);
+
   // Auto-scroll chat body
   useEffect(() => {
     if (chatBodyRef.current) {
@@ -155,13 +195,13 @@ const Streaming = () => {
 
         <div className={styles.videoContent}>
           <div className={styles.videoNavigation}>
-            <div className="navBtn">
+            <div className="navBtn" onClick={goToPrev} style={{ opacity: hasPrev ? 1 : 0.3, cursor: hasPrev ? "pointer" : "default" }}>
               <img
                 src="https://images.astroyogi.com/astroyogi2017/common/left_light_gray.png"
                 alt="Prev"
               />
             </div>
-            <div className="navBtn">
+            <div className="navBtn" onClick={goToNext} style={{ opacity: hasNext ? 1 : 0.3, cursor: hasNext ? "pointer" : "default" }}>
               <img
                 src="https://images.astroyogi.com/astroyogi2017/common/right_light_gray.png"
                 alt="Next"
@@ -181,15 +221,15 @@ const Streaming = () => {
       <div className={styles.chatSection}>
         <div className={styles.chatHeader}>
           <img
-            src={`https://images.astroyogi.com/english/astrologer/profileimage/${data.ProfileImage}`}
+            src={`https://images.astroyogi.com/english/astrologer/profileimage/${activeData.ProfileImage}`}
             alt="Astrologer"
           />
           <div>
             <PrimaryText>
-              {data?.FirstName} {data.LastName}
+              {activeData?.FirstName} {activeData.LastName}
             </PrimaryText>
             <PrimaryText size_12 color={appColors.greyMedium} lines={1}>
-              {data.AstroCategoryNameDltd}
+              {activeData.AstroCategoryNameDltd}
             </PrimaryText>
             <PrimaryButton
               buttonStyles={{ padding: "4px" }}
