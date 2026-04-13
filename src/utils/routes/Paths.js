@@ -192,6 +192,7 @@ import TicketDetails from "../../screens/v2/user/TicketDetails";
 import PrivacySecurity from "../../screens/v2/user/PrivacySecurity";
 import TermsConditionsView from "../../screens/v2/user/TermsConditionsView";
 import AppLicense from "../../screens/v2/user/AppLicense";
+import FollowedAstrologers from "../../screens/v2/user/FollowedAstrologers";
 
 export const PATH = {
   // DEFAULT: {
@@ -1141,6 +1142,12 @@ export const PATH = {
       path: "/app-license",
       element: AppLicense,
       header: false,
+      footer: false,
+    },
+    FOLLOWED_ASTROLOGERS: {
+      path: "/followed-astrologers",
+      element: FollowedAstrologers,
+      header: true,
       footer: false,
     },
   },

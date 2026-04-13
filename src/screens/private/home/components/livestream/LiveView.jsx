@@ -1,5 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { LocalUser, RemoteUser } from "agora-rtc-react";
+import { IoMic, IoMicOff, IoCallSharp } from "react-icons/io5";
+import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
 import "./styles/videoBox.scss";
 import { useLiveViewLogic } from "./useLiveViewLogic";
 import GiftPopup from "./GiftPopup";
@@ -18,6 +20,7 @@ import Toast from "../../../../../component/toast";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
 import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
+import { getUserFromStorage } from "../../../../../utils/authStorage";
 import { PATH } from "../../../../../utils/routes/Paths";
 
 import { createPortal } from "react-dom";
@@ -63,10 +66,14 @@ const LiveView = (props) => {
   const [showGifts, setShowGifts] = useState(false);
   const [showCallPopup, setShowCallPopup] = useState(false);
   const [showWaitingModal, setShowWaitingModal] = useState(false);
+  const [pendingCallType, setPendingCallType] = useState("audio");
   const [roomEnded, setRoomEnded] = useState(false);
   const [wasRoomReady, setWasRoomReady] = useState(false);
   const [connectingTimedOut, setConnectingTimedOut] = useState(false);
   const [liveDuration, setLiveDuration] = useState("00:00");
+  const [isCallExpanded, setIsCallExpanded] = useState(false);
+  const [localMicOn, setLocalMicOn] = useState(true);
+  const [localSpeakerOn, setLocalSpeakerOn] = useState(true);
 
   // Reset ended state when switching to a new channel
   // Use a counter to invalidate stale roomReady changes from old channels
@@ -140,6 +147,19 @@ const LiveView = (props) => {
   
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
   const token = localStorage.getItem("shubhtalk_customer_token");
+
+  // Ensure voiceSocket is connected for call features
+  useEffect(() => {
+    if (!userIdLocal || !token) return;
+    if (!voiceSocket.connected) {
+      voiceSocket.io.opts.query = {
+        userId: userIdLocal,
+        role: "CUSTOMER",
+      };
+      voiceSocket.connect();
+    }
+  }, [userIdLocal, token]);
+
   const [callRoomId, setCallRoomId] = useState(null);
   const [callWaitingList, setCallWaitingList] = useState(null);
   const astrologerRef = useRef(null);
@@ -177,6 +197,24 @@ const LiveView = (props) => {
       if (!isFollowing) {
         await followAstrologer({ astrologerId }).unwrap();
         Toast.success(`You are now following ${astrologer?.astrologerName || "this astrologer"}`);
+
+        // Emit follow message to live stream chat
+        if (props.socketRef?.current?.connected && props.channel && userIdLocal) {
+          const userName = localStorage.getItem("shubhtalk_customer_name") || "User";
+
+          const followMessage = JSON.stringify({
+            text: `${userName} started following`,
+          });
+
+          props.socketRef.current.emit("live:send_message", {
+            roomId: props.channel,
+            userId: userIdLocal,
+            userName,
+            message: followMessage,
+            userType: "audience",
+            type: "follow",
+          });
+        }
       } else {
         await unfollowAstrologer({ astrologerId }).unwrap();
         Toast.success(`Unfollowed ${astrologer?.astrologerName || "this astrologer"}`);
@@ -198,15 +236,47 @@ const LiveView = (props) => {
     ?.map((m) => {
       // Handle gift messages
       if (m.type === "gift") {
-        const giftData = typeof m.message === "object" ? m.message : null;
-        const giftName = giftData?.giftData?.giftName || "a gift";
+        let giftData = null;
+        let giftText = "";
         const senderName = m.sender || m.userName || "Someone";
+        
+        // Parse gift data from message
+        if (typeof m.message === "string") {
+          try {
+            const parsed = JSON.parse(m.message);
+            giftText = parsed.text || "";
+            giftData = parsed.giftData;
+          } catch {
+            giftText = m.message;
+          }
+        } else if (typeof m.message === "object") {
+          giftData = m.message?.giftData || m.message;
+          giftText = m.message?.text || "";
+        }
+
         return {
           ...m,
-          text: `🎁 ${senderName} sent ${giftName}`,
+          text: giftText || `${senderName} sent a gift`,
           role: m.role || m.userType,
           sender: senderName,
           isGift: true,
+          giftData: giftData,
+        };
+      }
+      // Handle follow messages
+      if (m.type === "follow") {
+        let followText;
+        try {
+          const parsed = typeof m.message === "string" ? JSON.parse(m.message) : m.message;
+          followText = parsed?.text;
+        } catch { /* ignore */ }
+        const senderName = m.sender || m.userName || "Someone";
+        return {
+          ...m,
+          text: followText || `${senderName} started following`,
+          role: m.role || m.userType,
+          sender: senderName,
+          isFollow: true,
         };
       }
       // Handle system messages (join/leave)
@@ -371,6 +441,7 @@ const LiveView = (props) => {
     // 7. Store astrologer info and emit call:initiate via socket
     setLastRequestedAstro(astrologer);
     setLastCallType("audio");
+    setPendingCallType("audio");
     astrologerRef.current = astrologer;
     localStorage.setItem("selectedAstroId", astrologerId);
 
@@ -411,6 +482,7 @@ const LiveView = (props) => {
 
     // Store astrologer info in context and ref
     setLastRequestedAstro(astrologer);
+    setPendingCallType(type);
     astrologerRef.current = astrologer;
 
     // Show waiting modal
@@ -461,9 +533,25 @@ const LiveView = (props) => {
     }
     setActiveCall(null);
     setIsCallMinimized(false);
+    setIsCallExpanded(false);
     setCallSeconds(0);
     resetCallFlow();
   };
+
+  // Sync mic/speaker state from VoiceCall via custom events
+  useEffect(() => {
+    const onMicSync = (e) => setLocalMicOn(e.detail);
+    const onSpeakerSync = (e) => setLocalSpeakerOn(e.detail);
+    window.addEventListener("mini-call-mic-sync", onMicSync);
+    window.addEventListener("mini-call-speaker-sync", onSpeakerSync);
+    return () => {
+      window.removeEventListener("mini-call-mic-sync", onMicSync);
+      window.removeEventListener("mini-call-speaker-sync", onSpeakerSync);
+    };
+  }, []);
+
+  const toggleMiniMic = () => window.dispatchEvent(new CustomEvent("mini-call-toggle-mic"));
+  const toggleMiniSpeaker = () => window.dispatchEvent(new CustomEvent("mini-call-toggle-speaker"));
 
   // Socket event handlers
   useEffect(() => {
@@ -595,35 +683,24 @@ const LiveView = (props) => {
     <FixedLayer>
       <div className="video-box">
         <div className="reel-scroll-root" ref={reelRef}>
-          {/* Header with Tabs */}
-          <div className="live-header">
-            <button className="live-back-button" onClick={handleCloseLive}>
-              <ChevronLeft size={24} />
-            </button>
-            <span className="live-header-title">Live Readings</span>
-          </div>
 
-          {/* Follow Button - only show when astrologer is live */}
-          {!isHost && isAstrologerLive && (
-            <div className="follow-bar">
-              <button
-                className={`follow-btn ${isFollowing ? "following" : ""}`}
-                onClick={handleFollow}
-                disabled={followLoading || unfollowLoading}
-              >
-                {followLoading || unfollowLoading
-                  ? "..."
-                  : isFollowing
-                  ? "Following"
-                  : "+ Follow"}
+          {/* Back button when astrologer is not live */}
+          {!isAstrologerLive && (
+            <div className="live-header">
+              <button className="live-back-button" onClick={handleCloseLive}>
+                <ChevronLeft size={24} />
               </button>
             </div>
           )}
 
           {/* Astrologer Info Bar - only show when astrologer is live */}
-          {isAstrologerLive && (
+          {isAstrologerLive && (<>
           <div className="top-bar">
-            <div className="host-info">
+            <div className="top-bar-left">
+              <button className="live-back-button" onClick={handleCloseLive}>
+                <ChevronLeft size={24} />
+              </button>
+              <div className="host-info">
               {fullAstro?.profileImgUrl ? (
                 <img className="host-avatar-img" src={fullAstro.profileImgUrl} alt={astrologer?.astrologerName || "Astrologer"} />
               ) : (
@@ -641,14 +718,14 @@ const LiveView = (props) => {
                 </div>
               </div>
               {/* Minimized call pill - right after name */}
-              {isCallForCurrentAstrologer && (
-                <div className="live-call-pill">
+              {isCallForCurrentAstrologer && !isCallExpanded && (
+                <div className="live-call-pill" onClick={() => setIsCallExpanded(true)}>
                   <span className="live-call-pill-avatar">
                     {(activeCall.callerName || "A").split(" ").map(w => w.charAt(0).toUpperCase()).join("").slice(0, 2)}
                   </span>
                   <button
                     className="live-call-pill-end"
-                    onClick={handleEndActiveCall}
+                    onClick={(e) => { e.stopPropagation(); handleEndActiveCall(); }}
                     aria-label="End call"
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
@@ -658,6 +735,69 @@ const LiveView = (props) => {
                 </div>
               )}
             </div>
+            </div>
+
+            {/* Follow button - right side of top bar */}
+            {!isHost && (
+              <button
+                className={`follow-btn ${isFollowing ? "following" : ""}`}
+                onClick={handleFollow}
+                disabled={followLoading || unfollowLoading}
+              >
+                {followLoading || unfollowLoading
+                  ? "..."
+                  : isFollowing
+                  ? "Following"
+                  : "+ Follow"}
+              </button>
+            )}
+          </div>
+
+          {/* Expanded call card - below top bar */}
+          {isCallForCurrentAstrologer && isCallExpanded && (
+              <div className="expanded-call-card">
+                <button className="expanded-call-collapse" onClick={() => setIsCallExpanded(false)} aria-label="Collapse">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f75801" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                </button>
+                <div className="expanded-call-info">
+                  <span className="expanded-call-name">
+                    {(activeCall.callerName || "Caller").length > 14
+                      ? (activeCall.callerName || "Caller").slice(0, 14) + "..."
+                      : (activeCall.callerName || "Caller")}
+                  </span>
+                  <span className="expanded-call-timer">{formatCallTime(callSeconds)}</span>
+                </div>
+                <div className="expanded-call-actions">
+                  <button
+                    className={`expanded-call-action-btn ${!localMicOn ? "off" : ""}`}
+                    onClick={toggleMiniMic}
+                    aria-label={localMicOn ? "Mute mic" : "Unmute mic"}
+                  >
+                    {localMicOn
+                      ? <IoMic size={16} />
+                      : <IoMicOff size={16} />}
+                  </button>
+                  <button
+                    className={`expanded-call-action-btn ${!localSpeakerOn ? "off" : ""}`}
+                    onClick={toggleMiniSpeaker}
+                    aria-label={localSpeakerOn ? "Mute speaker" : "Unmute speaker"}
+                  >
+                    {localSpeakerOn
+                      ? <HiSpeakerWave size={16} />
+                      : <HiSpeakerXMark size={16} />}
+                  </button>
+                  <button
+                    className="expanded-call-action-btn end"
+                    onClick={handleEndActiveCall}
+                    aria-label="End call"
+                  >
+                    <IoCallSharp size={16} style={{ transform: "rotate(135deg)" }} />
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* <div className="live-status">
               <div className="live-badge">LIVE</div>
@@ -672,8 +812,7 @@ const LiveView = (props) => {
                 )}
               </div>
             </div> */}
-          </div>
-          )}
+          </>)}
 
           {/* LIVE INDEX INDICATOR */}
           {!isHost && liveListCtx && <div className="live-counter"></div>}
@@ -768,7 +907,7 @@ const LiveView = (props) => {
                   const name = m.text?.split(" ")?.[0] || "U";
                   return (
                     <div key={m.id || index} className="inline-message" style={{ opacity: 0.7 }}>
-                      <span className="inline-initial" style={{ background: "#22c55e" }}>
+                      <span className="inline-initial">
                         {name.charAt(0).toUpperCase()}
                       </span>
                       <div className="inline-message-body">
@@ -779,14 +918,30 @@ const LiveView = (props) => {
                 }
                 // Gift messages — orange gradient style
                 if (m.isGift) {
+                  const gd = m.giftData;
                   return (
-                    <div key={m.id || index} className={`inline-message inline-gift-message`}>
-                      <span className="inline-initial" style={{ background: "linear-gradient(135deg, #f75801, #d43400)" }}>🎁</span>
+                    <div key={m.id || index} className="inline-message inline-gift-message">
+                      <span className="inline-initial" style={{ background: "linear-gradient(135deg, #f75801, #d43400)" }}>
+                        {(m.sender || "G").charAt(0).toUpperCase()}
+                      </span>
+                      <div className="gift-card-bubble">
+                        {gd?.giftImg && <img src={gd.giftImg} alt={gd?.giftName} className="gift-card-img" />}
+                        <div className="gift-card-info">
+                          <span className="gift-card-sender">{m.sender}</span>
+                          <span className="gift-card-label">sent {gd?.giftName || "a gift"}</span>
+                        </div>
+                        {gd?.price && <span className="gift-card-price">₹{gd.price}</span>}
+                      </div>
+                    </div>
+                  );
+                }
+                // Follow messages — same style as join (green arrow)
+                if (m.isFollow) {
+                  return (
+                    <div key={m.id || index} className="inline-message" style={{ opacity: 0.6 }}>
+                      <span className="inline-initial" style={{ background: "#22c55e", fontSize: 10 }}>❤️</span>
                       <div className="inline-message-body">
-                        {m.sender && (
-                          <span className="inline-sender" style={{ color: "#f75801" }}>{m.sender}</span>
-                        )}
-                        <span className="inline-text">{m.text}</span>
+                        <span className="inline-text" style={{ fontStyle: "italic", fontSize: 11 }}>{m.text}</span>
                       </div>
                     </div>
                   );
@@ -860,7 +1015,13 @@ const LiveView = (props) => {
             socketRef={props.socketRef}
             roomId={props.channel}
             userId={userIdLocal}
-            userName={localStorage.getItem("shubhtalk_customer_name") || "User"}
+            userName={(() => {
+              const u = getUserFromStorage();
+              const first = u?.firstName || "";
+              const last = u?.lastName || "";
+              if (first && last && first.toLowerCase() !== last.toLowerCase()) return `${first} ${last}`;
+              return first || "User";
+            })()}
           />
           <SharePopup
             show={showSharePopup}
@@ -886,7 +1047,7 @@ const LiveView = (props) => {
             <WaitingModal
               callRoomId={callRoomId}
               resetCallState={resetCallState}
-              connectionType="video"
+              connectionType={pendingCallType}
             />
           )}
 
