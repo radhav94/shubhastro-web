@@ -15,6 +15,7 @@ import {
   restoreViewerSession,
   saveViewerSession,
 } from "../../../../../utils/liveSessionStorage";
+import { getUserFromStorage } from "../../../../../utils/authStorage";
 
 const LiveStreamingContainer = ({ client }) => {
   const location = useLocation();
@@ -88,7 +89,13 @@ const LiveStreamingContainer = ({ client }) => {
   }, [channel, currentLive, ROLE]);
 
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id") || "";
-  const userNameLocal = localStorage.getItem("shubhtalk_customer_name") || "User";
+  const storedUser = getUserFromStorage();
+  const userNameLocal = (() => {
+    const first = storedUser?.firstName || "";
+    const last = storedUser?.lastName || "";
+    if (first && last && first.toLowerCase() !== last.toLowerCase()) return `${first} ${last}`;
+    return first || "User";
+  })();
 
   // Ref to hold retryJoinRoom — breaks circular dep between handleAstrologerStatus and chat
   const retryJoinRef = useRef(null);
