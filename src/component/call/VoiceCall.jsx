@@ -37,7 +37,7 @@ const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
 
 const AgoraVoiceCalling = ({ callData }) => {
-  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, setWaitingList, resetCallFlow, isCallMinimized, setIsCallMinimized, reconnectToCall } = useCall();
+  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, setWaitingList, resetCallFlow, isCallMinimized, setIsCallMinimized, reconnectToCall, isMicOn, setIsMicOn, isSpeakerOn, setIsSpeakerOn } = useCall();
   const { activeChat } = useChatContext();
   const navigate = useNavigate();
   const location = useLocation();
@@ -69,16 +69,20 @@ const AgoraVoiceCalling = ({ callData }) => {
   const isResumeFromRefresh = useRef(!!localStorage.getItem("shubhtalk_active_call"));
   // Ref to always hold the latest activeCall so socket handlers never use stale closures
   const activeCallRef = useRef(activeCall);
+  // Ref to hold latest speaker state for Agora event closures
+  const speakerOnRef = useRef(isSpeakerOn);
 
   /* ================= STATE ================= */
-  const [micOn, setMicOn] = useState(true);
+  const micOn = isMicOn;
+  const setMicOn = setIsMicOn;
   const [joined, setJoined] = useState(false);
   // Use context's isCallMinimized instead of local state
   const isMinimized = isCallMinimized;
   const setIsMinimized = setIsCallMinimized;
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
-  const [speakerOn, setSpeakerOn] = useState(true);
+  const speakerOn = isSpeakerOn;
+  const setSpeakerOn = setIsSpeakerOn;
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -94,6 +98,10 @@ const AgoraVoiceCalling = ({ callData }) => {
   useEffect(() => {
     activeCallRef.current = activeCall;
   }, [activeCall]);
+
+  useEffect(() => {
+    speakerOnRef.current = speakerOn;
+  }, [speakerOn]);
 
   const [chatNotification, setChatNotification] = useState(null);
   const notificationTimerRef = useRef(null);
@@ -145,25 +153,7 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [getBalance, { isLoading: isCheckingBalance }] = useGetBalanceMutation();
 
   /* ================= MINI CALL OVERLAY BRIDGE ================= */
-  useEffect(() => {
-    const onToggleMic = () => setMicOn((m) => !m);
-    const onToggleSpeaker = () => setSpeakerOn((s) => !s);
-    window.addEventListener("mini-call-toggle-mic", onToggleMic);
-    window.addEventListener("mini-call-toggle-speaker", onToggleSpeaker);
-    return () => {
-      window.removeEventListener("mini-call-toggle-mic", onToggleMic);
-      window.removeEventListener("mini-call-toggle-speaker", onToggleSpeaker);
-    };
-  }, []);
-
-  // Sync mic/speaker state to MiniCallOverlay
-  useEffect(() => {
-    window.dispatchEvent(new CustomEvent("mini-call-mic-sync", { detail: micOn }));
-  }, [micOn]);
-
-  useEffect(() => {
-    window.dispatchEvent(new CustomEvent("mini-call-speaker-sync", { detail: speakerOn }));
-  }, [speakerOn]);
+  // No longer needed — mic/speaker state is shared via CallContext
 
   // Fetch kundli profiles
   const { data: profilesData } = useGetAllKundlisQuery();
@@ -249,7 +239,7 @@ const AgoraVoiceCalling = ({ callData }) => {
 
         await client.subscribe(user, mediaType);
         if (mediaType === "audio") {
-          user.audioTrack?.setVolume(speakerOn ? 100 : 0);
+          user.audioTrack?.setVolume(speakerOnRef.current ? 100 : 0);
           user.audioTrack?.play();
         }
       });
@@ -298,8 +288,10 @@ const AgoraVoiceCalling = ({ callData }) => {
       }
 
       micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack();
+      // Sync mic track with context mute state (persists across remounts)
+      micTrackRef.current.setEnabled(isMicOn);
       await client.publish([micTrackRef.current]);
-      console.log("[VoiceCall] 🎙️ Mic track published");
+      console.log("[VoiceCall] 🎙️ Mic track published, micOn:", isMicOn);
 
       setJoined(true);
       
