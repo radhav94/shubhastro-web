@@ -111,15 +111,13 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
       day: dateObj.getDate(),
       month: dateObj.getMonth() + 1,
       year: dateObj.getFullYear(),
-      hour: data.unknownBirthTime ? 12 : parseInt(timeObj[0]),
-      min: data.unknownBirthTime ? 0 : parseInt(timeObj[1]),
-      second: 0,
+      hour: data.unknownBirthTime ? "00" : String(parseInt(timeObj[0])),
+      min: data.unknownBirthTime ? "00" : String(parseInt(timeObj[1])),
+      second: "00",
       place: data.birthPlace,
       lat: data.latitude || 0,
       lon: data.longitude || 0,
       tzone: data.timezone ?? 5.5,
-      birthDate: data.birthDate,
-      birthTime: data.unknownBirthTime ? "" : data.birthTime,
     };
   };
 
