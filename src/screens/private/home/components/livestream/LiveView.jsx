@@ -138,6 +138,8 @@ const LiveView = (props) => {
     setIsMicOn,
     isSpeakerOn,
     setIsSpeakerOn,
+    setOpenReview,
+    setReviewData,
   } = useCall();
 
   // Auto-minimize call if user is on live stream (handles page refresh)
@@ -528,10 +530,19 @@ const LiveView = (props) => {
   // End active call from minimized view
   const handleEndActiveCall = () => {
     if (activeCall?.roomId) {
+      // Set review data before clearing activeCall
+      setReviewData({
+        astrologerID: activeCall?.astrologerID || activeCall?.astrologerId,
+        fullName: activeCall?.callerName || "Astrologer",
+        roomId: activeCall.roomId,
+      });
+
       voiceSocket.emit("call:end", {
         roomId: activeCall.roomId,
         endedBy: "CUSTOMER",
       });
+
+      setOpenReview(true);
     }
     setActiveCall(null);
     setIsCallMinimized(false);
@@ -611,7 +622,7 @@ const LiveView = (props) => {
           callType: type, // "audio" or "video"
           userId: userIdLocal,
           astrologerId: astroId,
-          astrologerID: astro?.astrologer_ID,
+          astrologerID: fullAstro?.astrologer_ID || astro?.astrologer_ID || astroId,
           remainingTime,
           origin: "live",
           liveChannel: props.channel,
@@ -644,8 +655,8 @@ const LiveView = (props) => {
     };
 
     const handleCallEnded = () => {
-      setActiveCall(null);
-      resetCallState();
+      setShowWaitingModal(false);
+      setCallRoomId(null);
     };
 
     // Register socket listeners

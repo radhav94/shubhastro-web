@@ -399,7 +399,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     if (!isUpgradingToVideo.current) {
       const currentCall = activeCallRef.current;
       setReviewData({
-        astrologerID: currentCall?.astrologerID,
+        astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
         fullName: currentCall?.callerName || callerName,
         roomId,
       });
@@ -565,7 +565,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       if (!isUpgradingToVideo.current) {
         const currentCall = activeCallRef.current;
         setReviewData({
-          astrologerID: currentCall?.astrologerID,
+          astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
           fullName: currentCall?.callerName || callerName,
           roomId,
         });
