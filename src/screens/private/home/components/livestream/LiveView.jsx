@@ -33,6 +33,8 @@ import {
   useUnfollowAstrologerByIdMutation,
 } from "../../../../../redux/api/astrologer/followAstrologerApi";
 import { useGetAstrologerByIdQuery } from "../../../../../redux/api/astrologer/astrologerApi";
+import KundliSelectModal from "../../../../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
+import SuggestedRemedyPanel from "../../../../../component/call/SuggestedRemedyPanel";
 
 const FixedLayer = ({ children }) => {
   return createPortal(children, document.body);
@@ -73,6 +75,10 @@ const LiveView = (props) => {
   const [connectingTimedOut, setConnectingTimedOut] = useState(false);
   const [liveDuration, setLiveDuration] = useState("00:00");
   const [isCallExpanded, setIsCallExpanded] = useState(false);
+  const [showKundliModal, setShowKundliModal] = useState(false);
+  const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
+  const [suggestedRemedyData, setSuggestedRemedyData] = useState({ suggestedProducts: [], messages: [] });
+  const [hasNewRemedy, setHasNewRemedy] = useState(false);
 
   // Reset ended state when switching to a new channel
   // Use a counter to invalidate stale roomReady changes from old channels
@@ -586,6 +592,39 @@ const LiveView = (props) => {
     setIsSpeakerOn((s) => !s);
   };
 
+  // Handle kundli selection — send via voiceSocket (same as VoiceCall)
+  const handleKundliSelect = (kundli) => {
+    setShowKundliModal(false);
+    if (!kundli?._id || !activeCall?.roomId) return;
+    const kundliLink = `${window.location.origin}/kundli/${kundli._id}`;
+    voiceSocket.emit("chat:message", {
+      sender: "user",
+      kundliId: kundli._id,
+      roomId: activeCall.roomId,
+      userId: activeCall.userId || userIdLocal,
+      astrologerId: activeCall.astrologerId,
+      message: kundliLink,
+      type: "kundli",
+    });
+    Toast.success("Kundli shared");
+  };
+
+  // Listen for suggested remedy messages from astrologer during call
+  useEffect(() => {
+    if (!isCallForCurrentAstrologer) return;
+    const handleProductMessage = (data) => {
+      if (data?.type === "products" && data?.suggestedProducts?.length > 0) {
+        setSuggestedRemedyData((prev) => ({
+          suggestedProducts: [...prev.suggestedProducts, ...data.suggestedProducts],
+          messages: data.message ? [...prev.messages, data.message] : prev.messages,
+        }));
+        setHasNewRemedy(true);
+      }
+    };
+    voiceSocket.on("message:recieved", handleProductMessage);
+    return () => voiceSocket.off("message:recieved", handleProductMessage);
+  }, [isCallForCurrentAstrologer]);
+
   // Socket event handlers
   useEffect(() => {
     if (!userIdLocal) return;
@@ -1034,7 +1073,7 @@ const LiveView = (props) => {
                 </button>
               </div>
               
-              {!isHost && (
+              {!isHost && !isCallForCurrentAstrologer && (
                 <button 
                   className="call-price-btn"
                   onClick={handleDirectVoiceCall}
@@ -1044,6 +1083,26 @@ const LiveView = (props) => {
                   </svg>
                   <span>₹{fullAstro?.price?.audioRate?.amount || astrologer?.audioCallRate || 0}/ min</span>
                 </button>
+              )}
+              {!isHost && isCallForCurrentAstrologer && (
+                <>
+                  <button className="call-action-pill" onClick={() => setShowKundliModal(true)} aria-label="Share Kundli">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                      <text x="3" y="19" fontSize="18" fill="white" fontFamily="serif">卐</text>
+                    </svg>
+                  </button>
+                  <button
+                    className="call-action-pill"
+                    style={{ position: "relative" }}
+                    onClick={() => { setIsRemedyPanelOpen(true); setHasNewRemedy(false); }}
+                    aria-label="Suggested Remedy"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" stroke="none">
+                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    {hasNewRemedy && <span className="call-action-dot" />}
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -1171,6 +1230,21 @@ const LiveView = (props) => {
           </div>
           )}
         </div>
+
+        {/* Kundli Select Modal — shown during active call */}
+        <KundliSelectModal
+          isOpen={showKundliModal}
+          onClose={() => setShowKundliModal(false)}
+          onSelect={handleKundliSelect}
+        />
+
+        {/* Suggested Remedy Panel — shown during active call */}
+        <SuggestedRemedyPanel
+          isOpen={isRemedyPanelOpen}
+          onClose={() => setIsRemedyPanelOpen(false)}
+          remedyData={suggestedRemedyData}
+          onProductClick={() => setIsRemedyPanelOpen(false)}
+        />
       </div>
     </FixedLayer>
   );
