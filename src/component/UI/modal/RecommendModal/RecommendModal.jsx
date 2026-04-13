@@ -174,6 +174,8 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
     kundliRef.current = null;
 
     setActiveCall(null);
+    resetChatFlow();
+    resetCallFlow();
   };
 
   useEffect(() => {

@@ -22,7 +22,7 @@ const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1500;
 
-export const useLiveStreaming = (client, ROLE, channel, rejoinKey = 0) => {
+export const useLiveStreaming = (client, ROLE, channel, rejoinKey = 0, { onChannelNotFound } = {}) => {
   const [isConnected, setIsConnected] = useState(false);
   const [hostLeft, setHostLeft] = useState(false);
   const [isReconnect, setIsReconnect] = useState(false);
@@ -110,15 +110,33 @@ export const useLiveStreaming = (client, ROLE, channel, rejoinKey = 0) => {
           // Fresh token (first visit, or reconnect failed, or retry)
           if (!tokenData?.token) {
             clearViewerSession();
-            const res = await getViewerToken(channel);
-            tokenData = res?.data?.data;
-            if (tokenData?.token) {
-              setIsReconnect(false);
-              saveViewerSession({
-                token: tokenData.token,
-                channel,
-                uid: tokenData.uid,
-              });
+            try {
+              const res = await getViewerToken(channel);
+              // Check for "channel not found or stream ended" response
+              if (res?.data?.success === false) {
+                console.warn("Channel not found or stream ended:", channel);
+                if (!cancelled) onChannelNotFound?.(channel);
+                return;
+              }
+              tokenData = res?.data?.data;
+              if (tokenData?.token) {
+                setIsReconnect(false);
+                saveViewerSession({
+                  token: tokenData.token,
+                  channel,
+                  uid: tokenData.uid,
+                });
+              }
+            } catch (tokenErr) {
+              // Handle 404 or network error from viewer token API
+              const status = tokenErr?.response?.status;
+              const msg = tokenErr?.response?.data?.message || "";
+              if (status === 404 || msg.includes("channel not found") || msg.includes("stream ended")) {
+                console.warn("Channel not found (404):", channel);
+                if (!cancelled) onChannelNotFound?.(channel);
+                return;
+              }
+              throw tokenErr; // re-throw other errors for the outer catch
             }
           }
 
