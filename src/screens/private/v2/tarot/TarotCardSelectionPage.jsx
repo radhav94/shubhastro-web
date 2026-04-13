@@ -3,7 +3,7 @@ import ChevronLeft from '../components/ui/ChevronLeft'
 import { useNavigate, useLocation } from 'react-router-dom'
 import styles from './TarotCardSelectionPage.module.css'
 import { useGetTarotShuffleDataQuery } from '../../../../redux/api/tarot/tarotApi'
-import toast from 'react-hot-toast'
+import toast from '../../../../component/toast'
 
 const DISPLAY_CARD_COUNT = 10
 const MAX_RECENT = 3
@@ -49,6 +49,7 @@ const TarotCardSelectionPage = () => {
         const t2 = setTimeout(() => {
           setIsShuffling(false)
           setAnimationReady(true)
+          toast.success("Cards shuffled! Pick your card 🔮")
         }, 50)
         return () => clearTimeout(t2)
       }, 500)

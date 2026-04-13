@@ -73,8 +73,6 @@ const LiveView = (props) => {
   const [connectingTimedOut, setConnectingTimedOut] = useState(false);
   const [liveDuration, setLiveDuration] = useState("00:00");
   const [isCallExpanded, setIsCallExpanded] = useState(false);
-  const [localMicOn, setLocalMicOn] = useState(true);
-  const [localSpeakerOn, setLocalSpeakerOn] = useState(true);
 
   // Reset ended state when switching to a new channel
   // Use a counter to invalidate stale roomReady changes from old channels
@@ -138,6 +136,12 @@ const LiveView = (props) => {
     isCallMinimized,
     setIsCallMinimized,
     setPendingLiveCall,
+    isMicOn,
+    setIsMicOn,
+    isSpeakerOn,
+    setIsSpeakerOn,
+    setOpenReview,
+    setReviewData,
   } = useCall();
 
   // Auto-minimize call if user is on live stream (handles page refresh)
@@ -551,10 +555,19 @@ const LiveView = (props) => {
   // End active call from minimized view
   const handleEndActiveCall = () => {
     if (activeCall?.roomId) {
+      // Set review data before clearing activeCall
+      setReviewData({
+        astrologerID: activeCall?.astrologerID || activeCall?.astrologerId,
+        fullName: activeCall?.callerName || "Astrologer",
+        roomId: activeCall.roomId,
+      });
+
       voiceSocket.emit("call:end", {
         roomId: activeCall.roomId,
         endedBy: "CUSTOMER",
       });
+
+      setOpenReview(true);
     }
     setActiveCall(null);
     setIsCallMinimized(false);
@@ -563,20 +576,15 @@ const LiveView = (props) => {
     resetCallFlow();
   };
 
-  // Sync mic/speaker state from VoiceCall via custom events
-  useEffect(() => {
-    const onMicSync = (e) => setLocalMicOn(e.detail);
-    const onSpeakerSync = (e) => setLocalSpeakerOn(e.detail);
-    window.addEventListener("mini-call-mic-sync", onMicSync);
-    window.addEventListener("mini-call-speaker-sync", onSpeakerSync);
-    return () => {
-      window.removeEventListener("mini-call-mic-sync", onMicSync);
-      window.removeEventListener("mini-call-speaker-sync", onSpeakerSync);
-    };
-  }, []);
+  const localMicOn = isMicOn;
+  const localSpeakerOn = isSpeakerOn;
 
-  const toggleMiniMic = () => window.dispatchEvent(new CustomEvent("mini-call-toggle-mic"));
-  const toggleMiniSpeaker = () => window.dispatchEvent(new CustomEvent("mini-call-toggle-speaker"));
+  const toggleMiniMic = () => {
+    setIsMicOn((m) => !m);
+  };
+  const toggleMiniSpeaker = () => {
+    setIsSpeakerOn((s) => !s);
+  };
 
   // Socket event handlers
   useEffect(() => {
@@ -647,7 +655,7 @@ const LiveView = (props) => {
           callType: type, // "audio" or "video"
           userId: userIdLocal,
           astrologerId: astroId,
-          astrologerID: astro?.astrologer_ID,
+          astrologerID: fullAstro?.astrologer_ID || astro?.astrologer_ID || astroId,
           remainingTime,
           origin: "live",
           liveChannel: callingChannelRef.current || props.channel,
@@ -680,8 +688,8 @@ const LiveView = (props) => {
     };
 
     const handleCallEnded = () => {
-      setActiveCall(null);
-      resetCallState();
+      setShowWaitingModal(false);
+      setCallRoomId(null);
     };
 
     // Register socket listeners
