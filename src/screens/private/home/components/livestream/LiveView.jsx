@@ -72,8 +72,6 @@ const LiveView = (props) => {
   const [connectingTimedOut, setConnectingTimedOut] = useState(false);
   const [liveDuration, setLiveDuration] = useState("00:00");
   const [isCallExpanded, setIsCallExpanded] = useState(false);
-  const [localMicOn, setLocalMicOn] = useState(true);
-  const [localSpeakerOn, setLocalSpeakerOn] = useState(true);
 
   // Reset ended state when switching to a new channel
   // Use a counter to invalidate stale roomReady changes from old channels
@@ -136,6 +134,10 @@ const LiveView = (props) => {
     setLastCallType,
     isCallMinimized,
     setIsCallMinimized,
+    isMicOn,
+    setIsMicOn,
+    isSpeakerOn,
+    setIsSpeakerOn,
   } = useCall();
 
   // Auto-minimize call if user is on live stream (handles page refresh)
@@ -538,20 +540,15 @@ const LiveView = (props) => {
     resetCallFlow();
   };
 
-  // Sync mic/speaker state from VoiceCall via custom events
-  useEffect(() => {
-    const onMicSync = (e) => setLocalMicOn(e.detail);
-    const onSpeakerSync = (e) => setLocalSpeakerOn(e.detail);
-    window.addEventListener("mini-call-mic-sync", onMicSync);
-    window.addEventListener("mini-call-speaker-sync", onSpeakerSync);
-    return () => {
-      window.removeEventListener("mini-call-mic-sync", onMicSync);
-      window.removeEventListener("mini-call-speaker-sync", onSpeakerSync);
-    };
-  }, []);
+  const localMicOn = isMicOn;
+  const localSpeakerOn = isSpeakerOn;
 
-  const toggleMiniMic = () => window.dispatchEvent(new CustomEvent("mini-call-toggle-mic"));
-  const toggleMiniSpeaker = () => window.dispatchEvent(new CustomEvent("mini-call-toggle-speaker"));
+  const toggleMiniMic = () => {
+    setIsMicOn((m) => !m);
+  };
+  const toggleMiniSpeaker = () => {
+    setIsSpeakerOn((s) => !s);
+  };
 
   // Socket event handlers
   useEffect(() => {

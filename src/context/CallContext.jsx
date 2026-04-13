@@ -23,6 +23,8 @@ export const CallProvider = ({ children }) => {
   const [openReview, setOpenReview] = useState(false);
   const [reviewData, setReviewData] = useState(null);
   const [isReconnecting, setIsReconnecting] = useState(false);
+  const [isMicOn, setIsMicOn] = useState(true);
+  const [isSpeakerOn, setIsSpeakerOn] = useState(true);
 
   const [waitingList, setWaitingList] = useState(false);
   const [callSeconds, setCallSeconds] = useState(0);
@@ -532,6 +534,10 @@ export const CallProvider = ({ children }) => {
     stopTimer,
     resetTimer,
     resetCallFlow,
+    isMicOn,
+    setIsMicOn,
+    isSpeakerOn,
+    setIsSpeakerOn,
   };
 
   return (
