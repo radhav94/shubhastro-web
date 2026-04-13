@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import styles from "./EPooja.module.scss";
 import { FiChevronLeft, FiChevronRight, FiSearch, FiX, FiChevronDown } from "react-icons/fi";
 import Toast from "../../../component/toast";
@@ -122,6 +122,7 @@ const getBrand = (item) => typeof item?.brand === "object" ? item?.brand?.name :
 // ═══════════════════════════════════════
 const EPooja = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
@@ -156,6 +157,20 @@ const EPooja = () => {
     })).filter((t) => t.label && t.slug);
     return [ALL_TAB, ...mapped];
   })();
+
+  // ── Sync ?tab= query param to activeTab ──
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (!tabParam) return;
+    const match = categoryTabs.find(
+      (t) => t.slug.toLowerCase() === tabParam.toLowerCase() || t.label.toLowerCase() === tabParam.toLowerCase()
+    );
+    if (match && match.slug !== activeTab) {
+      setActiveTab(match.slug);
+      searchParams.delete("tab");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [categoriesData, searchParams]);
 
   // ── Build filter params ──
   const activeCategoryId = categoryTabs.find((t) => t.slug === activeTab)?.id;
