@@ -20,6 +20,7 @@ import Toast from "../../../../../component/toast";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
 import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
+import { getUserFromStorage } from "../../../../../utils/authStorage";
 import { PATH } from "../../../../../utils/routes/Paths";
 
 import { createPortal } from "react-dom";
@@ -65,6 +66,7 @@ const LiveView = (props) => {
   const [showGifts, setShowGifts] = useState(false);
   const [showCallPopup, setShowCallPopup] = useState(false);
   const [showWaitingModal, setShowWaitingModal] = useState(false);
+  const [pendingCallType, setPendingCallType] = useState("audio");
   const [roomEnded, setRoomEnded] = useState(false);
   const [wasRoomReady, setWasRoomReady] = useState(false);
   const [connectingTimedOut, setConnectingTimedOut] = useState(false);
@@ -145,6 +147,19 @@ const LiveView = (props) => {
   
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
   const token = localStorage.getItem("shubhtalk_customer_token");
+
+  // Ensure voiceSocket is connected for call features
+  useEffect(() => {
+    if (!userIdLocal || !token) return;
+    if (!voiceSocket.connected) {
+      voiceSocket.io.opts.query = {
+        userId: userIdLocal,
+        role: "CUSTOMER",
+      };
+      voiceSocket.connect();
+    }
+  }, [userIdLocal, token]);
+
   const [callRoomId, setCallRoomId] = useState(null);
   const [callWaitingList, setCallWaitingList] = useState(null);
   const astrologerRef = useRef(null);
@@ -221,15 +236,31 @@ const LiveView = (props) => {
     ?.map((m) => {
       // Handle gift messages
       if (m.type === "gift") {
-        const giftData = typeof m.message === "object" ? m.message : null;
-        const giftName = giftData?.giftData?.giftName || "a gift";
+        let giftData = null;
+        let giftText = "";
         const senderName = m.sender || m.userName || "Someone";
+        
+        // Parse gift data from message
+        if (typeof m.message === "string") {
+          try {
+            const parsed = JSON.parse(m.message);
+            giftText = parsed.text || "";
+            giftData = parsed.giftData;
+          } catch {
+            giftText = m.message;
+          }
+        } else if (typeof m.message === "object") {
+          giftData = m.message?.giftData || m.message;
+          giftText = m.message?.text || "";
+        }
+
         return {
           ...m,
-          text: `🎁 ${senderName} sent ${giftName}`,
+          text: giftText || `${senderName} sent a gift`,
           role: m.role || m.userType,
           sender: senderName,
           isGift: true,
+          giftData: giftData,
         };
       }
       // Handle follow messages
@@ -410,6 +441,7 @@ const LiveView = (props) => {
     // 7. Store astrologer info and emit call:initiate via socket
     setLastRequestedAstro(astrologer);
     setLastCallType("audio");
+    setPendingCallType("audio");
     astrologerRef.current = astrologer;
     localStorage.setItem("selectedAstroId", astrologerId);
 
@@ -450,6 +482,7 @@ const LiveView = (props) => {
 
     // Store astrologer info in context and ref
     setLastRequestedAstro(astrologer);
+    setPendingCallType(type);
     astrologerRef.current = astrologer;
 
     // Show waiting modal
@@ -874,7 +907,7 @@ const LiveView = (props) => {
                   const name = m.text?.split(" ")?.[0] || "U";
                   return (
                     <div key={m.id || index} className="inline-message" style={{ opacity: 0.7 }}>
-                      <span className="inline-initial" style={{ background: "#22c55e" }}>
+                      <span className="inline-initial">
                         {name.charAt(0).toUpperCase()}
                       </span>
                       <div className="inline-message-body">
@@ -885,14 +918,19 @@ const LiveView = (props) => {
                 }
                 // Gift messages — orange gradient style
                 if (m.isGift) {
+                  const gd = m.giftData;
                   return (
-                    <div key={m.id || index} className={`inline-message inline-gift-message`}>
-                      <span className="inline-initial" style={{ background: "linear-gradient(135deg, #f75801, #d43400)" }}>🎁</span>
-                      <div className="inline-message-body">
-                        {m.sender && (
-                          <span className="inline-sender" style={{ color: "#f75801" }}>{m.sender}</span>
-                        )}
-                        <span className="inline-text">{m.text}</span>
+                    <div key={m.id || index} className="inline-message inline-gift-message">
+                      <span className="inline-initial" style={{ background: "linear-gradient(135deg, #f75801, #d43400)" }}>
+                        {(m.sender || "G").charAt(0).toUpperCase()}
+                      </span>
+                      <div className="gift-card-bubble">
+                        {gd?.giftImg && <img src={gd.giftImg} alt={gd?.giftName} className="gift-card-img" />}
+                        <div className="gift-card-info">
+                          <span className="gift-card-sender">{m.sender}</span>
+                          <span className="gift-card-label">sent {gd?.giftName || "a gift"}</span>
+                        </div>
+                        {gd?.price && <span className="gift-card-price">₹{gd.price}</span>}
                       </div>
                     </div>
                   );
@@ -977,7 +1015,13 @@ const LiveView = (props) => {
             socketRef={props.socketRef}
             roomId={props.channel}
             userId={userIdLocal}
-            userName={localStorage.getItem("shubhtalk_customer_name") || "User"}
+            userName={(() => {
+              const u = getUserFromStorage();
+              const first = u?.firstName || "";
+              const last = u?.lastName || "";
+              if (first && last && first.toLowerCase() !== last.toLowerCase()) return `${first} ${last}`;
+              return first || "User";
+            })()}
           />
           <SharePopup
             show={showSharePopup}
@@ -1003,7 +1047,7 @@ const LiveView = (props) => {
             <WaitingModal
               callRoomId={callRoomId}
               resetCallState={resetCallState}
-              connectionType="video"
+              connectionType={pendingCallType}
             />
           )}
 

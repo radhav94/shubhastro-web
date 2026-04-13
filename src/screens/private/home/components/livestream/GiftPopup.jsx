@@ -41,7 +41,7 @@ const GiftPopup = ({ show, onClose, giftList, astrologerId, astrologerName, sock
           if (user?.firstName && user?.lastName && user.firstName.toLowerCase() !== user.lastName.toLowerCase()) {
             senderName = `${user.firstName} ${user.lastName}`;
           } else {
-            senderName = user?.firstName || user?.phoneNumber || "User";
+            senderName = user?.firstName || "User";
           }
         }
 
