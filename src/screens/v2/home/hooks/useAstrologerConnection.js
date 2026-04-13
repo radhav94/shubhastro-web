@@ -31,7 +31,11 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
     setActiveCallRoomId,
     setActiveCall,
     activeCall,
+    pendingLiveCall,
   } = useCall();
+
+  const pendingLiveCallRef = useRef(null);
+  useEffect(() => { pendingLiveCallRef.current = pendingLiveCall; }, [pendingLiveCall]);
 
 
   // Restore waiting state from localStorage on mount
@@ -186,6 +190,11 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       isSwitch,
       ...rest
     }) => {
+      // If there's a pending live call, let CallContext handle it
+      if (pendingLiveCallRef.current) {
+        console.log("[NormalFlow] ⏭️ Skipping — pending live call exists, CallContext will handle");
+        return;
+      }
       console.log("[NormalFlow] ✅ call:accepted received");
       console.log("[NormalFlow]   → roomId:", roomId);
       console.log("[NormalFlow]   → type:", type);

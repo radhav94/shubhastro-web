@@ -1481,3 +1481,12 @@
 
 
 
+
+/* Override WaitingModal positioning when inside live stream right-action-bar */
+.live-waiting-override {
+  position: static !important;
+  bottom: auto !important;
+  left: auto !important;
+  transform: none !important;
+  animation: none !important;
+}

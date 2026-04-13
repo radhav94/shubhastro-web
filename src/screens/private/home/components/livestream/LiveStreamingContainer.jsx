@@ -32,7 +32,39 @@ const LiveStreamingContainer = ({ client }) => {
     ? "host"
     : "audience";
 
-  const live = useLiveStreaming(client, ROLE, channel, rejoinKey);
+  // Keyboard arrow navigation (ArrowUp = prev, ArrowDown = next)
+  useEffect(() => {
+    if (ROLE === "host" || !liveList || liveList.lives.length <= 1) return;
+
+    const handleKeyDown = (e) => {
+      if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        liveList.goPrevLive?.();
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        liveList.goNextLive?.();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [ROLE, liveList]);
+
+  // When viewer token returns "channel not found", silently remove and go next
+  const handleChannelNotFound = useCallback((deadChannel) => {
+    if (liveList) {
+      liveList.removeLive(deadChannel);
+      // Clear the channelId from URL so it doesn't retry the dead channel
+      if (window.location.pathname.includes(deadChannel)) {
+        navigate("/live", { replace: true });
+      }
+    }
+  }, [liveList, navigate]);
+
+  const live = useLiveStreaming(client, ROLE, channel, rejoinKey, {
+    onChannelNotFound: handleChannelNotFound,
+  });
 
   // Persist astrologer info in sessionStorage so refresh can restore it
   useEffect(() => {

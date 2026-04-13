@@ -23,11 +23,15 @@ export const CallProvider = ({ children }) => {
   const [openReview, setOpenReview] = useState(false);
   const [reviewData, setReviewData] = useState(null);
   const [isReconnecting, setIsReconnecting] = useState(false);
+  const [isMicOn, setIsMicOn] = useState(true);
+  const [isSpeakerOn, setIsSpeakerOn] = useState(true);
 
   const [waitingList, setWaitingList] = useState(false);
   const [callSeconds, setCallSeconds] = useState(0);
   const timerRef = useRef(null);
   const activeCallRef = useRef(null);
+  // Pending live call — persists across navigation when user leaves /live while waiting
+  const [pendingLiveCall, setPendingLiveCall] = useState(null);
   // Ref to always hold the latest callSeconds for use in closures (e.g. handleCallUpgrade)
   const callSecondsRef = useRef(0);
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
@@ -465,6 +469,65 @@ export const CallProvider = ({ children }) => {
   }, [userIdLocal]);
 
   /* ================= ATTEMPT RECONNECTION ON MOUNT ================= */
+
+  /* ================= PENDING LIVE CALL HANDLER ================= */
+  // When user leaves /live while waiting for a call, this listener picks up
+  // call:accepted / call:rejected / call:ended so the call isn't lost.
+  const pendingLiveCallRef = useRef(null);
+  useEffect(() => { pendingLiveCallRef.current = pendingLiveCall; }, [pendingLiveCall]);
+
+  useEffect(() => {
+    if (!userIdLocal) return;
+
+    const handlePendingAccepted = async ({ roomId, token: agoraToken, type, remainingTime }) => {
+      const pending = pendingLiveCallRef.current;
+      if (!pending || activeCallRef.current) return; // Only handle if no active call yet
+
+      setPendingLiveCall(null);
+
+      const astro = pending.astrologer;
+      if (!astro) return;
+
+      const astroId = astro._id || astro.astrologerId;
+
+      setActiveCall({
+        roomId,
+        agoraToken,
+        callerName: astro.astrologerName || astro.firstName || "Astrologer",
+        isUserSide: true,
+        callType: type,
+        userId: userIdLocal,
+        astrologerId: astroId,
+        astrologerID: astro?.astrologer_ID,
+        remainingTime,
+        origin: "live",
+        liveChannel: pending.liveChannel,
+      });
+      setIsCallMinimized(true);
+      setCallSeconds(Number(remainingTime) * 60);
+    };
+
+    const handlePendingRejected = () => {
+      if (!pendingLiveCallRef.current) return;
+      setPendingLiveCall(null);
+    };
+
+    const handlePendingEnded = () => {
+      if (!pendingLiveCallRef.current) return;
+      setPendingLiveCall(null);
+    };
+
+    voiceSocket.on("call:accepted", handlePendingAccepted);
+    voiceSocket.on("call:rejected", handlePendingRejected);
+    voiceSocket.on("call:ended", handlePendingEnded);
+
+    return () => {
+      voiceSocket.off("call:accepted", handlePendingAccepted);
+      voiceSocket.off("call:rejected", handlePendingRejected);
+      voiceSocket.off("call:ended", handlePendingEnded);
+    };
+  }, [userIdLocal]);
+
   useEffect(() => {
     if (RECONNECTION_ENABLED) {
       reconnectToCall();
@@ -532,6 +595,12 @@ export const CallProvider = ({ children }) => {
     stopTimer,
     resetTimer,
     resetCallFlow,
+    pendingLiveCall,
+    setPendingLiveCall,
+    isMicOn,
+    setIsMicOn,
+    isSpeakerOn,
+    setIsSpeakerOn,
   };
 
   return (

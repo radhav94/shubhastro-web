@@ -46,10 +46,30 @@ export const useReelScroll = ({
       }, lockTime);
     };
 
+    // Keyboard arrow navigation (ArrowDown = next, ArrowUp = prev)
+    const onKeyDown = (e) => {
+      if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
+      if (locked.current) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        locked.current = true;
+        onNext?.();
+        setTimeout(() => { locked.current = false; }, lockTime);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        locked.current = true;
+        onPrev?.();
+        setTimeout(() => { locked.current = false; }, lockTime);
+      }
+    };
+
     el.addEventListener("wheel", onWheel, { passive: false });
+    document.addEventListener("keydown", onKeyDown);
 
     return () => {
       el.removeEventListener("wheel", onWheel);
+      document.removeEventListener("keydown", onKeyDown);
     };
   }, [enabled, onNext, onPrev, lockTime, threshold, containerRef]);
 };

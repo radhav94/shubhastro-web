@@ -43,7 +43,7 @@ const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
 
 const VideoCalling = ({ callData }) => {
-  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, reconnectToCall, isCallMinimized, setIsCallMinimized,setWaitingList } = useCall();
+  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, reconnectToCall, isCallMinimized, setIsCallMinimized, setWaitingList, isMicOn, setIsMicOn, isSpeakerOn, setIsSpeakerOn } = useCall();
   const { activeChat } = useChatContext();
   const navigate = useNavigate();
   const location = useLocation();
@@ -71,11 +71,14 @@ const VideoCalling = ({ callData }) => {
 
   // Ref to always hold the latest activeCall so socket handlers never use stale closures
   const activeCallRef = useRef(activeCall);
+  const speakerOnRef = useRef(isSpeakerOn);
 
   const [joined, setJoined] = useState(false);
-  const [micOn, setMicOn] = useState(true);
+  const micOn = isMicOn;
+  const setMicOn = setIsMicOn;
   const [cameraOn, setCameraOn] = useState(true);
-  const [speakerOn, setSpeakerOn] = useState(true);
+  const speakerOn = isSpeakerOn;
+  const setSpeakerOn = setIsSpeakerOn;
   // Use context's isCallMinimized instead of local state
   const isMinimized = isCallMinimized;
   const setIsMinimized = setIsCallMinimized;
@@ -88,6 +91,13 @@ const VideoCalling = ({ callData }) => {
   const [remoteVideoEnabled, setRemoteVideoEnabled] = useState(true);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
+
+  // Auto-minimize when call originated from live and user is not on live page
+  useEffect(() => {
+    if (activeCall?.origin === "live" && !isOnLivePage && !isMinimized) {
+      setIsMinimized(true);
+    }
+  }, [activeCall?.origin, isOnLivePage, isMinimized, setIsMinimized]);
   const [suggestedRemedyData, setSuggestedRemedyData] = useState({ suggestedProducts: [], messages: [] });
   const [hasNewRemedy, setHasNewRemedy] = useState(false);
   const [showEndCallConfirm, setShowEndCallConfirm] = useState(false);
@@ -108,6 +118,10 @@ const VideoCalling = ({ callData }) => {
   useEffect(() => {
     activeCallRef.current = activeCall;
   }, [activeCall]);
+
+  useEffect(() => {
+    speakerOnRef.current = speakerOn;
+  }, [speakerOn]);
 
   // Default avatar URL
   const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
@@ -265,7 +279,7 @@ const VideoCalling = ({ callData }) => {
       if (user.audioTrack) {
         try {
           user.audioTrack.play();
-          user.audioTrack.setVolume(speakerOn ? 100 : 0);
+          user.audioTrack.setVolume(speakerOnRef.current ? 100 : 0);
         } catch (err) {
           console.error("Error playing audio:", err);
         }
@@ -316,7 +330,7 @@ const VideoCalling = ({ callData }) => {
 
             if (mediaType === "audio" && user.audioTrack) {
               user.audioTrack.play();
-              user.audioTrack.setVolume(speakerOn ? 100 : 0);
+              user.audioTrack.setVolume(speakerOnRef.current ? 100 : 0);
             }
           } catch (err) {
             console.error("Error handling published media:", err);
@@ -367,6 +381,8 @@ const VideoCalling = ({ callData }) => {
 
         micTrackRef.current = micTrack;
         camTrackRef.current = camTrack;
+        // Sync mic track with context mute state (persists across remounts)
+        micTrackRef.current.setEnabled(isMicOn);
 
         await client.join(APP_ID, roomId, agoraToken, null);
         console.log("[VideoCall] ✅ Agora joined — channel:", roomId);
@@ -571,7 +587,7 @@ const VideoCalling = ({ callData }) => {
       console.log("[VideoCall] 🔚 safeEndCall — roomId:", roomId, "activeCall:", currentCall ? { astrologerID: currentCall.astrologerID, callerName: currentCall.callerName } : "null");
 
       setReviewData({
-        astrologerID: currentCall?.astrologerID,
+        astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
         fullName: currentCall?.callerName || callerName,
         roomId,
       });
@@ -664,7 +680,7 @@ const VideoCalling = ({ callData }) => {
         console.log("[VideoCall] 📞 call:ended received — roomId:", roomId, "activeCall:", currentCall ? { astrologerID: currentCall.astrologerID, callerName: currentCall.callerName } : "null");
 
         setReviewData({
-          astrologerID: currentCall?.astrologerID,
+          astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
           fullName: currentCall?.callerName || callerName,
           roomId,
         });
@@ -1049,7 +1065,14 @@ const VideoCalling = ({ callData }) => {
           <span>
             {capitalizeWords(callerName) || "Video Call"} • {formatTime(callSeconds)}
           </span>
-          <button onClick={() => setIsMinimized(false)}>⤢</button>
+          <button onClick={() => {
+            if (activeCall?.origin === "live") {
+              const channel = activeCall.liveChannel;
+              navigate(channel ? `/live/${channel}` : "/live");
+            } else {
+              setIsMinimized(false);
+            }
+          }}>⤢</button>
         </div>
 
         <div className={styles.miniVideo}>

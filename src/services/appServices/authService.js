@@ -23,7 +23,9 @@ export const getAstrologerLiveList = async (data) => {
 
 export const getViewerToken = async (channel) => {
   return await privateRequest.post(
-    `users/live/token/viewer?channel=${channel}`
+    `users/live/token/viewer?channel=${channel}`,
+    {},
+    { skipToast: true }
   );
 };
 
