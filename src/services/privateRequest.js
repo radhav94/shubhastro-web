@@ -47,6 +47,11 @@ const clearToken = () => {
 };
 
 const responseErrorHandler = (error) => {
+  // Allow callers to suppress toast by passing { skipToast: true } in config
+  if (error.config?.skipToast) {
+    return Promise.reject(error);
+  }
+
   if (error.response) {
     const { status, data, message } = error.response;
     

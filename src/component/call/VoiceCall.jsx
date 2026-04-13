@@ -84,6 +84,13 @@ const AgoraVoiceCalling = ({ callData }) => {
   const speakerOn = isSpeakerOn;
   const setSpeakerOn = setIsSpeakerOn;
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
+
+  // Auto-minimize when call originated from live and user is not on live page
+  useEffect(() => {
+    if (activeCall?.origin === "live" && !isOnLivePage && !isMinimized) {
+      setIsMinimized(true);
+    }
+  }, [activeCall?.origin, isOnLivePage, isMinimized, setIsMinimized]);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
@@ -775,7 +782,14 @@ const AgoraVoiceCalling = ({ callData }) => {
             <span>
               {capitalizeWords(callerName)} • {joined ? formatTime(callSeconds) : "Calling…"}
             </span>
-            <button onClick={() => setIsMinimized(false)}>⤢</button>
+            <button onClick={() => {
+              if (activeCall?.origin === "live") {
+                const channel = activeCall.liveChannel;
+                navigate(channel ? `/live/${channel}` : "/live");
+              } else {
+                setIsMinimized(false);
+              }
+            }}>⤢</button>
           </div>
 
           <div className={styles.miniControls}>
