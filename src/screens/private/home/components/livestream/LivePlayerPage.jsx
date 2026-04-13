@@ -46,7 +46,7 @@ const LivePlayerPage = () => {
 
       console.log("mappppp", map);
 
-      let liveList = Object.values(map);
+      let liveList = Object.values(map).filter((l) => l.astrologer);
 
       // Determine which channel to auto-start on:
       // 1. URL param (direct link / new tab) — always a channel/room ID

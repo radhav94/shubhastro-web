@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import styles from "./HomeLayout.module.scss";
 import TopBar from "./topbar/TopBar";
 import TopHeader from "../component/TopHeader";
-import { Outlet, useMatches, useLocation } from "react-router-dom";
+import { Outlet, useMatches, useLocation, useNavigate } from "react-router-dom";
 import Divider from "../component/Divider";
 
 import { useIsMobile } from "../utils/hooks/useIsMobile";
@@ -15,11 +15,23 @@ import VideoCallContainer from "../component/call/VideoCallContainer";
 import StickyChatFooter from "../screens/private/home/components/chats/StickyChatFooter";
 import StickyCallFooter from "../screens/private/home/components/call/StickyCallFooter";
 import StickyReview from "../screens/private/home/components/call/StickyReview";
+import { useCall } from "../context/CallContext";
+import { voiceSocket } from "../services/voiceSocketServices";
+import WaitingModal from "../component/UI/modal/waitingModal/WaitingModal";
 
 const HomeLayout = () => {
   const isMobile = useIsMobile();
   const matches = useMatches();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { pendingLiveCall, setPendingLiveCall } = useCall();
+
+  const handleCancelPending = () => {
+    if (pendingLiveCall?.callRoomId) {
+      voiceSocket.emit("call:cancel", { roomId: pendingLiveCall.callRoomId, canceledBy: "CUSTOMER" });
+    }
+    setPendingLiveCall(null);
+  };
 
   const currentRoute = matches
     .reverse()
@@ -75,6 +87,16 @@ const HomeLayout = () => {
 
       {/* ✅ FLOATING CALL UI (IMPORTANT LINE) */}
       <VideoCallContainer />
+
+      {/* Pending live call waiting banner — shown outside /live */}
+      {pendingLiveCall && !isLivePage && (
+        <WaitingModal
+          callRoomId={pendingLiveCall.callRoomId}
+          resetCallState={handleCancelPending}
+          connectionType={pendingLiveCall.pendingCallType}
+          astrologerName={pendingLiveCall.astrologer?.astrologerName || pendingLiveCall.astrologer?.firstName}
+        />
+      )}
 
       <StickyChatFooter />
       <StickyCallFooter />
