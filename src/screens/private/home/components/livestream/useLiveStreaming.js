@@ -28,6 +28,8 @@ export const useLiveStreaming = (client, ROLE, channel, rejoinKey = 0, { onChann
   const [isReconnect, setIsReconnect] = useState(false);
   const [calling, setCalling] = useState(true);
   const [uid, setUid] = useState(null);
+  // When true, skip Agora leave on unmount (e.g. pending call waiting)
+  const skipCleanupRef = useRef(false);
 
   const [micOn, setMic] = useState(true);
   const [cameraOn, setCamera] = useState(true);
@@ -190,8 +192,10 @@ export const useLiveStreaming = (client, ROLE, channel, rejoinKey = 0, { onChann
 
     return () => {
       cancelled = true;
-      // Leave on cleanup (channel change or unmount)
-      leaveChannel();
+      // Leave on cleanup (channel change or unmount) — unless skipCleanup is set
+      if (!skipCleanupRef.current) {
+        leaveChannel();
+      }
     };
   }, [channel, client, ROLE, leaveChannel, rejoinKey]);
 
@@ -303,5 +307,6 @@ export const useLiveStreaming = (client, ROLE, channel, rejoinKey = 0, { onChann
     isReconnect,
     isHostMuted,
     handleLeave,
+    skipCleanupRef,
   };
 };

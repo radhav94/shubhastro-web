@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { LocalUser, RemoteUser } from "agora-rtc-react";
-import { IoMic, IoMicOff, IoCallSharp } from "react-icons/io5";
+import { IoMic, IoMicOff, IoCallSharp, IoHourglass } from "react-icons/io5";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
 import "./styles/videoBox.scss";
 import { useLiveViewLogic } from "./useLiveViewLogic";
@@ -66,6 +66,7 @@ const LiveView = (props) => {
   const [showGifts, setShowGifts] = useState(false);
   const [showCallPopup, setShowCallPopup] = useState(false);
   const [showWaitingModal, setShowWaitingModal] = useState(false);
+  const [showWaitingPopup, setShowWaitingPopup] = useState(true);
   const [pendingCallType, setPendingCallType] = useState("audio");
   const [roomEnded, setRoomEnded] = useState(false);
   const [wasRoomReady, setWasRoomReady] = useState(false);
@@ -136,6 +137,7 @@ const LiveView = (props) => {
     setLastCallType,
     isCallMinimized,
     setIsCallMinimized,
+    setPendingLiveCall,
   } = useCall();
 
   // Auto-minimize call if user is on live stream (handles page refresh)
@@ -163,6 +165,7 @@ const LiveView = (props) => {
   const [callRoomId, setCallRoomId] = useState(null);
   const [callWaitingList, setCallWaitingList] = useState(null);
   const astrologerRef = useRef(null);
+  const callingChannelRef = useRef(null);
   const prevMessageCountRef = useRef(0);
   
   const [createChatRoom] = useCreateChatRoomMutation();
@@ -379,6 +382,24 @@ const LiveView = (props) => {
     if (isHost) {
       setCalling(false);
     } else {
+      // If waiting for a call response, save pending state to context
+      // and navigate without disconnecting socket/Agora so the call isn't lost
+      if (showWaitingModal && astrologerRef.current) {
+        setPendingLiveCall({
+          astrologer: astrologerRef.current,
+          liveChannel: callingChannelRef.current || props.channel,
+          callRoomId,
+          pendingCallType,
+        });
+        setShowWaitingModal(false);
+        setShowWaitingPopup(false);
+        // Tell useLiveStreaming to skip Agora/socket cleanup on unmount
+        if (props.skipCleanupRef) props.skipCleanupRef.current = true;
+        if (props.skipChatCleanupRef) props.skipChatCleanupRef.current = true;
+        // Don't call handleLeave — keep socket alive so backend doesn't cancel the call
+        navigate(PATH.privateRoutes.HOME.path);
+        return;
+      }
       clearViewerSession();
       await handleLeave?.();
       navigate(PATH.privateRoutes.HOME.path);
@@ -443,6 +464,7 @@ const LiveView = (props) => {
     setLastCallType("audio");
     setPendingCallType("audio");
     astrologerRef.current = astrologer;
+    callingChannelRef.current = props.channel;
     localStorage.setItem("selectedAstroId", astrologerId);
 
     voiceSocket.emit("call:initiate", {
@@ -452,6 +474,7 @@ const LiveView = (props) => {
     });
 
     setShowWaitingModal(true);
+    setShowWaitingPopup(true);
     Toast.success("Voice call request sent");
   };
 
@@ -484,9 +507,11 @@ const LiveView = (props) => {
     setLastRequestedAstro(astrologer);
     setPendingCallType(type);
     astrologerRef.current = astrologer;
+    callingChannelRef.current = props.channel;
 
     // Show waiting modal
     setShowWaitingModal(true);
+    setShowWaitingPopup(true);
 
     // Emit socket event to initiate call
     voiceSocket.emit("call:initiate", {
@@ -562,6 +587,7 @@ const LiveView = (props) => {
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
       setShowWaitingModal(true);
+      setShowWaitingPopup(true);
     };
 
     const handleCallAccepted = async ({ roomId, token: agoraToken, type, remainingTime, isSwitch }) => {
@@ -583,7 +609,14 @@ const LiveView = (props) => {
       
       // Regular call acceptance
       setShowWaitingModal(false);
+      setShowWaitingPopup(false);
       resetCallFlow();
+
+      // Switch back to the astrologer's stream if user scrolled away
+      if (callingChannelRef.current && liveListCtx) {
+        liveListCtx.switchToChannel(callingChannelRef.current);
+      }
+
       const astro = astrologerRef.current;
       
       if (!astro) {
@@ -617,7 +650,7 @@ const LiveView = (props) => {
           astrologerID: astro?.astrologer_ID,
           remainingTime,
           origin: "live",
-          liveChannel: props.channel,
+          liveChannel: callingChannelRef.current || props.channel,
         });
         setIsCallMinimized(true);
         
@@ -1044,25 +1077,45 @@ const LiveView = (props) => {
             waitingList={callWaitingList}
           />
 
-          {/* Waiting Modal */}
-          {showWaitingModal && (
-            <WaitingModal
-              callRoomId={callRoomId}
-              resetCallState={resetCallState}
-              connectionType={pendingCallType}
-            />
-          )}
+          {/* Waiting indicator is now shown as icon in right-action-bar */}
 
           {/* NEW BOTTOM ACTION BAR - only show when astrologer is live */}
           {isAstrologerLive && (
           <div className="right-action-bar">
-            {/* Timer / Stopwatch - commented out, using host-info bar timer instead */}
-            {/* <button className="icon-btn">
-              <div className="icon-circle">
-                <img src={AppImages.LiveIcon} alt="Timer" width="28" height="28" />
+            {/* Waiting in queue icon — only when waiting */}
+            {showWaitingModal && !isHost && astrologerRef.current && (astrologerRef.current._id === astrologerId || astrologerRef.current.astrologerId === astrologerId) && (
+              <div className="icon-btn" style={{ position: "relative" }}>
+                <div
+                  className="icon-circle"
+                  style={{ cursor: "pointer", background: "#f75801" }}
+                  onClick={(e) => { e.stopPropagation(); setShowWaitingPopup((v) => !v); }}
+                >
+                  <IoHourglass size={20} color="#fff" />
+                </div>
+                {showWaitingPopup && (
+                  <>
+                    <div
+                      style={{ position: "fixed", inset: 0, zIndex: 99 }}
+                      onClick={() => setShowWaitingPopup(false)}
+                    />
+                    <div style={{
+                      position: "absolute",
+                      right: 50,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      zIndex: 567000,
+                    }}>
+                      <WaitingModal
+                        callRoomId={callRoomId}
+                        resetCallState={() => { setShowWaitingPopup(false); resetCallState(); }}
+                        connectionType={pendingCallType}
+                        className="live-waiting-override"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
-              <span className="icon-label">{liveDuration}</span>
-            </button> */}
+            )}
 
             {/* Viewers */}
             <div className="icon-btn viewer-icon-btn" style={{ cursor: "default" }}>

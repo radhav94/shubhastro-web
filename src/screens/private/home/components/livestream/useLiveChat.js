@@ -9,6 +9,8 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
   const socketRef = useRef(null);
   const currentRoomRef = useRef(null);
   const [roomReady, setRoomReady] = useState(false);
+  // When true, skip socket disconnect on unmount (pending call waiting)
+  const skipChatCleanupRef = useRef(false);
 
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
@@ -146,6 +148,10 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     });
 
     return () => {
+      if (skipChatCleanupRef.current) {
+        console.log("LiveChat → Skipping cleanup (pending call)");
+        return;
+      }
       // Leave current room before disconnecting
       if (currentRoomRef.current) {
         socket.emit("live:leave_room", {
@@ -214,6 +220,7 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
 
     return () => {
       socket.off("connect", joinRoom);
+      if (skipChatCleanupRef.current) return;
       if (currentRoomRef.current === roomId && socket.connected) {
         socket.emit("live:leave_room", { roomId, userId, userName });
         currentRoomRef.current = null;
@@ -280,5 +287,6 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     retryJoinRoom,
     liveStartedAt,
     socketRef,
+    skipChatCleanupRef,
   };
 };

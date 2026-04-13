@@ -1,7 +1,7 @@
 import { voiceSocket } from "../../../../services/voiceSocketServices";
 import styles from "./WaitingModal.module.scss";
 
-const WaitingModal = ({ callRoomId, resetCallState, connectionType, astrologerName }) => {
+const WaitingModal = ({ callRoomId, resetCallState, connectionType, astrologerName, className }) => {
   const handleCancel = () => {
     if (callRoomId) {
       if (connectionType === 'chat') {
@@ -19,7 +19,7 @@ const WaitingModal = ({ callRoomId, resetCallState, connectionType, astrologerNa
   const waitingTime = connectionType === 'chat' ? '2' : '5';
 
   return (
-    <div className={styles.modalOverlay} onClick={(e) => e.stopPropagation()}>
+    <div className={`${styles.modalOverlay} ${className || ''}`} onClick={(e) => e.stopPropagation()}>
       <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
         <span style={{ fontSize: '28px' }}>⏳</span>
         <div style={{ flex: 1 }}>
