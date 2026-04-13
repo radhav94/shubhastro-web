@@ -587,7 +587,7 @@ const VideoCalling = ({ callData }) => {
       console.log("[VideoCall] 🔚 safeEndCall — roomId:", roomId, "activeCall:", currentCall ? { astrologerID: currentCall.astrologerID, callerName: currentCall.callerName } : "null");
 
       setReviewData({
-        astrologerID: currentCall?.astrologerID,
+        astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
         fullName: currentCall?.callerName || callerName,
         roomId,
       });
@@ -680,7 +680,7 @@ const VideoCalling = ({ callData }) => {
         console.log("[VideoCall] 📞 call:ended received — roomId:", roomId, "activeCall:", currentCall ? { astrologerID: currentCall.astrologerID, callerName: currentCall.callerName } : "null");
 
         setReviewData({
-          astrologerID: currentCall?.astrologerID,
+          astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
           fullName: currentCall?.callerName || callerName,
           roomId,
         });
