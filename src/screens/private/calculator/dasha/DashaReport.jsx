@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useGetDashaRepQuery } from "../../../../redux/api/calculator/calcApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./DashaReport.module.scss";
+import CalcBackButton from "../CalcBackButton";
 
 const DashaReport = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const DashaReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       {/* HEADER */}
       <h2 className={styles.title}>
         {stored?.name

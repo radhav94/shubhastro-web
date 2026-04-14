@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useGetAtmakarakaQuery } from "../../../../redux/api/calculator/calcApi";
 import styles from "./AtmakarakaReport.module.scss";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcBackButton from "../CalcBackButton";
 
 const AtmakarakaReport = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const AtmakarakaReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       {/* HEADER */}
       <h2 className={styles.title}>{stored?.name}'s Karaka Analysis</h2>
       <p className={styles.subtitle}>Atmakaraka & Karaka Overview</p>

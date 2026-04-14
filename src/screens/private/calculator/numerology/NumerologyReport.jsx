@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useGetNumerologyReportQuery } from "../../../../redux/api/calculator/calcApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./NumerologyReport.module.scss";
+import CalcBackButton from "../CalcBackButton";
 
 const NumerologyReport = () => {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ const NumerologyReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       {/* HEADER */}
       <div className={styles.header}>
         <h2>{stored?.name}'s Numerology Report</h2>

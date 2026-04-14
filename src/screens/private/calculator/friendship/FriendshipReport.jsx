@@ -3,6 +3,7 @@ import { useFriendshipCalculatorMutation } from "../../../../redux/api/calculato
 import { useEffect } from "react";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./FriendshipReport.module.scss";
+import CalcBackButton from "../CalcBackButton";
 
 const FriendshipReport = () => {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const FriendshipReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       <div className={styles.card}>
         {/* HEADER */}
         <div className={styles.header}>

@@ -157,6 +157,7 @@ export const ShubhCalcApi = privateRequestNew.injectEndpoints({
       query: (payload) => ({
         url: "calculators/love",
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: {
           name1: payload.name1,
           gender1: payload.gender1,
@@ -171,6 +172,7 @@ export const ShubhCalcApi = privateRequestNew.injectEndpoints({
       query: (payload) => ({
         url: "calculators/flames",
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: {
           name1: payload.name1,
           name2: payload.name2,
@@ -183,6 +185,7 @@ export const ShubhCalcApi = privateRequestNew.injectEndpoints({
       query: (payload) => ({
         url: "calculators/friendship",
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: {
           name1: payload.name1,
           name2: payload.name2,
@@ -195,6 +198,7 @@ export const ShubhCalcApi = privateRequestNew.injectEndpoints({
       query: (payload) => ({
         url: "calculators/age",
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: {
           dob: payload.dob,
           asOf: payload.asOf,
@@ -207,6 +211,7 @@ export const ShubhCalcApi = privateRequestNew.injectEndpoints({
       query: (payload) => ({
         url: "calculators/mobile-numerology",
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: {
           dob: payload.dob,
           mobile: payload.mobile,
@@ -219,6 +224,7 @@ export const ShubhCalcApi = privateRequestNew.injectEndpoints({
       query: (payload) => ({
         url: "calculators/vehicle-numerology",
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: {
           dob: payload.dob,
           vehicle: payload.vehicle,

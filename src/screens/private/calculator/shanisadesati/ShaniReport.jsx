@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useGetSadeSatiReportQuery } from "../../../../redux/api/calculator/calcApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./ShaniReport.module.scss";
+import CalcBackButton from "../CalcBackButton";
 import { BsCheckCircleFill } from "react-icons/bs";
 
 const ShaniReport = () => {
@@ -25,6 +26,7 @@ const ShaniReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       {/* HEADER */}
       <div className={styles.header}>
         <h2>{stored?.name}'s Shani Sade Sati Report</h2>

@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useGetSunSignQuery } from "../../../../redux/api/calculator/calcApi";
 import styles from "./SunSignReport.module.scss";
+import CalcBackButton from "../CalcBackButton";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 const SunSignReport = () => {
@@ -16,6 +17,7 @@ const SunSignReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       {/* HEADER */}
       <h2 className={styles.title}>
         {stored?.name ? `${stored.name}'s Sun Sign Report` : "Sun Sign Report"}

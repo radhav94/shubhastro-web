@@ -3,6 +3,7 @@ import { useGetKaalSarpReportQuery } from "../../../../redux/api/calculator/calc
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./KaalSarpReport.module.scss";
 import { BsCheckCircleFill } from "react-icons/bs";
+import CalcBackButton from "../CalcBackButton";
 
 const KaalSarpReport = () => {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ const KaalSarpReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       {/* HEADER CARD */}
       <div className={styles.headerCard}>
         <h2>{stored?.name}'s Kaal Sarp Yog</h2>

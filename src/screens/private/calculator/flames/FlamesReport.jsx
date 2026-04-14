@@ -3,6 +3,7 @@ import { useFlamesCalculatorMutation } from "../../../../redux/api/calculator/ca
 import { useEffect } from "react";
 import styles from "./FlamesReport.module.scss";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcBackButton from "../CalcBackButton";
 
 const FlamesReport = () => {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const FlamesReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       <div className={styles.card}>
         <h3 className={styles.title}>FLAMES RESULT</h3>
 

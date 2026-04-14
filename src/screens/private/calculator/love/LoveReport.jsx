@@ -6,6 +6,7 @@ import { PrimaryText } from "../../../../component";
 import DividerWithImage from "../../../../component/UI/DividerWithImage";
 import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcBackButton from "../CalcBackButton";
 
 const LoveReport = () => {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ const LoveReport = () => {
 
   return (
     <div style={{ margin: "0 3rem" }}>
+      <CalcBackButton />
       <PrimaryText isCenter isSemiBold size_24>
         Love Calculator: Find Your Perfect Match and Discover True Love
       </PrimaryText>

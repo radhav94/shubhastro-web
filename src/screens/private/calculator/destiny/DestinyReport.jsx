@@ -3,6 +3,7 @@ import { useGetNumerologyReportQuery } from "../../../../redux/api/calculator/ca
 import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./DestinyReport.module.scss";
+import CalcBackButton from "../CalcBackButton";
 import DividerWithImage from "../../../../component/UI/DividerWithImage";
 import { PrimaryText } from "../../../../component";
 
@@ -19,6 +20,7 @@ const DestinyReport = () => {
 
   return (
     <div style={{ margin: "0 3rem" }}>
+      <CalcBackButton />
       <PrimaryText isCenter isSemiBold size_24>
         Destiny Number Calculator: Discover Your Life's Purpose
       </PrimaryText>

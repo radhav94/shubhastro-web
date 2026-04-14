@@ -1,0 +1,48 @@
+.calcBackBar {
+  position: fixed;
+  top: 95px;
+  left: 0;
+  width: 100%;
+  z-index: 50;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 10px 16px;
+  box-sizing: border-box;
+
+  @media (max-width: 1180px) {
+    top: 53px;
+  }
+}
+
+.backBtn {
+  background: rgb(255, 244, 236);
+  border: 1px solid #D43400;
+  color: #D43400;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  transition: all 0.2s ease;
+
+  @media (max-width: 767px) {
+    width: 36px;
+    height: 36px;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.spacer {
+  height: 70px;
+
+  @media (max-width: 767px) {
+    height: 60px;
+  }
+}

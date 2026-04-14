@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useGetRisingSignQuery } from "../../../../redux/api/calculator/calcApi";
 import styles from "./RisingSignReport.module.scss";
+import CalcBackButton from "../CalcBackButton";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 const RisingSignReport = () => {
@@ -16,6 +17,7 @@ const RisingSignReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       {/* HEADER */}
       <h2 className={styles.title}>
         {stored?.name

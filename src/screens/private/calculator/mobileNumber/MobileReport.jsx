@@ -3,6 +3,7 @@ import { useMobileNumerologyCalculatorMutation } from "../../../../redux/api/cal
 import { useEffect } from "react";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./MobileReport.module.scss";
+import CalcBackButton from "../CalcBackButton";
 
 const MobileReport = () => {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const MobileReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       {/* HEADER */}
       <div className={styles.header}>
         <h2>✨ Lucky Mobile Number Analysis</h2>
