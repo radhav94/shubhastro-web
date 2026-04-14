@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useDispatch } from "react-redux";
 import styles from "./KundliSelectModal.module.scss";
 import { IoClose } from "react-icons/io5";
+import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { padZero } from "../../../../utils/dateFormat/dateTime";
 import Toast from "../../../../component/toast";
@@ -443,24 +444,41 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
 
                 <div className={styles.formGroup}>
                   <label>Birth Date</label>
-                  <input
-                    type="date"
-                    value={form.birthDate}
-                    onChange={(e) =>
-                      setForm({ ...form, birthDate: e.target.value })
-                    }
-                    required
+                  {/* <input type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} required /> */}
+                  <DateTimePicker
+                    mode="date"
+                    selected={form.birthDate ? new Date(form.birthDate) : null}
+                    onChange={(date) => {
+                      if (date) {
+                        const yyyy = date.getFullYear();
+                        const mm = String(date.getMonth() + 1).padStart(2, "0");
+                        const dd = String(date.getDate()).padStart(2, "0");
+                        setForm({ ...form, birthDate: `${yyyy}-${mm}-${dd}` });
+                      } else {
+                        setForm({ ...form, birthDate: "" });
+                      }
+                    }}
+                    maxDate={new Date()}
+                    placeholder="DD/MM/YYYY"
                   />
                 </div>
 
                 <div className={styles.formGroup}>
                   <label>Birth Time</label>
-                  <input
-                    type="time"
-                    value={form.birthTime}
-                    onChange={(e) =>
-                      setForm({ ...form, birthTime: e.target.value })
-                    }
+                  {/* <input type="time" value={form.birthTime} onChange={(e) => setForm({ ...form, birthTime: e.target.value })} disabled={form.unknownBirthTime} /> */}
+                  <DateTimePicker
+                    mode="time"
+                    selected={form.birthTime ? (() => { const [h, m] = form.birthTime.split(":"); const d = new Date(); d.setHours(h, m, 0, 0); return d; })() : null}
+                    onChange={(date) => {
+                      if (date) {
+                        const hh = String(date.getHours()).padStart(2, "0");
+                        const mm = String(date.getMinutes()).padStart(2, "0");
+                        setForm({ ...form, birthTime: `${hh}:${mm}` });
+                      } else {
+                        setForm({ ...form, birthTime: "" });
+                      }
+                    }}
+                    placeholder="Select time"
                     disabled={form.unknownBirthTime}
                   />
                   <label className={styles.checkboxLabel}>

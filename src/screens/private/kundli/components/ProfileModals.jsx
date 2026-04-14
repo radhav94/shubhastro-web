@@ -1,5 +1,6 @@
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import styles from "./ProfileModals.module.scss";
+import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 
 const ProfileModals = ({
     showSelectProfile,
@@ -163,20 +164,41 @@ const ProfileModals = ({
 
                                 <div className={styles.formGroup}>
                                     <label>Birth Date</label>
-                                    <input
-                                        type="date"
-                                        value={formData.birthDate}
-                                        onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-                                        required
+                                    {/* <input type="date" value={formData.birthDate} onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })} required /> */}
+                                    <DateTimePicker
+                                        mode="date"
+                                        selected={formData.birthDate ? new Date(formData.birthDate) : null}
+                                        onChange={(date) => {
+                                            if (date) {
+                                                const yyyy = date.getFullYear();
+                                                const mm = String(date.getMonth() + 1).padStart(2, "0");
+                                                const dd = String(date.getDate()).padStart(2, "0");
+                                                setFormData({ ...formData, birthDate: `${yyyy}-${mm}-${dd}` });
+                                            } else {
+                                                setFormData({ ...formData, birthDate: "" });
+                                            }
+                                        }}
+                                        maxDate={new Date()}
+                                        placeholder="DD/MM/YYYY"
                                     />
                                 </div>
 
                                 <div className={styles.formGroup}>
                                     <label>Birth Time</label>
-                                    <input
-                                        type="time"
-                                        value={formData.birthTime}
-                                        onChange={(e) => setFormData({ ...formData, birthTime: e.target.value })}
+                                    {/* <input type="time" value={formData.birthTime} onChange={(e) => setFormData({ ...formData, birthTime: e.target.value })} disabled={formData.unknownBirthTime} /> */}
+                                    <DateTimePicker
+                                        mode="time"
+                                        selected={formData.birthTime ? (() => { const [h, m] = formData.birthTime.split(":"); const d = new Date(); d.setHours(h, m, 0, 0); return d; })() : null}
+                                        onChange={(date) => {
+                                            if (date) {
+                                                const hh = String(date.getHours()).padStart(2, "0");
+                                                const mm = String(date.getMinutes()).padStart(2, "0");
+                                                setFormData({ ...formData, birthTime: `${hh}:${mm}` });
+                                            } else {
+                                                setFormData({ ...formData, birthTime: "" });
+                                            }
+                                        }}
+                                        placeholder="Select time"
                                         disabled={formData.unknownBirthTime}
                                     />
                                     <label className={styles.checkboxLabel}>
@@ -280,20 +302,41 @@ const ProfileModals = ({
 
                                 <div className={styles.formGroup}>
                                     <label>Birth Date</label>
-                                    <input
-                                        type="date"
-                                        value={editFormData.birthDate}
-                                        onChange={(e) => setEditFormData({ ...editFormData, birthDate: e.target.value })}
-                                        required
+                                    {/* <input type="date" value={editFormData.birthDate} onChange={(e) => setEditFormData({ ...editFormData, birthDate: e.target.value })} required /> */}
+                                    <DateTimePicker
+                                        mode="date"
+                                        selected={editFormData.birthDate ? new Date(editFormData.birthDate) : null}
+                                        onChange={(date) => {
+                                            if (date) {
+                                                const yyyy = date.getFullYear();
+                                                const mm = String(date.getMonth() + 1).padStart(2, "0");
+                                                const dd = String(date.getDate()).padStart(2, "0");
+                                                setEditFormData({ ...editFormData, birthDate: `${yyyy}-${mm}-${dd}` });
+                                            } else {
+                                                setEditFormData({ ...editFormData, birthDate: "" });
+                                            }
+                                        }}
+                                        maxDate={new Date()}
+                                        placeholder="DD/MM/YYYY"
                                     />
                                 </div>
 
                                 <div className={styles.formGroup}>
                                     <label>Birth Time</label>
-                                    <input
-                                        type="time"
-                                        value={editFormData.birthTime}
-                                        onChange={(e) => setEditFormData({ ...editFormData, birthTime: e.target.value })}
+                                    {/* <input type="time" value={editFormData.birthTime} onChange={(e) => setEditFormData({ ...editFormData, birthTime: e.target.value })} disabled={editFormData.unknownBirthTime} /> */}
+                                    <DateTimePicker
+                                        mode="time"
+                                        selected={editFormData.birthTime ? (() => { const [h, m] = editFormData.birthTime.split(":"); const d = new Date(); d.setHours(h, m, 0, 0); return d; })() : null}
+                                        onChange={(date) => {
+                                            if (date) {
+                                                const hh = String(date.getHours()).padStart(2, "0");
+                                                const mm = String(date.getMinutes()).padStart(2, "0");
+                                                setEditFormData({ ...editFormData, birthTime: `${hh}:${mm}` });
+                                            } else {
+                                                setEditFormData({ ...editFormData, birthTime: "" });
+                                            }
+                                        }}
+                                        placeholder="Select time"
                                         disabled={editFormData.unknownBirthTime}
                                     />
                                     <label className={styles.checkboxLabel}>

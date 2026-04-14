@@ -6,6 +6,7 @@ import PrimaryText from "../../../PrimaryText";
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import ErrorText from "../../../ErrorText";
 import { appColors } from "../../../../utils/theme";
+import DateTimePicker from "../../dateTimePicker/DateTimePicker";
 
 const PanchangInputCard = ({ imageSrc, title, onTap, initialDate, initialLocation, initialLatitude, initialLongitude }) => {
   const [formData, setFormData] = useState({
@@ -89,7 +90,7 @@ const PanchangInputCard = ({ imageSrc, title, onTap, initialDate, initialLocatio
               <label htmlFor="dateOfBirth" className={styles.label}>
                 Date <span className={styles.requiredMark}>*</span>
               </label>
-              <input
+              {/* <input
                 id="dateOfBirth"
                 name="dateOfBirth"
                 type="date"
@@ -98,12 +99,25 @@ const PanchangInputCard = ({ imageSrc, title, onTap, initialDate, initialLocatio
                 value={formData.dateOfBirth}
                 onChange={handleInputChange}
                 onClick={(e) => {
-                  // Manually show date picker
                   if (e.target.showPicker) {
                     e.target.showPicker();
                   }
                 }}
-                // max={new Date().toISOString().split("T")[0]}
+              /> */}
+              <DateTimePicker
+                mode="date"
+                selected={formData.dateOfBirth ? new Date(formData.dateOfBirth) : null}
+                onChange={(date) => {
+                  if (date) {
+                    const yyyy = date.getFullYear();
+                    const mm = String(date.getMonth() + 1).padStart(2, "0");
+                    const dd = String(date.getDate()).padStart(2, "0");
+                    setFormData((prev) => ({ ...prev, dateOfBirth: `${yyyy}-${mm}-${dd}` }));
+                  } else {
+                    setFormData((prev) => ({ ...prev, dateOfBirth: "" }));
+                  }
+                }}
+                placeholder="dd/mm/yyyy"
               />
               {errors.dateOfBirth && (
                 <ErrorText>{errors.dateOfBirth}</ErrorText>

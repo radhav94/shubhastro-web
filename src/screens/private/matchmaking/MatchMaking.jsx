@@ -5,6 +5,7 @@ import styles from "./MatchMaking.module.scss";
 import PrimaryText from "../../../component/PrimaryText";
 import { PATH } from "../../../utils/routes/Paths";
 import SavedKundliList from "../../../component/UI/Form/SavedKundliList";
+import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
 import {
   useCreateKundliMutation,
   useDeleteKundliMutation,
@@ -273,13 +274,22 @@ const MatchMaking = () => {
           {/* DOB */}
           <div className={styles.formGroup}>
             <label>Date of Birth*</label>
-            <input
-              type="date"
-              value={data.dob}
-              onChange={(e) => handleChange(personKey, "dob", e.target.value)}
-              onClick={(e) => e.target.showPicker?.()}
-              className={err.dob ? styles.inputError : ""}
-              max={today}
+            {/* <input type="date" value={data.dob} onChange={(e) => handleChange(personKey, "dob", e.target.value)} onClick={(e) => e.target.showPicker?.()} className={err.dob ? styles.inputError : ""} max={today} /> */}
+            <DateTimePicker
+              mode="date"
+              selected={data.dob ? new Date(data.dob) : null}
+              onChange={(date) => {
+                if (date) {
+                  const yyyy = date.getFullYear();
+                  const mm = String(date.getMonth() + 1).padStart(2, "0");
+                  const dd = String(date.getDate()).padStart(2, "0");
+                  handleChange(personKey, "dob", `${yyyy}-${mm}-${dd}`);
+                } else {
+                  handleChange(personKey, "dob", "");
+                }
+              }}
+              maxDate={new Date()}
+              placeholder="DD/MM/YYYY"
             />
             {err.dob && <p className={styles.error}>{err.dob}</p>}
           </div>
@@ -287,12 +297,20 @@ const MatchMaking = () => {
           {/* TOB */}
           <div className={styles.formGroup}>
             <label>Time of Birth*</label>
-            <input
-              type="time"
-              value={data.tob}
-              onChange={(e) => handleChange(personKey, "tob", e.target.value)}
-              onClick={(e) => e.target.showPicker?.()}
-              className={err.tob ? styles.inputError : ""}
+            {/* <input type="time" value={data.tob} onChange={(e) => handleChange(personKey, "tob", e.target.value)} onClick={(e) => e.target.showPicker?.()} className={err.tob ? styles.inputError : ""} /> */}
+            <DateTimePicker
+              mode="time"
+              selected={data.tob ? (() => { const [h, m] = data.tob.split(":"); const d = new Date(); d.setHours(h, m, 0, 0); return d; })() : null}
+              onChange={(date) => {
+                if (date) {
+                  const hh = String(date.getHours()).padStart(2, "0");
+                  const mm = String(date.getMinutes()).padStart(2, "0");
+                  handleChange(personKey, "tob", `${hh}:${mm}`);
+                } else {
+                  handleChange(personKey, "tob", "");
+                }
+              }}
+              placeholder="Select time"
             />
             {err.tob && <p className={styles.error}>{err.tob}</p>}
           </div>

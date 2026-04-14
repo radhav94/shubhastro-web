@@ -3,6 +3,7 @@ import * as Yup from "yup";
 import styles from "./Onboarding.module.scss";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
+import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -90,16 +91,32 @@ const BirthDetailsScreen = ({
 
             <div className={styles.formGroup}>
               <label>Birth Date<span className={styles.required}>*</span></label>
-              {/* <div className={`${styles.inputWrapper} ${touched.birthDate && errors.birthDate ? styles.error : ""}`}> */}
-                <Field
-                  type="date"
-                  name="birthDate"
-                  className={`${styles.input} ${styles.iosFix}`}
-                  placeholder="DD/MM/YYYY"
-                  onClick={(e) => e.target.showPicker?.()}
-                  max={new Date().toISOString().split('T')[0]}
-                />
-              {/* </div> */}
+              {/* Old native date input */}
+              {/* <Field
+                type="date"
+                name="birthDate"
+                className={`${styles.input} ${styles.iosFix}`}
+                placeholder="DD/MM/YYYY"
+                onClick={(e) => e.target.showPicker?.()}
+                max={new Date().toISOString().split('T')[0]}
+              /> */}
+              <DateTimePicker
+                mode="date"
+                selected={values.birthDate ? new Date(values.birthDate) : null}
+                onChange={(date) => {
+                  if (date) {
+                    const yyyy = date.getFullYear();
+                    const mm = String(date.getMonth() + 1).padStart(2, "0");
+                    const dd = String(date.getDate()).padStart(2, "0");
+                    setFieldValue("birthDate", `${yyyy}-${mm}-${dd}`);
+                  } else {
+                    setFieldValue("birthDate", "");
+                  }
+                  setFieldTouched("birthDate", true);
+                }}
+                maxDate={new Date()}
+                placeholder="DD/MM/YYYY"
+              />
               <ErrorMessage name="birthDate">
                 {(msg) => <span className={styles.errorText}>{msg}</span>}
               </ErrorMessage>
@@ -107,7 +124,8 @@ const BirthDetailsScreen = ({
 
             <div className={styles.formGroup}>
               <label>Birth Time</label>
-              <div className={styles.inputWrapper}>
+              {/* Old native time input */}
+              {/* <div className={styles.inputWrapper}>
                 <Field
                   type="time"
                   name="birthTime"
@@ -116,8 +134,22 @@ const BirthDetailsScreen = ({
                   placeholder="Select here"
                   disabled={values.unknownBirthTime}
                 />
-                {/* <Clock className={styles.inputIcon} size={20} /> */}
-              </div>
+              </div> */}
+              <DateTimePicker
+                mode="time"
+                selected={values.birthTime ? (() => { const [h, m] = values.birthTime.split(":"); const d = new Date(); d.setHours(h, m, 0, 0); return d; })() : null}
+                onChange={(date) => {
+                  if (date) {
+                    const hh = String(date.getHours()).padStart(2, "0");
+                    const mm = String(date.getMinutes()).padStart(2, "0");
+                    setFieldValue("birthTime", `${hh}:${mm}`);
+                  } else {
+                    setFieldValue("birthTime", "");
+                  }
+                }}
+                placeholder="Select time"
+                disabled={values.unknownBirthTime}
+              />
               <div className={styles.checkboxContainer}>
                 <label className={styles.checkboxLabel}>
                   <Field

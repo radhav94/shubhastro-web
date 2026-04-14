@@ -5,6 +5,7 @@ import LocationSearch from "../../../utils/location/locationSearchVedic";
 import styles from "./AddProfileModal.module.scss";
 import { Toast } from "../../index";
 import { relationOption } from "../../../utils/constanats/appData";
+import DateTimePicker from "../dateTimePicker/DateTimePicker";
 
 const EditProfileModal = ({
   isOpen,
@@ -285,22 +286,43 @@ const EditProfileModal = ({
 
                 <div className={styles.formGroup}>
                   <label>Birth Date <span className={styles.required}>*</span></label>
-                  <Field
-                    type="date"
-                    name="birthDate"
-                    max={new Date().toISOString().split("T")[0]}
-                    onClick={(e) => e.target.showPicker?.()}
+                  {/* <Field type="date" name="birthDate" max={new Date().toISOString().split("T")[0]} onClick={(e) => e.target.showPicker?.()} /> */}
+                  <DateTimePicker
+                    mode="date"
+                    selected={values.birthDate ? new Date(values.birthDate) : null}
+                    onChange={(date) => {
+                      if (date) {
+                        const yyyy = date.getFullYear();
+                        const mm = String(date.getMonth() + 1).padStart(2, "0");
+                        const dd = String(date.getDate()).padStart(2, "0");
+                        setFieldValue("birthDate", `${yyyy}-${mm}-${dd}`);
+                      } else {
+                        setFieldValue("birthDate", "");
+                      }
+                    }}
+                    maxDate={new Date()}
+                    placeholder="DD/MM/YYYY"
                   />
                   <ErrorMessage name="birthDate" component="div" className={styles.errorText} />
                 </div>
 
                 <div className={styles.formGroup}>
                   <label>Birth Time <span className={styles.required}>*</span></label>
-                  <Field
-                    type="time"
-                    name="birthTime"
+                  {/* <Field type="time" name="birthTime" disabled={values.unknownBirthTime} onClick={(e) => !values.unknownBirthTime && e.target.showPicker?.()} /> */}
+                  <DateTimePicker
+                    mode="time"
+                    selected={values.birthTime ? (() => { const [h, m] = values.birthTime.split(":"); const d = new Date(); d.setHours(h, m, 0, 0); return d; })() : null}
+                    onChange={(date) => {
+                      if (date) {
+                        const hh = String(date.getHours()).padStart(2, "0");
+                        const mm = String(date.getMinutes()).padStart(2, "0");
+                        setFieldValue("birthTime", `${hh}:${mm}`);
+                      } else {
+                        setFieldValue("birthTime", "");
+                      }
+                    }}
+                    placeholder="Select time"
                     disabled={values.unknownBirthTime}
-                    onClick={(e) => !values.unknownBirthTime && e.target.showPicker?.()}
                   />
                   <ErrorMessage name="birthTime" component="div" className={styles.errorText} />
                   <label className={styles.checkboxLabel}>
