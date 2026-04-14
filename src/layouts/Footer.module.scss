@@ -1,208 +1,364 @@
-// --- Global Fixes (Important) ---
-html,
-body {
-  margin: 0;
-  padding: 0;
-  // overflow-x: hidden; // Prevents right side white gap
-}
-
-// --- Design System Variables ---
-$color-dark-blue: #0f0c29;
-$color-deep-purple: #302b63;
-$color-night-sky: #24243e;
-$color-gold: #e74c3c;
+// ============================================================
+// DESIGN SYSTEM VARIABLES (shared by old + new)
+// ============================================================
+$color-dark-bg: #111111;
+$color-accent: #F75801;
 $color-light-text: #e0e0e0;
 $color-grey-text: #a0a0b0;
+$color-white: #ffffff;
+$color-link: #cccccc;
+$color-link-hover: #F75801;
 $font-primary: "Poppins", sans-serif;
 
-// --- Mixins for Reusability ---
-@mixin flex-center($direction: row) {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: $direction;
-}
+// ============================================================
+// OLD FOOTER STYLES (commented out — preserved for reference)
+// ============================================================
+// .footer_main {
+//   display: grid;
+//   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+//   gap: 30px;
+//   text-align: left;
+//   padding: 40px 16px;
+//   max-width: 1200px;
+//   margin: 0 auto;
+//   @media (width <= 768px) { text-align: center; gap: 40px; }
+// }
+// .footer_column {
+//   h3.column_title { color: #FEFEFE; font-size: 16px; margin-bottom: 15px; font-weight: 600; }
+//   ul { list-style: none; padding: 0; margin: 0;
+//     li { padding-block: 10px;
+//       a { color: #fff; text-decoration: none; transition: color 0.3s ease; font-size: 14px;
+//         &:hover { color: #FEFEFE; padding-left: 5px; }
+//       }
+//     }
+//   }
+// }
+// .footer_logo { width: 220px; margin: 0 0 15px 0; }
+// .footer_tagline { color: #fff; line-height: 1.6; margin-bottom: 20px; }
+// .support_link { color: #fff; text-decoration: none; &:hover { color: #FEFEFE; } }
+// .social_icons { display: flex; gap: 15px;
+//   a { color: #fff; font-size: 22px; transition: color 0.3s ease, transform 0.3s ease;
+//     &:hover { color: #FEFEFE; transform: translateY(-3px); }
+//   }
+// }
+// .column_title { ... }
+// .footer_top { ... }
+// .footer_grid { ... }
+// .contact_text { ... }
+// .chat_link { ... }
+// .secure_section { ... }
+// .secure_text { ... }
+// ============================================================
+// END OLD FOOTER STYLES
+// ============================================================
 
-// --- Main Footer Styling ---
+// ============================================================
+// NEW FOOTER STYLES (v2_ prefix — Astrotalk-style redesign)
+// ============================================================
+
+// --- Main wrapper ---
 .footer {
-  background: #030303;
+  background: $color-dark-bg;
   color: $color-light-text;
   font-family: $font-primary;
-  // padding: 40px 0 0 0;
   width: 100%;
   position: relative;
   font-size: 14px;
 }
 
-.container {
-  margin: 0 auto;
-  padding: 16px 16px 0;
-  @media (min-width: 768px) {
-    padding: 0 32px;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-  @media (min-width: 1024px) {
-    padding: 0 48px;
-    max-width: 1600px;
-  }
-  @media (min-width: 1400px) {
-    padding: 0 64px;
-    max-width: 1800px;
-  }
-}
-
-.footer_main {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 30px;
-  text-align: left;
-  padding: 40px 16px;
+// --- Top: Logo + Description ---
+.v2_top {
   max-width: 1200px;
   margin: 0 auto;
-  @media (width <= 768px) {
-    text-align: center;
-    gap: 40px;
-  }
-  @media (width <= 767px) {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  padding: 40px 16px 16px;
+}
+
+.v2_logo {
+  width: 200px;
+  margin-bottom: 14px;
+}
+
+.v2_tagline {
+  color: $color-grey-text;
+  font-size: 13px;
+  line-height: 1.75;
+  max-width: 920px;
+  margin: 0;
+}
+
+// --- Subtle divider between top and grid ---
+.v2_divider {
+  max-width: calc(1200px - 32px);
+  margin: 0 auto;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  // margin-left: 24px;
+  // margin-right: 24px;
+}
+
+// --- Multi-column grid ---
+.v2_grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) 2fr;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 16px 16px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-.footer_column {
-  h3.column_title {
-    color: #FEFEFE;
-    font-size: 16px;
-    margin-bottom: 15px;
-    font-weight: 600;
-  }
-
+// --- Column ---
+.v2_column {
   ul {
     list-style: none;
     padding: 0;
     margin: 0;
 
     li {
-      padding-block: 10px;
-      @media (width <= 767px) {
-        padding-block: 5px;
-      }
+      padding: 4.5px 0;
 
       a {
-        color: #fff;
+        color: $color-link;
         text-decoration: none;
-        transition: color 0.3s ease, padding-left 0.3s ease;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 400;
+        transition: color 0.2s ease, padding-left 0.2s ease;
 
         &:hover {
-          color: #FEFEFE;
-          padding-left: 5px;
+          color: $color-link-hover;
+          padding-left: 4px;
         }
       }
     }
   }
 }
 
-.logout {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  color: #a0a0b0;
-  text-decoration: none;
-  font-size: 11px;
-  padding: 5px;
-  transition: color 0.3s ease;
-  cursor: pointer;
-  &:hover {
-    color: white;
-    padding-left: 5px;
+.v2_columnWide {
+  @media (max-width: 1100px) {
+    grid-column: auto;
   }
 }
 
-.footer_logo {
-  width: 220px;
-  margin: 0 0 15px 0;
-  @media screen and (width <= 767px) {
-    margin: 0 auto 30px auto;
-  }
+// --- Section headings with left border accent ---
+.v2_heading {
+  color: $color-white;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 10px;
+  padding-left: 10px;
+  position: relative;
+  display: block;
+  border-left: 3px solid $color-accent;
 }
 
-// .footer_column:nth-child(2),.footer_column:nth-child(3),.footer_column:nth-child(4){
-//   @media screen and (width <= 767px) {
-//     width: 50%;
-//   }
-// }
+.v2_heading_sub {
+  margin-top: 22px;
+}
 
-.footer_tagline,
-.footer_column p {
-  color: #fff;
+// --- Contact column ---
+.v2_contactText {
+  color: $color-grey-text;
+  font-size: 13px;
   line-height: 1.6;
-  margin-bottom: 20px;
+  margin: 6px 0 4px;
 }
 
-.support_link {
-  color: #fff;
+.v2_phoneLink {
+  color: $color-white;
+  font-size: 13px;
+  font-weight: 500;
   text-decoration: none;
+  display: inline-block;
+  margin-bottom: 4px;
+  transition: color 0.2s ease;
 
   &:hover {
-    color: #FEFEFE;
+    color: $color-link-hover;
   }
 }
 
-.social_icons {
+.v2_chatLink {
+  color: $color-accent;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-block;
+  margin-bottom: 12px;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: lighten($color-accent, 12%);
+  }
+}
+
+.v2_emailLink {
+  color: $color-link;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $color-link-hover;
+  }
+}
+
+// --- Social icons ---
+.v2_socialIcons {
   display: flex;
-  gap: 15px;
+  gap: 16px;
+  margin-top: 16px;
 
   a {
-    color: #fff;
-    font-size: 22px;
-    transition: color 0.3s ease, transform 0.3s ease;
+    color: $color-white;
+    font-size: 20px;
+    transition: color 0.2s ease;
 
     &:hover {
-      color: #FEFEFE;
-      transform: translateY(-3px);
+      color: $color-accent;
     }
   }
 }
 
-// --- Footer Bottom Bar ---
-.footerOuter{
+// --- Store buttons ---
+.v2_storeButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  flex-direction: row;
+}
+
+.v2_storeBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  color: $color-white;
+  text-decoration: none;
+  background: transparent;
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: $color-accent;
+  }
+
+  svg {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 8px 14px;
+    gap: 8px;
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+.v2_storeInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.v2_storeLabel {
+  font-size: 10px;
+  color: $color-grey-text;
+  line-height: 1.2;
+  letter-spacing: 0.3px;
+}
+
+.v2_storeName {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+// --- Mobile accordion footer ---
+.v2_mobileFooter {
+  display: none;
+  padding: 0 16px 24px;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+}
+
+// Hide desktop grid on mobile
+.v2_grid {
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+// --- Accordion ---
+.v2_accordionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  user-select: none;
+
+  .v2_heading {
+    margin: 0;
+  }
+}
+
+.v2_accordionIcon {
+  color: $color-white;
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.v2_accordionBody {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+
+  ul {
+    padding: 8px 0 12px;
+  }
+}
+
+.v2_accordionOpen {
+  max-height: 500px;
+}
+
+// --- Bottom bar ---
+.v2_bottomOuter {
   width: 100%;
   background-color: #1E2939;
-  border-top: 1px solid rgba($color-night-sky, 0.5);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
-.footer_bottom {
-  
+
+.v2_bottomBar {
   padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 12px;
   font-size: 13px;
   color: $color-grey-text;
   max-width: 1200px;
   margin: 0 auto;
 
-  // @media (width <= 768px) {
-  //   padding: 16px 32px;
-  //   max-width: 1400px;
-  //   margin: 0 auto;
-  // }
-  // @media (width <= 1024px) {
-  //   padding: 16px 48px;
-  //   max-width: 1600px;
-  // }
-  // @media (width <= 1400px) {
-  //   padding: 16px 64px;
-  //   max-width: 1800px;
-  // }
+  p {
+    margin: 0;
+  }
 
   ul {
     display: flex;
-    gap: 25px;
+    gap: 24px;
     list-style: none;
     padding: 0;
     margin: 0;
@@ -210,300 +366,16 @@ $font-primary: "Poppins", sans-serif;
     a {
       color: $color-grey-text;
       text-decoration: none;
+      transition: color 0.2s ease;
 
       &:hover {
-        color: $color-gold;
+        color: $color-accent;
       }
     }
   }
-}
 
-// --- Sticky PWA / Mobile Footer ---
-.pwa_footer {
-  display: none; // Hidden on desktop
-}
-
-// --- Responsive Breakpoints ---
-@media screen and (max-width: 768px) {
-
-  // .footer_main {
-  //   text-align: center;
-  //   gap: 40px;
-  // }
-
-  .social_icons {
-    justify-content: center;
-  }
-
-  .footer_bottom {
+  @media (max-width: 768px) {
     flex-direction: column;
     text-align: center;
-  }
-
-  // Mobile Sticky Navigation becomes visible
-  .pwa_footer {
-    display: block;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0; // Prevent right white space
-    width: 100vw; // Prevent 1–2px overflow scroll
-    background: rgba($color-dark-blue, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.3);
-    z-index: 40;
-    border-top: 1px solid rgba($color-gold, 0.2);
-
-    nav ul {
-      display: flex;
-      justify-content: space-around;
-      list-style: none;
-      margin: 0;
-      padding: 8px 0;
-      padding-bottom: env(safe-area-inset-bottom); // Fix iPhone bottom gap
-    }
-
-    a {
-      @include flex-center(column);
-      color: $color-grey-text;
-      text-decoration: none;
-      font-size: 11px;
-      padding: 5px;
-      transition: color 0.3s ease;
-
-      &.active {
-        color: $color-gold !important;
-        &:hover {
-          color: $color-gold;
-        }
-      }
-      &:hover {
-        color: $color-light-text;
-      }
-    }
-  }
-
-  .nav_icon {
-    font-size: 22px;
-    margin-bottom: 2px;
-    position: relative;
-  }
-
-  .new_badge {
-    position: absolute;
-    top: -4px;
-    right: -10px;
-    background: #e74c3c;
-    color: white;
-    font-size: 9px;
-    font-weight: bold;
-    padding: 1px 4px;
-    border-radius: 5px;
-  }
-}
-
-// --- New Bottom Navigation (Modern Design) ---
-.bottomNav {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  height: 88px;
-  background: #ffffff;
-
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-
-  padding: 10px 14px 14px;
-  z-index: 999;
-
-  overflow: visible;
-
-  // Hide on desktop
-  @media (min-width: 1024px) {
-    display: none;
-  }
-}
-
-// Normal nav items
-.navItem {
-  flex: 1;
-  max-width: 90px;
-
-  border: none;
-  background: transparent;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-
-  gap: 6px;
-  padding: 6px 0 2px;
-  cursor: pointer;
-  position: relative;
-
-  color: #7a7a7a;
-  z-index: 2;
-}
-
-.iconCircle {
-  width: 42px;
-  height: 42px;
-  border-radius: 999px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: transparent;
-  transition: 0.2s ease;
-}
-
-.label {
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-// Active state
-.active {
-  color: #111111;
-
-  .iconCircle {
-    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-    color: #ffffff;
-  }
-}
-
-.activeLine {
-  position: absolute;
-  bottom: -14px;
-  left: 50%;
-  transform: translateX(-50%);
-
-  width: 60px;
-  height: 5px;
-
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-  border-radius: 0 0 4px 4px;
-
-  clip-path: polygon(
-    10% 0%,
-    90% 0%,
-    100% 100%,
-    0% 100%
-  );
-}
-
-// LIVE center button
-.liveItem {
-  flex: 1;
-  max-width: 90px;
-
-  border: none;
-  background: transparent;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-
-  gap: 6px;
-  cursor: pointer;
-  position: relative;
-
-  margin-bottom: 6px;
-  z-index: 3;
-  border-top: 1px solid #f35401;
-  border-radius: 100px;
-}
-
-.liveCircle {
-  width: 76px;
-  height: 76px;
-  border-radius: 50%;
-
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-  border: 5px solid #ffffff;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  box-shadow: 0 8px 20px rgba(210, 135, 28, 0.4);
-  position: relative;
-
-  color: #ffffff;
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: scale(1.05);
-  }
-}
-
-.liveLabel {
-  color: #7a7a7a;
-  font-weight: 500;
-  font-size: 13px;
-  line-height: 1;
-}
-
-// Responsive adjustments
-@media (max-width: 360px) {
-  .bottomNav {
-    padding: 6px 8px 16px;
-  }
-
-  .navItem {
-    padding: 6px 8px;
-    max-width: 70px;
-  }
-
-  .iconCircle {
-    width: 38px;
-    height: 38px;
-  }
-
-  .label {
-    font-size: 11px;
-  }
-
-  .liveCircle {
-    width: 56px;
-    height: 56px;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1023px) {
-  .bottomNav {
-    padding: 12px 32px 24px;
-    max-width: 600px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 24px 24px 0 0;
-  }
-
-  .navItem {
-    padding: 10px 16px;
-    max-width: 100px;
-  }
-
-  .iconCircle {
-    width: 52px;
-    height: 52px;
-  }
-
-  .label {
-    font-size: 13px;
-  }
-
-  .liveCircle {
-    width: 72px;
-    height: 72px;
   }
 }

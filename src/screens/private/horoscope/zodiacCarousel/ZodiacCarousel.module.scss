@@ -12,10 +12,7 @@
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 20px 16px;
-  @media (width <= 767px) {
-    padding: 16px;
-  }
+  padding: 20px 0px 20px 16px;
 }
 .horoscopeTitle{
   font-family: "Poppins", sans-serif;
