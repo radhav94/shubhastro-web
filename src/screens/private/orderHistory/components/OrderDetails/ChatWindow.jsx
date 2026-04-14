@@ -20,6 +20,7 @@ const MESSAGE_TYPES = {
   AUDIO: "audio",
   ATTACHMENT: "attachment",
   KUNDLI: "kundli",
+  GIFT: "gift",
 };
 
 const URL_REGEX = /(https?:\/\/[^\s]+)/g;
@@ -185,7 +186,53 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
           );
         }
 
+        case MESSAGE_TYPES.GIFT: {
+          let giftData = null;
+          try {
+            const parsed = typeof content === "string" ? JSON.parse(content) : content;
+            giftData = parsed?.giftData || parsed;
+          } catch {
+            giftData = null;
+          }
+          if (giftData?.giftName) {
+            return (
+              <div className={styles.giftMessage}>
+                {giftData.giftImg && (
+                  <img src={giftData.giftImg} alt={giftData.giftName} className={styles.giftImage} />
+                )}
+                <div className={styles.giftInfo}>
+                  <span className={styles.giftName}>{giftData.giftName}</span>
+                  {giftData.price && <span className={styles.giftPrice}>₹{giftData.price}</span>}
+                </div>
+              </div>
+            );
+          }
+          return <p className={styles.messageText}>{typeof content === "string" ? content : JSON.stringify(content)}</p>;
+        }
+
         default: {
+          // Check if content is a JSON gift message
+          if (typeof content === "string" && content.startsWith("{")) {
+            try {
+              const parsed = JSON.parse(content);
+              if (parsed?.giftData?.giftName) {
+                return (
+                  <div className={styles.giftMessage}>
+                    {parsed.giftData.giftImg && (
+                      <img src={parsed.giftData.giftImg} alt={parsed.giftData.giftName} className={styles.giftImage} />
+                    )}
+                    <div className={styles.giftInfo}>
+                      <span className={styles.giftName}>{parsed.giftData.giftName}</span>
+                      {parsed.giftData.price && <span className={styles.giftPrice}>₹{parsed.giftData.price}</span>}
+                    </div>
+                  </div>
+                );
+              }
+            } catch {
+              // Not valid JSON, continue to normal rendering
+            }
+          }
+
           // Check for external URLs in text messages
           const detectedURL = detectURL(content);
           if (detectedURL && type !== MESSAGE_TYPES.KUNDLI) {

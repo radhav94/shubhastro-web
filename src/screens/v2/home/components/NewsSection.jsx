@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { ChevronRight, ExternalLink } from "lucide-react";
+import dayjs from "dayjs";
 import SectionHeader from "./SectionHeader";
 import styles from "../Home.module.scss";
 import { Toast } from "../../../../component";
@@ -18,12 +19,15 @@ const NewsSection = ({ newsData, title, showMore }) => {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    if (!dateString) return "";
+    let date;
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+      const [day, month, year] = dateString.split("/");
+      date = dayjs(`${year}-${month}-${day}`);
+    } else {
+      date = dayjs(dateString);
+    }
+    return date.isValid() ? date.format("MMM DD, YYYY") : dateString;
   };
 
   return (
