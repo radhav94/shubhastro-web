@@ -748,14 +748,7 @@ const TopHeader = () => {
             >
               Panchang
             </NavLink>
-            {/* <NavLink
-              to="/live-landing"
-              className={({ isActive }) =>
-                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-              }
-            >
-              Live
-            </NavLink> */}
+            <CalculatorsDropdown />
           </nav>
         </div>
 
@@ -874,6 +867,7 @@ const TopHeader = () => {
             >
               Panchang
             </NavLink>
+            <MobileCalculatorsAccordion onClose={() => setIsDrawerOpen(false)} />
             <NavLink
               to="/live"
               onClick={() => setIsDrawerOpen(false)}
@@ -909,3 +903,106 @@ const TopHeader = () => {
 };
 
 export default TopHeader;
+
+const CALCULATOR_LINKS = [
+  { title: "Love Calculator", path: "/love-calculator" },
+  { title: "Atmakaraka & Darakaraka", path: "/atmakaraka-and-darakaraka-calculator" },
+  { title: "Numerology Calculator", path: "/name-numerology-calculator" },
+  { title: "Sun Sign Calculator", path: "/sun-sign-calculator" },
+  { title: "Rising Sign / Ascendant", path: "/rising-ascendant-sign-calculator" },
+  { title: "Rashi Calculator", path: "/rashi-moon-sign-calculator" },
+  { title: "Dasha Calculator", path: "/dasha-calculator" },
+  { title: "Mangal Dosha Calculator", path: "/mangal-kuja-dosha-calculator" },
+  { title: "Shani Sade Sati", path: "/shani-sade-sati-calculator" },
+  { title: "Birth / Natal Chart", path: "/birth-natal-chart-calculator" },
+  { title: "Kaal Sarp Dosh", path: "/kaal-sarp-dosh-calculator" },
+  { title: "Flames Calculator", path: "/flames-calculator" },
+  { title: "Lucky Vehicle Number", path: "/lucky-vehicle-number-calculator" },
+  { title: "Friendship Calculator", path: "/friendship-calculator" },
+  { title: "Age Calculator", path: "/age-calculator" },
+  { title: "Mobile Numerology", path: "/mobile-number-numerology-calculator" },
+  { title: "Destiny Number", path: "/destiny-number-calculator" },
+];
+
+const CalculatorsDropdown = () => {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div
+      className={styles.calcDropdownWrap}
+      ref={ref}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <span
+        className={styles.headerNavLink}
+        onClick={() => setOpen((p) => !p)}
+        style={{ cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
+      >
+        Calculators
+        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none">
+          <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
+        </svg>
+      </span>
+      {open && (
+        <div className={styles.calcDropdownMenu}>
+          {CALCULATOR_LINKS.map((item) => (
+            <div
+              key={item.path}
+              className={styles.calcDropdownItem}
+              onClick={() => { navigate(item.path); setOpen(false); }}
+            >
+              {item.title}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const MobileCalculatorsAccordion = ({ onClose }) => {
+  const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className={styles.mobileCalcAccordion}>
+      <div
+        className={styles.headerNavLink}
+        onClick={() => setExpanded((p) => !p)}
+        style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+      >
+        Calculators
+        <svg
+          xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none"
+          style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+        >
+          <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
+        </svg>
+      </div>
+      {expanded && (
+        <div className={styles.mobileCalcLinks}>
+          {CALCULATOR_LINKS.map((item) => (
+            <div
+              key={item.path}
+              className={styles.mobileCalcLink}
+              onClick={() => { navigate(item.path); onClose(); }}
+            >
+              {item.title}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};

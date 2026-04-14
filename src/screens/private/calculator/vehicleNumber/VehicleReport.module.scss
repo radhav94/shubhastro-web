@@ -11,7 +11,7 @@
 }
 
 .vehicle {
-  color: #22c55e;
+  color: #f75801;
 }
 
 .subtitle {
@@ -22,7 +22,7 @@
 
 .statusBar {
   margin: 30px auto 20px;
-  background: linear-gradient(90deg, #22c55e, #4ade80);
+  background: linear-gradient(135deg, #f75801, #d43400);
   color: #fff;
   padding: 14px 20px;
   border-radius: 12px;
@@ -32,8 +32,8 @@
 }
 
 .descriptionBox {
-  background: #f8fafc;
-  border-left: 4px solid #6366f1;
+  background: #fff8f5;
+  border-left: 4px solid #f75801;
   padding: 18px;
   border-radius: 10px;
   color: #444;
@@ -46,22 +46,28 @@
   margin: 0 auto;
   display: block;
   padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
-  background: #8b5cf6;
+  background: linear-gradient(135deg, #f75801, #d43400);
   color: #fff;
+  font-weight: 600;
   cursor: pointer;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.92; }
 }
 
 .againBtn {
   margin: 18px auto 0;
   display: block;
   padding: 10px 24px;
-  border-radius: 20px;
-  border: none;
-  background: #8b8000;
-  color: #fff;
+  border-radius: 12px;
+  border: 1.5px solid #f75801;
+  background: #fff;
+  color: #f75801;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
+  &:hover { background: #fff8f5; }
 }
 
 .center {

@@ -1,102 +1,141 @@
 import { useState } from "react";
-import AstroBirthForm from "../forms/AstroBirthForm";
-import PrimaryText from "../../../../component/PrimaryText";
-import DividerWithImage from "../../../../component/UI/DividerWithImage";
-import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import { useNavigate } from "react-router-dom";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import LocationSearch from "../../../../utils/location/locationSearchVedic";
+import { TODAY } from "../../../../utils/dateFormat/date";
+import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
+import styles from "../mangaldosha/MangalDosha.module.scss";
 
 const STORAGE_KEY = "kaal_sarp";
 const initialFormState = {
-  name: "",
-  gender: "",
-  dob: "",
-  tob: "",
-  place: "",
-  lat: null,
-  lng: null,
-  isTimeUnknown: false,
+  name: "", gender: "", dob: "", tob: "", place: "", lat: null, lng: null, isTimeUnknown: false,
 };
 
 const KaalSarpCalc = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useFormFromLocalStorage(
-    STORAGE_KEY,
-    initialFormState
-  );
-
+  const [formData, setFormData] = useFormFromLocalStorage(STORAGE_KEY, initialFormState);
   const [errors, setErrors] = useState({});
+
+  const token = localStorage.getItem("shubhtalk_customer_token");
+  const { data: kundliData } = useGetAllKundlisQuery(undefined, { skip: !token });
+  const profiles = kundliData?.data || [];
+
+  const handleProfileSelect = (profileId) => {
+    const profile = profiles.find((p) => p._id === profileId);
+    if (!profile) return;
+    const dob = `${profile.year}-${String(profile.month).padStart(2, "0")}-${String(profile.day).padStart(2, "0")}`;
+    const tob = `${String(profile.hour).padStart(2, "0")}:${String(profile.min).padStart(2, "0")}`;
+    setFormData({ name: profile.name || "", gender: profile.gender || "", dob, tob, place: profile.place || "", lat: profile.lat || null, lng: profile.lon || null, isTimeUnknown: false });
+    setErrors({});
+  };
 
   const handleChange = (key, value) => {
     setFormData((prev) => {
-      if (key === "isTimeUnknown" && value === true) {
-        return {
-          ...prev,
-          isTimeUnknown: true,
-        };
-      }
-
-      return {
-        ...prev,
-        [key]: value,
-      };
+      if (key === "isTimeUnknown" && value === true) return { ...prev, isTimeUnknown: true };
+      return { ...prev, [key]: value };
     });
-
-    // clear error on change
     setErrors((prev) => ({ ...prev, [key]: "" }));
+  };
+
+  const onReset = () => {
+    setFormData(initialFormState);
+    setErrors({});
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const newErrors = {};
-
     if (!formData.name) newErrors.name = "Name is required";
     if (!formData.gender) newErrors.gender = "Gender is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
     if (!formData.place) newErrors.place = "Place of birth is required";
-
-    if (!formData.isTimeUnknown && !formData.tob) {
-      newErrors.tob = "Time of birth is required or select unknown";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    const payload = {
-      ...formData,
-      tob: formData.isTimeUnknown ? "12:00" : formData.tob,
-    };
+    if (!formData.isTimeUnknown && !formData.tob) newErrors.tob = "Time of birth is required";
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+    const payload = { ...formData, tob: formData.isTimeUnknown ? "12:00" : formData.tob };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     navigate("/kaal-sarp-dosh-calculator/report");
   };
 
   return (
-    <div style={{ margin: "0 3rem" }}>
-      <PrimaryText isCenter isSemiBold size_24>
-        Kaal Sarp Dosh Calculator: Healing This Powerful Yoga
-      </PrimaryText>
-      <PrimaryText style={{ color: "gray" }} margin="" size_16>
-        Ever feel like you're doing everything right but still stuck in a loop,
-        whether it’s money struggles, strained relationships, or just this
-        constant sense of heaviness? That’s where a Kaal Sarp Dosh Calculator
-        can give you answers. It checks if all seven planets in your birth chart
-        are hemmed between Rahu and Ketu, a powerful and often misunderstood
-        combination in Vedic astrology.
-      </PrimaryText>
-      <div style={{ margin: "0 1rem" }}>
-        <DividerWithImage imageSrc={ShubhTalkLogo} />
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <h1>Kaal Sarp Dosh Calculator</h1>
+        <p>Check if Rahu-Ketu axis is affecting your life</p>
       </div>
-      <AstroBirthForm
-        title="Calculate Your Kaal Sarp Yog here"
-        submitText="Calculate my Kaal Sarp Yog"
-        formData={formData}
-        errors={errors}
-        onChange={handleChange}
-        onSubmit={handleSubmit}
-      />
+
+      <div className={styles.infoCard}>
+        <h3>What is Kaal Sarp Dosh?</h3>
+        <p>
+          Kaal Sarp Dosh occurs when all seven planets are hemmed between Rahu and Ketu
+          in your birth chart. It can cause delays, struggles, and a sense of being stuck.
+          Check your chart to understand and find remedies.
+        </p>
+      </div>
+
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <div className={styles.resetRow}>
+          <button type="button" className={styles.resetBtn} onClick={onReset}>Reset</button>
+        </div>
+        {/* <h3 className={styles.formTitle}>Enter Your Birth Details</h3>
+
+        {profiles.length > 0 && (
+          <div className={styles.profileSelector}>
+            <label>Quick Fill from Profile</label>
+            <div className={styles.profileChips}>
+              {profiles.map((p) => (
+                <button key={p._id} type="button" className={`${styles.profileChip} ${formData.name === p.name ? styles.activeChip : ""}`} onClick={() => handleProfileSelect(p._id)}>
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )} */}
+
+        <div className={styles.row}>
+          <div className={styles.field}>
+            <label>Full Name <span>*</span></label>
+            <input placeholder="Enter your name" value={formData.name} onChange={(e) => handleChange("name", e.target.value)} />
+            {errors.name && <p className={styles.err}>{errors.name}</p>}
+          </div>
+          <div className={styles.field}>
+            <label>Gender <span>*</span></label>
+            <select value={formData.gender} onChange={(e) => handleChange("gender", e.target.value)}>
+              <option value="">Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+            {errors.gender && <p className={styles.err}>{errors.gender}</p>}
+          </div>
+        </div>
+
+        <div className={styles.row}>
+          <div className={styles.field}>
+            <label>Date of Birth <span>*</span></label>
+            <input type="date" value={formData.dob} max={TODAY} onChange={(e) => handleChange("dob", e.target.value)} onClick={(e) => e.target.showPicker?.()} />
+            {errors.dob && <p className={styles.err}>{errors.dob}</p>}
+          </div>
+          <div className={styles.field}>
+            <div className={styles.tobLabelRow}>
+              <label>Time of Birth <span>*</span></label>
+              <label className={styles.checkLabel}>
+                <input type="checkbox" checked={formData.isTimeUnknown} onChange={(e) => handleChange("isTimeUnknown", e.target.checked)} />
+                I don't know
+              </label>
+            </div>
+            <input type="time" value={formData.isTimeUnknown ? "" : formData.tob} onChange={(e) => handleChange("tob", e.target.value)} onClick={(e) => e.target.showPicker?.()} disabled={formData.isTimeUnknown} style={formData.isTimeUnknown ? { opacity: 0.4, cursor: "not-allowed" } : {}} />
+            {errors.tob && <p className={styles.err}>{errors.tob}</p>}
+          </div>
+        </div>
+
+        <div className={styles.field}>
+          <label>Place of Birth <span>*</span></label>
+          <LocationSearch value={formData.place} onChange={(e) => handleChange("place", e.target.value)} onPlaceSelect={(loc) => { handleChange("place", loc.address); handleChange("lat", loc.lat); handleChange("lng", loc.lng); }} />
+          {errors.place && <p className={styles.err}>{errors.place}</p>}
+        </div>
+
+        <button type="submit" className={styles.submitBtn}>Check Kaal Sarp Dosh</button>
+      </form>
     </div>
   );
 };

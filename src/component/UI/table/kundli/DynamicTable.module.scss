@@ -107,21 +107,17 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
 .detailsTable {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed; /* 👈 ensures even spacing */
+  table-layout: auto;
   text-align: center;
 }
 
 .detailsTable th,
 .detailsTable td {
   border: 1px solid #ddd;
-  padding: 8px 4px;
-  width: auto;
+  padding: 8px 10px;
   text-align: center;
   font-size: 0.8rem;
-  @media (width <= 767px) {
-    padding: 8px 8px;
-    white-space: nowrap;
-  }
+  white-space: nowrap;
 }
 
 .detailsTable th {
@@ -154,10 +150,9 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   }
 
   .detailsTable {
-    min-width: 520px; /* 👈 forces horizontal scroll */
+    min-width: 1100px;
     font-size: 13px;
-    border-collapse: separate;
-    border-spacing: 0;
+    border-collapse: collapse;
     table-layout: auto;
     width: 100%;
   }

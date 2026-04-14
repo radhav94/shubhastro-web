@@ -5,7 +5,7 @@
 }
 
 .header {
-  background: linear-gradient(135deg, #ff7a7a, #ff9a9e);
+  background: linear-gradient(135deg, #f75801, #d43400);
   border-radius: 16px;
   padding: 30px;
   text-align: center;
@@ -24,7 +24,7 @@
 
 .numbersCard {
   margin-top: 24px;
-  background: linear-gradient(135deg, #f9a8ff, #ff6b8b);
+  background: linear-gradient(135deg, #f75801, #d43400);
   border-radius: 16px;
   padding: 24px;
   display: flex;
@@ -57,7 +57,7 @@
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  border-top: 4px solid #4ade80;
+  border-top: 4px solid #f75801;
 }
 
 .statusRow {
@@ -69,7 +69,7 @@
 .statusIcon {
   width: 42px;
   height: 42px;
-  background: #22c55e;
+  background: #f75801;
   color: #fff;
   border-radius: 50%;
   display: flex;
@@ -87,8 +87,8 @@
 .description {
   margin-top: 16px;
   padding: 14px;
-  border-left: 4px solid #22c55e;
-  background: #f6f7f8;
+  border-left: 4px solid #f75801;
+  background: #fff8f5;
   border-radius: 8px;
   color: #444;
   font-size: 14px;
@@ -99,22 +99,28 @@
   margin: 24px auto 0;
   display: block;
   padding: 10px 18px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
-  background: #8b5cf6;
+  background: linear-gradient(135deg, #f75801, #d43400);
   color: #fff;
+  font-weight: 600;
   cursor: pointer;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.92; }
 }
 
 .againBtn {
   margin: 20px auto 0;
   display: block;
   padding: 10px 24px;
-  border-radius: 20px;
-  border: none;
-  background: #8b8000;
-  color: #fff;
+  border-radius: 12px;
+  border: 1.5px solid #f75801;
+  background: #fff;
+  color: #f75801;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
+  &:hover { background: #fff8f5; }
 }
 
 .center {

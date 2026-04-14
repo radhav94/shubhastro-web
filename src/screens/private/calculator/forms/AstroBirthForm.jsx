@@ -9,11 +9,19 @@ const AstroBirthForm = ({
   errors,
   onChange,
   onSubmit,
+  onReset,
 }) => {
   const { name, gender, dob, tob, place, isTimeUnknown } = formData;
 
   return (
     <form className={styles.astroForm} onSubmit={onSubmit}>
+      {onReset && (
+        <div className={styles.resetRow}>
+          <button type="button" className={styles.resetBtn} onClick={onReset}>
+            Reset
+          </button>
+        </div>
+      )}
       <h3 className={styles.formTitle}>{title}</h3>
 
       {/* Name */}

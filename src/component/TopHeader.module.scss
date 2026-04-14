@@ -738,3 +738,70 @@
   //   height: 32px;
   // }
 }
+
+/* Calculators Dropdown - Quick Links bar */
+.calcDropdownWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.calcDropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 260px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  padding: 8px 0;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease;
+}
+
+.calcDropdownItem {
+  padding: 8px 16px;
+  font-size: 13px;
+  color: #2c1b0e;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #fff3ed;
+    color: #F75801;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile Calculators Accordion */
+.mobileCalcAccordion {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileCalcLinks {
+  display: flex;
+  flex-direction: column;
+  padding-left: 12px;
+  background: #fafafa;
+}
+
+.mobileCalcLink {
+  padding: 8px 16px;
+  font-size: 13px;
+  color: #2c1b0e;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #fff3ed;
+    color: #F75801;
+  }
+}

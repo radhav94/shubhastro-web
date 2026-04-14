@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useGetMangalDoshaReportQuery } from "../../../../redux/api/calculator/calcApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./MangalReport.module.scss";
+import CalcBackButton from "../CalcBackButton";
 
 const MangalReport = () => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ const MangalReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       {/* HEADER */}
       <div className={styles.header}>
         <h2>{stored?.name}'s Mangal Dosha Analysis</h2>
@@ -129,20 +131,6 @@ const MangalReport = () => {
 
       {/* ACTIONS */}
       <div className={styles.actions}>
-        <button
-          className={styles.shareBtn}
-          onClick={() => {
-            if (navigator.share) {
-              navigator.share({
-                title: "My Mangal Dosha Report",
-                text: bot_response,
-              });
-            }
-          }}
-        >
-          Share it with others
-        </button>
-
         <button className={styles.calculateBtn} onClick={() => navigate(-1)}>
           Calculate Again
         </button>

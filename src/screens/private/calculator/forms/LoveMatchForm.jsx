@@ -7,6 +7,7 @@ const LoveMatchForm = ({
   errors,
   onChange,
   onSubmit,
+  onReset,
 }) => {
   const { name1, gender1, name2, gender2 } = formData;
 
@@ -87,9 +88,16 @@ const LoveMatchForm = ({
         </div>
       </div>
 
-      <button type="submit" className={styles.submitBtn}>
-        {submitText}
-      </button>
+      <div className={styles.btnRow}>
+        <button type="submit" className={styles.submitBtn}>
+          {submitText}
+        </button>
+        {onReset && (
+          <button type="button" className={styles.resetBtn} onClick={onReset}>
+            Reset
+          </button>
+        )}
+      </div>
     </form>
   );
 };

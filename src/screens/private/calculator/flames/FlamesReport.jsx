@@ -3,6 +3,7 @@ import { useFlamesCalculatorMutation } from "../../../../redux/api/calculator/ca
 import { useEffect } from "react";
 import styles from "./FlamesReport.module.scss";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcBackButton from "../CalcBackButton";
 
 const FlamesReport = () => {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const FlamesReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       <div className={styles.card}>
         <h3 className={styles.title}>FLAMES RESULT</h3>
 
@@ -42,21 +44,9 @@ const FlamesReport = () => {
           <h2>{report.result.toUpperCase()}</h2>
           <p>{report.description}</p>
         </div>
-
-        <button
-          onClick={() =>
-            navigator.share?.({
-              title: "Flames Report",
-              text: "Check out my Flames Report",
-            })
-          }
-          className={styles.shareBtn}
-        >
-          🔗 Share It with others
-        </button>
       </div>
 
-      <button className={styles.againBtn} onClick={() => navigate("/flames")}>
+      <button className={styles.againBtn} onClick={() => navigate("/flames-calculator")}>
         Calculate Again
       </button>
     </div>

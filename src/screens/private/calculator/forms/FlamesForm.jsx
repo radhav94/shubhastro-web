@@ -7,11 +7,19 @@ const FlamesForm = ({
   errors,
   onChange,
   onSubmit,
+  onReset,
 }) => {
   const { name1, name2 } = formData;
 
   return (
     <form className={styles.flamesForm} onSubmit={onSubmit}>
+      {onReset && (
+        <div className={styles.resetRow}>
+          <button type="button" className={styles.resetBtn} onClick={onReset}>
+            Reset
+          </button>
+        </div>
+      )}
       <h3 className={styles.formTitle}>
         <span className={styles.dot}>●</span> {title}{" "}
         <span className={styles.moon}>☾</span>
