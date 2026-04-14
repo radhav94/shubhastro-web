@@ -8,7 +8,9 @@ const NumerologyReport = () => {
   const navigate = useNavigate();
 
   const stored = JSON.parse(localStorage.getItem("numerology_report"));
-  const { data, isLoading } = useGetNumerologyReportQuery(stored);
+  const { data, isLoading } = useGetNumerologyReportQuery(stored, {
+    skip: !stored,
+  });
 
   if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
   if (!data?.response) return <div>No data found</div>;
@@ -40,12 +42,13 @@ const NumerologyReport = () => {
         {cards.map((item) => (
           <div key={item.category} className={styles.card}>
             <div className={styles.circle}>{item.number}</div>
-            <h3 className={styles.title}>{item.title}</h3>
-            <p className={styles.text}>{item.description}</p>
-
-            {item.master && (
-              <span className={styles.master}>Master Number</span>
-            )}
+            <div className={styles.cardContent}>
+              <h3 className={styles.title}>{item.title}</h3>
+              <p className={styles.text}>{item.description}</p>
+              {item.master && (
+                <span className={styles.master}>Master Number</span>
+              )}
+            </div>
           </div>
         ))}
       </div>
@@ -65,7 +68,6 @@ const NumerologyReport = () => {
 
       {/* ACTIONS */}
       <div className={styles.actions}>
-        <button className={styles.shareBtn}>Share Your Report</button>
         <button className={styles.calculateBtn} onClick={() => navigate(-1)}>
           Calculate Again
         </button>

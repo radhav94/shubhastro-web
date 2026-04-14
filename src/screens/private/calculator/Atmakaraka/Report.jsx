@@ -57,18 +57,6 @@ const AtmakarakaReport = () => {
 
       {/* ACTIONS */}
       <div className={styles.actions}>
-        <button
-          className={styles.shareBtn}
-          onClick={() =>
-            navigator.share?.({
-              title: "Karaka Analysis",
-              text: "Check out my Karaka Analysis",
-            })
-          }
-        >
-          Share it with others
-        </button>
-
         <button className={styles.calculateBtn} onClick={() => navigate(-1)}>
           Calculate Again
         </button>

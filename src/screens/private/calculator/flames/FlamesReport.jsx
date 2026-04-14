@@ -44,18 +44,6 @@ const FlamesReport = () => {
           <h2>{report.result.toUpperCase()}</h2>
           <p>{report.description}</p>
         </div>
-
-        <button
-          onClick={() =>
-            navigator.share?.({
-              title: "Flames Report",
-              text: "Check out my Flames Report",
-            })
-          }
-          className={styles.shareBtn}
-        >
-          🔗 Share It with others
-        </button>
       </div>
 
       <button className={styles.againBtn} onClick={() => navigate("/flames-calculator")}>

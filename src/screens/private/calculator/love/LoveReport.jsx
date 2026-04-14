@@ -88,17 +88,6 @@ const LoveReport = () => {
             >
               ❤ Get Today's Love Horoscope
             </button>
-            <button
-              className={styles.secondaryBtn}
-              onClick={() =>
-                navigator.share?.({
-                  title: "Love Report",
-                  text: "Check out my Love Report",
-                })
-              }
-            >
-              🔗 Share It with others
-            </button>
           </div>
         </div>
 

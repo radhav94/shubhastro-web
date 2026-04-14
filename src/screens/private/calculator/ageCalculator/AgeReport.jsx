@@ -63,19 +63,6 @@ const AgeReport = () => {
         </div>
       </div>
 
-      {/* SHARE */}
-      <button
-        onClick={() =>
-          navigator.share?.({
-            title: "Age Report",
-            text: "Check out my Age Report",
-          })
-        }
-        className={styles.shareBtn}
-      >
-        🔗 Share It with others
-      </button>
-
       {/* AGAIN */}
       <button
         className={styles.againBtn}

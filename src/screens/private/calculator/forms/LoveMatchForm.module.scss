@@ -1,15 +1,18 @@
 .loveForm {
+  max-width: 620px;
+  margin: auto;
   background: #fff;
-  border-radius: 18px;
-  padding: 24px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
-  border-bottom: 6px solid #f1e517;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-bottom: 4px solid #f75801;
 }
 
 .formTitle {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   font-weight: 600;
+  font-size: 16px;
 }
 
 .grid {
@@ -20,21 +23,27 @@
 }
 
 .formGroup {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 
   label {
     display: block;
     font-weight: 500;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
+    font-size: 14px;
   }
 
   input,
   select {
     width: 100%;
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #e5e5e5;
     outline: none;
+    font-size: 14px;
+
+    &:focus {
+      border-color: #f75801;
+    }
   }
 }
 
@@ -53,13 +62,35 @@
   color: #ff5b5b;
 }
 
+.btnRow {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
 .submitBtn {
-  margin: 20px auto 0;
-  display: block;
-  padding: 10px 22px;
-  border-radius: 20px;
+  padding: 10px 24px;
+  border-radius: 10px;
   border: none;
-  background: #8b8000;
+  background: linear-gradient(135deg, #f75801, #d43400);
   color: #fff;
+  font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.92; }
+}
+
+.resetBtn {
+  padding: 10px 24px;
+  border-radius: 10px;
+  border: 1.5px solid #f75801;
+  background: #fff;
+  color: #f75801;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+  &:hover { background: #fff8f5; }
 }

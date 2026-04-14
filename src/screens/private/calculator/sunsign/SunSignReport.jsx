@@ -42,20 +42,6 @@ const SunSignReport = () => {
 
       {/* ACTION BUTTONS */}
       <div className={styles.actions}>
-        <button
-          className={styles.shareBtn}
-          onClick={() => {
-            if (navigator.share) {
-              navigator.share({
-                title: "My Sun Sign Report",
-                text: prediction || bot_response || "",
-              });
-            }
-          }}
-        >
-          Share your report
-        </button>
-
         <button className={styles.backBtn} onClick={() => navigate(-1)}>
           Back to Calculator
         </button>

@@ -131,20 +131,6 @@ const MangalReport = () => {
 
       {/* ACTIONS */}
       <div className={styles.actions}>
-        <button
-          className={styles.shareBtn}
-          onClick={() => {
-            if (navigator.share) {
-              navigator.share({
-                title: "My Mangal Dosha Report",
-                text: bot_response,
-              });
-            }
-          }}
-        >
-          Share it with others
-        </button>
-
         <button className={styles.calculateBtn} onClick={() => navigate(-1)}>
           Calculate Again
         </button>

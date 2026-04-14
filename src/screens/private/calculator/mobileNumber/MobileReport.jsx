@@ -65,18 +65,6 @@ const MobileReport = () => {
 
       {/* ACTIONS */}
       <button
-        onClick={() =>
-          navigator.share?.({
-            title: "Mobile Number  Report",
-            text: "Check out my Mobile Number Report",
-          })
-        }
-        className={styles.shareBtn}
-      >
-        🔗 Share It with others
-      </button>
-
-      <button
         className={styles.againBtn}
         onClick={() => navigate("/mobile-number-numerology-calculator")}
       >

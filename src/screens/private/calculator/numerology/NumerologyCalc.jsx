@@ -41,7 +41,7 @@ const NumerologyCalc = () => {
     const newErrors = {};
 
     if (!formData.name) newErrors.name = "Name is required";
-    if (!formData.type) newErrors.gender = "Type is required";
+    if (!formData.type) newErrors.type = "Type is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
 
     if (Object.keys(newErrors).length > 0) {
@@ -52,8 +52,8 @@ const NumerologyCalc = () => {
     const payload = {
       ...formData,
     };
-    navigate("/name-numerology-calculator/report");
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    navigate("/name-numerology-calculator/report");
   };
 
   return (
@@ -78,6 +78,11 @@ const NumerologyCalc = () => {
         errors={errors}
         onChange={handleChange}
         onSubmit={handleSubmit}
+        onReset={() => {
+          setFormData(initialFormState);
+          setErrors({});
+          localStorage.removeItem(STORAGE_KEY);
+        }}
       />
     </div>
   );

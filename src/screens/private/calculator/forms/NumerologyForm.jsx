@@ -9,12 +9,18 @@ const NumerologyForm = ({
   errors,
   onChange,
   onSubmit,
+  onReset,
   hideType = false,
 }) => {
   const { name, type, dob } = formData;
 
   return (
     <form className={styles.astroForm} onSubmit={onSubmit}>
+      <div className={styles.resetRow}>
+        <button type="button" className={styles.resetBtn} onClick={onReset}>
+          Reset
+        </button>
+      </div>
       <h3 className={styles.formTitle}>{title}</h3>
 
       {/* Name */}

@@ -8,6 +8,7 @@ const DateWithSingleInputForm = ({
   errors,
   onChange,
   onSubmit,
+  onReset,
   inputLabel,
   inputPlaceholder,
   inputName,
@@ -19,6 +20,13 @@ const DateWithSingleInputForm = ({
 
   return (
     <form className={styles.form} onSubmit={onSubmit}>
+      {onReset && (
+        <div className={styles.resetRow}>
+          <button type="button" className={styles.resetBtn} onClick={onReset}>
+            Reset
+          </button>
+        </div>
+      )}
       <h3 className={styles.formTitle}>{title}</h3>
 
       {/* DOB */}

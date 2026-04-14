@@ -68,6 +68,20 @@ export const calcApi = calculatorApi.injectEndpoints({
         },
       }),
     }),
+    getDashaPeriods: builder.query({
+      query: (payload) => ({
+        url: "dashas/maha-dasha",
+        params: {
+          api_key,
+          lang: "en",
+          dob: formatDate(payload?.dob),
+          tob: payload?.tob,
+          lat: payload?.lat,
+          lon: payload?.lng,
+          tz: 5.5,
+        },
+      }),
+    }),
     getDashaRep: builder.query({
       query: (payload) => ({
         url: "dashas/maha-dasha-predictions",
@@ -143,6 +157,7 @@ export const {
   useGetSunSignQuery,
   useGetRisingSignQuery,
   useGetRashiCalQuery,
+  useGetDashaPeriodsQuery,
   useGetDashaRepQuery,
   useGetMangalDoshaReportQuery,
   useGetSadeSatiReportQuery,

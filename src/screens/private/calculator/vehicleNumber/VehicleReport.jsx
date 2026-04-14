@@ -47,18 +47,6 @@ const VehicleReport = () => {
 
       {/* ACTIONS */}
       <button
-        onClick={() =>
-          navigator.share?.({
-            title: "Vehicle Number  Report",
-            text: "Check out my Vehicle Number Report",
-          })
-        }
-        className={styles.shareBtn}
-      >
-        🔗 Share It with others
-      </button>
-
-      <button
         className={styles.againBtn}
         onClick={() => navigate("/lucky-vehicle-number-calculator")}
       >

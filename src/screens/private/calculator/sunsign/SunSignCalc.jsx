@@ -107,6 +107,11 @@ const SunSignCalc = () => {
         errors={errors}
         onChange={handleChange}
         onSubmit={handleSubmit}
+        onReset={() => {
+          setFormData(initialFormState);
+          setErrors({});
+          localStorage.removeItem(STORAGE_KEY);
+        }}
       />
     </div>
   );

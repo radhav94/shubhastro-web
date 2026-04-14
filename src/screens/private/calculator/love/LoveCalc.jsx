@@ -28,6 +28,12 @@ const LoveCalc = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleReset = () => {
+    setFormData(initialFormState);
+    setErrors({});
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -70,6 +76,7 @@ const LoveCalc = () => {
         errors={errors}
         onChange={handleChange}
         onSubmit={handleSubmit}
+        onReset={handleReset}
       />
     </div>
   );
