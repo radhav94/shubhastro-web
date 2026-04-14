@@ -19,6 +19,8 @@ import { useCall } from "../context/CallContext";
 import { voiceSocket } from "../services/voiceSocketServices";
 import WaitingModal from "../component/UI/modal/waitingModal/WaitingModal";
 
+const PENDING_LIVE_CALL_STORAGE_KEY = "shubhtalk_pending_live_call";
+
 const HomeLayout = () => {
   const isMobile = useIsMobile();
   const matches = useMatches();
@@ -31,6 +33,11 @@ const HomeLayout = () => {
       voiceSocket.emit("call:cancel", { roomId: pendingLiveCall.callRoomId, canceledBy: "CUSTOMER" });
     }
     setPendingLiveCall(null);
+    try {
+      sessionStorage.removeItem(PENDING_LIVE_CALL_STORAGE_KEY);
+    } catch {
+      // Ignore storage failures; context state is the primary source.
+    }
   };
 
   const currentRoute = matches
