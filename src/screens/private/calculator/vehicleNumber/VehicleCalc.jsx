@@ -1,10 +1,8 @@
-import PrimaryText from "../../../../component/PrimaryText";
-import DividerWithImage from "../../../../component/UI/DividerWithImage";
-import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import { useState } from "react";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { useNavigate } from "react-router-dom";
 import DateWithSingleInputForm from "../forms/DateWithSingleInputForm";
+import styles from "./VehicleCalc.module.scss";
 
 const STORAGE_KEY = "vehicle_calculator";
 
@@ -65,25 +63,21 @@ const VehicleCalc = () => {
   };
 
   return (
-    <div style={{ margin: "0 3rem" }}>
-      <PrimaryText isCenter isSemiBold size_24>
-        Lucky Vehicle Number Calculator: Your Guide to Choosing the Perfect
-        Number
-      </PrimaryText>
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <h1>Lucky Vehicle Number Calculator</h1>
+        <p>Your Guide to Choosing the Perfect Number</p>
+      </div>
 
-      <PrimaryText style={{ color: "gray", marginTop: "0.5rem" }} size_16>
-        Thinking of buying a new car or bike and hoping it brings more than just
-        convenience, maybe a bit of good luck too? You’re not alone. In India,
-        many people believe that the number on your vehicle isn’t just random,
-        it can shape the kind of energy you invite into your daily life. That’s
-        where a <strong>Lucky Vehicle Number Calculator</strong> comes in. Based
-        on your date of birth and key numerology principles, it helps you choose
-        a number that aligns with your personal energy, attracting prosperity,
-        safety, and positive vibes on the road.
-      </PrimaryText>
-
-      <div style={{ margin: "0 1rem" }}>
-        <DividerWithImage imageSrc={ShubhTalkLogo} />
+      <div className={styles.infoCard}>
+        <h3>What is Lucky Vehicle Number?</h3>
+        <p>
+          Thinking of buying a new car or bike and hoping it brings more than just
+          convenience, maybe a bit of good luck too? Based on your date of birth
+          and key numerology principles, it helps you choose a number that aligns
+          with your personal energy, attracting prosperity, safety, and positive
+          vibes on the road.
+        </p>
       </div>
 
       <DateWithSingleInputForm

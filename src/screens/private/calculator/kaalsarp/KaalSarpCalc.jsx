@@ -37,6 +37,12 @@ const KaalSarpCalc = () => {
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
+  const onReset = () => {
+    setFormData(initialFormState);
+    setErrors({});
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
@@ -68,7 +74,10 @@ const KaalSarpCalc = () => {
       </div>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        <h3 className={styles.formTitle}>Enter Your Birth Details</h3>
+        <div className={styles.resetRow}>
+          <button type="button" className={styles.resetBtn} onClick={onReset}>Reset</button>
+        </div>
+        {/* <h3 className={styles.formTitle}>Enter Your Birth Details</h3>
 
         {profiles.length > 0 && (
           <div className={styles.profileSelector}>
@@ -81,7 +90,7 @@ const KaalSarpCalc = () => {
               ))}
             </div>
           </div>
-        )}
+        )} */}
 
         <div className={styles.row}>
           <div className={styles.field}>

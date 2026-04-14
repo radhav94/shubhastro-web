@@ -1,10 +1,8 @@
 import { useState } from "react";
 import AstroBirthForm from "../forms/AstroBirthForm";
-import PrimaryText from "../../../../component/PrimaryText";
-import DividerWithImage from "../../../../component/UI/DividerWithImage";
-import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import { useNavigate } from "react-router-dom";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import styles from "./RisingSign.module.scss";
 
 const STORAGE_KEY = "rising_sign";
 const initialFormState = {
@@ -74,19 +72,22 @@ const RisingSign = () => {
   };
 
   return (
-    <div style={{ margin: "0 3rem" }}>
-      <PrimaryText isCenter isSemiBold size_24>
-        The Complete Rising Sign Calculator: Discover Your True Self
-      </PrimaryText>
-      <PrimaryText style={{ color: "gray" }} margin="" size_16>
-        Have you ever felt like people see a version of you that doesn’t quite
-        match how you see yourself? This rising sign calculator explains the
-        reason for that! Your rising/ ascendant sign, is that zodiac sign that
-        was rising on the eastern horizon at the time you were born.
-      </PrimaryText>
-      <div style={{ margin: "0 1rem" }}>
-        <DividerWithImage imageSrc={ShubhTalkLogo} />
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <h1>The Complete Rising Sign Calculator</h1>
+        <p>Discover Your True Self</p>
       </div>
+
+      <div className={styles.infoCard}>
+        <h3>What is Rising Sign?</h3>
+        <p>
+          Have you ever felt like people see a version of you that doesn't quite
+          match how you see yourself? This rising sign calculator explains the
+          reason for that! Your rising/ascendant sign is the zodiac sign that
+          was rising on the eastern horizon at the time you were born.
+        </p>
+      </div>
+
       <AstroBirthForm
         title="Calculate your Rising/Ascendant Sign here"
         submitText="Calculate my Rising Sign"

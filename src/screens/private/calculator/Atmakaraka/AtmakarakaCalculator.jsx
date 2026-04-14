@@ -1,10 +1,8 @@
 import { useState } from "react";
 import AstroBirthForm from "../forms/AstroBirthForm";
-import PrimaryText from "../../../../component/PrimaryText";
-import DividerWithImage from "../../../../component/UI/DividerWithImage";
-import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import { useNavigate } from "react-router-dom";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import styles from "./AtmakarakaCalculator.module.scss";
 
 const STORAGE_KEY = "atmakaraka-and-darakaraka";
 
@@ -67,19 +65,18 @@ const AtmakarakaCalculator = () => {
   };
 
   return (
-    <div style={{ margin: "0 3rem" }}>
-      <PrimaryText isCenter isSemiBold size_24>
-        Atmakaraka and Darakaraka Calculator: Guide to Your Soul and Life
-        Partner
-      </PrimaryText>
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <h1>Atmakaraka and Darakaraka Calculator</h1>
+        <p>Guide to Your Soul and Life Partner</p>
+      </div>
 
-      <PrimaryText style={{ color: "gray" }} size_16>
-        Discover your soul planet (Atmakaraka) and life partner indicator
-        (Darakaraka) using Vedic astrology.
-      </PrimaryText>
-
-      <div style={{ margin: "0 1rem" }}>
-        <DividerWithImage imageSrc={ShubhTalkLogo} />
+      <div className={styles.infoCard}>
+        <h3>What is Atmakaraka and Darakaraka?</h3>
+        <p>
+          Discover your soul planet (Atmakaraka) and life partner indicator
+          (Darakaraka) using Vedic astrology.
+        </p>
       </div>
 
       <AstroBirthForm

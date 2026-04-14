@@ -16,6 +16,12 @@ const FlamesCalc = () => {
     setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
+  const onReset = () => {
+    setFormData(initialFormState);
+    setErrors({});
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
@@ -44,6 +50,9 @@ const FlamesCalc = () => {
       </div>
 
       <form className={styles.form} onSubmit={handleSubmit}>
+        <div className={styles.resetRow}>
+          <button type="button" className={styles.resetBtn} onClick={onReset}>Reset</button>
+        </div>
         <h3 className={styles.formTitle}>Enter Your Names</h3>
 
         <div className={styles.field}>

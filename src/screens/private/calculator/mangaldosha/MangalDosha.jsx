@@ -23,6 +23,12 @@ const MangalDosha = () => {
   const [formData, setFormData] = useFormFromLocalStorage(STORAGE_KEY, initialFormState);
   const [errors, setErrors] = useState({});
 
+  const onReset = () => {
+    setFormData(initialFormState);
+    setErrors({});
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
   const token = localStorage.getItem("shubhtalk_customer_token");
   const { data: kundliData } = useGetAllKundlisQuery(undefined, { skip: !token });
   const profiles = kundliData?.data || [];
@@ -86,10 +92,15 @@ const MangalDosha = () => {
       </div>
 
       <form className={styles.form} onSubmit={handleSubmit}>
+        <div className={styles.resetRow}>
+          <button type="button" className={styles.resetBtn} onClick={onReset}>
+            Reset
+          </button>
+        </div>
         <h3 className={styles.formTitle}>Enter Your Birth Details</h3>
 
         {/* Profile Selector */}
-        {profiles.length > 0 && (
+        {/* {profiles.length > 0 && (
           <div className={styles.profileSelector}>
             <label>Quick Fill from Profile</label>
             <div className={styles.profileChips}>
@@ -105,7 +116,7 @@ const MangalDosha = () => {
               ))}
             </div>
           </div>
-        )}
+        )} */}
 
         <div className={styles.row}>
           <div className={styles.field}>

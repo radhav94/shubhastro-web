@@ -1,10 +1,8 @@
 import { useState } from "react";
 import AstroBirthForm from "../forms/AstroBirthForm";
-import PrimaryText from "../../../../component/PrimaryText";
-import DividerWithImage from "../../../../component/UI/DividerWithImage";
-import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import { useNavigate } from "react-router-dom";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import styles from "./DashaCalc.module.scss";
 
 const STORAGE_KEY = "dasha_calc";
 const initialFormState = {
@@ -73,21 +71,24 @@ const DashaCalc = () => {
   };
 
   return (
-    <div style={{ margin: "0 3rem" }}>
-      <PrimaryText isCenter isSemiBold size_24>
-        Dasha Calculator: Making Sense of Your Life's Path
-      </PrimaryText>
-      <PrimaryText style={{ color: "gray" }} margin="" size_16>
-        Ever had a phase in life where everything just clicked a dream job, a
-        happy relationship, maybe even unexpected success? And then suddenly,
-        things slow down, plans stall, and you’re left wondering, “What
-        changed?” It’s your <strong>Dasha period</strong> at work. A
-        <strong> Dasha calculator</strong> will help you decode these shifts by
-        revealing which planets are influencing your life at any given time
-      </PrimaryText>
-      <div style={{ margin: "0 1rem" }}>
-        <DividerWithImage imageSrc={ShubhTalkLogo} />
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <h1>Dasha Calculator</h1>
+        <p>Making Sense of Your Life's Path</p>
       </div>
+
+      <div className={styles.infoCard}>
+        <h3>What is Dasha?</h3>
+        <p>
+          Ever had a phase in life where everything just clicked—a dream job, a
+          happy relationship, maybe even unexpected success? And then suddenly,
+          things slow down, plans stall, and you're left wondering, "What
+          changed?" It's your Dasha period at work. A Dasha calculator will help
+          you decode these shifts by revealing which planets are influencing your
+          life at any given time.
+        </p>
+      </div>
+
       <AstroBirthForm
         title="Calculate Your Dasha here"
         submitText="Calculate my Dasha"

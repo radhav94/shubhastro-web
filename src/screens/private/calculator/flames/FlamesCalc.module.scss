@@ -120,6 +120,28 @@
   &:active { transform: scale(0.98); }
 }
 
+.resetRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.resetBtn {
+  padding: 6px 18px;
+  border-radius: 20px;
+  border: 1.5px solid #f75801;
+  background: transparent;
+  color: #f75801;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  &:hover {
+    background: linear-gradient(90deg, #f75801, #d43400);
+    color: #fff;
+  }
+}
+
 @media (max-width: 560px) {
   .hero h1 { font-size: 22px; }
   .form { padding: 22px 16px; }

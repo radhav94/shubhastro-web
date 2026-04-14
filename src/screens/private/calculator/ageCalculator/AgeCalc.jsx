@@ -1,10 +1,8 @@
-import PrimaryText from "../../../../component/PrimaryText";
-import DividerWithImage from "../../../../component/UI/DividerWithImage";
-import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import { useState } from "react";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { useNavigate } from "react-router-dom";
 import DateWithSingleInputForm from "../forms/DateWithSingleInputForm";
+import styles from "./AgeCalc.module.scss";
 
 const STORAGE_KEY = "age_calculator";
 
@@ -65,21 +63,22 @@ const AgeCalc = () => {
   };
 
   return (
-    <div style={{ margin: "0 3rem" }}>
-      <PrimaryText isCenter isSemiBold size_24>
-        Age Calculator: Decode Your Life’s Journey with Cosmic Insight
-      </PrimaryText>
-      <PrimaryText style={{ color: "gray", marginTop: "0.5rem" }} size_16>
-        Have you ever paused for a moment and thought exactly how many days I
-        have lived? Or maybe you're trying to figure out the exact age gap
-        between you and your partner? That’s where an age calculator comes in.
-        It’s not just about numbers, it’s about knowing you better. From your
-        exact age in years, months, and days to even hours, this simple tool can
-        reveal more than you think.
-      </PrimaryText>
-      <div style={{ margin: "0 1rem" }}>
-        <DividerWithImage imageSrc={ShubhTalkLogo} />
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <h1>Age Calculator</h1>
+        <p>Decode Your Life's Journey with Cosmic Insight</p>
       </div>
+
+      <div className={styles.infoCard}>
+        <h3>What is Age Calculator?</h3>
+        <p>
+          Have you ever paused for a moment and thought exactly how many days you
+          have lived? Or maybe you're trying to figure out the exact age gap
+          between you and your partner? From your exact age in years, months, and
+          days to even hours, this simple tool can reveal more than you think.
+        </p>
+      </div>
+
       <DateWithSingleInputForm
         title="Calculate your Age here"
         submitText="Calculate my Age"

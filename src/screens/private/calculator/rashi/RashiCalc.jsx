@@ -1,10 +1,8 @@
 import { useState } from "react";
 import AstroBirthForm from "../forms/AstroBirthForm";
-import PrimaryText from "../../../../component/PrimaryText";
-import DividerWithImage from "../../../../component/UI/DividerWithImage";
-import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import { useNavigate } from "react-router-dom";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import styles from "./RashiCalc.module.scss";
 
 const STORAGE_KEY = "rashi_moon_sign";
 
@@ -75,20 +73,22 @@ const RashiCalc = () => {
   };
 
   return (
-    <div style={{ margin: "0 3rem" }}>
-      <PrimaryText isCenter isSemiBold size_24>
-        Rashi/Moon Sign Calculator: Find Your Moon sign & Unlock Life's
-        Mysteries
-      </PrimaryText>
-      <PrimaryText style={{ color: "gray" }} margin="" size_16>
-        Ever notice how some days flow effortlessly, while others feel like a
-        constant uphill climb? That’s because your Rashi, or moon sign, are
-        quietly shaping the emotional rhythm of your life. Using a Rashi/Moon
-        Sign calculator can make you understand the shape of your emotions.
-      </PrimaryText>
-      <div style={{ margin: "0 1rem" }}>
-        <DividerWithImage imageSrc={ShubhTalkLogo} />
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <h1>Rashi/Moon Sign Calculator</h1>
+        <p>Find Your Moon Sign & Unlock Life's Mysteries</p>
       </div>
+
+      <div className={styles.infoCard}>
+        <h3>What is Rashi/Moon Sign?</h3>
+        <p>
+          Ever notice how some days flow effortlessly, while others feel like a
+          constant uphill climb? That's because your Rashi, or moon sign, are
+          quietly shaping the emotional rhythm of your life. Using a Rashi/Moon
+          Sign calculator can make you understand the shape of your emotions.
+        </p>
+      </div>
+
       <AstroBirthForm
         title="Rashi Calculator"
         submitText="Calculate my Rashi"

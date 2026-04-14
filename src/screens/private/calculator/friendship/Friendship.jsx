@@ -1,10 +1,8 @@
-import PrimaryText from "../../../../component/PrimaryText";
-import DividerWithImage from "../../../../component/UI/DividerWithImage";
-import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import { useState } from "react";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { useNavigate } from "react-router-dom";
 import FlamesForm from "../forms/FlamesForm";
+import styles from "./Friendship.module.scss";
 
 const STORAGE_KEY = "friendship_calculator";
 
@@ -39,20 +37,23 @@ const Friendship = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
     navigate("/friendship-calculator/report");
   };
+
   return (
-    <div style={{ margin: "0 3rem" }}>
-      <PrimaryText isCenter isSemiBold size_24>
-        Friendship Compatibility Calculator: Understanding True Bonds
-      </PrimaryText>
-      <PrimaryText style={{ color: "gray", marginTop: "0.5rem" }} size_16>
-        Ever wondered if your bond with someone is built to last? Whether it’s
-        that childhood bestie, your college roommate, or a new connection, a
-        <strong>Friendship Compatibility Calculator</strong>
-        can give you surprising clarity.
-      </PrimaryText>
-      <div style={{ margin: "0 1rem" }}>
-        <DividerWithImage imageSrc={ShubhTalkLogo} />
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <h1>Friendship Compatibility Calculator</h1>
+        <p>Understanding True Bonds</p>
       </div>
+
+      <div className={styles.infoCard}>
+        <h3>What is Friendship?</h3>
+        <p>
+          Ever wondered if your bond with someone is built to last? Whether it's
+          that childhood bestie, your college roommate, or a new connection, a
+          Friendship Compatibility Calculator can give you surprising clarity.
+        </p>
+      </div>
+
       <FlamesForm
         title="Calculate your Friendship Compatibility here"
         submitText="Calculate our Friendship"
@@ -66,7 +67,6 @@ const Friendship = () => {
           localStorage.removeItem(STORAGE_KEY);
         }}
       />
-      ;
     </div>
   );
 };

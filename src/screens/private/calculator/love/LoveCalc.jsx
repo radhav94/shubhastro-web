@@ -1,10 +1,8 @@
-import PrimaryText from "../../../../component/PrimaryText";
-import DividerWithImage from "../../../../component/UI/DividerWithImage";
-import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import LoveMatchForm from "../forms/LoveMatchForm";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
-import { useNavigate } from "react-router-dom";
+import styles from "./LoveCalc.module.scss";
 
 const STORAGE_KEY = "love_calculator";
 
@@ -49,26 +47,28 @@ const LoveCalc = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
     navigate("/love-calculator/report");
   };
+
   return (
-    <div style={{ margin: "0 3rem" }}>
-      <PrimaryText isCenter isSemiBold size_24>
-        Love Calculator: Find Your Perfect Match and Discover True Love
-      </PrimaryText>
-      <div style={{ margin: "0 1rem" }}>
-        <DividerWithImage imageSrc={ShubhTalkLogo} />
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <h1>Love Calculator</h1>
+        <p>Find Your Perfect Match and Discover True Love</p>
       </div>
-      <PrimaryText style={{ color: "gray", marginTop: "0.5rem" }} size_16>
-        Have you ever thought if you and your crush are a perfect match? A love
-        calculator is a fun and simple tool that tells you your love percentage
-        and how well you both connect. Just enter names, birth dates, or even
-        zodiac signs, and see the result!
-      </PrimaryText>
-      <PrimaryText style={{ margin: "1rem 0rem", color: "gray" }} size_16>
-        Finding love isn’t always easy, but tools like the love calculator make
-        it exciting. They help you understand your feelings and check your
-        romantic compatibility. Many people use it for fun and to explore their
-        bond before starting a relationship. Try it and see what your stars say!
-      </PrimaryText>
+
+      <div className={styles.infoCard}>
+        <h3>What is Love?</h3>
+        <p>
+          Have you ever thought if you and your crush are a perfect match? A love
+          calculator is a fun and simple tool that tells you your love percentage
+          and how well you both connect. Just enter names, birth dates, or even
+          zodiac signs, and see the result! Finding love isn't always easy, but tools
+          like the love calculator make it exciting. They help you understand your
+          feelings and check your romantic compatibility. Many people use it for fun
+          and to explore their bond before starting a relationship. Try it and see
+          what your stars say!
+        </p>
+      </div>
+
       <LoveMatchForm
         title="Find Love (Percentage)% Between"
         submitText="Calculate Love %"
