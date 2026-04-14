@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Send, Mic, Check, Phone, MessageSquare } from "lucide-react";
+import { ChevronLeft, Check, Phone, MessageSquare } from "lucide-react";
 import { useGetSupportQuestionsQuery, useLazyGetSubTopicsQuery, useLazyGetSupportEntitySessionsQuery, useCreateSupportTicketMutation } from "../../../redux/api/supportApi/supportApi";
 import EntityCard from "./entityCards/EntityCard";
 import entityCardStyles from "./entityCards/EntityCards.module.scss";
@@ -9,7 +9,6 @@ import styles from "./CustomerSupport.module.scss";
 
 const CustomerSupport = () => {
   const navigate = useNavigate();
-  const [inputMessage, setInputMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedRating, setSelectedRating] = useState(0);
@@ -175,31 +174,6 @@ const CustomerSupport = () => {
     }
   };
 
-  const handleSendMessage = () => {
-    if (!inputMessage.trim()) return;
-
-    const userMessage = {
-      id: `user-${Date.now()}`,
-      type: "user",
-      text: inputMessage,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInputMessage("");
-
-    // Simulate bot response
-    setTimeout(() => {
-      const botResponse = {
-        id: `bot-${Date.now()}`,
-        type: "bot",
-        text: "Thank you for your message. Our support team will assist you shortly.",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botResponse]);
-    }, 1000);
-  };
-
   const handleEscalation = (option) => {
     setTicketContactMethod(option.contactMethod);
     setTicketIssue("");
@@ -296,18 +270,34 @@ const CustomerSupport = () => {
         setSessionsPage(1);
         setHasMoreSessions((res?.data?.pagination?.page || 1) < (res?.data?.pagination?.totalPages || 1));
 
+        if (list.length === 0) {
+          const botResponse = {
+            id: `bot-${Date.now()}`,
+            type: "bot",
+            text: "We don't have any details for you yet. It looks like you haven't taken any session so far. If you have any other issue, we're happy to help 🙏",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, botResponse]);
+        } else {
+          const botResponse = {
+            id: `bot-${Date.now()}`,
+            type: "bot",
+            text: "Sure 😊 Let us know which session this is about",
+            timestamp: new Date(),
+            showOrders: true,
+            connectVia,
+          };
+          setCurrentConnectVia(connectVia);
+          setMessages((prev) => [...prev, botResponse]);
+        }
+      } catch {
         const botResponse = {
           id: `bot-${Date.now()}`,
           type: "bot",
-          text: "Sure 😊 Let us know which session this is about",
+          text: "We're having trouble fetching your details. Please try again after some time 🙏",
           timestamp: new Date(),
-          showOrders: true,
-          connectVia,
         };
-        setCurrentConnectVia(connectVia);
         setMessages((prev) => [...prev, botResponse]);
-      } catch {
-        // silently fail
       } finally {
         setIsLoadingSessions(false);
       }
@@ -367,7 +357,7 @@ const CustomerSupport = () => {
   };
 
   const handleEndChat = () => {
-    setShowRatingModal(true);
+    navigate(-1);
   };
 
   const handleRatingSubmit = () => {
@@ -547,27 +537,12 @@ const CustomerSupport = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
-      {!ticketCreated && (
-        <div className={styles.inputArea}>
-          <div className={styles.inputWrapper}>
-            <input
-              type="text"
-              placeholder="Start typing..."
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-              className={styles.input}
-            />
-            <button className={styles.micButton}>
-              <Mic size={16} />
-            </button>
-            <button className={styles.sendButton} onClick={handleSendMessage}>
-              <Send size={16} />
-            </button>
-          </div>
-        </div>
-      )}
+      {/* End Chat Button - Fixed at bottom */}
+      <div className={styles.inputArea}>
+        <button className={styles.endChatBtn} onClick={handleEndChat}>
+          End Chat
+        </button>
+      </div>
 
       {/* Rating Modal */}
       {showRatingModal && (

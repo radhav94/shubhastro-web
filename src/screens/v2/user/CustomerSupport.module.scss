@@ -364,6 +364,7 @@
 .inputArea {
   display: flex;
   align-items: center;
+  justify-content: center;
   max-width: 800px;
   width: 100%;
   margin: 0 auto;
@@ -378,6 +379,23 @@
 
   @media (max-width: 480px) {
     padding: 10px 12px;
+  }
+}
+
+.endChatBtn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f75801, #d43400);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.92;
   }
 }
 
