@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import styles from "./TodayPanchang.module.scss";
 import { useFetchAdvancePanchangQuery } from "../../../../redux/api/panchang/panchangApi";
-import { useGetAstroDetailsQuery } from "../../../../redux/api/kundli/kundliApi";
+import { useGetAstroDetailsQuery, useGetPlanetsQuery } from "../../../../redux/api/kundli/kundliApi";
 import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import { skipToken } from "@reduxjs/toolkit/query";
+import { setForm } from "../../../../redux/kundliform/formSlice";
 
 import { PanchangInputCard } from "../../../../component";
 import PanchangCards from "../../../../component/UI/cards/PanchangCards";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
-import AccordionSection from "../../../../component/UI/AccordionSection/AccordionSection";
+import BasicContent from "../../kundli/BasicContent/BasicContent";
+// import AccordionSection from "../../../../component/UI/AccordionSection/AccordionSection";
 
 // Icons
 import { BsCalendar2Week } from "react-icons/bs";
@@ -35,7 +37,10 @@ import { WiMoonFull } from "react-icons/wi";
 
 const TodayPanchang = () => {
   const location = useLocation();
+  const dispatch = useDispatch();
   const pad = (num) => String(num).padStart(2, "0");
+
+
   
   // Get initial date and location from navigation state OR URL query params
   const searchParams = new URLSearchParams(window.location.search);
@@ -82,6 +87,28 @@ const TodayPanchang = () => {
     ? profiles.find((p) => p._id === selectedKundli._id) || selfProfile
     : selfProfile;
 
+  // Sync active profile to Redux form state so BasicContent can read it
+  useEffect(() => {
+    if (!activeProfile) return;
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const meridiem = activeProfile.hour >= 12 ? "PM" : "AM";
+    const hour12 = activeProfile.hour > 12 ? activeProfile.hour - 12 : activeProfile.hour === 0 ? 12 : activeProfile.hour;
+
+    dispatch(setForm({
+      name: activeProfile.name,
+      gender: activeProfile.gender === "male" ? "Male" : activeProfile.gender === "female" ? "Female" : "Others",
+      day: String(activeProfile.day),
+      month: months[activeProfile.month - 1],
+      year: String(activeProfile.year),
+      hour: String(hour12),
+      minute: String(activeProfile.min),
+      meridiem,
+      birthPlace: activeProfile.place,
+      latitude: activeProfile.lat,
+      longitude: activeProfile.lon,
+    }));
+  }, [activeProfile?._id, dispatch]);
+
   // Build birth panchang params: use profile if available, else use page's default payload
   const birthPayload = activeProfile
     ? {
@@ -96,7 +123,7 @@ const TodayPanchang = () => {
       }
     : payload; // fallback to page's default date/location
 
-  // Build vedic params for astro details API
+  // Build vedic params for kundli APIs
   const birthVedicParams = buildVedicParam({
     day: birthPayload.day,
     month: birthPayload.month,
@@ -108,12 +135,11 @@ const TodayPanchang = () => {
     tzone: birthPayload.tzone || 5.5,
   });
 
-  // Fetch birth panchang
-  const { data: birthPanchangRaw, isLoading: birthPanchangLoading } =
-    useFetchAdvancePanchangQuery(birthPayload);
-  const birthPanchang = birthPanchangRaw?.response || panchangData;
+  // Fetch planets data (provides birthDetails + birthPanchang for BasicContent)
+  const { data: planetsData, isLoading: planetsLoading } =
+    useGetPlanetsQuery(birthVedicParams || skipToken);
 
-  // Fetch astro details (for avakhada data)
+  // Fetch astro details (provides avakhada data for BasicContent)
   const { data: astroDetailsRaw, isLoading: astroLoading } =
     useGetAstroDetailsQuery(birthVedicParams || skipToken);
   const astroDetails = astroDetailsRaw?.response;
@@ -135,7 +161,7 @@ const TodayPanchang = () => {
         tzone: 5.5,
       });
     }
-  }, [initialDate, finalLat, finalLon]);
+  }, [initialDate, finalLat, finalLon, panchangTab]);
 
   // -------------------- TODAY HIGHLIGHTS --------------------
   const todayData = [
@@ -460,78 +486,42 @@ const TodayPanchang = () => {
               initialLocation={finalLocation}
               initialLatitude={finalLat}
               initialLongitude={finalLon}
-              showForm={panchangTab}
+              showForm={isLoggedIn ? panchangTab:"overall"}
             />
           
 
-          {/* Tab Switch */}
-          <div className={styles.tabWrapper}>
-            <button
-              className={`${styles.tab} ${panchangTab === "birth" ? styles.tabActive : ""}`}
-              onClick={() => setPanchangTab("birth")}
-            >
-              Birth Panchang
-            </button>
-            <button
-              className={`${styles.tab} ${panchangTab === "overall" ? styles.tabActive : ""}`}
-              onClick={() => setPanchangTab("overall")}
-            >
-              Overall Panchang
-            </button>
-          </div>
+          {/* Tab Switch - only for logged-in users */}
+          {isLoggedIn && (
+            <div className={styles.tabWrapper}>
+              <button
+                className={`${styles.tab} ${panchangTab === "birth" ? styles.tabActive : ""}`}
+                onClick={() => setPanchangTab("birth")}
+              >
+                Birth Panchang
+              </button>
+              <button
+                className={`${styles.tab} ${panchangTab === "overall" ? styles.tabActive : ""}`}
+                onClick={() => setPanchangTab("overall")}
+              >
+                Overall Panchang
+              </button>
+            </div>
+          )}
 
-          {/* Birth Panchang Tab */}
-          {panchangTab === "birth" && (
+          {/* Birth Panchang Tab - only for logged-in users */}
+          {isLoggedIn && panchangTab === "birth" && (
             <div className={styles.birthPanchangContent}>
-              {(birthPanchangLoading || astroLoading) && <PrimaryLoader isLoading />}
-              <AccordionSection
-                title="Birth Details"
-                defaultOpen={true}
-                data={{
-                  Name: activeProfile?.name || "—",
-                  Time: `${String(birthPayload.hour).padStart(2, "0")}:${String(birthPayload.min).padStart(2, "0")}`,
-                  Date: `${String(birthPayload.day).padStart(2, "0")}/${String(birthPayload.month).padStart(2, "0")}/${birthPayload.year}`,
-                  Place: activeProfile?.place || finalLocation,
-                  Rashi: birthPanchang?.rasi?.name || astroDetails?.moon_sign || "—",
-                  Nakshatra: birthPanchang?.nakshatra?.name || "—",
-                  "Nakshatra Pada": birthPanchang?.nakshatra?.pada || "—",
-                  "Day Of Birth": birthPanchang?.day?.name || "—",
-                  "Day Lord": birthPanchang?.nakshatra?.lord || "—",
-                }}
-              />
-              <AccordionSection
-                title="Panchang Details"
-                data={{
-                  Tithi: birthPanchang?.tithi?.name || "—",
-                  Yoga: birthPanchang?.yoga?.name || "—",
-                  Karana: birthPanchang?.karana?.name || "—",
-                  Paksha: birthPanchang?.advanced_details?.masa?.paksha || "—",
-                  Sunrise: birthPanchang?.advanced_details?.sun_rise || "—",
-                  Sunset: birthPanchang?.advanced_details?.sun_set || "—",
-                  Moonrise: birthPanchang?.advanced_details?.moon_rise || "—",
-                  Moonset: birthPanchang?.advanced_details?.moon_set || "—",
-                  "Rahu Kaal": birthPanchang?.rahukaal || "—",
-                }}
-              />
-              <AccordionSection
-                title="Avakhada Details"
-                data={{
-                  Varna: astroDetails?.Varna || "—",
-                  Vashya: astroDetails?.Vashya || "—",
-                  Yoni: astroDetails?.Yoni || "—",
-                  Gan: astroDetails?.Gan || "—",
-                  Nadi: astroDetails?.Nadi || "—",
-                  Tatva: astroDetails?.Tatva || astroDetails?.tatpitta || "—",
-                  "Name Alphabet": astroDetails?.name_alphabet || "—",
-                  Paya: astroDetails?.Paya || "—",
-                  Yunja: astroDetails?.Yunja || "—",
-                }}
+              {(planetsLoading || astroLoading) && <PrimaryLoader isLoading />}
+              <BasicContent
+                birthDetails={planetsData?.response}
+                birthPanchang={planetsData?.response?.panchang}
+                astroDetails={astroDetails}
               />
             </div>
           )}
 
-          {/* Overall Panchang Tab (existing content) */}
-          {panchangTab === "overall" && (
+          {/* Overall Panchang - shown when tab is "overall" OR user is not logged in */}
+          {(!isLoggedIn || panchangTab === "overall") && (
             <>
               <PanchangCards data={todayData} />
               <PanchangCards data={ayanamsaData} title="Ayanamsa & Rasi" />
