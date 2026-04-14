@@ -46,13 +46,19 @@
 .submitBtn {
   margin: 20px auto 0;
   display: block;
-  padding: 10px 22px;
+  padding: 12px 28px;
   border-radius: 24px;
-  background: #8d7b00;
+  background: linear-gradient(135deg, #f75801, #d43400);
   color: #fff;
   font-weight: 600;
+  font-size: 15px;
   border: none;
   cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.9;
+  }
 }
 .required {
   color: red;

@@ -7,9 +7,11 @@ const CalcBackButton = () => {
   return (
     <>
       <div className={styles.calcBackBar}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)} aria-label="Go back">
-          <ChevronLeft size={22} />
-        </button>
+        <div className={styles.backBtnInner}>
+          <button className={styles.backBtn} onClick={() => navigate(-1)} aria-label="Go back">
+            <ChevronLeft size={22} />
+          </button>
+        </div>
       </div>
       <div className={styles.spacer} />
     </>

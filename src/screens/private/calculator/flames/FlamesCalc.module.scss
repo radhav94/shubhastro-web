@@ -1,0 +1,126 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 24px;
+  h1 { font-size: 26px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px; }
+  p { font-size: 14px; color: #888; margin: 0; }
+}
+
+.infoCard {
+  background: #fffaf5;
+  border: 1px solid #ffe8d6;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 24px;
+  h3 { font-size: 15px; font-weight: 600; color: #1a1a1a; margin: 0 0 6px; }
+  p { font-size: 13px; color: #777; line-height: 1.6; margin: 0; }
+}
+
+.form {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 24px;
+  box-shadow: 0 1px 16px rgba(0, 0, 0, 0.06);
+}
+
+.formTitle {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 20px;
+}
+
+.profileSelector {
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #f0ebe4;
+  label { font-size: 13px; font-weight: 500; color: #888; display: block; margin-bottom: 10px; }
+}
+
+.profileChips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.profileChip {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1.5px solid #e0dbd4;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { border-color: #f75801; color: #f75801; }
+}
+
+.activeChip {
+  background: #fff5f0;
+  border-color: #f75801;
+  color: #f75801;
+  font-weight: 600;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+    span { color: #e53935; }
+  }
+
+  input {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    font-size: 15px;
+    color: #1a1a1a;
+    transition: border-color 0.3s, box-shadow 0.3s;
+
+    &:focus {
+      outline: none;
+      border-color: #f75801;
+      box-shadow: 0 0 0 3px rgba(247, 88, 1, 0.12);
+    }
+
+    &::placeholder { color: #bbb; }
+  }
+}
+
+.err {
+  color: #e53935;
+  font-size: 12px;
+  margin: -4px 0 0;
+}
+
+.submitBtn {
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f75801, #d43400);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  &:hover { opacity: 0.92; }
+  &:active { transform: scale(0.98); }
+}
+
+@media (max-width: 560px) {
+  .hero h1 { font-size: 22px; }
+  .form { padding: 22px 16px; }
+}

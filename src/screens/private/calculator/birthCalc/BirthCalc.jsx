@@ -1,13 +1,12 @@
 import { useState } from "react";
-import AstroBirthForm from "../forms/AstroBirthForm";
-import PrimaryText from "../../../../component/PrimaryText";
-import DividerWithImage from "../../../../component/UI/DividerWithImage";
-import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import { useNavigate } from "react-router-dom";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import LocationSearch from "../../../../utils/location/locationSearchVedic";
+import { TODAY } from "../../../../utils/dateFormat/date";
+import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
+import styles from "../mangaldosha/MangalDosha.module.scss";
 
 const STORAGE_KEY = "birth_natal_calc";
-
 const initialFormState = {
   name: "",
   gender: "",
@@ -21,77 +20,120 @@ const initialFormState = {
 
 const BirthCalc = () => {
   const navigate = useNavigate();
-
-  const [formData, setFormData] = useFormFromLocalStorage(
-    STORAGE_KEY,
-    initialFormState
-  );
-
+  const [formData, setFormData] = useFormFromLocalStorage(STORAGE_KEY, initialFormState);
   const [errors, setErrors] = useState({});
 
-  const handleChange = (key, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+  const token = localStorage.getItem("shubhtalk_customer_token");
+  const { data: kundliData } = useGetAllKundlisQuery(undefined, { skip: !token });
+  const profiles = kundliData?.data || [];
 
+  const handleProfileSelect = (profileId) => {
+    const profile = profiles.find((p) => p._id === profileId);
+    if (!profile) return;
+    const dob = `${profile.year}-${String(profile.month).padStart(2, "0")}-${String(profile.day).padStart(2, "0")}`;
+    const tob = `${String(profile.hour).padStart(2, "0")}:${String(profile.min).padStart(2, "0")}`;
+    setFormData({ name: profile.name || "", gender: profile.gender || "", dob, tob, place: profile.place || "", lat: profile.lat || null, lng: profile.lon || null, isTimeUnknown: false });
+    setErrors({});
+  };
+
+  const handleChange = (key, value) => {
+    setFormData((prev) => {
+      if (key === "isTimeUnknown" && value === true) return { ...prev, isTimeUnknown: true };
+      return { ...prev, [key]: value };
+    });
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const newErrors = {};
-
     if (!formData.name) newErrors.name = "Name is required";
     if (!formData.gender) newErrors.gender = "Gender is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
     if (!formData.place) newErrors.place = "Place of birth is required";
-
-    if (!formData.isTimeUnknown && !formData.tob) {
-      newErrors.tob = "Time of birth is required or select unknown";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    const payload = {
-      ...formData,
-      tob: formData.isTimeUnknown ? "12:00" : formData.tob,
-    };
+    if (!formData.isTimeUnknown && !formData.tob) newErrors.tob = "Time of birth is required";
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+    const payload = { ...formData, tob: formData.isTimeUnknown ? "12:00" : formData.tob };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     navigate("/birth-natal-chart-calculator/report");
   };
 
   return (
-    <div style={{ margin: "0 3rem" }}>
-      <PrimaryText isCenter isSemiBold size_24>
-        Birth/Natal Chart Calculator: Discover Your Life's Path
-      </PrimaryText>
-
-      <PrimaryText style={{ color: "gray" }} size_16>
-        Ever felt like there’s a version of you that no one really sees, not
-        even you sometimes? That feeling of being slightly off-track isn’t
-        random, it’s your soul nudging you to look deeper. A Birth/Natal Chart
-        Calculator comes in right here and it’s not just another astrology tool,
-        but a mirror to your inner world. The deeper truth you’re seeking? It’s
-        already written in your birth chart, waiting to be unlocked.
-      </PrimaryText>
-
-      <div style={{ margin: "0 1rem" }}>
-        <DividerWithImage imageSrc={ShubhTalkLogo} />
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <h1>Birth / Natal Chart Calculator</h1>
+        <p>Discover your life's path through the stars</p>
       </div>
 
-      <AstroBirthForm
-        title="Calculate Your Birth Chart here"
-        submitText="Calculate Birth"
-        formData={formData}
-        errors={errors}
-        onChange={handleChange}
-        onSubmit={handleSubmit}
-      />
+      <div className={styles.infoCard}>
+        <h3>What is a Birth Chart?</h3>
+        <p>
+          A birth chart is a snapshot of the sky at the exact moment you were born.
+          It reveals your personality, strengths, challenges, and life purpose based
+          on planetary positions. Unlock the deeper truth written in your stars.
+        </p>
+      </div>
+
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <h3 className={styles.formTitle}>Enter Your Birth Details</h3>
+
+        {profiles.length > 0 && (
+          <div className={styles.profileSelector}>
+            <label>Quick Fill from Profile</label>
+            <div className={styles.profileChips}>
+              {profiles.map((p) => (
+                <button key={p._id} type="button" className={`${styles.profileChip} ${formData.name === p.name ? styles.activeChip : ""}`} onClick={() => handleProfileSelect(p._id)}>
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className={styles.row}>
+          <div className={styles.field}>
+            <label>Full Name <span>*</span></label>
+            <input placeholder="Enter your name" value={formData.name} onChange={(e) => handleChange("name", e.target.value)} />
+            {errors.name && <p className={styles.err}>{errors.name}</p>}
+          </div>
+          <div className={styles.field}>
+            <label>Gender <span>*</span></label>
+            <select value={formData.gender} onChange={(e) => handleChange("gender", e.target.value)}>
+              <option value="">Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+            {errors.gender && <p className={styles.err}>{errors.gender}</p>}
+          </div>
+        </div>
+
+        <div className={styles.row}>
+          <div className={styles.field}>
+            <label>Date of Birth <span>*</span></label>
+            <input type="date" value={formData.dob} max={TODAY} onChange={(e) => handleChange("dob", e.target.value)} onClick={(e) => e.target.showPicker?.()} />
+            {errors.dob && <p className={styles.err}>{errors.dob}</p>}
+          </div>
+          <div className={styles.field}>
+            <div className={styles.tobLabelRow}>
+              <label>Time of Birth <span>*</span></label>
+              <label className={styles.checkLabel}>
+                <input type="checkbox" checked={formData.isTimeUnknown} onChange={(e) => handleChange("isTimeUnknown", e.target.checked)} />
+                I don't know
+              </label>
+            </div>
+            <input type="time" value={formData.isTimeUnknown ? "" : formData.tob} onChange={(e) => handleChange("tob", e.target.value)} onClick={(e) => e.target.showPicker?.()} disabled={formData.isTimeUnknown} style={formData.isTimeUnknown ? { opacity: 0.4, cursor: "not-allowed" } : {}} />
+            {errors.tob && <p className={styles.err}>{errors.tob}</p>}
+          </div>
+        </div>
+
+        <div className={styles.field}>
+          <label>Place of Birth <span>*</span></label>
+          <LocationSearch value={formData.place} onChange={(e) => handleChange("place", e.target.value)} onPlaceSelect={(loc) => { handleChange("place", loc.address); handleChange("lat", loc.lat); handleChange("lng", loc.lng); }} />
+          {errors.place && <p className={styles.err}>{errors.place}</p>}
+        </div>
+
+        <button type="submit" className={styles.submitBtn}>Calculate Birth Chart</button>
+      </form>
     </div>
   );
 };

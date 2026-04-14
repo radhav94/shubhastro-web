@@ -58,7 +58,7 @@ const FlamesReport = () => {
         </button>
       </div>
 
-      <button className={styles.againBtn} onClick={() => navigate("/flames")}>
+      <button className={styles.againBtn} onClick={() => navigate("/flames-calculator")}>
         Calculate Again
       </button>
     </div>
