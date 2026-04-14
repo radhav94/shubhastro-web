@@ -504,3 +504,40 @@
   height: 100%;
   border: none;
 }
+
+// Gift message
+.giftMessage {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #fff8e1, #fff3cd);
+  border: 1px solid #ffe0a0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  min-width: 180px;
+}
+
+.giftImage {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.giftInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.giftName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.giftPrice {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f75801;
+}

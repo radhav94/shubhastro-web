@@ -7,15 +7,16 @@ import styles from "../Home.module.scss";
 import { DefaultImages } from "../../../../utils/appImages";
 
 export function formatDateToReadable(input) {
-  const [day, month, year] = input.split("/").map(Number);
-
-  const date = new Date(year, month - 1, day);
-
-  return date.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  if (!input) return "";
+  let date;
+  // Handle DD/MM/YYYY format
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(input)) {
+    const [day, month, year] = input.split("/");
+    date = dayjs(`${year}-${month}-${day}`);
+  } else {
+    date = dayjs(input);
+  }
+  return date.isValid() ? date.format("DD MMM, YYYY") : input;
 }
 
 const BlogsSection = ({ blogData = [], title, showMore }) => {
