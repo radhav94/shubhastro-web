@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useParams, useLocation, useSearchParams } from "react-router-dom";
 import styles from "./EPoojaDetail.module.scss";
 import { FiChevronLeft, FiChevronRight, FiPlus, FiMinus, FiCalendar, FiX, FiHome, FiBriefcase, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
@@ -107,7 +107,16 @@ const EPoojaDetail = () => {
   const navigate = useNavigate();
   const { slug } = useParams();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const stateData = location.state;
+
+  // Prefer location.state (internal navigation), fall back to query params (external new-tab links)
+  const _resolvedVariant = stateData?._selectedVariant || (() => {
+    const variantId = searchParams.get("variantId");
+    const sku = searchParams.get("sku");
+    if (variantId) return { _id: variantId, skuCode: sku, sku };
+    return undefined;
+  })();
 
   // Always fetch product detail from API to ensure we have the MongoDB _id
   const { data: apiData, isLoading } = useGetEPoojaDetailQuery(slug, {
@@ -177,11 +186,11 @@ const EPoojaDetail = () => {
   })();
 
   // Track passed variant key for same-product different-variant navigation
-  const passedVariantKey = stateData?._selectedVariant?._id || stateData?._selectedVariant?.id || stateData?._selectedVariant?.sku || "";
+  const passedVariantKey = _resolvedVariant?._id || _resolvedVariant?.id || _resolvedVariant?.sku || "";
 
   useEffect(() => {
     if (product?.variants?.length) {
-      const passedVariant = stateData?._selectedVariant;
+      const passedVariant = _resolvedVariant;
       let initial = null;
       if (passedVariant) {
         initial = product.variants.find((v) =>

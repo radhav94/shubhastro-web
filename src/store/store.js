@@ -5,6 +5,7 @@ import authReducer from "../redux/auth/authSlice";
 import formReducer from "../redux/kundliform/formSlice";
 import kundliReducer from "../redux/kundli/kundliSlice";
 import aiwowReducer from "../redux/aiwow/aiwowSlice";
+import remedyReducer from "../redux/remedy/remedySlice";
 import { baseApi } from "../redux/api/baseApi/baseApi";
 import { pythonApi } from "../redux/api/baseApi/pythonApi";
 import { horoscopeApi } from "../redux/api/baseApi/horoscopeBaseApi";
@@ -30,6 +31,7 @@ const rootReducer = combineReducers({
   form: formReducer,
   kundli: kundliReducer,
   aiwow: aiwowReducer,
+  remedy: remedyReducer,
   [baseApi.reducerPath]: baseApi.reducer,
   [privateRequestNew.reducerPath]: privateRequestNew.reducer,
   [localReuqqestApi.reducerPath]: localReuqqestApi.reducer,
