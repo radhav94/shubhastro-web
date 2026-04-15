@@ -275,12 +275,28 @@ const ProfileManager = ({
       // Only call API if user is logged in
       if (token) {
         // Call editKundli with id and payload
-        await editKundli({
+        const result = await editKundli({
           id: profileToEdit.kundli_ID,
           ...payload,
         }).unwrap();
 
         Toast.success("Profile updated successfully");
+
+        // Notify parent with updated profile so kundli data refreshes immediately
+        if (onProfileSelect) {
+          const updatedProfile = result?.data || {
+            ...profileToEdit,
+            ...payload,
+            hour: Number(payload.hour),
+            min: Number(payload.min),
+            day: Number(payload.day),
+            month: Number(payload.month),
+            year: Number(payload.year),
+            lat: Number(payload.lat),
+            lon: Number(payload.lon),
+          };
+          onProfileSelect(updatedProfile);
+        }
       } else {
         // Non-logged-in user: just show success message
         Toast.success("Profile updated");

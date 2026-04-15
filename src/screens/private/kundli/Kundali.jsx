@@ -565,21 +565,24 @@ const Kundali = () => {
         setTempProfiles(prev => [...prev, profile]);
       }
     }
-    
+
+    const isSameProfile = selectedProfile?._id && selectedProfile._id === profile._id;
+
     setSelectedProfile(profile);
     setShowSelectProfile(false);
     setLocalDownloadedLangs({});
-    
-    // Reset to Basic tab (index 0)
-    setActiveTabIndex(0);
-    
-    // Clear tab and subtab query parameters
-    const newParams = new URLSearchParams(searchParams);
-    newParams.delete('tab');
-    newParams.delete('subtab');
-    setSearchParams(newParams, { replace: true });
-  };
 
+    // Only reset tab when selecting a different profile, not when editing the current one
+    if (!isSameProfile) {
+      setActiveTabIndex(0);
+
+      // Clear tab and subtab query parameters
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('tab');
+      newParams.delete('subtab');
+      setSearchParams(newParams, { replace: true });
+    }
+  };
   const handleDeleteProfile = (e, profileId) => {
     e?.stopPropagation?.();
     setProfileToDelete(profileId);
