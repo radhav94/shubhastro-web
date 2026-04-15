@@ -16,10 +16,12 @@ import {
   saveViewerSession,
 } from "../../../../../utils/liveSessionStorage";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
+import { useCall } from "../../../../../context/CallContext";
 
 const LiveStreamingContainer = ({ client }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { activeCall } = useCall();
   const liveList = useLiveList();
   console.log("liveList", liveList);
   const currentLive = liveList?.getCurrentLive();
@@ -34,7 +36,7 @@ const LiveStreamingContainer = ({ client }) => {
 
   // Keyboard arrow navigation (ArrowUp = prev, ArrowDown = next)
   useEffect(() => {
-    if (ROLE === "host" || !liveList || liveList.lives.length <= 1) return;
+    if (ROLE === "host" || !liveList || liveList.lives.length <= 1 || activeCall) return;
 
     const handleKeyDown = (e) => {
       if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
@@ -206,7 +208,7 @@ const LiveStreamingContainer = ({ client }) => {
 
 
     const swipeHandlers = useSwipeReel({
-    enabled: ROLE !== "host",
+    enabled: ROLE !== "host" && !activeCall,
     onNext: liveList?.goNextLive,
     onPrev: liveList?.goPrevLive,
   });
@@ -233,7 +235,7 @@ const LiveStreamingContainer = ({ client }) => {
 />
 
     {/* 🔥 LIVE NAVIGATION CONTROLS */}
-    {ROLE !== "host" && liveList && liveList.lives.length > 1 && (
+    {ROLE !== "host" && liveList && liveList.lives.length > 1 && !activeCall && (
       <div className="live-nav-controls">
         <button
           className="nav-btn"
