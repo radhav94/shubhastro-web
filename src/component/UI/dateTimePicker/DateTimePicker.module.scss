@@ -52,6 +52,64 @@
   }
 }
 
+/* ───── Custom 12-hour Time Picker ───── */
+.timePickerWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.timeDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  display: flex;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.timeColumn {
+  max-height: 220px;
+  overflow-y: auto;
+  min-width: 56px;
+  text-align: center;
+  scrollbar-width: thin;
+
+  &:not(:last-child) {
+    border-right: 1px solid #f0f0f0;
+  }
+
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+  }
+}
+
+.timeItem {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #1a1a1a;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #fff5ec;
+  }
+}
+
+.activeItem {
+  background: #F75801 !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
 /* Calendar popup */
 .popper {
   z-index: 9999 !important;
