@@ -25,6 +25,12 @@ const DestinyCalc = () => {
     setErrors({});
   };
 
+  const onReset = () => {
+    setFormData(initialFormState);
+    setErrors({});
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
   const handleChange = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: "" }));
@@ -57,7 +63,10 @@ const DestinyCalc = () => {
       </div>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        <h3 className={styles.formTitle}>Enter Your Details</h3>
+        <div className={styles.resetRow}>
+          <button type="button" className={styles.resetBtn} onClick={onReset}>Reset</button>
+        </div>
+        {/* <h3 className={styles.formTitle}>Enter Your Details</h3>
 
         {profiles.length > 0 && (
           <div className={styles.profileSelector}>
@@ -70,7 +79,7 @@ const DestinyCalc = () => {
               ))}
             </div>
           </div>
-        )}
+        )} */}
 
         <div className={styles.field}>
           <label>Full Name <span>*</span></label>
