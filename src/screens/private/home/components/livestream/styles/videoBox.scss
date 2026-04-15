@@ -247,7 +247,7 @@
 }
 
 .host-name-truncate {
-  max-width: 160px;
+  max-width: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -448,6 +448,7 @@
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(255, 140, 0, 0.4);
 
