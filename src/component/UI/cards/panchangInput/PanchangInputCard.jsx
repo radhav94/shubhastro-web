@@ -6,6 +6,7 @@ import PrimaryText from "../../../PrimaryText";
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import ErrorText from "../../../ErrorText";
 import { appColors } from "../../../../utils/theme";
+import DateTimePicker from "../../dateTimePicker/DateTimePicker";
 
 const PanchangInputCard = ({
   imageSrc,
@@ -90,6 +91,9 @@ const PanchangInputCard = ({
           {formData.dateOfBirth ? Userdob : today}{" "}
         </PrimaryText>
 
+       
+             
+            
         {showForm === "overall" && (
           <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.inputBox}>
@@ -98,22 +102,36 @@ const PanchangInputCard = ({
                 <label htmlFor="dateOfBirth" className={styles.label}>
                   Date <span className={styles.requiredMark}>*</span>
                 </label>
-                <input
-                  id="dateOfBirth"
-                  name="dateOfBirth"
-                  type="date"
-                  className={styles.inputField}
-                  placeholder="Enter the Date"
-                  value={formData.dateOfBirth}
-                  onChange={handleInputChange}
-                  onClick={(e) => {
-                    // Manually show date picker
-                    if (e.target.showPicker) {
-                      e.target.showPicker();
-                    }
-                  }}
-                  // max={new Date().toISOString().split("T")[0]}
-                />
+                
+                 {/* <input
+                id="dateOfBirth"
+                name="dateOfBirth"
+                type="date"
+                className={styles.inputField}
+                placeholder="Enter the Date"
+                value={formData.dateOfBirth}
+                onChange={handleInputChange}
+                onClick={(e) => {
+                  if (e.target.showPicker) {
+                    e.target.showPicker();
+                  }
+                }}
+              /> */}
+              <DateTimePicker
+                mode="date"
+                selected={formData.dateOfBirth ? new Date(formData.dateOfBirth) : null}
+                onChange={(date) => {
+                  if (date) {
+                    const yyyy = date.getFullYear();
+                    const mm = String(date.getMonth() + 1).padStart(2, "0");
+                    const dd = String(date.getDate()).padStart(2, "0");
+                    setFormData((prev) => ({ ...prev, dateOfBirth: `${yyyy}-${mm}-${dd}` }));
+                  } else {
+                    setFormData((prev) => ({ ...prev, dateOfBirth: "" }));
+                  }
+                }}
+                placeholder="dd/mm/yyyy"
+              />
                 {errors.dateOfBirth && (
                   <ErrorText>{errors.dateOfBirth}</ErrorText>
                 )}

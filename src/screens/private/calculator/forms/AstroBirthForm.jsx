@@ -1,6 +1,7 @@
 import { TODAY } from "../../../../utils/dateFormat/date";
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import styles from "./AstroBirthForm.module.scss";
+import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 
 const AstroBirthForm = ({
   title,
@@ -58,12 +59,22 @@ const AstroBirthForm = ({
         <label>
           Date of Birth <span className={styles.required}>*</span>
         </label>
-        <input
-          type="date"
-          value={dob}
-          onChange={(e) => onChange("dob", e.target.value)}
-          max={TODAY}
-          onClick={(e) => e.target.showPicker?.()}
+        {/* <input type="date" value={dob} onChange={(e) => onChange("dob", e.target.value)} max={TODAY} onClick={(e) => e.target.showPicker?.()} /> */}
+        <DateTimePicker
+          mode="date"
+          selected={dob ? new Date(dob) : null}
+          onChange={(date) => {
+            if (date) {
+              const yyyy = date.getFullYear();
+              const mm = String(date.getMonth() + 1).padStart(2, "0");
+              const dd = String(date.getDate()).padStart(2, "0");
+              onChange("dob", `${yyyy}-${mm}-${dd}`);
+            } else {
+              onChange("dob", "");
+            }
+          }}
+          maxDate={new Date()}
+          placeholder="DD/MM/YYYY"
         />
         {errors?.dob && <p className={styles.error}>{errors.dob}</p>}
       </div>
@@ -84,12 +95,23 @@ const AstroBirthForm = ({
           <span>I don’t know my time of birth</span>
         </div>
         {!isTimeUnknown && (
-          <input
-            type="time"
-            value={tob}
-            onChange={(e) => onChange("tob", e.target.value)}
-            onClick={(e) => e.target.showPicker?.()}
-          />
+          <>
+            {/* <input type="time" value={tob} onChange={(e) => onChange("tob", e.target.value)} onClick={(e) => e.target.showPicker?.()} /> */}
+            <DateTimePicker
+              mode="time"
+              selected={tob ? (() => { const [h, m] = tob.split(":"); const d = new Date(); d.setHours(h, m, 0, 0); return d; })() : null}
+              onChange={(date) => {
+                if (date) {
+                  const hh = String(date.getHours()).padStart(2, "0");
+                  const mm = String(date.getMinutes()).padStart(2, "0");
+                  onChange("tob", `${hh}:${mm}`);
+                } else {
+                  onChange("tob", "");
+                }
+              }}
+              placeholder="Select time"
+            />
+          </>
         )}
         {errors?.tob && <p className={styles.error}>{errors.tob}</p>}
       </div>

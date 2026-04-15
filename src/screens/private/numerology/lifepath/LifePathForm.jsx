@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { setNumerologyPayload } from "../../../../redux/kundliform/formSlice";
 import { PATH } from "../../../../utils/routes/Paths";
 import { formatted, TODAY } from "../../../../utils/dateFormat/date";
+import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 
 const LifePathForm = () => {
   const [fullName, setFullName] = useState("");
@@ -93,14 +94,22 @@ const LifePathForm = () => {
             Date of Birth
           </PrimaryText>
 
-          <input
-            type="date"
+          {/* <input type="date" placeholder="DD/MM/YYYY" className={styles.input} value={dob} max={TODAY} onClick={(e) => e.target.showPicker?.()} onChange={(e) => setDob(e.target.value)} /> */}
+          <DateTimePicker
+            mode="date"
+            selected={dob ? new Date(dob) : null}
+            onChange={(date) => {
+              if (date) {
+                const yyyy = date.getFullYear();
+                const mm = String(date.getMonth() + 1).padStart(2, "0");
+                const dd = String(date.getDate()).padStart(2, "0");
+                setDob(`${yyyy}-${mm}-${dd}`);
+              } else {
+                setDob("");
+              }
+            }}
+            maxDate={new Date()}
             placeholder="DD/MM/YYYY"
-            className={styles.input}
-            value={dob}
-            max={TODAY}
-            onClick={(e) => e.target.showPicker?.()}
-            onChange={(e) => setDob(e.target.value)}
           />
         </div>
 
