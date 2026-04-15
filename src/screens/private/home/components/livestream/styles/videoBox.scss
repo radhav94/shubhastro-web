@@ -341,6 +341,7 @@
   border-radius: 16px;
   padding: 12px 14px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   z-index: 20;
@@ -435,6 +436,111 @@
     &:hover {
       background: #dc2626;
     }
+  }
+}
+
+.expanded-call-recharge-btn {
+  width: 100%;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: 4px;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.live-recharge-floating-btn {
+  position: fixed;
+  top: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(247, 88, 1, 0.4);
+  animation: rechargeFloat 2s ease-in-out infinite;
+
+  &:active {
+    transform: translateX(-50%) scale(0.95);
+  }
+}
+
+@keyframes rechargeFloat {
+  0%, 100% { box-shadow: 0 4px 16px rgba(247, 88, 1, 0.4); }
+  50% { box-shadow: 0 4px 24px rgba(247, 88, 1, 0.7); }
+}
+
+.live-recharge-card {
+  position: fixed;
+  bottom: 28vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 24px 20px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: rechargeCardIn 0.3s ease-out;
+}
+
+@keyframes rechargeCardIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.live-recharge-card-text {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.live-recharge-card-btn {
+  padding: 10px 32px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(247, 88, 1, 0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    transform: scale(1.04);
+    box-shadow: 0 6px 16px rgba(247, 88, 1, 0.5);
+  }
+
+  &:active {
+    transform: scale(0.96);
   }
 }
 
@@ -863,6 +969,21 @@
     transform: scale(1.08);
     box-shadow: 0 4px 12px rgba(247, 88, 1, 0.5);
   }
+
+  &.recharge {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    animation: rechargePulse 2s infinite;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
+    }
+  }
+}
+
+@keyframes rechargePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
 }
 
 .call-action-dot {

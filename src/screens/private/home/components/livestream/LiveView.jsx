@@ -37,6 +37,8 @@ import { useGetAstrologerByIdQuery } from "../../../../../redux/api/astrologer/a
 import KundliSelectModal from "../../../../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
 import SuggestedRemedyPanel from "../../../../../component/call/SuggestedRemedyPanel";
 import { addRemedy, clearNewRemedy, clearAllRemedy } from "../../../../../redux/remedy/remedySlice";
+import RechargeModal from "../../../../../component/recharge-modal/RechargeModal";
+import { useWalletBalance } from "../../../../private/wallet/useWalletBalance";
 
 const FixedLayer = ({ children }) => {
   return createPortal(children, document.body);
@@ -82,6 +84,8 @@ const LiveView = (props) => {
   const liveListCtx = useLiveList();
   const [showKundliModal, setShowKundliModal] = useState(false);
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
+  const [showRechargeButton, setShowRechargeButton] = useState(false);
+  const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
   const dispatch = useDispatch();
   const suggestedRemedyData = useSelector((s) => s.remedy);
   const hasNewRemedy = suggestedRemedyData.hasNewRemedy;
@@ -233,6 +237,7 @@ const LiveView = (props) => {
   
   const [createChatRoom] = useCreateChatRoomMutation();
   const [getBalance] = useGetBalanceMutation();
+  const { refreshWallet } = useWalletBalance();
 
   // Follow/unfollow astrologer
   const astrologerId = astrologer?._id || astrologer?.astrologerId;
@@ -652,6 +657,7 @@ const LiveView = (props) => {
     resetCallFlow();
     setIsRemedyPanelOpen(false);
     dispatch(clearAllRemedy());
+    setShowRechargeButton(false);
   };
 
   const localMicOn = isMicOn;
@@ -705,6 +711,14 @@ const LiveView = (props) => {
     };
     window.addEventListener("live:open-remedy-panel", handleOpenRemedy);
     return () => window.removeEventListener("live:open-remedy-panel", handleOpenRemedy);
+  }, [isCallForCurrentAstrologer]);
+
+  // Listen for low balance warning from VoiceCall/VideoCall
+  useEffect(() => {
+    if (!isCallForCurrentAstrologer) return;
+    const handleLowBalance = () => setShowRechargeButton(true);
+    window.addEventListener("call:low-balance", handleLowBalance);
+    return () => window.removeEventListener("call:low-balance", handleLowBalance);
   }, [isCallForCurrentAstrologer]);
 
   // Socket event handlers
@@ -825,6 +839,14 @@ const LiveView = (props) => {
       clearPendingLiveCallState();
       setIsRemedyPanelOpen(false);
       dispatch(clearAllRemedy());
+      setShowRechargeButton(false);
+    };
+
+    const handleWarning = (msg) => {
+      if (msg?.message?.includes("Low balance alert")) {
+        setShowRechargeButton(true);
+      }
+      Toast.warning(msg.message);
     };
 
     // Register socket listeners
@@ -832,12 +854,14 @@ const LiveView = (props) => {
     voiceSocket.on("call:accepted", handleCallAccepted);
     voiceSocket.on("call:rejected", handleCallRejected);
     voiceSocket.on("call:ended", handleCallEnded);
+    voiceSocket.on("warning", handleWarning);
 
     return () => {
       voiceSocket.off("call:room", handleCallRoom);
       voiceSocket.off("call:accepted", handleCallAccepted);
       voiceSocket.off("call:rejected", handleCallRejected);
       voiceSocket.off("call:ended", handleCallEnded);
+      voiceSocket.off("warning", handleWarning);
     };
   }, [
     userIdLocal,
@@ -989,6 +1013,18 @@ const LiveView = (props) => {
                     <IoCallSharp size={16} style={{ transform: "rotate(135deg)" }} />
                   </button>
                 </div>
+              </div>
+            )}
+            {/* Floating Recharge Card — visible during active call on low balance */}
+            {isCallForCurrentAstrologer && showRechargeButton && (
+              <div className="live-recharge-card">
+                <span className="live-recharge-card-text">Balance &lt; 5 minutes</span>
+                <button
+                  className="live-recharge-card-btn"
+                  onClick={() => setIsRechargeModalOpen(true)}
+                >
+                  Recharge Now
+                </button>
               </div>
             )}
 
@@ -1355,6 +1391,18 @@ const LiveView = (props) => {
           onClose={() => setIsRemedyPanelOpen(false)}
           remedyData={suggestedRemedyData}
           onProductClick={() => setIsRemedyPanelOpen(false)}
+        />
+
+        {/* Recharge Modal — shown on low balance warning during active call */}
+        <RechargeModal
+          isOpen={isRechargeModalOpen}
+          onClose={() => setIsRechargeModalOpen(false)}
+          onSuccess={() => {
+            refreshWallet();
+            setIsRechargeModalOpen(false);
+            setShowRechargeButton(false);
+          }}
+          title="Recharge to Continue Call"
         />
       </div>
     </FixedLayer>
