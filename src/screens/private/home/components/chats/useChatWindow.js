@@ -68,6 +68,8 @@ export default function useChat({
     // Clear chat start time
     localStorage.removeItem("shubhtalk_chat_start_time");
 
+    toast.success("Chat ended.");
+
     // Don't show chat feedback if call review is already open (chat→call switch scenario)
     // or if there's an active call (chat ended because user switched to call)
     if (openReview || activeCall) {

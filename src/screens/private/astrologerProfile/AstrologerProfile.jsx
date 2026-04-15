@@ -1752,13 +1752,13 @@ const AstrologerProfile = () => {
 
       <StickyReview />
 
-      {/* Waiting Modal */}
+      {/* Waiting Modal — commented out to avoid duplicate with FooterWaiting */}
       {/* {(WaitingList || callWaitingList) && (
         <WaitingModal
-          isOpen={WaitingList || callWaitingList}
-          onClose={resetCallState}
-          waitingTime={WaitingList || callWaitingList}
+          callRoomId={connectionType === "chat" ? chatRoomId : callRoomId}
+          resetCallState={resetCallState}
           connectionType={connectionType}
+          astrologerName={`${data?.firstName || ""} ${data?.lastName || ""}`.trim()}
         />
       )} */}
 

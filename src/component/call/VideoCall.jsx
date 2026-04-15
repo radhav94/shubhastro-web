@@ -689,6 +689,8 @@ const VideoCalling = ({ callData }) => {
         refreshWallet();
         window.dispatchEvent(new Event("walletBalanceUpdated"));
 
+        Toast.success("Video session ended.");
+
         // Don't show review when this call was started from an ongoing chat.
         if (!hasOngoingChat()) {
           setOpenReview(true);

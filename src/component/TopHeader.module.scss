@@ -258,6 +258,8 @@
   border-radius: 80px;
   padding: 4px;
   background-color: #fff;
+  flex-shrink: 0;
+  max-width: 200px;
 }
 .namaste {
   font-size: 0.7rem;
@@ -401,12 +403,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .languageWrap {
-  // right: 50px;
   position: relative;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .onHoverChangeLang {
@@ -420,6 +423,7 @@
   padding: 4px 10px;
   border: 1px solid rgba(189, 189, 189, 0.50);
   height: 40px;
+  max-width: 130px;
 }
 .profileWrapName{
   display: flex;
@@ -440,6 +444,10 @@
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+  display: inline-block;
 }
 
 /* Dropdown hidden by default */
@@ -675,8 +683,9 @@
 }
 
 .avatarText {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
   background: #FFF5EC;
   border: 1px solid #FFD28E;
   border-radius: 50%;
@@ -686,13 +695,15 @@
   flex-shrink: 0;
   cursor: pointer;
   span{
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     color: #030303;
+    line-height: 1;
   }
   @media (width <= 767px) {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
   }
 }
 

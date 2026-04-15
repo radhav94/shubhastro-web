@@ -41,6 +41,7 @@ export const FooterWaiting = () => {
         onClick={() => {
           voiceSocket.emit("chat:cancel", {roomId : activeChatRoomId, canceledBy : "CUSTOMER"});
           resetChatFlow();
+          localStorage.removeItem("waitingState");
         }}
         className="rounded-xl border border-red-500/40 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm text-red-400 hover:bg-red-500/10 transition flex-shrink-0"
       >
