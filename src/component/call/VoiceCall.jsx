@@ -577,6 +577,8 @@ const AgoraVoiceCalling = ({ callData }) => {
         
         // Clear waiting list to prevent waiting popup from showing
         setWaitingList(null);
+
+        Toast.success("Call ended.");
         
         // Don't show review when this call was started from an ongoing chat.
         if (!hasOngoingChat()) {

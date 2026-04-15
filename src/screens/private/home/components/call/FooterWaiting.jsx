@@ -22,6 +22,7 @@ export const FooterWaiting = () => {
 
   const handleCancel = () => {
     voiceSocket.emit("call:cancel", {roomId: activeCallRoomId, canceledBy: "CUSTOMER"});
+    localStorage.removeItem("waitingState");
     // During a switch (activeCall exists), only clear waiting state — don't reset the timer
     if (activeCall) {
       setWaitingList(null);
