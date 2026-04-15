@@ -15,15 +15,17 @@
 }
 
 .resultItem {
-  background: #e5e5e5;
+  background: #fff8f5;
   padding: 12px 18px;
   border-radius: 10px;
   text-align: center;
   min-width: 90px;
+  border: 1px solid #ffe8d6;
 
   strong {
     display: block;
     font-size: 18px;
+    color: #f75801;
   }
 
   span {
@@ -36,22 +38,28 @@
   margin: 20px auto 0;
   display: block;
   padding: 10px 18px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
-  background: #8b5cf6;
+  background: linear-gradient(135deg, #f75801, #d43400);
   color: #fff;
+  font-weight: 600;
   cursor: pointer;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.92; }
 }
 
 .againBtn {
   margin: 20px auto 0;
   display: block;
   padding: 10px 24px;
-  border-radius: 20px;
-  border: none;
-  background: #8b8000;
-  color: #fff;
+  border-radius: 12px;
+  border: 1.5px solid #f75801;
+  background: #fff;
+  color: #f75801;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
+  &:hover { background: #fff8f5; }
 }
 
 .center {

@@ -17,7 +17,7 @@
 }
 
 .header {
-  background: linear-gradient(180deg, #f59e0b, #e88904);
+  background: linear-gradient(135deg, #f75801, #d43400);
   color: #fff;
   text-align: center;
   padding: 20px;
@@ -42,7 +42,7 @@
 
 .nameBox {
   padding: 10px 16px;
-  border: 1px solid #f59e0b;
+  border: 1px solid #f75801;
   border-radius: 8px;
   font-weight: 500;
   min-width: 90px;
@@ -52,7 +52,7 @@
 .connector {
   width: 60px;
   height: 1px;
-  background: #f59e0b;
+  background: #f75801;
   position: relative;
 
   span {
@@ -93,7 +93,7 @@
 
   h2 {
     margin: 0;
-    color: #f59e0b;
+    color: #f75801;
   }
 
   span {
@@ -113,14 +113,14 @@
 
 .analysis {
   margin: 20px;
-  background: #fff7e6;
-  border-left: 4px solid #f59e0b;
+  background: #fff8f5;
+  border-left: 4px solid #f75801;
   padding: 14px;
   border-radius: 8px;
 
   h4 {
     margin-bottom: 6px;
-    color: #f59e0b;
+    color: #f75801;
   }
 
   p {
@@ -134,21 +134,27 @@
   margin: 0 20px 24px;
   width: calc(100% - 40px);
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
-  background: #8b5cf6;
+  background: linear-gradient(135deg, #f75801, #d43400);
   color: #fff;
+  font-weight: 600;
   cursor: pointer;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.92; }
 }
 
 .againBtn {
   margin-top: 18px;
-  padding: 10px 22px;
-  border-radius: 20px;
-  border: none;
-  background: #8b8000;
-  color: #fff;
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: 1.5px solid #f75801;
+  background: #fff;
+  color: #f75801;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
+  &:hover { background: #fff8f5; }
 }
 
 .center {

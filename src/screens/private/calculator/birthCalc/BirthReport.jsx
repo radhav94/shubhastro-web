@@ -11,6 +11,7 @@ import {
 import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
+import CalcBackButton from "../CalcBackButton";
 
 export const planetaryHeaders = [
   { label: "Planet", key: "name" },
@@ -129,6 +130,7 @@ const BirthReport = () => {
 
   return (
     <div>
+      <CalcBackButton />
       <PrimaryLoader isLoading={loading} />
 
       {planetSuccess && birthSuccess && navSuccess && (

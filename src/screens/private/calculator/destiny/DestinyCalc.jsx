@@ -1,90 +1,91 @@
 import { useState } from "react";
-import PrimaryText from "../../../../component/PrimaryText";
-import DividerWithImage from "../../../../component/UI/DividerWithImage";
-import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import { useNavigate } from "react-router-dom";
-import NumerologyForm from "../forms/NumerologyForm";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import { TODAY } from "../../../../utils/dateFormat/date";
+import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
+import styles from "../flames/FlamesCalc.module.scss";
 
 const STORAGE_KEY = "destiny_calc";
-
-const initialFormState = {
-  name: "",
-  dob: "",
-};
+const initialFormState = { name: "", dob: "" };
 
 const DestinyCalc = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useFormFromLocalStorage(
-    STORAGE_KEY,
-    initialFormState
-  );
-
+  const [formData, setFormData] = useFormFromLocalStorage(STORAGE_KEY, initialFormState);
   const [errors, setErrors] = useState({});
 
-  const handleChange = (key, value) => {
-    setFormData((prev) => {
-      return {
-        ...prev,
-        [key]: value,
-      };
-    });
+  const token = localStorage.getItem("shubhtalk_customer_token");
+  const { data: kundliData } = useGetAllKundlisQuery(undefined, { skip: !token });
+  const profiles = kundliData?.data || [];
 
-    // clear error on change
+  const handleProfileSelect = (profileId) => {
+    const profile = profiles.find((p) => p._id === profileId);
+    if (!profile) return;
+    const dob = `${profile.year}-${String(profile.month).padStart(2, "0")}-${String(profile.day).padStart(2, "0")}`;
+    setFormData({ name: profile.name || "", dob });
+    setErrors({});
+  };
+
+  const handleChange = (key, value) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const newErrors = {};
-
     if (!formData.name) newErrors.name = "Name is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    const payload = {
-      ...formData,
-    };
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
     navigate("/destiny-number-calculator/report");
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   };
 
   return (
-    <div style={{ margin: "0 3rem" }}>
-      <PrimaryText isCenter isSemiBold size_24>
-        Destiny Number Calculator: Discover Your Life's Purpose
-      </PrimaryText>
-      <PrimaryText style={{ color: "gray", marginTop: "0.7rem" }} size_16>
-        A <strong>destiny number calculator</strong> helps you find your true
-        life purpose by using the numbers in your full birth name. It’s closely
-        connected with other numerology numbers like your Soul Urge Number,
-        Personality Number, and even your Name Number, which all reflect
-        different layers of your spiritual identity.
-      </PrimaryText>
-      <PrimaryText style={{ color: "gray", marginTop: "1rem" }} size_16>
-        It shows your natural talents, career direction, and spiritual path
-        simply. This special tool can also uncover patterns that explain why
-        certain things keep happening in your life. Understanding these patterns
-        becomes even deeper when you look at bridge numbers and soul numbers,
-        which fill the gap between your destiny and life paths.
-      </PrimaryText>
-
-      <div style={{ margin: "0 1rem" }}>
-        <DividerWithImage imageSrc={ShubhTalkLogo} />
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <h1>Destiny Number Calculator</h1>
+        <p>Discover your life's purpose through numerology</p>
       </div>
-      <NumerologyForm
-        submitText="Submit"
-        formData={formData}
-        errors={errors}
-        onChange={handleChange}
-        onSubmit={handleSubmit}
-        hideType={true}
-      />
+
+      <div className={styles.infoCard}>
+        <h3>What is a Destiny Number?</h3>
+        <p>
+          Your destiny number reveals your life purpose, natural talents, and spiritual path.
+          It's calculated from your full birth name and shows patterns that explain why
+          certain things keep happening in your life.
+        </p>
+      </div>
+
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <h3 className={styles.formTitle}>Enter Your Details</h3>
+
+        {profiles.length > 0 && (
+          <div className={styles.profileSelector}>
+            <label>Quick Fill from Profile</label>
+            <div className={styles.profileChips}>
+              {profiles.map((p) => (
+                <button key={p._id} type="button" className={`${styles.profileChip} ${formData.name === p.name ? styles.activeChip : ""}`} onClick={() => handleProfileSelect(p._id)}>
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className={styles.field}>
+          <label>Full Name <span>*</span></label>
+          <input placeholder="Enter your full name" value={formData.name} onChange={(e) => handleChange("name", e.target.value)} />
+          {errors.name && <p className={styles.err}>{errors.name}</p>}
+        </div>
+
+        <div className={styles.field}>
+          <label>Date of Birth <span>*</span></label>
+          <input type="date" value={formData.dob} max={TODAY} onChange={(e) => handleChange("dob", e.target.value)} onClick={(e) => e.target.showPicker?.()} />
+          {errors.dob && <p className={styles.err}>{errors.dob}</p>}
+        </div>
+
+        <button type="submit" className={styles.submitBtn}>Calculate Destiny Number</button>
+      </form>
     </div>
   );
 };

@@ -25,6 +25,7 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
       }),
       invalidatesTags: (_, __, { astrologerId }) => [
         { type: "Following", id: astrologerId },
+        "FollowedAstrologers",
       ],
     }),
 
@@ -40,6 +41,7 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
       }),
       invalidatesTags: (_, __, { astrologerId }) => [
         { type: "Following", id: astrologerId },
+        "FollowedAstrologers",
       ],
     }),
   }),

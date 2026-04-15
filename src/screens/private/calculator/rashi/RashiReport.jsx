@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useGetRashiCalQuery } from "../../../../redux/api/calculator/calcApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./RashiReport.module.scss";
+import CalcBackButton from "../CalcBackButton";
 
 const RashiReport = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const RashiReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       {/* HEADER */}
       <h2 className={styles.title}>
         {stored?.name ? `${stored.name}'s Rashi Report` : "Rashi Report"}
@@ -79,20 +81,6 @@ const RashiReport = () => {
 
       {/* ACTION */}
       <div className={styles.actions}>
-        <button
-          className={styles.shareBtn}
-          onClick={() => {
-            if (navigator.share) {
-              navigator.share({
-                title: "My Rising Sign Report",
-                text: prediction || bot_response || "",
-              });
-            }
-          }}
-        >
-          Share your report
-        </button>
-
         <button className={styles.backBtn} onClick={() => navigate(-1)}>
           Back to Calculator
         </button>

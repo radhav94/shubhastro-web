@@ -3,6 +3,7 @@ import { useFriendshipCalculatorMutation } from "../../../../redux/api/calculato
 import { useEffect } from "react";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./FriendshipReport.module.scss";
+import CalcBackButton from "../CalcBackButton";
 
 const FriendshipReport = () => {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const FriendshipReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       <div className={styles.card}>
         {/* HEADER */}
         <div className={styles.header}>
@@ -52,7 +54,7 @@ const FriendshipReport = () => {
             className={styles.circle}
             style={{
               background: `conic-gradient(
-                #f59e0b ${report.score * 3.6}deg,
+                #f75801 ${report.score * 3.6}deg,
                 #e5e7eb 0deg
               )`,
             }}
@@ -71,19 +73,6 @@ const FriendshipReport = () => {
           <h4>Your Friendship Analysis</h4>
           <p>{report.description}</p>
         </div>
-
-        {/* ACTION */}
-        <button
-          onClick={() =>
-            navigator.share?.({
-              title: "Friendship Report",
-              text: "Check out my Friendship Report",
-            })
-          }
-          className={styles.shareBtn}
-        >
-          🔗 Share it with others
-        </button>
       </div>
 
       <button

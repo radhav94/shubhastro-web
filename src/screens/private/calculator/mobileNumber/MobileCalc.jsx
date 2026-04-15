@@ -1,10 +1,8 @@
-import PrimaryText from "../../../../component/PrimaryText";
-import DividerWithImage from "../../../../component/UI/DividerWithImage";
-import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import { useState } from "react";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { useNavigate } from "react-router-dom";
 import DateWithSingleInputForm from "../forms/DateWithSingleInputForm";
+import styles from "./MobileCalc.module.scss";
 
 const STORAGE_KEY = "mobile_calculator";
 
@@ -60,18 +58,19 @@ const MobileCalc = () => {
   };
 
   return (
-    <div style={{ margin: "0 3rem" }}>
-      <PrimaryText isCenter isSemiBold size_24>
-        Lucky Mobile Number Calculator
-      </PrimaryText>
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <h1>Lucky Mobile Number Calculator</h1>
+        <p>Discover How Your Number Aligns with Your Energy</p>
+      </div>
 
-      <PrimaryText style={{ color: "gray", marginTop: "0.5rem" }} size_16>
-        Your mobile number carries vibrations that influence your life. Discover
-        how your date of birth aligns with your mobile number.
-      </PrimaryText>
-
-      <div style={{ margin: "0 1rem" }}>
-        <DividerWithImage imageSrc={ShubhTalkLogo} />
+      <div className={styles.infoCard}>
+        <h3>What is Lucky Mobile Number?</h3>
+        <p>
+          Your mobile number carries vibrations that influence your life. Discover
+          how your date of birth aligns with your mobile number and what kind of
+          energy it brings into your daily routine.
+        </p>
       </div>
 
       <DateWithSingleInputForm
@@ -85,6 +84,11 @@ const MobileCalc = () => {
         errors={errors}
         onChange={handleChange}
         onSubmit={handleSubmit}
+        onReset={() => {
+          setFormData(initialFormState);
+          setErrors({});
+          localStorage.removeItem(STORAGE_KEY);
+        }}
       />
     </div>
   );

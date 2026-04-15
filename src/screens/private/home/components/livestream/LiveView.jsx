@@ -40,6 +40,8 @@ const FixedLayer = ({ children }) => {
   return createPortal(children, document.body);
 };
 
+const PENDING_LIVE_CALL_STORAGE_KEY = "shubhtalk_pending_live_call";
+
 const LiveView = (props) => {
   console.log("propssssss", props);
   const {
@@ -75,6 +77,7 @@ const LiveView = (props) => {
   const [connectingTimedOut, setConnectingTimedOut] = useState(false);
   const [liveDuration, setLiveDuration] = useState("00:00");
   const [isCallExpanded, setIsCallExpanded] = useState(false);
+  const liveListCtx = useLiveList();
   const [showKundliModal, setShowKundliModal] = useState(false);
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
   const [suggestedRemedyData, setSuggestedRemedyData] = useState({ suggestedProducts: [], messages: [] });
@@ -131,6 +134,7 @@ const LiveView = (props) => {
 
   const { 
     activeCall, 
+    lastRequestedAstro,
     setLastRequestedAstro, 
     setActiveCall, 
     setCallSeconds,
@@ -141,6 +145,7 @@ const LiveView = (props) => {
     setLastCallType,
     isCallMinimized,
     setIsCallMinimized,
+    pendingLiveCall,
     setPendingLiveCall,
     isMicOn,
     setIsMicOn,
@@ -177,6 +182,51 @@ const LiveView = (props) => {
   const astrologerRef = useRef(null);
   const callingChannelRef = useRef(null);
   const prevMessageCountRef = useRef(0);
+
+  const getStoredPendingLiveCall = useCallback(() => {
+    try {
+      const stored = sessionStorage.getItem(PENDING_LIVE_CALL_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const persistPendingLiveCall = useCallback((pendingData) => {
+    setPendingLiveCall(pendingData);
+    try {
+      sessionStorage.setItem(
+        PENDING_LIVE_CALL_STORAGE_KEY,
+        JSON.stringify(pendingData)
+      );
+    } catch {
+      // Ignore storage failures; context state still preserves the request.
+    }
+  }, [setPendingLiveCall]);
+
+  const clearPendingLiveCallState = useCallback(() => {
+    setPendingLiveCall(null);
+    try {
+      sessionStorage.removeItem(PENDING_LIVE_CALL_STORAGE_KEY);
+    } catch {
+      // Ignore storage failures; context state is the primary source.
+    }
+  }, [setPendingLiveCall]);
+
+  const resolvePendingLiveCall = useCallback(() => {
+    return pendingLiveCall || getStoredPendingLiveCall();
+  }, [pendingLiveCall, getStoredPendingLiveCall]);
+
+  const restorePendingCallState = useCallback((pendingData) => {
+    if (!pendingData) return;
+
+    astrologerRef.current = pendingData.astrologer || null;
+    callingChannelRef.current = pendingData.liveChannel || props.channel || null;
+    setCallRoomId(pendingData.callRoomId || null);
+    setPendingCallType(pendingData.pendingCallType || "audio");
+    setShowWaitingModal(true);
+    setShowWaitingPopup(true);
+  }, [props.channel]);
   
   const [createChatRoom] = useCreateChatRoomMutation();
   const [getBalance] = useGetBalanceMutation();
@@ -203,6 +253,22 @@ const LiveView = (props) => {
   ) || false;
   const [followAstrologer, { isLoading: followLoading }] = useFollowAstrologerByIdMutation();
   const [unfollowAstrologer, { isLoading: unfollowLoading }] = useUnfollowAstrologerByIdMutation();
+
+  useEffect(() => {
+    const pending = resolvePendingLiveCall();
+    if (!pending) return;
+
+    console.log("LiveView restore effect — pending:", pending);
+    restorePendingCallState(pending);
+  }, [resolvePendingLiveCall, restorePendingCallState]);
+
+  useEffect(() => {
+    if (!showWaitingModal || !callingChannelRef.current || !liveListCtx?.lives?.length) {
+      return;
+    }
+
+    liveListCtx.switchToChannel(callingChannelRef.current);
+  }, [showWaitingModal, liveListCtx?.lives?.length, liveListCtx]);
 
   const handleFollow = async () => {
     if (!astrologerId) return;
@@ -310,7 +376,6 @@ const LiveView = (props) => {
     }) || [];
   const displayMessages = normalizedMessages;
 
-  const liveListCtx = useLiveList();
   const reelRef = useRef(null);
   const navigate = useNavigate();
 
@@ -395,7 +460,7 @@ const LiveView = (props) => {
       // If waiting for a call response, save pending state to context
       // and navigate without disconnecting socket/Agora so the call isn't lost
       if (showWaitingModal && astrologerRef.current) {
-        setPendingLiveCall({
+        persistPendingLiveCall({
           astrologer: astrologerRef.current,
           liveChannel: callingChannelRef.current || props.channel,
           callRoomId,
@@ -542,8 +607,10 @@ const LiveView = (props) => {
     }
     
     setShowWaitingModal(false);
+    setShowWaitingPopup(false);
     setCallRoomId(null);
     astrologerRef.current = null;
+    clearPendingLiveCallState();
     
     Toast.info("Call request cancelled");
   };
@@ -664,17 +731,25 @@ const LiveView = (props) => {
         liveListCtx.switchToChannel(callingChannelRef.current);
       }
 
-      const astro = astrologerRef.current;
+      const pending = resolvePendingLiveCall();
+      const astro =
+        astrologerRef.current ||
+        pending?.astrologer ||
+        lastRequestedAstro ||
+        astrologer;
+      const astroId = astro?._id || astro?.astrologerId;
+      const liveChannel =
+        callingChannelRef.current ||
+        pending?.liveChannel ||
+        props.channel;
       
-      if (!astro) {
+      if (!astro || !astroId) {
         Toast.error("Astrologer information not available");
         return;
       }
 
       try {
         // Create chat room for the call
-        // Note: astro object may have _id or astrologerId depending on source
-        const astroId = astro._id || astro.astrologerId;
         const res = await createChatRoom({
           userId: userIdLocal,
           astrologerId: astroId,
@@ -697,9 +772,10 @@ const LiveView = (props) => {
           astrologerID: fullAstro?.astrologer_ID || astro?.astrologer_ID || astroId,
           remainingTime,
           origin: "live",
-          liveChannel: callingChannelRef.current || props.channel,
+          liveChannel,
         });
         setIsCallMinimized(true);
+        clearPendingLiveCallState();
         
         setCallSeconds(Number(remainingTime) * 60);
         Toast.success(`${type === "video" ? "Video" : "Voice"} call started`);
@@ -723,12 +799,15 @@ const LiveView = (props) => {
           ? "Astrologer has rejected the call request"
           : "Call rejected";
       Toast.error(errorMsg);
+      clearPendingLiveCallState();
       resetCallState();
     };
 
     const handleCallEnded = () => {
       setShowWaitingModal(false);
+      setShowWaitingPopup(false);
       setCallRoomId(null);
+      clearPendingLiveCallState();
     };
 
     // Register socket listeners
@@ -743,7 +822,20 @@ const LiveView = (props) => {
       voiceSocket.off("call:rejected", handleCallRejected);
       voiceSocket.off("call:ended", handleCallEnded);
     };
-  }, [userIdLocal, setActiveCall, setCallSeconds, resetCallFlow, setActiveCallRoomId, createChatRoom]);
+  }, [
+    userIdLocal,
+    setActiveCall,
+    setCallSeconds,
+    resetCallFlow,
+    setActiveCallRoomId,
+    createChatRoom,
+    clearPendingLiveCallState,
+    lastRequestedAstro,
+    liveListCtx,
+    props.channel,
+    resolvePendingLiveCall,
+    astrologer,
+  ]);
 
   // Hide LiveView when there's an active call that is NOT minimized
   // Show LiveView when call is minimized so user can watch live stream
@@ -760,6 +852,8 @@ const LiveView = (props) => {
     wasRoomReady,
     channel: props.channel,
   });
+
+  const shouldShowWaitingIndicator = !isHost && (showWaitingModal || !!resolvePendingLiveCall());
 
   return (
     <FixedLayer>
@@ -1150,7 +1244,7 @@ const LiveView = (props) => {
           {isAstrologerLive && (
           <div className="right-action-bar">
             {/* Waiting in queue icon — only when waiting */}
-            {showWaitingModal && !isHost && astrologerRef.current && (astrologerRef.current._id === astrologerId || astrologerRef.current.astrologerId === astrologerId) && (
+            {shouldShowWaitingIndicator && (
               <div className="icon-btn" style={{ position: "relative" }}>
                 <div
                   className="icon-circle"

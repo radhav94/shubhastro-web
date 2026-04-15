@@ -3,6 +3,7 @@ import { useVehicleNumerologyCalculatorMutation } from "../../../../redux/api/ca
 import { useEffect } from "react";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./VehicleReport.module.scss";
+import CalcBackButton from "../CalcBackButton";
 
 const VehicleReport = () => {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const VehicleReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       {/* TITLE */}
       <h2 className={styles.title}>
         Vehicle Number Analysis –
@@ -44,18 +46,6 @@ const VehicleReport = () => {
       <div className={styles.descriptionBox}>“{report.description}”</div>
 
       {/* ACTIONS */}
-      <button
-        onClick={() =>
-          navigator.share?.({
-            title: "Vehicle Number  Report",
-            text: "Check out my Vehicle Number Report",
-          })
-        }
-        className={styles.shareBtn}
-      >
-        🔗 Share It with others
-      </button>
-
       <button
         className={styles.againBtn}
         onClick={() => navigate("/lucky-vehicle-number-calculator")}

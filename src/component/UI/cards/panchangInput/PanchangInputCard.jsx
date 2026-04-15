@@ -8,7 +8,16 @@ import ErrorText from "../../../ErrorText";
 import { appColors } from "../../../../utils/theme";
 import DateTimePicker from "../../dateTimePicker/DateTimePicker";
 
-const PanchangInputCard = ({ imageSrc, title, onTap, initialDate, initialLocation, initialLatitude, initialLongitude }) => {
+const PanchangInputCard = ({
+  imageSrc,
+  title,
+  onTap,
+  initialDate,
+  initialLocation,
+  initialLatitude,
+  initialLongitude,
+  showForm = "",
+}) => {
   const [formData, setFormData] = useState({
     dateOfBirth: initialDate || "",
     location: initialLocation || "",
@@ -40,8 +49,7 @@ const PanchangInputCard = ({ imageSrc, title, onTap, initialDate, initialLocatio
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.dateOfBirth)
-      newErrors.dateOfBirth = "Date is required!";
+    if (!formData.dateOfBirth) newErrors.dateOfBirth = "Date is required!";
     // if (!formData.location) newErrors.location = "Location is required!";
     return newErrors;
   };
@@ -83,14 +91,19 @@ const PanchangInputCard = ({ imageSrc, title, onTap, initialDate, initialLocatio
           {formData.dateOfBirth ? Userdob : today}{" "}
         </PrimaryText>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <div className={styles.inputBox}>
-            {/* Date of Birth */}
-            <div className={styles.inputControl}>
-              <label htmlFor="dateOfBirth" className={styles.label}>
-                Date <span className={styles.requiredMark}>*</span>
-              </label>
-              {/* <input
+       
+             
+            
+        {showForm === "overall" && (
+          <form className={styles.form} onSubmit={handleSubmit}>
+            <div className={styles.inputBox}>
+              {/* Date of Birth */}
+              <div className={styles.inputControl}>
+                <label htmlFor="dateOfBirth" className={styles.label}>
+                  Date <span className={styles.requiredMark}>*</span>
+                </label>
+                
+                 {/* <input
                 id="dateOfBirth"
                 name="dateOfBirth"
                 type="date"
@@ -119,39 +132,40 @@ const PanchangInputCard = ({ imageSrc, title, onTap, initialDate, initialLocatio
                 }}
                 placeholder="dd/mm/yyyy"
               />
-              {errors.dateOfBirth && (
-                <ErrorText>{errors.dateOfBirth}</ErrorText>
-              )}
-            </div>
+                {errors.dateOfBirth && (
+                  <ErrorText>{errors.dateOfBirth}</ErrorText>
+                )}
+              </div>
 
-            {/*  Location (custom search) */}
-            <div className={styles.inputControl}>
-              <label htmlFor="location" className={styles.label}>
-                Location
-              </label>
-              <LocationSearch
-                value={formData.location}
-                onChange={(e) =>
-                  handleInputChange({
-                    target: { name: "location", value: e.target.value },
-                  })
-                }
-                onPlaceSelect={handlePlaceSelect}
-              />
-              {errors.location && <ErrorText>{errors.location}</ErrorText>}
-            </div>
+              {/*  Location (custom search) */}
+              <div className={styles.inputControl}>
+                <label htmlFor="location" className={styles.label}>
+                  Location
+                </label>
+                <LocationSearch
+                  value={formData.location}
+                  onChange={(e) =>
+                    handleInputChange({
+                      target: { name: "location", value: e.target.value },
+                    })
+                  }
+                  onPlaceSelect={handlePlaceSelect}
+                />
+                {errors.location && <ErrorText>{errors.location}</ErrorText>}
+              </div>
 
-            {/* Submit Button */}
-            <div className={styles.submitButtonWrapper}>
-              <PrimaryButton
-                width={"100%"}
-                title="Submit"
-                type="submit"
-                textColor="#ffffff"
-              />
+              {/* Submit Button */}
+              <div className={styles.submitButtonWrapper}>
+                <PrimaryButton
+                  width={"100%"}
+                  title="Submit"
+                  type="submit"
+                  textColor="#ffffff"
+                />
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        )}
       </div>
     </div>
   );

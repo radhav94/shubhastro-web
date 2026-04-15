@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import DateWithSingleInputForm from "../forms/DateWithSingleInputForm";
 import styles from "./AgeReport.module.scss";
+import CalcBackButton from "../CalcBackButton";
 
 const AgeReport = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const AgeReport = () => {
 
   return (
     <div className={styles.wrapper}>
+      <CalcBackButton />
       {/* FORM (READ ONLY) */}
       <DateWithSingleInputForm
         title="Calculate your Age here"
@@ -60,19 +62,6 @@ const AgeReport = () => {
           <span>Days</span>
         </div>
       </div>
-
-      {/* SHARE */}
-      <button
-        onClick={() =>
-          navigator.share?.({
-            title: "Age Report",
-            text: "Check out my Age Report",
-          })
-        }
-        className={styles.shareBtn}
-      >
-        🔗 Share It with others
-      </button>
 
       {/* AGAIN */}
       <button
