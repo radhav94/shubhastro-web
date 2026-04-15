@@ -125,6 +125,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       image: astroImage,
       gender: astroGender,
       astrologerId: activeCall?.astrologerId,
+      type: data.type,
     });
 
     // Auto-dismiss after 4 seconds
@@ -818,19 +819,24 @@ const AgoraVoiceCalling = ({ callData }) => {
                 onClose={() => setChatNotification(null)}
                 onClick={() => {
                   setChatNotification(null);
-                  setIsMinimized(true);
-                  navigate(`/chat-with-astrologers/${chatNotification.astrologerId}`, {
-                    state: {
-                      userId: activeCall?.userId,
-                      astrologerId: activeCall?.astrologerId,
-                      roomId: activeCall?.roomId,
-                      fullName: callerName,
-                      isUserSide: activeCall?.isUserSide,
-                      kundliId: activeCall?.kundliId,
-                      astrologerName: callerName,
-                      astroID: activeCall?.astrologerID,
-                    }
-                  });
+                  if (chatNotification.type === "products") {
+                    setIsRemedyPanelOpen(true);
+                    setHasNewRemedy(false);
+                  } else {
+                    setIsMinimized(true);
+                    navigate(`/chat-with-astrologers/${chatNotification.astrologerId}`, {
+                      state: {
+                        userId: activeCall?.userId,
+                        astrologerId: activeCall?.astrologerId,
+                        roomId: activeCall?.roomId,
+                        fullName: callerName,
+                        isUserSide: activeCall?.isUserSide,
+                        kundliId: activeCall?.kundliId,
+                        astrologerName: callerName,
+                        astroID: activeCall?.astrologerID,
+                      }
+                    });
+                  }
                 }}
               />
             </div>

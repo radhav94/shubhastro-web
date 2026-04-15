@@ -425,7 +425,7 @@ export const ChatProvider = ({ children }) => {
 
       const astroInfo = lastAstrologerInfoRef.current;
       const senderName = astroInfo?.name || "Astrologer";
-      const messageText = data.type === "gift" ? "🎁 Sent a gift" : (data.message || data.response || "New message");
+      const messageText = data.type === "gift" ? "🎁 Sent a gift" : data.type === "products" ? "💊 Suggested a remedy" : (data.message || data.response || "New message");
 
       rht.custom((t) => (
         <ChatNotificationBanner
@@ -436,6 +436,10 @@ export const ChatProvider = ({ children }) => {
           onClose={() => rht.dismiss(t.id)}
           onClick={() => {
             rht.dismiss(t.id);
+            if (data.type === "products" && window.location.pathname.startsWith("/live")) {
+              window.dispatchEvent(new CustomEvent("live:open-remedy-panel"));
+              return;
+            }
             const astroId = data.astrologerId || activeChatRef.current?.astrologerId;
             if (astroId) {
               window.location.href = `/chat-with-astrologers/${astroId}`;

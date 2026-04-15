@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { LocalUser, RemoteUser } from "agora-rtc-react";
 import { IoMic, IoMicOff, IoCallSharp, IoHourglass } from "react-icons/io5";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
@@ -35,6 +36,7 @@ import {
 import { useGetAstrologerByIdQuery } from "../../../../../redux/api/astrologer/astrologerApi";
 import KundliSelectModal from "../../../../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
 import SuggestedRemedyPanel from "../../../../../component/call/SuggestedRemedyPanel";
+import { addRemedy, clearNewRemedy, clearAllRemedy } from "../../../../../redux/remedy/remedySlice";
 
 const FixedLayer = ({ children }) => {
   return createPortal(children, document.body);
@@ -80,8 +82,9 @@ const LiveView = (props) => {
   const liveListCtx = useLiveList();
   const [showKundliModal, setShowKundliModal] = useState(false);
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
-  const [suggestedRemedyData, setSuggestedRemedyData] = useState({ suggestedProducts: [], messages: [] });
-  const [hasNewRemedy, setHasNewRemedy] = useState(false);
+  const dispatch = useDispatch();
+  const suggestedRemedyData = useSelector((s) => s.remedy);
+  const hasNewRemedy = suggestedRemedyData.hasNewRemedy;
 
   // Reset ended state when switching to a new channel
   // Use a counter to invalidate stale roomReady changes from old channels
@@ -647,6 +650,8 @@ const LiveView = (props) => {
     setIsCallExpanded(false);
     setCallSeconds(0);
     resetCallFlow();
+    setIsRemedyPanelOpen(false);
+    dispatch(clearAllRemedy());
   };
 
   const localMicOn = isMicOn;
@@ -681,15 +686,25 @@ const LiveView = (props) => {
     if (!isCallForCurrentAstrologer) return;
     const handleProductMessage = (data) => {
       if (data?.type === "products" && data?.suggestedProducts?.length > 0) {
-        setSuggestedRemedyData((prev) => ({
-          suggestedProducts: [...prev.suggestedProducts, ...data.suggestedProducts],
-          messages: data.message ? [...prev.messages, data.message] : prev.messages,
+        dispatch(addRemedy({
+          suggestedProducts: data.suggestedProducts,
+          message: data.message || null,
         }));
-        setHasNewRemedy(true);
       }
     };
     voiceSocket.on("message:recieved", handleProductMessage);
     return () => voiceSocket.off("message:recieved", handleProductMessage);
+  }, [isCallForCurrentAstrologer, dispatch]);
+
+  // Listen for remedy panel open event from ChatContext notification
+  useEffect(() => {
+    if (!isCallForCurrentAstrologer) return;
+    const handleOpenRemedy = () => {
+      setIsRemedyPanelOpen(true);
+      dispatch(clearNewRemedy());
+    };
+    window.addEventListener("live:open-remedy-panel", handleOpenRemedy);
+    return () => window.removeEventListener("live:open-remedy-panel", handleOpenRemedy);
   }, [isCallForCurrentAstrologer]);
 
   // Socket event handlers
@@ -808,6 +823,8 @@ const LiveView = (props) => {
       setShowWaitingPopup(false);
       setCallRoomId(null);
       clearPendingLiveCallState();
+      setIsRemedyPanelOpen(false);
+      dispatch(clearAllRemedy());
     };
 
     // Register socket listeners
@@ -1188,7 +1205,7 @@ const LiveView = (props) => {
                   <button
                     className="call-action-pill"
                     style={{ position: "relative" }}
-                    onClick={() => { setIsRemedyPanelOpen(true); setHasNewRemedy(false); }}
+                    onClick={() => { setIsRemedyPanelOpen(true); dispatch(clearNewRemedy()); }}
                     aria-label="Suggested Remedy"
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" stroke="none">
