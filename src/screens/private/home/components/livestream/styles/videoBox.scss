@@ -439,28 +439,6 @@
   }
 }
 
-.expanded-call-recharge-btn {
-  width: 100%;
-  padding: 8px 16px;
-  border-radius: 999px;
-  border: none;
-  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
-  margin-top: 4px;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:active {
-    opacity: 0.8;
-  }
-}
-
 .live-recharge-floating-btn {
   position: fixed;
   top: 110px;
@@ -491,58 +469,7 @@
   50% { box-shadow: 0 4px 24px rgba(247, 88, 1, 0.7); }
 }
 
-.live-recharge-card {
-  position: fixed;
-  bottom: 28vh;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 25;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 24px 20px;
-  border-radius: 16px;
-  background: rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  animation: rechargeCardIn 0.3s ease-out;
-}
-
-@keyframes rechargeCardIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
-.live-recharge-card-text {
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.live-recharge-card-btn {
-  padding: 10px 32px;
-  border-radius: 999px;
-  border: none;
-  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(247, 88, 1, 0.4);
-  transition: transform 0.15s, box-shadow 0.15s;
-
-  &:hover {
-    transform: scale(1.04);
-    box-shadow: 0 6px 16px rgba(247, 88, 1, 0.5);
-  }
-
-  &:active {
-    transform: scale(0.96);
-  }
-}
+/* Recharge styles moved to LowBalanceModal component */
 
 .follow-btn {
   padding: 5px 16px;
@@ -713,19 +640,14 @@
 .inline-messages-overlay {
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   gap: 4px;
   max-height: 240px;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 0 4px;
   mask-image: linear-gradient(to bottom, transparent 0%, black 20%);
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%);
-  scroll-behavior: smooth;
-  overscroll-behavior: contain;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  scrollbar-width: none;
+  pointer-events: none;
 }
 
 .inline-message {

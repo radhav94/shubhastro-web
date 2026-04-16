@@ -38,6 +38,7 @@ import KundliSelectModal from "../../../../../screens/private/talkToAstrologer/k
 import SuggestedRemedyPanel from "../../../../../component/call/SuggestedRemedyPanel";
 import { addRemedy, clearNewRemedy, clearAllRemedy } from "../../../../../redux/remedy/remedySlice";
 import RechargeModal from "../../../../../component/recharge-modal/RechargeModal";
+import LowBalanceModal from "../../../../../component/UI/modal/LowBalanceModal/LowBalanceModal";
 import { useWalletBalance } from "../../../../private/wallet/useWalletBalance";
 
 const FixedLayer = ({ children }) => {
@@ -439,12 +440,8 @@ const LiveView = (props) => {
 
   const messagesOverlayRef = useRef(null);
 
-  // Auto-scroll inline messages overlay when new messages arrive
-  useEffect(() => {
-    if (messagesOverlayRef.current) {
-      messagesOverlayRef.current.scrollTop = messagesOverlayRef.current.scrollHeight;
-    }
-  }, [displayMessages.length]);
+  // Messages container ref (overflow hidden — newest messages visible at bottom)
+  useEffect(() => {}, [displayMessages.length]);
 
   const isHost = ROLE === "host";
   const isAstrologerLive = remoteUsers?.length > 0 && !hostLeft && !roomEnded;
@@ -1015,18 +1012,12 @@ const LiveView = (props) => {
                 </div>
               </div>
             )}
-            {/* Floating Recharge Card — visible during active call on low balance */}
-            {isCallForCurrentAstrologer && showRechargeButton && (
-              <div className="live-recharge-card">
-                <span className="live-recharge-card-text">Balance &lt; 5 minutes</span>
-                <button
-                  className="live-recharge-card-btn"
-                  onClick={() => setIsRechargeModalOpen(true)}
-                >
-                  Recharge Now
-                </button>
-              </div>
-            )}
+            {/* Low Balance Modal — visible during active call on low balance */}
+            <LowBalanceModal
+              isOpen={isCallForCurrentAstrologer && showRechargeButton}
+              onClose={() => setShowRechargeButton(false)}
+              onRecharge={() => setIsRechargeModalOpen(true)}
+            />
 
             {/* <div className="live-status">
               <div className="live-badge">LIVE</div>
