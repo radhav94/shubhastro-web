@@ -11,8 +11,26 @@
   margin-bottom: 6px;
 }
 
+.headingUnderline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dividerLine {
+  line-height: 0;
+}
+
+.dividerMoon {
+  flex-shrink: 0;
+  line-height: 0;
+  color: #030303;
+}
+
 .subtitle {
-  color: #f75801;
+  color: #030303;
   margin-bottom: 24px;
   font-weight: 500;
 }
@@ -21,13 +39,13 @@
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  border-bottom: 4px solid #f75801;
+  overflow-x: auto;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  white-space: nowrap;
 }
 
 thead {
@@ -48,7 +66,7 @@ tbody tr:not(:last-child) {
 
 .karaka {
   font-weight: 700;
-  color: #f75801;
+  color: #030303;
   background-color: #fff8f5;
 }
 
@@ -89,6 +107,12 @@ tbody tr:not(:last-child) {
   border-radius: 10px;
   border: none;
   cursor: pointer;
+}
+/* ── Connect Card ── */
+.connectCardWrap {
+  margin: 4px 0;
+  border-radius: 14px;
+  overflow: hidden;
 }
 
 .calculateBtn {
