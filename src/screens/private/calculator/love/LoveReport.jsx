@@ -1,20 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import { useLoveCalculatorMutation } from "../../../../redux/api/calculator/calcApi";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import styles from "./LoveReport.module.scss";
 import { PrimaryText } from "../../../../component";
 import DividerWithImage from "../../../../component/UI/DividerWithImage";
 import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import CalcBackButton from "../CalcBackButton";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
+import { Share2, ChevronDown } from "lucide-react";
 
 const LoveReport = () => {
   const navigate = useNavigate();
-
   const stored = JSON.parse(localStorage.getItem("love_calculator"));
 
   const [loveCalculator, { data, isLoading, isError, error }] =
     useLoveCalculatorMutation();
+
+  const [openAccordion, setOpenAccordion] = useState(null);
 
   useEffect(() => {
     if (!stored) return;
@@ -26,78 +29,207 @@ const LoveReport = () => {
       });
   }, []); // run once
 
+  const toggleAccordion = (index) => {
+    setOpenAccordion((prev) => (prev === index ? null : index));
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: "Love Calculator Result",
+      text: `${report.name1} ❤️ ${report.name2} - ${report.score}% Love Match!`,
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(
+          `${shareData.text}\n${shareData.url}`
+        );
+      }
+    } catch (_err) {
+      /* user cancelled */
+    }
+  };
+
   if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
   if (isError) return <div>No data found</div>;
 
   const report = data?.data;
-
   if (!report) return null;
 
+  const sections = report.sections || [];
+  const connectCardIndex = Math.min(2, sections.length);
+  const sectionsBeforeCard = sections.slice(0, connectCardIndex);
+  const sectionsAfterCard = sections.slice(connectCardIndex);
+
   return (
-    <div style={{ margin: "0 3rem" }}>
+    <div className={styles.pageWrapper}>
       <CalcBackButton />
-      <PrimaryText isCenter isSemiBold size_24>
+
+      {/* Page Title */}
+      {/* <PrimaryText isCenter isSemiBold size_24>
         Love Calculator: Find Your Perfect Match and Discover True Love
       </PrimaryText>
-      <div style={{ margin: "0 1rem" }}>
+      <div className={styles.dividerWrap}>
         <DividerWithImage imageSrc={ShubhTalkLogo} />
-      </div>
-      <PrimaryText style={{ color: "gray", marginTop: "0.5rem" }} size_16>
+      </div> */}
+
+      {/* Intro Text */}
+      {/* <PrimaryText className={styles.introText} size_16>
         Have you ever thought if you and your crush are a perfect match? A love
         calculator is a fun and simple tool that tells you your love percentage
         and how well you both connect. Just enter names, birth dates, or even
         zodiac signs, and see the result!
       </PrimaryText>
-      <PrimaryText style={{ margin: "1rem 0rem", color: "gray" }} size_16>
-        Finding love isn’t always easy, but tools like the love calculator make
+      <PrimaryText className={styles.introText} size_16>
+        Finding love isn&apos;t always easy, but tools like the love calculator make
         it exciting. They help you understand your feelings and check your
         romantic compatibility. Many people use it for fun and to explore their
         bond before starting a relationship. Try it and see what your stars say!
-      </PrimaryText>
-      <div className={styles.wrapper}>
-        <h2 className={styles.heading}>Your Love Percentage</h2>
+      </PrimaryText> */}
 
-        <div className={styles.card}>
-          <p className={styles.subText}>Percentage of love between</p>
-          <h3 className={styles.names}>
-            {report.name1} & {report.name2}
-          </h3>
-
-          <div className={styles.content}>
-            {/* LEFT CIRCLE */}
-            <div className={styles.circleWrapper}>
-              <div className={styles.circle}>
-                <span>{report.score}%</span>
-              </div>
-            </div>
-
-            {/* DIVIDER */}
-            <div className={styles.divider} />
-
-            {/* RIGHT TEXT */}
-            <div className={styles.textBox}>
-              <h4>{report.title}</h4>
-              <p>{report.description}</p>
-            </div>
-          </div>
-
-          <div className={styles.actions}>
-            <button
-              className={styles.primaryBtn}
-              onClick={() => navigate("/horoscopes/todays-horoscope")}
-            >
-              ❤ Get Today's Love Horoscope
-            </button>
-          </div>
+      {/* RESULTS Section */}
+      <div className={styles.resultsSection}>
+        <h2 className={styles.resultsHeading}>RESULTS</h2>
+        <div className={styles.resultsUnderline}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
+            <line y1="0.5" x2="93" y2="0.5" stroke="#030303" />
+          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="4" height="5" viewBox="0 0 4 5" fill="none">
+            <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
+          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
+            <line y1="0.5" x2="93" y2="0.5" stroke="#030303" />
+          </svg>
         </div>
 
-        <button
-          className={styles.againBtn}
-          onClick={() => navigate("/love-calculator")}
-        >
-          ⟳ Calculate Again
-        </button>
+        {/* Result Card */}
+        <div className={styles.resultCard}>
+          {/* Share Button */}
+          <button
+            className={styles.shareBtn}
+            onClick={handleShare}
+            aria-label="Share result"
+          >
+            <Share2 size={18} />
+          </button>
+
+          <p className={styles.subLabel}>Percentage of love between</p>
+          <h3 className={styles.namesRow}>
+            {report.name1} <span className={styles.heart}>❤️</span> {report.name2}
+          </h3>
+
+          {/* Score + Info Row */}
+          <div className={styles.scoreRow}>
+            <div className={styles.circleOuter}>
+              <svg className={styles.circleSvg} viewBox="0 0 120 120">
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="52"
+                  fill="none"
+                  stroke="#ffe0cc"
+                  strokeWidth="10"
+                />
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="52"
+                  fill="none"
+                  stroke="#f75801"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                  strokeDasharray={`${(report.score / 100) * 327} 327`}
+                  transform="rotate(-90 60 60)"
+                />
+              </svg>
+              <span className={styles.circleText}>{report.score}%</span>
+            </div>
+
+            <div className={styles.scoreInfo}>
+              <h4 className={styles.scoreTitle}>{report.title}</h4>
+              <p className={styles.scoreDesc}>{report.description}</p>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <button
+            className={styles.calcAgainBtn}
+            onClick={() => navigate("/love-calculator")}
+          >
+            Calculate Again
+          </button>
+          <button
+            className={styles.horoscopeBtn}
+            onClick={() => navigate("/horoscopes/todays-horoscope")}
+          >
+            ❤ Get today&apos;s love Horoscope
+          </button>
+        </div>
       </div>
+
+      {/* Accordion Sections */}
+      {sections.length > 0 && (
+        <div className={styles.accordionList}>
+          {sectionsBeforeCard.map((section, index) => (
+            <div key={index} className={styles.accordionItem}>
+              <button
+                className={styles.accordionHeader}
+                onClick={() => toggleAccordion(index)}
+                aria-expanded={openAccordion === index}
+              >
+                <span className={styles.accordionTitle}>{section.title}</span>
+                <ChevronDown
+                  size={20}
+                  className={`${styles.chevron} ${openAccordion === index ? styles.chevronOpen : ""}`}
+                />
+              </button>
+              <div
+                className={`${styles.accordionBody} ${openAccordion === index ? styles.accordionBodyOpen : ""}`}
+              >
+                <p>{section.content}</p>
+              </div>
+            </div>
+          ))}
+
+          {/* Connect Card between accordion items */}
+          <div className={styles.connectCardWrap}>
+            <ConnectCard />
+          </div>
+
+          {sectionsAfterCard.map((section, index) => {
+            const realIndex = connectCardIndex + index;
+            return (
+              <div key={realIndex} className={styles.accordionItem}>
+                <button
+                  className={styles.accordionHeader}
+                  onClick={() => toggleAccordion(realIndex)}
+                  aria-expanded={openAccordion === realIndex}
+                >
+                  <span className={styles.accordionTitle}>{section.title}</span>
+                  <ChevronDown
+                    size={20}
+                    className={`${styles.chevron} ${openAccordion === realIndex ? styles.chevronOpen : ""}`}
+                  />
+                </button>
+                <div
+                  className={`${styles.accordionBody} ${openAccordion === realIndex ? styles.accordionBodyOpen : ""}`}
+                >
+                  <p>{section.content}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Fallback: show ConnectCard even if no sections */}
+      {sections.length === 0 && (
+        <div className={styles.connectCardWrap}>
+          <ConnectCard />
+        </div>
+      )}
     </div>
   );
 };

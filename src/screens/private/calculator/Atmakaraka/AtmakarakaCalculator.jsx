@@ -1,7 +1,8 @@
 import { useState } from "react";
-import AstroBirthForm from "../forms/AstroBirthForm";
 import { useNavigate } from "react-router-dom";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import LocationSearch from "../../../../utils/location/locationSearchVedic";
+import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 import styles from "./AtmakarakaCalculator.module.scss";
 
 const STORAGE_KEY = "atmakaraka-and-darakaraka";
@@ -26,13 +27,13 @@ const AtmakarakaCalculator = () => {
   );
 
   const [errors, setErrors] = useState({});
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const handleChange = (key, value) => {
     setFormData((prev) => ({
       ...prev,
       [key]: value,
     }));
-
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
@@ -66,32 +67,190 @@ const AtmakarakaCalculator = () => {
 
   return (
     <div className={styles.page}>
+      {/* Hero Section */}
       <div className={styles.hero}>
-        <h1>Atmakaraka and Darakaraka Calculator</h1>
+        <h1>ATMAKARAKA AND DARAKARAKA CALCULATOR</h1>
+        <div className={styles.headingUnderline}>
+          <div className={styles.dividerLine}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
+              <line y1="0.5" x2="93" y2="0.5" stroke="#030303" />
+            </svg>
+          </div>
+          <span className={styles.dividerMoon}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="4" height="5" viewBox="0 0 4 5" fill="none">
+              <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303" />
+            </svg>
+          </span>
+          <div className={styles.dividerLine}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
+              <line y1="0.5" x2="93" y2="0.5" stroke="#030303" />
+            </svg>
+          </div>
+        </div>
         <p>Guide to Your Soul and Life Partner</p>
       </div>
 
+      {/* Info Accordion */}
       <div className={styles.infoCard}>
-        <h3>What is Atmakaraka and Darakaraka?</h3>
-        <p>
-          Discover your soul planet (Atmakaraka) and life partner indicator
-          (Darakaraka) using Vedic astrology.
-        </p>
+        <button
+          type="button"
+          className={styles.accordionHeader}
+          onClick={() => setInfoOpen((prev) => !prev)}
+          aria-expanded={infoOpen}
+        >
+          <span>What is Atmakaraka and Darakaraka?</span>
+          <svg
+            className={`${styles.chevron} ${infoOpen ? styles.chevronOpen : ""}`}
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#e84d00"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+        <div className={`${styles.accordionBody} ${infoOpen ? styles.accordionBodyOpen : ""}`}>
+          <p>
+            Discover your soul planet (Atmakaraka) and life partner indicator
+            (Darakaraka) using Vedic astrology. Atmakaraka is the planet with the
+            highest degree in your birth chart, representing your soul&apos;s desire.
+            Darakaraka is the planet with the lowest degree, indicating the nature
+            of your life partner.
+          </p>
+        </div>
       </div>
 
-      <AstroBirthForm
-        title="Calculate your Atmakaraka & Darakaraka here"
-        submitText="Calculate my Atmakaraka and Darakaraka"
-        formData={formData}
-        errors={errors}
-        onChange={handleChange}
-        onSubmit={handleSubmit}
-        onReset={() => {
-          setFormData(initialFormState);
-          setErrors({});
-          localStorage.removeItem(STORAGE_KEY);
-        }}
-      />
+      {/* Form Card */}
+      <form className={styles.formCard} onSubmit={handleSubmit}>
+        <h3 className={styles.formTitle}>Fill the form to calculate</h3>
+
+        <div className={styles.formGrid}>
+          {/* Row 1: Name + Gender */}
+          <div className={styles.formGroup}>
+            <label>
+              Your Name <span className={styles.required}>*</span>
+            </label>
+            <input
+              name="name"
+              value={formData.name}
+              placeholder="E.g. John Doe"
+              onChange={(e) => handleChange("name", e.target.value)}
+            />
+            {errors?.name && <p className={styles.error}>{errors.name}</p>}
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>
+              Gender <span className={styles.required}>*</span>
+            </label>
+            <select
+              value={formData.gender}
+              onChange={(e) => handleChange("gender", e.target.value)}
+            >
+              <option value="">--Select--</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+            {errors?.gender && <p className={styles.error}>{errors.gender}</p>}
+          </div>
+
+          {/* Row 2: Date of Birth + Place of birth */}
+          <div className={styles.formGroup}>
+            <label>
+              Date of Birth <span className={styles.required}>*</span>
+            </label>
+            <DateTimePicker
+              mode="date"
+              selected={formData.dob ? new Date(formData.dob) : null}
+              onChange={(date) => {
+                if (date) {
+                  const yyyy = date.getFullYear();
+                  const mm = String(date.getMonth() + 1).padStart(2, "0");
+                  const dd = String(date.getDate()).padStart(2, "0");
+                  handleChange("dob", `${yyyy}-${mm}-${dd}`);
+                } else {
+                  handleChange("dob", "");
+                }
+              }}
+              maxDate={new Date()}
+              placeholder="DD/MM/YYYY"
+            />
+            {errors?.dob && <p className={styles.error}>{errors.dob}</p>}
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>
+              Place of birth <span className={styles.required}>*</span>
+            </label>
+            <LocationSearch
+              value={formData.place}
+              onChange={(e) => handleChange("place", e.target.value)}
+              onPlaceSelect={(location) => {
+                handleChange("place", location.address);
+                handleChange("lat", location.lat);
+                handleChange("lng", location.lng);
+              }}
+            />
+            {errors?.place && <p className={styles.error}>{errors.place}</p>}
+          </div>
+
+          {/* Row 3: Birth Time */}
+          <div className={styles.formGroup}>
+            <label>
+              Birth Time <span className={styles.required}>*</span>
+            </label>
+            {!formData.isTimeUnknown && (
+              <DateTimePicker
+                mode="time"
+                selected={
+                  formData.tob
+                    ? (() => {
+                        const [h, m] = formData.tob.split(":");
+                        const d = new Date();
+                        d.setHours(h, m, 0, 0);
+                        return d;
+                      })()
+                    : null
+                }
+                onChange={(date) => {
+                  if (date) {
+                    const hh = String(date.getHours()).padStart(2, "0");
+                    const mm = String(date.getMinutes()).padStart(2, "0");
+                    handleChange("tob", `${hh}:${mm}`);
+                  } else {
+                    handleChange("tob", "");
+                  }
+                }}
+                placeholder="12:00 AM"
+              />
+            )}
+            {errors?.tob && <p className={styles.error}>{errors.tob}</p>}
+          </div>
+        </div>
+
+        {/* Checkbox below grid */}
+        <div className={styles.checkboxRow}>
+          <input
+            type="checkbox"
+            id="timeUnknown"
+            checked={formData.isTimeUnknown}
+            onChange={(e) => handleChange("isTimeUnknown", e.target.checked)}
+          />
+          <label htmlFor="timeUnknown">
+            Don&apos;t know the exact time of birth
+          </label>
+        </div>
+
+        <div className={styles.btnRow}>
+          <button type="submit" className={styles.submitBtn}>
+            Show Results
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
