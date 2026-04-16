@@ -5,6 +5,7 @@ import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import { TODAY } from "../../../../utils/dateFormat/date";
 import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
 import styles from "../mangaldosha/MangalDosha.module.scss";
+import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 
 const STORAGE_KEY = "kaal_sarp";
 const initialFormState = {
@@ -112,7 +113,23 @@ const KaalSarpCalc = () => {
         <div className={styles.row}>
           <div className={styles.field}>
             <label>Date of Birth <span>*</span></label>
-            <input type="date" value={formData.dob} max={TODAY} onChange={(e) => handleChange("dob", e.target.value)} onClick={(e) => e.target.showPicker?.()} />
+            {/* <input type="date" value={formData.dob} max={TODAY} onChange={(e) => handleChange("dob", e.target.value)} onClick={(e) => e.target.showPicker?.()} /> */}
+            <DateTimePicker
+              mode="date"
+              selected={formData.dob ? new Date(formData.dob) : null}
+              onChange={(date) => {
+                if (date) {
+                  const yyyy = date.getFullYear();
+                  const mm = String(date.getMonth() + 1).padStart(2, "0");
+                  const dd = String(date.getDate()).padStart(2, "0");
+                  handleChange("dob", `${yyyy}-${mm}-${dd}`);
+                } else {
+                  handleChange("dob", "");
+                }
+              }}
+              maxDate={new Date()}
+              placeholder="DD/MM/YYYY"
+            />
             {errors.dob && <p className={styles.err}>{errors.dob}</p>}
           </div>
           <div className={styles.field}>
@@ -123,7 +140,22 @@ const KaalSarpCalc = () => {
                 I don't know
               </label>
             </div>
-            <input type="time" value={formData.isTimeUnknown ? "" : formData.tob} onChange={(e) => handleChange("tob", e.target.value)} onClick={(e) => e.target.showPicker?.()} disabled={formData.isTimeUnknown} style={formData.isTimeUnknown ? { opacity: 0.4, cursor: "not-allowed" } : {}} />
+            {/* <input type="time" value={formData.isTimeUnknown ? "" : formData.tob} onChange={(e) => handleChange("tob", e.target.value)} onClick={(e) => e.target.showPicker?.()} disabled={formData.isTimeUnknown} style={formData.isTimeUnknown ? { opacity: 0.4, cursor: "not-allowed" } : {}} /> */}
+            <DateTimePicker
+              mode="time"
+              selected={!formData.isTimeUnknown && formData.tob ? (() => { const [h, m] = formData.tob.split(":"); const d = new Date(); d.setHours(h, m, 0, 0); return d; })() : null}
+              onChange={(date) => {
+                if (date) {
+                  const hh = String(date.getHours()).padStart(2, "0");
+                  const mm = String(date.getMinutes()).padStart(2, "0");
+                  handleChange("tob", `${hh}:${mm}`);
+                } else {
+                  handleChange("tob", "");
+                }
+              }}
+              placeholder="Select time"
+              disabled={formData.isTimeUnknown}
+            />
             {errors.tob && <p className={styles.err}>{errors.tob}</p>}
           </div>
         </div>

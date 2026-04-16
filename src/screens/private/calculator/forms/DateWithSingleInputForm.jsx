@@ -61,14 +61,35 @@ const DateWithSingleInputForm = ({
         <label>
           {inputLabel} <span className={styles.required}>*</span>
         </label>
-        <input
-          type={inputType}
-          placeholder={inputPlaceholder}
-          value={extraValue}
-          disabled={readOnly}
-          onChange={(e) => onChange(inputName, e.target.value)}
-          onClick={(e) => e.target.showPicker?.()}
-        />
+        {inputType === "date" ? (
+          <>
+            {/* <input type="date" placeholder={inputPlaceholder} value={extraValue} disabled={readOnly} onChange={(e) => onChange(inputName, e.target.value)} onClick={(e) => e.target.showPicker?.()} /> */}
+            <DateTimePicker
+              mode="date"
+              selected={extraValue ? new Date(extraValue) : null}
+              onChange={(date) => {
+                if (date) {
+                  const yyyy = date.getFullYear();
+                  const mm = String(date.getMonth() + 1).padStart(2, "0");
+                  const dd = String(date.getDate()).padStart(2, "0");
+                  onChange(inputName, `${yyyy}-${mm}-${dd}`);
+                } else {
+                  onChange(inputName, "");
+                }
+              }}
+              placeholder={inputPlaceholder || "DD/MM/YYYY"}
+              disabled={readOnly}
+            />
+          </>
+        ) : (
+          <input
+            type={inputType}
+            placeholder={inputPlaceholder}
+            value={extraValue}
+            disabled={readOnly}
+            onChange={(e) => onChange(inputName, e.target.value)}
+          />
+        )}
         {errors?.[inputName] && (
           <p className={styles.error}>{errors[inputName]}</p>
         )}
