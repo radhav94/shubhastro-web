@@ -108,11 +108,14 @@ const BirthDetailsScreen = ({
                     const yyyy = date.getFullYear();
                     const mm = String(date.getMonth() + 1).padStart(2, "0");
                     const dd = String(date.getDate()).padStart(2, "0");
-                    setFieldValue("birthDate", `${yyyy}-${mm}-${dd}`);
+                    setFieldValue("birthDate", `${yyyy}-${mm}-${dd}`).then(() => {
+                      setFieldTouched("birthDate", true, true);
+                    });
                   } else {
-                    setFieldValue("birthDate", "");
+                    setFieldValue("birthDate", "").then(() => {
+                      setFieldTouched("birthDate", true, true);
+                    });
                   }
-                  setFieldTouched("birthDate", true);
                 }}
                 maxDate={new Date()}
                 placeholder="DD/MM/YYYY"
