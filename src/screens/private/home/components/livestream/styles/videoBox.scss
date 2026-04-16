@@ -286,24 +286,37 @@
 }
 
 /* Minimized call pill on live stream */
+.live-call-pill-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  gap: 1px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .live-call-pill {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(8px);
   border-radius: 999px;
-  padding: 4px;
+  padding: 2px 4px;
   flex-shrink: 0;
 }
 
 .live-call-pill-avatar {
-  width: 36px;
-  height: 36px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: #fff;
   color: #f57c00;
-  font-size: 13px;
+  font-size: 9px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -312,8 +325,8 @@
 }
 
 .live-call-pill-end {
-  width: 36px;
-  height: 36px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: #ef5350;
   border: none;
@@ -323,10 +336,25 @@
   justify-content: center;
   transition: background 0.2s, transform 0.15s;
 
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+
   &:hover {
     background: #c62828;
     transform: scale(1.05);
   }
+}
+
+.live-call-pill-label {
+  display: block;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 600;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  letter-spacing: 0.3px;
 }
 
 /* Expanded call card */
@@ -567,6 +595,27 @@
     opacity: 0.6;
     cursor: not-allowed;
   }
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.mute-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(33, 33, 33, 0.6);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
 }
 
 .live-status {
