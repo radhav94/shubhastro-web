@@ -1,0 +1,155 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 567000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  width: 90%;
+  max-width: 380px;
+  animation: scaleIn 0.25s ease;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+}
+
+.description {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.userRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f75801, #ffa940);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #000;
+}
+
+.timer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.offlineToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 auto 16px;
+  padding: 8px 20px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #555;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.divider {
+  height: 1px;
+  background: #e0e0e0;
+  margin-bottom: 16px;
+}
+
+.waitTimeRow {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.waitLabel {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000;
+}
+
+.waitValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+.joinBtn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f75801, #d43400);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
