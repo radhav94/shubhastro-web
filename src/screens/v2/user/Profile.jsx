@@ -13,6 +13,7 @@ import {
   Trash2,
   FilterIcon,
   UserPlus,
+  Download,
 } from "lucide-react";
 import { TiUserDelete } from "react-icons/ti";
 import { LuPencilLine } from "react-icons/lu";
@@ -21,7 +22,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useState, useRef, useEffect } from "react";
 import dayjs from "dayjs";
-import { useGetTransactionsQuery } from "../../../services/appServices/transactionService";
+import { useGetTransactionsQuery, useGetInvoiceMutation } from "../../../services/appServices/transactionService";
 import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
 import { useGetCallHistoryQuery } from "../../../redux/api/callHistory/callHistory";
 import { useGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chatHistory";
@@ -184,6 +185,8 @@ const Profile = () => {
   const [appliedSortOrder, setAppliedSortOrder] = useState("");
   const [appliedMonth, setAppliedMonth] = useState("");
   const [appliedYear, setAppliedYear] = useState("");
+
+  const [invoiceLoadingId, setInvoiceLoadingId] = useState(null);
 
   // Fetch call and chat history
   const {
@@ -435,6 +438,8 @@ const Profile = () => {
       { page: currentPage, limit: 10 },
       { skip: !shouldFetch },
     );
+
+  const [getInvoice] = useGetInvoiceMutation();
 
   const pagination = transactionsData?.data?.pagination;
   const hasNextPage = pagination?.hasNextPage || false;
@@ -1686,6 +1691,14 @@ const Profile = () => {
 
         {activeTab === "Transactions" && (
           <div className={styles.transactionsContent}>
+            {/* Table Header */}
+            {allLoadedTransactions.length > 0 && (
+              <div className={styles.txnTableHeader}>
+                <span className={styles.txnHeaderCell}>Transaction</span>
+                <span className={styles.txnHeaderCell}>Amount</span>
+                <span className={styles.txnHeaderCell}>Action</span>
+              </div>
+            )}
             {/* Transaction History */}
             <div
               className={styles.transactionList}
@@ -1694,30 +1707,42 @@ const Profile = () => {
             >
               {allLoadedTransactions.length > 0 ? (
                 <>
-                  {allLoadedTransactions.map((transaction) => (
-                    <div
-                      key={transaction._id}
-                      className={styles.transactionItem}
-                    >
-                      <div className={styles.transactionContent}>
-                        <div className={styles.transactionLeft}>
-                          <div className={styles.transactionTop}>
-                            <span className={styles.transactionId}>
-                              #{transaction._id} •{" "}
-                              {dayjs(transaction.createdAt).format(
-                                "MMM DD, YYYY",
-                              )}{" "}
-                              • {dayjs(transaction.createdAt).format("hh:mm A")}
+                  {allLoadedTransactions.map((transaction) => {
+                    const txnType = (() => {
+                      const desc = (transaction.description || "").toLowerCase();
+                      if (desc.includes("gift")) return { label: "Gift Sent", icon: "🎁", color: "#F75801" };
+                      if (desc.includes("video")) return { label: "Video Call", icon: "📹", color: "#7C3AED" };
+                      if (desc.includes("audio") || desc.includes("call")) return { label: "Audio Call", icon: "📞", color: "#7C3AED" };
+                      if (desc.includes("chat")) return { label: "Chat", icon: "💬", color: "#2563EB" };
+                      if (desc.includes("recharge") || desc.includes("credit") || desc.includes("wallet")) return { label: "Recharge", icon: "💰", color: "#10B981" };
+                      return { label: "Other", icon: "📄", color: "#6B7280" };
+                    })();
+
+                    return (
+                      <div
+                        key={transaction._id}
+                        className={styles.txnRow}
+                      >
+                        {/* Icon + Info */}
+                        <div className={styles.txnInfoCell}>
+                          <div className={styles.txnIcon} style={{ background: `${txnType.color}15` }}>
+                            <span>{txnType.icon}</span>
+                          </div>
+                          <div className={styles.txnDetails}>
+                            <h4 className={styles.txnTitle}>
+                              {transaction.description || "Transaction with"}{" "}
+                              {transaction?.displayProfile?.name}
+                            </h4>
+                            <span className={styles.txnMeta}>
+                              {dayjs(transaction.createdAt).format("hh:mm A")} • TXN #{transaction._id}
                             </span>
                           </div>
-                          <h4 className={styles.transactionDescription}>
-                            {transaction.description || "Transaction with"}{" "}
-                            {transaction?.displayProfile?.name}
-                          </h4>
                         </div>
-                        <div className={styles.transactionRight}>
+
+                        {/* Amount */}
+                        <div className={styles.txnAmountCell}>
                           <span
-                            className={`${styles.transactionAmount} ${transaction?.billing?.user?.action === "credit" ? styles.credit : styles.debit}`}
+                            className={`${styles.txnAmount} ${transaction?.billing?.user?.action === "credit" ? styles.credit : styles.debit}`}
                           >
                             {transaction?.billing?.user?.action === "credit"
                               ? "+"
@@ -1725,85 +1750,48 @@ const Profile = () => {
                             ₹{transaction?.billing?.user?.debitAmount}
                           </span>
                         </div>
-                        <button
-                          className={styles.downloadInvoiceBtn}
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            const url = `https://devapi-shubhtalk.epicon.in/api/transactions/invoice?transactionId=${transaction._id}`;
-                            console.log("[Invoice] Fetching:", url);
-                            console.log(
-                              "[Invoice] Transaction ID:",
-                              transaction._id,
-                            );
-                            try {
-                              const token = localStorage.getItem(
-                                "shubhtalk_customer_token",
-                              );
-                              console.log(
-                                "[Invoice] Token:",
-                                token ? "present" : "MISSING",
-                              );
-                              const res = await fetch(url, {
-                                headers: {
-                                  accept: "application/json",
-                                  Authorization: `Bearer ${token}`,
-                                },
-                              });
-                              console.log("[Invoice] Status:", res.status);
-                              if (!res.ok) {
-                                console.log(
-                                  "[Invoice] API returned",
-                                  res.status,
-                                );
-                                Toast.error(
-                                  "Invoice not available for this transaction",
-                                );
-                                return;
+
+                        {/* Receipt Button */}
+                        <div className={styles.txnActionCell}>
+                          <button
+                            className={`${styles.receiptBtn} ${invoiceLoadingId === transaction._id ? styles.downloadLoading : ""}`}
+                            disabled={invoiceLoadingId === transaction._id}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              setInvoiceLoadingId(transaction._id);
+                              try {
+                                const data = await getInvoice(transaction._id).unwrap();
+                                const pdfUrl =
+                                  data?.data?.pdfUrl ||
+                                  data?.data?.url ||
+                                  data?.data ||
+                                  data?.pdfUrl ||
+                                  data?.url;
+                                if (pdfUrl) {
+                                  window.open(pdfUrl, "_blank");
+                                } else {
+                                  Toast.error("Invoice not available");
+                                }
+                              } catch (err) {
+                                console.error("[Invoice] Error:", err);
+                                Toast.error("Invoice not available for this transaction");
+                              } finally {
+                                setInvoiceLoadingId(null);
                               }
-                              const data = await res.json();
-                              console.log(
-                                "[Invoice] Response:",
-                                JSON.stringify(data),
-                              );
-                              const pdfUrl =
-                                data?.data?.pdfUrl ||
-                                data?.data?.url ||
-                                data?.data ||
-                                data?.pdfUrl ||
-                                data?.url;
-                              if (pdfUrl) {
-                                console.log("[Invoice] Opening PDF:", pdfUrl);
-                                window.open(pdfUrl, "_blank");
-                              } else {
-                                console.log(
-                                  "[Invoice] No PDF URL found in response",
-                                );
-                                Toast.error("Invoice not available");
-                              }
-                            } catch (err) {
-                              console.error("[Invoice] Error:", err);
-                              Toast.error("Failed to download invoice");
-                            }
-                          }}
-                        >
-                          <svg
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
+                            }}
+                            title="Download Invoice"
                           >
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="7 10 12 15 17 10" />
-                            <line x1="12" y1="15" x2="12" y2="3" />
-                          </svg>
-                        </button>
+                            {invoiceLoadingId === transaction._id ? (
+                              <span className={styles.btnSpinner} />
+                            ) : (
+                              <Download size={16} />
+                            )}
+                            Receipt
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {isFetchingTransactions && (
                     <div className={styles.loadingMore}>
                       <p>Loading more...</p>
