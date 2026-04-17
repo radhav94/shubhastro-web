@@ -183,7 +183,8 @@
   align-items: center;
   gap: 0;
   min-width: 0;
-  flex: 1;
+  flex-shrink: 1;
+  overflow: hidden;
 
   > .live-back-button {
     position: static;
@@ -209,11 +210,13 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .host-avatar {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
   border: 2px solid #d4af37;
   box-shadow: 0 0 15px rgba(212, 175, 55, 0.8);
@@ -222,12 +225,12 @@
   justify-content: center;
   background: radial-gradient(circle at center, #251432, #050208);
   color: #f8e9c4;
-  font-size: 18px;
+  font-size: 15px;
 }
 
 .host-avatar-img {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
   border: 2px solid #d4af37;
   box-shadow: 0 0 15px rgba(212, 175, 55, 0.8);
@@ -237,17 +240,18 @@
 .host-text {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .host-name {
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   text-shadow: 0px 0px 2px black;
 }
 
 .host-name-truncate {
-  max-width: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -354,6 +358,59 @@
   font-weight: 600;
   text-align: center;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  letter-spacing: 0.3px;
+}
+
+.live-call-pill-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-left: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  padding: 2px 4px;
+}
+
+.live-call-pill-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mini-call-wave {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 16px;
+}
+
+.mini-call-wave-bar {
+  width: 2px;
+  height: 4px;
+  background: #fff;
+  border-radius: 1px;
+  animation: miniWave 0.8s ease-in-out infinite;
+}
+
+.mini-call-wave-bar:nth-child(1) { animation-delay: 0s; }
+.mini-call-wave-bar:nth-child(2) { animation-delay: 0.2s; }
+.mini-call-wave-bar:nth-child(3) { animation-delay: 0.4s; }
+.mini-call-wave-bar:nth-child(4) { animation-delay: 0.6s; }
+
+@keyframes miniWave {
+  0%, 100% { height: 4px; }
+  50% { height: 12px; }
+}
+
+.live-call-pill-text {
+  color: #fff;
+  font-size: 7px;
+  font-weight: 600;
+  white-space: nowrap;
   letter-spacing: 0.3px;
 }
 
@@ -541,6 +598,41 @@
   font-size: 9px;
   font-weight: 500;
   padding: 5px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.private-call-banner {
+  position: relative;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(247, 88, 1, 0.85);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  margin: 8px 12px 0;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.private-call-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.private-call-text {
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  padding: 3px 10px;
   border-radius: 999px;
   white-space: nowrap;
 }

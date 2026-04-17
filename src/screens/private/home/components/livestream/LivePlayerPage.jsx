@@ -111,6 +111,8 @@ const LivePlayerPage = () => {
         videoCallRate: l.astrologer?.price?.videoCallRate?.amount,
         uid: l.uid,
         startedAt: l.startedAt,
+        isOnPrivateCall: !!l.isOnPrivateCall,
+        privateCallType: l.privateCallType || null,
       }))}
       autoStartIndex={autoStartIndex}
     >

@@ -71,6 +71,8 @@ const LiveView = (props) => {
     roomReady,
     liveStartedAt,
     isHostMuted,
+    privateCallInfo,
+    isOnPrivateCall,
   } = props;
 
   const [showGifts, setShowGifts] = useState(false);
@@ -92,6 +94,23 @@ const LiveView = (props) => {
   const dispatch = useDispatch();
   const suggestedRemedyData = useSelector((s) => s.remedy);
   const hasNewRemedy = suggestedRemedyData.hasNewRemedy;
+
+  // Private call state — comes from useLiveChat via props spread
+  // Also listen via window event as backup since props chain can be unreliable
+  const [localPrivateCall, setLocalPrivateCall] = useState(false);
+
+  useEffect(() => {
+    const handler = (e) => {
+      setLocalPrivateCall(e.detail?.isOnPrivateCall ?? false);
+    };
+    window.addEventListener("live:private_call_status", handler);
+    return () => window.removeEventListener("live:private_call_status", handler);
+  }, []);
+
+  // Reset when channel changes — initialize from API data
+  useEffect(() => {
+    setLocalPrivateCall(!!props.astrologer?.isOnPrivateCall);
+  }, [props.channel]);
 
   // Reset ended state when switching to a new channel
   // Use a counter to invalidate stale roomReady changes from old channels
@@ -852,6 +871,17 @@ const LiveView = (props) => {
       setShowRechargeButton(false);
     };
 
+    const handleCallCanceled = (data) => {
+      console.log("[LiveView] 📞 call:canceled received", data);
+      // Toast.info(data?.message || "Call was cancelled by the astrologer");
+      setShowWaitingModal(false);
+      setShowWaitingPopup(false);
+      setShowWaitingToast(false);
+      setCallRoomId(null);
+      clearPendingLiveCallState();
+      resetCallFlow();
+    };
+
     const handleWarning = (msg) => {
       if (msg?.message?.includes("Low balance alert")) {
         setShowRechargeButton(true);
@@ -859,18 +889,33 @@ const LiveView = (props) => {
       Toast.warning(msg.message);
     };
 
+    const handleAstrologerPrivateCall = (data) => {
+      if (data?.status === "on_private_call") {
+        console.log("[LiveView] 📞 Astrologer on private call");
+        setLocalPrivateCall(true);
+      } else if (data?.status === "private_call_ended") {
+        console.log("[LiveView] 📞 Astrologer private call ended");
+        setLocalPrivateCall(false);
+      }
+    };
+
     // Register socket listeners
     voiceSocket.on("call:room", handleCallRoom);
     voiceSocket.on("call:accepted", handleCallAccepted);
     voiceSocket.on("call:rejected", handleCallRejected);
     voiceSocket.on("call:ended", handleCallEnded);
+    voiceSocket.on("call:canceled", handleCallCanceled);
     voiceSocket.on("warning", handleWarning);
+    voiceSocket.on("live:astrologer_status", handleAstrologerPrivateCall);
 
     return () => {
       voiceSocket.off("call:room", handleCallRoom);
       voiceSocket.off("call:accepted", handleCallAccepted);
       voiceSocket.off("call:rejected", handleCallRejected);
       voiceSocket.off("call:ended", handleCallEnded);
+      voiceSocket.off("call:canceled", handleCallCanceled);
+      voiceSocket.off("warning", handleWarning);
+      voiceSocket.off("live:astrologer_status", handleAstrologerPrivateCall);
       voiceSocket.off("warning", handleWarning);
     };
   }, [
@@ -902,6 +947,7 @@ const LiveView = (props) => {
     roomReady,
     wasRoomReady,
     channel: props.channel,
+    isOnPrivateCall,
   });
 
   const shouldShowWaitingIndicator = !isHost && (showWaitingModal || !!resolvePendingLiveCall());
@@ -939,7 +985,7 @@ const LiveView = (props) => {
                 </div>
                 <div className="host-duration">
                   {isCallForCurrentAstrologer
-                    ? `Call ${formatCallTime(callSeconds)}`
+                    ? `Private Call ${formatCallTime(callSeconds)}`
                     : `Live ${liveDuration}`
                   }
                 </div>
@@ -947,11 +993,17 @@ const LiveView = (props) => {
               {/* Minimized call pill - right after name */}
               {/* Minimized call pill - right after name */}
               {isCallForCurrentAstrologer && !isCallExpanded && (
-                <div className="live-call-pill-wrapper" onClick={() => setIsCallExpanded(true)}>
-                  <div className="live-call-pill">
+                <div className="live-call-pill-inline" onClick={() => setIsCallExpanded(true)}>
+                  <div className="live-call-pill-row">
                     <span className="live-call-pill-avatar">
                       {(activeCall.callerName || "A").split(" ").map(w => w.charAt(0).toUpperCase()).join("").slice(0, 2)}
                     </span>
+                    <div className="mini-call-wave">
+                      <span className="mini-call-wave-bar"></span>
+                      <span className="mini-call-wave-bar"></span>
+                      <span className="mini-call-wave-bar"></span>
+                      <span className="mini-call-wave-bar"></span>
+                    </div>
                     <button
                       className="live-call-pill-end"
                       onClick={(e) => { e.stopPropagation(); handleEndActiveCall(); }}
@@ -962,11 +1014,17 @@ const LiveView = (props) => {
                       </svg>
                     </button>
                   </div>
-                  <span className="live-call-pill-label">Private Call</span>
                 </div>
               )}
             </div>
             </div>
+
+            {/* Private call indicator - between name and follow */}
+            {!isHost && localPrivateCall && !activeCall && (
+              <div className="private-call-center">
+                <span className="private-call-text">Private Call</span>
+              </div>
+            )}
 
             {/* Follow button - right side of top bar */}
             {!isHost && (
@@ -982,7 +1040,7 @@ const LiveView = (props) => {
                     ? "Following"
                     : "+ Follow"}
                 </button>
-                {isHostMuted && remoteUsers.length > 0 && !roomEnded && (
+                {isHostMuted && !localPrivateCall && remoteUsers.length > 0 && !roomEnded && (
                   <div className="mute-indicator">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="1" y1="1" x2="23" y2="23" />
@@ -996,6 +1054,9 @@ const LiveView = (props) => {
               </div>
             )}
           </div>
+
+          {/* Private call banner */}
+          {/* Moved to top bar */}
 
           {/* Expanded call card - below top bar */}
           {isCallForCurrentAstrologer && isCallExpanded && (
@@ -1291,7 +1352,7 @@ const LiveView = (props) => {
               <div className="icon-btn" style={{ position: "relative" }}>
                 <div
                   className="icon-circle"
-                  style={{ cursor: "pointer", background: "#f75801" }}
+                  style={{ cursor: "pointer", background: "transparent" }}
                   onClick={(e) => { e.stopPropagation(); setShowWaitingPopup((v) => !v); }}
                 >
                   <IoHourglass size={20} color="#fff" />
@@ -1310,6 +1371,7 @@ const LiveView = (props) => {
                       resetCallState={() => { setShowWaitingToast(false); resetCallState(); }}
                       connectionType={pendingCallType}
                       className="live-waiting-override"
+                      hideCancel
                     />
                   </div>
                 )}
