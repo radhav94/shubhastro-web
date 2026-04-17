@@ -472,8 +472,10 @@ const LiveView = (props) => {
   useEffect(() => {}, [displayMessages.length]);
 
   const isHost = ROLE === "host";
-  const isAstrologerLive = remoteUsers?.length > 0 && !hostLeft && !roomEnded;
-  const viewerCount = participantCount || (remoteUsers?.length || 0) + 1;
+  const safeRemoteUsers = remoteUsers.filter((u) => u);
+  const shouldRenderStream = !!props.channel && isConnected && !hostLeft && !roomEnded && safeRemoteUsers.length > 0;
+  const isAstrologerLive = shouldRenderStream;
+  const viewerCount = participantCount || (safeRemoteUsers?.length || 0) + 1;
 
   const {
     messagesEndRef,
@@ -711,7 +713,7 @@ const LiveView = (props) => {
       message: kundliLink,
       type: "kundli",
     });
-    Toast.success("Kundli shared");
+    Toast.success("Kundli shared", { position: "top-center" });
   };
 
   // Listen for suggested remedy messages from astrologer during call
@@ -1140,26 +1142,54 @@ const LiveView = (props) => {
               />
             )}
 
-            {/* AUDIENCE VIDEO — only show when room hasn't ended */}
-            {!isHost &&
-              remoteUsers.length > 0 && !roomEnded &&
-              remoteUsers.map((user) => (
+            {/* AUDIENCE VIDEO — safe render with connection guard */}
+            {!isHost && shouldRenderStream &&
+              safeRemoteUsers.map((user) => (
                 <RemoteUser key={user.uid} user={user} />
-              ))}
+              ))
+            }
 
-            {/* CONNECTING — Agora joining or waiting for remote media */}
-            {!isHost && remoteUsers.length === 0 && !hostLeft && !roomEnded && (
-              <div className="waiting-text">
-                {!props.channel || connectingTimedOut
-                  ? '🔮 Waiting for astrologer to start streaming…'
-                  : '🔮 Connecting to live stream…'}
+            {/* MUTE BANNER — show when astrologer mutes audio */}
+            {!isHost && isHostMuted && shouldRenderStream && (
+              <div style={{
+                position: "absolute",
+                top: 180,
+                left: "50%",
+                transform: "translateX(-50%)",
+                background: "rgba(33, 33, 33, 0.44)",
+                color: "#fff",
+                padding: "8px 14px",
+                borderRadius: "20px",
+                fontSize: "10px",
+                fontWeight: 500,
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                zIndex: 20,
+                whiteSpace: "nowrap",
+                backdropFilter: "blur(4px)",
+              }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
+                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2c0 .76-.13 1.49-.35 2.17" />
+                  <line x1="12" y1="19" x2="12" y2="23" />
+                  <line x1="8" y1="23" x2="16" y2="23" />
+                </svg>
+                Astrologer is on mute
               </div>
             )}
 
-            {/* ENDED — astrologer has left or room ended */}
-            {!isHost && (hostLeft || roomEnded) && remoteUsers.length === 0 && (
+            {/* WAITING — no live video available */}
+            {!isHost && !shouldRenderStream && (
               <div className="waiting-text">
-                🔮 Waiting for astrologer to go live…
+                {roomEnded
+                  ? '🔴 Live ended'
+                  : hostLeft
+                    ? '🔮 Waiting for astrologer to go live…'
+                    : !props.channel || connectingTimedOut
+                      ? '� Waiting for astrologer to start streaming…'
+                      : '🔮 Connecting to live stream…'}
               </div>
             )}
           </div>

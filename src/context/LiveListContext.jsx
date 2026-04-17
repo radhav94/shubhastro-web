@@ -65,7 +65,12 @@ export const LiveListProvider = ({ children, lives: initialLives, autoStartIndex
         setRejoinKey((k) => k + 1);
       }
       setHasNewLive(true);
-      return [...prev, liveEntry];
+      const next = [...prev, liveEntry];
+      // Auto-switch to the new entry if the list was empty (no active stream)
+      if (prev.length === 0) {
+        setCurrentIndex(0);
+      }
+      return next;
     });
   }, []);
 
