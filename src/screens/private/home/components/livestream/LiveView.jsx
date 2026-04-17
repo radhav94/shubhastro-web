@@ -694,7 +694,7 @@ const LiveView = (props) => {
       message: kundliLink,
       type: "kundli",
     });
-    Toast.success("Kundli shared", { position: "top-center" });
+    Toast.success("Kundali sent successfully.", { position: "top-center" });
   };
 
   // Listen for suggested remedy messages from astrologer during call
