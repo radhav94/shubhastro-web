@@ -206,30 +206,73 @@ const DateTimePicker = ({
     );
   }
 
-  // Resolve format based on mode
+  // ── Date / DateTime mode ──
+
   const resolvedFormat =
     dateFormat || (isDateTime ? "dd/MM/yyyy hh:mm aa" : "dd/MM/yyyy");
 
   const resolvedPlaceholder =
-    placeholder ||
-    (isDateTime ? "Select date & time" : "Select date");
+    placeholder || (isDateTime ? "Select date & time" : "dd/mm/yyyy");
 
-  // Custom input for consistent cross-browser rendering
-  const CustomInput = forwardRef(({ value, onClick, onChange: onInputChange }, ref) => (
-    <input
-      ref={ref}
-      type="text"
-      value={value}
-      onClick={onClick}
-      onChange={onInputChange}
-      placeholder={resolvedPlaceholder}
-      disabled={disabled}
-      className={styles.input}
-      readOnly={false}
-      autoComplete="off"
-    />
-  ));
-  CustomInput.displayName = "CustomInput";
+  // Controlled text input for manual entry
+  const formatDateDisplay = (d) => {
+    if (!d) return "";
+    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+  };
+
+  const [inputText, setInputText] = useState(selected ? formatDateDisplay(selected) : "");
+
+  // Sync inputText when selected prop changes (picker or parent update)
+  useEffect(() => {
+    setInputText(selected ? formatDateDisplay(selected) : "");
+  }, [selected]);
+
+  // Parse DD/MM/YYYY string to Date
+  const parseManualDate = (text) => {
+    const cleaned = text.replace(/[^0-9/]/g, "");
+    const parts = cleaned.split("/");
+    if (parts.length !== 3) return null;
+    const [dd, mm, yyyy] = parts;
+    if (!dd || !mm || !yyyy || yyyy.length !== 4) return null;
+    const d = parseInt(dd, 10);
+    const m = parseInt(mm, 10);
+    const y = parseInt(yyyy, 10);
+    if (d < 1 || d > 31 || m < 1 || m > 12 || y < 1900) return null;
+    const date = new Date(y, m - 1, d);
+    // Verify the date is valid (e.g., not Feb 30)
+    if (date.getDate() !== d || date.getMonth() !== m - 1 || date.getFullYear() !== y) return null;
+    // Check constraints
+    if (minDate && date < minDate) return null;
+    if (maxDate && date > maxDate) return null;
+    return date;
+  };
+
+  const handleManualChange = (e) => {
+    const val = e.target.value;
+    setInputText(val);
+    // Try to parse as user types — only call onChange when fully valid
+    const parsed = parseManualDate(val);
+    if (parsed) {
+      onChange(parsed);
+    }
+  };
+
+  const handleManualBlur = () => {
+    // On blur, if text doesn't parse to a valid date, revert to selected
+    const parsed = parseManualDate(inputText);
+    if (!parsed && inputText.length > 0) {
+      // Revert to last valid selection
+      setInputText(selected ? formatDateDisplay(selected) : "");
+    }
+  };
+
+  const handlePickerChange = (date) => {
+    onChange(date);
+    // inputText will sync via the useEffect above
+  };
+
+  // Ref for the DatePicker to open programmatically
+  const datePickerRef = useRef(null);
 
   return (
     <div className={`${styles.wrapper} ${className}`}>
@@ -240,37 +283,61 @@ const DateTimePicker = ({
         </label>
       )}
 
-      <DatePicker
-        selected={selected}
-        onChange={onChange}
-        // Date options
-        {...(!isTimeOnly && {
-          showMonthDropdown: true,
-          showYearDropdown: true,
-          dropdownMode: "select",
-          scrollableYearDropdown: true,
-          yearDropdownItemNumber: 100,
-        })}
-        // Time options
-        showTimeSelect={isDateTime}
-        showTimeSelectOnly={false}
-        timeFormat="hh:mm aa"
-        timeIntervals={15}
-        // Format
-        dateFormat={resolvedFormat}
-        // Constraints
-        minDate={minDate}
-        maxDate={maxDate}
-        disabled={disabled}
-        // Custom input for Safari compatibility
-        customInput={<CustomInput />}
-        // Positioning
-        popperPlacement="bottom-start"
-        popperClassName={styles.popper}
-        calendarClassName={styles.calendar}
-        // Accessibility
-        autoComplete="off"
-      />
+      <div className={styles.dateInputRow}>
+        <input
+          type="text"
+          value={inputText}
+          onChange={handleManualChange}
+          onBlur={handleManualBlur}
+          placeholder={resolvedPlaceholder}
+          disabled={disabled}
+          className={styles.input}
+          autoComplete="off"
+        />
+        {/* Invisible overlay covering right 1/3 of input to open calendar */}
+        <div
+          className={styles.calendarOverlay}
+          onClick={() => !disabled && datePickerRef.current?.setOpen(true)}
+        />
+        <button
+          type="button"
+          className={styles.calendarBtn}
+          disabled={disabled}
+          onClick={() => datePickerRef.current?.setOpen(true)}
+          tabIndex={-1}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Hidden DatePicker for calendar popup */}
+      <div className={styles.hiddenPicker}>
+        <DatePicker
+          ref={datePickerRef}
+          selected={selected}
+          onChange={handlePickerChange}
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode="select"
+          scrollableYearDropdown
+          yearDropdownItemNumber={100}
+          showTimeSelect={isDateTime}
+          timeFormat="hh:mm aa"
+          timeIntervals={15}
+          dateFormat={resolvedFormat}
+          minDate={minDate}
+          maxDate={maxDate}
+          disabled={disabled}
+          popperPlacement="bottom-start"
+          popperClassName={styles.popper}
+          calendarClassName={styles.calendar}
+        />
+      </div>
     </div>
   );
 };

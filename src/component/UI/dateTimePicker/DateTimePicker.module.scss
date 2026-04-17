@@ -52,6 +52,80 @@
   }
 }
 
+/* ───── Date input row with calendar button ───── */
+.dateInputRow {
+  display: flex;
+  align-items: center;
+  position: relative;
+
+  .input {
+    padding-right: 40px;
+  }
+}
+
+.calendarOverlay {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 33%;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.calendarBtn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 44px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 8px 8px 0;
+  transition: color 0.15s;
+  z-index: 2;
+
+  &:hover {
+    color: #F75801;
+    background: rgba(247, 88, 1, 0.04);
+  }
+
+  &:disabled {
+    color: #d1d5db;
+    cursor: not-allowed;
+    background: none;
+  }
+}
+
+.hiddenPicker {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+
+  :global(.react-datepicker-wrapper) {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+
+  :global(.react-datepicker__tab-loop) {
+    pointer-events: auto;
+  }
+
+  :global(.react-datepicker-popper) {
+    pointer-events: auto;
+  }
+}
+
 /* ───── Custom 12-hour Time Picker ───── */
 .timePickerWrapper {
   position: relative;

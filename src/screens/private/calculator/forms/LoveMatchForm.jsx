@@ -13,12 +13,11 @@ const LoveMatchForm = ({
 
   return (
     <form className={styles.loveForm} onSubmit={onSubmit}>
-      <h3 className={styles.formTitle}>{title}</h3>
+      {title && <h3 className={styles.formTitle}>{title}</h3>}
 
       <div className={styles.grid}>
         {/* LEFT PERSON */}
         <div>
-          {/* Name 1 */}
           <div className={styles.formGroup}>
             <label>
               Your Name <span className={styles.required}>*</span>
@@ -26,12 +25,12 @@ const LoveMatchForm = ({
             <input
               value={name1}
               name="name1"
+              placeholder="E.g. John Doe"
               onChange={(e) => onChange("name1", e.target.value)}
             />
             {errors?.name1 && <p className={styles.error}>{errors.name1}</p>}
           </div>
 
-          {/* Gender 1 */}
           <div className={styles.formGroup}>
             <label>
               Gender <span className={styles.required}>*</span>
@@ -40,7 +39,7 @@ const LoveMatchForm = ({
               value={gender1}
               onChange={(e) => onChange("gender1", e.target.value)}
             >
-              <option value="">Select</option>
+              <option value="">--Select--</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
             </select>
@@ -55,7 +54,6 @@ const LoveMatchForm = ({
 
         {/* RIGHT PERSON */}
         <div>
-          {/* Name 2 */}
           <div className={styles.formGroup}>
             <label>
               Partner's Name <span className={styles.required}>*</span>
@@ -63,12 +61,12 @@ const LoveMatchForm = ({
             <input
               name="name2"
               value={name2}
+              placeholder="E.g. Jane Doe"
               onChange={(e) => onChange("name2", e.target.value)}
             />
             {errors?.name2 && <p className={styles.error}>{errors.name2}</p>}
           </div>
 
-          {/* Gender 2 */}
           <div className={styles.formGroup}>
             <label>
               Gender <span className={styles.required}>*</span>
@@ -77,7 +75,7 @@ const LoveMatchForm = ({
               value={gender2}
               onChange={(e) => onChange("gender2", e.target.value)}
             >
-              <option value="">Select</option>
+              <option value="">--Select--</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
             </select>
@@ -89,14 +87,14 @@ const LoveMatchForm = ({
       </div>
 
       <div className={styles.btnRow}>
+        {onReset && (
+          <button type="button" className={styles.resetBtn} onClick={onReset}>
+            Cancel
+          </button>
+        )}
         <button type="submit" className={styles.submitBtn}>
           {submitText}
         </button>
-        {onReset && (
-          <button type="button" className={styles.resetBtn} onClick={onReset}>
-            Reset
-          </button>
-        )}
       </div>
     </form>
   );
