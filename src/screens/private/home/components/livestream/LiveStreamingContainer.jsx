@@ -1,5 +1,5 @@
 // src/components/LiveStreaming/LiveStreamingContainer.jsx
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useLiveStreaming } from "./useLiveStreaming";
 import { useLiveChat } from "./useLiveChat";
@@ -106,8 +106,20 @@ const LiveStreamingContainer = ({ client }) => {
   const liveRef = useRef(live);
   useEffect(() => { liveRef.current = live; }, [live]);
 
+  // Private call state — tracks when the current astrologer is on a private call
+  const [privateCallInfo, setPrivateCallInfo] = useState({ isOnPrivateCall: false, privateCallType: null });
+
+  // Reset private call state when switching channels
+  useEffect(() => {
+    if (!currentLive) return;
+    setPrivateCallInfo({
+      isOnPrivateCall: !!currentLive.isOnPrivateCall,
+      privateCallType: currentLive.privateCallType || null,
+    });
+  }, [currentLive?.channel]);
+
   const handleAstrologerStatus = useCallback((data) => {
-    const { status, roomId, hostId, hostName } = data;
+    const { status, roomId, hostId, hostName, privateCallType } = data;
 
     if (status === "ended") {
       liveList?.removeLive(roomId);
@@ -130,6 +142,16 @@ const LiveStreamingContainer = ({ client }) => {
           retryJoinRef.current?.(roomId);
         }, 300);
       }
+    }
+
+    if (status === "on_private_call") {
+      console.log("[LiveContainer] 📞 Setting privateCallInfo: on_private_call, type:", privateCallType);
+      setPrivateCallInfo({ isOnPrivateCall: true, privateCallType: privateCallType || null });
+    }
+
+    if (status === "private_call_ended") {
+      console.log("[LiveContainer] 📞 Setting privateCallInfo: private_call_ended");
+      setPrivateCallInfo({ isOnPrivateCall: false, privateCallType: null });
     }
   }, [liveList]);
 
@@ -232,6 +254,7 @@ const LiveStreamingContainer = ({ client }) => {
     {/* FIXED VIDEO (PORTALED INSIDE LiveView) */}
     <LiveView channel={channel} ROLE={ROLE} {...live} {...chat} 
       astrologer={currentLive}
+      privateCallInfo={privateCallInfo}
 />
 
     {/* 🔥 LIVE NAVIGATION CONTROLS */}
