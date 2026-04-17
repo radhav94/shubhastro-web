@@ -444,8 +444,10 @@ const LiveView = (props) => {
   useEffect(() => {}, [displayMessages.length]);
 
   const isHost = ROLE === "host";
-  const isAstrologerLive = remoteUsers?.length > 0 && !hostLeft && !roomEnded;
-  const viewerCount = participantCount || (remoteUsers?.length || 0) + 1;
+  const safeRemoteUsers = remoteUsers.filter((u) => u);
+  const shouldRenderStream = !!props.channel && isConnected && !hostLeft && !roomEnded && safeRemoteUsers.length > 0;
+  const isAstrologerLive = shouldRenderStream;
+  const viewerCount = participantCount || (safeRemoteUsers?.length || 0) + 1;
 
   const {
     messagesEndRef,
@@ -1049,15 +1051,15 @@ const LiveView = (props) => {
               />
             )}
 
-            {/* AUDIENCE VIDEO — only show when room hasn't ended */}
-            {!isHost &&
-              remoteUsers.length > 0 && !roomEnded &&
-              remoteUsers.map((user) => (
+            {/* AUDIENCE VIDEO — safe render with connection guard */}
+            {!isHost && shouldRenderStream &&
+              safeRemoteUsers.map((user) => (
                 <RemoteUser key={user.uid} user={user} />
-              ))}
+              ))
+            }
 
             {/* MUTE BANNER — show when astrologer mutes audio */}
-            {!isHost && isHostMuted && remoteUsers.length > 0 && !roomEnded && (
+            {!isHost && isHostMuted && shouldRenderStream && (
               <div style={{
                 position: "absolute",
                 top: 180,
@@ -1087,19 +1089,16 @@ const LiveView = (props) => {
               </div>
             )}
 
-            {/* CONNECTING — Agora joining or waiting for remote media */}
-            {!isHost && remoteUsers.length === 0 && !hostLeft && !roomEnded && (
+            {/* WAITING — no live video available */}
+            {!isHost && !shouldRenderStream && (
               <div className="waiting-text">
-                {!props.channel || connectingTimedOut
-                  ? '🔮 Waiting for astrologer to start streaming…'
-                  : '🔮 Connecting to live stream…'}
-              </div>
-            )}
-
-            {/* ENDED — astrologer has left or room ended */}
-            {!isHost && (hostLeft || roomEnded) && remoteUsers.length === 0 && (
-              <div className="waiting-text">
-                🔮 Waiting for astrologer to go live…
+                {roomEnded
+                  ? '🔴 Live ended'
+                  : hostLeft
+                    ? '🔮 Waiting for astrologer to go live…'
+                    : !props.channel || connectingTimedOut
+                      ? '🔮 Waiting for astrologer to start streaming…'
+                      : '🔮 Connecting to live stream…'}
               </div>
             )}
           </div>

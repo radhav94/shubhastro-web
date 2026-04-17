@@ -198,7 +198,18 @@ const LiveStreamingContainer = ({ client }) => {
   useEffect(() => {
     if (!channel || !chat.isConnected || chat.roomReady) return;
     if (roomNotFoundRef.current.has(channel)) return;
-    chat.retryJoinRoom();
+
+    // Immediate attempt
+    chat.retryJoinRoom(channel);
+
+    // Retry after 2s if still not ready (room may not be set up yet on server)
+    const retryTimer = setTimeout(() => {
+      if (!chat.roomReady) {
+        chat.retryJoinRoom(channel);
+      }
+    }, 2000);
+
+    return () => clearTimeout(retryTimer);
   }, [channel, chat.isConnected, chat.roomReady]);
 
   // Keep ref in sync so handleAstrologerStatus can call it
