@@ -516,7 +516,7 @@ const TopHeader = () => {
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
-              Astromall
+              ShubhMall
             </NavLink>
             <NavLink
               to={PATH.privateRoutes.KUNDLI.path}

@@ -128,6 +128,7 @@
   animation: slideIn 0.3s ease forwards;
   display: flex;
   flex-direction: column;
+  overflow: auto;
 
   a {
     padding: 10px 16px 10px 12px;
@@ -146,7 +147,7 @@
   border: none;
   height: 50px;
   width: 50px;
-  // position: absolute;
+  position: fixed;
   right: 0;
   z-index: 99;
   color: #f75801;
