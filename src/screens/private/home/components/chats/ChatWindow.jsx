@@ -55,7 +55,7 @@ const ChatWindow = () => {
   } = state || {};
   // console.log('kundliId in chat', kundliId)
 
-  const { activeCall, isCallMinimized } = useCall();
+  const { activeCall, isCallMinimized, reviewData } = useCall();
   const [openFeedback, setOpenFeedback] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showProfileManagerModal, setShowProfileManagerModal] = useState(false);
@@ -273,8 +273,10 @@ const ChatWindow = () => {
   const [addAstrologerReview, { isLoading }] = useAddAstrologerReviewMutation();
   const handleReviewSubmit = async ({ rating, review, isAnonymous }) => {
     try {
+      // Use astroID from location state, fall back to activeCall or reviewData
+      const reviewAstrologerID = astroID || activeCall?.astrologerID || activeCall?.astrologerId || reviewData?.astrologerID;
       const res = await addAstrologerReview({
-        astrologerID: astroID,
+        astrologerID: reviewAstrologerID,
         rating,
         review,
         isAnonymous,
