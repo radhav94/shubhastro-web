@@ -149,15 +149,19 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     });
 
     // Private call status — attached directly to socket instance, no timing issues
+    // Only update if the event is for the astrologer in the current room
     socket.on("live:astrologer_status", (data) => {
-      if (data?.status === "on_private_call") {
-        console.log("LiveChat → Private call started");
+      const eventHostId = data?.hostId;
+      const eventRoomId = data?.roomId;
+      const isCurrentRoom = !eventRoomId || eventRoomId === currentRoomRef.current;
+      if (data?.status === "on_private_call" && isCurrentRoom) {
+        console.log("LiveChat → Private call started for current host");
         setIsOnPrivateCall(true);
-        window.dispatchEvent(new CustomEvent("live:private_call_status", { detail: { isOnPrivateCall: true } }));
-      } else if (data?.status === "private_call_ended") {
-        console.log("LiveChat → Private call ended");
+        window.dispatchEvent(new CustomEvent("live:private_call_status", { detail: { isOnPrivateCall: true, hostId: eventHostId } }));
+      } else if (data?.status === "private_call_ended" && isCurrentRoom) {
+        console.log("LiveChat → Private call ended for current host");
         setIsOnPrivateCall(false);
-        window.dispatchEvent(new CustomEvent("live:private_call_status", { detail: { isOnPrivateCall: false } }));
+        window.dispatchEvent(new CustomEvent("live:private_call_status", { detail: { isOnPrivateCall: false, hostId: eventHostId } }));
       }
     });
 
