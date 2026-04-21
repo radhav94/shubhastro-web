@@ -11,11 +11,9 @@
 /* Popup */
 .gift-popup {
   width: 100%;
-  max-height: 65vh;
-  background: #fff;
+  background: #f5f3f0;
   border-radius: 18px 18px 0 0;
-  padding: 16px;
-  overflow-y: auto;
+  padding: 16px 16px 14px;
   animation: slideUp 0.3s ease;
 }
 
@@ -23,70 +21,122 @@
 .gift-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding-bottom: 6px;
+  align-items: flex-start;
+  padding-bottom: 8px;
 }
 
 .gift-title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
 }
 
-.gift-coins {
-  font-size: 14px;
+.gift-wallet {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.gift-wallet-amount {
+  font-size: 20px;
   font-weight: 700;
-  color: #111;
+  color: #e65100;
+}
+
+.gift-wallet-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+
+  span {
+    font-weight: 500;
+  }
+}
+
+/* Section Title */
+.gift-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
 }
 
 /* Gift Grid */
 .gift-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  padding: 8px 0 14px;
+  gap: 10px;
+  padding-bottom: 12px;
 }
 
 .gift-item {
   text-align: center;
-  padding: 4px;
   cursor: pointer;
-  border-radius: 12px;
   transition: 0.2s;
-  border: 1px solid transparent;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.gift-item.active {
-  border-color: #ff0076;
-  background: rgba(255, 0, 118, 0.08);
+.gift-img-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  overflow: visible;
+  transition: .2s;
+  border: 1px solid transparent;
+  box-shadow: 0 2px 6px #0000001a;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 13px;
+    display: block;
+  }
 }
 
-.gift-item img {
-  width: 38px;
-  height: 38px;
-  margin-bottom: 4px;
+.gift-item.active .gift-img-wrap {
+  border-color: #e65100;
+}
+
+.gift-price-badge {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #e65100;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 0;
+  border-radius: 20px;
+  white-space: nowrap;
+  line-height: 1.3;
+  width: 65%;
+  text-align: center;
 }
 
 .gift-name {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
-}
-
-.gift-price {
-  font-size: 9px;
-  color: #555;
+  color: #333;
+  margin-top: 14px;
 }
 
 /* Button */
 .gift-send-btn {
   width: 100%;
-  background: #ffd675;
-  font-size: 13px;
+  background: #e65100;
+  color: #fff;
+  font-size: 14px;
   font-weight: 600;
-  padding: 9px;
+  padding: 10px;
   border-radius: 12px;
   cursor: pointer;
   border: none;
@@ -108,35 +158,47 @@
   }
 }
 
-/* ---------------------------- */
 /* 📱 MOBILE OPTIMIZATION */
-/* ---------------------------- */
-
 @media (max-width: 450px) {
   .gift-popup {
-    max-height: 72vh;
-    padding: 12px;
+    padding: 14px 10px 10px;
+  }
+
+  .gift-title {
+    font-size: 16px;
+  }
+
+  .gift-wallet-amount {
+    font-size: 16px;
   }
 
   .gift-grid {
-    gap: 10px;
+    gap: 8px;
   }
 
-  .gift-item img {
-    width: 34px;
-    height: 34px;
+  .gift-img-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+
+    img {
+      border-radius: 11px;
+    }
+  }
+
+  .gift-price-badge {
+    font-size: 10px;
+    padding: 3px 0;
+    bottom: -8px;
   }
 
   .gift-name {
-    font-size: 9.5px;
-  }
-
-  .gift-price {
-    font-size: 8.5px;
+    font-size: 10px;
+    margin-top: 12px;
   }
 
   .gift-send-btn {
-    font-size: 12px;
+    font-size: 13px;
     padding: 8px;
   }
 }
@@ -144,29 +206,50 @@
 /* Extra Small Screens */
 @media (max-width: 360px) {
   .gift-popup {
-    max-height: 75vh;
-    padding: 10px;
-  }
-
-  .gift-grid {
-    gap: 8px;
-  }
-
-  .gift-item img {
-    width: 30px;
-    height: 30px;
+    padding: 12px 8px 8px;
   }
 
   .gift-title {
     font-size: 14px;
   }
 
-  .gift-coins {
-    font-size: 13px;
+  .gift-wallet-amount {
+    font-size: 14px;
+  }
+
+  .gift-section-title {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .gift-grid {
+    gap: 6px;
+  }
+
+  .gift-img-wrap {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+
+    img {
+      border-radius: 9px;
+    }
+  }
+
+  .gift-price-badge {
+    font-size: 9px;
+    padding: 2px 0;
+    bottom: -7px;
+    width: 62%;
+  }
+
+  .gift-name {
+    font-size: 9px;
+    margin-top: 10px;
   }
 
   .gift-send-btn {
-    font-size: 11px;
+    font-size: 12px;
     padding: 7px;
   }
 }

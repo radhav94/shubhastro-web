@@ -7,6 +7,7 @@ export const useReelScroll = ({
   onPrev,
   lockTime = 600,
   threshold = 80,
+  disabledRef,
 }) => {
   const locked = useRef(false);
   const deltaAcc = useRef(0);
@@ -23,6 +24,9 @@ export const useReelScroll = ({
       // allow scroll inside messages overlay
       const messagesOverlay = el.querySelector(".inline-messages-overlay");
       if (messagesOverlay && messagesOverlay.contains(e.target)) return;
+
+      // block navigation when gift popup is open
+      if (disabledRef?.current) return;
 
       e.preventDefault();
 
@@ -50,6 +54,7 @@ export const useReelScroll = ({
     const onKeyDown = (e) => {
       if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
       if (locked.current) return;
+      if (disabledRef?.current) return;
 
       if (e.key === "ArrowDown") {
         e.preventDefault();

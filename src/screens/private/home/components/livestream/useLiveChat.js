@@ -17,6 +17,7 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
   const [participantCount, setParticipantCount] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
   const [liveStartedAt, setLiveStartedAt] = useState(null);
+  const [isOnPrivateCall, setIsOnPrivateCall] = useState(false);
 
   // 1. Socket connection — stays alive independent of roomId
   useEffect(() => {
@@ -144,6 +145,23 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
         onStreamEnded?.({ reason: data.code, roomId: endedRoom });
       } else if (data.code === "CONTENT_BLOCKED") {
         Toast.error(data.message || "Message contains inappropriate content");
+      }
+    });
+
+    // Private call status — attached directly to socket instance, no timing issues
+    // Only update if the event is for the astrologer in the current room
+    socket.on("live:astrologer_status", (data) => {
+      const eventHostId = data?.hostId;
+      const eventRoomId = data?.roomId;
+      const isCurrentRoom = !eventRoomId || eventRoomId === currentRoomRef.current;
+      if (data?.status === "on_private_call" && isCurrentRoom) {
+        console.log("LiveChat → Private call started for current host");
+        setIsOnPrivateCall(true);
+        window.dispatchEvent(new CustomEvent("live:private_call_status", { detail: { isOnPrivateCall: true, hostId: eventHostId } }));
+      } else if (data?.status === "private_call_ended" && isCurrentRoom) {
+        console.log("LiveChat → Private call ended for current host");
+        setIsOnPrivateCall(false);
+        window.dispatchEvent(new CustomEvent("live:private_call_status", { detail: { isOnPrivateCall: false, hostId: eventHostId } }));
       }
     });
 
@@ -288,5 +306,6 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     liveStartedAt,
     socketRef,
     skipChatCleanupRef,
+    isOnPrivateCall,
   };
 };

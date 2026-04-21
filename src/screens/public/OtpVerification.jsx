@@ -7,6 +7,7 @@ import { PrimaryText, Toast } from "../../component";
 import { PATH } from "../../utils/routes/Paths";
 import * as AuthServices from "../../services/appServices/authService";
 import { saveUserToStorage } from "../../utils/authStorage";
+import { requestFCMToken } from "../../services/firebase";
 
 const OtpVerification = () => {
   const navigate = useNavigate();
@@ -83,10 +84,13 @@ const OtpVerification = () => {
 const handleVerifyOtp = async (event) => {
   event.preventDefault();
 
+  const fcmTokens = await requestFCMToken();
+
   const payload = {
     phoneNumber,
     type, // "CUSTOMER" or "ASTROLOGER"
     otp: String(otp),
+    ...(fcmTokens && { fcmTokens, deviceType: "web" }),
   };
 
   try {

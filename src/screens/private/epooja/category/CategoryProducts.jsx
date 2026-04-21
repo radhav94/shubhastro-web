@@ -160,7 +160,7 @@ const CategoryProducts = () => {
       navigate("/categories", { replace: true });
     } else {
       // No trail (came from homepage), go back to astromall
-      navigate("/astromall");
+      navigate("/shubhmall");
     }
   };
 
@@ -212,7 +212,7 @@ const CategoryProducts = () => {
         <div className={styles.noProducts}>
           <h2>No Products Available</h2>
           <p>There are no products available in this category right now.</p>
-          <button className={styles.browseBtn} onClick={() => navigate("/astromall")}>Browse AstroMall</button>
+          <button className={styles.browseBtn} onClick={() => navigate("/shubhmall")}>Browse ShubhMall</button>
         </div>
       )}
 

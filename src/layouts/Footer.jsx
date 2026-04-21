@@ -20,7 +20,7 @@ import { clearSelectedKundli } from "../redux/kundli/kundliSlice";
 // const quickLinks = [
 //   { href: "/chat-with-astrologers", text: "Talk to Astrologer" },
 //   { href: "/chat-with-astrologers", text: "Chat with Astrologer" },
-//   { href: "/astromall", text: "Astromall" },
+//   { href: "/shubhmall", text: "ShubhMall" },
 //   { href: "/tarot", text: "Tarot" },
 //   { href: "/blog", text: "Blog" },
 //   { href: "/tarot-card-selection", text: "Yes/No Tarot",
@@ -51,7 +51,7 @@ const horoscopeLinks = [
 
 // Column 2: Explore Services
 const serviceLinks = [
-  { href: "/astromall", text: "Astromall" },
+  { href: "/shubhmall", text: "ShubhMall" },
   { href: "/talk-to-astrologers", text: "Live Astrologers" },
   { href: "/kundli", text: "Free Kundli" },
   { href: "/matchmaking", text: "Kundli Matching" },
@@ -65,12 +65,12 @@ const serviceLinks = [
 
 // Column 4: Shop Our Products
 const shopLinks = [
-  { href: "/astromall?tab=bracelets", text: "Bracelets" },
-  { href: "/astromall?tab=rudraksha", text: "Rudraksha" },
-  { href: "/astromall?tab=murti", text: "Murti" },
-  { href: "/astromall?tab=gemstones", text: "Gemstones" },
-  { href: "/astromall?tab=yantra", text: "Yantra" },
-  { href: "/astromall?tab=kavach", text: "Kavach" },
+  { href: "/shubhmall?tab=bracelets", text: "Bracelets" },
+  { href: "/shubhmall?tab=rudraksha", text: "Rudraksha" },
+  { href: "/shubhmall?tab=murti", text: "Murti" },
+  { href: "/shubhmall?tab=gemstones", text: "Gemstones" },
+  { href: "/shubhmall?tab=yantra", text: "Yantra" },
+  { href: "/shubhmall?tab=kavach", text: "Kavach" },
 ];
 
 // Column 5: Company Policies

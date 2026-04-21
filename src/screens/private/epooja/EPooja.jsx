@@ -417,7 +417,7 @@ const EPooja = () => {
           <button className={styles.headerIconBtn} onClick={() => { if (isFiltering) { clearFilters(); } else { navigate("/"); } }} aria-label="Go back">
             <FiChevronLeft />
           </button>
-          <span className={styles.headerTitle}>AstroMall</span>
+          <span className={styles.headerTitle}>ShubhMall</span>
         </div>
         <div className={styles.headerRight}>
           <button className={styles.headerIconBtn} onClick={() => setShowSearch((v) => !v)} aria-label="Search">

@@ -1092,8 +1092,197 @@
 .transactionsContent {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding-bottom: 80px; // Space for sticky button
+  gap: 0;
+  padding-bottom: 80px;
+}
+
+// Transaction Table Header
+.txnTableHeader {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+  border-radius: 12px 12px 0 0;
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+.txnHeaderCell {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: capitalize;
+}
+
+// Transaction Row
+.txnRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  align-items: center;
+  padding: 1rem;
+  background: #fff;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #fafafa;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem 0.75rem;
+    padding: 0.875rem 0.75rem;
+  }
+}
+
+.txnInfoCell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+
+  @media (max-width: 640px) {
+    grid-column: 1 / 2;
+  }
+}
+
+.txnIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.125rem;
+}
+
+.txnDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.txnTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.txnMeta {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.txnTypeCell {
+  display: flex;
+  align-items: center;
+
+  @media (max-width: 640px) {
+    // mobile styles
+  }
+}
+
+.txnAmountCell {
+  display: flex;
+  align-items: center;
+
+  @media (max-width: 640px) {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    justify-content: flex-end;
+  }
+}
+
+.txnAmount {
+  font-size: 1rem;
+  font-weight: 600;
+
+  &.credit {
+    color: #10b981;
+  }
+
+  &.debit {
+    color: #ef4444;
+  }
+}
+
+.txnActionCell {
+  display: flex;
+  align-items: center;
+
+  @media (max-width: 640px) {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+    justify-content: flex-end;
+  }
+}
+
+.receiptBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: #ccc;
+    background: #fafafa;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+}
+
+.downloadLoading {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.btnSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e0e0e0;
+  border-top-color: #F75801;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 // Sub Tabs

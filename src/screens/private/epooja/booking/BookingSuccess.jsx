@@ -24,7 +24,7 @@ const BookingSuccess = () => {
   useEffect(() => {
     if (!hasAstromallState && !hasPoojaState) return;
     if (countdown === null || countdown <= 0) {
-      if (countdown === 0) navigate("/astromall", { replace: true });
+      if (countdown === 0) navigate("/shubhmall", { replace: true });
       return;
     }
     const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
@@ -32,7 +32,7 @@ const BookingSuccess = () => {
   }, [countdown, navigate, hasAstromallState, hasPoojaState]);
 
   if (!hasAstromallState && !hasPoojaState) {
-    return <Navigate to="/astromall" replace />;
+    return <Navigate to="/shubhmall" replace />;
   }
 
   const { pooja, pandit, date, time, total, address } = state;
@@ -103,7 +103,7 @@ const BookingSuccess = () => {
         )}
 
         <div className={styles.actions}>
-          <button className={styles.primaryBtn} onClick={() => handleUserAction("/astromall")}>
+          <button className={styles.primaryBtn} onClick={() => handleUserAction("/shubhmall")}>
             Browse Products
           </button>
           <button className={styles.secondaryBtn} onClick={() => handleUserAction("/")}>

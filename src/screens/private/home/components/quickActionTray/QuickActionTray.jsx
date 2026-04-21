@@ -27,7 +27,7 @@ const QuickActionTray = () => {
     },
     {
       id: "shop",
-      label: "Astromall Shop",
+      label: "ShubhMall Shop",
       icon: <IoCart />,
       path: PATH.privateRoutes.SHOP?.path,
       bg: "#5da9ff",

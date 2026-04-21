@@ -105,7 +105,7 @@ const AllCategories = () => {
         <div className={styles.empty}>
           <h2>No Categories Available</h2>
           <p>There are no categories available right now.</p>
-          <button className={styles.browseBtn} onClick={() => navigate("/astromall")}>Browse AstroMall</button>
+          <button className={styles.browseBtn} onClick={() => navigate("/shubhmall")}>Browse ShubhMall</button>
         </div>
       )}
 

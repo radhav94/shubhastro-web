@@ -33,7 +33,7 @@ const EPoojaBooking = () => {
   );
 
   const handleSelect = (pandit) => {
-    navigate(`/astromall/${slug}/payment`, {
+    navigate(`/shubhmall/${slug}/payment`, {
       state: { pooja, pandit },
     });
   };

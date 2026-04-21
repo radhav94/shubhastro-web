@@ -17,6 +17,7 @@ import { ChatProvider } from "./context/ChatContext";
 import ErrorBoundary from "./component/ErrorBoundary";
 import RouteErrorBoundary from "./component/RouteErrorBoundary";
 import PrimaryLoader from "./component/UI/PrimaryLoader";
+import { initializeFCM } from "./services/fcmService.jsx";
 
 // Flatten routes helper - moved outside component for better performance
 const flattenRoutes = (routes) => {
@@ -161,6 +162,13 @@ function App() {
       },
     ]);
   }, []); // Empty deps - router only created once
+
+  // Initialize FCM push notifications
+  useEffect(() => {
+    initializeFCM().catch((err) =>
+      console.error("FCM initialization failed:", err)
+    );
+  }, []);
 
   useEffect(() => {
     // Google Maps autocomplete z-index fix

@@ -25,7 +25,7 @@ const MallOrderDetail = () => {
   const order = location.state?.order || null;
 
   const handleBack = () => {
-    navigate("/profile", { state: { activeTab: "ShubhAstro Mall History" } });
+    navigate("/profile", { state: { activeTab: "ShubhMall History" } });
   };
 
   const items = order?.items || [];

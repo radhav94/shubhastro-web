@@ -298,7 +298,7 @@ const SideBar = ({ open, onClose }) => {
     { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
     { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
     { title: "Join Live", path: "/live" },
-    { title: "Astromall", path: "/shop" },
+    { title: "ShubhMall", path: "/shop" },
     { title: "Blogs", path: "/blog" },
     { title: "Recharge", path: "/recharge" },
   ];

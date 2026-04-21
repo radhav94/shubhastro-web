@@ -53,7 +53,7 @@ const QuickActions = ({ data = [], title }) => {
         },
         {
             id: 3,
-            title: "Astromall Shop",
+            title: "ShubhMall Shop",
             image: quickActionTwo,
             path: PATH.privateRoutes.SHOP.path,
         },

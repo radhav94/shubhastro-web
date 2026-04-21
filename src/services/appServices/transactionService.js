@@ -16,7 +16,15 @@ export const transactionsApi = privateRequestNew.injectEndpoints({
         },
         providesTags: ["Transactions"],
         }),
+
+        // Get Invoice for a transaction
+        getInvoice: builder.mutation({
+            query: (transactionId) => ({
+                url: `transactions/invoice?transactionId=${transactionId}`,
+                method: "GET",
+            }),
+        }),
     })
 })
 
-export const {useGetTransactionsQuery} = transactionsApi;
+export const { useGetTransactionsQuery, useGetInvoiceMutation } = transactionsApi;

@@ -41,7 +41,9 @@ const FeedbackModal = ({
           <CircleX size={24} />
         </button>
 
-        <h3 className={styles.title}>Please Rate your Experience </h3>
+        <h3 className={styles.title}>
+          Please Rate your Experience{ratedUserName ? ` with ${ratedUserName}` : ""}
+        </h3>
 
         {/* <img
           className={styles.avatar}
