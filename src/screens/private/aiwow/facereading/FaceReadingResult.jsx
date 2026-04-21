@@ -60,6 +60,7 @@ const FaceReadingResult = () => {
     { id: 'aura', label: 'Aura' },
     { id: 'features', label: 'Features' },
     { id: 'cosmic', label: 'Cosmic' },
+    { id: 'insights', label: 'Insights' },
   ];
 
   // Prepare pie chart data for aura colors
@@ -528,20 +529,65 @@ const FaceReadingResult = () => {
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
 
-                {/* Remedies */}
-                {personalizedInsights.remedies && personalizedInsights.remedies.length > 0 && (
+          {/* Insights Tab */}
+          {activeTab === 'insights' && (
+            <div className={styles.section}>
+              <div className={styles.guidanceGrid}>
+                {personalizedInsights.birthChartCorrelation && (
                   <div className={styles.guidanceCard}>
-                    <button
-                      onClick={() => setExpandedGuidance(expandedGuidance === 'cosmic-remedies' ? null : 'cosmic-remedies')}
-                      className={styles.cosmicHeader}
-                    >
-                      <h3 className={styles.cardTitle}>🔮 Astrological Remedies</h3>
-                      <span className={styles.cosmicArrow}>
-                        {expandedGuidance === 'cosmic-remedies' ? '▲' : '▼'}
-                      </span>
+                    <button onClick={() => setExpandedGuidance(expandedGuidance === 'insight-birthchart' ? null : 'insight-birthchart')} className={styles.guidanceHeader}>
+                      <h3 className={styles.cardTitle}>📜 Birth Chart Correlation</h3>
+                      <span className={styles.guidanceArrow}>{expandedGuidance === 'insight-birthchart' ? '▲' : '▼'}</span>
                     </button>
-                    <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-remedies' ? styles.expanded : ''}`}>
+                    <div className={`${styles.guidanceContent} ${expandedGuidance === 'insight-birthchart' ? styles.expanded : ''}`}>
+                      <p className={styles.cardText}>{personalizedInsights.birthChartCorrelation}</p>
+                    </div>
+                  </div>
+                )}
+                {personalizedInsights.planetaryInfluenceOnFace && (
+                  <div className={styles.guidanceCard}>
+                    <button onClick={() => setExpandedGuidance(expandedGuidance === 'insight-planetary' ? null : 'insight-planetary')} className={styles.guidanceHeader}>
+                      <h3 className={styles.cardTitle}>🌍 Planetary Influence on Face</h3>
+                      <span className={styles.guidanceArrow}>{expandedGuidance === 'insight-planetary' ? '▲' : '▼'}</span>
+                    </button>
+                    <div className={`${styles.guidanceContent} ${expandedGuidance === 'insight-planetary' ? styles.expanded : ''}`}>
+                      <p className={styles.cardText}>{personalizedInsights.planetaryInfluenceOnFace}</p>
+                    </div>
+                  </div>
+                )}
+                {personalizedInsights.karmaReflection && (
+                  <div className={styles.guidanceCard}>
+                    <button onClick={() => setExpandedGuidance(expandedGuidance === 'insight-karma' ? null : 'insight-karma')} className={styles.guidanceHeader}>
+                      <h3 className={styles.cardTitle}>☸️ Karma Reflection</h3>
+                      <span className={styles.guidanceArrow}>{expandedGuidance === 'insight-karma' ? '▲' : '▼'}</span>
+                    </button>
+                    <div className={`${styles.guidanceContent} ${expandedGuidance === 'insight-karma' ? styles.expanded : ''}`}>
+                      <p className={styles.cardText}>{personalizedInsights.karmaReflection}</p>
+                    </div>
+                  </div>
+                )}
+                {personalizedInsights.lifePathAlignment && (
+                  <div className={styles.guidanceCard}>
+                    <button onClick={() => setExpandedGuidance(expandedGuidance === 'insight-lifepath' ? null : 'insight-lifepath')} className={styles.guidanceHeader}>
+                      <h3 className={styles.cardTitle}>🛤️ Life Path Alignment</h3>
+                      <span className={styles.guidanceArrow}>{expandedGuidance === 'insight-lifepath' ? '▲' : '▼'}</span>
+                    </button>
+                    <div className={`${styles.guidanceContent} ${expandedGuidance === 'insight-lifepath' ? styles.expanded : ''}`}>
+                      <p className={styles.cardText}>{personalizedInsights.lifePathAlignment}</p>
+                    </div>
+                  </div>
+                )}
+                {personalizedInsights.remedies?.length > 0 && (
+                  <div className={styles.guidanceCard}>
+                    <button onClick={() => setExpandedGuidance(expandedGuidance === 'insight-remedies' ? null : 'insight-remedies')} className={styles.guidanceHeader}>
+                      <h3 className={styles.cardTitle}>🔮 Astrological Remedies</h3>
+                      <span className={styles.guidanceArrow}>{expandedGuidance === 'insight-remedies' ? '▲' : '▼'}</span>
+                    </button>
+                    <div className={`${styles.guidanceContent} ${expandedGuidance === 'insight-remedies' ? styles.expanded : ''}`}>
                       <ul className={styles.list}>
                         {personalizedInsights.remedies.map((remedy, index) => (
                           <li key={index} className={styles.listItem}>{remedy}</li>
