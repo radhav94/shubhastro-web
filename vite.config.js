@@ -1,10 +1,61 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { webhookLoggerPlugin } from "./webhook-logger-plugin.js";
+import fs from "fs";
+import path from "path";
+
+/**
+ * Vite plugin to inject env vars into the Firebase service worker.
+ * Service workers can't use import.meta.env, so we replace __VITE_*__
+ * placeholders with actual values at build time and in dev middleware.
+ */
+function firebaseSwPlugin() {
+  const envKeys = [
+    "VITE_FIREBASE_API_KEY",
+    "VITE_FIREBASE_AUTH_DOMAIN",
+    "VITE_FIREBASE_PROJECT_ID",
+    "VITE_FIREBASE_STORAGE_BUCKET",
+    "VITE_FIREBASE_MESSAGING_SENDER_ID",
+    "VITE_FIREBASE_APP_ID",
+  ];
+
+  function replacePlaceholders(src) {
+    let result = src;
+    for (const key of envKeys) {
+      result = result.replaceAll(`__${key}__`, process.env[key] || "");
+    }
+    return result;
+  }
+
+  return {
+    name: "firebase-sw-env",
+    // Dev: serve the processed SW via middleware
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url === "/firebase-messaging-sw.js") {
+          const filePath = path.resolve("public/firebase-messaging-sw.js");
+          const content = fs.readFileSync(filePath, "utf-8");
+          res.setHeader("Content-Type", "application/javascript");
+          res.end(replacePlaceholders(content));
+          return;
+        }
+        next();
+      });
+    },
+    // Build: transform the copied SW in the output directory
+    closeBundle() {
+      const outPath = path.resolve("dist/firebase-messaging-sw.js");
+      if (fs.existsSync(outPath)) {
+        const content = fs.readFileSync(outPath, "utf-8");
+        fs.writeFileSync(outPath, replacePlaceholders(content));
+      }
+    },
+  };
+}
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), webhookLoggerPlugin()],
+  plugins: [react(), webhookLoggerPlugin(), firebaseSwPlugin()],
   base: '/',
   build: {
     outDir: 'dist',
