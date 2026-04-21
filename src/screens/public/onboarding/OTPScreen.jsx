@@ -9,6 +9,7 @@ import {
   loginWithPhone,
 } from "../../../services/appServices/authService";
 import { loginSuccess } from "../../../redux/auth/authSlice";
+import { requestFCMToken } from "../../../services/firebase";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import onboardingBg from "../../../assets/images/onboarding.png";
 
@@ -62,10 +63,13 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     if (otpValue.length === 6) {
       setLoading(true);
       try {
+        const fcmToken = await requestFCMToken();
+
         const payload = {
           otp: otpValue,
           phoneNumber: `91${formData.phoneNumber}`,
           type: "CUSTOMER",
+          ...(fcmToken && { fcmToken, deviceType: "web" }),
         };
 
         const response = await verifyOtp(payload);

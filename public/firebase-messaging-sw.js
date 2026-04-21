@@ -4,12 +4,12 @@ importScripts("https://www.gstatic.com/firebasejs/11.8.1/firebase-messaging-comp
 
 // TODO: Must match the config in src/services/firebase.js
 firebase.initializeApp({
-    apiKey: "AIzaSyCVTIgs3pg31YjvYc09NavFrL8NHD4tRMw",
-    authDomain: "shubhtalk-20597.firebaseapp.com",
-    projectId: "shubhtalk-20597",
-    storageBucket: "shubhtalk-20597.firebasestorage.app",
-    messagingSenderId: "130482610258",
-    appId: "1:130482610258:web:c8e87ddd747c4714abbf8b"
+    apiKey: "AIzaSyBAn58yLqiljWUXhSC7D6KK79uDfZXskts",
+    authDomain: "shubhtalk-fbb51.firebaseapp.com",
+    projectId: "shubhtalk-fbb51",
+    storageBucket: "shubhtalk-fbb51.firebasestorage.app",
+    messagingSenderId: "291098264414",
+    appId: "1:291098264414:web:08098fdf9db01648f305cf"
 });
 
 const messaging = firebase.messaging();
