@@ -166,6 +166,7 @@ const LiveView = (props) => {
     setIsSpeakerOn,
     setOpenReview,
     setReviewData,
+    setWaitingList,
   } = useCall();
 
   // Auto-minimize call if user is on live stream (handles page refresh)
@@ -572,6 +573,7 @@ const LiveView = (props) => {
 
     setShowWaitingModal(true);
     setShowWaitingToast(true);
+    setWaitingList(5);
     Toast.success("Voice call request sent");
   };
 
@@ -609,6 +611,7 @@ const LiveView = (props) => {
     // Show waiting modal
     setShowWaitingModal(true);
     setShowWaitingToast(true);
+    setWaitingList(5);
 
     // Emit socket event to initiate call
     voiceSocket.emit("call:initiate", {

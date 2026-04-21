@@ -16,12 +16,15 @@ import {
   saveViewerSession,
 } from "../../../../../utils/liveSessionStorage";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
+import { getAstrologerDefaultImage } from "../../../../../utils/appImages";
 import { useCall } from "../../../../../context/CallContext";
+import { toast as rht } from "react-hot-toast";
 
 const LiveStreamingContainer = ({ client }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { activeCall } = useCall();
+  const { activeCall, waitingList } = useCall();
+  const isCallBusy = !!activeCall || !!waitingList;
   const liveList = useLiveList();
   const giftPopupOpenRef = useRef(false);
   console.log("liveList", liveList);
@@ -121,10 +124,46 @@ const LiveStreamingContainer = ({ client }) => {
   }, [currentLive?.channel]);
 
   const handleAstrologerStatus = useCallback((data) => {
-    const { status, roomId, hostId, hostName, privateCallType } = data;
+    const { status, roomId, hostId, hostName, profileImage, privateCallType, gender } = data;
 
     if (status === "ended") {
       liveList?.removeLive(roomId);
+
+      // Show notification that astrologer has left
+      rht.custom(
+        (t) => (
+          <div
+            onClick={() => rht.dismiss(t.id)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              background: "#fff",
+              borderRadius: 14,
+              padding: "12px 16px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+              border: "1px solid #f0ebe4",
+              maxWidth: 340,
+              cursor: "pointer",
+            }}
+          >
+            <img
+              src={profileImage || getAstrologerDefaultImage(gender)}
+              alt={hostName}
+              style={{ width: 42, height: 42, borderRadius: "50%", objectFit: "cover", border: "2px solid #f75801" }}
+            />
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 14, color: "#1a1a1a" }}>
+                {hostName || "Astrologer"} has left
+              </div>
+              <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
+                The live session has ended
+              </div>
+            </div>
+          </div>
+        ),
+        { duration: 4000, position: "top-center" }
+      );
     }
 
     if (status === "started") {
@@ -279,7 +318,7 @@ const LiveStreamingContainer = ({ client }) => {
 />
 
     {/* 🔥 LIVE NAVIGATION CONTROLS */}
-    {ROLE !== "host" && liveList && liveList.lives.length > 1 && !activeCall && (
+    {ROLE !== "host" && liveList && liveList.lives.length > 1 && !isCallBusy && (
       <div className="live-nav-controls">
         <button
           className="nav-btn"
