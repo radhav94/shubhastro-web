@@ -214,27 +214,13 @@ const FilterChips = ({
     const finalSkills = skills ?? selectedSkills;
 
     const isOnline = finalExperties === "online";
+    // Also treat as online when user navigated to /online URL route
+    const shouldFilterOnline = isOnline || isOnlineFromURL;
 
-    // console.log("finalExperties::",finalExperties,isOnline)
     try {
       loadingMoreRef.current = true;
       isFilterActiveRef.current = true;
 
-      // OLD: "online" was passed as experties, causing it to be sent as a skill parameter
-      // const response = await triggerFilter({
-      //   searchText: finalSearchText,
-      //   selectedSkills: finalSkills,
-      //   experties: finalExperties,
-      //   selectedSort,
-      //   selectedGender,
-      //   page: pageNo,
-      //   limit: 9,
-      //   ...(isOnline && { isActive: true }),
-      //   isActiveType,
-      // }).unwrap();
-
-      // NEW: When "Online" is selected, pass isActive=true but exclude "online" from experties
-      // so it doesn't get sent as a skill parameter
       const response = await triggerFilter({
         searchText: finalSearchText,
         selectedSkills: finalSkills,
@@ -243,7 +229,7 @@ const FilterChips = ({
         selectedGender,
         page: pageNo,
         limit: 9,
-        ...(isOnline && { isActive: true }),
+        ...(shouldFilterOnline && { isActive: true }),
         isActiveType,
       }).unwrap();
 
