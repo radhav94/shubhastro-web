@@ -3,7 +3,7 @@ export const useTabs = () => {
     { key: "call", label: "Call" },
     { key: "chat", label: "Chat" },
     { key: "report", label: "Report" },
-    { key: "astromall", label: "Astromall" },
+    { key: "shubhmall", label: "ShubhMall" },
   ];
 
   return { tabs };

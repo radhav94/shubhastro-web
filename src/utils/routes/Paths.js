@@ -926,7 +926,7 @@ export const PATH = {
 
     // E-Pooja Booking
     E_POOJA: {
-      path: "/astromall",
+      path: "/shubhmall",
       element: EPooja,
     },
     ASTROMALL_CART: {
@@ -934,7 +934,7 @@ export const PATH = {
       element: AstromallCart,
     },
     ASTROMALL_CART_PAYMENT: {
-      path: "/astromall/cart/payment",
+      path: "/shubhmall/cart/payment",
       element: EPoojaPayment,
     },
     ASTROMALL_CART_CHECKOUT: {
@@ -946,11 +946,11 @@ export const PATH = {
       element: EPoojaDetail,
     },
     E_POOJA_BOOKING: {
-      path: "/astromall/:slug/book",
+      path: "/shubhmall/:slug/book",
       element: EPoojaBooking,
     },
     E_POOJA_PAYMENT: {
-      path: "/astromall/:slug/payment",
+      path: "/shubhmall/:slug/payment",
       element: EPoojaPayment,
     },
     E_POOJA_BOOKING_SUCCESS: {

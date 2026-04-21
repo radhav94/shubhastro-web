@@ -362,7 +362,7 @@ const TopBar = () => {
     { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
     { title: "Join Live", path: "/live" },
 
-    { title: "Astromall", path: "/shop" },
+    { title: "ShubhMall", path: "/shop" },
     // { title: "Shubhtalk Store", path: "/store" },
     { title: "Blogs", path: "/blog" },
     { title: "Recharge", path: "/recharge" },

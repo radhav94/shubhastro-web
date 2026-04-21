@@ -146,7 +146,7 @@ const AddressesTab = () => {
         <Plus size={16} className={styles.addBtnIcon} /> <span>Add New Address</span>
       </button>
 
-      {/* ── Add / Edit Address Modal (same as AstroMall product page) ── */}
+      {/* ── Add / Edit Address Modal (same as ShubhMall product page) ── */}
       {showNewAddress && (
         <div className={styles.overlay} onClick={() => setShowNewAddress(false)}>
           <div className={`${styles.modal} ${styles.modalLarge}`} onClick={(e) => e.stopPropagation()}>

@@ -437,7 +437,7 @@ const EPoojaCheckout = () => {
       amount: amountInPaise,
       currency: "INR",
       name: "ShubhTalk",
-      description: items.length === 1 ? getItemTitle(items[0]) : `${items.length} items from AstroMall`,
+      description: items.length === 1 ? getItemTitle(items[0]) : `${items.length} items from ShubhMall`,
       ...(gatewayOrderId && { order_id: gatewayOrderId }),
       handler: async () => {
         setIsProcessing(false);
@@ -531,7 +531,7 @@ const EPoojaCheckout = () => {
       amount: amountInPaise,
       currency: "INR",
       name: "ShubhTalk",
-      description: items.length === 1 ? getItemTitle(items[0]) : `${items.length} items from AstroMall`,
+      description: items.length === 1 ? getItemTitle(items[0]) : `${items.length} items from ShubhMall`,
       ...(gatewayOrderId && { order_id: gatewayOrderId }),
       handler: async () => {
         setIsProcessing(false);
@@ -620,14 +620,14 @@ const EPoojaCheckout = () => {
     return (
       <div className={styles.page}>
         <div className={styles.topNav}>
-          <button className={styles.backBtn} onClick={() => navigate("/astromall")}>
+          <button className={styles.backBtn} onClick={() => navigate("/shubhmall")}>
             <span className={styles.backCircle}><FiChevronLeft /></span>
             <span className={styles.backLabel}>Checkout</span>
           </button>
         </div>
         <div style={{ textAlign: "center", padding: "80px 0", color: "#999" }}>
           <p>Your cart is empty</p>
-          <button className={styles.payBtn} style={{ maxWidth: 220, margin: "16px auto" }} onClick={() => navigate("/astromall")}>Browse Products</button>
+          <button className={styles.payBtn} style={{ maxWidth: 220, margin: "16px auto" }} onClick={() => navigate("/shubhmall")}>Browse Products</button>
         </div>
       </div>
     );

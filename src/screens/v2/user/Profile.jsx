@@ -1140,7 +1140,7 @@ const Profile = () => {
     navigate("/");
   };
 
-  const tabs = ["Profile", "Order History", "ShubhAstro Mall History", "Transactions", "Support"];
+  const tabs = ["Profile", "Order History", "ShubhMall History", "Transactions", "Support"];
 
   // Get initials for avatar
   const getInitials = (name) => {
@@ -1687,7 +1687,7 @@ const Profile = () => {
           </div>
         )}
 
-        {activeTab === "ShubhAstro Mall History" && <MallHistoryContent />}
+        {activeTab === "ShubhMall History" && <MallHistoryContent />}
 
         {activeTab === "Transactions" && (
           <div className={styles.transactionsContent}>
