@@ -511,7 +511,7 @@ const TopHeader = () => {
               Blogs
             </NavLink> */}
             <NavLink
-              to="/astromall"
+              to="/shubhmall"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -706,7 +706,7 @@ const TopHeader = () => {
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
-              Astromall
+              ShubhMall
             </NavLink> */}
             {/* <NavLink
               to={PATH.privateRoutes.KUNDLI.path}
