@@ -75,7 +75,11 @@ const LiveView = (props) => {
     isOnPrivateCall,
   } = props;
 
-  const [showGifts, setShowGifts] = useState(false);
+  const [showGifts, _setShowGifts] = useState(false);
+  const setShowGifts = (val) => {
+    _setShowGifts(val);
+    if (props.giftPopupOpenRef) props.giftPopupOpenRef.current = val;
+  };
   const [showCallPopup, setShowCallPopup] = useState(false);
   const [showWaitingModal, setShowWaitingModal] = useState(false);
   const [showWaitingPopup, setShowWaitingPopup] = useState(false);
@@ -422,6 +426,7 @@ const LiveView = (props) => {
     containerRef: reelRef,
     onNext: liveListCtx?.goNextLive,
     onPrev: liveListCtx?.goPrevLive,
+    disabledRef: props.giftPopupOpenRef,
   });
 
   console.log("liveListCtx", JSON.stringify(liveListCtx));

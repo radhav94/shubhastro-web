@@ -23,6 +23,7 @@ const LiveStreamingContainer = ({ client }) => {
   const navigate = useNavigate();
   const { activeCall } = useCall();
   const liveList = useLiveList();
+  const giftPopupOpenRef = useRef(false);
   console.log("liveList", liveList);
   const currentLive = liveList?.getCurrentLive();
 
@@ -40,6 +41,7 @@ const LiveStreamingContainer = ({ client }) => {
 
     const handleKeyDown = (e) => {
       if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
+      if (giftPopupOpenRef.current) return;
       if (e.key === "ArrowUp") {
         e.preventDefault();
         liveList.goPrevLive?.();
@@ -244,6 +246,7 @@ const LiveStreamingContainer = ({ client }) => {
     enabled: ROLE !== "host" && !activeCall,
     onNext: liveList?.goNextLive,
     onPrev: liveList?.goPrevLive,
+    disabledRef: giftPopupOpenRef,
   });
 
   const { calling, setCalling } = live;
@@ -266,6 +269,7 @@ const LiveStreamingContainer = ({ client }) => {
     <LiveView channel={channel} ROLE={ROLE} {...live} {...chat} 
       astrologer={currentLive}
       privateCallInfo={privateCallInfo}
+      giftPopupOpenRef={giftPopupOpenRef}
 />
 
     {/* 🔥 LIVE NAVIGATION CONTROLS */}
@@ -273,7 +277,7 @@ const LiveStreamingContainer = ({ client }) => {
       <div className="live-nav-controls">
         <button
           className="nav-btn"
-          onClick={liveList.goPrevLive}
+          onClick={() => { if (!giftPopupOpenRef.current) liveList.goPrevLive(); }}
           aria-label="Previous live"
         >
           <FiChevronUp size={22} />
@@ -281,7 +285,7 @@ const LiveStreamingContainer = ({ client }) => {
 
         <button
           className={`nav-btn${liveList.hasNewLive ? " nav-btn-highlight" : ""}`}
-          onClick={liveList.goNextLive}
+          onClick={() => { if (!giftPopupOpenRef.current) liveList.goNextLive(); }}
           aria-label="Next live"
         >
           <FiChevronDown size={22} />

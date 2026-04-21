@@ -1,7 +1,7 @@
 // src/components/LiveStreaming/useSwipeReel.js
 import { useRef } from "react";
 
-export const useSwipeReel = ({ enabled, onNext, onPrev }) => {
+export const useSwipeReel = ({ enabled, onNext, onPrev, disabledRef }) => {
   const startY = useRef(0);
   const locked = useRef(false);
 
@@ -11,6 +11,7 @@ export const useSwipeReel = ({ enabled, onNext, onPrev }) => {
 
  const onTouchEnd = (e) => {
     if (!enabled || locked.current) return;
+    if (disabledRef?.current) return;
 
     const diff = startY.current - e.changedTouches[0].clientY;
 

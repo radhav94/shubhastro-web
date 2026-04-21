@@ -112,7 +112,7 @@ const BirthPanchangSection = () => {
     <section className={styles.birthPanchangSection} onClick={() => navigate("/kundli")} style={{ cursor: "pointer" }}>
       <div className={styles.birthPanchangHeader}>
         <Calendar size={18} />
-        <h2>Birth Details tt</h2>
+        <h2>Birth Details</h2>
         <div className={styles.birthPanchangArrow}>
           <ChevronRight size={22} />
         </div>
