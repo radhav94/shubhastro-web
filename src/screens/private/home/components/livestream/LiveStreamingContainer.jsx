@@ -1,5 +1,5 @@
 // src/components/LiveStreaming/LiveStreamingContainer.jsx
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useLiveStreaming } from "./useLiveStreaming";
 import { useLiveChat } from "./useLiveChat";
@@ -23,6 +23,7 @@ const LiveStreamingContainer = ({ client }) => {
   const navigate = useNavigate();
   const { activeCall } = useCall();
   const liveList = useLiveList();
+  const giftPopupOpenRef = useRef(false);
   console.log("liveList", liveList);
   const currentLive = liveList?.getCurrentLive();
 
@@ -40,6 +41,7 @@ const LiveStreamingContainer = ({ client }) => {
 
     const handleKeyDown = (e) => {
       if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
+      if (giftPopupOpenRef.current) return;
       if (e.key === "ArrowUp") {
         e.preventDefault();
         liveList.goPrevLive?.();
@@ -106,8 +108,20 @@ const LiveStreamingContainer = ({ client }) => {
   const liveRef = useRef(live);
   useEffect(() => { liveRef.current = live; }, [live]);
 
+  // Private call state — tracks when the current astrologer is on a private call
+  const [privateCallInfo, setPrivateCallInfo] = useState({ isOnPrivateCall: false, privateCallType: null });
+
+  // Reset private call state when switching channels
+  useEffect(() => {
+    if (!currentLive) return;
+    setPrivateCallInfo({
+      isOnPrivateCall: !!currentLive.isOnPrivateCall,
+      privateCallType: currentLive.privateCallType || null,
+    });
+  }, [currentLive?.channel]);
+
   const handleAstrologerStatus = useCallback((data) => {
-    const { status, roomId, hostId, hostName } = data;
+    const { status, roomId, hostId, hostName, privateCallType } = data;
 
     if (status === "ended") {
       liveList?.removeLive(roomId);
@@ -130,6 +144,16 @@ const LiveStreamingContainer = ({ client }) => {
           retryJoinRef.current?.(roomId);
         }, 300);
       }
+    }
+
+    if (status === "on_private_call") {
+      console.log("[LiveContainer] 📞 Setting privateCallInfo: on_private_call, type:", privateCallType);
+      setPrivateCallInfo({ isOnPrivateCall: true, privateCallType: privateCallType || null });
+    }
+
+    if (status === "private_call_ended") {
+      console.log("[LiveContainer] 📞 Setting privateCallInfo: private_call_ended");
+      setPrivateCallInfo({ isOnPrivateCall: false, privateCallType: null });
     }
   }, [liveList]);
 
@@ -198,7 +222,18 @@ const LiveStreamingContainer = ({ client }) => {
   useEffect(() => {
     if (!channel || !chat.isConnected || chat.roomReady) return;
     if (roomNotFoundRef.current.has(channel)) return;
-    chat.retryJoinRoom();
+
+    // Immediate attempt
+    chat.retryJoinRoom(channel);
+
+    // Retry after 2s if still not ready (room may not be set up yet on server)
+    const retryTimer = setTimeout(() => {
+      if (!chat.roomReady) {
+        chat.retryJoinRoom(channel);
+      }
+    }, 2000);
+
+    return () => clearTimeout(retryTimer);
   }, [channel, chat.isConnected, chat.roomReady]);
 
   // Keep ref in sync so handleAstrologerStatus can call it
@@ -211,6 +246,7 @@ const LiveStreamingContainer = ({ client }) => {
     enabled: ROLE !== "host" && !activeCall,
     onNext: liveList?.goNextLive,
     onPrev: liveList?.goPrevLive,
+    disabledRef: giftPopupOpenRef,
   });
 
   const { calling, setCalling } = live;
@@ -232,6 +268,8 @@ const LiveStreamingContainer = ({ client }) => {
     {/* FIXED VIDEO (PORTALED INSIDE LiveView) */}
     <LiveView channel={channel} ROLE={ROLE} {...live} {...chat} 
       astrologer={currentLive}
+      privateCallInfo={privateCallInfo}
+      giftPopupOpenRef={giftPopupOpenRef}
 />
 
     {/* 🔥 LIVE NAVIGATION CONTROLS */}
@@ -239,7 +277,7 @@ const LiveStreamingContainer = ({ client }) => {
       <div className="live-nav-controls">
         <button
           className="nav-btn"
-          onClick={liveList.goPrevLive}
+          onClick={() => { if (!giftPopupOpenRef.current) liveList.goPrevLive(); }}
           aria-label="Previous live"
         >
           <FiChevronUp size={22} />
@@ -247,7 +285,7 @@ const LiveStreamingContainer = ({ client }) => {
 
         <button
           className={`nav-btn${liveList.hasNewLive ? " nav-btn-highlight" : ""}`}
-          onClick={liveList.goNextLive}
+          onClick={() => { if (!giftPopupOpenRef.current) liveList.goNextLive(); }}
           aria-label="Next live"
         >
           <FiChevronDown size={22} />

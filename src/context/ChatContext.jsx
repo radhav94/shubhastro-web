@@ -420,8 +420,12 @@ export const ChatProvider = ({ children }) => {
     const handleGlobalMessage = (data) => {
       // Only show notification for astrologer messages (not user's own)
       if (data.sender === "user") return;
+
+      const isOnChatPage = window.location.pathname.includes("/chat-with-astrologers");
+      const isOnLivePage = window.location.pathname.startsWith("/live");
+
       // Don't show if user is already on the chat page
-      if (window.location.pathname.includes("/chat-with-astrologers")) return;
+      if (isOnChatPage) return;
 
       const astroInfo = lastAstrologerInfoRef.current;
       const senderName = astroInfo?.name || "Astrologer";
@@ -436,7 +440,7 @@ export const ChatProvider = ({ children }) => {
           onClose={() => rht.dismiss(t.id)}
           onClick={() => {
             rht.dismiss(t.id);
-            if (data.type === "products" && window.location.pathname.startsWith("/live")) {
+            if (data.type === "products" && isOnLivePage) {
               window.dispatchEvent(new CustomEvent("live:open-remedy-panel"));
               return;
             }
@@ -446,7 +450,7 @@ export const ChatProvider = ({ children }) => {
             }
           }}
         />
-      ), { duration: 4000, position: "top-right" });
+      ), { duration: 4000, position: isOnLivePage ? "top-center" : "top-right" });
     };
 
     voiceSocket.on("message:recieved", handleGlobalMessage);

@@ -1,7 +1,7 @@
 import { voiceSocket } from "../../../../services/voiceSocketServices";
 import styles from "./WaitingModal.module.scss";
 
-const WaitingModal = ({ callRoomId, resetCallState, connectionType, astrologerName, className }) => {
+const WaitingModal = ({ callRoomId, resetCallState, connectionType, astrologerName, className, hideCancel }) => {
   const handleCancel = () => {
     if (callRoomId) {
       if (connectionType === 'chat') {
@@ -27,9 +27,11 @@ const WaitingModal = ({ callRoomId, resetCallState, connectionType, astrologerNa
           <div style={{ color: '#9ca3af', fontSize: '13px', marginTop: 2 }}>Approx {waitingTime} mins</div>
           {astrologerName && <div style={{ color: '#9ca3af', fontSize: '13px' }}>Astrologer: {astrologerName}</div>}
         </div>
-        <div className={styles.modalButtons}>
-          <button className={styles.rejectBtn} onClick={handleCancel}>Cancel</button>
-        </div>
+        {!hideCancel && (
+          <div className={styles.modalButtons}>
+            <button className={styles.rejectBtn} onClick={handleCancel}>Cancel</button>
+          </div>
+        )}
       </div>
     </div>
   );

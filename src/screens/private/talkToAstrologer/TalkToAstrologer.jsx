@@ -245,11 +245,12 @@ const TalkToAstrologer = () => {
     },
     {
       skip: isFiltered, // Skip normal API when in filtered mode
+      refetchOnMountOrArgChange: true,
     },
   );
 
   const { data: recommendedData, isLoading: isLoadingRecommended } =
-    useGetRecommendedAstrologersQuery();
+    useGetRecommendedAstrologersQuery(undefined, { refetchOnMountOrArgChange: true });
 
   const data = astrodata?.data?.result || [];
   const recommendedAstrologers = recommendedData?.data || [];

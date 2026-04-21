@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Filter, ArrowUpDown, X } from "lucide-react";
+import { Filter, ArrowUpDown, X, ShoppingBag, CreditCard, Clock, CheckCircle, Hash, FileText } from "lucide-react";
 import { useGetMallOrderHistoryQuery } from "../../../../redux/api/mallOrder/mallOrderApi";
+import { useGetInvoiceMutation } from "../../../../services/appServices/transactionService";
+import Toast from "../../../../component/toast";
 import styles from "./OrderHistoryTab.module.scss";
 import ProductImage from "../../../../component/UI/ProductImage";
 
@@ -48,6 +50,9 @@ const OrderHistoryTab = () => {
 
   const sortRef = useRef(null);
   const filterRef = useRef(null);
+
+  const [getInvoice] = useGetInvoiceMutation();
+  const [invoiceLoadingId, setInvoiceLoadingId] = useState(null);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -259,23 +264,31 @@ const OrderHistoryTab = () => {
               ? new Date(orderDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })
               : "";
 
-            // Collect first image from each variant across all items (empty string kept for default fallback)
-            const itemImages = items.flatMap((itm) => {
-              const variants = itm.variants || [];
+            // First item image
+            const getFirstImage = () => {
+              const variants = firstItem.variants || [];
               if (variants.length > 0) {
-                return variants.map((v) => {
-                  const img = v.images?.[0] || "";
-                  if (typeof img === "string") return img;
-                  if (img && typeof img === "object") return img.original || img.small || img.url || img.src || "";
-                  return "";
-                });
+                const img = variants[0]?.images?.[0] || "";
+                if (typeof img === "string") return img;
+                if (img && typeof img === "object") return img.original || img.small || img.url || img.src || "";
               }
-              // Fallback: product-level image
-              const raw = itm.product_image || (itm.images?.length ? itm.images[0] : null) || itm.image || "";
-              if (typeof raw === "string") return [raw];
-              if (raw && typeof raw === "object") return [raw.original || raw.small || raw.url || raw.src || ""];
-              return [""];
-            });
+              const raw = firstItem.product_image || (firstItem.images?.length ? firstItem.images[0] : null) || firstItem.image || "";
+              if (typeof raw === "string") return raw;
+              if (raw && typeof raw === "object") return raw.original || raw.small || raw.url || raw.src || "";
+              return "";
+            };
+
+            const firstImage = getFirstImage();
+            const sku = firstItem.sku || firstItem.product_sku || "";
+            const mrp = firstItem.mrp || firstItem.original_price || 0;
+            const itemPrice = firstItem.price || firstItem.selling_price || price;
+            const discount = mrp > itemPrice ? Math.round(((mrp - itemPrice) / mrp) * 100) : 0;
+
+            const orderStatus = order.order_status || "pending";
+            const paymentStatus = order.payment_status || "pending";
+            const paymentMethod = order.payment_method || "";
+            const orderNumber = order.order_number || "";
+            const displayOrderId = order.order_id || order.orderId || "";
 
             return (
               <div
@@ -286,47 +299,93 @@ const OrderHistoryTab = () => {
                 tabIndex={0}
                 onKeyDown={(e) => e.key === "Enter" && handleOrderClick(orderId, order)}
               >
-                {/* Top row: order number + price + arrow */}
-                <div className={styles.cardTopRow}>
-                  <span className={styles.orderNumber}>#{order.order_number || ""}</span>
-                  <div className={styles.priceArrow}>
-                    <span className={styles.price}>₹{price}</span>
+                {/* ── Card Header ── */}
+                <div className={styles.cardHeader}>
+                  <div className={styles.headerLeft}>
+                    <span className={styles.orderBagIcon}><ShoppingBag size={16} /></span>
+                    <div>
+                      <span className={styles.orderNumber}>ORD-{orderNumber}</span>
+                      {formattedDate && <p className={styles.orderDate}>Placed on {formattedDate}</p>}
+                    </div>
+                  </div>
+                  <button
+                    className={`${styles.downloadInvoiceBtn} ${invoiceLoadingId === orderId ? styles.downloadLoading : ""}`}
+                    disabled={invoiceLoadingId === orderId}
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      setInvoiceLoadingId(orderId);
+                      try {
+                        const data = await getInvoice(orderId).unwrap();
+                        const pdfUrl = data?.data?.pdfUrl || data?.data?.url || data?.data || data?.pdfUrl || data?.url;
+                        if (pdfUrl) {
+                          window.open(pdfUrl, "_blank");
+                        } else {
+                          Toast.error("Invoice not available");
+                        }
+                      } catch (err) {
+                        Toast.error("Invoice not available for this order");
+                      } finally {
+                        setInvoiceLoadingId(null);
+                      }
+                    }}
+                  >
+                    <FileText size={16} />
+                    {invoiceLoadingId === orderId ? "Loading..." : "Download Invoice"}
+                  </button>
+                  <div className={styles.headerRight}>
+                    <span className={`${styles.statusChip} ${styles[`status_${orderStatus}`]}`}>
+                      {orderStatus.charAt(0).toUpperCase() + orderStatus.slice(1)} {(orderStatus === "confirmed" || orderStatus === "completed") && <CheckCircle size={11} />}
+                    </span>
+                    <span className={`${styles.statusChip} ${styles[`pay_${paymentStatus}`]}`}>
+                      {paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1)} {paymentStatus === "paid" && <CheckCircle size={11} />}
+                    </span>
+                    <span className={styles.headerPrice}>₹{price}</span>
                     <span className={styles.arrowCircle}>›</span>
                   </div>
                 </div>
 
-                <div className={styles.cardDivider} />
-
-                {/* Status + date */}
-                <div className={styles.statusSection}>
-                  <p className={styles.statusLabel}>
-                    {order.order_status || "Pending"}
-                    {order.order_status === "completed" || order.order_status === "delivered" ? " ✅" : ""}
-                  </p>
-                  {formattedDate && (
-                    <p className={styles.orderDate}>Placed at {formattedDate}</p>
-                  )}
-                </div>
-
-                {/* Item images row — one per variant, default shown on error */}
-                {itemImages.length > 0 && (
-                  <div className={styles.itemImagesRow}>
-                    {itemImages.map((src, i) => (
-                      <div key={i} className={styles.itemThumb}>
-                        <ProductImage src={src || ""} alt={`Item ${i + 1}`} />
-                      </div>
-                    ))}
+                {/* ── Card Body ── */}
+                <div className={styles.cardBody}>
+                  <div className={styles.productImg}>
+                    <ProductImage src={firstImage} alt={productName} />
                   </div>
-                )}
-
-                {/* <div className={styles.cardFooter}>
-                  <button
-                    className={styles.reorderBtn}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    Order Again
-                  </button>
-                </div> */}
+                  <div className={styles.productInfo}>
+                    <h4 className={styles.productName}>{productName}{itemCount > 1 ? ` +${itemCount - 1} more` : ""}</h4>
+                    {sku && <p className={styles.skuText}>SKU: {sku}</p>}
+                    <p className={styles.qtyText}>Qty: {qty}</p>
+                    <div className={styles.priceRow}>
+                      <span className={styles.sellingPrice}>₹{itemPrice}</span>
+                      {mrp > itemPrice && <span className={styles.mrpPrice}>₹{mrp}</span>}
+                      {discount > 0 && <span className={styles.discountBadge}>{discount}% OFF</span>}
+                    </div>
+                  </div>
+                  <div className={styles.detailsCol}>
+                    {paymentMethod && (
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailIcon}><CreditCard size={13} /></span>
+                        <span className={styles.detailLabel}>Payment Method</span>
+                        <span className={styles.detailValue}>{paymentMethod.toUpperCase()}</span>
+                      </div>
+                    )}
+                    <div className={styles.detailRow}>
+                      <span className={styles.detailIcon}><Clock size={13} /></span>
+                      <span className={styles.detailLabel}>Payment Status</span>
+                      <span className={`${styles.detailValue} ${styles[`payVal_${paymentStatus}`]}`}>{paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1)}</span>
+                    </div>
+                    <div className={styles.detailRow}>
+                      <span className={styles.detailIcon}><CheckCircle size={13} /></span>
+                      <span className={styles.detailLabel}>Order Status</span>
+                      <span className={`${styles.detailValue} ${styles[`statusVal_${orderStatus}`]}`}>{orderStatus.charAt(0).toUpperCase() + orderStatus.slice(1)}</span>
+                    </div>
+                    {displayOrderId && (
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailIcon}><Hash size={13} /></span>
+                        <span className={styles.detailLabel}>Order ID</span>
+                        <span className={styles.detailValue}>{displayOrderId}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             );
           })}

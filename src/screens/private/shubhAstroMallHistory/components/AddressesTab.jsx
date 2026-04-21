@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FiX, FiHome, FiBriefcase, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiX, FiEdit2, FiTrash2, FiUser } from "react-icons/fi";
 import { Plus } from "lucide-react";
 import {
   useGetAddressesQuery,
@@ -102,7 +102,12 @@ const AddressesTab = () => {
 
   return (
     <div className={styles.wrapper}>
-      <h3 className={styles.heading}>Saved Addresses</h3>
+      <div className={styles.headingRow}>
+        <h3 className={styles.heading}>Saved Addresses</h3>
+        <button className={styles.addBtnTop} onClick={() => { setEditingAddress(null); setNewAddr(EMPTY_ADDR); setAddrErrors({}); setShowNewAddress(true); }}>
+          + Add New Address
+        </button>
+      </div>
 
       {/* Address List */}
       <div className={styles.addressList}>
@@ -112,26 +117,33 @@ const AddressesTab = () => {
         {addressList.map((a) => {
           const addrId = a._id || a.id;
           const addrType = a.type || "home";
+          const isSelected = selectedAddress === addrId;
           return (
-            <div key={addrId} className={`${styles.addressCard} ${selectedAddress === addrId ? styles.addressActive : ""}`} onClick={() => setSelectedAddress(addrId)}>
-              <span className={styles.addressIcon}>{addrType === "home" ? <FiHome /> : <FiBriefcase />}</span>
-              <div className={styles.addressInfo}>
-                <span className={styles.addressType}>{a.name || addrType}{a.phone ? ` · ${a.phone}` : ""}</span>
-                <p className={styles.addressText}>
-                  {[a.addressLine1, a.addressLine2, a.landmark].filter(Boolean).join(", ")}
-                  <br />{[a.city, a.state, a.pincode].filter(Boolean).join(", ")}
-                </p>
+            <div key={addrId} className={`${styles.addressCard} ${isSelected ? styles.addressActive : ""}`} onClick={() => setSelectedAddress(addrId)}>
+              <div className={styles.cardTop}>
+                <span className={styles.typeBadge}>{addrType.toUpperCase()}</span>
+                <input type="radio" name="address" checked={isSelected} readOnly className={styles.addressRadio} />
               </div>
-              <button className={styles.actionBtn} onClick={(e) => { e.stopPropagation(); openEditAddress(a); }} aria-label="Edit address"><FiEdit2 size={14} /></button>
-              <button className={styles.actionBtn} onClick={(e) => { e.stopPropagation(); handleDeleteAddress(addrId); }} aria-label="Delete address"><FiTrash2 size={14} /></button>
-              <input type="radio" name="address" checked={selectedAddress === addrId} readOnly className={styles.addressRadio} />
+              <div className={styles.cardBody}>
+                <FiUser size={16} className={styles.userIcon} />
+                <span className={styles.namePhone}>{a.name || addrType}{a.phone ? ` · ${a.phone}` : ""}</span>
+              </div>
+              <p className={styles.addressText}>
+                {[a.addressLine1, a.addressLine2, a.landmark].filter(Boolean).join(", ")}
+                <br />{[a.city, a.state, a.pincode].filter(Boolean).join(", ")}
+              </p>
+              <div className={styles.cardActions}>
+                <button className={styles.actionBtn} onClick={(e) => { e.stopPropagation(); openEditAddress(a); }} aria-label="Edit address"><FiEdit2 size={14} /> Edit</button>
+                <button className={styles.actionBtn} onClick={(e) => { e.stopPropagation(); handleDeleteAddress(addrId); }} aria-label="Delete address"><FiTrash2 size={14} /> Delete</button>
+                {!a.isDefault && <button className={styles.setDefaultBtn} onClick={(e) => { e.stopPropagation(); setSelectedAddress(addrId); }} aria-label="Set default">Set Default</button>}
+              </div>
             </div>
           );
         })}
       </div>
 
       <button className={styles.addBtn} onClick={() => { setEditingAddress(null); setNewAddr(EMPTY_ADDR); setAddrErrors({}); setShowNewAddress(true); }}>
-        <span>Add New Address</span> <Plus size={16} />
+        <Plus size={16} className={styles.addBtnIcon} /> <span>Add New Address</span>
       </button>
 
       {/* ── Add / Edit Address Modal (same as AstroMall product page) ── */}

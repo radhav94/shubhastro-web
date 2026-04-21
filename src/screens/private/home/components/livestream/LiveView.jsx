@@ -17,6 +17,7 @@ import { useLiveList } from "../../../../../context/LiveListContext";
 import { useCall } from "../../../../../context/CallContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import WaitingModal from "../../../../../component/UI/modal/waitingModal/WaitingModal";
+import WaitlistModal from "../../../../../component/UI/modal/waitlistModal/WaitlistModal";
 import Toast from "../../../../../component/toast";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
 import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
@@ -37,6 +38,9 @@ import { useGetAstrologerByIdQuery } from "../../../../../redux/api/astrologer/a
 import KundliSelectModal from "../../../../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
 import SuggestedRemedyPanel from "../../../../../component/call/SuggestedRemedyPanel";
 import { addRemedy, clearNewRemedy, clearAllRemedy } from "../../../../../redux/remedy/remedySlice";
+import RechargeModal from "../../../../../component/recharge-modal/RechargeModal";
+import LowBalanceModal from "../../../../../component/UI/modal/LowBalanceModal/LowBalanceModal";
+import { useWalletBalance } from "../../../../private/wallet/useWalletBalance";
 
 const FixedLayer = ({ children }) => {
   return createPortal(children, document.body);
@@ -67,12 +71,19 @@ const LiveView = (props) => {
     roomReady,
     liveStartedAt,
     isHostMuted,
+    privateCallInfo,
+    isOnPrivateCall,
   } = props;
 
-  const [showGifts, setShowGifts] = useState(false);
+  const [showGifts, _setShowGifts] = useState(false);
+  const setShowGifts = (val) => {
+    _setShowGifts(val);
+    if (props.giftPopupOpenRef) props.giftPopupOpenRef.current = val;
+  };
   const [showCallPopup, setShowCallPopup] = useState(false);
   const [showWaitingModal, setShowWaitingModal] = useState(false);
-  const [showWaitingPopup, setShowWaitingPopup] = useState(true);
+  const [showWaitingPopup, setShowWaitingPopup] = useState(false);
+  const [showWaitingToast, setShowWaitingToast] = useState(false);
   const [pendingCallType, setPendingCallType] = useState("audio");
   const [roomEnded, setRoomEnded] = useState(false);
   const [wasRoomReady, setWasRoomReady] = useState(false);
@@ -82,9 +93,28 @@ const LiveView = (props) => {
   const liveListCtx = useLiveList();
   const [showKundliModal, setShowKundliModal] = useState(false);
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
+  const [showRechargeButton, setShowRechargeButton] = useState(false);
+  const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
   const dispatch = useDispatch();
   const suggestedRemedyData = useSelector((s) => s.remedy);
   const hasNewRemedy = suggestedRemedyData.hasNewRemedy;
+
+  // Private call state — comes from useLiveChat via props spread
+  // Also listen via window event as backup since props chain can be unreliable
+  const [localPrivateCall, setLocalPrivateCall] = useState(false);
+
+  useEffect(() => {
+    const handler = (e) => {
+      setLocalPrivateCall(e.detail?.isOnPrivateCall ?? false);
+    };
+    window.addEventListener("live:private_call_status", handler);
+    return () => window.removeEventListener("live:private_call_status", handler);
+  }, []);
+
+  // Reset when channel changes — initialize from API data
+  useEffect(() => {
+    setLocalPrivateCall(!!props.astrologer?.isOnPrivateCall);
+  }, [props.channel]);
 
   // Reset ended state when switching to a new channel
   // Use a counter to invalidate stale roomReady changes from old channels
@@ -228,11 +258,12 @@ const LiveView = (props) => {
     setCallRoomId(pendingData.callRoomId || null);
     setPendingCallType(pendingData.pendingCallType || "audio");
     setShowWaitingModal(true);
-    setShowWaitingPopup(true);
+    setShowWaitingToast(true);
   }, [props.channel]);
   
   const [createChatRoom] = useCreateChatRoomMutation();
   const [getBalance] = useGetBalanceMutation();
+  const { refreshWallet } = useWalletBalance();
 
   // Follow/unfollow astrologer
   const astrologerId = astrologer?._id || astrologer?.astrologerId;
@@ -273,6 +304,13 @@ const LiveView = (props) => {
     liveListCtx.switchToChannel(callingChannelRef.current);
   }, [showWaitingModal, liveListCtx?.lives?.length, liveListCtx]);
 
+  // Auto-dismiss the old waiting toast after 3 seconds
+  useEffect(() => {
+    if (!showWaitingToast) return;
+    const timer = setTimeout(() => setShowWaitingToast(false), 3000);
+    return () => clearTimeout(timer);
+  }, [showWaitingToast]);
+
   const handleFollow = async () => {
     if (!astrologerId) return;
     try {
@@ -282,7 +320,8 @@ const LiveView = (props) => {
 
         // Emit follow message to live stream chat
         if (props.socketRef?.current?.connected && props.channel && userIdLocal) {
-          const userName = localStorage.getItem("shubhtalk_customer_name") || "User";
+          const userData = JSON.parse(localStorage.getItem("shubhtalk_user") || "{}");
+          const userName = `${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "User";
 
           const followMessage = JSON.stringify({
             text: `${userName} started following`,
@@ -387,6 +426,7 @@ const LiveView = (props) => {
     containerRef: reelRef,
     onNext: liveListCtx?.goNextLive,
     onPrev: liveListCtx?.goPrevLive,
+    disabledRef: props.giftPopupOpenRef,
   });
 
   console.log("liveListCtx", JSON.stringify(liveListCtx));
@@ -434,16 +474,14 @@ const LiveView = (props) => {
 
   const messagesOverlayRef = useRef(null);
 
-  // Auto-scroll inline messages overlay when new messages arrive
-  useEffect(() => {
-    if (messagesOverlayRef.current) {
-      messagesOverlayRef.current.scrollTop = messagesOverlayRef.current.scrollHeight;
-    }
-  }, [displayMessages.length]);
+  // Messages container ref (overflow hidden — newest messages visible at bottom)
+  useEffect(() => {}, [displayMessages.length]);
 
   const isHost = ROLE === "host";
-  const isAstrologerLive = remoteUsers?.length > 0 && !hostLeft && !roomEnded;
-  const viewerCount = participantCount || (remoteUsers?.length || 0) + 1;
+  const safeRemoteUsers = remoteUsers.filter((u) => u);
+  const shouldRenderStream = !!props.channel && isConnected && !hostLeft && !roomEnded && safeRemoteUsers.length > 0;
+  const isAstrologerLive = shouldRenderStream;
+  const viewerCount = participantCount || (safeRemoteUsers?.length || 0) + 1;
 
   const {
     messagesEndRef,
@@ -471,6 +509,7 @@ const LiveView = (props) => {
         });
         setShowWaitingModal(false);
         setShowWaitingPopup(false);
+        setShowWaitingToast(false);
         // Tell useLiveStreaming to skip Agora/socket cleanup on unmount
         if (props.skipCleanupRef) props.skipCleanupRef.current = true;
         if (props.skipChatCleanupRef) props.skipChatCleanupRef.current = true;
@@ -552,7 +591,7 @@ const LiveView = (props) => {
     });
 
     setShowWaitingModal(true);
-    setShowWaitingPopup(true);
+    setShowWaitingToast(true);
     Toast.success("Voice call request sent");
   };
 
@@ -589,7 +628,7 @@ const LiveView = (props) => {
 
     // Show waiting modal
     setShowWaitingModal(true);
-    setShowWaitingPopup(true);
+    setShowWaitingToast(true);
 
     // Emit socket event to initiate call
     voiceSocket.emit("call:initiate", {
@@ -611,6 +650,7 @@ const LiveView = (props) => {
     
     setShowWaitingModal(false);
     setShowWaitingPopup(false);
+    setShowWaitingToast(false);
     setCallRoomId(null);
     astrologerRef.current = null;
     clearPendingLiveCallState();
@@ -652,6 +692,7 @@ const LiveView = (props) => {
     resetCallFlow();
     setIsRemedyPanelOpen(false);
     dispatch(clearAllRemedy());
+    setShowRechargeButton(false);
   };
 
   const localMicOn = isMicOn;
@@ -678,7 +719,7 @@ const LiveView = (props) => {
       message: kundliLink,
       type: "kundli",
     });
-    Toast.success("Kundli shared");
+    Toast.success("Kundali sent successfully.", { position: "top-center" });
   };
 
   // Listen for suggested remedy messages from astrologer during call
@@ -707,6 +748,14 @@ const LiveView = (props) => {
     return () => window.removeEventListener("live:open-remedy-panel", handleOpenRemedy);
   }, [isCallForCurrentAstrologer]);
 
+  // Listen for low balance warning from VoiceCall/VideoCall
+  useEffect(() => {
+    if (!isCallForCurrentAstrologer) return;
+    const handleLowBalance = () => setShowRechargeButton(true);
+    window.addEventListener("call:low-balance", handleLowBalance);
+    return () => window.removeEventListener("call:low-balance", handleLowBalance);
+  }, [isCallForCurrentAstrologer]);
+
   // Socket event handlers
   useEffect(() => {
     if (!userIdLocal) return;
@@ -716,7 +765,7 @@ const LiveView = (props) => {
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
       setShowWaitingModal(true);
-      setShowWaitingPopup(true);
+      setShowWaitingToast(true);
     };
 
     const handleCallAccepted = async ({ roomId, token: agoraToken, type, remainingTime, isSwitch }) => {
@@ -739,6 +788,7 @@ const LiveView = (props) => {
       // Regular call acceptance
       setShowWaitingModal(false);
       setShowWaitingPopup(false);
+      setShowWaitingToast(false);
       resetCallFlow();
 
       // Switch back to the astrologer's stream if user scrolled away
@@ -821,10 +871,40 @@ const LiveView = (props) => {
     const handleCallEnded = () => {
       setShowWaitingModal(false);
       setShowWaitingPopup(false);
+      setShowWaitingToast(false);
       setCallRoomId(null);
       clearPendingLiveCallState();
       setIsRemedyPanelOpen(false);
       dispatch(clearAllRemedy());
+      setShowRechargeButton(false);
+    };
+
+    const handleCallCanceled = (data) => {
+      console.log("[LiveView] 📞 call:canceled received", data);
+      // Toast.info(data?.message || "Call was cancelled by the astrologer");
+      setShowWaitingModal(false);
+      setShowWaitingPopup(false);
+      setShowWaitingToast(false);
+      setCallRoomId(null);
+      clearPendingLiveCallState();
+      resetCallFlow();
+    };
+
+    const handleWarning = (msg) => {
+      if (msg?.message?.includes("Low balance alert")) {
+        setShowRechargeButton(true);
+      }
+      Toast.warning(msg.message);
+    };
+
+    const handleAstrologerPrivateCall = (data) => {
+      if (data?.status === "on_private_call") {
+        console.log("[LiveView] 📞 Astrologer on private call");
+        setLocalPrivateCall(true);
+      } else if (data?.status === "private_call_ended") {
+        console.log("[LiveView] 📞 Astrologer private call ended");
+        setLocalPrivateCall(false);
+      }
     };
 
     // Register socket listeners
@@ -832,12 +912,19 @@ const LiveView = (props) => {
     voiceSocket.on("call:accepted", handleCallAccepted);
     voiceSocket.on("call:rejected", handleCallRejected);
     voiceSocket.on("call:ended", handleCallEnded);
+    voiceSocket.on("call:canceled", handleCallCanceled);
+    voiceSocket.on("warning", handleWarning);
+    voiceSocket.on("live:astrologer_status", handleAstrologerPrivateCall);
 
     return () => {
       voiceSocket.off("call:room", handleCallRoom);
       voiceSocket.off("call:accepted", handleCallAccepted);
       voiceSocket.off("call:rejected", handleCallRejected);
       voiceSocket.off("call:ended", handleCallEnded);
+      voiceSocket.off("call:canceled", handleCallCanceled);
+      voiceSocket.off("warning", handleWarning);
+      voiceSocket.off("live:astrologer_status", handleAstrologerPrivateCall);
+      voiceSocket.off("warning", handleWarning);
     };
   }, [
     userIdLocal,
@@ -868,6 +955,7 @@ const LiveView = (props) => {
     roomReady,
     wasRoomReady,
     channel: props.channel,
+    isOnPrivateCall,
   });
 
   const shouldShowWaitingIndicator = !isHost && (showWaitingModal || !!resolvePendingLiveCall());
@@ -905,46 +993,78 @@ const LiveView = (props) => {
                 </div>
                 <div className="host-duration">
                   {isCallForCurrentAstrologer
-                    ? `Call ${formatCallTime(callSeconds)}`
+                    ? `Private Call ${formatCallTime(callSeconds)}`
                     : `Live ${liveDuration}`
                   }
                 </div>
               </div>
               {/* Minimized call pill - right after name */}
+              {/* Minimized call pill - right after name */}
               {isCallForCurrentAstrologer && !isCallExpanded && (
-                <div className="live-call-pill" onClick={() => setIsCallExpanded(true)}>
-                  <span className="live-call-pill-avatar">
-                    {(activeCall.callerName || "A").split(" ").map(w => w.charAt(0).toUpperCase()).join("").slice(0, 2)}
-                  </span>
-                  <button
-                    className="live-call-pill-end"
-                    onClick={(e) => { e.stopPropagation(); handleEndActiveCall(); }}
-                    aria-label="End call"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
-                      <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.956.956 0 0 1-.29-.7c0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.73-1.68-1.36-2.66-1.85a.993.993 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
-                    </svg>
-                  </button>
+                <div className="live-call-pill-inline" onClick={() => setIsCallExpanded(true)}>
+                  <div className="live-call-pill-row">
+                    <span className="live-call-pill-avatar">
+                      {(activeCall.callerName || "A").split(" ").map(w => w.charAt(0).toUpperCase()).join("").slice(0, 2)}
+                    </span>
+                    <div className="mini-call-wave">
+                      <span className="mini-call-wave-bar"></span>
+                      <span className="mini-call-wave-bar"></span>
+                      <span className="mini-call-wave-bar"></span>
+                      <span className="mini-call-wave-bar"></span>
+                    </div>
+                    <button
+                      className="live-call-pill-end"
+                      onClick={(e) => { e.stopPropagation(); handleEndActiveCall(); }}
+                      aria-label="End call"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
+                        <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.956.956 0 0 1-.29-.7c0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.73-1.68-1.36-2.66-1.85a.993.993 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
             </div>
 
+            {/* Private call indicator - between name and follow */}
+            {!isHost && localPrivateCall && !activeCall && (
+              <div className="private-call-center">
+                <span className="private-call-text">Private Call</span>
+              </div>
+            )}
+
             {/* Follow button - right side of top bar */}
             {!isHost && (
-              <button
-                className={`follow-btn ${isFollowing ? "following" : ""}`}
-                onClick={handleFollow}
-                disabled={followLoading || unfollowLoading}
-              >
-                {followLoading || unfollowLoading
-                  ? "..."
-                  : isFollowing
-                  ? "Following"
-                  : "+ Follow"}
-              </button>
+              <div className="top-bar-right">
+                <button
+                  className={`follow-btn ${isFollowing ? "following" : ""}`}
+                  onClick={handleFollow}
+                  disabled={followLoading || unfollowLoading}
+                >
+                  {followLoading || unfollowLoading
+                    ? "..."
+                    : isFollowing
+                    ? "Following"
+                    : "+ Follow"}
+                </button>
+                {isHostMuted && !localPrivateCall && remoteUsers.length > 0 && !roomEnded && (
+                  <div className="mute-indicator">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                      <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
+                      <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2c0 .76-.13 1.49-.35 2.17" />
+                      <line x1="12" y1="19" x2="12" y2="23" />
+                      <line x1="8" y1="23" x2="16" y2="23" />
+                    </svg>
+                  </div>
+                )}
+              </div>
             )}
           </div>
+
+          {/* Private call banner */}
+          {/* Moved to top bar */}
 
           {/* Expanded call card - below top bar */}
           {isCallForCurrentAstrologer && isCallExpanded && (
@@ -991,6 +1111,12 @@ const LiveView = (props) => {
                 </div>
               </div>
             )}
+            {/* Low Balance Modal — visible during active call on low balance */}
+            <LowBalanceModal
+              isOpen={isCallForCurrentAstrologer && showRechargeButton}
+              onClose={() => setShowRechargeButton(false)}
+              onRecharge={() => setIsRechargeModalOpen(true)}
+            />
 
             {/* <div className="live-status">
               <div className="live-badge">LIVE</div>
@@ -1022,57 +1148,23 @@ const LiveView = (props) => {
               />
             )}
 
-            {/* AUDIENCE VIDEO — only show when room hasn't ended */}
-            {!isHost &&
-              remoteUsers.length > 0 && !roomEnded &&
-              remoteUsers.map((user) => (
+            {/* AUDIENCE VIDEO — safe render with connection guard */}
+            {!isHost && shouldRenderStream &&
+              safeRemoteUsers.map((user) => (
                 <RemoteUser key={user.uid} user={user} />
-              ))}
+              ))
+            }
 
-            {/* MUTE BANNER — show when astrologer mutes audio */}
-            {!isHost && isHostMuted && remoteUsers.length > 0 && !roomEnded && (
-              <div style={{
-                position: "absolute",
-                top: 180,
-                left: "50%",
-                transform: "translateX(-50%)",
-                background: "rgba(33, 33, 33, 0.44)",
-                color: "#fff",
-                padding: "8px 14px",
-                borderRadius: "20px",
-                fontSize: "10px",
-                fontWeight: 500,
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                zIndex: 20,
-                whiteSpace: "nowrap",
-                backdropFilter: "blur(4px)",
-              }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="1" y1="1" x2="23" y2="23" />
-                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
-                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2c0 .76-.13 1.49-.35 2.17" />
-                  <line x1="12" y1="19" x2="12" y2="23" />
-                  <line x1="8" y1="23" x2="16" y2="23" />
-                </svg>
-                Astrologer is on mute
-              </div>
-            )}
-
-            {/* CONNECTING — Agora joining or waiting for remote media */}
-            {!isHost && remoteUsers.length === 0 && !hostLeft && !roomEnded && (
+            {/* WAITING — no live video available */}
+            {!isHost && !shouldRenderStream && (
               <div className="waiting-text">
-                {!props.channel || connectingTimedOut
-                  ? '🔮 Waiting for astrologer to start streaming…'
-                  : '🔮 Connecting to live stream…'}
-              </div>
-            )}
-
-            {/* ENDED — astrologer has left or room ended */}
-            {!isHost && (hostLeft || roomEnded) && remoteUsers.length === 0 && (
-              <div className="waiting-text">
-                🔮 Waiting for astrologer to go live…
+                {roomEnded
+                  ? '🔴 Live ended'
+                  : hostLeft
+                    ? '🔮 Waiting for astrologer to go live…'
+                    : !props.channel || connectingTimedOut
+                      ? '� Waiting for astrologer to start streaming…'
+                      : '🔮 Connecting to live stream…'}
               </div>
             )}
           </div>
@@ -1132,7 +1224,9 @@ const LiveView = (props) => {
                 if (m.isFollow) {
                   return (
                     <div key={m.id || index} className="inline-message" style={{ opacity: 0.6 }}>
-                      <span className="inline-initial" style={{ background: "#22c55e", fontSize: 10 }}>❤️</span>
+                      <span className="inline-initial" style={{ background: "#22c55e" }}>
+                        {(m.sender || "U").charAt(0).toUpperCase()}
+                      </span>
                       <div className="inline-message-body">
                         <span className="inline-text" style={{ fontStyle: "italic", fontSize: 11 }}>{m.text}</span>
                       </div>
@@ -1265,33 +1359,38 @@ const LiveView = (props) => {
               <div className="icon-btn" style={{ position: "relative" }}>
                 <div
                   className="icon-circle"
-                  style={{ cursor: "pointer", background: "#f75801" }}
+                  style={{ cursor: "pointer", background: "transparent" }}
                   onClick={(e) => { e.stopPropagation(); setShowWaitingPopup((v) => !v); }}
                 >
                   <IoHourglass size={20} color="#fff" />
                 </div>
-                {showWaitingPopup && (
-                  <>
-                    <div
-                      style={{ position: "fixed", inset: 0, zIndex: 99 }}
-                      onClick={() => setShowWaitingPopup(false)}
+                {/* Old toast — auto-dismisses after 3s */}
+                {showWaitingToast && (
+                  <div style={{
+                    position: "absolute",
+                    right: 50,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    zIndex: 567000,
+                  }}>
+                    <WaitingModal
+                      callRoomId={callRoomId}
+                      resetCallState={() => { setShowWaitingToast(false); resetCallState(); }}
+                      connectionType={pendingCallType}
+                      className="live-waiting-override"
+                      hideCancel
                     />
-                    <div style={{
-                      position: "absolute",
-                      right: 50,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      zIndex: 567000,
-                    }}>
-                      <WaitingModal
-                        callRoomId={callRoomId}
-                        resetCallState={() => { setShowWaitingPopup(false); resetCallState(); }}
-                        connectionType={pendingCallType}
-                        className="live-waiting-override"
-                      />
-                    </div>
-                  </>
+                  </div>
                 )}
+                {/* New waitlist modal — opens on hourglass click */}
+                <WaitlistModal
+                  show={showWaitingPopup}
+                  callRoomId={callRoomId}
+                  onClose={() => setShowWaitingPopup(false)}
+                  resetCallState={() => { setShowWaitingPopup(false); resetCallState(); }}
+                  connectionType={pendingCallType}
+                  waitTime={callWaitingList}
+                />
               </div>
             )}
 
@@ -1355,6 +1454,18 @@ const LiveView = (props) => {
           onClose={() => setIsRemedyPanelOpen(false)}
           remedyData={suggestedRemedyData}
           onProductClick={() => setIsRemedyPanelOpen(false)}
+        />
+
+        {/* Recharge Modal — shown on low balance warning during active call */}
+        <RechargeModal
+          isOpen={isRechargeModalOpen}
+          onClose={() => setIsRechargeModalOpen(false)}
+          onSuccess={() => {
+            refreshWallet();
+            setIsRechargeModalOpen(false);
+            setShowRechargeButton(false);
+          }}
+          title="Recharge to Continue Call"
         />
       </div>
     </FixedLayer>

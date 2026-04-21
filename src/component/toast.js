@@ -27,13 +27,13 @@ const showToast = (fn, msg, opts) => {
   return activeToastId;
 };
 
-const success = (msg) => showToast(rht.success, msg, options);
+const success = (msg, opts) => showToast(rht.success, msg, { ...options, ...opts });
 
-const error = (msg) => showToast(rht.error, msg, options);
+const error = (msg, opts) => showToast(rht.error, msg, { ...options, ...opts });
 
-const warning = (msg) => showToast(rht, msg, { ...options, icon: "⚠️" });
+const warning = (msg, opts) => showToast(rht, msg, { ...options, icon: "⚠️", ...opts });
 
-const info = (msg) => showToast(rht, msg, { ...options, icon: "ℹ️" });
+const info = (msg, opts) => showToast(rht, msg, { ...options, icon: "ℹ️", ...opts });
 
 const promise = (myPromise, msgObj) => {
   rht.dismiss(activeToastId);

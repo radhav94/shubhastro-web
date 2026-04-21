@@ -4,6 +4,7 @@ import { useSendGiftMutation } from "../../../../../redux/api/gift/giftApi";
 import { useWalletBalance } from "../../../wallet/useWalletBalance";
 import toast from "../../../../../component/toast";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
+import walletIcon from "../../../../../assets/icons/wallet-2.svg";
 
 const GiftPopup = ({ show, onClose, giftList, astrologerId, astrologerName, socketRef, roomId, userId, userName }) => {
   if (!show) return null;
@@ -34,7 +35,6 @@ const GiftPopup = ({ show, onClose, giftList, astrologerId, astrologerName, sock
       refreshWallet();
       window.dispatchEvent(new Event("walletBalanceUpdated"));
 
-      // Emit gift message to live stream chat
       if (socketRef?.current?.connected && roomId && userId) {
         let senderName = userName;
         if (!senderName) {
@@ -73,25 +73,31 @@ const GiftPopup = ({ show, onClose, giftList, astrologerId, astrologerName, sock
   };
 
   return (
-    <div className="gift-overlay" onClick={onClose}>
+    <div className="gift-overlay" onClick={onClose} onTouchStart={(e) => e.stopPropagation()} onTouchEnd={(e) => e.stopPropagation()} onTouchMove={(e) => e.stopPropagation()}>
       <div className="gift-popup" onClick={(e) => e.stopPropagation()}>
         <div className="gift-header">
-          <div className="gift-title">Send a gift 🎁</div>
-          <div className="gift-coins">₹ {balance}</div>
+          <div className="gift-title">Send a Gift</div>
+          <div className="gift-wallet">
+            <span className="gift-wallet-amount">₹{balance}</span>
+            <div className="gift-wallet-label">
+              <img src={walletIcon} alt="wallet" width="16" height="16" />
+              <span>Wallet</span>
+            </div>
+          </div>
         </div>
 
         <div className="gift-grid">
           {giftList?.map((gift) => (
             <div
               key={gift._id}
-              className={`gift-item ${
-                selected?._id === gift._id ? "active" : ""
-              }`}
+              className={`gift-item ${selected?._id === gift._id ? "active" : ""}`}
               onClick={() => setSelected(gift)}
             >
-              <img src={gift.giftImg} alt="" />
+              <div className="gift-img-wrap">
+                <img src={gift.giftImg} alt={gift.giftName} />
+                <span className="gift-price-badge">₹{gift.price}</span>
+              </div>
               <div className="gift-name">{gift.giftName}</div>
-              <div className="gift-price">₹ {gift.price}</div>
             </div>
           ))}
         </div>

@@ -29,6 +29,7 @@ const CALL_EVENTS = [
   "error",
   "message:recieved",
   "return_call_room",
+  "live:astrologer_status",
 ];
 
 /* ================= 🔄 RECONNECTION STATE ================= */
