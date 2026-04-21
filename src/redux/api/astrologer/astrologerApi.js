@@ -116,10 +116,10 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
           params.append("isActive", "true");
         }
 
-        // // Handle active type
-        // if (isActiveType) {
-        //   params.append("isActiveType", isActiveType);
-        // }
+        // Handle active type
+        if (isActiveType) {
+          params.append("isActiveType", isActiveType);
+        }
 
         return {
           url: `astrologers/filterAstrologers?${params.toString()}`,
