@@ -88,7 +88,7 @@ const LiveView = (props) => {
   const [roomEnded, setRoomEnded] = useState(false);
   const [wasRoomReady, setWasRoomReady] = useState(false);
   const [connectingTimedOut, setConnectingTimedOut] = useState(false);
-  const [liveDuration, setLiveDuration] = useState("00:00");
+
   const [isCallExpanded, setIsCallExpanded] = useState(false);
   const liveListCtx = useLiveList();
   const [showKundliModal, setShowKundliModal] = useState(false);
@@ -105,11 +105,15 @@ const LiveView = (props) => {
 
   useEffect(() => {
     const handler = (e) => {
+      // Only update if the event is for the current astrologer or no hostId specified
+      const eventHostId = e.detail?.hostId;
+      const currentAstroId = astrologer?._id || astrologer?.astrologerId;
+      if (eventHostId && currentAstroId && eventHostId !== currentAstroId) return;
       setLocalPrivateCall(e.detail?.isOnPrivateCall ?? false);
     };
     window.addEventListener("live:private_call_status", handler);
     return () => window.removeEventListener("live:private_call_status", handler);
-  }, []);
+  }, [astrologer]);
 
   // Reset when channel changes — initialize from API data
   useEffect(() => {
@@ -126,7 +130,6 @@ const LiveView = (props) => {
     setRoomEnded(false);
     setWasRoomReady(false);
     setConnectingTimedOut(false);
-    setLiveDuration("00:00");
     const gen = channelGenRef.current + 1;
     channelGenRef.current = gen;
     setChannelGeneration(gen);
@@ -141,29 +144,6 @@ const LiveView = (props) => {
     const timer = setTimeout(() => setConnectingTimedOut(true), 10000);
     return () => clearTimeout(timer);
   }, [remoteUsers?.length, hostLeft, roomEnded, props.channel]);
-
-  // Live duration timer — ticks every second while stream is active
-  // Use startedAt from REST API (api/users/live-users)
-  const effectiveStartedAt = astrologer?.startedAt ? Number(astrologer.startedAt) : null;
-
-  useEffect(() => {
-    if (!effectiveStartedAt) return;
-    const tick = () => {
-      const elapsed = Math.floor((Date.now() - effectiveStartedAt) / 1000);
-      const hrs = Math.floor(elapsed / 3600);
-      const mins = Math.floor((elapsed % 3600) / 60);
-      const secs = elapsed % 60;
-      const pad = (n) => String(n).padStart(2, "0");
-      if (hrs > 0) {
-        setLiveDuration(`${pad(hrs)}:${pad(mins)}:${pad(secs)}`);
-      } else {
-        setLiveDuration(`${pad(mins)}:${pad(secs)}`);
-      }
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [effectiveStartedAt]);
 
   const { 
     activeCall, 
@@ -898,6 +878,13 @@ const LiveView = (props) => {
     };
 
     const handleAstrologerPrivateCall = (data) => {
+      // Only update private call state if the event is for the current astrologer
+      const currentAstroId = astrologer?._id || astrologer?.astrologerId;
+      const eventHostId = data?.hostId;
+      if (eventHostId && currentAstroId && eventHostId !== currentAstroId) {
+        console.log("[LiveView] 📞 Ignoring private call event for different astrologer:", eventHostId);
+        return;
+      }
       if (data?.status === "on_private_call") {
         console.log("[LiveView] 📞 Astrologer on private call");
         setLocalPrivateCall(true);
@@ -994,7 +981,7 @@ const LiveView = (props) => {
                 <div className="host-duration">
                   {isCallForCurrentAstrologer
                     ? `Private Call ${formatCallTime(callSeconds)}`
-                    : `Live ${liveDuration}`
+                    : `Live`
                   }
                 </div>
               </div>

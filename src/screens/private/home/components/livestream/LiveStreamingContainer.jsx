@@ -146,14 +146,20 @@ const LiveStreamingContainer = ({ client }) => {
       }
     }
 
+    // Only update private call state if the event is for the current astrologer
+    const currentAstrologerId = liveList?.getCurrentLive()?.astrologerId;
     if (status === "on_private_call") {
-      console.log("[LiveContainer] 📞 Setting privateCallInfo: on_private_call, type:", privateCallType);
-      setPrivateCallInfo({ isOnPrivateCall: true, privateCallType: privateCallType || null });
+      if (!hostId || hostId === currentAstrologerId) {
+        console.log("[LiveContainer] 📞 Setting privateCallInfo: on_private_call, type:", privateCallType);
+        setPrivateCallInfo({ isOnPrivateCall: true, privateCallType: privateCallType || null });
+      }
     }
 
     if (status === "private_call_ended") {
-      console.log("[LiveContainer] 📞 Setting privateCallInfo: private_call_ended");
-      setPrivateCallInfo({ isOnPrivateCall: false, privateCallType: null });
+      if (!hostId || hostId === currentAstrologerId) {
+        console.log("[LiveContainer] 📞 Setting privateCallInfo: private_call_ended");
+        setPrivateCallInfo({ isOnPrivateCall: false, privateCallType: null });
+      }
     }
   }, [liveList]);
 
