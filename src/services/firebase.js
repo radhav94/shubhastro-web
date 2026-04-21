@@ -1,18 +1,16 @@
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
-// TODO: Replace with your actual Firebase project config
 const firebaseConfig = {
-    apiKey: "AIzaSyBAn58yLqiljWUXhSC7D6KK79uDfZXskts",
-    authDomain: "shubhtalk-fbb51.firebaseapp.com",
-    projectId: "shubhtalk-fbb51",
-    storageBucket: "shubhtalk-fbb51.firebasestorage.app",
-    messagingSenderId: "291098264414",
-    appId: "1:291098264414:web:08098fdf9db01648f305cf"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// TODO: Replace with your actual VAPID key from Firebase Console > Cloud Messaging > Web Push certificates
-const VAPID_KEY = "BA8u2x_jQI0fGf0uMVqj-arH7Cr2Z037HW5ZOEHMmPrVIpCOBsUR0W7ng6pepdZdDIaYv-T8EWyPQ-s-qx518r8";
+const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);

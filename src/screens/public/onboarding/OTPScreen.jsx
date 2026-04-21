@@ -63,13 +63,13 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     if (otpValue.length === 6) {
       setLoading(true);
       try {
-        const fcmToken = await requestFCMToken();
+        const fcmTokens = await requestFCMToken();
 
         const payload = {
           otp: otpValue,
           phoneNumber: `91${formData.phoneNumber}`,
           type: "CUSTOMER",
-          ...(fcmToken && { fcmToken, deviceType: "web" }),
+          ...(fcmTokens && { fcmTokens, deviceType: "web" }),
         };
 
         const response = await verifyOtp(payload);

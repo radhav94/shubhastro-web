@@ -84,13 +84,13 @@ const OtpVerification = () => {
 const handleVerifyOtp = async (event) => {
   event.preventDefault();
 
-  const fcmToken = await requestFCMToken();
+  const fcmTokens = await requestFCMToken();
 
   const payload = {
     phoneNumber,
     type, // "CUSTOMER" or "ASTROLOGER"
     otp: String(otp),
-    ...(fcmToken && { fcmToken, deviceType: "web" }),
+    ...(fcmTokens && { fcmTokens, deviceType: "web" }),
   };
 
   try {

@@ -2,14 +2,14 @@
 importScripts("https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/11.8.1/firebase-messaging-compat.js");
 
-// TODO: Must match the config in src/services/firebase.js
+// These placeholders are replaced at build time by the firebaseSwPlugin in vite.config.js
 firebase.initializeApp({
-    apiKey: "AIzaSyBAn58yLqiljWUXhSC7D6KK79uDfZXskts",
-    authDomain: "shubhtalk-fbb51.firebaseapp.com",
-    projectId: "shubhtalk-fbb51",
-    storageBucket: "shubhtalk-fbb51.firebasestorage.app",
-    messagingSenderId: "291098264414",
-    appId: "1:291098264414:web:08098fdf9db01648f305cf"
+    apiKey: "__VITE_FIREBASE_API_KEY__",
+    authDomain: "__VITE_FIREBASE_AUTH_DOMAIN__",
+    projectId: "__VITE_FIREBASE_PROJECT_ID__",
+    storageBucket: "__VITE_FIREBASE_STORAGE_BUCKET__",
+    messagingSenderId: "__VITE_FIREBASE_MESSAGING_SENDER_ID__",
+    appId: "__VITE_FIREBASE_APP_ID__"
 });
 
 const messaging = firebase.messaging();
