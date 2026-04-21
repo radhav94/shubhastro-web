@@ -316,7 +316,8 @@ const LiveView = (props) => {
 
         // Emit follow message to live stream chat
         if (props.socketRef?.current?.connected && props.channel && userIdLocal) {
-          const userName = localStorage.getItem("shubhtalk_customer_name") || "User";
+          const userData = JSON.parse(localStorage.getItem("shubhtalk_user") || "{}");
+          const userName = `${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "User";
 
           const followMessage = JSON.stringify({
             text: `${userName} started following`,
@@ -1218,7 +1219,9 @@ const LiveView = (props) => {
                 if (m.isFollow) {
                   return (
                     <div key={m.id || index} className="inline-message" style={{ opacity: 0.6 }}>
-                      <span className="inline-initial" style={{ background: "#22c55e", fontSize: 10 }}>❤️</span>
+                      <span className="inline-initial" style={{ background: "#22c55e" }}>
+                        {(m.sender || "U").charAt(0).toUpperCase()}
+                      </span>
                       <div className="inline-message-body">
                         <span className="inline-text" style={{ fontStyle: "italic", fontSize: 11 }}>{m.text}</span>
                       </div>
