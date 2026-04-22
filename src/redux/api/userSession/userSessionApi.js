@@ -9,9 +9,18 @@ export const userSessionApi = privateRequestNew.injectEndpoints({
         method: "GET",
       }),
     }),
+
+    // LOGOUT
+    logoutUser: builder.mutation({
+      query: ({ deviceType = "web" } = {}) => ({
+        url: "users/logout",
+        method: "POST",
+        body: { deviceType },
+      }),
+    }),
   }),
   overrideExisting: false,
 });
 
 //  EXPORT HOOKS
-export const { useGetAllUserSessionQuery } = userSessionApi;
+export const { useGetAllUserSessionQuery, useLogoutUserMutation } = userSessionApi;
