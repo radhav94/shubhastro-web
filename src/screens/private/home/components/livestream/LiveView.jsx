@@ -8,6 +8,8 @@ import { useLiveViewLogic } from "./useLiveViewLogic";
 import GiftPopup from "./GiftPopup";
 import CallRequestPopup from "./CallRequestPopup";
 import SharePopup from "./SharePopup";
+import LiveListModal from "./LiveListModal";
+import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 import { useReelScroll } from "./useReelScroll";
 
 import { useNavigate } from "react-router-dom";
@@ -76,9 +78,23 @@ const LiveView = (props) => {
   } = props;
 
   const [showGifts, _setShowGifts] = useState(false);
+  const [showLiveList, setShowLiveList] = useState(false);
+  const [liveListData, setLiveListData] = useState([]);
+
+  // Auto-refresh live list when socket events fire while modal is open
+  useEffect(() => {
+    if (!showLiveList) return;
+    getAstrologerLiveList()
+      .then((res) => {
+        const all = res.data?.data || [];
+        setLiveListData(all.filter((l) => l.astrologer && l.astrologer.firstName));
+      })
+      .catch(() => {});
+  }, [props.liveListRefreshKey]);
   const setShowGifts = (val) => {
     _setShowGifts(val);
     if (props.giftPopupOpenRef) props.giftPopupOpenRef.current = val;
+    scrollDisabledRef.current = val || showLiveList;
   };
   const [showCallPopup, setShowCallPopup] = useState(false);
   const [showWaitingModal, setShowWaitingModal] = useState(false);
@@ -194,6 +210,7 @@ const LiveView = (props) => {
   const [callRoomId, setCallRoomId] = useState(null);
   const [callWaitingList, setCallWaitingList] = useState(null);
   const astrologerRef = useRef(null);
+  const scrollDisabledRef = useRef(false);
   const callingChannelRef = useRef(null);
   const prevMessageCountRef = useRef(0);
 
@@ -407,7 +424,7 @@ const LiveView = (props) => {
     containerRef: reelRef,
     onNext: liveListCtx?.goNextLive,
     onPrev: liveListCtx?.goPrevLive,
-    disabledRef: props.giftPopupOpenRef,
+    disabledRef: scrollDisabledRef,
   });
 
   console.log("liveListCtx", JSON.stringify(liveListCtx));
@@ -1049,6 +1066,26 @@ const LiveView = (props) => {
                     </svg>
                   </div>
                 )}
+                <button className="live-grid-btn" onClick={async () => {
+                  try {
+                    const res = await getAstrologerLiveList();
+                    const all = res.data?.data || [];
+                    const valid = all.filter((l) => l.astrologer && l.astrologer.firstName);
+                    setLiveListData(valid);
+                    setShowLiveList(true);
+                    scrollDisabledRef.current = true;
+                    if (props.giftPopupOpenRef) props.giftPopupOpenRef.current = true;
+                  } catch (err) {
+                    console.error("Failed to fetch live list:", err);
+                  }
+                }} aria-label="View all live astrologers">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="3" y="3" width="8" height="8" rx="2" />
+                    <rect x="13" y="3" width="8" height="8" rx="2" />
+                    <rect x="3" y="13" width="8" height="8" rx="2" />
+                    <rect x="13" y="13" width="8" height="8" rx="2" />
+                  </svg>
+                </button>
               </div>
             )}
           </div>
@@ -1327,6 +1364,12 @@ const LiveView = (props) => {
             shareToWhatsapp={shareToWhatsapp}
             shareToGmail={shareToGmail}
             handleCopyLink={handleCopyLink}
+          />
+
+          <LiveListModal
+            show={showLiveList}
+            onClose={() => { setShowLiveList(false); scrollDisabledRef.current = false; if (props.giftPopupOpenRef) props.giftPopupOpenRef.current = false; }}
+            lives={liveListData}
           />
 
           <CallRequestPopup
