@@ -1690,6 +1690,28 @@
   letter-spacing: 0.3px;
 }
 
+/* Orange blinking dot for hourglass waiting indicator */
+@keyframes hourglassDotBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+.icon-circle.hourglass-blink {
+  position: relative;
+}
+
+.hourglass-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f75801;
+  border: 1.5px solid #000;
+  animation: hourglassDotBlink 1.4s ease-in-out infinite;
+}
+
 /* End button variation */
 .right-action-bar .end-live .icon-circle {
   background: rgba(0, 0, 0, 0.85);
