@@ -111,6 +111,10 @@ const LiveStreamingContainer = ({ client }) => {
   const liveRef = useRef(live);
   useEffect(() => { liveRef.current = live; }, [live]);
 
+  // Keep channel in a ref so handleAstrologerStatus always reads the current channel
+  const channelRef = useRef(channel);
+  useEffect(() => { channelRef.current = channel; }, [channel]);
+
   // Private call state — tracks when the current astrologer is on a private call
   const [privateCallInfo, setPrivateCallInfo] = useState({ isOnPrivateCall: false, privateCallType: null });
 
@@ -127,43 +131,48 @@ const LiveStreamingContainer = ({ client }) => {
     const { status, roomId, hostId, hostName, profileImage, privateCallType, gender } = data;
 
     if (status === "ended") {
+      // Only show the "has left" toast if the user was watching this specific stream
+      const wasWatchingThis = roomId && roomId === channelRef.current;
+
       liveList?.removeLive(roomId);
 
-      // Show notification that astrologer has left
-      rht.custom(
-        (t) => (
-          <div
-            onClick={() => rht.dismiss(t.id)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              background: "#fff",
-              borderRadius: 14,
-              padding: "12px 16px",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
-              border: "1px solid #f0ebe4",
-              maxWidth: 340,
-              cursor: "pointer",
-            }}
-          >
-            <img
-              src={profileImage || getAstrologerDefaultImage(gender)}
-              alt={hostName}
-              style={{ width: 42, height: 42, borderRadius: "50%", objectFit: "cover", border: "2px solid #f75801" }}
-            />
-            <div>
-              <div style={{ fontWeight: 600, fontSize: 14, color: "#1a1a1a" }}>
-                {hostName || "Astrologer"} has left
-              </div>
-              <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
-                The live session has ended
+      if (wasWatchingThis) {
+        // Show notification that astrologer has left
+        rht.custom(
+          (t) => (
+            <div
+              onClick={() => rht.dismiss(t.id)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                background: "#fff",
+                borderRadius: 14,
+                padding: "12px 16px",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+                border: "1px solid #f0ebe4",
+                maxWidth: 340,
+                cursor: "pointer",
+              }}
+            >
+              <img
+                src={profileImage || getAstrologerDefaultImage(gender)}
+                alt={hostName}
+                style={{ width: 42, height: 42, borderRadius: "50%", objectFit: "cover", border: "2px solid #f75801" }}
+              />
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 14, color: "#1a1a1a" }}>
+                  {hostName || "Astrologer"} has left
+                </div>
+                <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
+                  The live session has ended
+                </div>
               </div>
             </div>
-          </div>
-        ),
-        { duration: 4000, position: "top-center" }
-      );
+          ),
+          { duration: 4000, position: "top-center" }
+        );
+      }
     }
 
     if (status === "started") {
