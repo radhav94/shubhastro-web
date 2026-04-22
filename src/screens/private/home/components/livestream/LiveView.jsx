@@ -472,8 +472,15 @@ const LiveView = (props) => {
 
   const messagesOverlayRef = useRef(null);
 
-  // Messages container ref (overflow hidden — newest messages visible at bottom)
-  useEffect(() => {}, [displayMessages.length]);
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    const container = messagesOverlayRef.current;
+    if (!container) return;
+    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
+    if (isAtBottom) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [displayMessages.length]);
 
   const isHost = ROLE === "host";
   const safeRemoteUsers = remoteUsers.filter((u) => u);
@@ -1186,7 +1193,7 @@ const LiveView = (props) => {
             {!isHost && !shouldRenderStream && (
               <div className="waiting-text">
                 {roomEnded
-                  ? '🔴 Live ended'
+                  ? '🔮 Waiting for astrologer to go live…'
                   : hostLeft
                     ? '🔮 Waiting for astrologer to go live…'
                     : !props.channel || connectingTimedOut
@@ -1210,7 +1217,7 @@ const LiveView = (props) => {
 
           {/* CHAT - only show when astrologer is live */}
           {isAstrologerLive && (
-          <div className="chat-panel">
+          <div className="chat-panel" onTouchStart={(e) => e.stopPropagation()} onTouchEnd={(e) => e.stopPropagation()}>
             {/* Inline Messages Overlay */}
             <div className="inline-messages-overlay" ref={messagesOverlayRef}>
               {displayMessages.map((m, index) => {
