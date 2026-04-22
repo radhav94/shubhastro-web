@@ -781,14 +781,22 @@
 .inline-messages-overlay {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  gap: 4px;
+  gap: 6px;
   max-height: 240px;
-  overflow: hidden;
+  max-width: 60%;
+
+  @media (max-width: 768px) {
+    max-width: 85%;
+  }
+  overflow-y: auto;
   padding: 0 4px;
-  mask-image: linear-gradient(to bottom, transparent 0%, black 20%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%);
-  pointer-events: none;
+  scroll-behavior: smooth;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  scrollbar-width: none;
+  // pointer-events: none;
 }
 
 .inline-message {
