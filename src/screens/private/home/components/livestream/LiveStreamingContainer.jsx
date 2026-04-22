@@ -27,6 +27,7 @@ const LiveStreamingContainer = ({ client }) => {
   const isCallBusy = !!activeCall || !!waitingList;
   const liveList = useLiveList();
   const giftPopupOpenRef = useRef(false);
+  const [liveListRefreshKey, setLiveListRefreshKey] = useState(0);
   console.log("liveList", liveList);
   const currentLive = liveList?.getCurrentLive();
 
@@ -135,6 +136,7 @@ const LiveStreamingContainer = ({ client }) => {
       const wasWatchingThis = roomId && roomId === channelRef.current;
 
       liveList?.removeLive(roomId);
+      setLiveListRefreshKey((k) => k + 1);
 
       if (wasWatchingThis) {
         // Show notification that astrologer has left
@@ -241,12 +243,14 @@ const LiveStreamingContainer = ({ client }) => {
       astrologerName: hostName || "",
       startedAt: Date.now(),
     });
+    setLiveListRefreshKey((k) => k + 1);
   }, [liveList]);
 
   // Broadcast: a live session ended (from any astrologer)
   const handleSessionEnded = useCallback((data) => {
     const { roomId } = data;
     liveList?.removeLive(roomId);
+    setLiveListRefreshKey((k) => k + 1);
   }, [liveList]);
 
   // Track rooms that returned ROOM_NOT_FOUND to prevent retry loops
@@ -324,6 +328,7 @@ const LiveStreamingContainer = ({ client }) => {
       astrologer={currentLive}
       privateCallInfo={privateCallInfo}
       giftPopupOpenRef={giftPopupOpenRef}
+      liveListRefreshKey={liveListRefreshKey}
 />
 
     {/* 🔥 LIVE NAVIGATION CONTROLS */}
