@@ -1398,11 +1398,12 @@ const LiveView = (props) => {
             {shouldShowWaitingIndicator && (
               <div className="icon-btn" style={{ position: "relative" }}>
                 <div
-                  className="icon-circle"
+                  className="icon-circle hourglass-blink"
                   style={{ cursor: "pointer", background: "transparent" }}
                   onClick={(e) => { e.stopPropagation(); setShowWaitingPopup((v) => !v); }}
                 >
                   <IoHourglass size={20} color="#fff" />
+                  <span className="hourglass-dot" />
                 </div>
                 {/* Old toast — auto-dismisses after 3s */}
                 {showWaitingToast && (
