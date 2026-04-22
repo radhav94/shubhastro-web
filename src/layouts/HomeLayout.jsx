@@ -26,7 +26,7 @@ const HomeLayout = () => {
   const matches = useMatches();
   const location = useLocation();
   const navigate = useNavigate();
-  const { pendingLiveCall, setPendingLiveCall } = useCall();
+  const { pendingLiveCall, setPendingLiveCall, waitingList } = useCall();
 
   const handleCancelPending = () => {
     if (pendingLiveCall?.callRoomId) {
@@ -95,8 +95,8 @@ const HomeLayout = () => {
       {/* ✅ FLOATING CALL UI (IMPORTANT LINE) */}
       <VideoCallContainer />
 
-      {/* Pending live call waiting banner — shown outside /live */}
-      {pendingLiveCall && !isLivePage && (
+      {/* Pending live call waiting banner — shown outside /live only when FooterWaiting isn't already visible */}
+      {pendingLiveCall && !isLivePage && !waitingList && (
         <WaitingModal
           callRoomId={pendingLiveCall.callRoomId}
           resetCallState={handleCancelPending}
