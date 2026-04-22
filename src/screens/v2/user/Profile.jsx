@@ -60,6 +60,7 @@ import {
 import Pagination from "../../../component/pagination/Pagination";
 import { ProfileManager } from "../../../component/UI/Profile";
 import { registerUser } from "../../../services/appServices/authService";
+import { useLogoutUserMutation } from "../../../redux/api/userSession/userSessionApi";
 import { useSelector } from "react-redux";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 
@@ -144,6 +145,7 @@ const Profile = () => {
   } = useCall();
 
   const [createChatRoom] = useCreateChatRoomMutation();
+  const [logoutUser] = useLogoutUserMutation();
 
   // Use profile manager hook
   const { selectedProfile, profiles, profilesLoading, isCreating } =
@@ -1125,19 +1127,23 @@ const Profile = () => {
     }
   };
 
-  const handleLogout = () => {
-   
-    // Dispatch Redux logout action
-    dispatch(logout());
-     dispatch(clearSelectedKundli())
-    
-    // Clear all authentication related data from localStorage
-    localStorage.clear();
+  const handleLogout = async () => {
+    // Call logout API
+    try {
+      await logoutUser({ deviceType: "web" }).unwrap();
+      // Dispatch Redux logout action
+      dispatch(logout());
+      dispatch(clearSelectedKundli());
+      // Clear all authentication related data from localStorage
+      localStorage.clear();
+      window.dispatchEvent(new Event("auth-change"));
 
-    window.dispatchEvent(new Event("auth-change"));
-
-    // Navigate to home page
-    navigate("/");
+      // Navigate to home page
+      navigate("/");
+    } catch (err) {
+      // Continue with local logout even if API fails
+      console.error("Logout API error:", err);
+    }
   };
 
   const tabs = ["Profile", "Order History", "ShubhMall History", "Transactions", "Support"];
