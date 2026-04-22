@@ -4,7 +4,7 @@ import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
 
 export const FooterWaiting = () => {
-  const { waitingList, resetCallFlow, activeCall, activeCallRoomId, setCallApproval, setWaitingList, lastRequestedAstro } = useCall();
+  const { waitingList, resetCallFlow, activeCall, activeCallRoomId, setCallApproval, setWaitingList, lastRequestedAstro, pendingLiveCall, setPendingLiveCall } = useCall();
 
   useEffect(() => {
     const handleAstrologerIncoming = (data) => {
@@ -23,6 +23,11 @@ export const FooterWaiting = () => {
   const handleCancel = () => {
     voiceSocket.emit("call:cancel", {roomId: activeCallRoomId, canceledBy: "CUSTOMER"});
     localStorage.removeItem("waitingState");
+    // Clear pending live call so HomeLayout WaitingModal doesn't appear after this one dismisses
+    if (pendingLiveCall) {
+      setPendingLiveCall(null);
+      try { sessionStorage.removeItem("shubhtalk_pending_live_call"); } catch { /* ignore */ }
+    }
     // During a switch (activeCall exists), only clear waiting state — don't reset the timer
     if (activeCall) {
       setWaitingList(null);
