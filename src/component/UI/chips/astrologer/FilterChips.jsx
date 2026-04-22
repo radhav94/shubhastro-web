@@ -170,7 +170,7 @@ const FilterChips = ({
       const windowHeight = window.innerHeight;
       const fullHeight = document.documentElement.scrollHeight;
 
-      if (scrollTop + windowHeight >= fullHeight - 800) {
+      if (scrollTop + windowHeight >= fullHeight - 800) { 
         loadMore();
       }
     };
