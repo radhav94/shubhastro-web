@@ -40,7 +40,7 @@ const LiveStreamingContainer = ({ client }) => {
 
   // Keyboard arrow navigation (ArrowUp = prev, ArrowDown = next)
   useEffect(() => {
-    if (ROLE === "host" || !liveList || liveList.lives.length <= 1 || activeCall) return;
+    if (ROLE === "host" || !liveList || liveList.lives.length <= 1 || isCallBusy) return;
 
     const handleKeyDown = (e) => {
       if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
@@ -288,7 +288,7 @@ const LiveStreamingContainer = ({ client }) => {
 
 
     const swipeHandlers = useSwipeReel({
-    enabled: ROLE !== "host" && !activeCall,
+    enabled: ROLE !== "host" && !isCallBusy,
     onNext: liveList?.goNextLive,
     onPrev: liveList?.goPrevLive,
     disabledRef: giftPopupOpenRef,
@@ -302,7 +302,7 @@ const LiveStreamingContainer = ({ client }) => {
   }
 
   return (
-  <div className="live-container" {...swipeHandlers}>
+  <div className="live-container" {...(isCallBusy ? {} : swipeHandlers)} style={isCallBusy ? { touchAction: "none", overflowY: "hidden" } : undefined}>
     <div
       key={`${liveList?.currentIndex || 0}-${direction}`}
       className={`live-slide-wrapper ${direction}`}

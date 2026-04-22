@@ -403,7 +403,7 @@ const LiveView = (props) => {
   const navigate = useNavigate();
 
   useReelScroll({
-    enabled: !!liveListCtx && ROLE !== "host" && !activeCall,
+    enabled: !!liveListCtx && ROLE !== "host" && !activeCall && !showWaitingModal,
     containerRef: reelRef,
     onNext: liveListCtx?.goNextLive,
     onPrev: liveListCtx?.goPrevLive,
