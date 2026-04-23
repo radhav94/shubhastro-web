@@ -9,7 +9,7 @@ const SuggestedRemedyPanel = ({ isOpen, onClose, remedyData, onProductClick }) =
   const entries = remedyData?.entries || [];
   // Fallback: if no grouped entries, build one from flat arrays (backward compat)
   const displayEntries = entries.length > 0
-    ? entries
+    ? [...entries].reverse()
     : (remedyData?.suggestedProducts?.length || remedyData?.messages?.length)
       ? [{ message: remedyData.messages?.[0] || null, products: remedyData.suggestedProducts || [] }]
       : [];
