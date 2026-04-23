@@ -1020,6 +1020,20 @@
   fill: none;
 }
 
+/* Cancel call circle button — replaces call button when waiting */
+.call-cancel-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #e53935;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(229, 57, 53, 0.5);
+}
+
 /* Call action pills (Kundli / Remedy) — shown during active call */
 .call-action-pill {
   display: flex;
@@ -1720,6 +1734,42 @@
 
 .right-action-bar .end-live .icon-circle svg {
   stroke: #fff;
+}
+
+/* Waiting toast — positioned beside hourglass icon, then shrinks into it */
+.waiting-beside-toast {
+  position: absolute;
+  right: 50px;
+  top: 50%;
+  transform-origin: right center;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #1f1f1f;
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+  animation: toastShrinkIn 3s ease-in-out forwards;
+}
+
+@keyframes toastShrinkIn {
+  0% {
+    transform: translateY(-50%) translateX(10px) scale(0.8);
+    opacity: 0;
+  }
+  10% {
+    transform: translateY(-50%) translateX(0) scale(1);
+    opacity: 1;
+  }
+  65% {
+    transform: translateY(-50%) translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50%) translateX(30px) scale(0);
+    opacity: 0;
+  }
 }
 
 

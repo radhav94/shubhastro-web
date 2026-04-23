@@ -654,6 +654,11 @@ const LiveView = (props) => {
     if (astrologerRef.current?.timeoutId) {
       clearTimeout(astrologerRef.current.timeoutId);
     }
+
+    // Emit call:cancel to server
+    if (callRoomId) {
+      voiceSocket.emit("call:cancel", { roomId: callRoomId, canceledBy: "CUSTOMER" });
+    }
     
     setShowWaitingModal(false);
     setShowWaitingPopup(false);
@@ -1312,7 +1317,7 @@ const LiveView = (props) => {
                 </button>
               </div>
               
-              {!isHost && !isCallForCurrentAstrologer && (
+              {!isHost && !isCallForCurrentAstrologer && !showWaitingModal && (
                 <button 
                   className="call-price-btn"
                   onClick={handleDirectVoiceCall}
@@ -1321,6 +1326,14 @@ const LiveView = (props) => {
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                   </svg>
                   <span>₹{fullAstro?.price?.audioRate?.amount || astrologer?.audioCallRate || 0}/ min</span>
+                </button>
+              )}
+              {!isHost && !isCallForCurrentAstrologer && showWaitingModal && (
+                <button className="call-cancel-circle" onClick={resetCallState} aria-label="Cancel call">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
                 </button>
               )}
               {!isHost && isCallForCurrentAstrologer && (
@@ -1405,22 +1418,17 @@ const LiveView = (props) => {
                   <IoHourglass size={20} color="#fff" />
                   <span className="hourglass-dot" />
                 </div>
-                {/* Old toast — auto-dismisses after 3s */}
+                {/* Waiting toast — beside hourglass, then shrinks into it */}
                 {showWaitingToast && (
-                  <div style={{
-                    position: "absolute",
-                    right: 50,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    zIndex: 567000,
-                  }}>
-                    <WaitingModal
-                      callRoomId={callRoomId}
-                      resetCallState={() => { setShowWaitingToast(false); resetCallState(); }}
-                      connectionType={pendingCallType}
-                      className="live-waiting-override"
-                      hideCancel
-                    />
+                  <div
+                    className="waiting-beside-toast"
+                    onAnimationEnd={() => setShowWaitingToast(false)}
+                  >
+                    <span style={{ fontSize: 18 }}>⏳</span>
+                    <div>
+                      <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>Waiting in queue</div>
+                      <div style={{ color: '#9ca3af', fontSize: 11 }}>Approx 5 mins</div>
+                    </div>
                   </div>
                 )}
                 {/* New waitlist modal — opens on hourglass click */}
