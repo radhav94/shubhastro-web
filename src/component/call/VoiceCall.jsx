@@ -855,7 +855,11 @@ const AgoraVoiceCalling = ({ callData }) => {
             
             <div className={styles.astrologerInfo}>
               <h3 className={styles.astrologerName}>{capitalizeWords(callerName)}</h3>
-              <p className={styles.astrologerExp}>{experience ? `${experience} Years` : 'Astrologer'}</p>
+              <p className={styles.astrologerExp}>
+                {lastRequestedAstro?.role 
+                  ? lastRequestedAstro.role.charAt(0).toUpperCase() + lastRequestedAstro.role.slice(1).toLowerCase()
+                  : "Astrologer"} • Exp. {experience || lastRequestedAstro?.experience || "0"} Years
+              </p>
             </div>
 
             <div className={styles.groupBtns}>
