@@ -5,6 +5,7 @@ import { FooterWaiting } from "./FooterWaiting";
 import { FooterMissedApproval } from "./FooterMissedApproval";
 import { useEffect } from "react";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
+import { PANDIT_AI_ID } from "../../../../../component/panditAI/usePanditAI";
 
 const StickyChatFooter = () => {
   const {
@@ -41,6 +42,8 @@ const StickyChatFooter = () => {
 
   // Hide only on detail page
   if (onTalkDetailPage) return null;
+
+  if (activeChat?.astrologerId === PANDIT_AI_ID) return null;
 
   if (!waitingList && !chatApproval && !activeChat && !missedApproval)
     return null;

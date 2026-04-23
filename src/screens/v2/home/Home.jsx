@@ -14,6 +14,7 @@ import { renderSection, sortSectionsByOrder } from "./utils/sectionMapper";
 import styles from "./Home.module.scss";
 import {ProfileManager} from "../../../component/UI/Profile";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
+import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
 
 const Home = () => {
   const requireAuth = useRequireAuth();
@@ -33,6 +34,16 @@ const Home = () => {
   // Sort sections by list_order for proper rendering sequence
   const sortedSections = useMemo(() => {
     return sortSectionsByOrder(homeList);
+  }, [homeList]);
+
+  // Extract Pandit AI astrologer info from home data
+  const panditAIData = useMemo(() => {
+    const section = homeList?.find((s) => s.display_type === "pandit-ai");
+    const content = section?.content?.[0];
+    return {
+      astrologerId: content?.astrologer_id || "6928390dc00d56953b586c04",
+      name: content?.title || "Pandit AI",
+    };
   }, [homeList]);
 
   // Use profile manager hook
@@ -240,6 +251,8 @@ const Home = () => {
       </main>
 
       <BottomNavigation />
+
+      <PanditAIBubble />
 
       {/* Connect Astrologer Popup - COMMENTED OUT: Now skipping popup and directly initiating connections */}
       {/* {isConnectPopupOpen && selectedAstrologer && (

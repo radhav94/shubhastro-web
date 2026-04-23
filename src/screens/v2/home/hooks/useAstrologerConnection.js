@@ -4,6 +4,7 @@ import { voiceSocket } from "../../../../services/voiceSocketServices";
 import { useChat } from "../../../../context/ChatContext";
 import { useCall } from "../../../../context/CallContext";
 import { Toast } from "../../../../component";
+import { isPanditAIChatActive, isPanditAIEvent } from "../../../../component/panditAI/usePanditAI";
 
 export const useAstrologerConnection = (externalAstroRef = null, selectedKundli) => {
   const navigate = useNavigate();
@@ -83,6 +84,9 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
     if (!userIdLocal) return;
 
     const handleChatRoom = (data) => {
+      // Skip Pandit AI — handled by PanditAIBubble
+      if (isPanditAIChatActive() || isPanditAIEvent(data)) return;
+
       console.log("[NormalFlow] 📥 chat:room received — server created chat room");
       console.log("[NormalFlow]   → roomId:", data?.roomId);
       console.log("[NormalFlow]   → waitingTime:", data?.waitingTime);
@@ -131,6 +135,9 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       userId,
       ...data
     }) => {
+      // Skip Pandit AI — handled by PanditAIBubble
+      if (isPanditAIChatActive() || isPanditAIEvent({ roomId, astrologerId, userId, ...data })) return;
+
       console.log("[NormalFlow] ✅ chat:accepted received — astrologer accepted chat");
       console.log("[NormalFlow]   → roomId:", roomId);
       console.log("[NormalFlow]   → astrologerId:", astrologerId);
