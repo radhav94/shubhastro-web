@@ -151,6 +151,8 @@ const VideoCalling = ({ callData }) => {
     }, 4000);
   }, [callerName, lastRequestedAstro]);
 
+  console.log("lastRequestedAstro::",lastRequestedAstro,callerName)
+
   useEffect(() => {
     voiceSocket.on("message:recieved", showChatNotification);
 
@@ -1169,7 +1171,7 @@ const VideoCalling = ({ callData }) => {
                 <p className={styles.astrologerExp}>
                   {lastRequestedAstro?.role 
                     ? lastRequestedAstro.role.charAt(0).toUpperCase() + lastRequestedAstro.role.slice(1).toLowerCase()
-                    : "Astrologer"} • Exp. {lastRequestedAstro?.experience || "0"} Years
+                    : "Astrologer"} • Exp. {lastRequestedAstro?.experience || callData?.experience || "0"} Years
                 </p>
               </div>
 

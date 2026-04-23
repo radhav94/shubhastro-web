@@ -13,6 +13,7 @@ const useChatSocket = ({
   roomId: chatRoomId,
   isUserSide,
   astroID,
+  experience,
 }) => {
   const { 
     activeCall, 
@@ -168,6 +169,7 @@ const useChatSocket = ({
         astrologerID: astroID,
         kundliId,
         remainingTime,
+        experience,
       });
 
       setWaitingPopup(false);
