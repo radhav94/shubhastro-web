@@ -1,7 +1,9 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import { voiceSocket, registerChatSession, clearChatSession } from "../services/voiceSocketServices";
 import { toast as rht } from "react-hot-toast";
 import ChatNotificationBanner from "../component/UI/ChatNotificationBanner/ChatNotificationBanner";
+import { PANDIT_AI_ID, isPanditAIEvent } from "../component/panditAI/usePanditAI";
 
 const ChatContext = createContext();
 
@@ -97,11 +99,12 @@ export const ChatProvider = ({ children }) => {
       if (!saved || !timestamp) return null;
 
       const elapsed = Date.now() - Number(timestamp);
-      if (elapsed > CHAT_EXPIRY_TIME) {
+      const parsedChat = JSON.parse(saved);
+      if (elapsed > CHAT_EXPIRY_TIME || parsedChat?.astrologerId === PANDIT_AI_ID) {
         clearPersistedChatState();
         return null;
       }
-      return JSON.parse(saved);
+      return parsedChat;
     } catch (e) {
       console.warn("[ChatContext] Failed to restore chat state:", e);
       clearPersistedChatState();
@@ -111,6 +114,13 @@ export const ChatProvider = ({ children }) => {
 
   /* ================= SET ACTIVE CHAT (wrapper with persistence) ================= */
   const setActiveChat = useCallback((chatData) => {
+    if (chatData?.astrologerId === PANDIT_AI_ID) {
+      setActiveChatState(null);
+      clearPersistedChatState();
+      clearChatSession();
+      return;
+    }
+
     setActiveChatState(chatData);
     if (chatData) {
       persistChatState(chatData);
@@ -311,6 +321,7 @@ export const ChatProvider = ({ children }) => {
 
     /* 🔍 [ChatReconnect] Chat lifecycle event loggers */
     const logChatRoom = (data) => {
+      if (isPanditAIEvent(data)) return;
       console.log("[ChatReconnect] 📥 chat:room — server created chat room");
       console.log("[ChatReconnect]   → roomId:", data?.roomId);
       console.log("[ChatReconnect]   → waitingTime:", data?.waitingTime);
@@ -318,6 +329,7 @@ export const ChatProvider = ({ children }) => {
     };
 
     const logChatAccepted = (data) => {
+      if (isPanditAIEvent(data)) return;
       console.log("[ChatReconnect] ✅ chat:accepted — astrologer accepted chat");
       console.log("[ChatReconnect]   → roomId:", data?.roomId);
       console.log("[ChatReconnect]   → remainingTime:", data?.remainingTime);
@@ -326,6 +338,7 @@ export const ChatProvider = ({ children }) => {
     };
 
     const logChatRejected = (data) => {
+      if (isPanditAIEvent(data)) return;
       console.log("[ChatReconnect] ❌ chat:rejected — astrologer rejected / unavailable");
       console.log("[ChatReconnect]   → message:", data?.message);
       console.log("[ChatReconnect]   → reason:", data?.sessionData?.sessionEndReason);
@@ -333,12 +346,14 @@ export const ChatProvider = ({ children }) => {
     };
 
     const logChatEnded = (data) => {
+      if (isPanditAIEvent(data)) return;
       console.log("[ChatReconnect] 🔚 chat:ended — chat session ended");
       console.log("[ChatReconnect]   → full data:", JSON.stringify(data));
       console.log("[ChatReconnect]   → activeChat was:", JSON.stringify(activeChatRef.current));
     };
 
     const logChatReconnected = (data) => {
+      if (isPanditAIEvent(data)) return;
       console.log("[ChatReconnect] 🔄 chat:reconnected — backend reconnect response");
       console.log("[ChatReconnect]   → active:", data?.active);
       console.log("[ChatReconnect]   → remainingTime:", data?.remainingTime);
@@ -420,6 +435,9 @@ export const ChatProvider = ({ children }) => {
     const handleGlobalMessage = (data) => {
       // Only show notification for astrologer messages (not user's own)
       if (data.sender === "user") return;
+
+      // Skip Pandit AI messages — handled inline by PanditAIBubble
+      if (isPanditAIEvent(data)) return;
 
       const isOnChatPage = window.location.pathname.includes("/chat-with-astrologers");
       const isOnLivePage = window.location.pathname.startsWith("/live");

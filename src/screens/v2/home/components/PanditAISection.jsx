@@ -20,35 +20,17 @@ const PanditAISection = ({ data, astrologerId, onChatStart }) => {
       return;
     }
 
-    if (!aiAstrologerId) {
-      Toast.error("AI Astrologer not configured");
-      return;
-    }
-
     if (!userIdLocal) {
       Toast.error("Please login to continue");
       navigate("/login");
       return;
     }
 
-    // If onChatStart handler is provided, use it (for proper flow with balance check, kundli selection)
-    if (onChatStart) {
-      // Create astrologer object for the hook
-      const aiAstrologer = {
-        _id: aiAstrologerId,
-        firstName: panditTitle,
-        isActive: true,
-      };
-      onChatStart(aiAstrologer, query);
-    } else {
-      // Direct chat initiation (fallback)
-      console.log("💬 Initiating AI chat with query:", query);
-      voiceSocket.emit("chat:initiate", {
-        userId: userIdLocal,
-        astrologerId: aiAstrologerId,
-        initialMessage: query,
-      });
-    }
+    // Dispatch event to open PanditAI bubble and send the query
+    window.dispatchEvent(
+      new CustomEvent("panditai:ask", { detail: { query: query.trim() } })
+    );
+    setQuery("");
   };
 
   const handleKeyPress = (e) => {
