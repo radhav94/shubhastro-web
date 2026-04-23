@@ -4,9 +4,8 @@ import ShubhTalkLogo from "../assets/images/ShubhAstrologoFooter.svg";
 import {
   IoLogoFacebook,
   IoLogoInstagram,
-  IoLogoTwitter,
 } from "react-icons/io5";
-import { FaYoutube, FaLinkedinIn } from "react-icons/fa";
+import { FaYoutube, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useEffect, useState, useCallback } from "react";
@@ -190,7 +189,7 @@ const Footer = () => {
           <div className={styles.social_icons}>
             <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
             <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><IoLogoInstagram /></a>
-            <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noopener noreferrer"><IoLogoTwitter /></a>
+            <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a>
           </div>
         </div>
         <div className={styles.footer_column}>
@@ -251,7 +250,7 @@ const Footer = () => {
             <FaLinkedinIn />
           </a>
           <a href="https://twitter.com" aria-label="X" target="_blank" rel="noopener noreferrer">
-            <IoLogoTwitter />
+            <FaXTwitter />
           </a>
         </div>
       </div>
