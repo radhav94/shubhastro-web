@@ -30,7 +30,8 @@ import { PATH } from "../../../../../utils/routes/Paths";
 import { createPortal } from "react-dom";
 import { ChevronLeft } from "lucide-react";
 import { clearViewerSession } from "../../../../../utils/liveSessionStorage";
-import { AppImages } from "../../../../../utils/appImages";
+import { AppImages, getAstrologerDefaultImage } from "../../../../../utils/appImages";
+import astrologerOfflineBg from "../../../../../assets/images/astrologer-offline-bg.png";
 import {
   useCheckFollowingStatusQuery,
   useFollowAstrologerByIdMutation,
@@ -1194,16 +1195,26 @@ const LiveView = (props) => {
               ))
             }
 
+            {/* Camera off overlay — background only, no profile */}
+            {!isHost && shouldRenderStream && safeRemoteUsers.length > 0 && !safeRemoteUsers.some((u) => u.hasVideo) && (
+              <div className="camera-off-overlay">
+                <img src={astrologerOfflineBg} alt="" className="camera-off-bg" />
+              </div>
+            )}
+
             {/* WAITING — no live video available */}
             {!isHost && !shouldRenderStream && (
               <div className="waiting-text">
+                <img src={astrologerOfflineBg} alt="" className="waiting-bg-img" />
+                <span className="waiting-text-label">
                 {roomEnded
-                  ? '🔮 Waiting for astrologer to go live…'
+                  ? 'Waiting for astrologer to go live…'
                   : hostLeft
-                    ? '🔮 Waiting for astrologer to go live…'
+                    ? 'Waiting for astrologer to go live…'
                     : !props.channel || connectingTimedOut
-                      ? '� Waiting for astrologer to start streaming…'
-                      : '🔮 Connecting to live stream…'}
+                      ? 'Waiting for astrologer to start streaming…'
+                      : 'Connecting to live stream…'}
+                </span>
               </div>
             )}
           </div>
