@@ -370,6 +370,7 @@ const AstrologerProfile = () => {
     setReviewData({
       astrologerID: data?.astrologer_ID,
       fullName: `${data?.firstName || ""} ${data?.lastName || ""}`.trim(),
+      profileImage: data?.profileImgUrl || data?.imageUrl ,
       roomId: lastRoomId,
     });
     setOpenReview(true);
@@ -517,6 +518,7 @@ const AstrologerProfile = () => {
             kundliId,
             astrologerName: data?.astrologer?.firstName || "",
             astroID: data?.astrologer?.astrologer_ID,
+            profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
           },
         });
       } catch (e) {

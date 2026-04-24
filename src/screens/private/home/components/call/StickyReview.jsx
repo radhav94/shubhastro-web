@@ -46,7 +46,7 @@ const StickyReview = () => {
           onClose={() => setOpenReview(false)}
           handleSubmit={handleReviewSubmit}
           ratedUserName={reviewData?.fullName}
-          reviewerName="You"
+          profileImgUrl={reviewData?.profileImage || reviewData?.profileImgUrl}
         />
     </div>
   );

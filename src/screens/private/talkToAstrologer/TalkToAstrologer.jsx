@@ -625,6 +625,7 @@ const TalkToAstrologer = () => {
             astrologerName: data?.astrologer?.firstName || "",
             astroID: data?.astrologer?.astrologer_ID,
             experience: data?.astrologer?.experience,
+            profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
           },
         });
       } catch (e) {

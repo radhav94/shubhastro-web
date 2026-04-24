@@ -4,6 +4,7 @@ import { IoArrowBack } from "react-icons/io5";
 import { PrimaryText } from "../../../../../component";
 import ChatFooter from "./ChatFooter";
 import { capitalizeWords } from "../../../../../utils/capitalize";
+import { getAstrologerDefaultImage } from "../../../../../utils/appImages";
 
 const ChatHeader = ({
   fullName,
@@ -16,7 +17,8 @@ const ChatHeader = ({
   isVideoCallActive,
   onChatEnd,
   isChatActive,
-  isEnding = false
+  isEnding = false,
+  profileImgUrl,
 }) => {
   return (
     <div className={styles.header}>
@@ -24,9 +26,12 @@ const ChatHeader = ({
         <IoArrowBack className={styles.backIcon} onClick={onBack} />
 
         <img
-          src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+          src={profileImgUrl || getAstrologerDefaultImage()}
           className={styles.headerAvatar}
-          alt="User"
+          alt={fullName || "Astrologer"}
+          onError={(e) => {
+            e.target.src = getAstrologerDefaultImage();
+          }}
         />
 
         <div className={styles.userInfo}>

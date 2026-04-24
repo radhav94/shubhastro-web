@@ -283,7 +283,8 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
             kundliId,
             astrologerName: data?.astrologer?.firstName || "",
             astroID: data?.astrologer?.astrologer_ID,
-            experience: data?.astrologer?.experience
+            experience: data?.astrologer?.experience,
+            profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
           },
         });
       } catch (e) {

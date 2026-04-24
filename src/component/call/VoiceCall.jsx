@@ -402,6 +402,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       setReviewData({
         astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
         fullName: currentCall?.callerName || callerName,
+        profileImage: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
         roomId,
       });
 
@@ -568,6 +569,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         setReviewData({
           astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
           fullName: currentCall?.callerName || callerName,
+          profileImage: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
           roomId,
         });
 
@@ -766,6 +768,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         kundliId: activeCall.kundliId,
         astrologerName: callerName,
         astroID: activeCall.astrologerID,
+        profileImgUrl: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
       }
     });
   };
@@ -836,6 +839,7 @@ const AgoraVoiceCalling = ({ callData }) => {
                         kundliId: activeCall?.kundliId,
                         astrologerName: callerName,
                         astroID: activeCall?.astrologerID,
+                        profileImgUrl: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
                       }
                     });
                   }
