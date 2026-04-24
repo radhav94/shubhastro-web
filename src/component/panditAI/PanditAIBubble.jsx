@@ -75,8 +75,8 @@ const PanditAIBubble = () => {
   useEffect(() => {
     const handleOpenAndSend = (e) => {
       const query = e.detail?.query;
+      setIsOpen(true);
       if (query?.trim()) {
-        setIsOpen(true);
         sendText(query.trim());
       }
     };
