@@ -1,16 +1,19 @@
 import { useEffect, useRef } from "react";
 
+// Global lock shared across all instances — prevents any double-trigger
+let globalLocked = false;
+
 export const useReelScroll = ({
   enabled,
   containerRef,
   onNext,
   onPrev,
-  lockTime = 600,
-  threshold = 80,
+  lockTime = 1500,
+  threshold = 50,
   disabledRef,
 }) => {
-  const locked = useRef(false);
-  const deltaAcc = useRef(0);
+  const scrollIntent = useRef(0);
+  const intentTimer = useRef(null);
 
   useEffect(() => {
     if (!enabled || !containerRef?.current) return;
@@ -18,54 +21,64 @@ export const useReelScroll = ({
     const el = containerRef.current;
 
     const onWheel = (e) => {
-      // allow scroll in inputs
       if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
 
-      // allow scroll inside messages overlay
       const messagesOverlay = el.querySelector(".inline-messages-overlay");
       if (messagesOverlay && messagesOverlay.contains(e.target)) return;
 
-      // block navigation when gift popup is open
       if (disabledRef?.current) return;
 
       e.preventDefault();
 
-      deltaAcc.current += e.deltaY;
+      if (globalLocked) return;
 
-      if (Math.abs(deltaAcc.current) < threshold) return;
-      if (locked.current) return;
+      // Accumulate scroll intent
+      scrollIntent.current += e.deltaY;
 
-      locked.current = true;
+      // Debounce — wait for scroll to settle, then act once
+      clearTimeout(intentTimer.current);
+      intentTimer.current = setTimeout(() => {
+        if (globalLocked) {
+          scrollIntent.current = 0;
+          return;
+        }
 
-      if (deltaAcc.current > 0) {
-        onNext?.();
-      } else {
-        onPrev?.();
-      }
+        if (Math.abs(scrollIntent.current) < threshold) {
+          scrollIntent.current = 0;
+          return;
+        }
 
-      deltaAcc.current = 0;
+        globalLocked = true;
+        const direction = scrollIntent.current;
+        scrollIntent.current = 0;
 
-      setTimeout(() => {
-        locked.current = false;
-      }, lockTime);
+        if (direction > 0) {
+          onNext?.();
+        } else {
+          onPrev?.();
+        }
+
+        setTimeout(() => {
+          globalLocked = false;
+        }, lockTime);
+      }, 150);
     };
 
-    // Keyboard arrow navigation (ArrowDown = next, ArrowUp = prev)
     const onKeyDown = (e) => {
       if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
-      if (locked.current) return;
+      if (globalLocked) return;
       if (disabledRef?.current) return;
 
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        locked.current = true;
+        globalLocked = true;
         onNext?.();
-        setTimeout(() => { locked.current = false; }, lockTime);
+        setTimeout(() => { globalLocked = false; }, lockTime);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        locked.current = true;
+        globalLocked = true;
         onPrev?.();
-        setTimeout(() => { locked.current = false; }, lockTime);
+        setTimeout(() => { globalLocked = false; }, lockTime);
       }
     };
 
@@ -75,6 +88,7 @@ export const useReelScroll = ({
     return () => {
       el.removeEventListener("wheel", onWheel);
       document.removeEventListener("keydown", onKeyDown);
+      clearTimeout(intentTimer.current);
     };
   }, [enabled, onNext, onPrev, lockTime, threshold, containerRef]);
 };
