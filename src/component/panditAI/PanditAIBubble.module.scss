@@ -26,10 +26,12 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   padding: 8px 18px 8px 10px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.56);
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.36), transparent 26%),
-    $send-gradient;
+  border-radius: 70px;
+  // background:
+  //   radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.36), transparent 26%),
+  //   $send-gradient;
+  // background: linear-gradient(88deg, var(--primary-900k, #E56329) 0%, var(--secondary-900k, #1E2939) 200%), #FFF;
+  background: var(--orange_gradient, linear-gradient(90deg, #f75801 0%, #1E2939 100%));
   color: #fff;
   cursor: pointer;
   font-family: inherit;
@@ -79,7 +81,7 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   flex: 0 0 auto;
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.42);
-  border-radius: 18px;
+  border-radius: 50px;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.12)),
     rgba(255, 255, 255, 0.12);
