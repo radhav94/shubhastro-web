@@ -44,6 +44,27 @@
   word-wrap: break-word;
 }
 
+.astrologerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.astrologerAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.astrologerName {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333333;
+}
+
 .avatar {
   width: 90px;
   height: 90px;

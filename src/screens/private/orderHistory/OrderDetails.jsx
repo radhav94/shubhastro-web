@@ -320,6 +320,7 @@ const OrderDetails = () => {
     setReviewData({
       astrologerID: astrologer.astrologer_ID || astrologer._id,
       fullName: `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim(),
+      profileImage: astrologer.profileImgUrl || astrologer.imageUrl ,
       roomId,
     });
     setOpenReview(true);

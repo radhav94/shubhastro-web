@@ -583,7 +583,7 @@ const LiveView = (props) => {
     }
 
     // 7. Store astrologer info and emit call:initiate via socket
-    setLastRequestedAstro(astrologer);
+    setLastRequestedAstro({ ...astrologer, profileImgUrl: fullAstro?.profileImgUrl || astrologer?.profileImgUrl });
     setLastCallType("audio");
     setPendingCallType("audio");
     astrologerRef.current = astrologer;
@@ -628,7 +628,7 @@ const LiveView = (props) => {
     }
 
     // Store astrologer info in context and ref
-    setLastRequestedAstro(astrologer);
+    setLastRequestedAstro({ ...astrologer, profileImgUrl: fullAstro?.profileImgUrl || astrologer?.profileImgUrl });
     setPendingCallType(type);
     astrologerRef.current = astrologer;
     callingChannelRef.current = props.channel;
@@ -688,6 +688,7 @@ const LiveView = (props) => {
       setReviewData({
         astrologerID: activeCall?.astrologerID || activeCall?.astrologerId,
         fullName: activeCall?.callerName || "Astrologer",
+        profileImage: fullAstro?.profileImgUrl || activeCall?.profileImgUrl || activeCall?.astrologerImage,
         roomId: activeCall.roomId,
       });
 

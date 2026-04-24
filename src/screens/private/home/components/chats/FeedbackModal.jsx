@@ -1,14 +1,14 @@
 import { useState } from "react";
 import styles from "./Feedback.module.scss";
 import { ChevronRight, CircleX } from "lucide-react";
-import { AppIcons } from "../../../../../utils/appImages";
+import { AppIcons, getAstrologerDefaultImage } from "../../../../../utils/appImages";
 
 const FeedbackModal = ({
   open,
   onClose,
   handleSubmit,
   ratedUserName,
-  reviewerName,
+  profileImgUrl,
   loading,
 }) => {
   const [rating, setRating] = useState(0);
@@ -41,29 +41,21 @@ const FeedbackModal = ({
           <CircleX size={24} />
         </button>
 
-        <h3 className={styles.title}>
-          Please Rate your Experience{ratedUserName ? ` with ${ratedUserName}` : ""}
-        </h3>
-
-        {/* <img
-          className={styles.avatar}
-          src={"https://cdn-icons-png.flaticon.com/512/149/149071.png"}
-          alt="User"
-        />
-
-        <div className={styles.userRow}>
+        <div className={styles.astrologerRow}>
           <img
-            className={styles.smallAvatar}
-            src={"https://cdn-icons-png.flaticon.com/512/149/149071.png"}
-            alt="Reviewer"
+            className={styles.astrologerAvatar}
+            src={profileImgUrl || getAstrologerDefaultImage()}
+            alt={ratedUserName || "Astrologer"}
+            onError={(e) => {
+              e.target.src = getAstrologerDefaultImage();
+            }}
           />
-          <div>
-            <p className={styles.name}>{reviewerName}</p>
-            <p className={styles.hint}>
-              Reviews are public if you are not anonymous
-            </p>
-          </div>
-        </div> */}
+          <span className={styles.astrologerName}>{ratedUserName || "Astrologer"}</span>
+        </div>
+
+        <h3 className={styles.title}>
+          Please rate your experience
+        </h3>
 
         {/* Star rating - Figma: centered, larger stars with gap */}
         <div className={styles.stars} role="radiogroup" aria-label="Rating">

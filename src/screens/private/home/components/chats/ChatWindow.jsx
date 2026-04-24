@@ -51,7 +51,8 @@ const ChatWindow = () => {
     astrologerName,
     refreshKey,
     astroID,
-    experience
+    experience,
+    profileImgUrl
   } = state || {};
   // console.log('kundliId in chat', kundliId)
 
@@ -477,6 +478,7 @@ const ChatWindow = () => {
             onChatEnd={handleChatEnd}
             isChatActive={isChatActive}
             isEnding={isEnding}
+            profileImgUrl={profileImgUrl}
           />
 
           {/* Call Buttons Below Header */}
@@ -555,7 +557,7 @@ const ChatWindow = () => {
             onClose={() => setOpenFeedback(false)}
             handleSubmit={handleReviewSubmit}
             ratedUserName={fullName}
-            reviewerName={user?.firstName || "User"}
+            profileImgUrl={profileImgUrl || reviewData?.profileImage || reviewData?.profileImgUrl}
             loading={isLoading}
           />
 

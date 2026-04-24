@@ -608,6 +608,7 @@ const Profile = () => {
             kundliId,
             astrologerName: data?.astrologer?.firstName || "",
             astroID: data?.astrologer?.astrologer_ID,
+            profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
           },
         });
       } catch (e) {
@@ -804,6 +805,7 @@ const Profile = () => {
     setReviewData({
       astrologerID: astrologer.astrologer_ID || astrologer._id,
       fullName: `${astrologer.firstName} ${astrologer.lastName || ""}`.trim(),
+      profileImage:  astrologer.profileImgUrl || astrologer.imageUrl,
       roomId,
     });
     setOpenReview(true);

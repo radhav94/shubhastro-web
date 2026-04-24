@@ -592,6 +592,7 @@ const VideoCalling = ({ callData }) => {
       setReviewData({
         astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
         fullName: currentCall?.callerName || callerName,
+        profileImage: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
         roomId,
       });
 
@@ -685,6 +686,7 @@ const VideoCalling = ({ callData }) => {
         setReviewData({
           astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
           fullName: currentCall?.callerName || callerName,
+          profileImage: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
           roomId,
         });
 
@@ -1017,6 +1019,7 @@ const VideoCalling = ({ callData }) => {
         kundliId: activeCall.kundliId,
         astrologerName: callerName,
         astroID: activeCall.astrologerID,
+        profileImgUrl: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
       }
     });
   };
@@ -1145,6 +1148,7 @@ const VideoCalling = ({ callData }) => {
                       kundliId: activeCall?.kundliId,
                       astrologerName: callerName,
                       astroID: activeCall?.astrologerID,
+                      profileImgUrl: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
                     }
                   });
                 }
