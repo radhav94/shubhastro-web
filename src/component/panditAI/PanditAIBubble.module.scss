@@ -162,22 +162,28 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   padding: 20px 22px;
   overflow: hidden;
   color: #fff;
-  background: $header-gradient;
+  // background: $header-gradient;
+  background: var(--orange_gradient, linear-gradient(90deg, #f75801 0%, #1E2939 100%));
   isolation: isolate;
 
   &::before {
     position: absolute;
-    inset: auto -42px -78px auto;
+    // inset: auto -42px -78px auto;
     z-index: -1;
-    width: 178px;
-    height: 178px;
+    width: 100%;
+    height: 312px;
+    right: 0;
+    top: 0;
     content: "";
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 50%;
-    background:
-      radial-gradient(circle, rgba(255, 255, 255, 0.18) 0 2px, transparent 3px),
-      transparent;
-    background-size: 22px 22px;
+    background-image: url("../../assets/images/wire-bg.svg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    // border: 1px solid rgba(255, 255, 255, 0.25);
+    // border-radius: 50%;
+    // background:
+    //   radial-gradient(circle, rgba(255, 255, 255, 0.18) 0 2px, transparent 3px),
+    //   transparent;
+    // background-size: 22px 22px;
   }
 }
 
@@ -194,8 +200,8 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   height: 48px;
   flex: 0 0 auto;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.38);
-  border-radius: 18px;
+  // border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 50px;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.1)),
     rgba(255, 255, 255, 0.15);
