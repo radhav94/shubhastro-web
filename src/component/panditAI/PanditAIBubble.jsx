@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, memo } from "react";
+import { createPortal } from "react-dom";
 import {
   IoClose,
   IoSend,
@@ -28,13 +29,33 @@ const LANGUAGES = [
 
 const TRANSLATION_DEBOUNCE_MS = 700;
 
+// Memoized message bubble to avoid re-rendering the entire list on new messages
+const MessageBubble = memo(({ msg }) => {
+  const isUser = msg.sender === "user";
+  return (
+    <div className={`${styles.msgRow} ${isUser ? styles.userRow : styles.aiRow}`}>
+      <div className={`${styles.msgBubble} ${isUser ? styles.userBubble : styles.aiBubble}`}>
+        <p className={styles.msgText}>{msg.text}</p>
+        <div className={styles.msgMeta}>
+          <span className={styles.msgTime}>{msg.time}</span>
+        </div>
+      </div>
+    </div>
+  );
+});
+MessageBubble.displayName = "MessageBubble";
+
 const PanditAIBubble = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [text, setText] = useState("");
   const [lang, setLang] = useState("en-IN");
   const [showLangPicker, setShowLangPicker] = useState(false);
   const [translating, setTranslating] = useState(false);
+  const [interimText, setInterimText] = useState("");
+  const inputRef = useRef(null);
   const translationRequestRef = useRef(0);
+  const langRef = useRef(lang);
+  langRef.current = lang;
   const lastTranslationRef = useRef({
     source: "",
     targetLanguage: "",
@@ -62,44 +83,64 @@ const PanditAIBubble = () => {
     return () => window.removeEventListener("panditai:ask", handleOpenAndSend);
   }, [sendText]);
 
-  const handleSpeechResult = useCallback(
-    (transcript) => {
+  const handleSpeechResult = useCallback(async (transcript) => {
+    setInterimText("");
+    const currentLang = langRef.current;
+    // If speech lang (hi-IN) matches selected lang, no translation needed
+    if (currentLang === "hi-IN") {
       setText((prev) => (prev ? prev + " " + transcript : transcript));
-    },
-    []
-  );
+      setTimeout(() => inputRef.current?.focus(), 0);
+      return;
+    }
+    // Translate before showing in input
+    setTranslating(true);
+    try {
+      const translated = await translateText({
+        text: transcript,
+        targetLanguage: currentLang,
+      });
+      setText((prev) => (prev ? prev + " " + translated : translated));
+    } catch {
+      // Fallback to raw transcript if translation fails
+      setText((prev) => (prev ? prev + " " + transcript : transcript));
+    } finally {
+      setTranslating(false);
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  }, []);
+
+  const handleInterim = useCallback((transcript) => {
+    // Don't show raw interim text — it'll be in Hindi (speech lang)
+    // Just show a generic "Listening..." indicator instead
+    setInterimText("...");
+  }, []);
 
   const { isListening, isSupported, startListening, stopListening } =
-    useSpeechToText({ lang, onResult: handleSpeechResult });
+    useSpeechToText({ onResult: handleSpeechResult, onInterim: handleInterim });
 
+  // Debounced auto-translation when text or lang changes
   useEffect(() => {
     const textToTranslate = text.trim();
-
     if (!textToTranslate || sending || isLoading) return undefined;
 
-    const lastTranslation = lastTranslationRef.current;
-    const alreadyTranslated =
-      lastTranslation.targetLanguage === lang &&
-      lastTranslation.result === textToTranslate;
-
-    const alreadyTried =
-      lastTranslation.targetLanguage === lang &&
-      lastTranslation.source === textToTranslate;
-
-    if (alreadyTranslated || alreadyTried) return undefined;
+    const lastT = lastTranslationRef.current;
+    if (
+      lastT.targetLanguage === lang &&
+      (lastT.result === textToTranslate || lastT.source === textToTranslate)
+    ) {
+      return undefined;
+    }
 
     const timeoutId = setTimeout(async () => {
-      const latestTranslation = lastTranslationRef.current;
+      const latest = lastTranslationRef.current;
       if (
-        latestTranslation.targetLanguage === lang &&
-        (latestTranslation.source === textToTranslate ||
-          latestTranslation.result === textToTranslate)
+        latest.targetLanguage === lang &&
+        (latest.source === textToTranslate || latest.result === textToTranslate)
       ) {
         return;
       }
 
-      const requestId = translationRequestRef.current + 1;
-      translationRequestRef.current = requestId;
+      const requestId = ++translationRequestRef.current;
       setTranslating(true);
 
       try {
@@ -116,9 +157,7 @@ const PanditAIBubble = () => {
 
         if (translationRequestRef.current !== requestId) return;
 
-        setText((currentText) =>
-          currentText.trim() === textToTranslate ? translatedText : currentText
-        );
+        setText((cur) => (cur.trim() === textToTranslate ? translatedText : cur));
       } catch (error) {
         console.error("[PanditAI] Translation error:", error);
       } finally {
@@ -133,74 +172,98 @@ const PanditAIBubble = () => {
 
   const handleSend = useCallback(() => {
     if (text.trim()) {
+      stopListening();
+      setInterimText("");
       sendText(text);
       setText("");
     }
-  }, [text, sendText]);
+  }, [text, sendText, stopListening]);
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    },
+    [handleSend]
+  );
 
-  const handleMicClick = () => {
+  const handleMicClick = useCallback(() => {
     if (isListening) {
       stopListening();
+      setInterimText("");
     } else {
       startListening();
     }
-  };
+  }, [isListening, startListening, stopListening]);
 
-  const handleLanguageSelect = async (selectedLang) => {
-    setLang(selectedLang);
-    setShowLangPicker(false);
+  const handleLanguageSelect = useCallback(
+    async (selectedLang) => {
+      setLang(selectedLang);
+      setShowLangPicker(false);
 
-    const textToTranslate = text.trim();
-    if (!textToTranslate) return;
+      const textToTranslate = text.trim();
+      if (!textToTranslate) return;
 
-    const requestId = translationRequestRef.current + 1;
-    translationRequestRef.current = requestId;
-    setTranslating(true);
+      const requestId = ++translationRequestRef.current;
+      setTranslating(true);
 
-    try {
-      const translatedText = await translateText({
-        text: textToTranslate,
-        targetLanguage: selectedLang,
-      });
+      try {
+        const translatedText = await translateText({
+          text: textToTranslate,
+          targetLanguage: selectedLang,
+        });
 
-      if (translationRequestRef.current !== requestId) return;
+        if (translationRequestRef.current !== requestId) return;
 
-      lastTranslationRef.current = {
-        source: textToTranslate,
-        targetLanguage: selectedLang,
-        result: translatedText,
-      };
+        lastTranslationRef.current = {
+          source: textToTranslate,
+          targetLanguage: selectedLang,
+          result: translatedText,
+        };
 
-      setText((currentText) =>
-        currentText.trim() === textToTranslate ? translatedText : currentText
-      );
-    } catch (error) {
-      console.error("[PanditAI] Translation error:", error);
-      toast.error("Could not translate text. Please try again.");
-    } finally {
-      if (translationRequestRef.current === requestId) {
-        setTranslating(false);
+        setText((cur) =>
+          cur.trim() === textToTranslate ? translatedText : cur
+        );
+      } catch (error) {
+        console.error("[PanditAI] Translation error:", error);
+        toast.error("Could not translate text. Please try again.");
+      } finally {
+        if (translationRequestRef.current === requestId) {
+          setTranslating(false);
+        }
       }
-    }
-  };
+    },
+    [text]
+  );
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    setShowLangPicker(false);
+  }, []);
+
+  const handleOpen = useCallback(() => setIsOpen(true), []);
+
+  const toggleLangPicker = useCallback(() => setShowLangPicker((p) => !p), []);
+
+  const handleInputChange = useCallback((e) => setText(e.target.value), []);
 
   const currentLangLabel =
     LANGUAGES.find((l) => l.code === lang)?.label || "English";
 
-  return (
+  const placeholder = translating
+    ? "Translating..."
+    : isListening
+      ? "Listening..."
+      : "Ask Pandit AI...";
+
+  return createPortal(
     <>
-      {/* Floating Bubble */}
       {!isOpen && (
         <button
           className={styles.bubble}
-          onClick={() => setIsOpen(true)}
+          onClick={handleOpen}
           aria-label="Open Pandit AI chat"
         >
           <span className={styles.bubbleGlow} />
@@ -214,14 +277,10 @@ const PanditAIBubble = () => {
         </button>
       )}
 
-      {/* Chat Window */}
       {isOpen && (
-        <div
-          className={styles.chatWindow}
-          role="dialog"
-          aria-label="Pandit AI Chat"
-        >
-          {/* Header */}
+        <>
+          <div className={styles.overlay} />
+          <div className={styles.chatWindow} role="dialog" aria-label="Pandit AI Chat">
           <div className={styles.header}>
             <div className={styles.headerInfo}>
               <div className={styles.headerAvatar}>
@@ -238,10 +297,7 @@ const PanditAIBubble = () => {
             <div className={styles.headerActions}>
               <button
                 className={styles.closeBtn}
-                onClick={() => {
-                  setIsOpen(false);
-                  setShowLangPicker(false);
-                }}
+                onClick={handleClose}
                 aria-label="Close chat"
               >
                 <IoClose size={20} />
@@ -249,7 +305,6 @@ const PanditAIBubble = () => {
             </div>
           </div>
 
-          {/* Messages */}
           <div className={styles.messagesArea}>
             {isLoading ? (
               <div className={styles.skeleton}>
@@ -268,35 +323,17 @@ const PanditAIBubble = () => {
                 <p>Ask Pandit AI anything about your life</p>
               </div>
             ) : (
-              messages.map((msg) => {
-                const isUser = msg.sender === "user";
-                return (
-                  <div
-                    key={msg._id}
-                    className={`${styles.msgRow} ${isUser ? styles.userRow : styles.aiRow}`}
-                  >
-                    <div
-                      className={`${styles.msgBubble} ${isUser ? styles.userBubble : styles.aiBubble}`}
-                    >
-                      <p className={styles.msgText}>{msg.text}</p>
-                      <div className={styles.msgMeta}>
-                        <span className={styles.msgTime}>{msg.time}</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
+              messages.map((msg) => <MessageBubble key={msg._id} msg={msg} />)
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
           <div className={styles.inputBar}>
             <div className={styles.inputWrapper}>
               <div className={styles.langWrapper}>
                 <button
                   className={styles.langBtn}
-                  onClick={() => setShowLangPicker((p) => !p)}
+                  onClick={toggleLangPicker}
                   aria-label={`Select language, current ${currentLangLabel}`}
                   title={currentLangLabel}
                   type="button"
@@ -324,11 +361,12 @@ const PanditAIBubble = () => {
               </div>
 
               <input
+                ref={inputRef}
                 className={styles.textInput}
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
-                placeholder={translating ? "Translating..." : "Ask Pandit AI..."}
+                placeholder={placeholder}
                 disabled={sending || isLoading}
               />
 
@@ -356,8 +394,10 @@ const PanditAIBubble = () => {
             </div>
           </div>
         </div>
+        </>
       )}
-    </>
+    </>,
+    document.body
   );
 };
 

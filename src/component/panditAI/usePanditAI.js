@@ -124,9 +124,9 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     initChat();
   }, [isOpen, userIdLocal, createChatRoom]);
 
-  // End session and reset when bubble closes
+  // End session only on unmount, not on close
   useEffect(() => {
-    if (!isOpen && initiatedRef.current) {
+    return () => {
       const currentRoomId = roomIdRef.current;
       if (currentRoomId && voiceSocket.connected) {
         voiceSocket.emit("chat:end", {
@@ -135,18 +135,14 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
           astrologerId: PANDIT_AI_ID,
         });
       }
-      // Reset everything for next open
       roomIdRef.current = null;
       panditAIRoomId = null;
       initiatedRef.current = false;
       historyLoadedRef.current = false;
       pendingMessageRef.current = null;
       panditAIChatActive = false;
-      setMessages([]);
-      setSending(false);
-      setConnecting(false);
-    }
-  }, [isOpen, userIdLocal]);
+    };
+  }, [userIdLocal]);
 
   // Listen for socket events
   useEffect(() => {
@@ -224,14 +220,17 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     };
   }, [isOpen]);
 
+  // Ref-based guard so sendText callback stays stable across send cycles
+  const sendingRef = useRef(false);
+  sendingRef.current = sending;
+
   const sendText = useCallback(
     (text) => {
       const trimmedText = text.trim();
-      if (!trimmedText || sending) return;
+      if (!trimmedText || sendingRef.current) return;
 
       const currentRoomId = roomIdRef.current;
       if (!currentRoomId) {
-        // Queue the message to be sent when room connects
         pendingMessageRef.current = trimmedText;
         return;
       }
@@ -239,7 +238,6 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       setSending(true);
       const selectedLanguage = getLanguageMeta(lang);
 
-      // Add optimistic user message
       const userMsg = {
         _id: `user-${Date.now()}`,
         text: trimmedText,
@@ -269,7 +267,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         setSending(false);
       }
     },
-    [lang, sending, userIdLocal]
+    [lang, userIdLocal]
   );
 
   // Keep ref in sync so socket handlers can call latest sendText
