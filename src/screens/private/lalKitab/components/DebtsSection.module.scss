@@ -1,0 +1,13 @@
+.container { display: flex; flex-direction: column; gap: 20px; }
+.tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; &::-webkit-scrollbar { display: none; } padding-bottom: 4px; }
+.tab { display: flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 999px; border: 1px solid #e2e8f0; background: #fff; font-size: 13px; font-weight: 500; color: #4a5568; cursor: pointer; white-space: nowrap; transition: all 0.2s; &:hover { border-color: #ffcb03; } }
+.active { background: linear-gradient(135deg, #fff5f0, #fff9f5); border-color: #F75801; color: #D43400; font-weight: 600; }
+.tabIcon { font-size: 16px; }
+.content { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.section { margin-bottom: 20px; &:last-child { margin-bottom: 0; } }
+.sectionTitle { font-size: 16px; font-weight: 600; color: #1a1a1a; margin: 0 0 10px; }
+.list { margin: 0; padding: 0 0 0 20px; display: flex; flex-direction: column; gap: 8px; li { font-size: 14px; color: #4a5568; line-height: 1.6; } }
+.skeletonList { display: flex; flex-direction: column; gap: 14px; }
+.skeleton { height: 80px; border-radius: 12px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.empty, .emptyCategory { text-align: center; padding: 40px 20px; color: #718096; span { font-size: 48px; display: block; margin-bottom: 12px; } p { margin: 0; font-size: 15px; } }

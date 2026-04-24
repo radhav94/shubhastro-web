@@ -194,6 +194,11 @@ import TermsConditionsView from "../../screens/v2/user/TermsConditionsView";
 import AppLicense from "../../screens/v2/user/AppLicense";
 import FollowedAstrologers from "../../screens/v2/user/FollowedAstrologers";
 
+import LalKitab from "../../screens/private/lalKitab/LalKitab";
+import LalKitabDetail from "../../screens/private/lalKitab/detail/LalKitabDetail";
+import LalKitabZodiac from "../../screens/private/lalKitab/zodiac/LalKitabZodiac";
+import LalKitabProblems from "../../screens/private/lalKitab/problems/LalKitabProblems";
+
 export const PATH = {
   // DEFAULT: {
   //     path: "/",
@@ -354,6 +359,25 @@ export const PATH = {
       path: "/panchang/tithi",
       element: Tithi,
     },
+
+    // Lal Kitab
+    LAL_KITAB: {
+      path: "/lal-kitab",
+      element: LalKitab,
+    },
+    LAL_KITAB_DETAIL: {
+      path: "/lal-kitab/:lalKitabId",
+      element: LalKitabDetail,
+    },
+    LAL_KITAB_ZODIAC: {
+      path: "/lal-kitab/zodiac",
+      element: LalKitabZodiac,
+    },
+    LAL_KITAB_PROBLEMS: {
+      path: "/lal-kitab/problems",
+      element: LalKitabProblems,
+    },
+
     MATCHMAKING: {
       path: "/matchmaking",
       element: MatchMaking,
