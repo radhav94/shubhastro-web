@@ -1,5 +1,6 @@
 // src/components/LiveStreaming/LiveStreamingContainer.jsx
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useLiveStreaming } from "./useLiveStreaming";
 import { useLiveChat } from "./useLiveChat";
@@ -128,52 +129,47 @@ const LiveStreamingContainer = ({ client }) => {
     });
   }, [currentLive?.channel]);
 
-  const handleAstrologerStatus = useCallback((data) => {
+  // Session ended modal state
+  const [endedInfo, setEndedInfo] = useState(null);
+  const endedTimerRef = useRef(null);
+
+  const dismissEnded = useCallback(() => {
+    const rid = endedInfo?.roomId;
+    setEndedInfo(null);
+    if (endedTimerRef.current) { clearTimeout(endedTimerRef.current); endedTimerRef.current = null; }
+    if (rid) { liveList?.removeLive(rid); setLiveListRefreshKey((k) => k + 1); }
+  }, [endedInfo, liveList]);
+
+  // Cleanup on unmount — clear timer and reset modal state
+  useEffect(() => {
+    return () => {
+      if (endedTimerRef.current) { clearTimeout(endedTimerRef.current); endedTimerRef.current = null; }
+      setEndedInfo(null);
+    };
+  }, []);
+
+  const handleAstrologerStatus = (data) => {
     const { status, roomId, hostId, hostName, profileImage, privateCallType, gender } = data;
 
+    console.log("handleAstrologerStatus::",data)
+
     if (status === "ended") {
-      // Only show the "has left" toast if the user was watching this specific stream
       const wasWatchingThis = roomId && roomId === channelRef.current;
 
-      liveList?.removeLive(roomId);
-      setLiveListRefreshKey((k) => k + 1);
-
       if (wasWatchingThis) {
-        // Show notification that astrologer has left
-        rht.custom(
-          (t) => (
-            <div
-              onClick={() => rht.dismiss(t.id)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                background: "#fff",
-                borderRadius: 14,
-                padding: "12px 16px",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
-                border: "1px solid #f0ebe4",
-                maxWidth: 340,
-                cursor: "pointer",
-              }}
-            >
-              <img
-                src={profileImage || getAstrologerDefaultImage(gender)}
-                alt={hostName}
-                style={{ width: 42, height: 42, borderRadius: "50%", objectFit: "cover", border: "2px solid #f75801" }}
-              />
-              <div>
-                <div style={{ fontWeight: 600, fontSize: 14, color: "#1a1a1a" }}>
-                  {hostName || "Astrologer"} has left
-                </div>
-                <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
-                  The live session has ended
-                </div>
-              </div>
-            </div>
-          ),
-          { duration: 4000, position: "top-center" }
-        );
+        // Show modal first, defer removeLive until modal closes/auto-dismisses
+        setEndedInfo({ hostName, profileImage, gender, roomId });
+        if (endedTimerRef.current) clearTimeout(endedTimerRef.current);
+        endedTimerRef.current = setTimeout(() => {
+          setEndedInfo((prev) => {
+            if (prev?.roomId) { liveList?.removeLive(prev.roomId); setLiveListRefreshKey((k) => k + 1); }
+            return null;
+          });
+        }, 2000);
+      } else {
+        // Not watching this stream — just remove silently
+        liveList?.removeLive(roomId);
+        setLiveListRefreshKey((k) => k + 1);
       }
     }
 
@@ -211,28 +207,34 @@ const LiveStreamingContainer = ({ client }) => {
         setPrivateCallInfo({ isOnPrivateCall: false, privateCallType: null });
       }
     }
-  }, [liveList]);
+  };
 
   // Handle stream ended (room not found, room ended, host disconnected)
   const handleStreamEnded = useCallback(({ reason, roomId: endedRoomId }) => {
     console.log("Stream ended, reason:", reason, "roomId:", endedRoomId);
     clearViewerSession();
 
-    const targetRoom = endedRoomId || channel;
+    const targetRoom = endedRoomId || channelRef.current;
 
-    // If we already switched to a different channel (e.g. astrologer_status
-    // triggered a channel switch before room_ended arrived), skip removal —
-    // the ended room was likely already removed by handleAstrologerStatus.
-    if (targetRoom && targetRoom !== channel) {
+    if (targetRoom && targetRoom !== channelRef.current) {
       console.log("Stream ended for a room we already left, ignoring:", targetRoom);
       return;
     }
 
-    // If there are other lives, remove the ended one
-    if (liveList) {
-      liveList.removeLive(targetRoom);
-    }
-  }, [liveList, channel, navigate]);
+    // Show session ended modal, defer removeLive until modal closes
+    const currentAstro = liveList?.getCurrentLive();
+    setEndedInfo({
+      hostName: currentAstro?.astrologerName || "Astrologer",
+      roomId: targetRoom,
+    });
+    if (endedTimerRef.current) clearTimeout(endedTimerRef.current);
+    endedTimerRef.current = setTimeout(() => {
+      setEndedInfo((prev) => {
+        if (prev?.roomId && liveList) { liveList.removeLive(prev.roomId); setLiveListRefreshKey((k) => k + 1); }
+        return null;
+      });
+    }, 5000);
+  }, [liveList, channel]);
 
   // Broadcast: new live session started (from any astrologer)
   const handleSessionStarted = useCallback((data) => {
@@ -249,6 +251,8 @@ const LiveStreamingContainer = ({ client }) => {
   // Broadcast: a live session ended (from any astrologer)
   const handleSessionEnded = useCallback((data) => {
     const { roomId } = data;
+    // Don't remove if user is currently watching this — handleStreamEnded will show modal first
+    if (roomId && roomId === channelRef.current) return;
     liveList?.removeLive(roomId);
     setLiveListRefreshKey((k) => k + 1);
   }, [liveList]);
@@ -350,6 +354,24 @@ const LiveStreamingContainer = ({ client }) => {
           <FiChevronDown size={22} />
         </button>
       </div>
+    )}
+
+    {/* Session Ended Modal — portaled to body for guaranteed centering */}
+    {endedInfo && createPortal(
+      <div onClick={dismissEnded} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999999 }}>
+        <div onClick={(e) => e.stopPropagation()} style={{ background: "#fff", borderRadius: 16, padding: "32px 28px", maxWidth: 340, width: "85vw", textAlign: "center", position: "relative", boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+          <button onClick={dismissEnded} style={{ position: "absolute", top: 12, right: 14, background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#999", lineHeight: 1 }}>✕</button>
+          {endedInfo.profileImage ? (
+            <img src={endedInfo.profileImage || getAstrologerDefaultImage(endedInfo.gender)} alt="" style={{ width: 60, height: 60, borderRadius: "50%", objectFit: "cover", border: "2px solid #f75801", margin: "0 auto 14px", display: "block" }} />
+          ) : (
+            <div style={{ fontSize: 36, marginBottom: 14 }}>🔮</div>
+          )}
+          <h3 style={{ fontSize: 17, fontWeight: 600, color: "#1a1a1a", margin: "0 0 6px" }}>{endedInfo.hostName || "Astrologer"} has left</h3>
+          <p style={{ fontSize: 14, color: "#888", margin: "0 0 18px" }}>The live session has ended</p>
+          <button onClick={dismissEnded} style={{ background: "linear-gradient(90deg, #F75801, #D43400)", color: "#fff", border: "none", borderRadius: 10, padding: "10px 32px", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>OK</button>
+        </div>
+      </div>,
+      document.body
     )}
   </div>
 );

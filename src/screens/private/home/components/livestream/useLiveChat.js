@@ -8,6 +8,18 @@ const SOCKET_URL = import.meta.env.VITE_APP_API_BASE_URL;
 export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onStreamEnded, onSessionStarted, onSessionEnded, onRoomNotFound }) => {
   const socketRef = useRef(null);
   const currentRoomRef = useRef(null);
+
+  // Keep callback refs in sync so socket listeners always call the latest version
+  const onStreamEndedRef = useRef(onStreamEnded);
+  const onAstrologerStatusRef = useRef(onAstrologerStatus);
+  const onSessionStartedRef = useRef(onSessionStarted);
+  const onSessionEndedRef = useRef(onSessionEnded);
+  const onRoomNotFoundRef = useRef(onRoomNotFound);
+  useEffect(() => { onStreamEndedRef.current = onStreamEnded; }, [onStreamEnded]);
+  useEffect(() => { onAstrologerStatusRef.current = onAstrologerStatus; }, [onAstrologerStatus]);
+  useEffect(() => { onSessionStartedRef.current = onSessionStarted; }, [onSessionStarted]);
+  useEffect(() => { onSessionEndedRef.current = onSessionEnded; }, [onSessionEnded]);
+  useEffect(() => { onRoomNotFoundRef.current = onRoomNotFound; }, [onRoomNotFound]);
   const [roomReady, setRoomReady] = useState(false);
   // When true, skip socket disconnect on unmount (pending call waiting)
   const skipChatCleanupRef = useRef(false);
@@ -99,13 +111,13 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     // Broadcast: a new live session started somewhere
     socket.on("live:session_started", (data) => {
       console.log("LiveChat → Session started broadcast:", data);
-      onSessionStarted?.(data);
+      onSessionStartedRef.current?.(data);
     });
 
     // Broadcast: a live session ended somewhere
     socket.on("live:session_ended", (data) => {
       console.log("LiveChat → Session ended broadcast:", data);
-      onSessionEnded?.(data);
+      onSessionEndedRef.current?.(data);
     });
 
     socket.on("live:room_ended", (data) => {
@@ -122,7 +134,7 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
         currentRoomRef.current = null;
         clearViewerSession();
       }
-      onStreamEnded?.({ reason: data?.reason || "ended", endedAt: data?.endedAt, roomId: endedRoom });
+      onStreamEndedRef.current?.({ reason: data?.reason || "ended", endedAt: data?.endedAt, roomId: endedRoom });
     });
 
     socket.on("live:error", (data) => {
@@ -131,7 +143,7 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
         // Room doesn't exist — stop retrying this room.
         setRoomReady(false);
         currentRoomRef.current = null;
-        onRoomNotFound?.(roomId);
+        onRoomNotFoundRef.current?.(roomId);
       } else if (data.code === "ROOM_ENDED") {
         const endedRoom = data?.roomId;
         if (!endedRoom || endedRoom === currentRoomRef.current) {
@@ -142,7 +154,7 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
           currentRoomRef.current = null;
           clearViewerSession();
         }
-        onStreamEnded?.({ reason: data.code, roomId: endedRoom });
+        onStreamEndedRef.current?.({ reason: data.code, roomId: endedRoom });
       } else if (data.code === "CONTENT_BLOCKED") {
         Toast.error(data.message || "Message contains inappropriate content");
       }
@@ -192,12 +204,12 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
 
     const handler = (data) => {
       console.log("LiveChat → Astrologer status:", data);
-      onAstrologerStatus?.(data);
+      onAstrologerStatusRef.current?.(data);
     };
 
     socket.on("live:astrologer_status", handler);
     return () => socket.off("live:astrologer_status", handler);
-  }, [onAstrologerStatus]);
+  }, []);
 
   // 3. Room join/leave — reacts to roomId changes without reconnecting socket
   useEffect(() => {
