@@ -19,7 +19,7 @@ import matchMakingImg from '../../../../assets/images/match-making-top-img.svg';
 import matchMakingImgBottom from '../../../../assets/images/match-making-bottom-img.svg';
 import Footer from '../../../../layouts/Footer';
 import { PATH } from '../../../../utils/routes/Paths';
-import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
+// import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 
 const SmartMatchmaking = () => {
   const navigate = useNavigate();
@@ -93,7 +93,7 @@ const SmartMatchmaking = () => {
     if (selectingType === "PRIMARY") {
       if (profile._id === partnerProfile?._id) return;
       setPrimaryProfile(profile);
-      dispatch(setSelectedKundli(profile));
+      // dispatch(setSelectedKundli(profile));
     }
 
     if (selectingType === "PARTNER") {
@@ -202,7 +202,7 @@ const SmartMatchmaking = () => {
         const newProfile = result.data;
         if (selectingType === "PRIMARY") {
           setPrimaryProfile(newProfile);
-          dispatch(setSelectedKundli(newProfile));
+          // dispatch(setSelectedKundli(newProfile));
         } else if (selectingType === "PARTNER") {
           setPartnerProfile(newProfile);
         }
@@ -236,7 +236,7 @@ const SmartMatchmaking = () => {
       if (result?.data) {
         if (primaryProfile?._id === profileToEdit._id) {
           setPrimaryProfile(result.data);
-          dispatch(setSelectedKundli(result.data));
+          // dispatch(setSelectedKundli(result.data));
         }
         if (partnerProfile?._id === profileToEdit._id) {
           setPartnerProfile(result.data);
