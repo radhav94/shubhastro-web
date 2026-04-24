@@ -19,7 +19,7 @@ import bondIcon from "../../../assets/icons/destiny-icon.svg";
 import matchMakingImg from "../../../assets/images/match-making-top-img.svg";
 import matchMakingImgBottom from "../../../assets/images/match-making-bottom-img.svg";
 import { ProfileManager } from "../../../component/UI/Profile";
-import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
+// import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 
 const MatchMaking = () => {
   const navigate = useNavigate();
@@ -119,7 +119,7 @@ const MatchMaking = () => {
         setPrimaryProfile(boyProfile);
         setPartnerProfile(girlProfile);
         setSelectedProfile(boyProfile);
-        dispatch(setSelectedKundli(boyProfile));
+        // dispatch(setSelectedKundli(boyProfile));
       }
     }
   }, [location.state, profiles]);
@@ -219,7 +219,7 @@ const MatchMaking = () => {
       if (profile._id === partnerProfile?._id) return; // prevent selecting same as partner
       setPrimaryProfile(profile);
       setSelectedProfile(profile);
-      dispatch(setSelectedKundli(profile));
+      // dispatch(setSelectedKundli(profile));
     }
 
     if (selectingType === "PARTNER") {
@@ -264,7 +264,7 @@ const MatchMaking = () => {
         if (primaryProfile?._id === profileToEdit._id) {
           setPrimaryProfile(result.data);
           setSelectedProfile(result.data);
-          dispatch(setSelectedKundli(result.data));
+          // dispatch(setSelectedKundli(result.data));
         }
         if (partnerProfile?._id === profileToEdit._id) {
           setPartnerProfile(result.data);
@@ -481,7 +481,7 @@ const MatchMaking = () => {
           if (selectingType === "PRIMARY") {
             setPrimaryProfile(newProfile);
             setSelectedProfile(newProfile);
-            dispatch(setSelectedKundli(newProfile));
+            // dispatch(setSelectedKundli(newProfile));
           } else if (selectingType === "PARTNER") {
             setPartnerProfile(newProfile);
           }
@@ -506,7 +506,7 @@ const MatchMaking = () => {
         if (selectingType === "PRIMARY") {
           setPrimaryProfile(tempProfile);
           setSelectedProfile(tempProfile);
-          dispatch(setSelectedKundli(tempProfile));
+          // dispatch(setSelectedKundli(tempProfile));
         } else if (selectingType === "PARTNER") {
           setPartnerProfile(tempProfile);
         }
