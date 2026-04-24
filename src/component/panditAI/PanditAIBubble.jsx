@@ -269,8 +269,8 @@ const PanditAIBubble = () => {
         >
           <span className={styles.bubbleGlow} />
           <span className={styles.bubbleIcon}>
-            {/* <Sparkles size={21} /> */}
-            <img src={panditAiIcon} alt="icon" />
+            <Sparkles size={21} />
+            {/* <img src={panditAiIcon} alt="icon" /> */}
           </span>
           <span className={styles.bubbleText}>
             <span className={styles.bubbleKicker}>Ask</span>
@@ -286,8 +286,8 @@ const PanditAIBubble = () => {
           <div className={styles.header}>
             <div className={styles.headerInfo}>
               <div className={styles.headerAvatar}>
-                {/* <Sparkles size={19} /> */}
-                <img src={panditAiIcon} alt="icon" />
+                <Sparkles size={19} />
+                {/* <img src={panditAiIcon} alt="icon" /> */}
               </div>
               <div className={styles.headerCopy}>
                 <h4 className={styles.headerName}>Pandit AI</h4>
