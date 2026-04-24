@@ -5,11 +5,20 @@ const SpeechRecognition =
     ? window.SpeechRecognition || window.webkitSpeechRecognition
     : null;
 
-export default function useSpeechToText({ lang = "hi-IN", onResult }) {
+export default function useSpeechToText({ lang = "hi-IN", onResult, onInterim }) {
   const [isListening, setIsListening] = useState(false);
   const [isSupported] = useState(!!SpeechRecognition);
   const recognitionRef = useRef(null);
-  const hasResultRef = useRef(false);
+  const finalTranscriptRef = useRef("");
+  const lastInterimRef = useRef("");
+
+  // Keep callbacks in refs so startListening/stopListening stay stable
+  const onResultRef = useRef(onResult);
+  const onInterimRef = useRef(onInterim);
+  const langRef = useRef(lang);
+  onResultRef.current = onResult;
+  onInterimRef.current = onInterim;
+  langRef.current = lang;
 
   useEffect(() => {
     return () => {
@@ -27,45 +36,65 @@ export default function useSpeechToText({ lang = "hi-IN", onResult }) {
       recognitionRef.current.abort();
     }
 
-    hasResultRef.current = false;
+    finalTranscriptRef.current = "";
+    lastInterimRef.current = "";
 
     const recognition = new SpeechRecognition();
-    recognition.lang = lang;
+    recognition.lang = langRef.current;
     recognition.interimResults = true;
-    recognition.continuous = true;
+    recognition.continuous = false;
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => setIsListening(true);
 
     recognition.onresult = (event) => {
       let finalTranscript = "";
+      let interimTranscript = "";
+
       for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
         }
       }
+
       if (finalTranscript) {
-        onResult?.(finalTranscript);
+        finalTranscriptRef.current += finalTranscript;
+        lastInterimRef.current = "";
+        onResultRef.current?.(finalTranscript);
+      } else if (interimTranscript) {
+        lastInterimRef.current = interimTranscript;
+        onInterimRef.current?.(interimTranscript);
       }
     };
 
-    recognition.onerror = () => {
+    recognition.onerror = (e) => {
+      if (e.error !== "aborted") {
+        console.warn("[SpeechToText] error:", e.error);
+      }
       setIsListening(false);
-      hasResultRef.current = false;
     };
 
     recognition.onend = () => {
+      recognitionRef.current = null;
       setIsListening(false);
-      hasResultRef.current = false;
     };
 
     recognitionRef.current = recognition;
     recognition.start();
-  }, [lang, onResult]);
+  }, []);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
-      recognitionRef.current.stop();
+      if (lastInterimRef.current) {
+        onResultRef.current?.(lastInterimRef.current);
+        lastInterimRef.current = "";
+      }
+      recognitionRef.current.abort();
+      recognitionRef.current = null;
+      setIsListening(false);
     }
   }, []);
 

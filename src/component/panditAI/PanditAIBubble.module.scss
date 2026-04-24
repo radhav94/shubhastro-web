@@ -15,7 +15,7 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
 /* ==================== FLOATING BUBBLE ==================== */
 .bubble {
   position: fixed;
-  right: $profile-edge-offset;
+  right: max(16px, calc(#{$profile-edge-offset} - 184px));
   bottom: 25px;
   z-index: 9990;
   display: inline-flex;
@@ -114,6 +114,14 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   letter-spacing: 0.01em;
   line-height: 1.1;
   white-space: nowrap;
+}
+
+/* ==================== OVERLAY ==================== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  background: transparent;
 }
 
 /* ==================== CHAT WINDOW ==================== */
