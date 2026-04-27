@@ -1,4 +1,5 @@
 import NotFound from "../../screens/private/NotFound/NotFound";
+import ComingSoon from "../../screens/public/coming-soon/ComingSoon";
 
 import VideoCalling from "../../component/call/VideoCall";
 import AgoraVoiceCalling from "../../component/call/VoiceCall";
@@ -228,6 +229,14 @@ export const PATH = {
       path: "*",
       element: NotFound,
     }
+  },
+
+  // Routes accessible to everyone (no auth redirect)
+  openRoutes: {
+    COMING_SOON: {
+      path: "/coming-soon",
+      element: ComingSoon,
+    },
   },
 
   privateRoutes: {
