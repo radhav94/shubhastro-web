@@ -107,6 +107,19 @@ function App() {
   // Memoize router creation - only create once
   const roleWiseRouting = useMemo(() => {
     return createBrowserRouter([
+      // Open routes — no auth check, accessible to everyone
+      ...Object.values(PATH.openRoutes || {})
+        .filter((route) => route.path && route.element)
+        .map((route) => ({
+          path: route.path,
+          element: (
+            <NavigationSetup>
+              <route.element />
+            </NavigationSetup>
+          ),
+          errorElement: routeErrorElement,
+        })),
+
       ...Object.values(PATH.publicRoutes)
         .filter((route) => route.path !== "*")
         .map((route) => ({
