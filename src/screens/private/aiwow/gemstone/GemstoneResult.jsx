@@ -97,6 +97,71 @@ const GemstoneResult = () => {
           <p className={styles.recommendationText}>{d.overall.recommendation}</p>
         </div>
       </div>
+
+      {/* Personalized Insights */}
+      {d.personalized && Object.keys(d.personalized).length > 0 && (
+        <div className={styles.personalizedSection}>
+          <h3 className={styles.sectionTitle}>Personalized Insights</h3>
+          <div className={styles.personalizedGrid}>
+            {Object.entries(d.personalized).map(([key, value]) => {
+              if (!value) return null;
+
+              const title = key
+                .replace(/([A-Z])/g, ' $1')
+                .replace(/^./, s => s.toUpperCase())
+                .trim();
+
+              // Handle arrays
+              if (Array.isArray(value)) {
+                if (value.length === 0) return null;
+                return (
+                  <div className={styles.personalizedCard} key={key}>
+                    <h4 className={styles.boxTitle}>{title}</h4>
+                    <ul className={styles.compactList}>
+                      {value.map((item, i) => (
+                        <li key={i}>{typeof item === 'string' ? item : JSON.stringify(item)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              }
+
+              // Handle objects
+              if (typeof value === 'object') {
+                return (
+                  <div className={styles.personalizedCard} key={key}>
+                    <h4 className={styles.boxTitle}>{title}</h4>
+                    {Object.entries(value).map(([subKey, subVal]) => {
+                      if (!subVal) return null;
+                      if (Array.isArray(subVal)) {
+                        return (
+                          <div key={subKey}>
+                            <InfoRow label={subKey.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim()} value="" />
+                            <ul className={styles.compactList}>
+                              {subVal.map((item, i) => (
+                                <li key={i}>{typeof item === 'string' ? item : JSON.stringify(item)}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        );
+                      }
+                      return <InfoRow key={subKey} label={subKey.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim()} value={String(subVal)} />;
+                    })}
+                  </div>
+                );
+              }
+
+              // Handle strings/numbers
+              return (
+                <div className={styles.personalizedCard} key={key}>
+                  <h4 className={styles.boxTitle}>{title}</h4>
+                  <p className={styles.boxDesc}>{String(value)}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 

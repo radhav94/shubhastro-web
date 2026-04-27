@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeft, Download } from "lucide-react";
 import styles from "./MallOrderDetail.module.scss";
 import { DefaultImages } from "../../../utils/appImages";
 import ProductImage from "../../../component/UI/ProductImage";
+import { useGetMallOrderInvoiceMutation } from "../../../redux/api/mallOrder/mallOrderApi";
+import Toast from "../../../component/toast";
+import { openInvoice } from "../../../utils/helper/openInvoice";
 
 const GST_RATE = 0.18;
 
@@ -23,6 +27,8 @@ const MallOrderDetail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const order = location.state?.order || null;
+  const [getMallOrderInvoice] = useGetMallOrderInvoiceMutation();
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
 
   const handleBack = () => {
     navigate("/profile", { state: { activeTab: "ShubhMall History" } });
@@ -195,8 +201,21 @@ const MallOrderDetail = () => {
             <span>₹{total.toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</span>
           </div>
 
-          <button className={styles.downloadBtn}>
-            <Download size={16} /> Download Invoice
+          <button className={styles.downloadBtn} disabled={invoiceLoading} onClick={async () => {
+            setInvoiceLoading(true);
+            try {
+              const data = await getMallOrderInvoice(orderId).unwrap();
+              const pdfUrl = data?.data || data?.pdfUrl || data?.url;
+              if (pdfUrl) {
+                openInvoice(pdfUrl);
+              }
+            } catch {
+              Toast.error("Invoice not available for this order");
+            } finally {
+              setInvoiceLoading(false);
+            }
+          }}>
+            <Download size={16} /> {invoiceLoading ? "Loading..." : "Download Invoice"}
           </button>
         </section>
       </div>
