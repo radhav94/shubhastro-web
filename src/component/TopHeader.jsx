@@ -748,6 +748,14 @@ const TopHeader = () => {
             >
               Panchang
             </NavLink>
+            <NavLink
+              to="/lal-kitab"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Lal Kitab
+            </NavLink>
             <CalculatorsDropdown />
           </nav>
         </div>
@@ -866,6 +874,15 @@ const TopHeader = () => {
               }
             >
               Panchang
+            </NavLink>
+            <NavLink
+              to="/lal-kitab"
+              onClick={() => setIsDrawerOpen(false)}
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Lal Kitab
             </NavLink>
             <MobileCalculatorsAccordion onClose={() => setIsDrawerOpen(false)} />
             <NavLink
