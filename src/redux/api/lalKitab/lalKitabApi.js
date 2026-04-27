@@ -7,6 +7,7 @@ export const lalKitabApi = privateRequestNew.injectEndpoints({
         url: "lal-kitab/generate-teva",
         method: "POST",
         body: { kundliId },
+        headers: { "Content-Type": "application/json" },
       }),
     }),
     getLalKitabChart: builder.query({
