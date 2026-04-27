@@ -613,46 +613,34 @@ const PalmistryResult = () => {
               </LineDropdown>
             )}
 
-            {/* Secondary Lines - 2 Column Grid */}
+            {/* Secondary Lines - 2 Column Grid (auto-binds any new keys from API) */}
             {resultData.secondaryLines && (
               <div className={styles.secondaryLinesGrid}>
-                {resultData.secondaryLines.sunLine?.interpretation && (
-                  <div className={styles.lineCard}>
-                    <div className={styles.lineHeader}>
-                      <h3 className={styles.lineTitle}>Sun Line</h3>
-                    </div>
-                    <p className={styles.text}>{resultData.secondaryLines.sunLine.interpretation}</p>
-                  </div>
-                )}
+                {Object.entries(resultData.secondaryLines).map(([key, lineData]) => {
+                  if (!lineData || typeof lineData !== 'object') return null;
+                  // Show if there's an interpretation or count
+                  if (!lineData.interpretation && lineData.count == null) return null;
 
-                {resultData.secondaryLines.mercuryLine?.interpretation && (
-                  <div className={styles.lineCard}>
-                    <div className={styles.lineHeader}>
-                      <h3 className={styles.lineTitle}>Mercury Line</h3>
-                    </div>
-                    <p className={styles.text}>{resultData.secondaryLines.mercuryLine.interpretation}</p>
-                  </div>
-                )}
+                  // Format key to readable title: "sunLine" -> "Sun Line", "marriageLines" -> "Marriage Lines"
+                  const title = key
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, s => s.toUpperCase())
+                    .trim();
 
-                {resultData.secondaryLines.marriageLines?.count > 0 && (
-                  <div className={styles.lineCard}>
-                    <div className={styles.lineHeader}>
-                      <h3 className={styles.lineTitle}>Marriage Lines</h3>
-                      <div className={styles.lineScore}>{resultData.secondaryLines.marriageLines.count}</div>
+                  return (
+                    <div className={styles.lineCard} key={key}>
+                      <div className={styles.lineHeader}>
+                        <h3 className={styles.lineTitle}>{title}</h3>
+                        {lineData.count != null && (
+                          <div className={styles.lineScore}>{lineData.count}</div>
+                        )}
+                      </div>
+                      {lineData.interpretation && (
+                        <p className={styles.text}>{lineData.interpretation}</p>
+                      )}
                     </div>
-                    <p className={styles.text}>{resultData.secondaryLines.marriageLines.interpretation}</p>
-                  </div>
-                )}
-
-                {resultData.secondaryLines.travelLines?.count > 0 && (
-                  <div className={styles.lineCard}>
-                    <div className={styles.lineHeader}>
-                      <h3 className={styles.lineTitle}>Travel Lines</h3>
-                      <div className={styles.lineScore}>{resultData.secondaryLines.travelLines.count}</div>
-                    </div>
-                    <p className={styles.text}>{resultData.secondaryLines.travelLines.interpretation}</p>
-                  </div>
-                )}
+                  );
+                })}
               </div>
             )}
 

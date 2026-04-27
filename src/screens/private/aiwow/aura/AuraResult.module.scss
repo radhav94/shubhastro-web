@@ -169,6 +169,7 @@
   font-weight: 500;
   cursor: pointer;
   border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
   transition: all 0.2s;
   white-space: nowrap;
 
@@ -234,6 +235,31 @@
   }
 }
 
+.astroDataGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.astroDataItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.astroDataLabel {
+  font-size: 0.8125rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.astroDataValue {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
 .planetCard {
   background: #fff;
   border-radius: 1rem;
@@ -280,7 +306,6 @@
   position: relative;
   overflow: visible;
   height: auto;
-  align-self: start;
 }
 
 .cardHeaderButton {
