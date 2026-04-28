@@ -116,6 +116,9 @@
     min-width: 180px;
     flex-shrink: 0;
   }
+  @media (max-width: 767px) {
+    padding:12px 1rem!important;
+  }
 }
 
 .qText {
@@ -133,6 +136,9 @@
     color: #9ca3af;
     margin: 0;
     line-height: 1.4;
+    @media (max-width:767px) {
+    display: none;
+  }
   }
 }
 
@@ -1159,6 +1165,9 @@
 
 .popularBox {
   overflow: hidden;
+  @media (width <= 767px) {
+    padding: 1rem 0 0 0;
+  }
 }
 
 .calHeader {
@@ -1238,17 +1247,26 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  // @media (width <= 767px) {
-  //   grid-template-columns: repeat(2, 1fr);
-  // }
+  @media (width <= 767px) {
+    grid-template-columns: repeat(3, 1fr);
+    // display: flex;
+    // flex-wrap: wrap;
+  }
+  @media (width <= 390px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .catItem {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
     cursor: pointer;
-    // width: 144px;
+    width: 100%;
+    height: auto;
     transition: transform 0.15s;
+    // @media (width <= 767px) {
+    //   width: 25%;
+    // }
   &:hover { transform: translateY(-2px); }
 
   span {
@@ -1259,6 +1277,13 @@
     white-space: pre-line;
     line-height: 1.4;
     font-family: 'Poppins', sans-serif;
+    @media (width <= 767px) {
+    grid-template-columns: repeat(3, 1fr);
+    font-size: 14px;
+  }
+  @media (width <= 390px) {
+    font-size: 12px;
+  }
   }
 }
 .catIconBox {
@@ -1267,6 +1292,10 @@
   background: #fff;
   border-radius: 8px;
   flex-shrink: 0;
+  // @media (width <= 767px) {
+  //       width: 100px;
+  //       height: 100px;
+  // }
 }
 }
 
@@ -1453,7 +1482,7 @@
   // .gridItem { width: 100px; span { font-size: 13px; } }
   .twoColEqual { grid-template-columns: 1fr; }
   // .catItem { width: 110px; }
-  .catIconBox { width: 70px; height: 70px; }
+  // .catIconBox { width: 70px; height: 70px; }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1506,7 +1535,7 @@
 
   // .catGrid { gap: 10px; }
   // .catItem { width: 90px; span { font-size: 13px; } }
-  .catIconBox { width: 60px; height: 60px; }
+  // .catIconBox { width: 60px; height: 60px; }
 
   .discoverGrid { grid-template-columns: 1fr 1fr; gap: 12px; }
   .discoverIconBox { height: 60px; }
@@ -1514,7 +1543,7 @@
   .blogRow { grid-template-columns: repeat(2, 1fr); }
   .blogBody h4 { font-size: 14px; }
 
-  .sectionTitle { font-size: 14px; }
+  // .sectionTitle { font-size: 14px; }
   .muhuratItem h5 { font-size: 13px; }
 }
 
@@ -1544,7 +1573,7 @@
 
   /* catItem smaller on mobile */
   // .catItem { width: 80px; }
-  .catIconBox { width: 56px; height: 56px; }
+  // .catIconBox { width: 56px; height: 56px; }
 
   /* gridItem smaller */
   // .gridItem { width: 72px; }
@@ -1579,7 +1608,7 @@
 
   .heroBanner h1 {
     font-size: 26px;
-    font-weight: 800;
+    // font-weight: 800;
   }
 
   .heroBgImg {
@@ -1634,7 +1663,7 @@
   }
 
   .qText h3 { font-size: 15px !important; white-space: nowrap; }
-  .qImgWrap { width: 70px !important; height: 70px !important; }
+  .qImgWrap { width: 70px; height: 70px; }
 }
 
 .mahadashaTag {
