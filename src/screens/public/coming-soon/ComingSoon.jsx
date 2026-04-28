@@ -547,11 +547,13 @@ const ComingSoon = () => {
                     <div className={styles.fieldGroup}>
                       <label htmlFor="placeOfBirth">Place of Birth</label>
                       <div className={styles.locationWrap}>
-                        <LocationSearch
-                          value={values.placeOfBirth}
-                          onChange={(e) => setFieldValue("placeOfBirth", e.target.value)}
-                          onPlaceSelect={({ address }) => setFieldValue("placeOfBirth", address)}
-                        />
+                        <div style={{ width: "100%" }}>
+                          <LocationSearch
+                            value={values.placeOfBirth}
+                            onChange={(e) => setFieldValue("placeOfBirth", e.target.value)}
+                            onPlaceSelect={({ address }) => setFieldValue("placeOfBirth", address)}
+                          />
+                        </div>
                         <IoLocation className={styles.locationIcon} />
                       </div>
                     </div>
