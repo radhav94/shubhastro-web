@@ -40,7 +40,7 @@ const validationSchema = Yup.object({
     .min(2, "Name must be at least 2 characters")
     .max(50, "Name must be under 50 characters")
     .matches(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces")
-    .required("Full name is required"),
+    .required("Name is required"),
   mobile: Yup.string()
     .matches(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number")
     .required("Mobile number is required"),
@@ -517,11 +517,13 @@ const ComingSoon = () => {
                                   day === new Date().getDate() &&
                                   calMonth === new Date().getMonth() &&
                                   calYear === new Date().getFullYear();
+                                const isFuture = new Date(calYear, calMonth, day) > new Date();
                                 return (
                                   <button
                                     key={day}
                                     type="button"
-                                    className={`${styles.calDay} ${isSelected ? styles.calDaySelected : ""} ${isToday && !isSelected ? styles.calDayToday : ""}`}
+                                    disabled={isFuture}
+                                    className={`${styles.calDay} ${isSelected ? styles.calDaySelected : ""} ${isToday && !isSelected ? styles.calDayToday : ""} ${isFuture ? styles.calDayDisabled : ""}`}
                                     onClick={() => {
                                       setFieldValue("dob", dateStr);
                                       setCalOpen(false);
@@ -544,13 +546,13 @@ const ComingSoon = () => {
 
                     <div className={styles.fieldGroup}>
                       <label htmlFor="placeOfBirth">Place of Birth</label>
-                      <div className={styles.inputWithIcon}>
+                      <div className={styles.locationWrap}>
                         <LocationSearch
                           value={values.placeOfBirth}
                           onChange={(e) => setFieldValue("placeOfBirth", e.target.value)}
                           onPlaceSelect={({ address }) => setFieldValue("placeOfBirth", address)}
                         />
-                        <IoLocation className={styles.fieldIcon} />
+                        <IoLocation className={styles.locationIcon} />
                       </div>
                     </div>
                   </div>
