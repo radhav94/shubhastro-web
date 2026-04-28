@@ -42,6 +42,7 @@ import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionM
 import NewAstrologerCard from "../../../component/UI/cards/newAstrologerCard/NewAstrologerCard";
 import NewAstrologerDetailsCard from "../../../component/UI/cards/newAstrologerCard/NewAstrologerDetailsCard";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
+import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -188,6 +189,8 @@ const TalkToAstrologer = () => {
     setLastRequestedAstro,
     setChatSeconds,
   } = useChat();
+
+  const { cancelAllExcept, removePendingConnection, removePendingByAstrologer, cancelAll, assignRoomId } = useWaitingQueue();
 
   // ✅ Ref for current calling astrologer (no re-render)
   const activeCallAstroRef = useRef(null);
@@ -439,12 +442,12 @@ const TalkToAstrologer = () => {
   const handleConnectClick = async (astrologer, connectionType, isEmergency = false) => {
     if (!requireAuth()) return;
 
-    if (WaitingList || callWaitingList) {
-      Toast.error(
-        "You are already waiting for an astrologer. Please cancel the current request first.",
-      );
-      return;
-    }
+    // if (WaitingList || callWaitingList) {
+    //   Toast.error(
+    //     "You are already waiting for an astrologer. Please cancel the current request first.",
+    //   );
+    //   return;
+    // }
 
     setSelectedAstrologer(astrologer);
     activeCallAstroRef.current = astrologer;
@@ -522,12 +525,14 @@ const TalkToAstrologer = () => {
       setActiveChatRoomId(data?.roomId);
       // setWaitingPopup(false);
       setWaitingList(data?.waitingTime || 2);
+      assignRoomId(data?.roomId, "chat", data?.waitingTime || 2);
     };
 
     const handleCallRoom = (data) => {
       setCallRoomId(data?.roomId);
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
+      assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
     };
 
     const handleCallAccepted = async ({
@@ -554,6 +559,7 @@ const TalkToAstrologer = () => {
       
       // Regular call acceptance
       resetCallFlow();
+      cancelAllExcept(roomId);
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
       // console.log(kundliId, "kundli");
@@ -594,6 +600,7 @@ const TalkToAstrologer = () => {
       ...data
     }) => {
       setWaitingList(false);
+      cancelAllExcept(roomId);
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
 
@@ -637,18 +644,21 @@ const TalkToAstrologer = () => {
       // Check if this is a switch rejection during an active call
       if (data?.switchRejected && (data?.type === "audio" || data?.type === "video")) {
         console.log("🔄 Call switch rejected - current call continues");
-        // Don't reset anything - the current call should continue
         return;
       }
       
-      // Regular call rejection - end everything
-      const errorMsg =
-        data?.sessionData?.sessionEndReason === "rejected" &&
-        data?.type === "chat"
-          ? "Astrologer has rejected the chat request"
-          : "Astrologer has rejected the call request";
-      Toast.error(errorMsg);
-      resetCallState();
+      // Extract roomId and astrologerId — can be at top level or inside sessionData
+      const rejectedRoomId = data?.roomId || data?.sessionData?.roomId;
+      const rejectedAstrologerId = data?.astrologerId || data?.sessionData?.astrologerId;
+      if (rejectedRoomId) {
+        removePendingConnection(rejectedRoomId);
+      } else if (rejectedAstrologerId) {
+        removePendingByAstrologer(rejectedAstrologerId);
+      }
+
+      // Remove this specific connection from the queue
+      const label = data?.type === "chat" ? "chat" : "call";
+      Toast.error(`Astrologer rejected the ${label} request`);
       resetChatFlow();
       resetCallFlow();
     };
@@ -656,13 +666,13 @@ const TalkToAstrologer = () => {
     /* ERROR */
     const handleSocketError = (err) => {
       if (err?.message === "Call has already ended") {
-        // soft reset only
         resetCallState();
         return;
       }
 
       Toast.error(err?.message || "Connection error");
       resetCallState();
+      cancelAll();
     };
 
     /* CALL ENDED */

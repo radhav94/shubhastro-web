@@ -18,6 +18,7 @@ import { useCall } from "../../../../../context/CallContext";
 import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
 import { useChat } from "../../../../../context/ChatContext";
 import { useAstrologerConnect } from "../../../../../utils/hooks/useAstrologerConnect";
+import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import ConnectAstrologerPopup from "../../../v2/components/ui/ConnectAstrologerPopup";
 import EmergencySessionModal from "../../../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import ProfileModals from "../../../kundli/components/ProfileModals";
@@ -51,6 +52,8 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
     lastRequestedAstro,
     setChatSeconds
   } = useChat();
+
+  const { cancelAllExcept, removePendingConnection, removePendingByAstrologer, assignRoomId } = useWaitingQueue();
 
   const page = 1;
   const limit = 3;
@@ -180,12 +183,14 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       setChatRoomId(data?.roomId);
       setActiveChatRoomId(data?.roomId);
       setWaitingList(data?.waitingTime || 2);
+      assignRoomId(data?.roomId, "chat", data?.waitingTime || 2);
     };
 
     const handleCallRoom = (data) => {
       setCallRoomId(data?.roomId);
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
+      assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
     };
 
     const handleCallAccepted = async ({ roomId, token, type, remainingTime, isSwitch, ...rest }) => {
@@ -205,6 +210,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       
       // Regular call acceptance
       resetCallFlow();
+      cancelAllExcept(roomId);
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
 
@@ -236,6 +242,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       ...data
     }) => {
       setWaitingList(false);
+      cancelAllExcept(roomId);
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
 
@@ -279,11 +286,18 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       // Check if this is a switch rejection during an active call
       if (data?.switchRejected && (data?.type === "audio" || data?.type === "video")) {
         console.log("🔄 Call switch rejected - current call continues");
-        // Don't reset anything - the current call should continue
         return;
       }
       
-      // Regular call rejection - end everything
+      // Extract roomId and astrologerId — can be at top level or inside sessionData
+      const rejectedRoomId = data?.roomId || data?.sessionData?.roomId;
+      const rejectedAstrologerId = data?.astrologerId || data?.sessionData?.astrologerId;
+      if (rejectedRoomId) {
+        removePendingConnection(rejectedRoomId);
+      } else if (rejectedAstrologerId) {
+        removePendingByAstrologer(rejectedAstrologerId);
+      }
+
       const errorMsg =
         data?.sessionData?.sessionEndReason === "rejected" &&
           data?.type === "chat"

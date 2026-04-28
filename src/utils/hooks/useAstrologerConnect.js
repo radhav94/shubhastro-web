@@ -6,6 +6,7 @@ import { getToken } from "../token";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
 import { useChat } from "../../context/ChatContext";
+import { useWaitingQueue } from "../../context/WaitingQueueContext";
 import { useGetBalanceMutation } from "../../redux/api/wallet/walletApi";
 import { useCreateChatRoomMutation } from "../../redux/api/chatApi";
 import { useGetAllKundlisQuery } from "../../services/appServices/kundliServicesNew";
@@ -18,6 +19,8 @@ export const useAstrologerConnect = () => {
   const headerSelectedKundli = useSelector((state) => state.kundli.selectedKundli);
   const token = getToken();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+
+  const { addPendingConnection, isInQueue } = useWaitingQueue();
 
   const [openModal, setOpenModal] = useState({
     recharge: false,
@@ -335,6 +338,13 @@ export const useAstrologerConnect = () => {
           return Toast.error("You are already on a call");
         }
 
+        // Check if same astrologer+type already in queue
+        if (isInQueue(astro._id, connectionType)) {
+          console.log("[NormalFlow] ⏭️ Already in queue for this astrologer+type");
+          Toast.error("Already waiting for this astrologer");
+          return;
+        }
+
         setLastCallType(connectionType);
         const payload = {
           userId: userIdLocal,
@@ -345,9 +355,27 @@ export const useAstrologerConnect = () => {
         console.log("[NormalFlow] 📤 Emitting call:initiate");
         console.log("[NormalFlow]   → payload:", JSON.stringify(payload));
         voiceSocket.emit("call:initiate", payload);
+
+        // Add to waiting queue (roomId will be assigned when call:room arrives)
+        addPendingConnection({
+          id: `${astro._id}-${connectionType}-${Date.now()}`,
+          astrologer: astro,
+          type: connectionType,
+          roomId: null,
+          waitingTime: 5,
+          isEmergency,
+        });
+
         console.log("[NormalFlow] ✅ call:initiate emitted — waiting for call:room / call:accepted / error");
       } else {
         // Initiate chat
+        // Check if same astrologer already in queue for chat
+        if (isInQueue(astro._id, "chat")) {
+          console.log("[NormalFlow] ⏭️ Already in queue for chat with this astrologer");
+          Toast.error("Already waiting for this astrologer");
+          return;
+        }
+
         const payload = {
           userId: userIdLocal,
           astrologerId: astro._id,
@@ -356,12 +384,23 @@ export const useAstrologerConnect = () => {
         console.log("[NormalFlow] 📤 Emitting chat:initiate");
         console.log("[NormalFlow]   → payload:", JSON.stringify(payload));
         voiceSocket.emit("chat:initiate", payload);
+
+        // Add to waiting queue (roomId will be assigned when chat:room arrives)
+        addPendingConnection({
+          id: `${astro._id}-chat-${Date.now()}`,
+          astrologer: astro,
+          type: "chat",
+          roomId: null,
+          waitingTime: 2,
+          isEmergency,
+        });
+
         console.log("[NormalFlow] ✅ chat:initiate emitted — waiting for chat:room / chat:accepted / error");
       }
     } catch (error) {
       console.error("[NormalFlow] ❌ Error in handleAfterKundliSelect:", error);
     }
-  }, [token, userIdLocal, activeCall, navigate, location, setLastSelectedKundli, setLastCallType, setCallWaitingList, profiles]);
+  }, [token, userIdLocal, activeCall, navigate, location, setLastSelectedKundli, setLastCallType, setCallWaitingList, profiles, addPendingConnection, isInQueue]);
 
   const handleRechargeNow = useCallback(() => {
     setOpenModal((prev) => ({ ...prev, recharge: false }));

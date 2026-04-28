@@ -1,5 +1,6 @@
 import { useMatch, useNavigate } from "react-router-dom";
 import { useChat } from "../../../../../context/ChatContext";
+import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { FooterApproval } from "./FooterApproval";
 import { FooterWaiting } from "./FooterWaiting";
 import { FooterMissedApproval } from "./FooterMissedApproval";
@@ -19,6 +20,7 @@ const StickyChatFooter = () => {
     activeChatRoomId,
     chatSeconds,
   } = useChat();
+  const { hasAnyPending } = useWaitingQueue();
   const navigate = useNavigate();
 
   const onTalkDetailPage = useMatch("/chat-with-astrologers/:id");
@@ -45,13 +47,17 @@ const StickyChatFooter = () => {
 
   if (activeChat?.astrologerId === PANDIT_AI_ID) return null;
 
+  // When the queue is active, hide ONLY the waiting state from this footer.
+  // Approval, missedApproval, and activeChat states should still show here.
+  if (hasAnyPending && waitingList && !chatApproval && !activeChat && !missedApproval) return null;
+
   if (!waitingList && !chatApproval && !activeChat && !missedApproval)
     return null;
 
   return (
     <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-slideUp waiting-queue">
       <div className="flex items-center gap-4 rounded-2xl bg-zinc-900/95 px-5 py-4 shadow-2xl backdrop-blur-md border border-zinc-800">
-        {waitingList && <FooterWaiting />}
+        {waitingList && !hasAnyPending && <FooterWaiting />}
 
         {chatApproval && <FooterApproval />}
         {missedApproval && <FooterMissedApproval />}

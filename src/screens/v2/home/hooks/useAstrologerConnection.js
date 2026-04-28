@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { voiceSocket } from "../../../../services/voiceSocketServices";
 import { useChat } from "../../../../context/ChatContext";
 import { useCall } from "../../../../context/CallContext";
+import { useWaitingQueue } from "../../../../context/WaitingQueueContext";
 import { Toast } from "../../../../component";
 import { isPanditAIChatActive, isPanditAIEvent } from "../../../../component/panditAI/usePanditAI";
 
@@ -35,9 +36,21 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
     pendingLiveCall,
   } = useCall();
 
+  const {
+    pendingConnections,
+    assignRoomId,
+    removePendingConnection,
+    removePendingByAstrologer,
+    cancelAllExcept,
+    cancelAll,
+  } = useWaitingQueue();
+
   const pendingLiveCallRef = useRef(null);
   useEffect(() => { pendingLiveCallRef.current = pendingLiveCall; }, [pendingLiveCall]);
 
+  // Keep a ref of pendingConnections for use in socket handlers
+  const pendingConnectionsRef = useRef(pendingConnections);
+  useEffect(() => { pendingConnectionsRef.current = pendingConnections; }, [pendingConnections]);
 
   // Restore waiting state from localStorage on mount
   useEffect(() => {
@@ -96,6 +109,9 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       setWaitingList(data?.waitingTime || 2);
       setConnectionType("chat");
 
+      // Assign roomId to the pending queue entry
+      assignRoomId(data?.roomId, "chat", data?.waitingTime || 2);
+
       localStorage.setItem(
         "waitingState",
         JSON.stringify({
@@ -117,6 +133,9 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
       setConnectionType(data?.type || "audio");
+
+      // Assign roomId to the pending queue entry
+      assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
 
       localStorage.setItem(
         "waitingState",
@@ -142,9 +161,11 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       console.log("[NormalFlow]   → roomId:", roomId);
       console.log("[NormalFlow]   → astrologerId:", astrologerId);
       console.log("[NormalFlow]   → remainingTime:", data?.remainingTime);
-      console.log("[NormalFlow]   → full data:", JSON.stringify({ roomId, astrologerId, userId, ...data }));
       setWaitingList(false);
       localStorage.removeItem("waitingState");
+
+      // Cancel all other pending connections — this one was accepted
+      cancelAllExcept(roomId);
 
       // Use external ref if provided, otherwise use local ref
       const astro = externalAstroRef?.current || activeAstroRef.current;
@@ -208,12 +229,10 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       console.log("[NormalFlow]   → remainingTime:", remainingTime);
       console.log("[NormalFlow]   → astrologerId:", astrologerId);
       console.log("[NormalFlow]   → isSwitch:", isSwitch);
-      console.log("[NormalFlow]   → agoraToken:", token ? "present (" + token.substring(0, 20) + "...)" : "MISSING");
-      console.log("[NormalFlow]   → full data:", JSON.stringify({ roomId, token: token ? "[redacted]" : null, type, remainingTime, astrologerId, isSwitch, ...rest }));
 
       // If there's an active audio call and this is a video acceptance, it's an upgrade — let CallContext handle it
       if (type === "video" && activeCall && activeCall.callType === "audio") {
-        console.log("[NormalFlow] 🔄 Video upgrade accepted — CallContext will handle the switch (isSwitch:", isSwitch, ")");
+        console.log("[NormalFlow] 🔄 Video upgrade accepted — CallContext will handle the switch");
         resetCallFlow();
         localStorage.removeItem("waitingState");
         return;
@@ -221,7 +240,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
 
       // If there's an active video call and this is an audio acceptance, it's a downgrade — let CallContext handle it
       if (type === "audio" && activeCall && activeCall.callType === "video") {
-        console.log("[NormalFlow] 🔄 Audio downgrade accepted — CallContext will handle the switch (isSwitch:", isSwitch, ")");
+        console.log("[NormalFlow] 🔄 Audio downgrade accepted — CallContext will handle the switch");
         resetCallFlow();
         localStorage.removeItem("waitingState");
         return;
@@ -231,11 +250,13 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       resetCallFlow();
       localStorage.removeItem("waitingState");
 
+      // Cancel all other pending connections — this one was accepted
+      cancelAllExcept(roomId);
+
       // Use external ref if provided, otherwise use local ref
       const astro = externalAstroRef?.current || activeAstroRef.current;
-
       const kundliId = localSelectedProfile;
-      console.log("[NormalFlow]   → astro from ref:",astro, astro?._id, astro?.firstName);
+      console.log("[NormalFlow]   → astro from ref:", astro, astro?._id, astro?.firstName);
       console.log("[NormalFlow]   → kundliId:", kundliId);
 
       try {
@@ -281,40 +302,60 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       console.log("[NormalFlow] ❌ call:rejected / chat:rejected received");
       console.log("[NormalFlow]   → switchRejected:", data?.switchRejected);
       console.log("[NormalFlow]   → type:", data?.type);
-      console.log("[NormalFlow]   → sessionEndReason:", data?.sessionData?.sessionEndReason);
-      console.log("[NormalFlow]   → message:", data?.message);
-      console.log("[NormalFlow]   → full data:", JSON.stringify(data));
 
       // Check if this is a switch rejection during an active call
       if (data?.switchRejected && (data?.type === "audio" || data?.type === "video")) {
         console.log("[NormalFlow] 🔄 Call switch rejected — current call continues");
-        // Don't reset anything - the current call should continue
         return;
       }
-      
-      // Regular call rejection - end everything
-      const errorMsg =
-        data?.sessionData?.sessionEndReason === "rejected" &&
-        data?.type === "chat"
-          ? "Astrologer has rejected the chat request"
-          : "Astrologer has rejected the call request";
-      console.log("[NormalFlow] 🛑 Showing error:", errorMsg);
-      Toast.error(errorMsg);
 
-      localStorage.removeItem("waitingState");
-      resetChatFlow();
-      resetCallFlow();
-      setConnectionType(null);
+      // Extract roomId and astrologerId — can be at top level or inside sessionData
+      const rejectedRoomId = data?.roomId || data?.sessionData?.roomId;
+      const rejectedAstrologerId = data?.astrologerId || data?.sessionData?.astrologerId;
+      console.log("[NormalFlow]   → rejectedRoomId:", rejectedRoomId);
+      console.log("[NormalFlow]   → rejectedAstrologerId:", rejectedAstrologerId);
+
+      // Remove from the queue by roomId first, fallback to astrologerId
+      if (rejectedRoomId) {
+        removePendingConnection(rejectedRoomId);
+      } else if (rejectedAstrologerId) {
+        removePendingByAstrologer(rejectedAstrologerId);
+      }
+
+      // Check if there are still other pending connections
+      const remaining = pendingConnectionsRef.current.filter(
+        (c) => c.roomId !== rejectedRoomId && c.astrologer?._id !== rejectedAstrologerId
+      );
+
+      if (remaining.length > 0) {
+        // Still have other pending connections — just show a toast for this one
+        const label = data?.type === "chat" ? "chat" : "call";
+        Toast.error(`Astrologer rejected the ${label} request`);
+        console.log("[NormalFlow] 📋 Still have", remaining.length, "pending connections");
+      } else {
+        // No more pending connections — full reset
+        const errorMsg =
+          data?.sessionData?.sessionEndReason === "rejected" &&
+          data?.type === "chat"
+            ? "Astrologer has rejected the chat request"
+            : "Astrologer has rejected the call request";
+        Toast.error(errorMsg);
+
+        localStorage.removeItem("waitingState");
+        resetChatFlow();
+        resetCallFlow();
+        setConnectionType(null);
+      }
     };
 
     const handleSocketError = (err) => {
       console.log("[NormalFlow] ⚠️ Socket error event received");
       console.log("[NormalFlow]   → message:", err?.message);
-      console.log("[NormalFlow]   → full data:", JSON.stringify(err));
       Toast.error(err?.message || "Connection error");
       localStorage.removeItem("waitingState");
       resetChatFlow();
       resetCallFlow();
+      cancelAll();
       setConnectionType(null);
     };
 
@@ -348,6 +389,11 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
     setActiveChat,
     setChatSeconds,
     setActiveCall,
+    assignRoomId,
+    removePendingConnection,
+    removePendingByAstrologer,
+    cancelAllExcept,
+    cancelAll,
   ]);
 
   const resetCallState = () => {
@@ -368,6 +414,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
     localStorage.removeItem("waitingState");
     resetChatFlow();
     resetCallFlow();
+    cancelAll();
   };
 
   const setSelectedAstrologer = (astrologer) => {

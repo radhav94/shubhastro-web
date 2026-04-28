@@ -15,6 +15,7 @@ import VideoCallContainer from "../component/call/VideoCallContainer";
 import StickyChatFooter from "../screens/private/home/components/chats/StickyChatFooter";
 import StickyCallFooter from "../screens/private/home/components/call/StickyCallFooter";
 import StickyReview from "../screens/private/home/components/call/StickyReview";
+import StickyWaitingQueue from "../component/UI/waitingQueue/StickyWaitingQueue";
 import { useCall } from "../context/CallContext";
 import { voiceSocket } from "../services/voiceSocketServices";
 import WaitingModal from "../component/UI/modal/waitingModal/WaitingModal";
@@ -107,6 +108,7 @@ const HomeLayout = () => {
 
       <StickyChatFooter />
       <StickyCallFooter />
+      <StickyWaitingQueue />
       <StickyReview />
     </div>
   );

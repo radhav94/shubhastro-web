@@ -17,6 +17,7 @@ import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect"
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import { useChat } from "../../../context/ChatContext";
 import { useCall } from "../../../context/CallContext";
+import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
 
 const OrderDetails = () => {
@@ -36,6 +37,7 @@ const OrderDetails = () => {
   const { handleChatStart, handleCallStart } = useAstrologerConnect();
   const { setWaitingList, resetChatFlow, setActiveChatRoomId, setActiveChat, setChatSeconds, waitingList: chatWaiting } = useChat();
   const { setWaitingList: setCallWaitingList, resetCallFlow, setActiveCallRoomId, setActiveCall, setOpenReview, setReviewData, waitingList: callWaiting } = useCall();
+  const { cancelAllExcept, removePendingConnection, removePendingByAstrologer, cancelAll, assignRoomId } = useWaitingQueue();
   const [createChatRoom] = useCreateChatRoomMutation();
   const activeAstroRef = useRef(null);
 
@@ -184,6 +186,7 @@ const OrderDetails = () => {
       setActiveChatRoomId(data?.roomId);
       setWaitingList(data?.waitingTime || 2);
       setConnectionType("chat");
+      assignRoomId(data?.roomId, "chat", data?.waitingTime || 2);
     };
 
     const handleCallRoom = (data) => {
@@ -191,10 +194,12 @@ const OrderDetails = () => {
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
       setConnectionType(data?.type || "audio");
+      assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
     };
 
     const handleChatAccepted = async ({ roomId, astrologerId: astroId, userId: uid, ...data }) => {
       setWaitingList(false);
+      cancelAllExcept(roomId);
       const astro = activeAstroRef.current || astrologerData?.data;
       try {
         if (!roomId) throw new Error("Room ID missing");
@@ -217,6 +222,7 @@ const OrderDetails = () => {
 
     const handleCallAccepted = async ({ roomId, token, type, remainingTime, ...rest }) => {
       resetCallFlow();
+      cancelAllExcept(roomId);
       const astro = activeAstroRef.current || astrologerData?.data;
       try {
         if (!astro) { Toast.error("Astrologer data missing"); return; }
@@ -234,7 +240,15 @@ const OrderDetails = () => {
       }
     };
 
-    const handleRejected = () => {
+    const handleRejected = (data) => {
+      // Extract roomId and astrologerId — can be at top level or inside sessionData
+      const rejectedRoomId = data?.roomId || data?.sessionData?.roomId;
+      const rejectedAstrologerId = data?.astrologerId || data?.sessionData?.astrologerId;
+      if (rejectedRoomId) {
+        removePendingConnection(rejectedRoomId);
+      } else if (rejectedAstrologerId) {
+        removePendingByAstrologer(rejectedAstrologerId);
+      }
       Toast.error("Astrologer has rejected the request");
       resetChatFlow();
       resetCallFlow();
