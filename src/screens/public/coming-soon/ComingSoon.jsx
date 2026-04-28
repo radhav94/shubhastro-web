@@ -38,6 +38,12 @@ const validationSchema = Yup.object({
     .trim()
     .min(2, "Name must be at least 2 characters")
     .max(50, "Name must be under 50 characters")
+    .matches(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces")
+    .test("full-name", "Please enter your full name", (val) => {
+      if (!val) return false;
+      const parts = val.trim().split(/\s+/);
+      return parts.length >= 2 && parts.every((p) => p.length >= 1);
+    })
     .required("Full name is required"),
   mobile: Yup.string()
     .matches(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number")
@@ -45,12 +51,12 @@ const validationSchema = Yup.object({
   email: Yup.string()
     .email("Enter a valid email address")
     .required("Email is required"),
-  interest: Yup.string().required("Please select an interest"),
+  interest: Yup.string().required("Please select a role"),
   dob: Yup.string().required("Date of birth is required"),
   placeOfBirth: Yup.string(),
 });
 
-const interestOptions = ["Astrology", "Numerology", "Tarot", "Vastu", "All"];
+const interestOptions = ["User", "Expert"];
 
 const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/YOUR_INVITE_CODE";
 
@@ -95,6 +101,7 @@ const ComingSoon = () => {
   const calRef = useRef(null);
   const yearListRef = useRef(null);
   const [submitState, setSubmitState] = useState({ status: "idle", message: "" });
+  const [submittedData, setSubmittedData] = useState(null);
 
   const utmParams = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
@@ -113,13 +120,13 @@ const ComingSoon = () => {
         email: values.email.trim(),
         mobileNumber: values.mobile.trim(),
         dateOfBirth: values.dob,
-        interestedIn: values.interest.toLowerCase(),
-        source: "landing_page",
+        iAmHereAs: values.interest.toLowerCase(),
         ...utmParams,
       };
       const { data } = await axios.post(API_URL, payload);
       if (data?.success) {
-        setSubmitState({ status: "success", message: data.message || "Lead captured successfully!" });
+        setSubmittedData({ role: values.interest.toLowerCase(), name: values.fullName.trim() });
+        setSubmitState({ status: "success", message: "" });
         resetForm();
       } else {
         setSubmitState({ status: "error", message: data?.message || "Something went wrong. Please try again." });
@@ -217,6 +224,68 @@ const ComingSoon = () => {
 
         <section className={styles.contentSection}>
           <div className={styles.contentCard}>
+            {submitState.status === "success" && submittedData ? (
+              <div className={styles.thankYouWrap}>
+                <span className={styles.mailBadge}>
+                  <IoCheckmarkCircle />
+                </span>
+                <div className={styles.formHeader}>
+                  <h2>
+                    Thank <span className={styles.orange}>You!</span>
+                  </h2>
+                </div>
+                {submittedData.role === "expert" ? (
+                  <div className={styles.thankYouBody}>
+                    <p>
+                      Thanks, {submittedData.name}. We're building something special and would love to have you onboard.
+                    </p>
+                    <p>
+                      Our team will reach out within 3–5 days to discuss your application and walk you through the onboarding process once we go live.
+                    </p>
+                    <p>
+                      Have questions? Write to{" "}
+                      <a href="mailto:onboarding@shubhastro.in" className={styles.thankYouLink}>
+                        onboarding@shubhastro.in
+                      </a>{" "}
+                      or WhatsApp{" "}
+                      <a href="https://wa.me/91XXXXXXXXXX" className={styles.thankYouLink}>
+                        +91-XXXXXXXXXX
+                      </a>
+                    </p>
+                  </div>
+                ) : (
+                  <div className={styles.thankYouBody}>
+                    <p>
+                      You're on the list! We'll notify you when ShubhAstro launches.
+                    </p>
+                    <p>
+                      Join WhatsApp for early access updates.
+                    </p>
+                    <a
+                      href={WHATSAPP_INVITE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.whatsappBtn}
+                    >
+                      <IoLogoWhatsapp />
+                      Join WhatsApp Community
+                    </a>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  className={styles.submitBtn}
+                  onClick={() => {
+                    setSubmitState({ status: "idle", message: "" });
+                    setSubmittedData(null);
+                  }}
+                  style={{ marginTop: 24 }}
+                >
+                  Submit Another Response
+                </button>
+              </div>
+            ) : (
+              <>
             <span className={styles.mailBadge}>
               <IoMail />
             </span>
@@ -262,9 +331,8 @@ const ComingSoon = () => {
                           <button
                             type="button"
                             className={styles.countryToggle}
-                            onClick={() => setCodeOpen((prev) => !prev)}
-                            aria-expanded={codeOpen}
-                            aria-label="Select country code"
+                            disabled
+                            aria-label="Country code"
                           >
                             <span className={styles.flagBadge} aria-hidden="true">
                               <span />
@@ -296,6 +364,7 @@ const ComingSoon = () => {
                           name="mobile"
                           type="tel"
                           placeholder="98989 98989"
+                          maxLength={10}
                           className={`${styles.input} ${styles.mobileInput}`}
                         />
                       </div>
@@ -321,7 +390,7 @@ const ComingSoon = () => {
                     </div>
 
                     <div className={styles.fieldGroup}>
-                      <label>I am interested in</label>
+                      <label>I am here as</label>
                       <div className={styles.customSelect} ref={interestRef}>
                         <button
                           type="button"
@@ -491,9 +560,6 @@ const ComingSoon = () => {
                     </div>
                   </div>
 
-                  {submitState.status === "success" && (
-                    <p className={styles.successMsg}>{submitState.message}</p>
-                  )}
                   {submitState.status === "error" && (
                     <p className={styles.errorMsg}>{submitState.message}</p>
                   )}
@@ -658,6 +724,8 @@ const ComingSoon = () => {
                 })}
               </div>
             </div>
+              </>
+            )}
           </div>
         </section>
       </main>

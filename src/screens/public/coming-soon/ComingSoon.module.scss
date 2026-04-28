@@ -452,6 +452,58 @@
   text-align: center;
 }
 
+/* ── Thank You Page ── */
+.thankYouWrap {
+  text-align: center;
+  padding: 40px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.thankYouBody {
+  max-width: 520px;
+  margin: 20px auto 0;
+  color: #333;
+  font-size: 16px;
+  line-height: 1.7;
+
+  p {
+    margin: 0 0 14px;
+  }
+}
+
+.thankYouLink {
+  color: #f75801;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.whatsappBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 12px 28px;
+  border-radius: 999px;
+  background: #25d366;
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+  }
+}
+
 /* ── Custom Select Dropdown ── */
 .customSelect {
   position: relative;
