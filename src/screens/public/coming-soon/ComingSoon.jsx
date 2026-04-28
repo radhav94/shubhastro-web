@@ -1,5 +1,7 @@
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+import axios from "axios";
 import {
   IoCalendar,
   IoCheckmarkCircle,
@@ -20,6 +22,8 @@ import {
 import ShubhAstroLogo from "../../../assets/images/ShubhAstrologo.svg";
 import styles from "./ComingSoon.module.scss";
 
+const API_URL = "https://devapi-shubhtalk.epicon.in/api/landing-leads/submit";
+
 const initialValues = {
   fullName: "",
   mobile: "",
@@ -29,7 +33,30 @@ const initialValues = {
   placeOfBirth: "",
 };
 
-const interestOptions = ["Astrology", "Numerology", "Tarot", "Vastu", "All"];
+const validationSchema = Yup.object({
+  fullName: Yup.string()
+    .trim()
+    .min(2, "Name must be at least 2 characters")
+    .max(50, "Name must be under 50 characters")
+    .matches(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces")
+    .test("full-name", "Please enter your full name", (val) => {
+      if (!val) return false;
+      const parts = val.trim().split(/\s+/);
+      return parts.length >= 2 && parts.every((p) => p.length >= 1);
+    })
+    .required("Full name is required"),
+  mobile: Yup.string()
+    .matches(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number")
+    .required("Mobile number is required"),
+  email: Yup.string()
+    .email("Enter a valid email address")
+    .required("Email is required"),
+  interest: Yup.string().required("Please select a role"),
+  dob: Yup.string().required("Date of birth is required"),
+  placeOfBirth: Yup.string(),
+});
+
+const interestOptions = ["User", "Expert"];
 
 const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/YOUR_INVITE_CODE";
 
@@ -69,10 +96,47 @@ const ComingSoon = () => {
   const [calOpen, setCalOpen] = useState(false);
   const [calMonth, setCalMonth] = useState(new Date().getMonth());
   const [calYear, setCalYear] = useState(new Date().getFullYear() - 25);
+  const [yearPickerOpen, setYearPickerOpen] = useState(false);
+  const [monthPickerOpen, setMonthPickerOpen] = useState(false);
   const calRef = useRef(null);
+  const yearListRef = useRef(null);
+  const [submitState, setSubmitState] = useState({ status: "idle", message: "" });
+  const [submittedData, setSubmittedData] = useState(null);
 
-  const handleSubmit = (values) => {
-    console.log("Form submitted:", { ...values, countryCode: selectedCode });
+  const utmParams = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const utm = {};
+    if (params.get("utm_source")) utm.utmSource = params.get("utm_source");
+    if (params.get("utm_medium")) utm.utmMedium = params.get("utm_medium");
+    if (params.get("utm_campaign")) utm.utmCampaign = params.get("utm_campaign");
+    return utm;
+  }, []);
+
+  const handleSubmit = async (values, { resetForm }) => {
+    setSubmitState({ status: "loading", message: "" });
+    try {
+      const payload = {
+        fullName: values.fullName.trim(),
+        email: values.email.trim(),
+        mobileNumber: values.mobile.trim(),
+        dateOfBirth: values.dob,
+        iAmHereAs: values.interest.toLowerCase(),
+        placeOfBirth: values.placeOfBirth.trim(),
+        source: "landing_page",
+        ...utmParams,
+      };
+      const { data } = await axios.post(API_URL, payload);
+      if (data?.success) {
+        setSubmittedData({ role: values.interest.toLowerCase(), name: values.fullName.trim() });
+        setSubmitState({ status: "success", message: "" });
+        resetForm();
+      } else {
+        setSubmitState({ status: "error", message: data?.message || "Something went wrong. Please try again." });
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || "Something went wrong. Please try again.";
+      setSubmitState({ status: "error", message: msg });
+    }
   };
 
   const handleCodeSelect = useCallback((code) => {
@@ -104,6 +168,20 @@ const ComingSoon = () => {
     for (let d = 1; d <= daysInMonth; d++) cells.push(d);
     return cells;
   };
+
+  const currentYear = new Date().getFullYear();
+  const yearRange = useMemo(() => {
+    const years = [];
+    for (let y = currentYear; y >= 1920; y--) years.push(y);
+    return years;
+  }, [currentYear]);
+
+  useEffect(() => {
+    if (yearPickerOpen && yearListRef.current) {
+      const activeEl = yearListRef.current.querySelector('[data-active="true"]');
+      if (activeEl) activeEl.scrollIntoView({ block: "center" });
+    }
+  }, [yearPickerOpen]);
 
   const prevMonth = () => {
     if (calMonth === 0) { setCalMonth(11); setCalYear((y) => y - 1); }
@@ -148,6 +226,68 @@ const ComingSoon = () => {
 
         <section className={styles.contentSection}>
           <div className={styles.contentCard}>
+            {submitState.status === "success" && submittedData ? (
+              <div className={styles.thankYouWrap}>
+                <span className={styles.mailBadge}>
+                  <IoCheckmarkCircle />
+                </span>
+                <div className={styles.formHeader}>
+                  <h2>
+                    Thank <span className={styles.orange}>You!</span>
+                  </h2>
+                </div>
+                {submittedData.role === "expert" ? (
+                  <div className={styles.thankYouBody}>
+                    <p>
+                      Thanks, {submittedData.name}. We're building something special and would love to have you onboard.
+                    </p>
+                    <p>
+                      Our team will reach out within 3–5 days to discuss your application and walk you through the onboarding process once we go live.
+                    </p>
+                    <p>
+                      Have questions? Write to{" "}
+                      <a href="mailto:onboarding@shubhastro.in" className={styles.thankYouLink}>
+                        onboarding@shubhastro.in
+                      </a>{" "}
+                      or WhatsApp{" "}
+                      <a href="https://wa.me/91XXXXXXXXXX" className={styles.thankYouLink}>
+                        +91-XXXXXXXXXX
+                      </a>
+                    </p>
+                  </div>
+                ) : (
+                  <div className={styles.thankYouBody}>
+                    <p>
+                      You're on the list! We'll notify you when ShubhAstro launches.
+                    </p>
+                    <p>
+                      Join WhatsApp for early access updates.
+                    </p>
+                    <a
+                      href={WHATSAPP_INVITE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.whatsappBtn}
+                    >
+                      <IoLogoWhatsapp />
+                      Join WhatsApp Community
+                    </a>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  className={styles.submitBtn}
+                  onClick={() => {
+                    setSubmitState({ status: "idle", message: "" });
+                    setSubmittedData(null);
+                  }}
+                  style={{ marginTop: 24 }}
+                >
+                  Submit Another Response
+                </button>
+              </div>
+            ) : (
+              <>
             <span className={styles.mailBadge}>
               <IoMail />
             </span>
@@ -164,9 +304,10 @@ const ComingSoon = () => {
 
             <Formik
               initialValues={initialValues}
+              validationSchema={validationSchema}
               onSubmit={handleSubmit}
             >
-              {({ values, setFieldValue }) => (
+              {({ values, setFieldValue, errors, touched, isSubmitting }) => (
                 <Form className={styles.form}>
                   <div className={styles.fieldGrid}>
                     <div className={styles.fieldGroup}>
@@ -180,6 +321,9 @@ const ComingSoon = () => {
                           className={styles.input}
                         />
                       </div>
+                      {touched.fullName && errors.fullName && (
+                        <p className={styles.error}>{errors.fullName}</p>
+                      )}
                     </div>
 
                     <div className={styles.fieldGroup}>
@@ -189,9 +333,8 @@ const ComingSoon = () => {
                           <button
                             type="button"
                             className={styles.countryToggle}
-                            onClick={() => setCodeOpen((prev) => !prev)}
-                            aria-expanded={codeOpen}
-                            aria-label="Select country code"
+                            disabled
+                            aria-label="Country code"
                           >
                             <span className={styles.flagBadge} aria-hidden="true">
                               <span />
@@ -223,9 +366,13 @@ const ComingSoon = () => {
                           name="mobile"
                           type="tel"
                           placeholder="98989 98989"
+                          maxLength={10}
                           className={`${styles.input} ${styles.mobileInput}`}
                         />
                       </div>
+                      {touched.mobile && errors.mobile && (
+                        <p className={styles.error}>{errors.mobile}</p>
+                      )}
                     </div>
 
                     <div className={styles.fieldGroup}>
@@ -239,10 +386,13 @@ const ComingSoon = () => {
                           className={styles.input}
                         />
                       </div>
+                      {touched.email && errors.email && (
+                        <p className={styles.error}>{errors.email}</p>
+                      )}
                     </div>
 
                     <div className={styles.fieldGroup}>
-                      <label>I am interested in</label>
+                      <label>I am here as</label>
                       <div className={styles.customSelect} ref={interestRef}>
                         <button
                           type="button"
@@ -274,6 +424,9 @@ const ComingSoon = () => {
                           </ul>
                         )}
                       </div>
+                      {touched.interest && errors.interest && (
+                        <p className={styles.error}>{errors.interest}</p>
+                      )}
                     </div>
 
                     <div className={styles.fieldGroup}>
@@ -295,13 +448,66 @@ const ComingSoon = () => {
                               <button type="button" onClick={prevMonth} className={styles.calNav}>
                                 <IoChevronBack />
                               </button>
-                              <span className={styles.calTitle}>
-                                {MONTHS[calMonth]} {calYear}
-                              </span>
+                              <div className={styles.calTitleGroup}>
+                                <button
+                                  type="button"
+                                  className={styles.calTitleBtn}
+                                  onClick={() => { setMonthPickerOpen((p) => !p); setYearPickerOpen(false); }}
+                                >
+                                  {MONTHS[calMonth]}
+                                  <IoChevronDown className={styles.calTitleChevron} />
+                                </button>
+                                <button
+                                  type="button"
+                                  className={styles.calTitleBtn}
+                                  onClick={() => { setYearPickerOpen((p) => !p); setMonthPickerOpen(false); }}
+                                >
+                                  {calYear}
+                                  <IoChevronDown className={styles.calTitleChevron} />
+                                </button>
+                              </div>
                               <button type="button" onClick={nextMonth} className={styles.calNav}>
                                 <IoChevronForward />
                               </button>
                             </div>
+
+                            {monthPickerOpen ? (
+                              <ul className={styles.monthGrid} role="listbox">
+                                {MONTHS.map((m, i) => (
+                                  <li
+                                    key={m}
+                                    role="option"
+                                    aria-selected={i === calMonth}
+                                    className={`${styles.monthOption} ${i === calMonth ? styles.monthOptionActive : ""}`}
+                                    onClick={() => {
+                                      setCalMonth(i);
+                                      setMonthPickerOpen(false);
+                                    }}
+                                  >
+                                    {m.slice(0, 3)}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : yearPickerOpen ? (
+                              <ul className={styles.yearGrid} ref={yearListRef} role="listbox">
+                                {yearRange.map((y) => (
+                                  <li
+                                    key={y}
+                                    role="option"
+                                    aria-selected={y === calYear}
+                                    data-active={y === calYear}
+                                    className={`${styles.yearOption} ${y === calYear ? styles.yearOptionActive : ""}`}
+                                    onClick={() => {
+                                      setCalYear(y);
+                                      setYearPickerOpen(false);
+                                    }}
+                                  >
+                                    {y}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <>
                             <div className={styles.calDays}>
                               {DAYS.map((d) => (
                                 <span key={d} className={styles.calDayLabel}>{d}</span>
@@ -331,9 +537,14 @@ const ComingSoon = () => {
                                 );
                               })}
                             </div>
+                              </>
+                            )}
                           </div>
                         )}
                       </div>
+                      {touched.dob && errors.dob && (
+                        <p className={styles.error}>{errors.dob}</p>
+                      )}
                     </div>
 
                     <div className={styles.fieldGroup}>
@@ -351,9 +562,17 @@ const ComingSoon = () => {
                     </div>
                   </div>
 
-                  <button type="submit" className={styles.submitBtn}>
+                  {submitState.status === "error" && (
+                    <p className={styles.errorMsg}>{submitState.message}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    className={styles.submitBtn}
+                    disabled={isSubmitting}
+                  >
                     <IoNotifications />
-                    Notify Me
+                    {isSubmitting ? "Submitting..." : "Notify Me"}
                   </button>
 
                   <p className={styles.privacy}>
@@ -507,6 +726,8 @@ const ComingSoon = () => {
                 })}
               </div>
             </div>
+              </>
+            )}
           </div>
         </section>
       </main>
