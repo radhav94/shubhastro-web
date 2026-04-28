@@ -450,6 +450,51 @@
   font-size: 12px;
 }
 
+/* ── Location Search Wrap ── */
+.locationWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid #d7d7d7;
+  border-radius: 10px;
+  background: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus-within {
+    border-color: #f75801;
+    box-shadow: 0 0 0 3px rgba(247, 88, 1, 0.08);
+  }
+
+  input {
+    width: 100%;
+    border: 0 !important;
+    outline: 0;
+    padding: 13px 40px 13px 16px;
+    color: #2b2b2b;
+    font: inherit;
+    font-size: 16px;
+    background: transparent !important;
+    border-radius: 10px;
+    height: auto !important;
+    min-height: 0;
+
+    &::placeholder {
+      color: #a2a2a2;
+    }
+  }
+}
+
+.locationIcon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #f17633;
+  font-size: 20px;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
 .successMsg {
   margin-top: 16px;
   padding: 10px 16px;
@@ -848,6 +893,12 @@
 .calDayToday {
   border: 1px solid #f75801;
   color: #f75801;
+}
+
+.calDayDisabled {
+  color: #ccc;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* ── Submit Button ── */
