@@ -114,7 +114,7 @@ const ComingSoon = () => {
       const payload = {
         fullName: values.fullName.trim(),
         email: values.email.trim(),
-        mobileNumber: values.mobile.trim(),
+        mobileNumber: selectedCode.replace("+", "") + values.mobile.trim(),
         dateOfBirth: values.dob.split("-").reverse().join("/"),
         iAmHereAs: values.interest.toLowerCase(),
         placeOfBirth: values.placeOfBirth.trim(),
@@ -302,7 +302,7 @@ const ComingSoon = () => {
               validationSchema={validationSchema}
               onSubmit={handleSubmit}
             >
-              {({ values, setFieldValue, errors, touched, isSubmitting }) => (
+              {({ values, setFieldValue, errors, touched, isSubmitting, isValid, dirty }) => (
                 <Form className={styles.form}>
                   <div className={styles.fieldGrid}>
                     <div className={styles.fieldGroup}>
@@ -566,7 +566,7 @@ const ComingSoon = () => {
                   <button
                     type="submit"
                     className={styles.submitBtn}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !isValid || !dirty}
                   >
                     <IoNotifications />
                     {isSubmitting ? "Submitting..." : "Notify Me"}

@@ -920,9 +920,15 @@
   cursor: pointer;
   transition: transform 0.2s ease, opacity 0.2s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     opacity: 0.96;
     transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
   }
 }
 
