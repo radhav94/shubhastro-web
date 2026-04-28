@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Filter, ArrowUpDown, X, ShoppingBag, CreditCard, Clock, CheckCircle, Hash, FileText } from "lucide-react";
-import { useGetMallOrderHistoryQuery } from "../../../../redux/api/mallOrder/mallOrderApi";
-import { useGetInvoiceMutation } from "../../../../services/appServices/transactionService";
+import { useGetMallOrderHistoryQuery, useGetMallOrderInvoiceMutation } from "../../../../redux/api/mallOrder/mallOrderApi";
 import Toast from "../../../../component/toast";
+import { openInvoice } from "../../../../utils/helper/openInvoice";
 import styles from "./OrderHistoryTab.module.scss";
 import ProductImage from "../../../../component/UI/ProductImage";
 
@@ -51,7 +51,7 @@ const OrderHistoryTab = () => {
   const sortRef = useRef(null);
   const filterRef = useRef(null);
 
-  const [getInvoice] = useGetInvoiceMutation();
+  const [getMallOrderInvoice] = useGetMallOrderInvoiceMutation();
   const [invoiceLoadingId, setInvoiceLoadingId] = useState(null);
 
   // Close dropdowns on outside click
@@ -315,10 +315,10 @@ const OrderHistoryTab = () => {
                       e.stopPropagation();
                       setInvoiceLoadingId(orderId);
                       try {
-                        const data = await getInvoice(orderId).unwrap();
-                        const pdfUrl = data?.data?.pdfUrl || data?.data?.url || data?.data || data?.pdfUrl || data?.url;
+                        const data = await getMallOrderInvoice(orderId).unwrap();
+                        const pdfUrl = data?.data || data?.pdfUrl || data?.url;
                         if (pdfUrl) {
-                          window.open(pdfUrl, "_blank");
+                          openInvoice(pdfUrl);
                         } else {
                           Toast.error("Invoice not available");
                         }

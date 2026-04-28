@@ -224,6 +224,7 @@ const TalkToAstrologer = () => {
   // 🔄 Update activeType if URL changes
   useEffect(() => {
     setActiveType(getTypeFromURL());
+
     if (!location.state?.rejoinAstro) return;
 
     // Handle rejoin flow - open connect popup

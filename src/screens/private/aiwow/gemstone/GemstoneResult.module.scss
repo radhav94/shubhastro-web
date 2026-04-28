@@ -491,6 +491,45 @@
 }
 
 
+// ─── PERSONALIZED INSIGHTS ───
+.personalizedSection {
+  margin-top: 16px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+
+  @media (min-width: 768px) {
+    font-size: 18px;
+  }
+}
+
+.personalizedGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (min-width: 1024px) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.personalizedCard {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+
+  @media (min-width: 1024px) {
+    padding: 14px;
+  }
+}
+
 // Consult Button
 .consultButton {
   width: fit-content;

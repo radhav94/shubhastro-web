@@ -16,7 +16,7 @@
 }
 .directKundli{
   padding-top: 260px;
-  @media (width <= 767px) {
+  @media (width <= 1180px) {
     padding-top: 224px;
   }
 }
@@ -119,6 +119,7 @@
   transition: all 0.3s ease;
   white-space: nowrap;
   flex-shrink: 0;
+  height: 40px;
 
   @media (max-width: 768px) {
     font-size: 13px;
