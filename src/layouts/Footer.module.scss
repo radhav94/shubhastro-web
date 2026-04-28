@@ -71,21 +71,11 @@ $font-primary: "Poppins", sans-serif;
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 16px 16px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
 }
 
 .v2_logo {
   width: 200px;
   margin-bottom: 14px;
-}
-
-.v2_topLeft {
-  flex: 1;
-  max-width: 700px;
 }
 
 .v2_tagline {
@@ -215,32 +205,18 @@ $font-primary: "Poppins", sans-serif;
 }
 
 // --- Social icons ---
-.v2_followUs {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.v2_followLabel {
-  font-size: 14px;
-  font-weight: 500;
-  color: $color-grey-text;
-}
-
 .v2_socialIcons {
   display: flex;
   gap: 16px;
-  align-items: center;
+  margin-top: 16px;
 
   a {
-    color: $color-accent;
-    font-size: 22px;
+    color: $color-white;
+    font-size: 20px;
     transition: color 0.2s ease;
 
     &:hover {
-      color: darken(#f75801, 10%);
+      color: $color-accent;
     }
   }
 }
@@ -258,15 +234,15 @@ $font-primary: "Poppins", sans-serif;
   align-items: center;
   gap: 10px;
   padding: 10px 10px;
-  border: 2px solid #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 10px;
-  color: #1a1a1a;
+  color: $color-white;
   text-decoration: none;
-  background: #fff;
+  background: transparent;
   transition: border-color 0.2s ease;
 
   &:hover {
-    border-color: #f75801;
+    border-color: $color-accent;
   }
 
   svg {
@@ -372,13 +348,12 @@ $font-primary: "Poppins", sans-serif;
   flex-wrap: wrap;
   gap: 12px;
   font-size: 13px;
-  color: #fff;
+  color: $color-grey-text;
   max-width: 1200px;
   margin: 0 auto;
 
   p {
     margin: 0;
-    color: #fff;
   }
 
   ul {
@@ -389,7 +364,7 @@ $font-primary: "Poppins", sans-serif;
     margin: 0;
 
     a {
-      color: #fff;
+      color: $color-grey-text;
       text-decoration: none;
       transition: color 0.2s ease;
 

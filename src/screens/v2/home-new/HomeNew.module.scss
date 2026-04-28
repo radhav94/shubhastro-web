@@ -1445,29 +1445,50 @@
     &:hover { color: #f75801 !important; }
   }
 
-  // Keep social icons orange
+  // v2_top — flex layout with social on right
+  footer [class*="v2_top"] {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 20px !important;
+  }
+
+  // Social icons — right side, orange
+  footer [class*="v2_socialIcons"] {
+    margin-top: 0 !important;
+    align-items: center !important;
+  }
   footer [class*="v2_socialIcons"] a,
   footer [class*="v2_socialIcons"] a * {
     color: #f75801 !important;
+    font-size: 22px !important;
     &:hover { color: #d43400 !important; }
   }
 
-  // Keep divider visible
+  // Divider visible
   footer [class*="v2_divider"] {
     background: rgba(0,0,0,0.12) !important;
   }
 
-  // Keep bottom bar text white
-  footer [class*="v2_bottomOuter"] *,
+  // Bottom bar — keep dark bg + white text
+  footer [class*="v2_bottomOuter"] {
+    background-color: #1E2939 !important;
+  }
+  footer [class*="v2_bottomBar"],
   footer [class*="v2_bottomBar"] *,
   footer [class*="v2_bottomBar"] a {
     color: #fff !important;
   }
-}
 
-.v2_storeBtn{
-  background-color: white;
-  border: 2px solid;
+  // Store buttons — white bg, dark border
+  footer [class*="v2_storeBtn"] {
+    background: #fff !important;
+    border: 2px solid #1a1a1a !important;
+  }
+  footer [class*="v2_storeBtn"] * {
+    color: #1a1a1a !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1717,5 +1738,45 @@
 
   :global(.blogTitle) {
     font-size: 15px !important;
+  }
+}
+
+/* ═══ Agentic Calendar overrides for home-new ═══ */
+.agenticCalendarWrapper {
+  // Hide "Plan Your Events" banner
+  :global(.planEventsBanner) { display: none !important; }
+
+  // Match home-new color scheme
+  :global(.agenticCalendarSection) {
+    background: linear-gradient(90deg, #fff7ed, #fed7aa) !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+  }
+
+  :global(.occasionChip) {
+    background: #fff !important;
+    border: 1px solid #ea580c !important;
+    color: #1f2937 !important;
+  }
+
+  :global(.occasionChip.selected) {
+    background: #ea580c !important;
+    color: #fff !important;
+  }
+
+  :global(.getMuhuratBtn) {
+    background: linear-gradient(90deg, #ea580c, #c2410c) !important;
+    border-radius: 999px !important;
+  }
+
+  :global(.periodChip), :global(.dateChip) {
+    background: #fff !important;
+    border: 1px solid #ea580c !important;
+    color: #1f2937 !important;
+  }
+
+  :global(.periodChip.periodSelected), :global(.dateChip.periodSelected) {
+    background: #ea580c !important;
+    color: #fff !important;
   }
 }

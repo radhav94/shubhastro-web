@@ -104,7 +104,7 @@ const FilterChips = ({
         append: false,
       });
     }
-  }, [selectedType]);
+  }, [selectedType, astroFilterTab]);
 
   const openFilterModal = () => {
     setFilterModalOpen(true);
