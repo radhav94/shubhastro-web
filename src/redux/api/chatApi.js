@@ -64,11 +64,11 @@ export const chatApi = privateRequestNew.injectEndpoints({
 
     // Virtual Assistant - send message
     sendVirtualAssistantMessage: builder.mutation({
-      query: ({ astrologerId, type, sender, message }) => ({
+      query: ({ astrologerId, type, sender, message, kundliId, kundliName }) => ({
         url: "chat/messages/create",
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: { astrologerId, type, sender, message },
+        body: { astrologerId, type, sender, message, kundliId, kundliName },
       }),
     }),
 

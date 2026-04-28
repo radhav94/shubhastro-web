@@ -137,6 +137,49 @@ export default function useVirtualAssistant({ astrologerId, isOpen }) {
     [astrologerId, sending, sendMsgApi, getS3SignedUrl, refetch, scrollToBottom]
   );
 
+  const sendKundli = useCallback(
+    async (kundliId, kundliName) => {
+      if (!kundliId || sending) return;
+      setSending(true);
+
+      const kundliLink = `${window.location.origin}/kundli/${kundliId}`;
+      const tempId = `temp-${Date.now()}`;
+      const optimistic = {
+        _id: tempId,
+        sender: "user",
+        type: "kundli",
+        message: kundliLink,
+        kundliName: kundliName || "Kundli",
+        kundliId,
+        createdAt: new Date().toISOString(),
+        _optimistic: true,
+      };
+      setOptimisticMsgs((prev) => [...prev, optimistic]);
+      scrollToBottom();
+
+      try {
+        await sendMsgApi({
+          astrologerId,
+          type: "kundli",
+          sender: "user",
+          message: kundliLink,
+          kundliId,
+          kundliName: kundliName || "Kundli",
+        }).unwrap();
+        setOptimisticMsgs((prev) => prev.filter((m) => m._id !== tempId));
+        refetch();
+      } catch {
+        setOptimisticMsgs((prev) =>
+          prev.map((m) => (m._id === tempId ? { ...m, _failed: true } : m))
+        );
+        toast.error("Failed to send Kundli");
+      } finally {
+        setSending(false);
+      }
+    },
+    [astrologerId, sending, sendMsgApi, refetch, scrollToBottom]
+  );
+
   const retryMessage = useCallback(
     (msg) => {
       setOptimisticMsgs((prev) => prev.filter((m) => m._id !== msg._id));
@@ -157,6 +200,7 @@ export default function useVirtualAssistant({ astrologerId, isOpen }) {
     sending,
     sendText,
     sendImage,
+    sendKundli,
     retryMessage,
     messagesEndRef,
   };
