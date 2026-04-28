@@ -19,6 +19,7 @@ import { astroTarotApi } from "../redux/api/tarot/astroTarotApi";
 import { calculatorApi } from "../redux/api/baseApi/calculatorApi";
 import "../redux/api/plansApi/plansApi"; // inject endpoints into privateRequestNew
 import "../redux/api/supportApi/supportApi"; // inject support endpoints
+import "../redux/api/lalKitab/lalKitabApi"; // inject lal kitab endpoints
 
 const persistConfig = {
   key: "root",

@@ -36,8 +36,15 @@ export const mallOrderApi = privateRequestNew.injectEndpoints({
       }),
       providesTags: (result, error, orderId) => [{ type: "MallOrders", id: orderId }],
     }),
+
+    getMallOrderInvoice: builder.mutation({
+      query: (orderId) => ({
+        url: `mall/orders/${orderId}?printInvoice=true`,
+        method: "GET",
+      }),
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useGetMallOrderHistoryQuery, useGetMallOrderDetailQuery } = mallOrderApi;
+export const { useGetMallOrderHistoryQuery, useGetMallOrderDetailQuery, useGetMallOrderInvoiceMutation } = mallOrderApi;

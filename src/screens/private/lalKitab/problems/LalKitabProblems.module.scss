@@ -1,0 +1,10 @@
+.container { max-width: 1200px; margin: 0 auto; padding: 20px 16px 40px; }
+.pageTitle { font-size: 24px; font-weight: 700; color: #1a1a1a; margin: 0 0 4px; }
+.pageSubtitle { font-size: 14px; color: #718096; margin: 0 0 24px; }
+.categoryGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; @media (max-width: 768px) { grid-template-columns: repeat(2, 1fr); } @media (max-width: 400px) { grid-template-columns: 1fr; } }
+.catCard { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 24px 16px; background: #fff; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; text-align: center; transition: all 0.2s; border: 2px solid transparent; &:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); } h3 { font-size: 15px; font-weight: 600; color: #1a1a1a; margin: 0; } p { font-size: 12px; color: #718096; margin: 0; } }
+.activeCat { border-color: #ffcb03; background: #fffdf5; }
+.catIcon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #fff; }
+.result { display: flex; flex-direction: column; gap: 16px; }
+.descCard { background: #fff; border-radius: 12px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); h3 { font-size: 16px; font-weight: 600; margin: 0 0 8px; } p { font-size: 14px; color: #4a5568; line-height: 1.6; margin: 0; } }
+.causeCard { background: linear-gradient(135deg, #fffdf5, #fff8e1); border: 1px solid #ffcb03; border-radius: 12px; padding: 16px 20px; h3 { font-size: 16px; font-weight: 600; margin: 0 0 8px; } p { font-size: 14px; color: #4a5568; line-height: 1.6; margin: 0; } }

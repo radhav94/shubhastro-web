@@ -74,7 +74,7 @@ const AuraResult = () => {
     { id: 'overall', label: 'Overall' },
     { id: 'colors', label: 'Aura Colors' },
     { id: 'chakras', label: 'Chakras' },
-    { id: 'energy', label: 'Energy' },
+    // { id: 'energy', label: 'Energy' },
     { id: 'spiritual', label: 'Spiritual' },
   ];
 
@@ -203,7 +203,7 @@ const AuraResult = () => {
           {activeTab === 'overall' && (
             <div className={styles.section}>
               <div className={styles.cardsGrid}>
-                {dominantColor.color && (
+                {/* {dominantColor.color && (
                   <div className={styles.dominantCard}>
                     <button
                       className={styles.cardHeaderButton}
@@ -224,13 +224,13 @@ const AuraResult = () => {
                           <h4 className={styles.dominantColorName}>
                             {dominantColor.color}
                           </h4>
-                          {/* <p className={styles.dominantPercentage}>{dominantColor.percentage}%</p> */}
+                          <p className={styles.dominantPercentage}>{dominantColor.percentage}%</p>
                         </div>
                       </div>
                       <p className={styles.dominantMeaning}>{dominantColor.meaning}</p>
                     </div>
                   </div>
-                )}
+                )} */}
 
                 {astrologicalData.sunSign && (
                   <div className={styles.card}>
@@ -254,7 +254,7 @@ const AuraResult = () => {
                   </div>
                 )}
 
-                {overallReading.strengths?.length > 0 && (
+                {/* {overallReading.strengths?.length > 0 && (
                   <div className={styles.card}>
                     <button
                       className={styles.cardHeaderButton}
@@ -273,7 +273,7 @@ const AuraResult = () => {
                       </ul>
                     </div>
                   </div>
-                )}
+                )} */}
 
                 {overallReading.challenges?.length > 0 && (
                   <div className={styles.card}>
@@ -369,14 +369,14 @@ const AuraResult = () => {
             </div>
           )}
 
-          {activeTab === 'energy' && (
+          {/* {activeTab === 'energy' && (
             <div className={styles.section}>
               {energyLevel.overall && (
                 <div className={styles.energyCard}>
                   <h3 className={styles.cardTitle}>⚡ Overall Energy Level</h3>
-                  {/* <div className={styles.energyContent}>
+                  <div className={styles.energyContent}>
                     <p className={styles.energyPercentage}>{energyLevel.overall}%</p>
-                  </div> */}
+                  </div>
                   <p className={styles.energyDescription}>{energyLevel.description}</p>
                 </div>
               )}
@@ -410,19 +410,20 @@ const AuraResult = () => {
                 )}
               </div>
             </div>
-          )}
+          )} */}
 
           {activeTab === 'spiritual' && (
             <div className={styles.section}>
               <div className={styles.spiritualGrid}>
-                {spiritualInsights.path && (
+                {/* 🕉️ Spiritual Path - commented out */}
+                {/* {spiritualInsights.path && (
                   <div className={styles.card}>
                     <div className={styles.cardStaticContent}>
                       <h3 className={styles.cardTitle}>🕉️ Spiritual Path</h3>
                       <p className={styles.cardText}>{spiritualInsights.path}</p>
                     </div>
                   </div>
-                )}
+                )} */}
 
                 {spiritualInsights.guidance && (
                   <div className={styles.card}>
@@ -433,13 +434,62 @@ const AuraResult = () => {
                   </div>
                 )}
 
-                {spiritualInsights.practices?.length > 0 && (
+                {/* 🧘 Recommended Practices - commented out */}
+                {/* {spiritualInsights.practices?.length > 0 && (
                   <div className={styles.card}>
                     <div className={styles.cardStaticContent}>
                       <h3 className={styles.cardTitle}>🧘 Recommended Practices</h3>
                       <ul className={styles.list}>
                         {spiritualInsights.practices.map((practice, index) => (
                           <li key={index} className={styles.listItem}>{practice}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )} */}
+
+                {/* Astrological Data */}
+                {astrologicalData && (astrologicalData.sunSign || astrologicalData.element || astrologicalData.dominantPlanet || astrologicalData.moonPhase) && (
+                  <div className={`${styles.card} ${styles.astroDataCard}`}>
+                    <div className={styles.cardStaticContent}>
+                      <h3 className={styles.cardTitle}>🪐 Astrological Data</h3>
+                      <div className={styles.astroDataGrid}>
+                        {astrologicalData.sunSign && (
+                          <div className={styles.astroDataItem}>
+                            <span className={styles.astroDataLabel}>♈ Sun Sign</span>
+                            <span className={styles.astroDataValue}>{astrologicalData.sunSign}</span>
+                          </div>
+                        )}
+                        {astrologicalData.element && (
+                          <div className={styles.astroDataItem}>
+                            <span className={styles.astroDataLabel}>🔥 Element</span>
+                            <span className={styles.astroDataValue}>{astrologicalData.element}</span>
+                          </div>
+                        )}
+                        {astrologicalData.dominantPlanet && (
+                          <div className={styles.astroDataItem}>
+                            <span className={styles.astroDataLabel}>🪐 Dominant Planet</span>
+                            <span className={styles.astroDataValue}>{astrologicalData.dominantPlanet}</span>
+                          </div>
+                        )}
+                        {astrologicalData.moonPhase && (
+                          <div className={styles.astroDataItem}>
+                            <span className={styles.astroDataLabel}>🌙 Moon Phase</span>
+                            <span className={styles.astroDataValue}>{astrologicalData.moonPhase}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {astrologicalData?.currentTransits?.length > 0 && (
+                  <div className={styles.card}>
+                    <div className={styles.cardStaticContent}>
+                      <h3 className={styles.cardTitle}>🌌 Current Transits</h3>
+                      <ul className={styles.list}>
+                        {astrologicalData.currentTransits.map((transit, index) => (
+                          <li key={index} className={styles.listItem}>{transit}</li>
                         ))}
                       </ul>
                     </div>
