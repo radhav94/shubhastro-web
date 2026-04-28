@@ -143,17 +143,28 @@ const HomeNew = () => {
                 <h1>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></h1>
                 <p className={styles.heroDesc}>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
               </div>
-              <img src={heroBg} alt="" className={styles.heroBgImg} />
+              <div className={styles.heroBgImg}>
+                <img src={heroBg} alt="" />
+              </div>
             </div>
 
             {/* Divider */}
-            <div className={styles.centerDivider} />
+            {/* <div className={styles.centerDivider} /> */}
 
             {/* WOW Suite */}
             <div className={styles.wowInner}>
               {/* Glow blob */}
               <div className={styles.wowGlow} />
-              <h4 className={styles.wowTitle}>WOW SUITE</h4>
+
+              <div className={`${styles.titleWithBottomDevider} ${styles.tWBmarginLeft}`}>
+                <h4 className={styles.wowTitle}>WOW SUITE</h4>
+                <div className={styles.BottomDevider}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
+                      <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
+                    </svg>
+                </div>
+              </div>
+
               {/* <div className={styles.wowUnderline}><span className={styles.wowLine} /><span className={styles.wowDot}>●</span></div> */}
               <div className={styles.wowRow}>
                 <button className={styles.wowArrow}>‹</button>
@@ -203,7 +214,14 @@ const HomeNew = () => {
 
       {/* ═══ SECTION 2 — Feature Cards (LOREM IPSUM AI) ═══ */}
       <section className={styles.featureSection}>
-        <h2 className={styles.sectionTitle}>LOREM IPSUM AI</h2>
+        <div className={`${styles.titleWithBottomDevider}`}>
+          <h4 className={styles.wowTitle}>LOREM IPSUM AI</h4>
+          <div className={styles.BottomDevider}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
+                <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
+              </svg>
+          </div>
+        </div>
         <div className={styles.featureRow}>
           {/* Laal Kitaab — special card with image */}
           <div className={`${styles.featureCard} ${styles.laalKitaab}`}>
@@ -232,7 +250,7 @@ const HomeNew = () => {
               <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
             </div>
             <div className={styles.fcMicIcon}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="130" height="130" viewBox="0 0 130 130" fill="none" className={styles.glowCircle}>
+              {/* <svg xmlns="http://www.w3.org/2000/svg" width="130" height="130" viewBox="0 0 130 130" fill="none" className={styles.glowCircle}>
                 <g filter="url(#filter0_f_12155_25282)">
                   <circle cx="65" cy="65" r="50" fill="url(#paint0_radial_12155_25282)"/>
                 </g>
@@ -247,8 +265,8 @@ const HomeNew = () => {
                     <stop offset="1" stopColor="#4E2E7E"/>
                   </radialGradient>
                 </defs>
-              </svg>
-              <img src={aiPanditMic} alt="mic" className={styles.micImg} />
+              </svg> */}
+              {/* <img src={aiPanditMic} alt="mic" className={styles.micImg} /> */}
             </div>
             <button className={styles.fcCtaLight}>Talk Now &gt;</button>
           </div>

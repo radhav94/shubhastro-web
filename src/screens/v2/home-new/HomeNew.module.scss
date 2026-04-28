@@ -3,22 +3,22 @@
    ═══════════════════════════════════════════════════════ */
 
 .page {
-  max-width: 1440px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 16px 20px;
+  padding: 16px;
   font-family: "Poppins", -apple-system, BlinkMacSystemFont, sans-serif;
   background: #f5f5f5;
   overflow-x: hidden;
 
-  @media (max-width: 1280px) { padding: 14px 16px; }
-  @media (max-width: 1024px) { padding: 12px 12px; }
-  @media (max-width: 480px)  { padding: 10px 10px; }
+  // @media (max-width: 1280px) { padding: 14px 16px; }
+  // @media (max-width: 1024px) { padding: 12px 12px; }
+  // @media (max-width: 480px)  { padding: 10px 10px; }
 }
 
 /* ═══ SHARED ═══ */
 .sectionTitle {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   color: #1f2937;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -59,7 +59,7 @@
    ═══════════════════════════════════════════════════════ */
 .heroRow {
   display: grid;
-  grid-template-columns: 220px 1fr 260px;
+  grid-template-columns: 240px 1fr 220px;
   gap: 14px;
   margin-bottom: 20px;
 
@@ -92,12 +92,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff5ee;
-  border: 1.5px solid #ffe0c2;
+  border: 1.5px solid #FFDBB9;
+  background: #FEF2E7;
   border-radius: 16px;
-  padding: 14px 12px;
+  padding: 20px 16px;
   cursor: pointer;
-  min-height: 120px;
+  // min-height: 120px;
   overflow: hidden;
   transition: box-shadow 0.2s, transform 0.15s;
 
@@ -115,12 +115,12 @@
 .qText {
   flex: 1;
   h3 {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 18px;
+    font-weight: 600;
     color: #1a1a1a;
     margin: 0 0 4px;
     white-space: pre-line;
-    line-height: 1.2;
+    line-height: 1.5;
   }
   p {
     font-size: 10px;
@@ -132,8 +132,8 @@
 
 .qImgWrap {
   flex-shrink: 0;
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -144,16 +144,23 @@
 .center {
   display: flex;
   flex-direction: column;
-
-  @media (max-width: 900px) { order: 2; }
+  background: linear-gradient(127deg, #FEFBF7 25.07%, #FFE6CB 100%);
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid #ffe8d0;
+  // @media (max-width: 900px) { order: 2; }
 }
 
 .centerCard {
-  background: linear-gradient(160deg, #fff8f2 0%, #fff4ec 40%, #ffeedd 100%);
+  padding: 24px;
+  // background-color: linear-gradient(160deg, #fff8f2 0%, #fff4ec 40%, #ffeedd 100%);
   border-radius: 20px;
-  overflow: visible;
-  border: 1px solid #ffe8d0;
+  // overflow: visible;
+  // border: 1px solid #ffe8d0;
   position: relative;
+  // background-image: url("../../../assets/images/home-hero-bg.png");
+  // background-repeat: no-repeat;
+  // background-size: contain;
 }
 
 .centerGlow {
@@ -171,57 +178,102 @@
 }
 
 .heroBanner {
-  padding: 24px 24px 16px;
+  // padding: 24px 24px 16px;
+  margin-bottom: 14px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  position: relative;
-  min-height: 180px;
   z-index: 1;
+}
+
+.titleWithBottomDevider{
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  margin-bottom: 1rem;
+  &.tWBmarginLeft{
+    margin-left: 16px;
+  }
+  .wowTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #030303;
+    text-transform: uppercase;
+  }
+  .BottomDevider{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    &::after,&::before{
+      content: "";
+      height: 1px;
+      width: 100%;
+    }
+    &::before{
+      background: linear-gradient(270deg,rgba(0, 0, 0, 1) 35%, rgba(0, 0, 0, 0) 100%);
+    }
+    &::after{
+      background: linear-gradient(90deg,rgba(0, 0, 0, 1) 35%, rgba(0, 0, 0, 0) 100%);
+    }
+    svg{
+      flex-shrink: 0;
+    }
+  }
 }
 
 .heroContent { flex: 1; z-index: 2; }
 
-.greeting { font-size: 13px; color: #6b7280; margin: 0 0 4px; }
+.greeting { font-size: 13px; color: #030303; }
 
 .heroBanner h1 {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 600;
   color: #1f2937;
   margin: 0 0 8px;
-  line-height: 1.2;
+  line-height: 1.5;
 }
 
 .ai { color: #f75801; font-weight: 800; }
 
 .heroDesc {
   font-size: 13px;
-  color: #9ca3af;
+  color: #424242;
   margin: 0;
   max-width: 340px;
   line-height: 1.5;
 }
 
 .heroBgImg {
+  width: 400px;
+  height: auto;
   position: absolute;
-  right: -25px;
-  top: -43px;
+  right: 0px;
+  top: 0px;
   object-fit: contain;
   opacity: 1;
   z-index: 1;
   pointer-events: none;
+  img{
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .centerDivider {
   height: 1px;
   background: rgba(247, 88, 1, 0.1);
   margin: 0 24px;
+  display: none;
 }
 .wowInner {
-  padding: 20px 10px 24px;
+  padding: 16px 0;
   background: transparent;
   position: relative;
   z-index: 2;
+  border-radius: 10px;
+  background: rgba(255 233 229 / 80%);
+  // filter: blur(50px);
 }
 
 .wowGlow {
@@ -236,17 +288,7 @@
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: 0;
-}
-
-.wowTitle {
-  font-size: 22px;
-  font-weight: 600;
-  color: #030303;
-  margin: 0 0 0 20px;
-  text-transform: uppercase;
-  line-height: 28px;
-  position: relative;
-  z-index: 1;
+  display: none;
 }
 
 .wowUnderline {
@@ -291,8 +333,8 @@
 }
 
 .wowArrow {
-  width: 44px;
-  height: 44px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   border: none;
   background: #f75801;
@@ -309,8 +351,8 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
-  &:first-of-type { left: -8px; }
-  &:last-of-type  { right: -8px; }
+  &:first-of-type { left: 0px; }
+  &:last-of-type  { right: 0px; }
   &:hover { background: #d43400; }
 }
 
@@ -321,15 +363,15 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 28px 12px;
-  gap: 16px;
-  background: rgba(255, 255, 255, 0.6);
+  padding: 1rem 0;
+  gap: 5px;
+  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
+  background: var(--surface, #FEFEFE);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 16px;
   cursor: pointer;
-  min-height: 210px;
+  // min-height: 210px;
   transition: box-shadow 0.2s, background 0.2s;
   &:hover {
     background: rgba(255, 255, 255, 0.8);
@@ -338,7 +380,7 @@
 
   span {
     font-family: 'Poppins', sans-serif;
-    font-size: 16px;
+    font-size: 0.8rem;
     font-weight: 500;
     color: #1f2937;
     text-align: center;
@@ -356,8 +398,8 @@
 }
 
 .wowIconBox {
-  width: 80px;
-  height: 80px;
+  width: 50px;
+  height: 50px;
   background: #fff5ec;
   border-radius: 10px;
   display: flex;
@@ -365,8 +407,8 @@
   justify-content: center;
   flex-shrink: 0;
   img {
-    width: 52px;
-    height: 52px;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
   }
 }
@@ -391,14 +433,14 @@
 
 /* Right — Crucial Muhurats */
 .rightPanel {
-  background: #fff8f2;
-  border: 1.5px solid #ffe0c2;
+  border: 1.5px solid #FFDBB9;
+  background: #FEF2E7;
   border-radius: 16px;
   padding: 16px 12px;
 
   h4 {
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 600;
     color: #1a1a1a;
     margin: 0 0 12px;
     letter-spacing: 0.5px;
@@ -426,17 +468,18 @@
 }
 
 .muhuratItem {
-  background: #fff;
+  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
+  background: rgba(255, 255, 255, 0.70);
   border-radius: 10px;
-  padding: 10px 12px;
-  margin-bottom: 8px;
+  padding: 4px 12px;
+  // margin-bottom: 8px;
   &:last-child { margin-bottom: 0; }
 
   h5 {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 500;
     color: #1a1a1a;
-    margin: 0 0 10px;
+    margin: 0 0 5px;
   }
 }
 
@@ -451,9 +494,9 @@
 
 .greenBar { width: 3px; height: 14px; border-radius: 2px; background: #22c55e; flex-shrink: 0; }
 .redBar   { width: 3px; height: 14px; border-radius: 2px; background: #ef4444; flex-shrink: 0; }
-.label    { color: #22c55e; font-weight: 500; font-size: 12px; width: 36px; }
-.labelRed { color: #ef4444; font-weight: 500; font-size: 12px; width: 36px; }
-.time     { color: #1a1a1a; margin-left: auto; font-size: 12px; font-weight: 500; }
+.label    { color: #22c55e; font-weight: 400; font-size: 14px; width: 36px; }
+.labelRed { color: #ef4444; font-weight: 400; font-size: 14px; width: 36px; }
+.time     { color: #1a1a1a; margin-left: auto; font-size: 14px; font-weight: 500; }
 
 /* ═══════════════════════════════════════════════════════
    SECTION 2 — FEATURE CARDS
@@ -475,7 +518,7 @@
 
 .featureCard {
   border-radius: 18px;
-  padding: 22px;
+  padding: 16px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -485,13 +528,13 @@
   position: relative;
   overflow: hidden;
   &:hover { transform: translateY(-3px); }
-  h3 { font-size: 20px; font-weight: 700; margin: 0; }
+  h3 { font-size: 20px; font-weight: 600; margin: 0; }
   p  { font-size: 13px; line-height: 1.5; margin: 0; flex: 1; opacity: 0.85; }
 }
 
 .featureTag {
   display: inline-block; width: fit-content; padding: 3px 12px;
-  border-radius: 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  border-radius: 10px; font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
 }
 
 .featureCta {
@@ -512,10 +555,10 @@
   color: #1a1a1a;
   position: relative;
   overflow: hidden;
-  min-height: 370px;
+  // min-height: 370px;
   justify-content: flex-start;
 
-  h3 { font-size: 22px; font-weight: 700; color: #1a1a1a; }
+  h3 { font-size: 22px; font-weight: 600; color: #1a1a1a; }
   p  { font-size: 14px; color: #555; max-width: 200px; }
 
   .featureTag {
@@ -532,9 +575,9 @@
     color: #fff;
     border: none;
     border-radius: 24px;
-    padding: 12px 24px;
+    padding: 6px 24px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     margin-top: auto;
     position: relative;
     z-index: 2;
@@ -605,18 +648,19 @@
     background: #fff;
     border: none;
     border-radius: 24px;
-    padding: 12px 24px;
+    padding: 6px 24px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     cursor: pointer;
     position: relative;
     z-index: 2;
     width: fit-content;
     margin-top: auto;
-    background-image: linear-gradient(90deg, #F75801 0%, #D43400 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    // background-image: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+    // -webkit-background-clip: text;
+    // -webkit-text-fill-color: transparent;
+    // background-clip: text;
+    color: #F75801;
 
     &::before {
       content: "";
@@ -692,9 +736,9 @@
     background: #6b21a8;
     border: none;
     border-radius: 24px;
-    padding: 12px 24px;
+    padding: 6px 24px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 400;
     cursor: pointer;
     width: fit-content;
     margin-top: auto;
@@ -765,18 +809,19 @@
     background: #fff;
     border: none;
     border-radius: 24px;
-    padding: 12px 24px;
+    padding: 6px 24px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     cursor: pointer;
     width: fit-content;
     margin-top: auto;
     position: relative;
     z-index: 2;
-    background-image: linear-gradient(90deg, #F75801 0%, #D43400 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    // background-image: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+    // -webkit-background-clip: text;
+    // -webkit-text-fill-color: transparent;
+    // background-clip: text;
+    color: #F75801;
 
     &::before {
       content: "";
@@ -1258,7 +1303,7 @@
 
 .statItem {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  strong { font-size: 24px; font-weight: 700; color: #fff; }
+  strong { font-size: 24px; font-weight: 600; color: #fff; }
   span   { font-size: 12px; color: rgba(255,255,255,0.85); }
 }
 
@@ -1343,15 +1388,14 @@
   .qImgWrap { width: 60px; height: 60px; }
 
   .centerCard { border-radius: 16px; }
-  .heroBanner { padding: 20px 16px 12px; min-height: auto; }
+  .heroBanner { padding: 20px 16px 12px;}
   .heroBanner h1 { font-size: 22px; }
   .heroDesc { font-size: 12px; }
 
-  .wowInner { padding: 16px 8px 20px; }
-  .wowTitle { font-size: 18px; margin-left: 12px; }
+  // .wowInner { padding: 16px 8px 20px; }
   .wowUnderline { margin-left: 12px; }
   .wowCard { min-height: 160px; padding: 16px 8px; }
-  .wowIconBox { width: 60px; height: 60px; img { width: 40px; height: 40px; } }
+  // .wowIconBox { width: 40px; height: 40px;}
   .wowCard span { font-size: 13px; }
 
   .featureRow { grid-template-columns: 1fr; }
@@ -1430,7 +1474,7 @@
 
 @media (max-width: 480px) {
   .heroBanner h1 { font-size: 18px; }
-  .wowCard { min-height: 140px; }
+  // .wowCard { min-height: 140px; }
   .featureCard { min-height: 220px; }
   .catItem { width: 70px; span { font-size: 11px; } }
   .gridItem { width: 60px; span { font-size: 10px; } }
@@ -1440,8 +1484,7 @@
 /* ═══ Mobile-only hero fixes (no desktop changes) ═══ */
 @media (max-width: 768px) {
   .heroBanner {
-    padding: 20px 16px 16px;
-    min-height: 200px;
+    padding: 16px 16px 16px;
   }
 
   .heroBanner h1 {
@@ -1466,18 +1509,17 @@
   }
 
   /* WOW cards — show 2.5 cards on mobile as scroll hint */
-  .wowCard {
-    flex: 0 0 42vw;
-    min-height: 180px;
-    padding: 20px 8px;
-    span { font-size: 14px; }
-  }
+  // .wowCard {
+  //   flex: 0 0 42vw;
+  //   min-height: 180px;
+  //   padding: 20px 8px;
+  //   span { font-size: 14px; }
+  // }
 
-  .wowIconBox {
-    width: 70px;
-    height: 70px;
-    img { width: 44px; height: 44px; }
-  }
+  // .wowIconBox {
+  //   width: 50px;
+  //   height: 50px;
+  // }
 
   .wowArrow { display: none; }
 
@@ -1485,15 +1527,13 @@
     padding: 0 4px;
     gap: 12px;
   }
-
-  .wowTitle { font-size: 20px; }
 }
 
 @media (max-width: 480px) {
   .heroBanner h1 { font-size: 22px; }
   .heroDesc { font-size: 13px; }
   .heroBgImg { width: 208px; }
-  .wowCard { flex: 0 0 44vw; }
+  // .wowCard { flex: 0 0 44vw; }
 }
 
 /* ═══ Left cards — horizontal scroll on mobile only ═══ */
