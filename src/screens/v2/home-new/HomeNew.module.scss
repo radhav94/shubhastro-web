@@ -70,6 +70,9 @@
     flex-direction: column;
     gap: 12px;
   }
+  @media (max-width: 767px) {
+    flex-direction: column-reverse;
+  }
 }
 
 /* Left Cards */
@@ -82,9 +85,12 @@
     flex-direction: row;
     overflow-x: auto;
     gap: 12px;
-    order: 3;
+    // order: 3;
     -webkit-overflow-scrolling: touch;
     &::-webkit-scrollbar { display: none; }
+  }
+  @media (max-width: 767px) {
+    flex-direction: column;
   }
 }
 
@@ -242,6 +248,14 @@
   margin: 0;
   max-width: 340px;
   line-height: 1.5;
+  @media (width <= 768px) {
+    font-size: 14px;
+    max-width: 65%;
+  }
+  @media (width <= 767px) {
+    font-size: 12px;
+    max-width: 100%;
+  }
 }
 
 .heroBgImg {
@@ -330,6 +344,10 @@
     -webkit-overflow-scrolling: touch;
     &::-webkit-scrollbar { display: none; }
   }
+  @media (max-width: 767px) {
+    gap: 10px;
+    padding: 0 16px;
+  }
 }
 
 .wowArrow {
@@ -394,6 +412,10 @@
     min-height: 160px;
     padding: 16px 8px;
     span { font-size: 13px; }
+  }
+  @media (max-width: 767px) {
+    flex: 0 0 120px;
+    min-height: auto;
   }
 }
 
@@ -511,8 +533,9 @@
   @media (max-width: 1024px) {
     grid-template-columns: repeat(2, 1fr);
   }
-  @media (max-width: 600px) {
-    grid-template-columns: 1fr;
+  @media (max-width: 767px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 }
 
@@ -528,8 +551,19 @@
   position: relative;
   overflow: hidden;
   &:hover { transform: translateY(-3px); }
-  h3 { font-size: 20px; font-weight: 600; margin: 0; }
-  p  { font-size: 13px; line-height: 1.5; margin: 0; flex: 1; opacity: 0.85; }
+  h3 { font-size: 20px; font-weight: 600; margin: 0;
+    @media (width <= 767px) {
+      font-size: 16px;
+    }
+    @media (width <= 390px) {
+      font-size: 14px;
+    }
+   }
+  p  { font-size: 13px; line-height: 1.5; margin: 0; flex: 1; opacity: 0.85; 
+    @media (width <= 767px) {
+      display: none;
+    }
+  }
 }
 
 .featureTag {
@@ -558,8 +592,19 @@
   // min-height: 370px;
   justify-content: flex-start;
 
-  h3 { font-size: 22px; font-weight: 600; color: #1a1a1a; }
-  p  { font-size: 14px; color: #555; max-width: 200px; }
+  h3 { font-size: 22px; font-weight: 600; color: #1a1a1a; 
+      @media (width <= 767px) {
+        font-size: 16px;        
+      }
+      @media (width <= 390px) {
+        font-size: 14px;        
+      }
+  }
+  p  { font-size: 14px; color: #555; max-width: 200px;
+    @media (width <= 767px) {
+        display: none;     
+      }
+   }
 
   .featureTag {
     background: linear-gradient(90deg, #f75801, #d43400);
@@ -581,6 +626,9 @@
     margin-top: auto;
     position: relative;
     z-index: 2;
+    @media (width <= 767px) {
+      padding: 6px 6px;
+    }
   }
 }
 
@@ -700,13 +748,18 @@
 
   .fcMicIcon {
     text-align: center;
-    margin: 16px 0;
+    margin: 16px -16px;
     z-index: 2;
     position: relative;
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: calc(100% + 32px);
+    background-image: url("../../../assets/images/ai-pandit-bg.svg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
 
     .glowCircle {
       position: absolute;
@@ -732,6 +785,23 @@
     }
   }
 
+  .micWrap{
+    background: radial-gradient(circle,rgba(78, 46, 126, 1) 35%, rgba(78, 46, 126, 0) 100%);
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 100px;
+    @media (width <= 767px) {
+      width: 60px;
+      height: 60px;
+      svg{
+        width: 30px;
+        height: 30px;
+      }
+    }
+  }
   .fcCtaLight {
     background: #6b21a8;
     border: none;
@@ -799,10 +869,19 @@
     width: 64px;
     height: 64px;
     border-radius: 50%;
+    -o-object-fit: cover;
     object-fit: cover;
-    border: 3px solid #fff;
     margin-left: -18px;
+    background: #fff;
     &:first-child { margin-left: 0; }
+    @media (width <= 767px) {
+      width: 46px;
+      height: 46px;
+    }
+    @media (width <= 390px) {
+      width: 36px;
+      height: 36px;
+    }
   }
 
   .fcCtaLight {
@@ -1003,7 +1082,7 @@
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
-  width: 144px;
+  // width: 144px;
   cursor: pointer;
   transition: transform 0.15s;
   &:hover { transform: translateY(-2px); }
@@ -1016,6 +1095,9 @@
     white-space: pre-line;
     line-height: 1.4;
     font-family: 'Poppins', sans-serif;
+    @media (width <= 767px) {
+      font-size: 12px;      
+    }
   }
 }
 
@@ -1024,6 +1106,10 @@
   height: 144px;
   border-radius: 12px;
   flex-shrink: 0;
+  @media (width <= 767px) {
+    width: 90px;
+    height: 90px;
+  }
 }
 
 // keep old gridIcon for any legacy usage
@@ -1143,20 +1229,21 @@
 }
 
 .catGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
   margin-bottom: 14px;
-}
-
-.catItem {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  width: 144px;
-  transition: transform 0.15s;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  // @media (width <= 767px) {
+  //   grid-template-columns: repeat(2, 1fr);
+  // }
+  .catItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    // width: 144px;
+    transition: transform 0.15s;
   &:hover { transform: translateY(-2px); }
 
   span {
@@ -1169,14 +1256,16 @@
     font-family: 'Poppins', sans-serif;
   }
 }
-
 .catIconBox {
-  width: 80px;
-  height: 80px;
+  width: 100%;
+  height: 100px;
   background: #fff;
   border-radius: 8px;
   flex-shrink: 0;
 }
+}
+
+
 
 .catEmoji { font-size: 32px; }
 
@@ -1351,14 +1440,14 @@
    RESPONSIVE — TABLET (max 1024px)
    ═══════════════════════════════════════════════════════ */
 @media (max-width: 1024px) {
-  .featureRow {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  // .featureRow {
+  //   grid-template-columns: repeat(2, 1fr);
+  // }
   .quickGrid { padding: 24px 16px; }
-  .gridIconBox { width: 100px; height: 100px; }
-  .gridItem { width: 100px; span { font-size: 13px; } }
+  // .gridIconBox { width: 100px; height: 100px; }
+  // .gridItem { width: 100px; span { font-size: 13px; } }
   .twoColEqual { grid-template-columns: 1fr; }
-  .catItem { width: 110px; }
+  // .catItem { width: 110px; }
   .catIconBox { width: 70px; height: 70px; }
 }
 
@@ -1370,12 +1459,12 @@
     grid-template-columns: 1fr;
   }
 
-  .leftCards {
-    flex-direction: row;
-    overflow-x: auto;
-    gap: 12px;
-    &::-webkit-scrollbar { display: none; }
-  }
+  // .leftCards {
+  //   flex-direction: row;
+  //   overflow-x: auto;
+  //   gap: 12px;
+  //   &::-webkit-scrollbar { display: none; }
+  // }
 
   .qCard {
     min-width: 160px;
@@ -1387,31 +1476,31 @@
   .qText h3 { font-size: 14px; }
   .qImgWrap { width: 60px; height: 60px; }
 
-  .centerCard { border-radius: 16px; }
-  .heroBanner { padding: 20px 16px 12px;}
+  .centerCard { border-radius: 16px;padding: 16px; }
+  // .heroBanner { padding: 20px 16px 12px;}
   .heroBanner h1 { font-size: 22px; }
-  .heroDesc { font-size: 12px; }
+  // .heroDesc { font-size: 12px; }
 
   // .wowInner { padding: 16px 8px 20px; }
   .wowUnderline { margin-left: 12px; }
-  .wowCard { min-height: 160px; padding: 16px 8px; }
+  // .wowCard { min-height: 160px; padding: 16px 8px; }
   // .wowIconBox { width: 40px; height: 40px;}
   .wowCard span { font-size: 13px; }
 
-  .featureRow { grid-template-columns: 1fr; }
+  // .featureRow { grid-template-columns: 1fr; }
   .featureCard { min-height: 280px; }
 
   .astrologerSection { padding: 20px 12px; }
 
   .quickGrid { padding: 20px 12px; }
-  .gridIconBox { width: 80px; height: 80px; }
-  .gridItem { width: 80px; span { font-size: 11px; } }
+  // .gridIconBox { width: 80px; height: 80px; }
+  // .gridItem { width: 80px; span { font-size: 11px; } }
 
   .twoColSection { grid-template-columns: 1fr; }
   .twoColEqual { grid-template-columns: 1fr; }
 
-  .catGrid { gap: 10px; }
-  .catItem { width: 90px; span { font-size: 13px; } }
+  // .catGrid { gap: 10px; }
+  // .catItem { width: 90px; span { font-size: 13px; } }
   .catIconBox { width: 60px; height: 60px; }
 
   .discoverGrid { grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -1428,12 +1517,12 @@
    RESPONSIVE — SMALL MOBILE (max 480px)
    ═══════════════════════════════════════════════════════ */
 @media (max-width: 480px) {
-  .featureRow { grid-template-columns: 1fr; }
+  // .featureRow { grid-template-columns: 1fr; }
   .blogRow { grid-template-columns: 1fr; }
   .wowCard span { font-size: 12px; }
   .heroBanner h1 { font-size: 20px; }
-  .gridIconBox { width: 70px; height: 70px; }
-  .gridItem { width: 70px; span { font-size: 10px; } }
+  // .gridIconBox { width: 70px; height: 70px; }
+  // .gridItem { width: 70px; span { font-size: 10px; } }
 }
 
 /* ═══ Additional mobile fixes ═══ */
@@ -1449,12 +1538,12 @@
   }
 
   /* catItem smaller on mobile */
-  .catItem { width: 80px; }
+  // .catItem { width: 80px; }
   .catIconBox { width: 56px; height: 56px; }
 
   /* gridItem smaller */
-  .gridItem { width: 72px; }
-  .gridIconBox { width: 72px; height: 72px; }
+  // .gridItem { width: 72px; }
+  // .gridIconBox { width: 72px; height: 72px; }
 
   /* quickGrid horizontal scroll on mobile */
   .gridRow { gap: 12px; }
@@ -1471,30 +1560,21 @@
   .quickGrid { padding: 16px 12px; }
   .twoColEqual { padding: 0; }
 }
-
 @media (max-width: 480px) {
   .heroBanner h1 { font-size: 18px; }
   // .wowCard { min-height: 140px; }
-  .featureCard { min-height: 220px; }
-  .catItem { width: 70px; span { font-size: 11px; } }
-  .gridItem { width: 60px; span { font-size: 10px; } }
-  .gridIconBox { width: 60px; height: 60px; }
+  .featureCard { min-height: 250px; }
+  // .catItem { width: 70px; span { font-size: 11px; } }
+  // .gridItem { width: 60px; span { font-size: 10px; } }
+  // .gridIconBox { width: 60px; height: 60px; }
 }
 
 /* ═══ Mobile-only hero fixes (no desktop changes) ═══ */
 @media (max-width: 768px) {
-  .heroBanner {
-    padding: 16px 16px 16px;
-  }
 
   .heroBanner h1 {
     font-size: 26px;
     font-weight: 800;
-  }
-
-  .heroDesc {
-    font-size: 14px;
-    max-width: 65%;
   }
 
   .heroBgImg {
@@ -1523,28 +1603,24 @@
 
   .wowArrow { display: none; }
 
-  .wowRow {
-    padding: 0 4px;
-    gap: 12px;
-  }
 }
 
 @media (max-width: 480px) {
   .heroBanner h1 { font-size: 22px; }
-  .heroDesc { font-size: 13px; }
+  // .heroDesc { font-size: 13px; }
   .heroBgImg { width: 208px; }
   // .wowCard { flex: 0 0 44vw; }
 }
 
 /* ═══ Left cards — horizontal scroll on mobile only ═══ */
 @media (max-width: 900px) {
-  .leftCards {
-    flex-direction: row !important;
-    overflow-x: auto !important;
-    gap: 12px !important;
-    -webkit-overflow-scrolling: touch;
-    &::-webkit-scrollbar { display: none; }
-  }
+  // .leftCards {
+  //   flex-direction: row !important;
+  //   overflow-x: auto !important;
+  //   gap: 12px !important;
+  //   -webkit-overflow-scrolling: touch;
+  //   &::-webkit-scrollbar { display: none; }
+  // }
 
   .qCard {
     min-width: 200px !important;
