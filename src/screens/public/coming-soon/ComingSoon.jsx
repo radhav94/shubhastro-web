@@ -121,6 +121,8 @@ const ComingSoon = () => {
         mobileNumber: values.mobile.trim(),
         dateOfBirth: values.dob,
         iAmHereAs: values.interest.toLowerCase(),
+        placeOfBirth: values.placeOfBirth.trim(),
+        source: "landing_page",
         ...utmParams,
       };
       const { data } = await axios.post(API_URL, payload);
