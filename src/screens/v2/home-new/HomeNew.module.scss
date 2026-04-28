@@ -358,7 +358,8 @@
 
 /* WOW Card — Figma exact */
 .wowCard {
-  flex: 1;
+  flex: 0 0 calc(25% - 12px);
+  min-width: calc(25% - 12px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1070,6 +1071,10 @@
   border: 1px solid #f0ebe4;
 }
 
+.popularBox {
+  overflow: hidden;
+}
+
 .calHeader {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
   .sectionTitle { margin: 0; }
@@ -1554,4 +1559,58 @@
 
   .qText h3 { font-size: 15px !important; white-space: nowrap; }
   .qImgWrap { width: 70px !important; height: 70px !important; }
+}
+
+.mahadashaTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px 14px;
+  background: rgba(247, 88, 1, 0.1);
+  border: 1px solid rgba(247, 88, 1, 0.2);
+  border-radius: 20px;
+  font-size: 13px;
+  color: #f75801;
+  font-family: 'Poppins', sans-serif;
+
+  strong { font-weight: 600; }
+}
+
+.wowArrow:disabled { background: #ccc !important; box-shadow: none !important; cursor: not-allowed !important; }
+
+/* WOW cards scroll container */
+.wowCards {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  overflow: hidden;
+  scroll-behavior: smooth;
+}
+
+/* ═══ Blog section overrides for home-new ═══ */
+.blogSection {
+  :global(.blogsGrid) {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 16px !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  :global(.blogCard) {
+    min-width: 220px !important;
+    width: 220px !important;
+    flex-shrink: 0 !important;
+  }
+
+  :global(.blogImage) {
+    height: 160px !important;
+  }
+
+  :global(.blogTitle) {
+    font-size: 15px !important;
+  }
 }

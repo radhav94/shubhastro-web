@@ -1,8 +1,11 @@
 import styles from "./HomeNew.module.scss";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { getUserFromStorage } from "../../../utils/authStorage";
 import { Toast } from "../../../component";
-import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices";
+import { useGetHomeDetailsQuery, useGetAiSuitesQuery } from "../../../services/appServices/homeServices";
+import { useGetCurrentMahadashaFullQuery } from "../../../redux/api/kundli/dashaApi";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
@@ -10,6 +13,8 @@ import ProfileModals from "../../private/kundli/components/ProfileModals";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import AstrologersSection from "../home/components/AstrologersSection";
 import BlogsSection from "../home/components/BlogsSection";
+import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
+import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 
 // Left card images
@@ -39,6 +44,7 @@ import sectionBg from "../../../assets/images/section-bg.png";
 
 const HomeNew = () => {
   const requireAuth = useRequireAuth();
+  const navigate = useNavigate();
   const user = getUserFromStorage();
   const name = user?.firstName || "Guest";
 
@@ -56,17 +62,92 @@ const HomeNew = () => {
   const { data } = useGetHomeDetailsQuery();
   const homeList = data?.data?.list;
 
-  // Extract astrologer section from home API
-  const astrologers = useMemo(() => {
-    const section = homeList?.find(s =>
-      s.display_type === "astrologer-list" || s.display_type === "astrologer-grid"
-    );
+  // API 2: AI Suites (WOW Suite icons)
+  const { data: aiSuitesData } = useGetAiSuitesQuery();
+  const wowSuiteItems = useMemo(() => {
+    const section = aiSuitesData?.data?.list?.find(s => s.display_type === "wow-suite");
     return section?.content || [];
+  }, [aiSuitesData]);
+
+  const [showMobileAppModal, setShowMobileAppModal] = useState(false);
+
+  const handleWowCardClick = (item) => {
+    if (!item.slug) return;
+    if (item.slug === "ar-vastu-scanner") {
+      setShowMobileAppModal(true);
+    } else {
+      navigate(`/aiwow/${item.slug}`);
+    }
+  };
+  const [wowIndex, setWowIndex] = useState(0);
+  const wowScrollRef = useRef(null);
+  const wowAllItems = useMemo(() => wowSuiteItems.length > 0 ? wowSuiteItems : [
+    { icon: vastuIcon, title: "AR Vastu\nScanner" },
+    { icon: palmIcon, title: "Ai Palmistry\nScanner" },
+    { icon: faceIcon, title: "Astro Face\nReading" },
+    { icon: signatureIcon, title: "AI Signature\nAnalysis" },
+  ], [wowSuiteItems]);
+
+  const scrollWow = (dir) => {
+    const container = wowScrollRef.current;
+    if (!container) return;
+    const cardWidth = container.children[0]?.offsetWidth + 16; // card + gap
+    const next = Math.max(0, Math.min(wowAllItems.length - 4, wowIndex + dir));
+    setWowIndex(next);
+    container.scrollTo({ left: next * cardWidth, behavior: 'smooth' });
+  };
+
+  // API 1: Current Mahadasha — use selected kundli profile
+  const selectedProfile = useSelector(s => s.aiwow?.selectedKundliProfile);
+  const kundliParams = useMemo(() => {
+    if (!selectedProfile) return null;
+    return {
+      dob: selectedProfile.dob,
+      tob: selectedProfile.tob,
+      lat: selectedProfile.lat,
+      lon: selectedProfile.lon,
+      tz: selectedProfile.tz || 5.5,
+      lang: "en",
+    };
+  }, [selectedProfile]);
+
+  const { data: mahadashaData } = useGetCurrentMahadashaFullQuery(kundliParams, {
+    skip: !kundliParams,
+  });
+  const currentMahadasha = mahadashaData?.response?.mahadasha?.find(m => {
+    const now = Date.now();
+    return new Date(m.start).getTime() <= now && new Date(m.end).getTime() >= now;
+  });
+
+  // Extract astrologer section from home API — slug: top-rated-astrologer
+  const astrologerSection = useMemo(() => {
+    return homeList?.find(s => s.slug === "top-rated-astrologer");
   }, [homeList]);
+  const astrologers = astrologerSection?.content || [];
 
   // Extract blog section from home API
   const blogSection = useMemo(() => {
     return homeList?.find(s => s.display_type === "blog");
+  }, [homeList]);
+
+  // Extract complementary services (left cards)
+  const complementaryServices = useMemo(() => {
+    return homeList?.find(s => s.display_type === "complementary-services")?.content || [];
+  }, [homeList]);
+
+  // Extract astrologers by category
+  const categoriesData = useMemo(() => {
+    return homeList?.find(s => s.display_type === "astrologers-by-category")?.content || [];
+  }, [homeList]);
+
+  // Extract discover more
+  const discoverMoreData = useMemo(() => {
+    return homeList?.find(s => s.display_type === "discover-more")?.content || [];
+  }, [homeList]);
+
+  // Extract popular astrologers
+  const popularAstrologers = useMemo(() => {
+    return homeList?.find(s => s.slug === "popular-astrologers")?.content || [];
   }, [homeList]);
 
   const { profiles, isCreating, showAddProfile, showEditProfile, formData, editFormData,
@@ -117,11 +198,11 @@ const HomeNew = () => {
         {/* LEFT — Quick Action Cards */}
         <div className={styles.leftCards}>
           {[
-            { title: "Generate\nMy Kundli", desc: "Lorem ipsum is simply dummy text", img: kundliImg },
-            { title: "Talk To\nAstrologer", desc: "Lorem ipsum is simply dummy text", img: astrologerImg },
-            { title: "Explore\nHoroscopes", desc: "Lorem ipsum is simply dummy text", img: horoscopeImg },
+            { title: "Generate\nMy Kundli", desc: "Lorem ipsum is simply dummy text", img: kundliImg, path: "/kundli" },
+            { title: "Talk To\nAstrologer", desc: "Lorem ipsum is simply dummy text", img: astrologerImg, path: "/chat-with-astrologers" },
+            { title: "Explore\nHoroscopes", desc: "Lorem ipsum is simply dummy text", img: horoscopeImg, path: "/horoscopes/daily-horoscope" },
           ].map((card, i) => (
-            <div key={i} className={styles.qCard}>
+            <div key={i} className={styles.qCard} onClick={() => navigate(card.path)}>
               <div className={styles.qText}>
                 <h3>{card.title}</h3>
                 <p>{card.desc}</p>
@@ -142,6 +223,11 @@ const HomeNew = () => {
                 <p className={styles.greeting}>Hello, {name}! 👋</p>
                 <h1>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></h1>
                 <p className={styles.heroDesc}>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+                {currentMahadasha && (
+                  <div className={styles.mahadashaTag}>
+                    🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong>
+                  </div>
+                )}
               </div>
               <div className={styles.heroBgImg}>
                 <img src={heroBg} alt="" />
@@ -167,26 +253,24 @@ const HomeNew = () => {
 
               {/* <div className={styles.wowUnderline}><span className={styles.wowLine} /><span className={styles.wowDot}>●</span></div> */}
               <div className={styles.wowRow}>
-                <button className={styles.wowArrow}>‹</button>
-                {[
-                  { icon: vastuIcon, label: "AR Vastu\nScanner" },
-                  { icon: palmIcon, label: "Ai Palmistry\nScanner" },
-                  { icon: faceIcon, label: "Astro Face\nReading" },
-                  { icon: signatureIcon, label: "AI Signature\nAnalysis" },
-                ].map((item, i) => (
-                  <div key={i} className={styles.wowCard}>
-                    <div className={styles.wowIconBox}><img src={item.icon} alt="" /></div>
-                    <span>{item.label}</span>
-                  </div>
-                ))}
-                <button className={styles.wowArrow}>›</button>
+                <button className={styles.wowArrow} onClick={() => scrollWow(-1)} disabled={wowIndex === 0}>‹</button>
+                <div className={styles.wowCards} ref={wowScrollRef}>
+                  {wowAllItems.map((item, i) => (
+                    <div key={i} className={styles.wowCard} onClick={() => handleWowCardClick(item)} style={{ cursor: item.slug ? 'pointer' : 'default' }}>
+                      <div className={styles.wowIconBox}>
+                        <img src={item.icon || item.iconUrl || item.icon_url} alt={item.title} />
+                      </div>
+                      <span>{item.title}</span>
+                    </div>
+                  ))}
+                </div>
+                <button className={styles.wowArrow} onClick={() => scrollWow(1)} disabled={wowIndex >= wowAllItems.length - 1}>›</button>
               </div>
               {/* Pagination dots */}
               <div className={styles.wowDots}>
-                <span className={styles.dotFilled} />
-                <span className={styles.dotEmpty} />
-                <span className={styles.dotEmpty} />
-                <span className={styles.dotFilled} />
+                {wowAllItems.map((_, i) => (
+                  <span key={i} className={i === wowIndex ? styles.dotFilled : styles.dotEmpty} onClick={() => scrollWow(i - wowIndex)} style={{ cursor: 'pointer' }} />
+                ))}
               </div>
             </div>
           </div>
@@ -224,7 +308,7 @@ const HomeNew = () => {
         </div>
         <div className={styles.featureRow}>
           {/* Laal Kitaab — special card with image */}
-          <div className={`${styles.featureCard} ${styles.laalKitaab}`}>
+          <div className={`${styles.featureCard} ${styles.laalKitaab}`} onClick={() => navigate('/lal-kitab')} style={{ cursor: 'pointer' }}>
             <span className={styles.featureTag}>New</span>
             <h3>Laal Kitaab</h3>
             <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
@@ -243,7 +327,7 @@ const HomeNew = () => {
           </div>
 
           {/* AI Pandit Voice */}
-          <div className={`${styles.featureCard} ${styles.aiPanditVoice}`}>
+          <div className={`${styles.featureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }))} style={{ cursor: 'pointer' }}>
             <span className={styles.featureTag}>New</span>
             <div className={styles.fcTop}>
               <h3>AI Pandit (Voice)</h3>
@@ -272,7 +356,7 @@ const HomeNew = () => {
           </div>
 
           {/* Live Community */}
-          <div className={`${styles.featureCard} ${styles.liveCommunity}`}>
+          <div className={`${styles.featureCard} ${styles.liveCommunity}`} onClick={() => navigate('/live')} style={{ cursor: 'pointer' }}>
             <span className={styles.featureTag}>New</span>
             <div className={styles.fcTop}>
               <h3>ShubhAstro Live Community</h3>
@@ -292,9 +376,9 @@ const HomeNew = () => {
       <section className={styles.astrologerSection} style={{ backgroundImage: `url(${sectionBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className={styles.sectionHeader}>
           <div className={styles.sectionTitleBlock}>
-            <h2 className={styles.sectionTitle}>TOP RATED ASTROLOGERS FOR YOU</h2>
+            <h2 className={styles.sectionTitle}>{astrologerSection?.display_title || "TOP RATED ASTROLOGERS FOR YOU"}</h2>
           </div>
-          <button className={styles.viewAllBtn}>View all →</button>
+          <button className={styles.viewAllBtn} onClick={() => navigate('/chat-with-astrologers')}>View all →</button>
         </div>
         <AstrologersSection
           title=""
@@ -337,19 +421,21 @@ const HomeNew = () => {
             {/* <div className={styles.titleUnderline}><span className={styles.titleLine}/><span className={styles.titleDot}/><span className={styles.titleLine}/></div> */}
           </div>
           <div className={styles.catGrid}>
-            {[
-              { label: "Love &\nRelationship" },
-              { label: "Career &\nBusiness" },
-              { label: "Health &\nWellness" },
-              { label: "Money &\nFinance" },
-              { label: "Marriage &\nFamily" },
-              { label: "Child &\nEducation" },
-            ].map((c, i) => (
-              <div key={i} className={styles.catItem}>
-                <div className={styles.catIconBox} />
-                <span>{c.label}</span>
-              </div>
-            ))}
+            {(categoriesData.length > 0 ? categoriesData : [
+              { title: "Love &\nRelationship", slug: "love-relationships" },
+              { title: "Career &\nBusiness", slug: "career-business" },
+              { title: "Health &\nWellness", slug: "health-wellness" },
+              { title: "Money &\nFinance", slug: "money-finance" },
+              { title: "Marriage &\nFamily", slug: "marriage-family" },
+              { title: "Child &\nEducation", slug: "child-education" },
+            ]).map((c, i) => {
+              return (
+                <div key={i} className={styles.catItem} onClick={() => navigate('/chat-with-astrologers', { state: { selectedType: c.slug } })} style={{ cursor: 'pointer' }}>
+                  <div className={styles.catIconBox} style={{ background: '#fff' }} />
+                  <span>{c.title}</span>
+                </div>
+              );
+            })}
           </div>
           {/* <button className={styles.viewAllLink}>View All Categories →</button> */}
         </div>
@@ -388,27 +474,30 @@ const HomeNew = () => {
             {/* <div className={styles.titleUnderline}><span className={styles.titleLine}/><span className={styles.titleDot}/><span className={styles.titleLine}/></div> */}
           </div>
           <div className={styles.discoverGrid}>
-            {[
-              { label: "Panchang",       bg: "#ffedd5" },
-              { label: "Kundli Matching", bg: "#fef2f2" },
-              { label: "Numerology",     bg: "#f5f3ff" },
-              { label: "Tarot Reading",  bg: "#fecaca" },
-            ].map((item, i) => (
-              <div key={i} className={styles.discoverItem}>
-                <div className={styles.discoverIconBox} style={{ background: item.bg }} />
-                <span>{item.label}</span>
-              </div>
-            ))}
+            {(discoverMoreData.length > 0 ? discoverMoreData : [
+              { title: "Panchang",        bg: "#ffedd5" },
+              { title: "Kundli Matching", bg: "#fef2f2" },
+              { title: "Numerology",      bg: "#f5f3ff" },
+              { title: "Tarot Reading",   bg: "#fecaca" },
+            ]).map((item, i) => {
+              const bgs = ["#ffedd5", "#fef2f2", "#f5f3ff", "#fecaca"];
+              return (
+                <div key={i} className={styles.discoverItem}>
+                  <div className={styles.discoverIconBox} style={{ background: item.bg || bgs[i % 4] }} />
+                  <span>{item.title}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
         <div className={styles.popularBox}>
           <div className={styles.calHeader}>
-            <h2 className={styles.sectionTitle}>TOP RATED ASTROLOGER FOR YOU</h2>
-            <button className={styles.viewAllBtn}>View All →</button>
+            <h2 className={styles.sectionTitle}>Popular Astrologers</h2>
+            <button className={styles.viewAllBtn} onClick={() => navigate('/chat-with-astrologers')}>View All →</button>
           </div>
           <AstrologersSection
             title=""
-            astrologers={astrologers.slice(0, 3)}
+            astrologers={popularAstrologers}
             onConnect={handleConnectClick}
           />
         </div>
@@ -419,7 +508,7 @@ const HomeNew = () => {
         <BlogsSection
           blogData={blogSection?.content || []}
           title={blogSection?.display_title || "EXPLORE BLOGS"}
-          showMore={blogSection?.show_more}
+          showMore={true}
         />
       </section>
 
@@ -457,6 +546,8 @@ const HomeNew = () => {
         onChatNow={(a) => handleConnectClick(a, "chat", true)}
         onCallNow={(a) => handleConnectClick(a, "audio", true)}
       />
+      <PanditAIBubble />
+      <MobileAppModal isOpen={showMobileAppModal} onClose={() => setShowMobileAppModal(false)} />
     </>
   );
 };
