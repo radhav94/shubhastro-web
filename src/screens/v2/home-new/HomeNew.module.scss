@@ -1167,6 +1167,9 @@
 .categoryBox, .calendarBox, .discoverBox, .popularBox {
   border-radius: 20px;
   padding: 20px;
+  @media (width <= 767px) {
+    padding: 16px;    
+  }
 }
 
 .categoryBox {
@@ -1177,9 +1180,14 @@
   // background: #fff;
   border: 1px solid #f0ebe4;
 }
-
+.anotherClass{
+  margin-bottom: 0;
+}
 .popularBox {
   overflow: hidden;
+  border: none;
+  padding: 0;
+  border-radius: 0px;
   @media (width <= 767px) {
     padding: 1rem 0 0 0;
   }
@@ -1210,7 +1218,7 @@
 .calBody {
   flex: 1;
   background: #f4f4f5;
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -1225,7 +1233,7 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.calChips { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.calChips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
 .calChip {
   height: 32px; padding: 0 14px;
@@ -1285,7 +1293,7 @@
   &:hover { transform: translateY(-2px); }
 
   span {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
     color: #1f2937;
     text-align: center;

@@ -378,7 +378,7 @@ const HomeNew = () => {
       </section>
 
       {/* ═══ SECTION 3 — Top Rated Astrologers ═══ */}
-      <section className={styles.astrologerSection} style={{ backgroundImage: `url(${sectionBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      <section className={styles.astrologerSection} style={{ backgroundColor: `#FFE9E5`,paddingBottom:'1px',paddingTop:'24px'}}>
         <div className={styles.sectionHeader}>
           <div className={styles.sectionTitleBlock}>
             <h2 className={styles.sectionTitle}>{astrologerSection?.display_title || "TOP RATED ASTROLOGERS FOR YOU"}</h2>
@@ -387,7 +387,7 @@ const HomeNew = () => {
         </div>
         <AstrologersSection
           title=""
-          className={styles.astrologerCard1}
+          className={`${styles.astrologerCard1} ${styles.anotherClass}`}
           astrologers={astrologers}
           onConnect={handleConnectClick}
         />
@@ -484,7 +484,7 @@ const HomeNew = () => {
       {/* ═══ SECTION 6 — Discover More + Popular Astrologers ═══ */}
       <section className={styles.twoColSection} style={{ backgroundImage: `url(${sectionBg})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '20px' }}>
         <div className={styles.discoverBox}>
-          <div className={`${styles.titleWithBottomDevider}`}>
+          <div className={`${styles.titleWithBottomDevider} ${styles.tWBmarginBottomZero}`}>
             <h4 className={styles.wowTitle}>DISCOVER MORE</h4>
             <div className={styles.BottomDevider}>
               <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
