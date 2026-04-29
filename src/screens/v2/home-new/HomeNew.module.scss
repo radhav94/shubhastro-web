@@ -206,6 +206,9 @@
   &.tWBmarginLeft{
     margin-left: 16px;
   }
+  &.tWBmarginBottomZero{
+    margin-bottom: 0px;
+  }
   .wowTitle {
     font-size: 1rem;
     font-weight: 600;
@@ -1062,7 +1065,7 @@
   background: #fafaf9;
   border: 1px solid rgba(0,0,0,0.08);
   border-radius: 20px;
-  padding: 40px;
+  padding: 24px;
 }
 
 .gridRow {
@@ -1085,7 +1088,7 @@
   &:hover { transform: translateY(-2px); }
 
   span {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 500;
     color: #1f2937;
     text-align: center;
@@ -1093,6 +1096,9 @@
     line-height: 1.4;
     font-family: 'Poppins', sans-serif;
     @media (width <= 767px) {
+      font-size: 14px;      
+    }
+    @media (width <= 390px) {
       font-size: 12px;      
     }
   }
@@ -1142,6 +1148,9 @@
 .categoryBox, .calendarBox, .discoverBox, .popularBox {
   border-radius: 20px;
   padding: 20px;
+  @media (width <= 767px) {
+    padding: 16px;    
+  }
 }
 
 .categoryBox {
@@ -1152,9 +1161,14 @@
   // background: #fff;
   border: 1px solid #f0ebe4;
 }
-
+.anotherClass{
+  margin-bottom: 0;
+}
 .popularBox {
   overflow: hidden;
+  border: none;
+  padding: 0;
+  border-radius: 0px;
   @media (width <= 767px) {
     padding: 1rem 0 0 0;
   }
@@ -1185,7 +1199,7 @@
 .calBody {
   flex: 1;
   background: #f4f4f5;
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -1200,7 +1214,7 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.calChips { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.calChips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
 .calChip {
   height: 32px; padding: 0 14px;
@@ -1260,7 +1274,7 @@
   &:hover { transform: translateY(-2px); }
 
   span {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
     color: #1f2937;
     text-align: center;

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useState, useCallback } from "react";
+import { useParams, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import styles from "./LalKitabDetail.module.scss";
 import {
   useGetLalKitabChartQuery,
@@ -24,7 +24,34 @@ const LalKitabDetail = () => {
   const { lalKitabId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("houses");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const validTabs = TABS.map((t) => t.key);
+  const tabFromUrl = searchParams.get("tab");
+  const initialTab = validTabs.includes(tabFromUrl) ? tabFromUrl : "houses";
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  const handleTabChange = useCallback((key) => {
+    setActiveTab(key);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("tab", key);
+      // Clear planet sub-tab when switching away from planets
+      if (key !== "planets") next.delete("planet");
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
+
+  const planetFromUrl = parseInt(searchParams.get("planet"), 10);
+  const initialPlanet = Number.isFinite(planetFromUrl) ? planetFromUrl : 0;
+
+  const handlePlanetChange = useCallback((idx) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("planet", String(idx));
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
 
   // Use teva data from navigation state (from generate-teva response)
   const tevaData = location.state?.tevaData;
@@ -64,7 +91,7 @@ const LalKitabDetail = () => {
           <button
             key={tab.key}
             className={`${styles.tab} ${activeTab === tab.key ? styles.active : ""}`}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => handleTabChange(tab.key)}
           >
             {tab.label}
           </button>
@@ -76,7 +103,7 @@ const LalKitabDetail = () => {
           <HousesGrid houses={houses} isLoading={chartLoading && planetLoading && !tevaData?.houses?.length} />
         )}
         {activeTab === "planets" && (
-          <PlanetDetailsAccordion planets={planetDetails} isLoading={planetLoading} />
+          <PlanetDetailsAccordion planets={planetDetails} isLoading={planetLoading} initialSelected={initialPlanet} onPlanetChange={handlePlanetChange} />
         )}
         {activeTab === "debts" && (
           <DebtsSection debts={debts} isLoading={debtsLoading} />
