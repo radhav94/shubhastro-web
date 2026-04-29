@@ -358,7 +358,8 @@ const HomeNew = () => {
           </div>
           {/* Occult World */}
           <div className={`${styles.featureCard} ${styles.occultWorld}`}
-            style={aiServicesItems[1]?.image_url_web ? { backgroundImage: `url(${aiServicesItems[1].image_url_web})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+            onClick={() => navigate('/occult')}
+            style={{ cursor: 'pointer', ...(aiServicesItems[1]?.image_url_web ? { backgroundImage: `url(${aiServicesItems[1].image_url_web})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}) }}
           >
             <span className={styles.featureTag}>New</span>
             <div className={styles.fcTop}>
