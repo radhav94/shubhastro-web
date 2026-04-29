@@ -756,6 +756,14 @@ const TopHeader = () => {
             >
               Lal Kitab
             </NavLink>
+            <NavLink
+              to="/occult"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Occult
+            </NavLink>
             <CalculatorsDropdown />
           </nav>
         </div>
@@ -883,6 +891,15 @@ const TopHeader = () => {
               }
             >
               Lal Kitab
+            </NavLink>
+            <NavLink
+              to="/occult"
+              onClick={() => setIsDrawerOpen(false)}
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Occult
             </NavLink>
             <MobileCalculatorsAccordion onClose={() => setIsDrawerOpen(false)} />
             <NavLink

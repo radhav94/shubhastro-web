@@ -199,6 +199,7 @@ import LalKitab from "../../screens/private/lalKitab/LalKitab";
 import LalKitabDetail from "../../screens/private/lalKitab/detail/LalKitabDetail";
 import LalKitabZodiac from "../../screens/private/lalKitab/zodiac/LalKitabZodiac";
 import LalKitabProblems from "../../screens/private/lalKitab/problems/LalKitabProblems";
+import OccultChat from "../../screens/private/occult/OccultChat";
 
 export const PATH = {
   // DEFAULT: {
@@ -385,6 +386,12 @@ export const PATH = {
     LAL_KITAB_PROBLEMS: {
       path: "/lal-kitab/problems",
       element: LalKitabProblems,
+    },
+
+    // Occult
+    OCCULT: {
+      path: "/occult",
+      element: OccultChat,
     },
 
     MATCHMAKING: {
