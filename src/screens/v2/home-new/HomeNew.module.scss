@@ -1087,7 +1087,7 @@
   background: #fafaf9;
   border: 1px solid rgba(0,0,0,0.08);
   border-radius: 20px;
-  padding: 40px;
+  padding: 24px;
 }
 
 .gridRow {
@@ -1110,7 +1110,7 @@
   &:hover { transform: translateY(-2px); }
 
   span {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 500;
     color: #1f2937;
     text-align: center;
@@ -1118,6 +1118,9 @@
     line-height: 1.4;
     font-family: 'Poppins', sans-serif;
     @media (width <= 767px) {
+      font-size: 14px;      
+    }
+    @media (width <= 390px) {
       font-size: 12px;      
     }
   }
