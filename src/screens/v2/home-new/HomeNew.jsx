@@ -4,8 +4,9 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getUserFromStorage } from "../../../utils/authStorage";
 import { Toast } from "../../../component";
-import { useGetHomeDetailsQuery, useGetAiSuitesQuery } from "../../../services/appServices/homeServices";
+import { useGetHomeDetailsQuery, useGetAiSuitesQuery, useGetNewHomeDetailsQuery } from "../../../services/appServices/homeServices";
 import { useGetCurrentMahadashaFullQuery } from "../../../redux/api/kundli/dashaApi";
+import { useFetchAdvancePanchangQuery } from "../../../redux/api/panchang/panchangApi";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
@@ -59,8 +60,8 @@ const HomeNew = () => {
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
 
   // Fetch real home data for astrologers
-  const { data } = useGetHomeDetailsQuery();
-  const homeList = data?.data?.list;
+  const { data: newHomeData } = useGetNewHomeDetailsQuery();
+  const homeList = newHomeData?.data?.list;
 
   // API 2: AI Suites (WOW Suite icons)
   const { data: aiSuitesData } = useGetAiSuitesQuery();
@@ -125,14 +126,47 @@ const HomeNew = () => {
   }, [homeList]);
   const astrologers = astrologerSection?.content || [];
 
-  // Extract blog section from home API
+  // Live muhurat data from panchang API
+  const panchangPayload = useMemo(() => {
+    const pad = (n) => String(n).padStart(2, "0");
+    const now = new Date();
+    return { day: pad(now.getDate()), month: pad(now.getMonth() + 1), year: now.getFullYear(), hour: pad(now.getHours()), min: pad(now.getMinutes()), lat: 19.132, lon: 72.342, tzone: 5.5 };
+  }, []);
+  const { data: panchangData } = useFetchAdvancePanchangQuery(panchangPayload);
+  const panchangResponse = panchangData?.response;
+  const muhurats = useMemo(() => {
+    if (!panchangResponse) return [
+      { name: "Abhijit Muhurat", start: "—", end: "—" },
+      { name: "Rahu Kaal", start: "—", end: "—" },
+      { name: "Gulika Kaal", start: "—", end: "—" },
+      { name: "Yamakanta Kaal", start: "—", end: "—" },
+    ];
+    const fmt = (t) => t?.trim() || "—";
+    return [
+      { name: "Abhijit Muhurat", start: fmt(panchangResponse?.advanced_details?.abhijit_muhurta?.start), end: fmt(panchangResponse?.advanced_details?.abhijit_muhurta?.end) },
+      { name: "Rahu Kaal", start: fmt(panchangResponse?.rahukaal?.split("to")[0]), end: fmt(panchangResponse?.rahukaal?.split("to")[1]) },
+      { name: "Gulika Kaal", start: fmt(panchangResponse?.gulika?.split("to")[0]), end: fmt(panchangResponse?.gulika?.split("to")[1]) },
+      { name: "Yamakanta Kaal", start: fmt(panchangResponse?.yamakanta?.split("to")[0]), end: fmt(panchangResponse?.yamakanta?.split("to")[1]) },
+    ];
+  }, [panchangResponse]);
   const blogSection = useMemo(() => {
     return homeList?.find(s => s.display_type === "blog");
   }, [homeList]);
 
+  // Extract ai-services section (feature cards)
+  const aiServicesSection = useMemo(() => {
+    return homeList?.find(s => s.slug === "ai-services");
+  }, [homeList]);
+  const aiServicesItems = aiServicesSection?.content || [];
+
+  // Extract quick-link-section
+  const quickLinkItems = useMemo(() => {
+    return homeList?.find(s => s.slug === "quick-link-section")?.content || [];
+  }, [homeList]);
+
   // Extract complementary services (left cards)
   const complementaryServices = useMemo(() => {
-    return homeList?.find(s => s.display_type === "complementary-services")?.content || [];
+    return homeList?.find(s => s.slug === "complementary-services")?.content || [];
   }, [homeList]);
 
   // Extract astrologers by category
@@ -197,21 +231,25 @@ const HomeNew = () => {
       <section className={styles.heroRow}>
         {/* LEFT — Quick Action Cards */}
         <div className={styles.leftCards}>
-          {[
-            { title: "Generate\nMy Kundli", desc: "Lorem ipsum is simply dummy text", img: kundliImg, path: "/kundli" },
-            { title: "Talk To\nAstrologer", desc: "Lorem ipsum is simply dummy text", img: astrologerImg, path: "/chat-with-astrologers" },
-            { title: "Explore\nHoroscopes", desc: "Lorem ipsum is simply dummy text", img: horoscopeImg, path: "/horoscopes/daily-horoscope" },
-          ].map((card, i) => (
-            <div key={i} className={styles.qCard} onClick={() => navigate(card.path)}>
-              <div className={styles.qText}>
-                <h3>{card.title}</h3>
-                <p>{card.desc}</p>
+          {complementaryServices.map((card, i) => {
+            const slugPaths = {
+              "free-kundli": "/kundli",
+              "talk-to-astrologer": "/chat-with-astrologers",
+              "daily-horoscope": "/horoscopes/daily-horoscope",
+            };
+            const path = slugPaths[card.slug] || "/";
+            return (
+              <div key={i} className={styles.qCard} onClick={() => navigate(path)}>
+                <div className={styles.qText}>
+                  <h3>{card.title}</h3>
+                  <p>{card.description}</p>
+                </div>
+                <div className={styles.qImgWrap}>
+                  <img src={card.image_url || card.icon} alt={card.title} />
+                </div>
               </div>
-              <div className={styles.qImgWrap}>
-                <img src={card.img} alt="" />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* CENTER — Hero + WOW (single card) */}
@@ -280,12 +318,7 @@ const HomeNew = () => {
         <div className={styles.rightPanel}>
           <h4>CRUCIAL MUHURATS</h4>
           <div className={styles.muhuratGrid}>
-            {[
-              { name: "Abhijit Muhurat", start: "12:29 PM", end: "07:13 PM" },
-              { name: "Rahu Kaal", start: "12:29 PM", end: "07:13 PM" },
-              { name: "Gulika Kaal", start: "12:29 PM", end: "07:13 PM" },
-              { name: "Yamakanta Kaal", start: "12:29 PM", end: "07:13 PM" },
-            ].map((m, i) => (
+            {muhurats.map((m, i) => (
               <div key={i} className={styles.muhuratItem}>
                 <h5>{m.name}</h5>
                 <div className={styles.timeRow}><span className={styles.greenBar} /><span className={styles.label}>Start</span><span className={styles.time}>{m.start}</span></div>
@@ -299,7 +332,7 @@ const HomeNew = () => {
       {/* ═══ SECTION 2 — Feature Cards (LOREM IPSUM AI) ═══ */}
       <section className={styles.featureSection}>
         <div className={`${styles.titleWithBottomDevider}`}>
-          <h4 className={styles.wowTitle}>LOREM IPSUM AI</h4>
+          <h4 className={styles.wowTitle}>{aiServicesSection?.display_title || "LOREM IPSUM AI"}</h4>
           <div className={styles.BottomDevider}>
               <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
                 <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
@@ -308,69 +341,49 @@ const HomeNew = () => {
         </div>
         <div className={styles.featureRow}>
           {/* Laal Kitaab — special card with image */}
-          <div className={`${styles.featureCard} ${styles.laalKitaab}`} onClick={() => navigate('/lal-kitab')} style={{ cursor: 'pointer' }}>
+          <div
+            className={`${styles.featureCard} ${styles.laalKitaab}`}
+            onClick={() => navigate('/lal-kitab')}
+            style={{
+              cursor: 'pointer',
+              backgroundImage: `url(${aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.images_for_web || aiServicesItems[0]?.image_url || laalKitaabImg})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
             <span className={styles.featureTag}>New</span>
-            <h3>Laal Kitaab</h3>
+            <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title || "Laal Kitaab"}</h3>
             <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
             <button className={styles.featureCta}>Explore Laal Kitaab &gt;</button>
-            <img src={laalKitaabImg} alt="Laal Kitaab" className={styles.laalKitaabImg} />
           </div>
           {/* Occult World */}
-          <div className={`${styles.featureCard} ${styles.occultWorld}`}>
+          <div className={`${styles.featureCard} ${styles.occultWorld}`}
+            style={aiServicesItems[1]?.image_url_web ? { backgroundImage: `url(${aiServicesItems[1].image_url_web})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+          >
             <span className={styles.featureTag}>New</span>
             <div className={styles.fcTop}>
-              <h3>Occult World</h3>
+              <h3>{aiServicesItems[1]?.display_title || aiServicesItems[1]?.title || "Occult World"}</h3>
               <p>Explore the mystical &amp; hidden sciences for deeper insights into your life.</p>
             </div>
             <button className={styles.fcCtaLight}>Explore Occult &gt;</button>
-            <img src={occultWorldImg} alt="Occult World" className={styles.fcImg} />
           </div>
 
           {/* AI Pandit Voice */}
-          <div className={`${styles.featureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }))} style={{ cursor: 'pointer' }}>
+          <div className={`${styles.featureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }))} style={{ cursor: 'pointer', ...(aiServicesItems[2]?.image_url_web ? { backgroundImage: `url(${aiServicesItems[2].image_url_web})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}) }}>
             <span className={styles.featureTag}>New</span>
             <div className={styles.fcTop}>
-              <h3>AI Pandit (Voice)</h3>
+              <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title || "AI Pandit (Voice)"}</h3>
               <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-            </div>
-            <div className={styles.fcMicIcon}>
-              {/* <svg xmlns="http://www.w3.org/2000/svg" width="130" height="130" viewBox="0 0 130 130" fill="none" className={styles.glowCircle}>
-                <g filter="url(#filter0_f_12155_25282)">
-                  <circle cx="65" cy="65" r="50" fill="url(#paint0_radial_12155_25282)"/>
-                </g>
-                <defs>
-                  <filter id="filter0_f_12155_25282" x="0" y="0" width="130" height="130" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-                    <feFlood floodOpacity="0" result="BackgroundImageFix"/>
-                    <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-                    <feGaussianBlur stdDeviation="7.5" result="effect1_foregroundBlur_12155_25282"/>
-                  </filter>
-                  <radialGradient id="paint0_radial_12155_25282" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(65 65) rotate(90) scale(72)">
-                    <stop stopColor="#351664"/>
-                    <stop offset="1" stopColor="#4E2E7E"/>
-                  </radialGradient>
-                </defs>
-              </svg> */}
-              {/* <img src={aiPanditMic} alt="mic" className={styles.micImg} /> */}
-              <div className={styles.micWrap}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
-                  <path d="M31.9996 37.3333C36.4263 37.3333 39.9996 33.7599 39.9996 29.3333V13.3333C39.9996 8.90659 36.4263 5.33325 31.9996 5.33325C27.573 5.33325 23.9996 8.90659 23.9996 13.3333V29.3333C23.9996 33.7599 27.573 37.3333 31.9996 37.3333ZM47.7596 29.3333C46.453 29.3333 45.3596 30.2933 45.1463 31.5999C44.053 37.8666 38.5863 42.6666 31.9996 42.6666C25.413 42.6666 19.9463 37.8666 18.853 31.5999C18.6396 30.2933 17.5463 29.3333 16.2396 29.3333C14.613 29.3333 13.333 30.7733 13.573 32.3733C14.8796 40.3733 21.2796 46.6399 29.333 47.7866V53.3333C29.333 54.7999 30.533 55.9999 31.9996 55.9999C33.4663 55.9999 34.6663 54.7999 34.6663 53.3333V47.7866C42.7196 46.6399 49.1196 40.3733 50.4263 32.3733C50.693 30.7733 49.3863 29.3333 47.7596 29.3333Z" fill="white"/>
-                </svg>
-              </div>
             </div>
             <button className={styles.fcCtaLight}>Talk Now &gt;</button>
           </div>
 
           {/* Live Community */}
-          <div className={`${styles.featureCard} ${styles.liveCommunity}`} onClick={() => navigate('/live')} style={{ cursor: 'pointer' }}>
+          <div className={`${styles.featureCard} ${styles.liveCommunity}`} onClick={() => navigate('/live')} style={{ cursor: 'pointer', ...(aiServicesItems[3]?.image_url_web ? { backgroundImage: `url(${aiServicesItems[3].image_url_web})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}) }}>
             <span className={styles.featureTag}>New</span>
             <div className={styles.fcTop}>
-              <h3>ShubhAstro Live Community</h3>
+              <h3>{aiServicesItems[3]?.display_title || aiServicesItems[3]?.title || "ShubhAstro Live Community"}</h3>
               <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-            </div>
-            <div className={styles.fcAvatars}>
-              {[avatar1, avatar2, avatar3, avatar4, avatar5].map((av, i) => (
-                <img key={i} src={av} alt="" className={styles.fcAvatar} style={{ zIndex: 5 - i }} />
-              ))}
             </div>
             <button className={styles.fcCtaLight}>Join Live Now &gt;</button>
           </div>
@@ -396,7 +409,7 @@ const HomeNew = () => {
       {/* ═══ SECTION 4 — Quick Actions Grid ═══ */}
       <section className={styles.quickGrid}>
         <div className={`${styles.titleWithBottomDevider}`}>
-          <h4 className={styles.wowTitle}>LOREM IPSUM AI</h4>
+          <h4 className={styles.wowTitle}>{homeList?.find(s => s.slug === "quick-link-section")?.display_title || "QUICK LINKS"}</h4>
           <div className={styles.BottomDevider}>
               <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
                 <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
@@ -404,21 +417,24 @@ const HomeNew = () => {
           </div>
         </div>
         <div className={styles.gridRow}>
-          {[
-            { label: "Horoscope\nSection",    bg: "#fef3c7" },
-            { label: "Consult\nAstrologer",   bg: "#fef2f2" },
-            { label: "Future\nPredictions",   bg: "#f5f3ff" },
-            { label: "Dasha\nTimeline",       bg: "#fff7ed" },
-            { label: "Birth\nDetails",        bg: "#fff7ed" },
-            { label: "Talk to\nAstrologer",   bg: "#ede9fe" },
-            { label: "Top Rated\nAstrologer", bg: "#fefce8" },
-            { label: "My\nSessions",          bg: "#eef2ff" },
-          ].map((a, i) => (
-            <div key={i} className={styles.gridItem}>
-              <div className={styles.gridIconBox} style={{ background: a.bg }} />
-              <span>{a.label}</span>
-            </div>
-          ))}
+          {(quickLinkItems.length > 0 ? quickLinkItems : [
+            { title: "Horoscope\nSection",    bg: "#fef3c7", redirect_url: "/horoscopes/daily-horoscope" },
+            { title: "Consult\nAstrologer",   bg: "#fef2f2", redirect_url: "/chat-with-astrologers" },
+            { title: "Future\nPredictions",   bg: "#f5f3ff", redirect_url: "/chat-with-astrologers" },
+            { title: "Dasha\nTimeline",       bg: "#fff7ed", redirect_url: "/kundli" },
+            { title: "Birth\nDetails",        bg: "#fff7ed", redirect_url: "/kundli" },
+            { title: "Talk to\nAstrologer",   bg: "#ede9fe", redirect_url: "/talk-to-astrologers" },
+            { title: "Top Rated\nAstrologer", bg: "#fefce8", redirect_url: "/chat-with-astrologers" },
+            { title: "My\nSessions",          bg: "#eef2ff", redirect_url: "/profile" },
+          ]).map((a, i) => {
+            const bgs = ["#fef3c7","#fef2f2","#f5f3ff","#fff7ed","#fff7ed","#ede9fe","#fefce8","#eef2ff"];
+            return (
+              <div key={i} className={styles.gridItem} onClick={() => a.redirect_url && navigate(a.redirect_url)} style={{ cursor: a.redirect_url ? 'pointer' : 'default' }}>
+                <div className={styles.gridIconBox} style={{ background: a.bg || bgs[i % 8] }} />
+                <span>{a.title}</span>
+              </div>
+            );
+          })}
         </div>
       </section>
 
