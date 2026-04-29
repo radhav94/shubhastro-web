@@ -21,9 +21,10 @@ const HousesGrid = ({ houses, isLoading }) => {
   return (
     <div className={styles.tableWrap}>
       <div className={styles.ttsRow}>
-        <button className={styles.ttsBtn} onClick={handleSpeak} aria-label={isSpeaking ? "Stop reading" : "Read aloud"}>
+        <button className={styles.ttsBtn} onClick={isSpeaking ? stop : handleSpeak} aria-label={isSpeaking ? "Stop reading" : "Read aloud"}>
           {isSpeaking ? <VolumeX size={18} /> : <Volume2 size={18} />}
-          <span>{isSpeaking ? "Stop" : "Listen"}</span>
+          <span style={{ display: isSpeaking ? "none" : "inline" }}>Listen</span>
+          <span style={{ display: isSpeaking ? "inline" : "none" }}>Stop</span>
         </button>
       </div>
       <table className={styles.table}>
