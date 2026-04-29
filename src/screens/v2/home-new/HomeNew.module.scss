@@ -578,7 +578,7 @@
 
 .featureTag {
   display: inline-block; width: fit-content; padding: 3px 12px;
-  border-radius: 10px; font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+  border-radius: 5px; font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
 }
 
 .featureCta {
@@ -595,14 +595,13 @@
 
 /* Laal Kitaab special card */
 .laalKitaab {
-  background: #fde8d8;
   color: #1a1a1a;
   position: relative;
   overflow: hidden;
   // min-height: 370px;
   justify-content: flex-start;
 
-  h3 { font-size: 22px; font-weight: 600; color: #1a1a1a; 
+  h3 { font-size: 22px; font-weight: 600; color: #1a1a1a;
       @media (width <= 767px) {
         font-size: 16px;        
       }
@@ -619,11 +618,16 @@
   .featureTag {
     background: linear-gradient(90deg, #f75801, #d43400);
     color: #fff;
-    border-radius: 8px;
+    border-radius: 5px;
     padding: 4px 12px;
     font-size: 12px;
     font-weight: 600;
+    position: relative;
+    z-index: 2;
   }
+
+  h3 { position: relative; z-index: 2; }
+  p  { position: relative; z-index: 2; }
 
   .featureCta {
     background: linear-gradient(90deg, #f75801, #d43400);
@@ -632,6 +636,8 @@
     border-radius: 24px;
     padding: 6px 24px;
     font-size: 14px;
+    position: relative;
+    z-index: 2;
     font-weight: 400;
     margin-top: auto;
     position: relative;
@@ -660,31 +666,15 @@
 
 /* Occult World card */
 .occultWorld {
-  background: linear-gradient(141deg, #16253A 0%, #0B1525 100%);
+  background: transparent;
   color: #fff;
   position: relative;
   overflow: hidden;
 
-  &::before {
-    content: "";
-    position: absolute;
-    width: 200px;
-    height: 200px;
-    background: #fff;
-    opacity: 0.4;
-    filter: blur(50px);
-    border-radius: 50%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 0;
-    pointer-events: none;
-  }
-
   .featureTag {
     background: linear-gradient(90deg, #f75801, #d43400);
     color: #fff;
-    border-radius: 8px;
+    border-radius: 5px;
     padding: 4px 12px;
     font-size: 12px;
     font-weight: 600;
@@ -745,7 +735,7 @@
 
 /* AI Pandit Voice card */
 .aiPanditVoice {
-  background: linear-gradient(321deg, #1D0F35 2.2%, #251144 98.87%);
+  background: transparent;
   color: #fff;
   position: relative;
   overflow: hidden;
@@ -753,7 +743,7 @@
   .featureTag {
     background: linear-gradient(90deg, #f75801, #d43400);
     color: #fff;
-    border-radius: 8px;
+    border-radius: 5px;
     padding: 4px 12px;
     font-size: 12px;
     font-weight: 600;
@@ -842,27 +832,15 @@
 
 /* Live Community card */
 .liveCommunity {
-  background: linear-gradient(to left, #ea580c, #581c87);
+  background: transparent;
   color: #fff;
   position: relative;
   overflow: hidden;
 
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: url('/src/assets/images/live-community-bg.png');
-    background-size: cover;
-    background-position: center;
-    opacity: 0.35;
-    z-index: 0;
-    pointer-events: none;
-  }
-
   .featureTag {
     background: linear-gradient(90deg, #f75801, #d43400);
     color: #fff;
-    border-radius: 8px;
+    border-radius: 5px;
     padding: 4px 12px;
     font-size: 12px;
     font-weight: 600;
@@ -888,13 +866,14 @@
   }
 
   .fcAvatar {
-    width: 64px;
-    height: 64px;
+    width: 55px;
+    height: 55px;
     border-radius: 50%;
     -o-object-fit: cover;
     object-fit: cover;
     margin-left: -18px;
     background: #fff;
+    transition: 0.3s ease-in-out;
     &:first-child { margin-left: 0; }
     @media (width <= 767px) {
       width: 46px;
@@ -903,6 +882,9 @@
     @media (width <= 390px) {
       width: 36px;
       height: 36px;
+    }
+    &:hover{
+      z-index: 5!important;
     }
   }
 

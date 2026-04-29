@@ -19,7 +19,14 @@ export const homeApi = privateRequestNew.injectEndpoints({
         params: { slug: "ai-suites" },
       }),
     }),
+    getNewHomeDetails: builder.query({
+      query: () => ({
+        url: "homepage",
+        method: "GET",
+        params: { slug: "newcustomerlandingpage" },
+      }),
+    }),
   }),
 });
 
-export const { useGetHomeDetailsQuery, useGetAiSuitesQuery } = homeApi;
+export const { useGetHomeDetailsQuery, useGetAiSuitesQuery, useGetNewHomeDetailsQuery } = homeApi;
