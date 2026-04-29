@@ -12,8 +12,21 @@ export const homeApi = privateRequestNew.injectEndpoints({
       }),
       providesTags: ["Kundlis"],
     }),
+    getAiSuites: builder.query({
+      query: () => ({
+        url: "homepage",
+        method: "GET",
+        params: { slug: "ai-suites" },
+      }),
+    }),
+    getNewHomeDetails: builder.query({
+      query: () => ({
+        url: "homepage",
+        method: "GET",
+        params: { slug: "newcustomerlandingpage" },
+      }),
+    }),
   }),
 });
 
-// ⭐ Hook Export
-export const { useGetHomeDetailsQuery } = homeApi;
+export const { useGetHomeDetailsQuery, useGetAiSuitesQuery, useGetNewHomeDetailsQuery } = homeApi;

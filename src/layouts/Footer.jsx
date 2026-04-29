@@ -1,5 +1,6 @@
 import styles from "./Footer.module.scss";
 import ShubhTalkLogo from "../assets/images/ShubhAstrologoFooter.svg";
+import ShubhAstroLogo from "../assets/images/ShubhAstrologo.svg";
 
 import {
   IoLogoFacebook,
@@ -226,33 +227,39 @@ const Footer = () => {
       {/* ============================================================ */}
 
       {/* Logo + Description */}
-      <div className={styles.v2_top}>
-        <img
-          src={ShubhTalkLogo}
-          alt="ShubhAstro Logo"
-          className={styles.v2_logo}
-        />
-        <p className={styles.v2_tagline}>
-          Your trusted guide to the cosmos. Connect with the best astrologers from India.
-          Get predictions related to Marriage, Love life, Career or Health over call, chat, query or report.
-        </p>
-        <div className={styles.v2_socialIcons}>
-          <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
-            <IoLogoFacebook />
-          </a>
-          <a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener noreferrer">
-            <FaYoutube />
-          </a>
-          <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
-            <IoLogoInstagram />
-          </a>
-          <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
-            <FaLinkedinIn />
-          </a>
-          <a href="https://twitter.com" aria-label="X" target="_blank" rel="noopener noreferrer">
-            <FaXTwitter />
-          </a>
+      <div className={styles.v2_top} style={location.pathname === '/home-new' ? { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' } : {}}>
+        <div style={location.pathname === '/home-new' ? { flex: 1, maxWidth: 700 } : {}}>
+          <img
+            src={location.pathname === '/home-new' ? ShubhAstroLogo : ShubhTalkLogo}
+            alt="ShubhAstro Logo"
+            className={styles.v2_logo}
+          />
+          <p className={styles.v2_tagline}>
+            Your trusted guide to the cosmos. Connect with the best astrologers from India.
+            Get predictions related to Marriage, Love life, Career or Health over call, chat, query or report.
+          </p>
         </div>
+        {location.pathname === '/home-new' && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10, flexShrink: 0 }}>
+            <span style={{ fontSize: 14, fontWeight: 500, color: '#6b7280' }}>Follow Us</span>
+            <div className={styles.v2_socialIcons}>
+              <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
+              <a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
+              <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><IoLogoInstagram /></a>
+              <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><FaLinkedinIn /></a>
+              <a href="https://twitter.com" aria-label="X" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a>
+            </div>
+          </div>
+        )}
+        {location.pathname !== '/home-new' && (
+          <div className={styles.v2_socialIcons}>
+            <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
+            <a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
+            <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><IoLogoInstagram /></a>
+            <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><FaLinkedinIn /></a>
+            <a href="https://twitter.com" aria-label="X" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a>
+          </div>
+        )}
       </div>
 
       {/* Divider */}

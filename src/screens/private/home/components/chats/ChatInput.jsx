@@ -176,6 +176,7 @@ const ChatInput = ({
             disabled={isMessageDisabled}
             onKeyDown={(e) => e.key === "Enter" && onSend()}
             placeholder="Type your message here..."
+            autoFocus
           />
           <div className={styles.inputIcons}>
             <button type="button" className={styles.iconButton} onClick={handleAttachClick}>
