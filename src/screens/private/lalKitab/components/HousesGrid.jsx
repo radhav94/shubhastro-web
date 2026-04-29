@@ -1,13 +1,32 @@
 import styles from "./HousesGrid.module.scss";
+import useTTS from "./useTTS";
+import { Volume2, VolumeX } from "lucide-react";
 
 const PLANET_COLORS = { Sun: "#ed8936", Moon: "#a0aec0", Mars: "#e53e3e", Mercury: "#38a169", Jupiter: "#d69e2e", Venus: "#ed64a6", Saturn: "#3182ce", Rahu: "#805ad5", Ketu: "#805ad5" };
 
 const HousesGrid = ({ houses, isLoading }) => {
+  const { speak, stop, isSpeaking } = useTTS();
+
   if (isLoading) return <div className={styles.skeletonList}>{Array.from({ length: 4 }).map((_, i) => <div key={i} className={styles.skeleton} />)}</div>;
   if (!houses?.length) return <div className={styles.empty}><span>🏠</span><p>Houses data not available.</p></div>;
 
+  const handleSpeak = () => {
+    const text = houses.map((h, i) => {
+      const num = h.khana || i + 1;
+      return `House ${num}: Sign ${h.sign || "unknown"}, Maalik ${h.maalik || "unknown"}, Kismat ${h.kismat || "unknown"}${h.planets?.length ? ", Planets: " + h.planets.join(", ") : ""}`;
+    }).join(". ");
+    speak(text);
+  };
+
   return (
     <div className={styles.tableWrap}>
+      <div className={styles.ttsRow}>
+        <button className={styles.ttsBtn} onClick={isSpeaking ? stop : handleSpeak} aria-label={isSpeaking ? "Stop reading" : "Read aloud"}>
+          {isSpeaking ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          <span style={{ display: isSpeaking ? "none" : "inline" }}>Listen</span>
+          <span style={{ display: isSpeaking ? "inline" : "none" }}>Stop</span>
+        </button>
+      </div>
       <table className={styles.table}>
         <thead>
           <tr>

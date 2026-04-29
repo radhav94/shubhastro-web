@@ -343,6 +343,9 @@ const TopHeader = () => {
     }
     setOpen(false);
 
+    // Notify listeners (e.g. TTS) that the translation language changed
+    window.dispatchEvent(new CustomEvent("translationchange", { detail: { lang: targetLang } }));
+
     // Switching back to English requires a reload (Google Translate can't "untranslate" via widget)
     if (targetLang === 'en') {
       clearCookies();
