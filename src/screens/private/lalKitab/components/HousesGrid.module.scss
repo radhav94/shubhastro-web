@@ -108,3 +108,22 @@
 
   p { margin: 0; }
 }
+
+.ttsRow { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+
+.ttsBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #F75801;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover { background: #fff5f0; border-color: #F75801; }
+}
