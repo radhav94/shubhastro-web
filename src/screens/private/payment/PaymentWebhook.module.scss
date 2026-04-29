@@ -1,4 +1,4 @@
-@import "../../../assets/variables/variables";
+@use "../../../assets/variables/variables" as *;
 
 .container {
   display: flex;
@@ -66,6 +66,6 @@
   transition: background 0.2s;
 
   &:hover {
-    background: darken(#ff6b35, 8%);
+    background: #e85a28;
   }
 }

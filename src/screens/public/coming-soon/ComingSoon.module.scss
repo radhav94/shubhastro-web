@@ -375,6 +375,26 @@
   padding-right: 0;
 }
 
+.inputWithIcon input {
+  width: 100%;
+  min-height: 0;
+  border: 0 !important;
+  outline: 0;
+  padding: 13px 16px;
+  padding-right: 0;
+  color: #2b2b2b;
+  font: inherit;
+  font-size: 16px;
+  background: transparent !important;
+  appearance: none;
+  border-radius: 10px;
+  height: auto !important;
+
+  &::placeholder {
+    color: #a2a2a2;
+  }
+}
+
 .hiddenDateInput {
   position: absolute;
   inset: auto 0 0 auto;
@@ -428,6 +448,51 @@
   margin-top: 5px;
   color: #d93d2b;
   font-size: 12px;
+}
+
+/* ── Location Search Wrap ── */
+.locationWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid #d7d7d7;
+  border-radius: 10px;
+  background: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus-within {
+    border-color: #f75801;
+    box-shadow: 0 0 0 3px rgba(247, 88, 1, 0.08);
+  }
+
+  input {
+    width: 100%;
+    border: 0 !important;
+    outline: 0;
+    padding: 13px 40px 13px 16px;
+    color: #2b2b2b;
+    font: inherit;
+    font-size: 16px;
+    background: transparent !important;
+    border-radius: 10px;
+    height: auto !important;
+    min-height: 0;
+
+    &::placeholder {
+      color: #a2a2a2;
+    }
+  }
+}
+
+.locationIcon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #f17633;
+  font-size: 20px;
+  pointer-events: none;
+  flex-shrink: 0;
 }
 
 .successMsg {
@@ -830,6 +895,12 @@
   color: #f75801;
 }
 
+.calDayDisabled {
+  color: #ccc;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* ── Submit Button ── */
 .submitBtn {
   display: inline-flex;
@@ -849,9 +920,15 @@
   cursor: pointer;
   transition: transform 0.2s ease, opacity 0.2s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     opacity: 0.96;
     transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
   }
 }
 
@@ -1214,6 +1291,7 @@
 
   .heroInner {
     padding: 28px 24px 40px;
+    padding-top: 72px;
     justify-content: center;
     align-items: center;
     text-align: center;

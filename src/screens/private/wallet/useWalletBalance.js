@@ -1,5 +1,4 @@
-// useWalletBalance.js
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useLazyGetWalletBalanceQuery } from "../../../redux/api/wallet/walletApi";
 import { getToken } from "../../../utils/token";
 
@@ -12,6 +11,7 @@ export const useWalletBalance = () => {
   });
 
   const [trigger, { data, isFetching }] = useLazyGetWalletBalanceQuery();
+  const fetchCount = useRef(0);
 
   useEffect(() => {
     if (!getToken()) return;
@@ -26,11 +26,25 @@ export const useWalletBalance = () => {
       localStorage.setItem(LOCAL_KEY, newBalance);
       setBalance(newBalance);
     }
-  }, [data]);
+  }, [data, fetchCount.current]);
 
   const refreshWallet = useCallback(() => {
     if (!getToken()) return;
-    trigger();
+    fetchCount.current += 1;
+    // Force cache bust by passing unique arg
+    trigger(fetchCount.current, false);
+  }, [trigger]);
+
+  // Listen for wallet updates from other components
+  useEffect(() => {
+    const handleWalletUpdate = () => {
+      if (getToken()) {
+        fetchCount.current += 1;
+        trigger(fetchCount.current, false);
+      }
+    };
+    window.addEventListener("walletBalanceUpdated", handleWalletUpdate);
+    return () => window.removeEventListener("walletBalanceUpdated", handleWalletUpdate);
   }, [trigger]);
 
   return {

@@ -20,6 +20,7 @@ import {
   IoShieldCheckmark,
 } from "react-icons/io5";
 import ShubhAstroLogo from "../../../assets/images/ShubhAstrologo.svg";
+import LocationSearch from "../../../utils/location/locationSearchVedic";
 import styles from "./ComingSoon.module.scss";
 
 const API_URL = "https://devapi-shubhtalk.epicon.in/api/landing-leads/submit";
@@ -39,12 +40,7 @@ const validationSchema = Yup.object({
     .min(2, "Name must be at least 2 characters")
     .max(50, "Name must be under 50 characters")
     .matches(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces")
-    .test("full-name", "Please enter your full name", (val) => {
-      if (!val) return false;
-      const parts = val.trim().split(/\s+/);
-      return parts.length >= 2 && parts.every((p) => p.length >= 1);
-    })
-    .required("Full name is required"),
+    .required("Name is required"),
   mobile: Yup.string()
     .matches(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number")
     .required("Mobile number is required"),
@@ -56,7 +52,7 @@ const validationSchema = Yup.object({
   placeOfBirth: Yup.string(),
 });
 
-const interestOptions = ["User", "Expert"];
+const interestOptions = ["User", "Expert/Astrologer"];
 
 const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/YOUR_INVITE_CODE";
 
@@ -95,7 +91,7 @@ const ComingSoon = () => {
   const interestRef = useRef(null);
   const [calOpen, setCalOpen] = useState(false);
   const [calMonth, setCalMonth] = useState(new Date().getMonth());
-  const [calYear, setCalYear] = useState(new Date().getFullYear() - 25);
+  const [calYear, setCalYear] = useState(new Date().getFullYear());
   const [yearPickerOpen, setYearPickerOpen] = useState(false);
   const [monthPickerOpen, setMonthPickerOpen] = useState(false);
   const calRef = useRef(null);
@@ -118,8 +114,8 @@ const ComingSoon = () => {
       const payload = {
         fullName: values.fullName.trim(),
         email: values.email.trim(),
-        mobileNumber: values.mobile.trim(),
-        dateOfBirth: values.dob,
+        mobileNumber: selectedCode.replace("+", "") + values.mobile.trim(),
+        dateOfBirth: values.dob.split("-").reverse().join("/"),
         iAmHereAs: values.interest.toLowerCase(),
         placeOfBirth: values.placeOfBirth.trim(),
         source: "landing_page",
@@ -197,8 +193,7 @@ const ComingSoon = () => {
     if (!value) return "";
     const [year, month, day] = value.split("-");
     if (!year || !month || !day) return value;
-    const m = parseInt(month, 10);
-    return `${day} ${MONTHS[m - 1]?.slice(0, 3)} ${year}`;
+    return `${day}/${month}/${year}`;
   };
 
   return (
@@ -236,7 +231,7 @@ const ComingSoon = () => {
                     Thank <span className={styles.orange}>You!</span>
                   </h2>
                 </div>
-                {submittedData.role === "expert" ? (
+                {submittedData.role === "expert/astrologer" ? (
                   <div className={styles.thankYouBody}>
                     <p>
                       Thanks, {submittedData.name}. We're building something special and would love to have you onboard.
@@ -307,11 +302,11 @@ const ComingSoon = () => {
               validationSchema={validationSchema}
               onSubmit={handleSubmit}
             >
-              {({ values, setFieldValue, errors, touched, isSubmitting }) => (
+              {({ values, setFieldValue, errors, touched, isSubmitting, isValid, dirty }) => (
                 <Form className={styles.form}>
                   <div className={styles.fieldGrid}>
                     <div className={styles.fieldGroup}>
-                      <label htmlFor="fullName">Full Name</label>
+                      <label htmlFor="fullName">Name</label>
                       <div className={styles.inputWrap}>
                         <Field
                           id="fullName"
@@ -522,11 +517,13 @@ const ComingSoon = () => {
                                   day === new Date().getDate() &&
                                   calMonth === new Date().getMonth() &&
                                   calYear === new Date().getFullYear();
+                                const isFuture = new Date(calYear, calMonth, day) > new Date();
                                 return (
                                   <button
                                     key={day}
                                     type="button"
-                                    className={`${styles.calDay} ${isSelected ? styles.calDaySelected : ""} ${isToday && !isSelected ? styles.calDayToday : ""}`}
+                                    disabled={isFuture}
+                                    className={`${styles.calDay} ${isSelected ? styles.calDaySelected : ""} ${isToday && !isSelected ? styles.calDayToday : ""} ${isFuture ? styles.calDayDisabled : ""}`}
                                     onClick={() => {
                                       setFieldValue("dob", dateStr);
                                       setCalOpen(false);
@@ -549,15 +546,15 @@ const ComingSoon = () => {
 
                     <div className={styles.fieldGroup}>
                       <label htmlFor="placeOfBirth">Place of Birth</label>
-                      <div className={styles.inputWithIcon}>
-                        <Field
-                          id="placeOfBirth"
-                          name="placeOfBirth"
-                          type="text"
-                          placeholder="Select here"
-                          className={styles.input}
-                        />
-                        <IoLocation className={styles.fieldIcon} />
+                      <div className={styles.locationWrap}>
+                        <div style={{ width: "100%" }}>
+                          <LocationSearch
+                            value={values.placeOfBirth}
+                            onChange={(e) => setFieldValue("placeOfBirth", e.target.value)}
+                            onPlaceSelect={({ address }) => setFieldValue("placeOfBirth", address)}
+                          />
+                        </div>
+                        <IoLocation className={styles.locationIcon} />
                       </div>
                     </div>
                   </div>
@@ -569,7 +566,7 @@ const ComingSoon = () => {
                   <button
                     type="submit"
                     className={styles.submitBtn}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !isValid || !dirty}
                   >
                     <IoNotifications />
                     {isSubmitting ? "Submitting..." : "Notify Me"}
