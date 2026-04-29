@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { useGetAllGiftsQuery } from "../../../../../redux/api/gift/giftApi";
 import { useLiveList } from "../../../../../context/LiveListContext";
 import { useCall } from "../../../../../context/CallContext";
+import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import WaitingModal from "../../../../../component/UI/modal/waitingModal/WaitingModal";
 import WaitlistModal from "../../../../../component/UI/modal/waitlistModal/WaitlistModal";
@@ -185,6 +186,8 @@ const LiveView = (props) => {
     setReviewData,
     setWaitingList,
   } = useCall();
+
+  const { addPendingConnection, assignRoomId, removePendingConnection, removePendingByAstrologer, cancelAllExcept, isInQueue } = useWaitingQueue();
 
   // Auto-minimize call if user is on live stream (handles page refresh)
   useEffect(() => {
@@ -559,6 +562,12 @@ const LiveView = (props) => {
       return;
     }
 
+    // Check if already in queue for this astrologer
+    if (isInQueue(astrologerId, "audio")) {
+      Toast.error("Already waiting for this astrologer");
+      return;
+    }
+
     try {
       // 5. Check wallet balance only — astrologer is already live, no need to check availability
       const result = await getBalance({ astrologerId, type: "call" });
@@ -596,6 +605,16 @@ const LiveView = (props) => {
       type: "audio",
     });
 
+    // Add to waiting queue
+    addPendingConnection({
+      id: `${astrologerId}-audio-${Date.now()}`,
+      astrologer: { ...astrologer, _id: astrologerId },
+      type: "audio",
+      roomId: null,
+      waitingTime: 5,
+      isEmergency: false,
+    });
+
     setShowWaitingModal(true);
     setShowWaitingToast(true);
     setWaitingList(5);
@@ -627,6 +646,12 @@ const LiveView = (props) => {
       return;
     }
 
+    // Check if already in queue for this astrologer+type
+    if (isInQueue(astrologerId, type)) {
+      Toast.error("Already waiting for this astrologer");
+      return;
+    }
+
     // Store astrologer info in context and ref
     setLastRequestedAstro({ ...astrologer, profileImgUrl: fullAstro?.profileImgUrl || astrologer?.profileImgUrl });
     setPendingCallType(type);
@@ -643,6 +668,16 @@ const LiveView = (props) => {
       userId: userIdLocal,
       astrologerId,
       type, // "audio" | "video"
+    });
+
+    // Add to waiting queue
+    addPendingConnection({
+      id: `${astrologerId}-${type}-${Date.now()}`,
+      astrologer: { ...astrologer, _id: astrologerId },
+      type,
+      roomId: null,
+      waitingTime: 5,
+      isEmergency: false,
     });
 
     setShowCallPopup(false);
@@ -780,6 +815,7 @@ const LiveView = (props) => {
       setCallWaitingList(data?.waitingTime || 5);
       setShowWaitingModal(true);
       setShowWaitingToast(true);
+      assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
     };
 
     const handleCallAccepted = async ({ roomId, token: agoraToken, type, remainingTime, isSwitch }) => {
@@ -804,6 +840,7 @@ const LiveView = (props) => {
       setShowWaitingPopup(false);
       setShowWaitingToast(false);
       resetCallFlow();
+      cancelAllExcept(roomId);
 
       // Switch back to the astrologer's stream if user scrolled away
       if (callingChannelRef.current && liveListCtx) {
@@ -868,18 +905,28 @@ const LiveView = (props) => {
       // Check if this is a switch rejection during an active call
       if (data?.switchRejected && (data?.type === "audio" || data?.type === "video")) {
         console.log("🔄 Call switch rejected - current call continues");
-        // Don't reset anything - the current call should continue
         return;
       }
       
-      // Regular call rejection - end everything
+      // Extract roomId and astrologerId — can be at top level or inside sessionData
+      const rejectedRoomId = data?.roomId || data?.sessionData?.roomId;
+      const rejectedAstrologerId = data?.astrologerId || data?.sessionData?.astrologerId;
+      if (rejectedRoomId) {
+        removePendingConnection(rejectedRoomId);
+      } else if (rejectedAstrologerId) {
+        removePendingByAstrologer(rejectedAstrologerId);
+      }
+
       const errorMsg =
         data?.sessionData?.sessionEndReason === "rejected"
           ? "Astrologer has rejected the call request"
           : "Call rejected";
       Toast.error(errorMsg);
       clearPendingLiveCallState();
-      resetCallState();
+      setShowWaitingModal(false);
+      setShowWaitingPopup(false);
+      setShowWaitingToast(false);
+      setCallRoomId(null);
     };
 
     const handleCallEnded = () => {

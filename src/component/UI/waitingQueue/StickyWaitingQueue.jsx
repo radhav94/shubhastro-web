@@ -19,21 +19,40 @@ const typeLabel = {
 
 const StickyWaitingQueue = () => {
   const { pendingConnections, cancelPendingConnection, cancelAll } = useWaitingQueue();
-  const { callApproval, missedApproval: callMissed, activeCall } = useCall();
-  const { chatApproval, missedApproval: chatMissed, activeChat } = useChat();
+  const { callApproval, missedApproval: callMissed, activeCall, setWaitingList: setCallWaitingList, resetCallFlow } = useCall();
+  const { chatApproval, missedApproval: chatMissed, activeChat, setWaitingList, resetChatFlow } = useChat();
   const [expanded, setExpanded] = useState(false);
 
   // Don't render if no pending connections
   if (pendingConnections.length === 0) return null;
 
   // Hide when approval/missed/active states are showing in the sticky footers
-  // Those take priority over the queue display
   if (callApproval || chatApproval || callMissed || chatMissed) return null;
 
   // Hide when there's an active call or chat (the session is live)
   if (activeCall || activeChat) return null;
 
   const count = pendingConnections.length;
+
+  const handleCancelAll = () => {
+    cancelAll();
+    // Also reset the old waiting states so old sticky footers don't appear
+    setWaitingList(false);
+    setCallWaitingList(false);
+    resetChatFlow();
+    resetCallFlow();
+  };
+
+  const handleCancelOne = (conn) => {
+    cancelPendingConnection(conn.roomId, conn.type);
+    // If this was the last one, also reset old waiting states
+    if (pendingConnections.length <= 1) {
+      setWaitingList(false);
+      setCallWaitingList(false);
+      resetChatFlow();
+      resetCallFlow();
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -50,7 +69,7 @@ const StickyWaitingQueue = () => {
             className={styles.cancelAllBtn}
             onClick={(e) => {
               e.stopPropagation();
-              cancelAll();
+              handleCancelAll();
             }}
           >
             Cancel All
@@ -77,7 +96,7 @@ const StickyWaitingQueue = () => {
                 </div>
                 <button
                   className={styles.itemCancel}
-                  onClick={() => cancelPendingConnection(conn.roomId, conn.type)}
+                  onClick={() => handleCancelOne(conn)}
                 >
                   <X size={16} />
                 </button>
