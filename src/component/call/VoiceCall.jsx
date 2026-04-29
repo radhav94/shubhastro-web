@@ -33,7 +33,6 @@ import walletIcon from "../../assets/images/wallet-icon.svg";
 import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
-// const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
 
 const AgoraVoiceCalling = ({ callData }) => {

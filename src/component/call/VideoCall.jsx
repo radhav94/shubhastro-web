@@ -38,7 +38,6 @@ import VideocamIcon from "../../assets/chat/Videocam.svg";
 import CallIcon from "../../assets/chat/Call.svg";
 import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
 
-// const APP_ID = "c76e3d30a3b6483689dac88ca9f94381";
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
 
