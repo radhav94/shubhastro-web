@@ -294,10 +294,29 @@ const AgoraVoiceCalling = ({ callData }) => {
         }, 5000);
       }
 
-      micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack();
-      // Sync mic track with context mute state (persists across remounts)
-      micTrackRef.current.setEnabled(isMicOn);
+      // During video→audio downgrades the old VideoCall component is unmounting
+      // concurrently and releasing its mic/camera tracks. If the browser hasn't
+      // fully freed the mic yet, createMicrophoneAudioTrack can fail. Retry a
+      // few times with a short delay to give the old tracks time to close.
+      const MAX_TRACK_RETRIES = 3;
+      const TRACK_RETRY_DELAY = 800; // ms
+      for (let attempt = 1; attempt <= MAX_TRACK_RETRIES; attempt++) {
+        try {
+          micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack();
+          break; // success
+        } catch (trackErr) {
+          console.warn(`[VoiceCall] ⚠️ Mic track creation attempt ${attempt}/${MAX_TRACK_RETRIES} failed:`, trackErr.message);
+          if (attempt === MAX_TRACK_RETRIES) throw trackErr;
+          await new Promise((r) => setTimeout(r, TRACK_RETRY_DELAY));
+        }
+      }
+      // Publish track while it is still enabled — Agora SDK rejects
+      // publishing disabled tracks with TRACK_IS_DISABLED. We apply the
+      // mute state (isMicOn) AFTER publishing so the track is accepted
+      // by the server and then silenced locally.
       await client.publish([micTrackRef.current]);
+      // Now sync mic track with context mute state (persists across remounts)
+      micTrackRef.current.setEnabled(isMicOn);
       console.log("[VoiceCall] 🎙️ Mic track published, micOn:", isMicOn);
 
       setJoined(true);
