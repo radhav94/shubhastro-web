@@ -227,10 +227,10 @@ const Footer = () => {
       {/* ============================================================ */}
 
       {/* Logo + Description */}
-      <div className={styles.v2_top} style={location.pathname === '/home-new' ? { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' } : {}}>
-        <div style={location.pathname === '/home-new' ? { flex: 1, maxWidth: 700 } : {}}>
+      <div className={styles.v2_top} style={location.pathname === '/home-new' || location.pathname === '/home-v2' ? { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' } : {}}>
+        <div style={location.pathname === '/home-new' || location.pathname === '/home-v2' ? { flex: 1, maxWidth: 700 } : {}}>
           <img
-            src={location.pathname === '/home-new' ? ShubhAstroLogo : ShubhTalkLogo}
+            src={location.pathname === '/home-new' || location.pathname === '/home-v2' ? ShubhAstroLogo : ShubhTalkLogo}
             alt="ShubhAstro Logo"
             className={styles.v2_logo}
           />
@@ -239,7 +239,7 @@ const Footer = () => {
             Get predictions related to Marriage, Love life, Career or Health over call, chat, query or report.
           </p>
         </div>
-        {location.pathname === '/home-new' && (
+        {(location.pathname === '/home-new' || location.pathname === '/home-v2') && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10, flexShrink: 0 }}>
             <span style={{ fontSize: 14, fontWeight: 500, color: '#6b7280' }}>Follow Us</span>
             <div className={styles.v2_socialIcons}>
@@ -251,7 +251,7 @@ const Footer = () => {
             </div>
           </div>
         )}
-        {location.pathname !== '/home-new' && (
+        {location.pathname !== '/home-new' && location.pathname !== '/home-v2' && (
           <div className={styles.v2_socialIcons}>
             <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
             <a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
