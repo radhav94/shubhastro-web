@@ -124,7 +124,7 @@
 .qText {
   flex: 1;
   h3 {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: #1a1a1a;
     margin: 0 0 4px;
@@ -578,7 +578,7 @@
 
 .featureTag {
   display: inline-block; width: fit-content; padding: 3px 12px;
-  border-radius: 10px; font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+  border-radius: 5px; font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
 }
 
 .featureCta {
@@ -618,7 +618,7 @@
   .featureTag {
     background: linear-gradient(90deg, #f75801, #d43400);
     color: #fff;
-    border-radius: 8px;
+    border-radius: 5px;
     padding: 4px 12px;
     font-size: 12px;
     font-weight: 600;
@@ -674,7 +674,7 @@
   .featureTag {
     background: linear-gradient(90deg, #f75801, #d43400);
     color: #fff;
-    border-radius: 8px;
+    border-radius: 5px;
     padding: 4px 12px;
     font-size: 12px;
     font-weight: 600;
@@ -743,7 +743,7 @@
   .featureTag {
     background: linear-gradient(90deg, #f75801, #d43400);
     color: #fff;
-    border-radius: 8px;
+    border-radius: 5px;
     padding: 4px 12px;
     font-size: 12px;
     font-weight: 600;
@@ -840,7 +840,7 @@
   .featureTag {
     background: linear-gradient(90deg, #f75801, #d43400);
     color: #fff;
-    border-radius: 8px;
+    border-radius: 5px;
     padding: 4px 12px;
     font-size: 12px;
     font-weight: 600;
@@ -866,13 +866,14 @@
   }
 
   .fcAvatar {
-    width: 64px;
-    height: 64px;
+    width: 55px;
+    height: 55px;
     border-radius: 50%;
     -o-object-fit: cover;
     object-fit: cover;
     margin-left: -18px;
     background: #fff;
+    transition: 0.3s ease-in-out;
     &:first-child { margin-left: 0; }
     @media (width <= 767px) {
       width: 46px;
@@ -881,6 +882,9 @@
     @media (width <= 390px) {
       width: 36px;
       height: 36px;
+    }
+    &:hover{
+      z-index: 5!important;
     }
   }
 
