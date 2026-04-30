@@ -147,11 +147,11 @@
 }
 
 .contentExpanded {
-  max-height: 500px;
+  max-height: fit-content;
 
-  @media (max-width: 767px) {
-    max-height: 600px;
-  }
+  // @media (max-width: 767px) {
+  //   max-height: 600px;
+  // }
 }
 
 .contentInner {
