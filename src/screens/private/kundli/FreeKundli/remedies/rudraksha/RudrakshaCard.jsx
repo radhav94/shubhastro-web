@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styles from "./Rudraksha.module.scss";
 import PrimaryText from "../../../../../../component/PrimaryText";
+import TTSButton from "../../../../../../component/UI/TTSButton";
 import { ChevronDown } from "lucide-react";
 
 const RudrakshaCard = ({ data }) => {
@@ -24,7 +25,20 @@ const RudrakshaCard = ({ data }) => {
           onClick={() => setIsOpen(!isOpen)}
           aria-expanded={isOpen}
         >
-          <h1 className={styles.title}>{name}</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1 }}>
+            <h1 className={styles.title}>{name}</h1>
+            <span onClick={(e) => e.stopPropagation()}>
+              <TTSButton
+                text={[
+                  name,
+                  mukhi_description ? `Description: ${mukhi_description}` : "",
+                  mukhi_for_disease_cure?.length ? `For Disease Cure: ${mukhi_for_disease_cure.map(n => `${n} Mukhi`).join(", ")}` : "",
+                  mukhi_for_money?.length ? `For Money and Prosperity: ${mukhi_for_money.map(n => `${n} Mukhi`).join(", ")}` : "",
+                  bot_response ? `AI Recommendation: ${bot_response}` : "",
+                ].filter(Boolean).join(". ")}
+              />
+            </span>
+          </div>
           <ChevronDown 
             className={`${styles.accordionIcon} ${isOpen ? styles.iconRotated : ''}`}
             size={24}

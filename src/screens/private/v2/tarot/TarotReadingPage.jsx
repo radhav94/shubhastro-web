@@ -89,6 +89,7 @@ const TarotReadingPage = () => {
               <div className={styles.tarotCardImage}>
                 <img src="/images/4card_black.png" alt="Tarot Cards" />
               </div>
+                <svg viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg" style={{ display: 'none' }}>
                   <defs>
                     <linearGradient id={`cardBg-${reading.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
                       <stop offset="0%" style={{ stopColor: '#f5f5f5', stopOpacity: 1 }} />
@@ -185,6 +186,7 @@ const TarotReadingPage = () => {
                     <circle cx="20" cy="100" r="3" fill="#d4a574"/>
                     <circle cx="55" cy="100" r="3" fill="#d4a574"/>
                   </g>
+                </svg>
             </div>
           </div>
         ))}

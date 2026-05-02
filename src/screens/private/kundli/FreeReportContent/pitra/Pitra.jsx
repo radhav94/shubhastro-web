@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import { useGetPitraDoshQuery } from "../../../../../redux/api/kundli/dashaApi";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
+import TTSButton from "../../../../../component/UI/TTSButton";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useState } from "react";
 import styles from "./Pitra.module.scss";
@@ -71,6 +72,9 @@ const Pitra = () => {
             <h2 className={styles.sectionTitle}>
               <span className={styles.sectionIcon}>⚠️</span>
               Effects of Pitra Dosh
+              <span onClick={(e) => e.stopPropagation()} style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+                <TTSButton text={`Effects of Pitra Dosh. ${pitra.effects.join('. ')}`} />
+              </span>
             </h2>
             <span className={`${styles.dropdownArrow} ${isEffectsExpanded ? styles.expanded : ''}`}>
               ▼
@@ -99,6 +103,9 @@ const Pitra = () => {
             <h2 className={styles.sectionTitle}>
               <span className={styles.sectionIcon}><img src={namaste} width="20" alt="icon" /></span>
               Remedies
+              <span onClick={(e) => e.stopPropagation()} style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+                <TTSButton text={`Remedies. ${pitra.remedies.join('. ')}`} />
+              </span>
             </h2>
             <span className={`${styles.dropdownArrow} ${isRemediesExpanded ? styles.expanded : ''}`}>
               ▼

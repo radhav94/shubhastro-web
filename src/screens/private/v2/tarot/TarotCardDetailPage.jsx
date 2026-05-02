@@ -7,6 +7,7 @@ import {
   useGetBusinessBreakupQuery
 } from '../../../../redux/api/tarot/tarotApi'
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader'
+import TTSButton from '../../../../component/UI/TTSButton'
 import styles from './TarotCardDetailPage.module.css'
 import { DefaultImages } from '../../../../utils/appImages'
 
@@ -131,6 +132,30 @@ const TarotCardDetailPage = () => {
     displayData = activeTab === 0 ? cardData.cause : cardData.advise
   }
 
+  // Build full TTS text from all card content
+  const fullTtsText = (() => {
+    const parts = [];
+    const name = displayData.card_name || displayData.name;
+    if (name) parts.push(name);
+    if (displayData.answer) parts.push(`Answer: ${displayData.answer}`);
+    if (displayData.traits?.length) parts.push(`Traits: ${displayData.traits.join(', ')}`);
+    if (isDaily) {
+      if (cardData.health) parts.push(`Health. ${cardData.health}`);
+      if (cardData.relationship) parts.push(`Relationship. ${cardData.relationship}`);
+      if (cardData.career) parts.push(`Career. ${cardData.career}`);
+      if (cardData.finance) parts.push(`Finance. ${cardData.finance}`);
+    } else if (isBreakupReading) {
+      if (displayData.description) parts.push(displayData.description);
+    } else {
+      if (displayData.description) parts.push(`Reading and Guidance. ${displayData.description}`);
+      if (displayData.careerPaths?.length) parts.push(`Career Paths: ${displayData.careerPaths.join(', ')}`);
+      if (displayData.meaning) parts.push(displayData.meaning);
+      if (displayData.upright) parts.push(`Upright. ${displayData.upright}`);
+      if (displayData.reversed) parts.push(`Reversed. ${displayData.reversed}`);
+    }
+    return parts.join('. ');
+  })();
+
   return (
     <div className={styles.detailPage}>
       <div className={styles.headerWrap}>
@@ -183,9 +208,12 @@ const TarotCardDetailPage = () => {
 
         {/* Right side - Title, description, reading details */}
         <div className={styles.cardTextWrap}>
-          {(displayData.card_name || displayData.name) && (
-            <h2 className={styles.cardName}>{displayData.card_name || displayData.name}</h2>
-          )}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', width: '100%' }}>
+            {(displayData.card_name || displayData.name) && (
+              <h2 className={styles.cardName}>{displayData.card_name || displayData.name}</h2>
+            )}
+            <TTSButton text={fullTtsText} />
+          </div>
 
           {displayData.card_number && (
             <p className={styles.cardNumber}>{displayData.card_number}</p>

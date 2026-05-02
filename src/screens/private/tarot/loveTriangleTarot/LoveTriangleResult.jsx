@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "../resultTarot/ResultTarot.module.scss";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 const LoveTriangleResult = ({ resultData, userName = "", handleReset }) => {
   if (!resultData) return null;
@@ -41,6 +42,12 @@ const LoveTriangleResult = ({ resultData, userName = "", handleReset }) => {
         {/* CHIP TRAITS */}
         <TraitChips traits={card?.traits} />
 
+        {card?.description && (
+          <div className={styles.sectionHeader} style={{ marginBottom: "8px" }}>
+            <span>📖 Reading and Guidance</span>
+            <TTSButton text={`Reading and Guidance. ${card.description}`} />
+          </div>
+        )}
         <p className={styles.cardDescription}>{card?.description}</p>
       </div>
     </div>
