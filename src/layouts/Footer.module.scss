@@ -12,13 +12,64 @@ $font-primary:     "Poppins", sans-serif;
 // ============================================================
 // FOOTER WRAPPER
 // ============================================================
-.footer {
+
+/* New footer — light bg for /home-v2 */
+.footerLight {
   background: #F2F0F1;
-  color: $color-dark;
+  color: #1a1a1a;
   font-family: $font-primary;
   width: 100%;
   position: relative;
   font-size: 14px;
+}
+
+/* Old footer — dark bg for all other pages */
+.footer {
+  background: #111111;
+  color: #e0e0e0;
+  font-family: $font-primary;
+  width: 100%;
+  position: relative;
+  font-size: 14px;
+
+  // Old footer link colors
+  .v2_column ul li a {
+    color: #cccccc;
+    &:hover { color: $color-accent; }
+  }
+
+  .v2_heading {
+    color: #ffffff;
+  }
+
+  .v2_tagline { color: #a0a0b0; }
+  .v2_followLabel { color: #ffffff; }
+  .v2_contactText { color: #a0a0b0; }
+  .v2_phoneLink { color: #ffffff; }
+  .v2_emailLink { color: $color-accent; }
+
+  .v2_bottomOuter {
+    background: #1E2939 !important;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .v2_bottomBar {
+    color: #a0a0b0;
+    p { color: #a0a0b0; }
+    ul li a { color: #a0a0b0; }
+  }
+
+  .v2_divider {
+    background: rgba(255,255,255,0.08);
+  }
+
+  .v2_storeBtn {
+    border-color: rgba(255,255,255,0.3);
+    color: #ffffff;
+    background: transparent;
+    .v2_storeLabel { color: #a0a0b0; }
+    .v2_storeName { color: #ffffff; }
+  }
 }
 
 // ============================================================
@@ -82,6 +133,28 @@ $font-primary:     "Poppins", sans-serif;
   margin: 0 auto;
   height: 1px;
   background: rgba(0, 0, 0, 0.08);
+}
+
+// ============================================================
+// TOP — Logo + Tagline + Social (old footer pages)
+// ============================================================
+.v2_top {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 40px 40px 20px;
+}
+
+// Old footer grid (without logo column)
+.v2_grid_old {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 32px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px 40px 24px;
+
+  @media (max-width: 1100px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 768px)  { display: none; }
 }
 
 // ============================================================
