@@ -287,7 +287,7 @@ const HomeV2 = () => {
 
               {/* Header row: title left, View More right */}
               <div className={styles.wowHeader}>
-                <div className={`${styles.titleWithBottomDevider} ${styles.tWBmarginLeft}`}>
+                <div className={`${styles.titleWithBottomDevider}`}>
                   <h4 className={styles.wowTitle}>{wowSuiteItems[0]?.section_title || "LOREM IPSUM"}</h4>
                   <div className={styles.BottomDevider}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
@@ -501,8 +501,8 @@ const HomeV2 = () => {
       </section>
 
       {/* ═══ SECTION 4 — Top Rated Astrologers ═══ */}
-      <section className={styles.astrologerSection} style={{ backgroundColor: `#FFE9E5`,paddingBottom:'1px',paddingTop:'24px'}}>
-        <div className={styles.sectionHeader}>
+      <section className={styles.astrologerSection} style={{ backgroundColor: `#FFE9E5`,paddingBottom:'1px',paddingTop:'16px'}}>
+        <div className={styles.sectionHeader} style={{marginBottom:"0px"}}>
           <div className={styles.sectionTitleBlock}>
             <h2 className={styles.sectionTitle}>{astrologerSection?.display_title || "TOP RATED ASTROLOGERS FOR YOU"}</h2>
           </div>
