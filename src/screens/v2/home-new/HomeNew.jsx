@@ -419,19 +419,30 @@ const HomeNew = () => {
         </div>
         <div className={styles.gridRow}>
           {(quickLinkItems.length > 0 ? quickLinkItems : [
-            { title: "Horoscope\nSection",    bg: "#fef3c7", redirect_url: "/horoscopes/daily-horoscope" },
-            { title: "Consult\nAstrologer",   bg: "#fef2f2", redirect_url: "/chat-with-astrologers" },
-            { title: "Future\nPredictions",   bg: "#f5f3ff", redirect_url: "/chat-with-astrologers" },
-            { title: "Dasha\nTimeline",       bg: "#fff7ed", redirect_url: "/kundli" },
-            { title: "Birth\nDetails",        bg: "#fff7ed", redirect_url: "/kundli" },
-            { title: "Talk to\nAstrologer",   bg: "#ede9fe", redirect_url: "/talk-to-astrologers" },
-            { title: "Top Rated\nAstrologer", bg: "#fefce8", redirect_url: "/chat-with-astrologers" },
-            { title: "My\nSessions",          bg: "#eef2ff", redirect_url: "/profile" },
+            { title: "Horoscope\nSection",    redirect_url: "/horoscopes/daily-horoscope" },
+            { title: "Consult\nAstrologer",   redirect_url: "/chat-with-astrologers" },
+            { title: "Future\nPredictions",   redirect_url: "/chat-with-astrologers" },
+            { title: "Dasha\nTimeline",       redirect_url: "/kundli" },
+            { title: "Birth\nDetails",        redirect_url: "/kundli" },
+            { title: "Talk to\nAstrologer",   redirect_url: "/talk-to-astrologers" },
+            { title: "Top Rated\nAstrologer", redirect_url: "/chat-with-astrologers" },
+            { title: "My\nSessions",          redirect_url: "/profile" },
           ]).map((a, i) => {
             const bgs = ["#fef3c7","#fef2f2","#f5f3ff","#fff7ed","#fff7ed","#ede9fe","#fefce8","#eef2ff"];
             return (
               <div key={i} className={styles.gridItem} onClick={() => a.redirect_url && navigate(a.redirect_url)} style={{ cursor: a.redirect_url ? 'pointer' : 'default' }}>
-                <div className={styles.gridIconBox} style={{ background: a.bg || bgs[i % 8] }} />
+                <div
+                  className={styles.gridIconBox}
+                  style={{
+                    background: '#FFF1E4',
+                    ...(a.image_url_web || a.image_url || a.icon ? {
+                      backgroundImage: `url(${a.image_url_web || a.image_url || a.icon})`,
+                      backgroundSize: '65%',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                    } : {})
+                  }}
+                />
                 <span>{a.title}</span>
               </div>
             );
@@ -461,7 +472,18 @@ const HomeNew = () => {
             ]).map((c, i) => {
               return (
                 <div key={i} className={styles.catItem} onClick={() => navigate('/chat-with-astrologers', { state: { selectedType: c.slug } })} style={{ cursor: 'pointer' }}>
-                  <div className={styles.catIconBox} style={{ background: '#fff' }} />
+                  <div
+                    className={styles.catIconBox}
+                    style={{
+                      background: '#fff',
+                      ...(c.image_url ? {
+                        backgroundImage: `url(${c.image_url})`,
+                        backgroundSize: '50%',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'center',
+                      } : {})
+                    }}
+                  />
                   <span>{c.title}</span>
                 </div>
               );
@@ -519,7 +541,18 @@ const HomeNew = () => {
               const bgs = ["#ffedd5", "#fef2f2", "#f5f3ff", "#fecaca"];
               return (
                 <div key={i} className={styles.discoverItem}>
-                  <div className={styles.discoverIconBox} style={{ background: item.bg || bgs[i % 4] }} />
+                  <div
+                    className={styles.discoverIconBox}
+                    style={{
+                      background: bgs[i % 4],
+                      ...(item.image_url ? {
+                        backgroundImage: `url(${item.image_url})`,
+                        backgroundSize: '50%',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'center',
+                      } : {})
+                    }}
+                  />
                   <span>{item.title}</span>
                 </div>
               );
