@@ -359,6 +359,9 @@ $font-primary:     "Poppins", sans-serif;
   flex-direction: column;
   gap: 10px;
   margin-top: 12px;
+  @media (width <= 768px) {
+      flex-direction: row;
+  }
 }
 
 // Horizontal store buttons for old footer
