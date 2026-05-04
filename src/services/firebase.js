@@ -29,7 +29,7 @@ export const requestFCMToken = async () => {
 
         const token = await getToken(messaging, { vapidKey: VAPID_KEY });
         if (token) {
-            console.log("FCM Token:", token);
+            console.log("FCM Token received");
             return token;
         }
 
