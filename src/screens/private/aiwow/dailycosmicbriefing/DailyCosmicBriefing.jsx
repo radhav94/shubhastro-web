@@ -6,6 +6,7 @@ import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliP
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import Footer from '../../../../layouts/Footer';
 import { PATH } from '../../../../utils/routes/Paths';
+import TTSButton from '../../../../component/UI/TTSButton';
 
 const DailyCosmicBriefing = () => {
   const navigate = useNavigate();
@@ -111,14 +112,20 @@ const DailyCosmicBriefing = () => {
         </div>
 
         {/* Main Prediction */}
-        <div className={styles.predictionCard}>
+        <div className={styles.predictionCard} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <TTSButton text={`Today's Cosmic Energy. ${briefing.prediction}`} />
+          </span>
           <h2 className={styles.sectionTitle}>Today's Cosmic Energy</h2>
           <p className={styles.prediction}>{briefing.prediction}</p>
         </div>
 
         {/* Mood & Lucky Items */}
         <div className={styles.quickInfo}>
-          <div className={styles.infoCard}>
+          <div className={styles.infoCard} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '4px', right: '4px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <TTSButton text={`Mood. ${briefing.mood?.label}`} />
+            </span>
             <div className={styles.infoIcon}>😊</div>
             <div className={styles.infoContent}>
               <span className={styles.infoLabel}>Mood</span>
@@ -131,7 +138,10 @@ const DailyCosmicBriefing = () => {
             </div>
           </div>
 
-          <div className={styles.infoCard}>
+          <div className={styles.infoCard} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '4px', right: '4px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <TTSButton text={`Lucky Color. ${briefing.luckyColor}`} />
+            </span>
             <div className={styles.infoIcon}>🎨</div>
             <div className={styles.infoContent}>
               <span className={styles.infoLabel}>Lucky Color</span>
@@ -139,7 +149,10 @@ const DailyCosmicBriefing = () => {
             </div>
           </div>
 
-          <div className={styles.infoCard}>
+          <div className={styles.infoCard} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '4px', right: '4px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <TTSButton text={`Lucky Number. ${briefing.luckyNumber}`} />
+            </span>
             <div className={styles.infoIcon}>🔢</div>
             <div className={styles.infoContent}>
               <span className={styles.infoLabel}>Lucky Number</span>
@@ -164,6 +177,9 @@ const DailyCosmicBriefing = () => {
                   <h3 className={styles.categoryTitle}>
                     {key.charAt(0).toUpperCase() + key.slice(1)}
                   </h3>
+                  <span style={{ display: 'inline-flex', marginLeft: 'auto' }}>
+                    <TTSButton text={`${key.charAt(0).toUpperCase() + key.slice(1)}. Score: ${value.score}. ${value.description}`} />
+                  </span>
                   <div className={styles.scoreCircle}>
                     <span>{value.score}</span>
                   </div>
@@ -176,7 +192,10 @@ const DailyCosmicBriefing = () => {
 
         {/* Advice */}
         {briefing.advice && (
-          <div className={styles.adviceCard}>
+          <div className={styles.adviceCard} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <TTSButton text={`Cosmic Advice. ${briefing.advice}`} />
+            </span>
             <div className={styles.adviceIcon}>💡</div>
             <div className={styles.adviceContent}>
               <h3 className={styles.adviceTitle}>Cosmic Advice</h3>
@@ -187,7 +206,10 @@ const DailyCosmicBriefing = () => {
 
         {/* Compatible Signs */}
         {briefing.compatibleSigns && briefing.compatibleSigns.length > 0 && (
-          <div className={styles.compatibleSection}>
+          <div className={styles.compatibleSection} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <TTSButton text={`Compatible Signs Today. ${briefing.compatibleSigns.join(', ')}`} />
+            </span>
             <h3 className={styles.compatibleTitle}>Compatible Signs Today</h3>
             <div className={styles.compatibleSigns}>
               {briefing.compatibleSigns.map((sign, index) => (

@@ -5,6 +5,7 @@ import styles from './AuraInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setAuraImage } from '../../../../redux/aiwow/aiwowSlice';
 import Footer from '../../../../layouts/Footer';
+import TTSButton from '../../../../component/UI/TTSButton';
 
 const AuraInstructions = () => {
   const navigate = useNavigate();
@@ -63,6 +64,10 @@ const AuraInstructions = () => {
         </div>
 
         <div>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '0', right: '0', display: 'flex' }}>
+            <TTSButton text={`Good Lighting. Ensure your room is well-lit for accurate aura capture. Neutral Background. Stand against a plain background for best results. Camera Permission. Allow camera access when prompted. Disclaimer. This aura analysis is for informational and spiritual guidance purposes only. The analysis combines AI technology with astrological principles to provide insights about your energy field and emotional state.`} />
+          </span>
         <div className={styles.checklistSection}>
           <div className={styles.checkItem}>
             <div className={styles.checkIcon}>
@@ -130,6 +135,7 @@ const AuraInstructions = () => {
           style={{ display: 'none' }}
           onChange={handleFileChange}
         />
+        </div>
         </div>
       </div>
       </div>

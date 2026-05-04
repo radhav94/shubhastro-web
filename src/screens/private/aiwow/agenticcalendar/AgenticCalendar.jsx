@@ -8,6 +8,7 @@ import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { FiMapPin, FiCalendar, FiChevronLeft, FiChevronRight, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 import Footer from '../../../../layouts/Footer';
 import { PATH } from '../../../../utils/routes/Paths';
+import TTSButton from '../../../../component/UI/TTSButton';
 
 const DEFAULT_OCCASIONS = [
   'Marriage',
@@ -277,7 +278,10 @@ const AgenticCalendar = () => {
 
       <div className={styles.content}>
         {/* Plan Your Events Banner */}
-        <div className={styles.banner}>
+        <div className={styles.banner} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <TTSButton text="Plan Your Events. Get astrologically optimal timing recommendations for your important life events" />
+          </span>
           <h2 className={styles.bannerTitle}>PLAN YOUR EVENTS</h2>
           <p className={styles.bannerSubtitle}>
             Get astrologically optimal timing recommendations for your important life events
@@ -419,6 +423,16 @@ const AgenticCalendar = () => {
                           <span>{name}</span>
                           {isCustom && <span className={styles.customTag}>Custom</span>}
                         </div>
+                        <span style={{ display: 'inline-flex', marginRight: '8px' }} onClick={(e) => e.stopPropagation()}>
+                          <TTSButton text={`${name}. ${timings.map(t => {
+                            let text = '';
+                            if (t.bestDate) text += new Date(t.bestDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) + '. ';
+                            if (t.bestTimeRange) text += 'Best Time: ' + t.bestTimeRange + '. ';
+                            if (t.alternateTimeRange) text += 'Alternate: ' + t.alternateTimeRange + '. ';
+                            if (t.reason) text += t.reason;
+                            return text;
+                          }).join('. ')}`} />
+                        </span>
                         <span className={styles.mobileChevron}>
                           {isExpanded ? <FiChevronUp size={20} color="#f75801" /> : <FiChevronDown size={20} color="#f75801" />}
                         </span>

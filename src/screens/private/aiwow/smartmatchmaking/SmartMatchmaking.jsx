@@ -19,6 +19,7 @@ import matchMakingImg from '../../../../assets/images/match-making-top-img.svg';
 import matchMakingImgBottom from '../../../../assets/images/match-making-bottom-img.svg';
 import Footer from '../../../../layouts/Footer';
 import { PATH } from '../../../../utils/routes/Paths';
+import TTSButton from '../../../../component/UI/TTSButton';
 // import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 
 const SmartMatchmaking = () => {
@@ -433,7 +434,10 @@ const SmartMatchmaking = () => {
               <img className={styles.bottomImg} src={matchMakingImgBottom} alt="img" />
             </>
           ) : error ? (
-            <div className={styles.errorSection}>
+            <div className={styles.errorSection} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`Analysis Failed. ${error.message || ''}${error.details?.detectedIssue ? '. Issue Detected: ' + error.details.detectedIssue : ''}${error.details?.expected ? '. Expected: ' + error.details.expected : ''}`} />
+              </span>
               <div className={styles.errorIcon}>
                 <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
                   <circle cx="32" cy="32" r="30" stroke="#ef4444" strokeWidth="2" fill="none"/>
@@ -476,7 +480,10 @@ const SmartMatchmaking = () => {
               {/* Score and Summary Wrapper */}
               <div className={styles.scoreSummaryWrapper}>
                 {/* Overall Score Card */}
-                <div className={styles.scoreCard}>
+                <div className={styles.scoreCard} style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                    <TTSButton text={`Compatibility Score: ${result?.ashtakootScore || 0} out of ${result?.ashtakootMaxScore}. ${result?.compatibilityLevel || 'N/A'}. ${primaryProfile?.name} and ${partnerProfile?.name}`} />
+                  </span>
                   <div className={styles.scoreCircle}>
                     <div className={styles.scoreValue}>{result?.ashtakootScore || 0}</div>
                     <div className={styles.scoreMax}>/{result?.ashtakootMaxScore}</div>
@@ -490,14 +497,20 @@ const SmartMatchmaking = () => {
                 </div>
 
                 {/* Summary */}
-                <div className={styles.summaryCard}>
+                <div className={styles.summaryCard} style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                    <TTSButton text={`Summary. ${result?.summary || 'No summary available'}`} />
+                  </span>
                   <h3 className={styles.cardTitle}>Summary</h3>
                   <p className={styles.summaryText}>{result?.summary || 'No summary available'}</p>
                 </div>
               </div>
 
             {/* Category Scores */}
-            <div className={styles.categoryCard}>
+            <div className={styles.categoryCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`Compatibility Breakdown. ${result?.categoryScores ? Object.entries(result.categoryScores).map(([k, v]) => k.replace(/([A-Z])/g, ' $1').trim() + ': ' + v + ' percent').join('. ') : ''}`} />
+              </span>
               <h3 className={styles.cardTitle}>Compatibility Breakdown</h3>
               <div className={styles.categoryList}>
                 {result?.categoryScores && Object.entries(result.categoryScores).map(([key, value]) => (
@@ -520,7 +533,10 @@ const SmartMatchmaking = () => {
             </div>
 
             {/* Astrology Insights */}
-            <div className={styles.insightsCard}>
+            <div className={styles.insightsCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`Astrological Insights. Guna Milan: ${result?.astrologyInsights?.gunaMilan || 0} out of 36. Manglik Status: ${result?.astrologyInsights?.manglikStatus || 'N/A'}. Dasha Alignment: ${result?.astrologyInsights?.dashaAlignment || 'N/A'}. Dominant Planets: ${result?.astrologyInsights?.dominantPlanets?.join(', ') || 'N/A'}`} />
+              </span>
               <h3 className={styles.cardTitle}>Astrological Insights</h3>
               <div className={styles.insightsGrid}>
                 <div className={styles.insightItem}>
@@ -557,7 +573,10 @@ const SmartMatchmaking = () => {
             </div>
 
              {/* Ashtakoot Details */}
-            <div className={styles.insightsCard}>
+            <div className={styles.insightsCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`Ashtakoot Details. Varna: ${result?.astrologyInsights?.ashtakootDetails?.varna ?? '0'} out of 1. Vasya: ${result?.astrologyInsights?.ashtakootDetails?.vasya ?? '0'} out of 2. Tara: ${result?.astrologyInsights?.ashtakootDetails?.tara ?? '0'} out of 3. Yoni: ${result?.astrologyInsights?.ashtakootDetails?.yoni ?? '0'} out of 4. Graha Maitri: ${result?.astrologyInsights?.ashtakootDetails?.grahamaitri ?? '0'} out of 5. Gana: ${result?.astrologyInsights?.ashtakootDetails?.gana ?? '0'} out of 6. Bhakoot: ${result?.astrologyInsights?.ashtakootDetails?.bhakoot ?? '0'} out of 7. Nadi: ${result?.astrologyInsights?.ashtakootDetails?.nadi ?? '0'} out of 8`} />
+              </span>
               <h3 className={styles.cardTitle}>Ashtakoot Details</h3>
               <div className={styles.ashtakootGrid}>
                 <div className={styles.ashtakootItem}>
@@ -596,7 +615,10 @@ const SmartMatchmaking = () => {
             </div>
 
             {/* Personality Match */}
-            <div className={styles.personalityCard}>
+            <div className={styles.personalityCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`Personality Match. ${primaryProfile?.name}: ${result?.personalityMatch?.[primaryProfile?.name]?.traits?.join(', ') || 'No traits'}. ${partnerProfile?.name}: ${result?.personalityMatch?.[partnerProfile?.name]?.traits?.join(', ') || 'No traits'}. Relationship Dynamic: ${result?.personalityMatch?.dynamic || 'N/A'}`} />
+              </span>
               <h3 className={styles.cardTitle}>Personality Match</h3>
               
               <div className={styles.personalityGrid}>
@@ -636,7 +658,10 @@ const SmartMatchmaking = () => {
             </div>
 
             {/* Conflict Prediction */}
-            <div className={styles.conflictCard}>
+            <div className={styles.conflictCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`Potential Challenges. ${result?.conflictPrediction?.map(c => c.area + ': ' + c.riskLevel + ' Risk. ' + c.reason)?.join('. ') || 'No conflict predictions available'}`} />
+              </span>
               <h3 className={styles.cardTitle}>Potential Challenges</h3>
               <div className={styles.conflictList}>
                 {result?.conflictPrediction?.map((conflict, idx) => (
@@ -654,7 +679,10 @@ const SmartMatchmaking = () => {
             </div>
 
             {/* Future Timeline */}
-            <div className={styles.timelineCard}>
+            <div className={styles.timelineCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`Future Timeline. ${result?.futureTimeline?.map(p => p.period + ': ' + p.theme + '. ' + p.riskLevel + ' Risk')?.join('. ') || 'No timeline data available'}`} />
+              </span>
               <h3 className={styles.cardTitle}>Future Timeline</h3>
               <div className={styles.timelineList}>
                 {result?.futureTimeline?.map((phase, idx) => (
@@ -675,7 +703,10 @@ const SmartMatchmaking = () => {
             </div>
 
             {/* Marriage Recommendation */}
-            <div className={styles.marriageCard}>
+            <div className={styles.marriageCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`Marriage Recommendation. Suitable for Marriage: ${result?.marriageRecommendation?.suitable ? 'Yes' : 'No'}${result?.marriageRecommendation?.bestMarriageWindow ? '. Best Marriage Window: ' + result.marriageRecommendation.bestMarriageWindow : ''}${result?.marriageRecommendation?.riskIfDelayed ? '. Risk if Delayed: ' + result.marriageRecommendation.riskIfDelayed : ''}`} />
+              </span>
               <h3 className={styles.cardTitle}>Marriage Recommendation</h3>
               <div className={styles.marriageContent}>
                 <div className={styles.marriageStatus}>
@@ -713,7 +744,10 @@ const SmartMatchmaking = () => {
             </div>
 
             {/* Remedies */}
-            <div className={styles.remediesCard}>
+            <div className={styles.remediesCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`Recommended Remedies. ${result?.remedies?.map(r => r.remedy + '. Purpose: ' + r.purpose)?.join('. ') || 'No remedies available'}`} />
+              </span>
               <h3 className={styles.cardTitle}>Recommended Remedies</h3>
               <div className={styles.remediesList}>
                 {result?.remedies?.map((remedy, idx) => {

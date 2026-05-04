@@ -1,4 +1,4 @@
-import { Volume2, VolumeX } from "lucide-react";
+import { Pause, Volume2 } from "lucide-react";
 import useTTS from "../../utils/hooks/useTTS";
 
 const btnStyle = {
@@ -29,7 +29,7 @@ const TTSButton = ({ text, size = 16 }) => {
       aria-label={isSpeaking ? "Stop reading" : "Read aloud"}
       type="button"
     >
-      {isSpeaking ? <VolumeX size={size} /> : <Volume2 size={size} />}
+      {isSpeaking ? <Pause size={size} /> : <Volume2 size={size} />}
     </button>
   );
 };
