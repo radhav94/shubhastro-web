@@ -663,7 +663,7 @@
   background: #ffffff;
   border-radius: 14px;
   padding: 12px 14px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+  // box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
   border: none;
 
   &:last-child {
@@ -738,7 +738,7 @@
   overflow: hidden;
   background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%);
   border: 1.5px solid #FFFFFF;
-  box-shadow: 0px 4px 10px 0px #0000000F;
+  // box-shadow: 0px 4px 10px 0px #0000000F;
   color: #1a1a1a;
 
   &:hover {
@@ -865,7 +865,7 @@
 .laalKitaab {
   background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%) !important;
   border: 1.5px solid #FFFFFF;
-  box-shadow: 0px 4px 10px 0px #0000000F;
+  // box-shadow: 0px 4px 10px 0px #0000000F;
   color: #1a1a1a;
   position: relative;
   overflow: hidden;
@@ -910,7 +910,7 @@
     margin-top: auto;
     position: relative;
     z-index: 2;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 }
 
@@ -1258,7 +1258,7 @@
   margin-bottom: 28px;
   background: #FFFFFF33;
   border: 1px solid #FFFFFF;
-  box-shadow: 0px 4px 10px 0px #0000000F;
+  // box-shadow: 0px 4px 10px 0px #0000000F;
   border-radius: 20px;
   padding: 16px;
   gap: 16px;
@@ -1304,6 +1304,9 @@
   &:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+  }
+  @media (width <= 767px) {
+    display: none;
   }
 }
 
@@ -1453,7 +1456,7 @@
   padding: 16px;
   // background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%);
   border: 1.5px solid #FFFFFF;
-  box-shadow: 0px 4px 10px 0px #0000000F;
+  // box-shadow: 0px 4px 10px 0px #0000000F;
 
   // @media (width <=767px) {
   //   padding: 16px;
@@ -1498,7 +1501,7 @@
 .calendarBox {
   background: #fff;
   border: 1.5px solid #FFFFFF;
-  box-shadow: 0px 4px 10px 0px #0000000F;
+  // box-shadow: 0px 4px 10px 0px #0000000F;
   border-radius: 20px;
   overflow: hidden;
   display: flex;
@@ -1508,7 +1511,7 @@
 .calHead {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   padding: 16px;
   background: #fff;
   border-bottom: 1px solid #f0f0f0;
@@ -1520,7 +1523,7 @@
 .calBody {
   flex: 1;
   background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%);
-  padding: 20px;
+  padding: 16px 0px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -1660,7 +1663,7 @@
 
 .calDateActive {
   height: 36px;
-  padding: 0 20px;
+  padding: 0 10px;
   background: #f75801;
   border: none;
   border-radius: 999px;
@@ -1682,6 +1685,7 @@
   color: #1f2937;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
+  flex-shrink: 0;
 
   &:hover {
     border-color: #f75801;
@@ -1783,16 +1787,16 @@
   background: #fff;
   border: 1px solid #f0ebe4;
   border-radius: 16px;
-  padding: 28px 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .discoverGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 16px;
 }
 
 .discoverItem {
@@ -1877,7 +1881,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 16px;
+  // margin-bottom: 16px;
 }
 
 /* Horizontal scroll container */
@@ -1898,12 +1902,13 @@
   gap: 15px;
   background: #FFFFFF66;
   border: 1.5px solid #FFFFFF;
-  box-shadow: 0px 4px 10px 0px #0000000F;
+  // box-shadow: 0px 4px 10px 0px #0000000F;
   border-radius: 16px;
-  padding: 20px;
+  padding: 16px 16px 20px 16px;
   flex-shrink: 0;
-  width: 415px;
-  min-height: 162px;
+  width: fit-content;
+  // width: 415px;
+  // min-height: 162px;
 }
 
 .sessionAvatar {
@@ -1917,18 +1922,24 @@
     object-fit: cover;
     border: 2px solid #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    @media (width <= 767px) {
+      width: 70px;
+      height: 70px;
+    }
   }
 }
 
 .sessionOnlineDot {
   position: absolute;
-  bottom: 3px;
+  bottom: -5px;
   right: 3px;
   width: 13px;
   height: 13px;
   border-radius: 50%;
   background: #22c55e;
-  border: 2px solid #fff;
+  // border: 2px solid #fff;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .sessionInfo {
@@ -1994,6 +2005,10 @@
   border: none;
   flex: 1;
   height: 40px;
+  @media (width <= 767px) {
+    padding: 0 12px;
+    gap: 5px;
+  }
 }
 
 .sessionPlayBtn {
@@ -2132,14 +2147,17 @@
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
   }
+  @media (max-width: 400px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
 }
 
 .statCard {
   background: #fff;
   border: 1.5px solid #FFFFFF;
-  box-shadow: 0px 4px 10px 0px #0000000F;
+  // box-shadow: 0px 4px 10px 0px #0000000F;
   border-radius: 16px;
-  padding: 20px;
+  padding: 16px;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -2177,14 +2195,14 @@
 .ctaBanner {
   width: 100%;
   background: linear-gradient(120deg, #f0ecfa 0%, #e8e2f5 35%, #ede8f8 60%, #f5eef8 100%);
-  border-radius: 24px;
+  border-radius: 16px;
   padding: 40px 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 48px;
   border: 1.5px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0px 4px 24px 0px rgba(120, 80, 200, 0.08);
+  // box-shadow: 0px 4px 24px 0px rgba(120, 80, 200, 0.08);
   position: relative;
   overflow: hidden;
 
@@ -3006,7 +3024,7 @@
   -webkit-backdrop-filter: none !important;
   border: none !important;
   border-radius: 16px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
   position: relative !important;
   overflow: hidden !important;
 
@@ -3059,7 +3077,7 @@
 
 .qCard {
   border: 2px solid #FFFFFF !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
   outline: none !important;
 }
 
@@ -3097,7 +3115,7 @@
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border: none !important;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06) !important;
+  // box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06) !important;
 }
 
 /* ═══ HomeV2 — WOW Suite crystal glass ═══ */
@@ -3135,9 +3153,14 @@
 
 /* ═══ HomeV2 body background ═══ */
 :global(body.home-v2-page) {
-  background-image: none !important;
+  background-image: url("../../../assets/images/main-body-bg.png") !important;
   background-color: #ebecf2 !important;
   position: relative !important;
+  background-repeat: repeat-y;
+  background-size: cover;
+  @media (width <= 767px) {
+    background-image: url("../../../assets/images/main-body-bg-mobile.png") !important;
+  }
 }
 
 :global(body.home-v2-page::before) {
@@ -3158,10 +3181,10 @@
     backdrop-filter: blur(20px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
     border: none !important;
-    box-shadow:
-      0 0 0 1.5px rgba(255, 255, 255, 0.9),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      0 8px 24px rgba(255, 255, 255, 0.5) !important;
+    // box-shadow:
+    //   0 0 0 1.5px rgba(255, 255, 255, 0.9),
+    //   inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    //   0 8px 24px rgba(255, 255, 255, 0.5) !important;
     outline: 1.5px solid rgba(255, 255, 255, 0.95) !important;
   }
 }
@@ -3173,10 +3196,10 @@
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
   // border-radius: 24px !important;
   // padding: 24px 20px !important;
-  box-shadow:
-    0 0 0 1.5px rgba(255, 255, 255, 0.9),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 8px 32px rgba(255, 255, 255, 0.4) !important;
+  // box-shadow:
+  //   0 0 0 1.5px rgba(255, 255, 255, 0.9),
+  //   inset 0 1px 0 rgba(255, 255, 255, 0.8),
+  //   0 8px 32px rgba(255, 255, 255, 0.4) !important;
   outline: 1.5px solid rgba(255, 255, 255, 0.95) !important;
   position: relative !important;
 
@@ -3188,7 +3211,7 @@
     right: 0;
     height: 35%;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 100%);
-    border-radius: 24px 24px 0 0;
+    border-radius: 16px 16px 0 0;
     pointer-events: none;
     z-index: 0;
   }
@@ -3211,7 +3234,7 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
   background: $glass-bg !important;
   backdrop-filter: $glass-blur !important;
   -webkit-backdrop-filter: $glass-blur !important;
-  border-radius: 24px !important;
+  border-radius: 16px !important;
   box-shadow: $glass-shadow !important;
   outline: $glass-border !important;
   position: relative !important;
@@ -3225,7 +3248,7 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
     right: 0;
     height: 35%;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 100%);
-    border-radius: 24px 24px 0 0;
+    border-radius: 16px 16px 0 0;
     pointer-events: none;
     z-index: 0;
   }
@@ -3253,7 +3276,7 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
 .quickGrid {
   background: #FFFFFF33 !important;
   border: 1px solid #FFFFFF !important;
-  box-shadow: 0px 4px 10px 0px #0000000F !important;
+  // box-shadow: 0px 4px 10px 0px #0000000F !important;
   backdrop-filter: none !important;
   outline: none !important;
 
@@ -3283,7 +3306,8 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
 
 .blogSection {
   @include glass-section;
-  padding: 24px 20px !important;
+  padding: 16px 16px 0px 16px !important;
+  box-shadow: none!important;
 }
 
 /* Inner boxes inside sections */
@@ -3291,9 +3315,9 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
   background: #FFFFFF66 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  border-radius: 20px !important;
+  border-radius: 16px !important;
   border: 1.5px solid #FFFFFF !important;
-  box-shadow: 0px 4px 10px 0px #0000000F !important;
+  // box-shadow: 0px 4px 10px 0px #0000000F !important;
 }
 
 .calendarBox,
@@ -3304,7 +3328,7 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
   -webkit-backdrop-filter: none !important;
   border-radius: 16px !important;
   border: 1.5px solid #FFFFFF !important;
-  box-shadow: 0px 4px 10px 0px #0000000F !important;
+  // box-shadow: 0px 4px 10px 0px #0000000F !important;
 }
 
 /* Blog cards */
@@ -3386,9 +3410,7 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
     -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
     border: none !important;
     box-shadow:
-      0 0 0 1.5px rgba(255, 255, 255, 0.9),
-      inset 0 1px 0 rgba(255, 255, 255, 0.85),
-      0 8px 24px rgba(255, 255, 255, 0.5) !important;
+      none !important;
     outline: 1.5px solid rgba(255, 255, 255, 0.95) !important;
     position: relative !important;
     overflow: hidden !important;
