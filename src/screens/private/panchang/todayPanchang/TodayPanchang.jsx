@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "./TodayPanchang.module.scss";
 import { useFetchAdvancePanchangQuery } from "../../../../redux/api/panchang/panchangApi";
+import useUserLocation from "../../../../utils/hooks/useUserLocation";
 import { useGetAstroDetailsQuery, useGetPlanetsQuery } from "../../../../redux/api/kundli/kundliApi";
 import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
@@ -39,7 +40,7 @@ const TodayPanchang = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const pad = (num) => String(num).padStart(2, "0");
-
+  const userLocation = useUserLocation();
 
   
   // Get initial date and location from navigation state OR URL query params
@@ -50,9 +51,9 @@ const TodayPanchang = () => {
   const queryLat = searchParams.get('lat');
   const queryLon = searchParams.get('lon');
   
-  const finalLat = initialLat || queryLat || 19.132;
-  const finalLon = initialLon || queryLon || 72.342;
-  const finalLocation = initialLocation || "Mumbai, India";
+  const finalLat = initialLat || queryLat || userLocation.lat;
+  const finalLon = initialLon || queryLon || userLocation.lon;
+  const finalLocation = initialLocation || userLocation.locationName;
   
   // Initialize with passed data or current date/location
   const now = initialDate ? new Date(initialDate) : new Date();
@@ -156,12 +157,23 @@ const TodayPanchang = () => {
         year: date.getFullYear(),
         hour: pad(date.getHours()),
         min: pad(date.getMinutes()),
-        lat: Number(finalLat),
-        lon: Number(finalLon),
+        lat: Number(initialLat || queryLat),
+        lon: Number(initialLon || queryLon),
         tzone: 5.5,
       });
     }
-  }, [initialDate, finalLat, finalLon, panchangTab]);
+  }, [initialDate, initialLat, initialLon, queryLat, queryLon, panchangTab]);
+
+  // Update payload when browser geolocation resolves
+  useEffect(() => {
+    if (userLocation.loaded && !userLocation.isDefault) {
+      setPayload((prev) => ({
+        ...prev,
+        lat: userLocation.lat,
+        lon: userLocation.lon,
+      }));
+    }
+  }, [userLocation.loaded, userLocation.lat, userLocation.lon]);
 
   // -------------------- TODAY HIGHLIGHTS --------------------
   const todayData = [
@@ -464,8 +476,8 @@ const TodayPanchang = () => {
       year: dob ? dob.getUTCFullYear() : now.getFullYear(),
       hour: dob ? pad(dob.getHours()) : pad(now.getHours()),
       min: dob ? pad(dob.getMinutes()-27) : pad(now.getMinutes()),
-      lat: Number(details?.latitude) || 19.132,
-      lon: Number(details?.longitude) || 72.342,
+      lat: Number(details?.latitude) || userLocation.lat,
+      lon: Number(details?.longitude) || userLocation.lon,
       tzone: 5.5,
     });
   };
