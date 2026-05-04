@@ -226,32 +226,17 @@ const Footer = () => {
       {/* NEW FOOTER UI — Astrotalk-style redesign                     */}
       {/* ============================================================ */}
 
-      {/* Logo + Description */}
-      <div className={styles.v2_top} style={location.pathname === '/home-new' || location.pathname === '/home-v2' ? { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' } : {}}>
-        <div style={location.pathname === '/home-new' || location.pathname === '/home-v2' ? { flex: 1, maxWidth: 700 } : {}}>
-          <img
-            src={location.pathname === '/home-new' || location.pathname === '/home-v2' ? ShubhAstroLogo : ShubhTalkLogo}
-            alt="ShubhAstro Logo"
-            className={styles.v2_logo}
-          />
+      {/* Multi-column Grid — Logo + Links all in one row */}
+      <div className={styles.v2_grid}>
+
+        {/* Column 0: Logo + Tagline + Social */}
+        <div className={`${styles.v2_column} ${styles.v2_logoCol}`}>
+          <img src={ShubhAstroLogo} alt="ShubhAstro Logo" className={styles.v2_logo} />
           <p className={styles.v2_tagline}>
             Your trusted guide to the cosmos. Connect with the best astrologers from India.
             Get predictions related to Marriage, Love life, Career or Health over call, chat, query or report.
           </p>
-        </div>
-        {(location.pathname === '/home-new' || location.pathname === '/home-v2') && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10, flexShrink: 0 }}>
-            <span style={{ fontSize: 14, fontWeight: 500, color: '#6b7280' }}>Follow Us</span>
-            <div className={styles.v2_socialIcons}>
-              <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
-              <a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
-              <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><IoLogoInstagram /></a>
-              <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><FaLinkedinIn /></a>
-              <a href="https://twitter.com" aria-label="X" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a>
-            </div>
-          </div>
-        )}
-        {location.pathname !== '/home-new' && location.pathname !== '/home-v2' && (
+          <p className={styles.v2_followLabel}>Follow Us</p>
           <div className={styles.v2_socialIcons}>
             <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
             <a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
@@ -259,44 +244,43 @@ const Footer = () => {
             <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><FaLinkedinIn /></a>
             <a href="https://twitter.com" aria-label="X" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a>
           </div>
-        )}
-      </div>
+        </div>
 
-      {/* Divider */}
-      <div className={styles.v2_divider} />
-
-      {/* Multi-column Links Grid — Desktop */}
-      <div className={styles.v2_grid}>
+        {/* Column 1: Horoscope */}
         <div className={styles.v2_column}>
           <h4 className={styles.v2_heading}>Horoscope</h4>
           {renderLinks(horoscopeLinks)}
         </div>
+
+        {/* Column 2: Explore Services */}
         <div className={styles.v2_column}>
           <h4 className={styles.v2_heading}>Explore Services</h4>
           {renderLinks(serviceLinks)}
         </div>
+
+        {/* Column 3: Shop Our Products */}
         <div className={styles.v2_column}>
           <h4 className={styles.v2_heading}>Shop Our Products</h4>
           {renderLinks(shopLinks)}
         </div>
+
+        {/* Column 4: Company Policies */}
         <div className={styles.v2_column}>
           <h4 className={styles.v2_heading}>Company Policies</h4>
           {renderLinks(companyLinks)}
         </div>
+
+        {/* Column 5: Contact Us */}
         <div className={`${styles.v2_column} ${styles.v2_columnWide}`}>
           <h4 className={styles.v2_heading}>Contact Us</h4>
           <p className={styles.v2_contactText}>Have questions?</p>
-          <a href="mailto:support@shubhtalk.com" className={styles.v2_emailLink}>
-            support@shubhtalk.com
-          </a>
+          <a href="mailto:support@shubhtalk.com" className={styles.v2_emailLink}>support@shubhtalk.com</a>
           <p className={styles.v2_contactText}>Or call us at</p>
-          <a href="tel:+911234567890" className={styles.v2_phoneLink}>
-            +91 12345 67890
-          </a>
+          <a href="tel:+911234567890" className={styles.v2_phoneLink}>+91 12345 67890</a>
           <h4 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h4>
           <div className={styles.v2_storeButtons}>
             <a href="https://play.google.com/store/apps/details?id=com.shubhtalk" target="_blank" rel="noopener noreferrer" className={styles.v2_storeBtn}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <path d="M3 20.5V3.5C3 2.91 3.34 2.39 3.84 2.15L13.69 12L3.84 21.85C3.34 21.6 3 21.09 3 20.5Z" fill="#4CAF50"/>
                 <path d="M16.81 15.12L6.05 21.34L14.54 12.85L16.81 15.12Z" fill="#F44336"/>
                 <path d="M20.16 10.81C20.5 11.08 20.75 11.5 20.75 12C20.75 12.5 20.53 12.9 20.18 13.18L17.89 14.5L15.39 12L17.89 9.5L20.16 10.81Z" fill="#FFC107"/>
@@ -308,7 +292,7 @@ const Footer = () => {
               </div>
             </a>
             <a href="https://apps.apple.com/app/shubhtalk/id123456789" target="_blank" rel="noopener noreferrer" className={styles.v2_storeBtn}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="#1a1a1a">
                 <path d="M17.05 20.28C16.03 21.23 14.96 21.08 13.93 20.63C12.85 20.17 11.85 20.15 10.71 20.63C9.28 21.25 8.52 21.07 7.62 20.28C2.79 15.25 3.51 7.59 9.05 7.31C10.4 7.38 11.34 8.05 12.13 8.11C13.31 7.87 14.44 7.18 15.7 7.27C17.21 7.39 18.35 7.99 19.1 9.07C15.98 10.94 16.72 15.05 19.58 16.2C19.01 17.7 18.27 19.19 17.04 20.29L17.05 20.28ZM12.03 7.25C11.88 5.02 13.69 3.18 15.77 3C16.06 5.58 13.43 7.5 12.03 7.25Z"/>
               </svg>
               <div className={styles.v2_storeInfo}>
@@ -318,51 +302,34 @@ const Footer = () => {
             </a>
           </div>
         </div>
+
       </div>
 
       {/* Mobile Accordion Footer */}
       <div className={styles.v2_mobileFooter}>
+        {/* Logo on mobile */}
+        <div className={styles.v2_mobileLogo}>
+          <img src={ShubhAstroLogo} alt="ShubhAstro Logo" className={styles.v2_logo} />
+          <p className={styles.v2_tagline}>Your trusted guide to the cosmos.</p>
+          <p className={styles.v2_followLabel}>Follow Us</p>
+          <div className={styles.v2_socialIcons}>
+            <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
+            <a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
+            <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><IoLogoInstagram /></a>
+            <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><FaLinkedinIn /></a>
+            <a href="https://twitter.com" aria-label="X" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a>
+          </div>
+        </div>
         {renderAccordionColumn("horoscope", "Horoscope", horoscopeLinks)}
         {renderAccordionColumn("services", "Explore Services", serviceLinks)}
         {renderAccordionColumn("shop", "Shop Our Products", shopLinks)}
         {renderAccordionColumn("company", "Company Policies", companyLinks)}
-
-        {/* Customer Support — always visible, no accordion */}
         <div className={styles.v2_column}>
-          <h4 className={styles.v2_heading}>Customer Support</h4>
+          <h4 className={styles.v2_heading}>Contact Us</h4>
           <p className={styles.v2_contactText}>Have questions?</p>
-          <a href="mailto:support@shubhtalk.com" className={styles.v2_emailLink}>
-            support@shubhtalk.com
-          </a>
+          <a href="mailto:support@shubhtalk.com" className={styles.v2_emailLink}>support@shubhtalk.com</a>
           <p className={styles.v2_contactText}>Or call us at</p>
-          <a href="tel:+911234567890" className={styles.v2_phoneLink}>
-            +91 12345 67890
-          </a>
-
-          <h4 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h4>
-          <div className={styles.v2_storeButtons}>
-            <a href="https://play.google.com/store/apps/details?id=com.shubhtalk" target="_blank" rel="noopener noreferrer" className={styles.v2_storeBtn}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                <path d="M3 20.5V3.5C3 2.91 3.34 2.39 3.84 2.15L13.69 12L3.84 21.85C3.34 21.6 3 21.09 3 20.5Z" fill="#4CAF50"/>
-                <path d="M16.81 15.12L6.05 21.34L14.54 12.85L16.81 15.12Z" fill="#F44336"/>
-                <path d="M20.16 10.81C20.5 11.08 20.75 11.5 20.75 12C20.75 12.5 20.53 12.9 20.18 13.18L17.89 14.5L15.39 12L17.89 9.5L20.16 10.81Z" fill="#FFC107"/>
-                <path d="M6.05 2.66L16.81 8.88L14.54 11.15L6.05 2.66Z" fill="#2196F3"/>
-              </svg>
-              <div className={styles.v2_storeInfo}>
-                <span className={styles.v2_storeLabel}>GET IT ON</span>
-                <span className={styles.v2_storeName}>Google Play</span>
-              </div>
-            </a>
-            <a href="https://apps.apple.com/app/shubhtalk/id123456789" target="_blank" rel="noopener noreferrer" className={styles.v2_storeBtn}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.05 20.28C16.03 21.23 14.96 21.08 13.93 20.63C12.85 20.17 11.85 20.15 10.71 20.63C9.28 21.25 8.52 21.07 7.62 20.28C2.79 15.25 3.51 7.59 9.05 7.31C10.4 7.38 11.34 8.05 12.13 8.11C13.31 7.87 14.44 7.18 15.7 7.27C17.21 7.39 18.35 7.99 19.1 9.07C15.98 10.94 16.72 15.05 19.58 16.2C19.01 17.7 18.27 19.19 17.04 20.29L17.05 20.28ZM12.03 7.25C11.88 5.02 13.69 3.18 15.77 3C16.06 5.58 13.43 7.5 12.03 7.25Z"/>
-              </svg>
-              <div className={styles.v2_storeInfo}>
-                <span className={styles.v2_storeLabel}>Download on the</span>
-                <span className={styles.v2_storeName}>App Store</span>
-              </div>
-            </a>
-          </div>
+          <a href="tel:+911234567890" className={styles.v2_phoneLink}>+91 12345 67890</a>
         </div>
       </div>
 
