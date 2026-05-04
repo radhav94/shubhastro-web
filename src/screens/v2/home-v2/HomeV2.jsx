@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { getUserFromStorage } from "../../../utils/authStorage";
 import { Toast } from "../../../component";
 import { useGetHomeDetailsQuery, useGetAiSuitesQuery, useGetNewHomeDetailsQuery } from "../../../services/appServices/homeServices";
+import { useGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chatHistory";
+import { useGetCallHistoryQuery } from "../../../redux/api/callHistory/callHistory";
 import { useGetCurrentMahadashaFullQuery } from "../../../redux/api/kundli/dashaApi";
 import { useFetchAdvancePanchangQuery } from "../../../redux/api/panchang/panchangApi";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
@@ -18,6 +20,8 @@ import BlogsSection from "../home/components/BlogsSection";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
 import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
+import MySessionsSection from "./MySessionsSection";
+import AgenticCalendarV2 from "./AgenticCalendarV2";
 
 // Left card images
 import kundliImg from "../../../assets/images/home-hero-kundli.png";
@@ -287,7 +291,7 @@ const HomeV2 = () => {
 
               {/* Header row: title left, View More right */}
               <div className={styles.wowHeader}>
-                <div className={`${styles.titleWithBottomDevider} ${styles.tWBmarginLeft}`}>
+                <div className={`${styles.titleWithBottomDevider}`}>
                   <h4 className={styles.wowTitle}>{wowSuiteItems[0]?.section_title || "LOREM IPSUM"}</h4>
                   <div className={styles.BottomDevider}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
@@ -501,8 +505,8 @@ const HomeV2 = () => {
       </section>
 
       {/* ═══ SECTION 4 — Top Rated Astrologers ═══ */}
-      <section className={styles.astrologerSection} style={{ backgroundColor: `#FFE9E5`,paddingBottom:'1px',paddingTop:'24px'}}>
-        <div className={styles.sectionHeader}>
+      <section className={styles.astrologerSection} style={{ backgroundColor: `#FFE9E5`,paddingBottom:'1px',paddingTop:'16px'}}>
+        <div className={styles.sectionHeader} style={{marginBottom:"0px"}}>
           <div className={styles.sectionTitleBlock}>
             <h2 className={styles.sectionTitle}>{astrologerSection?.display_title || "TOP RATED ASTROLOGERS FOR YOU"}</h2>
           </div>
@@ -517,7 +521,7 @@ const HomeV2 = () => {
       </section>
 
       {/* ═══ SECTION 5 — Explore by Category + Agentic Calendar + Discover More ═══ */}
-      <section className={styles.threeColSection}>
+      <section className={styles.threeColSection} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '16px' }}>
 
         {/* LEFT — Explore by Category */}
         <div className={styles.categoryBox}>
@@ -537,68 +541,28 @@ const HomeV2 = () => {
               { title: "Money &\nFinance", slug: "money-finance" },
               { title: "Marriage &\nFamily", slug: "marriage-family" },
               { title: "Child &\nEducation", slug: "child-education" },
-            ]).map((c, i) => (
-              <div key={i} className={styles.catItem} onClick={() => navigate('/chat-with-astrologers', { state: { selectedType: c.slug } })} style={{ cursor: 'pointer' }}>
-                <div
-                  className={styles.catIconBox}
-                  style={{
-                    ...(c.image_url ? {
-                      background: `url(${c.image_url}) center/50% no-repeat, linear-gradient(135deg, #FCF8F7 0%, #FCDBD9 100%)`,
-                    } : {})
-                  }}
-                />
-                <span>{c.title}</span>
-              </div>
-            ))}
+            ]).map((c, i) => {
+              const catColors = ["#FFE4E4","#FFE4F0","#E4EEFF","#FFF3E4","#E4FFE9","#F0E4FF"];
+              return (
+                <div key={i} className={styles.catItem} onClick={() => navigate('/chat-with-astrologers', { state: { selectedType: c.slug } })} style={{ cursor: 'pointer' }}>
+                  <div
+                    className={styles.catIconBox}
+                    style={{
+                      background: c.image_url
+                        ? `url(${c.image_url}) center/60% no-repeat, ${catColors[i % catColors.length]}`
+                        : catColors[i % catColors.length],
+                    }}
+                  />
+                  <span>{c.title}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {/* CENTER — Agentic Calendar */}
         <div className={styles.calendarBox}>
-          <div className={styles.calHead}>
-            <div className={`${styles.titleWithBottomDevider} ${styles.tWBmarginBottomZero}`}>
-              <h4 className={styles.wowTitle}>AGENTIC CALENDAR</h4>
-              <div className={styles.BottomDevider}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
-                  <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
-                </svg>
-              </div>
-            </div>
-            <button className={styles.viewAllBtn} style={{ color: '#f75801' }}>›</button>
-          </div>
-          <div className={styles.calBody}>
-            {/* Occasions */}
-            <div className={styles.calOccasions}>
-              <p className={styles.calLabel}>Select Occasions</p>
-              <div className={styles.calChips}>
-                <button className={styles.calChipActive}>Buy New Car <span className={styles.calChipX}>✕</span></button>
-                {["Engagement", "Divorce", "Room Rent"].map((chip, i) => (
-                  <button key={i} className={styles.calChip}>{chip}</button>
-                ))}
-                <button className={styles.calChipAdd}>+ Add Custom</button>
-              </div>
-              <p className={styles.calHint}>Select one or more occasions to view Muhurat</p>
-            </div>
-
-            {/* Divider */}
-            <div className={styles.calDivider} />
-
-            {/* Date filter */}
-            <div className={styles.calDateRow}>
-              {["Today", "Tomorrow", "This Week", "This Month"].map((d, i) => (
-                <button key={i} className={i === 0 ? styles.calDateActive : styles.calDateChip}>{d}</button>
-              ))}
-              <button className={styles.calChipAdd}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#f75801" style={{flexShrink:0}}>
-                  <path d="M19 3h-1V1h-2v2H8V1H6v2H5C3.9 3 3 3.9 3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zm-8 4h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/>
-                </svg>
-                Date
-              </button>
-            </div>
-
-            {/* CTA */}
-            <button className={styles.calCta}>View Muhuratas</button>
-          </div>
+          <AgenticCalendarV2 styles={styles} />
         </div>
 
         {/* RIGHT — Discover More */}
@@ -614,24 +578,19 @@ const HomeV2 = () => {
           <div className={styles.discoverGrid}>
             {(discoverMoreData.length > 0 ? discoverMoreData : [
               { title: "Panchang" },
-              { title: "Kundli Matching" },
+              { title: "Kundli\nMatching" },
               { title: "Numerology" },
-              { title: "Tarot Reading" },
+              { title: "Tarot\nReading" },
             ]).map((item, i) => {
-              const discoverBgs = [
-                "linear-gradient(116.1deg, #FBF3F1 0%, #F7E0DA 100%)",
-                "linear-gradient(116.1deg, #FFF0F0 0%, #FFE0E0 100%)",
-                "linear-gradient(116.1deg, #F3F1FD 0%, #EBE5FC 100%)",
-                "linear-gradient(116.1deg, #FAECFF 0%, #F9E7FF 100%)",
-              ];
+              const discoverBgs = ["#FFE4E4","#FFF3E4","#E4EEFF","#F0E4FF"];
               return (
                 <div key={i} className={styles.discoverItem}>
                   <div
                     className={styles.discoverIconBox}
                     style={{
-                      ...(item.image_url ? {
-                        background: `url(${item.image_url}) center/50% no-repeat, ${discoverBgs[i % 4]}`,
-                      } : { background: discoverBgs[i % 4] })
+                      background: item.image_url
+                        ? `url(${item.image_url}) center/60% no-repeat, ${discoverBgs[i % 4]}`
+                        : discoverBgs[i % 4],
                     }}
                   />
                   <span>{item.title}</span>
@@ -643,67 +602,22 @@ const HomeV2 = () => {
 
       </section>
 
-      {/* ═══ SECTION 6 — My Sessions ═══ */}
-      <section className={styles.mySessionsSection}>
-        <div className={styles.mySessionsHeader}>
-          <div className={`${styles.titleWithBottomDevider}`}>
-            <h4 className={styles.wowTitle}>MY SESSIONS</h4>
-            <div className={styles.BottomDevider}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
-                <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
-              </svg>
-            </div>
-          </div>
-          <button className={styles.viewAllBtn} onClick={() => navigate('/profile')}>View all &rsaquo;</button>
-        </div>
-
-        {/* Horizontally scrollable cards */}
-        <div className={styles.sessionScroll}>
-          {[1,2,3,4].map((_, idx) => (
-            <div key={idx} className={styles.sessionCard}>
-              {/* Avatar */}
-              <div className={styles.sessionAvatar}>
-                <img src={astrologerMaleImg} alt="Astrologer" />
-                <span className={styles.sessionOnlineDot} />
-              </div>
-
-              {/* Info */}
-              <div className={styles.sessionInfo}>
-                <h3 className={styles.sessionName}>Jane Doe</h3>
-                <div className={styles.sessionMeta}>
-                  <span className={styles.sessionDate}>29 Apr, 2029</span>
-                  <span className={styles.sessionDivider}>|</span>
-                  <span className={styles.sessionType}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="#f75801"/>
-                    </svg>
-                    Call Session
-                  </span>
-                </div>
-
-                {/* Bottom row */}
-                <div className={styles.sessionActions}>
-                  {/* Voice player */}
-                  <div className={styles.sessionPlayer}>
-                    <button className={styles.sessionPlayBtn}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#f75801">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    </button>
-                    <div className={styles.sessionWave}>
-                      {[4, 8, 14, 18, 22, 16, 22, 18, 14, 8, 4].map((h, i) => (
-                        <span key={i} className={styles.sessionWaveBar} style={{ height: `${h}px` }} />
-                      ))}
-                    </div>
-                  </div>
-                  {/* Call Again */}
-                  <button className={styles.sessionCallBtn}>Call Again</button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* ═══ SECTION 5b — News / Blog ═══ */}
+      <section className={styles.blogSection}>
+        <BlogsSection
+          blogData={blogSection?.content || []}
+          title={blogSection?.display_title || "NEWS / BLOGS"}
+          showMore={true}
+        />
       </section>
+
+      {/* ═══ SECTION 6 — My Sessions ═══ */}
+      <MySessionsSection
+        userId={user?.id}
+        navigate={navigate}
+        styles={styles}
+        astrologerMaleImg={astrologerMaleImg}
+      />
 
       {/* ═══ SECTION 7 — Real Consultations (Live Tracking + CTA) ═══ */}
       <section className={styles.liveSection}>
@@ -792,14 +706,7 @@ const HomeV2 = () => {
 
       </section>
 
-      {/* ═══ SECTION 8 — Explore Blogs ═══ */}
-      <section className={styles.blogSection}>
-        <BlogsSection
-          blogData={blogSection?.content || []}
-          title={blogSection?.display_title || "EXPLORE BLOGS"}
-          showMore={true}
-        />
-      </section>
+      {/* ═══ SECTION 8 — Explore Blogs (removed — now in threeColSection) ═══ */}
 
 
     </div>
