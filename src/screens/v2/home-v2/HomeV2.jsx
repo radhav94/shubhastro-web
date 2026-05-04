@@ -185,6 +185,18 @@ const HomeV2 = () => {
     return homeList?.find(s => s.display_type === "discover-more")?.content || [];
   }, [homeList]);
 
+  // Extract live tracking stats
+  const liveTrackingSection = useMemo(() => {
+    return homeList?.find(s => s.slug === "live-tracking" || s.slug === "total-count");
+  }, [homeList]);
+
+  const liveTrackingCounts = liveTrackingSection?.content?.[0] || {};
+
+  // Extract connect-astrologer CTA section
+  const connectSection = useMemo(() => {
+    return homeList?.find(s => s.slug === "connect-astrologer");
+  }, [homeList]);
+
   // Extract popular astrologers
   const popularAstrologers = useMemo(() => {
     return homeList?.find(s => s.slug === "popular-astrologers")?.content || [];
@@ -630,26 +642,32 @@ const HomeV2 = () => {
 
         {/* Heading */}
         <h2 className={styles.liveHeading}>
-          Real People. Real Consultations. <span className={styles.liveOrange}>Right Now.</span>
+          {liveTrackingSection?.display_title || "Real People. Real Consultations. Right Now."}
         </h2>
-        <p className={styles.liveSubtitle}>Live updates from ShubhAstro community</p>
+        <p className={styles.liveSubtitle}>{liveTrackingSection?.description || "Live updates from ShubhAstro community"}</p>
 
         {/* 4 Stat Cards */}
         <div className={styles.liveStats}>
-          {[
-            { num: "234", label: "users in active consultations",  color: "#FEF0E4" },
-            { num: "47",  label: "Kundlis generated today",        color: "#F4ECFB" },
-            { num: "8",   label: "Lal Kitab remedies tried tonight", color: "#E9F2EF" },
-            { num: "12",  label: "new chats started in the last hour", color: "#EBF2FB" },
-          ].map((s, i) => (
-            <div key={i} className={styles.statCard}>
-              <div className={styles.statCircle} style={{ background: s.color }} />
-              <div className={styles.statText}>
-                <span className={styles.statNum}>{s.num}</span>
-                <span className={styles.statLabel}>{s.label}</span>
+          {(liveTrackingSection?.content?.length > 0
+            ? liveTrackingSection.content
+            : [
+                { count: 234, description: "users in active consultations" },
+                { count: 47,  description: "Kundlis generated today" },
+                { count: 8,   description: "Lal Kitab remedies tried tonight" },
+                { count: 12,  description: "new chats started in the last hour" },
+              ]
+          ).map((s, i) => {
+            const colors = ["#FEF0E4", "#F4ECFB", "#E9F2EF", "#EBF2FB"];
+            return (
+              <div key={i} className={styles.statCard}>
+                <div className={styles.statCircle} style={{ background: colors[i % 4] }} />
+                <div className={styles.statText}>
+                  <span className={styles.statNum}>{(s.count ?? 0).toLocaleString()}</span>
+                  <span className={styles.statLabel}>{s.description}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* CTA Banner */}
@@ -658,11 +676,11 @@ const HomeV2 = () => {
           <div className={styles.ctaLeft}>
             <div className={styles.ctaTag}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-              Don't Wait. Get Clarity Now.
+              {connectSection?.quick_message || "Don't Wait. Get Clarity Now."}
             </div>
-            <h3 className={styles.ctaHeading}>Your Answers Are Waiting.</h3>
-            <p className={styles.ctaOrange}>Connect with an Astrologer Now!</p>
-            <p className={styles.ctaDesc}>Talk to verified astrologers and get clarity on love, career, health, finance and more.</p>
+            <h3 className={styles.ctaHeading}>{connectSection?.title || "Your Answers Are Waiting."}</h3>
+            <p className={styles.ctaOrange}>{connectSection?.sub_title || "Connect with an Astrologer Now!"}</p>
+            <p className={styles.ctaDesc}>{connectSection?.description || "Talk to verified astrologers and get clarity on love, career, health, finance and more."}</p>
             <div className={styles.ctaAvatarRow}>
               <div className={styles.ctaAvatars}>
                 {[avatar1, avatar2, avatar3, avatar4].map((av, i) => (
@@ -681,25 +699,26 @@ const HomeV2 = () => {
           <div className={styles.ctaRight}>
             <button className={styles.ctaBtnPrimary} onClick={() => navigate('/chat-with-astrologers')}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-              Start Chat Consultation
+              {connectSection?.action_btn?.[0] || "Start Chat Consultation"}
             </button>
             <button className={styles.ctaBtnSecondary} onClick={() => navigate('/chat-with-astrologers')}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="#f75801"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-              Connect with Astrologer
+              {connectSection?.action_btn?.[1] || "Connect with Astrologer"}
             </button>
             <div className={styles.ctaTrust}>
-              <span className={styles.ctaTrustItem}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-                100% Secure
-              </span>
-              <span className={styles.ctaTrustItem}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                Verified Experts
-              </span>
-              <span className={styles.ctaTrustItem}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-                Privacy Protected
-              </span>
+              {(connectSection?.tag_label || ["100% Secure", "Verified Experts", "Privacy Protected"]).map((label, i) => {
+                const icons = [
+                  <svg key="lock" width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>,
+                  <svg key="check" width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>,
+                  <svg key="shield" width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>,
+                ];
+                return (
+                  <span key={i} className={styles.ctaTrustItem}>
+                    {icons[i % 3]}
+                    {label}
+                  </span>
+                );
+              })}
             </div>
           </div>
         </div>
