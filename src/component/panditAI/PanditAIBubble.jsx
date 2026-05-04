@@ -13,7 +13,7 @@ import usePanditAI from "./usePanditAI";
 import useSpeechToText from "./useSpeechToText";
 import toast from "../toast";
 import { translateText } from "./translateText";
-import panditAiIcon from "../../assets/images/AiPandit.svg";
+import panditAiIcon from "../../assets/images/AiPandit.png";
 
 const LANGUAGES = [
   { code: "en-IN", label: "English" },
@@ -269,8 +269,8 @@ const PanditAIBubble = () => {
         >
           <span className={styles.bubbleGlow} />
           <span className={styles.bubbleIcon}>
-            <Sparkles size={21} />
-            {/* <img src={panditAiIcon} alt="icon" /> */}
+            {/* <Sparkles size={21} /> */}
+            <img src={panditAiIcon} alt="icon" />
           </span>
           <span className={styles.bubbleText}>
             <span className={styles.bubbleKicker}>Ask</span>
