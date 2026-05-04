@@ -207,6 +207,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
     const handleCallAccepted = async ({
       roomId,
       token,
+      channelName,
       type,
       remainingTime,
       isSwitch,
@@ -228,13 +229,14 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
       
       // Regular call acceptance
       resetCallFlow();
-      cancelAllExcept(roomId);
+      removePendingConnection(roomId);
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
 
       try {
         setActiveCall({
           roomId,
+          channelName,
           chatRoomId,
           agoraToken: token,
           callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
@@ -259,7 +261,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
       ...data
     }) => {
       setWaitingList(false);
-      cancelAllExcept(roomId);
+      removePendingConnection(roomId);
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
 

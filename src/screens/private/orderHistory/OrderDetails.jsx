@@ -199,7 +199,7 @@ const OrderDetails = () => {
 
     const handleChatAccepted = async ({ roomId, astrologerId: astroId, userId: uid, ...data }) => {
       setWaitingList(false);
-      cancelAllExcept(roomId);
+      removePendingConnection(roomId);
       const astro = activeAstroRef.current || astrologerData?.data;
       try {
         if (!roomId) throw new Error("Room ID missing");
@@ -220,16 +220,16 @@ const OrderDetails = () => {
       }
     };
 
-    const handleCallAccepted = async ({ roomId, token, type, remainingTime, ...rest }) => {
+    const handleCallAccepted = async ({ roomId, token, channelName, type, remainingTime, ...rest }) => {
       resetCallFlow();
-      cancelAllExcept(roomId);
+      removePendingConnection(roomId);
       const astro = activeAstroRef.current || astrologerData?.data;
       try {
         if (!astro) { Toast.error("Astrologer data missing"); return; }
         const res = await createChatRoom({ userId, astrologerId: astro._id });
         const chatRoomId = res?.data?.data;
         setActiveCall({
-          roomId, chatRoomId, agoraToken: token,
+          roomId, channelName, chatRoomId, agoraToken: token,
           callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true, callType: type, userId, astrologerId: astro._id,
           astrologerID: astro?.astrologer_ID, remainingTime,

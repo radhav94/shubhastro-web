@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, useCallback, useRef } from "react";
+import { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
 import { voiceSocket } from "../services/voiceSocketServices";
+import { useCall } from "./CallContext";
+import { useChat } from "./ChatContext";
 
 const WaitingQueueContext = createContext();
 
@@ -17,6 +19,8 @@ const QUEUE_MAX_AGE = 30 * 60 * 1000; // 30 minutes
  *   waitingTime: number,  // approx minutes
  *   timestamp: number,    // Date.now() when added
  *   isEmergency: boolean,
+ *   status: "ringing" | "waiting" | "astrologer_accepted" | "on_hold" | "on-going" | null,
+ *   sessionId: string,    // session ID from server
  * }
  */
 
@@ -104,12 +108,17 @@ export const WaitingQueueProvider = ({ children }) => {
   }, [persist]);
 
   // Cancel and remove a specific pending connection
-  const cancelPendingConnection = useCallback((roomId, type) => {
-    if (!roomId) return;
-    const eventName = type === "chat" ? "chat:cancel" : "call:cancel";
-    voiceSocket.emit(eventName, { roomId, canceledBy: "CUSTOMER" });
-    removePendingConnection(roomId);
-  }, [removePendingConnection]);
+  const cancelPendingConnection = useCallback((roomId, type, astrologerId) => {
+    if (roomId) {
+      const eventName = type === "chat" ? "chat:cancel" : "call:cancel";
+      voiceSocket.emit(eventName, { roomId, canceledBy: "CUSTOMER" });
+      removePendingConnection(roomId);
+    } else if (astrologerId) {
+      // No roomId yet (server hasn't responded with call:room/chat:room)
+      // Remove from local queue by astrologerId
+      removePendingByAstrologer(astrologerId);
+    }
+  }, [removePendingConnection, removePendingByAstrologer]);
 
   // Cancel ALL pending connections except the accepted one
   const cancelAllExcept = useCallback((acceptedRoomId) => {
@@ -146,7 +155,139 @@ export const WaitingQueueProvider = ({ children }) => {
     );
   }, []);
 
+  // Update status of a pending connection by roomId
+  const updateStatusByRoomId = useCallback((roomId, status, extraData = {}) => {
+    setPendingConnections((prev) => {
+      const next = prev.map((c) => {
+        if (c.roomId === roomId) {
+          return { ...c, status, ...extraData };
+        }
+        return c;
+      });
+      persist(next);
+      return next;
+    });
+  }, [persist]);
+
+  // Get a pending connection by roomId
+  const getConnectionByRoomId = useCallback((roomId) => {
+    return pendingConnectionsRef.current.find((c) => c.roomId === roomId) || null;
+  }, []);
+
+  // Get a pending connection by astrologerId
+  const getConnectionByAstrologerId = useCallback((astrologerId) => {
+    return pendingConnectionsRef.current.find((c) => c.astrologer?._id === astrologerId) || null;
+  }, []);
+
   const hasAnyPending = pendingConnections.length > 0;
+
+  /* ================= GLOBAL TWO-WAY ACCEPT LISTENERS ================= */
+  // These run at app level so events are handled regardless of which page the user is on
+  const { setCallApprovalData, callApprovalData } = useCall();
+  const { setChatApprovalData, chatApprovalData } = useChat();
+  const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+
+  useEffect(() => {
+    if (!userIdLocal) return;
+
+    const handleCallAstrologerAccepted = (data) => {
+      console.log("[GlobalTwoWay] 📥 call:astrologer_accepted", JSON.stringify(data));
+      const { roomId, sessionId, astrologerId, astrologerDetail, type, isEmergency } = data;
+      if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
+      setCallApprovalData({ roomId, sessionId, astrologerId, astrologerDetail, type, isEmergency });
+    };
+
+    const handleChatAstrologerAccepted = (data) => {
+      console.log("[GlobalTwoWay] 📥 chat:astrologer_accepted", JSON.stringify(data));
+      const { roomId, sessionId, astrologerId, astrologerDetail, type, isEmergency } = data;
+      if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
+      setChatApprovalData({ roomId, sessionId, astrologerId, astrologerDetail, type: type || "chat", isEmergency });
+    };
+
+    const handleCallOnHold = (data) => {
+      console.log("[GlobalTwoWay] ⏸️ call:on_hold", JSON.stringify(data));
+      const { roomId } = data;
+      if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
+      if (roomId) updateStatusByRoomId(roomId, "on_hold");
+    };
+
+    const handleChatOnHold = (data) => {
+      console.log("[GlobalTwoWay] ⏸️ chat:on_hold", JSON.stringify(data));
+      const { roomId } = data;
+      if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
+      if (roomId) updateStatusByRoomId(roomId, "on_hold");
+    };
+
+    const handleCallUnavailable = (data) => {
+      const { roomId } = data;
+      if (roomId) removePendingConnection(roomId);
+      if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
+    };
+
+    const handleChatUnavailable = (data) => {
+      const { roomId } = data;
+      if (roomId) removePendingConnection(roomId);
+      if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
+    };
+
+    const handleCanceled = (data) => {
+      const canceledRoomId = data?.roomId || data?.sessionData?.roomId;
+      if (canceledRoomId) {
+        removePendingConnection(canceledRoomId);
+        if (callApprovalData?.roomId === canceledRoomId) setCallApprovalData(null);
+        if (chatApprovalData?.roomId === canceledRoomId) setChatApprovalData(null);
+      }
+    };
+
+    const handleRejected = (data) => {
+      if (data?.switchRejected) return;
+      const rejectedRoomId = data?.roomId || data?.sessionData?.roomId;
+      const rejectedAstrologerId = data?.astrologerId || data?.sessionData?.astrologerId;
+      if (rejectedRoomId) {
+        removePendingConnection(rejectedRoomId);
+        if (callApprovalData?.roomId === rejectedRoomId) setCallApprovalData(null);
+        if (chatApprovalData?.roomId === rejectedRoomId) setChatApprovalData(null);
+      } else if (rejectedAstrologerId) {
+        removePendingByAstrologer(rejectedAstrologerId);
+      }
+    };
+
+    const handleActivity = (data) => {
+      if (data?.status === "ringing" && data?.roomId) {
+        updateStatusByRoomId(data.roomId, "ringing");
+      }
+    };
+
+    voiceSocket.on("call:astrologer_accepted", handleCallAstrologerAccepted);
+    voiceSocket.on("chat:astrologer_accepted", handleChatAstrologerAccepted);
+    voiceSocket.on("call:on_hold", handleCallOnHold);
+    voiceSocket.on("chat:on_hold", handleChatOnHold);
+    voiceSocket.on("call:ring_timeout", handleCallOnHold);
+    voiceSocket.on("chat:ring_timeout", handleChatOnHold);
+    voiceSocket.on("call:unavailable", handleCallUnavailable);
+    voiceSocket.on("chat:unavailable", handleChatUnavailable);
+    voiceSocket.on("call:canceled", handleCanceled);
+    voiceSocket.on("chat:canceled", handleCanceled);
+    voiceSocket.on("call:rejected", handleRejected);
+    voiceSocket.on("chat:rejected", handleRejected);
+    voiceSocket.on("activity", handleActivity);
+
+    return () => {
+      voiceSocket.off("call:astrologer_accepted", handleCallAstrologerAccepted);
+      voiceSocket.off("chat:astrologer_accepted", handleChatAstrologerAccepted);
+      voiceSocket.off("call:on_hold", handleCallOnHold);
+      voiceSocket.off("chat:on_hold", handleChatOnHold);
+      voiceSocket.off("call:ring_timeout", handleCallOnHold);
+      voiceSocket.off("chat:ring_timeout", handleChatOnHold);
+      voiceSocket.off("call:unavailable", handleCallUnavailable);
+      voiceSocket.off("chat:unavailable", handleChatUnavailable);
+      voiceSocket.off("call:canceled", handleCanceled);
+      voiceSocket.off("chat:canceled", handleCanceled);
+      voiceSocket.off("call:rejected", handleRejected);
+      voiceSocket.off("chat:rejected", handleRejected);
+      voiceSocket.off("activity", handleActivity);
+    };
+  }, [userIdLocal]);
 
   return (
     <WaitingQueueContext.Provider
@@ -162,6 +303,9 @@ export const WaitingQueueProvider = ({ children }) => {
         cancelAll,
         isInQueue,
         hasAnyPending,
+        updateStatusByRoomId,
+        getConnectionByRoomId,
+        getConnectionByAstrologerId,
       }}
     >
       {children}

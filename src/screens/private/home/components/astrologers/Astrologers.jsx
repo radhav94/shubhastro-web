@@ -193,7 +193,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
     };
 
-    const handleCallAccepted = async ({ roomId, token, type, remainingTime, isSwitch, ...rest }) => {
+    const handleCallAccepted = async ({ roomId, token, channelName, type, remainingTime, isSwitch, ...rest }) => {
       // If there's an active audio call and this is a video acceptance, it's an upgrade — let CallContext handle it
       if (type === "video" && activeCall && activeCall.callType === "audio") {
         console.log("🔄 Video upgrade accepted - CallContext will handle the switch (isSwitch:", isSwitch, ")");
@@ -210,13 +210,14 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       
       // Regular call acceptance
       resetCallFlow();
-      cancelAllExcept(roomId);
+      removePendingConnection(roomId);
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
 
       try {
         setActiveCall({
           roomId,
+          channelName,
           chatRoomId,
           agoraToken: token,
           callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
@@ -242,7 +243,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       ...data
     }) => {
       setWaitingList(false);
-      cancelAllExcept(roomId);
+      removePendingConnection(roomId);
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
 

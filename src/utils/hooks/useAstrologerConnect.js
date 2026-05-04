@@ -351,6 +351,7 @@ export const useAstrologerConnect = () => {
           astrologerId: astro._id,
           type: connectionType,
           ...(isEmergency && { isEmergency: true }),
+          fromLive: false,
         };
         console.log("[NormalFlow] 📤 Emitting call:initiate");
         console.log("[NormalFlow]   → payload:", JSON.stringify(payload));
@@ -379,7 +380,9 @@ export const useAstrologerConnect = () => {
         const payload = {
           userId: userIdLocal,
           astrologerId: astro._id,
+          type: "chat",
           ...(isEmergency && { isEmergency: true }),
+          fromLive: false,
         };
         console.log("[NormalFlow] 📤 Emitting chat:initiate");
         console.log("[NormalFlow]   → payload:", JSON.stringify(payload));

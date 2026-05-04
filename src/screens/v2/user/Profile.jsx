@@ -582,7 +582,7 @@ const Profile = () => {
 
       // Clear localStorage
       localStorage.removeItem("waitingState");
-      cancelAllExcept(roomId);
+      removePendingConnection(roomId);
 
       const astro = activeAstroRef.current;
       const kundliId = selectedProfile?._id;
@@ -627,6 +627,7 @@ const Profile = () => {
     const handleCallAccepted = async ({
       roomId,
       token,
+      channelName,
       type,
       remainingTime,
       isSwitch,
@@ -653,7 +654,7 @@ const Profile = () => {
 
       // Clear localStorage
       localStorage.removeItem("waitingState");
-      cancelAllExcept(roomId);
+      removePendingConnection(roomId);
 
       const astro = activeAstroRef.current;
       const kundliId = selectedProfile?._id;
@@ -675,6 +676,7 @@ const Profile = () => {
 
         setActiveCall({
           roomId,
+          channelName,
           chatRoomId,
           agoraToken: token,
           callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),

@@ -492,7 +492,7 @@ const AstrologerProfile = () => {
     }) => {
       setWaitingList(false);
       localStorage.removeItem("waitingState");
-      cancelAllExcept(roomId);
+      removePendingConnection(roomId);
 
       const astro = activeCallAstroRef.current;
       const kundliId = lastSelectedKundli?._id;
@@ -536,6 +536,7 @@ const AstrologerProfile = () => {
     const handleCallAccepted = async ({
       roomId,
       token,
+      channelName,
       type,
       remainingTime,
       isSwitch,
@@ -560,7 +561,7 @@ const AstrologerProfile = () => {
       // Regular call acceptance
       resetCallFlow();
       localStorage.removeItem("waitingState");
-      cancelAllExcept(roomId);
+      removePendingConnection(roomId);
 
       const astro = activeCallAstroRef.current;
 
@@ -581,6 +582,7 @@ const AstrologerProfile = () => {
 
         setActiveCall({
           roomId,
+          channelName,
           chatRoomId,
           agoraToken: token,
           callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),

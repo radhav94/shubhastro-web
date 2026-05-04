@@ -3,6 +3,7 @@ import { X, ChevronUp, ChevronDown, Phone, MessageSquare, Video } from "lucide-r
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { useCall } from "../../../context/CallContext";
 import { useChat } from "../../../context/ChatContext";
+import { voiceSocket } from "../../../services/voiceSocketServices";
 import styles from "./StickyWaitingQueue.module.scss";
 
 const typeIcon = {
@@ -17,10 +18,17 @@ const typeLabel = {
   video: "Video",
 };
 
+const statusLabel = {
+  ringing: "Ringing…",
+  waiting: "Waiting…",
+  astrologer_accepted: "Astrologer accepted",
+  on_hold: "",
+};
+
 const StickyWaitingQueue = () => {
-  const { pendingConnections, cancelPendingConnection, cancelAll } = useWaitingQueue();
-  const { callApproval, missedApproval: callMissed, activeCall, setWaitingList: setCallWaitingList, resetCallFlow } = useCall();
-  const { chatApproval, missedApproval: chatMissed, activeChat, setWaitingList, resetChatFlow } = useChat();
+  const { pendingConnections, cancelPendingConnection, cancelAll, removePendingConnection, addPendingConnection } = useWaitingQueue();
+  const { callApproval, missedApproval: callMissed, activeCall, setWaitingList: setCallWaitingList, resetCallFlow, setCallApprovalData } = useCall();
+  const { chatApproval, missedApproval: chatMissed, activeChat, setWaitingList, resetChatFlow, setChatApprovalData } = useChat();
   const [expanded, setExpanded] = useState(false);
 
   // Don't render if no pending connections
@@ -36,7 +44,6 @@ const StickyWaitingQueue = () => {
 
   const handleCancelAll = () => {
     cancelAll();
-    // Also reset the old waiting states so old sticky footers don't appear
     setWaitingList(false);
     setCallWaitingList(false);
     resetChatFlow();
@@ -44,14 +51,41 @@ const StickyWaitingQueue = () => {
   };
 
   const handleCancelOne = (conn) => {
-    cancelPendingConnection(conn.roomId, conn.type);
-    // If this was the last one, also reset old waiting states
-    if (pendingConnections.length <= 1) {
-      setWaitingList(false);
-      setCallWaitingList(false);
-      resetChatFlow();
-      resetCallFlow();
-    }
+    cancelPendingConnection(conn.roomId, conn.type, conn.astrologer?._id);
+  };
+
+  // User accepts the astrologer's accepted call/chat
+  const handleAccept = (conn) => {
+    if (!conn.roomId) return;
+    const eventName = conn.type === "chat" ? "chat:user_accept" : "call:user_accept";
+    voiceSocket.emit(eventName, { roomId: conn.roomId });
+  };
+
+  // User unholds — cancel old session and re-initiate to same astrologer
+  const handleUnhold = (conn) => {
+    if (!conn.roomId) return;
+    const eventName = conn.type === "chat" ? "chat:unhold" : "call:unhold";
+    voiceSocket.emit(eventName, { roomId: conn.roomId });
+    // Remove old on-hold connection, then add a fresh pending entry
+    // so the new call:room / chat:room from server has a queue entry to match
+    removePendingConnection(conn.roomId);
+    addPendingConnection({
+      id: `${conn.astrologer?._id}-${conn.type}-${Date.now()}`,
+      astrologer: conn.astrologer,
+      type: conn.type,
+      roomId: null, // new roomId will come from server
+      waitingTime: conn.waitingTime || 5,
+      isEmergency: conn.isEmergency || false,
+      status: "ringing",
+    });
+  };
+
+  // User cancels on-hold session
+  const handleHoldCancel = (conn) => {
+    if (!conn.roomId) return;
+    const eventName = conn.type === "chat" ? "chat:hold_cancel" : "call:hold_cancel";
+    voiceSocket.emit(eventName, { roomId: conn.roomId });
+    removePendingConnection(conn.roomId);
   };
 
   return (
@@ -83,23 +117,50 @@ const StickyWaitingQueue = () => {
         <div className={styles.list}>
           {pendingConnections.map((conn) => {
             const name = conn.astrologer?.firstName || "Astrologer";
+            const status = conn.status || "waiting";
+            const isAccepted = status === "astrologer_accepted";
+            const isOnHold = status === "on_hold";
+
             return (
-              <div key={conn.roomId || conn.astrologer?._id} className={styles.item}>
+              <div key={conn.roomId || conn.astrologer?._id} className={`${styles.item} ${isAccepted ? styles.itemAccepted : ""} ${isOnHold ? styles.itemOnHold : ""}`}>
                 <div className={styles.itemIcon}>
                   {typeIcon[conn.type] || typeIcon.audio}
                 </div>
                 <div className={styles.itemInfo}>
                   <p className={styles.itemName}>{name}</p>
-                  <p className={styles.itemMeta}>
-                    {typeLabel[conn.type] || "Call"} · ~{conn.waitingTime || 5} min
-                  </p>
+                  {(statusLabel[status] || (!isOnHold && `${typeLabel[conn.type] || "Call"} · ~${conn.waitingTime || 5} min`)) && (
+                    <p className={styles.itemMeta}>
+                      {statusLabel[status] || `${typeLabel[conn.type] || "Call"} · ~${conn.waitingTime || 5} min`}
+                    </p>
+                  )}
                 </div>
-                <button
-                  className={styles.itemCancel}
-                  onClick={() => handleCancelOne(conn)}
-                >
-                  <X size={16} />
-                </button>
+                <div className={styles.itemActions}>
+                  {isAccepted && (
+                    <button
+                      className={styles.acceptBtn}
+                      onClick={() => handleAccept(conn)}
+                      aria-label="Accept"
+                    >
+                      Accept
+                    </button>
+                  )}
+                  {isOnHold && (
+                    <button
+                      className={styles.unholdBtn}
+                      onClick={() => handleUnhold(conn)}
+                      aria-label="Reconnect"
+                    >
+                      On Hold
+                    </button>
+                  )}
+                  <button
+                    className={styles.itemCancel}
+                    onClick={() => isOnHold ? handleHoldCancel(conn) : handleCancelOne(conn)}
+                    aria-label="Cancel"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
               </div>
             );
           })}

@@ -51,7 +51,12 @@ const VideoCalling = ({ callData }) => {
 
   if (!activeCall || activeCall.callType !== "video") return null;
 
-  const { roomId, agoraToken, isUserSide, callerName } = callData;
+  const { roomId, sessionRoomId, channelName, agoraToken, isUserSide, callerName } = callData;
+
+  // Use channelName from server if provided, otherwise fall back to roomId
+  const agoraChannelName = channelName || roomId;
+  // For socket events, use sessionRoomId (original server roomId) if available
+  const socketRoomId = sessionRoomId || roomId;
 
   const clientRef = useRef(null);
   const micTrackRef = useRef(null);
@@ -387,8 +392,33 @@ const VideoCalling = ({ callData }) => {
         // Sync mic track with context mute state (persists across remounts)
         micTrackRef.current.setEnabled(isMicOn);
 
-        await client.join(APP_ID, roomId, agoraToken, null);
-        console.log("[VideoCall] ✅ Agora joined — channel:", roomId);
+        // Retry join with exponential backoff — Agora channel may not be ready immediately
+        // after two-way accept (server creates channel after both sides accept)
+        const MAX_JOIN_RETRIES = 3;
+        const RETRY_DELAY_BASE = 1500;
+
+        for (let attempt = 0; attempt < MAX_JOIN_RETRIES; attempt++) {
+          if (didCancelStart || cleanupRef.current || endCallRef.current) return;
+          try {
+            console.log("[VideoCall] 🔌 Agora join attempt", attempt + 1, "of", MAX_JOIN_RETRIES);
+            await client.join(APP_ID, agoraChannelName, agoraToken, null);
+            console.log("[VideoCall] ✅ Agora joined — channel:", agoraChannelName);
+            break;
+          } catch (joinErr) {
+            const isGatewayError = joinErr?.code === "CAN_NOT_GET_GATEWAY_SERVER" ||
+              joinErr?.message?.includes("CAN_NOT_GET_GATEWAY_SERVER") ||
+              joinErr?.message?.includes("no active status");
+
+            if (isGatewayError && attempt < MAX_JOIN_RETRIES - 1) {
+              const delay = RETRY_DELAY_BASE * Math.pow(2, attempt);
+              console.warn(`[VideoCall] ⚠️ Agora gateway not ready (attempt ${attempt + 1}), retrying in ${delay}ms...`);
+              await new Promise((r) => setTimeout(r, delay));
+              try { await client.leave(); } catch { /* ignore */ }
+            } else {
+              throw joinErr;
+            }
+          }
+        }
 
         if (didCancelStart || cleanupRef.current || endCallRef.current) {
           await client.leave();
@@ -600,14 +630,14 @@ const VideoCalling = ({ callData }) => {
       // and sent when reconnected, or we rely on server timeout
       if (voiceSocket.connected) {
         voiceSocket.emit("call:end", {
-          roomId,
+          roomId: socketRoomId,
           endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
         });
       } else {
         console.log("[VideoCall] ⚠️ Socket disconnected, attempting to send call:end anyway");
         // Emit anyway - socket.io will queue it if reconnection happens
         voiceSocket.emit("call:end", {
-          roomId,
+          roomId: socketRoomId,
           endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
         });
         

@@ -151,3 +151,78 @@
     background: rgba(248, 113, 113, 0.15);
   }
 }
+
+.itemActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.acceptBtn {
+  border-radius: 8px;
+  border: none;
+  background: #22c55e;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.15s;
+  animation: pulseGreen 1.5s ease-in-out infinite;
+
+  &:hover {
+    background: #16a34a;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulseGreen {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+}
+
+.unholdBtn {
+  border-radius: 8px;
+  border: none;
+  background: #3b82f6;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    background: #2563eb;
+  }
+}
+
+.itemAccepted {
+  background: rgba(34, 197, 94, 0.08);
+  border-left: 3px solid #22c55e;
+
+  .itemMeta {
+    color: #4ade80;
+    font-weight: 500;
+  }
+}
+
+.itemOnHold {
+  background: rgba(59, 130, 246, 0.08);
+  border-left: 3px solid #3b82f6;
+
+  .itemMeta {
+    color: #60a5fa;
+    font-weight: 500;
+  }
+}

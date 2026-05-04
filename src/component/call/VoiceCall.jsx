@@ -49,12 +49,19 @@ const AgoraVoiceCalling = ({ callData }) => {
 
   const { 
     roomId, 
+    sessionRoomId,
+    channelName,
     agoraToken, 
     callerName, 
     isUserSide, 
     experience, 
     astrologerImage
   } = callData;
+
+  // Use channelName from server if provided, otherwise fall back to roomId
+  const agoraChannelName = channelName || roomId;
+  // For socket events, use sessionRoomId (original server roomId) if available
+  const socketRoomId = sessionRoomId || roomId;
 
   /* ================= REFS ================= */
   const clientRef = useRef(null);
@@ -232,7 +239,12 @@ const AgoraVoiceCalling = ({ callData }) => {
     console.log("[VoiceCall] 📦 localStorage activeCall:", savedCall ? "exists" : "null", "| sessionStorage seconds:", savedSecs);
 
     const startCall = async () => {
-      console.log("[VoiceCall] ⏳ Creating Agora client & joining channel:", roomId);
+      console.log("[VoiceCall] ⏳ Creating Agora client & joining channel");
+      console.log("[VoiceCall]   → roomId:", roomId);
+      console.log("[VoiceCall]   → channelName:", channelName);
+      console.log("[VoiceCall]   → agoraChannelName (used for join):", agoraChannelName);
+      console.log("[VoiceCall]   → agoraToken:", agoraToken ? agoraToken.substring(0, 20) + "..." : "MISSING");
+      console.log("[VoiceCall]   → callData keys:", Object.keys(callData));
       const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
       clientRef.current = client;
 
@@ -283,8 +295,38 @@ const AgoraVoiceCalling = ({ callData }) => {
         }
       });
 
-      await client.join(APP_ID, roomId, agoraToken, "");
-      console.log("[VoiceCall] ✅ Agora joined — channel:", roomId, "remoteUsers:", client.remoteUsers.length);
+      // Retry join with exponential backoff — Agora channel may not be ready immediately
+      // after two-way accept (server creates channel after both sides accept)
+      const MAX_JOIN_RETRIES = 3;
+      const RETRY_DELAY_BASE = 1500; // ms
+      let joinSuccess = false;
+
+      for (let attempt = 0; attempt < MAX_JOIN_RETRIES; attempt++) {
+        if (cleanupRef.current) return; // Component unmounted during retry
+        try {
+          console.log("[VoiceCall] 🔌 Agora join attempt", attempt + 1, "of", MAX_JOIN_RETRIES);
+          await client.join(APP_ID, agoraChannelName, agoraToken, "");
+          console.log("[VoiceCall] ✅ Agora joined — channel:", agoraChannelName, "remoteUsers:", client.remoteUsers.length);
+          joinSuccess = true;
+          break;
+        } catch (joinErr) {
+          const isGatewayError = joinErr?.code === "CAN_NOT_GET_GATEWAY_SERVER" ||
+            joinErr?.message?.includes("CAN_NOT_GET_GATEWAY_SERVER") ||
+            joinErr?.message?.includes("no active status");
+
+          if (isGatewayError && attempt < MAX_JOIN_RETRIES - 1) {
+            const delay = RETRY_DELAY_BASE * Math.pow(2, attempt);
+            console.warn(`[VoiceCall] ⚠️ Agora gateway not ready (attempt ${attempt + 1}), retrying in ${delay}ms...`);
+            await new Promise((r) => setTimeout(r, delay));
+            // Leave in case partial join happened
+            try { await client.leave(); } catch { /* ignore */ }
+          } else {
+            throw joinErr;
+          }
+        }
+      }
+
+      if (!joinSuccess) return;
 
       // Clear the resume flag now that we've successfully rejoined
       if (isResumeFromRefresh.current) {
@@ -407,7 +449,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       });
 
       voiceSocket.emit("call:end", {
-        roomId,
+        roomId: socketRoomId,
         endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
       });
       
@@ -728,7 +770,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         astrologerId: activeCall.astrologerId,
         type: "video",
         isSwitch: true,
-        roomId: roomId,
+        roomId: socketRoomId,
         ...(activeCall?.isEmergency && { isEmergency: true }),
       });
 

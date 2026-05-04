@@ -136,7 +136,7 @@ const useChatSocket = ({
       setGlobalWaitingList(data?.waitingTime || 5);
     };
 
-    const handleCallAccepted = ({ roomId, token, type, remainingTime, isSwitch }) => {
+    const handleCallAccepted = ({ roomId, token, channelName, type, remainingTime, isSwitch }) => {
       
       // If there's an active audio call and this is a video acceptance, it's an upgrade — let CallContext handle it
       if (type === "video" && activeCall && activeCall.callType === "audio") {
@@ -159,6 +159,7 @@ const useChatSocket = ({
       // Regular call acceptance (including direct video calls from chat)
       setActiveCall({
         roomId,
+        channelName,
         chatRoomId,
         agoraToken: token,
         callerName: fullName,

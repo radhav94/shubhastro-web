@@ -23,6 +23,8 @@ export const ChatProvider = ({ children }) => {
   const [waitingList, setWaitingList] = useState(false);
   const [chatApproval, setChatApproval] = useState(false);
   const [missedApproval, setMissedApproval] = useState(false);
+  // Two-way accept: data from chat:astrologer_accepted for user ring UI
+  const [chatApprovalData, setChatApprovalData] = useState(null);
   const [isReconnecting, setIsReconnecting] = useState(false);
 
   const [chatSeconds, setChatSeconds] = useState(0);
@@ -527,6 +529,8 @@ export const ChatProvider = ({ children }) => {
         setChatApproval,
         missedApproval,
         setMissedApproval,
+        chatApprovalData,
+        setChatApprovalData,
         resetChatFlow,
         activeChatRoomId,
         setActiveChatRoomId,

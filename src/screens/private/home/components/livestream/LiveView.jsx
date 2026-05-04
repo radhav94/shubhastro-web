@@ -818,7 +818,7 @@ const LiveView = (props) => {
       assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
     };
 
-    const handleCallAccepted = async ({ roomId, token: agoraToken, type, remainingTime, isSwitch }) => {
+    const handleCallAccepted = async ({ roomId, token: agoraToken, channelName, type, remainingTime, isSwitch }) => {
       // If there's an active audio call and this is a video acceptance, it's an upgrade — let CallContext handle it
       if (type === "video" && activeCall && activeCall.callType === "audio") {
         console.log("🔄 Video upgrade accepted - CallContext will handle the switch (isSwitch:", isSwitch, ")");
@@ -840,7 +840,7 @@ const LiveView = (props) => {
       setShowWaitingPopup(false);
       setShowWaitingToast(false);
       resetCallFlow();
-      cancelAllExcept(roomId);
+      removePendingConnection(roomId);
 
       // Switch back to the astrologer's stream if user scrolled away
       if (callingChannelRef.current && liveListCtx) {
@@ -878,6 +878,7 @@ const LiveView = (props) => {
         // Auto-minimize since user is on live stream
         setActiveCall({
           roomId,
+          channelName,
           chatRoomId,
           agoraToken,
           callerName: astro.astrologerName || astro.firstName || "Astrologer",

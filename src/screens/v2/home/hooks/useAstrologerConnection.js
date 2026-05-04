@@ -165,7 +165,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       localStorage.removeItem("waitingState");
 
       // Cancel all other pending connections — this one was accepted
-      cancelAllExcept(roomId);
+      removePendingConnection(roomId);
 
       // Use external ref if provided, otherwise use local ref
       const astro = externalAstroRef?.current || activeAstroRef.current;
@@ -212,6 +212,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
     const handleCallAccepted = async ({
       roomId,
       token,
+      channelName,
       type,
       remainingTime,
       astrologerId,
@@ -251,7 +252,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       localStorage.removeItem("waitingState");
 
       // Cancel all other pending connections — this one was accepted
-      cancelAllExcept(roomId);
+      removePendingConnection(roomId);
 
       // Use external ref if provided, otherwise use local ref
       const astro = externalAstroRef?.current || activeAstroRef.current;
@@ -277,6 +278,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
 
         const callPayload = {
           roomId,
+          channelName,
           agoraToken: token,
           callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true,
