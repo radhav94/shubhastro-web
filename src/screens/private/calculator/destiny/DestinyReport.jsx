@@ -3,6 +3,7 @@ import { useGetNumerologyReportQuery } from "../../../../redux/api/calculator/ca
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./DestinyReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 const DestinyReport = () => {
   const navigate = useNavigate();
@@ -23,7 +24,10 @@ const DestinyReport = () => {
         <p>Numerology analysis of your life path</p>
       </div>
 
-      <div className={styles.resultCard}>
+      <div className={styles.resultCard} style={{ position: 'relative' }}>
+        <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+          <TTSButton text={`Destiny Number ${destiny.number}${destiny.master ? '. Master Number' : ''}. ${destiny.meaning || ''}`} />
+        </span>
         <div className={styles.numberCircle}>{destiny.number}</div>
         <h3 className={styles.resultLabel}>Destiny Number</h3>
         {destiny.master && <span className={styles.masterBadge}>Master Number</span>}
