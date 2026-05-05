@@ -6,7 +6,8 @@
   flex-direction: column;
 }
 .headerWrap{
-  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(6px);
   position: fixed;
   top: 88px;
   left: 0;
