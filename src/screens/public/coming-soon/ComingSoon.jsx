@@ -54,7 +54,7 @@ const validationSchema = Yup.object({
 
 const interestOptions = ["User", "Expert/Astrologer"];
 
-const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/YOUR_INVITE_CODE";
+const WHATSAPP_INVITE_URL = "https://chat.whatsapp.com/GO78pN5ZRNJHClTYdkXHPc";
 
 const whatsappBenefits = [
   "Get instant updates",
@@ -245,10 +245,19 @@ const ComingSoon = () => {
                         onboarding@shubhastro.in
                       </a>{" "}
                       or WhatsApp{" "}
-                      <a href="https://wa.me/91XXXXXXXXXX" className={styles.thankYouLink}>
-                        +91-XXXXXXXXXX
+                      <a href="https://wa.me/918655682877" className={styles.thankYouLink}>
+                        +91-8655682877
                       </a>
                     </p>
+                    <a
+                      href={WHATSAPP_INVITE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.whatsappBtn}
+                    >
+                      <IoLogoWhatsapp />
+                      Join WhatsApp Community
+                    </a>
                   </div>
                 ) : (
                   <div className={styles.thankYouBody}>
@@ -604,86 +613,11 @@ const ComingSoon = () => {
                 aria-label="Join our WhatsApp community"
               >
                 <div className={styles.qrFrame}>
-                  <svg
-                    viewBox="0 0 150 150"
-                    width="150"
-                    height="150"
+                  <img
+                    src="/images/whatsapp-qr.png"
+                    alt="WhatsApp QR Code"
                     className={styles.qrSvg}
-                    aria-hidden="true"
-                  >
-                    {/* Top-left finder */}
-                    <rect x="8" y="8" width="38" height="38" rx="4" fill="#1a1a1a" />
-                    <rect x="13" y="13" width="28" height="28" rx="2" fill="#fff" />
-                    <rect x="18" y="18" width="18" height="18" rx="2" fill="#1a1a1a" />
-                    {/* Top-right finder */}
-                    <rect x="104" y="8" width="38" height="38" rx="4" fill="#1a1a1a" />
-                    <rect x="109" y="13" width="28" height="28" rx="2" fill="#fff" />
-                    <rect x="114" y="18" width="18" height="18" rx="2" fill="#1a1a1a" />
-                    {/* Bottom-left finder */}
-                    <rect x="8" y="104" width="38" height="38" rx="4" fill="#1a1a1a" />
-                    <rect x="13" y="109" width="28" height="28" rx="2" fill="#fff" />
-                    <rect x="18" y="114" width="18" height="18" rx="2" fill="#1a1a1a" />
-                    {/* Data modules */}
-                    <rect x="52" y="8" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="64" y="8" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="76" y="8" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="88" y="8" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="52" y="20" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="70" y="20" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="82" y="20" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="52" y="32" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="64" y="32" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="88" y="32" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="58" y="44" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="76" y="44" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="8" y="52" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="20" y="52" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="38" y="52" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="52" y="52" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="88" y="52" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="104" y="52" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="120" y="52" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="136" y="52" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="14" y="64" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="32" y="64" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="58" y="64" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="76" y="64" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="110" y="64" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="130" y="64" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="8" y="76" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="26" y="76" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="44" y="76" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="64" y="76" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="82" y="76" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="104" y="76" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="120" y="76" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="136" y="76" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="20" y="88" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="38" y="88" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="52" y="88" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="70" y="88" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="88" y="88" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="110" y="88" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="130" y="88" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="52" y="104" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="70" y="104" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="82" y="104" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="104" y="104" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="120" y="104" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="52" y="116" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="64" y="116" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="88" y="116" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="110" y="116" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="136" y="116" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="58" y="130" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="76" y="130" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="104" y="130" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="124" y="130" width="6" height="6" fill="#1a1a1a" />
-                    <rect x="136" y="130" width="6" height="6" fill="#1a1a1a" />
-                  </svg>
-                  <div className={styles.qrCenter}>
-                    <IoLogoWhatsapp />
-                  </div>
+                  />
                 </div>
                 <p className={styles.qrText}>
                   <IoScan />
