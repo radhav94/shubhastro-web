@@ -286,8 +286,8 @@ const PanditAIBubble = () => {
           <div className={styles.header}>
             <div className={styles.headerInfo}>
               <div className={styles.headerAvatar}>
-                <Sparkles size={19} />
-                {/* <img src={panditAiIcon} alt="icon" /> */}
+                {/* <Sparkles size={19} /> */}
+                <img src={panditAiIcon} alt="icon" />
               </div>
               <div className={styles.headerCopy}>
                 <h4 className={styles.headerName}>Pandit AI</h4>
