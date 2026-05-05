@@ -18,6 +18,7 @@ import StickyReview from "../screens/private/home/components/call/StickyReview";
 import { useCall } from "../context/CallContext";
 import { voiceSocket } from "../services/voiceSocketServices";
 import WaitingModal from "../component/UI/modal/waitingModal/WaitingModal";
+import NoInternet, { useOnlineStatus } from "../component/NoInternet/NoInternet";
 
 const PENDING_LIVE_CALL_STORAGE_KEY = "shubhtalk_pending_live_call";
 
@@ -27,6 +28,7 @@ const HomeLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { pendingLiveCall, setPendingLiveCall, waitingList } = useCall();
+  const isOnline = useOnlineStatus();
 
   const handleCancelPending = () => {
     if (pendingLiveCall?.callRoomId) {
@@ -74,14 +76,14 @@ const HomeLayout = () => {
       )} */}
 
       {/* Scrollable Content */}
-      <div className={styles.contentWrapper}>
+      <div className={styles.contentWrapper} style={!isOnline ? { background: 'transparent' } : {}}>
         <div className={showHeader && !isWebview ? styles.topGap : ""}></div>
 
         {showHeader && !isWebview && <Breadcrumb />}
 
         <Suspense fallback={<CircleSpinner />}>
-          <div className={styles.outletDiv}>
-            <Outlet />
+          <div className={styles.outletDiv} style={!isOnline ? { background: 'transparent' } : {}}>
+            {isOnline ? <Outlet /> : <NoInternet />}
           </div>
         </Suspense>
       </div>

@@ -17,6 +17,7 @@ import { ChatProvider } from "./context/ChatContext";
 import ErrorBoundary from "./component/ErrorBoundary";
 import RouteErrorBoundary from "./component/RouteErrorBoundary";
 import PrimaryLoader from "./component/UI/PrimaryLoader";
+import NoInternet, { useOnlineStatus } from "./component/NoInternet/NoInternet";
 import { initializeFCM } from "./services/fcmService.jsx";
 
 // Flatten routes helper - moved outside component for better performance
@@ -104,6 +105,8 @@ const handleChunkLoadError = (context) => {
 };
 
 function App() {
+  const isOnline = useOnlineStatus();
+
   // Memoize router creation - only create once
   const roleWiseRouting = useMemo(() => {
     return createBrowserRouter([
