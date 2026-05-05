@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
+import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
+import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
 
 // Inject getAllUserSessions endpoint
 const sessionsApi = privateRequestNew.injectEndpoints({
@@ -37,6 +39,14 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
     { skip: !userId }
   );
 
+  const {
+    handleChatStart,
+    handleCallStart,
+    activeCallAstroRef,
+    kundliRef,
+  } = useAstrologerConnect();
+
+  const { setSelectedAstrologer } = useAstrologerConnection(activeCallAstroRef, kundliRef.current);
   const sessions = useMemo(() => {
     return Array.isArray(data?.data?.recentSessions)
       ? data.data.recentSessions.slice(0, 6)
@@ -44,6 +54,32 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
   }, [data]);
 
   if (isLoading || !sessions.length) return null;
+  const handleAgain = async (session) => {
+    if (!session._id) {
+      console.error("Astrologer _id not found in session");
+      return;
+    }
+
+    const astrologer = {
+      _id: session._id,
+      astrologerID: session.astrologerID,
+      firstName: session.astrologerName?.split(' ')[0] || session.astrologerName,
+      lastName: session.astrologerName?.split(' ').slice(1).join(' ') || '',
+      profileImgUrl: session.profileImgUrl,
+      isActiveType: session.isActiveType,
+      price: session.price,
+    };
+
+    if (session.sessiontype === 'chat') {
+      await handleChatStart(astrologer);
+    } else if (session.sessiontype === 'audio') {
+      await handleCallStart(astrologer, 'audio');
+    } else if (session.sessiontype === 'video') {
+      await handleCallStart(astrologer, 'video');
+    } else {
+      navigate('/chat-with-astrologers');
+    }
+  };
 
   return (
     <section className={styles.mySessionsSection}>
@@ -88,8 +124,8 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
 
               <div className={styles.sessionActions}>
                 {/* Voice player */}
-                <div className={styles.sessionPlayer}>
-                  <button className={styles.sessionPlayBtn}>
+                <div className={styles.sessionPlayer} onClick={() => navigate(`/profile/order-history/${session._id}`)} style={{ cursor: 'pointer' }}>
+                  <button className={styles.sessionPlayBtn} onClick={() => navigate(`/profile/order-history/${session._id}`)}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="#f75801">
                       <path d="M8 5v14l11-7z"/>
                     </svg>
@@ -112,7 +148,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
                 {/* Action button */}
                 <button
                   className={styles.sessionCallBtn}
-                  onClick={() => navigate('/chat-with-astrologers')}
+                  onClick={() => handleAgain(session)}
                 >
                   {session.sessiontype === 'chat' ? 'Chat Again' : 'Call Again'}
                 </button>
