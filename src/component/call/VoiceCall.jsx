@@ -58,10 +58,10 @@ const AgoraVoiceCalling = ({ callData }) => {
     astrologerImage
   } = callData;
 
-  // Use channelName from server if provided, otherwise fall back to roomId
+  // For Agora: use channelName if provided by server, otherwise roomId
   const agoraChannelName = channelName || roomId;
-  // For socket events, use sessionRoomId (original server roomId) if available
-  const socketRoomId = sessionRoomId || roomId;
+  // For socket events: use roomId (always the session identifier)
+  const socketRoomId = roomId;
 
   /* ================= REFS ================= */
   const clientRef = useRef(null);
@@ -296,9 +296,9 @@ const AgoraVoiceCalling = ({ callData }) => {
       });
 
       // Retry join with exponential backoff — Agora channel may not be ready immediately
-      // after two-way accept (server creates channel after both sides accept)
-      const MAX_JOIN_RETRIES = 3;
-      const RETRY_DELAY_BASE = 1500; // ms
+      // after two-way accept (astrologer may still be joining the channel)
+      const MAX_JOIN_RETRIES = 5;
+      const RETRY_DELAY_BASE = 2000; // ms
       let joinSuccess = false;
 
       for (let attempt = 0; attempt < MAX_JOIN_RETRIES; attempt++) {

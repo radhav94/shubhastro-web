@@ -53,10 +53,10 @@ const VideoCalling = ({ callData }) => {
 
   const { roomId, sessionRoomId, channelName, agoraToken, isUserSide, callerName } = callData;
 
-  // Use channelName from server if provided, otherwise fall back to roomId
+  // For Agora: use channelName if provided by server, otherwise roomId
   const agoraChannelName = channelName || roomId;
-  // For socket events, use sessionRoomId (original server roomId) if available
-  const socketRoomId = sessionRoomId || roomId;
+  // For socket events: use roomId
+  const socketRoomId = roomId;
 
   const clientRef = useRef(null);
   const micTrackRef = useRef(null);

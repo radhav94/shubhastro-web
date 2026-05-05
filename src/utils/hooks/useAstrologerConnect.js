@@ -338,9 +338,9 @@ export const useAstrologerConnect = () => {
           return Toast.error("You are already on a call");
         }
 
-        // Check if same astrologer+type already in queue
-        if (isInQueue(astro._id, connectionType)) {
-          console.log("[NormalFlow] ⏭️ Already in queue for this astrologer+type");
+        // Check if same astrologer already has any pending request (call or chat)
+        if (isInQueue(astro._id, connectionType) || isInQueue(astro._id, "chat")) {
+          console.log("[NormalFlow] ⏭️ Already in queue for this astrologer");
           Toast.error("Already waiting for this astrologer");
           return;
         }
@@ -370,9 +370,9 @@ export const useAstrologerConnect = () => {
         console.log("[NormalFlow] ✅ call:initiate emitted — waiting for call:room / call:accepted / error");
       } else {
         // Initiate chat
-        // Check if same astrologer already in queue for chat
-        if (isInQueue(astro._id, "chat")) {
-          console.log("[NormalFlow] ⏭️ Already in queue for chat with this astrologer");
+        // Check if same astrologer already has any pending request (call or chat)
+        if (isInQueue(astro._id, "chat") || isInQueue(astro._id, "audio") || isInQueue(astro._id, "video")) {
+          console.log("[NormalFlow] ⏭️ Already in queue for this astrologer");
           Toast.error("Already waiting for this astrologer");
           return;
         }

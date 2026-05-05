@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, ChevronUp, ChevronDown, Phone, MessageSquare, Video } from "lucide-react";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { useCall } from "../../../context/CallContext";
@@ -30,6 +30,12 @@ const StickyWaitingQueue = () => {
   const { callApproval, missedApproval: callMissed, activeCall, setWaitingList: setCallWaitingList, resetCallFlow, setCallApprovalData } = useCall();
   const { chatApproval, missedApproval: chatMissed, activeChat, setWaitingList, resetChatFlow, setChatApprovalData } = useChat();
   const [expanded, setExpanded] = useState(false);
+
+  // Auto-expand when any connection is in astrologer_accepted state
+  const hasAccepted = pendingConnections.some((c) => c.status === "astrologer_accepted");
+  useEffect(() => {
+    if (hasAccepted) setExpanded(true);
+  }, [hasAccepted]);
 
   // Don't render if no pending connections
   if (pendingConnections.length === 0) return null;
@@ -155,7 +161,18 @@ const StickyWaitingQueue = () => {
                   )}
                   <button
                     className={styles.itemCancel}
-                    onClick={() => isOnHold ? handleHoldCancel(conn) : handleCancelOne(conn)}
+                    onClick={() => {
+                      if (isAccepted) {
+                        // Astrologer accepted — reject the ring
+                        const eventName = conn.type === "chat" ? "chat:user_reject" : "call:user_reject";
+                        voiceSocket.emit(eventName, { roomId: conn.roomId });
+                        removePendingConnection(conn.roomId);
+                      } else if (isOnHold) {
+                        handleHoldCancel(conn);
+                      } else {
+                        handleCancelOne(conn);
+                      }
+                    }}
                     aria-label="Cancel"
                   >
                     <X size={16} />

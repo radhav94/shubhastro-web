@@ -793,8 +793,8 @@ const TalkToAstrologer = () => {
 
       try {
         setActiveCall({
-          roomId: agoraChannel,
-          sessionRoomId: roomId,
+          roomId,
+          channelName: agoraChannel,
           chatRoomId,
           agoraToken: token,
           callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
@@ -1453,30 +1453,6 @@ const TalkToAstrologer = () => {
         onChatNow={(astro) => handleConnectClick(astro, "chat", true)}
         onCallNow={(astro) => handleConnectClick(astro, "audio", true)}
       />
-
-      {/* Two-Way Accept: Primary ring modal (call) */}
-      {callApprovalData && !activeCall && (
-        <AstrologerRingModal
-          data={callApprovalData}
-          onAccept={handleUserAcceptCall}
-          onReject={handleUserRejectCall}
-          onDismiss={() => setCallApprovalData(null)}
-          onTimeout={handleRingTimeout}
-          variant="modal"
-        />
-      )}
-
-      {/* Two-Way Accept: Primary ring modal (chat) */}
-      {chatApprovalData && !activeCall && (
-        <AstrologerRingModal
-          data={chatApprovalData}
-          onAccept={handleUserAcceptChat}
-          onReject={handleUserRejectChat}
-          onDismiss={() => setChatApprovalData(null)}
-          onTimeout={handleRingTimeout}
-          variant="modal"
-        />
-      )}
 
       {/* Two-Way Accept: Stacked toast banners for secondary rings during active call */}
       {ringQueue.map((ring) => (
