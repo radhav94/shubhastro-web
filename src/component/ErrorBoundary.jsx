@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './ErrorBoundary.module.scss';
+import NoInternet from './NoInternet/NoInternet';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -12,11 +13,19 @@ class ErrorBoundary extends React.Component {
   }
 
   static getDerivedStateFromError(error) {
+    // If offline, don't set hasError — let NoInternet handle it
+    if (!navigator.onLine) {
+      return { hasError: false };
+    }
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log error details to console
+    // If offline, ignore the error — it's likely caused by failed network requests
+    if (!navigator.onLine) {
+      return;
+    }
+
     console.error('🔴 ErrorBoundary caught an error:', {
       error: error,
       errorMessage: error.message,
@@ -31,6 +40,21 @@ class ErrorBoundary extends React.Component {
     });
   }
 
+  componentDidMount() {
+    // Reset error state when coming back online
+    window.addEventListener('online', this.handleOnline);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('online', this.handleOnline);
+  }
+
+  handleOnline = () => {
+    if (this.state.hasError) {
+      this.setState({ hasError: false, error: null, errorInfo: null });
+    }
+  };
+
   handleReload = () => {
     window.location.reload();
   };
@@ -40,6 +64,12 @@ class ErrorBoundary extends React.Component {
   };
 
   render() {
+    // If offline — ignore errors, render children normally
+    // HomeLayout will show NoInternet component with header/footer
+    if (!navigator.onLine) {
+      return this.props.children;
+    }
+
     if (this.state.hasError) {
       return (
         <div className={styles.errorContainer}>
