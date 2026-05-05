@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { getUserFromStorage } from "../../../utils/authStorage";
 import { Toast } from "../../../component";
 import { useGetHomeDetailsQuery, useGetAiSuitesQuery, useGetNewHomeDetailsQuery } from "../../../services/appServices/homeServices";
+import { useGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chatHistory";
+import { useGetCallHistoryQuery } from "../../../redux/api/callHistory/callHistory";
 import { useGetCurrentMahadashaFullQuery } from "../../../redux/api/kundli/dashaApi";
 import { useFetchAdvancePanchangQuery } from "../../../redux/api/panchang/panchangApi";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
@@ -18,6 +20,8 @@ import BlogsSection from "../home/components/BlogsSection";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
 import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
+import MySessionsSection from "./MySessionsSection";
+import AgenticCalendarV2 from "./AgenticCalendarV2";
 
 // Left card images
 import kundliImg from "../../../assets/images/home-hero-kundli.png";
@@ -181,6 +185,18 @@ const HomeV2 = () => {
     return homeList?.find(s => s.display_type === "discover-more")?.content || [];
   }, [homeList]);
 
+  // Extract live tracking stats
+  const liveTrackingSection = useMemo(() => {
+    return homeList?.find(s => s.slug === "live-tracking" || s.slug === "total-count");
+  }, [homeList]);
+
+  const liveTrackingCounts = liveTrackingSection?.content?.[0] || {};
+
+  // Extract connect-astrologer CTA section
+  const connectSection = useMemo(() => {
+    return homeList?.find(s => s.slug === "connect-astrologer");
+  }, [homeList]);
+
   // Extract popular astrologers
   const popularAstrologers = useMemo(() => {
     return homeList?.find(s => s.slug === "popular-astrologers")?.content || [];
@@ -287,7 +303,7 @@ const HomeV2 = () => {
 
               {/* Header row: title left, View More right */}
               <div className={styles.wowHeader}>
-                <div className={`${styles.titleWithBottomDevider} ${styles.tWBmarginLeft}`}>
+                <div className={`${styles.titleWithBottomDevider}`}>
                   <h4 className={styles.wowTitle}>{wowSuiteItems[0]?.section_title || "LOREM IPSUM"}</h4>
                   <div className={styles.BottomDevider}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
@@ -501,8 +517,8 @@ const HomeV2 = () => {
       </section>
 
       {/* ═══ SECTION 4 — Top Rated Astrologers ═══ */}
-      <section className={styles.astrologerSection} style={{ backgroundColor: `#FFE9E5`,paddingBottom:'1px',paddingTop:'24px'}}>
-        <div className={styles.sectionHeader}>
+      <section className={styles.astrologerSection} style={{ backgroundColor: `#FFE9E5`,paddingBottom:'1px',paddingTop:'16px'}}>
+        <div className={styles.sectionHeader} style={{marginBottom:"0px"}}>
           <div className={styles.sectionTitleBlock}>
             <h2 className={styles.sectionTitle}>{astrologerSection?.display_title || "TOP RATED ASTROLOGERS FOR YOU"}</h2>
           </div>
@@ -537,68 +553,28 @@ const HomeV2 = () => {
               { title: "Money &\nFinance", slug: "money-finance" },
               { title: "Marriage &\nFamily", slug: "marriage-family" },
               { title: "Child &\nEducation", slug: "child-education" },
-            ]).map((c, i) => (
-              <div key={i} className={styles.catItem} onClick={() => navigate('/chat-with-astrologers', { state: { selectedType: c.slug } })} style={{ cursor: 'pointer' }}>
-                <div
-                  className={styles.catIconBox}
-                  style={{
-                    ...(c.image_url ? {
-                      background: `url(${c.image_url}) center/50% no-repeat, linear-gradient(135deg, #FCF8F7 0%, #FCDBD9 100%)`,
-                    } : {})
-                  }}
-                />
-                <span>{c.title}</span>
-              </div>
-            ))}
+            ]).map((c, i) => {
+              const catColors = ["#FFE4E4","#FFE4F0","#E4EEFF","#FFF3E4","#E4FFE9","#F0E4FF"];
+              return (
+                <div key={i} className={styles.catItem} onClick={() => navigate('/chat-with-astrologers', { state: { selectedType: c.slug } })} style={{ cursor: 'pointer' }}>
+                  <div
+                    className={styles.catIconBox}
+                    style={{
+                      background: c.image_url
+                        ? `url(${c.image_url}) center/60% no-repeat, ${catColors[i % catColors.length]}`
+                        : catColors[i % catColors.length],
+                    }}
+                  />
+                  <span>{c.title}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {/* CENTER — Agentic Calendar */}
         <div className={styles.calendarBox}>
-          <div className={styles.calHead}>
-            <div className={`${styles.titleWithBottomDevider} ${styles.tWBmarginBottomZero}`}>
-              <h4 className={styles.wowTitle}>AGENTIC CALENDAR</h4>
-              <div className={styles.BottomDevider}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
-                  <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
-                </svg>
-              </div>
-            </div>
-            <button className={styles.viewAllBtn} style={{ color: '#f75801' }}>›</button>
-          </div>
-          <div className={styles.calBody}>
-            {/* Occasions */}
-            <div className={styles.calOccasions}>
-              <p className={styles.calLabel}>Select Occasions</p>
-              <div className={styles.calChips}>
-                <button className={styles.calChipActive}>Buy New Car <span className={styles.calChipX}>✕</span></button>
-                {["Engagement", "Divorce", "Room Rent"].map((chip, i) => (
-                  <button key={i} className={styles.calChip}>{chip}</button>
-                ))}
-                <button className={styles.calChipAdd}>+ Add Custom</button>
-              </div>
-              <p className={styles.calHint}>Select one or more occasions to view Muhurat</p>
-            </div>
-
-            {/* Divider */}
-            <div className={styles.calDivider} />
-
-            {/* Date filter */}
-            <div className={styles.calDateRow}>
-              {["Today", "Tomorrow", "This Week", "This Month"].map((d, i) => (
-                <button key={i} className={i === 0 ? styles.calDateActive : styles.calDateChip}>{d}</button>
-              ))}
-              <button className={styles.calChipAdd}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#f75801" style={{flexShrink:0}}>
-                  <path d="M19 3h-1V1h-2v2H8V1H6v2H5C3.9 3 3 3.9 3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zm-8 4h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/>
-                </svg>
-                Date
-              </button>
-            </div>
-
-            {/* CTA */}
-            <button className={styles.calCta}>View Muhuratas</button>
-          </div>
+          <AgenticCalendarV2 styles={styles} />
         </div>
 
         {/* RIGHT — Discover More */}
@@ -614,24 +590,19 @@ const HomeV2 = () => {
           <div className={styles.discoverGrid}>
             {(discoverMoreData.length > 0 ? discoverMoreData : [
               { title: "Panchang" },
-              { title: "Kundli Matching" },
+              { title: "Kundli\nMatching" },
               { title: "Numerology" },
-              { title: "Tarot Reading" },
+              { title: "Tarot\nReading" },
             ]).map((item, i) => {
-              const discoverBgs = [
-                "linear-gradient(116.1deg, #FBF3F1 0%, #F7E0DA 100%)",
-                "linear-gradient(116.1deg, #FFF0F0 0%, #FFE0E0 100%)",
-                "linear-gradient(116.1deg, #F3F1FD 0%, #EBE5FC 100%)",
-                "linear-gradient(116.1deg, #FAECFF 0%, #F9E7FF 100%)",
-              ];
+              const discoverBgs = ["#FFE4E4","#FFF3E4","#E4EEFF","#F0E4FF"];
               return (
                 <div key={i} className={styles.discoverItem}>
                   <div
                     className={styles.discoverIconBox}
                     style={{
-                      ...(item.image_url ? {
-                        background: `url(${item.image_url}) center/50% no-repeat, ${discoverBgs[i % 4]}`,
-                      } : { background: discoverBgs[i % 4] })
+                      background: item.image_url
+                        ? `url(${item.image_url}) center/60% no-repeat, ${discoverBgs[i % 4]}`
+                        : discoverBgs[i % 4],
                     }}
                   />
                   <span>{item.title}</span>
@@ -643,67 +614,22 @@ const HomeV2 = () => {
 
       </section>
 
-      {/* ═══ SECTION 6 — My Sessions ═══ */}
-      <section className={styles.mySessionsSection}>
-        <div className={styles.mySessionsHeader}>
-          <div className={`${styles.titleWithBottomDevider}`}>
-            <h4 className={styles.wowTitle}>MY SESSIONS</h4>
-            <div className={styles.BottomDevider}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
-                <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
-              </svg>
-            </div>
-          </div>
-          <button className={styles.viewAllBtn} onClick={() => navigate('/profile')}>View all &rsaquo;</button>
-        </div>
-
-        {/* Horizontally scrollable cards */}
-        <div className={styles.sessionScroll}>
-          {[1,2,3,4].map((_, idx) => (
-            <div key={idx} className={styles.sessionCard}>
-              {/* Avatar */}
-              <div className={styles.sessionAvatar}>
-                <img src={astrologerMaleImg} alt="Astrologer" />
-                <span className={styles.sessionOnlineDot} />
-              </div>
-
-              {/* Info */}
-              <div className={styles.sessionInfo}>
-                <h3 className={styles.sessionName}>Jane Doe</h3>
-                <div className={styles.sessionMeta}>
-                  <span className={styles.sessionDate}>29 Apr, 2029</span>
-                  <span className={styles.sessionDivider}>|</span>
-                  <span className={styles.sessionType}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="#f75801"/>
-                    </svg>
-                    Call Session
-                  </span>
-                </div>
-
-                {/* Bottom row */}
-                <div className={styles.sessionActions}>
-                  {/* Voice player */}
-                  <div className={styles.sessionPlayer}>
-                    <button className={styles.sessionPlayBtn}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#f75801">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    </button>
-                    <div className={styles.sessionWave}>
-                      {[4, 8, 14, 18, 22, 16, 22, 18, 14, 8, 4].map((h, i) => (
-                        <span key={i} className={styles.sessionWaveBar} style={{ height: `${h}px` }} />
-                      ))}
-                    </div>
-                  </div>
-                  {/* Call Again */}
-                  <button className={styles.sessionCallBtn}>Call Again</button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* ═══ SECTION 5b — News / Blog ═══ */}
+      <section className={styles.blogSection}>
+        <BlogsSection
+          blogData={blogSection?.content || []}
+          title={blogSection?.display_title || "NEWS / BLOGS"}
+          showMore={true}
+        />
       </section>
+
+      {/* ═══ SECTION 6 — My Sessions ═══ */}
+      <MySessionsSection
+        userId={user?.id}
+        navigate={navigate}
+        styles={styles}
+        astrologerMaleImg={astrologerMaleImg}
+      />
 
       {/* ═══ SECTION 7 — Real Consultations (Live Tracking + CTA) ═══ */}
       <section className={styles.liveSection}>
@@ -716,26 +642,32 @@ const HomeV2 = () => {
 
         {/* Heading */}
         <h2 className={styles.liveHeading}>
-          Real People. Real Consultations. <span className={styles.liveOrange}>Right Now.</span>
+          {liveTrackingSection?.display_title || "Real People. Real Consultations. Right Now."}
         </h2>
-        <p className={styles.liveSubtitle}>Live updates from ShubhAstro community</p>
+        <p className={styles.liveSubtitle}>{liveTrackingSection?.description || "Live updates from ShubhAstro community"}</p>
 
         {/* 4 Stat Cards */}
         <div className={styles.liveStats}>
-          {[
-            { num: "234", label: "users in active consultations",  color: "#FEF0E4" },
-            { num: "47",  label: "Kundlis generated today",        color: "#F4ECFB" },
-            { num: "8",   label: "Lal Kitab remedies tried tonight", color: "#E9F2EF" },
-            { num: "12",  label: "new chats started in the last hour", color: "#EBF2FB" },
-          ].map((s, i) => (
-            <div key={i} className={styles.statCard}>
-              <div className={styles.statCircle} style={{ background: s.color }} />
-              <div className={styles.statText}>
-                <span className={styles.statNum}>{s.num}</span>
-                <span className={styles.statLabel}>{s.label}</span>
+          {(liveTrackingSection?.content?.length > 0
+            ? liveTrackingSection.content
+            : [
+                { count: 234, description: "users in active consultations" },
+                { count: 47,  description: "Kundlis generated today" },
+                { count: 8,   description: "Lal Kitab remedies tried tonight" },
+                { count: 12,  description: "new chats started in the last hour" },
+              ]
+          ).map((s, i) => {
+            const colors = ["#FEF0E4", "#F4ECFB", "#E9F2EF", "#EBF2FB"];
+            return (
+              <div key={i} className={styles.statCard}>
+                <div className={styles.statCircle} style={{ background: colors[i % 4] }} />
+                <div className={styles.statText}>
+                  <span className={styles.statNum}>{(s.count ?? 0).toLocaleString()}</span>
+                  <span className={styles.statLabel}>{s.description}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* CTA Banner */}
@@ -744,11 +676,11 @@ const HomeV2 = () => {
           <div className={styles.ctaLeft}>
             <div className={styles.ctaTag}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-              Don't Wait. Get Clarity Now.
+              {connectSection?.quick_message || "Don't Wait. Get Clarity Now."}
             </div>
-            <h3 className={styles.ctaHeading}>Your Answers Are Waiting.</h3>
-            <p className={styles.ctaOrange}>Connect with an Astrologer Now!</p>
-            <p className={styles.ctaDesc}>Talk to verified astrologers and get clarity on love, career, health, finance and more.</p>
+            <h3 className={styles.ctaHeading}>{connectSection?.title || "Your Answers Are Waiting."}</h3>
+            <p className={styles.ctaOrange}>{connectSection?.sub_title || "Connect with an Astrologer Now!"}</p>
+            <p className={styles.ctaDesc}>{connectSection?.description || "Talk to verified astrologers and get clarity on love, career, health, finance and more."}</p>
             <div className={styles.ctaAvatarRow}>
               <div className={styles.ctaAvatars}>
                 {[avatar1, avatar2, avatar3, avatar4].map((av, i) => (
@@ -767,39 +699,33 @@ const HomeV2 = () => {
           <div className={styles.ctaRight}>
             <button className={styles.ctaBtnPrimary} onClick={() => navigate('/chat-with-astrologers')}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-              Start Chat Consultation
+              {connectSection?.action_btn?.[0] || "Start Chat Consultation"}
             </button>
             <button className={styles.ctaBtnSecondary} onClick={() => navigate('/chat-with-astrologers')}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="#f75801"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-              Connect with Astrologer
+              {connectSection?.action_btn?.[1] || "Connect with Astrologer"}
             </button>
             <div className={styles.ctaTrust}>
-              <span className={styles.ctaTrustItem}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-                100% Secure
-              </span>
-              <span className={styles.ctaTrustItem}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                Verified Experts
-              </span>
-              <span className={styles.ctaTrustItem}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-                Privacy Protected
-              </span>
+              {(connectSection?.tag_label || ["100% Secure", "Verified Experts", "Privacy Protected"]).map((label, i) => {
+                const icons = [
+                  <svg key="lock" width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>,
+                  <svg key="check" width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>,
+                  <svg key="shield" width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>,
+                ];
+                return (
+                  <span key={i} className={styles.ctaTrustItem}>
+                    {icons[i % 3]}
+                    {label}
+                  </span>
+                );
+              })}
             </div>
           </div>
         </div>
 
       </section>
 
-      {/* ═══ SECTION 8 — Explore Blogs ═══ */}
-      <section className={styles.blogSection}>
-        <BlogsSection
-          blogData={blogSection?.content || []}
-          title={blogSection?.display_title || "EXPLORE BLOGS"}
-          showMore={true}
-        />
-      </section>
+      {/* ═══ SECTION 8 — Explore Blogs (removed — now in threeColSection) ═══ */}
 
 
     </div>

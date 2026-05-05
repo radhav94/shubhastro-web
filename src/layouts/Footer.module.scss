@@ -12,13 +12,115 @@ $font-primary:     "Poppins", sans-serif;
 // ============================================================
 // FOOTER WRAPPER
 // ============================================================
-.footer {
+
+/* New footer — light bg for /home-v2 */
+.footerLight {
   background: #F2F0F1;
-  color: $color-dark;
+  color: #1a1a1a;
   font-family: $font-primary;
   width: 100%;
   position: relative;
   font-size: 14px;
+}
+
+/* Old footer — dark bg for all other pages */
+.footer {
+  background: #111111;
+  color: #e0e0e0;
+  font-family: $font-primary;
+  width: 100%;
+  position: relative;
+  font-size: 14px;
+
+  .v2_column ul li a {
+    color: #cccccc;
+    &:hover { color: $color-accent; }
+  }
+
+  .v2_heading {
+    color: #ffffff;
+  }
+
+  .v2_tagline { color: #a0a0b0; font-size: 13px; }
+  .v2_followLabel { color: #ffffff; }
+  .v2_contactText { color: #a0a0b0; }
+  .v2_phoneLink { color: #ffffff; }
+  .v2_emailLink { color: $color-accent; }
+
+  .v2_divider {
+    background: rgba(255,255,255,0.08);
+    max-width: calc(1200px - 0px);
+    margin: 0 auto;
+    height: 1px;
+  }
+
+  .v2_grid_old {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 32px;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 32px 40px 24px;
+
+    @media (max-width: 1100px) { grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 768px)  { display: none; }
+  }
+
+  .v2_top {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 32px 40px 20px;
+
+    .v2_logoCol {
+      max-width: 100%;
+    }
+
+    .v2_logo {
+      width: 140px;
+      margin-bottom: 10px;
+    }
+
+    .v2_tagline {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #a0a0b0;
+      margin: 0 0 14px;
+      max-width: 700px;
+    }
+
+    .v2_socialIcons {
+      gap: 14px;
+      margin-top: 0;
+      a {
+        font-size: 20px;
+        color: $color-accent;
+        background: none;
+        width: auto;
+        height: auto;
+        border-radius: 0;
+      }
+    }
+  }
+
+  .v2_bottomOuter {
+    background: #1E2939 !important;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .v2_bottomBar {
+    color: #a0a0b0;
+    p { color: #a0a0b0; }
+    ul li a { color: #a0a0b0; &:hover { color: $color-accent; } }
+  }
+
+  .v2_storeBtn {
+    border-color: rgba(255,255,255,0.3);
+    color: #ffffff;
+    background: transparent;
+    .v2_storeLabel { color: #a0a0b0; }
+    .v2_storeName { color: #ffffff; }
+    &:hover { border-color: $color-accent; }
+  }
 }
 
 // ============================================================
@@ -41,7 +143,7 @@ $font-primary:     "Poppins", sans-serif;
 
 .v2_tagline {
   color: $color-dark;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.8;
   max-width: 340px;
   margin: 0 0 20px;
@@ -85,15 +187,64 @@ $font-primary:     "Poppins", sans-serif;
 }
 
 // ============================================================
+// TOP — Logo + Tagline + Social (old footer pages)
+// ============================================================
+.v2_top {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px 40px 20px;
+
+  .v2_logoCol {
+    max-width: 600px;
+  }
+
+  .v2_logo {
+    width: 160px;
+    margin-bottom: 10px;
+  }
+
+  .v2_tagline {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #a0a0b0;
+    margin: 0 0 12px;
+    max-width: 560px;
+  }
+
+  .v2_socialIcons {
+    gap: 14px;
+    margin-top: 0;
+
+    a {
+      font-size: 22px;
+      color: $color-accent;
+    }
+  }
+}
+
+// Old footer grid (without logo column)
+.v2_grid_old {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 32px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px 40px 24px;
+
+  @media (max-width: 1100px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 768px)  { display: none; }
+}
+
+// ============================================================
 // MULTI-COLUMN GRID — Logo + all link columns in one row
 // ============================================================
 .v2_grid {
   display: grid;
   grid-template-columns: 1.4fr repeat(4, 1fr) 1.2fr;
   gap: 32px;
-  max-width: 1440px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 40px 32px;
+  padding: 40px 16px 32px;
 
   @media (max-width: 1200px) {
     grid-template-columns: repeat(3, 1fr);
@@ -125,7 +276,7 @@ $font-primary:     "Poppins", sans-serif;
       a {
         color: $color-link;
         text-decoration: none;
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 400;
         transition: color 0.2s, padding-left 0.2s;
 
@@ -145,12 +296,15 @@ $font-primary:     "Poppins", sans-serif;
 // ============================================================
 .v2_heading {
   color: $color-dark;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   margin: 0 0 16px;
   padding-left: 12px;
   border-left: 4px solid $color-accent;
   display: block;
+  @media (width <= 767px) {
+    font-size: 14px;
+  }
 }
 
 .v2_heading_sub {
@@ -205,6 +359,18 @@ $font-primary:     "Poppins", sans-serif;
   flex-direction: column;
   gap: 10px;
   margin-top: 12px;
+  @media (width <= 768px) {
+      flex-direction: row;
+  }
+}
+
+// Horizontal store buttons for old footer
+.v2_storeButtonsRow {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
 }
 
 .v2_storeBtn {
@@ -289,6 +455,7 @@ $font-primary:     "Poppins", sans-serif;
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease;
+  padding-left: 16px;
   ul { padding: 8px 0 12px; }
 }
 
@@ -306,7 +473,7 @@ $font-primary:     "Poppins", sans-serif;
 }
 
 .v2_bottomBar {
-  padding: 18px 40px;
+  padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -314,7 +481,7 @@ $font-primary:     "Poppins", sans-serif;
   gap: 12px;
   font-size: 14px;
   color: $color-dark;
-  max-width: 1440px;
+  max-width: 1200px;
   margin: 0 auto;
 
   p {
@@ -344,5 +511,10 @@ $font-primary:     "Poppins", sans-serif;
     flex-direction: column;
     text-align: center;
     padding: 16px 20px;
+  }
+}
+@media (width <= 767px) {
+  .v2_marT{
+    margin-top: 16px;
   }
 }
