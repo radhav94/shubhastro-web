@@ -257,7 +257,7 @@
 
 .heroBanner {
   // padding: 24px 24px 16px;
-  margin-bottom: 14px;
+  margin-bottom: 24px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -372,21 +372,22 @@
   }
 }
 
-// .heroBgGlow {
-//   position: absolute;
-//   width: 10px;
-//   height: 10px;
-//   border-radius: 50%;
-//   background: #5a2fb131;
-//   opacity: 0.3;
-//   backdrop-filter: blur(100px);
-//   -webkit-backdrop-filter: blur(100px);
-//   top: 50px;
-//   box-shadow: 0px 0px 300px 100px #5A2FB1;
-//   // left: 400px;
-//   z-index: 0;
-//   pointer-events: none;
-// }
+.heroBgGlow {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #F75801;
+  opacity: 0.5;
+  backdrop-filter: blur(100px);
+  -webkit-backdrop-filter: blur(100px);
+  bottom: 70px;
+  right: 70px;
+  box-shadow: 0px 0px 300px 100px #F75801;
+  // left: 400px;
+  z-index: 9;
+  pointer-events: none;
+}
 
 .centerDivider {
   height: 1px;
@@ -564,7 +565,7 @@
     text-align: center;
     white-space: pre-line;
     line-height: 1.4;
-    padding: 0 4px;
+    // padding: 0 4px;
   }
 
   @media (max-width: 900px) {
@@ -2288,7 +2289,10 @@
 /* CTA Banner */
 .ctaBanner {
   width: 100%;
-  background: linear-gradient(120deg, #f0ecfa 0%, #e8e2f5 35%, #ede8f8 60%, #f5eef8 100%);
+  background-color: linear-gradient(120deg, #f0ecfa 0%, #e8e2f5 35%, #ede8f8 60%, #f5eef8 100%);
+  background-image: url("../../../assets/images/dont-wait-top-bg.svg"),url("../../../assets/images/dont-wait-bottom-bg.svg");
+  background-repeat: no-repeat,no-repeat;
+  background-position: top right, bottom left;
   border-radius: 16px;
   padding: 40px 48px;
   display: flex;
@@ -2540,7 +2544,7 @@
 
 .ctaTrustItem {
   font-size: 13px;
-  color: #6b7280;
+  color: #000000;
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
   display: flex;
@@ -3248,10 +3252,10 @@
 
 .wowCard {
   background: #FFFFFF66;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1.5px solid #FFFFFF;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+  box-shadow: none !important;
   outline: none !important;
   position: relative !important;
 
@@ -3419,7 +3423,7 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
 
 .blogSection {
   @include glass-section;
-  padding: 16px 16px 0px 16px !important;
+  padding: 16px 16px 0px 16px;
   box-shadow: none!important;
 }
 
