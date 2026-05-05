@@ -10,12 +10,8 @@ import dayjs from "dayjs";
 import { useVideoCallChat } from "./useVideoCallChat";
 import { GrReactjs } from "react-icons/gr";
 import IframeModal from "../../screens/private/home/components/chats/IframeModal";
-// OLD: KundliSelectModal for kundli selection
-// import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
-// NEW: ProfileManager for kundli listing and selection — auto-selects self, not ideal for user choice
-// import { ProfileManager } from "../UI/Profile";
-// RESTORED: KundliSelectModal — shows proper list for user to choose from (matches ChatInput.jsx)
 import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
+import AudioMessageWrapper from "../../screens/private/home/components/chats/AudioMessageWrapper";
 
 const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 
@@ -331,26 +327,12 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
       if (msg.type === "audio") {
         isSpecialMessage = true;
         content = (
-          <div className={styles.voiceMessage}>
-            <button className={styles.playButton}>
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </button>
-            <div className={styles.waveformContainer}>
-              <audio controls className={styles.audioPlayer}>
-                <source src={msg.text} type="audio/mpeg" />
-              </audio>
-            </div>
-            <span className={styles.voiceDuration}>
-              {/* {Math.floor(parsed.duration / 60)}:{String(parsed.duration % 60).padStart(2, '0')} */}
-            </span>
-          </div>
+          <AudioMessageWrapper
+            url={msg.text}
+            duration={msg.duration}
+            time={msg.time}
+            isSender={msg.isSender}
+          />
         );
       } else if (msg.type === "video") {
         isSpecialMessage = true;
@@ -519,7 +501,7 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
               msg.isSender ? styles.sent : styles.received
             }`}
           >
-            <div className={styles.messageContent}>{content}</div>
+            <div className={`${styles.messageContent} ${msg.type === "audio" ? styles.messageContentAudio : ""}`}>{content}</div>
             <div className={styles.messageTime}>{msg.time}</div>
           </div>
         )}

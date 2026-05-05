@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "../resultTarot/ResultTarot.module.scss";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 const RomanticBreakupResult = ({ resultData, userName = "", handleReset }) => {
   if (!resultData) return null;
@@ -22,6 +23,12 @@ const RomanticBreakupResult = ({ resultData, userName = "", handleReset }) => {
         <h2 style={{ marginBottom: "10px" }}>{title}</h2>
         <h3 className={styles.cardName}>{card?.name}</h3>
 
+        {card?.description && (
+          <div className={styles.sectionHeader} style={{ marginBottom: "8px" }}>
+            <span>📖 Reading</span>
+            <TTSButton text={`Reading. ${card.description}`} />
+          </div>
+        )}
         <p className={styles.cardDescription}>{card?.description}</p>
       </div>
     </div>

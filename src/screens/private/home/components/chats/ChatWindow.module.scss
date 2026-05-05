@@ -433,18 +433,21 @@ $floating-button-gap: 14px;
 
 .senderBubble {
   margin-left: auto;
-  background: #FFE4BA;
+  background: linear-gradient(135deg, #fff5ee 0%, #ffe8d6 100%);
   color: $text-primary;
   border-radius: 18px 18px 4px 18px;
-  padding-right: 60px; /* Extra space for timestamp */
+  border: 1px solid rgba(247, 88, 1, 0.12);
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.08);
+  // padding-right: 60px; /* Extra space for timestamp */
 }
 
 .receiverBubble {
   margin-right: auto;
-  background: $bg-received-message;
+  background: #ffffff;
   color: $text-receiver;
   border-radius: 18px 18px 18px 4px;
-  border: 1px solid #E0E0E0;
+  border: 1px solid #f0ebe4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .bubbleContent {
@@ -1390,7 +1393,7 @@ $floating-button-gap: 14px;
   }
 
   .senderBubble {
-    padding-right: 50px; /* Mobile: smaller space for timestamp */
+    // padding-right: 50px; /* Mobile: smaller space for timestamp */
   }
 
   .msgTime {
@@ -1612,7 +1615,7 @@ $floating-button-gap: 14px;
   }
 
   .senderBubble {
-    padding-right: 70px; /* Desktop: more space for timestamp */
+    // padding-right: 70px; /* Desktop: more space for timestamp */
   }
 
   .floatingActions {

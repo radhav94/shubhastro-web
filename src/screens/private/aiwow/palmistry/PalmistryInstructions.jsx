@@ -5,7 +5,7 @@ import styles from './PalmistryInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setPalmistryImage } from '../../../../redux/aiwow/aiwowSlice';
 import Footer from '../../../../layouts/Footer';
-
+import TTSButton from '../../../../component/UI/TTSButton';
 const PalmistryInstructions = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -60,7 +60,10 @@ const PalmistryInstructions = () => {
               <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
             </div>
 
-          <div>
+          <div style={{ position: 'relative' }}>
+             <span style={{ position: 'absolute', top: '0', right: '0', display: 'flex' }}>
+              <TTSButton text={`Clear Background. Use a neutral background to avoid distractions in the photo. Focus on Your Palm. Make sure your palm is centered and clearly visible in the frame. Steady Hands.Keep your hands steady to avoid blurriness for better detail. Disclaimer. This palm reading is for informational purposes only and not a substitute for professional advice. Analysis is based on AI interpretation.`} />
+             </span>
             <div className={styles.checklistSection}>
               <div className={styles.checkItem}>
                 <div className={styles.checkIcon}>

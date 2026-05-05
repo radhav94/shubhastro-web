@@ -1,5 +1,5 @@
 import styles from "./ResultHistoryCard.module.scss";
-
+import TTSButton from "../../../../component/UI/TTSButton";
 const statusConfig = {
   completed: { label: "Completed", className: "statusCompleted" },
   failed: { label: "Failed", className: "statusFailed" },
@@ -35,6 +35,9 @@ const ResultHistoryCard = ({ item }) => {
             )}
           </div>
           <span className={styles.featureName}>{featureName}</span>
+          <span style={{top: '8px', right: '8px', display: 'inline-flex', zIndex: 1 }} onClick={(e) => e.stopPropagation()}>
+        <TTSButton text={`${[featureName,statusInfo?.label,date,`Overall Analysis`,summary,`Download your detailed analysis report`].filter(Boolean).join('. ')}`} />
+      </span>
         </div>
         <span className={`${styles.statusBadge} ${styles[statusInfo.className]}`}>
           {statusInfo.label}

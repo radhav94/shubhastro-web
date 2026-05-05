@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import { useGetSadeSatiTableQuery, useGetSadesatiQuery } from "../../../../../redux/api/kundli/dashaApi";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
+import TTSButton from "../../../../../component/UI/TTSButton";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useState } from "react";
 import Table from "../../../../../component/UI/table/kundli/free-report/Table";
@@ -44,6 +45,17 @@ const SadeSati = () => {
             {isInSadeSati
               ? "You Are in Sade Sati Period"
               : "You Are Not in Sade Sati"}
+            <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+              <TTSButton
+                text={[
+                  isInSadeSati ? "You Are in Sade Sati Period" : "You Are Not in Sade Sati",
+                  sadeSatiData.shani_period_type ? `Period Type: ${sadeSatiData.shani_period_type}` : "",
+                  sadeSatiData.bot_response ? `Analysis: ${sadeSatiData.bot_response}` : "",
+                  sadeSatiData.date_considered ? `As on ${sadeSatiData.date_considered}` : "",
+                  sadeSatiData.remedies?.length ? `Recommended Remedies: ${sadeSatiData.remedies.join(". ")}` : "",
+                ].filter(Boolean).join(". ")}
+              />
+            </span>
           </h1>
 
           <div className={styles.contentWrapper}>
@@ -86,6 +98,9 @@ const SadeSati = () => {
             <h2 className={styles.sectionTitle}>
               <span className={styles.sectionIcon}><img src={namaste} width="20" alt="icon" /></span>
               Recommended Remedies
+              <span onClick={(e) => e.stopPropagation()} style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+                <TTSButton text={`Recommended Remedies. ${sadeSatiData.remedies.join('. ')}`} />
+              </span>
             </h2>
             <span className={`${styles.dropdownArrow} ${isRemediesExpanded ? styles.expanded : ''}`}>
               ▼

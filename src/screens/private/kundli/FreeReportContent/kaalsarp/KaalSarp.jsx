@@ -3,6 +3,7 @@ import { useGetKaalSarpDoshQuery } from "../../../../../redux/api/kundli/dashaAp
 import { useSelector } from "react-redux";
 import { useState } from "react";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
+import TTSButton from "../../../../../component/UI/TTSButton";
 import styles from "./KaalSarp.module.scss";
 import { buildVedicParam } from "../../../../../utils/VedicParams.js/vedicParams";
 import stars from "../../../../../assets/images/stars.png";
@@ -91,6 +92,9 @@ const KaalSarp = () => {
             <h2 className={styles.sectionTitle}>
               <span className={styles.sectionIcon}><img src={namaste} width="20" alt="icon" /></span>
               Remedies
+              <span onClick={(e) => e.stopPropagation()} style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+                <TTSButton text={`Remedies. ${kaalsarp.remedies.join('. ')}`} />
+              </span>
             </h2>
             <span className={`${styles.dropdownArrow} ${isRemediesExpanded ? styles.expanded : ''}`}>
               ▼

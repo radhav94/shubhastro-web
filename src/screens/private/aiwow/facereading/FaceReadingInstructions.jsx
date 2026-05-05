@@ -5,6 +5,7 @@ import styles from './FaceReadingInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
 import Footer from '../../../../layouts/Footer';
+import TTSButton from '../../../../component/UI/TTSButton';
 
 const FaceReadingInstructions = () => {
   const navigate = useNavigate();
@@ -64,6 +65,10 @@ const FaceReadingInstructions = () => {
       
 
       <div>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '0', right: '0', display: 'flex' }}>
+            <TTSButton text={`Good Lighting. Ensure your room is well-lit for accurate analysis. Stable Position. Hold your device steady during capture. Camera Permission. Allow camera access when prompted. Disclaimer. This face analysis is for informational purposes only and should not be considered a substitute for professional medical or psychological advice. The analysis is based on AI interpretation of facial features. Consult with healthcare professionals for any health concerns.`} />
+          </span>
         <div className={styles.checklistSection}>
           <div className={styles.checkItem}>
             <div className={styles.checkIcon}>
@@ -131,6 +136,7 @@ const FaceReadingInstructions = () => {
           style={{ display: 'none' }}
           onChange={handleFileChange}
         />
+      </div>
       </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./ResultTarot.module.scss";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 const ResultTarot = ({ card, userName = "", onReset }) => {
   if (!card || Object.keys(card).length === 0) {
@@ -24,6 +25,8 @@ const ResultTarot = ({ card, userName = "", onReset }) => {
     );
   }
 
+  const allText = [card.meaning, card.description].filter(Boolean).join(". ");
+
   return (
     <div className={styles.resultContainer}>
       <div className={styles.tarotCard}>
@@ -44,6 +47,12 @@ const ResultTarot = ({ card, userName = "", onReset }) => {
               </span>
             )}
           </h2>
+          {allText && (
+            <div className={styles.sectionHeader}>
+              <span>📖 Reading and Guidance</span>
+              <TTSButton text={`Reading and Guidance. ${allText}`} />
+            </div>
+          )}
           <p>{card.meaning}</p>
           <p>{card.description}</p>
           <button

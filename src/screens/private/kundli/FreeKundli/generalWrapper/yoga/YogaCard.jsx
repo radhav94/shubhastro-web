@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { IoChevronDown } from "react-icons/io5";
 import PrimaryText from "../../../../../../component/PrimaryText";
+import TTSButton from "../../../../../../component/UI/TTSButton";
 import styles from "./YogaCard.module.scss";
 
 const YogaCard = ({ yoga }) => {
@@ -16,9 +17,22 @@ const YogaCard = ({ yoga }) => {
     <div className={styles.wrapper}>
       {/* Title - Clickable Header (only on mobile) */}
       <div className={styles.header} onClick={toggleExpand}>
-        <h2 className={styles.title}>
-          {yoga.yoga}
-        </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <h2 className={styles.title}>
+            {yoga.yoga}
+          </h2>
+          <span onClick={(e) => e.stopPropagation()}>
+            <TTSButton
+              text={[
+                yoga.yoga,
+                yoga.meaning ? `Meaning: ${yoga.meaning}` : "",
+                yoga.strength_in_percentage ? `Strength: ${yoga.strength_in_percentage}%` : "",
+                yoga.planets_involved?.length ? `Planets: ${yoga.planets_involved.join(", ")}` : "",
+                yoga.houses_involved?.length ? `Houses: ${yoga.houses_involved.join(", ")}` : "",
+              ].filter(Boolean).join(". ")}
+            />
+          </span>
+        </div>
         <IoChevronDown 
           className={`${styles.arrow} ${isExpanded ? styles.arrowExpanded : ''}`}
         />

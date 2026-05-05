@@ -5,6 +5,7 @@ import styles from './ClothColorResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
 import Footer from '../../../../layouts/Footer';
+import TTSButton from '../../../../component/UI/TTSButton';
 
 const ClothColorResult = () => {
   const navigate = useNavigate();
@@ -102,7 +103,10 @@ const ClothColorResult = () => {
   const renderRecommended = () => (
     <div className={styles.tabContent}>
 
-      <div className={styles.intentionCard}>
+      <div className={styles.intentionCard} style={{ position: 'relative' }}>
+      <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+        <TTSButton text={`Analysis Details. Intention: ${getIntentionLabel(resultData.intention)}${resultData.analysisDate ? '. Analysis Date: ' + String(resultData.analysisDate) : ''}${resultData.dominantPlanet ? '. Dominant Planet: ' + String(resultData.dominantPlanet) : ''}`} />
+      </span>
       {resultData.image && (
         <div className={styles.clothImageWrapper}>
           <img src={resultData.image} alt="Analyzed clothes" className={styles.clothImage} />
@@ -130,7 +134,10 @@ const ClothColorResult = () => {
       </div>
 
       {resultData.recommendedColors && Array.isArray(resultData.recommendedColors) && resultData.recommendedColors.length > 0 && (
-        <div className={styles.colorsCard}>
+        <div className={styles.colorsCard} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <TTSButton text={`Recommended Colors. ${resultData.recommendedColors.map(c => c.colorName + (c.description ? ': ' + c.description : '') + (c.whenToWear ? '. When to Wear: ' + c.whenToWear : '')).join('. ')}`} />
+          </span>
           <h3 className={styles.cardTitle}>Recommended Colors</h3>
           <div className={styles.colorsGrid}>
             {resultData.recommendedColors.map((color, index) => (
@@ -182,7 +189,10 @@ const ClothColorResult = () => {
   const renderCombinations = () => (
     <div className={styles.tabContent}>
       {resultData.suggestedCombinations && Array.isArray(resultData.suggestedCombinations) && resultData.suggestedCombinations.length > 0 && (
-        <div className={styles.combinationsCard}>
+        <div className={styles.combinationsCard} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <TTSButton text={`Suggested Color Combinations. ${resultData.suggestedCombinations.map(c => (c.colors ? c.colors.map(cl => cl.colorName).join(' and ') : '') + (c.description ? '. ' + c.description : '') + (c.occasion ? '. Best For: ' + c.occasion : '')).join('. ')}`} />
+          </span>
           <h3 className={styles.cardTitle}>Suggested Color Combinations</h3>
           <div className={styles.combinationsGrid}>
             {resultData.suggestedCombinations.map((combo, index) => (
@@ -216,7 +226,10 @@ const ClothColorResult = () => {
       )}
 
       {resultData.wardrobeAnalysis && (
-        <div className={styles.wardrobeCard}>
+        <div className={styles.wardrobeCard} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <TTSButton text={`Wardrobe Analysis. ${resultData.wardrobeAnalysis.detectedColors?.length > 0 ? 'Detected Colors: ' + resultData.wardrobeAnalysis.detectedColors.map(c => c.colorName + ' ' + c.percentage + ' percent').join(', ') + '. ' : ''}${resultData.wardrobeAnalysis.astrologicalMatches?.length > 0 ? 'Astrological Matches: ' + resultData.wardrobeAnalysis.astrologicalMatches.map(m => m.detectedColor + ' to ' + m.recommendedColor + ' ' + m.matchPercentage + ' percent match').join(', ') : ''}`} />
+          </span>
           <h3 className={styles.cardTitle}>Wardrobe Analysis</h3>
           
           {resultData.wardrobeAnalysis.detectedColors && Array.isArray(resultData.wardrobeAnalysis.detectedColors) && resultData.wardrobeAnalysis.detectedColors.length > 0 && (
@@ -267,7 +280,10 @@ const ClothColorResult = () => {
   const renderAvoid = () => (
     <div className={styles.tabContent}>
       {resultData.colorsToAvoid && Array.isArray(resultData.colorsToAvoid) && resultData.colorsToAvoid.length > 0 ? (
-        <div className={styles.avoidCard}>
+        <div className={styles.avoidCard} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <TTSButton text={`Colors to Avoid. ${resultData.colorsToAvoid.map(c => c.colorName + (c.reason ? ': ' + c.reason : '')).join('. ')}`} />
+          </span>
           <h3 className={styles.cardTitle}>Colors to Avoid</h3>
           <p className={styles.avoidIntro}>
             These colors may not be favorable for your intention on this day:
@@ -302,7 +318,10 @@ const ClothColorResult = () => {
           </div>
         </div>
       ) : (
-        <div className={styles.avoidCard}>
+        <div className={styles.avoidCard} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <TTSButton text="Colors to Avoid. No specific colors to avoid for your intention today." />
+          </span>
           <h3 className={styles.cardTitle}>Colors to Avoid</h3>
           <p className={styles.avoidIntro}>
             No specific colors to avoid for your intention today.

@@ -1563,7 +1563,7 @@
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 4px 4px 0px 4px;
+  padding: 4px 4px 2px 4px;
   // width: calc(100% + 130px);
   // @media screen and (width <= 767px) {
   //   padding: 4px 4px 20px 0px;
@@ -3894,7 +3894,7 @@
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 4px 4px 0px 4px;
+  padding: 4px 4px 2px 4px;
   @media (width <= 767px) {
     // gap: 16px;    
     padding: 0px 0px 0px 0px;
@@ -3907,7 +3907,7 @@
 
 .blogCard {
   // flex: 0 0 220px;
-  width: 190px;
+  width: 220px;
   background: #ffffff;
   border-radius: 12px;
   overflow: hidden;
@@ -3919,7 +3919,7 @@
     flex-shrink: 0;
   @media screen and (width <= 767px) {
     // flex: 0 0 150px;
-    width: 150px;
+    width: 180px;
   }
 }
 

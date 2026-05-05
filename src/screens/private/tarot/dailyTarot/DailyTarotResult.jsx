@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "../resultTarot/ResultTarot.module.scss";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 const DailyTarotResult = ({ card, onReset  }) => {
   const { name, card_image, health, relationship, career, finance } = card;
@@ -18,22 +19,22 @@ const DailyTarotResult = ({ card, onReset  }) => {
           <h2 className={styles.cardName}>{name}</h2>
 
           <div className={styles.section}>
-            <h3>💪 Health</h3>
+            <div className={styles.sectionHeader}><h3>💪 Health</h3><TTSButton text={`Health. ${health}`} /></div>
             <p>{health}</p>
           </div>
 
           <div className={styles.section}>
-            <h3>❤️ Relationship</h3>
+            <div className={styles.sectionHeader}><h3>❤️ Relationship</h3><TTSButton text={`Relationship. ${relationship}`} /></div>
             <p>{relationship}</p>
           </div>
 
           <div className={styles.section}>
-            <h3>💼 Career</h3>
+            <div className={styles.sectionHeader}><h3>💼 Career</h3><TTSButton text={`Career. ${career}`} /></div>
             <p>{career}</p>
           </div>
 
           <div className={styles.section}>
-            <h3>💰 Finance</h3>
+            <div className={styles.sectionHeader}><h3>💰 Finance</h3><TTSButton text={`Finance. ${finance}`} /></div>
             <p>{finance}</p>
           </div>
         </div>

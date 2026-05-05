@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useGetAi12MonthsPredictionQuery } from "../../../../redux/api/kundli/kundliApi";
+import TTSButton from "../../../../component/UI/TTSButton";
 import arrowUp from "../../../../assets/images/arrow-up.svg";
 
 /* ================= UTIL HELPERS ================= */
@@ -188,7 +189,9 @@ const Prediction = ({ params, skipToken }) => {
                             {formatLabel(key)}
                           </p>
 
-                          {value.outcome && (
+                          <div className="flex items-center gap-2">
+                            <TTSButton text={`${formatLabel(key)}. ${value.bot_response}. Probability: ${formatValue(value.probability)}`} />
+                            {value.outcome && (
                             <span
                               className={`text-xs px-3 py-1 rounded-full capitalize ${
                                 value.outcome === "positive"
@@ -199,6 +202,7 @@ const Prediction = ({ params, skipToken }) => {
                               {value.outcome}
                             </span>
                           )}
+                          </div>
                         </div>
 
                         <p className="text-sm text-gray-600 leading-relaxed">

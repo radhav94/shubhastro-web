@@ -61,6 +61,8 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false,
+    // Strip console.log and console.warn in production builds
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         // Disable manual chunks to prevent React 19 internal splitting issues
@@ -79,5 +81,10 @@ export default defineConfig({
   },
   server: {
     host: true
-  }
+  },
+  esbuild: {
+    // Remove console.log and console.warn in production, keep console.error
+    pure: process.env.NODE_ENV === 'production' ? ['console.log', 'console.warn', 'console.info', 'console.debug'] : [],
+    drop: process.env.NODE_ENV === 'production' ? ['debugger'] : [],
+  },
 });

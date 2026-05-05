@@ -5,6 +5,7 @@ import styles from './GemstoneInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setGemstoneImage } from '../../../../redux/aiwow/aiwowSlice';
 import Footer from '../../../../layouts/Footer';
+import TTSButton from '../../../../component/UI/TTSButton';
 
 const GemstoneInstructions = () => {
   const navigate = useNavigate();
@@ -61,7 +62,10 @@ const GemstoneInstructions = () => {
             <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
           </div>
 
-        <div>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '0', right: '0', display: 'flex' }}>
+            <TTSButton text={`Verify Certification. Ensure the gemstone comes with a valid certification from a recognized authority. Inspect Clarity. Evaluate the clarity of the gemstone to determine its quality and authenticity. Examine Cut Quality. Assess the cut of the gemstone for precision and craftsmanship, which contribute to its value. Disclaimer. This gemstone authenticity check is for informational purposes only and should not replace professional appraisal. Our analysis is powered by advanced AI.`} />
+          </span>
             <div className={styles.checklistSection}>
               <div className={styles.checkItem}>
                 <div className={styles.checkIcon}>

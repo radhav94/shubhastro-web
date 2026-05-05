@@ -108,6 +108,14 @@
   }
 }
 
+/* Audio message — no bubble padding/background, VoiceMessage handles its own card */
+.messageContentAudio {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
 .messageTime {
   font-size: 0.75rem;
   color: #9ca3af;

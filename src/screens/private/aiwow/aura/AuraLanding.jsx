@@ -6,6 +6,7 @@ import EnergyLevelsIcon from '../../../../assets/icons/energylevels.png';
 import ChakraIcon from '../../../../assets/icons/chakra.png';
 import AuraSizeIcon from '../../../../assets/icons/aurasize.png';
 import Footer from '../../../../layouts/Footer';
+import TTSButton from '../../../../component/UI/TTSButton';
 
 const AuraLanding = () => {
   const navigate = useNavigate();
@@ -54,7 +55,10 @@ const AuraLanding = () => {
 
         <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
-            <div key={index} className={styles.featureCard}>
+            <div key={index} className={styles.featureCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                <TTSButton text={`${[feature?.title, feature.description].filter(Boolean).join('. ')}`} />
+              </span>
               <div className={styles.iconWrapper}>
                 <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
               </div>
