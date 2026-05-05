@@ -1,10 +1,14 @@
 import React from 'react';
 import styles from './FeatureCard.module.scss';
 import { getAIWowIcon } from '../../../../utils/appImages';
+import TTSButton from '../../../../component/UI/TTSButton';
 
 const FeatureCard = ({ badge, badgeType, title, description, icon, onStartNow, largeIcon }) => {
   return (
     <div className={styles.card} onClick={onStartNow}>
+      <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 1 }} onClick={(e) => e.stopPropagation()}>
+        <TTSButton text={`${[title, description].filter(Boolean).join('. ')}`} />
+      </span>
       <div className={styles.iconWrapper}>
         <div className={styles.iconBackground}>
           <img src={icon} alt={title} className={styles.icon} />

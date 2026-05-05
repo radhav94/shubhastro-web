@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import styles from "./HtmlContentCard.module.scss";
 import PrimaryText from "../../../PrimaryText";
+import TTSButton from "../../TTSButton";
 
 // Animation variants for the container and its children
 const containerVariants = {
@@ -27,6 +28,14 @@ const itemVariants = {
 };
 
 const HtmlContentCard = ({ sections = [] }) => {
+  // Build plain text from all sections for TTS
+  const ttsText = sections.map((s) => {
+    if (s.type === 'heading') return s.content;
+    if (s.type === 'paragraph') return s.content?.replace(/<[^>]*>/g, '') || '';
+    if (s.type === 'list') return s.items?.map((i) => i.replace(/<[^>]*>/g, '')).join('. ') || '';
+    return '';
+  }).filter(Boolean).join('. ');
+
   const renderSection = (section, index) => {
     switch (section.type) {
       case "heading":
@@ -78,6 +87,11 @@ const HtmlContentCard = ({ sections = [] }) => {
       initial="hidden"
       animate="visible"
     >
+      {ttsText && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '4px' }}>
+          <TTSButton text={ttsText} />
+        </div>
+      )}
       {sections.map(renderSection)}
     </motion.div>
   );

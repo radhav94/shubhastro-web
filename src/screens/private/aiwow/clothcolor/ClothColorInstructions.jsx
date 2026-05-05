@@ -5,6 +5,7 @@ import styles from './ClothColorInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
 import Footer from '../../../../layouts/Footer';
+import TTSButton from '../../../../component/UI/TTSButton';
 
 const ClothColorInstructions = () => {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ const ClothColorInstructions = () => {
   };
 
   return (
-    <>
+
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -63,6 +64,10 @@ const ClothColorInstructions = () => {
           </div>
 
         <div>
+        <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '0', right: '0', display: 'flex' }}>
+            <TTSButton text={`Analyze Wardrobe Choices. Examine how the choice of clothing colors reflects personal traits and moods. Identify Color Preferences. Explore which colors individuals gravitate towards and what they signify about their personality. Assess Seasonal Impact. Consider how seasonal color trends influence personal style and self-expression. Disclaimer. This color analysis is for informational purposes only and is not a substitute for professional style advice. Our insights are generated using advanced algorithms.`} />
+          </span>
         <div className={styles.checklistSection}>
           <div className={styles.checkItem}>
             <div className={styles.checkIcon}>
@@ -135,7 +140,7 @@ const ClothColorInstructions = () => {
     </div>
     </div>
     <Footer />
-    </>
+    </div>
   );
 };
 

@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useGetManglikDoshQuery } from "../../../../../redux/api/kundli/dashaApi";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
+import TTSButton from "../../../../../component/UI/TTSButton";
 import styles from "./Manglik.module.scss";
 import { buildVedicParam } from "../../../../../utils/VedicParams.js/vedicParams";
 
@@ -35,6 +36,18 @@ const Manglik = () => {
             <h2 className={styles.sectionTitle}>
               <span className={styles.sectionIcon}>📊</span>
               Manglik Dosh Analysis
+              <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+                <TTSButton
+                  text={[
+                    "Manglik Dosh Analysis",
+                    `By Mars: ${manglik.manglik_by_mars ? "Yes" : "No"}`,
+                    `By Rahu/Ketu: ${manglik.manglik_by_rahuketu ? "Yes" : "No"}`,
+                    `By Saturn: ${manglik.manglik_by_saturn ? "Yes" : "No"}`,
+                    `Score: ${manglik.score}%`,
+                    manglik.bot_response ? `Summary: ${manglik.bot_response}` : "",
+                  ].filter(Boolean).join(". ")}
+                />
+              </span>
             </h2>
             
             <div className={styles.statsGrid}>
@@ -79,6 +92,9 @@ const Manglik = () => {
               <h2 className={styles.sectionTitle}>
                 <span className={styles.sectionIcon}>🔍</span>
                 Manglik Analysis Factors
+                <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+                  <TTSButton text={`Manglik Analysis Factors. ${manglik.factors.join('. ')}`} />
+                </span>
               </h2>
               <div className={styles.factorsList}>
                 {manglik.factors.map((item, i) => (
@@ -99,6 +115,9 @@ const Manglik = () => {
               <h2 className={styles.sectionTitle}>
                 <span className={styles.sectionIcon}>✨</span>
                 Manglik Aspects
+                <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+                  <TTSButton text={`Manglik Aspects. ${manglik.aspects.join('. ')}`} />
+                </span>
               </h2>
               <div className={styles.aspectsList}>
                 {manglik.aspects.map((item, i) => (

@@ -5,6 +5,7 @@ import styles from './AuraResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
 import Footer from '../../../../layouts/Footer';
+import TTSButton from '../../../../component/UI/TTSButton';
 
 const AuraResult = () => {
   const navigate = useNavigate();
@@ -174,7 +175,10 @@ const AuraResult = () => {
         
 
         {overallReading.summary && (
-          <div className={styles.summaryCard}>
+          <div className={styles.summaryCard} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <TTSButton text={`Your Aura Reading. ${overallReading.summary}`} />
+            </span>
             {displayImage && (
               <div className={styles.imageSection}>
                 <img src={displayImage} alt="Aura" className={styles.auraImage} />
@@ -233,7 +237,10 @@ const AuraResult = () => {
                 )} */}
 
                 {astrologicalData.sunSign && (
-                  <div className={styles.card}>
+                  <div className={styles.card} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '40px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Astrological Profile. Sun: ${astrologicalData.sunSign}. Element: ${astrologicalData.element}. Planet: ${astrologicalData.dominantPlanet}. Moon: ${astrologicalData.moonPhase}`} />
+                    </span>
                     <button
                       className={styles.cardHeaderButton}
                       onClick={() => setExpandedAstrological(!expandedAstrological)}
@@ -276,7 +283,10 @@ const AuraResult = () => {
                 )} */}
 
                 {overallReading.challenges?.length > 0 && (
-                  <div className={styles.card}>
+                  <div className={styles.card} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                      <TTSButton text={`Areas for Growth. ${overallReading.challenges.join('. ')}`} />
+                    </span>
                     <div className={styles.cardStaticContent}>
                       <h3 className={styles.cardTitle}>⚡ Areas for Growth</h3>
                       <ul className={styles.list}>
@@ -289,7 +299,10 @@ const AuraResult = () => {
                 )}
 
                 {recommendations?.length > 0 && (
-                  <div className={styles.card}>
+                  <div className={styles.card} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '40px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Recommendations. ${recommendations.join('. ')}`} />
+                    </span>
                     <button
                       className={styles.cardHeaderButton}
                       onClick={() => setExpandedRecommendations(!expandedRecommendations)}
@@ -316,7 +329,10 @@ const AuraResult = () => {
             <div className={styles.section}>
               <div className={styles.auraColorsGrid}>
                 {auraColors?.length > 0 && auraColors.map((color, index) => (
-                  <div key={index} className={styles.auraCard}>
+                  <div key={index} className={styles.auraCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                      <TTSButton text={`${color.type}. ${color.color}. ${color.percentage} percent. ${color.meaning || ''}`} />
+                    </span>
                     <div className={styles.auraHeader}>
                       <div 
                         className={styles.colorCircle} 
@@ -348,7 +364,10 @@ const AuraResult = () => {
 
           {activeTab === 'chakras' && (
             <div className={styles.section}>
-              <div className={styles.card}>
+              <div className={styles.card} style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                  <TTSButton text={`Planetary Influences. Your aura is influenced by planetary energies. Dominant planet: ${astrologicalData.dominantPlanet}`} />
+                </span>
                 <div className={styles.cardStaticContent}>
                   <h3 className={styles.cardTitle}>🌟 Planetary Influences</h3>
                   <p className={styles.cardText}>
@@ -359,7 +378,10 @@ const AuraResult = () => {
               
               <div className={styles.planetaryGrid}>
                 {astrologicalData.planetaryInfluences?.map((planet, index) => (
-                  <div key={index} className={styles.planetCard}>
+                  <div key={index} className={styles.planetCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                      <TTSButton text={`${planet.planet}. ${planet.aspect}. Influence: ${planet.influence} percent`} />
+                    </span>
                     <h4 className={styles.planetName}>{planet.planet}</h4>
                     <p className={styles.planetAspect}>{planet.aspect}</p>
                     <div className={styles.planetInfluence}>{planet.influence}%</div>
@@ -426,7 +448,10 @@ const AuraResult = () => {
                 )} */}
 
                 {spiritualInsights.guidance && (
-                  <div className={styles.card}>
+                  <div className={styles.card} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                      <TTSButton text={`Spiritual Guidance. ${spiritualInsights.guidance}`} />
+                    </span>
                     <div className={styles.cardStaticContent}>
                       <h3 className={styles.cardTitle}>🌟 Spiritual Guidance</h3>
                       <p className={styles.cardText}>{spiritualInsights.guidance}</p>
@@ -450,7 +475,10 @@ const AuraResult = () => {
 
                 {/* Astrological Data */}
                 {astrologicalData && (astrologicalData.sunSign || astrologicalData.element || astrologicalData.dominantPlanet || astrologicalData.moonPhase) && (
-                  <div className={`${styles.card} ${styles.astroDataCard}`}>
+                  <div className={`${styles.card} ${styles.astroDataCard}`} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                      <TTSButton text={`Astrological Data. ${astrologicalData.sunSign ? 'Sun Sign: ' + astrologicalData.sunSign + '. ' : ''}${astrologicalData.element ? 'Element: ' + astrologicalData.element + '. ' : ''}${astrologicalData.dominantPlanet ? 'Dominant Planet: ' + astrologicalData.dominantPlanet + '. ' : ''}${astrologicalData.moonPhase ? 'Moon Phase: ' + astrologicalData.moonPhase : ''}`} />
+                    </span>
                     <div className={styles.cardStaticContent}>
                       <h3 className={styles.cardTitle}>🪐 Astrological Data</h3>
                       <div className={styles.astroDataGrid}>
@@ -484,7 +512,10 @@ const AuraResult = () => {
                 )}
 
                 {astrologicalData?.currentTransits?.length > 0 && (
-                  <div className={styles.card}>
+                  <div className={styles.card} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                      <TTSButton text={`Current Transits. ${astrologicalData.currentTransits.join('. ')}`} />
+                    </span>
                     <div className={styles.cardStaticContent}>
                       <h3 className={styles.cardTitle}>🌌 Current Transits</h3>
                       <ul className={styles.list}>
@@ -497,7 +528,10 @@ const AuraResult = () => {
                 )}
 
                 {spiritualInsights.affirmations?.length > 0 && (
-                  <div className={styles.card}>
+                  <div className={styles.card} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                      <TTSButton text={`Daily Affirmations. ${spiritualInsights.affirmations.join('. ')}`} />
+                    </span>
                     <div className={styles.cardStaticContent}>
                       <h3 className={styles.cardTitle}>✨ Daily Affirmations</h3>
                       <ul className={styles.list}>
