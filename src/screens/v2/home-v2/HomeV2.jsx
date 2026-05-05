@@ -708,9 +708,43 @@ const HomeV2 = () => {
             <div className={styles.ctaTrust}>
               {(connectSection?.tag_label || ["100% Secure", "Verified Experts", "Privacy Protected"]).map((label, i) => {
                 const icons = [
-                  <svg key="lock" width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>,
-                  <svg key="check" width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>,
-                  <svg key="shield" width="14" height="14" viewBox="0 0 24 24" fill="#f75801"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>,
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <g clip-path="url(#clip0_12974_46595)">
+                      <path d="M18 8H17V6C17 3.24 14.76 1 12 1C9.24 1 7 3.24 7 6V8H6C4.9 8 4 8.9 4 10V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V10C20 8.9 19.1 8 18 8ZM12 17C10.9 17 10 16.1 10 15C10 13.9 10.9 13 12 13C13.1 13 14 13.9 14 15C14 16.1 13.1 17 12 17ZM9 8V6C9 4.34 10.34 3 12 3C13.66 3 15 4.34 15 6V8H9Z" fill="url(#paint0_linear_12974_46595)"/>
+                    </g>
+                    <defs>
+                      <linearGradient id="paint0_linear_12974_46595" x1="4" y1="11.5" x2="20" y2="11.5" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#F75801"/>
+                        <stop offset="1" stop-color="#D43400"/>
+                      </linearGradient>
+                      <clipPath id="clip0_12974_46595">
+                        <rect width="24" height="24" fill="white"/>
+                      </clipPath>
+                    </defs>
+                  </svg>,
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="21" viewBox="0 0 22 21" fill="none">
+                    <path d="M22 10.5L19.56 7.71L19.9 4.02L16.29 3.2L14.4 0L11 1.46L7.6 0L5.71 3.19L2.1 4L2.44 7.7L0 10.5L2.44 13.29L2.1 16.99L5.71 17.81L7.6 21L11 19.53L14.4 20.99L16.29 17.8L19.9 16.98L19.56 13.29L22 10.5ZM8.38 14.51L6 12.11C5.61 11.72 5.61 11.09 6 10.7L6.07 10.63C6.46 10.24 7.1 10.24 7.49 10.63L9.1 12.25L14.25 7.09C14.64 6.7 15.28 6.7 15.67 7.09L15.74 7.16C16.13 7.55 16.13 8.18 15.74 8.57L9.82 14.51C9.41 14.9 8.78 14.9 8.38 14.51Z" fill="url(#paint0_linear_12974_46607)"/>
+                    <defs>
+                      <linearGradient id="paint0_linear_12974_46607" x1="0" y1="10.5" x2="22" y2="10.5" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#F75801"/>
+                        <stop offset="1" stop-color="#D43400"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>,
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <g clip-path="url(#clip0_12974_46610)">
+                      <path d="M11.3 2.26007L5.3 4.51007C4.52 4.81007 4 5.55007 4 6.39007V11.0901C4 15.9201 7.13 20.4601 11.43 21.8401C11.8 21.9601 12.2 21.9601 12.57 21.8401C16.87 20.4601 20 15.9301 20 11.0901V6.39007C20 5.56007 19.48 4.81007 18.7 4.52007L12.7 2.27007C12.25 2.09007 11.75 2.09007 11.3 2.26007Z" fill="url(#paint0_linear_12974_46610)"/>
+                    </g>
+                    <defs>
+                      <linearGradient id="paint0_linear_12974_46610" x1="4" y1="12.0319" x2="20" y2="12.0319" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#F75801"/>
+                        <stop offset="1" stop-color="#D43400"/>
+                      </linearGradient>
+                      <clipPath id="clip0_12974_46610">
+                        <rect width="24" height="24" fill="white"/>
+                      </clipPath>
+                    </defs>
+                  </svg>,
                 ];
                 return (
                   <span key={i} className={styles.ctaTrustItem}>
