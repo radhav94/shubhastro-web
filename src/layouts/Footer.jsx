@@ -49,6 +49,11 @@ const companyLinks = [
   { href: "/disclaimer", text: "Disclaimer" },
   { href: "/aboutus", text: "About Us" },
   { href: "/pricing-policy", text: "Pricing Policy" },
+  { href: "/ai-use-policy", text: "AI Use Policy" },
+  { href: "/astrologer-onboarding-agreement", text: "Onboarding Agreement" },
+  { href: "/live-chat-policy", text: "Live Chat Policy" },
+  { href: "/user-agreement", text: "User Agreement" },
+  { href: "/onboarding-guide", text: "Onboarding Guide" },
 ];
 
 const Footer = () => {

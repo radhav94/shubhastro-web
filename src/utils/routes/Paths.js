@@ -40,7 +40,12 @@ import Disclaimer from "../../screens/public/static-pages/Disclaimer";
 import PricingPolicy from "../../screens/public/static-pages/PricingPolicy";
 import PrivacyPolicy from "../../screens/public/static-pages/PrivacyPolicy";
 import RefundPolicy from "../../screens/public/static-pages/RefundPolicy";
+import AiUsePolicy from "../../screens/public/static-pages/AiUsePolicy";
+import AstrologerOnboardingAgreement from "../../screens/public/static-pages/AstrologerOnboardingAgreement";
+import LiveChatPolicy from "../../screens/public/static-pages/LiveChatPolicy";
+import UserAgreement from "../../screens/public/static-pages/UserAgreement";
 import TermsConditions from "../../screens/public/static-pages/TermsConditions";
+import OnboardingGuide from "../../screens/public/static-pages/OnboardingGuide";
 import Notification from "../../screens/private/notification/Notification";
 import WalletTranscations from "../../screens/private/wallet/WalletTranscations";
 import AstrologerProfile from "../../screens/private/astrologerProfile/AstrologerProfile";
@@ -1104,9 +1109,34 @@ export const PATH = {
       element: RefundPolicy,
       header: true,
     },
+    AI_USE_POLICY: {
+      path: "/ai-use-policy",
+      element: AiUsePolicy,
+      header: true,
+    },
+    ASTROLOGER_ONBOARDING_AGREEMENT: {
+      path: "/astrologer-onboarding-agreement",
+      element: AstrologerOnboardingAgreement,
+      header: true,
+    },
+    LIVE_CHAT_POLICY: {
+      path: "/live-chat-policy",
+      element: LiveChatPolicy,
+      header: true,
+    },
+    USER_AGREEMENT: {
+      path: "/user-agreement",
+      element: UserAgreement,
+      header: true,
+    },
     TERMSCONDITIONS: {
       path: "/terms-conditions",
       element: TermsConditions,
+      header: true,
+    },
+    ONBOARDING_GUIDE: {
+      path: "/onboarding-guide",
+      element: OnboardingGuide,
       header: true,
     },
 
