@@ -3249,10 +3249,10 @@
 
 .wowCard {
   background: #FFFFFF66;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1.5px solid #FFFFFF;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+  box-shadow: none !important;
   outline: none !important;
   position: relative !important;
 
