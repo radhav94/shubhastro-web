@@ -156,7 +156,7 @@ const StickyWaitingQueue = () => {
                       onClick={() => handleUnhold(conn)}
                       aria-label="Reconnect"
                     >
-                      On Hold
+                      Unhold
                     </button>
                   )}
                   <button

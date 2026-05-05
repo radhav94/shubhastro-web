@@ -110,12 +110,19 @@ export const WaitingQueueProvider = ({ children }) => {
   // Cancel and remove a specific pending connection
   const cancelPendingConnection = useCallback((roomId, type, astrologerId) => {
     if (roomId) {
-      const eventName = type === "chat" ? "chat:cancel" : "call:cancel";
-      voiceSocket.emit(eventName, { roomId, canceledBy: "CUSTOMER" });
+      const conn = pendingConnectionsRef.current.find((c) => c.roomId === roomId);
+      if (conn?.status === "on_hold") {
+        const eventName = type === "chat" ? "chat:hold_cancel" : "call:hold_cancel";
+        voiceSocket.emit(eventName, { roomId });
+      } else if (conn?.status === "astrologer_accepted") {
+        const eventName = type === "chat" ? "chat:user_reject" : "call:user_reject";
+        voiceSocket.emit(eventName, { roomId });
+      } else {
+        const eventName = type === "chat" ? "chat:cancel" : "call:cancel";
+        voiceSocket.emit(eventName, { roomId, canceledBy: "CUSTOMER" });
+      }
       removePendingConnection(roomId);
     } else if (astrologerId) {
-      // No roomId yet (server hasn't responded with call:room/chat:room)
-      // Remove from local queue by astrologerId
       removePendingByAstrologer(astrologerId);
     }
   }, [removePendingConnection, removePendingByAstrologer]);
@@ -125,8 +132,16 @@ export const WaitingQueueProvider = ({ children }) => {
     const current = pendingConnectionsRef.current;
     current.forEach((c) => {
       if (c.roomId && c.roomId !== acceptedRoomId) {
-        const eventName = c.type === "chat" ? "chat:cancel" : "call:cancel";
-        voiceSocket.emit(eventName, { roomId: c.roomId, canceledBy: "CUSTOMER" });
+        if (c.status === "on_hold") {
+          const eventName = c.type === "chat" ? "chat:hold_cancel" : "call:hold_cancel";
+          voiceSocket.emit(eventName, { roomId: c.roomId });
+        } else if (c.status === "astrologer_accepted") {
+          const eventName = c.type === "chat" ? "chat:user_reject" : "call:user_reject";
+          voiceSocket.emit(eventName, { roomId: c.roomId });
+        } else {
+          const eventName = c.type === "chat" ? "chat:cancel" : "call:cancel";
+          voiceSocket.emit(eventName, { roomId: c.roomId, canceledBy: "CUSTOMER" });
+        }
       }
     });
     setPendingConnections([]);
@@ -139,8 +154,16 @@ export const WaitingQueueProvider = ({ children }) => {
     const current = pendingConnectionsRef.current;
     current.forEach((c) => {
       if (c.roomId) {
-        const eventName = c.type === "chat" ? "chat:cancel" : "call:cancel";
-        voiceSocket.emit(eventName, { roomId: c.roomId, canceledBy: "CUSTOMER" });
+        if (c.status === "on_hold") {
+          const eventName = c.type === "chat" ? "chat:hold_cancel" : "call:hold_cancel";
+          voiceSocket.emit(eventName, { roomId: c.roomId });
+        } else if (c.status === "astrologer_accepted") {
+          const eventName = c.type === "chat" ? "chat:user_reject" : "call:user_reject";
+          voiceSocket.emit(eventName, { roomId: c.roomId });
+        } else {
+          const eventName = c.type === "chat" ? "chat:cancel" : "call:cancel";
+          voiceSocket.emit(eventName, { roomId: c.roomId, canceledBy: "CUSTOMER" });
+        }
       }
     });
     setPendingConnections([]);
@@ -258,6 +281,68 @@ export const WaitingQueueProvider = ({ children }) => {
       }
     };
 
+    // session:active_list — server sends all active sessions on connect/reconnect
+    const handleActiveList = (data) => {
+      console.log("[GlobalTwoWay] 📋 session:active_list", JSON.stringify(data));
+      const sessions = data?.sessions || [];
+      if (!sessions.length) return;
+
+      // Sync pending connections with server state
+      setPendingConnections((prev) => {
+        const now = Date.now();
+        const merged = [...prev];
+
+        sessions.forEach((session) => {
+          const { roomId, status, type, astrologerId } = session;
+          // Skip on-going sessions — those are handled by CallContext/ChatContext reconnect
+          if (status === "on-going") return;
+
+          const existingIdx = merged.findIndex((c) => c.roomId === roomId);
+          if (existingIdx !== -1) {
+            // Update status of existing entry
+            merged[existingIdx] = { ...merged[existingIdx], status };
+          } else {
+            // Add new entry from server
+            const astro = typeof astrologerId === "object" ? astrologerId : { _id: astrologerId };
+            merged.push({
+              id: roomId,
+              astrologer: astro,
+              type: type || "chat",
+              roomId,
+              waitingTime: 5,
+              timestamp: now,
+              isEmergency: session.isEmergency || false,
+              status: status || "ringing",
+              sessionId: session.sessionId || session._id,
+            });
+          }
+        });
+
+        persist(merged);
+        return merged;
+      });
+
+      // If any session is astrologer_accepted, set approval data
+      sessions.forEach((session) => {
+        if (session.status === "astrologer_accepted") {
+          const astro = typeof session.astrologerId === "object" ? session.astrologerId : null;
+          const ringData = {
+            roomId: session.roomId,
+            sessionId: session.sessionId || session._id,
+            astrologerId: astro?._id || session.astrologerId,
+            astrologerDetail: astro,
+            type: session.type,
+            isEmergency: session.isEmergency || false,
+          };
+          if (session.type === "chat") {
+            setChatApprovalData(ringData);
+          } else {
+            setCallApprovalData(ringData);
+          }
+        }
+      });
+    };
+
     voiceSocket.on("call:astrologer_accepted", handleCallAstrologerAccepted);
     voiceSocket.on("chat:astrologer_accepted", handleChatAstrologerAccepted);
     voiceSocket.on("call:on_hold", handleCallOnHold);
@@ -271,6 +356,7 @@ export const WaitingQueueProvider = ({ children }) => {
     voiceSocket.on("call:rejected", handleRejected);
     voiceSocket.on("chat:rejected", handleRejected);
     voiceSocket.on("activity", handleActivity);
+    voiceSocket.on("session:active_list", handleActiveList);
 
     return () => {
       voiceSocket.off("call:astrologer_accepted", handleCallAstrologerAccepted);
@@ -286,6 +372,7 @@ export const WaitingQueueProvider = ({ children }) => {
       voiceSocket.off("call:rejected", handleRejected);
       voiceSocket.off("chat:rejected", handleRejected);
       voiceSocket.off("activity", handleActivity);
+      voiceSocket.off("session:active_list", handleActiveList);
     };
   }, [userIdLocal]);
 
