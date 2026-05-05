@@ -517,12 +517,12 @@ const HomeV2 = () => {
       </section>
 
       {/* ═══ SECTION 4 — Top Rated Astrologers ═══ */}
-      <section className={styles.astrologerSection} style={{ backgroundColor: `#FFE9E5`,paddingBottom:'1px',paddingTop:'16px'}}>
+      <section className={styles.astrologerSection} style={{ backgroundColor: `#FFE9E5`,paddingBottom:'1px',paddingTop:'16px',paddingRight:'0px'}}>
         <div className={styles.sectionHeader} style={{marginBottom:"0px"}}>
           <div className={styles.sectionTitleBlock}>
             <h2 className={styles.sectionTitle}>{astrologerSection?.display_title || "TOP RATED ASTROLOGERS FOR YOU"}</h2>
           </div>
-          <button className={styles.viewAllBtn} onClick={() => navigate('/chat-with-astrologers')}>View all →</button>
+          <button className={styles.viewAllBtn} style={{marginRight:"16px"}} onClick={() => navigate('/chat-with-astrologers')}>View all →</button>
         </div>
         <AstrologersSection
           title=""
@@ -615,7 +615,7 @@ const HomeV2 = () => {
       </section>
 
       {/* ═══ SECTION 5b — News / Blog ═══ */}
-      <section className={styles.blogSection}>
+      <section className={styles.blogSection} style={{ paddingRight:'0px'}}>
         <BlogsSection
           blogData={blogSection?.content || []}
           title={blogSection?.display_title || "NEWS / BLOGS"}

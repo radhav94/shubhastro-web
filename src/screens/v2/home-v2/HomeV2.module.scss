@@ -372,21 +372,22 @@
   }
 }
 
-// .heroBgGlow {
-//   position: absolute;
-//   width: 10px;
-//   height: 10px;
-//   border-radius: 50%;
-//   background: #5a2fb131;
-//   opacity: 0.3;
-//   backdrop-filter: blur(100px);
-//   -webkit-backdrop-filter: blur(100px);
-//   top: 50px;
-//   box-shadow: 0px 0px 300px 100px #5A2FB1;
-//   // left: 400px;
-//   z-index: 0;
-//   pointer-events: none;
-// }
+.heroBgGlow {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #F75801;
+  opacity: 0.5;
+  backdrop-filter: blur(100px);
+  -webkit-backdrop-filter: blur(100px);
+  bottom: 70px;
+  right: 70px;
+  box-shadow: 0px 0px 300px 100px #F75801;
+  // left: 400px;
+  z-index: 9;
+  pointer-events: none;
+}
 
 .centerDivider {
   height: 1px;
@@ -3419,7 +3420,7 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
 
 .blogSection {
   @include glass-section;
-  padding: 16px 16px 0px 16px !important;
+  padding: 16px 16px 0px 16px;
   box-shadow: none!important;
 }
 
