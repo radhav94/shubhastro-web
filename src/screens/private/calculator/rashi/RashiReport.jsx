@@ -3,6 +3,7 @@ import { useGetRashiCalQuery } from "../../../../redux/api/calculator/calcApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./RashiReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 const RashiReport = () => {
   const navigate = useNavigate();
@@ -70,7 +71,10 @@ const RashiReport = () => {
 
       {/* ABOUT RASHI */}
       {(prediction || bot_response) && (
-        <div className={styles.aboutBox}>
+        <div className={styles.aboutBox} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <TTSButton text={`About Your Rashi. ${prediction || ''} ${bot_response || ''}`} />
+          </span>
           <h4>About Your Rashi</h4>
 
           {prediction && <p>{prediction}</p>}

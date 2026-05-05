@@ -4,6 +4,7 @@ import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./KaalSarpReport.module.scss";
 import { BsCheckCircleFill } from "react-icons/bs";
 import CalcBackButton from "../CalcBackButton";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 const KaalSarpReport = () => {
   const navigate = useNavigate();
@@ -20,7 +21,10 @@ const KaalSarpReport = () => {
     <div className={styles.wrapper}>
       <CalcBackButton />
       {/* HEADER CARD */}
-      <div className={styles.headerCard}>
+      <div className={styles.headerCard} style={{ position: 'relative' }}>
+        <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+          <TTSButton text={`Kaal Sarp Yog. ${is_dosha_present ? 'Present' : 'Not Present'}. ${bot_response || ''}`} />
+        </span>
         <h2>{stored?.name}'s Kaal Sarp Yog</h2>
         <p className={styles.subTitle}>Analysis Result</p>
 
@@ -31,13 +35,16 @@ const KaalSarpReport = () => {
         >
           {is_dosha_present ? "PRESENT" : "NOT PRESENT"}
         </div>
-
+          
         {bot_response && <p className={styles.resultText}>{bot_response}</p>}
       </div>
 
       {/* REMEDIES */}
       {Array.isArray(remedies) && remedies.length > 0 && (
-        <div className={styles.remediesSection}>
+        <div className={styles.remediesSection} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <TTSButton text={`Recommended Remedies. ${remedies.join('. ')}`} />
+          </span>
           <h3>Recommended Remedies</h3>
           <p className={styles.remedyHint}>
             These spiritual remedies are traditionally recommended to reduce the

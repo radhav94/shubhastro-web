@@ -9,6 +9,7 @@ import { Toast } from "../../../component";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
+import TTSButton from "../../../component/UI/TTSButton";
 
 const LalKitab = () => {
   const navigate = useNavigate();
@@ -116,7 +117,10 @@ const LalKitab = () => {
       </button>
 
       {/* Info Section */}
-      <div className={styles.infoSection}>
+      <div className={styles.infoSection} style={{ position: 'relative' }}>
+        <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+          <TTSButton text="What is Lal Kitab? Lal Kitab is a unique system of astrology that provides simple yet powerful remedies for planetary afflictions. Unlike traditional Vedic astrology, Lal Kitab focuses on practical remedies that can be performed in daily life to mitigate negative planetary effects." />
+        </span>
         <h3 className={styles.infoTitle}>What is Lal Kitab?</h3>
         <p className={styles.infoText}>
           Lal Kitab is a unique system of astrology that provides simple yet powerful remedies

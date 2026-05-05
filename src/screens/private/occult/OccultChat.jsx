@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import styles from "./OccultChat.module.scss";
 import { get } from "../../../services/publicRequest";
+import TTSButton from "../../../component/UI/TTSButton";
 
 const SERVICES = [
   {
@@ -305,7 +306,11 @@ const OccultChat = () => {
               tabIndex={0}
               onKeyDown={(e) => e.key === "Enter" && openService(service)}
               aria-label={`Open ${service.title}`}
+              style={{ position: 'relative' }}
             >
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                <TTSButton text={`${service.title}. ${service.description}`} />
+              </span>
               <div className={styles.cardTop}>
                 <span className={styles.featureIcon}><service.Icon size={28} /></span>
                 <span className={styles.openHint}>
@@ -325,7 +330,10 @@ const OccultChat = () => {
           ))}
         </div>
 
-        <div className={styles.infoSection}>
+        <div className={styles.infoSection} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <TTSButton text="What are Occult Services? Occult sciences encompass ancient mystical practices like tarot reading, numerology, reiki healing, and spiritual protection. These services help you gain clarity, heal energy imbalances, and shield yourself from negative influences through personalized consultations. Ask one clear question for a more focused reading." />
+          </span>
           <div>
             <span className={styles.infoKicker}>Before you begin</span>
             <h3 className={styles.infoTitle}>What are Occult Services?</h3>
@@ -369,7 +377,14 @@ const OccultChat = () => {
               key={i}
               className={msg.type === "bot" ? styles.botMsg : styles.userMsg}
             >
-              {msg.type === "bot" ? <FormattedBotMessage text={msg.text} /> : msg.text}
+              {msg.type === "bot" ? (
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', top: '0px', right: '0px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                    <TTSButton text={msg.text} />
+                  </span>
+                  <FormattedBotMessage text={msg.text} />
+                </div>
+              ) : msg.text}
             </div>
           ))}
           {showTarot && (
