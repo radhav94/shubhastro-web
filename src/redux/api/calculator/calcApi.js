@@ -1,7 +1,6 @@
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { calculatorApi } from "../baseApi/calculatorApi";
 
-const api_key = import.meta.env.VITE_VEDIC_ASTRO_API_KEY;
 const formatDate = (dateString) => {
   if (!dateString) return "";
   const [year, month, day] = dateString.split("-");
@@ -15,7 +14,6 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "extended-horoscope/jaimini-karakas",
         params: {
-          api_key,
           lang: "en",
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
@@ -30,7 +28,6 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "extended-horoscope/find-sun-sign",
         params: {
-          api_key,
           lang: "en",
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
@@ -44,7 +41,6 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "extended-horoscope/find-ascendant",
         params: {
-          api_key,
           lang: "en",
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
@@ -58,7 +54,6 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "extended-horoscope/find-moon-sign",
         params: {
-          api_key,
           lang: "en",
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
@@ -72,7 +67,6 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "dashas/maha-dasha",
         params: {
-          api_key,
           lang: "en",
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
@@ -86,7 +80,6 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "dashas/maha-dasha-predictions",
         params: {
-          api_key,
           lang: "en",
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
@@ -100,7 +93,6 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "dosha/mangal-dosh",
         params: {
-          api_key,
           lang: "en",
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
@@ -114,7 +106,6 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "extended-horoscope/current-sade-sati",
         params: {
-          api_key,
           lang: "en",
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
@@ -128,7 +119,6 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "dosha/kaalsarp-dosh",
         params: {
-          api_key,
           lang: "en",
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
@@ -142,7 +132,6 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "prediction/numerology",
         params: {
-          api_key,
           name: payload?.name,
           lang: "en",
           date: formatDate(payload?.dob),
