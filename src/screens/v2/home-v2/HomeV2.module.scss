@@ -57,6 +57,8 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  display: flex;
+  align-items: center;
 
   &:hover {
     text-decoration: underline;
@@ -141,7 +143,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%);
+  background: rgba(255, 255, 255, 0.4);
   border: 2px solid #FFFFFF;
   border-radius: 16px;
   padding: 16px;
@@ -349,7 +351,7 @@
 
   @media (width <=767px) {
     font-size: 12px;
-    max-width: 100%;
+    max-width: 70%;
   }
 }
 
@@ -387,6 +389,9 @@
   // left: 400px;
   z-index: 9;
   pointer-events: none;
+  @media (width <= 767px) {
+    display: none;
+  }
 }
 
 .centerDivider {
@@ -725,19 +730,32 @@
 
 .featureCard {
   border-radius: 18px;
-  padding: 20px 16px;
+  padding:16px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  min-height: 330px;
+  min-height: auto;
   transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%);
+  // background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%);
+  background: rgba(255, 255, 255, 0.4);
   border: 1.5px solid #FFFFFF;
   // box-shadow: 0px 4px 10px 0px #0000000F;
   color: #1a1a1a;
+  &:last-child{
+    background: #fff;
+  }
+  &:nth-child(3){
+    background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%);
+  }
+  img{
+    width: 70%;
+  }
+  @media (width <= 767px) {
+    padding:6px;
+  }
 
   &:hover {
     transform: translateY(-3px);
@@ -745,7 +763,7 @@
   }
 
   h3 {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
     color: #1a1a1a;
     margin: 0;
@@ -763,12 +781,17 @@
   }
 
   p {
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1.5;
     margin: 0;
     color: #6b7280;
     position: relative;
     z-index: 2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Change this number to limit to more lines */
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
+    width: 50%;
 
     @media (width <=767px) {
       display: none;
@@ -793,13 +816,13 @@
 /* Shared CTA button for all cards */
 .featureCta,
 .fcCtaLight {
-  background: #ffffff;
+  background: rgba(255, 255, 255,0.6);
   color: #f75801;
   border: none;
   border-radius: 50px;
-  padding: 8px 20px;
+  padding: 8px 16px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   width: fit-content;
   margin-top: auto;
@@ -807,13 +830,14 @@
   z-index: 2;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: box-shadow 0.2s;
+  backdrop-filter: blur(12px);
 
   &:hover {
     box-shadow: 0 4px 16px rgba(247, 88, 1, 0.15);
   }
 
   @media (width <=767px) {
-    padding: 6px 14px;
+    padding: 6px 6px;
     font-size: 13px;
   }
 }
@@ -861,7 +885,7 @@
 
 /* Laal Kitaab special card */
 .laalKitaab {
-  background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%) !important;
+  background: rgba(255, 255, 255, 0.2) !important;
   border: 1.5px solid #FFFFFF;
   // box-shadow: 0px 4px 10px 0px #0000000F;
   color: #1a1a1a;
@@ -870,25 +894,33 @@
   justify-content: flex-start;
 
   h3 {
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 600;
     color: #1a1a1a;
     line-height: 1.2;
     position: relative;
     z-index: 2;
 
-    @media (width <=767px) {
-      font-size: 18px;
+     @media (width <=767px) {
+      font-size: 16px;
+    }
+
+    @media (width <=390px) {
+      font-size: 14px;
     }
   }
 
   p {
-    font-size: 14px;
+    font-size: 12px;
     color: #6b7280;
     max-width: 55%;
     line-height: 1.6;
     position: relative;
     z-index: 2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Change this number to limit to more lines */
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
 
     @media (width <=767px) {
       display: none;
@@ -896,18 +928,22 @@
   }
 
   .featureCta {
-    background: #ffffff;
+    background: rgba(255, 255, 255,0.6);
     color: #f75801;
     border: none;
     border-radius: 50px;
-    padding: 10px 24px;
+    padding: 8px 16px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
     width: fit-content;
     margin-top: auto;
     position: relative;
     z-index: 2;
+    backdrop-filter: blur(12px);
+     @media (width <=767px) {
+      font-size: 12px;
+    }
     // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 }
@@ -1788,8 +1824,13 @@
    SECTION 6 — DISCOVER MORE + POPULAR ASTROLOGERS
    ═══════════════════════════════════════════════════════ */
 .discoverBox {
-  background: #fff;
-  border: 1px solid #f0ebe4;
+  // background: #fff;
+  // border: 1px solid #f0ebe4;
+  background: linear-gradient(114.19deg, rgba(246, 247, 248, 0.5) 0%, rgba(240, 237, 240, 0.5) 100%) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  // border-radius: 16px !important;
+  border: 1.5px solid #FFFFFF !important;
   border-radius: 16px;
   padding: 16px;
   display: flex;
@@ -2244,7 +2285,7 @@
 }
 
 .statCard {
-  background: #fff;
+  background: rgba(255, 255, 255,0.7);
   border: 1.5px solid #FFFFFF;
   // box-shadow: 0px 4px 10px 0px #0000000F;
   border-radius: 16px;
@@ -2259,6 +2300,8 @@
   height: 52px;
   border-radius: 50%;
   flex-shrink: 0;
+  border: 1px solid #fff;
+  background: linear-gradient(135deg, #FCF8F7 0%, #FCDBD9 100%);
 }
 
 .statText {
@@ -2345,7 +2388,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #ffffff;
+  background: rgba(255, 255, 255,0.9);
   border: 1px solid #e8e8e8;
   border-radius: 999px;
   padding: 8px 20px;
@@ -2407,7 +2450,7 @@
   height: 65px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #fff;
+  border: 1.8px solid #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   margin-left: -16px;
 
@@ -2420,15 +2463,14 @@
   width: 65px;
   height: 65px;
   border-radius: 50%;
-  background: #ffffff;
+  background: rgba(255, 255, 255,0.9);
   color: #1a1a1a;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-left: -16px;
-  border: 3px solid #fff;
   font-family: 'Poppins', sans-serif;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -2477,7 +2519,7 @@
   border: none;
   border-radius: 999px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   color: #fff;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
@@ -2511,7 +2553,7 @@
   border: none;
   border-radius: 999px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   color: #f75801;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
@@ -2861,7 +2903,8 @@
   }
 
   .heroBanner h1 {
-    font-size: 20px;
+    font-size: 18px;
+    width: 70%;
   }
 
   // .gridIconBox { width: 70px; height: 70px; }
@@ -2936,7 +2979,7 @@
 
   // .wowCard { min-height: 140px; }
   .featureCard {
-    min-height: 250px;
+    min-height: 200px;
   }
 
   // .catItem { width: 70px; span { font-size: 11px; } }
@@ -3053,6 +3096,7 @@
   flex: 1;
   overflow: hidden;
   scroll-behavior: smooth;
+  padding-top: 2px;
 
   @media (max-width: 767px) {
     overflow-x: auto;
@@ -3140,7 +3184,7 @@
 
 /* ═══ HomeV2 — iOS Liquid Glass left cards ═══ */
 .qCard {
-  background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%) !important;
+  background: rgba(255, 255, 255, 0.4)!important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border: none !important;
@@ -3274,14 +3318,15 @@
 
 /* ═══ HomeV2 body background ═══ */
 :global(body.home-v2-page) {
-  background-image: url("../../../assets/images/main-body-bg.png") !important;
+  background-image: url("../../../assets/images/main-body-bg-new.png") !important;
+  background-attachment: fixed;
   background-color: #ebecf2 !important;
   position: relative !important;
   background-repeat: repeat-y;
-  background-size: 100% auto;
-  @media (width <= 767px) {
-    background-image: url("../../../assets/images/main-body-bg-mobile.png") !important;
-  }
+  background-size: 100% 100%;
+  // @media (width <= 767px) {
+  //   background-image: url("../../../assets/images/main-body-bg-mobile.png") !important;
+  // }
 }
 
 :global(body.home-v2-page::before) {
@@ -3443,7 +3488,7 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
 .calendarBox,
 .discoverBox,
 .popularBox {
-  background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%) !important;
+  background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%);
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border-radius: 16px !important;
@@ -3469,13 +3514,13 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
 /* ═══ HomeV2 — Footer glass effect ═══ */
 :global(body.home-v2-page) {
   footer {
-    background: rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
+    background: rgba(255, 255, 255, 0.4) !important;
+    // backdrop-filter: blur(20px) saturate(180%) !important;
     // // -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
     // // box-shadow:
     // //   0 0 0 1.5px rgba(255, 255, 255, 0.9),
     //   inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
-    outline: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+    // outline: 1.5px solid rgba(255, 255, 255, 0.95) !important;
   }
 
   footer * {
@@ -3510,9 +3555,10 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
   }
 
   footer [class*="v2_storeBtn"] {
-    background: rgba(255, 255, 255, 0.4) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
+    background: rgb(255, 255, 255) !important;
+    // border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
     backdrop-filter: blur(8px) !important;
+    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.06);
   }
 
   footer [class*="v2_storeBtn"] * {

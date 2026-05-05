@@ -660,7 +660,7 @@ const HomeV2 = () => {
             const colors = ["#FEF0E4", "#F4ECFB", "#E9F2EF", "#EBF2FB"];
             return (
               <div key={i} className={styles.statCard}>
-                <div className={styles.statCircle} style={{ background: colors[i % 4] }} />
+                <div className={styles.statCircle} />
                 <div className={styles.statText}>
                   <span className={styles.statNum}>{(s.count ?? 0).toLocaleString()}</span>
                   <span className={styles.statLabel}>{s.description}</span>

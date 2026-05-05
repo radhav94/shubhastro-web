@@ -15,7 +15,7 @@ $font-primary:     "Poppins", sans-serif;
 
 /* New footer — light bg for /home-v2 */
 .footerLight {
-  // background: #F2F0F1;
+  background: rgba(255, 255, 255, 0.4);
   color: #1a1a1a;
   font-family: $font-primary;
   width: 100%;
@@ -376,9 +376,9 @@ $font-primary:     "Poppins", sans-serif;
 .v2_storeBtn {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   padding: 10px 14px;
-  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  // border: 1.5px solid rgba(0, 0, 0, 0.12);
   border-radius: 10px;
   color: $color-dark;
   text-decoration: none;
@@ -393,8 +393,8 @@ $font-primary:     "Poppins", sans-serif;
 
   svg {
     flex-shrink: 0;
-    width: 22px;
-    height: 22px;
+    width: 30px;
+    height: 30px;
   }
 }
 
