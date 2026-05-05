@@ -12,6 +12,14 @@ export const navigateToLogin = (currentPath) => {
   console.log("📍 window.location.pathname:", window.location.pathname);
   console.log("📍 window.location.search:", window.location.search);
   console.log("📍 window.location.href:", window.location.href);
+
+  // Don't redirect guest users browsing public-facing pages (e.g., astrologer profile)
+  const publicPathPatterns = [/^\/astrologer\//, /^\/talk-to-astrologers/];
+  const pathname = window.location.pathname;
+  if (publicPathPatterns.some((pattern) => pattern.test(pathname))) {
+    console.log("⏭️ Skipping login redirect — user on public page:", pathname);
+    return;
+  }
   
   // Save the current location for redirect after login
   if (currentPath && currentPath !== "/login") {

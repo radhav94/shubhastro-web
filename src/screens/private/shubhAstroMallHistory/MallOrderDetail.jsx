@@ -221,9 +221,9 @@ const MallOrderDetail = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div className={styles.bottomBar}>
+      {/* <div className={styles.bottomBar}>
         <button className={styles.orderAgainBtn}>Order Again</button>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -6,14 +6,26 @@ import { navigateToLogin } from "../../utils/navigationHelper";
 let unAuthorizedCount = 0;
 const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
+// Endpoints that should be accessible without authentication (no login redirect on 401)
+const PUBLIC_ENDPOINTS = ["getAstrologerById", "getAstrologers", "getRecommendedAstrologers"];
+
 // ERROR HANDLER
-const handleApiError = (error) => {
+const handleApiError = (error, endpoint) => {
   const status = error?.status;
   const data = error?.data;
   const message = data?.message || data?.error || "Some Error Occurred";
 
   switch (status) {
     case 401:
+      // Skip login redirect for public-facing endpoints
+      if (PUBLIC_ENDPOINTS.includes(endpoint)) break;
+      // Only redirect if user was previously authenticated (token expired/invalid)
+      // Don't redirect guest users who never had a token
+      const role = localStorage.getItem("shubhtalk_role");
+      const hasToken = role === "ASTROLOGER"
+        ? localStorage.getItem("shubhtalk_astro_token")
+        : localStorage.getItem("shubhtalk_customer_token");
+      if (!hasToken) break;
       if (!unAuthorizedCount) {
         // Don't redirect guest users (no token means they're browsing without login)
         const role = localStorage.getItem("shubhtalk_role");
@@ -93,12 +105,12 @@ export const privateRequestNew = createApi({
     const result = await rawBaseQuery(args, api, extraOptions);
 
     if (result.error) {
-      handleApiError(result.error);
+      handleApiError(result.error, api.endpoint);
     }
 
     return result;
   },
-  tagTypes: ["Kundlis", "VirtualAssistant", "Following", "FollowedAstrologers"], //  Required
+  tagTypes: ["Kundlis", "VirtualAssistant", "Following", "FollowedAstrologers"],
 
   endpoints: () => ({}), // EMPTY — endpoints later inject honge
 });
