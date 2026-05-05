@@ -5,6 +5,7 @@ import styles from './GemstoneResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
 import Footer from '../../../../layouts/Footer';
+import TTSButton from '../../../../component/UI/TTSButton';
 
 const GemstoneResult = () => {
   const navigate = useNavigate();
@@ -84,14 +85,20 @@ const GemstoneResult = () => {
         <div className={styles.gemstoneImageWrapper}>
           <img src={d.image} alt="Gemstone" className={styles.gemstoneImage} />
         </div>
-        <div className={styles.identificationCard}>
+        <div className={styles.identificationCard} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <TTSButton text={`Gemstone Identification. Name: ${d.identification.name || ''}. Hindi Name: ${d.identification.hindiName || ''}. Scientific: ${d.identification.scientificName || ''}. Natural: ${d.identification.isNatural ? 'Yes' : 'No'}`} />
+          </span>
           <h3 className={styles.cardTitle}>Gemstone Identification</h3>
           <InfoRow label="Name" value={d.identification.name} />
           <InfoRow label="Hindi Name" value={d.identification.hindiName} />
           <InfoRow label="Scientific" value={d.identification.scientificName} />
           <InfoRow label="Natural" value={d.identification.isNatural ? 'Yes' : 'No'} />
         </div>
-        <div className={styles.summaryCard}>
+        <div className={styles.summaryCard} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <TTSButton text={`Overall Summary. ${d.overall.summary || ''}. ${d.overall.recommendation || ''}`} />
+          </span>
           <h3 className={styles.cardTitle}>Overall Summary</h3>
           <p className={styles.summaryText}>{d.overall.summary}</p>
           <p className={styles.recommendationText}>{d.overall.recommendation}</p>
@@ -115,7 +122,10 @@ const GemstoneResult = () => {
               if (Array.isArray(value)) {
                 if (value.length === 0) return null;
                 return (
-                  <div className={styles.personalizedCard} key={key}>
+                  <div className={styles.personalizedCard} key={key} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                      <TTSButton text={`${title}. ${value.map(item => typeof item === 'string' ? item : JSON.stringify(item)).join('. ')}`} />
+                    </span>
                     <h4 className={styles.boxTitle}>{title}</h4>
                     <ul className={styles.compactList}>
                       {value.map((item, i) => (
@@ -129,7 +139,14 @@ const GemstoneResult = () => {
               // Handle objects
               if (typeof value === 'object') {
                 return (
-                  <div className={styles.personalizedCard} key={key}>
+                  <div className={styles.personalizedCard} key={key} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                      <TTSButton text={`${title}. ${Object.entries(value).filter(([, v]) => v).map(([k, v]) => {
+                        const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
+                        if (Array.isArray(v)) return label + ': ' + v.join(', ');
+                        return label + ': ' + String(v);
+                      }).join('. ')}`} />
+                    </span>
                     <h4 className={styles.boxTitle}>{title}</h4>
                     {Object.entries(value).map(([subKey, subVal]) => {
                       if (!subVal) return null;
@@ -153,7 +170,10 @@ const GemstoneResult = () => {
 
               // Handle strings/numbers
               return (
-                <div className={styles.personalizedCard} key={key}>
+                <div className={styles.personalizedCard} key={key} style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                    <TTSButton text={`${title}. ${String(value)}`} />
+                  </span>
                   <h4 className={styles.boxTitle}>{title}</h4>
                   <p className={styles.boxDesc}>{String(value)}</p>
                 </div>
@@ -170,14 +190,20 @@ const GemstoneResult = () => {
     <div className={styles.tabContent}>
       <div className={styles.detailsGrid}>
         {/* Quality */}
-        <div className={styles.detailBox}>
+        <div className={styles.detailBox} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <TTSButton text={`Quality. ${d.details.quality || 'N/A'}`} />
+          </span>
           <h4 className={styles.boxTitle}>Quality</h4>
           <p className={styles.boxValue}>{d.details.quality || "—"}</p>
         </div>
 
         {/* Color */}
         {d.details.color && (
-          <div className={styles.detailBox}>
+          <div className={styles.detailBox} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <TTSButton text={`Color. Primary: ${d.details.color.primary || ''}. Secondary: ${d.details.color.secondary || ''}`} />
+            </span>
             <h4 className={styles.boxTitle}>Color</h4>
             <InfoRow label="Primary" value={d.details.color.primary} />
             <InfoRow label="Secondary" value={d.details.color.secondary} />
@@ -186,7 +212,10 @@ const GemstoneResult = () => {
 
         {/* Clarity */}
         {d.details.clarity && (
-          <div className={styles.detailBox}>
+          <div className={styles.detailBox} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <TTSButton text={`Clarity. Grade: ${d.details.clarity.grade || ''}${d.details.clarity.inclusions?.length > 0 ? '. Inclusions: ' + d.details.clarity.inclusions.join(', ') : ''}`} />
+            </span>
             <h4 className={styles.boxTitle}>Clarity</h4>
             <InfoRow label="Grade" value={d.details.clarity.grade} />
             {d.details.clarity.inclusions?.length > 0 && (
@@ -200,7 +229,10 @@ const GemstoneResult = () => {
 
         {/* Cut */}
         {d.details.cut && (
-          <div className={styles.detailBox}>
+          <div className={styles.detailBox} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <TTSButton text={`Cut. Shape: ${d.details.cut.shape || ''}. Quality: ${d.details.cut.quality || ''}`} />
+            </span>
             <h4 className={styles.boxTitle}>Cut</h4>
             <InfoRow label="Shape" value={d.details.cut.shape} />
             <InfoRow label="Quality" value={d.details.cut.quality} />
@@ -209,7 +241,10 @@ const GemstoneResult = () => {
 
         {/* Carat */}
         {d.details.estimatedCarat && (
-          <div className={styles.detailBox}>
+          <div className={styles.detailBox} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <TTSButton text={`Carat Weight. Range: ${d.details.estimatedCarat.range || ''}. Approximate: ${d.details.estimatedCarat.approximate || ''} carats`} />
+            </span>
             <h4 className={styles.boxTitle}>Carat Weight</h4>
             <InfoRow label="Range" value={d.details.estimatedCarat.range} />
             <InfoRow
@@ -221,7 +256,10 @@ const GemstoneResult = () => {
 
         {/* Treatment */}
         {d.details.treatment && (
-          <div className={styles.detailBox}>
+          <div className={styles.detailBox} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <TTSButton text={`Treatment. Detected: ${d.details.treatment.isDetected ? 'Yes' : 'No'}. ${d.details.treatment.description || ''}`} />
+            </span>
             <h4 className={styles.boxTitle}>Treatment</h4>
             <InfoRow
               label="Detected"
@@ -241,7 +279,10 @@ const GemstoneResult = () => {
         <h2 className={styles.SectionTitle}>Astrological Properties</h2>
         <div className={styles.astroGrid}>
           {d.astrological.rulingPlanet && (
-            <div className={styles.astroBox}>
+            <div className={styles.astroBox} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`Ruling Planet. ${d.astrological.rulingPlanet.planet}. ${d.astrological.rulingPlanet.influence || ''}`} />
+              </span>
               <h4 className={styles.boxTitle}>Ruling Planet</h4>
               <p className={styles.boxHighlight}>
                 {d.astrological.rulingPlanet.planet}
@@ -253,7 +294,10 @@ const GemstoneResult = () => {
           )}
 
           {d.astrological.zodiacSigns && (
-            <div className={styles.astroBox}>
+            <div className={styles.astroBox} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`Zodiac Signs. Primary: ${d.astrological.zodiacSigns.primary || ''}${d.astrological.zodiacSigns.secondary?.length > 0 ? '. Also: ' + d.astrological.zodiacSigns.secondary.join(', ') : ''}`} />
+              </span>
               <h4 className={styles.boxTitle}>Zodiac Signs</h4>
               <p className={styles.boxHighlight}>
                 {d.astrological.zodiacSigns.primary}
@@ -267,7 +311,10 @@ const GemstoneResult = () => {
           )}
 
           {d.astrological.chakra && (
-            <div className={styles.astroBox}>
+            <div className={styles.astroBox} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`Chakra. ${d.astrological.chakra.name}. ${d.astrological.chakra.benefits || ''}`} />
+              </span>
               <h4 className={styles.boxTitle}>Chakra</h4>
               <p className={styles.boxHighlight}>
                 {d.astrological.chakra.name}
@@ -279,14 +326,20 @@ const GemstoneResult = () => {
           )}
 
           {d.astrological.element && (
-            <div className={styles.astroBox}>
+            <div className={styles.astroBox} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`Element. ${d.astrological.element}`} />
+              </span>
               <h4 className={styles.boxTitle}>Element</h4>
               <p className={styles.boxHighlight}>{d.astrological.element}</p>
             </div>
           )}
 
           {d.astrological.numerology && (
-            <div className={styles.astroBox}>
+            <div className={styles.astroBox} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`Numerology. Number: ${d.astrological.numerology.number}. ${d.astrological.numerology.significance || ''}`} />
+              </span>
               <h4 className={styles.boxTitle}>Numerology</h4>
               <p className={styles.boxHighlight}>
                 {d.astrological.numerology.number}
@@ -353,7 +406,10 @@ const GemstoneResult = () => {
   const renderSuitability = (d) => (
     <div className={styles.tabContent}>
       {/* Suitability Analysis - Dropdown */}
-      <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`}>
+      <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`} style={{ position: 'relative' }}>
+        <span style={{ position: 'absolute', top: '8px', right: '40px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+          <TTSButton text={`Suitability Analysis. Score: ${d.suitability.score || ''} ${d.suitability.level || ''}${d.suitability.forDasha ? '. For Dasha: ' + d.suitability.forDasha : ''}${d.suitability.benefits?.length > 0 ? '. Benefits: ' + d.suitability.benefits.join(', ') : ''}${d.suitability.cautions?.length > 0 ? '. Cautions: ' + d.suitability.cautions.join(', ') : ''}`} />
+        </span>
         <button className={styles.dropdownHeader} onClick={() => toggleSection('suitability')}>
           <div className={styles.dropdownTitleWrap}>
             <h3 className={styles.dropdownTitle}>Suitability Analysis</h3>
@@ -395,7 +451,10 @@ const GemstoneResult = () => {
 
       {/* Wearing Guidelines - Dropdown */}
       {d.wearing && (
-        <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`}>
+        <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '40px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+            <TTSButton text={`Wearing Guidelines. Best Day: ${d.wearing.bestDay || ''}. Best Time: ${d.wearing.bestTime || ''}. Finger: ${d.wearing.finger || ''}. Hand: ${d.wearing.hand || ''}. Metal: ${d.wearing.metal || ''}. Weight: ${d.wearing.weight || ''}${d.wearing.mantra ? '. Mantra: ' + d.wearing.mantra : ''}${d.wearing.activationRitual ? '. Activation Ritual: ' + d.wearing.activationRitual : ''}`} />
+          </span>
           <button className={styles.dropdownHeader} onClick={() => toggleSection('wearing')}>
             <h3 className={styles.dropdownTitle}>Wearing Guidelines</h3>
             {!isDesktop && <Arrow isOpen={openSections.wearing} />}
@@ -434,7 +493,10 @@ const GemstoneResult = () => {
   const renderHealing = (d) => (
     <div className={styles.tabContent}>
       {/* Healing Properties - Dropdown */}
-      <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`}>
+      <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`} style={{ position: 'relative' }}>
+        <span style={{ position: 'absolute', top: '8px', right: '40px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+          <TTSButton text={`Healing Properties. ${d.healing.physical?.length > 0 ? 'Physical: ' + d.healing.physical.join(', ') + '. ' : ''}${d.healing.emotional?.length > 0 ? 'Emotional: ' + d.healing.emotional.join(', ') + '. ' : ''}${d.healing.spiritual?.length > 0 ? 'Spiritual: ' + d.healing.spiritual.join(', ') : ''}`} />
+        </span>
         <button className={styles.dropdownHeader} onClick={() => toggleSection('healing')}>
           <h3 className={styles.dropdownTitle}>Healing Properties</h3>
           {!isDesktop && <Arrow isOpen={openSections.healing} />}
@@ -473,7 +535,10 @@ const GemstoneResult = () => {
 
       {/* Compatibility - Dropdown */}
       {d.compatibility && (
-        <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`}>
+        <div className={`${styles.dropdown} ${isDesktop ? styles.alwaysOpen : ''}`} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '40px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+            <TTSButton text={`Gemstone Compatibility. ${d.compatibility.compatibleGemstones?.length > 0 ? 'Compatible: ' + d.compatibility.compatibleGemstones.join(', ') + '. ' : ''}${d.compatibility.incompatibleGemstones?.length > 0 ? 'Incompatible: ' + d.compatibility.incompatibleGemstones.join(', ') + '. ' : ''}${d.compatibility.stackingAdvice ? 'Stacking Advice: ' + d.compatibility.stackingAdvice : ''}`} />
+          </span>
           <button className={styles.dropdownHeader} onClick={() => toggleSection('compatibility')}>
             <h3 className={styles.dropdownTitle}>Gemstone Compatibility</h3>
             {!isDesktop && <Arrow isOpen={openSections.compatibility} />}

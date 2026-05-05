@@ -274,9 +274,8 @@ const TopHeader = () => {
   })();
         
 
-  // Handle language change with Google Translate
+  // Handle language change with Google Translate — no reload for non-English
   const handleLanguageChange = (targetLang) => {
-    // Get current language from cookie
     const getCurrentLang = () => {
       const cookie = document.cookie
         .split("; ")
@@ -289,62 +288,39 @@ const TopHeader = () => {
       return "en";
     };
 
-    // Clear Google Translate cookies completely - enhanced for production
     const clearCookies = () => {
       const hostname = window.location.hostname;
       const cookiesToClear = ['googtrans', 'googtrans_backup'];
-      
-      // Get all possible domain variations
       const domainParts = hostname.split('.');
       const domains = [''];
-      
-      // Add current domain
       domains.push(`domain=${hostname}`);
-      
-      // Add parent domains (e.g., .example.com for sub.example.com)
       if (domainParts.length > 1) {
         domains.push(`domain=.${hostname}`);
-        
-        // Also try parent domain if subdomain exists
         if (domainParts.length > 2) {
           const parentDomain = domainParts.slice(-2).join('.');
           domains.push(`domain=.${parentDomain}`);
         }
       }
-
-      // Clear cookies for all combinations
       cookiesToClear.forEach(cookieName => {
         domains.forEach(domainStr => {
-          // Try both with and without path
           ['/', ''].forEach(path => {
             const pathStr = path ? `path=${path};` : '';
             const domainPart = domainStr ? `${domainStr};` : '';
-            
-            // Set multiple expiry formats for better compatibility
             document.cookie = `${cookieName}=; ${pathStr} ${domainPart} expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0;`;
-            document.cookie = `${cookieName}=; ${pathStr} ${domainPart} expires=Thu, 01 Jan 1970 00:00:00 UTC; max-age=0;`;
           });
         });
       });
     };
 
-    // Set Google Translate cookie - enhanced for production
     const setCookie = (lang) => {
       const hostname = window.location.hostname;
       const cookieValue = `/en/${lang}`;
-      const maxAge = 31536000; // 1 year
-
-      // Set cookie for current domain
+      const maxAge = 31536000;
       document.cookie = `googtrans=${cookieValue}; path=/; max-age=${maxAge}; SameSite=Lax;`;
-      
-      // Set for explicit domain
       document.cookie = `googtrans=${cookieValue}; path=/; domain=${hostname}; max-age=${maxAge}; SameSite=Lax;`;
-      
-      // Set for parent domain if applicable
       const domainParts = hostname.split('.');
       if (domainParts.length > 1) {
         document.cookie = `googtrans=${cookieValue}; path=/; domain=.${hostname}; max-age=${maxAge}; SameSite=Lax;`;
-        
         if (domainParts.length > 2) {
           const parentDomain = domainParts.slice(-2).join('.');
           document.cookie = `googtrans=${cookieValue}; path=/; domain=.${parentDomain}; max-age=${maxAge}; SameSite=Lax;`;
@@ -353,43 +329,45 @@ const TopHeader = () => {
     };
 
     const currentLang = getCurrentLang();
-    
-    // Prevent unnecessary reload if already on target language
+
     if (currentLang === targetLang) {
       setOpen(false);
       return;
     }
-    
-    // Update selected language state and UI immediately
+
+    // Update UI state immediately
     setSelectedLang(targetLang);
     const selectedLanguage = supportedLanguages.find(lang => lang.code === targetLang);
     if (selectedLanguage) {
       setActiveLang(selectedLanguage.name);
     }
-
-    // Close dropdown
     setOpen(false);
 
-    // Clear all cookies first (for both English and other languages)
-    clearCookies();
+    // Notify listeners (e.g. TTS) that the translation language changed
+    window.dispatchEvent(new CustomEvent("translationchange", { detail: { lang: targetLang } }));
 
-    // If switching to English, just reload after clearing cookies
+    // Switching back to English requires a reload (Google Translate can't "untranslate" via widget)
     if (targetLang === 'en') {
-      // Use a longer timeout to ensure cookies are cleared
-      setTimeout(() => {
-        window.location.reload();
-      }, 200);
+      clearCookies();
+      setTimeout(() => { window.location.reload(); }, 200);
       return;
     }
 
-    // For other languages, set cookie then reload
+    // For non-English: try the widget first (no reload)
+    const widget = document.querySelector('.goog-te-combo');
+    if (widget) {
+      widget.value = targetLang;
+      widget.dispatchEvent(new Event('change'));
+      // Also set cookie so it persists on next page load
+      setCookie(targetLang);
+      return;
+    }
+
+    // Fallback: cookie + reload if widget not found
+    clearCookies();
     setTimeout(() => {
       setCookie(targetLang);
-      
-      // Reload after setting cookie
-      setTimeout(() => {
-        window.location.reload();
-      }, 200);
+      setTimeout(() => { window.location.reload(); }, 200);
     }, 200);
   };
 

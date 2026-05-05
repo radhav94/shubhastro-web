@@ -6,6 +6,7 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import AdditionalPlanetaryInfo from "../kundaliContent/AdditionalPlanetaryInfo";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 const Vimshottari = () => {
   const [expandedIndex, setExpandedIndex] = useState(null);
@@ -75,7 +76,12 @@ const Vimshottari = () => {
             onClick={() => toggleDasha(i)}
           >
             <div className={styles.headerContent}>
-              <div className={styles.dashaName}>{dasha.dasha} Mahadasha</div>
+              <div className={styles.dashaName}>
+                {dasha.dasha} Mahadasha
+                <span onClick={(e) => e.stopPropagation()} style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+                  <TTSButton text={`${dasha.dasha} Mahadasha. ${dasha.dasha_start_year} to ${dasha.dasha_end_year}. Prediction: ${dasha.prediction || ''}. Planet in Zodiac: ${dasha.planet_in_zodiac || ''}`} />
+                </span>
+              </div>
               <div className={styles.dateRange}>
                 {dasha.dasha_start_year} - {dasha.dasha_end_year}
               </div>

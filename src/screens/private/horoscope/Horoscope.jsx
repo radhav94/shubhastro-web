@@ -9,6 +9,7 @@ import {
 } from '../../../redux/api/horoscope/zodiacApi';
 import { signToNumber, zodiacDateRanges } from './utils';
 import PrimaryLoader from '../../../component/UI/PrimaryLoader';
+import TTSButton from '../../../component/UI/TTSButton';
 import { formatted } from '../../../utils/dateFormat/date';
 import { zodiac, zodiacSignImages } from './zodiac';
 import './Horoscope.css';
@@ -581,14 +582,30 @@ const HoroscopeNew = () => {
           </div>
 
           <div className="horoscope-content" ref={overviewRef}>
-            <h2 className="content-title">
-              {currentContent.title}
-              {currentContent.score && !currentContent.isOverview && (
-                <span style={{ fontSize: '14px', color: 'orange', marginLeft: '8px' }}>
-                  ({currentContent.score}/100)
-                </span>
-              )}
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+              <h2 className="content-title">
+                {currentContent.title}
+                {currentContent.score && !currentContent.isOverview && (
+                  <span style={{ fontSize: '14px', color: 'orange', marginLeft: '8px' }}>
+                    ({currentContent.score}/100)
+                  </span>
+                )}
+              </h2>
+              <TTSButton text={(() => {
+                const parts = [];
+                if (currentContent.title) parts.push(currentContent.title);
+                if (currentContent.luckyColor) parts.push(`Lucky Color: ${currentContent.luckyColor}`);
+                if (currentContent.luckyNumber?.length) parts.push(`Lucky Number: ${currentContent.luckyNumber.join(', ')}`);
+                if (currentContent.isOverview && currentContent.overviewSections) {
+                  currentContent.overviewSections.forEach((s) => {
+                    parts.push(`${s.title}. ${s.content}`);
+                  });
+                } else if (currentContent.content) {
+                  parts.push(currentContent.content);
+                }
+                return parts.join('. ');
+              })()} />
+            </div>
             
             {/* Lucky Details - Only for Daily and Weekly, not in Overview */}
             {!currentContent.isOverview && (activeTab === 'Today' || activeTab === 'Tomorrow' || activeTab === 'This Week') && currentContent.luckyColor && (

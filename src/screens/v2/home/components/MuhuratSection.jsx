@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useFetchAdvancePanchangQuery } from "../../../../redux/api/panchang/panchangApi";
+import useUserLocation from "../../../../utils/hooks/useUserLocation";
 import SectionHeader from "./SectionHeader";
 import styles from "../Home.module.scss";
 
@@ -13,6 +14,7 @@ const formatTime = (time) => {
 
 const MuhuratSection = () => {
   const pad = (num) => String(num).padStart(2, "0");
+  const userLocation = useUserLocation();
 
   const payload = useMemo(() => {
     const now = new Date();
@@ -22,11 +24,11 @@ const MuhuratSection = () => {
       year: now.getFullYear(),
       hour: pad(now.getHours()),
       min: pad(now.getMinutes()),
-      lat: 19.132,
-      lon: 72.342,
+      lat: userLocation.lat,
+      lon: userLocation.lon,
       tzone: 5.5,
     };
-  }, []);
+  }, [userLocation.lat, userLocation.lon]);
 
   const { data, isLoading } = useFetchAdvancePanchangQuery(payload);
   const panchangData = data?.response;

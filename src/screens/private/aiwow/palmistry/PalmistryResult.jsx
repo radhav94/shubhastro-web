@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import styles from './PalmistryResult.module.scss';
@@ -7,9 +7,13 @@ import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
 import Footer from '../../../../layouts/Footer';
+import TTSButton from '../../../../component/UI/TTSButton';
 
-const LineDropdown = ({ title, subtitle, children, isOpen, onToggle }) => (
-  <div className={styles.lineDropdown}>
+const LineDropdown = ({ title, subtitle, children, isOpen, onToggle, ttsText }) => (
+  <div className={styles.lineDropdown} style={{ position: 'relative' }}>
+    <span style={{ position: 'absolute', top: '8px', right: '40px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+      <TTSButton text={ttsText} />
+    </span>
     <button className={styles.lineDropdownHeader} onClick={onToggle}>
       <div>
         <h3 className={styles.lineTitle}>{title}</h3>
@@ -274,7 +278,10 @@ const PalmistryResult = () => {
 
               <div className={styles.contentSection}>
                 <div className={styles.twoColumnGrid}>
-                  <div className={styles.section}>
+                  <div className={styles.section} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                      <TTSButton text={`Personality Type. ${typeof overallReading?.personalityType === 'string' ? overallReading.personalityType : 'No data available'}`} />
+                    </span>
                     <h3 className={styles.sectionTitle}>Personality Type</h3>
                     <p className={styles.text}>
                       {typeof overallReading?.personalityType === 'string' 
@@ -283,7 +290,10 @@ const PalmistryResult = () => {
                     </p>
                   </div>
 
-                  <div className={styles.section}>
+                  <div className={styles.section} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                      <TTSButton text={`Life Path. ${typeof overallReading?.lifePath === 'string' ? overallReading.lifePath : 'No data available'}`} />
+                    </span>
                     <h3 className={styles.sectionTitle}>Life Path</h3>
                     <p className={styles.text}>
                       {typeof overallReading?.lifePath === 'string' 
@@ -296,7 +306,10 @@ const PalmistryResult = () => {
             </div>
 
             <div className={styles.insightsWrapper}>
-              <div className={styles.insightsCard}>
+              <div className={styles.insightsCard} style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                  <TTSButton text={`Personalized Insights. ${overallReading?.personalizedInsights?.zodiacSign ? 'Zodiac Sign: ' + overallReading.personalizedInsights.zodiacSign + '. ' : ''}${overallReading?.personalizedInsights?.rulingPlanet ? 'Ruling Planet: ' + overallReading.personalizedInsights.rulingPlanet + '. ' : ''}${overallReading?.personalizedInsights?.elementalHandType ? 'Hand Type: ' + overallReading.personalizedInsights.elementalHandType + '. ' : ''}${overallReading?.personalizedInsights?.dominantMounts?.length > 0 ? 'Dominant Mounts: ' + overallReading.personalizedInsights.dominantMounts.join(', ') : ''}`} />
+                </span>
                 <h3 className={styles.insightsMainTitle}>Personalized Insights</h3>
                 {overallReading?.personalizedInsights && typeof overallReading.personalizedInsights === 'object' ? (
                   <>
@@ -347,7 +360,10 @@ const PalmistryResult = () => {
             </div>
 
             {overallReading?.personalizedInsights?.astrologyCorrelation && (
-              <div className={styles.section} style={{ marginTop: '1rem' }}>
+              <div className={styles.section} style={{ marginTop: '1rem', position: 'relative' }}>
+                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                  <TTSButton text={`Astrology Correlation. ${overallReading.personalizedInsights.astrologyCorrelation}`} />
+                </span>
                 <h4 className={styles.subsectionTitle}>Astrology Correlation</h4>
                 <p className={styles.text}>{overallReading.personalizedInsights.astrologyCorrelation}</p>
               </div>
@@ -357,14 +373,20 @@ const PalmistryResult = () => {
             {astroCorrelation && typeof astroCorrelation === 'object' && (
               <div className={styles.astroCorrelationSection}>
                 {astroCorrelation.zodiacSign && (
-                  <div className={styles.section}>
+                  <div className={styles.section} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                      <TTSButton text={`Zodiac Sign. ${String(astroCorrelation.zodiacSign)}`} />
+                    </span>
                     <h3 className={styles.sectionTitle}>Zodiac Sign</h3>
                     <p className={styles.text}>{String(astroCorrelation.zodiacSign)}</p>
                   </div>
                 )}
 
                 {astroCorrelation.elementalHandType && (
-                  <div className={styles.section}>
+                  <div className={styles.section} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                      <TTSButton text={`Hand Type. ${String(astroCorrelation.elementalHandType)}`} />
+                    </span>
                     <h3 className={styles.sectionTitle}>Hand Type</h3>
                     <p className={styles.text}>{String(astroCorrelation.elementalHandType)}</p>
                   </div>
@@ -383,6 +405,7 @@ const PalmistryResult = () => {
                 subtitle={lines.fate.interpretation.summary}
                 isOpen={openLines.fate}
                 onToggle={() => toggleLine('fate')}
+                ttsText={`Fate Line. ${[lines.fate.interpretation.summary, lines.fate.interpretation.careerPath ? 'Career Path: ' + lines.fate.interpretation.careerPath : '', lines.fate.interpretation.lifePurpose ? 'Life Purpose: ' + lines.fate.interpretation.lifePurpose : '', lines.fate.interpretation.successTiming ? 'Success Timing: ' + lines.fate.interpretation.successTiming : ''].filter(Boolean).join('. ')}`}
               >
                 <div className={styles.lineDetailsGrid}>
                   <div className={styles.lineDetailCard}>
@@ -443,6 +466,7 @@ const PalmistryResult = () => {
                 subtitle={lines.heart.interpretation?.summary}
                 isOpen={openLines.heart}
                 onToggle={() => toggleLine('heart')}
+                ttsText={`Heart Line. ${[lines.heart.interpretation?.summary, lines.heart.interpretation?.emotionalNature ? 'Emotional Nature: ' + lines.heart.interpretation.emotionalNature : '', lines.heart.interpretation?.relationshipPattern ? 'Relationship Pattern: ' + lines.heart.interpretation.relationshipPattern : ''].filter(Boolean).join('. ')}`}
               >
                 <div className={styles.lineDetailsGrid}>
                   {lines.heart.interpretation?.emotionalNature && (
@@ -502,6 +526,7 @@ const PalmistryResult = () => {
                 subtitle={lines.head.interpretation?.summary}
                 isOpen={openLines.head}
                 onToggle={() => toggleLine('head')}
+                ttsText={`Head Line. ${[lines.head.interpretation?.summary, lines.head.interpretation?.thinkingStyle ? 'Thinking Style: ' + lines.head.interpretation.thinkingStyle : '', lines.head.interpretation?.intellectualDepth ? 'Intellectual Depth: ' + lines.head.interpretation.intellectualDepth : '', lines.head.interpretation?.careerAptitude ? 'Career Aptitude: ' + lines.head.interpretation.careerAptitude : ''].filter(Boolean).join('. ')}`}
               >
                 <div className={styles.lineDetailsGrid}>
                   {lines.head.interpretation?.thinkingStyle && (
@@ -557,6 +582,7 @@ const PalmistryResult = () => {
                 subtitle={lines.life.interpretation?.summary}
                 isOpen={openLines.life}
                 onToggle={() => toggleLine('life')}
+                ttsText={`Life Line. ${[lines.life.interpretation?.summary, lines.life.interpretation?.vitalityLevel ? 'Vitality Level: ' + lines.life.interpretation.vitalityLevel : ''].filter(Boolean).join('. ')}`}
               >
                 <div className={styles.lineDetailsGrid}>
                   {lines.life.interpretation?.vitalityLevel && (
@@ -628,9 +654,14 @@ const PalmistryResult = () => {
                     .trim();
 
                   return (
-                    <div className={styles.lineCard} key={key}>
+                    <div className={styles.lineCard} key={key} style={{ position: 'relative' }}>
+                      
                       <div className={styles.lineHeader}>
-                        <h3 className={styles.lineTitle}>{title}</h3>
+                        <h3 className={styles.lineTitle}>{title}
+                          <span style={{marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle'}}>
+                            <TTSButton text={`${title}. ${lineData.interpretation || ''}`} />
+                          </span>
+                        </h3>
                         {lineData.count != null && (
                           <div className={styles.lineScore}>{lineData.count}</div>
                         )}
@@ -659,13 +690,19 @@ const PalmistryResult = () => {
 
         {activeTab === 'personality' && (
           <div className={styles.personalityGrid}>
-            <div className={styles.personalityCard}>
+            <div className={styles.personalityCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                <TTSButton text={`Personality Type. ${overallReading?.personalityType || 'No data available'}`} />
+              </span>
               <h3 className={styles.personalityCardTitle}>Personality Type</h3>
               <p className={styles.personalityCardText}>{overallReading?.personalityType || 'No data available'}</p>
             </div>
 
             {lines?.heart?.detected && (
-              <div className={styles.personalityCard}>
+              <div className={styles.personalityCard} style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                  <TTSButton text={`Emotional Nature. ${lines.heart.interpretation?.emotionalNature || 'No data available'}`} />
+                </span>
                 <h3 className={styles.personalityCardTitle}>Emotional Nature</h3>
                 <p className={styles.personalityCardText}>{lines.heart.interpretation?.emotionalNature || 'No data available'}</p>
                 
@@ -694,7 +731,10 @@ const PalmistryResult = () => {
             )}
 
             {lines?.head?.detected && (
-              <div className={styles.personalityCard}>
+              <div className={styles.personalityCard} style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                  <TTSButton text={`Thinking Style. ${lines.head.interpretation?.thinkingStyle || 'No data available'}`} />
+                </span>
                 <h3 className={styles.personalityCardTitle}>Thinking Style</h3>
                 <p className={styles.personalityCardText}>{lines.head.interpretation?.thinkingStyle || 'No data available'}</p>
                 
@@ -715,13 +755,19 @@ const PalmistryResult = () => {
 
         {activeTab === 'career' && (
           <div className={styles.careerGrid}>
-            <div className={styles.careerCard}>
+            <div className={styles.careerCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                <TTSButton text={`Career Guidance. ${overallReading?.careerGuidance || 'No data available'}`} />
+              </span>
               <h3 className={styles.careerCardTitle}>Career Guidance</h3>
               <p className={styles.careerCardText}>{overallReading?.careerGuidance || 'No data available'}</p>
             </div>
 
             {lines?.head?.detected && (
-              <div className={styles.careerCard}>
+              <div className={styles.careerCard} style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                  <TTSButton text={`Career Aptitude. ${lines.head.interpretation?.careerAptitude || 'No data available'}`} />
+                </span>
                 <h3 className={styles.careerCardTitle}>Career Aptitude</h3>
                 <p className={styles.careerCardText}>{lines.head.interpretation?.careerAptitude || 'No data available'}</p>
               </div>
@@ -729,24 +775,36 @@ const PalmistryResult = () => {
 
             {lines?.fate?.detected && (
               <>
-                <div className={styles.careerCard}>
+                <div className={styles.careerCard} style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                    <TTSButton text={`Career Path. ${lines.fate.interpretation?.careerPath || 'No data available'}`} />
+                  </span>
                   <h3 className={styles.careerCardTitle}>Career Path</h3>
                   <p className={styles.careerCardText}>{lines.fate.interpretation?.careerPath || 'No data available'}</p>
                 </div>
 
-                <div className={styles.careerCard}>
+                <div className={styles.careerCard} style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                    <TTSButton text={`Life Purpose. ${lines.fate.interpretation?.lifePurpose || 'No data available'}`} />
+                  </span>
                   <h3 className={styles.careerCardTitle}>Life Purpose</h3>
                   <p className={styles.careerCardText}>{lines.fate.interpretation?.lifePurpose || 'No data available'}</p>
                 </div>
 
-                <div className={styles.careerCard}>
+                <div className={styles.careerCard} style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                    <TTSButton text={`Success Timing. ${lines.fate.interpretation?.successTiming || 'No data available'}`} />
+                  </span>
                   <h3 className={styles.careerCardTitle}>Success Timing</h3>
                   <p className={styles.careerCardText}>{lines.fate.interpretation?.successTiming || 'No data available'}</p>
                 </div>
               </>
             )}
 
-            <div className={styles.careerCard}>
+            <div className={styles.careerCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                <TTSButton text={`Life Path. ${overallReading?.lifePath || 'No data available'}`} />
+              </span>
               <h3 className={styles.careerCardTitle}>Life Path</h3>
               <p className={styles.careerCardText}>{overallReading?.lifePath || 'No data available'}</p>
             </div>
@@ -755,13 +813,19 @@ const PalmistryResult = () => {
 
         {activeTab === 'insights' && (
           <div className={styles.insightsTabGrid}>
-            <div className={styles.insightTabCard}>
+            <div className={styles.insightTabCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                <TTSButton text={`Relationship Advice. ${overallReading?.relationshipAdvice || 'No data available'}`} />
+              </span>
               <h3 className={styles.insightTabCardTitle}>Relationship Advice</h3>
               <p className={styles.insightTabCardText}>{overallReading?.relationshipAdvice || 'No data available'}</p>
             </div>
 
             {overallReading?.healthIndicators?.length > 0 && (
-              <div className={styles.insightTabCard}>
+              <div className={styles.insightTabCard} style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                  <TTSButton text={`Health Indicators. ${overallReading.healthIndicators.join('. ')}`} />
+                </span>
                 <h3 className={styles.insightTabCardTitle}>Health Indicators</h3>
                 <ul className={styles.list}>
                   {overallReading.healthIndicators.map((item, idx) => (
@@ -772,7 +836,10 @@ const PalmistryResult = () => {
             )}
 
             {overallReading?.luckyPeriods?.length > 0 && (
-              <div className={styles.insightTabCard}>
+              <div className={styles.insightTabCard} style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                  <TTSButton text={`Lucky Periods. ${overallReading.luckyPeriods.join('. ')}`} />
+                </span>
                 <h3 className={styles.insightTabCardTitle}>Lucky Periods</h3>
                 <ul className={styles.list}>
                   {overallReading.luckyPeriods.map((item, idx) => (
@@ -783,7 +850,10 @@ const PalmistryResult = () => {
             )}
 
             {overallReading?.warnings?.length > 0 && (
-              <div className={styles.warningCard}>
+              <div className={styles.warningCard} style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                  <TTSButton text={`Important Warnings. ${overallReading.warnings.join('. ')}`} />
+                </span>
                 <h3 className={styles.insightTabCardTitle}>Important Warnings</h3>
                 <ul className={styles.list}>
                   {overallReading.warnings.map((item, idx) => (
@@ -796,28 +866,40 @@ const PalmistryResult = () => {
             {astroCorrelation && (
               <>
                 {astroCorrelation.zodiacSign && (
-                  <div className={styles.insightTabCard}>
+                  <div className={styles.insightTabCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                      <TTSButton text={`Zodiac Sign. ${astroCorrelation.zodiacSign}`} />
+                    </span>
                     <h3 className={styles.insightTabCardTitle}>Zodiac Sign</h3>
                     <p className={styles.insightTabCardText}>{astroCorrelation.zodiacSign}</p>
                   </div>
                 )}
 
                 {astroCorrelation.rulingPlanet && (
-                  <div className={styles.insightTabCard}>
+                  <div className={styles.insightTabCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                      <TTSButton text={`Ruling Planet. ${astroCorrelation.rulingPlanet}`} />
+                    </span>
                     <h3 className={styles.insightTabCardTitle}>Ruling Planet</h3>
                     <p className={styles.insightTabCardText}>{astroCorrelation.rulingPlanet}</p>
                   </div>
                 )}
 
                 {astroCorrelation.elementalHandType && (
-                  <div className={styles.insightTabCard}>
+                  <div className={styles.insightTabCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                      <TTSButton text={`Elemental Hand Type. ${astroCorrelation.elementalHandType}`} />
+                    </span>
                     <h3 className={styles.insightTabCardTitle}>Elemental Hand Type</h3>
                     <p className={styles.insightTabCardText}>{astroCorrelation.elementalHandType}</p>
                   </div>
                 )}
 
                 {astroCorrelation.dominantMounts?.length > 0 && (
-                  <div className={styles.insightTabCard}>
+                  <div className={styles.insightTabCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                      <TTSButton text={`Dominant Mounts. ${astroCorrelation.dominantMounts.map(item => typeof item === 'string' ? item : JSON.stringify(item)).join(', ')}`} />
+                    </span>
                     <h3 className={styles.insightTabCardTitle}>Dominant Mounts</h3>
                     <ul className={styles.list}>
                       {astroCorrelation.dominantMounts.map((item, idx) => (
@@ -828,14 +910,20 @@ const PalmistryResult = () => {
                 )}
 
                 {astroCorrelation.astrologyCorrelation && (
-                  <div className={styles.insightTabCard}>
+                  <div className={styles.insightTabCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                      <TTSButton text={`Astrology Correlation. ${astroCorrelation.astrologyCorrelation}`} />
+                    </span>
                     <h3 className={styles.insightTabCardTitle}>Astrology Correlation</h3>
                     <p className={styles.insightTabCardText}>{astroCorrelation.astrologyCorrelation}</p>
                   </div>
                 )}
 
                 {astroCorrelation.planetaryInfluences?.length > 0 && (
-                  <div className={styles.insightTabCard}>
+                  <div className={styles.insightTabCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                      <TTSButton text={`Planetary Influences. ${astroCorrelation.planetaryInfluences.join('. ')}`} />
+                    </span>
                     <h3 className={styles.insightTabCardTitle}>Planetary Influences</h3>
                     <ul className={styles.list}>
                       {astroCorrelation.planetaryInfluences.map((item, idx) => (
@@ -846,14 +934,20 @@ const PalmistryResult = () => {
                 )}
 
                 {astroCorrelation.dashaAlignment && (
-                  <div className={styles.insightTabCard}>
+                  <div className={styles.insightTabCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                      <TTSButton text={`Dasha Alignment. ${astroCorrelation.dashaAlignment}`} />
+                    </span>
                     <h3 className={styles.insightTabCardTitle}>Dasha Alignment</h3>
                     <p className={styles.insightTabCardText}>{astroCorrelation.dashaAlignment}</p>
                   </div>
                 )}
 
                 {astroCorrelation.recommendations?.length > 0 && (
-                  <div className={styles.insightTabCard}>
+                  <div className={styles.insightTabCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                      <TTSButton text={`Recommendations. ${astroCorrelation.recommendations.join('. ')}`} />
+                    </span>
                     <h3 className={styles.insightTabCardTitle}>Recommendations</h3>
                     <ul className={styles.list}>
                       {astroCorrelation.recommendations.map((item, idx) => (

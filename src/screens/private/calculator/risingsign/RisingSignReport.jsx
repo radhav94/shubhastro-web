@@ -3,6 +3,7 @@ import { useGetRisingSignQuery } from "../../../../redux/api/calculator/calcApi"
 import styles from "./RisingSignReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 const RisingSignReport = () => {
   const navigate = useNavigate();
@@ -36,7 +37,10 @@ const RisingSignReport = () => {
 
       {/* ABOUT ASCENDANT */}
       {(bot_response || prediction) && (
-        <div className={styles.aboutBox}>
+        <div className={styles.aboutBox} style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <TTSButton text={`About Your Ascendant. ${prediction || ''} ${bot_response || ''}`} />
+          </span>
           <h4>About Your Ascendant</h4>
 
           {prediction && <p>{prediction}</p>}

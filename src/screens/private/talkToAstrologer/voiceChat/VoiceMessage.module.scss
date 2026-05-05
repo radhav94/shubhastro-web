@@ -1,74 +1,116 @@
+/* WhatsApp-style voice message player */
+
 .voiceBubble {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #ffe082;
-  padding: 8px 12px;
-  border-radius: 14px;
-  max-width: 320px;
-  width: fit-content;
-  margin-left: auto;
+  padding: 0;
+  max-width: 280px;
+  width: 280px;
+  position: relative;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
-.voiceBubbleAstro {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #f0f0f0;
-  padding: 8px 12px;
-  border-radius: 14px;
-  max-width: 320px;
-  width: fit-content;
+.sender {
   margin-left: auto;
+  .playBtn { background: linear-gradient(135deg, #f75801, #d43400); }
+  .barActive { background: #f75801; }
+  .scrubDot { background: #f75801; }
+  .currentTime { color: #c43a00; }
+  .msgTime { color: #b05030; }
 }
 
+.receiver {
+  .playBtn { background: linear-gradient(135deg, #6b7280, #4b5563); }
+  .barActive { background: #6b7280; }
+  .scrubDot { background: #6b7280; }
+  .currentTime { color: #374151; }
+  .msgTime { color: #9ca3af; }
+}
+
+/* Play/Pause button */
 .playBtn {
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   border: none;
-  background: #1976d2;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: transform 0.15s, box-shadow 0.15s;
+
+  &:hover { transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+  &:active { transform: scale(0.95); }
 }
 
-.content {
+/* Waveform container */
+.waveWrap {
   flex: 1;
-  min-width: 200px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.progressTrack {
-  width: 100%;
-  height: 6px;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progressFill {
-  height: 100%;
-  background: #1976d2;
-  width: 0%;
-  transition: width 0.15s linear;
-}
-
-.meta {
+  height: 36px;
+  position: relative;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  font-size: 11px;
-  color: #444;
 }
 
-.duration {
+/* Scrub dot — sits above bars */
+.scrubDot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  z-index: 10;
+  pointer-events: none;
+  transition: left 0.1s linear;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+
+/* Waveform bars */
+.waveform {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.bar {
+  flex: 1;
+  border-radius: 2px;
+  background: #d1d5db;
+  min-height: 3px;
+  transition: background 0.1s;
+  position: relative;
+  z-index: 1;
+}
+
+/* Time meta */
+.timeMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.currentTime {
+  font-size: 12px;
   font-weight: 600;
+  font-family: 'Poppins', monospace;
+  min-width: 32px;
+  text-align: right;
 }
 
-.time {
-  opacity: 0.8;
+.msgTime {
+  font-size: 10px;
 }

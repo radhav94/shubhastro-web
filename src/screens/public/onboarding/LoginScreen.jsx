@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
+import { logout } from "../../../redux/auth/authSlice";
 import { loginWithPhone } from "../../../services/appServices/authService";
 import onboardingBg from "../../../assets/images/onboarding.png";
 
 const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [phoneNumber, setPhoneNumber] = useState(formData.phoneNumber || "");
   const [loading, setLoading] = useState(false);
 
@@ -42,6 +45,14 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   };
 
   const handleSkipAndProceed = () => {
+    // Clear any stale auth state so guest browsing doesn't trigger 401 redirects
+    dispatch(logout());
+    localStorage.removeItem("shubhtalk_redirect_after_login");
+    localStorage.removeItem("astro_wallet_balance");
+    localStorage.removeItem("shubhtalk_user");
+    localStorage.removeItem("shubhtalk_customer_token");
+    localStorage.removeItem("shubhtalk_customer_id");
+    localStorage.removeItem("selectedKundliProfile");
     navigate(PATH.privateRoutes.HOME.path || "/");
   };
 

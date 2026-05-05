@@ -28,7 +28,15 @@ const ChatInput = ({
   const canvasRef = useRef(null);
 
   const { openFileSelector } = useFileSelector();
-  const { recording, seconds, startRecording, stopRecording } = useVoiceRecorder();
+  const { recording, paused, seconds, startRecording, stopRecording, pauseRecording, resumeRecording } = useVoiceRecorder();
+
+  const handlePauseResume = () => {
+    if (paused) {
+      resumeRecording();
+    } else {
+      pauseRecording();
+    }
+  };
 
   // Start camera stream when cameraOpen becomes true
   useEffect(() => {
@@ -151,7 +159,29 @@ const ChatInput = ({
     onSend(kundli);
   };
 
-  const handleMicClick = async () => await startRecording();
+  const [micPermissionDenied, setMicPermissionDenied] = useState(false);
+
+  const handleMicClick = async () => {
+    try {
+      if (navigator.permissions) {
+        const status = await navigator.permissions.query({ name: 'microphone' });
+        if (status.state === 'denied') {
+          setMicPermissionDenied(true);
+          return;
+        }
+      }
+      await navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        stream.getTracks().forEach(t => t.stop());
+      });
+      await startRecording();
+    } catch (err) {
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setMicPermissionDenied(true);
+      } else {
+        toast.error("Could not access microphone. Please check your device settings.");
+      }
+    }
+  };
 
   const handleStopRecording = async () => {
     try {
@@ -162,6 +192,13 @@ const ChatInput = ({
     }
   };
 
+  const handleDeleteRecording = async () => {
+    try {
+      await stopRecording();
+    } catch {}
+    // discard — don't send
+  };
+
   return (
     <>
       {/* Hidden canvas for capture */}
@@ -169,15 +206,26 @@ const ChatInput = ({
 
       <div className={styles.inputBox}>
         <div className={styles.inputWrapper}>
-          <input
-            className={styles.inputField}
-            value={value}
-            onChange={onChange}
-            disabled={isMessageDisabled}
-            onKeyDown={(e) => e.key === "Enter" && onSend()}
-            placeholder="Type your message here..."
-            autoFocus
-          />
+          {recording ? (
+            <VoiceRecorderPopup
+              seconds={seconds}
+              paused={paused}
+              onStop={handleStopRecording}
+              onDelete={handleDeleteRecording}
+              onPause={handlePauseResume}
+              onResume={handlePauseResume}
+            />
+          ) : (
+            <>
+            <input
+              className={styles.inputField}
+              value={value}
+              onChange={onChange}
+              disabled={isMessageDisabled}
+              onKeyDown={(e) => e.key === "Enter" && onSend()}
+              placeholder="Type your message here..."
+              autoFocus
+            />
           <div className={styles.inputIcons}>
             <button type="button" className={styles.iconButton} onClick={handleAttachClick}>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="20" viewBox="0 0 16 20" fill="none">
@@ -211,6 +259,8 @@ const ChatInput = ({
               </svg>
             </button>
           </div>
+          </>
+          )}
         </div>
       </div>
 
@@ -321,9 +371,36 @@ const ChatInput = ({
         onSelect={handleChatAfterKundliSelect}
       />
 
-      {recording && (
-        <VoiceRecorderPopup seconds={seconds} onStop={handleStopRecording} />
+      {/* Mic Permission Denied Modal */}
+      {micPermissionDenied && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}
+          onClick={() => setMicPermissionDenied(false)}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: '28px 24px', maxWidth: 340, width: '90%', textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>🎙️</div>
+            <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: '#1a1a1a' }}>Microphone Access Required</h3>
+            <p style={{ margin: '0 0 20px', fontSize: 14, color: '#6b7280', lineHeight: 1.5 }}>
+              To send voice messages, please allow microphone access in your browser settings.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button
+                onClick={() => setMicPermissionDenied(false)}
+                style={{ background: 'linear-gradient(90deg,#f75801,#d43400)', color: '#fff', border: 'none', borderRadius: 24, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                OK, Got it
+              </button>
+              <p style={{ margin: 0, fontSize: 12, color: '#9ca3af', lineHeight: 1.5 }}>
+                Click the 🔒 lock icon in your browser's address bar → find <strong>Microphone</strong> → set to <strong>Allow</strong> → refresh the page
+              </p>
+              <button
+                onClick={() => setMicPermissionDenied(false)}
+                style={{ background: 'none', border: '1px solid #e5e7eb', borderRadius: 24, padding: '8px 20px', fontSize: 14, color: '#6b7280', cursor: 'pointer' }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
+
     </>
   );
 };

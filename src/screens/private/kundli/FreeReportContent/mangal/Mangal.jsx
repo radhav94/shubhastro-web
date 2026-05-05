@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import { useGetMangalDoshQuery } from "../../../../../redux/api/kundli/dashaApi";
 import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
+import TTSButton from "../../../../../component/UI/TTSButton";
 import styles from "./Mangal.module.scss";
 import { buildVedicParam } from "../../../../../utils/VedicParams.js/vedicParams";
 import stars from "../../../../../assets/images/stars.png";
@@ -74,6 +75,9 @@ const Mangal = () => {
           <h2 className={styles.sectionTitle}>
             <span className={styles.sectionIcon}>🔍</span>
             Mangal Analysis Factors
+            <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+              <TTSButton text={`Mangal Analysis Factors. ${[mangal.factors?.mars, mangal.factors?.moon].filter(Boolean).join('. ')}`} />
+            </span>
           </h2>
           <div className={styles.factorsList}>
             {mangal.factors.mars && (

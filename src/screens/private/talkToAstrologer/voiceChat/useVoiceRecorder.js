@@ -1,30 +1,23 @@
 import { useRef, useState, useCallback } from "react";
 
 /**
- * Voice recorder hook.
- * Primary: AAC in M4A container via Mediabunny + WebCodecs (Chrome/Edge 94+).
- * Fallback: WebM or MP4 via MediaRecorder (Firefox/Safari/mobile).
+ * Voice recorder — uses native MediaRecorder.pause()/resume()
+ * Same as WhatsApp approach: single recorder instance, continuous timestamps.
  */
 export const useVoiceRecorder = () => {
-  const outputRef = useRef(null);
   const streamRef = useRef(null);
   const timerRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
-  const modeRef = useRef(null); // "aac" | "webm" | "mp4"
+  const mimeTypeRef = useRef("");
 
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const activeSecondsRef = useRef(0);
 
-  // Find a supported mimeType for MediaRecorder
   const getSupportedMimeType = () => {
-    const types = [
-      "audio/webm;codecs=opus",
-      "audio/webm",
-      "audio/mp4",
-      "audio/ogg;codecs=opus",
-      "",
-    ];
+    const types = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus", ""];
     for (const type of types) {
       if (!type || MediaRecorder.isTypeSupported(type)) return type;
     }
@@ -33,139 +26,119 @@ export const useVoiceRecorder = () => {
 
   const startRecording = useCallback(async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-      },
+      audio: { echoCancellation: true, noiseSuppression: true },
     });
     streamRef.current = stream;
+    chunksRef.current = [];
+    activeSecondsRef.current = 0;
+
+    const mimeType = getSupportedMimeType();
+    mimeTypeRef.current = mimeType;
+
+    const options = mimeType ? { mimeType } : undefined;
+    const recorder = new MediaRecorder(stream, options);
+    mediaRecorderRef.current = recorder;
+
+    recorder.ondataavailable = (e) => {
+      if (e.data?.size > 0) chunksRef.current.push(e.data);
+    };
+
+    recorder.start(100);
+
     setRecording(true);
+    setPaused(false);
     setSeconds(0);
 
     timerRef.current = setInterval(() => {
       setSeconds((s) => s + 1);
+      activeSecondsRef.current += 1;
     }, 1000);
-
-    // Try AAC via Mediabunny (needs WebCodecs AudioEncoder)
-    if (typeof AudioEncoder !== "undefined") {
-      try {
-        const {
-          Output,
-          Mp4OutputFormat,
-          BufferTarget,
-          MediaStreamAudioTrackSource,
-        } = await import("mediabunny");
-
-        const audioTrack = stream.getAudioTracks()[0];
-
-        const audioSource = new MediaStreamAudioTrackSource(audioTrack, {
-          codec: "aac",
-          bitrate: 128_000,
-        });
-
-        const target = new BufferTarget();
-        const output = new Output({
-          format: new Mp4OutputFormat(),
-          target,
-        });
-
-        output.addAudioTrack(audioSource);
-        await output.start();
-
-        outputRef.current = output;
-        modeRef.current = "aac";
-        console.log("[VoiceRecorder] AAC mode started");
-        return;
-      } catch (e) {
-        console.warn("[VoiceRecorder] AAC failed, falling back:", e);
-        // Fall through to MediaRecorder
-      }
-    }
-
-    // Fallback: MediaRecorder (WebM/MP4/OGG depending on browser)
-    try {
-      chunksRef.current = [];
-      const mimeType = getSupportedMimeType();
-      console.log("[VoiceRecorder] MediaRecorder mimeType:", mimeType || "default");
-
-      const options = mimeType ? { mimeType } : undefined;
-      const mediaRecorder = new MediaRecorder(stream, options);
-      mediaRecorderRef.current = mediaRecorder;
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data?.size > 0) chunksRef.current.push(e.data);
-      };
-
-      mediaRecorder.start(100);
-      modeRef.current = "webm";
-      console.log("[VoiceRecorder] MediaRecorder fallback started");
-    } catch (e) {
-      console.error("[VoiceRecorder] MediaRecorder also failed:", e);
-      // Cleanup
-      clearInterval(timerRef.current);
-      stream.getTracks().forEach((t) => t.stop());
-      setRecording(false);
-    }
   }, []);
 
-  const stopRecording = useCallback(
-    () =>
-      new Promise(async (resolve, reject) => {
-        try {
-          clearInterval(timerRef.current);
-          setRecording(false);
+  const pauseRecording = useCallback(() => {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder) return;
 
-          // Stop mic
-          streamRef.current?.getTracks().forEach((t) => t.stop());
+    clearInterval(timerRef.current);
 
-          const duration = Math.max(seconds, 1);
+    if (recorder.state === "recording") {
+      // Native pause — recorder keeps running internally but marks data as paused
+      // No new data chunks are generated during pause
+      recorder.pause();
+    }
 
-          if (modeRef.current === "aac") {
-            const output = outputRef.current;
-            if (!output) return reject("Recorder not initialized");
+    setPaused(true);
+  }, []);
 
-            await output.finalize();
-            const buffer = output.target.buffer;
-            if (!buffer || buffer.byteLength === 0)
-              return reject("No audio data captured");
+  const resumeRecording = useCallback(() => {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder) return;
 
-            const blob = new Blob([buffer], { type: "audio/mp4" });
-            outputRef.current = null;
-            modeRef.current = null;
-            setSeconds(0);
-            resolve({ blob, duration, codec: "aac" });
-          } else if (modeRef.current === "webm") {
-            const recorder = mediaRecorderRef.current;
-            if (!recorder || recorder.state === "inactive")
-              return reject("Recorder not initialized");
+    if (recorder.state === "paused") {
+      recorder.resume();
+    }
 
-            recorder.onstop = () => {
-              if (!chunksRef.current.length)
-                return reject("No audio data captured");
+    timerRef.current = setInterval(() => {
+      setSeconds((s) => s + 1);
+      activeSecondsRef.current += 1;
+    }, 1000);
 
-              const blob = new Blob(chunksRef.current, {
-                type: recorder.mimeType || "audio/webm",
-              });
-              mediaRecorderRef.current = null;
-              modeRef.current = null;
-              setSeconds(0);
-              resolve({ blob, duration, codec: "webm" });
-            };
-            recorder.stop();
-          } else {
-            reject("Recorder not initialized — no mode set");
-          }
-        } catch (err) {
-          reject(err);
+    setPaused(false);
+  }, []);
+
+  const stopRecording = useCallback(() =>
+    new Promise((resolve, reject) => {
+      try {
+        clearInterval(timerRef.current);
+        setRecording(false);
+        setPaused(false);
+
+        const duration = Math.max(activeSecondsRef.current, 1);
+        const recorder = mediaRecorderRef.current;
+
+        if (!recorder || recorder.state === "inactive") {
+          return reject("Recorder not initialized");
         }
-      }),
-    [seconds]
-  );
+
+        // If paused, resume briefly to flush final data then stop
+        if (recorder.state === "paused") {
+          recorder.resume();
+        }
+
+        recorder.onstop = () => {
+          streamRef.current?.getTracks().forEach(t => t.stop());
+          streamRef.current = null;
+
+          if (!chunksRef.current.length) {
+            return reject("No audio data captured");
+          }
+
+          const blob = new Blob(chunksRef.current, {
+            type: mimeTypeRef.current || "audio/webm",
+          });
+
+          mediaRecorderRef.current = null;
+          chunksRef.current = [];
+          setSeconds(0);
+          activeSecondsRef.current = 0;
+
+          resolve({ blob, duration, codec: "webm" });
+        };
+
+        recorder.stop();
+      } catch (err) {
+        reject(err);
+      }
+    }),
+  []);
 
   return {
     recording,
+    paused,
     seconds,
     startRecording,
     stopRecording,
+    pauseRecording,
+    resumeRecording,
   };
 };

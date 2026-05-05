@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useGetSingleBlogQuery, useGetBlogPageDataQuery } from "../../../../services/appServices/blogService";
 import styles from "./SingleBlogDetails.module.scss";
 import MoreBlogsCarousel from "../../../../component/UI/cards/MoreBlogsCarousel";
-
+import TTSButton from "../../../../component/UI/TTSButton";
 const SingleBlogDetails = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -17,7 +17,10 @@ const SingleBlogDetails = () => {
   const relatedBlogs = relatedSection?.content || [];
   const relatedTitle = relatedSection?.title;
   const relatedSubtitle = relatedSection?.sub_title || relatedSection?.subtitle;
-  
+  const cleanText = singleBLogData?.body
+  ?.replace(/<[^>]+>/g, ' ')   // remove HTML tags
+  ?.replace(/\s+/g, ' ')       // normalize spaces
+  ?.trim();
   if (isLoading) return <p style={{ textAlign: "center" }}>Loading...</p>;
   if (!singleBLogData) return <p style={{ textAlign: "center" }}>No blog found</p>;
 
@@ -44,8 +47,11 @@ const SingleBlogDetails = () => {
           />
 
           {/* Title */}
-          <h1 className={styles.title}>{singleBLogData.title}</h1>
-
+          <h1 className={styles.title}>{singleBLogData.title}
+           <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+              <TTSButton text={`${[singleBLogData?.title,singleBLogData?.author,cleanText].filter(Boolean).join('. ')}`} />
+            </span>
+          </h1>
           {/* Publish Date and Author */}
           <div className={styles.metaInfo}>
             <p className={styles.date}>Published on: {singleBLogData.publishDate}</p>

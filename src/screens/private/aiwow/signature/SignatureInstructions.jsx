@@ -5,6 +5,7 @@ import styles from './SignatureInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setSignatureImage } from '../../../../redux/aiwow/aiwowSlice';
 import Footer from '../../../../layouts/Footer';
+import TTSButton from '../../../../component/UI/TTSButton';
 
 const SignatureInstructions = () => {
   const navigate = useNavigate();
@@ -61,6 +62,10 @@ const SignatureInstructions = () => {
           </div>
 
         <div>
+          <div style={{ position: 'relative' }}>
+          <span style={{ position: 'absolute', top: '0', right: '0', display: 'flex' }}>
+            <TTSButton text={`Highlight Signature. Emphasize the signature area to draw attention to authenticity. Adjust Contrast. Enhance contrast to make the signature more legible against the background. Add Annotations. Include notes or markers to indicate specific features of the signature. Disclaimer. This signature analysis is for informational purposes only, not a substitute for professional authentication. Analysis is AI-driven.`} />
+          </span>
           <div className={styles.checklistSection}>
             <div className={styles.checkItem}>
               <div className={styles.checkIcon}>
@@ -128,6 +133,7 @@ const SignatureInstructions = () => {
             style={{ display: 'none' }}
             onChange={handleFileChange}
           />
+          </div>
           </div>
         </div>
       </div>

@@ -1563,7 +1563,7 @@
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 4px 4px 0px 4px;
+  padding: 4px 4px 2px 4px;
   // width: calc(100% + 130px);
   // @media screen and (width <= 767px) {
   //   padding: 4px 4px 20px 0px;
@@ -3842,6 +3842,7 @@
   justify-content: space-between;
   margin-bottom: 16px;
   gap: 16px;
+  padding-right: 16px;
   @media screen and (width <= 767px) {
     margin-bottom: 12px;
   }
@@ -3894,7 +3895,7 @@
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 4px 4px 0px 4px;
+  padding: 4px 4px 2px 4px;
   @media (width <= 767px) {
     // gap: 16px;    
     padding: 0px 0px 0px 0px;

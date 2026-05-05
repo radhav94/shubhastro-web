@@ -4,6 +4,7 @@ import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./NumerologyReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 const NumerologyReport = () => {
 
@@ -59,7 +60,12 @@ const NumerologyReport = () => {
         {cards.map((item) => (
           <div key={item.category} className={styles.card}>
             <div className={styles.cardContent}>
-              <h3 className={styles.title}>{item.title}</h3>
+              <h3 className={styles.title}>
+                {item.title}
+                <span style={{ display: 'inline-flex', marginLeft: '8px', verticalAlign: 'middle' }}>
+                  <TTSButton text={`${item.title}. Number ${item.number}. ${item.description}${item.master ? '. Master Number' : ''}`} />
+                </span>
+              </h3>
               <p className={styles.text}>{item.description}</p>
               {item.master && (
                 <span className={styles.master}>Master Number</span>

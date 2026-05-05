@@ -39,8 +39,8 @@ const LalKitabDetail = () => {
       // Clear planet sub-tab when switching away from planets
       if (key !== "planets") next.delete("planet");
       return next;
-    }, { replace: true });
-  }, [setSearchParams]);
+    }, { replace: true, state: location.state });
+  }, [setSearchParams, location.state]);
 
   const planetFromUrl = parseInt(searchParams.get("planet"), 10);
   const initialPlanet = Number.isFinite(planetFromUrl) ? planetFromUrl : 0;
@@ -50,8 +50,8 @@ const LalKitabDetail = () => {
       const next = new URLSearchParams(prev);
       next.set("planet", String(idx));
       return next;
-    }, { replace: true });
-  }, [setSearchParams]);
+    }, { replace: true, state: location.state });
+  }, [setSearchParams, location.state]);
 
   // Use teva data from navigation state (from generate-teva response)
   const tevaData = location.state?.tevaData;
@@ -62,7 +62,7 @@ const LalKitabDetail = () => {
   const { data: chartData, isLoading: chartLoading } = useGetLalKitabChartQuery(lalKitabId);
 
   // Merge: prefer API data (more complete), fall back to teva data
-  const houses = tevaData?.houses || chartData?.data?.houses || [];
+  const houses = chartData?.data?.houses || tevaData?.houses || [];
   const planetDetails = planetData?.data?.planetDetails || tevaData?.planetDetails || [];
   const debts = debtsData?.data?.debts || tevaData?.debts || null;
   const chart = chartData?.data || (tevaData?.svgChart ? { chartUrl: tevaData.svgChart } : null);
@@ -100,7 +100,7 @@ const LalKitabDetail = () => {
 
       <div className={styles.content}>
         {activeTab === "houses" && (
-          <HousesGrid houses={houses} isLoading={chartLoading && planetLoading && !tevaData?.houses?.length} />
+          <HousesGrid houses={houses} isLoading={chartLoading && !houses.length} />
         )}
         {activeTab === "planets" && (
           <PlanetDetailsAccordion planets={planetDetails} isLoading={planetLoading} initialSelected={initialPlanet} onPlanetChange={handlePlanetChange} />

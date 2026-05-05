@@ -7,6 +7,7 @@ import {
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./DashaReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 const DashaReport = () => {
   const navigate = useNavigate();
@@ -44,7 +45,10 @@ const DashaReport = () => {
       {periods.length > 0 && (
         <div className={styles.periodsGrid}>
           {periods.map((item, index) => (
-            <div key={index} className={styles.periodCard}>
+            <div key={index} className={styles.periodCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '4px', right: '4px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                <TTSButton text={`${item.planet}. ${item.start} to ${item.end}`} />
+              </span>
               <div className={styles.periodPlanet}>{item.planet}</div>
               <div className={styles.periodInfo}>
                 <span className={styles.periodDate}>
@@ -75,6 +79,9 @@ const DashaReport = () => {
                 <div className={styles.headerRight}>
                   <span className={styles.date}>
                     {item.dasha_start_year} – {item.dasha_end_year}
+                  </span>
+                  <span style={{ display: 'inline-flex' }} onClick={(e) => e.stopPropagation()}>
+                    <TTSButton text={`${item.dasha} Mahadasha. ${item.dasha_start_year} to ${item.dasha_end_year}. ${item.planet_in_zodiac || ''}. ${item.prediction || ''}`} />
                   </span>
                   <span className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ""}`}>
                     ▾
