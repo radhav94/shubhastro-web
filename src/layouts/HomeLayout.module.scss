@@ -54,7 +54,8 @@ $mobile-screen-width: 500px;
     top: 0;
     width: 100%;
     z-index: 2001;
-    background: linear-gradient(90deg, #FEFEFE 0%, #FFF8EC 100%);
+    background: linear-gradient(90deg, rgba(254, 254, 254, 0.8) 0%, rgba(255, 248, 236,0.8));
+    backdrop-filter: blur(6px);
   }
 
   .fixedTopBar {

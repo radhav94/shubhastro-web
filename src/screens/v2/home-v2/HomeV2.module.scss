@@ -729,7 +729,7 @@
 
 .featureCard {
   border-radius: 18px;
-  padding: 20px 16px;
+  padding:16px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -742,6 +742,9 @@
   border: 1.5px solid #FFFFFF;
   // box-shadow: 0px 4px 10px 0px #0000000F;
   color: #1a1a1a;
+  @media (width <= 767px) {
+    padding:6px;
+  }
 
   &:hover {
     transform: translateY(-3px);
@@ -801,7 +804,7 @@
   color: #f75801;
   border: none;
   border-radius: 50px;
-  padding: 8px 20px;
+  padding: 8px 6px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -817,7 +820,7 @@
   }
 
   @media (width <=767px) {
-    padding: 6px 14px;
+    padding: 6px 6px;
     font-size: 13px;
   }
 }
@@ -882,7 +885,7 @@
     z-index: 2;
 
     @media (width <=767px) {
-      font-size: 18px;
+      font-size: 14px;
     }
   }
 
@@ -904,7 +907,7 @@
     color: #f75801;
     border: none;
     border-radius: 50px;
-    padding: 10px 24px;
+    padding: 10px 6px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -912,6 +915,9 @@
     margin-top: auto;
     position: relative;
     z-index: 2;
+     @media (width <=767px) {
+      font-size: 12px;
+    }
     // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 }
@@ -2940,7 +2946,7 @@
 
   // .wowCard { min-height: 140px; }
   .featureCard {
-    min-height: 250px;
+    min-height: 200px;
   }
 
   // .catItem { width: 70px; span { font-size: 11px; } }
@@ -3466,13 +3472,13 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
 /* ═══ HomeV2 — Footer glass effect ═══ */
 :global(body.home-v2-page) {
   footer {
-    background: rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
+    background: rgba(255, 255, 255, 0.4) !important;
+    // backdrop-filter: blur(20px) saturate(180%) !important;
     // // -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
     // // box-shadow:
     // //   0 0 0 1.5px rgba(255, 255, 255, 0.9),
     //   inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
-    outline: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+    // outline: 1.5px solid rgba(255, 255, 255, 0.95) !important;
   }
 
   footer * {
