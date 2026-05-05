@@ -69,7 +69,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
                 alt={session.astrologerName}
                 onError={e => { e.target.src = astrologerMaleImg; }}
               />
-              <span className={styles.sessionOnlineDot} />
+              <span className={styles.sessionOnlineDot} style={{ background: session.isActive ? '#22c55e' : '#9ca3af' }} />
             </div>
 
             {/* Info */}
