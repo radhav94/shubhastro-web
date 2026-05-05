@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./PanchangInputCard.module.scss";
 
 import PrimaryButton from "../../../PrimaryButton";
@@ -7,6 +7,7 @@ import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import ErrorText from "../../../ErrorText";
 import { appColors } from "../../../../utils/theme";
 import DateTimePicker from "../../dateTimePicker/DateTimePicker";
+import useUserLocation from "../../../../utils/hooks/useUserLocation";
 
 const PanchangInputCard = ({
   imageSrc,
@@ -18,11 +19,12 @@ const PanchangInputCard = ({
   initialLongitude,
   showForm = "",
 }) => {
+  const userLocation = useUserLocation();
   const [formData, setFormData] = useState({
     dateOfBirth: initialDate || "",
     location: initialLocation || "",
-    latitude: initialLatitude || "19.132",
-    longitude: initialLongitude || "72.342",
+    latitude: initialLatitude || userLocation.lat,
+    longitude: initialLongitude || userLocation.lon,
   });
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long", // Thursday
@@ -33,6 +35,18 @@ const PanchangInputCard = ({
 
   const [errors, setErrors] = useState({});
 
+  // Update location when browser geolocation resolves
+  useEffect(() => {
+    if (userLocation.loaded && !userLocation.isDefault) {
+      setFormData((prev) => ({
+        ...prev,
+        location: userLocation.locationName,
+        latitude: userLocation.lat,
+        longitude: userLocation.lon,
+      }));
+    }
+  }, [userLocation.loaded, userLocation.lat, userLocation.lon, userLocation.locationName]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -42,8 +56,8 @@ const PanchangInputCard = ({
     setFormData((prev) => ({
       ...prev,
       location: place.address,
-      latitude: place.lat || 19.132,
-      longitude: place.lng || 72.342,
+      latitude: place.lat || userLocation.lat,
+      longitude: place.lng || userLocation.lon,
     }));
   };
 
@@ -87,7 +101,7 @@ const PanchangInputCard = ({
           </PrimaryText>
         )}
         <PrimaryText isCenter size_20 color={appColors.greyDark}>
-          {formData?.location || initialLocation || "Mumbai, India"},&nbsp;
+          {formData?.location || initialLocation || userLocation.locationName},&nbsp;
           {formData.dateOfBirth ? Userdob : today}{" "}
         </PrimaryText>
 
