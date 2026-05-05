@@ -698,11 +698,33 @@ const HomeV2 = () => {
           {/* Right */}
           <div className={styles.ctaRight}>
             <button className={styles.ctaBtnPrimary} onClick={() => navigate('/chat-with-astrologers')}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
+                <path d="M10.625 23.75H10C5 23.75 2.5 22.5 2.5 16.25V10C2.5 5 5 2.5 10 2.5H20C25 2.5 27.5 5 27.5 10V16.25C27.5 21.25 25 23.75 20 23.75H19.375C18.9875 23.75 18.6125 23.9375 18.375 24.25L16.5 26.75C15.675 27.85 14.325 27.85 13.5 26.75L11.625 24.25C11.425 23.975 10.9625 23.75 10.625 23.75Z" stroke="#FEFEFE" stroke-width="1.8" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8.75 10H21.25" stroke="#FEFEFE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8.75 16.25H16.25" stroke="#FEFEFE" stroke-width="1.77938" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
               {connectSection?.action_btn?.[0] || "Start Chat Consultation"}
             </button>
             <button className={styles.ctaBtnSecondary} onClick={() => navigate('/chat-with-astrologers')}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="#f75801"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
+                <path d="M27.4625 22.9125C27.4625 23.3625 27.3625 23.825 27.15 24.275C26.9375 24.725 26.6625 25.15 26.3 25.55C25.6875 26.225 25.0125 26.7125 24.25 27.025C23.5 27.3375 22.6875 27.5 21.8125 27.5C20.5375 27.5 19.175 27.2 17.7375 26.5875C16.3 25.975 14.8625 25.15 13.4375 24.1125C12 23.0625 10.6375 21.9 9.3375 20.6125C8.05 19.3125 6.8875 17.95 5.85 16.525C4.825 15.1 4 13.675 3.4 12.2625C2.8 10.8375 2.5 9.475 2.5 8.175C2.5 7.325 2.65 6.5125 2.95 5.7625C3.25 5 3.725 4.3 4.3875 3.675C5.1875 2.8875 6.0625 2.5 6.9875 2.5C7.3375 2.5 7.6875 2.575 8 2.725C8.325 2.875 8.6125 3.1 8.8375 3.425L11.7375 7.5125C11.9625 7.825 12.125 8.1125 12.2375 8.3875C12.35 8.65 12.4125 8.9125 12.4125 9.15C12.4125 9.45 12.325 9.75 12.15 10.0375C11.9875 10.325 11.75 10.625 11.45 10.925L10.5 11.9125C10.3625 12.05 10.3 12.2125 10.3 12.4125C10.3 12.5125 10.3125 12.6 10.3375 12.7C10.375 12.8 10.4125 12.875 10.4375 12.95C10.6625 13.3625 11.05 13.9 11.6 14.55C12.1625 15.2 12.7625 15.8625 13.4125 16.525C14.0875 17.1875 14.7375 17.8 15.4 18.3625C16.05 18.9125 16.5875 19.2875 17.0125 19.5125C17.075 19.5375 17.15 19.575 17.2375 19.6125C17.3375 19.65 17.4375 19.6625 17.55 19.6625C17.7625 19.6625 17.925 19.5875 18.0625 19.45L19.0125 18.5125C19.325 18.2 19.625 17.9625 19.9125 17.8125C20.2 17.6375 20.4875 17.55 20.8 17.55C21.0375 17.55 21.2875 17.6 21.5625 17.7125C21.8375 17.825 22.125 17.9875 22.4375 18.2L26.575 21.1375C26.9 21.3625 27.125 21.625 27.2625 21.9375C27.3875 22.25 27.4625 22.5625 27.4625 22.9125Z" stroke="url(#paint0_linear_12974_46590)" stroke-width="1.8" stroke-miterlimit="10"/>
+                <path d="M19.375 7.5H25.625" stroke="url(#paint1_linear_12974_46590)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M22.5 10.625V4.375" stroke="url(#paint2_linear_12974_46590)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <defs>
+                  <linearGradient id="paint0_linear_12974_46590" x1="2.5" y1="15" x2="27.4625" y2="15" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#F75801"/>
+                    <stop offset="1" stop-color="#D43400"/>
+                  </linearGradient>
+                  <linearGradient id="paint1_linear_12974_46590" x1="19.375" y1="8" x2="25.625" y2="8" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#F75801"/>
+                    <stop offset="1" stop-color="#D43400"/>
+                  </linearGradient>
+                  <linearGradient id="paint2_linear_12974_46590" x1="22.5" y1="7.5" x2="23.5" y2="7.5" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#F75801"/>
+                    <stop offset="1" stop-color="#D43400"/>
+                  </linearGradient>
+                </defs>
+              </svg>
               {connectSection?.action_btn?.[1] || "Connect with Astrologer"}
             </button>
             <div className={styles.ctaTrust}>
