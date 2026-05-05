@@ -401,7 +401,7 @@ const HomeV2 = () => {
             )}
           </div>
           {/* Occult World */}
-          <div className={`${styles.featureCard} ${styles.occultWorld}`}>
+          <div className={`${styles.featureCard} ${styles.occultWorld}`} onClick={() => navigate('/occult')} style={{ cursor: 'pointer' }}>
             <div className={styles.occultEllipse} />
             <span className={styles.featureTag}>New</span>
             <div className={styles.fcTop}>
@@ -465,15 +465,42 @@ const HomeV2 = () => {
 
           <div className={styles.gridRow} id="quickGridRow">
             {(quickLinkItems.length > 0 ? quickLinkItems : [
-              { title: "Horoscope\nSection",    redirect_url: "/horoscopes/daily-horoscope", icon: AppIcons.Astrology },
-              { title: "Consult\nAstrologer",   redirect_url: "/chat-with-astrologers",      icon: AppIcons.Chat },
-              { title: "Future\nPredictions",   redirect_url: "/chat-with-astrologers",      icon: AppIcons.Star },
-              { title: "Dasha\nTimeline",       redirect_url: "/kundli",                     icon: AppIcons.Kundali },
-              { title: "Birth\nDetails",        redirect_url: "/kundli",                     icon: AppIcons.Education },
-              { title: "Talk to\nAstrologer",   redirect_url: "/talk-to-astrologers",        icon: AppIcons.Call },
-              { title: "Top Rated\nAstrologer", redirect_url: "/chat-with-astrologers",      icon: AppIcons.Trophy },
-              { title: "My\nSessions",          redirect_url: "/profile",                    icon: AppIcons.Message },
+              { title: "Horoscope\nSection",    redirect_url: "/horoscopes/daily-horoscope/",          icon: AppIcons.Astrology },
+              { title: "Consult\nAstrologer",   redirect_url: "/chat-with-astrologers",    icon: AppIcons.Chat },
+              { title: "Future\nPredictions",   redirect_url: "/chat-with-astrologers",    icon: AppIcons.Star },
+              { title: "Dasha\nTimeline",       redirect_url: "/kundli",                   icon: AppIcons.Kundali },
+              { title: "Birth\nDetails",        redirect_url: "/kundli",                   icon: AppIcons.Education },
+              { title: "Talk to\nAstrologer",   redirect_url: "/chat-with-astrologers",    icon: AppIcons.Call },
+              { title: "Top Rated\nAstrologer", redirect_url: "/chat-with-astrologers",    icon: AppIcons.Trophy },
+              { title: "My\nSessions",          redirect_url: "/profile",                  icon: AppIcons.Message },
             ]).map((a, i) => {
+              // Fallback URLs by slug or title if API redirect_url is empty
+              const titleFallbacks = {
+                "horoscope section":    "/horoscopes/daily-horoscope/",
+                "consult astrologer":   "/chat-with-astrologers",
+                "future predictions":   "/chat-with-astrologers",
+                "dasha timeline":       "/kundli",
+                "birth details":        "/kundli",
+                "talk to astrologer":   "/chat-with-astrologers",
+                "top rated astrologer": "/chat-with-astrologers",
+                "my sessions":          "/profile",
+              };
+              const slugFallbacks = {
+                "horoscope": "/daily-horoscope",
+                "consult-astrologer": "/chat-with-astrologers",
+                "future-predictions": "/chat-with-astrologers",
+                "dasha-timeline": "/kundli",
+                "birth-details": "/kundli",
+                "talk-to-astrologer": "/chat-with-astrologers",
+                "top-rated-astrologer": "/chat-with-astrologers",
+                "my-sessions": "/profile",
+              };
+              // Normalize title: remove newlines, trim, lowercase
+              const normalizedTitle = (a.title || "").replace(/\n/g, " ").trim().toLowerCase();
+              const effectiveUrl = a.redirect_url
+                || slugFallbacks[a.slug]
+                || titleFallbacks[normalizedTitle]
+                || null;
               const iconBgs = [
                 "linear-gradient(116.1deg, #FBF3F1 0%, #F7E0DA 100%)",
                 "linear-gradient(116.1deg, #F3F1FD 0%, #EBE5FC 100%)",
@@ -485,7 +512,15 @@ const HomeV2 = () => {
                 "linear-gradient(116.1deg, #FFFFFF 0%, #CBE9FC 100%)",
               ];
               return (
-                <div key={i} className={styles.gridItem} onClick={() => a.redirect_url && navigate(a.redirect_url)} style={{ cursor: a.redirect_url ? 'pointer' : 'default' }}>
+                <div key={i} className={styles.gridItem} onClick={() => {
+                  const url = effectiveUrl;
+                  if (!url) return;
+                  if (url.startsWith('http')) {
+                    window.location.href = url;
+                  } else {
+                    navigate(url, a.state ? { state: a.state } : undefined);
+                  }
+                }} style={{ cursor: effectiveUrl ? 'pointer' : 'default' }}>
                   <div
                     className={styles.gridIconBox}
                     style={{
