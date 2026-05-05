@@ -241,22 +241,18 @@ const ComingSoon = () => {
                     </p>
                     <p>
                       Have questions? Write to{" "}
-                      <a href="mailto:onboarding@shubhastro.in" className={styles.thankYouLink}>
-                        onboarding@shubhastro.in
-                      </a>{" "}
-                      or WhatsApp{" "}
-                      <a href="https://wa.me/918655682877" className={styles.thankYouLink}>
-                        +91-8655682877
+                      <a href="mailto:onboarding@shubhastro.ai" className={styles.thankYouLink}>
+                        onboarding@shubhastro.ai
                       </a>
                     </p>
                     <a
-                      href={WHATSAPP_INVITE_URL}
+                      href="https://wa.me/918655682877"
                       target="_blank"
                       rel="noopener noreferrer"
                       className={styles.whatsappBtn}
                     >
                       <IoLogoWhatsapp />
-                      Join WhatsApp Community
+                      Connect on WhatsApp
                     </a>
                   </div>
                 ) : (
