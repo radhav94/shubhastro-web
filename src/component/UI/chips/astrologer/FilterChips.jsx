@@ -62,6 +62,24 @@ const FilterChips = ({
     };
   }, []);
 
+  // Poll every 15s when filters are active to keep astrologer status updated
+  useEffect(() => {
+    if (!isFilterActiveRef.current) return;
+
+    const intervalId = setInterval(() => {
+      if (!isFilterActiveRef.current) return;
+      applyFilters({
+        pageNo: 1,
+        searchValue: searchTextRef.current,
+        skills: selectedSkillsRef.current,
+        experties: expertiesRef.current,
+        append: false,
+      });
+    }, 15000);
+
+    return () => clearInterval(intervalId);
+  }, [active, activeChips, selectedGender, selectedSort]);
+
   // Keep refs in sync with state for pagination
   useEffect(() => { searchTextRef.current = searchText; }, [searchText]);
   useEffect(() => { selectedSkillsRef.current = selectedSkills; }, [selectedSkills]);

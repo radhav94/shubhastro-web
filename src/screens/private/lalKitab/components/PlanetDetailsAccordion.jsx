@@ -64,17 +64,12 @@ const PlanetDetailsAccordion = ({ planets, isLoading, initialSelected = 0, onPla
               <h3 className={styles.detailName}>{name}</h3>
               {active.house && <span className={styles.detailHouse}>House {active.house}</span>}
             </div>
-          </div>
-
-          {(active.interpretation || active.remedies?.length > 0) && (
-            <div className={styles.ttsRow}>
+            {(active.interpretation || active.remedies?.length > 0) && (
               <button className={styles.ttsBtn} onClick={isSpeaking ? stop : handleSpeak} aria-label={isSpeaking ? "Stop reading" : "Read aloud"}>
                 {isSpeaking ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                <span style={{ display: isSpeaking ? "none" : "inline" }}>Listen</span>
-                <span style={{ display: isSpeaking ? "inline" : "none" }}>Stop</span>
               </button>
-            </div>
-          )}
+            )}
+          </div>
 
           {active.interpretation && (
             <p className={styles.interpretation}>{active.interpretation}</p>

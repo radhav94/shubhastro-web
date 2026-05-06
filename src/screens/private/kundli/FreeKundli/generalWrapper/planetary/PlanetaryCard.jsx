@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PrimaryText from "../../../../../../component/PrimaryText";
+import TTSButton from "../../../../../../component/UI/TTSButton";
 import styles from "./Planetary.module.scss";
 
 const PlanetaryCard = ({ planet }) => {
@@ -46,6 +47,7 @@ const PlanetaryCard = ({ planet }) => {
         <h2 className={styles.cardTitle}>
           {safe(planet.planet_considered)} Consideration
         </h2>
+        <TTSButton text={`${safe(planet.planet_considered)} Consideration. Definition: ${safe(planet.planet_definitions)}. Affliction: ${safe(planet.affliction)}. General Prediction: ${safe(planet.general_prediction)}`} />
       </div>
 
       {/* Content - Always Visible */}

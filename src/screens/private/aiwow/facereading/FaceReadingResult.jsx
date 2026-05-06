@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import styles from './FaceReadingResult.module.scss';
 import { Toast, PieChart } from '../../../../component';
 import Footer from '../../../../layouts/Footer';
+import TTSButton from '../../../../component/UI/TTSButton';
 
 const FaceReadingResult = () => {
   const navigate = useNavigate();
@@ -130,7 +131,10 @@ const FaceReadingResult = () => {
 
         {/* Overall Summary */}
         {overallReading.summary && (
-          <div className={styles.summaryCard}>
+          <div className={styles.summaryCard} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <TTSButton text={`Overall Reading. ${overallReading.summary}`} />
+            </span>
 
             {faceImage && (
               <div className={styles.imageSection}>
@@ -166,7 +170,10 @@ const FaceReadingResult = () => {
               <div className={styles.guidanceGrid}>
                 {/* Strengths */}
                 {overallReading?.strengths?.length > 0 && (
-                  <div className={styles.guidanceCard}>
+                  <div className={styles.guidanceCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Strengths. ${overallReading.strengths.join('. ')}`} />
+                    </span>
                     <button
                       onClick={() => setExpandedGuidance(expandedGuidance === 'overall-strengths' ? null : 'overall-strengths')}
                       className={styles.guidanceHeader}
@@ -188,7 +195,10 @@ const FaceReadingResult = () => {
 
                 {/* Challenges */}
                 {overallReading?.challenges?.length > 0 && (
-                  <div className={styles.guidanceCard}>
+                  <div className={styles.guidanceCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Challenges. ${overallReading.challenges.join('. ')}`} />
+                    </span>
                     <button
                       onClick={() => setExpandedGuidance(expandedGuidance === 'overall-challenges' ? null : 'overall-challenges')}
                       className={styles.guidanceHeader}
@@ -210,7 +220,10 @@ const FaceReadingResult = () => {
 
                 {/* Life Advice */}
                 {overallReading?.lifeAdvice && (
-                  <div className={styles.guidanceCard}>
+                  <div className={styles.guidanceCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Life Advice. ${overallReading.lifeAdvice}`} />
+                    </span>
                     <button
                       onClick={() => setExpandedGuidance(expandedGuidance === 'overall-lifeAdvice' ? null : 'overall-lifeAdvice')}
                       className={styles.guidanceHeader}
@@ -228,7 +241,10 @@ const FaceReadingResult = () => {
 
                 {/* Career Suggestions */}
                 {overallReading?.careerSuggestions?.length > 0 && (
-                  <div className={styles.guidanceCard}>
+                  <div className={styles.guidanceCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Career Suggestions. ${overallReading.careerSuggestions.join(', ')}`} />
+                    </span>
                     <button
                       onClick={() => setExpandedGuidance(expandedGuidance === 'overall-career' ? null : 'overall-career')}
                       className={styles.guidanceHeader}
@@ -250,7 +266,10 @@ const FaceReadingResult = () => {
 
                 {/* Unique Traits */}
                 {uniqueTraits?.length > 0 && (
-                  <div className={styles.guidanceCard}>
+                  <div className={styles.guidanceCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Unique Traits. ${uniqueTraits.join('. ')}`} />
+                    </span>
                     <button
                       onClick={() => setExpandedGuidance(expandedGuidance === 'overall-traits' ? null : 'overall-traits')}
                       className={styles.guidanceHeader}
@@ -275,14 +294,20 @@ const FaceReadingResult = () => {
               {(overallReading.relationshipInsights || overallReading.spiritualGuidance) && (
                 <div className={styles.insightsContainer}>
                   {overallReading.relationshipInsights && (
-                    <div className={styles.insightCard}>
+                    <div className={styles.insightCard} style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                        <TTSButton text={`Relationship Insights. ${overallReading.relationshipInsights}`} />
+                      </span>
                       <h3 className={styles.insightTitle}>💕 Relationship Insights</h3>
                       <p className={styles.insightText}>{overallReading.relationshipInsights}</p>
                     </div>
                   )}
 
                   {overallReading.spiritualGuidance && (
-                    <div className={styles.insightCard}>
+                    <div className={styles.insightCard} style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                        <TTSButton text={`Spiritual Guidance. ${overallReading.spiritualGuidance}`} />
+                      </span>
                       <h3 className={styles.insightTitle}>🙏 Spiritual Guidance</h3>
                       <p className={styles.insightText}>{overallReading.spiritualGuidance}</p>
                     </div>
@@ -298,7 +323,10 @@ const FaceReadingResult = () => {
               <div className={styles.guidanceGrid}>
                 {personalityAnalysis && Object.entries(personalityAnalysis).map(([key, value]) => (
                   value && (
-                    <div key={key} className={styles.guidanceCard}>
+                    <div key={key} className={styles.guidanceCard} style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                        <TTSButton text={`${key.replace(/([A-Z])/g, ' $1').trim()}. ${value.level || ''}. ${value.description || ''}`} />
+                      </span>
                       <button
                         onClick={() => setExpandedGuidance(expandedGuidance === `personality-${key}` ? null : `personality-${key}`)}
                         className={styles.guidanceHeader}
@@ -338,7 +366,7 @@ const FaceReadingResult = () => {
                     })
                     .map(([key, value]) => (
                       value && (
-                        <div key={key} className={styles.auraColorCard}>
+                        <div key={key} className={styles.auraColorCard} style={{ position: 'relative' }}>
                           <button
                             onClick={() => setExpandedGuidance(expandedGuidance === `aura-${key}` ? null : `aura-${key}`)}
                             className={styles.auraColorHeader}
@@ -360,6 +388,9 @@ const FaceReadingResult = () => {
                               </span>
                             </div>
                           </button>
+                          <span style={{ position: 'absolute', top: '12px', right: '100px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                            <TTSButton text={`${key.charAt(0).toUpperCase() + key.slice(1)} Aura. ${value.color || 'Unknown'}. ${value.percentage || 0} percent. ${value.meaning || ''}`} />
+                          </span>
                           <div className={`${styles.guidanceContent} ${expandedGuidance === `aura-${key}` ? styles.expanded : ''}`}>
                             <p className={styles.auraMeaning}>{value.meaning || ''}</p>
                           </div>
@@ -390,7 +421,10 @@ const FaceReadingResult = () => {
               <div className={styles.guidanceGrid}>
                 {facialFeatures && Object.entries(facialFeatures).map(([key, value]) => (
                   value && (
-                    <div key={key} className={styles.guidanceCard}>
+                    <div key={key} className={styles.guidanceCard} style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                        <TTSButton text={`${key.replace(/([A-Z])/g, ' $1').trim()}. Shape: ${value.shape || value.shapeType || 'N/A'}. ${value.interpretation || ''}`} />
+                      </span>
                       <button
                         onClick={() => setExpandedGuidance(expandedGuidance === `feature-${key}` ? null : `feature-${key}`)}
                         className={styles.guidanceHeader}
@@ -421,7 +455,10 @@ const FaceReadingResult = () => {
               <div className={styles.guidanceGrid}>
                 {/* Dominant Planet */}
                 {cosmicConnections.dominantPlanet && (
-                  <div className={styles.guidanceCard}>
+                  <div className={styles.guidanceCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Dominant Planet. ${cosmicConnections.dominantPlanet.planet}. ${cosmicConnections.dominantPlanet.influence}${cosmicConnections.dominantPlanet.traits ? '. Traits: ' + cosmicConnections.dominantPlanet.traits.join(', ') : ''}`} />
+                    </span>
                     <button
                       onClick={() => setExpandedGuidance(expandedGuidance === 'cosmic-planet' ? null : 'cosmic-planet')}
                       className={styles.cosmicHeader}
@@ -447,7 +484,10 @@ const FaceReadingResult = () => {
 
                 {/* Zodiac Alignment */}
                 {cosmicConnections.zodiacAlignment && (
-                  <div className={styles.guidanceCard}>
+                  <div className={styles.guidanceCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Zodiac Alignment. ${cosmicConnections.zodiacAlignment.sign}. ${cosmicConnections.zodiacAlignment.description}${cosmicConnections.zodiacAlignment.compatibility ? '. Compatible with: ' + cosmicConnections.zodiacAlignment.compatibility : ''}`} />
+                    </span>
                     <button
                       onClick={() => setExpandedGuidance(expandedGuidance === 'cosmic-zodiac' ? null : 'cosmic-zodiac')}
                       className={styles.cosmicHeader}
@@ -471,7 +511,10 @@ const FaceReadingResult = () => {
 
                 {/* Elemental Energy */}
                 {cosmicConnections.elementalEnergy && (
-                  <div className={styles.guidanceCard}>
+                  <div className={styles.guidanceCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Elemental Energy. ${cosmicConnections.elementalEnergy.element}${cosmicConnections.elementalEnergy.characteristics ? '. ' + cosmicConnections.elementalEnergy.characteristics.join(', ') : ''}`} />
+                    </span>
                     <button
                       onClick={() => setExpandedGuidance(expandedGuidance === 'cosmic-element' ? null : 'cosmic-element')}
                       className={styles.cosmicHeader}
@@ -498,7 +541,10 @@ const FaceReadingResult = () => {
 
                 {/* Spiritual Path */}
                 {cosmicConnections.spiritualPath && (
-                  <div className={styles.guidanceCard}>
+                  <div className={styles.guidanceCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Spiritual Path. ${cosmicConnections.spiritualPath.path}${cosmicConnections.spiritualPath.guidance ? '. Guidance: ' + cosmicConnections.spiritualPath.guidance : ''}${cosmicConnections.spiritualPath.practices ? '. Practices: ' + cosmicConnections.spiritualPath.practices.join(', ') : ''}`} />
+                    </span>
                     <button
                       onClick={() => setExpandedGuidance(expandedGuidance === 'cosmic-spiritual' ? null : 'cosmic-spiritual')}
                       className={styles.cosmicHeader}
@@ -538,7 +584,10 @@ const FaceReadingResult = () => {
             <div className={styles.section}>
               <div className={styles.guidanceGrid}>
                 {personalizedInsights.birthChartCorrelation && (
-                  <div className={styles.guidanceCard}>
+                  <div className={styles.guidanceCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Birth Chart Correlation. ${personalizedInsights.birthChartCorrelation}`} />
+                    </span>
                     <button onClick={() => setExpandedGuidance(expandedGuidance === 'insight-birthchart' ? null : 'insight-birthchart')} className={styles.guidanceHeader}>
                       <h3 className={styles.cardTitle}>📜 Birth Chart Correlation</h3>
                       <span className={styles.guidanceArrow}>{expandedGuidance === 'insight-birthchart' ? '▲' : '▼'}</span>
@@ -549,7 +598,10 @@ const FaceReadingResult = () => {
                   </div>
                 )}
                 {personalizedInsights.planetaryInfluenceOnFace && (
-                  <div className={styles.guidanceCard}>
+                  <div className={styles.guidanceCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Planetary Influence on Face. ${personalizedInsights.planetaryInfluenceOnFace}`} />
+                    </span>
                     <button onClick={() => setExpandedGuidance(expandedGuidance === 'insight-planetary' ? null : 'insight-planetary')} className={styles.guidanceHeader}>
                       <h3 className={styles.cardTitle}>🌍 Planetary Influence on Face</h3>
                       <span className={styles.guidanceArrow}>{expandedGuidance === 'insight-planetary' ? '▲' : '▼'}</span>
@@ -560,7 +612,10 @@ const FaceReadingResult = () => {
                   </div>
                 )}
                 {personalizedInsights.karmaReflection && (
-                  <div className={styles.guidanceCard}>
+                  <div className={styles.guidanceCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Karma Reflection. ${personalizedInsights.karmaReflection}`} />
+                    </span>
                     <button onClick={() => setExpandedGuidance(expandedGuidance === 'insight-karma' ? null : 'insight-karma')} className={styles.guidanceHeader}>
                       <h3 className={styles.cardTitle}>☸️ Karma Reflection</h3>
                       <span className={styles.guidanceArrow}>{expandedGuidance === 'insight-karma' ? '▲' : '▼'}</span>
@@ -571,7 +626,10 @@ const FaceReadingResult = () => {
                   </div>
                 )}
                 {personalizedInsights.lifePathAlignment && (
-                  <div className={styles.guidanceCard}>
+                  <div className={styles.guidanceCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Life Path Alignment. ${personalizedInsights.lifePathAlignment}`} />
+                    </span>
                     <button onClick={() => setExpandedGuidance(expandedGuidance === 'insight-lifepath' ? null : 'insight-lifepath')} className={styles.guidanceHeader}>
                       <h3 className={styles.cardTitle}>🛤️ Life Path Alignment</h3>
                       <span className={styles.guidanceArrow}>{expandedGuidance === 'insight-lifepath' ? '▲' : '▼'}</span>
@@ -582,7 +640,10 @@ const FaceReadingResult = () => {
                   </div>
                 )}
                 {personalizedInsights.remedies?.length > 0 && (
-                  <div className={styles.guidanceCard}>
+                  <div className={styles.guidanceCard} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Astrological Remedies. ${personalizedInsights.remedies.join('. ')}`} />
+                    </span>
                     <button onClick={() => setExpandedGuidance(expandedGuidance === 'insight-remedies' ? null : 'insight-remedies')} className={styles.guidanceHeader}>
                       <h3 className={styles.cardTitle}>🔮 Astrological Remedies</h3>
                       <span className={styles.guidanceArrow}>{expandedGuidance === 'insight-remedies' ? '▲' : '▼'}</span>

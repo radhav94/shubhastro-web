@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useFetchAdvancePanchangQuery } from "../../../../redux/api/panchang/panchangApi";
+import useUserLocation from "../../../../utils/hooks/useUserLocation";
 import SectionHeader from "./SectionHeader";
 import sun from "../../../../assets/images/sun.png";
 import sunriseIcon from "../../../../assets/images/sunrise-icon.svg";
@@ -24,6 +25,7 @@ const formatTime = (time) => {
 const PanchangSection = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("today");
+  const userLocation = useUserLocation();
 
   const handleNavigateToPanchang = () => {
     // Calculate the date based on active tab
@@ -50,9 +52,9 @@ const PanchangSection = () => {
     navigate("/panchang", {
       state: {
         date: formattedDate,
-        location: "Mumbai, India",
-        latitude: 19.132,
-        longitude: 72.342,
+        location: userLocation.locationName || "Mumbai, India",
+        latitude: userLocation.lat,
+        longitude: userLocation.lon,
       }
     });
   };
@@ -71,8 +73,8 @@ const PanchangSection = () => {
       year: date.getFullYear(),
       hour: pad(date.getHours()),
       min: pad(date.getMinutes()),
-      lat: 19.132,
-      lon: 72.342,
+      lat: userLocation.lat,
+      lon: userLocation.lon,
       tzone: 5.5,
     };
   };
@@ -89,7 +91,7 @@ const PanchangSection = () => {
       default:
         return getDatePayload(0);
     }
-  }, [activeTab]);
+  }, [activeTab, userLocation.lat, userLocation.lon]);
 
   // Fetch panchang data
   const { data, isLoading } = useFetchAdvancePanchangQuery(payload);

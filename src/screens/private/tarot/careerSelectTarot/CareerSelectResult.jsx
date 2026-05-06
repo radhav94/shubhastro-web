@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "../resultTarot/ResultTarot.module.scss";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 const CareerSelectResult = ({ card, onReset }) => {
   if (!card) return null;
@@ -32,7 +33,7 @@ const CareerSelectResult = ({ card, onReset }) => {
           <h2 className={styles.cardName}>{name}</h2>
 
           <div className={styles.section}>
-            <h3>📝 Overview</h3>
+            <div className={styles.sectionHeader}><h3>📝 Overview</h3><TTSButton text={`Overview. ${description}`} /></div>
             <p>{description}</p>
           </div>
 
@@ -63,21 +64,21 @@ const CareerSelectResult = ({ card, onReset }) => {
 
           {strengths && (
             <div className={styles.section}>
-              <h3>💪 Strengths to Leverage</h3>
+              <div className={styles.sectionHeader}><h3>💪 Strengths to Leverage</h3><TTSButton text={`Strengths to Leverage. ${strengths}`} /></div>
               <p>{strengths}</p>
             </div>
           )}
 
           {challenges && (
             <div className={styles.section}>
-              <h3>⚠️ Potential Challenges</h3>
+              <div className={styles.sectionHeader}><h3>⚠️ Potential Challenges</h3><TTSButton text={`Potential Challenges. ${challenges}`} /></div>
               <p>{challenges}</p>
             </div>
           )}
 
           {advice && (
             <div className={styles.section}>
-              <h3>💡 Professional Advice</h3>
+              <div className={styles.sectionHeader}><h3>💡 Professional Advice</h3><TTSButton text={`Professional Advice. ${advice}`} /></div>
               <p>{advice}</p>
             </div>
           )}

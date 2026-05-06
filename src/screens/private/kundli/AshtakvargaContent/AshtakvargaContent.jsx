@@ -7,6 +7,7 @@ import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { useGetAshtakvargaChartQuery } from "../../../../redux/api/kundli/kundliApi";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -81,7 +82,10 @@ const AshtakvargaContent = () => {
       {true && (
         <div className={styles.mainContainer}>
           <div className={styles.textContainer}>
-            <h1 className={styles.cardTitle}>Ashtakvarga Chart</h1>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+              <h1 className={styles.cardTitle}>Ashtakvarga Chart</h1>
+              <TTSButton text="Ashtakvarga Chart. Ashtakvarga is used to assess the strength and patterns that are present in a birth chart. The Ashtakvarga or Ashtakavarga is a numerical quantification or score of each planet placed in the chart with reference to the other 7 planets and the Lagna. In Sarva Ashtaka Varga the total scores of all the BAVs are overlaid and then totalled. This makes the SAV of the chart. The total of all the scores should be 337" />
+            </div>
             <p>
               Ashtakvarga is used to assess the strength and patterns that are
               present in a birth chart. The Ashtakvarga or Ashtakavarga is a

@@ -138,6 +138,16 @@ $font-sans: "Poppins", sans-serif;
   margin-top: 10px;
 }
 
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  h3 { margin: 0; }
+  span { font-weight: 600; font-size: 15px; color: $color-text-dark; }
+}
+
 .resetWrapper {
   text-align: center;
   margin-top: 20px;

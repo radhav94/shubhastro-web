@@ -75,6 +75,14 @@ const responseErrorHandler = (error) => {
     switch (status) {
       case 401:
         if (!unAuthorizedCount) {
+          // Don't redirect guest users (no token means they're browsing without login)
+          const role = localStorage.getItem("shubhtalk_role");
+          const hasToken = role === "ASTROLOGER"
+            ? localStorage.getItem("shubhtalk_astro_token")
+            : localStorage.getItem("shubhtalk_customer_token");
+
+          if (!hasToken) break;
+
           unAuthorizedCount++;
           
           // Get current path for redirect after login

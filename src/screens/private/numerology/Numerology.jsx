@@ -4,6 +4,7 @@ import styles from "./Numerology.module.scss";
 import PrimaryText from "../../../component/PrimaryText";
 import { PATH } from "../../../utils/routes/Paths";
 import { Link, useNavigate } from "react-router-dom";
+import TTSButton from "../../../../src/component/UI/TTSButton";
 import {
   useGetAllKundlisQuery,
   useCreateKundliMutation,
@@ -484,8 +485,13 @@ const NumerologyWeb = () => {
           {Object.values(numerologyResponse).map((item, index) => (
             <div key={index} className={styles.numerologyCard}>
               <div className={styles.cardContent}>
-                <span className={styles.cardLabel}>{item.title}</span>
-                <h3 className={styles.cardTitle}>{item.category}</h3>
+                <span className={styles.cardLabel}>{item.title}
+                </span>
+                <h3 className={styles.cardTitle}>{item.category}
+                  <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+                      <TTSButton text={`${[item?.category,item?.meaning].filter(Boolean).join('. ')}`} />
+                  </span>
+                </h3>
                 <p className={styles.cardDescription}>{item.meaning}</p>
               </div>
               <div className={styles.cardNumber}>{item.number}</div>

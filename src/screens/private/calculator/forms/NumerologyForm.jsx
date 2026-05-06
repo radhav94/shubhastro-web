@@ -11,7 +11,7 @@ const NumerologyForm = ({
   onChange,
   onSubmit,
   onReset,
-  hideType = false,
+  hideType = true,
 }) => {
   const { name, type, dob } = formData;
 

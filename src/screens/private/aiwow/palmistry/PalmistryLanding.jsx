@@ -6,6 +6,7 @@ import PalmMountIcon from '../../../../assets/icons/palmmount.png';
 import CakeIcon from '../../../../assets/icons/Cake.png';
 import LoveIcon from '../../../../assets/icons/loveIcon.png';
 import Footer from '../../../../layouts/Footer';
+import TTSButton from '../../../../component/UI/TTSButton';
 
 const PalmistryLanding = () => {
   const navigate = useNavigate();
@@ -54,7 +55,10 @@ const PalmistryLanding = () => {
 
         <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
-            <div key={index} className={styles.featureCard}>
+            <div key={index} className={styles.featureCard} style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
+                <TTSButton text={`${[feature?.title, feature.description].filter(Boolean).join('. ')}`} />
+              </span>
               <div className={styles.iconWrapper}>
                 <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
               </div>

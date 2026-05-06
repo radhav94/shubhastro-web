@@ -137,7 +137,7 @@ const AstrologerProfile = () => {
 
   const { data: followingData } = useCheckFollowingStatusQuery(
     { astrologerId: data?._id },
-    { skip: !data?._id }
+    { skip: !data?._id || !getToken() }
   );
 
   // Check if the current astrologer is in the following list

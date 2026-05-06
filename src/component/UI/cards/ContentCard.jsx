@@ -2,6 +2,7 @@ import React from "react";
 import PrimaryText from "../../PrimaryText";
 import styles from "./ContentCard.module.scss";
 import { appColors } from "../../../utils/theme";
+import TTSButton from "../TTSButton";
 
 const ContentCard = ({
   title,
@@ -21,6 +22,17 @@ const ContentCard = ({
     day: "numeric",
   });
 
+  // Build full TTS text from all card content
+  const ttsText = (() => {
+    const parts = [];
+    if (title) parts.push(title);
+    if (description) parts.push(description);
+    if (isDailyHoroscope && zodiacData?.length) {
+      parts.push(zodiacData.map((d) => `${d.label}: ${d.value}`).join('. '));
+    }
+    return parts.join('. ');
+  })();
+
   return (
     <div
       className={`${styles.card} ${className}`}
@@ -31,12 +43,14 @@ const ContentCard = ({
           {title}
         </PrimaryText>
 
-        {showDate && (
-          <PrimaryText className={styles.date}>
-            {date || currentDate}
-          </PrimaryText>
-        )}
+        <TTSButton text={ttsText} />
       </div>
+
+      {showDate && (
+        <PrimaryText className={styles.date}>
+          {date || currentDate}
+        </PrimaryText>
+      )}
 
       <PrimaryText size_14 className={styles.description}>
         {description}

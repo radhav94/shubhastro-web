@@ -2,343 +2,122 @@ import React from 'react';
 import styles from "./StaticPages.module.scss";
 import Divider from '../../../component/Divider';
 
-const TermsConditions = ({isRefundPolicy = false}) => {
+const TermsConditions = () => {
   return (
-    <div className={styles.container} >
-    <h1 className={styles.title} >TERMS AND CONDITIONS OF USAGE</h1>
-    <Divider/>
-    {isRefundPolicy ? 
-    <p className={styles.paragraph}>These terms and conditions of Use (hereinafter referred as "Terms of Usage") describe and govern the User's use of the content and services offered by ShubhAstro Services Private Limited (Formerly Codeyeti Software Solutions Pvt. Ltd.) through www.ShubhAstro.com (hereinafter referred as "We" "ShubhAstro" "us" "our" "ShubhAstro application" "Website").</p> 
-    : (
-      <>
-      <p className={styles.paragraph}>This website is owned and operated ShubhAstro Services Private Limited ("us" "We", "the Company" or "ShubhAstro" which also includes its affiliates) (<a href="mailto:contact@ShubhAstro.com" className={styles.link}>contact@ShubhAstro.com</a>). The Platform may be provided or be accessible via multiple websites or applications whether owned and/or operated by us or by third parties, including, without limitation, the website<a href="https://www.shubhastro.in/" className={styles.link}><strong>&nbsp;<u>shubhastro.in</u></strong></a>&nbsp;and its related apps.</p>
-      <p className={styles.paragraph}>Following Terms and Conditions (the "Agreement") govern your access and use of our online platform through which consulting, information related to Indian Astrology and other allied spiritual sciences (collectively, the "Spiritual Advisory Services") are administered and accessible to any person. </p>
-      <p className={styles.paragraph}>By accessing or using the Platform, you are entering into this Agreement. You should read this Agreement carefully before starting to use the Platform. If you do not agree to be bound to any term of this Agreement, you must not access the Platform.</p>
-      <p className={styles.paragraph}>When the terms "we", "us", "our" or similar are used in this Agreement, they refer to any company that owns and operates the Platform (the "Company").</p>
-      <p className={styles.paragraph}>IF YOU ARE THINKING ABOUT HARMING YOURSELF OR OTHERS OR IF YOU FEEL THAT ANY OTHER PERSON MAY BE IN ANY DANGER OR IF YOU HAVE ANY MEDICAL EMERGENCY, YOU MUST IMMEDIATELY CALL THEPOLICE OR A SUICIDE PREVENTION HELPLINE SUCH AS AASRA (91-22-27546669)AND NOTIFY THEM. THE PLATFORM IS NOT DESIGNED FOR USE IN ANY OF THE AFOREMENTIONED CASES AND THE SERVICE PROVIDERS CANNOT PROVIDE THE ASSISTANCE REQUIRED IN ANY OF THE AFOREMENTIONED CASES. IF YOU PROCEED TO USE THE PLATFORM NOTWITHSTANDING THIS NOTICE, YOU DO SO ENTIRELY AT YOUR OWN RISK.</p>
-      <p className={styles.paragraph}>THE PLATFORM IS NOT INTENDED FOR THE PROVISION OF CLINICAL DIAGNOSIS REQUIRING AN IN-PERSON EVALUATION. IT IS ALSO NOT INTENDED FOR ANY INFORMATION REGARDING WHICH DRUGS OR MEDICAL TREATMENT MAY BE APPROPRIATE FOR YOU, AND YOU SHOULD DISREGARD ANY SUCH ADVICE IF DELIVERED THROUGH THE PLATFORM.</p>
-      <p className={styles.paragraph}>DO NOT DISREGARD, AVOID, OR DELAY IN OBTAINING IN-PERSON CARE FROM YOUR DOCTOR OR OTHER QUALIFIED PROFESSIONAL BECAUSE OF INFORMATION OR ADVICE YOU RECEIVED THROUGH THE PLATFORM.</p>
-      </>
-    )
-    }
-    
-    <h4 className={styles.subtitle}>UPDATION</h4>
-    <p className={styles.paragraph}>The Website may update/amend/modify these Terms of Usage from time to time. The User is responsible to check and go through the Terms of Usage periodically to remain in compliance with these terms before you access the website or avail services made available on the website of ShubhAstro.</p>
-    
-    <h4 className={styles.subtitle}>USER CONSENT</h4>
-    <p className={styles.paragraph}>By accessing or downloading the Website and using it, you ("Member", "You", "Your") indicate that you understand the terms and unconditionally &amp; expressly consent to the Terms of Usage of this Website and agree to abide by them. If you do not agree with the Terms of Usage, please do not click on the "I AGREE" button. The User is advised to read the Terms of Usage carefully before using or registering on the Website or accessing any material, information or services through the Website. Your use and continued usage of the Website (irrespective of the amendments made from time to time) shall signify your acceptance of the terms of usage and your agreement to be legally bound by the same.</p>
-    
-    <h4 className={styles.subtitle}>GENERAL DESCRIPTION</h4>
-    <p className={styles.paragraph}>The Website is an internet-based portal having its existence on World Wide Web, Application and other electronic medium and provides a platform for obtaining astrological content, reports, data, telephone, video and email consultations (hereinafter referred as "Content"). The Content offered through the Website consistseither "Free Services","Paid Services" or a combination of the two (Collectively referred as "Services"). Free Services are easily accessible without becoming a member however for accessing the personalised astrological services and/or receive additional Content and get access to Paid Services. You are required to register as a member on the portal. By registering for Paid Services, a Member agrees to:</p>
-    <ul className={styles.list}>
-    <li className={styles.listItem}>To provide current, complete, and accurate information about himself as prompted to do so by the Website.</li>
-    <li className={styles.listItem}>To maintain and update the above information as required and submitted by you with the view to maintain the accuracy of the information being current and complete.</li>
-    </ul>
+    <div className={styles.container}>
+      <h1 className={styles.title}>TERMS AND CONDITIONS OF SERVICE</h1>
+      <Divider />
 
-    <h4 className={styles.subtitle}>REGISTRATION AND ELIGIBILITY</h4>
-    <ul className={styles.list}>
-    <li className={styles.listItem}>By using this website, you agree that you are over the age of 18 years and are allowed to enter into a legally binding and enforceable contract under Indian Contract Act, 1872. The Website would not be held responsible for any misuse that may occur by virtue of any person including a minor using the services provided through the Website. You are however allowed to ask questions related to minors in your family as per the terms and conditions outlined herewith in this policy.</li>
-    <li className={styles.listItem}>For the User to avail the services, the User will be directed to Register as a Member on the Website whereby You (User) agree to provide update, current and accurate information while filling up the sign-in form. All information that you fill and provide to the Website and all updates thereto are referred to in these Terms of Usage as "Registration Data".</li>
-    <li className={styles.listItem}>An account could be created by you through the Website ID (Your Phone Number) and password (OTP)<strong>&nbsp;or other log - in ID and password which can include a facebook, gmail or any other valid email ID.</strong>&nbsp;The User while creating an account hereby represents and warrants that all the information provided by the User is current, accurate and complete and that the User will maintain the accuracy and keep the information updated from time to time. Use of another User's account information for availing the services is expressly prohibited. If in case it is found that the information so supplied on the Website is inaccurate, incomplete, untrue and not current, the Website has the right to suspend or terminate the User's account and restrict/refuse the use of the Website by such User in future.</li>
-    <li className={styles.listItem}>The right to use this Website is personal to the User and is not transferable to any other person or entity. The User would be responsible for protecting the confidentiality of User's passwords and other information required for the purposes of registration. The User would be fully responsible for all the activities that occur under the User's account with the Website. The Website cannot and will not be liable for any loss or damage arising from the User's failure to maintain secrecy and confidentiality. The User shall notify the Website immediately if they become aware of any unauthorized use of their Account(s) or breach of any security. The User must log out from its account at the end of the session.</li>
-    <li className={styles.listItem}>The User while availing any service shall be informed whether the service so rendered is personal to the Website or is available from a Third party. The Website shall have no control or monitoring on the information disseminated to any third party via the Website.</li>
-    <li className={styles.listItem}>The User agrees, understands and confirms that his/ her personal data including without limitation to details relating to debit card/ credit card transmitted over the Internet may be susceptible to misuse, hacking, theft and/ or fraud and that the Website or the Payment Service Provider(s) have no control over such matters.</li>
-    <li className={styles.listItem}>The Website does not permit the use of the Services by any User under the following conditions: -
-     <ul className={styles.nestedList}>
-    <li className={styles.nestedListItem}>If the User is a resident of any jurisdiction that may prohibit the use of the Services rendered by the Website.</li>
-    <li className={styles.nestedListItem}>If the User is a resident of any State/Country that prohibits by way of law, regulation, treaty or administrative act for entering into trade relations or/and</li>
-    <li className={styles.nestedListItem}>Due to any religious practices.</li>
-    <li className={styles.nestedListItem}>If the User has created multiple accounts using various mobile numbers. The User may not have more than one active account with the Website.</li>
-    </ul>
-    </li>
-    </ul>
+      <p className={styles.paragraph}><strong>Effective Date:</strong> April 21, 2026 &nbsp;|&nbsp; <strong>Last Updated:</strong> April 21, 2026</p>
 
-    <h4 className={styles.subtitle}>FEATURE "CALL WITH SERVICE PROVIDER"</h4>
-    <p className={styles.paragraph}>The Website is providing certain service which is available through the medium of telecommunication with the Service Provider listed and enrolled with the Website. By agreeing to the present Terms of Usage, you are also giving your unconditional consent to the Website to arrange a call with you on your mobile number even though your number is on DND service provided by your mobile service provider.</p>
-    
-    <h4 className={styles.subtitle}>First Free Chat/Call</h4>
-    <p className={styles.paragraph}>ShubhAstro offers the first free chat or call, lasting 1 to 5 minutes (varies among users), to each unique user. A unique user, as defined by ShubhAstro, is an individual whose mobile number and device ID have never been registered on ShubhAstro&nbsp;before.</p>
-    <p className={styles.paragraph}>The Service Providers listed on ShubhAstro are independent service providers, and they operate in their personal capacity when offering predictions, advice, consultations including the performance of havans, pujas or special offerings. ShubhAstro acts solely as an intermediary platform facilitating connections between users and Service Providers and does not assume any responsibility or ownership over the predictions, advice, or services provided by the Service Providers.</p>
-    <p className={styles.paragraph}>Each Service Provider is solely responsible for the accuracy, reliability, and appropriateness of their predictions and advice. ShubhAstro does not warrant or guarantee the effectiveness, accuracy, or impact of the advice or remedies provided by any Service Provider, nor does ShubhAstro control, endorse, or influence the professional judgments made by Service Providers.</p>
-    <p className={styles.paragraph}>ShubhAstro disclaims any liability arising from the interactions between the Service Provider and the user. Users engage with Service Providers at their own discretion, and any consequences, decisions, or actions taken based on astrological advice are the sole responsibility of the user and the Service Provider. </p>
-    <p className={styles.paragraph}>By using ShubhAstro's platform, users acknowledge and agree that Service Providers are fully responsible for their services, and any legal claims or disputes related to the services provided by an Service Provider shall be directed solely against the Service Provider in question, not ShubhAstro. </p>
-    <p className={styles.paragraph}>The company reserves the right to remove Service Providers from the platform based on violations of community standards but does not otherwise control their advice or actions.</p>
+      <h4 className={styles.subtitle}>1. ACCEPTANCE OF TERMS</h4>
+      <p className={styles.paragraph}>By accessing, registering on, or using the Shubhastro website (www.shubhastro.com), mobile application, or any related services (collectively, the "Platform"), you agree to be bound by these Terms and Conditions ("Terms"), our Privacy Policy, Refund Policy, and any other applicable policies. If you do not agree to these Terms, you must immediately stop using the Platform.</p>
+      <p className={styles.paragraph}>These Terms constitute a legally binding agreement between you ("User") and Shubhastro ("Company," "we," "us," or "our"), a brand operated under applicable Indian laws. These Terms are governed by and construed in accordance with the laws of India.</p>
 
-    <h4 className={styles.subtitle}>WEBSITE CONTENT</h4>
-    <ul className={styles.list}>
-    <li className={styles.listItem}>The Website and any individual Websites which may be available through external hyperlinks with the Website are private property.</li>
-    <li className={styles.listItem}>All interaction on this Website inclusive of the guidance and advice received directly from the Licensed Provider must comply with these Terms of Usage.</li>
-    <li className={styles.listItem}>The User shall not post or transmit through this Website any material which violates or infringes in any way upon the rights of others, or any material which is unlawful, abusive, defamatory, invasive of privacy, vulgar, obscene, profane or otherwise objectionable, which encourages conduct that would constitute a criminal offence, give rise to civil liability or otherwise violate any law.</li>
-    <li className={styles.listItem}>The Website shall have a right to suspend or terminate access by such User or terminate the User's registration and such User shall not gain access to the Website.</li>
-    <li className={styles.listItem}>The Website reserves the right to terminate the access or to change or discontinue any aspect or feature of the Website including, but not limited to, content, graphics, deals, offers, settings, etc.</li>
-    <li className={styles.listItem}>Any information other the guidance and advice, received directly from the Third-Party Service Provider, the educational, graphics, research sources and other incidental information on the Site, the content, should not be considered as medical advice</li>
-    <li className={styles.listItem}>The Website does not take guarantee regarding the medical advice, if provided, by the third-party service provider inclusive of registered Service Providers with the site. The User should always talk to an appropriately qualified health care professional for diagnosis and treatment including information regarding which medications or treatment may be appropriate for the User. None of the Content represents or warrants that any particular medication or treatment is safe, appropriate, or effective for you. ShubhAstro does not endorse any specific tests, medications, products or procedures.</li>
-    <li className={styles.listItem}>The Website does not take guarantee of any untoward incident that may happen with the User after seeking the Service. The Website or the Service Provider providing the advice is not liable and does not guarantee any results as expected by the User and accessing the Website in such scenario is purely at the risk of the User.</li>
-    <li className={styles.listItem}>Astrological consultations provided via ShubhAstro are intended solely for personal insight and reflection and do not constitute professional medical, legal, or financial advice. Users should seek professional services in these areas, and ShubhAstro bears no responsibility for any decisions made based on astrological advice. </li>
-    <li className={styles.listItem}>The Service Provider is solely responsible for making their predictions and advice. ShubhAstro does not claim any ownership, control or responsibility for the behaviour, advice of the Service Providers with the user.</li>
-    <li className={styles.listItem}>By using the Site, Application or Services, User hereby agrees that any legal remedy or liability that you seek to obtain for actions or omissions of other Members inclusive of the service provider registered with the Website or other third parties linked with the Website, shall be limited to claim against such particular party who may have caused any harm. You agree not to attempt to impose liability on or seek any legal remedy from the Website with respect to such actions or omissions.</li>
-    </ul>
+      <h4 className={styles.subtitle}>2. NATURE OF SERVICES</h4>
+      <p className={styles.paragraph}><strong>2.1 Entertainment and Informational Purpose</strong></p>
+      <p className={styles.paragraph}>The Platform offers consultations through both human practitioners ('Human Astrologers') and automated systems ('AI Astrologers'). AI-generated insights are produced via proprietary algorithms and large language models trained on astrological datasets. While AI Astrologers provide instant, data-driven patterns, they lack human intuition, empathy, and spiritual sensitivity. Please be advised that AI-generated outputs have an inherent fallibility and may be unreliable. This system is based on probabilistic algorithms and does not guarantee the accuracy, completeness, or spiritual validity of any prediction. Users are advised to exercise independent judgment and not rely solely on these outputs for critical life decisions. All astrology, horoscope, numerology, vastu, tarot, and related content on Shubhastro is provided STRICTLY for entertainment, spiritual guidance, and informational purposes only. The content does not constitute professional, medical, legal, financial, psychiatric, or any other form of regulated professional advice.</p>
 
-    <h4 className={styles.subtitle}>USER ACCOUNT ACCESS</h4>
-    <p className={styles.paragraph}>The Website shall have access to the account and the information created by the User for ensuring and maintaining the high-quality services provided by the Website and for addressing the need of the customer in the most effective manner. User hereby consents for the unconditional access of the account by the Website, its employees, agents and other appointed person in such regard. For the purpose of addressing the complaints (if any received) and any suspected abuse reported, the Website shall investigate on case-to-case basis from the records available. The User is directed to read the terms provided in the Privacy Policy as regards such records.</p>
+      <p className={styles.paragraph}><strong>2.2 Disclaimer of Predictive Accuracy</strong></p>
+      <p className={styles.paragraph}>Shubhastro does not guarantee the accuracy, completeness, or reliability of any astrological reading, prediction, or spiritual guidance provided on the Platform. Planetary movements, astrological interpretations, and spiritual insights are subjective in nature and may vary between practitioners.</p>
+      <p className={styles.paragraph}>Shubhastro shall not be liable for the accuracy, completeness, or reliability of any astrological predictions. You acknowledge that any reliance on such information is strictly at your own risk and that results vary based on individual interpretation.</p>
 
-    <h4 className={styles.subtitle}>PRIVACY POLICY</h4>
-    <p className={styles.paragraph}>By using ShubhAstro, you acknowledge and consent to the collection and use of your personal data as outlined in our Privacy Policy, in compliance with the Information Technology Act, 2000 and applicable data protection laws. ShubhAstro takes all reasonable steps to protect user data, but is not liable for unauthorized access resulting from user negligence.. The User further consents, expresses and agrees that the terms and contents of such Privacy policy is acceptable to the User inclusive of any update/alteration/change made and duly displayed on the Website.</p>
+      <p className={styles.paragraph}><strong>2.3 Services Offered</strong></p>
+      <p className={styles.paragraph}>The Platform offers, including but not limited to:</p>
+      <ul className={styles.list}>
+        <li className={styles.listItem}>Live and recorded consultations with astrologers via chat, voice, and video</li>
+        <li className={styles.listItem}>Personalized horoscope reports and birth chart analysis</li>
+        <li className={styles.listItem}>Daily, weekly, and monthly horoscope content</li>
+        <li className={styles.listItem}>Numerology, vastu shastra, tarot, and palmistry services</li>
+        <li className={styles.listItem}>Pooja, rituals, and gemstone recommendations</li>
+        <li className={styles.listItem}>Kundali matching and marriage compatibility services</li>
+        <li className={styles.listItem}>Subscription-based content and digital products</li>
+      </ul>
 
-    <h4 className={styles.subtitle}>BREACH AND TERMINATION</h4>
-   <ul className={styles.list}>
-   <li className={styles.listItem}>The Website may, in whole or in part, without informing the User, modify, discontinue, change or alter the services ordered or the Account of the User registered with the Website. The Website may or may not issue notice or provide any reason for such action taken by the Website.</li>
-   <li className={styles.listItem}>Violation of any conditions mentioned in this Terms of Usage shall lead to immediate cancellation of the Registration of the User, if registered with the Website. The Website reserves right to terminate and initiate action immediately, if:
-   <ul className={styles.nestedList}>
-   <li className={styles.nestedListItem}>The Website is not able to verify and authenticate the Registration data or any other relevant information provided by the User.</li>
-   <li className={styles.nestedListItem}>The Website believes that the actions of the User may cause legal liability for the Website, other Users or any service provider linked with the Website.</li>
-   <li className={styles.nestedListItem}>The Website believes that the User has provided the Website with false and misleading Registration Data or there is interference with the other Users or the administration of the services, or have violated the privacy policy as listed by the Website.</li>
-   </ul>
-   </li>
-    <li className={styles.listItem}>With regards to the Service Provider, you understand and agree that your relationship with the Website is limited to being a member and you act exclusively on your own behalf and for your own benefit. <strong>DELIVERY, CANCELLATION AND REFUND</strong></li>
-    <li className={styles.listItem}>No refund shall be processed on the order of any reports under any circumstances if the order has reached the "processing" (Assigned to an Service Provider) stage. The risk and liability of placing order in a haste and careless manner totally lies with the User and the Website is not responsible for any refund once the processing stage has started.</li>
-    <li className={styles.listItem}>Refunds are not provided once an order for astrological services has been processed and delivered. Any requests for refunds must be made within 24 hours of service completion, subject to review by ShubhAstro's operations team. ShubhAstro reserves the right to approve or deny refunds based on the nature of the issue and compliance with these terms. However, if the User intends to cancel a successfully placed order before execution, the User is required to contact the customer care team within 1 (one) hour of making the payment, whereafter it is totally at the discretion of the Website whether to issue refund</li>
-    <li className={styles.listItem}>Any technical delay or glitch reported on the Website during the processing of the request which includes generating reports by the service provider i.e. Service Provider shall not be eligible for claiming refund. The User agrees that the timelines are approximate and all essentials steps would be taken to adhere to the timelines as displayed.</li>
-    <li className={styles.listItem}>No refund shall be processed for the reason that in-correct information or data has been provided by You. The User agrees to be careful while providing any information to the Website and must re-check the information filled before clicking on "Submit". The User can request for change in the in-correct information or data entered provided, the request for such change has been made with the customer care within 1 (one hour) of execution of the service rendered by the service provider.</li>
-    <li className={styles.listItem}>No refund shall be processed for return of any damaged product. The User undertakes and agrees that by ordering any product as displayed on the Website, the Registered User shall be fully responsible for any damaged caused to the product, post its delivery. For orders made via "Cash on Delivery" method of payment, the User shall be charged for the cost of the product as displayed by the Website and the shipping/custom/courier charges as applicable, if the product is returned.</li>
-    <li className={styles.listItem}>Refund on pro-rata basis may be considered for any delay in the activation of the subscription services and any damage that may be caused to the product while in transit shall be dealt by the Website and its agencies. On successful verification, if refund is required, it will be made within 10 business days.</li>
-    <li className={styles.listItem}>You agree that the display picture for the products listed for purchase by the User are for reference purpose only and the Website will try to deliver the product ordered in an as-is condition as displayed on the Website. The User is advised to exercise discretion in such case and no refund shall be issued on such grounds.</li>
-    <li className={styles.listItem}>No refund shall be processed for providing a wrong contact number for the purpose of availing the "Call with Service Provider" feature. The User once opted for this feature is advised to keep the Contact Number in full coverage area and must answer the call when received. No refund shall be processed for any call which gets connected.</li>
-    <li className={styles.listItem}>The refunds, if any, shall be processed after deduction of the transaction charges levied by the Bank and/or the Payment Gateway, to &amp;fro cost of the shipping and/or courier charges (With regard to purchase of a product listed on the Website), customs duty (if levied) and/or any other charges that may have been incurred by the Website during processing and/or delivering the service, as applicable.</li>
-    <li className={styles.listItem}>In case the Website or Payment gateway's webpage, that is linked to the Website, is experiencing any server related issues like 'slow down' or 'failure' or 'session timeout', the User shall, before initiating the second payment, check whether his/her Bank Account has been debited or not and accordingly resort to one of the following options:
-    <ul className={styles.nestedList}>
-    <li className={styles.nestedListItem}>In case the Bank Account appears to be debited, ensure that you do not make the payment twice and immediately thereafter contact the Website via customer care to confirm payment.</li>
-    <li className={styles.nestedListItem}>In case the Bank Account is not debited, the User may initiate a fresh transaction to make payment.</li>
-    </ul>
-    </li>
-    <li className={styles.listItem}>However, refund for multiple payment, if any, even after the above precaution against the same order shall be refunded in full without deduction of the transaction charges as mentioned above. The Website shall only retain the cost of one single order as intended to be placed by the User</li>
-    <li className={styles.listItem}>If there are orders that the Website is unable to accept and must cancel, the Website at its sole discretion, reserves the right to refuse or cancel any order for any reason whatsoever. Some situations may result in the order being cancelled and include, without limitation, non-availability of the service, inaccuracy, error in pricing information or other problems as identified. If the User's order is cancelled after charges being paid against the said service, the said amount paid for booking shall be refunded.</li>
-    <li className={styles.listItem}>By requesting for refund, user is agreeing to provide ShubhAstro's quality audit team permission to access the chat/call recording of the consultation for which refund has been requested, in order to determine whether the case is eligible for refund or not.</li>
-    <li className={styles.listItem}>ShubhAstro quality audit team, at best effort basis, provide partial/full refunds to the users in their ShubhAstro wallet wherever consultant's quality parameters are not satisfied. It can take upto 72 hours to analyse and refund the amount back to ShubhAstro wallet</li>
-    <li className={styles.listItem}>Note: All refunds will be credited to user's ShubhAstro wallet.</li>
-    <li className={styles.listItem}>Refunds will only be considered in the following cases:
-    <ul className={styles.nestedList}>
-    <li className={styles.nestedListItem}>Network issue due to which chat/call was affected in between or there was a weak signal, background noise, inaudible consultant etc during the video/normal call sessions</li>
-    <li className={styles.nestedListItem}>Consultant is unable to respond fluently in the language mentioned in their profile</li>
-    <li className={styles.nestedListItem}>Consultant is taking inordinately long enough to respond back to the user</li>
-    <li className={styles.nestedListItem}>Consultant has responded back in irrelevant or inappropriate response to the query asked by the user</li>
-    </ul>
-    </li>
-    <li className={styles.listItem}>Please Note: No refund will be given in case of lack of accuracy of any consultation. ShubhAstro takes no responsibility for factual accuracy on any consultations.</li>
-   </ul>
+      <h4 className={styles.subtitle}>3. USER ELIGIBILITY AND REGISTRATION</h4>
+      <p className={styles.paragraph}><strong>3.1 Age Requirement</strong></p>
+      <p className={styles.paragraph}>You must be at least 18 years of age to use the Platform. By registering, you confirm that you are 18 years or older. If you are under 18, you may only use the Platform under the supervision and consent of a parent or legal guardian.</p>
 
-   <h4 className={styles.subtitle}>USER OBLIGATION</h4>
-   <p className={styles.paragraph}>The User (inclusive of the Service Provider and the Member Customer) under an obligation not to violate the privacy policy, terms and conditions and any other terms as defined on the Website. The User represents that he is an individual and not a corporation or other legal business entity. The rights to use the Website's services is personal to the User.The User shall while using the Website and engaged in any form of communication on any of the forums inclusive of the products listed on the Website shall not violate the terms and conditions which are inclusive of:-</p>
-   <ul className={styles.list}>
-   <li className={styles.listItem}>The User shall not post, publish or transmit any messages that is false, misleading, defamatory, harmful, threatening, abusive, harassing, defamatory, invades another's privacy, offensive, promotes racism, hatred or harm against any individual or group or religion or caste, infringes another's rights including any intellectual property rights or copyright or trademark, violates or encourages any conduct that would violate any applicable law or regulation or would give rise to civil liability.</li>
-   <li className={styles.listItem}>The User shall not upload or post or otherwise make available any content that User do not have a right to make available, under any law or under contractual or fiduciary relationships.</li>
-   <li className={styles.listItem}>The User shall not upload or post or otherwise make available any content that infringes any patent, trademark, trade secret, copyright or other proprietary rights of any party. The User may, however, post excerpts of copyrighted material so long as they adhere to Fair Use guidelines.</li>
-   <li className={styles.listItem}>The User shall not collect screen names and email addresses of members who are registered on the Website for purposes of advertisement, solicitation or spam</li>
-   <li className={styles.listItem}>The User shall not send unsolicited email, junk mail, spam, or chain letters, or promotions or advertisements for products or services.</li>
-   <li className={styles.listItem}>The User shall not upload or distribute files that contain viruses, corrupted files, or any other similar software or programs that may damage the operation of the Website or another's computer.</li>
-   <li className={styles.listItem}>The User shall not engage in any activity that interferes with or disrupts access to the Website</li>
-   <li className={styles.listItem}>The User shall not attempt to gain unauthorized access to any portion or feature of the Website, any other systems or networks connected to the Website, to any of the services offered on or through the Website, by hacking, password mining or any other illegitimate means.</li>
-   <li className={styles.listItem}>The User shall not violate any applicable laws or regulations for the time being in force within or outside India. The use and continuous use of the Website is subject to but not limited to using the services for personal use.</li>
-   <li className={styles.listItem}>The User shall not resell or make any commercial use of the Services without the express written consent from the Website.</li>
-   <li className={styles.listItem}>The User shall not violate these Terms of Usage including but not limited to any applicable Additional terms of the Website contained herein or elsewhere.</li>
-   <li className={styles.listItem}>The User shall not reverse engineer, modify, copy, distribute, duplicate, transmit, trade, display, perform, reproduce, publish, license, create derivative works, transfer, or sell/resell or exploit for any commercial purposes, any portion or use of any information or software obtained from the Website.</li>
-   <li className={styles.listItem}>The User by becoming a Registered member of the Website agrees to the following situations, which list is not exhaustive and may include services incidental to the below mentioned: -
-   <ul className={styles.nestedList}>
-   <li className={styles.nestedListItem}>The user agrees to receive communication through the app/website through email/SMS or any other communication medium including though Whatsapp Business Messages in regards to the usage of the app/website.</li>
-   <li className={styles.nestedListItem}>The User agrees not to transmit via the Website any unlawful, harassing, libelous, abusive, threatening, harmful, vulgar, obscene or otherwise objectionable material of any kind or nature.</li>
-   <li className={styles.nestedListItem}>The User not to transmit any material that encourages conduct that could constitute a criminal offense, give rise to civil liability, or otherwise violate any applicable local, state, national or international law or regulation. Attempts to gain unauthorized access to other computer systems are prohibited.</li>
-   <li className={styles.nestedListItem}>The User shall not interfere with any other members' use or enjoyment of the Website or Services.</li>
-   <li className={styles.nestedListItem}>The User is under an obligation to report any misuse or abuse of the Site. If you notice any abuse or misuse of the Site or anything which is in violation of this Agreement, you shall forthwith report such violation to Website by writing to Customer Care. On receipt of such complaint, Website may investigate such complaint and if necessary, may terminate the membership of the Member responsible for such violation abuse or misuse without any refund of the subscription fee.</li>
-   <li className={styles.nestedListItem}>The user shall only provide genuine feedback about the Service Provider and shall own responsibility of the same, in case of a fake review or feedback or a false feedback, the Company shall reserve the right to review and take appropriate action on such unfair negative feedback which may be baseless and without any evidence of unfit services. Any false complaint made by a Member shall make such Member liable for termination of his / her membership without any refund of the subscription fee.</li>
-   <li className={styles.nestedListItem}>ShubhAstro prohibits discrimination against  Service Providers basis race, religion, caste, national origin, disability, sexual orientation, sex, marital status, gender identity, age, or any other characteristic protected under applicable law. Discriminatory behaviour, including but not limited to refusal to accept services from Service Providers based on these characteristics, will not be tolerated.</li>
-   <li className={styles.nestedListItem}>We request that you treat all Service Providers with respect and courtesy. You are expected to engage with Service Providers in a civil and respectful manner.</li>
-   <li className={styles.nestedListItem}>The Website reserves the right to withdraw its services/ terminate access or take legal action against any customer who is found to be unreasonable or abusive during their conversation or engaging in harassment, hate speech, illegal activities, or violating community standards set by the platform with the Service Provider inclusive of Service Provider regardless of any reason.</li>
-   <li className={styles.nestedListItem}>In the event that any Service Provider behaves in a discourteous, abusive, or inappropriate manner, or if their conduct violates any laws, you are required to report the incident to support@ShubhAstro.com within 48 hours. ShubhAstro will take reasonable action to address the issue in accordance with our policies.</li>
-   </ul>
-   </li>
-   </ul>
-<p className={styles.paragraph}>While the Website shall take all steps to resolve any situation that is in violation of the above obligations arises, however if the situation is not controllable, the Website reserves its right to send a written warning henceforth. Such violations, if repeated by the User, shall lead to a total ban for transacting on the platform by such User. If any balance is present in the wallet of the User, the same shall be refunded subject to the other charges that may be applicable for such violations.</p>
+      <p className={styles.paragraph}><strong>3.2 Account Registration</strong></p>
+      <p className={styles.paragraph}>To access paid services, you must create an account by providing accurate, current, and complete information. You are responsible for providing correct and accurate information as well as for maintaining the confidentiality of your account credentials and are liable for all activities under your account. Shubhastro reserves the right, at its sole discretion to suspend or terminate accounts with false or misleading information.</p>
 
-<h4 className={styles.subtitle}>BANK ACCOUNT INFORMATION</h4>
-<p className={styles.paragraph}>The User is under an obligation to provide his banking information as and when required. For that purpose, the obligation of the User are:-</p>
-<ul className={styles.list}>
-<li className={styles.listItem}>The User agrees that the debit/credit card details provided by him/ her for use of the aforesaid Service(s) must be correct and accurate and that the User shall not use a debit/ credit card, that is not lawfully owned by him/ her or the use of which is not authorized by the lawful owner thereof. The User further agrees and undertakes to provide correct and valid debit/credit card details.</li>
-<li className={styles.listItem}>The User may pay the fees required, to the Website by using a debit/credit card or through online banking account. The User warrants, agrees and confirms that when he/ she initiates a payment transaction and/or issues an online payment instruction and provides his/ her card / bank details:
-<ul className={styles.nestedList}>
-<li className={styles.nestedListItem}>The User is fully and lawfully entitled to use such credit / debit card, bank account for such transactions;</li>
-<li className={styles.nestedListItem}>The User is responsible to ensure that the card/ bank account details provided by him/ her are accurate;</li>
-</ul>
-</li>
-<li className={styles.listItem}>The User is responsible to ensure sufficient credit is available on the nominated card/ bank account at the time of making the payment to permit the payment of the dues payable or the bill(s) selected by the User inclusive of the applicable Fee.</li>
-</ul>
+      <p className={styles.paragraph}><strong>3.3 One Account Policy</strong></p>
+      <p className={styles.paragraph}>Each user may maintain only one account. Creating multiple accounts to exploit promotions, offers, or free credits is prohibited and may result in permanent suspension.</p>
 
-<p className={styles.paragraph}>The User further agrees that if any part of these Terms of Usage are determined to be invalid or unenforceable pursuant to applicable law including, but not limited to, the warranty disclaimers and liability limitations set forth herein, then the invalid or unenforceable provision will be deemed superseded by a valid, enforceable provision that most closely matches the intent of the original provision and the remainder of these Terms of Usage shall continue in effect.</p>
+      <h4 className={styles.subtitle}>4. PROHIBITED CONDUCT</h4>
+      <p className={styles.paragraph}>Users agree NOT to:</p>
+      <ul className={styles.list}>
+        <li className={styles.listItem}>Use the Platform for any unlawful, fraudulent, or harmful purpose</li>
+        <li className={styles.listItem}>Harass, abuse, threaten, or intimidate astrologers or other users</li>
+        <li className={styles.listItem}>Share, reproduce, or distribute Platform content without prior written consent</li>
+        <li className={styles.listItem}>Attempt to reverse engineer, hack, or disrupt the Platform</li>
+        <li className={styles.listItem}>Submit false reviews, ratings, or feedback</li>
+        <li className={styles.listItem}>Use automated bots, scrapers, or data harvesting tools</li>
+        <li className={styles.listItem}>Impersonate any person, astrologer, or entity</li>
+        <li className={styles.listItem}>Upload malicious code, viruses, or harmful content</li>
+        <li className={styles.listItem}>Engage in unauthorized commercial activities on the Platform</li>
+        <li className={styles.listItem}>Furnish any information that is not verifiably authentic, or suppress material information while providing personal birth details or identity proofs</li>
+        <li className={styles.listItem}>Register false or frivolous grievances or complaints against Astrologers or the Platform</li>
+        <li className={styles.listItem}>Record, screenshot, or livestream any part of the consultation session without the express, prior written consent of both Shubhastro and the participating Astrologer</li>
+        <li className={styles.listItem}>Engage with the Astrologer(s) outside the Platform</li>
+        <li className={styles.listItem}>Not Submit fake, manipulated or incorrect information to the Astrologer and/or the Platform</li>
+      </ul>
 
-<h4 className={styles.subtitle}>DISCLAIMER / LIMITATION OF LIABILITY / WARRANTY</h4>
-<p className={styles.paragraph}>The User expressly understands and agree that, to the maximum extent permitted by applicable law, the Website does not provide warranties for the service of the Service Providers. Astrological counselling provided through the Website is based on cumulative or individual knowledge, experience and interpretations of Service Providers and as such, it may vary from one Service Provider to another.</p>
+      <h4 className={styles.subtitle}>5. PAYMENT AND WALLET TERMS</h4>
+      <p className={styles.paragraph}><strong>5.1 Wallet System</strong></p>
+      <p className={styles.paragraph}>Shubhastro operates a prepaid wallet system. Users must add funds to their wallet before availing paid consultation or service. Wallet credits are non-transferable and cannot be exchanged for cash except as provided in the Refund Policy.</p>
 
-<ul className={styles.list}>
-<li className={styles.listItem}>The Website is offering services through a diverse panel of Service Providers duly verified by the Website and such Service Provider (Service Provider) may from time to time make recommendations of using mantras, jantras, gemstones or other astrological remedies to be used by User. Such recommendations are being made in good faith by the Service Providers and the Website and its subsidiaries, affiliates, officers, employees, agents, partners, and licensors make no warranty that:
-<ul className={styles.nestedList}><li className={styles.nestedListItem}>the service will meet your requirements;</li>
-<li className={styles.nestedListItem}>the service will be uninterrupted, timely, secure or error –free;</li>
-<li className={styles.nestedListItem}>the results that may be obtained from the use of the service will be accurate or reliable;</li>
-<li className={styles.nestedListItem}>the quality of any products, services, information or other material purchased or obtained by you through the service will meet your expectations and</li>
-<li className={styles.nestedListItem}>any errors in the software will be corrected. You are required to make full disclosure about the emotional, mental and physical state of the person seeking advice from the panel of Service Providers of Website so that the Service Providers make an informed judgment about giving advice.</li>
-</ul>
-</li>
-<li className={styles.listItem}><strong>Disclaimer on System Generated Advice:</strong>The information and guidance provided through the interactive tool available on this website ("System Generated Advice") are intended solely for general informational purposes and do not constitute professional, medical, legal, financial, or specialized advice. ShubhAstro makes no warranties or representations regarding the accuracy, completeness, or applicability of the System Generated Advice. Users are encouraged to consult with qualified professionals prior to making any decisions based on System Generated Advice, as any reliance upon such information is entirely at the user's own risk. ShubhAstro expressly disclaims liability for actions taken or not taken based on the System Generated Advice, and users acknowledge that such information may be periodically reviewed, updated, or revised by the company.The Website, services and other materials are provided by the Website on an "as is" basis without warranty of any kind, express, implied, statutory or otherwise, including the implied warranties of title, non-infringement, merchantability or fitness for a particular purpose. without limiting the foregoing, the Website makes no warranty that (i) the Website or the services will meet your requirements or your use of the Website or the services will be uninterrupted, timely, secure or error-free; (ii) the results that may be obtained from the use of the Website, services or materials will be effective, accurate or reliable; (iii) the quality of the Website, services or other materials will meet your expectations; or that (iv) any errors or defects in the Website, services or other materials will be corrected. no advice or information, whether oral or written, obtained by the User from the Website or through or from use of the services shall create any warranty not expressly stated in the terms of use.</li>
-<li className={styles.listItem}>To the maximum extent permitted by applicable law, the Website will have no liability related to User content arising under intellectual property rights, libel, privacy, publicity, obscenity or other laws. The Website also disclaims all liability with respect to the misuse, loss, modification or unavailability of any User content.</li>
-<li className={styles.listItem}>The Website will not be liable for any loss that the User may incur as a consequence of unauthorized use of their account or account information in connection with the Website or any services or materials, either with or without the User's knowledge. The Website has endeavoured to ensure that all the information on the Website is correct, but the Website neither warrants nor makes any representations regarding the quality, accuracy or completeness of any data, information, product or service. The Website shall not be responsible for the delay or inability to use the Website or related functionalities, the provision of or failure to provide functionalities, or for any information, software, products, functionalities and related graphics obtained through the Website, or otherwise arising out of the use of the Website, whether based on contract, tort, negligence, strict liability or otherwise. further, the Website shall not be held responsible for non-availability of the Website during periodic maintenance operations or any unplanned suspension of access to the Website that may occur due to technical reasons or for any reason beyond the Website's control.</li>
-<li className={styles.listItem}>The User understands and agrees that any material or data downloaded or otherwise obtained through the Website is done entirely at their own discretion and risk and they will be solely responsible for any damage to their computer systems or loss of data that results from the download of such material or data. The Website is not responsible for any typographical error leading to an invalid coupon. The Website accepts no liability for any errors or omissions, with respect to any information provided to you whether on behalf of itself or third parties.</li>
-<li className={styles.listItem}>The Website on behalf of itself and its suppliers, disclaims all warranties of any kind, express or implied, including without limitation any warranty of merchantability, fitness for a particular purpose, title, non-infringement and it makes no warranty or representation regarding the results that may be obtained from the use of content or services, the accuracy or reliability of any content obtained through the Services, any goods or services purchased or obtained through the Website, and makes no warranty that the services will meet your requirements, be uninterrupted, timely, secure or error-free. No advice or information, whether oral or written, obtained by you from the Website shall create any warranty.</li>
-<li className={styles.listItem}>The services may consist of the following, without limitation: Astrological content, Reports, Tarot readings, fortunes, numerology, predictions, live telephone consultations, email consultations. ShubhAstro charges for the chat/call service offered on this platform on per minute basis and holds no responsibility or liability about the reality or reliability of the astrological effects on the human physiology, by the gems, any other products or services represented and sold on the website. No advice or information, whether oral or written, obtained by you shall create any warranty.</li>
-<li className={styles.listItem}>The advisors/consultants/Service Providers are also members of the site and not employees of the Website or the company. However, the Website verifies the degrees, qualifications, certification, credentials, and background of the advisors/consultants/Service Providers, on the basis of the eligibility criteria as set out by it which may vary from time to time,  but does not refer, endorse, recommend, verify, evaluate or guarantee any advice, information or other services provided by the advisors/consultants/Service Providers or by the company, nor does it warrant the validity, accuracy, completeness, safety, legality, quality, or applicability of the content, anything said or written by, or any advice provided by the advisors/consultants/Service Providers.</li>
-<li className={styles.listItem}>The website is not a suicide helpline platform. If you are considering or contemplating suicide or feel that you are a danger to yourself or to others, you may discontinue use of the services immediately at your discretion and please notify appropriate police or emergency medical personnel. If you are thinking about suicide, immediately call a suicide prevention helpline such as AASRA (91-22-27546669).</li>
-<li className={styles.listItem}>The Website shall not be liable for any inaccuracy, error or delay in, or omission of (a) any data, information or message, or (b) the transmission or delivery of any such data, information or message; or (c) any loss or damage arising from or occasioned by any such inaccuracy, error, delay or omission, non-performance or interruption in any such data, information or message. Under no circumstances shall the Website and/or the payment service providers, its employees, directors, and its third party agents involved in processing, delivering or managing the services, be liable for any direct, indirect, incidental, special or consequential damages, or any damages whatsoever, including punitive or exemplary arising out of or in any way connected with the provision of or any inadequacy or deficiency in the provision of the services or resulting from unauthorized access or alteration of transmissions of data or arising from suspension or termination of the services.</li>
-</ul>
+      <p className={styles.paragraph}><strong>5.2 Pricing</strong></p>
+      <p className={styles.paragraph}>All prices are displayed in Indian Rupees (INR) inclusive of applicable taxes. Per-minute consultation rates are displayed on each astrologer's profile and may be updated without prior notice. Session charges begin from the moment a consultation session is successfully connected.</p>
 
-<p className={styles.paragraph}>Notwithstanding anything to the contrary contained herein, ShubhAstro liability to you for any cause whatsoever, and regardless of the form of the action, will at all times be limited to the amount paid, if any, by you to the Website, for the service during the term of membership.</p>
+      <p className={styles.paragraph}><strong>5.3 Taxes</strong></p>
+      <p className={styles.paragraph}>All transactions on the Platform are subject to applicable Goods and Services Tax (GST) as per Indian law. Tax invoices will be made available to users on request.</p>
 
-<p className={styles.paragraph}>ShubhAstro shall not be held liable for any failure or delay in providing services due to events beyond its reasonable control, including but not limited to acts of God, government actions, wars, pandemics, cyber-attacks, or disruptions in telecommunications.</p>
+      <h4 className={styles.subtitle}>6. INTELLECTUAL PROPERTY</h4>
+      <p className={styles.paragraph}>All content on the Platform, including but not limited to text, graphics, logos, icons, software, audio, and video, is the exclusive property of Shubhastro or its content licensors and is protected under Indian and international copyright and intellectual property laws. Unauthorized use, reproduction, or distribution of Platform content is strictly prohibited and may attract legal action. Users receive a limited, personal, non-exclusive license.</p>
 
-<h4 className={styles.subtitle}>INDEMNIFICATION</h4>
-<p className={styles.paragraph}>The User shall indemnify, defend and hold harmless the Website and its parent, subsidiaries, affiliates, officers, directors, employees, suppliers, consultants and agents from any and all third party claims, liability, damages and/or costs (including, but not limited to, attorney's fees) arising from Your use of the Services, Your violation of the Privacy Policy or breach of these Terms of Service, or misuse of the platform or services provided, your violation of any third party's rights, including without limitation, infringement by You or any other user of Your account of any intellectual property or other right of any person or entity. These Terms of Service will inure to the benefit of Website's successors, assigns, and licensees.</p>
+      <h4 className={styles.subtitle}>7. THIRD-PARTY LINKS AND SERVICES</h4>
+      <p className={styles.paragraph}>The Platform may contain links to third-party websites or integrate third-party payment gateways. Shubhastro is not responsible for the content, privacy policies, or practices of any third-party services. Use of third-party services is at your own risk.</p>
 
-<h4 className={styles.subtitle}>PROPRIETARY RIGHTS TO CONTENT</h4>
-<p className={styles.paragraph}>The User acknowledges that the Content, including but not limited to text, software, music, sound, photographs, video, graphics or other material contained in sponsor advertisements or distributed via email, commercially produced information presented to Member by the Website, its suppliers, and/or advertisers, is protected by copyrights, trademarks, service marks, patents and/or other proprietary rights and laws. The User is not permitted to copy, use, reproduce, distribute, perform, display, or create derivative works from the Content unless expressly authorized by the Website, its suppliers, or advertisers. Moreover, the content such as images, text, designs, etc on all of the portals of the Website are taken from various online portals such as Google Images. ShubhAstro Services Private Limited (Formerly Codeyeti Software Solutions Pvt. Ltd ShubhAstro Services Pvt Ltd.) is not liable for any copyrights of that content or data. Unauthorized commercial use of ShubhAstro's intellectual property is strictly prohibited.</p>
-<p className={styles.paragraph}>ShubhAstro reserves the right to modify, remove, or use any user-generated content for legal compliance, service improvement, or marketing purposes, without prior notice.</p>
+      <h4 className={styles.subtitle}>8. LIMITATION OF LIABILITY</h4>
+      <p className={styles.paragraph}>To the fullest extent permitted by law, Shubhastro, its directors, employees, affiliates, and partners shall not be liable for:</p>
+      <ul className={styles.list}>
+        <li className={styles.listItem}>Any direct, indirect, incidental, special, or consequential damages arising from your use of the Platform</li>
+        <li className={styles.listItem}>Loss of data, profits, or goodwill</li>
+        <li className={styles.listItem}>Decisions made based on astrological or spiritual advice obtained through the Platform</li>
+        <li className={styles.listItem}>Technical disruptions, server failures, or Platform unavailability</li>
+        <li className={styles.listItem}>Acts or omissions of third-party service providers or astrologers</li>
+      </ul>
+      <p className={styles.paragraph}>The total liability of the Platform shall be limited to the amount paid by the User for the specific consultation in question.</p>
 
-<h4 className={styles.subtitle}>NOTICES</h4>
-<p className={styles.paragraph}>Except as otherwise stated in these Terms of Service, all notices to a party shall be in writing and shall be made either via email or snail mail. Notice shall be deemed given 24 hours after an email is sent, or 3 days after deposit in the snail mail, to Member at the address provided by Member in the Registration Data and to the Website at the address set forth below:</p>
+      <h4 className={styles.subtitle}>9. INDEMNIFICATION</h4>
+      <p className={styles.paragraph}>You agree to indemnify, defend, and hold harmless Shubhastro and its officers, directors, employees, and agents from and against any claims, damages, losses, liabilities, costs, and expenses (including reasonable legal fees) arising from your violation of these Terms, your use of the Platform, the terms of the user onboarding agreement, user agreement and/or your infringement of any third-party rights.</p>
 
-<p className={styles.paragraph}><strong>"Flat No.713, Devika Tower 6, Nehru Place, New Delhi-110019, India"</strong></p>
-<p className={styles.paragraph}><strong>or can be sent at:</strong></p>
-<p className={styles.paragraph}><strong>Email: support@ShubhAstro.com.</strong></p>
+      <h4 className={styles.subtitle}>10. GOVERNING LAW AND DISPUTE RESOLUTION</h4>
+      <p className={styles.paragraph}><strong>10.1 Governing Law</strong></p>
+      <p className={styles.paragraph}>These Terms shall be governed by and construed in accordance with the laws of India, without regard to its conflict of law principles.</p>
 
-<h4 className={styles.subtitle}>Restricted Content</h4>
-<p className={styles.paragraph}><strong>Child Endangerment</strong></p>
-<p className={styles.paragraph}>Our App strictly prohibits users from creating, uploading, or distributing content that facilitates the exploitation or abuse of children will be subject to immediate deletion of the account. This includes all child sexual abuse materials. To report content on the ShubhAstro App that may exploit a child,&nbsp;click.</p>
+      <p className={styles.paragraph}><strong>10.2 Jurisdiction</strong></p>
+      <p className={styles.paragraph}>All disputes arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts located in Mumbai, India. Users consent to jurisdiction and venue in such courts.</p>
 
-<p className={styles.paragraph}>Wealso prohibit the use of ShubhAstro app to endanger children. This includes but is not limited to use of apps to promote predatory behaviour towards children, such as:</p>
-<ul className={styles.list}>
-<li className={styles.listItem}>Inappropriate interaction targeted at a child (for example, groping or caressing).</li>
-<li className={styles.listItem}>Child grooming (for example, befriending a child online to facilitate, either online or offline, sexual contact and/or exchanging sexual imagery with that child).</li>
-<li className={styles.listItem}>Sexualization of a minor (for example, imagery that depicts, encourages or promotes the sexual abuse of children or the portrayal of children in a manner that could result in the sexual exploitation of children).</li>
-<li className={styles.listItem}>Sextortion (for example, threatening or blackmailing a child by using real or alleged access to a child's intimate images).</li>
-<li className={styles.listItem}>Trafficking of a child (for example, advertising or solicitation of a child for commercial sexual exploitation).</li>
-</ul>
+      <h4 className={styles.subtitle}>11. MODIFICATIONS TO TERMS</h4>
+      <p className={styles.paragraph}>Shubhastro reserves the right to modify these Terms at any time. Updated Terms will be posted on the Platform with a revised effective date. Continued use of the Platform after such changes constitutes your acceptance of the modified Terms.</p>
 
-<p className={styles.paragraph}>We will take appropriate action, if we become aware of content with child sexual abuse materials.Any such behaviour or content should be reported immediately to <strong>support@ShubhAstro.com</strong>. The company maintains zero tolerance for any content that encourages or contains violence, gore, or inappropriate interactions involving minors.</p>
+      <h4 className={styles.subtitle}>12. TERMINATION</h4>
+      <p className={styles.paragraph}>Shubhastro reserves the right, at its sole discretion, to suspend or terminate your access to the Platform at any time without notice for violation of these Terms, fraudulent activity, or any other reason deemed appropriate. Upon termination, your right to use the Platform ceases immediately.</p>
 
-<p className={styles.paragraph}>In addition, content that appeal to children but contain adult themes are strictly prohibited, including but not limited to:</p>
-<ul className={styles.list}>
-<li className={styles.listItem}>Content with excessive violence, blood, and gore.</li>
-<li className={styles.listItem}>Content that depict or encourage harmful and dangerous activities.</li>
-</ul>
-
-<p className={styles.paragraph}>We also don't allow users that promote negative body or self-image including apps that depict for entertainment purposes plastic surgery, weight loss, and other cosmetic adjustments to a person's physical appearance.</p>
-
-<h4 className={styles.subtitle}>Inappropriate Content</h4>
-<p className={styles.paragraph}>To ensure that Our App remains a safe and respectful platform, we have created standards defining and prohibiting content that is harmful or inappropriate for our users.</p>
-<p className={styles.paragraph}>Users are strictly forbidden from uploading or distributing:</p>
-<ul className={styles.list}>
-<li className={styles.listItem}>Sexual content or profanity, including pornography, sexual acts, or services promoting or soliciting sexual activities for compensation.</li>
-<li className={styles.listItem}>Depictions of violence, threats, or behavior that incites hatred or harm based on protected characteristics such as race, religion, gender, sexual orientation, or nationality.</li>
-<li className={styles.listItem}>Any content that glorifies terrorist activities or promotes dangerous organizations and movements.</li>
-</ul>
-
-<p className={styles.paragraph}>ShubhAstro reserves the right to remove accounts that violate these standards and take legal action where applicable.</p>
-
-<h4 className={styles.subtitle}>Sexual Content and Profanity</h4>
-<p className={styles.paragraph}>We don't allow accounts that contain or promote sexual content or profanity, including pornography, or any content or services intended to be sexually gratifying. We don't allow app content that appear to promote or solicit a sexual act in exchange for compensation. We don't allow content that contain or promote content associated with sexually predatory behaviour, or distribute non-consensual sexual content.</p>
-<p className={styles.paragraph}>If an account contains content that violates this policy it gives the absolute right to the owner to delete the account with immediate effect.</p>
-
-<p className={styles.paragraph}>Users are prohibited from engaging in:</p>
-<ul className={styles.list}>
-<li className={styles.listItem}>Depictions of sexual nudity, or sexually suggestive poses in which the subject is nude, blurred or minimally clothed, and/or where the clothing would not be acceptable in an appropriate public context.</li>
-<li className={styles.listItem}>Depictions, animations or illustrations of sex acts, or sexually suggestive poses or the sexual depiction of body parts.</li>
-<li className={styles.listItem}>Content that depicts or are functionally sexual aids, sex guides, illegal sexual themes and fetishes.</li>
-<li className={styles.listItem}>Content that is lewd or profane – including but not limited to content which may contain profanity, slurs, explicit text, or adult/sexual keywords in the store listing or in-app.</li>
-<li className={styles.listItem}>Content that depicts, describes, or encourages bestiality.</li>
-<li className={styles.listItem}>Content that promote sex-related entertainment, escort services, or other services that may be interpreted as providing or soliciting sexual acts in exchange for compensation, including, but not limited to compensated dating or sexual arrangements where one participant is expected or implied to provide money, gifts, or financial support to another participant ("sugar dating").</li>
-<li className={styles.listItem}>Content that degrade or objectify people, such as apps that claim to undress people or see through clothing, even if labelled as prank or entertainment apps.</li>
-<li className={styles.listItem}>Content or behaviour that attempts to threaten or exploit people in a sexual manner, such as creepshots, hidden camera, non-consensual sexual content created via deepfake or similar technology, or assault content.</li>
-</ul>
-
-<h4 className={styles.subtitle}>Hate Speech</h4>
-<p className={styles.paragraph}>We don't allow users that promote violence or incite hatred against individuals or groups based on race or ethnic origin, religion, disability, age, nationality, veteran status, sexual orientation, gender, gender identity, caste, immigration status, or any other characteristic that is associated with systemic discrimination or marginalization.</p>
-
-<p className={styles.paragraph}>Users are prohibited from engaging in:</p>
-<ul className={styles.list}>
-<li className={styles.listItem}>Content or speech asserting that a protected group is inhuman, inferior or worthy of being hated.</li>
-<li className={styles.listItem}>Content that is hateful slurs, stereotypes, or theories about a protected group possessing negative characteristics (for example, malicious, corrupt, evil, etc.), or explicitly or implicitly claims the group is a threat.</li>
-<li className={styles.listItem}>Content or speech trying to encourage others to believe that people should be hated or discriminated against because they are a member of a protected group.</li>
-<li className={styles.listItem}>Content which promotes hate symbols such as flags, symbols, insignias, paraphernalia or behaviours associated with hate groups.</li>
-</ul>
-
-<h4 className={styles.subtitle}>Violence</h4>
-<p className={styles.paragraph}>We don't allow apps that depict or facilitate gratuitous violence or other dangerous activities.</p>
-<p className={styles.paragraph}>Users are prohibited from engaging in:</p>
-<ul className={styles.list}>
-<li className={styles.listItem}>Graphic depictions or descriptions of realistic violence or violent threats to any person or animal.</li>
-<li className={styles.listItem}>Content that promotes self-harm, suicide, eating disorders, choking games or other acts where serious injury or death may result.</li>
-</ul>
-
-<h4 className={styles.subtitle}>Terrorist Content</h4>
-<p className={styles.paragraph}>We do not permit terrorist organizations to publish content for any purpose, including recruitment.</p>
-<p className={styles.paragraph}>We don't allow users with content related to terrorism, such as content that promotes terrorist acts, incites violence, or celebrates terrorist attacks.</p>
-
-<h4 className={styles.subtitle}>Dangerous Organizations and Movements</h4>
-<p className={styles.paragraph}>We do not permit movements or organizations that have engaged in, prepared for, or claimed responsibility for acts of violence against civilians to publish content for any purpose, including recruitment.</p>
-<p className={styles.paragraph}>We don't allow users with content related to planning, preparing, or glorifying violence against civilians.</p>
-
-<h4 className={styles.subtitle}>Sensitive Events</h4>
-<p className={styles.paragraph}>We don't allow contents that capitalize on or are insensitive toward a sensitive event with significant social, cultural, or political impact, such as civil emergencies, natural disasters, public health emergencies, conflicts, deaths, or other tragic events.</p>
-
-<p className={styles.paragraph}>Users are prohibited from engaging in:</p>
-<ul className={styles.list}>
-<li className={styles.listItem}>Lacking sensitivity regarding the death of a real person or group of people due to suicide, overdose, natural causes, etc</li>
-<li className={styles.listItem}>Denying the occurrence of a well-documented, major tragic event.</li>
-<li className={styles.listItem}>Appearing to profit from a sensitive event with no discernible benefit to the victims.</li>
-</ul>
-
-<h4 className={styles.subtitle}>Bullying and Harassment</h4>
-<p className={styles.paragraph}>We don't allow content that contain or facilitate threats, harassment, or bullying.</p>
-<p className={styles.paragraph}>Users are prohibited from engaging in:</p>
-<ul className={styles.list}>
-<li className={styles.listItem}>Bullying victims of international or religious conflicts.</li>
-<li className={styles.listItem}>Content that seeks to exploit others, including extortion, blackmail, etc.</li>
-<li className={styles.listItem}>Posting content in order to humiliate someone publicly.</li>
-<li className={styles.listItem}>Harassing victims, or their friends and families, of a tragic event.</li>
-</ul>
-
-<h4 className={styles.subtitle}>Dangerous Products</h4>
-<p className={styles.paragraph}>We do not allow users that facilitate the sale of explosives, firearms, ammunition, or certain firearms accessories.</p>
-<p className={styles.paragraph}>We donott allow users that provide instructions for the manufacture of explosives, firearms, ammunition, restricted firearm accessories, or other weapons. This includes instructions on how to convert a firearm to automatic, or simulated automatic, firing capabilities.</p>
-
-<h4 className={styles.subtitle}>Psychotropic drugs.</h4>
-<p className={styles.paragraph}>We do not allow users that facilitate the sale of marijuana or marijuana products, regardless of legality. We don't allow users that facilitate the sale of tobacco (including e-cigarettes and vape pens) or encourage the illegal or inappropriate use of alcohol or tobacco. We don't allow users that facilitate the sale of psychotropic drugs or drugs falling under the restricted category of Drugs and Cosmetics Act and Rules 1945.</p>
-
-<h4 className={styles.subtitle}>Black Magic, Witchcraft, Voodoo and Tantrism</h4>
-<p className={styles.paragraph}>We, strictly prohibit our users to get into any form of black magic, witchcraft, voodoo and tantrism. In case it comes to our information, that a user is indulged intentionally/unintentionally in any such activity, we hereby reserve the right to delete the account with immediate effect.</p>
-
-<p className={styles.paragraph}>Any such behaviour or content should be reported immediately to <strong>support@ShubhAstro.com.ShubhAstro Services:</strong></p>
-
-<p className={styles.paragraph}>These Terms of Service apply to all users of ShubhAstro Services Private Limited (Formerly Codeyeti Software Solutions Pvt.Ltd.)("ShubhAstro"), Information provided by our users through the ShubhAstro Service may contain links to third party websites that are not owned or controlled by ShubhAstro. ShubhAstro has no control over, and assumes no responsibility for, the content, privacy policies, or practices of any third party websites. Also, ShubhAstro does not assume any liability for any mistakes, misinterpretation of law, defamation, omissions, falsehood, obscenity, pornography or profanity in the statements, opinions, representations or any other form of third party content on the Site as well as that of its users. In addition, ShubhAstro will not and cannot censor or edit the content of any users and third-party site. By using the Service, you expressly acknowledge and agree that ShubhAstro shall not be responsible for any damages, claims or other liability arising from or related to your use of any content and third-party website. You understand that the information and opinions in the content represent solely the thoughts of the author and is neither endorsed by nor does it necessarily reflect ShubhAstro's belief.</p>
-
-<p className={styles.paragraph}>Users are advised to review the terms and policies of third-party services before engaging in transactions.</p>
-
-<p className={styles.paragraph}>Errors, Corrections, and Right to Modify or Discontinue Service and Sites:</p>
-
-<p className={styles.paragraph}>We do not represent or warrant that the ShubhAstro Site will be error-free, free of viruses or other harmful components, or that defects will be corrected. We do not represent or warrant that the information available on or through the ShubhAstro will be correct, accurate, timely or otherwise reliable. We may make changes to the features, functionality or content of the ShubhAstro at any time. We reserve the right in our sole discretion to edit or delete any documents, information or other content appearing on the Site. ShubhAstro reserves the right at any time and from time to time to modify or discontinue, temporarily or permanently, the Services and/or Sites (or any part thereof) with or without notice. ShubhAstro shall not be liable to you or to any third party for any modification, suspension or discontinuance of the Service or any Sites.</p>
-
-<h4 className={styles.subtitle}>GOVERNING LAW AND JURISDICTION:</h4>
-<p className={styles.paragraph}>Any dispute arising from these Terms of Usage, including scope and applicability, shall be resolved by arbitration in New Delhi, India, under the Arbitration and Conciliation Act, 1996, before a mutually appointed sole arbitrator. Arbitration proceedings will be in English, and the award will be final and binding.</p>
-
-<p className={styles.paragraph}>Notwithstanding the above, either party may seek interim relief in the courts of New Delhi to protect its rights pending arbitration. These Terms are governed by the laws of India, and the parties submit to the exclusive jurisdiction of New Delhi courts for such proceedings.</p>
-
+      <h4 className={styles.subtitle}>13. CONTACT INFORMATION</h4>
+      <p className={styles.paragraph}>For queries, grievances, or legal notices, please contact:</p>
+      <p className={styles.paragraph}><strong>Shubhastro Customer Support</strong></p>
+      <ul className={styles.list}>
+        <li className={styles.listItem}>Email: <a href="mailto:legal@shubhastro.com" className={styles.link}>legal@shubhastro.com</a></li>
+        <li className={styles.listItem}>Support Hours: Monday to Saturday, 9:00 AM to 6:00 PM IST</li>
+      </ul>
+      <h4 className={styles.subtitle}>ACKNOWLEDGEMENT AND EXECUTION:</h4>
+      <p className={styles.paragraph}>I confirm that I have reviewed the terms in their entirety and hereby accord my unconditional consent to the same. I solemnly affirm that such consent is given <b>without any force, threat, or coercion,</b> and that I am executing this instrument with full knowledge of its legal consequences.</p>
+      <p className={styles.paragraph} style={{ marginTop: '2rem' }}>By using Shubhastro, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions.</p>
     </div>
-  )
-}
+  );
+};
 
-export default TermsConditions
+export default TermsConditions;

@@ -3,6 +3,7 @@ import ChevronLeft from "../components/ui/ChevronLeft";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useGetLoveTriangleTarotQuery } from "../../../../redux/api/tarot/tarotApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import TTSButton from "../../../../component/UI/TTSButton";
 import styles from "./LoveTriangleResultPage.module.css";
 
 const LoveTriangleResultPage = () => {
@@ -146,7 +147,10 @@ const LoveTriangleResultPage = () => {
         
         <div>
         {currentCard.name && (
-          <h2 className={styles.cardName}>{currentCard.name}</h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            <h2 className={styles.cardName}>{currentCard.name}</h2>
+            <TTSButton text={`${currentCard.name}. ${currentCard.traits?.length ? 'Traits: ' + currentCard.traits.join(', ') + '. ' : ''}Reading and Guidance. ${currentCard.description}`} />
+          </div>
         )}
 
         {/* Traits Capsules */}
