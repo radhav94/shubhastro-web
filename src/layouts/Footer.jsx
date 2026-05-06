@@ -169,7 +169,7 @@ const Footer = () => {
         <div className={`${styles.v2_column} ${styles.v2_columnWide}`}>
           <h4 className={styles.v2_heading}>Contact Us</h4>
           <p className={styles.v2_contactText}>Have questions?</p>
-          <a href="mailto:support@shubhtalk.com" className={styles.v2_emailLink}>support@shubhtalk.com</a>
+          <a href="mailto:support@shubhtalk.ai" className={styles.v2_emailLink}>support@shubhtalk.ai</a>
           <p className={styles.v2_contactText}>Or call us at</p>
           <a href="tel:+911234567890" className={styles.v2_phoneLink}>+91 12345 67890</a>
           <h4 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h4>
@@ -199,7 +199,7 @@ const Footer = () => {
         <div className={`${styles.v2_column} ${styles.v2_marT}`}>
           <h4 className={styles.v2_heading}>Contact Us</h4>
           <p className={styles.v2_contactText}>Have questions?</p>
-          <a href="mailto:support@shubhtalk.com" className={styles.v2_emailLink}>support@shubhtalk.com</a>
+          <a href="mailto:support@shubhtalk.ai" className={styles.v2_emailLink}>support@shubhtalk.ai</a>
           <p className={styles.v2_contactText}>Or call us at</p>
           <a href="tel:+911234567890" className={styles.v2_phoneLink}>+91 12345 67890</a>
           <h4 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h4>
@@ -210,7 +210,7 @@ const Footer = () => {
       {/* Bottom Bar */}
       <div className={styles.v2_bottomOuter}>
         <div className={styles.v2_bottomBar}>
-          <p>© 2001-{currentYear} Shubh Talk Pvt. Ltd. All rights reserved</p>
+          <p> ©{currentYear} Shubh Talk Pvt. Ltd. All rights reserved</p>
           <ul>
             <li><Link to="/privacy-policy">Privacy Policy</Link></li>
             <li><Link to="/terms-conditions">T&C</Link></li>

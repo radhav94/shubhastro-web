@@ -560,6 +560,7 @@ const HomeV2 = () => {
                   <div
                     className={styles.catIconBox}
                     style={{
+                      boxShadow: '1px 0px 4px 1px #605f5e90',
                       background: c.image_url
                         ? `url(${c.image_url}) center/60% no-repeat, ${catColors[i % catColors.length]}`
                         : catColors[i % catColors.length],
