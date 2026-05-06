@@ -8,6 +8,9 @@ const SOCKET_URL = import.meta.env.VITE_APP_API_BASE_URL;
 export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onStreamEnded, onSessionStarted, onSessionEnded, onRoomNotFound, onBlocked, onUserBlocked, onReportSubmitted }) => {
   const socketRef = useRef(null);
   const currentRoomRef = useRef(null);
+  // Grace period refs for room_ended → session_started race condition
+  const pendingEndRoomRef = useRef(null);
+  const pendingEndTimerRef = useRef(null);
 
   // Keep callback refs in sync so socket listeners always call the latest version
   const onStreamEndedRef = useRef(onStreamEnded);
@@ -118,6 +121,25 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     // Broadcast: a new live session started somewhere
     socket.on("live:session_started", (data) => {
       console.log("LiveChat → Session started broadcast:", data);
+      // If this room was pending end (within 2s grace), cancel the end and reconnect
+      if (data?.roomId && data.roomId === pendingEndRoomRef.current) {
+        console.log("LiveChat → Session restarted within grace period, canceling end & reconnecting:", data.roomId);
+        clearTimeout(pendingEndTimerRef.current);
+        pendingEndRoomRef.current = null;
+        pendingEndTimerRef.current = null;
+        // Reconnect to the room directly
+        const targetRoom = data.roomId;
+        setMessages([]);
+        setRoomReady(false);
+        currentRoomRef.current = targetRoom;
+        socket.emit("live:join_room", {
+          roomId: targetRoom,
+          userId,
+          userName,
+          userType: "audience",
+        });
+        return;
+      }
       onSessionStartedRef.current?.(data);
     });
 
@@ -130,18 +152,27 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     socket.on("live:room_ended", (data) => {
       console.log("LiveChat → Room ended:", data);
       const endedRoom = data?.roomId;
-      // Only clear state if the ended room is the one we're currently in.
-      // If we already switched to another room (e.g. via astrologer_status),
-      // don't nuke the new room's connection.
+      // Only process if the ended room is the one we're currently in
       if (!endedRoom || endedRoom === currentRoomRef.current) {
-        setRoomReady(false);
-        setMessages([]);
-        setParticipantCount(0);
-        setLiveStartedAt(null);
-        currentRoomRef.current = null;
-        clearViewerSession();
+        // Add 2s grace period — if session_started fires for same room, cancel the end
+        pendingEndRoomRef.current = endedRoom;
+        pendingEndTimerRef.current = setTimeout(() => {
+          pendingEndRoomRef.current = null;
+          pendingEndTimerRef.current = null;
+          // Only clear if we're still in the same room (not already switched)
+          if (currentRoomRef.current === endedRoom || currentRoomRef.current === null) {
+            setRoomReady(false);
+            setMessages([]);
+            setParticipantCount(0);
+            setLiveStartedAt(null);
+            currentRoomRef.current = null;
+            clearViewerSession();
+            onStreamEndedRef.current?.({ reason: data?.reason || "ended", endedAt: data?.endedAt, roomId: endedRoom });
+          }
+        }, 2000);
+      } else {
+        onStreamEndedRef.current?.({ reason: data?.reason || "ended", endedAt: data?.endedAt, roomId: endedRoom });
       }
-      onStreamEndedRef.current?.({ reason: data?.reason || "ended", endedAt: data?.endedAt, roomId: endedRoom });
     });
 
     socket.on("live:error", (data) => {
@@ -214,6 +245,12 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
       if (skipChatCleanupRef.current) {
         console.log("LiveChat → Skipping cleanup (pending call)");
         return;
+      }
+      // Clear pending end timer
+      if (pendingEndTimerRef.current) {
+        clearTimeout(pendingEndTimerRef.current);
+        pendingEndTimerRef.current = null;
+        pendingEndRoomRef.current = null;
       }
       // Leave current room before disconnecting
       if (currentRoomRef.current) {

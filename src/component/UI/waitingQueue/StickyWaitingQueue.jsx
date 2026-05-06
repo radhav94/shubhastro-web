@@ -62,8 +62,12 @@ const StickyWaitingQueue = () => {
 
   // User accepts the astrologer's accepted call/chat
   const handleAccept = (conn) => {
-    if (!conn.roomId) return;
+    if (!conn.roomId) {
+      console.warn("[StickyWaitingQueue] handleAccept — no roomId!", conn);
+      return;
+    }
     const eventName = conn.type === "chat" ? "chat:user_accept" : "call:user_accept";
+    console.log("[StickyWaitingQueue] Emitting", eventName, "roomId:", conn.roomId, "socket connected:", voiceSocket.connected);
     voiceSocket.emit(eventName, { roomId: conn.roomId });
   };
 
@@ -122,7 +126,7 @@ const StickyWaitingQueue = () => {
       {expanded && (
         <div className={styles.list}>
           {pendingConnections.map((conn) => {
-            const name = conn.astrologer?.firstName || "Astrologer";
+            const name = `${conn.astrologer?.firstName || conn.astrologer?.astrologerName || ""} ${conn.astrologer?.lastName || ""}`.trim() || "Astrologer";
             const status = conn.status || "waiting";
             const isAccepted = status === "astrologer_accepted";
             const isOnHold = status === "on_hold";

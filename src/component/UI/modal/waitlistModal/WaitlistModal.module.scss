@@ -13,7 +13,7 @@
 .modal {
   background: #fff;
   border-radius: 14px 14px 0 0;
-  padding: 8px 10px;
+  padding: 12px 14px;
   width: 100%;
   max-width: 600px;
   animation: slideUp 0.25s ease;
@@ -23,11 +23,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: #000;
   margin: 0;
@@ -41,45 +41,6 @@
   display: flex;
 }
 
-.description {
-  font-size: 11px;
-  color: #666;
-  margin: 0 0 8px;
-  line-height: 1.3;
-}
-
-.userRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-
-.userInfo {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.userAvatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #f75801, #ffa940);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.userName {
-  font-size: 13px;
-  font-weight: 600;
-  color: #000;
-}
-
 .timer {
   display: flex;
   align-items: center;
@@ -87,49 +48,132 @@
   font-size: 12px;
   font-weight: 600;
   color: #333;
-}
-
-.offlineToggle {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin: 0 auto 6px;
-  padding: 4px 12px;
-  background: #f0f0f0;
-  border: none;
-  border-radius: 20px;
-  font-size: 11px;
-  color: #555;
-  font-weight: 500;
-  cursor: pointer;
+  margin-bottom: 8px;
 }
 
 .divider {
   height: 1px;
   background: #e0e0e0;
-  margin-bottom: 0;
+  margin: 6px 0;
 }
 
-.waitTimeRow {
-  text-align: center;
+.sessionList {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.sessionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 4px;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.sessionAccepted {
+  background: #f0fdf4;
+  border-radius: 8px;
+  border-bottom: none;
   margin-bottom: 4px;
+  padding: 8px;
 }
 
-.waitLabel {
+.sessionOnHold {
+  background: #eff6ff;
+  border-radius: 8px;
+  border-bottom: none;
+  margin-bottom: 4px;
+  padding: 8px;
+}
+
+.sessionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sessionName {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   color: #000;
 }
 
-.waitValue {
-  font-size: 13px;
-  font-weight: 700;
+.sessionStatus {
+  font-size: 11px;
+  color: #666;
+
+  .sessionAccepted & {
+    color: #16a34a;
+    font-weight: 500;
+  }
+
+  .sessionOnHold & {
+    color: #2563eb;
+    font-weight: 500;
+  }
+}
+
+.sessionActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.acceptBtn {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #22c55e;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #16a34a;
+  }
+}
+
+.unholdBtn {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #2563eb;
+  }
+}
+
+.cancelBtn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid #fca5a5;
+  background: transparent;
   color: #ef4444;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:hover {
+    background: #fef2f2;
+  }
 }
 
 .joinBtn {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   border: none;
   border-radius: 999px;
   background: linear-gradient(90deg, #f75801, #d43400);
@@ -138,6 +182,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: opacity 0.2s;
+  margin-top: 4px;
 
   &:hover {
     opacity: 0.9;

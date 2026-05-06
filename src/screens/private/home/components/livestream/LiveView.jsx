@@ -608,7 +608,7 @@ const LiveView = (props) => {
     // Add to waiting queue
     addPendingConnection({
       id: `${astrologerId}-audio-${Date.now()}`,
-      astrologer: { ...astrologer, _id: astrologerId },
+      astrologer: { ...astrologer, _id: astrologerId, firstName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "" },
       type: "audio",
       roomId: null,
       waitingTime: 5,
@@ -673,7 +673,7 @@ const LiveView = (props) => {
     // Add to waiting queue
     addPendingConnection({
       id: `${astrologerId}-${type}-${Date.now()}`,
-      astrologer: { ...astrologer, _id: astrologerId },
+      astrologer: { ...astrologer, _id: astrologerId, firstName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "" },
       type,
       roomId: null,
       waitingTime: 5,

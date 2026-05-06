@@ -1,59 +1,83 @@
-import { useState, useEffect, useRef } from "react";
 import { voiceSocket } from "../../../../services/voiceSocketServices";
-import { getUserFromStorage } from "../../../../utils/authStorage";
+import { useWaitingQueue } from "../../../../context/WaitingQueueContext";
+import { useCall } from "../../../../context/CallContext";
+import { useChat } from "../../../../context/ChatContext";
 import styles from "./WaitlistModal.module.scss";
 
-const WaitlistModal = ({ show, callRoomId, resetCallState, onClose, connectionType, waitTime, offlineUsers }) => {
-  const [elapsed, setElapsed] = useState(0);
-  const [showOffline, setShowOffline] = useState(false);
-  const startTimeRef = useRef(null);
-  const intervalRef = useRef(null);
-  const user = getUserFromStorage();
-  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "You";
-  const initials = fullName.split(" ").map(w => w.charAt(0).toUpperCase()).join("").slice(0, 2);
-
-  // Start timer once when callRoomId is set, never reset on show/hide
-  useEffect(() => {
-    if (callRoomId && !startTimeRef.current) {
-      startTimeRef.current = Date.now();
-      intervalRef.current = setInterval(() => {
-        setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000));
-      }, 1000);
-    }
-    if (!callRoomId) {
-      startTimeRef.current = null;
-      setElapsed(0);
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    }
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [callRoomId]);
+const WaitlistModal = ({ show, callRoomId, resetCallState, onClose, connectionType, waitTime }) => {
+  const { pendingConnections, removePendingConnection, addPendingConnection, cancelPendingConnection, cancelAll } = useWaitingQueue();
+  const { setWaitingList: setCallWaitingList, resetCallFlow } = useCall();
+  const { setWaitingList, resetChatFlow } = useChat();
 
   if (!show) return null;
 
-  const mins = String(Math.floor(elapsed / 60)).padStart(2, "0");
-  const secs = String(elapsed % 60).padStart(2, "0");
+  // Use pendingConnections as the source of truth
+  const sessions = pendingConnections.length > 0
+    ? pendingConnections
+    : (callRoomId ? [{ roomId: callRoomId, type: connectionType || "audio", status: "waiting", waitingTime: waitTime || 5 }] : []);
 
-  const handleCancel = () => {
-    if (callRoomId) {
-      if (connectionType === "chat") {
-        voiceSocket.emit("chat:cancel", { roomId: callRoomId, canceledBy: "CUSTOMER" });
-      } else {
-        voiceSocket.emit("call:cancel", { roomId: callRoomId, canceledBy: "CUSTOMER" });
-      }
+  if (sessions.length === 0) return null;
+
+  const handleCancel = (conn) => {
+    cancelPendingConnection(conn.roomId, conn.type, conn.astrologer?._id);
+    if (pendingConnections.length <= 1) {
+      resetCallState?.();
     }
-    resetCallState();
   };
 
-  const estimatedWait = waitTime || (connectionType === "chat" ? 2 : 5);
-  const offlineCount = offlineUsers || 0;
+  const handleAccept = (conn) => {
+    if (!conn.roomId) {
+      console.warn("[WaitlistModal] handleAccept — no roomId!", conn);
+      return;
+    }
+    const eventName = conn.type === "chat" ? "chat:user_accept" : "call:user_accept";
+    console.log("[WaitlistModal] Emitting", eventName, "roomId:", conn.roomId, "socket connected:", voiceSocket.connected);
+    voiceSocket.emit(eventName, { roomId: conn.roomId });
+  };
+
+  const handleUnhold = (conn) => {
+    if (!conn.roomId) return;
+    const eventName = conn.type === "chat" ? "chat:unhold" : "call:unhold";
+    voiceSocket.emit(eventName, { roomId: conn.roomId });
+    removePendingConnection(conn.roomId);
+    if (conn.astrologer) {
+      addPendingConnection({
+        id: `${conn.astrologer._id}-${conn.type}-${Date.now()}`,
+        astrologer: conn.astrologer,
+        type: conn.type,
+        roomId: null,
+        waitingTime: conn.waitingTime || 5,
+        isEmergency: conn.isEmergency || false,
+        status: "ringing",
+      });
+    }
+  };
+
+  const handleCancelAll = () => {
+    cancelAll();
+    setWaitingList(false);
+    setCallWaitingList(false);
+    resetChatFlow();
+    resetCallFlow();
+    resetCallState?.();
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "astrologer_accepted": return "Accepted";
+      case "on_hold": return "On Hold";
+      case "ringing": return "Ringing…";
+      default: return "Waiting…";
+    }
+  };
 
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Waitlist</h2>
+          <h2 className={styles.title}>
+            Waiting for {sessions.length} astrologer{sessions.length > 1 ? "s" : ""}
+          </h2>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
@@ -63,42 +87,45 @@ const WaitlistModal = ({ show, callRoomId, resetCallState, onClose, connectionTy
           </button>
         </div>
 
-        <p className={styles.description}>
-          You are in the waitlist. Please wait while the astrologer connects with you.
-        </p>
+        <div className={styles.divider} />
 
-        <div className={styles.userRow}>
-          <div className={styles.userInfo}>
-            <div className={styles.userAvatar}>{initials}</div>
-            <span className={styles.userName}>{fullName}</span>
-          </div>
-          <div className={styles.timer}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="23 4 23 10 17 10" />
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-            </svg>
-            <span>{mins}m {secs}s</span>
-          </div>
+        <div className={styles.sessionList}>
+          {sessions.map((conn) => {
+            const name = `${conn.astrologer?.firstName || conn.astrologer?.astrologerName || ""} ${conn.astrologer?.lastName || ""}`.trim() || "Astrologer";
+            const status = conn.status || "waiting";
+            const isAccepted = status === "astrologer_accepted";
+            const isOnHold = status === "on_hold";
+
+            return (
+              <div key={conn.roomId || conn.id} className={`${styles.sessionItem} ${isAccepted ? styles.sessionAccepted : ""} ${isOnHold ? styles.sessionOnHold : ""}`}>
+                <div className={styles.sessionInfo}>
+                  <span className={styles.sessionName}>{name}</span>
+                  <span className={styles.sessionStatus}>{getStatusLabel(status)}</span>
+                </div>
+                <div className={styles.sessionActions}>
+                  {isAccepted && (
+                    <button className={styles.acceptBtn} onClick={() => handleAccept(conn)}>
+                      Accept
+                    </button>
+                  )}
+                  {isOnHold && (
+                    <button className={styles.unholdBtn} onClick={() => handleUnhold(conn)}>
+                      Unhold
+                    </button>
+                  )}
+                  <button className={styles.cancelBtn} onClick={() => handleCancel(conn)}>
+                    ✕
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
-
-        {offlineCount > 0 && (
-          <button className={styles.offlineToggle} onClick={() => setShowOffline(!showOffline)}>
-            +{offlineCount} Offline users
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: showOffline ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
-        )}
 
         <div className={styles.divider} />
 
-        <div className={styles.waitTimeRow}>
-          <span className={styles.waitLabel}>Wait Time :</span>
-          <span className={styles.waitValue}>~{estimatedWait} min</span>
-        </div>
-
-        <button className={styles.joinBtn} onClick={handleCancel}>
-          Cancel Waitlist
+        <button className={styles.joinBtn} onClick={handleCancelAll}>
+          Cancel All
         </button>
       </div>
     </div>
