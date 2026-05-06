@@ -8,6 +8,7 @@ import {
   IoStopCircle,
 } from "react-icons/io5";
 import { Sparkles, Globe } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import styles from "./PanditAIBubble.module.scss";
 import usePanditAI from "./usePanditAI";
 import useSpeechToText from "./useSpeechToText";
@@ -47,6 +48,7 @@ const MessageBubble = memo(({ msg }) => {
 MessageBubble.displayName = "MessageBubble";
 
 const PanditAIBubble = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [text, setText] = useState("");
   const [lang, setLang] = useState("en-IN");
@@ -244,7 +246,14 @@ const PanditAIBubble = () => {
     setShowLangPicker(false);
   }, []);
 
-  const handleOpen = useCallback(() => setIsOpen(true), []);
+  const handleOpen = useCallback(() => {
+    const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+    if (!userIdLocal) {
+      navigate("/login");
+      return;
+    }
+    setIsOpen(true);
+  }, [navigate]);
 
   const toggleLangPicker = useCallback(() => setShowLangPicker((p) => !p), []);
 
