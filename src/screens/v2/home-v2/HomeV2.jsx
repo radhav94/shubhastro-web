@@ -172,7 +172,14 @@ const HomeV2 = () => {
 
   // Extract complementary services (left cards)
   const complementaryServices = useMemo(() => {
-    return homeList?.find(s => s.slug === "complementary-services")?.content || [];
+    const apiData = homeList?.find(s => s.slug === "complementary-services")?.content;
+    if (apiData?.length > 0) return apiData;
+    // Fallback — show immediately while API loads
+    return [
+      { title: "Generate My Kundli",      slug: "free-kundli",          description: "Get your free birth chart", image_url: kundliImg },
+      { title: "Talk to an Astrologer",   slug: "talk-to-astrologer",   description: "Connect with experts",      image_url: astrologerImg },
+      { title: "Explore Horoscope",       slug: "daily-horoscope",      description: "Daily predictions",         image_url: horoscopeImg },
+    ];
   }, [homeList]);
 
   // Extract astrologers by category
@@ -253,7 +260,7 @@ const HomeV2 = () => {
             const slugPaths = {
               "free-kundli": "/kundli",
               "talk-to-astrologer": "/chat-with-astrologers",
-              "daily-horoscope": "/horoscopes/daily-horoscope",
+              "daily-horoscope": "/daily-horoscope",
             };
             const path = slugPaths[card.slug] || "/";
             return (
