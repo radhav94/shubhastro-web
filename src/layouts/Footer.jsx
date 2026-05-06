@@ -210,7 +210,7 @@ const Footer = () => {
       {/* Bottom Bar */}
       <div className={styles.v2_bottomOuter}>
         <div className={styles.v2_bottomBar}>
-          <p>© 2001-{currentYear} Shubh Talk Pvt. Ltd. All rights reserved</p>
+          <p> ©{currentYear} Shubh Talk Pvt. Ltd. All rights reserved</p>
           <ul>
             <li><Link to="/privacy-policy">Privacy Policy</Link></li>
             <li><Link to="/terms-conditions">T&C</Link></li>
