@@ -694,6 +694,7 @@ const LiveView = (props) => {
     // Emit call:cancel to server
     if (callRoomId) {
       voiceSocket.emit("call:cancel", { roomId: callRoomId, canceledBy: "CUSTOMER" });
+      removePendingConnection(callRoomId);
     }
     
     setShowWaitingModal(false);
@@ -1496,7 +1497,9 @@ const LiveView = (props) => {
                   show={showWaitingPopup}
                   callRoomId={callRoomId}
                   onClose={() => setShowWaitingPopup(false)}
+                  onShow={() => setShowWaitingPopup(true)}
                   resetCallState={() => { setShowWaitingPopup(false); resetCallState(); }}
+                  onUnhold={(roomId) => { removePendingConnection(roomId); }}
                   connectionType={pendingCallType}
                   waitTime={callWaitingList}
                 />

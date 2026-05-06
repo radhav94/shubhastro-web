@@ -108,7 +108,7 @@ const HomeLayout = () => {
 
       <StickyChatFooter />
       <StickyCallFooter />
-      <StickyWaitingQueue />
+      {!isLivePage && <StickyWaitingQueue />}
       <StickyReview />
     </div>
   );
