@@ -187,7 +187,7 @@ const LiveView = (props) => {
     setWaitingList,
   } = useCall();
 
-  const { addPendingConnection, assignRoomId, removePendingConnection, removePendingByAstrologer, cancelAllExcept, isInQueue } = useWaitingQueue();
+  const { pendingConnections, addPendingConnection, assignRoomId, removePendingConnection, removePendingByAstrologer, cancelAllExcept, isInQueue } = useWaitingQueue();
 
   // Auto-minimize call if user is on live stream (handles page refresh)
   useEffect(() => {
@@ -297,14 +297,6 @@ const LiveView = (props) => {
     console.log("LiveView restore effect — pending:", pending);
     restorePendingCallState(pending);
   }, [resolvePendingLiveCall, restorePendingCallState]);
-
-  useEffect(() => {
-    if (!showWaitingModal || !callingChannelRef.current || !liveListCtx?.lives?.length) {
-      return;
-    }
-
-    liveListCtx.switchToChannel(callingChannelRef.current);
-  }, [showWaitingModal, liveListCtx?.lives?.length, liveListCtx]);
 
   // Auto-dismiss the old waiting toast after 3 seconds
   useEffect(() => {
@@ -424,7 +416,7 @@ const LiveView = (props) => {
   const navigate = useNavigate();
 
   useReelScroll({
-    enabled: !!liveListCtx && ROLE !== "host" && !activeCall && !showWaitingModal,
+    enabled: !!liveListCtx && ROLE !== "host" && !activeCall,
     containerRef: reelRef,
     onNext: liveListCtx?.goNextLive,
     onPrev: liveListCtx?.goPrevLive,
@@ -977,6 +969,17 @@ const LiveView = (props) => {
       }
     };
 
+    // When astrologer accepts, auto-scroll to their stream and show waitlist
+    const handleAstrologerAcceptedScroll = (data) => {
+      const acceptedAstroId = data?.astrologerId;
+      if (!acceptedAstroId || !liveListCtx) return;
+      const live = liveListCtx.lives?.find((l) => l.astrologerId === acceptedAstroId || l.hostId === acceptedAstroId);
+      if (live?.channel) {
+        liveListCtx.switchToChannel(live.channel);
+        setShowWaitingPopup(true);
+      }
+    };
+
     // Register socket listeners
     voiceSocket.on("call:room", handleCallRoom);
     voiceSocket.on("call:accepted", handleCallAccepted);
@@ -985,6 +988,8 @@ const LiveView = (props) => {
     voiceSocket.on("call:canceled", handleCallCanceled);
     voiceSocket.on("warning", handleWarning);
     voiceSocket.on("live:astrologer_status", handleAstrologerPrivateCall);
+    voiceSocket.on("call:astrologer_accepted", handleAstrologerAcceptedScroll);
+    voiceSocket.on("chat:astrologer_accepted", handleAstrologerAcceptedScroll);
 
     return () => {
       voiceSocket.off("call:room", handleCallRoom);
@@ -994,6 +999,8 @@ const LiveView = (props) => {
       voiceSocket.off("call:canceled", handleCallCanceled);
       voiceSocket.off("warning", handleWarning);
       voiceSocket.off("live:astrologer_status", handleAstrologerPrivateCall);
+      voiceSocket.off("call:astrologer_accepted", handleAstrologerAcceptedScroll);
+      voiceSocket.off("chat:astrologer_accepted", handleAstrologerAcceptedScroll);
       voiceSocket.off("warning", handleWarning);
     };
   }, [
@@ -1028,7 +1035,7 @@ const LiveView = (props) => {
     isOnPrivateCall,
   });
 
-  const shouldShowWaitingIndicator = !isHost && (showWaitingModal || !!resolvePendingLiveCall());
+  const shouldShowWaitingIndicator = !isHost && pendingConnections.some((c) => c.astrologer?._id === astrologerId);
 
   return (
     <FixedLayer>
@@ -1378,7 +1385,7 @@ const LiveView = (props) => {
                 </button>
               </div>
               
-              {!isHost && !isCallForCurrentAstrologer && !showWaitingModal && (
+              {!isHost && !isCallForCurrentAstrologer && !pendingConnections.some((c) => c.astrologer?._id === astrologerId) && (
                 <button 
                   className="call-price-btn"
                   onClick={handleDirectVoiceCall}
@@ -1389,8 +1396,14 @@ const LiveView = (props) => {
                   <span>₹{fullAstro?.price?.audioRate?.amount || astrologer?.audioCallRate || 0}/ min</span>
                 </button>
               )}
-              {!isHost && !isCallForCurrentAstrologer && showWaitingModal && (
-                <button className="call-cancel-circle" onClick={resetCallState} aria-label="Cancel call">
+              {!isHost && !isCallForCurrentAstrologer && pendingConnections.some((c) => c.astrologer?._id === astrologerId) && (
+                <button className="call-cancel-circle" onClick={() => {
+                  const conn = pendingConnections.find((c) => c.astrologer?._id === astrologerId);
+                  if (conn?.roomId) {
+                    voiceSocket.emit("call:cancel", { roomId: conn.roomId, canceledBy: "CUSTOMER" });
+                    removePendingConnection(conn.roomId);
+                  }
+                }} aria-label="Cancel call">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round">
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />
@@ -1495,13 +1508,35 @@ const LiveView = (props) => {
                 {/* New waitlist modal — opens on hourglass click */}
                 <WaitlistModal
                   show={showWaitingPopup}
-                  callRoomId={callRoomId}
+                  pendingRequests={pendingConnections.filter((c) => c.astrologer?._id === astrologerId)}
                   onClose={() => setShowWaitingPopup(false)}
                   onShow={() => setShowWaitingPopup(true)}
-                  resetCallState={() => { setShowWaitingPopup(false); resetCallState(); }}
-                  onUnhold={(roomId) => { removePendingConnection(roomId); }}
-                  connectionType={pendingCallType}
-                  waitTime={callWaitingList}
+                  onAccept={(roomId, type) => {
+                    const event = type === "chat" ? "chat:user_accept" : "call:user_accept";
+                    voiceSocket.emit(event, { roomId });
+                  }}
+                  onReject={(roomId, type) => {
+                    const event = type === "chat" ? "chat:user_reject" : "call:user_reject";
+                    voiceSocket.emit(event, { roomId });
+                    removePendingConnection(roomId);
+                  }}
+                  onUnhold={(roomId, type) => {
+                    const event = type === "chat" ? "chat:unhold" : "call:unhold";
+                    voiceSocket.emit(event, { roomId });
+                    removePendingConnection(roomId);
+                  }}
+                  onCancel={(roomId, type) => {
+                    if (!roomId) return;
+                    const event = type === "chat" ? "chat:cancel" : "call:cancel";
+                    voiceSocket.emit(event, { roomId, canceledBy: "CUSTOMER" });
+                    removePendingConnection(roomId);
+                  }}
+                  onCancelAll={() => { resetCallState(); }}
+                  onScrollToAstrologer={(astrologerId) => {
+                    if (!liveListCtx) return;
+                    const live = liveListCtx.lives?.find((l) => l.astrologerId === astrologerId || l.hostId === astrologerId);
+                    if (live?.channel) liveListCtx.switchToChannel(live.channel);
+                  }}
                 />
               </div>
             )}

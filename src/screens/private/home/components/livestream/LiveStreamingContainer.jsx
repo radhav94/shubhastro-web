@@ -25,7 +25,7 @@ const LiveStreamingContainer = ({ client }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { activeCall, waitingList } = useCall();
-  const isCallBusy = !!activeCall || !!waitingList;
+  const isCallBusy = !!activeCall;
   const liveList = useLiveList();
   const giftPopupOpenRef = useRef(false);
   const [liveListRefreshKey, setLiveListRefreshKey] = useState(0);

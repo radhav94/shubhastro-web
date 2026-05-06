@@ -1,147 +1,77 @@
 import { useState, useEffect, useRef } from "react";
-import { voiceSocket } from "../../../../services/voiceSocketServices";
-import { getUserFromStorage } from "../../../../utils/authStorage";
 import styles from "./WaitlistModal.module.scss";
 
-const WaitlistModal = ({ show, callRoomId, resetCallState, onClose, onShow, connectionType, waitTime, onUnhold }) => {
-  const [elapsed, setElapsed] = useState(0);
-  const [status, setStatus] = useState("waiting"); // "waiting" | "astrologer_accepted" | "on_hold"
-  const [approvalData, setApprovalData] = useState(null);
-  const [timerKey, setTimerKey] = useState(0); // bump to restart timer
-  const startTimeRef = useRef(null);
-  const intervalRef = useRef(null);
-  const user = getUserFromStorage();
-  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "You";
-  const initials = fullName.split(" ").map(w => w.charAt(0).toUpperCase()).join("").slice(0, 2);
+/**
+ * Multi-request WaitlistModal
+ * Props:
+ *  - show: boolean
+ *  - pendingRequests: array of { roomId, astrologer, type, status, waitingTime, timestamp }
+ *  - onClose: () => void
+ *  - onShow: () => void
+ *  - onAccept: (roomId, type) => void
+ *  - onReject: (roomId, type) => void
+ *  - onUnhold: (roomId, type) => void
+ *  - onCancel: (roomId, type) => void
+ *  - onCancelAll: () => void
+ *  - onScrollToAstrologer: (astrologerId) => void
+ */
+const WaitlistModal = ({
+  show,
+  pendingRequests = [],
+  onClose,
+  onShow,
+  onAccept,
+  onReject,
+  onUnhold,
+  onCancel,
+  onCancelAll,
+  onScrollToAstrologer,
+}) => {
+  const [now, setNow] = useState(Date.now());
+  const timerRef = useRef(null);
 
-  // Listen for status change events
+  // Global tick for elapsed time display
   useEffect(() => {
-    const handleCallAstrologerAccepted = (data) => {
-      console.log("[WaitlistModal] 📥 call:astrologer_accepted", JSON.stringify(data));
-      if (data?.roomId === callRoomId || !callRoomId) {
-        setStatus("astrologer_accepted");
-        setApprovalData({ ...data, type: data.type || connectionType || "audio" });
-        if (onShow) onShow();
-      }
-    };
+    if (show && pendingRequests.length > 0) {
+      timerRef.current = setInterval(() => setNow(Date.now()), 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [show, pendingRequests.length]);
 
-    const handleChatAstrologerAccepted = (data) => {
-      console.log("[WaitlistModal] 📥 chat:astrologer_accepted", JSON.stringify(data));
-      if (data?.roomId === callRoomId || !callRoomId) {
-        setStatus("astrologer_accepted");
-        setApprovalData({ ...data, type: data.type || "chat" });
-        if (onShow) onShow();
-      }
-    };
-
-    const handleOnHold = (data) => {
-      if (data?.roomId === callRoomId || data?.roomId === approvalData?.roomId) {
-        setStatus("on_hold");
-        setApprovalData((prev) => prev ? { ...prev, ...data } : data);
-      }
-    };
-
-    voiceSocket.on("call:astrologer_accepted", handleCallAstrologerAccepted);
-    voiceSocket.on("chat:astrologer_accepted", handleChatAstrologerAccepted);
-    voiceSocket.on("call:on_hold", handleOnHold);
-    voiceSocket.on("chat:on_hold", handleOnHold);
-
-    return () => {
-      voiceSocket.off("call:astrologer_accepted", handleCallAstrologerAccepted);
-      voiceSocket.off("chat:astrologer_accepted", handleChatAstrologerAccepted);
-      voiceSocket.off("call:on_hold", handleOnHold);
-      voiceSocket.off("chat:on_hold", handleOnHold);
-    };
-  }, [callRoomId, connectionType, approvalData?.roomId, onShow]);
-
-  // Timer — depends on callRoomId and timerKey (bumped on unhold to restart)
+  // Auto-show when any request gets accepted
   useEffect(() => {
-    if (!callRoomId) {
-      startTimeRef.current = null;
-      setElapsed(0);
-      setStatus("waiting");
-      setApprovalData(null);
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      intervalRef.current = null;
-      return;
-    }
+    const hasAccepted = pendingRequests.some((r) => r.status === "astrologer_accepted");
+    if (hasAccepted && onShow) onShow();
+  }, [pendingRequests, onShow]);
 
-    // Start fresh timer
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    startTimeRef.current = Date.now();
-    setElapsed(0);
-    intervalRef.current = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000));
-    }, 1000);
+  if (!show || pendingRequests.length === 0) return null;
 
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    };
-  }, [callRoomId, timerKey]);
-
-  useEffect(() => {
-    if (!show) {
-      setApprovalData(null);
-      setStatus("waiting");
-    }
-  }, [show]);
-
-  if (!show) return null;
-
-  const mins = String(Math.floor(elapsed / 60)).padStart(2, "0");
-  const secs = String(elapsed % 60).padStart(2, "0");
-
-  const handleCancel = () => {
-    if (callRoomId) {
-      if (status === "on_hold") {
-        const event = connectionType === "chat" ? "chat:hold_cancel" : "call:hold_cancel";
-        voiceSocket.emit(event, { roomId: callRoomId });
-      } else if (status === "astrologer_accepted") {
-        const event = (approvalData?.type || connectionType) === "chat" ? "chat:user_reject" : "call:user_reject";
-        voiceSocket.emit(event, { roomId: callRoomId });
-      } else {
-        const event = connectionType === "chat" ? "chat:cancel" : "call:cancel";
-        voiceSocket.emit(event, { roomId: callRoomId, canceledBy: "CUSTOMER" });
-      }
-    }
-    resetCallState();
+  const getElapsed = (timestamp) => {
+    if (!timestamp) return "00m 00s";
+    const secs = Math.floor((now - timestamp) / 1000);
+    const m = String(Math.floor(secs / 60)).padStart(2, "0");
+    const s = String(secs % 60).padStart(2, "0");
+    return `${m}m ${s}s`;
   };
 
-  const handleUserAccept = () => {
-    const roomId = approvalData?.roomId || callRoomId;
-    if (!roomId) return;
-    const event = (approvalData?.type || connectionType) === "chat" ? "chat:user_accept" : "call:user_accept";
-    voiceSocket.emit(event, { roomId });
+  const handleAccept = (req) => {
+    if (onScrollToAstrologer) onScrollToAstrologer(req.astrologer?._id || req.astrologer?.astrologerId);
+    if (onAccept) onAccept(req.roomId, req.type);
   };
 
-  const handleUnhold = () => {
-    const roomId = approvalData?.roomId || callRoomId;
-    if (!roomId) return;
-    const event = connectionType === "chat" ? "chat:unhold" : "call:unhold";
-    voiceSocket.emit(event, { roomId });
-    setStatus("waiting");
-    // Bump timerKey to trigger useEffect and restart timer
-    setTimerKey((k) => k + 1);
-    // Notify parent to clear pending connection from queue
-    if (onUnhold) onUnhold(roomId);
-  };
-
-  const estimatedWait = waitTime || (connectionType === "chat" ? 2 : 5);
-  const astrologerName = approvalData?.astrologerDetail?.firstName || approvalData?.astrologerDetail?.astrologerName || "Astrologer";
-
-  // Status-based description
-  const getDescription = () => {
-    if (status === "astrologer_accepted") return `${astrologerName} is ready to connect with you.`;
-    if (status === "on_hold") return "You are on hold. You can unhold or cancel.";
-    return "You are in the waitlist. Please wait while the astrologer connects with you.";
-  };
+  const count = pendingRequests.length;
+  const acceptedCount = pendingRequests.filter((r) => r.status === "astrologer_accepted").length;
 
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
         <div className={styles.header}>
-          <h2 className={styles.title}>Waitlist</h2>
+          <h2 className={styles.title}>
+            Waitlist <span className={styles.badge}>{count}</span>
+          </h2>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
@@ -151,57 +81,85 @@ const WaitlistModal = ({ show, callRoomId, resetCallState, onClose, onShow, conn
           </button>
         </div>
 
-        <p className={styles.description}>{getDescription()}</p>
+        <p className={styles.description}>
+          {acceptedCount > 0
+            ? `${acceptedCount} astrologer${acceptedCount > 1 ? "s" : ""} ready to connect.`
+            : `Waiting for ${count} astrologer${count > 1 ? "s" : ""} to accept.`}
+        </p>
 
-        {/* User row with actions based on status */}
-        <div className={styles.userRow}>
-          <div className={styles.userInfo}>
-            <div className={styles.userAvatar}>{initials}</div>
-            <div className={styles.userMeta}>
-              <span className={styles.userName}>{fullName}</span>
-              {status !== "waiting" && (
-                <span className={styles.statusTag}>
-                  {status === "astrologer_accepted" ? "Accepting..." : "On Hold"}
-                </span>
-              )}
-            </div>
-          </div>
+        {/* Request list */}
+        <div className={styles.list}>
+          {pendingRequests.map((req) => {
+            const name = req.astrologer?.firstName || req.astrologer?.astrologerName || req.astrologer?.hostName || "Astrologer";
+            const initial = name.charAt(0).toUpperCase();
+            const isAccepted = req.status === "astrologer_accepted";
+            const isOnHold = req.status === "on_hold";
 
-          {/* Right side: timer or action buttons */}
-          {status === "waiting" && (
-            <div className={styles.timer}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 4 23 10 17 10" />
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-              </svg>
-              <span>{mins}m {secs}s</span>
-            </div>
-          )}
+            return (
+              <div
+                key={req.roomId || req.astrologer?._id || req.id}
+                className={`${styles.listItem} ${isAccepted ? styles.listItemAccepted : ""} ${isOnHold ? styles.listItemHold : ""}`}
+              >
+                <div className={styles.listItemLeft}>
+                  <div className={styles.listAvatar}>{initial}</div>
+                  <div className={styles.listMeta}>
+                    <span className={styles.listName}>{name}</span>
+                    <span className={styles.listType}>
+                      {req.type === "chat" ? "Chat" : req.type === "video" ? "Video" : "Audio"}
+                      {isAccepted && <span className={styles.acceptedTag}> · Ready</span>}
+                      {isOnHold && <span className={styles.holdTag}> · On Hold</span>}
+                    </span>
+                  </div>
+                </div>
 
-          {status === "astrologer_accepted" && (
-            <div className={styles.actionBtns}>
-              <button className={styles.acceptBtn} onClick={handleUserAccept}>Accept</button>
-              <button className={styles.rejectBtn} onClick={handleCancel}>Reject</button>
-            </div>
-          )}
+                <div className={styles.listItemRight}>
+                  {/* Waiting state — show timer + cancel */}
+                  {!isAccepted && !isOnHold && (
+                    <>
+                      <span className={styles.listTimer}>{getElapsed(req.timestamp)}</span>
+                      <button className={styles.cancelIconBtn} onClick={() => onCancel && onCancel(req.roomId, req.type)} aria-label="Cancel">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
 
-          {status === "on_hold" && (
-            <div className={styles.actionBtns}>
-              <button className={styles.unholdBtn} onClick={handleUnhold}>Unhold</button>
-              <button className={styles.rejectBtn} onClick={handleCancel}>Cancel</button>
-            </div>
-          )}
+                  {/* Accepted — show accept + reject */}
+                  {isAccepted && (
+                    <div className={styles.actionBtns}>
+                      <button className={styles.acceptBtn} onClick={() => handleAccept(req)}>Accept</button>
+                      <button className={styles.rejectBtn} onClick={() => onReject && onReject(req.roomId, req.type)}>Reject</button>
+                    </div>
+                  )}
+
+                  {/* On hold — show unhold + cancel */}
+                  {isOnHold && (
+                    <div className={styles.actionBtns}>
+                      <button className={styles.unholdBtn} onClick={() => onUnhold && onUnhold(req.roomId, req.type)}>Unhold</button>
+                      <button className={styles.rejectBtn} onClick={() => onCancel && onCancel(req.roomId, req.type)}>Cancel</button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        <div className={styles.divider} />
-
-        {status === "waiting" && (
+        {/* Footer — cancel all */}
+        {count > 1 && (
           <>
-            <div className={styles.waitTimeRow}>
-              <span className={styles.waitLabel}>Wait Time :</span>
-              <span className={styles.waitValue}>~{estimatedWait} min</span>
-            </div>
-            <button className={styles.joinBtn} onClick={handleCancel}>
+            <div className={styles.divider} />
+            <button className={styles.joinBtn} onClick={onCancelAll}>
+              Cancel All ({count})
+            </button>
+          </>
+        )}
+        {count === 1 && !pendingRequests[0]?.status?.includes("accepted") && (
+          <>
+            <div className={styles.divider} />
+            <button className={styles.joinBtn} onClick={() => onCancel && onCancel(pendingRequests[0].roomId, pendingRequests[0].type)}>
               Cancel Waitlist
             </button>
           </>
