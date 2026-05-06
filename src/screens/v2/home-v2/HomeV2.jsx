@@ -397,7 +397,7 @@ const HomeV2 = () => {
           >
             <span className={styles.featureTag}>New</span>
             <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title || "Laal Kitaab"}</h3>
-            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+            <p>{aiServicesItems[0]?.description || aiServicesItems[0]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
             <button className={styles.featureCta}>Explore Laal Kitaab &gt;</button>
             {(aiServicesItems[0]?.icon || laalKitaabImg) && (
               <img
@@ -413,7 +413,7 @@ const HomeV2 = () => {
             <span className={styles.featureTag}>New</span>
             <div className={styles.fcTop}>
               <h3>{aiServicesItems[1]?.display_title || aiServicesItems[1]?.title || "Occult World"}</h3>
-              <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+              <p>{aiServicesItems[1]?.description || aiServicesItems[1]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
             </div>
             <button className={styles.fcCtaLight}>Explore Occult &gt;</button>
             {(aiServicesItems[1]?.icon || occultWorldImg) && (
@@ -427,7 +427,7 @@ const HomeV2 = () => {
             <span className={styles.featureTag}>New</span>
             <div className={styles.fcTop}>
               <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title || "AI Pandit (Voice)"}</h3>
-              <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+              <p>{aiServicesItems[2]?.description || aiServicesItems[2]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
             </div>
             <button className={styles.fcCtaLight}>Talk Now &gt;</button>
             {(aiServicesItems[2]?.icon || aiPanditMic) && (
@@ -441,7 +441,7 @@ const HomeV2 = () => {
             <span className={styles.featureTag}>New</span>
             <div className={styles.fcTop}>
               <h3>{aiServicesItems[3]?.display_title || aiServicesItems[3]?.title || "ShubhAstro Live Community"}</h3>
-              <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+              <p>{aiServicesItems[3]?.description || aiServicesItems[3]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
             </div>
             <button className={styles.fcCtaLight}>Join Live Chat &gt;</button>
             {(aiServicesItems[3]?.icon) && (
