@@ -247,74 +247,61 @@ const TalkToAstrologer = () => {
     {
       skip: isFiltered, // Skip normal API when in filtered mode
       refetchOnMountOrArgChange: true,
-      pollingInterval: 15000,
-    },
-  );
-
-  // Separate polling query that fetches all loaded astrologers for status updates
-  const { data: statusPollData } = useGetAstrologersQuery(
-    {
-      page: 1,
-      limit: page * limit, // Fetch enough to cover all loaded astrologers
-      specialties: specialty || "",
-      isActiveType,
-      ...(isActiveOnline === true && { isActive: true }),
-    },
-    {
-      skip: isFiltered || page <= 1, // Skip when filtered or still on page 1
-      pollingInterval: 15000,
-    },
+       },
   );
 
   const { data: recommendedData, isLoading: isLoadingRecommended } =
-    useGetRecommendedAstrologersQuery(undefined, { refetchOnMountOrArgChange: true, pollingInterval: 15000 });
+    useGetRecommendedAstrologersQuery(undefined, { refetchOnMountOrArgChange: true });
 
   const data = astrodata?.data?.result || [];
   const recommendedAstrologers = recommendedData?.data || [];
-  const token = getToken();
   const { balance } = useWalletBalance();
   const [getBalance] = useGetBalanceMutation();
 
   // Update astrologer statuses from the status polling query (when page > 1)
-  useEffect(() => {
-    if (isFiltered || page <= 1) return;
-    const freshData = statusPollData?.data?.result;
-    if (!freshData || freshData.length === 0) return;
+  // useEffect(() => {
+  //   if (isFiltered || page <= 1) return;
+  //   const freshData = statusPollData?.data?.result;
+  //   if (!freshData || freshData.length === 0) return;
 
-    setAllAstrologers((prev) => {
-      const freshMap = new Map(freshData.map((a) => [a._id, a]));
-      let changed = false;
-      const updated = prev.map((a) => {
-        const fresh = freshMap.get(a._id);
-        if (fresh && (fresh.isActive !== a.isActive || fresh.isBusy !== a.isBusy || JSON.stringify(fresh.isActiveType) !== JSON.stringify(a.isActiveType))) {
-          changed = true;
-          return { ...a, isActive: fresh.isActive, isBusy: fresh.isBusy, isActiveType: fresh.isActiveType };
-        }
-        return a;
-      });
-      return changed ? updated : prev;
-    });
+  //   setAllAstrologers((prev) => {
+  //     const freshMap = new Map(freshData.map((a) => [a._id, a]));
+  //     let changed = false;
+  //     const updated = prev.map((a) => {
+  //       const fresh = freshMap.get(a._id);
+  //       if (fresh && (fresh.isActive !== a.isActive || fresh.isBusy !== a.isBusy || JSON.stringify(fresh.isActiveType) !== JSON.stringify(a.isActiveType))) {
+  //         changed = true;
+  //         return { ...a, isActive: fresh.isActive, isBusy: fresh.isBusy, isActiveType: fresh.isActiveType };
+  //       }
+  //       return a;
+  //     });
+  //     return changed ? updated : prev;
+  //   });
 
-    // Also update top ten astrologers status
-    setTopTenAstrologers((prev) => {
-      const freshMap = new Map(freshData.map((a) => [a._id, a]));
-      let changed = false;
-      const updated = prev.map((a) => {
-        const fresh = freshMap.get(a._id);
-        if (fresh && (fresh.isActive !== a.isActive || fresh.isBusy !== a.isBusy || JSON.stringify(fresh.isActiveType) !== JSON.stringify(a.isActiveType))) {
-          changed = true;
-          return { ...a, isActive: fresh.isActive, isBusy: fresh.isBusy, isActiveType: fresh.isActiveType };
-        }
-        return a;
-      });
-      return changed ? updated : prev;
-    });
-  }, [statusPollData, isFiltered, page]);
+  //   // Also update top ten astrologers status
+  //   setTopTenAstrologers((prev) => {
+  //     const freshMap = new Map(freshData.map((a) => [a._id, a]));
+  //     let changed = false;
+  //     const updated = prev.map((a) => {
+  //       const fresh = freshMap.get(a._id);
+  //       if (fresh && (fresh.isActive !== a.isActive || fresh.isBusy !== a.isBusy || JSON.stringify(fresh.isActiveType) !== JSON.stringify(a.isActiveType))) {
+  //         changed = true;
+  //         return { ...a, isActive: fresh.isActive, isBusy: fresh.isBusy, isActiveType: fresh.isActiveType };
+  //       }
+  //       return a;
+  //     });
+  //     return changed ? updated : prev;
+  //   });
+  // }, [statusPollData, isFiltered, page]);
 
   useEffect(() => {
     const incomingTopTen = astrodata?.data?.topTenAstrologer;
 
-    if (incomingTopTen && incomingTopTen.length > 0) {
+     if (
+      incomingTopTen &&
+      incomingTopTen.length > 0 &&
+      topTenAstrologers.length === 0
+    ) {
       setTopTenAstrologers(incomingTopTen);
     }
   }, [astrodata?.data?.topTenAstrologer]);
@@ -330,21 +317,10 @@ const TalkToAstrologer = () => {
   // MERGE API DATA - only for normal (non-filtered) mode
   useEffect(() => {
     if (isFiltered) return; // Don't process normal API data when in filtered mode
-    if (!data || data.length === 0) {
-      setHasMore(false);
-      return;
-    }
+    if (!data || data.length === 0) return;
 
     if (page === 1) {
-      setAllAstrologers((prev) => {
-        if (prev.length === 0) return data;
-        // Update existing astrologers with fresh data (status changes) and append new ones
-        const freshMap = new Map(data.map((a) => [a._id, a]));
-        const updated = prev.map((a) => freshMap.has(a._id) ? { ...a, ...freshMap.get(a._id) } : a);
-        const existingIds = new Set(prev.map((a) => a._id));
-        const newOnes = data.filter((a) => !existingIds.has(a._id));
-        return [...updated, ...newOnes];
-      });
+      setAllAstrologers(data);
     } else {
       setAllAstrologers((prev) => {
         const existingIds = new Set(prev.map((i) => i._id));
