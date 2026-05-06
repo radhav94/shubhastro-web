@@ -752,7 +752,7 @@
     background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%);
   }
   img{
-    width: 70%;
+    width: 100%;
   }
   @media (width <= 767px) {
     padding:6px;
@@ -846,7 +846,7 @@
 /* Shared image for all cards — right side absolute */
 .fcCardImg {
   position: absolute;
-  bottom: 0;
+  bottom: 7px;
   right: -8px;
   // width: 55%;
   // height: 100%;
@@ -951,7 +951,7 @@
 
 .laalKitaabImg {
   position: absolute;
-  bottom: 0;
+  bottom: 10px;
   right: -10px;
   width: 100%;
   object-fit: contain;
