@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useGetMahaDashaPredictionsQuery } from "../../../../redux/api/kundli/dashaApi";
 import styles from "./DashaContent.module.scss";
@@ -78,10 +78,10 @@ const Vimshottari = () => {
             <div className={styles.headerContent}>
               <div className={styles.dashaName}>
                 {dasha.dasha} Mahadasha
-                <span onClick={(e) => e.stopPropagation()} style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
-                  <TTSButton text={`${dasha.dasha} Mahadasha. ${dasha.dasha_start_year} to ${dasha.dasha_end_year}. Prediction: ${dasha.prediction || ''}. Planet in Zodiac: ${dasha.planet_in_zodiac || ''}`} />
-                </span>
               </div>
+               <span onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center', marginLeft: 'auto' }}>
+              <TTSButton text={`${dasha.dasha} Mahadasha. ${dasha.dasha_start_year} to ${dasha.dasha_end_year}. Prediction: ${dasha.prediction || ''}. Planet in Zodiac: ${dasha.planet_in_zodiac || ''}`} />
+            </span>
               <div className={styles.dateRange}>
                 {dasha.dasha_start_year} - {dasha.dasha_end_year}
               </div>
