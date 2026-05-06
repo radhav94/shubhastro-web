@@ -214,9 +214,6 @@ const PalmistryAnalysis = () => {
             </div>
 
             <div className={styles.messageSection} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                <TTSButton text="Hold tight as we are analysing your palm" />
-              </span>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className={styles.sparkleIcon}>
                 <path d="M20 5L22.5 15L30 17.5L22.5 20L20 30L17.5 20L10 17.5L17.5 15L20 5Z" fill="#1f2937"/>
               </svg>
