@@ -255,7 +255,7 @@ const Profile = () => {
             isActive: true,
           },
           date: item?.timestamp || new Date(),
-          duration: `${item?.duration || 0} Min`,
+          duration:`${formatDuration(Math.round(item?.totalDuration)) || 0}`,
           amount: item?.amount || 0,
           rate: 0,
           status: item?.status || "completed",

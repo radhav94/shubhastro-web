@@ -34,6 +34,11 @@ const FilterChips = ({
   const [experties, setEexperties] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
   const [selectedSort, setSelectedSort] = useState("");
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(1000);
+  const [minRating, setMinRating] = useState(0);
+  const [minExperience, setMinExperience] = useState(0);
+  const [selectedLanguages, setSelectedLanguages] = useState([]);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -46,6 +51,11 @@ const FilterChips = ({
   const expertiesRef = useRef("");
   const selectedGenderRef = useRef("");
   const selectedSortRef = useRef("");
+  const minPriceRef = useRef(0);
+  const maxPriceRef = useRef(1000);
+  const minRatingRef = useRef(0);
+  const minExperienceRef = useRef(0);
+  const selectedLanguagesRef = useRef([]);
   // NEW: Debounce timer ref for search input
   const debounceTimerRef = useRef(null);
   const [activeModalTab, setActiveModalTab] = useState("Skill");
@@ -86,6 +96,11 @@ const FilterChips = ({
   useEffect(() => { expertiesRef.current = experties; }, [experties]);
   useEffect(() => { selectedGenderRef.current = selectedGender; }, [selectedGender]);
   useEffect(() => { selectedSortRef.current = selectedSort; }, [selectedSort]);
+  useEffect(() => { minPriceRef.current = minPrice; }, [minPrice]);
+  useEffect(() => { maxPriceRef.current = maxPrice; }, [maxPrice]);
+  useEffect(() => { minRatingRef.current = minRating; }, [minRating]);
+  useEffect(() => { minExperienceRef.current = minExperience; }, [minExperience]);
+  useEffect(() => { selectedLanguagesRef.current = selectedLanguages; }, [selectedLanguages]);
 
   // Auto-scroll to active chip when selectedType changes from parent
   useEffect(() => {
@@ -248,6 +263,11 @@ const FilterChips = ({
         page: pageNo,
         limit: 9,
         ...(shouldFilterOnline && { isActive: true }),
+        ...(minPrice > 0 && { minPrice }),
+        ...(maxPrice < 1000 && { maxPrice }),
+        ...(minRating > 0 && { minRating }),
+        ...(minExperience > 0 && { minExperience }),
+        ...(selectedLanguages.length > 0 && { language: selectedLanguages.join(",") }),
         isActiveType,
       }).unwrap();
 
@@ -375,7 +395,7 @@ const FilterChips = ({
     // Sync activeChips with modal's selectedSkills
     setActiveChips(selectedSkills);
 
-    if (selectedSkills.length > 0 || selectedGender || selectedSort) {
+    if (selectedSkills.length > 0 || selectedGender || selectedSort || minPrice > 0 || maxPrice < 1000 || minRating > 0 || minExperience > 0 || selectedLanguages.length > 0) {
       setActive(selectedSkills.length > 0 ? "" : "filter");
     }
     setPage(1);
@@ -406,6 +426,11 @@ const FilterChips = ({
     setSelectedGender("");
     setSelectedSort("");
     setActiveChips([]);
+    setMinPrice(0);
+    setMaxPrice(1000);
+    setMinRating(0);
+    setMinExperience(0);
+    setSelectedLanguages([]);
   };
 
   const handleClick = (itemSlug) => {
@@ -611,6 +636,30 @@ const FilterChips = ({
                     {filterSection.title}
                   </div>
                 ))}
+                <div
+                  className={`${styles.sidebarItem} ${activeModalTab === "Price" ? styles.activeSidebarItem : ""}`}
+                  onClick={() => setActiveModalTab("Price")}
+                >
+                  Price
+                </div>
+                <div
+                  className={`${styles.sidebarItem} ${activeModalTab === "Rating" ? styles.activeSidebarItem : ""}`}
+                  onClick={() => setActiveModalTab("Rating")}
+                >
+                  Rating
+                </div>
+                <div
+                  className={`${styles.sidebarItem} ${activeModalTab === "Experience" ? styles.activeSidebarItem : ""}`}
+                  onClick={() => setActiveModalTab("Experience")}
+                >
+                  Experience
+                </div>
+                <div
+                  className={`${styles.sidebarItem} ${activeModalTab === "Language" ? styles.activeSidebarItem : ""}`}
+                  onClick={() => setActiveModalTab("Language")}
+                >
+                  Language
+                </div>
 
                 {/* ✅ STATIC RENDERING (COMMENTED OUT - Replaced with dynamic rendering above)
                 <div
@@ -729,6 +778,133 @@ const FilterChips = ({
                             className={isSelected ? styles.selectedText : ""}
                           >
                             {s.title}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {activeModalTab === "Price" && (
+                  <div className={styles.priceRangeContainer}>
+                    <div className={styles.priceHeader}>
+                      <span> Minimum Price to Maximum Price</span>
+                    </div>
+                    <div className={styles.priceValues}>
+                      <span>₹{minPrice}</span>
+                      <span>₹{maxPrice}</span>
+                    </div>
+                    <div className={styles.rangeSliderWrapper}>
+                      <input
+                        type="range"
+                        min={0}
+                        max={1000}
+                        step={5}
+                        value={minPrice}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          if (val < maxPrice) setMinPrice(val);
+                        }}
+                        className={styles.rangeSlider}
+                      />
+                      <input
+                        type="range"
+                        min={0}
+                        max={1000}
+                        step={5}
+                        value={maxPrice}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          if (val > minPrice) setMaxPrice(val);
+                        }}
+                        className={styles.rangeSlider}
+                      />
+                    </div>
+                    <div className={styles.priceLabels}>
+                      <span>₹0</span>
+                      <span>₹1000</span>
+                    </div>
+                  </div>
+                )}
+
+                {activeModalTab === "Rating" && (
+                  <div className={styles.priceRangeContainer}>
+                    <div className={styles.priceHeader}>
+                      <span>Minimum Rating (0–5)</span>
+                    </div>
+                    <div className={styles.priceValues}>
+                      <span>⭐ {minRating}</span>
+                    </div>
+                    <div className={styles.rangeSliderWrapper}>
+                      <input
+                        type="range"
+                        min={0}
+                        max={5}
+                        step={0.5}
+                        value={minRating}
+                        onChange={(e) => setMinRating(Number(e.target.value))}
+                        className={styles.rangeSlider}
+                      />
+                    </div>
+                    <div className={styles.priceLabels}>
+                      <span>0</span>
+                      <span>5</span>
+                    </div>
+                  </div>
+                )}
+
+                {activeModalTab === "Experience" && (
+                  <div className={styles.priceRangeContainer}>
+                    <div className={styles.priceHeader}>
+                      <span>Minimum Experience (years)</span>
+                    </div>
+                    <div className={styles.priceValues}>
+                      <span>{minExperience} yrs</span>
+                    </div>
+                    <div className={styles.rangeSliderWrapper}>
+                      <input
+                        type="range"
+                        min={0}
+                        max={30}
+                        step={1}
+                        value={minExperience}
+                        onChange={(e) => setMinExperience(Number(e.target.value))}
+                        className={styles.rangeSlider}
+                      />
+                    </div>
+                    <div className={styles.priceLabels}>
+                      <span>0 yrs</span>
+                      <span>30 yrs</span>
+                    </div>
+                  </div>
+                )}
+
+                {activeModalTab === "Language" && (
+                  <div className={styles.optionsList}>
+                    {["Hindi", "English", "Marathi", "Gujarati", "Bengali", "Tamil", "Telugu", "Kannada", "Malayalam", "Punjabi"].map((lang) => {
+                      const isSelected = selectedLanguages.includes(lang);
+                      return (
+                        <div
+                          key={lang}
+                          className={styles.option}
+                          onClick={() =>
+                            setSelectedLanguages((prev) =>
+                              prev.includes(lang)
+                                ? prev.filter((l) => l !== lang)
+                                : [...prev, lang]
+                            )
+                          }
+                        >
+                          <FaCheck
+                            className={
+                              isSelected
+                                ? styles.checkIcon
+                                : styles.checkIconInactive
+                            }
+                            size={14}
+                          />
+                          <span className={isSelected ? styles.selectedText : ""}>
+                            {lang}
                           </span>
                         </div>
                       );

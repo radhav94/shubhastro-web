@@ -58,6 +58,11 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         limit = 10,
         isActiveType,
         isActive,
+        minPrice,
+        maxPrice,
+        minRating,
+        minExperience,
+        language,
       }) => {
         // OLD: isActive was always included in params, sending false/undefined values
         // const params = new URLSearchParams({
@@ -119,6 +124,29 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         // Handle active type
         if (isActiveType) {
           params.append("isActiveType", isActiveType);
+        }
+
+        // Handle price range
+        if (minPrice !== undefined && minPrice !== null && minPrice !== "") {
+          params.append("minPrice", minPrice);
+        }
+        if (maxPrice !== undefined && maxPrice !== null && maxPrice !== "") {
+          params.append("maxPrice", maxPrice);
+        }
+
+        // Handle rating
+        if (minRating !== undefined && minRating !== null && minRating !== "") {
+          params.append("minRating", minRating);
+        }
+
+        // Handle experience
+        if (minExperience !== undefined && minExperience !== null && minExperience !== "") {
+          params.append("minExperience", minExperience);
+        }
+
+        // Handle language
+        if (language) {
+          params.append("language", language);
         }
 
         return {
