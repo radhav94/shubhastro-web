@@ -4,39 +4,17 @@
 
 .page {
   min-height: 100vh;
-  background:
-    linear-gradient(135deg, #fde8d8 0%, #f5e6f0 30%, #e8eaf6 60%, #fde8d8 100%);
+  background-image: url("../../../assets/images/main-body-bg-new.png");
+  background-color: #ebecf2;
+  background-repeat: repeat-y;
   background-attachment: fixed;
+  background-size: 100% auto;
   color: #1c1c1c;
   font-family: "Poppins", sans-serif;
   position: relative;
 
-  /* Decorative blobs */
-  &::before {
-    content: "";
-    position: fixed;
-    top: -200px;
-    left: -200px;
-    width: 600px;
-    height: 600px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(247,88,1,0.18) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  &::after {
-    content: "";
-    position: fixed;
-    bottom: -200px;
-    right: -200px;
-    width: 600px;
-    height: 600px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
+  &::before { display: none; }
+  &::after  { display: none; }
 }
 
 /* ── Header ── */
