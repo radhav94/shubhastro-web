@@ -368,14 +368,14 @@ const HomeV2 = () => {
           {/* Bottom 2 feature cards — Occult World + AI Pandit — outside centerCard */}
           <div className={styles.centerFeatureRow}>
             {/* Occult World */}
-            <div className={`${styles.centerFeatureCard} ${styles.occultWorld}`}>
+            <div className={`${styles.centerFeatureCard} ${styles.occultWorld}`} onClick={() => navigate('/occult')} style={{ cursor: 'pointer' }}>
               <div className={styles.occultEllipse} />
               <span className={styles.featureTag}>New</span>
               <div className={styles.fcTop}>
                 <h3>{aiServicesItems[1]?.display_title || aiServicesItems[1]?.title || "Occult World"}</h3>
                 <p>{aiServicesItems[1]?.description || aiServicesItems[1]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
               </div>
-              <button className={styles.fcCtaLight}>Explore Occult &gt;</button>
+              <button className={styles.fcCtaLight} onClick={() => navigate('/occult')}>Explore Occult &gt;</button>
               {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon || occultWorldImg) && (
                 <img src={aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon || occultWorldImg} alt="Occult World" className={styles.fcCardImg} />
               )}
