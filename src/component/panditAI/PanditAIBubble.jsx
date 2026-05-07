@@ -86,6 +86,13 @@ const PanditAIBubble = () => {
     return () => window.removeEventListener("panditai:ask", handleOpenAndSend);
   }, [sendText]);
 
+  // Auto-focus input when chat opens
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isOpen]);
+
   const handleSpeechResult = useCallback(async (transcript) => {
     setInterimText("");
     const currentLang = langRef.current;

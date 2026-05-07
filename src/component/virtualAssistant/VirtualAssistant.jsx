@@ -361,6 +361,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen }) =
             </button>
             <canvas ref={canvasRef} style={{ display: "none" }} />
             <input
+              autoFocus
               className={styles.textInput}
               value={text}
               onChange={(e) => setText(e.target.value)}
