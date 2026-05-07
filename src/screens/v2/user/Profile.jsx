@@ -14,6 +14,7 @@ import {
   FilterIcon,
   UserPlus,
   Download,
+  Search,
 } from "lucide-react";
 import { TiUserDelete } from "react-icons/ti";
 import { LuPencilLine } from "react-icons/lu";
@@ -63,6 +64,7 @@ import { registerUser } from "../../../services/appServices/authService";
 import { useLogoutUserMutation } from "../../../redux/api/userSession/userSessionApi";
 import { useSelector } from "react-redux";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
+import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -176,6 +178,26 @@ const Profile = () => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [allLoadedTransactions, setAllLoadedTransactions] = useState([]);
+  const [txnFilterBy, setTxnFilterBy] = useState("");
+  const [txnFilterModalOpen, setTxnFilterModalOpen] = useState(false);
+  const [txnFilterType, setTxnFilterType] = useState("");
+  const [txnSortBy, setTxnSortBy] = useState("");
+  const [txnDateRange, setTxnDateRange] = useState("");
+  const [txnCustomFromDate, setTxnCustomFromDate] = useState("");
+  const [txnCustomToDate, setTxnCustomToDate] = useState("");
+  const [txnMinPrice, setTxnMinPrice] = useState("");
+  const [txnMaxPrice, setTxnMaxPrice] = useState("");
+  const [txnFilterActiveTab, setTxnFilterActiveTab] = useState("Type");
+  const [txnSearchText, setTxnSearchText] = useState("");
+  const [txnAppliedSearch, setTxnAppliedSearch] = useState("");
+  const txnSearchTimerRef = useRef(null);
+  // Applied filter state (used in API calls)
+  const [txnAppliedSortBy, setTxnAppliedSortBy] = useState("");
+  const [txnAppliedDateRange, setTxnAppliedDateRange] = useState("");
+  const [txnAppliedFromDate, setTxnAppliedFromDate] = useState("");
+  const [txnAppliedToDate, setTxnAppliedToDate] = useState("");
+  const [txnAppliedMinPrice, setTxnAppliedMinPrice] = useState("");
+  const [txnAppliedMaxPrice, setTxnAppliedMaxPrice] = useState("");
 
   // Call history pagination state
   const [callHistoryPage, setCallHistoryPage] = useState(1);
@@ -437,7 +459,18 @@ const Profile = () => {
 
   const { data: transactionsData, isFetching: isFetchingTransactions } =
     useGetTransactionsQuery(
-      { page: currentPage, limit: 10 },
+      {
+        page: currentPage,
+        limit: 10,
+        filterBy: txnFilterBy || null,
+        sortBy: txnAppliedSortBy || null,
+        dateRange: txnAppliedDateRange || null,
+        customFromDate: txnAppliedFromDate || null,
+        customToDate: txnAppliedToDate || null,
+        minPrice: txnAppliedMinPrice || null,
+        maxPrice: txnAppliedMaxPrice || null,
+        search: txnAppliedSearch || null,
+      },
       { skip: !shouldFetch },
     );
 
@@ -1699,6 +1732,37 @@ const Profile = () => {
 
         {activeTab === "Transactions" && (
           <div className={styles.transactionsContent}>
+            {/* Search + Filter */}
+            <div className={styles.txnSearchFilterRow}>
+              <div className={styles.txnSearchWrap}>
+                <input
+                  type="text"
+                  className={styles.txnSearchInput}
+                  placeholder="Search Name"
+                  value={txnSearchText}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setTxnSearchText(val);
+                    if (txnSearchTimerRef.current) {
+                      clearTimeout(txnSearchTimerRef.current);
+                    }
+                    txnSearchTimerRef.current = setTimeout(() => {
+                      setTxnAppliedSearch(val.trim());
+                      setCurrentPage(1);
+                      setAllLoadedTransactions([]);
+                    }, 500);
+                  }}
+                />
+              </div>
+              <button
+                className={styles.filterButton}
+                onClick={() => setTxnFilterModalOpen(true)}
+              >
+                <FilterIcon size={16} />
+                <span>Filter</span>
+              </button>
+            </div>
+
             {/* Table Header */}
             {allLoadedTransactions.length > 0 && (
               <div className={styles.txnTableHeader}>
@@ -2177,6 +2241,250 @@ const Profile = () => {
                   if (orderHistoryTab === "call") setCallHistoryPage(1);
                   else setChatHistoryPage(1);
                   setFilterModalOpen(false);
+                }}
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Transaction Filter Modal */}
+      {txnFilterModalOpen && (
+        <div className={styles.filterModalOverlay} onClick={() => setTxnFilterModalOpen(false)}>
+          <div className={styles.filterModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.filterModalHeader}>
+              <h3 className={styles.filterModalTitle}>Filters</h3>
+              <button className={styles.filterModalClose} onClick={() => setTxnFilterModalOpen(false)}>✕</button>
+            </div>
+
+            <div className={styles.filterModalBody}>
+              <div className={styles.filterTabs}>
+                {["Type", "Sort", "Date", "Price"].map((tab) => (
+                  <button
+                    key={tab}
+                    className={`${styles.filterTab} ${txnFilterActiveTab === tab ? styles.filterTabActive : ""}`}
+                    onClick={() => setTxnFilterActiveTab(tab)}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              <div className={styles.filterOptions}>
+                {txnFilterActiveTab === "Type" && (
+                  <>
+                    <div className={styles.filterOptionHeader}>
+                      <span>Transaction Type</span>
+                    </div>
+                    {[
+                      { label: "All", value: "" },
+                      { label: "Chat", value: "chat" },
+                      { label: "Call", value: "call" },
+                      { label: "Video", value: "video" },
+                      { label: "Gift", value: "gift" },
+                    ].map((opt) => (
+                      <div
+                        key={opt.value}
+                        className={styles.filterOptionItem}
+                        onClick={() => setTxnFilterType(opt.value)}
+                      >
+                        <FaCheck
+                          size={14}
+                          className={txnFilterType === opt.value ? styles.filterCheckActive : styles.filterCheckInactive}
+                          style={{ opacity: txnFilterType === opt.value ? 1 : 0.2 }}
+                        />
+                        <span className={styles.filterOptionLabel}>{opt.label}</span>
+                      </div>
+                    ))}
+                  </>
+                )}
+
+                {txnFilterActiveTab === "Sort" && (
+                  <>
+                    <div className={styles.filterOptionHeader}>
+                      <span>Sort Order</span>
+                    </div>
+                    {[
+                      { label: "Latest First", value: "latestFirst" },
+                      { label: "Oldest First", value: "oldestFirst" },
+                      { label: "Highest Price", value: "highestPrice" },
+                      { label: "Lowest Price", value: "lowestPrice" },
+                      { label: "Longest Duration", value: "longestDuration" },
+                      { label: "Shortest Duration", value: "shortestDuration" },
+                    ].map((opt) => (
+                      <div
+                        key={opt.value}
+                        className={styles.filterOptionItem}
+                        onClick={() => setTxnSortBy(opt.value)}
+                      >
+                        <FaCheck
+                          size={14}
+                          className={txnSortBy === opt.value ? styles.filterCheckActive : styles.filterCheckInactive}
+                          style={{ opacity: txnSortBy === opt.value ? 1 : 0.2 }}
+                        />
+                        <span className={styles.filterOptionLabel}>{opt.label}</span>
+                      </div>
+                    ))}
+                  </>
+                )}
+
+                {txnFilterActiveTab === "Date" && (
+                  <>
+                    <div className={styles.filterOptionHeader}>
+                      <span>Date Range</span>
+                      {txnDateRange && (
+                        <span className={styles.filterClearLink} onClick={() => setTxnDateRange("")}>Clear</span>
+                      )}
+                    </div>
+                    {[
+                      { label: "Today", value: "today" },
+                      { label: "Yesterday", value: "yesterday" },
+                      { label: "Last 7 Days", value: "last7days" },
+                      { label: "Last 30 Days", value: "last30days" },
+                    ].map((opt) => (
+                      <div
+                        key={opt.value}
+                        className={styles.filterOptionItem}
+                        onClick={() => setTxnDateRange(txnDateRange === opt.value ? "" : opt.value)}
+                      >
+                        <FaCheck
+                          size={14}
+                          className={txnDateRange === opt.value ? styles.filterCheckActive : styles.filterCheckInactive}
+                          style={{ opacity: txnDateRange === opt.value ? 1 : 0.2 }}
+                        />
+                        <span className={styles.filterOptionLabel}>{opt.label}</span>
+                      </div>
+                    ))}
+                    <div className={styles.filterOptionHeader} style={{ marginTop: "12px" }}>
+                      <span>Custom Range</span>
+                      {(txnCustomFromDate || txnCustomToDate) && (
+                        <span className={styles.filterClearLink} onClick={() => { setTxnCustomFromDate(""); setTxnCustomToDate(""); }}>Clear</span>
+                      )}
+                    </div>
+                    <div className={styles.filterDateInputs}>
+                      <DateTimePicker
+                        mode="date"
+                        selected={txnCustomFromDate ? new Date(txnCustomFromDate) : null}
+                        onChange={(date) => {
+                          if (date) {
+                            const yyyy = date.getFullYear();
+                            const mm = String(date.getMonth() + 1).padStart(2, "0");
+                            const dd = String(date.getDate()).padStart(2, "0");
+                            setTxnCustomFromDate(`${yyyy}-${mm}-${dd}`);
+                          } else {
+                            setTxnCustomFromDate("");
+                          }
+                        }}
+                        placeholder="From date"
+                      />
+                      <DateTimePicker
+                        mode="date"
+                        selected={txnCustomToDate ? new Date(txnCustomToDate) : null}
+                        onChange={(date) => {
+                          if (date) {
+                            const yyyy = date.getFullYear();
+                            const mm = String(date.getMonth() + 1).padStart(2, "0");
+                            const dd = String(date.getDate()).padStart(2, "0");
+                            setTxnCustomToDate(`${yyyy}-${mm}-${dd}`);
+                          } else {
+                            setTxnCustomToDate("");
+                          }
+                        }}
+                        placeholder="To date"
+                        minDate={txnCustomFromDate ? new Date(txnCustomFromDate) : undefined}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {txnFilterActiveTab === "Price" && (
+                  <>
+                    <div className={styles.filterOptionHeader}>
+                      <span>Minimum Price to Maximum Price</span>
+                    </div>
+                    <div className={styles.txnPriceRange}>
+                      <div className={styles.txnPriceLabels}>
+                        <span className={styles.txnPriceValue}>₹{txnMinPrice || 0}</span>
+                        <span className={styles.txnPriceValue}>₹{txnMaxPrice || 1000}</span>
+                      </div>
+                      <div className={styles.txnRangeSliderWrap}>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1000"
+                          value={txnMinPrice || 0}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            if (val <= (Number(txnMaxPrice) || 1000)) {
+                              setTxnMinPrice(String(val));
+                            }
+                          }}
+                          className={styles.txnRangeSlider}
+                        />
+                        <input
+                          type="range"
+                          min="0"
+                          max="1000"
+                          value={txnMaxPrice || 1000}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            if (val >= (Number(txnMinPrice) || 0)) {
+                              setTxnMaxPrice(String(val));
+                            }
+                          }}
+                          className={styles.txnRangeSlider}
+                        />
+                      </div>
+                      <div className={styles.txnPriceLabels}>
+                        <span className={styles.txnPriceBound}>₹0</span>
+                        <span className={styles.txnPriceBound}>₹1000</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className={styles.filterModalFooter}>
+              <button
+                className={styles.filterResetBtn}
+                onClick={() => {
+                  setTxnFilterType("");
+                  setTxnSortBy("");
+                  setTxnDateRange("");
+                  setTxnCustomFromDate("");
+                  setTxnCustomToDate("");
+                  setTxnMinPrice("");
+                  setTxnMaxPrice("");
+                  setTxnFilterBy("");
+                  setTxnAppliedSortBy("");
+                  setTxnAppliedDateRange("");
+                  setTxnAppliedFromDate("");
+                  setTxnAppliedToDate("");
+                  setTxnAppliedMinPrice("");
+                  setTxnAppliedMaxPrice("");
+                  setCurrentPage(1);
+                  setAllLoadedTransactions([]);
+                  setTxnFilterModalOpen(false);
+                }}
+              >
+                Reset
+              </button>
+              <button
+                className={styles.filterApplyBtn}
+                onClick={() => {
+                  setTxnFilterBy(txnFilterType);
+                  setTxnAppliedSortBy(txnSortBy);
+                  setTxnAppliedDateRange(txnDateRange);
+                  setTxnAppliedFromDate(txnCustomFromDate);
+                  setTxnAppliedToDate(txnCustomToDate);
+                  setTxnAppliedMinPrice(txnMinPrice);
+                  setTxnAppliedMaxPrice(txnMaxPrice);
+                  setCurrentPage(1);
+                  setAllLoadedTransactions([]);
+                  setTxnFilterModalOpen(false);
                 }}
               >
                 Apply
