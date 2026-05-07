@@ -160,6 +160,11 @@ const HomeV2 = () => {
     return homeList?.find(s => s.display_type === "blog");
   }, [homeList]);
 
+  // Extract ai-powered-astrology hero section
+  const aiPoweredSection = useMemo(() => {
+    return homeList?.find(s => s.display_type === "ai-powered-astrology");
+  }, [homeList]);
+
   // Extract ai-services section (feature cards)
   const aiServicesSection = useMemo(() => {
     return homeList?.find(s => s.slug === "ai-services");
@@ -289,7 +294,7 @@ const HomeV2 = () => {
             <p>{aiServicesItems[0]?.description || aiServicesItems[0]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
             <button className={styles.featureCta}>Explore Laal Kitaab &gt;</button>
             <img
-              src={aiServicesItems[0]?.icon || laalKitaabImg}
+              src={aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon || laalKitaabImg}
               alt="Laal Kitaab"
               className={styles.laalKitaabImgLeft}
             />
@@ -303,8 +308,15 @@ const HomeV2 = () => {
             <div className={styles.heroBanner}>
               <div className={styles.heroContent}>
                 <p className={styles.greeting}>Hello, {name}! 👋</p>
-                <h1>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></h1>
-                {/* <p className={styles.heroDesc}>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p> */}
+                <h1>
+                  {aiPoweredSection?.title
+                    ? <>{aiPoweredSection.title.replace(" AI", "")} <span className={styles.ai}>AI</span></>
+                    : <>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></>
+                  }
+                </h1>
+                <p className={styles.heroDesc}>
+                  {aiPoweredSection?.description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}
+                </p>
                 {currentMahadasha && (
                   <div className={styles.mahadashaTag}>
                     🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong>
@@ -364,8 +376,8 @@ const HomeV2 = () => {
                 <p>{aiServicesItems[1]?.description || aiServicesItems[1]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
               </div>
               <button className={styles.fcCtaLight}>Explore Occult &gt;</button>
-              {(aiServicesItems[1]?.icon || occultWorldImg) && (
-                <img src={aiServicesItems[1]?.icon || occultWorldImg} alt="Occult World" className={styles.fcCardImg} />
+              {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon || occultWorldImg) && (
+                <img src={aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon || occultWorldImg} alt="Occult World" className={styles.fcCardImg} />
               )}
             </div>
 
@@ -378,18 +390,26 @@ const HomeV2 = () => {
                 <p>{aiServicesItems[2]?.description || aiServicesItems[2]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
               </div>
               <button className={styles.panditTalkBtn}>Talk Now &rsaquo;</button>
-              {/* Mic circle with sound waves */}
-              <div className={styles.panditMicWrap}>
-                <div className={styles.panditWave} />
-                <div className={styles.panditMicCircle}>
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="#fff"/>
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
-                    <line x1="12" y1="19" x2="12" y2="23" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
-                    <line x1="8" y1="23" x2="16" y2="23" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
+              {/* Image from API or fallback mic UI */}
+              {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon || aiPanditMic) ? (
+                <img
+                  src={aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon || aiPanditMic}
+                  alt="AI Pandit"
+                  className={styles.fcCardImg}
+                />
+              ) : (
+                <div className={styles.panditMicWrap}>
+                  <div className={styles.panditWave} />
+                  <div className={styles.panditMicCircle}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="#fff"/>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+                      <line x1="12" y1="19" x2="12" y2="23" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+                      <line x1="8" y1="23" x2="16" y2="23" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -568,7 +588,6 @@ const HomeV2 = () => {
                   <div
                     className={styles.catIconBox}
                     style={{
-                      boxShadow: '1px 0px 4px 1px #605f5e90',
                       background: c.image_url
                         ? `url(${c.image_url}) center/60% no-repeat, ${catColors[i % catColors.length]}`
                         : catColors[i % catColors.length],
