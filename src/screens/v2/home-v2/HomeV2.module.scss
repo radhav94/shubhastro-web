@@ -430,6 +430,10 @@
   // border: 1px solid #FFFFFF;
   // backdrop-filter: blur(100px);
   // -webkit-backdrop-filter: blur(100px);
+  @media (width <= 767px) {
+    width: calc(100% + 32px);
+    margin-left: -16px;
+  }
 }
 
 /* WOW header — title left, View More right */
@@ -711,6 +715,11 @@
   object-fit: contain;
   z-index: 1;
   pointer-events: none;
+  @media (width <= 767px) {
+    bottom: -53px;
+    right: -40px;
+    width: 56%;
+  }
 }
 
 /* ═══ Center col — bottom 2 feature cards row ═══ */
@@ -3122,6 +3131,12 @@
 
   // .catItem { width: 110px; }
   // .catIconBox { width: 70px; height: 70px; }
+  .heroBgImg {
+    width: 330px;
+    right: -90px;
+    top: -44px;
+    opacity: 1;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -3335,13 +3350,6 @@
     // font-weight: 600;
   }
 
-  .heroBgImg {
-    width: 180px;
-    right: -62px;
-    top: -44px;
-    opacity: 1;
-  }
-
   .centerCard {
     overflow: hidden;
   }
@@ -3466,7 +3474,7 @@
     padding: 0px 16px 16px 16px;
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 1024px) {
     grid-template-columns: repeat(4, 1fr);
   }
 
@@ -3944,14 +3952,14 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
   }
 
   footer [class*="v2_storeBtn"] {
-    background: rgb(255, 255, 255) !important;
+    background: rgb(0, 0, 0) !important;
     // border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
     backdrop-filter: blur(8px) !important;
     box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.06);
   }
 
   footer [class*="v2_storeBtn"] * {
-    color: #1a1a1a !important;
+    color: #ffffff !important;
   }
 }
 
