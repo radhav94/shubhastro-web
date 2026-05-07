@@ -495,12 +495,13 @@ const HomeV2 = () => {
             {(quickLinkItems.length > 0 ? quickLinkItems.map((a, i) => ({
               ...a,
               _navFn: () => {
-                const slug = a.slug || a.title?.toLowerCase().replace(/\s+/g, '-');
-                if (slug?.includes('horoscope')) return navigate('/horoscopes/daily-horoscope');
-                if (slug?.includes('dasha')) return navigate('/kundli?tab=dasha');
-                if (slug?.includes('birth') || slug?.includes('kundli')) return navigate('/kundli');
-                if (slug?.includes('session') || slug?.includes('order')) return navigate('/profile', { state: { activeTab: 'Order History' } });
-                if (a.redirect_url) return navigate(a.redirect_url);
+                const slug = (a.slug || a.title?.toLowerCase().replace(/\s+/g, '-') || '');
+                if (slug.includes('horoscope'))                                    return navigate('/horoscopes/daily-horoscope');
+                if (slug.includes('dasha'))                                        return navigate('/kundli?tab=dasha');
+                if (slug.includes('birth') || slug.includes('kundli'))             return navigate('/kundli');
+                if (slug.includes('session') || slug.includes('order'))            return navigate('/profile', { state: { activeTab: 'Order History' } });
+                if (slug.includes('talk') || slug.includes('consult') || slug.includes('astrologer') || slug.includes('top-rated')) return navigate('/chat-with-astrologers');
+                if (a.redirect_url)                                                return navigate(a.redirect_url);
               }
             })) : [
               { title: "Horoscope\nSection",    _navFn: () => navigate('/horoscopes/daily-horoscope'),                              icon: AppIcons.Astrology },
