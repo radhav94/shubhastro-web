@@ -422,6 +422,7 @@ const TopHeader = () => {
 
   return (
     <>
+    <div className={styles.topHeaderBg}>
       <header className={styles.topHeader}>
         {/* <div className={styles.menuWrap}> */}
           <div className={styles.mainLeftMain}>
@@ -632,7 +633,7 @@ const TopHeader = () => {
           </div>
         {/* </div> */}
       </header>
-
+    </div>
       <div className={styles.headerNavigationSubmenuWrap}>
         <nav className={styles.headerNavigationSubmenu}>
                 <span className={styles.quickNavText}>Quick Links 
