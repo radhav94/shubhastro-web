@@ -492,15 +492,25 @@ const HomeV2 = () => {
           }}>‹</button>
 
           <div className={styles.gridRow} id="quickGridRow">
-            {(quickLinkItems.length > 0 ? quickLinkItems : [
-              { title: "Horoscope\nSection",    redirect_url: "/horoscopes/daily-horoscope", icon: AppIcons.Astrology },
-              { title: "Consult\nAstrologer",   redirect_url: "/chat-with-astrologers",      icon: AppIcons.Chat },
-              { title: "Future\nPredictions",   redirect_url: "/chat-with-astrologers",      icon: AppIcons.Star },
-              { title: "Dasha\nTimeline",       redirect_url: "/kundli",                     icon: AppIcons.Kundali },
-              { title: "Birth\nDetails",        redirect_url: "/kundli",                     icon: AppIcons.Education },
-              { title: "Talk to\nAstrologer",   redirect_url: "/talk-to-astrologers",        icon: AppIcons.Call },
-              { title: "Top Rated\nAstrologer", redirect_url: "/chat-with-astrologers",      icon: AppIcons.Trophy },
-              { title: "My\nSessions",          redirect_url: "/profile",                    icon: AppIcons.Message },
+            {(quickLinkItems.length > 0 ? quickLinkItems.map((a, i) => ({
+              ...a,
+              _navFn: () => {
+                const slug = a.slug || a.title?.toLowerCase().replace(/\s+/g, '-');
+                if (slug?.includes('horoscope')) return navigate('/horoscopes/daily-horoscope');
+                if (slug?.includes('dasha')) return navigate('/kundli?tab=dasha');
+                if (slug?.includes('birth') || slug?.includes('kundli')) return navigate('/kundli');
+                if (slug?.includes('session') || slug?.includes('order')) return navigate('/profile', { state: { activeTab: 'Order History' } });
+                if (a.redirect_url) return navigate(a.redirect_url);
+              }
+            })) : [
+              { title: "Horoscope\nSection",    _navFn: () => navigate('/horoscopes/daily-horoscope'),                              icon: AppIcons.Astrology },
+              { title: "Consult\nAstrologer",   _navFn: () => navigate('/chat-with-astrologers'),                                   icon: AppIcons.Chat },
+              { title: "Future\nPredictions",   _navFn: () => navigate('/chat-with-astrologers'),                                   icon: AppIcons.Star },
+              { title: "Dasha\nTimeline",       _navFn: () => navigate('/kundli?tab=dasha'),                                        icon: AppIcons.Kundali },
+              { title: "Birth\nDetails",        _navFn: () => navigate('/kundli'),                                                  icon: AppIcons.Education },
+              { title: "Talk to\nAstrologer",   _navFn: () => navigate('/chat-with-astrologers'),                                   icon: AppIcons.Call },
+              { title: "Top Rated\nAstrologer", _navFn: () => navigate('/chat-with-astrologers'),                                   icon: AppIcons.Trophy },
+              { title: "My\nSessions",          _navFn: () => navigate('/profile', { state: { activeTab: 'Order History' } }),      icon: AppIcons.Message },
             ]).map((a, i) => {
               const iconBgs = [
                 "linear-gradient(116.1deg, #FBF3F1 0%, #F7E0DA 100%)",
@@ -513,7 +523,7 @@ const HomeV2 = () => {
                 "linear-gradient(116.1deg, #FFFFFF 0%, #CBE9FC 100%)",
               ];
               return (
-                <div key={i} className={styles.gridItem} onClick={() => a.redirect_url && navigate(a.redirect_url)} style={{ cursor: a.redirect_url ? 'pointer' : 'default' }}>
+                <div key={i} className={styles.gridItem} onClick={() => a._navFn ? a._navFn() : (a.redirect_url && navigate(a.redirect_url))} style={{ cursor: 'pointer' }}>
                   <div
                     className={styles.gridIconBox}
                     style={{
@@ -617,14 +627,32 @@ const HomeV2 = () => {
           </div>
           <div className={styles.discoverGrid}>
             {(discoverMoreData.length > 0 ? discoverMoreData : [
-              { title: "Panchang" },
-              { title: "Kundli\nMatching" },
-              { title: "Numerology" },
-              { title: "Tarot\nReading" },
+              { title: "Vedic Kundli",    slug: "vedic-kundli",   redirect_url: "/kundli" },
+              { title: "Numerology",      slug: "numerology",     redirect_url: "/numerology" },
+              { title: "Tarot",           slug: "tarot",          redirect_url: "/tarot" },
+              { title: "Match-making",    slug: "matchmaking",    redirect_url: "/matchmaking" },
             ]).map((item, i) => {
               const discoverBgs = ["#FFE4E4","#FFF3E4","#E4EEFF","#F0E4FF"];
+              // Slug-based route map for API items
+              const slugRoutes = {
+                "vedic-kundli": "/kundli",
+                "kundli": "/kundli",
+                "numerology": "/numerology",
+                "tarot": "/tarot",
+                "tarot-reading": "/tarot",
+                "matchmaking": "/matchmaking",
+                "match-making": "/matchmaking",
+                "kundli-matching": "/matchmaking",
+                "panchang": "/panchang",
+              };
+              const route = item.redirect_url || slugRoutes[item.slug] || (item.slug ? `/${item.slug}` : null);
               return (
-                <div key={i} className={styles.discoverItem}>
+                <div
+                  key={i}
+                  className={styles.discoverItem}
+                  onClick={() => route && navigate(route)}
+                  style={{ cursor: route ? 'pointer' : 'default' }}
+                >
                   <div
                     className={styles.discoverIconBox}
                     style={{

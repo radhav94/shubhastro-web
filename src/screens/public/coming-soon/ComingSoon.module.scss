@@ -4,9 +4,39 @@
 
 .page {
   min-height: 100vh;
-  background: #f3f3f3;
+  background:
+    linear-gradient(135deg, #fde8d8 0%, #f5e6f0 30%, #e8eaf6 60%, #fde8d8 100%);
+  background-attachment: fixed;
   color: #1c1c1c;
   font-family: "Poppins", sans-serif;
+  position: relative;
+
+  /* Decorative blobs */
+  &::before {
+    content: "";
+    position: fixed;
+    top: -200px;
+    left: -200px;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(247,88,1,0.18) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &::after {
+    content: "";
+    position: fixed;
+    bottom: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 /* ── Header ── */
@@ -14,8 +44,12 @@
   display: flex;
   justify-content: center;
   padding: 14px 24px;
-  background: #fffaf5;
-  border-bottom: 1px solid rgba(243, 136, 63, 0.18);
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  position: relative;
+  z-index: 10;
 }
 
 .logo,
@@ -28,6 +62,8 @@
 /* ── Main ── */
 .main {
   padding-bottom: 24px;
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Hero ── */
@@ -39,9 +75,9 @@
   background:
     linear-gradient(
       90deg,
-      rgba(255, 251, 245, 0.78) 0%,
-      rgba(255, 245, 233, 0.46) 22%,
-      rgba(255, 235, 212, 0.12) 40%,
+      rgba(255, 251, 245, 0.6) 0%,
+      rgba(255, 245, 233, 0.3) 22%,
+      rgba(255, 235, 212, 0.08) 40%,
       rgba(255, 213, 177, 0) 56%
     ),
     url("../../../assets/images/coming-soon-banner-bg.png");
@@ -117,11 +153,15 @@
 .contentCard {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, #FFF5EC 0%, #FFFCF9 100%);
-  border: 1px solid rgba(228, 212, 197, 0.9);
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  border-radius: 24px;
   padding: 36px 40px 24px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 
   &::before,
   &::after {
@@ -138,7 +178,8 @@
     background: url("../../../assets/images/form-top-right.png") no-repeat;
     background-size: contain;
     background-position: top right;
-    border-top-right-radius: 20px;
+    border-top-right-radius: 24px;
+    opacity: 0.5;
   }
 
   &::after {
@@ -149,7 +190,8 @@
     background: url("../../../assets/images/form-bottom-left.png") no-repeat;
     background-size: contain;
     background-position: bottom left;
-    border-bottom-left-radius: 20px;
+    border-bottom-left-radius: 24px;
+    opacity: 0.5;
   }
 }
 
@@ -224,9 +266,11 @@
 .selectWrap {
   position: relative;
   min-height: 50px;
-  border: 1px solid #d7d7d7;
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 10px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -986,8 +1030,10 @@
   align-items: center;
   padding: 32px 36px;
   border-radius: 16px;
-  background: linear-gradient(180deg, #fff3df 0%, #fff7ea 100%);
-  border: 1px solid rgba(237, 214, 181, 0.85);
+  background: rgba(255, 243, 223, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
 }
 
 .whatsappLeft {
@@ -1016,7 +1062,7 @@
   padding: 14px;
   margin: 0 auto;
   border-radius: 14px;
-  background: #fff;
+  background: rgba(255, 255, 255,0.3);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
   text-decoration: none;
   color: inherit;
@@ -1074,7 +1120,7 @@
 .whatsappRight {
   padding: 22px 20px;
   border-radius: 14px;
-  background: #fff;
+  background: rgba(255, 255, 255,0.3);
   border: 1px solid rgba(154, 216, 169, 0.76);
 
   h4 {
@@ -1190,8 +1236,12 @@
 
 /* ── Footer ── */
 .footer {
-  border-top: 1px solid rgba(243, 136, 63, 0.18);
-  background: #fffaf5;
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: relative;
+  z-index: 1;
 }
 
 .footerInner {
