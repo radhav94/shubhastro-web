@@ -20,10 +20,34 @@ const typeLabel = {
 
 const statusLabel = {
   ringing: "Ringing…",
-  waiting: "Waiting…",
   astrologer_accepted: "Astrologer accepted",
   on_hold: "",
 };
+
+/**
+ * Format dynamic wait time for display based on confidence level.
+ */
+function formatWaitDisplay(conn) {
+  const { waitingTime, minWait, maxWait, confidence, position } = conn;
+  const type = typeLabel[conn.type] || "Call";
+
+  if (waitingTime === undefined && !position) {
+    return "Waiting…";
+  }
+
+  const safeWait = Math.max(1, waitingTime || 1);
+  const safeMin = Math.max(1, minWait || safeWait);
+  const safeMax = Math.max(safeMin, maxWait || safeWait);
+
+  let timeStr;
+  if (confidence === "high") {
+    timeStr = `~${safeWait} min`;
+  } else {
+    timeStr = `~${safeMin}-${safeMax} min`;
+  }
+
+  return `Waiting time: ${timeStr}`;
+}
 
 const StickyWaitingQueue = () => {
   const { pendingConnections, cancelPendingConnection, cancelAll, removePendingConnection, addPendingConnection } = useWaitingQueue();
@@ -71,22 +95,38 @@ const StickyWaitingQueue = () => {
     voiceSocket.emit(eventName, { roomId: conn.roomId });
   };
 
-  // User unholds — cancel old session and re-initiate to same astrologer
+  // User unholds — emit unhold event, remove old session, re-initiate call/chat
   const handleUnhold = (conn) => {
     if (!conn.roomId) return;
-    const eventName = conn.type === "chat" ? "chat:unhold" : "call:unhold";
-    voiceSocket.emit(eventName, { roomId: conn.roomId });
-    // Remove old on-hold connection, then add a fresh pending entry
-    // so the new call:room / chat:room from server has a queue entry to match
+    const userId = localStorage.getItem("shubhtalk_customer_id");
+    if (!userId) return;
+
+    // 1. Emit unhold event to notify server
+    const unholdEvent = conn.type === "chat" ? "chat:unhold" : "call:unhold";
+    voiceSocket.emit(unholdEvent, { roomId: conn.roomId });
+
+    // 2. Remove old on-hold connection
     removePendingConnection(conn.roomId);
+
+    // 3. Re-initiate the call/chat (same as normal flow)
+    const initiateEvent = conn.type === "chat" ? "chat:initiate" : "call:initiate";
+    const payload = {
+      userId,
+      astrologerId: conn.astrologer?._id,
+      type: conn.type,
+      ...(conn.isEmergency && { isEmergency: true }),
+      fromLive: false,
+    };
+    voiceSocket.emit(initiateEvent, payload);
+
+    // 4. Add fresh pending entry (roomId will come from server via call:room/chat:room)
     addPendingConnection({
       id: `${conn.astrologer?._id}-${conn.type}-${Date.now()}`,
       astrologer: conn.astrologer,
       type: conn.type,
-      roomId: null, // new roomId will come from server
-      waitingTime: conn.waitingTime || 5,
+      roomId: null,
+      waitingTime: conn.type === "chat" ? 2 : 5,
       isEmergency: conn.isEmergency || false,
-      status: "ringing",
     });
   };
 
@@ -138,9 +178,9 @@ const StickyWaitingQueue = () => {
                 </div>
                 <div className={styles.itemInfo}>
                   <p className={styles.itemName}>{name}</p>
-                  {(statusLabel[status] || (!isOnHold && `${typeLabel[conn.type] || "Call"} · ~${conn.waitingTime || 5} min`)) && (
+                  {(statusLabel[status] || true) && (
                     <p className={styles.itemMeta}>
-                      {statusLabel[status] || `${typeLabel[conn.type] || "Call"} · ~${conn.waitingTime || 5} min`}
+                      {statusLabel[status] || formatWaitDisplay(conn)}
                     </p>
                   )}
                 </div>
@@ -163,24 +203,21 @@ const StickyWaitingQueue = () => {
                       Unhold
                     </button>
                   )}
-                  <button
-                    className={styles.itemCancel}
-                    onClick={() => {
-                      if (isAccepted) {
-                        // Astrologer accepted — reject the ring
-                        const eventName = conn.type === "chat" ? "chat:user_reject" : "call:user_reject";
-                        voiceSocket.emit(eventName, { roomId: conn.roomId });
-                        removePendingConnection(conn.roomId);
-                      } else if (isOnHold) {
-                        handleHoldCancel(conn);
-                      } else {
-                        handleCancelOne(conn);
-                      }
-                    }}
-                    aria-label="Cancel"
-                  >
-                    <X size={16} />
-                  </button>
+                  {!isAccepted && (
+                    <button
+                      className={styles.itemCancel}
+                      onClick={() => {
+                        if (isOnHold) {
+                          handleHoldCancel(conn);
+                        } else {
+                          handleCancelOne(conn);
+                        }
+                      }}
+                      aria-label="Cancel"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
                 </div>
               </div>
             );

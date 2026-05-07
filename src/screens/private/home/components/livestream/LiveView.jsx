@@ -1501,7 +1501,18 @@ const LiveView = (props) => {
                     <span style={{ fontSize: 18 }}>⏳</span>
                     <div>
                       <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>Waiting in queue</div>
-                      <div style={{ color: '#9ca3af', fontSize: 11 }}>Approx 5 mins</div>
+                      <div style={{ color: '#9ca3af', fontSize: 11 }}>
+                        {(() => {
+                          const conn = pendingConnections.find((c) => c.astrologer?._id === astrologerId && c.confidence);
+                          if (!conn) return "Approx 5 mins";
+                          const { waitingTime, minWait, maxWait, confidence } = conn;
+                          const safeWait = Math.max(1, waitingTime || 1);
+                          const safeMin = Math.max(1, minWait || safeWait);
+                          const safeMax = Math.max(safeMin, maxWait || safeWait);
+                          if (confidence === "high") return `~${safeWait} min`;
+                          return `~${safeMin}-${safeMax} min`;
+                        })()}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1521,9 +1532,31 @@ const LiveView = (props) => {
                     removePendingConnection(roomId);
                   }}
                   onUnhold={(roomId, type) => {
-                    const event = type === "chat" ? "chat:unhold" : "call:unhold";
-                    voiceSocket.emit(event, { roomId });
+                    const userId = localStorage.getItem("shubhtalk_customer_id");
+                    if (!roomId || !userId) return;
+                    // Emit unhold
+                    const unholdEvent = type === "chat" ? "chat:unhold" : "call:unhold";
+                    voiceSocket.emit(unholdEvent, { roomId });
+                    // Get connection data before removing
+                    const conn = pendingConnections.find((c) => c.roomId === roomId);
                     removePendingConnection(roomId);
+                    // Re-initiate call/chat
+                    const initiateEvent = type === "chat" ? "chat:initiate" : "call:initiate";
+                    voiceSocket.emit(initiateEvent, {
+                      userId,
+                      astrologerId: conn?.astrologer?._id || astrologerId,
+                      type,
+                      fromLive: true,
+                    });
+                    // Add fresh pending entry
+                    addPendingConnection({
+                      id: `${conn?.astrologer?._id || astrologerId}-${type}-${Date.now()}`,
+                      astrologer: conn?.astrologer || { _id: astrologerId },
+                      type,
+                      roomId: null,
+                      waitingTime: type === "chat" ? 2 : 5,
+                      isEmergency: false,
+                    });
                   }}
                   onCancel={(roomId, type) => {
                     if (!roomId) return;

@@ -278,6 +278,30 @@ export const WaitingQueueProvider = ({ children }) => {
     const handleActivity = (data) => {
       if (data?.status === "ringing" && data?.roomId) {
         updateStatusByRoomId(data.roomId, "ringing");
+        return;
+      }
+
+      // Dynamic wait time update — propagate new fields to pending connection
+      if (data?.waitingTime !== undefined || data?.position !== undefined) {
+        setPendingConnections((prev) => {
+          let updated;
+          // If roomId is present, update that specific entry
+          if (data.roomId) {
+            updated = prev.map((c) =>
+              c.roomId === data.roomId
+                ? { ...c, waitingTime: data.waitingTime, minWait: data.minWait, maxWait: data.maxWait, confidence: data.confidence, position: data.position }
+                : c
+            );
+          } else {
+            // No roomId — update all waiting entries (broadcast scenario)
+            updated = prev.map((c) => {
+              if (["ringing", "astrologer_accepted", "on_hold", "on-going"].includes(c.status)) return c;
+              return { ...c, waitingTime: data.waitingTime, minWait: data.minWait, maxWait: data.maxWait, confidence: data.confidence, position: data.position };
+            });
+          }
+          persist(updated);
+          return updated;
+        });
       }
     };
 

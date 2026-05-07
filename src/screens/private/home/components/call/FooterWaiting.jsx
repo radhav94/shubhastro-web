@@ -3,10 +3,19 @@ import { useCall } from "../../../../../context/CallContext";
 import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
+function formatWait(conn) {
+  if (!conn || conn.confidence === undefined) return null;
+  const { waitingTime, minWait, maxWait, confidence } = conn;
+  const safeWait = Math.max(1, waitingTime || 1);
+  const safeMin = Math.max(1, minWait || safeWait);
+  const safeMax = Math.max(safeMin, maxWait || safeWait);
+  if (confidence === "high") return `~${safeWait} min`;
+  return `~${safeMin}-${safeMax} min`;
+}
 
 export const FooterWaiting = () => {
   const { waitingList, resetCallFlow, activeCall, activeCallRoomId, setCallApproval, setWaitingList, lastRequestedAstro, pendingLiveCall, setPendingLiveCall } = useCall();
-  const { removePendingConnection } = useWaitingQueue();
+  const { removePendingConnection, getConnectionByRoomId } = useWaitingQueue();
 
   useEffect(() => {
     const handleAstrologerIncoming = (data) => {
