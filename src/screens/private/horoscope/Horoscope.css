@@ -35,7 +35,7 @@
 }
 
 .horoscope-page-content {
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
   padding-top: 72px;
 }
@@ -54,7 +54,7 @@
   background: #ffffff;
   gap: 12px;
   /* margin-bottom: 10px; */
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
 }
 

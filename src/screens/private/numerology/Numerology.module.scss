@@ -71,7 +71,7 @@
 
 /* Info Section - matches KundliInfoContent */
 .infoSection {
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 24px auto;
   padding: 20px 20px;
   background-color: #fff;
@@ -266,7 +266,7 @@
   display: flex; /* Hidden by default on mobile */
   align-items: center;
   backdrop-filter: blur(10px);
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 6px 16px;
   @media (width <= 767px) {
@@ -982,7 +982,7 @@
 
 /* NUMEROLOGY SECTION */
 .numerologySection {
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0px auto 16px auto;
   padding: 0 16px;
   display: grid;
@@ -1066,7 +1066,7 @@
 /* RESPONSIVE */
 @media (min-width: 769px) {
   // .numerologySection {
-  //   max-width: 1200px;
+  //   max-width: 1440px;
   //   margin: 0px auto 60px auto;
   //   padding: 0 40px;
   //   display: grid;
@@ -1104,7 +1104,7 @@
 
 /* EXPERT SECTION */
 .expertSection {
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 24px auto;
   padding: 0 16px;
 }

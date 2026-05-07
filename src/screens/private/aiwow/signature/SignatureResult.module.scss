@@ -19,7 +19,7 @@
   // justify-content: space-between;
   align-items: center;
   padding:6px 16px;
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
   gap: 16px;
 }
@@ -61,7 +61,7 @@
 
 .content {
   // padding: 0;
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 20px auto;
   @media (width <= 767px) {
     margin: 0px auto;
@@ -80,7 +80,7 @@
   z-index: 9;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
   
   &::-webkit-scrollbar {
