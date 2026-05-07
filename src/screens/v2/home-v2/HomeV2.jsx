@@ -304,7 +304,7 @@ const HomeV2 = () => {
               <div className={styles.heroContent}>
                 <p className={styles.greeting}>Hello, {name}! 👋</p>
                 <h1>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></h1>
-                <p className={styles.heroDesc}>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+                {/* <p className={styles.heroDesc}>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p> */}
                 {currentMahadasha && (
                   <div className={styles.mahadashaTag}>
                     🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong>
