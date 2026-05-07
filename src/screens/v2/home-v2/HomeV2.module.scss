@@ -3474,7 +3474,7 @@
     padding: 0px 16px 16px 16px;
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 1024px) {
     grid-template-columns: repeat(4, 1fr);
   }
 
@@ -3952,14 +3952,14 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
   }
 
   footer [class*="v2_storeBtn"] {
-    background: rgb(255, 255, 255) !important;
+    background: rgb(0, 0, 0) !important;
     // border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
     backdrop-filter: blur(8px) !important;
     box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.06);
   }
 
   footer [class*="v2_storeBtn"] * {
-    color: #1a1a1a !important;
+    color: #ffffff !important;
   }
 }
 
