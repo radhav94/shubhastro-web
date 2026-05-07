@@ -1112,10 +1112,10 @@
     box-shadow: 0 4px 16px rgba(247, 88, 1, 0.15);
   }
 
-  @media (width <=767px) {
-    padding: 6px 6px;
-    font-size: 13px;
-  }
+  // @media (width <=767px) {
+  //   // padding: 6px 6px;
+  //   font-size: 13px;
+  // }
 }
 
 /* Shared image for all cards — right side absolute */
@@ -1324,11 +1324,14 @@
 }
 
 .panditTalkBtn {
-  background: none;
-  border: none;
+  background: rgba(255, 255, 255, 0.6);
+  width: fit-content;
+  border: none!important;
+  border-radius: 50px;
+  padding: 8px 16px!important;
   color: #7c3aed;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   padding: 0;
   font-family: 'Poppins', sans-serif;
@@ -1338,6 +1341,9 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s;
+  backdrop-filter: blur(12px);
 
   &:hover { text-decoration: underline; }
 }
