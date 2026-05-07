@@ -187,7 +187,7 @@ const LiveView = (props) => {
     setWaitingList,
   } = useCall();
 
-  const { pendingConnections, addPendingConnection, assignRoomId, removePendingConnection, removePendingByAstrologer, cancelAllExcept, isInQueue } = useWaitingQueue();
+  const { pendingConnections, addPendingConnection, assignRoomId, removePendingConnection, removePendingByAstrologer, cancelAllExcept, isInQueue, getConnectionByRoomId } = useWaitingQueue();
 
   // Auto-minimize call if user is on live stream (handles page refresh)
   useEffect(() => {
@@ -833,23 +833,20 @@ const LiveView = (props) => {
       setShowWaitingPopup(false);
       setShowWaitingToast(false);
       resetCallFlow();
-      removePendingConnection(roomId);
 
-      // Switch back to the astrologer's stream if user scrolled away
-      if (callingChannelRef.current && liveListCtx) {
-        liveListCtx.switchToChannel(callingChannelRef.current);
-      }
+      // Get connection data before removing (has correct astrologer info)
+      const connData = getConnectionByRoomId(roomId);
+      removePendingConnection(roomId);
 
       const pending = resolvePendingLiveCall();
       const astro =
+        connData?.astrologer ||
         astrologerRef.current ||
         pending?.astrologer ||
         lastRequestedAstro ||
         astrologer;
       const astroId = astro?._id || astro?.astrologerId;
       const liveChannel =
-        callingChannelRef.current ||
-        pending?.liveChannel ||
         props.channel;
       
       if (!astro || !astroId) {
@@ -969,15 +966,11 @@ const LiveView = (props) => {
       }
     };
 
-    // When astrologer accepts, auto-scroll to their stream and show waitlist
+    // When astrologer accepts, show waitlist popup (no scroll)
     const handleAstrologerAcceptedScroll = (data) => {
       const acceptedAstroId = data?.astrologerId;
-      if (!acceptedAstroId || !liveListCtx) return;
-      const live = liveListCtx.lives?.find((l) => l.astrologerId === acceptedAstroId || l.hostId === acceptedAstroId);
-      if (live?.channel) {
-        liveListCtx.switchToChannel(live.channel);
-        setShowWaitingPopup(true);
-      }
+      if (!acceptedAstroId) return;
+      setShowWaitingPopup(true);
     };
 
     // Register socket listeners
@@ -991,6 +984,10 @@ const LiveView = (props) => {
     voiceSocket.on("call:astrologer_accepted", handleAstrologerAcceptedScroll);
     voiceSocket.on("chat:astrologer_accepted", handleAstrologerAcceptedScroll);
 
+    // When user accepts from StickyWaitingQueue — no scroll needed, stay on current stream
+    const handleWaitlistAccepted = () => {};
+    window.addEventListener("waitlist:accepted", handleWaitlistAccepted);
+
     return () => {
       voiceSocket.off("call:room", handleCallRoom);
       voiceSocket.off("call:accepted", handleCallAccepted);
@@ -1002,6 +999,7 @@ const LiveView = (props) => {
       voiceSocket.off("call:astrologer_accepted", handleAstrologerAcceptedScroll);
       voiceSocket.off("chat:astrologer_accepted", handleAstrologerAcceptedScroll);
       voiceSocket.off("warning", handleWarning);
+      window.removeEventListener("waitlist:accepted", handleWaitlistAccepted);
     };
   }, [
     userIdLocal,

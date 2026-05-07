@@ -93,6 +93,11 @@ const StickyWaitingQueue = () => {
     const eventName = conn.type === "chat" ? "chat:user_accept" : "call:user_accept";
     console.log("[StickyWaitingQueue] Emitting", eventName, "roomId:", conn.roomId, "socket connected:", voiceSocket.connected);
     voiceSocket.emit(eventName, { roomId: conn.roomId });
+
+    // Notify live stream view to switch to the accepted astrologer's channel
+    window.dispatchEvent(new CustomEvent("waitlist:accepted", {
+      detail: { astrologerId: conn.astrologer?._id, roomId: conn.roomId, type: conn.type }
+    }));
   };
 
   // User unholds — emit unhold event, remove old session, re-initiate call/chat
