@@ -25,7 +25,7 @@
   }
 }
 .taroteHeaderInner{
-  max-width: 1200px;
+  max-width: 1440px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -57,7 +57,7 @@
 .tarotIntro {
   padding: 16px;
   padding-top: 88px;
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
   /* background: white; */
 }
@@ -89,7 +89,7 @@
   gap: 12px;
   padding: 16px 16px;
   max-width: 100%;
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
 }
 

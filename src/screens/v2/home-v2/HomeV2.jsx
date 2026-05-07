@@ -1,6 +1,6 @@
 import styles from "./HomeV2.module.scss";
 import { AppIcons } from "../../../utils/appImages";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getUserFromStorage } from "../../../utils/authStorage";
@@ -69,12 +69,29 @@ const HomeV2 = () => {
   const { data: newHomeData } = useGetNewHomeDetailsQuery();
   const homeList = newHomeData?.data?.list;
 
-  // API 2: AI Suites (WOW Suite icons)
+  // API 2: AI Suites (WOW Suite icons) — all 3 sections
   const { data: aiSuitesData } = useGetAiSuitesQuery();
-  const wowSuiteItems = useMemo(() => {
-    const section = aiSuitesData?.data?.list?.find(s => s.display_type === "wow-suite");
-    return { items: section?.content || [], title: section?.display_title || "WOW SUITE" };
+  const wowSections = useMemo(() => {
+    const list = aiSuitesData?.data?.list || [];
+    if (list.length > 0) return list;
+    // Fallback while loading
+    return [
+      {
+        title: "WOW SUITE",
+        content: [
+          { icon: vastuIcon, title: "AR Vastu\nScanner", slug: "ar-vastu-scanner" },
+          { icon: palmIcon, title: "Ai Palmistry\nScanner", slug: "ai-palmistry" },
+          { icon: faceIcon, title: "Astro Face\nReading", slug: "astro-face-reading" },
+          { icon: signatureIcon, title: "AI Signature\nAnalysis", slug: "ai-signature" },
+        ],
+      },
+    ];
   }, [aiSuitesData]);
+
+  // Keep wowSuiteItems for the header title (first section)
+  const wowSuiteItems = useMemo(() => ({
+    title: wowSections[0]?.title || "WOW SUITE",
+  }), [wowSections]);
 
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
 
@@ -86,23 +103,7 @@ const HomeV2 = () => {
       navigate(`/aiwow/${item.slug}`);
     }
   };
-  const [wowIndex, setWowIndex] = useState(0);
-  const wowScrollRef = useRef(null);
-  const wowAllItems = useMemo(() => wowSuiteItems.items.length > 0 ? wowSuiteItems.items : [
-    { icon: vastuIcon, title: "AR Vastu\nScanner" },
-    { icon: palmIcon, title: "Ai Palmistry\nScanner" },
-    { icon: faceIcon, title: "Astro Face\nReading" },
-    { icon: signatureIcon, title: "AI Signature\nAnalysis" },
-  ], [wowSuiteItems]);
 
-  const scrollWow = (dir) => {
-    const container = wowScrollRef.current;
-    if (!container) return;
-    const cardWidth = container.children[0]?.offsetWidth + 16; // card + gap
-    const next = Math.max(0, Math.min(wowAllItems.length - 4, wowIndex + dir));
-    setWowIndex(next);
-    container.scrollTo({ left: next * cardWidth, behavior: 'smooth' });
-  };
 
   // API 1: Current Mahadasha — use selected kundli profile
   const selectedProfile = useSelector(s => s.aiwow?.selectedKundliProfile);
@@ -157,6 +158,11 @@ const HomeV2 = () => {
   }, [panchangResponse]);
   const blogSection = useMemo(() => {
     return homeList?.find(s => s.display_type === "blog");
+  }, [homeList]);
+
+  // Extract ai-powered-astrology hero section
+  const aiPoweredSection = useMemo(() => {
+    return homeList?.find(s => s.display_type === "ai-powered-astrology");
   }, [homeList]);
 
   // Extract ai-services section (feature cards)
@@ -254,8 +260,9 @@ const HomeV2 = () => {
     <>
     <div className={styles.page}>
       <section className={styles.heroRow}>
-        {/* LEFT — Quick Action Cards */}
+        {/* LEFT — Quick Action Cards + Laal Kitaab */}
         <div className={styles.leftCards}>
+          {/* Top 3 quick cards */}
           {complementaryServices.map((card, i) => {
             const slugPaths = {
               "free-kundli": "/kundli",
@@ -268,7 +275,6 @@ const HomeV2 = () => {
                 <div className={styles.qText}>
                   <h3>{card.title}</h3>
                   <p>{card.description}</p>
-                  {/* <button className={styles.qArrow}>→</button> */}
                 </div>
                 <div className={styles.qImgWrap}>
                   <div className={styles.qImgGlow} />
@@ -277,17 +283,40 @@ const HomeV2 = () => {
               </div>
             );
           })}
+
+          {/* Laal Kitaab — special card at bottom of left col */}
+          <div
+            className={`${styles.qCardLaal}`}
+            onClick={() => navigate('/lal-kitab')}
+          >
+            <span className={styles.featureTag}>New</span>
+            <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title || "Laal Kitaab"}</h3>
+            <p>{aiServicesItems[0]?.description || aiServicesItems[0]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
+            <button className={styles.featureCta}>Explore Laal Kitaab &gt;</button>
+            <img
+              src={aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon || laalKitaabImg}
+              alt="Laal Kitaab"
+              className={styles.laalKitaabImgLeft}
+            />
+          </div>
         </div>
 
-        {/* CENTER — Hero + WOW (single card) */}
+        {/* CENTER — Hero + WOW + 2 feature cards */}
         <div className={styles.center}>
           <div className={styles.centerCard}>
             {/* Hero part */}
             <div className={styles.heroBanner}>
               <div className={styles.heroContent}>
                 <p className={styles.greeting}>Hello, {name}! 👋</p>
-                <h1>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></h1>
-                <p className={styles.heroDesc}>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+                <h1>
+                  {aiPoweredSection?.title
+                    ? <>{aiPoweredSection.title.replace(" AI", "")} <span className={styles.ai}>AI</span></>
+                    : <>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></>
+                  }
+                </h1>
+                <p className={styles.heroDesc}>
+                  {aiPoweredSection?.description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}
+                </p>
                 {currentMahadasha && (
                   <div className={styles.mahadashaTag}>
                     🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong>
@@ -300,15 +329,9 @@ const HomeV2 = () => {
               </div>
             </div>
 
-            {/* Divider */}
-            {/* <div className={styles.centerDivider} /> */}
-
             {/* WOW Suite */}
             <div className={styles.wowInner}>
-              {/* Glow blob */}
               <div className={styles.wowGlow} />
-
-              {/* Header row: title left, View More right */}
               <div className={styles.wowHeader}>
                 <div className={`${styles.titleWithBottomDevider}`}>
                   <h4 className={styles.wowTitle}>{wowSuiteItems.title}</h4>
@@ -321,137 +344,135 @@ const HomeV2 = () => {
                 <button className={styles.wowViewMore} onClick={() => navigate('/aiwow')}>View More &rsaquo;</button>
               </div>
 
-              <div className={styles.wowRow}>
-                <button className={styles.wowArrow} onClick={() => scrollWow(-1)} disabled={wowIndex === 0}>‹</button>
-                <div className={styles.wowCards} ref={wowScrollRef}>
-                  {wowAllItems.map((item, i) => (
-                    <div key={i} className={styles.wowCard} onClick={() => handleWowCardClick(item)} style={{ cursor: item.slug ? 'pointer' : 'default' }}>
+              {/* All sections from API — continuous grid */}
+              <div className={styles.wowGrid}>
+                {wowSections.flatMap((section, si) =>
+                  (section.content || []).map((item, i) => (
+                    <div
+                      key={`${si}-${i}`}
+                      className={styles.wowCard}
+                      onClick={() => handleWowCardClick(item)}
+                      style={{ cursor: item.slug ? 'pointer' : 'default' }}
+                    >
                       <div className={styles.wowIconBox}>
                         <img src={item.icon || item.iconUrl || item.icon_url} alt={item.title} />
                       </div>
                       <span>{item.title}</span>
                     </div>
-                  ))}
-                </div>
-                <button className={styles.wowArrow} onClick={() => scrollWow(1)} disabled={wowIndex >= wowAllItems.length - 1}>›</button>
-              </div>
-              {/* Pagination dots */}
-              <div className={styles.wowDots}>
-                {wowAllItems.map((_, i) => (
-                  <span key={i} className={i === wowIndex ? styles.dotFilled : styles.dotEmpty} onClick={() => scrollWow(i - wowIndex)} style={{ cursor: 'pointer' }} />
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* RIGHT — Crucial Muhurats */}
-        <div className={styles.rightPanel}>
-          <h4>CRUCIAL MUHURATS</h4>
-          <div className={styles.muhuratGrid}>
-            {muhurats.map((m, i) => {
-              const iconBgs = ["#FEF0E4", "#F4ECFB", "#E9F2EF", "#EBF2FB"];
-              const iconColors = ["#F75801", "#9333ea", "#16a34a", "#2563eb"];
-              const icons = [
-                // Sun/muhurat icon
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill={iconColors[0]}/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke={iconColors[0]} strokeWidth="2" strokeLinecap="round"/></svg>,
-                // Rahu — moon/shadow icon
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill={iconColors[1]}/></svg>,
-                // Gulika — clock icon
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke={iconColors[2]} strokeWidth="2"/><path d="M12 7v5l3 3" stroke={iconColors[2]} strokeWidth="2" strokeLinecap="round"/></svg>,
-                // Yamakanta — star icon
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill={iconColors[3]}/></svg>,
-              ];
-              return (
-                <div key={i} className={styles.muhuratItem}>
-                  <div className={styles.muhuratTop}>
-                    <div className={styles.muhuratIcon} style={{ background: iconBgs[i % 4] }}>
-                      {icons[i % 4]}
-                    </div>
-                    <h5>{m.name}</h5>
+          {/* Bottom 2 feature cards — Occult World + AI Pandit — outside centerCard */}
+          <div className={styles.centerFeatureRow}>
+            {/* Occult World */}
+            <div className={`${styles.centerFeatureCard} ${styles.occultWorld}`} onClick={() => navigate('/occult')} style={{ cursor: 'pointer' }}>
+              <div className={styles.occultEllipse} />
+              <span className={styles.featureTag}>New</span>
+              <div className={styles.fcTop}>
+                <h3>{aiServicesItems[1]?.display_title || aiServicesItems[1]?.title || "Occult World"}</h3>
+                <p>{aiServicesItems[1]?.description || aiServicesItems[1]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
+              </div>
+              <button className={styles.fcCtaLight} onClick={() => navigate('/occult')}>Explore Occult &gt;</button>
+              {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon || occultWorldImg) && (
+                <img src={aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon || occultWorldImg} alt="Occult World" className={styles.fcCardImg} />
+              )}
+            </div>
+
+            {/* AI Pandit Voice */}
+            <div className={`${styles.centerFeatureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }))} style={{ cursor: 'pointer' }}>
+              <div className={styles.panditEllipse} />
+              <span className={styles.featureTag}>New</span>
+              <div className={styles.fcTop}>
+                <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title || "AI Pandit (Voice)"}</h3>
+                <p>{aiServicesItems[2]?.description || aiServicesItems[2]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
+              </div>
+              <button className={styles.panditTalkBtn}>Talk Now &rsaquo;</button>
+              {/* Image from API or fallback mic UI */}
+              {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon || aiPanditMic) ? (
+                <img
+                  src={aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon || aiPanditMic}
+                  alt="AI Pandit"
+                  className={styles.fcCardImg}
+                />
+              ) : (
+                <div className={styles.panditMicWrap}>
+                  <div className={styles.panditWave} />
+                  <div className={styles.panditMicCircle}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="#fff"/>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+                      <line x1="12" y1="19" x2="12" y2="23" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+                      <line x1="8" y1="23" x2="16" y2="23" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
                   </div>
-                  <p className={styles.muhuratTime}>{m.start} – {m.end}</p>
                 </div>
-              );
-            })}
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT — Crucial Muhurats + Live Community (separate cards) */}
+        <div className={styles.rightCol}>
+          {/* Crucial Muhurats box */}
+          <div className={styles.rightPanel}>
+            <h4>CRUCIAL MUHURATS</h4>
+            <div className={styles.muhuratGrid}>
+              {muhurats.map((m, i) => {
+                const iconBgs = ["#FEF0E4", "#F4ECFB", "#E9F2EF", "#EBF2FB"];
+                const iconColors = ["#F75801", "#9333ea", "#16a34a", "#2563eb"];
+                const icons = [
+                  <svg key="sun" width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill={iconColors[0]}/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke={iconColors[0]} strokeWidth="2" strokeLinecap="round"/></svg>,
+                  <svg key="moon" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill={iconColors[1]}/></svg>,
+                  <svg key="clock" width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke={iconColors[2]} strokeWidth="2"/><path d="M12 7v5l3 3" stroke={iconColors[2]} strokeWidth="2" strokeLinecap="round"/></svg>,
+                  <svg key="star" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill={iconColors[3]}/></svg>,
+                ];
+                return (
+                  <div key={i} className={styles.muhuratItem}>
+                    <div className={styles.muhuratTop}>
+                      <div className={styles.muhuratIcon} style={{ background: iconBgs[i % 4] }}>
+                        {icons[i % 4]}
+                      </div>
+                      <h5>{m.name}</h5>
+                    </div>
+                    <p className={styles.muhuratTime}>{m.start} – {m.end}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Live Community card — outside Muhurats box */}
+          <div className={styles.liveCommunityCard} onClick={() => navigate('/live')}>
+            <span className={styles.featureTag}>New</span>
+            <h4 className={styles.liveCommunityTitle}>
+              {aiServicesItems[3]?.display_title || aiServicesItems[3]?.title || "ShubhAsrto Live Community"}
+            </h4>
+            <p className={styles.liveCommunityDesc}>
+              {aiServicesItems[3]?.description || aiServicesItems[3]?.short_description || "Lorem Ipsum is simply dummy text of"}
+            </p>
+            <button className={styles.liveCommunityBtn}>Join Live Chat &rsaquo;</button>
+            {/* Circular avatar cluster */}
+            <div className={styles.avatarCluster}>
+              <div className={styles.avatarClusterInner}>
+                <img src={avatar1} alt="" className={`${styles.clusterAvatar} ${styles.ca1}`} />
+                <img src={avatar2} alt="" className={`${styles.clusterAvatar} ${styles.ca2}`} />
+                <img src={avatar3} alt="" className={`${styles.clusterAvatar} ${styles.ca3}`} />
+                <img src={avatar4} alt="" className={`${styles.clusterAvatar} ${styles.ca4}`} />
+                <img src={avatar5} alt="" className={`${styles.clusterAvatar} ${styles.ca5}`} />
+                <div className={`${styles.clusterAvatar} ${styles.ca6} ${styles.clusterCount}`}>
+                  <span>+128</span>
+                  <span>Online</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ═══ SECTION 2 — Feature Cards (LOREM IPSUM AI) ═══ */}
-      <section className={styles.featureSection}>
-        <div className={`${styles.titleWithBottomDevider}`}>
-          <h4 className={styles.wowTitle}>{aiServicesSection?.display_title || "LOREM IPSUM AI"}</h4>
-          <div className={styles.BottomDevider}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
-                <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
-              </svg>
-          </div>
-        </div>
-        <div className={styles.featureRow}>
-          {/* Laal Kitaab — special card with image */}
-          <div
-            className={`${styles.featureCard} ${styles.laalKitaab}`}
-            onClick={() => navigate('/lal-kitab')}
-            style={{ cursor: 'pointer' }}
-          >
-            <span className={styles.featureTag}>New</span>
-            <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title || "Laal Kitaab"}</h3>
-            <p>{aiServicesItems[0]?.description || aiServicesItems[0]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
-            <button className={styles.featureCta}>Explore Laal Kitaab &gt;</button>
-            {(aiServicesItems[0]?.icon || laalKitaabImg) && (
-              <img
-                src={aiServicesItems[0]?.icon || laalKitaabImg}
-                alt="Laal Kitaab"
-                className={styles.laalKitaabImg}
-              />
-            )}
-          </div>
-          {/* Occult World */}
-          <div className={`${styles.featureCard} ${styles.occultWorld}`}>
-            <div className={styles.occultEllipse} />
-            <span className={styles.featureTag}>New</span>
-            <div className={styles.fcTop}>
-              <h3>{aiServicesItems[1]?.display_title || aiServicesItems[1]?.title || "Occult World"}</h3>
-              <p>{aiServicesItems[1]?.description || aiServicesItems[1]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
-            </div>
-            <button className={styles.fcCtaLight}>Explore Occult &gt;</button>
-            {(aiServicesItems[1]?.icon || occultWorldImg) && (
-              <img src={aiServicesItems[1]?.icon || occultWorldImg} alt="Occult World" className={styles.fcCardImg} />
-            )}
-          </div>
-
-          {/* AI Pandit Voice */}
-          <div className={`${styles.featureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }))} style={{ cursor: 'pointer' }}>
-            <div className={styles.panditEllipse} />
-            <span className={styles.featureTag}>New</span>
-            <div className={styles.fcTop}>
-              <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title || "AI Pandit (Voice)"}</h3>
-              <p>{aiServicesItems[2]?.description || aiServicesItems[2]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
-            </div>
-            <button className={styles.fcCtaLight}>Talk Now &gt;</button>
-            {(aiServicesItems[2]?.icon || aiPanditMic) && (
-              <img src={aiServicesItems[2]?.icon || aiPanditMic} alt="AI Pandit" className={styles.fcCardImg} />
-            )}
-          </div>
-
-          {/* Live Community */}
-          <div className={`${styles.featureCard} ${styles.liveCommunity}`} onClick={() => navigate('/live')} style={{ cursor: 'pointer' }}>
-            <div className={styles.liveEllipse} />
-            <span className={styles.featureTag}>New</span>
-            <div className={styles.fcTop}>
-              <h3>{aiServicesItems[3]?.display_title || aiServicesItems[3]?.title || "ShubhAstro Live Community"}</h3>
-              <p>{aiServicesItems[3]?.description || aiServicesItems[3]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
-            </div>
-            <button className={styles.fcCtaLight}>Join Live Chat &gt;</button>
-            {(aiServicesItems[3]?.icon) && (
-              <img src={aiServicesItems[3]?.icon} alt="Live Community" className={styles.fcCardImg} />
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ SECTION 3 — Quick Actions Grid ═══ */}
+      {/* ═══ SECTION 2 — Quick Actions Grid ═══ */}
       <section className={styles.quickGrid}>
         <div className={styles.quickGridHeader}>
           <div className={`${styles.titleWithBottomDevider}`}>
@@ -567,7 +588,6 @@ const HomeV2 = () => {
                   <div
                     className={styles.catIconBox}
                     style={{
-                      boxShadow: '1px 0px 4px 1px #605f5e90',
                       background: c.image_url
                         ? `url(${c.image_url}) center/60% no-repeat, ${catColors[i % catColors.length]}`
                         : catColors[i % catColors.length],
