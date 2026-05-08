@@ -6,9 +6,9 @@ export const MENU_LIST = [
   {
     title: "Horoscope",
     children: [
-      { title: "Daily Horoscope", path: "/horoscopes/daily-horoscope" },
-      { title: "Monthly Horoscope", path: "/horoscopes/weekly-horoscope" },
-      { title: "Monthly Horoscope", path: "/horoscopes/yearly-horoscope" },
+      { title: "Daily Horoscope", path: "/daily-horoscope" },
+      { title: "Monthly Horoscope", path: "/weekly-horoscope" },
+      { title: "Monthly Horoscope", path: "/yearly-horoscope" },
     ],
   },
 
@@ -18,7 +18,7 @@ export const MENU_LIST = [
   },
   { title: "Kundli", path: "/kundli" },
   // { title: "Sadesati", path: "/sadesati" },
-  { title: "Match Making", path: "/matchmaking" },
+  { title: "Match Making", path: "/match-making" },
   { title: "Numerology", path: "/numerology" },
   {
     title: "Tarot",
@@ -45,9 +45,9 @@ export const MENU_LIST = [
       { title: "Tarot Experts", path: "/astro/tarot" },
     ],
   },
-  { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
-  { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
-  { title: "Shubhmall", path: "/shubhmall" },
+  { title: "Chat with Astrologer", path: "/talk-to-astrologer" },
+  { title: "Talk to Astrologer", path: "/talk-to-astrologer" },
+  { title: "Shubhmall", path: "/shubh-mall" },
   { title: "Live", path: "/livestream" },
   // { title: "Shubhtalk Store", path: "/store" },
   { title: "Blogs", path: "/blog" },
@@ -74,7 +74,7 @@ export const MENU_LIST = [
     {
       label: "ShubhMall",
       icon: Store,
-      path: "/shubhmall",
+      path: "/shubh-mall",
     },
     {
       label: "Profile",

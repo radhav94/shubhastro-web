@@ -43,12 +43,12 @@ const FaceReadingResult = () => {
       } catch (error) {
         console.error('Error parsing result:', error);
         Toast.error('Failed to load analysis results');
-        navigate('/aiwow/face-reading/instructions');
+        navigate('/astro-face-reading/instructions');
         return;
       }
     } else {
       Toast.error('No analysis results found');
-      navigate('/aiwow/face-reading/instructions');
+      navigate('/astro-face-reading/instructions');
       return;
     }
     
@@ -92,7 +92,7 @@ const FaceReadingResult = () => {
       <div className={styles.container}>
         <div className={styles.errorContainer}>
           <p>No analysis data available</p>
-          <button onClick={() => navigate('/aiwow/face-reading/instructions')}>
+          <button onClick={() => navigate('/astro-face-reading/instructions')}>
             Try Again
           </button>
         </div>
@@ -665,7 +665,7 @@ const FaceReadingResult = () => {
         <div className='text-center'>
           <button 
             className={styles.consultButton}
-            onClick={() => navigate('/chat-with-astrologers')}
+            onClick={() => navigate('/chat-to-astrologer')}
           >
             Consult with Expert Astrologer
           </button>

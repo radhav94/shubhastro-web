@@ -155,11 +155,11 @@ const PurposeProducts = () => {
     <div className={styles.page}>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <button className={styles.backBtn} onClick={() => navigate("/shubhmall")} aria-label="Go back">
+          <button className={styles.backBtn} onClick={() => navigate("/shubh-mall")} aria-label="Go back">
             <FiChevronLeft />
           </button>
           <nav className={styles.breadcrumb}>
-            <span className={styles.breadcrumbLink} onClick={() => navigate("/shubhmall")}>ShubhMall</span>
+            <span className={styles.breadcrumbLink} onClick={() => navigate("/shubh-mall")}>ShubhMall</span>
             <span className={styles.breadcrumbSep}>›</span>
             <span className={styles.breadcrumbActive}>{purposeName}</span>
           </nav>
@@ -175,7 +175,7 @@ const PurposeProducts = () => {
         <div className={styles.noProducts}>
           <h2>No Products Available</h2>
           <p>There are no products available for "{purposeName}" right now.</p>
-          <button className={styles.browseBtn} onClick={() => navigate("/shubhmall")}>Browse ShubhMall</button>
+          <button className={styles.browseBtn} onClick={() => navigate("/shubh-mall")}>Browse ShubhMall</button>
         </div>
       )}
 

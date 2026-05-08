@@ -84,7 +84,7 @@ const ServiceCards = () => {
     if (service.slug === "tarot") {
       return navigate("/tarot/yes-no-tarot");
     }
-    const path = slugRoutes[service.slug] || `/horoscopes/${service.slug}`;
+    const path = slugRoutes[service.slug] || `/horoscope/${service.slug}`;
     navigate(path);
   };
 

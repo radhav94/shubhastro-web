@@ -7,7 +7,7 @@ const HoroscopeCard = ({ data }) => {
   const imageUrl = data?.image_url?.original;
 
   return (
-    <Link to="/horoscopes/daily-horoscope">
+    <Link to="/daily-horoscope">
       <section className={styles.horoscopeSection}>
         <div
           className={styles.horoscopeCard}

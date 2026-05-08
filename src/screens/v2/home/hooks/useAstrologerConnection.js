@@ -170,7 +170,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
         setChatSeconds(Number(data?.remainingTime) * 60);
         console.log("[NormalFlow] ✅ activeChat set, navigating to chat page");
 
-        navigate(`/chat-with-astrologers/${astrologerId}`, {
+        navigate(`/chat-to-astrologer/${astrologerId}`, {
           state: {
             userId: userIdLocal,
             astrologerId,

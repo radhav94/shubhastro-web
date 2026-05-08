@@ -147,7 +147,7 @@ const EPoojaPayment = () => {
       await removeCartItem({ productId, variantId }).unwrap();
       Toast.success("Item removed from cart");
       // If cart becomes empty, go back to astromall
-      if (items.length <= 1) navigate("/shubhmall");
+      if (items.length <= 1) navigate("/shubh-mall");
     } catch (err) {
       Toast.error(err?.data?.message || "Failed to remove item");
     }
@@ -213,7 +213,7 @@ const EPoojaPayment = () => {
         <div className={styles.emptyCart}>
           <FiShoppingCart size={48} color="#ccc" />
           <p>Your cart is empty</p>
-          <button className={styles.addressBtn} onClick={() => navigate("/shubhmall")}>Browse Products</button>
+          <button className={styles.addressBtn} onClick={() => navigate("/shubh-mall")}>Browse Products</button>
         </div>
       )}
 

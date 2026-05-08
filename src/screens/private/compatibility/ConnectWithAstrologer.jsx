@@ -7,10 +7,10 @@ const ConnectWithAstrologer = () => {
     <section className={styles.bannerBox}>
       <div className={styles.bannerContent}>
         <h3>Connect with an Astrologer on Call or Chat</h3>
-        <Link to={"/talk-to-astrologers"}>
+        <Link to={"/talk-to-astrologer"}>
           <button className={styles.callBtn}>📞 Talk to Astrologer</button>
         </Link>
-        <Link to={"/talk-to-astrologers"}>
+        <Link to={"/talk-to-astrologer"}>
           <button className={styles.chatBtn}>💬 Chat with Astrologer</button>
         </Link>
       </div>

@@ -631,7 +631,7 @@ const Profile = () => {
         setChatSeconds(Number(data?.remainingTime) * 60);
 
         // Navigate to chat page
-        navigate(`/chat-with-astrologers/${astrologerId}`, {
+        navigate(`/chat-to-astrologer/${astrologerId}`, {
           state: {
             userId: userId,
             astrologerId,
@@ -1718,7 +1718,7 @@ const Profile = () => {
                   </p>
                   <button
                     className={styles.exploreButton}
-                    onClick={() => navigate("/chat-with-astrologers")}
+                    onClick={() => navigate("/chat-to-astrologer")}
                   >
                     Explore Astrologers
                   </button>

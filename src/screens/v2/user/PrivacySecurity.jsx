@@ -33,7 +33,7 @@ const PrivacySecurity = () => {
       id: 1,
       title: "Terms & Conditions",
       description: "Read our service terms and platform policies.",
-      path: "/terms-conditions",
+      path: "/terms-and-conditions",
     },
     {
       id: 2,

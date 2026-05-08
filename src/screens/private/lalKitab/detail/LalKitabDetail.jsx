@@ -76,7 +76,7 @@ const LalKitabDetail = () => {
       {isAnyLoading && <PrimaryLoader />}
 
       <div className={styles.headerRow}>
-        <button className={styles.backButton} onClick={() => navigate("/lal-kitab")}>
+        <button className={styles.backButton} onClick={() => navigate("/laal-kitab")}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>

@@ -77,7 +77,16 @@ const HomeNew = () => {
     if (item.slug === "ar-vastu-scanner") {
       setShowMobileAppModal(true);
     } else {
-      navigate(`/aiwow/${item.slug}`);
+      const rootLevelSlugs = [
+        "ai-palmistry-scanner",
+        "astro-face-reading",
+        "signature-analysis",
+        "clothes-colour-analysis",
+        "gemstone-authenticity",
+        "aura-photography",
+      ];
+      const path = rootLevelSlugs.includes(item.slug) ? `/${item.slug}` : `/aiwow/${item.slug}`;
+      navigate(path);
     }
   };
   const [wowIndex, setWowIndex] = useState(0);
@@ -234,8 +243,8 @@ const HomeNew = () => {
           {complementaryServices.map((card, i) => {
             const slugPaths = {
               "free-kundli": "/kundli",
-              "talk-to-astrologer": "/chat-with-astrologers",
-              "daily-horoscope": "/horoscopes/daily-horoscope",
+              "talk-to-astrologer": "/chat-to-astrologer",
+              "daily-horoscope": "/daily-horoscope",
             };
             const path = slugPaths[card.slug] || "/";
             return (
@@ -343,7 +352,7 @@ const HomeNew = () => {
           {/* Laal Kitaab — special card with image */}
           <div
             className={`${styles.featureCard} ${styles.laalKitaab}`}
-            onClick={() => navigate('/lal-kitab')}
+            onClick={() => navigate('/laal-kitab')}
             style={{
               cursor: 'pointer',
               backgroundImage: `url(${aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.images_for_web || aiServicesItems[0]?.image_url || laalKitaabImg})`,
@@ -397,7 +406,7 @@ const HomeNew = () => {
           <div className={styles.sectionTitleBlock}>
             <h2 className={styles.sectionTitle}>{astrologerSection?.display_title || "TOP RATED ASTROLOGERS FOR YOU"}</h2>
           </div>
-          <button className={styles.viewAllBtn} onClick={() => navigate('/chat-with-astrologers')}>View all →</button>
+          <button className={styles.viewAllBtn} onClick={() => navigate('/chat-to-astrologer')}>View all →</button>
         </div>
         <AstrologersSection
           title=""
@@ -419,13 +428,13 @@ const HomeNew = () => {
         </div>
         <div className={styles.gridRow}>
           {(quickLinkItems.length > 0 ? quickLinkItems : [
-            { title: "Horoscope\nSection",    redirect_url: "/horoscopes/daily-horoscope" },
-            { title: "Consult\nAstrologer",   redirect_url: "/chat-with-astrologers" },
-            { title: "Future\nPredictions",   redirect_url: "/chat-with-astrologers" },
+            { title: "Horoscope\nSection",    redirect_url: "/daily-horoscope" },
+            { title: "Consult\nAstrologer",   redirect_url: "/chat-to-astrologer" },
+            { title: "Future\nPredictions",   redirect_url: "/chat-to-astrologer" },
             { title: "Dasha\nTimeline",       redirect_url: "/kundli" },
             { title: "Birth\nDetails",        redirect_url: "/kundli" },
-            { title: "Talk to\nAstrologer",   redirect_url: "/talk-to-astrologers" },
-            { title: "Top Rated\nAstrologer", redirect_url: "/chat-with-astrologers" },
+            { title: "Talk to\nAstrologer",   redirect_url: "/talk-to-astrologer" },
+            { title: "Top Rated\nAstrologer", redirect_url: "/chat-to-astrologer" },
             { title: "My\nSessions",          redirect_url: "/profile" },
           ]).map((a, i) => {
             const bgs = ["#fef3c7","#fef2f2","#f5f3ff","#fff7ed","#fff7ed","#ede9fe","#fefce8","#eef2ff"];
@@ -471,7 +480,7 @@ const HomeNew = () => {
               { title: "Child &\nEducation", slug: "child-education" },
             ]).map((c, i) => {
               return (
-                <div key={i} className={styles.catItem} onClick={() => navigate('/chat-with-astrologers', { state: { selectedType: c.slug } })} style={{ cursor: 'pointer' }}>
+                <div key={i} className={styles.catItem} onClick={() => navigate('/chat-to-astrologer', { state: { selectedType: c.slug } })} style={{ cursor: 'pointer' }}>
                   <div
                     className={styles.catIconBox}
                     style={{
@@ -562,7 +571,7 @@ const HomeNew = () => {
         <div className={styles.popularBox}>
           <div className={styles.calHeader}>
             <h2 className={styles.sectionTitle}>Popular Astrologers</h2>
-            <button className={styles.viewAllBtn} onClick={() => navigate('/chat-with-astrologers')}>View All →</button>
+            <button className={styles.viewAllBtn} onClick={() => navigate('/chat-to-astrologer')}>View All →</button>
           </div>
           <AstrologersSection
             title=""

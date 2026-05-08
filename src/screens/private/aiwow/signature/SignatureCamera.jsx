@@ -229,7 +229,7 @@ const SignatureCamera = () => {
   const proceedWithImage = () => {
     if (capturedImage) {
       dispatch(setSignatureImage(capturedImage));
-      navigate('/aiwow/signature/capture');
+      navigate('/signature-analysis/capture');
     }
   };
 

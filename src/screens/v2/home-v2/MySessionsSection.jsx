@@ -77,7 +77,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
     } else if (session.sessiontype === 'video') {
       await handleCallStart(astrologer, 'video');
     } else {
-      navigate('/chat-with-astrologers');
+      navigate('/chat-to-astrologer');
     }
   };
 

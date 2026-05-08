@@ -204,7 +204,7 @@ const ClothColorCamera = () => {
   const proceedWithImage = () => {
     if (capturedImage) {
       dispatch(setClothColorImage(capturedImage));
-      navigate('/aiwow/cloth-color/capture');
+      navigate('/clothes-colour-analysis/capture');
     }
   };
 

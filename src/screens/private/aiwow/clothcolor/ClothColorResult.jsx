@@ -77,12 +77,12 @@ const ClothColorResult = () => {
       } catch (error) {
         console.error('Error parsing result:', error);
         Toast.error('Failed to load analysis results');
-        navigate('/aiwow/cloth-color/instructions');
+        navigate('/clothes-colour-analysis/instructions');
         return;
       }
     } else {
       Toast.error('No analysis results found');
-      navigate('/aiwow/cloth-color/form', { replace: true });
+      navigate('/clothes-colour-analysis/form', { replace: true });
       return;
     }
     

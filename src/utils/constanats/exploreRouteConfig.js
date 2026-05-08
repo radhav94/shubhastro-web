@@ -9,8 +9,8 @@
 
 export const EXPLORE_SLUG_TO_ROUTE_MAP = {
   // All About You Section
-  "explore-your-horoscope": "/horoscopes/daily-horoscope",
-  "daily-horoscope": "/horoscopes/daily-horoscope",
+  "explore-your-horoscope": "/daily-horoscope",
+  "daily-horoscope": "/daily-horoscope",
   "explore-your-kundli": "/kundli",
   "kundli-reports": "/kundli?tab=free-report",
   "remedies-for-you": "/remedies",

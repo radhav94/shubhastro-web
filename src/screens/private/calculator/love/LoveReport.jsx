@@ -162,7 +162,7 @@ const LoveReport = () => {
           </button>
           <button
             className={styles.horoscopeBtn}
-            onClick={() => navigate("/horoscopes/todays-horoscope")}
+            onClick={() => navigate("/horoscope/todays-horoscope")}
           >
             ❤ Get today&apos;s love Horoscope
           </button>

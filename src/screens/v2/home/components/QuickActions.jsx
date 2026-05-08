@@ -25,7 +25,7 @@ const QuickActions = ({ data = [], title }) => {
         if (item.slug === "talk-to-astrologer") {
             path = PATH.privateRoutes.Chat_With_ASTROLOGER.path;
         } else if (item.slug === "daily-horoscope") {
-            path = "/horoscopes/daily-horoscope";
+            path = "/daily-horoscope";
         } else if (item.slug === "free-kundli") {
             path = "/kundli";
         } else if (item.redirect_url) {

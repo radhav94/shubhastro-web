@@ -312,63 +312,63 @@ export const PATH = {
       footer: true,
     },
     TALK_TO_ASTROLOGER: {
-      path: "/talk-to-astrologers",
+      path: "/talk-to-astrologer",
       element: TalkToAstrologer,
     },
     TALK_TO_ASTROLOGER_ONLINE: {
-      path: "/talk-to-astrologers/online",
+      path: "/talk-to-astrologer/online",
       element: TalkToAstrologer,
     },
     Chat_With_ASTROLOGER: {
-      path: "/chat-with-astrologers",
+      path: "/chat-to-astrologer",
       element: TalkToAstrologer,
     },
     HOROSCOPE: {
-      path: "/horoscopes",
+      path: "/horoscope",
       element: Horoscope,
       DAILY: {
-        path: "/horoscopes/:slug",
+        path: "/horoscope/:slug",
         element: SignScreen,
       },
       DAILY_NEW: {
-        path: ["/horoscopes/daily-horoscope/:sign", "/horoscopes/daily-horoscope"],
+        path: ["/daily-horoscope/:sign", "/daily-horoscope"],
         element: HoroscopeNew,
       },
       WEEKLY_NEW: {
-        path: ["/horoscopes/weekly-horoscope/:sign", "/horoscopes/weekly-horoscope"],
+        path: ["/weekly-horoscope/:sign", "/weekly-horoscope"],
         element: HoroscopeNew,
       },
       YEARLY_NEW: {
-        path: ["/horoscopes/yearly-horoscope/:sign", "/horoscopes/yearly-horoscope"],
+        path: ["/yearly-horoscope/:sign", "/yearly-horoscope"],
         element: HoroscopeNew,
       },
       TOMORROW_NEW: {
-        path: ["/horoscopes/tomorrow-horoscope-new/:sign", "/horoscopes/tomorrow-horoscope-new"],
+        path: ["/horoscope/tomorrow-horoscope-new/:sign", "/horoscope/tomorrow-horoscope-new"],
         element: HoroscopeNew,
       },
       TODAY_NEW: {
-        path: ["/horoscopes/todays-horoscope/:sign", "/horoscopes/todays-horoscope"],
+        path: ["/horoscope/todays-horoscope/:sign", "/horoscope/todays-horoscope"],
         element: HoroscopeNew,
       },
       MONTHLY: {
-        path: "/horoscopes/monthly-horoscope",
+        path: "/monthly-horoscope",
         element: SignScreen,
       },
       MONTHLY_DETAIL: {
-        path: "/horoscopes/monthly-horoscope/:sign",
+        path: "/monthly-horoscope/:sign",
         element: Monthly,
       },
       YESTERDAY: {
-        path: "/horoscopes/yesterday-horoscope/:sign",
+        path: "/horoscope/yesterday-horoscope/:sign",
         element: Yesterday,
       },
       TOMORROW: {
-        path: "/horoscopes/tomorrow-horoscope/:sign",
+        path: "/horoscope/tomorrow-horoscope/:sign",
         element: Tomorrow,
       },
     },
     HOROSCOPEDETAILS: {
-      path: "/horoscopes/daily/:name-free-horoscope",
+      path: "/horoscope/daily/:name-free-horoscope",
       element: DetailHoroscope,
     },
 
@@ -392,19 +392,19 @@ export const PATH = {
 
     // Lal Kitab
     LAL_KITAB: {
-      path: "/lal-kitab",
+      path: "/laal-kitab",
       element: LalKitab,
     },
     LAL_KITAB_DETAIL: {
-      path: "/lal-kitab/:lalKitabId",
+      path: "/laal-kitab/:lalKitabId",
       element: LalKitabDetail,
     },
     LAL_KITAB_ZODIAC: {
-      path: "/lal-kitab/zodiac",
+      path: "/laal-kitab/zodiac",
       element: LalKitabZodiac,
     },
     LAL_KITAB_PROBLEMS: {
-      path: "/lal-kitab/problems",
+      path: "/laal-kitab/problems",
       element: LalKitabProblems,
     },
 
@@ -415,12 +415,12 @@ export const PATH = {
     },
 
     MATCHMAKING: {
-      path: "/matchmaking",
+      path: "/match-making",
       element: MatchMaking,
       header: false,
     },
     MATCHMAKING_DETAILS: {
-      path: "/matchmaking/match-making-details",
+      path: "/match-making/match-making-details",
       element: MatchDetails,
     },
 
@@ -478,11 +478,11 @@ export const PATH = {
       element: RisingSignReport,
     },
     RASHI_CALC: {
-      path: "/rashi-moon-sign-calculator",
+      path: "/rashi-calculator",
       element: RashiCalc,
     },
     RASHI_REPORT: {
-      path: "/rashi-moon-sign-calculator/report",
+      path: "/rashi-calculator/report",
       element: RashiReport,
     },
     DASHA_CALC: {
@@ -494,11 +494,11 @@ export const PATH = {
       element: DashaReport,
     },
     MANGAL_DOSHA_CALC: {
-      path: "/mangal-kuja-dosha-calculator",
+      path: "/mangal-dasha-calculator",
       element: MangalDosha,
     },
     MANGAL_DOSHA_REPORT: {
-      path: "/mangal-kuja-dosha-calculator/report",
+      path: "/mangal-dasha-calculator/report",
       element: MangalReport,
     },
     ShaniSadeSati_CALC: {
@@ -510,19 +510,19 @@ export const PATH = {
       element: ShaniReport,
     },
     KaalSarp_CALC: {
-      path: "/kaal-sarp-dosh-calculator",
+      path: "/kaal-sarpa-dosh-calculator",
       element: KaalSarpCalc,
     },
     KaalSarp_REPORT: {
-      path: "/kaal-sarp-dosh-calculator/report",
+      path: "/kaal-sarpa-dosh-calculator/report",
       element: KaalSarpReport,
     },
     NUMEROLOGY_CALC: {
-      path: "/name-numerology-calculator",
+      path: "/numerology-calculator",
       element: NumerologyCalc,
     },
     NUMEROLOGY_REPORT: {
-      path: "/name-numerology-calculator/report",
+      path: "/numerology-calculator/report",
       element: NumerologyReport,
     },
     FLAMES_CALC: {
@@ -598,163 +598,163 @@ export const PATH = {
       footer: false,
     },
     PALMISTRY_LANDING: {
-      path: "/aiwow/ai-palmistry-scanner",
+      path: "/ai-palmistry-scanner",
       element: PalmistryLanding,
       header: false,
       footer: false,
     },
     PALMISTRY_HAND_SELECTION: {
-      path: "/aiwow/palmistry/hand-selection",
+      path: "/ai-palmistry-scanner/hand-selection",
       element: PalmistryHandSelection,
       header: false,
       footer: false,
     },
     PALMISTRY_INSTRUCTIONS: {
-      path: "/aiwow/palmistry/instructions",
+      path: "/ai-palmistry-scanner/instructions",
       element: PalmistryInstructions,
       header: false,
       footer: false,
     },
     PALMISTRY_CAMERA: {
-      path: "/aiwow/palmistry/camera",
+      path: "/ai-palmistry-scanner/camera",
       element: PalmistryCamera,
       header: false,
       footer: false,
     },
     PALMISTRY_ANALYSIS: {
-      path: "/aiwow/palmistry/capture",
+      path: "/ai-palmistry-scanner/capture",
       element: PalmistryAnalysis,
       header: false,
       footer: false,
     },
     PALMISTRY_RESULT: {
-      path: "/aiwow/palmistry/result",
+      path: "/ai-palmistry-scanner/result",
       element: PalmistryResult,
       header: false,
       footer: false,
     },
     FACE_READING_LANDING: {
-      path: "/aiwow/astro-face-reading",
+      path: "/astro-face-reading",
       element: FaceReadingLanding,
       header: false,
       footer: false,
     },
     FACE_READING_INSTRUCTIONS: {
-      path: "/aiwow/face-reading/instructions",
+      path: "/astro-face-reading/instructions",
       element: FaceReadingInstructions,
       header: false,
       footer: false,
     },
     FACE_READING_CAMERA: {
-      path: "/aiwow/face-reading/camera",
+      path: "/astro-face-reading/camera",
       element: FaceReadingCamera,
       header: false,
       footer: false,
     },
     FACE_READING_ANALYSIS: {
-      path: "/aiwow/face-reading/capture",
+      path: "/astro-face-reading/capture",
       element: FaceReadingAnalysis,
       header: false,
       footer: false,
     },
     FACE_READING_RESULT: {
-      path: "/aiwow/face-reading/result",
+      path: "/astro-face-reading/result",
       element: FaceReadingResult,
       header: false,
       footer: false,
     },
     SIGNATURE_LANDING: {
-      path: "/aiwow/signature-analysis",
+      path: "/signature-analysis",
       element: SignatureLanding,
       header: false,
       footer: false,
     },
     SIGNATURE_INSTRUCTIONS: {
-      path: "/aiwow/signature/instructions",
+      path: "/signature-analysis/instructions",
       element: SignatureInstructions,
       header: false,
       footer: false,
     },
     SIGNATURE_CAMERA: {
-      path: "/aiwow/signature/camera",
+      path: "/signature-analysis/camera",
       element: SignatureCamera,
       header: false,
       footer: false,
     },
     SIGNATURE_ANALYSIS: {
-      path: "/aiwow/signature/capture",
+      path: "/signature-analysis/capture",
       element: SignatureAnalysis,
       header: false,
       footer: false,
     },
     SIGNATURE_RESULT: {
-      path: "/aiwow/signature/result",
+      path: "/signature-analysis/result",
       element: SignatureResult,
       header: false,
       footer: false,
     },
     GEMSTONE_LANDING: {
-      path: "/aiwow/gemstone-authenticity",
+      path: "/gemstone-authenticity",
       element: GemstoneLanding,
       header: false,
       footer: false,
     },
     GEMSTONE_INSTRUCTIONS: {
-      path: "/aiwow/gemstone/instructions",
+      path: "/gemstone-authenticity/instructions",
       element: GemstoneInstructions,
       header: false,
       footer: false,
     },
     GEMSTONE_CAMERA: {
-      path: "/aiwow/gemstone/camera",
+      path: "/gemstone-authenticity/camera",
       element: GemstoneCamera,
       header: false,
       footer: false,
     },
     GEMSTONE_ANALYSIS: {
-      path: "/aiwow/gemstone/capture",
+      path: "/gemstone-authenticity/capture",
       element: GemstoneAnalysis,
       header: false,
       footer: false,
     },
     GEMSTONE_RESULT: {
-      path: "/aiwow/gemstone/result",
+      path: "/gemstone-authenticity/result",
       element: GemstoneResult,
       header: false,
       footer: false,
     },
     CLOTH_COLOR_LANDING: {
-      path: "/aiwow/clothes-colour-analysis",
+      path: "/clothes-colour-analysis",
       element: ClothColorLanding,
       header: false,
       footer: false,
     },
     CLOTH_COLOR_FORM: {
-      path: "/aiwow/cloth-color/form",
+      path: "/clothes-colour-analysis/form",
       element: ClothColorForm,
       header: false,
       footer: false,
     },
     CLOTH_COLOR_INSTRUCTIONS: {
-      path: "/aiwow/cloth-color/instructions",
+      path: "/clothes-colour-analysis/instructions",
       element: ClothColorInstructions,
       header: false,
       footer: false,
     },
     CLOTH_COLOR_CAMERA: {
-      path: "/aiwow/cloth-color/camera",
+      path: "/clothes-colour-analysis/camera",
       element: ClothColorCamera,
       header: false,
       footer: false,
     },
     CLOTH_COLOR_ANALYSIS: {
-      path: "/aiwow/cloth-color/capture",
+      path: "/clothes-colour-analysis/capture",
       element: ClothColorAnalysis,
       header: false,
       footer: false,
     },
     CLOTH_COLOR_RESULT: {
-      path: "/aiwow/cloth-color/result",
+      path: "/clothes-colour-analysis/result",
       element: ClothColorResult,
       header: false,
       footer: false,
@@ -808,31 +808,31 @@ export const PATH = {
     //   footer: false,
     // },
     AURA_LANDING: {
-      path: "/aiwow/aura-photography",
+      path: "/aura-photography",
       element: AuraLanding,
       header: false,
       footer: false,
     },
     AURA_INSTRUCTIONS: {
-      path: "/aiwow/aura/instructions",
+      path: "/aura-photography/instructions",
       element: AuraInstructions,
       header: false,
       footer: false,
     },
     AURA_CAMERA: {
-      path: "/aiwow/aura/camera",
+      path: "/aura-photography/camera",
       element: AuraCamera,
       header: false,
       footer: false,
     },
     AURA_ANALYSIS: {
-      path: "/aiwow/aura/capture",
+      path: "/aura-photography/capture",
       element: AuraAnalysis,
       header: false,
       footer: false,
     },
     AURA_RESULT: {
-      path: "/aiwow/aura/result",
+      path: "/aura-photography/result",
       element: AuraResult,
       header: false,
       footer: false,
@@ -986,7 +986,7 @@ export const PATH = {
 
     // E-Pooja Booking
     E_POOJA: {
-      path: "/shubhmall",
+      path: "/shubh-mall",
       element: EPooja,
     },
     ASTROMALL_CART: {
@@ -994,7 +994,7 @@ export const PATH = {
       element: AstromallCart,
     },
     ASTROMALL_CART_PAYMENT: {
-      path: "/shubhmall/cart/payment",
+      path: "/shubh-mall/cart/payment",
       element: EPoojaPayment,
     },
     ASTROMALL_CART_CHECKOUT: {
@@ -1006,11 +1006,11 @@ export const PATH = {
       element: EPoojaDetail,
     },
     E_POOJA_BOOKING: {
-      path: "/shubhmall/:slug/book",
+      path: "/shubh-mall/:slug/book",
       element: EPoojaBooking,
     },
     E_POOJA_PAYMENT: {
-      path: "/shubhmall/:slug/payment",
+      path: "/shubh-mall/:slug/payment",
       element: EPoojaPayment,
     },
     E_POOJA_BOOKING_SUCCESS: {
@@ -1045,11 +1045,11 @@ export const PATH = {
       footer: false,
     },
     ASTROLOGERS: {
-      path: "/talk-to-astrologers/expert/:name",
+      path: "/talk-to-astrologer/expert/:name",
       element: Astrologers,
     },
     CHAT_WITH_ASTROLOGER: {
-      path: "/chat-with-astrologers/:id",
+      path: "/chat-to-astrologer/:id",
       element: ChatWindow,
       footer: false,
     },
@@ -1061,7 +1061,7 @@ export const PATH = {
     },
 
     VIDEO_CALL: {
-      path: "/talk-to-astrologers/video-call/:channelName",
+      path: "/talk-to-astrologer/video-call/:channelName",
       element: VideoCalling,
     },
 
@@ -1071,7 +1071,7 @@ export const PATH = {
     },
 
     VOICE_CALL: {
-      path: "/talk-to-astrologers/voice-call/:roomId",
+      path: "/talk-to-astrologer/voice-call/:roomId",
       element: AgoraVoiceCalling,
     },
 
@@ -1086,7 +1086,7 @@ export const PATH = {
       footer: true,
     },
     ABOUT: {
-      path: "/aboutus",
+      path: "/about-us",
       element: About,
       header: true,
     },
@@ -1106,7 +1106,7 @@ export const PATH = {
       header: true,
     },
     REFUND_POLICY: {
-      path: "/refund-and-cancellation-policy",
+      path: "/refund-cancellation-policy",
       element: RefundPolicy,
       header: true,
     },
@@ -1131,7 +1131,7 @@ export const PATH = {
       header: true,
     },
     TERMSCONDITIONS: {
-      path: "/terms-conditions",
+      path: "/terms-and-conditions",
       element: TermsConditions,
       header: true,
     },
