@@ -284,9 +284,9 @@ const HomeV2 = () => {
             );
           })}
 
-          {/* Laal Kitaab — special card at bottom of left col */}
+          {/* Laal Kitaab — special card at bottom of left col (desktop only) */}
           <div
-            className={`${styles.qCardLaal}`}
+            className={`${styles.qCardLaal} ${styles.desktopOnly}`}
             onClick={() => navigate('/lal-kitab')}
           >
             <span className={styles.featureTag}>New</span>
@@ -365,8 +365,8 @@ const HomeV2 = () => {
             </div>
           </div>
 
-          {/* Bottom 2 feature cards — Occult World + AI Pandit — outside centerCard */}
-          <div className={styles.centerFeatureRow}>
+          {/* Bottom 2 feature cards — Occult World + AI Pandit — outside centerCard (desktop only) */}
+          <div className={`${styles.centerFeatureRow} ${styles.desktopOnly}`}>
             {/* Occult World */}
             <div className={`${styles.centerFeatureCard} ${styles.occultWorld}`} onClick={() => navigate('/occult')} style={{ cursor: 'pointer' }}>
               <div className={styles.occultEllipse} />
@@ -444,8 +444,8 @@ const HomeV2 = () => {
             </div>
           </div>
 
-          {/* Live Community card — outside Muhurats box */}
-          <div className={styles.liveCommunityCard} onClick={() => navigate('/live')}>
+          {/* Live Community card — outside Muhurats box (desktop only) */}
+          <div className={`${styles.liveCommunityCard} ${styles.desktopOnly}`} onClick={() => navigate('/live')}>
             <span className={styles.featureTag}>New</span>
             <h4 className={styles.liveCommunityTitle}>
               {aiServicesItems[3]?.display_title || aiServicesItems[3]?.title || "ShubhAsrto Live Community"}
@@ -467,6 +467,70 @@ const HomeV2 = () => {
                   <span>Online</span>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ MOBILE ONLY — AI Services 2×2 Grid ═══ */}
+      <section className={styles.mobileAiGrid}>
+        <div className={`${styles.titleWithBottomDevider}`}>
+          <h4 className={styles.wowTitle}>{aiServicesSection?.display_title || "LOREM IPSUM"}</h4>
+          <div className={styles.BottomDevider}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
+              <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
+            </svg>
+          </div>
+        </div>
+        <div className={styles.mobileAiGridRow}>
+          {/* Laal Kitaab */}
+          <div className={`${styles.mobileAiCard} ${styles.laalKitaab}`} onClick={() => navigate('/lal-kitab')}>
+            <span className={styles.featureTag}>New</span>
+            <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title || "Laal Kitaab"}</h3>
+            <button className={styles.featureCta}>Explore Laal Kitaab &gt;</button>
+            <img src={aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon || laalKitaabImg} alt="Laal Kitaab" className={styles.mobileAiCardImg} />
+          </div>
+          {/* Occult World */}
+          <div className={`${styles.mobileAiCard} ${styles.occultWorld}`} onClick={() => navigate('/occult')}>
+            <div className={styles.occultEllipse} />
+            <span className={styles.featureTag}>New</span>
+            <h3>{aiServicesItems[1]?.display_title || aiServicesItems[1]?.title || "Occult World"}</h3>
+            <button className={styles.fcCtaLight}>Explore Occult &gt;</button>
+            {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon || occultWorldImg) && (
+              <img src={aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon || occultWorldImg} alt="Occult World" className={styles.mobileAiCardImg} />
+            )}
+          </div>
+          {/* AI Pandit */}
+          <div className={`${styles.mobileAiCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }))}>
+            <span className={styles.featureTag}>New</span>
+            <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title || "AI Pandit (Voice)"}</h3>
+            <button className={styles.panditTalkBtn}>Talk Now &rsaquo;</button>
+            {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon || aiPanditMic) ? (
+              <img src={aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon || aiPanditMic} alt="AI Pandit" className={styles.mobileAiCardImg} />
+            ) : (
+              <div className={styles.panditMicWrap}>
+                <div className={styles.panditWave} />
+                <div className={styles.panditMicCircle}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="#fff"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+                    <line x1="12" y1="19" x2="12" y2="23" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+                    <line x1="8" y1="23" x2="16" y2="23" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Live Community */}
+          <div className={`${styles.mobileAiCard}`} onClick={() => navigate('/live')}>
+            <span className={styles.featureTag}>New</span>
+            <h3>{aiServicesItems[3]?.display_title || aiServicesItems[3]?.title || "ShubhAsrto Live Community"}</h3>
+            <button className={styles.liveCommunityBtn}>Join Live Now &rsaquo;</button>
+            <div className={styles.liveCommunityAvatars}>
+              {[avatar1, avatar2, avatar3, avatar4].map((av, i) => (
+                <img key={i} src={av} alt="" className={styles.liveCommunityAvatarImg} />
+              ))}
+              <span className={styles.liveCommunityCount}>+128<br/>Online</span>
             </div>
           </div>
         </div>
