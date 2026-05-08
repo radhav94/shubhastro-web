@@ -8,6 +8,7 @@ import {
   IoStopCircle,
 } from "react-icons/io5";
 import { Sparkles, Globe } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import styles from "./PanditAIBubble.module.scss";
 import usePanditAI from "./usePanditAI";
 import useSpeechToText from "./useSpeechToText";
@@ -47,6 +48,7 @@ const MessageBubble = memo(({ msg }) => {
 MessageBubble.displayName = "MessageBubble";
 
 const PanditAIBubble = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [text, setText] = useState("");
   const [lang, setLang] = useState("en-IN");
@@ -83,6 +85,13 @@ const PanditAIBubble = () => {
     window.addEventListener("panditai:ask", handleOpenAndSend);
     return () => window.removeEventListener("panditai:ask", handleOpenAndSend);
   }, [sendText]);
+
+  // Auto-focus input when chat opens
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isOpen]);
 
   const handleSpeechResult = useCallback(async (transcript) => {
     setInterimText("");
@@ -244,7 +253,14 @@ const PanditAIBubble = () => {
     setShowLangPicker(false);
   }, []);
 
-  const handleOpen = useCallback(() => setIsOpen(true), []);
+  const handleOpen = useCallback(() => {
+    const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+    if (!userIdLocal) {
+      navigate("/login");
+      return;
+    }
+    setIsOpen(true);
+  }, [navigate]);
 
   const toggleLangPicker = useCallback(() => setShowLangPicker((p) => !p), []);
 

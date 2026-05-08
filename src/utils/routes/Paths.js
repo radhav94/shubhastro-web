@@ -40,7 +40,12 @@ import Disclaimer from "../../screens/public/static-pages/Disclaimer";
 import PricingPolicy from "../../screens/public/static-pages/PricingPolicy";
 import PrivacyPolicy from "../../screens/public/static-pages/PrivacyPolicy";
 import RefundPolicy from "../../screens/public/static-pages/RefundPolicy";
+import AiUsePolicy from "../../screens/public/static-pages/AiUsePolicy";
+import AstrologerOnboardingAgreement from "../../screens/public/static-pages/AstrologerOnboardingAgreement";
+import LiveChatPolicy from "../../screens/public/static-pages/LiveChatPolicy";
+import UserAgreement from "../../screens/public/static-pages/UserAgreement";
 import TermsConditions from "../../screens/public/static-pages/TermsConditions";
+import OnboardingGuide from "../../screens/public/static-pages/OnboardingGuide";
 import Notification from "../../screens/private/notification/Notification";
 import WalletTranscations from "../../screens/private/wallet/WalletTranscations";
 import AstrologerProfile from "../../screens/private/astrologerProfile/AstrologerProfile";
@@ -180,7 +185,8 @@ import TarotCardSelectionPage from "../../screens/private/v2/tarot/TarotCardSele
 import LoveTriangleSelectionPage from "../../screens/private/v2/tarot/LoveTriangleSelectionPage";
 import LoveTriangleResultPage from "../../screens/private/v2/tarot/LoveTriangleResultPage";
 
-import Home from "../../screens/v2/home/Home";
+// import Home from "../../screens/v2/home/Home";
+import Home from "../../screens/v2/home-v2/HomeV2";
 import HomeNew from "../../screens/v2/home-new/HomeNew";
 import HomeV2 from "../../screens/v2/home-v2/HomeV2";
 import ProfileV2 from "../../screens/v2/user/Profile";
@@ -202,6 +208,7 @@ import LalKitabDetail from "../../screens/private/lalKitab/detail/LalKitabDetail
 import LalKitabZodiac from "../../screens/private/lalKitab/zodiac/LalKitabZodiac";
 import LalKitabProblems from "../../screens/private/lalKitab/problems/LalKitabProblems";
 import OccultChat from "../../screens/private/occult/OccultChat";
+import OccultResult from "../../screens/private/occult/OccultResult";
 
 export const PATH = {
   // DEFAULT: {
@@ -406,6 +413,10 @@ export const PATH = {
     OCCULT: {
       path: "/occult",
       element: OccultChat,
+    },
+    OCCULT_RESULT: {
+      path: "/occult/result",
+      element: OccultResult,
     },
 
     MATCHMAKING: {
@@ -1104,9 +1115,34 @@ export const PATH = {
       element: RefundPolicy,
       header: true,
     },
+    AI_USE_POLICY: {
+      path: "/ai-use-policy",
+      element: AiUsePolicy,
+      header: true,
+    },
+    ASTROLOGER_ONBOARDING_AGREEMENT: {
+      path: "/astrologer-onboarding-agreement",
+      element: AstrologerOnboardingAgreement,
+      header: true,
+    },
+    LIVE_CHAT_POLICY: {
+      path: "/live-chat-policy",
+      element: LiveChatPolicy,
+      header: true,
+    },
+    USER_AGREEMENT: {
+      path: "/user-agreement",
+      element: UserAgreement,
+      header: true,
+    },
     TERMSCONDITIONS: {
       path: "/terms-conditions",
       element: TermsConditions,
+      header: true,
+    },
+    ONBOARDING_GUIDE: {
+      path: "/onboarding-guide",
+      element: OnboardingGuide,
       header: true,
     },
 

@@ -260,7 +260,7 @@ const TalkToAstrologer = () => {
     {
       skip: isFiltered, // Skip normal API when in filtered mode
       refetchOnMountOrArgChange: true,
-    },
+       },
   );
 
   const { data: recommendedData, isLoading: isLoadingRecommended } =
@@ -268,14 +268,49 @@ const TalkToAstrologer = () => {
 
   const data = astrodata?.data?.result || [];
   const recommendedAstrologers = recommendedData?.data || [];
-  const token = getToken();
   const { balance } = useWalletBalance();
   const [getBalance] = useGetBalanceMutation();
+
+  // Update astrologer statuses from the status polling query (when page > 1)
+  // useEffect(() => {
+  //   if (isFiltered || page <= 1) return;
+  //   const freshData = statusPollData?.data?.result;
+  //   if (!freshData || freshData.length === 0) return;
+
+  //   setAllAstrologers((prev) => {
+  //     const freshMap = new Map(freshData.map((a) => [a._id, a]));
+  //     let changed = false;
+  //     const updated = prev.map((a) => {
+  //       const fresh = freshMap.get(a._id);
+  //       if (fresh && (fresh.isActive !== a.isActive || fresh.isBusy !== a.isBusy || JSON.stringify(fresh.isActiveType) !== JSON.stringify(a.isActiveType))) {
+  //         changed = true;
+  //         return { ...a, isActive: fresh.isActive, isBusy: fresh.isBusy, isActiveType: fresh.isActiveType };
+  //       }
+  //       return a;
+  //     });
+  //     return changed ? updated : prev;
+  //   });
+
+  //   // Also update top ten astrologers status
+  //   setTopTenAstrologers((prev) => {
+  //     const freshMap = new Map(freshData.map((a) => [a._id, a]));
+  //     let changed = false;
+  //     const updated = prev.map((a) => {
+  //       const fresh = freshMap.get(a._id);
+  //       if (fresh && (fresh.isActive !== a.isActive || fresh.isBusy !== a.isBusy || JSON.stringify(fresh.isActiveType) !== JSON.stringify(a.isActiveType))) {
+  //         changed = true;
+  //         return { ...a, isActive: fresh.isActive, isBusy: fresh.isBusy, isActiveType: fresh.isActiveType };
+  //       }
+  //       return a;
+  //     });
+  //     return changed ? updated : prev;
+  //   });
+  // }, [statusPollData, isFiltered, page]);
 
   useEffect(() => {
     const incomingTopTen = astrodata?.data?.topTenAstrologer;
 
-    if (
+     if (
       incomingTopTen &&
       incomingTopTen.length > 0 &&
       topTenAstrologers.length === 0

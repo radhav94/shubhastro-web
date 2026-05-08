@@ -4,7 +4,7 @@
   position: relative;
   min-height: 100vh;
   padding-top: 210px;
-  background: #f5f5f5;
+  // background: #f5f5f5;
   padding-bottom: 2rem;
   @media screen and (width <= 1180px) {
     padding-top: 165px;
@@ -31,7 +31,7 @@
   align-items: center;
   gap: 1rem;
   padding:16px 16px;
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
   @media (width <= 767px) {
     // justify-content: space-between;
@@ -144,7 +144,7 @@
 }
 
 .content {
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 1.5rem auto 0 auto;
   padding: 1rem;
   @media (width <= 767px) {

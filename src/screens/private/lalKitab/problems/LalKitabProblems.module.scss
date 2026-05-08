@@ -1,4 +1,4 @@
-.container { max-width: 1200px; margin: 0 auto; padding: 20px 16px 40px; }
+.container { max-width: 1440px; margin: 0 auto; padding: 20px 16px 40px; }
 .pageTitle { font-size: 24px; font-weight: 700; color: #1a1a1a; margin: 0 0 4px; }
 .pageSubtitle { font-size: 14px; color: #718096; margin: 0 0 24px; }
 .categoryGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; @media (max-width: 768px) { grid-template-columns: repeat(2, 1fr); } @media (max-width: 400px) { grid-template-columns: 1fr; } }

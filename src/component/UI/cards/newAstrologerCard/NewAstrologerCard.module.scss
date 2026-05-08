@@ -17,7 +17,7 @@
 }
 
 .astrologerCard {
-  min-width: 230px;
+  min-width: 190px;
   background: #ffffff;
   border-radius: 12px;
   display: flex;
@@ -224,14 +224,14 @@
 
 .chatBtn {
   width: 100%;
-  height: 38px;
-  background: transparent;
+  height: 32px;
+  background: #fff;
   color: #f75801;
-  border: 1px solid #f75801;
+  // border: 1px solid #f75801;
   padding: 0px 5px;
   border-radius: 50px;
   font-family: "Poppins", sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -239,6 +239,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
+  box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.06);
 
   img {
     width: 16px;
@@ -265,7 +266,7 @@
 
 .callBtn {
   width: 100%;
-  height: 38px;
+  height: 32px;
   background: var(
     --orange_gradient,
     linear-gradient(90deg, #f75801 0%, #d43400 100%)
@@ -275,7 +276,7 @@
   padding: 0px 5px;
   border-radius: 50px;
   font-family: "Poppins", sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;

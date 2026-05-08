@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { IoChevronDown } from "react-icons/io5";
 import PrimaryText from "../../../../../../component/PrimaryText";
 import TTSButton from "../../../../../../component/UI/TTSButton";
@@ -17,10 +17,10 @@ const YogaCard = ({ yoga }) => {
     <div className={styles.wrapper}>
       {/* Title - Clickable Header (only on mobile) */}
       <div className={styles.header} onClick={toggleExpand}>
+        <h2 className={styles.title}>
+          {yoga.yoga}
+        </h2>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <h2 className={styles.title}>
-            {yoga.yoga}
-          </h2>
           <span onClick={(e) => e.stopPropagation()}>
             <TTSButton
               text={[
@@ -32,10 +32,10 @@ const YogaCard = ({ yoga }) => {
               ].filter(Boolean).join(". ")}
             />
           </span>
+          <IoChevronDown 
+            className={`${styles.arrow} ${isExpanded ? styles.arrowExpanded : ''}`}
+          />
         </div>
-        <IoChevronDown 
-          className={`${styles.arrow} ${isExpanded ? styles.arrowExpanded : ''}`}
-        />
       </div>
 
       {/* Content - Always visible on desktop/tablet, collapsible on mobile */}

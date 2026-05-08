@@ -6,7 +6,7 @@
 .threeColumnLayout {
   display: flex;
   gap: 24px;
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 80px 16px 24px 16px;
   
@@ -54,6 +54,12 @@
     background: #FFFFFF;
     border-radius: 16px;
     padding: 16px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 2px solid white;
+    box-shadow: none !important;
+    outline: none !important;
     // position: sticky;
     // top: 24px;
   }
@@ -83,7 +89,7 @@
 
 .astrologerCard {
   width: 100%;
-  background: #FFF5EC;
+  // background: #FFF5EC;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -94,7 +100,14 @@
   transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
   padding: 16px;
-  border: 1px solid rgba(189, 189, 189, 0.20);
+  // border: 1px solid rgba(189, 189, 189, 0.20);
+
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid white;
+  box-shadow: none !important;
+  outline: none !important;
 
   &:hover {
       transform: translateY(-2px);
@@ -560,6 +573,12 @@
     border-radius: 16px;
     padding: 16px;
     position: sticky;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 2px solid white;
+    box-shadow: none !important;
+    outline: none !important;
     // margin-top: 20px;
   }
   
@@ -827,7 +846,7 @@
 }
 
 .profileContentMain{
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 0 16px;
   
@@ -852,7 +871,8 @@
    TOP HEADER
 =========================== */
 .topHeaderWrap{
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(6px);
   border-bottom: 1px solid #e0e0e0;
   position: fixed;
   top: 93px;
@@ -866,7 +886,7 @@
 }
 
 .topHeader {
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
   display: flex;
   align-items: center;

@@ -10,12 +10,20 @@
   <style>
     body {
       background-color: #ebecf2;
-      background-image: url('/src/assets/images/main-body-bg.png');
+      background-image: url('/src/assets/images/main-body-bg-new.png');
       background-repeat: repeat-y;
-      background-size: 100% auto;
+      background-attachment: fixed;
+      background-size: 100% 100%;
       position: relative;
       margin: 0;
       padding: 0;
+    }
+
+    /* Astrologer card — global background */
+    [class*="astrologerCard"],
+    [class*="detailsCard"],
+    [class*="detailsImageWrapper"] {
+      background: rgba(255, 255, 255, 0.25) !important;
     }
   </style>
 </head>
