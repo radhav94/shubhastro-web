@@ -657,14 +657,14 @@ const HomeV2 = () => {
               { title: "Marriage &\nFamily", slug: "marriage-family" },
               { title: "Child &\nEducation", slug: "child-education" },
             ]).map((c, i) => {
-              const catColors = ["#FFE4E4","#FFE4F0","#E4EEFF","#FFF3E4","#E4FFE9","#F0E4FF"];
+              const catColors = ["#FFF"];
               return (
                 <div key={i} className={styles.catItem} onClick={() => navigate('/chat-with-astrologers', { state: { selectedType: c.slug } })} style={{ cursor: 'pointer' }}>
                   <div
                     className={styles.catIconBox}
                     style={{
                       background: c.image_url
-                        ? `url(${c.image_url}) center/60% no-repeat, ${catColors[i % catColors.length]}`
+                        ? `url(${c.image_url}) center/60% no-repeat,${catColors[i % catColors.length]}`
                         : catColors[i % catColors.length],
                     }}
                   />
