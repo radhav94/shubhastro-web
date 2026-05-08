@@ -2711,9 +2711,9 @@
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
   }
-  @media (max-width: 400px) {
-    grid-template-columns: repeat(1, 1fr);
-  }
+  // @media (max-width: 400px) {
+  //   grid-template-columns: repeat(1, 1fr);
+  // }
 }
 
 .statCard {
@@ -2728,6 +2728,9 @@
   gap: 16px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  @media (width <= 767px) {
+    padding: 10px;
+  }
 }
 
 .statCircle {
