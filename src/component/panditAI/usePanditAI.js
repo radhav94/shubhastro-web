@@ -195,6 +195,12 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
 
     const handleError = (err) => {
       console.error("[PanditAI] Socket error:", err);
+      // CONTENT_BLOCKED — remove the user's message (unsend it)
+      if (err?.code === "CONTENT_BLOCKED") {
+        setMessages((prev) => prev.slice(0, -1));
+        setSending(false);
+        return;
+      }
       panditAIRoomId = null;
       panditAIChatActive = false;
       setSending(false);
