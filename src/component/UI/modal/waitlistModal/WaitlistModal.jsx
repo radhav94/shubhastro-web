@@ -127,10 +127,10 @@ const WaitlistModal = ({
                     </button>
                   )}
 
-                  {/* Accepted — Join Call + Cancel */}
+                  {/* Accepted — Accept + Cancel */}
                   {isAccepted && (
                     <div className={styles.actionBtns}>
-                      <button className={styles.joinCallBtn} onClick={() => handleAccept(req)}>Join Call</button>
+                      <button className={styles.acceptBtn} onClick={() => handleAccept(req)}>Accept</button>
                       <button className={styles.cancelBtn} onClick={() => onCancel && onCancel(req.roomId, req.type)}>Cancel</button>
                     </div>
                   )}

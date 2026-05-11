@@ -180,7 +180,10 @@ export const WaitingQueueProvider = ({ children }) => {
 
   // Update status of a pending connection by roomId
   const updateStatusByRoomId = useCallback((roomId, status, extraData = {}) => {
+    console.log("[WaitingQueue] 🔄 updateStatusByRoomId:", roomId, "→", status);
     setPendingConnections((prev) => {
+      const matched = prev.find((c) => c.roomId === roomId);
+      console.log("[WaitingQueue]   matched:", !!matched, "stored roomIds:", prev.map(c => c.roomId));
       const next = prev.map((c) => {
         if (c.roomId === roomId) {
           return { ...c, status, ...extraData };
