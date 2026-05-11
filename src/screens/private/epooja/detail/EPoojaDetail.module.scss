@@ -450,7 +450,7 @@
 .cartBtn {
   padding: 13px 28px;
   border: 1px solid #f75801;
-  border-radius: 8px;
+  border-radius: 100px;
   background: #fff;
   color: #f75801;
   font-size: 15px;
@@ -471,7 +471,7 @@
 .bookBtn {
   padding: 13px 28px;
   border: none;
-  border-radius: 8px;
+  border-radius: 100px;
   background: var(--orange_gradient, linear-gradient(90deg, #f75801 0%, #d43400 100%));
   color: #fff;
   font-size: 15px;
@@ -1380,7 +1380,7 @@
   width: 100%;
   padding: 8px 0;
   border: 1px solid #f75801;
-  border-radius: 24px;
+  border-radius: 100px;
   background: #fff;
   font-size: 13px;
   font-weight: 500;
