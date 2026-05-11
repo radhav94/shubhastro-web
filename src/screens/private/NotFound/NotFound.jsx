@@ -1,58 +1,36 @@
 import { useNavigate } from "react-router-dom";
-import { PrimaryButton, PrimaryText } from "../../../component";
-import { appColors } from "../../../utils/theme";
 import styles from "./NotFound.module.scss";
+import bgWaves from "../../../assets/images/404-bg-waves.svg";
+import bgRight from "../../../assets/images/404-bg-right.svg";
+import zodiacWheel from "../../../assets/images/404-zodiac-wheel.png";
 
 const NotFound = () => {
   const navigate = useNavigate();
 
-  const handleGoHome = () => {
-    navigate("/");
-  };
-
-  const handleGoBack = () => {
-    navigate(-1);
-  };
-
   return (
     <div className={styles.container}>
-      <div className={styles.content}>
-        <div className={styles.errorCode}>404</div>
-        
-        <PrimaryText 
-          size_24 
-          isExtraBold 
-          color={appColors.tri}
-          style={{ marginBottom: "12px" }}
-        >
-          Page Not Found
-        </PrimaryText>
-        
-        <PrimaryText 
-          size_14 
-          color={appColors.greyMedium}
-          style={{ marginBottom: "32px", textAlign: "center", maxWidth: "400px" }}
-        >
-          The page you are looking for doesn't exist or has been moved.
-        </PrimaryText>
+      <div className={styles.card}>
 
-        <div className={styles.buttonGroup}>
-          <PrimaryButton
-            title="Go to Home"
-            onClick={handleGoHome}
-            bgColor={appColors.tri}
-            textColor={appColors.white}
-            buttonStyles={{ minWidth: "140px" }}
-          />
-          
-          <PrimaryButton
-            title="Go Back"
-            onClick={handleGoBack}
-            transparent
-            textColor={appColors.tri}
-            borderColor={appColors.tri}
-            buttonStyles={{ minWidth: "140px" }}
-          />
+        {/* Background decorations */}
+        <img src={bgWaves} alt="" className={styles.bgWaves} aria-hidden="true" />
+        <img src={bgRight} alt="" className={styles.bgRight} aria-hidden="true" />
+
+        {/* Left — Zodiac wheel image from Figma */}
+        <div className={styles.wheelWrap}>
+          <img src={zodiacWheel} alt="404 Zodiac Wheel" className={styles.wheelImg} />
+        </div>
+
+        {/* Right — Content */}
+        <div className={styles.content}>
+          <span className={styles.oopsBadge}>Oops!</span>
+          <h1 className={styles.title}>Your destiny path is lost</h1>
+          <p className={styles.subtitle}>
+            The page you're looking for doesn't exist or has moved.<br />
+            Let our AI guide you back to the right path.
+          </p>
+          <button className={styles.homeBtn} onClick={() => navigate("/")}>
+            Go to homepage
+          </button>
         </div>
       </div>
     </div>

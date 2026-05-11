@@ -26,6 +26,11 @@ const NewAstrologerDetailsCard = ({
     astrologer?.emergencyPrice?.chatRate?.amount > 0 ||
     astrologer?.emergencyPrice?.audioRate?.amount > 0
   );
+  const emergencyChatRate = Number(astrologer?.emergencyPrice?.chatRate?.amount) || 0;
+  const emergencyCallRate = Number(astrologer?.emergencyPrice?.audioRate?.amount) || 0;
+  const emergencyMinRate = emergencyChatRate > 0 && emergencyCallRate > 0
+    ? Math.min(emergencyChatRate, emergencyCallRate)
+    : emergencyChatRate || emergencyCallRate;
   const imageUrl = astrologer?.profileImgUrl || getAstrologerDefaultImage(astrologer?.gender);
 
   return (
@@ -90,7 +95,7 @@ const NewAstrologerDetailsCard = ({
           {!isOnline && hasEmergency ? (
             <div className={styles.emergencyButtonWrapper}>
               <button className={styles.emergencySingleBtn} onClick={() => setShowEmergencyModal(true)}>
-                Emergency Session
+                Emergency Session{emergencyMinRate > 0 ? ` - ₹${emergencyMinRate}/min` : ''}
               </button>
             </div>
           ) : (

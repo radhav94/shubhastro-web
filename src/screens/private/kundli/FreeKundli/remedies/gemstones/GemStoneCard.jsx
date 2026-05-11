@@ -4,13 +4,14 @@ import TTSButton from "../../../../../../component/UI/TTSButton";
 import styles from "./GemStoneCard.module.scss";
 import { IoChevronDown, IoChevronUp } from "react-icons/io5";
 
-const SectionCard = ({ title, children }) => {
+const SectionCard = ({ title, titleExtra, children }) => {
   return (
     <div className={styles.cardBox}>
       <div className={styles.header}>
         <PrimaryText size="lg" weight="600" className={styles.cardTitle}>
           {title}
         </PrimaryText>
+        {titleExtra && <span style={{ marginLeft: "auto" }}>{titleExtra}</span>}
       </div>
       <div className={styles.content}>
         {children}
@@ -52,31 +53,33 @@ const GemStoneCard = ({ gem }) => {
     <div className={styles.wrapper}>
       {/* TOP DESCRIPTION CARD */}
       <div className={styles.topCard}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center" }}>
           <PrimaryText size="xl" weight="700" className={styles.title}>
             {gem.name}
           </PrimaryText>
-          <TTSButton
-            text={[
-              gem.name,
-              gem.planet ? `Planet: ${gem.planet}` : "",
-              gem.description || "",
-              gem.gem ? `Gem: ${gem.gem}` : "",
-              gem.other_name ? `Other Name: ${gem.other_name}` : "",
-              gem.finger ? `Finger: ${gem.finger}` : "",
-              gem.weight ? `Weight: ${gem.weight}` : "",
-              gem.day ? `Day: ${gem.day}` : "",
-              gem.metal ? `Metal: ${gem.metal}` : "",
-              gem.substitute?.length ? `Substitutes: ${gem.substitute.join(", ")}` : "",
-              gem.not_to_wear_with?.length ? `Not to Wear With: ${gem.not_to_wear_with.join(", ")}` : "",
-              gem.good_results?.length ? `Good Results: ${gem.good_results.join(", ")}` : "",
-              gem.diseases_cure?.length ? `Diseases It Helps With: ${gem.diseases_cure.join(", ")}` : "",
-              gem.time_to_wear ? `Time to Wear: ${gem.time_to_wear}` : "",
-              gem.time_to_wear_short ? `In short: ${gem.time_to_wear_short}` : "",
-              gem.methods ? `How to Wear: ${gem.methods}` : "",
-              gem.mantra ? `Mantra: ${gem.mantra}` : "",
-            ].filter(Boolean).join(". ")}
-          />
+          <span style={{ marginLeft: "auto" }}>
+            <TTSButton
+              text={[
+                gem.name,
+                gem.planet ? `Planet: ${gem.planet}` : "",
+                gem.description || "",
+                gem.gem ? `Gem: ${gem.gem}` : "",
+                gem.other_name ? `Other Name: ${gem.other_name}` : "",
+                gem.finger ? `Finger: ${gem.finger}` : "",
+                gem.weight ? `Weight: ${gem.weight}` : "",
+                gem.day ? `Day: ${gem.day}` : "",
+                gem.metal ? `Metal: ${gem.metal}` : "",
+                gem.substitute?.length ? `Substitutes: ${gem.substitute.join(", ")}` : "",
+                gem.not_to_wear_with?.length ? `Not to Wear With: ${gem.not_to_wear_with.join(", ")}` : "",
+                gem.good_results?.length ? `Good Results: ${gem.good_results.join(", ")}` : "",
+                gem.diseases_cure?.length ? `Diseases It Helps With: ${gem.diseases_cure.join(", ")}` : "",
+                gem.time_to_wear ? `Time to Wear: ${gem.time_to_wear}` : "",
+                gem.time_to_wear_short ? `In short: ${gem.time_to_wear_short}` : "",
+                gem.methods ? `How to Wear: ${gem.methods}` : "",
+                gem.mantra ? `Mantra: ${gem.mantra}` : "",
+              ].filter(Boolean).join(". ")}
+            />
+          </span>
         </div>
 
         <PrimaryText size="md" weight="500" className={styles.subTitle}>
@@ -179,7 +182,18 @@ const GemStoneCard = ({ gem }) => {
         </SectionCard>
 
         {/* TIME TO WEAR */}
-        <SectionCard title="Time to Wear">
+        <SectionCard 
+          title="Time to Wear"
+          titleExtra={
+            <TTSButton
+              text={[
+                "Time to Wear",
+                gem.time_to_wear || "",
+                gem.time_to_wear_short ? `In short: ${gem.time_to_wear_short}` : "",
+              ].filter(Boolean).join(". ")}
+            />
+          }
+        >
           <PrimaryText marginBottom="5px" size="base">
             {displayTimeToWear}
           </PrimaryText>
@@ -197,7 +211,17 @@ const GemStoneCard = ({ gem }) => {
         </SectionCard>
 
         {/* METHODS */}
-        <SectionCard title="How to Wear">
+        <SectionCard 
+          title="How to Wear"
+          titleExtra={
+            <TTSButton
+              text={[
+                "How to Wear",
+                gem.methods || "",
+              ].filter(Boolean).join(". ")}
+            />
+          }
+        >
           <PrimaryText size="base">{displayMethods}</PrimaryText>
           {shouldTruncateMethods && (
             <span 
