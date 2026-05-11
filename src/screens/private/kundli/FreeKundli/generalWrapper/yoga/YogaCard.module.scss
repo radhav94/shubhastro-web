@@ -21,6 +21,11 @@
   @media (min-width: 769px) {
     cursor: default;
     pointer-events: none;
+
+    /* Allow TTS button and interactive elements to still receive clicks */
+    > * {
+      pointer-events: auto;
+    }
   }
   
   /* Enable click on mobile */

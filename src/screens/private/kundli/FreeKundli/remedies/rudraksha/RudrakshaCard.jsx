@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import styles from "./Rudraksha.module.scss";
 import PrimaryText from "../../../../../../component/PrimaryText";
 import TTSButton from "../../../../../../component/UI/TTSButton";
@@ -25,9 +25,9 @@ const RudrakshaCard = ({ data }) => {
           onClick={() => setIsOpen(!isOpen)}
           aria-expanded={isOpen}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", flex: 1 }}>
             <h1 className={styles.title}>{name}</h1>
-            <span onClick={(e) => e.stopPropagation()}>
+            <span onClick={(e) => e.stopPropagation()} style={{ marginLeft: "auto" }}>
               <TTSButton
                 text={[
                   name,

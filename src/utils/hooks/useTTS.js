@@ -32,6 +32,10 @@ const findVoice = (locale, voices) => {
   );
 };
 
+// Global reference to the currently active TTS instance's stop function.
+// When a new button starts speaking, it calls this to stop the previous one.
+let activeStopFn = null;
+
 const useTTS = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const utteranceRef = useRef(null);
@@ -60,12 +64,21 @@ const useTTS = () => {
     watchdogRef.current = null;
   }, []);
 
+  // Stable ref so the global tracker always invokes the latest stop
+  const stopRef = useRef(null);
+
   const stop = useCallback(() => {
     busyRef.current = false;
     window.speechSynthesis.cancel();
     setSpeaking(false);
     stopWatchdog();
+    // Clear global active reference if this instance was the active one
+    if (activeStopFn === stopRef.current) {
+      activeStopFn = null;
+    }
   }, [setSpeaking, stopWatchdog]);
+
+  stopRef.current = stop;
 
   const speak = useCallback(
     (text) => {
@@ -75,6 +88,12 @@ const useTTS = () => {
         stop();
         return;
       }
+
+      // Stop any other active TTS instance before starting this one
+      if (activeStopFn && activeStopFn !== stopRef.current) {
+        activeStopFn();
+      }
+      activeStopFn = stopRef.current;
 
       const currentLang = getGoogleTranslateLang();
       const locale = LANG_TO_LOCALE[currentLang] || `${currentLang}-${currentLang.toUpperCase()}`;
