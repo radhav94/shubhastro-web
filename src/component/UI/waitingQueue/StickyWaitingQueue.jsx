@@ -58,16 +58,7 @@ const StickyWaitingQueue = () => {
   const count = pendingConnections.length;
 
   const handleCancelAll = () => {
-    // If any call is accepted, only cancel non-accepted ones
-    if (hasAccepted) {
-      pendingConnections.forEach((conn) => {
-        if (conn.status !== "astrologer_accepted") {
-          cancelPendingConnection(conn.roomId, conn.type, conn.astrologer?._id);
-        }
-      });
-    } else {
-      cancelAll();
-    }
+    cancelAll();
     setWaitingList(false);
     setCallWaitingList(false);
     resetChatFlow();
