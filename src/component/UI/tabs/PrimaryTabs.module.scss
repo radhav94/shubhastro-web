@@ -55,8 +55,9 @@
 .tabButton {
   padding: 8px 16px;
   border-radius: 30px;
-  border: 1px solid #ff6b35;
-  background: #ffffff;
+  border: 1.5px solid #fff;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
   color: #1a1a1a;
   cursor: pointer;
   font-weight: 400;
