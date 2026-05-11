@@ -81,13 +81,14 @@
   white-space: nowrap;
   padding: 8px 20px;
   border-radius: 24px;
-  border: 1.5px solid #e0e0e0;
-  background: #fff;
+  border: 1.5px solid #fff;
+  background: rgba(255, 255, 255, 0.5);
   font-size: 14px;
   font-weight: 500;
-  color: #555;
+  color: #000;
   cursor: pointer;
   transition: all 0.2s;
+  backdrop-filter: blur(12px);
   &:hover { border-color: #f75801; color: #f75801; }
 }
 
@@ -305,7 +306,7 @@
   position: relative;
   min-width: 175px;
   max-width: 200px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
@@ -316,6 +317,8 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  border: 1px solid #fff;
+  backdrop-filter: blur(12px);
   &:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
   // @media (max-width: 629px) { min-width: 155px; }
   @media (width <= 767px) {
@@ -352,7 +355,7 @@
 
 .prodConsultant {
   font-size: 11px;
-  color: #999;
+  color: rgba(0, 0, 0, 0.8);
   margin: 0 0 4px;
 }
 
@@ -371,21 +374,23 @@
   font-weight: 700;
   color: #222;
   margin: 0 0 8px;
-  s { color: #bbb; font-weight: 400; font-size: 12px; margin-left: 4px; }
+  s { color: rgba(0, 0, 0, 0.5); font-weight: 400; font-size: 12px; margin-left: 4px; }
 }
 
 .addCartBtn {
   width: 100%;
   padding: 7px;
   border: 1px solid #e0e0e0;
-  border-radius: 6px;
+  border-radius: 50px;
   background: #fff;
-  color: #555;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  &:hover { border-color: #f75801; color: #f75801; }
+  border-color: #f75801; 
+  color: #f75801;
+
+  &:hover { background: var(--orange_gradient, linear-gradient(90deg, #f75801 0%, #d43400 100%)); color: #fff; }
 }
 
 /* ── CTA Banner ── */
