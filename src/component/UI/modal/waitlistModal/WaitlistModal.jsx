@@ -74,7 +74,7 @@ const WaitlistModal = ({
         {/* Header */}
         <div className={styles.header}>
           <h2 className={styles.title}>
-            Waitlist <span className={styles.badge}>{count}</span>
+            Waitlist
           </h2>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -84,14 +84,6 @@ const WaitlistModal = ({
             </svg>
           </button>
         </div>
-
-        <p className={styles.description}>
-          {ringingCount > 0
-            ? `Connecting to ${ringingCount} astrologer${ringingCount > 1 ? "s" : ""}...`
-            : acceptedCount > 0
-              ? `${acceptedCount} astrologer${acceptedCount > 1 ? "s" : ""} ready to connect.`
-              : `Waiting for ${count} astrologer${count > 1 ? "s" : ""} to accept.`}
-        </p>
 
         {/* Request list */}
         <div className={styles.list}>
@@ -116,53 +108,38 @@ const WaitlistModal = ({
                   <div className={styles.listMeta}>
                     <span className={styles.listName}>{name}</span>
                     <span className={styles.listType}>
-                      {req.type === "chat" ? "Chat" : req.type === "video" ? "Video" : "Audio"}
-                      {isAccepted && <span className={styles.acceptedTag}> · Ready</span>}
-                      {isOnHold && <span className={styles.holdTag}> · On Hold</span>}
-                      {isRinging && <span className={styles.ringingTag}> · Connecting</span>}
+                      {isAccepted && <span className={styles.acceptedTag}>Accepted</span>}
+                      {isOnHold && <span className={styles.holdTag}>Missed Call</span>}
+                      {isRinging && <span className={styles.ringingTag}>Ringing...</span>}
+                      {isWaiting && waitData && waitData.position && (
+                        <span>{`#${waitData.position} in queue${waitData.confidence ? ` • ${formatWaitTime(waitData)}` : ""}`}</span>
+                      )}
+                      {isWaiting && (!waitData || !waitData.position) && <span className={styles.ringingTag}>Ringing...</span>}
                     </span>
                   </div>
                 </div>
 
                 <div className={styles.listItemRight}>
-                  {/* Ringing state — show connecting indicator + cancel */}
-                  {isRinging && (
-                    <>
-                      <span className={styles.connectingText}>Your turn!</span>
-                      <button className={styles.cancelIconBtn} onClick={() => onCancel && onCancel(req.roomId, req.type)} aria-label="Cancel">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <line x1="18" y1="6" x2="6" y2="18" />
-                          <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                      </button>
-                    </>
+                  {/* Ringing / Waiting state — Cancel button */}
+                  {(isRinging || isWaiting) && (
+                    <button className={styles.cancelBtn} onClick={() => onCancel && onCancel(req.roomId, req.type)}>
+                      Cancel
+                    </button>
                   )}
 
-                  {/* Waiting state — show wait time + cancel */}
-                  {isWaiting && (
-                    <>
-                      <span className={styles.listTimer}>{waitData && waitData.confidence ? formatWaitTime(waitData) : "Waiting…"}</span>
-                      <button className={styles.cancelIconBtn} onClick={() => onCancel && onCancel(req.roomId, req.type)} aria-label="Cancel">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <line x1="18" y1="6" x2="6" y2="18" />
-                          <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                      </button>
-                    </>
-                  )}
-
-                  {/* Accepted — show accept */}
+                  {/* Accepted — Join Call + Cancel */}
                   {isAccepted && (
                     <div className={styles.actionBtns}>
-                      <button className={styles.acceptBtn} onClick={() => handleAccept(req)}>Accept</button>
+                      <button className={styles.joinCallBtn} onClick={() => handleAccept(req)}>Join Call</button>
+                      <button className={styles.cancelBtn} onClick={() => onCancel && onCancel(req.roomId, req.type)}>Cancel</button>
                     </div>
                   )}
 
-                  {/* On hold — show unhold + cancel */}
+                  {/* On hold / Missed — Rejoin + Cancel */}
                   {isOnHold && (
                     <div className={styles.actionBtns}>
-                      <button className={styles.unholdBtn} onClick={() => onUnhold && onUnhold(req.roomId, req.type)}>Unhold</button>
-                      <button className={styles.rejectBtn} onClick={() => onCancel && onCancel(req.roomId, req.type)}>Cancel</button>
+                      <button className={styles.rejoinBtn} onClick={() => onUnhold && onUnhold(req.roomId, req.type)}>Rejoin</button>
+                      <button className={styles.cancelBtn} onClick={() => onCancel && onCancel(req.roomId, req.type)}>Cancel</button>
                     </div>
                   )}
                 </div>
@@ -171,23 +148,7 @@ const WaitlistModal = ({
           })}
         </div>
 
-        {/* Footer — cancel all */}
-        {count > 1 && (
-          <>
-            <div className={styles.divider} />
-            <button className={styles.joinBtn} onClick={onCancelAll}>
-              Cancel All ({count})
-            </button>
-          </>
-        )}
-        {count === 1 && !pendingRequests[0]?.status?.includes("accepted") && pendingRequests[0]?.status !== "ringing" && (
-          <>
-            <div className={styles.divider} />
-            <button className={styles.joinBtn} onClick={() => onCancel && onCancel(pendingRequests[0].roomId, pendingRequests[0].type)}>
-              Cancel Waitlist
-            </button>
-          </>
-        )}
+        {/* Footer removed — individual cancel buttons handle each item */}
       </div>
     </div>
   );

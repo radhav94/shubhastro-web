@@ -153,12 +153,17 @@
 }
 
 .holdTag {
-  color: #d97706;
+  color: #dc2626;
   font-weight: 600;
 }
 
 .waitTag {
   color: #f75801;
+  font-weight: 600;
+}
+
+.ringingTag {
+  color: #059669;
   font-weight: 600;
 }
 
@@ -212,6 +217,54 @@
 
   &:hover {
     opacity: 0.85;
+  }
+}
+
+.joinCallBtn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 20px;
+  background: #f75801;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.cancelBtn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 20px;
+  background: #f75801;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.rejoinBtn {
+  padding: 6px 14px;
+  border: 1.5px solid #f75801;
+  border-radius: 20px;
+  background: #fff;
+  color: #f75801;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #fff7ed;
   }
 }
 
