@@ -78,6 +78,7 @@ const SunSignReport = () => {
               className={styles.shareBtn}
               onClick={handleShare}
               aria-label="Share result"
+              style={{ display: 'none' }}
             >
               <Share2 size={18} />
             </button>

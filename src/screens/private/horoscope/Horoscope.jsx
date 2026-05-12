@@ -154,6 +154,8 @@ const HoroscopeNew = () => {
 
   // Track the previous profile ID to detect actual profile switches from header
   const prevProfileId = useRef(activeProfile?._id || null);
+  // Track if a profile switch is pending (waiting for new sun sign from API)
+  const pendingProfileSwitch = useRef(false);
 
   // Refs for overview cards to scroll back on "Show Less"
   const overviewCardRefs = useRef([]);
@@ -201,11 +203,22 @@ const HoroscopeNew = () => {
   useEffect(() => {
     const currentProfileId = activeProfile?._id || null;
     
-    // Skip if profile hasn't actually changed (initial load or same profile)
-    if (currentProfileId === prevProfileId.current) return;
-    prevProfileId.current = currentProfileId;
+    // Detect if profile actually changed
+    if (currentProfileId !== prevProfileId.current) {
+      prevProfileId.current = currentProfileId;
+      pendingProfileSwitch.current = true;
+    }
 
-    if (!profileSunSign || !signToNumber[profileSunSign] || profileSunSign === selectedZodiac) return;
+    // If no pending switch, nothing to do
+    if (!pendingProfileSwitch.current) return;
+
+    // Wait for the new sun sign to arrive from the API
+    if (!profileSunSign || !signToNumber[profileSunSign]) return;
+
+    // Sun sign is ready — apply it
+    pendingProfileSwitch.current = false;
+
+    if (profileSunSign === selectedZodiac) return;
 
     setSelectedZodiac(profileSunSign);
     setTempSelectedZodiac(profileSunSign);

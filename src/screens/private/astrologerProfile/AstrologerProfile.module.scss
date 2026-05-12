@@ -713,11 +713,15 @@
   }
   
   .consultationCard {
-    background: #FFF9F3;
+    background: rgba(255, 249, 243, 0.6);
     border-radius: 20px;
     padding: 16px;
     position: sticky;
     overflow: hidden;
+    border: 2px solid #FFFFFF;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
   }
   
   .hoursHeader {
@@ -1103,9 +1107,9 @@
    PROFILE CARD
 =========================== */
 .profileCard,.statsSection,.consultationHours,.minutesSection,.aboutSection,.giftSection {
-  background: #FFFFFF;
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 16px;
-  // border: 1px solid rgba(0, 0, 0, 0.03);
+  border: 2px solid #FFFFFF;
   padding: 16px;
   // margin: 16px 0px 16px;
   display: flex;
@@ -1113,6 +1117,9 @@
   gap: 12px;
   width: 100%;
   height: auto;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
   @media (width <= 767px) {
     border-radius: 12px;
   }
@@ -1383,9 +1390,10 @@
 }
 
 .consultationHours {
-  background: #FFF5EC;
+  background: rgba(255, 245, 236, 0.6);
   flex-direction: column;
   display: flex;
+  border: 2px solid #FFFFFF;
   
   @media (min-width: 1024px) {
     display: none !important;
@@ -1840,14 +1848,18 @@
    REVIEWS SECTION
 =========================== */
 .reviewsSection {
-  background: transparent;
-  border-radius: 0;
-  // padding: 0 20px;
-  margin: 32px 0px 32px 0px;
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  border: 2px solid #FFFFFF;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  padding: 16px;
+  margin: 10px 0px 32px 0px;
   @media (width <= 767px) {
-    padding: 0px;
-    margin: 32px 0px 32px 0px;
+    padding: 16px;
+    margin: 10px 0px 32px 0px;
+    border-radius: 12px;
   }
 }
 
@@ -1950,11 +1962,11 @@
 }
 
 .reviewCard {
-  background: #FFFFFF;
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 20px;
   padding: 16px;
-  border: none;
-  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 2px solid #FFFFFF;
+  box-shadow: none !important;
 }
 
 .reviewHeader {

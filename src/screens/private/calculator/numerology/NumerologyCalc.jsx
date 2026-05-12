@@ -39,7 +39,6 @@ const NumerologyCalc = () => {
     const newErrors = {};
 
     if (!formData.name) newErrors.name = "Name is required";
-    if (!formData.type) newErrors.type = "Type is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
 
     if (Object.keys(newErrors).length > 0) {
