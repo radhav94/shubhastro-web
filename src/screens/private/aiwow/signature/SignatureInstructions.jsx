@@ -13,7 +13,7 @@ const SignatureInstructions = () => {
   const fileInputRef = useRef(null);
 
   const handleCamera = () => {
-    navigate('/aiwow/signature/camera');
+    navigate('/signature-analysis/camera');
   };
 
   const handleUpload = () => {
@@ -26,7 +26,7 @@ const SignatureInstructions = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         dispatch(setSignatureImage(reader.result));
-        navigate('/aiwow/signature/capture');
+        navigate('/signature-analysis/capture');
       };
       reader.readAsDataURL(file);
     }
@@ -37,7 +37,7 @@ const SignatureInstructions = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate('/aiwow/signature-analysis')}>
+          <button className={styles.backButton} onClick={() => navigate('/signature-analysis')}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

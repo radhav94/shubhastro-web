@@ -418,7 +418,7 @@ const Explore = () => {
     if (!redirectUrl) {
       const titleToRouteMap = {
         // All About You section
-        "Explore Your Horoscope": "/horoscopes/daily-horoscope",
+        "Explore Your Horoscope": "/daily-horoscope",
         "Explore Your Kundli": "/kundli",
         "Kundli Reports": "/kundli?tab=free-report",
         "Remedies For You": "/remedies",
@@ -436,8 +436,8 @@ const Explore = () => {
         // Explore Your Destiny section
         "Tarot": "/tarot",
         "Numerology": "/numerology",
-        "Gemstones": "/aiwow/gemstone-authenticity",
-        "Gemstone": "/aiwow/gemstone-authenticity",
+        "Gemstones": "/gemstone-authenticity",
+        "Gemstone": "/gemstone-authenticity",
       };
       
       redirectUrl = titleToRouteMap[card.title] || card.redirect_url || card.redirectUrl || card.url || card.link;

@@ -55,7 +55,7 @@ const KaalSarpCalc = () => {
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
     const payload = { ...formData, tob: formData.isTimeUnknown ? "12:00" : formData.tob };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    navigate("/kaal-sarp-dosh-calculator/report");
+    navigate("/kaal-sarpa-dosh-calculator/report");
   };
 
   return (

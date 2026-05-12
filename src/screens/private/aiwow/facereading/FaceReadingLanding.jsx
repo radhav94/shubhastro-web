@@ -69,7 +69,7 @@ const FaceReadingLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/aiwow/face-reading/instructions')}
+          onClick={() => navigate('/astro-face-reading/instructions')}
         >
           Proceed Ahead
         </button>

@@ -73,7 +73,7 @@ const MangalDosha = () => {
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
     const payload = { ...formData, tob: formData.isTimeUnknown ? "12:00" : formData.tob };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    navigate("/mangal-kuja-dosha-calculator/report");
+    navigate("/mangal-dasha-calculator/report");
   };
 
   return (
