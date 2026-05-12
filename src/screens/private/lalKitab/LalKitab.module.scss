@@ -41,6 +41,10 @@ $dark-orange: #d43400;
     padding: 32px 24px;
     gap: 24px;
   }
+  @media (max-width: 767px) {
+    padding: 16px;
+    gap: 16px;
+  }
 }
 
 .heroContent {
@@ -66,14 +70,14 @@ $dark-orange: #d43400;
 }
 
 .heroTitle {
-  font-size: 44px;
-  font-weight: 800;
+  font-size: 34px;
+  font-weight: 600;
   color: #111;
   margin: 0;
   line-height: 1.1;
   letter-spacing: -0.5px;
 
-  @media (max-width: 600px) { font-size: 32px; }
+  @media (max-width: 600px) { font-size: 24px; }
 }
 
 .heroDesc {
@@ -147,9 +151,9 @@ $dark-orange: #d43400;
   color: #9ca3af;
   display: block;
   margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  // white-space: nowrap;
+  // overflow: hidden;
+  // text-overflow: ellipsis;
 }
 
 .changeChip {
@@ -279,7 +283,7 @@ $dark-orange: #d43400;
 
 .infoTitle {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 600;
   color: #111;
   margin: 0;
   line-height: 1.3;

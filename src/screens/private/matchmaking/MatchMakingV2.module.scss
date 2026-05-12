@@ -29,14 +29,17 @@
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 2px solid #fff;
   border-radius: 12px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.10);
+  // box-shadow: 0 2px 5px rgba(0, 0, 0, 0.10);
   @media (width <= 767px) {
     flex-direction: column;
     background: transparent;
     box-shadow: none;
     padding: 0px;
+    border: none;
   }
 }
 .matchInput{

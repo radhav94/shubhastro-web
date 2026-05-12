@@ -1,7 +1,7 @@
 .panchangWidget {
   display: flex;
   gap: 16px;
-  background: #fff;
+  // background: #fff;
   border-radius: 16px;
 }
 
@@ -28,14 +28,17 @@
 .inputBox {
   display: flex;
   gap: 12px;
-  width: 100%;
+  width: 800px;
   align-items: flex-end;
-  margin-top: 16px;
-
+  margin: 16px auto 0 auto;
   @media (max-width: 768px) {
+    width: 600px;
     flex-direction: column;
     gap: 16px;
     align-items: stretch;
+  }
+  @media (max-width: 767px) {
+    width: 100%;
   }
 }
 
