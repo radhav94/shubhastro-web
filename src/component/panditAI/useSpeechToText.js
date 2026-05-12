@@ -5,20 +5,20 @@ const SpeechRecognition =
     ? window.SpeechRecognition || window.webkitSpeechRecognition
     : null;
 
-export default function useSpeechToText({ lang = "hi-IN", onResult, onInterim }) {
+export default function useSpeechToText({ onResult, onInterim, onEnd }) {
   const [isListening, setIsListening] = useState(false);
   const [isSupported] = useState(!!SpeechRecognition);
   const recognitionRef = useRef(null);
   const finalTranscriptRef = useRef("");
   const lastInterimRef = useRef("");
+  const manualStopRef = useRef(false);
 
-  // Keep callbacks in refs so startListening/stopListening stay stable
   const onResultRef = useRef(onResult);
   const onInterimRef = useRef(onInterim);
-  const langRef = useRef(lang);
+  const onEndRef = useRef(onEnd);
   onResultRef.current = onResult;
   onInterimRef.current = onInterim;
-  langRef.current = lang;
+  onEndRef.current = onEnd;
 
   useEffect(() => {
     return () => {
@@ -40,7 +40,8 @@ export default function useSpeechToText({ lang = "hi-IN", onResult, onInterim })
     lastInterimRef.current = "";
 
     const recognition = new SpeechRecognition();
-    recognition.lang = langRef.current;
+    // hi-IN recognizes Hindi/Hinglish and outputs in Devanagari script
+    recognition.lang = "hi-IN";
     recognition.interimResults = true;
     recognition.continuous = false;
     recognition.maxAlternatives = 1;
@@ -63,7 +64,7 @@ export default function useSpeechToText({ lang = "hi-IN", onResult, onInterim })
       if (finalTranscript) {
         finalTranscriptRef.current += finalTranscript;
         lastInterimRef.current = "";
-        onResultRef.current?.(finalTranscript);
+        onResultRef.current?.(finalTranscript.trim());
       } else if (interimTranscript) {
         lastInterimRef.current = interimTranscript;
         onInterimRef.current?.(interimTranscript);
@@ -80,6 +81,15 @@ export default function useSpeechToText({ lang = "hi-IN", onResult, onInterim })
     recognition.onend = () => {
       recognitionRef.current = null;
       setIsListening(false);
+      // If mic stopped automatically (not manual), flush interim and notify
+      if (!manualStopRef.current) {
+        if (lastInterimRef.current) {
+          onResultRef.current?.(lastInterimRef.current.trim());
+          lastInterimRef.current = "";
+        }
+        onEndRef.current?.();
+      }
+      manualStopRef.current = false;
     };
 
     recognitionRef.current = recognition;
@@ -88,8 +98,9 @@ export default function useSpeechToText({ lang = "hi-IN", onResult, onInterim })
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
+      manualStopRef.current = true;
       if (lastInterimRef.current) {
-        onResultRef.current?.(lastInterimRef.current);
+        onResultRef.current?.(lastInterimRef.current.trim());
         lastInterimRef.current = "";
       }
       recognitionRef.current.abort();
@@ -98,5 +109,10 @@ export default function useSpeechToText({ lang = "hi-IN", onResult, onInterim })
     }
   }, []);
 
-  return { isListening, isSupported, startListening, stopListening };
+  const resetTranscript = useCallback(() => {
+    finalTranscriptRef.current = "";
+    lastInterimRef.current = "";
+  }, []);
+
+  return { isListening, isSupported, startListening, stopListening, resetTranscript };
 }
