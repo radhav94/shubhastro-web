@@ -758,6 +758,9 @@ const FilterChips = ({
                   <div className={styles.optionsList}>
                     {sorting.map((s) => {
                       const isSelected = selectedSort === s.slug;
+                      const displayTitle = s.title
+                        ?.replace(/ascending/gi, "Low to High")
+                        ?.replace(/descending/gi, "High to Low");
                       return (
                         <div
                           key={s.slug}
@@ -777,7 +780,7 @@ const FilterChips = ({
                           <span
                             className={isSelected ? styles.selectedText : ""}
                           >
-                            {s.title}
+                            {displayTitle}
                           </span>
                         </div>
                       );
