@@ -15,39 +15,39 @@ import { clearSelectedKundli } from "../redux/kundli/kundliSlice";
 
 // Footer link data
 const horoscopeLinks = [
-  { href: "/horoscopes/daily-horoscope", text: "Daily Horoscope" },
-  { href: "/horoscopes/weekly-horoscope", text: "Weekly Horoscope" },
-  { href: "/horoscopes/monthly-horoscope", text: "Monthly Horoscope" },
-  { href: "/horoscopes/yearly-horoscope", text: "Yearly Horoscope" },
+  { href: "/daily-horoscope", text: "Daily Horoscope" },
+  { href: "/weekly-horoscope", text: "Weekly Horoscope" },
+  { href: "/monthly-horoscope", text: "Monthly Horoscope" },
+  { href: "/yearly-horoscope", text: "Yearly Horoscope" },
 ];
 
 const serviceLinks = [
-  { href: "/shubhmall", text: "ShubhMall" },
-  { href: "/talk-to-astrologers", text: "Live Astrologers" },
+  { href: "/shubh-mall", text: "ShubhMall" },
+  { href: "/talk-to-astrologer", text: "Live Astrologers" },
   { href: "/kundli", text: "Free Kundli" },
-  { href: "/matchmaking", text: "Kundli Matching" },
+  { href: "/match-making", text: "Kundli Matching" },
   { href: "/tarot", text: "Tarot" },
-  { href: "/chat-with-astrologers", text: "Chat with Astrologer" },
-  { href: "/talk-to-astrologers", text: "Talk to Astrologer" },
+  { href: "/chat-to-astrologer", text: "Chat with Astrologer" },
+  { href: "/talk-to-astrologer", text: "Talk to Astrologer" },
   { href: "/numerology", text: "Numerology" },
   { href: "/blog", text: "Blogs" },
 ];
 
 const shopLinks = [
-  { href: "/shubhmall?tab=bracelets", text: "Bracelets" },
-  { href: "/shubhmall?tab=rudraksha", text: "Rudraksha" },
-  { href: "/shubhmall?tab=murti", text: "Murti" },
-  { href: "/shubhmall?tab=gemstones", text: "Gemstones" },
-  { href: "/shubhmall?tab=yantra", text: "Yantra" },
-  { href: "/shubhmall?tab=kavach", text: "Kavach" },
+  { href: "/shubh-mall?tab=bracelets", text: "Bracelets" },
+  { href: "/shubh-mall?tab=rudraksha", text: "Rudraksha" },
+  { href: "/shubh-mall?tab=murti", text: "Murti" },
+  { href: "/shubh-mall?tab=gemstones", text: "Gemstones" },
+  { href: "/shubh-mall?tab=yantra", text: "Yantra" },
+  { href: "/shubh-mall?tab=kavach", text: "Kavach" },
 ];
 
 const companyLinks = [
-  { href: "/refund-and-cancellation-policy", text: "Refund & Cancellation Policy" },
-  { href: "/terms-conditions", text: "Terms & Conditions" },
+  { href: "/refund-cancellation-policy", text: "Refund & Cancellation Policy" },
+  { href: "/terms-and-conditions", text: "Terms & Conditions" },
   { href: "/privacy-policy", text: "Privacy Policy" },
   { href: "/disclaimer", text: "Disclaimer" },
-  { href: "/aboutus", text: "About Us" },
+  { href: "/about-us", text: "About Us" },
   { href: "/pricing-policy", text: "Pricing Policy" },
   { href: "/ai-use-policy", text: "AI Use Policy" },
   { href: "/astrologer-onboarding-agreement", text: "Onboarding Agreement" },
@@ -213,7 +213,7 @@ const Footer = () => {
           <p> ©{currentYear} Shubh Talk Pvt. Ltd. All rights reserved</p>
           <ul>
             <li><Link to="/privacy-policy">Privacy Policy</Link></li>
-            <li><Link to="/terms-conditions">T&C</Link></li>
+            <li><Link to="/terms-and-conditions">T&C</Link></li>
           </ul>
         </div>
       </div>

@@ -10,16 +10,7 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { PATH } from "../../../utils/routes/Paths";
-import occultWorldImg from "../../../assets/images/occult-world.png";
-
-const features = [
-  { icon: "🔮", title: "Tarot Reading",       desc: "Gain clarity on life decisions through ancient card interpretations" },
-  { icon: "🔢", title: "Numerology",           desc: "Discover the hidden meaning behind your birth numbers" },
-  { icon: "🛡️", title: "Spiritual Protection", desc: "Shield yourself from negative energies and evil eye" },
-  { icon: "✨", title: "Reiki Healing",        desc: "Balance your energy centers for holistic well-being" },
-  { icon: "🌙", title: "Moon Rituals",         desc: "Harness lunar energy for manifestation and release" },
-  { icon: "🧿", title: "Dosha Analysis",       desc: "Identify and remedy planetary doshas in your chart" },
-];
+import aiImage from "../../../assets/images/Ai Image.png";
 
 const OccultChat = () => {
   const navigate = useNavigate();
@@ -56,9 +47,25 @@ const OccultChat = () => {
   const handleGenerate = async () => {
     if (!token) { requireAuth(); return; }
     if (!selectedProfile?._id) { Toast.error("Please select a Kundli profile first"); return; }
+
     try {
       const body = selectedProfile._id?.startsWith("temp_")
-        ? { kundliDetails: { name: selectedProfile.name, gender: selectedProfile.gender, day: Number(selectedProfile.day), month: Number(selectedProfile.month), year: Number(selectedProfile.year), hour: Number(selectedProfile.hour), min: Number(selectedProfile.min), second: 0, lat: String(selectedProfile.lat || "0"), lon: String(selectedProfile.lon || "0"), tzone: selectedProfile.tzone ?? 5.5, place: selectedProfile.place } }
+        ? {
+            kundliDetails: {
+              name: selectedProfile.name,
+              gender: selectedProfile.gender,
+              day: Number(selectedProfile.day),
+              month: Number(selectedProfile.month),
+              year: Number(selectedProfile.year),
+              hour: Number(selectedProfile.hour),
+              min: Number(selectedProfile.min),
+              second: 0,
+              lat: String(selectedProfile.lat || "0"),
+              lon: String(selectedProfile.lon || "0"),
+              tzone: selectedProfile.tzone ?? 5.5,
+              place: selectedProfile.place,
+            },
+          }
         : { kundliId: selectedProfile._id };
 
       const result = await getOccultDasha(body).unwrap();
@@ -73,97 +80,111 @@ const OccultChat = () => {
     }
   };
 
+  const benefits = [
+    { icon: "☸", label: "Understand karmic patterns" },
+    { icon: "✧", label: "Remove negative energy" },
+    { icon: "☀", label: "Gain emotional clarity" },
+    { icon: "☽", label: "Improve spiritual balance" },
+    { icon: "⛩", label: "Experience inner peace" },
+  ];
+
   return (
-    <div className={styles.page}>
+    <div className={styles.container}>
       {(isLoadingProfiles || isGenerating) && <PrimaryLoader />}
 
-      {/* ── Hero ── */}
-      <div className={styles.hero}>
-        {/* Decorative orbs */}
-        <div className={styles.orb1} />
-        <div className={styles.orb2} />
-
-        <div className={styles.heroContent}>
-          <span className={styles.heroBadge}>✦ Ancient Mystical Sciences ✦</span>
-          <h1 className={styles.heroTitle}>Occult World</h1>
-          <p className={styles.heroDesc}>
-            Explore the mystical realm of ancient sciences. Uncover hidden truths, heal energy imbalances,
-            and receive powerful spiritual guidance tailored to your cosmic blueprint.
+      {/* Hero Section - Two columns */}
+      <div className={styles.heroRow}>
+        <div className={styles.heroLeft}>
+          <h1 className={styles.heroTitle}>
+            Occult Services –<br />
+            <span className={styles.heroTitleItalic}>Reveal Hidden Energies in Your Life</span>
+          </h1>
+          <p className={styles.heroBadge}>
+            <span className={styles.heroBadgeIcon}>🔮</span>
+            Trusted Spiritual Guidance at ShubhAstro.ai
           </p>
-
-          {/* Profile selector */}
-          <div className={styles.profileBox}>
-            <p className={styles.profileLabel}>Select your Kundli profile to begin</p>
-            {selectedProfile ? (
-              <div className={styles.selectedCard} onClick={() => setShowProfileManager(true)}>
-                <div className={styles.avatar}>{(selectedProfile.name || "U").charAt(0).toUpperCase()}</div>
-                <div className={styles.profileInfo}>
-                  <span className={styles.profileName}>{selectedProfile.name}</span>
-                  <span className={styles.profileMeta}>
-                    {selectedProfile.day}/{selectedProfile.month}/{selectedProfile.year} · {selectedProfile.place}
-                  </span>
-                </div>
-                <span className={styles.changeChip}>Change ›</span>
-              </div>
-            ) : (
-              <button className={styles.selectBtn} onClick={() => setShowProfileManager(true)}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-                </svg>
-                Select Kundli Profile
-              </button>
-            )}
-
-            <button
-              className={styles.generateBtn}
-              onClick={handleGenerate}
-              disabled={!selectedProfile || isGenerating}
-            >
-              {isGenerating ? (
-                <><span className={styles.spinner} /> Analyzing your chart...</>
-              ) : (
-                <>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
-                  </svg>
-                  Get Occult Reading
-                </>
-              )}
-            </button>
-          </div>
+          <p className={styles.heroDesc}>
+            Sometimes recurring problems in career, relationships, finances, or mental peace may be connected to deeper spiritual and karmic influences. Occult services help uncover these hidden energies and guide individuals toward positivity, balance, and emotional healing.
+          </p>
         </div>
-
-        {/* Hero image */}
-        <div className={styles.heroImgWrap}>
-          <div className={styles.imgGlow} />
-          <img src={occultWorldImg} alt="Occult World" className={styles.heroImg} />
+        <div className={styles.heroRight}>
+          <div className={styles.aiCard}>
+            <div className={styles.aiIconWrap}>
+              <img src={aiImage} alt="AI" className={styles.aiIconImg} />
+            </div>
+            <div className={styles.aiContent}>
+              <h3 className={styles.aiCardTitle}>AI-powered occult analysis</h3>
+              <p className={styles.aiCardText}>
+                At ShubhAstro.ai, we offer AI-powered occult analysis based on ancient Vedic astrology principles. Our advanced Dosha Analysis helps identify spiritual afflictions like Kala Sarpa Dosha, Pitra Dosha, and Nazar Dosha that may create obstacles and negativity in life.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── Info Section ── */}
-      <div className={styles.infoSection}>
-        <div className={styles.infoHeader}>
-          <h2 className={styles.infoTitle}>
-            What are <span className={styles.purple}>Occult Sciences?</span>
-          </h2>
-        </div>
-        <p className={styles.infoText}>
-          Occult sciences encompass ancient mystical practices that help you gain clarity,
-          heal energy imbalances, and shield yourself from negative influences.
-          From tarot to numerology, these time-tested tools offer profound insights into your life's journey.
-        </p>
-
-        <div className={styles.featureGrid}>
-          {features.map((f, i) => (
-            <div key={i} className={styles.featureCard}>
-              <span className={styles.featureIcon}>{f.icon}</span>
-              <div>
-                <h4 className={styles.featureTitle}>{f.title}</h4>
-                <p className={styles.featureDesc}>{f.desc}</p>
-              </div>
+      {/* Profile Selection */}
+      <div className={styles.profileSection}>
+        <h2 className={styles.sectionTitle}>Select Kundli Profile</h2>
+        {selectedProfile ? (
+          <div className={styles.selectedCard} onClick={() => setShowProfileManager(true)}>
+            <div className={styles.selectedAvatar}>
+              {(selectedProfile.name || "U").charAt(0).toUpperCase()}
             </div>
-          ))}
+            <div className={styles.selectedInfo}>
+              <span className={styles.selectedName}>{selectedProfile.name}</span>
+              <span className={styles.selectedDetails}>
+                {selectedProfile.day}/{selectedProfile.month}/{selectedProfile.year} • {selectedProfile.place}
+              </span>
+            </div>
+            <span className={styles.changeBtn}>Change</span>
+          </div>
+        ) : (
+          <button className={styles.selectBtn} onClick={() => setShowProfileManager(true)}>
+            + Select Kundli Profile
+          </button>
+        )}
+      </div>
+
+      <button className={styles.generateBtn} onClick={handleGenerate} disabled={!selectedProfile || isGenerating}>
+        {isGenerating ? "Analyzing..." : "Get Occult Reading"}
+      </button>
+
+      {/* Bottom Two Column Section */}
+      <div className={styles.bottomRow}>
+        <div className={styles.remediesCard}>
+          <div className={styles.remediesIconWrap}>
+            <span className={styles.remediesIcon}>🪷</span>
+          </div>
+          <div className={styles.remediesContent}>
+            <h3 className={styles.remediesTitle}>Personalized Remedies & Spiritual Healing</h3>
+            <p className={styles.remediesSubtitle}>— Find Peace, Protection & Positive Energy —</p>
+            <p className={styles.remediesDesc}>
+              Our occult experts provide personalized spiritual remedies including aura cleansing, energy balancing, and protective rituals designed to reduce negative influences and improve emotional well-being.
+            </p>
+          </div>
         </div>
+
+        <div className={styles.benefitsCard}>
+          <h3 className={styles.benefitsTitle}>Occult services at ShubhAstro.ai can help you:</h3>
+          <ul className={styles.benefitsList}>
+            {benefits.map((item) => (
+              <li key={item.label} className={styles.benefitItem}>
+                <span className={styles.benefitCheck}>✓</span>
+                <span className={styles.benefitLabel}>{item.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* Closing Banner */}
+      <div className={styles.closingBanner}>
+        <div className={styles.closingIconWrap}>
+          <span className={styles.closingIcon}>✦</span>
+        </div>
+        <p className={styles.closingText}>
+          Whether you are facing emotional stress, repeated setbacks, or spiritual confusion, our trusted occult guidance helps you move toward a more positive and peaceful life with ancient wisdom and modern technology.
+        </p>
       </div>
 
       <ProfileManager

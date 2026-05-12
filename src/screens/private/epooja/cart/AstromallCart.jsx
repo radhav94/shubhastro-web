@@ -373,7 +373,7 @@ const AstromallCart = () => {
   };
 
   const handleRemove = async (item) => {
-    if (isBuyNowMode) { navigate("/shubhmall"); return; }
+    if (isBuyNowMode) { navigate("/shubh-mall"); return; }
     const productId = getId(item); if (!productId) return;
     try { await removeCartItem({ productId, variantId: getVariantId(item) }).unwrap(); Toast.success("Item removed"); }
     catch (err) { Toast.error(err?.data?.message || "Failed to remove"); }
@@ -508,7 +508,7 @@ const AstromallCart = () => {
   return (
     <div className={styles.page}>
       <div className={styles.topNav}>
-        <button className={styles.backBtn} onClick={() => { if (checkoutStep === "checkout") { setCheckoutStep("cart"); setValidationIssues([]); setValidatedProducts({}); } else navigate("/shubhmall"); }}>
+        <button className={styles.backBtn} onClick={() => { if (checkoutStep === "checkout") { setCheckoutStep("cart"); setValidationIssues([]); setValidatedProducts({}); } else navigate("/shubh-mall"); }}>
           <span className={styles.backCircle}><FiChevronLeft /></span>
           <span className={styles.backLabel}>{checkoutStep === "checkout" ? "Checkout" : "My Cart"}</span>
         </button>
@@ -519,7 +519,7 @@ const AstromallCart = () => {
 
       {checkoutStep === "cart" && (<>
         {items.length > 0 && <h2 className={styles.sectionTitle}>PRODUCT DETAILS</h2>}
-        {items.length === 0 && (<div className={styles.emptyCart}><FiShoppingCart size={48} color="#ccc" /><p>Your cart is empty</p><button className={styles.browseBtn} onClick={() => navigate("/shubhmall")}>Browse Products</button></div>)}
+        {items.length === 0 && (<div className={styles.emptyCart}><FiShoppingCart size={48} color="#ccc" /><p>Your cart is empty</p><button className={styles.browseBtn} onClick={() => navigate("/shubh-mall")}>Browse Products</button></div>)}
         {items.map((item, idx) => {
           const qty = item?.quantity || 1, price = getPrice(item), routeId = getRouteId(item);
           const cartVid = getVariantId(item);

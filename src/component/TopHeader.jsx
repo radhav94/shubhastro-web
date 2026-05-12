@@ -466,7 +466,7 @@ const TopHeader = () => {
               Explore
             </NavLink>
             <NavLink
-              to="/chat-with-astrologers"
+              to="/chat-to-astrologer"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -490,7 +490,7 @@ const TopHeader = () => {
               Blogs
             </NavLink> */}
             <NavLink
-              to="/shubhmall"
+              to="/shubh-mall"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -506,7 +506,7 @@ const TopHeader = () => {
               Kundli
             </NavLink>
             {/* <NavLink
-              to="/matchmaking"
+              to="/match-making"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -522,7 +522,7 @@ const TopHeader = () => {
               Numerology
             </NavLink> */}
             {/* <NavLink
-              to="/horoscopes/daily-horoscope"
+              to="/daily-horoscope"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -648,7 +648,7 @@ const TopHeader = () => {
               Tarot
             </NavLink> */}
             {/* <NavLink
-              to="/chat-with-astrologers"
+              to="/chat-to-astrologer"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -696,7 +696,7 @@ const TopHeader = () => {
               Kundli
             </NavLink> */}
             <NavLink
-              to="/matchmaking"
+              to="/match-making"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -712,7 +712,7 @@ const TopHeader = () => {
               Numerology
             </NavLink>
             <NavLink
-              to="/horoscopes/daily-horoscope"
+              to="/daily-horoscope"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -728,7 +728,7 @@ const TopHeader = () => {
               Panchang
             </NavLink>
             <NavLink
-              to="/lal-kitab"
+              to="/laal-kitab"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -773,7 +773,7 @@ const TopHeader = () => {
               Home
             </NavLink>
             <NavLink
-              to="/chat-with-astrologers"
+              to="/chat-to-astrologer"
               onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
@@ -827,7 +827,7 @@ const TopHeader = () => {
               Tarot
             </NavLink>
             <NavLink
-              to="/matchmaking"
+              to="/match-making"
               onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
@@ -845,7 +845,7 @@ const TopHeader = () => {
               Numerology
             </NavLink>
             <NavLink
-              to="/horoscopes/daily-horoscope"
+              to="/daily-horoscope"
               onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
@@ -863,7 +863,7 @@ const TopHeader = () => {
               Panchang
             </NavLink>
             <NavLink
-              to="/lal-kitab"
+              to="/laal-kitab"
               onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
@@ -920,15 +920,15 @@ export default TopHeader;
 const CALCULATOR_LINKS = [
   { title: "Love Calculator", path: "/love-calculator" },
   { title: "Atmakaraka & Darakaraka", path: "/atmakaraka-and-darakaraka-calculator" },
-  { title: "Numerology Calculator", path: "/name-numerology-calculator" },
+  { title: "Numerology Calculator", path: "/numerology-calculator" },
   { title: "Sun Sign Calculator", path: "/sun-sign-calculator" },
   { title: "Rising Sign / Ascendant", path: "/rising-ascendant-sign-calculator" },
-  { title: "Rashi Calculator", path: "/rashi-moon-sign-calculator" },
+  { title: "Rashi Calculator", path: "/rashi-calculator" },
   { title: "Dasha Calculator", path: "/dasha-calculator" },
-  { title: "Mangal Dosha Calculator", path: "/mangal-kuja-dosha-calculator" },
+  { title: "Mangal Dosha Calculator", path: "/mangal-dasha-calculator" },
   { title: "Shani Sade Sati", path: "/shani-sade-sati-calculator" },
   { title: "Birth / Natal Chart", path: "/birth-natal-chart-calculator" },
-  { title: "Kaal Sarp Dosh", path: "/kaal-sarp-dosh-calculator" },
+  { title: "Kaal Sarp Dosh", path: "/kaal-sarpa-dosh-calculator" },
   { title: "Flames Calculator", path: "/flames-calculator" },
   { title: "Lucky Vehicle Number", path: "/lucky-vehicle-number-calculator" },
   { title: "Friendship Calculator", path: "/friendship-calculator" },

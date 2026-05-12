@@ -621,7 +621,7 @@ const EPoojaDetail = () => {
     return (
       <div className={styles.page}>
         <div className={styles.topNav}>
-          <button className={styles.backBtn} onClick={() => navigate("/shubhmall")}>
+          <button className={styles.backBtn} onClick={() => navigate("/shubh-mall")}>
             <span className={styles.backCircle}><FiChevronLeft /></span>
             <span className={styles.backLabel}>Back</span>
           </button>
@@ -629,7 +629,7 @@ const EPoojaDetail = () => {
         <div style={{ textAlign: "center", padding: "80px 0", color: "#999" }}>
           <p style={{ fontSize: 48, margin: "0 0 8px" }}>404</p>
           <p style={{ fontSize: 16, margin: "0 0 20px" }}>Product not found</p>
-          <button className={styles.bookBtn} onClick={() => navigate("/shubhmall")}>Browse Products</button>
+          <button className={styles.bookBtn} onClick={() => navigate("/shubh-mall")}>Browse Products</button>
         </div>
       </div>
     );
@@ -639,7 +639,7 @@ const EPoojaDetail = () => {
     <div className={styles.page}>
       {/* Top Nav */}
       <div className={styles.topNav}>
-        <button className={styles.backBtn} onClick={() => navigate("/shubhmall")}>
+        <button className={styles.backBtn} onClick={() => navigate("/shubh-mall")}>
           <span className={styles.backCircle}><FiChevronLeft /></span>
           <span className={styles.backLabel}>ShubhMall</span>
         </button>

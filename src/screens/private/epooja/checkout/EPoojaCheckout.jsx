@@ -620,14 +620,14 @@ const EPoojaCheckout = () => {
     return (
       <div className={styles.page}>
         <div className={styles.topNav}>
-          <button className={styles.backBtn} onClick={() => navigate("/shubhmall")}>
+          <button className={styles.backBtn} onClick={() => navigate("/shubh-mall")}>
             <span className={styles.backCircle}><FiChevronLeft /></span>
             <span className={styles.backLabel}>Checkout</span>
           </button>
         </div>
         <div style={{ textAlign: "center", padding: "80px 0", color: "#999" }}>
           <p>Your cart is empty</p>
-          <button className={styles.payBtn} style={{ maxWidth: 220, margin: "16px auto" }} onClick={() => navigate("/shubhmall")}>Browse Products</button>
+          <button className={styles.payBtn} style={{ maxWidth: 220, margin: "16px auto" }} onClick={() => navigate("/shubh-mall")}>Browse Products</button>
         </div>
       </div>
     );

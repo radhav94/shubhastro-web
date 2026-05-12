@@ -51,7 +51,7 @@ const SignScreen = () => {
           return (
             <Link
               key={zod.id}
-              to={`/horoscopes/${
+              to={`/horoscope/${
                 pathname.split("/")[2]
               }/${zod.name.toLowerCase()}`}
             >

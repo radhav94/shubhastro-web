@@ -28,7 +28,7 @@ const Sidebar = () => {
 
   const hanldeSelectChange = (e) => {
     const selectedSign = e.target.value.toLowerCase();
-    navigate(`/horoscopes/${horoscopeType}/${selectedSign}`);
+    navigate(`/horoscope/${horoscopeType}/${selectedSign}`);
   };
 
   //   const activeLink =
@@ -58,7 +58,7 @@ const Sidebar = () => {
             Horoscopes
           </h3> */}
           <ul id="horoscope-type" className={styles.horoscopes}>
-            <Link to={`/horoscopes/daily-horoscope/${paramSign}`}>
+            <Link to={`/daily-horoscope/${paramSign}`}>
               <li
                 className={`${
                   horoscopeType.includes("daily") ? styles.active : ""
@@ -67,7 +67,7 @@ const Sidebar = () => {
                 Daily Horoscope
               </li>
             </Link>
-            <Link to={`/horoscopes/weekly-horoscope/${paramSign}`}>
+            <Link to={`/weekly-horoscope/${paramSign}`}>
               <li
                 className={`${
                   horoscopeType.includes("weekly") ? styles.active : ""
@@ -76,7 +76,7 @@ const Sidebar = () => {
                 Weekly Horoscope
               </li>
             </Link>
-            <Link to={`/horoscopes/yearly-horoscope/${paramSign}`}>
+            <Link to={`/yearly-horoscope/${paramSign}`}>
               <li
                 className={`${
                   horoscopeType.includes("yearly") ? styles.active : ""
@@ -85,7 +85,7 @@ const Sidebar = () => {
                 Yearly Horoscope
               </li>
             </Link>
-            <Link to={`/horoscopes/todays-horoscope/${paramSign}`}>
+            <Link to={`/horoscope/todays-horoscope/${paramSign}`}>
               <li
                 className={`${
                   horoscopeType.includes("todays") ? styles.active : ""

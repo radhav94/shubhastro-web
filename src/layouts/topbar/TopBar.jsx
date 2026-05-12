@@ -127,7 +127,7 @@ const TopBar = () => {
 
   const MENU_LIST = [
     { title: "Home", path: PATH.privateRoutes.HOME.path },
-    { title: "Horoscope", path: "/horoscopes/daily-horoscope" },
+    { title: "Horoscope", path: "/daily-horoscope" },
     {
       title: "Astrologers",
       children: [
@@ -298,7 +298,7 @@ const TopBar = () => {
         },
         {
           title: "Numerology Calculator",
-          path: "/name-numerology-calculator",
+          path: "/numerology-calculator",
         },
         {
           title: "Sun Sign Calculator",
@@ -310,7 +310,7 @@ const TopBar = () => {
         },
         {
           title: "Rashi Calculator",
-          path: "/rashi-moon-sign-calculator",
+          path: "/rashi-calculator",
         },
         {
           title: "Dasha Calculator",
@@ -318,7 +318,7 @@ const TopBar = () => {
         },
         {
           title: "Mangal Dosha Calculator",
-          path: "/mangal-kuja-dosha-calculator",
+          path: "/mangal-dasha-calculator",
         },
         {
           title: "Shani Sade Sati Calculator",
@@ -330,7 +330,7 @@ const TopBar = () => {
         },
         {
           title: "Kaal Sarp Dosh Calculator",
-          path: "/kaal-sarp-dosh-calculator",
+          path: "/kaal-sarpa-dosh-calculator",
         },
         {
           title: "Flames Calculator",
@@ -358,8 +358,8 @@ const TopBar = () => {
         },
       ],
     },
-    { title: "Chat with Astrologer", path: "/chat-with-astrologers" },
-    { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
+    { title: "Chat with Astrologer", path: "/chat-to-astrologer" },
+    { title: "Talk to Astrologer", path: "/talk-to-astrologer" },
     { title: "Join Live", path: "/live" },
 
     { title: "ShubhMall", path: "/shop" },

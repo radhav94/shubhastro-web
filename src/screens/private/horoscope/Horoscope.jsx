@@ -182,15 +182,15 @@ const HoroscopeNew = () => {
       // Update URL to reflect the selected zodiac
       let newPath;
       if (pathname.includes('tomorrow-horoscope')) {
-        newPath = `/horoscopes/tomorrow-horoscope-new/${profileSunSign}`;
+        newPath = `/horoscope/tomorrow-horoscope-new/${profileSunSign}`;
       } else if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
-        newPath = `/horoscopes/daily-horoscope/${profileSunSign}`;
+        newPath = `/daily-horoscope/${profileSunSign}`;
       } else if (pathname.includes('weekly-horoscope')) {
-        newPath = `/horoscopes/weekly-horoscope/${profileSunSign}`;
+        newPath = `/weekly-horoscope/${profileSunSign}`;
       } else if (pathname.includes('yearly-horoscope')) {
-        newPath = `/horoscopes/yearly-horoscope/${profileSunSign}`;
+        newPath = `/yearly-horoscope/${profileSunSign}`;
       } else {
-        newPath = `/horoscopes/daily-horoscope/${profileSunSign}`;
+        newPath = `/daily-horoscope/${profileSunSign}`;
       }
       
       navigate(newPath, { replace: true });
@@ -212,15 +212,15 @@ const HoroscopeNew = () => {
 
     let newPath;
     if (pathname.includes('tomorrow-horoscope')) {
-      newPath = `/horoscopes/tomorrow-horoscope-new/${profileSunSign}`;
+      newPath = `/horoscope/tomorrow-horoscope-new/${profileSunSign}`;
     } else if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
-      newPath = `/horoscopes/daily-horoscope/${profileSunSign}`;
+      newPath = `/daily-horoscope/${profileSunSign}`;
     } else if (pathname.includes('weekly-horoscope')) {
-      newPath = `/horoscopes/weekly-horoscope/${profileSunSign}`;
+      newPath = `/weekly-horoscope/${profileSunSign}`;
     } else if (pathname.includes('yearly-horoscope')) {
-      newPath = `/horoscopes/yearly-horoscope/${profileSunSign}`;
+      newPath = `/yearly-horoscope/${profileSunSign}`;
     } else {
-      newPath = `/horoscopes/daily-horoscope/${profileSunSign}`;
+      newPath = `/daily-horoscope/${profileSunSign}`;
     }
     navigate(newPath, { replace: true });
   }, [activeProfile?._id, profileSunSign]);
@@ -426,13 +426,13 @@ const HoroscopeNew = () => {
     // Navigate to corresponding route
     // Both "Today" and "Daily" go to daily-horoscope
     if (tab === 'Today' || tab === 'Daily') {
-      navigate(`/horoscopes/daily-horoscope/${selectedZodiac}`);
+      navigate(`/daily-horoscope/${selectedZodiac}`);
     } else if (tab === 'Tomorrow') {
-      navigate(`/horoscopes/tomorrow-horoscope-new/${selectedZodiac}`);
+      navigate(`/horoscope/tomorrow-horoscope-new/${selectedZodiac}`);
     } else if (tab === 'This Week') {
-      navigate(`/horoscopes/weekly-horoscope/${selectedZodiac}`);
+      navigate(`/weekly-horoscope/${selectedZodiac}`);
     } else if (tab === 'This Year') {
-      navigate(`/horoscopes/yearly-horoscope/${selectedZodiac}`);
+      navigate(`/yearly-horoscope/${selectedZodiac}`);
     }
   };
 
@@ -447,16 +447,16 @@ const HoroscopeNew = () => {
     // Construct the new path based on current tab
     let newPath;
     if (pathname.includes('tomorrow-horoscope')) {
-      newPath = `/horoscopes/tomorrow-horoscope-new/${tempSelectedZodiac}`;
+      newPath = `/horoscope/tomorrow-horoscope-new/${tempSelectedZodiac}`;
     } else if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
-      newPath = `/horoscopes/daily-horoscope/${tempSelectedZodiac}`;
+      newPath = `/daily-horoscope/${tempSelectedZodiac}`;
     } else if (pathname.includes('weekly-horoscope')) {
-      newPath = `/horoscopes/weekly-horoscope/${tempSelectedZodiac}`;
+      newPath = `/weekly-horoscope/${tempSelectedZodiac}`;
     } else if (pathname.includes('yearly-horoscope')) {
-      newPath = `/horoscopes/yearly-horoscope/${tempSelectedZodiac}`;
+      newPath = `/yearly-horoscope/${tempSelectedZodiac}`;
     } else {
       // Default to daily horoscope
-      newPath = `/horoscopes/daily-horoscope/${tempSelectedZodiac}`;
+      newPath = `/daily-horoscope/${tempSelectedZodiac}`;
     }
     
     navigate(newPath, { replace: true });
