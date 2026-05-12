@@ -593,10 +593,8 @@ const HomeV2 = () => {
                     className={styles.gridIconBox}
                     style={{
                       ...(a.image_url_web || a.image_url || a.icon ? {
-                        background: `url(${a.image_url_web || a.image_url || a.icon}) center/60% no-repeat, ${iconBgs[i % iconBgs.length]}`,
-                      } : {
-                        background: iconBgs[i % iconBgs.length],
-                      })
+                        background: `url(${a.image_url_web || a.image_url || a.icon}) center/60% no-repeat`,
+                      } : {})
                     }}
                   />
                   <span>{a.title}</span>
