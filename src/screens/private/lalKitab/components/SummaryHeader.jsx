@@ -1,15 +1,20 @@
 import styles from "./SummaryHeader.module.scss";
+import { format12HourTime } from "../../../../utils/dateFormat/dateTime";
 
 const SummaryHeader = ({ summary }) => {
   if (!summary?.name) return null;
 
-  const dob = summary.dob || (summary.day && summary.month && summary.year
-    ? `${String(summary.day).padStart(2, "0")}/${String(summary.month).padStart(2, "0")}/${summary.year}`
-    : "");
+  const dob = summary.dob
+    ? new Date(summary.dob.split("/").reverse().join("-")).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+    : (summary.day && summary.month && summary.year
+      ? new Date(summary.year, summary.month - 1, summary.day).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+      : "");
 
-  const time = summary.time || (summary.hour != null && summary.min != null
-    ? `${String(summary.hour).padStart(2, "0")}:${String(summary.min).padStart(2, "0")}`
-    : "");
+  const time = summary.time
+    ? format12HourTime(summary.time.split(":")[0], summary.time.split(":")[1])
+    : (summary.hour != null && summary.min != null
+      ? format12HourTime(summary.hour, summary.min, summary.meridiem)
+      : "");
 
   return (
     <div className={styles.card}>

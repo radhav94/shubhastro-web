@@ -72,7 +72,7 @@ const GemstoneLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/aiwow/gemstone/instructions')}
+          onClick={() => navigate('/gemstone-authenticity/instructions')}
         >
           Proceed Ahead
         </button>

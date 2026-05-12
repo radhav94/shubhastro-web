@@ -15,7 +15,7 @@ const FaceReadingInstructions = () => {
   const gender = selectedProfile?.identity?.toLowerCase() || selectedProfile?.gender?.toLowerCase() || 'male';
 
   const handleCamera = () => {
-    navigate('/aiwow/face-reading/camera');
+    navigate('/astro-face-reading/camera');
   };
 
   const handleUpload = () => {
@@ -28,7 +28,7 @@ const FaceReadingInstructions = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         dispatch(setFaceReadingImage(reader.result));
-        navigate('/aiwow/face-reading/capture');
+        navigate('/astro-face-reading/capture');
       };
       reader.readAsDataURL(file);
     }

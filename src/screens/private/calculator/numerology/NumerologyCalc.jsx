@@ -51,7 +51,7 @@ const NumerologyCalc = () => {
       ...formData,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    navigate("/name-numerology-calculator/report");
+    navigate("/numerology-calculator/report");
   };
 
   return (

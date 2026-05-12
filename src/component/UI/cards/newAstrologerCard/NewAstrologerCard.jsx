@@ -91,6 +91,15 @@ const NewAstrologerCard = ({
             </span>
           </div>
         )}
+        {astrologer?.languagePreferences?.length > 0 && (
+          <div className={styles.languages}>
+            {astrologer.languagePreferences.map((lang, index) => (
+              <span key={index} className={styles.languageBadge}>
+                {lang.languageName}
+              </span>
+            ))}
+          </div>
+        )}
       </Link>
       <div className={styles.actionButtons}>
         {!isOnline && hasEmergency ? (
@@ -114,6 +123,9 @@ const NewAstrologerCard = ({
               </button>
               <p className={styles.priceText}>
                 <span className={styles.priceAmount}>₹{chatPrice}</span>/min
+                {astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice && (
+                  <span className={styles.originalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}/min</span>
+                )}
               </p>
             </div>
             <div className={styles.buttonWrapper}>
@@ -126,6 +138,9 @@ const NewAstrologerCard = ({
               </button>
               <p className={styles.priceText}>
                 <span className={styles.priceAmount}>₹{callPrice}</span>/min
+                {astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice && (
+                  <span className={styles.originalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}/min</span>
+                )}
               </p>
             </div>
           </>

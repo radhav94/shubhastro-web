@@ -1,7 +1,9 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 import styles from "./OccultResult.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
 import astralCompass from "../../../assets/icons/astral-compass.svg";
+import { format12HourTime } from "../../../utils/dateFormat/dateTime";
 
 const SEVERITY_COLOR = {
   SEVERE: "#ef4444",
@@ -82,13 +84,13 @@ const OccultResult = () => {
             <span className={styles.detailLabel}>NAME</span>
             <span className={styles.detailValue}>{userDetails.name}</span>
             <span className={styles.detailLabel}>DATE OF BIRTH</span>
-            <span className={styles.detailValue}>{userDetails.dateOfBirth}</span>
+            <span className={styles.detailValue}>{userDetails.dateOfBirth ? dayjs(userDetails.dateOfBirth).format("DD MMM YYYY") : "--"}</span>
           </div>
           <div className={styles.detailRow}>
             <span className={styles.detailLabel}>PLACE OF BIRTH</span>
             <span className={styles.detailValue}>{userDetails.placeOfBirth}</span>
             <span className={styles.detailLabel}>TIME OF BIRTH</span>
-            <span className={styles.detailValue}>{userDetails.timeOfBirth}</span>
+            <span className={styles.detailValue}>{userDetails.timeOfBirth ? format12HourTime(userDetails.timeOfBirth.split(":")[0], userDetails.timeOfBirth.split(":")[1]) : "--"}</span>
           </div>
         </div>
       )}

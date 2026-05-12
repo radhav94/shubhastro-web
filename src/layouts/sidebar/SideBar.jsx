@@ -148,10 +148,10 @@ const SideBar = ({ open, onClose }) => {
     {
       title: "Horoscope",
       children: [
-        { title: "Today's Horoscope", path: "/horoscopes/todays-horoscope" },
-        { title: "Daily Horoscope", path: "/horoscopes/daily-horoscope" },
-        { title: "Yearly Horoscope", path: "/horoscopes/yearly-horoscope" },
-        { title: "Weekly Horoscope", path: "/horoscopes/weekly-horoscope" },
+        { title: "Today's Horoscope", path: "/horoscope/todays-horoscope" },
+        { title: "Daily Horoscope", path: "/daily-horoscope" },
+        { title: "Yearly Horoscope", path: "/yearly-horoscope" },
+        { title: "Weekly Horoscope", path: "/weekly-horoscope" },
       ],
     },
     { title: "Compatibility", path: PATH.privateRoutes.COMPATIBILITY.path },
@@ -232,7 +232,7 @@ const SideBar = ({ open, onClose }) => {
         },
         {
           title: "Numerology Calculator",
-          path: "/name-numerology-calculator",
+          path: "/numerology-calculator",
         },
         {
           title: "Sun Sign Calculator",
@@ -244,7 +244,7 @@ const SideBar = ({ open, onClose }) => {
         },
         {
           title: "Rashi Calculator",
-          path: "/rashi-moon-sign-calculator",
+          path: "/rashi-calculator",
         },
         {
           title: "Dasha Calculator",
@@ -252,7 +252,7 @@ const SideBar = ({ open, onClose }) => {
         },
         {
           title: "Mangal Dosha Calculator",
-          path: "/mangal-kuja-dosha-calculator",
+          path: "/mangal-dasha-calculator",
         },
         {
           title: "Shani Sade Sati Calculator",
@@ -264,7 +264,7 @@ const SideBar = ({ open, onClose }) => {
         },
         {
           title: "Kaal Sarp Dosh Calculator",
-          path: "/kaal-sarp-dosh-calculator",
+          path: "/kaal-sarpa-dosh-calculator",
         },
         {
           title: "Flames Calculator",
@@ -295,8 +295,8 @@ const SideBar = ({ open, onClose }) => {
   ];
 
   const BOTTOM_MENU = [
-    { title: "Chat with Astrologer", path: "/talk-to-astrologers" },
-    { title: "Talk to Astrologer", path: "/talk-to-astrologers" },
+    { title: "Chat with Astrologer", path: "/talk-to-astrologer" },
+    { title: "Talk to Astrologer", path: "/talk-to-astrologer" },
     { title: "Join Live", path: "/live" },
     { title: "ShubhMall", path: "/shop" },
     { title: "Blogs", path: "/blog" },

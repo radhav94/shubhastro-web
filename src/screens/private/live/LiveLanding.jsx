@@ -78,7 +78,7 @@ const LiveLanding = () => {
     };
 
     const handleTalkToAstrologer = () => {
-        navigate("/chat-with-astrologers");
+        navigate("/chat-to-astrologer");
     };
 
     return (
