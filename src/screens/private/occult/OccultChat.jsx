@@ -10,6 +10,7 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { PATH } from "../../../utils/routes/Paths";
+import aiImage from "../../../assets/images/Ai Image.png";
 
 const OccultChat = () => {
   const navigate = useNavigate();
@@ -48,7 +49,6 @@ const OccultChat = () => {
     if (!selectedProfile?._id) { Toast.error("Please select a Kundli profile first"); return; }
 
     try {
-      // If profile has a saved kundliId, use it. Otherwise send full details.
       const body = selectedProfile._id?.startsWith("temp_")
         ? {
             kundliDetails: {
@@ -80,15 +80,49 @@ const OccultChat = () => {
     }
   };
 
+  const benefits = [
+    { icon: "☸", label: "Understand karmic patterns" },
+    { icon: "✧", label: "Remove negative energy" },
+    { icon: "☀", label: "Gain emotional clarity" },
+    { icon: "☽", label: "Improve spiritual balance" },
+    { icon: "⛩", label: "Experience inner peace" },
+  ];
+
   return (
     <div className={styles.container}>
       {(isLoadingProfiles || isGenerating) && <PrimaryLoader />}
 
-      <h1 className={styles.pageTitle}>Occult Services</h1>
-      <p className={styles.pageSubtitle}>
-        Explore mystical practices — tarot, numerology, reiki healing, and spiritual protection
-      </p>
+      {/* Hero Section - Two columns */}
+      <div className={styles.heroRow}>
+        <div className={styles.heroLeft}>
+          <h1 className={styles.heroTitle}>
+            Occult Services –<br />
+            <span className={styles.heroTitleItalic}>Reveal Hidden Energies in Your Life</span>
+          </h1>
+          <p className={styles.heroBadge}>
+            <span className={styles.heroBadgeIcon}>🔮</span>
+            Trusted Spiritual Guidance at ShubhAstro.ai
+          </p>
+          <p className={styles.heroDesc}>
+            Sometimes recurring problems in career, relationships, finances, or mental peace may be connected to deeper spiritual and karmic influences. Occult services help uncover these hidden energies and guide individuals toward positivity, balance, and emotional healing.
+          </p>
+        </div>
+        <div className={styles.heroRight}>
+          <div className={styles.aiCard}>
+            <div className={styles.aiIconWrap}>
+              <img src={aiImage} alt="AI" className={styles.aiIconImg} />
+            </div>
+            <div className={styles.aiContent}>
+              <h3 className={styles.aiCardTitle}>AI-powered occult analysis</h3>
+              <p className={styles.aiCardText}>
+                At ShubhAstro.ai, we offer AI-powered occult analysis based on ancient Vedic astrology principles. Our advanced Dosha Analysis helps identify spiritual afflictions like Kala Sarpa Dosha, Pitra Dosha, and Nazar Dosha that may create obstacles and negativity in life.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      {/* Profile Selection */}
       <div className={styles.profileSection}>
         <h2 className={styles.sectionTitle}>Select Kundli Profile</h2>
         {selectedProfile ? (
@@ -115,26 +149,42 @@ const OccultChat = () => {
         {isGenerating ? "Analyzing..." : "Get Occult Reading"}
       </button>
 
-      <div className={styles.infoSection}>
-        <h3 className={styles.infoTitle}>What are Occult Services?</h3>
-        <p className={styles.infoText}>
-          Occult sciences encompass ancient mystical practices that help you gain clarity,
-          heal energy imbalances, and shield yourself from negative influences.
-        </p>
-        <div className={styles.featureGrid}>
-          {[
-            { icon: "🔮", title: "Tarot Reading", desc: "Gain clarity on life decisions through card interpretations" },
-            { icon: "🔢", title: "Numerology", desc: "Discover the hidden meaning behind your numbers" },
-            { icon: "🛡️", title: "Spiritual Protection", desc: "Shield yourself from negative energies" },
-            { icon: "✨", title: "Reiki Healing", desc: "Balance your energy centers for well-being" },
-          ].map((f) => (
-            <div key={f.title} className={styles.featureCard}>
-              <span className={styles.featureIcon}>{f.icon}</span>
-              <h4>{f.title}</h4>
-              <p>{f.desc}</p>
-            </div>
-          ))}
+      {/* Bottom Two Column Section */}
+      <div className={styles.bottomRow}>
+        <div className={styles.remediesCard}>
+          <div className={styles.remediesIconWrap}>
+            <span className={styles.remediesIcon}>🪷</span>
+          </div>
+          <div className={styles.remediesContent}>
+            <h3 className={styles.remediesTitle}>Personalized Remedies & Spiritual Healing</h3>
+            <p className={styles.remediesSubtitle}>— Find Peace, Protection & Positive Energy —</p>
+            <p className={styles.remediesDesc}>
+              Our occult experts provide personalized spiritual remedies including aura cleansing, energy balancing, and protective rituals designed to reduce negative influences and improve emotional well-being.
+            </p>
+          </div>
         </div>
+
+        <div className={styles.benefitsCard}>
+          <h3 className={styles.benefitsTitle}>Occult services at ShubhAstro.ai can help you:</h3>
+          <ul className={styles.benefitsList}>
+            {benefits.map((item) => (
+              <li key={item.label} className={styles.benefitItem}>
+                <span className={styles.benefitCheck}>✓</span>
+                <span className={styles.benefitLabel}>{item.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* Closing Banner */}
+      <div className={styles.closingBanner}>
+        <div className={styles.closingIconWrap}>
+          <span className={styles.closingIcon}>✦</span>
+        </div>
+        <p className={styles.closingText}>
+          Whether you are facing emotional stress, repeated setbacks, or spiritual confusion, our trusted occult guidance helps you move toward a more positive and peaceful life with ancient wisdom and modern technology.
+        </p>
       </div>
 
       <ProfileManager
