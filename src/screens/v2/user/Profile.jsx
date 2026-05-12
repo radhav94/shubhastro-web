@@ -1233,7 +1233,7 @@ const Profile = () => {
             <h1 className={styles.profileName}>{userName}</h1>
             <p className={styles.profileDetails}>
               {primaryProfile
-                ? `${dayjs(`${primaryProfile.year}-${primaryProfile.month}-${primaryProfile.day}`).format("MMM DD, YYYY")} • ${String(primaryProfile.hour > 12 ? primaryProfile.hour - 12 : primaryProfile.hour === 0 ? 12 : primaryProfile.hour).padStart(2, "0")}:${String(primaryProfile.min).padStart(2, "0")} ${primaryProfile.hour >= 12 ? "PM" : "AM"}`
+                ? `${dayjs(`${primaryProfile.year}-${primaryProfile.month}-${primaryProfile.day}`).format("DD MMM YYYY")} • ${String(primaryProfile.hour > 12 ? primaryProfile.hour - 12 : primaryProfile.hour === 0 ? 12 : primaryProfile.hour).padStart(2, "0")}:${String(primaryProfile.min).padStart(2, "0")} ${primaryProfile.hour >= 12 ? "PM" : "AM"}`
                 : " "}
             </p>
             {user?.phoneNumber && (

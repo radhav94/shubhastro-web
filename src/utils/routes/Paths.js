@@ -208,6 +208,7 @@ import LalKitabDetail from "../../screens/private/lalKitab/detail/LalKitabDetail
 import LalKitabZodiac from "../../screens/private/lalKitab/zodiac/LalKitabZodiac";
 import LalKitabProblems from "../../screens/private/lalKitab/problems/LalKitabProblems";
 import OccultChat from "../../screens/private/occult/OccultChat";
+import OccultResult from "../../screens/private/occult/OccultResult";
 
 export const PATH = {
   // DEFAULT: {
@@ -412,6 +413,10 @@ export const PATH = {
     OCCULT: {
       path: "/occult",
       element: OccultChat,
+    },
+    OCCULT_RESULT: {
+      path: "/occult/result",
+      element: OccultResult,
     },
 
     MATCHMAKING: {

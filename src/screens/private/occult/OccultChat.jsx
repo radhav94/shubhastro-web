@@ -1,445 +1,200 @@
-import { useState, useRef, useEffect } from "react";
-import {
-  Send,
-  ArrowLeft,
-  Sparkles,
-  Hash,
-  Heart,
-  ShieldCheck,
-  Moon,
-  MessageCircle,
-  WandSparkles,
-  Clock3,
-  ChevronRight,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import styles from "./OccultChat.module.scss";
-import { get } from "../../../services/publicRequest";
-import TTSButton from "../../../component/UI/TTSButton";
-
-const SERVICES = [
-  {
-    id: "tarot",
-    title: "Tarot Reading",
-    Icon: Sparkles,
-    description:
-      "Gain clarity on love, career, and life decisions through intuitive tarot card readings.",
-    tags: ["Love", "Career", "Guidance"],
-    prompt: "What do I need to know about my current situation?",
-  },
-  {
-    id: "numerology",
-    title: "Numerology",
-    Icon: Hash,
-    description:
-      "Discover the hidden meaning behind your birth numbers — life path, destiny & personality.",
-    tags: ["Life Path", "Destiny", "Compatibility"],
-    prompt: "What does my birth number reveal about my direction?",
-  },
-  {
-    id: "reiki",
-    title: "Reiki Healing",
-    Icon: Heart,
-    description:
-      "Balance your chakras and promote well-being through universal energy healing sessions.",
-    tags: ["Healing", "Chakra", "Wellness"],
-    prompt: "Which energy block should I focus on healing first?",
-  },
-  {
-    id: "protection",
-    title: "Black Magic Removal / Protection",
-    Icon: ShieldCheck,
-    description:
-      "Shield yourself from negative energies with powerful protection rituals and cleansing.",
-    tags: ["Protection", "Cleansing", "Spiritual"],
-    prompt: "How can I protect my energy from negativity?",
-  },
-];
-
-const QUICK_PROMPTS = [
-  "Give me clarity for today",
-  "What should I be careful about?",
-  "Suggest a simple remedy",
-];
-
-const tarotDeck = [
-  { name: "The Fool", meaning: "New beginnings, innocence, adventure." },
-  { name: "The Lovers", meaning: "Love, harmony, relationships." },
-  { name: "The Tower", meaning: "Sudden change, chaos, awakening." },
-  { name: "The Star", meaning: "Hope, faith, renewal." },
-  { name: "The Moon", meaning: "Intuition, illusion, subconscious." },
-  { name: "The Sun", meaning: "Joy, success, vitality." },
-];
-
-const RESPONSE_SECTIONS = [
-  { key: "samajh", match: "samajh", fallbackTitle: "Samajh" },
-  { key: "upaay", match: "upaay", fallbackTitle: "Upaay" },
-  { key: "mantra", match: "mantra", fallbackTitle: "Mantra" },
-  { key: "salah", match: "salah", fallbackTitle: "Salah" },
-];
-
-const renderInlineText = (text) =>
-  text
-    .split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
-    .filter(Boolean)
-    .map((part, index) => {
-      if (part.startsWith("**") && part.endsWith("**")) {
-        return <strong key={index}>{part.slice(2, -2)}</strong>;
-      }
-
-      if (part.startsWith("*") && part.endsWith("*")) {
-        return <em key={index}>{part.slice(1, -1)}</em>;
-      }
-
-      return part;
-    });
-
-const parseOccultResponse = (text) => {
-  if (typeof text !== "string") return [];
-
-  const sectionPattern = /\*\*([^*]+?(?:Samajh|Upaay|Mantra|Salah)[^*]*?):\*\*/gi;
-  const matches = [...text.matchAll(sectionPattern)];
-
-  if (!matches.length) return [];
-
-  return matches.map((match, index) => {
-    const start = match.index + match[0].length;
-    const end = matches[index + 1]?.index ?? text.length;
-    const rawTitle = match[1].trim();
-    const content = text.slice(start, end).trim();
-    const section = RESPONSE_SECTIONS.find((item) =>
-      rawTitle.toLowerCase().includes(item.match)
-    );
-
-    return {
-      key: section?.key || `section-${index}`,
-      title: rawTitle || section?.fallbackTitle || "Guidance",
-      content,
-    };
-  });
-};
-
-const parseRemedyItems = (content) => {
-  const itemPattern = /(?:^|\s)(\d+)\.\s+\*\*([^*]+):\*\*\s*([\s\S]*?)(?=(?:\s+\d+\.\s+\*\*)|$)/g;
-  const items = [...content.matchAll(itemPattern)];
-
-  return items.map((item) => ({
-    number: item[1],
-    title: item[2].trim(),
-    text: item[3].trim(),
-  }));
-};
-
-const FormattedBotMessage = ({ text }) => {
-  const sections = parseOccultResponse(text);
-
-  if (!sections.length) {
-    return (
-      <div className={styles.simpleResponseCard}>
-        <p>{renderInlineText(text)}</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className={styles.responseCard}>
-      {sections.map((section) => {
-        const remedyItems = section.key === "upaay" ? parseRemedyItems(section.content) : [];
-
-        return (
-          <section key={section.key} className={styles.responseSection}>
-            <h3 className={styles.responseTitle}>{section.title}</h3>
-            {remedyItems.length ? (
-              <div className={styles.remedyList}>
-                {remedyItems.map((item) => (
-                  <div key={`${item.number}-${item.title}`} className={styles.remedyItem}>
-                    <span className={styles.remedyNumber}>{item.number}</span>
-                    <div>
-                      <h4>{item.title}</h4>
-                      <p>{renderInlineText(item.text)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p>{renderInlineText(section.content)}</p>
-            )}
-          </section>
-        );
-      })}
-    </div>
-  );
-};
+import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
+import { useGetOccultDashaMutation } from "../../../redux/api/occult/occultApi";
+import { ProfileManager } from "../../../component/UI/Profile";
+import { Toast } from "../../../component";
+import PrimaryLoader from "../../../component/UI/PrimaryLoader";
+import useRequireAuth from "../../../utils/hooks/useRequireAuth";
+import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
+import { PATH } from "../../../utils/routes/Paths";
+import aiImage from "../../../assets/images/Ai Image.png";
 
 const OccultChat = () => {
-  const [selectedService, setSelectedService] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [showTarot, setShowTarot] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef(null);
-  const messagesContainerRef = useRef(null);
-  const inputRef = useRef(null);
-  const isInitialOpen = useRef(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const requireAuth = useRequireAuth();
+
+  const [showProfileManager, setShowProfileManager] = useState(false);
+  const [selectedProfile, setSelectedProfileLocal] = useState(null);
+  const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
+
+  const token = localStorage.getItem("shubhtalk_customer_token");
+  const { data: kundliData, isLoading: isLoadingProfiles } = useGetAllKundlisQuery(undefined, { skip: !token });
+  const profiles = kundliData?.data || [];
+  const [getOccultDasha, { isLoading: isGenerating }] = useGetOccultDashaMutation();
+
+  const setSelectedProfile = (profile) => {
+    setSelectedProfileLocal(profile);
+    dispatch(setSelectedKundli(profile));
+  };
 
   useEffect(() => {
-    if (isInitialOpen.current) {
-      isInitialOpen.current = false;
-      return;
+    if (selectedKundli && selectedKundli._id !== selectedProfile?._id) {
+      setSelectedProfileLocal(selectedKundli);
     }
-    // Scroll within the messages container only, not the page
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+  }, [selectedKundli]);
+
+  useEffect(() => {
+    if (profiles.length > 0 && !selectedProfile) {
+      const match = selectedKundli && profiles.some((p) => p._id === selectedKundli._id);
+      setSelectedProfile(match ? selectedKundli : profiles[0]);
     }
-  }, [messages, showTarot, isLoading]);
+  }, [profiles.length]);
 
-  const openService = (service) => {
-    isInitialOpen.current = true;
-    setSelectedService(service);
-    setMessages([{ type: "bot", text: `Ask me anything about ${service.title}.` }]);
-    setShowTarot(false);
-    setInput("");
-  };
+  const handleGenerate = async () => {
+    if (!token) { requireAuth(); return; }
+    if (!selectedProfile?._id) { Toast.error("Please select a Kundli profile first"); return; }
 
-  const goBack = () => {
-    setSelectedService(null);
-    setMessages([]);
-    setShowTarot(false);
-    setInput("");
-  };
-
-  const handleBotResponse = async (msg) => {
-    const lower = msg.toLowerCase();
-
-    // Tarot card picking flow (local, no API)
-    if (selectedService?.id === "tarot" && lower.includes("tarot")) {
-      setShowTarot(true);
-      setMessages((prev) => [...prev, { type: "bot", text: "Pick a card (1–3)" }]);
-      return;
-    }
-
-    if (["1", "2", "3"].includes(msg) && showTarot) {
-      const card = tarotDeck[Math.floor(Math.random() * tarotDeck.length)];
-      setMessages((prev) => [
-        ...prev,
-        { type: "bot", text: `🃏 ${card.name}: ${card.meaning}` },
-      ]);
-      setShowTarot(false);
-      return;
-    }
-
-    // Call the occult API
-    setIsLoading(true);
     try {
-      const query = `[${selectedService?.title || "Occult"}] ${msg}`;
-      const res = await get(`ocult/ocultRemedi?text=${encodeURIComponent(query)}`);
-      const reply = res?.data?.message || "✨ I'm interpreting your energy...";
-      setMessages((prev) => [
-        ...prev,
-        { type: "bot", text: typeof reply === "string" ? reply : JSON.stringify(reply) },
-      ]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { type: "bot", text: "Something went wrong. Please try again." },
-      ]);
-    } finally {
-      setIsLoading(false);
+      const body = selectedProfile._id?.startsWith("temp_")
+        ? {
+            kundliDetails: {
+              name: selectedProfile.name,
+              gender: selectedProfile.gender,
+              day: Number(selectedProfile.day),
+              month: Number(selectedProfile.month),
+              year: Number(selectedProfile.year),
+              hour: Number(selectedProfile.hour),
+              min: Number(selectedProfile.min),
+              second: 0,
+              lat: String(selectedProfile.lat || "0"),
+              lon: String(selectedProfile.lon || "0"),
+              tzone: selectedProfile.tzone ?? 5.5,
+              place: selectedProfile.place,
+            },
+          }
+        : { kundliId: selectedProfile._id };
+
+      const result = await getOccultDasha(body).unwrap();
+      const data = result?.message?.message || result?.message || result;
+      if (data) {
+        navigate(PATH.privateRoutes.OCCULT_RESULT.path, { state: { result: data, profile: selectedProfile } });
+      } else {
+        Toast.error("Failed to generate reading");
+      }
+    } catch (err) {
+      Toast.error(err?.data?.message || "Failed to generate Occult Dosha analysis");
     }
   };
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
-    setMessages((prev) => [...prev, { type: "user", text: input }]);
-    handleBotResponse(input);
-    setInput("");
-  };
+  const benefits = [
+    { icon: "☸", label: "Understand karmic patterns" },
+    { icon: "✧", label: "Remove negative energy" },
+    { icon: "☀", label: "Gain emotional clarity" },
+    { icon: "☽", label: "Improve spiritual balance" },
+    { icon: "⛩", label: "Experience inner peace" },
+  ];
 
-  const sendTarotChoice = (num) => {
-    setMessages((prev) => [...prev, { type: "user", text: num.toString() }]);
-    handleBotResponse(num.toString());
-  };
-
-  const sendQuickPrompt = (prompt) => {
-    if (isLoading) return;
-    setMessages((prev) => [...prev, { type: "user", text: prompt }]);
-    handleBotResponse(prompt);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") sendMessage();
-  };
-
-  // ── Service List View (follows Lal Kitab layout) ──
-  if (!selectedService) {
-    return (
-      <div className={styles.container}>
-        <section className={styles.heroSection}>
-          <div className={styles.heroAura} />
-          <div className={styles.heroContent}>
-            <span className={styles.eyebrow}>
-              <Moon size={16} />
-              Mystic guidance desk
-            </span>
-            <h1 className={styles.pageTitle}>Occult Services</h1>
-            <p className={styles.pageSubtitle}>
-              Choose a sacred path and begin a focused consultation for clarity,
-              healing, protection, or intuitive direction.
-            </p>
-            <div className={styles.heroStats} aria-label="Occult service highlights">
-              <span><strong>4</strong> Guided services</span>
-              <span><strong>24/7</strong> Energy support</span>
-              <span><strong>AI</strong> Assisted insights</span>
-            </div>
-          </div>
-          <div className={styles.heroOrb} aria-hidden="true">
-            <Sparkles size={46} />
-          </div>
-        </section>
-
-        <div className={styles.featureGrid}>
-          {SERVICES.map((service) => (
-            <div
-              key={service.id}
-              className={styles.featureCard}
-              onClick={() => openService(service)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === "Enter" && openService(service)}
-              aria-label={`Open ${service.title}`}
-              style={{ position: 'relative' }}
-            >
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
-                <TTSButton text={`${service.title}. ${service.description}`} />
-              </span>
-              <div className={styles.cardTop}>
-                <span className={styles.featureIcon}><service.Icon size={28} /></span>
-                <span className={styles.openHint}>
-                  Start <ChevronRight size={16} />
-                </span>
-              </div>
-              <h4>{service.title}</h4>
-              <p>{service.description}</p>
-              <div className={styles.cardFooter}>
-                <div className={styles.tags}>
-                  {service.tags.map((tag) => (
-                    <span key={tag} className={styles.tag}>{tag}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className={styles.infoSection} style={{ position: 'relative' }}>
-          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-            <TTSButton text="What are Occult Services? Occult sciences encompass ancient mystical practices like tarot reading, numerology, reiki healing, and spiritual protection. These services help you gain clarity, heal energy imbalances, and shield yourself from negative influences through personalized consultations. Ask one clear question for a more focused reading." />
-          </span>
-          <div>
-            <span className={styles.infoKicker}>Before you begin</span>
-            <h3 className={styles.infoTitle}>What are Occult Services?</h3>
-            <p className={styles.infoText}>
-              Occult sciences encompass ancient mystical practices like tarot reading,
-              numerology, reiki healing, and spiritual protection. These services help
-              you gain clarity, heal energy imbalances, and shield yourself from
-              negative influences through personalized consultations.
-            </p>
-          </div>
-          <div className={styles.infoCard}>
-            <WandSparkles size={22} />
-            <span>Ask one clear question for a more focused reading.</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Chat View ──
   return (
     <div className={styles.container}>
-      <div className={styles.chatWrap}>
-        <div className={styles.chatHeader}>
-          <button onClick={goBack} className={styles.backBtn} aria-label="Back to services">
-            <ArrowLeft size={20} />
+      {(isLoadingProfiles || isGenerating) && <PrimaryLoader />}
+
+      {/* Hero Section - Two columns */}
+      <div className={styles.heroRow}>
+        <div className={styles.heroLeft}>
+          <h1 className={styles.heroTitle}>
+            Occult Services –<br />
+            <span className={styles.heroTitleItalic}>Reveal Hidden Energies in Your Life</span>
+          </h1>
+          <p className={styles.heroBadge}>
+            <span className={styles.heroBadgeIcon}>🔮</span>
+            Trusted Spiritual Guidance at ShubhAstro.ai
+          </p>
+          <p className={styles.heroDesc}>
+            Sometimes recurring problems in career, relationships, finances, or mental peace may be connected to deeper spiritual and karmic influences. Occult services help uncover these hidden energies and guide individuals toward positivity, balance, and emotional healing.
+          </p>
+        </div>
+        <div className={styles.heroRight}>
+          <div className={styles.aiCard}>
+            <div className={styles.aiIconWrap}>
+              <img src={aiImage} alt="AI" className={styles.aiIconImg} />
+            </div>
+            <div className={styles.aiContent}>
+              <h3 className={styles.aiCardTitle}>AI-powered occult analysis</h3>
+              <p className={styles.aiCardText}>
+                At ShubhAstro.ai, we offer AI-powered occult analysis based on ancient Vedic astrology principles. Our advanced Dosha Analysis helps identify spiritual afflictions like Kala Sarpa Dosha, Pitra Dosha, and Nazar Dosha that may create obstacles and negativity in life.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Profile Selection */}
+      <div className={styles.profileSection}>
+        <h2 className={styles.sectionTitle}>Select Kundli Profile</h2>
+        {selectedProfile ? (
+          <div className={styles.selectedCard} onClick={() => setShowProfileManager(true)}>
+            <div className={styles.selectedAvatar}>
+              {(selectedProfile.name || "U").charAt(0).toUpperCase()}
+            </div>
+            <div className={styles.selectedInfo}>
+              <span className={styles.selectedName}>{selectedProfile.name}</span>
+              <span className={styles.selectedDetails}>
+                {selectedProfile.day}/{selectedProfile.month}/{selectedProfile.year} • {selectedProfile.place}
+              </span>
+            </div>
+            <span className={styles.changeBtn}>Change</span>
+          </div>
+        ) : (
+          <button className={styles.selectBtn} onClick={() => setShowProfileManager(true)}>
+            + Select Kundli Profile
           </button>
-          <span className={styles.chatHeaderIcon}><selectedService.Icon size={24} /></span>
-          <div className={styles.chatHeaderInfo}>
-            <span className={styles.chatHeaderMeta}>
-              <Clock3 size={13} />
-              Live guidance
-            </span>
-            <h2 className={styles.chatHeaderTitle}>{selectedService.title}</h2>
+        )}
+      </div>
+
+      <button className={styles.generateBtn} onClick={handleGenerate} disabled={!selectedProfile || isGenerating}>
+        {isGenerating ? "Analyzing..." : "Get Occult Reading"}
+      </button>
+
+      {/* Bottom Two Column Section */}
+      <div className={styles.bottomRow}>
+        <div className={styles.remediesCard}>
+          <div className={styles.remediesIconWrap}>
+            <span className={styles.remediesIcon}>🪷</span>
+          </div>
+          <div className={styles.remediesContent}>
+            <h3 className={styles.remediesTitle}>Personalized Remedies & Spiritual Healing</h3>
+            <p className={styles.remediesSubtitle}>— Find Peace, Protection & Positive Energy —</p>
+            <p className={styles.remediesDesc}>
+              Our occult experts provide personalized spiritual remedies including aura cleansing, energy balancing, and protective rituals designed to reduce negative influences and improve emotional well-being.
+            </p>
           </div>
         </div>
 
-        <div className={styles.messages} ref={messagesContainerRef}>
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={msg.type === "bot" ? styles.botMsg : styles.userMsg}
-            >
-              {msg.type === "bot" ? (
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', top: '0px', right: '0px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                    <TTSButton text={msg.text} />
-                  </span>
-                  <FormattedBotMessage text={msg.text} />
-                </div>
-              ) : msg.text}
-            </div>
-          ))}
-          {showTarot && (
-            <div className={styles.tarotCards}>
-              {[1, 2, 3].map((num) => (
-                <button
-                  key={num}
-                  onClick={() => sendTarotChoice(num)}
-                  className={styles.tarotCard}
-                  aria-label={`Pick tarot card ${num}`}
-                >
-                  {num}
-                </button>
-              ))}
-            </div>
-          )}
-          {isLoading && (
-            <div className={styles.botMsg}>
-              <div className={styles.typingDots}>
-                <span />
-                <span />
-                <span />
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        <div className={styles.quickPrompts} aria-label="Suggested questions">
-          <button type="button" onClick={() => sendQuickPrompt(selectedService.prompt)} disabled={isLoading}>
-            <MessageCircle size={14} />
-            {selectedService.prompt}
-          </button>
-          {QUICK_PROMPTS.map((prompt) => (
-            <button type="button" key={prompt} onClick={() => sendQuickPrompt(prompt)} disabled={isLoading}>
-              {prompt}
-            </button>
-          ))}
-        </div>
-
-        <div className={styles.inputBar}>
-          <input
-            ref={inputRef}
-            className={styles.chatInput}
-            placeholder={`Ask about ${selectedService.title.toLowerCase()}...`}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            aria-label="Type your message"
-          />
-          <button onClick={sendMessage} className={styles.sendBtn} aria-label="Send message" disabled={isLoading}>
-            <Send size={18} />
-          </button>
+        <div className={styles.benefitsCard}>
+          <h3 className={styles.benefitsTitle}>Occult services at ShubhAstro.ai can help you:</h3>
+          <ul className={styles.benefitsList}>
+            {benefits.map((item) => (
+              <li key={item.label} className={styles.benefitItem}>
+                <span className={styles.benefitCheck}>✓</span>
+                <span className={styles.benefitLabel}>{item.label}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
+
+      {/* Closing Banner */}
+      <div className={styles.closingBanner}>
+        <div className={styles.closingIconWrap}>
+          <span className={styles.closingIcon}>✦</span>
+        </div>
+        <p className={styles.closingText}>
+          Whether you are facing emotional stress, repeated setbacks, or spiritual confusion, our trusted occult guidance helps you move toward a more positive and peaceful life with ancient wisdom and modern technology.
+        </p>
+      </div>
+
+      <ProfileManager
+        isOpen={showProfileManager}
+        onClose={() => setShowProfileManager(false)}
+        onProfileSelect={(profile) => { setSelectedProfile(profile); setShowProfileManager(false); }}
+        selectedProfileId={selectedProfile?._id}
+        title="Select Kundli"
+        enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+      />
     </div>
   );
 };
