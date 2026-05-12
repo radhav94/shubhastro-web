@@ -110,6 +110,9 @@ const NewAstrologerDetailsCard = ({
                 </button>
                 <p className={styles.detailsPriceText}>
                   <span className={styles.detailsPriceAmount}>₹{chatPrice}</span>/min
+                  {astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice && (
+                    <span className={styles.detailsOriginalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}/min</span>
+                  )}
                 </p>
               </div>
               <div className={styles.detailsButtonWrapper}>
@@ -122,6 +125,9 @@ const NewAstrologerDetailsCard = ({
                 </button>
                 <p className={styles.detailsPriceText}>
                   <span className={styles.detailsPriceAmount}>₹{callPrice}</span>/min
+                  {astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice && (
+                    <span className={styles.detailsOriginalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}/min</span>
+                  )}
                 </p>
               </div>
             </>
