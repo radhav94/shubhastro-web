@@ -3,7 +3,7 @@
 .container {
   position: relative;
   min-height: 100vh;
-  background: #f5f5f5;
+  // background: #f5f5f5;
   padding-top: 95px;
   @media screen and (width <= 1180px) {
     padding-top: 53px;
@@ -65,7 +65,9 @@
 }
 
 .middleContent{
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   display: flex;
   flex-direction: row;
   padding: 24px;
@@ -237,15 +239,15 @@
   gap: 0.75rem;
   margin-top: auto;
   padding-bottom: 1rem;
-  @media (width <= 767px) {
-    position: fixed;
-    bottom: 88px;
-    background: #fff;
-    padding: 16px 16px 2.1rem 16px;
-    width: 100%;
-    left: 0;
-    z-index: 99;
-  }
+  // @media (width <= 767px) {
+  //   position: fixed;
+  //   bottom: 88px;
+  //   background: #fff;
+  //   padding: 16px 16px 2.1rem 16px;
+  //   width: 100%;
+  //   left: 0;
+  //   z-index: 99;
+  // }
   @media (width <= 360px) {
     padding: 16px 16px 2rem 16px;
   }
