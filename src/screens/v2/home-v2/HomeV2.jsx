@@ -49,11 +49,38 @@ import avatar5 from "../../../assets/images/community-avatar-5.png";
 import liveCommunityBg from "../../../assets/images/live-community-bg.png";
 import sectionBg from "../../../assets/images/section-bg.png";
 
+// Muhurat icons
+import abhijitIcon from "../../../assets/images/Abhijit-Muhurat 1.png";
+import rahuKaalIcon from "../../../assets/images/Crucial Muhurats.png";
+import gulikaIcon from "../../../assets/images/Gulika-icon 1.png";
+import yamakantaIcon from "../../../assets/images/Crucial Muhurats (1).png";
+
 const HomeV2 = () => {
   const requireAuth = useRequireAuth();
   const navigate = useNavigate();
   const user = getUserFromStorage();
-  const name = user?.firstName || "Guest";
+  const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
+  const name = selectedKundli?.name?.split(" ")[0] || user?.firstName || "Guest";
+
+  // Random online count: random 100-500, increments by 30-50 each refresh, resets when exceeds 500
+  const [onlineCount] = useState(() => {
+    const stored = sessionStorage.getItem("liveCommunityCount");
+    if (stored) {
+      const increment = Math.floor(Math.random() * 21) + 30; // +30 to +50
+      const newCount = Number(stored) + increment;
+      if (newCount > 500) {
+        // Reset to a new random number between 100-500
+        const reset = Math.floor(Math.random() * 401) + 100;
+        sessionStorage.setItem("liveCommunityCount", reset);
+        return reset;
+      }
+      sessionStorage.setItem("liveCommunityCount", newCount);
+      return newCount;
+    }
+    const initial = Math.floor(Math.random() * 401) + 100;
+    sessionStorage.setItem("liveCommunityCount", initial);
+    return initial;
+  });
 
   // Add body class for footer text override on this page only
   useEffect(() => {
@@ -148,7 +175,12 @@ const HomeV2 = () => {
       { name: "Gulika Kaal", start: "—", end: "—" },
       { name: "Yamakanta Kaal", start: "—", end: "—" },
     ];
-    const fmt = (t) => t?.trim() || "—";
+    const fmt = (t) => {
+      const val = t?.trim();
+      if (!val) return "—";
+      // Remove seconds as we are getting from API (e.g. "12:14:20 PM" → "12:14 PM")
+      return val.replace(/(\d{1,2}:\d{2}):\d{2}/, "$1");
+    };
     return [
       { name: "Abhijit Muhurat", start: fmt(panchangResponse?.advanced_details?.abhijit_muhurta?.start), end: fmt(panchangResponse?.advanced_details?.abhijit_muhurta?.end) },
       { name: "Rahu Kaal", start: fmt(panchangResponse?.rahukaal?.split("to")[0]), end: fmt(panchangResponse?.rahukaal?.split("to")[1]) },
@@ -267,7 +299,7 @@ const HomeV2 = () => {
             const slugPaths = {
               "free-kundli": "/kundli",
               "talk-to-astrologer": "/chat-with-astrologers",
-              "daily-horoscope": "/daily-horoscope",
+              "daily-horoscope": "/horoscopes/daily-horoscope",
             };
             const path = slugPaths[card.slug] || "/";
             return (
@@ -422,18 +454,12 @@ const HomeV2 = () => {
             <div className={styles.muhuratGrid}>
               {muhurats.map((m, i) => {
                 const iconBgs = ["#FEF0E4", "#F4ECFB", "#E9F2EF", "#EBF2FB"];
-                const iconColors = ["#F75801", "#9333ea", "#16a34a", "#2563eb"];
-                const icons = [
-                  <svg key="sun" width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill={iconColors[0]}/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke={iconColors[0]} strokeWidth="2" strokeLinecap="round"/></svg>,
-                  <svg key="moon" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill={iconColors[1]}/></svg>,
-                  <svg key="clock" width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke={iconColors[2]} strokeWidth="2"/><path d="M12 7v5l3 3" stroke={iconColors[2]} strokeWidth="2" strokeLinecap="round"/></svg>,
-                  <svg key="star" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill={iconColors[3]}/></svg>,
-                ];
+                const muhuratIcons = [abhijitIcon, rahuKaalIcon, gulikaIcon, yamakantaIcon];
                 return (
                   <div key={i} className={styles.muhuratItem}>
                     <div className={styles.muhuratTop}>
                       <div className={styles.muhuratIcon} style={{ background: iconBgs[i % 4] }}>
-                        {icons[i % 4]}
+                        <img src={muhuratIcons[i % 4]} alt={m.name} width="22" height="22" />
                       </div>
                       <h5>{m.name}</h5>
                     </div>
@@ -463,7 +489,7 @@ const HomeV2 = () => {
                 <img src={avatar4} alt="" className={`${styles.clusterAvatar} ${styles.ca4}`} />
                 <img src={avatar5} alt="" className={`${styles.clusterAvatar} ${styles.ca5}`} />
                 <div className={`${styles.clusterAvatar} ${styles.ca6} ${styles.clusterCount}`}>
-                  <span>+128</span>
+                  <span>+{onlineCount}</span>
                   <span>Online</span>
                 </div>
               </div>
@@ -530,7 +556,7 @@ const HomeV2 = () => {
               {[avatar1, avatar2, avatar3, avatar4].map((av, i) => (
                 <img key={i} src={av} alt="" className={styles.liveCommunityAvatarImg} />
               ))}
-              <span className={styles.liveCommunityCount}>+128<br/>Online</span>
+              <span className={styles.liveCommunityCount}>+{onlineCount}<br/>Online</span>
             </div>
           </div>
         </div>
