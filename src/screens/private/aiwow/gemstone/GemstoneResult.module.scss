@@ -1,7 +1,9 @@
+@use '../../../../assets/variables/variables' as *;
+
 .container {
   position: relative;
   min-height: 100vh;
-  background: #f5f5f5;
+  // background: #f5f5f5;
   padding-top: 95px;
   @media screen and (width <= 1180px) {
     padding-top: 53px;
@@ -13,12 +15,14 @@
 }
 .header {
   display: flex;
+  // justify-content: space-between;
   align-items: center;
   padding:6px 16px;
   max-width: 1440px;
   margin: 0 auto;
   gap: 16px;
 }
+
 .backButton {
   background: rgb(255, 244, 236);
   border: none;
@@ -46,489 +50,799 @@
 }
 
 .title {
-  font-size: 18px;
+  font-size: 1rem;
   font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 0 12px;
-}
-
-.content {
-  padding: 0;
-  max-width: 1440px;
-  margin: 0 auto;
-}
-
-// ─── Gemstone Selection Tabs ───
-.gemstoneTabs {
-  display: flex;
-  border-bottom: 2px solid #e5e7eb;
-  background: #fff;
-  position: sticky;
-  top: 57px;
-  z-index: 10;
-  overflow-x: auto;
-  &::-webkit-scrollbar { display: none; }
-}
-
-.gemstoneTab {
-  flex: 1;
-  min-width: 120px;
-  padding: 16px;
-  background: transparent;
-  border: none;
-  border-bottom: 3px solid transparent;
-  font-size: 15px;
-  font-weight: 600;
-  color: #6b7280;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s;
-  &:hover,&.active { color: #1f2937;border-bottom-color: #D43400; background: #fff5f0; }
-  // &.active { color: #D43400;  }
-}
-
-// ─── Detail Tabs ───
-.tabsWrap{
-  width: 100%;
-  background-color: #fff;
-}
-.tabs {
-  display: flex;
-  border-bottom: 1px solid #e5e7eb;
-  background: #fff;
-  position: sticky;
-  top: 57px;
-  z-index: 9;
-  overflow-x: auto;
-  margin: 0 auto;
-  max-width: 1440px;
-  padding: 0 16px;
-  &::-webkit-scrollbar { display: none; }
-}
-
-.gemstoneTabs ~ .tabs { top: 114px; }
-
-.tab {
-  flex: 1;
-  // min-width: 90px;
-  padding: 14px 10px;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  font-size: 13px;
-  font-weight: 500;
-  color: #1f2937;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s;
-  &:hover { color: #D43400; }
-  &.active { color: #D43400; border-bottom-color: #D43400; }
-}
-
-.tabContent {
-  padding: 16px;
-}
-
-// ─── OVERVIEW TAB ───
-.overviewRow {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  background-color: #fff;
-  border-radius: 16px;
-
-  @media (max-width: 767px) {
-    flex-direction: column;
-    align-items: center;
-  }
-}
-
-.gemstoneImageWrapper {
-  width: 120px;
-  flex-shrink: 0;
-  border-radius: 10px;
-  overflow: hidden;
-  padding: 16px;
-  // box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-
-  @media (min-width: 768px) { width: 160px; }
-  @media (min-width: 1024px) { width: 200px; }
-}
-
-.gemstoneImage {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
-}
-
-.identificationCard,
-.summaryCard {
-  flex: 1;
-  min-width: 0;
-  background: #fff;
-  border-radius: 10px;
-  padding: 12px;
-
-  @media (max-width: 767px) {
-    width: 100%;
-  }
-}
-
-// .summaryCard {
-//   @media (min-width: 768px) {
-//     max-width: 340px;
-//   }
-// }
-
-.cardTitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 8px 0;
-}
-
-.summaryText,
-.recommendationText {
-  font-size: 13px;
-  line-height: 1.5;
-  color: #4b5563;
-  margin: 0 0 8px 0;
-  &:last-child { margin-bottom: 0; }
-}
-
-.recommendationText {
-  font-weight: 500;
-  color: #1f2937;
-}
-
-// ─── INFO ROW (shared) ───
-.infoRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 4px 0;
-  border-bottom: 1px solid #e5e7eb;
-  gap: 8px;
-  &:last-child { border-bottom: none; }
-}
-
-.label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #6b7280;
-  flex-shrink: 0;
-}
-
-.value {
-  font-size: 12px;
-  color: #1f2937;
-  text-align: right;
-  word-break: break-word;
-}
-
-// ─── DETAILS TAB - Vertical Grid ───
-.detailsGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 32px; // Add spacing before astrological section
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-    margin-bottom: 24px;
-  }
-  @media (min-width: 768px) {
-    grid-template-columns: 1fr 1fr 1fr;
-    margin-bottom: 40px;
-  }
-}
-
-.astroDetailsGrid {
-  margin-top: 0; // Remove top margin since detailsGrid has bottom margin
-  
-  .SectionTitle {
-    grid-column: 1 / -1; // Make title span full width
-    font-size: 18px;
-    font-weight: 700;
-    color: #1f2937;
-    margin: 0 0 16px 0;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #e5e7eb;
-    
-    @media (min-width: 768px) {
-      font-size: 20px;
-      margin-bottom: 20px;
-    }
-  }
-  
-  .tabContent {
-    grid-column: 1 / -1; // Make nested tabContent span full width
-    padding: 0; // Remove padding from nested tabContent
-  }
-}
-
-.detailBox {
-  background: #fff;
-  border-radius: 10px;
-  padding: 12px;
-}
-
-.boxTitle {
-  font-size: 12px;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 6px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.boxValue {
-  font-size: 14px;
-  font-weight: 600;
-  color: #D43400;
+  color: #333;
   margin: 0;
 }
 
-.boxHighlight {
-  font-size: 16px;
-  font-weight: 600;
-  color: #D43400;
-  margin: 0 0 4px 0;
-}
-
-.boxDesc {
-  font-size: 12px;
-  line-height: 1.5;
-  color: #4b5563;
-  margin: 4px 0 0 0;
-}
-
-// ─── ASTROLOGICAL TAB - Single Row Boxes ───
-.astroGrid {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-  }
-}
-
-.astroBox {
-  flex: 1;
-  min-width: 140px;
-  background: #fff;
-  border-radius: 10px;
-  padding: 12px;
-
-  @media (max-width: 480px) {
-    min-width: 100%;
-  }
-}
-
-// ─── DROPDOWN SECTIONS (Suitability & Healing) ───
-.dropdown {
-  background: #fff;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  overflow: hidden;
-
-  &.alwaysOpen {
-    @media (min-width: 1024px) {
-      .dropdownHeader {
-        cursor: default;
-        pointer-events: none;
-        
-        &:hover {
-          background: none;
-        }
-      }
-    }
-  }
-}
-
-.dropdownHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 14px 14px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #1f2937;
-  transition: background 0.15s;
-
-  &:hover { background: rgba(0, 0, 0, 0.01); }
-}
-
-.dropdownTitleWrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.dropdownTitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0;
-}
-
-.scoreBadge {
-  font-size: 12px;
-  font-weight: 600;
-  color: #D43400;
-  background: #fff5f0;
-  padding: 2px 10px;
-  border-radius: 12px;
-}
-
-.dropdownBody {
-  padding: 0 14px 14px;
-}
-
-// ─── Single Row Boxes inside dropdowns ───
-.suitRow {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-
-  @media (max-width: 600px) {
-    flex-direction: column;
-  }
-}
-
-.suitBox {
-  flex: 1;
-  min-width: 160px;
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-
-  @media (max-width: 600px) {
-    min-width: 100%;
-  }
-}
-
-.compactList {
-  list-style: none;
-  padding: 0;
-  margin: 4px 0 0 0;
-
-  li {
-    font-size: 12px;
-    line-height: 1.5;
-    color: #4b5563;
-    padding: 2px 0 2px 14px;
-    position: relative;
-
-    &::before {
-      content: '•';
-      position: absolute;
-      left: 2px;
-      color: #D43400;
-      font-weight: 600;
-    }
-  }
-}
-
-.mantraText {
-  font-size: 12px;
-  font-family: 'Georgia', serif;
-  font-style: italic;
-  color: #1f2937;
-  background: #f9fafb;
-  border-radius: 6px;
-  padding: 8px;
-  margin: 4px 0 0 0;
-}
-
-.compatibleText {
-  font-size: 12px;
-  color: #D43400;
-  font-weight: 500;
-  margin: 4px 0 0 0;
-}
-
-.incompatibleText {
-  font-size: 12px;
-  color: #dc2626;
-  font-weight: 500;
-  margin: 4px 0 0 0;
-}
-
-// ─── Loading ───
-.loadingContainer {
+.loading {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  font-size: 16px;
+  min-height: 50vh;
+  font-size: 1rem;
   color: #6b7280;
 }
 
-// ─── Tablet ───
-@media (min-width: 768px) {
-  // .tabContent { padding: 24px; }
-  .tab { font-size: 14px; padding: 16px 14px; }
-  .cardTitle { font-size: 16px; }
-  .boxTitle { font-size: 13px; }
-  .label, .value { font-size: 13px; }
-  .infoRow { padding: 6px 0; }
-  .dropdownTitle { font-size: 15px; }
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  padding: 2rem;
+  text-align: center;
 }
 
-// ─── Desktop ───
-@media (min-width: 1024px) {
-  // .tabContent { padding: 32px; }
-  .cardTitle { font-size: 18px; }
-  .identificationCard, .summaryCard { padding: 16px; }
-  .detailBox, .astroBox, .suitBox { padding: 14px; }
+.errorText {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
 }
 
+.retryButton {
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
 
-// ─── PERSONALIZED INSIGHTS ───
-.personalizedSection {
-  margin-top: 16px;
+  &:hover {
+    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+  }
+}
+
+.content {
+  max-width: 1440px;
+  margin: 16px auto;
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: 12px;
+  @media (width <= 767px) {
+    margin: 0px auto;
+    border-radius: 12px;
+  }
+}
+
+// Overview layout with image on left, content on right
+.overviewLayout {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+
+  @media (width <= 767px) {
+    flex-direction: column;
+  }
+}
+
+.imageSection {
+  flex-shrink: 0;
+  // width: 350px;
+  // position: sticky;
+  // top: 120px;
+
+  @media (width <= 767px) {
+    width: 100%;
+    position: static;
+  }
+}
+
+.contentSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// Two column grid for Personality Type and Life Path
+.twoColumnGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+
+  @media (width <= 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.palmImageWrapper {
+  position: relative;
+  width: 100%;
+  height: 225px;
+  aspect-ratio: 1;
+  background: #f3f4f6;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  @media (width <= 768px) {
+    height: 150px;
+  }
+}
+
+.palmImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.handBadge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.3);
+}
+
+.scoreCard {
+  background: white;
+  border: 2px solid rgba(247, 88, 1, 0.2);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
+}
+
+.scoreHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.scoreTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.scoreValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.progressBar {
+  width: 100%;
+  height: 12px;
+  background: rgba(247, 88, 1, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(247, 88, 1, 0.2);
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  transition: width 0.3s ease;
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(247, 88, 1, 0.5);
+}
+
+.section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  // box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+  &:hover {
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.15);
+    border-color: rgba(247, 88, 1, 0.3);
+  }
 }
 
 .sectionTitle {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 1.125rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.75rem 0;
+}
+
+.text {
+  font-size: 0.9375rem;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.lineCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s;
+  // box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
+  &:hover {
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.15);
+    border-color: rgba(247, 88, 1, 0.3);
+  }
+}
+
+.lineDropdown {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  // box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
+  overflow: hidden;
+}
+
+.lineDropdownHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(247, 88, 1, 0.05);
+  }
+}
+
+.lineDropdownContent {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.dropdownIcon {
+  flex-shrink: 0;
+  color: #F75801;
+  transition: transform 0.2s;
+}
+
+.dropdownIconOpen {
+  transform: rotate(180deg);
+}
+
+.lineSubtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0.25rem 0 0 0;
+  line-height: 1.4;
+}
+
+.lineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.lineTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.lineScore {
+  font-size: 1.5rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.lineSummary {
+  font-size: 0.9375rem;
   color: #1f2937;
-  margin: 0 0 12px 0;
-
-  @media (min-width: 768px) {
-    font-size: 18px;
-  }
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0 0 1rem 0;
 }
 
-.personalizedGrid {
+// Personalized Insights Grid
+.insightsWrapper {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.insightsCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  // box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
+}
+
+.insightsMainTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 1rem 0;
+}
+
+.insightsGrid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
 
-  @media (min-width: 768px) {
-    grid-template-columns: 1fr 1fr;
+  @media (width <= 1024px) {
+    grid-template-columns: repeat(2, 1fr);
   }
-  @media (min-width: 1024px) {
-    grid-template-columns: 1fr 1fr 1fr;
+
+  @media (width <= 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.astroCorrelationSection {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.insightCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  // box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.15);
+    border-color: rgba(247, 88, 1, 0.3);
   }
 }
 
-.personalizedCard {
-  background: #fff;
-  border-radius: 10px;
-  padding: 12px;
+.insightTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
-  @media (min-width: 1024px) {
-    padding: 14px;
+.insightText {
+  font-size: 0.9375rem;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.insightList {
+  margin: 0;
+  padding-left: 1.25rem;
+  
+  li {
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.5;
+    margin-bottom: 0.25rem;
+
+    &::marker {
+      color: #F75801;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 }
+
+// Line Details Grid (for Fate Line sections)
+.lineDetailsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+
+  @media (width <= 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (width <= 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lineDetailCard {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
+    border-color: rgba(247, 88, 1, 0.2);
+  }
+}
+
+.lineDetailTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #F75801;
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.lineDetailText {
+  font-size: 0.875rem;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.lineDetailList {
+  margin: 0;
+  padding-left: 1.25rem;
+  
+  li {
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.5;
+    margin-bottom: 0.25rem;
+
+    &::marker {
+      color: #F75801;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.remediesSection {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.subsection {
+  margin-top: 1rem;
+}
+
+.subsectionTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.list {
+  margin: 0;
+  // padding-left: 1.25rem;
+  
+  li {
+    font-size: 0.9375rem;
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+    position: relative;
+
+    &::marker {
+      color: #F75801;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Personality Tab Grid
+.personalityGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+
+  @media (width <= 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (width <= 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.personalityCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.15);
+    border-color: rgba(247, 88, 1, 0.3);
+  }
+}
+
+.personalityCardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.75rem 0;
+}
+
+.personalityCardText {
+  font-size: 0.9375rem;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0 0 1rem 0;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// Career Tab Grid
+.careerGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+
+  @media (width <= 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (width <= 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.careerCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.15);
+    border-color: rgba(247, 88, 1, 0.3);
+  }
+}
+
+.careerCardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.75rem 0;
+}
+
+.careerCardText {
+  font-size: 0.9375rem;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
+// Insights Tab Grid
+.insightsTabGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+
+  @media (width <= 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (width <= 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.insightTabCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.15);
+    border-color: rgba(247, 88, 1, 0.3);
+  }
+}
+
+.insightTabCardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.75rem 0;
+}
+
+.insightTabCardText {
+  font-size: 0.9375rem;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.card {
+  background: white;
+  border: 2px solid rgba(247, 88, 1, 0.2);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.75rem 0;
+}
+
+.warningCard {
+  background: #fff5f0;
+  border: 2px solid rgba(247, 88, 1, 0.3);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.15);
+}
+.tabsContainerWrap{
+  background-color: #fff;
+}
+.tabsContainer {
+  position: sticky;
+  top: 57px;
+  left: 0;
+  right: 0;
+  background: white;
+  // border-bottom: 2px solid rgba(247, 88, 1, 0.1);
+  display: flex;
+  justify-content: space-around;
+  padding: 6px 16px 0px 16px;
+  z-index: 9;
+  // box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 1440px;
+  margin: 0 auto;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.tab {
+  flex: 1;
+  background: transparent;
+  color: #1f2937;
+  border: none;
+  padding: 0.625rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  text-align: center;
+  min-width: fit-content;
+
+  &:hover {
+    color: #F75801;
+  }
+}
+
+.activeTab {
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  border-bottom-color: #F75801;
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  // .content {
+  //   padding: 2rem;
+  // }
+
+  // .header {
+  //   padding: 1rem 2rem;
+  // }
+
+  .title {
+    font-size: 1.125rem;
+  }
+
+  .tab {
+    font-size: 0.875rem;
+    padding: 0.75rem 1rem;
+  }
+
+  // .tabsContainer {
+  //   padding: 0.75rem 1rem;
+  // }
+}
+
+.noDataCard {
+  background: #fff5f0;
+  border: 2px dashed rgba(247, 88, 1, 0.3);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.noDataText {
+  font-size: 0.9375rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.secondaryLinesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+
+  @media (width <= 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 // Consult Button
 .consultButton {
@@ -537,16 +851,16 @@
   color: white;
   border: none;
   border-radius: 50px;
-  padding: 1rem 2rem;
+  padding: 1rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   margin: 16px auto;
   display: block;
-  // @media (width <= 767px) {
-  //   width: 100%;
-  // }
+  @media (width <= 767px) {
+    width: 100%;
+  }
 
   &:hover,&:active {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);

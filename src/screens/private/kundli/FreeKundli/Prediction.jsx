@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useGetAi12MonthsPredictionQuery } from "../../../../redux/api/kundli/kundliApi";
 import TTSButton from "../../../../component/UI/TTSButton";
 import arrowUp from "../../../../assets/images/arrow-up.svg";
+import styles from "./FreeReportContent.module.scss";
 
 /* ================= UTIL HELPERS ================= */
 
@@ -105,14 +106,14 @@ const Prediction = ({ params, skipToken }) => {
           <div
             key={index}
             ref={(el) => (accordionRefs.current[index] = el)}
-            className="border border-gray-200 rounded-lg bg-white"
+            className={styles.accordianTab}
           >
             {/* ================= HEADER ================= */}
             <button
               onClick={() => setOpenIndex(isOpen ? null : index)}
               className="w-full flex justify-between items-center px-4 py-3 text-left"
             >
-              <p className="text-base font-semibold text-gray-800">
+              <p className="text-base text-black-600">
                 {(() => {
                   const sd = specifications?.start_date;
                   const ed = specifications?.end_date;
@@ -150,9 +151,9 @@ const Prediction = ({ params, skipToken }) => {
             </button>
 
             {isOpen && (
-              <div className="border-t px-4 py-4 space-y-5">
+              <div className="border-t border-white px-4 py-4 space-y-5">
                 {/* ================= SPECIFICATIONS ================= */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-md border">
+                <div className={styles.innerTabStyle}>
                   {Object.entries(specifications).map(([key, value]) => (
                     <div key={key}>
                       <p className="text-sm text-gray-500">
@@ -166,7 +167,7 @@ const Prediction = ({ params, skipToken }) => {
                 </div>
 
                 {/* ================= PREDICTIONS ================= */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div className={styles.innerTabStyleBox}>
                   {Object.entries(predData).map(([key, value]) => {
                     if (!value?.bot_response) return null;
 
@@ -182,7 +183,7 @@ const Prediction = ({ params, skipToken }) => {
                     return (
                       <div
                         key={key}
-                        className="border border-gray-200 rounded-md p-4 bg-gray-50"
+                        className={styles.box}
                       >
                         <div className="flex justify-between items-center mb-2">
                           <p className="text-sm font-semibold text-gray-700">

@@ -1,7 +1,7 @@
 @use '../../../../assets/variables/variables' as *;
 
 .card {
-  background: white;
+  // background: white;
   border-radius: 1.25rem;
   padding: 0;
   display: flex;
@@ -12,6 +12,10 @@
   cursor: pointer;
   height: 232px;
   flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: none !important;
+    border: 2px solid white;
   @media (width <= 768px) {
     width: 160px;
     height: auto;
@@ -59,7 +63,7 @@
 
     .iconBackground {
       transform: scale(1.05);
-      background: linear-gradient(135deg, #FFF5EB 0%, #FFE8D6 100%);
+      // background: linear-gradient(135deg, #FFF5EB 0%, #FFE8D6 100%);
     }
   }
 
@@ -84,7 +88,9 @@
   height: 80px;
   padding: 0.2rem;
   border-radius: 1rem;
-  background: linear-gradient(135deg, #FFF9F5 0%, #FFF5EB 100%);
+  // background: linear-gradient(135deg, #FFF9F5 0%, #FFF5EB 100%);
+  background: #fff;
+  border: 1px solid #E563294D;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,7 +169,7 @@
 
 .description {
   font-size: 0.8rem;
-  color: #6b7280;
+  color: rgba(0, 0, 0, 0.8);
   line-height: 1.5;
   margin: 0;
   flex: 1;

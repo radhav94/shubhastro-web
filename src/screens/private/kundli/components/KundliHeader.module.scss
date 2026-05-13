@@ -1,12 +1,13 @@
 .headerSection {
   text-align: center;
   padding: 20px;
-  background: #fef9f0;
+  background: rgba(255, 255, 255, 0.8);
   position: fixed;
   top: 90px;
   left: 0;
   right: 0;
   z-index: 99;
+  backdrop-filter: blur(12px);
   @media (width <= 1200px) {
     top: 53px;
     padding: 20px 20px;

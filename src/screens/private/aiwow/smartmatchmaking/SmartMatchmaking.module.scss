@@ -3,7 +3,7 @@
 // Match the MatchMakingV2 structure
 .matchMakingMain {
   min-height: 100vh;
-  background: #f9fafb;
+  // background: #f9fafb;
   padding-top: 95px;
   
   @media (width <= 1180px) {
@@ -124,9 +124,11 @@
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
   border-radius: 16px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.10);
+  // box-shadow: 0 2px 5px rgba(0, 0, 0, 0.10);
   width: fit-content;
   margin: 0 auto;
   
@@ -136,6 +138,7 @@
     box-shadow: none;
     padding: 0px;
     width: 100%;
+    border: none;
   }
 }
 
@@ -534,7 +537,9 @@
 
 // Summary Card
 .summaryCard {
-  background: white;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
   padding: 1.25rem;
   border-radius: 0.875rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -550,7 +555,7 @@
   color: #1f2937;
   margin: 0 0 1rem 0;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid #f3f4f6;
+  border-bottom: 2px solid #ffffff;
 }
 
 .summaryText {

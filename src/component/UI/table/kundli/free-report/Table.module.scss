@@ -2,6 +2,8 @@
   width: 100%;
   overflow-x: auto;
   margin: 20px 0;
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
 }
 
 .dashaTable {
@@ -12,7 +14,7 @@
 
   th,
   td {
-    border: 1px solid #ddd;
+    border: 1px solid #ffffff;
     padding: 8px 4px;
     width: auto;
     // word-wrap: break-word;

@@ -58,6 +58,11 @@
   display: flex;
   gap: 12px;
   justify-content: space-between;
+  form{
+    @media (width <= 767px) {
+      width: 100%;
+    }
+  }
   > div {
     width: 100%;
     input {
@@ -72,6 +77,11 @@
     );
     color: #fff;
   }
+  .chip{
+    @media (width <= 767px) {
+      width: 100px;
+    }
+  }
 }
 .filterTabs {
   display: flex;
@@ -83,17 +93,23 @@
   align-items: center;
   gap: 5px;
   padding: 10px 25px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #fff;
   border-radius: 24px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.5);
   font-size: 16px;
   font-weight: 500;
   font-family: "Poppins", sans-serif;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
-  color: #666666;
+  color: #000;
   justify-content: center;
+  backdrop-filter: blur(12px);
+
+  @media (width <= 767px) {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
 
   &:hover {
     background: #fff9e5;

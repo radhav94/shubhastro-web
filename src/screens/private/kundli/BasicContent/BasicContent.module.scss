@@ -17,13 +17,14 @@ $font-primary: "Poppins", sans-serif;
 
 // --- Accordion Section ---
 .accordionSection {
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
   border-radius: 12px;
   margin-bottom: 16px;
   overflow: hidden;
   transition: all 0.3s ease;
   border-radius: 15px;
-  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
+  border: 1.5px solid var(--border-50, rgba(255, 255, 255, 1));
   @media (width <= 767px) {
     margin-bottom: 10px;
     border-radius: 8px;
@@ -51,11 +52,11 @@ $font-primary: "Poppins", sans-serif;
   }
 
   &:hover {
-    background-color: #eeeeee;
+    background-color: rgba(255, 255, 255, 0.4);
   }
 
   &:active {
-    background-color: #e8e8e8;
+    background-color: rgba(255, 255, 255, 0.4);
   }
 }
 
@@ -137,9 +138,9 @@ $font-primary: "Poppins", sans-serif;
 
 // --- Grouped Detail Box (one grey container with multiple stacked rows) ---
 .detailGroupBox {
-  background: #fafafa;
-  border: 1px solid #e0e0e05c;
-  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid #fff;
+  border-radius: 8px;
   padding: 4px 12px;
   display: flex;
   flex-direction: column;

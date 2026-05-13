@@ -1,0 +1,29 @@
+.accordianTab,.box{
+    width: 100%;
+    background: rgba($color: #fff, $alpha: 0.4);
+    backdrop-filter: blur(12px);
+    border-radius: 8px;
+    border: 1.5px solid #fff;
+}
+.innerTabStyle{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 16px;
+    gap: 16px;
+    background: rgba($color: #fff, $alpha: 0.4);
+    backdrop-filter: blur(12px);
+    border-radius: 8px;
+    &>div{
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+}
+.innerTabStyleBox{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+.box{
+    padding: 16px;
+}
