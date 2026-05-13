@@ -373,9 +373,9 @@ const HomeV2 = () => {
                     : <>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></>
                   }
                 </h1>
-                <p className={styles.heroDesc}>
+                {/* <p className={styles.heroDesc}>
                   {aiPoweredSection?.description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}
-                </p>
+                </p> */}
                 {currentMahadasha && (
                   <div className={styles.mahadashaTag}>
                     🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong>
@@ -400,7 +400,7 @@ const HomeV2 = () => {
                     </svg>
                   </div>
                 </div>
-                <button className={styles.wowViewMore} onClick={() => navigate('/aiwow')}>View More &rsaquo;</button>
+                <button className={styles.wowViewMore} onClick={() => navigate('/aiwow')}>View All &rsaquo;</button>
               </div>
 
               {/* All sections from API — continuous grid */}
@@ -666,7 +666,7 @@ const HomeV2 = () => {
           <div className={styles.sectionTitleBlock}>
             <h2 className={styles.sectionTitle}>{astrologerSection?.title || "TOP RATED ASTROLOGERS FOR YOU"}</h2>
           </div>
-          <button className={styles.viewAllBtn} style={{marginRight:"16px"}} onClick={() => navigate('/chat-to-astrologer')}>View all →</button>
+          <button className={styles.viewAllBtn} style={{marginRight:"16px"}} onClick={() => navigate('/chat-to-astrologer')}>View All →</button>
         </div>
         <Suspense fallback={null}>
           <AstrologersSection
@@ -702,14 +702,14 @@ const HomeV2 = () => {
               { title: "Marriage &\nFamily", slug: "marriage-family" },
               { title: "Child &\nEducation", slug: "child-education" },
             ]).map((c, i) => {
-              const catColors = ["#FFF"];
+              const catColors = ["#FFF0"];
               return (
                 <div key={i} className={styles.catItem} onClick={() => navigate('/chat-to-astrologer', { state: { selectedType: c.slug } })} style={{ cursor: 'pointer' }}>
                   <div
                     className={styles.catIconBox}
                     style={{
                       background: c.image_url
-                        ? `url(${c.image_url}) center/60% no-repeat,${catColors[i % catColors.length]}`
+                        ? `url(${c.image_url}) center/100% no-repeat,${catColors[i % catColors.length]}`
                         : catColors[i % catColors.length],
                     }}
                   />
@@ -744,7 +744,7 @@ const HomeV2 = () => {
               { title: "Tarot",           slug: "tarot",          redirect_url: "/tarot" },
               { title: "Match-making",    slug: "matchmaking",    redirect_url: "/match-making" },
             ]).map((item, i) => {
-              const discoverBgs = ["#FFE4E4","#FFF3E4","#E4EEFF","#F0E4FF"];
+              const discoverBgs = ["#ffe4e400","#fff3e400","#e4eeff00","#f0e4ff00"];
               // Slug-based route map for API items
               const slugRoutes = {
                 "vedic-kundli": "/kundli",
@@ -769,7 +769,7 @@ const HomeV2 = () => {
                     className={styles.discoverIconBox}
                     style={{
                       background: item.image_url
-                        ? `url(${item.image_url}) center/60% no-repeat, ${discoverBgs[i % 4]}`
+                        ? `url(${item.image_url}) center/100% no-repeat, ${discoverBgs[i % 4]}`
                         : discoverBgs[i % 4],
                     }}
                   />

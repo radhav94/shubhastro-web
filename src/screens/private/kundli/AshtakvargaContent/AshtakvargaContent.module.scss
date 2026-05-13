@@ -54,14 +54,14 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .cardTitle {
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 500;
   color: $color-black;
   display: flex;
   align-self: flex-start;
   margin: 8px 0;
-  border-bottom: 1px solid $color-white;
-  padding-bottom: 12px;
+  // border-bottom: 1px solid $color-white;
+  // padding-bottom: 12px;
   @media (width<=767px) {
     font-size: 16px;
   }

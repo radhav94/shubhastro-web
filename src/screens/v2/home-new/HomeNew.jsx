@@ -406,7 +406,7 @@ const HomeNew = () => {
           <div className={styles.sectionTitleBlock}>
             <h2 className={styles.sectionTitle}>{astrologerSection?.display_title || "TOP RATED ASTROLOGERS FOR YOU"}</h2>
           </div>
-          <button className={styles.viewAllBtn} onClick={() => navigate('/chat-to-astrologer')}>View all →</button>
+          <button className={styles.viewAllBtn} onClick={() => navigate('/chat-to-astrologer')}>View All →</button>
         </div>
         <AstrologersSection
           title=""
@@ -517,7 +517,7 @@ const HomeNew = () => {
                   </svg>
               </div>
             </div>
-            <button className={styles.viewAllBtn}>View More →</button>
+            <button className={styles.viewAllBtn}>View All →</button>
           </div>
           <div className={styles.calBody}>
             <div className={styles.calOccasions}>

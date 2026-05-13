@@ -769,7 +769,7 @@ const Kundali = () => {
   return (
     <div className={!isDirectKundliView ? styles.directKundli : ""}>
       {/* Free Kundli Online Title - Hidden in direct kundli view */}
-      {!isDirectKundliView && <KundliHeader />}
+      {/* {!isDirectKundliView && <KundliHeader />} */}
 
       {/* Profile Selector - Hidden in direct kundli view */}
       {!isDirectKundliView && (
@@ -788,6 +788,7 @@ const Kundali = () => {
       {/* Show tabs only when profile is selected and data is loaded */}
       {selectedProfile && (
         <div ref={contentRef} id="kundli-tabs">
+          {!isDirectKundliView && <KundliHeader />}
           {planetLoading || isAstro ? (
             <PrimaryTabs 
               key={selectedProfile._id} 

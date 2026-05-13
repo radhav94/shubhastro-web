@@ -495,7 +495,7 @@ const CustomerSupport = () => {
                     )}
                     {hasMoreSessions && !isLoadingSessions && (
                       <button className={styles.viewMoreButton} onClick={handleViewMore}>
-                        View More
+                        View All
                       </button>
                     )}
                   </div>

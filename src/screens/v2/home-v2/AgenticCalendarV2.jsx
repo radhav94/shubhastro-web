@@ -73,7 +73,7 @@ const AgenticCalendarV2 = ({ styles }) => {
           </div>
         </div>
         <button className={styles.viewAllBtn} style={{ color: '#f75801' }} onClick={() => navigate('/aiwow/agentic-calendar')}>
-          View More <FiChevronRight size={14} />
+          View All <FiChevronRight size={14} />
         </button>
       </div>
 
