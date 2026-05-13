@@ -1,24 +1,23 @@
 import { useEffect, useState } from "react";
 import styles from "./NoInternet.module.scss";
-import wifiImg from "../../assets/images/no-internet-wifi.png";
-import bgSvg from "../../assets/images/no-internet-bg.svg";
-import cornerTR from "../../assets/images/no-internet-corner-tr.png";
-import cornerBL from "../../assets/images/no-internet-corner-bl.png";
 
 const NoInternet = () => {
   return (
     <div className={styles.page}>
-      <div className={styles.card} >
+      <div className={styles.card}>
 
-        {/* Top-right corner decoration */}
-        <img src={cornerTR} alt="" className={styles.cornerTR} />
-
-        {/* Bottom-left corner decoration */}
-        <img src={cornerBL} alt="" className={styles.cornerBL} />
-
-        {/* Left — WiFi image */}
+        {/* Left — WiFi SVG (inline, no network needed) */}
         <div className={styles.imgWrap}>
-          <img src={wifiImg} alt="No Internet" className={styles.wifiImg} />
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Crossed WiFi icon */}
+            <circle cx="60" cy="60" r="58" fill="#fff3ee" stroke="#f75801" strokeWidth="2"/>
+            {/* WiFi arcs */}
+            <path d="M60 80a6 6 0 1 1 0 12 6 6 0 0 1 0-12z" fill="#f75801"/>
+            <path d="M44 66c4.4-4.4 10.5-7 16-7s11.6 2.6 16 7" stroke="#f75801" strokeWidth="4" strokeLinecap="round" fill="none"/>
+            <path d="M33 55c7.4-7.4 17.5-12 27-12s19.6 4.6 27 12" stroke="#f75801" strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.5"/>
+            {/* Cross line */}
+            <line x1="30" y1="30" x2="90" y2="90" stroke="#f75801" strokeWidth="5" strokeLinecap="round"/>
+          </svg>
         </div>
 
         {/* Right — Content */}
@@ -35,10 +34,6 @@ const NoInternet = () => {
           <p className={styles.desc}>
             It seems you're offline. Please check your internet connection and try again.
           </p>
-
-          {/* <button className={styles.btn} onClick={() => { window.location.href = '/'; }}>
-            Go to homepage
-          </button> */}
         </div>
       </div>
     </div>
@@ -52,13 +47,30 @@ export const useOnlineStatus = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
-    const goOnline  = () => setIsOnline(true);
-    const goOffline = () => setIsOnline(false);
+    let offlineTimer = null;
+
+    const goOnline = () => {
+      // Clear any pending offline timer — brief blips don't trigger offline UI
+      if (offlineTimer) {
+        clearTimeout(offlineTimer);
+        offlineTimer = null;
+      }
+      setIsOnline(true);
+    };
+
+    const goOffline = () => {
+      // Debounce: only show offline UI if disconnected for > 3 seconds
+      offlineTimer = setTimeout(() => {
+        setIsOnline(false);
+      }, 3000);
+    };
+
     window.addEventListener("online",  goOnline);
     window.addEventListener("offline", goOffline);
     return () => {
       window.removeEventListener("online",  goOnline);
       window.removeEventListener("offline", goOffline);
+      if (offlineTimer) clearTimeout(offlineTimer);
     };
   }, []);
 

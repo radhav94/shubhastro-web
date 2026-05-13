@@ -22,11 +22,12 @@
 }
 
 .topCard {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
   border-radius: 16px;
   padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(12px);
   transition: all 0.3s ease;
 
   &:hover {
@@ -56,8 +57,9 @@
 }
 
 .cardBox {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 16px;
   padding: 0;
   transition: all 0.3s ease;

@@ -147,11 +147,12 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
 
 // New Section Styling
 .newSection {
-  background-color: $color-white;
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
   border-radius: 16px;
   padding: 24px;
   margin-block: 16px;
-  // border: 1px solid $color-grey-light;
+  border: 1.5px solid $color-white;
   // box-shadow: $shadow-4;
 }
 
@@ -229,7 +230,7 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: $color-grey-light;
+  background-color: $color-white;
   color: $color-grey-dark;
   display: flex;
   align-items: center;
@@ -272,7 +273,7 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
 .dashaStepLine {
   flex: 1;
   height: 2px;
-  background-color: $color-grey-light;
+  background-color: $color-white;
   margin: 0 8px;
   position: relative;
   top: -12px;
@@ -295,17 +296,17 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
 
 .dashaTable {
   width: 100%;
-  background-color: $color-white;
+  background-color: rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid $color-grey-light;
+  border: 1.5px solid $color-white;
 }
 
 .dashaTableHeader {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  background-color: $color-app-bg;
-  border-bottom: 2px solid $color-grey-light;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-bottom: 2px solid $color-white;
   font-weight: 600;
   font-size: 15px;
   color: $color-black;
@@ -320,13 +321,13 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 40px;
   align-items: center;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #fff;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
   
   &:hover {
-    background-color: #fffbf0;
+    background-color: rgba(255, 255, 255, 0.4);
     
     .dashaTableArrow {
       opacity: 1;

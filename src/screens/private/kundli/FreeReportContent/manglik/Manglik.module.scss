@@ -51,7 +51,7 @@ $font-primary: "Poppins", sans-serif;
 // --- Header Card ---
 .headerCard {
   position: relative;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: 24px;
@@ -64,7 +64,7 @@ $font-primary: "Poppins", sans-serif;
   inset: 0;
   border-radius: 15px;
   border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
-  background: var(--surface, #FEFEFE);
+  // background: var(--surface, #FEFEFE);
 }
 
 .headerContent {
@@ -105,7 +105,7 @@ $font-primary: "Poppins", sans-serif;
 .statCard {
   border-radius: 15px;
   border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
-  background: var(--surface, #FEFEFE);
+  background: var(--surface, rgba(255, 255, 255, 0.2));
   // backdrop-filter: blur(10px);
   border-radius: 12px;
   padding: 16px;
@@ -221,10 +221,11 @@ $font-primary: "Poppins", sans-serif;
 // --- Section ---
 .section {
   margin-bottom: 0;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.5));
+  border: 1.5px solid var(--border-50, rgb(255, 255, 255));
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -266,7 +267,7 @@ $font-primary: "Poppins", sans-serif;
 }
 
 .factorCard {
-  background: #fff9e6;
+  background: #fff9e666;
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -314,7 +315,7 @@ $font-primary: "Poppins", sans-serif;
 }
 
 .aspectCard {
-  background: #fff9e6;
+  background: #fff9e666;
   border-radius: 12px;
   padding: 16px;
   display: flex;

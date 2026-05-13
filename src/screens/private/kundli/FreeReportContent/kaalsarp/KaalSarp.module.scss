@@ -27,19 +27,21 @@ $font-primary: "Poppins", sans-serif;
 // --- Header Card ---
 .headerCard {
   position: relative;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: 24px;
   min-height: 300px;
+  border: 1.5px solid #fff;
 }
 
 .headerOverlay {
   position: absolute;
   inset: 0;
   border-radius: 15px;
-  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
-  background: var(--surface, #FEFEFE);
+  // border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
+  // background: var(--surface, #FEFEFE);
 }
 
 .headerContent {
@@ -109,8 +111,8 @@ $font-primary: "Poppins", sans-serif;
 
 .statCard {
   border-radius: 15px;
-  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
-  background: var(--surface, #FEFEFE);
+  border: 1.5px solid var(--border-50, rgba(255, 255, 255, 1));
+  background: rgba(255, 255, 255, 0.6);
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -196,14 +198,14 @@ $font-primary: "Poppins", sans-serif;
   cursor: pointer;
   user-select: none;
   padding: 12px 16px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 12px;
-  border: 1px solid $color-border;
+  border: 1.5px solid #fff;
   margin-bottom: 16px;
   transition: all 0.3s ease;
 
   &:hover {
-    background: #f9f9f9;
+    background: rgba(255, 255, 255, 0.6);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
 
@@ -274,7 +276,8 @@ $font-primary: "Poppins", sans-serif;
 }
 
 .remedyCard {
-  background: #fff9e6;
+  background: rgba(255, 249, 230, 0.4);
+  backdrop-filter: blur(12px);
   border-radius: 12px;
   padding: 16px;
   display: flex;

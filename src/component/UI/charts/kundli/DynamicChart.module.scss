@@ -51,9 +51,10 @@ $font-primary: "Poppins", sans-serif;
   width: 100%;
   min-height: clamp(220px, 35vw, 280px); // Responsive height
   padding: 20px;
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
   // box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  // border: 1px solid #e5e5e5;
+  border: 1.5px solid #fff;
 
   img {
     width: 100%;

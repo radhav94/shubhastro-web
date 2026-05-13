@@ -4,7 +4,9 @@
   left: 50%;
   transform: translateX(-50%);
   width: min(720px, calc(100% - 24px));
-  background: #fff;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(24px);
+  border: 2px solid #fff;
   border-radius: 18px;
   padding: 30px 20px 20px 100px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
@@ -33,7 +35,7 @@
   position: absolute;
   top: 10px;
   left: 10px;
-  background: #f2f2f2;
+  background: #ffffff;
   border: none;
   border-radius: 50%;
   width: 28px;
@@ -41,9 +43,10 @@
   cursor: pointer;
   display: grid;
   place-items: center;
+  z-index: 99;
 
   &:hover {
-    background: #e5e5e5;
+    background: #ffffff;
   }
 }
 
