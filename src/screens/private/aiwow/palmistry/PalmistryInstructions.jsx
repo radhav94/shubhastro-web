@@ -12,7 +12,7 @@ const PalmistryInstructions = () => {
   const fileInputRef = useRef(null);
 
   const handleCamera = () => {
-    navigate('/aiwow/palmistry/camera');
+    navigate('/ai-palmistry-scanner/camera');
   };
 
   const handleUpload = () => {
@@ -25,7 +25,7 @@ const PalmistryInstructions = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         dispatch(setPalmistryImage(reader.result));
-        navigate('/aiwow/palmistry/capture');
+        navigate('/ai-palmistry-scanner/capture');
       };
       reader.readAsDataURL(file);
     }

@@ -22,7 +22,7 @@ const StickyCallFooter = () => {
   const { hasAnyPending } = useWaitingQueue();
   const navigate = useNavigate();
 
-  const onTalkDetailPage = useMatch("/talk-to-astrologers/:id");
+  const onTalkDetailPage = useMatch("/talk-to-astrologer/:id");
 
   useEffect(() => {
     if (!callApproval) return;
@@ -61,6 +61,38 @@ const StickyCallFooter = () => {
 
         {callApproval && <FooterApproval />}
         {missedApproval && <FooterMissedApproval />}
+
+        {/* {activeCall && (
+          <div className="flex items-center gap-3 text-white">
+            <span className="text-xl">💬</span>
+            <div>
+              <p className="text-sm font-medium">Call ongoing</p>
+              <p className="text-xs text-zinc-400">
+                With {activeCall.callerName || "Astrologer"} {Math.floor(callSeconds / 60)}:
+                {String(callSeconds % 60).padStart(2, "0")}
+              </p>
+            </div>
+            <button
+              onClick={() =>
+                navigate(`/talk-to-astrologer/${activeCall.astrologerId}`, {
+                  state: {
+                    userId: activeCall.userId,
+                    astrologerId: activeCall.astrologerId,
+                    fullName: activeCall.callerName,
+                    roomId: activeCall.roomId,
+                    isUserSide: true,
+                    kundliId: activeCall.kundliId,
+                    astrologerName: activeCall?.astrologerName,
+                    refreshKey: Math.floor(Math.random() * 100) + 1,
+                  },
+                })
+              }
+              className="ml-3 rounded-xl bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700 transition"
+            >
+              Open Call
+            </button>
+          </div>
+        )} */}
       </div>
     </div>
   );

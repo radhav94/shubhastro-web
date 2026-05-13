@@ -212,7 +212,7 @@ const OrderDetails = () => {
           isEmergency: data?.isEmergency || false,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
-        navigate(`/chat-with-astrologers/${astroId}`, {
+        navigate(`/chat-to-astrologer/${astroId}`, {
           state: { userId: uid, astrologerId: astroId, fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(), roomId, isUserSide: true },
         });
       } catch (e) {

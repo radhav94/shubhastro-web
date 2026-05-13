@@ -93,7 +93,16 @@ const AIWowSection = () => {
     if (slug === "ar-vastu-scanner") {
       setShowMobileAppModal(true);
     } else {
-      navigate(`/aiwow/${slug}`);
+      const rootLevelSlugs = [
+        "ai-palmistry-scanner",
+        "astro-face-reading",
+        "signature-analysis",
+        "clothes-colour-analysis",
+        "gemstone-authenticity",
+        "aura-photography",
+      ];
+      const path = rootLevelSlugs.includes(slug) ? `/${slug}` : `/aiwow/${slug}`;
+      navigate(path);
     }
   };
 

@@ -69,7 +69,7 @@ const RashiCalc = () => {
       tob: formData.isTimeUnknown ? "12:00" : formData.tob,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    navigate("/rashi-moon-sign-calculator/report");
+    navigate("/rashi-calculator/report");
   };
 
   return (

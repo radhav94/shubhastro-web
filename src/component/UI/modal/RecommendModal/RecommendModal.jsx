@@ -1,7 +1,7 @@
 import { useGetRecommendedAstrologersQuery } from "../../../../redux/api/astrologer/astrologerApi";
 // COMMENTED OUT: Replaced with NewAstrologerCard
 // import RecommendedCard from "./RecommendedCard";
-import NewAstrologerCard from "../../cards/newAstrologerCard/NewAstrologerCard";
+import NewAstrologerDetailsCard from "../../cards/newAstrologerCard/NewAstrologerDetailsCard";
 import styles from "./recommendModal.module.scss";
 import { IoClose } from "react-icons/io5";
 import { useEffect, useRef, useState } from "react";
@@ -282,7 +282,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 
-        navigate(`/chat-with-astrologers/${astrologerId}`, {
+        navigate(`/chat-to-astrologer/${astrologerId}`, {
           state: {
             userId: userId,
             astrologerId,
@@ -460,11 +460,10 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
                   //   onAudioCall={() => handleConnectClick(astro)}
                   //   onVideoCall={() => handleConnectClick(astro)}
                   // />
-                  <NewAstrologerCard
+                  <NewAstrologerDetailsCard
                     key={astro._id}
                     astrologer={astro}
                     onConnect={onConnect}
-                    className={styles.card}
                   />
                 ))}
               </div>

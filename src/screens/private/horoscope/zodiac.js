@@ -66,7 +66,7 @@ export const zodiac = () => {
         signImg: ariesImg,
         bannerImg:
           "https://images.astroyogi.com/strapicmsprod/assets/Traits_ee14f625a9.webp",
-        link: "/horoscopes/daily/aries-free-horoscope.aspx",
+        link: "/horoscope/daily/aries-free-horoscope.aspx",
         overview:
           "Fiery Mars-ruled Aries, your pioneering spirit ignites transformation today. As the first sign of the zodiac, you naturally lead with courage and determination. Your cardinal fire energy seeks new beginnings and bold adventures in all endeavors.",
         lucky_color: "violet",
@@ -81,7 +81,7 @@ export const zodiac = () => {
         signImg: taurusImg,
         bannerImg:
           "https://images.astroyogi.com/strapicmsprod/assets/Seasons_b0619d2142.webp",
-        link: "/horoscopes/daily/taurus-free-horoscope.aspx",
+        link: "/horoscope/daily/taurus-free-horoscope.aspx",
         overview:
           "Grounded Taurus, ruled by Venus, embodies earthly stability and sensual appreciation. Your fixed earth nature seeks comfort, beauty, and lasting value in all endeavors, making you a reliable foundation for others.",
         lucky_color: "rust-brown",
@@ -95,7 +95,7 @@ export const zodiac = () => {
         img: Gemini,
         signImg: geminiImg,
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/gemini-free-horoscope.aspx",
+        link: "/horoscope/daily/gemini-free-horoscope.aspx",
         overview:
           "Gemini, ruled by Mercury, your dual nature thrives on intellectual stimulation and social connection. As an air sign, you naturally adapt to changing circumstances while maintaining your curious, communicative essence that bridges different worlds and perspectives.",
         lucky_color: "white",
@@ -109,7 +109,7 @@ export const zodiac = () => {
         img: Cancer,
         signImg: cancerImg,
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/cancer-free-horoscope.aspx",
+        link: "/horoscope/daily/cancer-free-horoscope.aspx",
         overview:
           "Cancer, the nurturing water sign ruled by the Moon, embodies emotional depth and protective instincts. Your intuitive nature and caring heart guide you through life's rhythms with sensitivity and wisdom.",
         lucky_color: "rust-brown",
@@ -123,7 +123,7 @@ export const zodiac = () => {
         img: Leo,
         signImg: leoImg,
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/leo-free-horoscope.aspx",
+        link: "/horoscope/daily/leo-free-horoscope.aspx",
         overview:
           "Bold Leo, ruled by the radiant Sun, your natural magnetism and creative fire illuminate every space you enter. Today's Tuesday energy, governed by Mars, amplifies your already powerful presence with dynamic action-oriented vibrations that demand leadership.",
         lucky_color: "red-orange",
@@ -137,7 +137,7 @@ export const zodiac = () => {
         img: Virgo,
         signImg: virgoImg,
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/virgo-free-horoscope.aspx",
+        link: "/horoscope/daily/virgo-free-horoscope.aspx",
         overview:
           "Virgo, ruled by Mercury, embodies analytical precision and practical wisdom. Your earth sign nature seeks perfection through methodical approaches and meticulous attention to detail. Today's Monday energy, guided by the Moon, invites you to blend your analytical mind with intuitive insights for optimal results.",
         lucky_color: "turmeric yellow",
@@ -151,7 +151,7 @@ export const zodiac = () => {
         img: Libra,
         signImg: libraImg,
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/libra-free-horoscope.aspx",
+        link: "/horoscope/daily/libra-free-horoscope.aspx",
         overview:
           "Libra, ruled by Venus and symbolized by the scales, you embody harmony, beauty, and diplomatic grace. Your air sign nature seeks balance in all relationships, while your aesthetic sensibility draws you toward elegance and fairness in every interaction.",
         lucky_color: "turmeric yellow",
@@ -165,7 +165,7 @@ export const zodiac = () => {
         img: Scorpio,
         signImg: scorpioImg,
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/scorpio-free-horoscope.aspx",
+        link: "/horoscope/daily/scorpio-free-horoscope.aspx",
         overview:
           "Scorpio, ruled by transformative Pluto and fierce Mars, embodies profound emotional depth and magnetic intensity. Your fixed water nature creates unshakeable determination while your investigative spirit uncovers hidden truths beneath surface appearances.",
         lucky_color: "white",
@@ -179,7 +179,7 @@ export const zodiac = () => {
         img: Sagittarius,
         signImg: sagittariusImg,
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/sagittarius-free-horoscope.aspx",
+        link: "/horoscope/daily/sagittarius-free-horoscope.aspx",
         overview:
           "As the archer of the zodiac, Sagittarius embodies boundless curiosity and philosophical wisdom. Ruled by expansive Jupiter, your fire sign nature seeks truth, adventure, and higher learning. Your optimistic spirit and love for freedom define your cosmic journey through life's grand adventures.",
         lucky_color: "dark-purple",
@@ -193,7 +193,7 @@ export const zodiac = () => {
         img: Capricorn,
         signImg: capricornImg,
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/capricorn-free-horoscope.aspx",
+        link: "/horoscope/daily/capricorn-free-horoscope.aspx",
         overview:
           "Capricorn, ruled by disciplined Saturn, your earth element brings methodical strength and unwavering determination. Today's Tuesday Mars energy amplifies your natural leadership abilities, creating perfect conditions for ambitious pursuits and structured progress toward your mountain-top goals.",
         lucky_color: "green",
@@ -207,7 +207,7 @@ export const zodiac = () => {
         img: Aquarius,
         signImg: aquariusImg,
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/aquarius-free-horoscope.aspx",
+        link: "/horoscope/daily/aquarius-free-horoscope.aspx",
         overview:
           "Aquarius, the water bearer ruled by progressive Uranus, emerges as Tuesday's Martian energy amplifies your revolutionary spirit. Your fixed air nature harmonizes with November's transformative currents, igniting breakthroughs in humanitarian pursuits and technological frontiers.",
         lucky_color: "blood-red",
@@ -221,7 +221,7 @@ export const zodiac = () => {
         img: Pisces,
         signImg: piscesImg,
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/pisces-free-horoscope.aspx",
+        link: "/horoscope/daily/pisces-free-horoscope.aspx",
         overview:
           "As a water sign ruled by Neptune, Pisces flows with intuitive wisdom and boundless compassion. Your dreamy nature and psychic sensitivity allow you to navigate life's currents with remarkable emotional intelligence and creative vision.",
         lucky_color: "pale-red",
@@ -236,7 +236,7 @@ export const zodiac = () => {
     "A horoscope is an astrological chart created based on the positions of the Sun, Moon, and other celestial bodies at the time of a person's birth. It provides insights into an individual's personality, likes, dislikes, thoughts, love life, career, health, and more. Horoscopes offer a glimpse into future events and can be used to make informed decisions.Horoscopic traditions are primarily associated with the Western Zodiac. Vedic Astrology, on the other hand, uses a different system with the Kundali (birth chart). While some debate the scientific validity of horoscopes, their accuracy in reflecting individual traits continues to intrigue many.";
 
   const onClickSign = (data) => {
-    navigate(`/horoscopes/daily/${data.name}-free-horoscope`, {
+    navigate(`/horoscope/daily/${data.name}-free-horoscope`, {
       state: { data },
     });
   };

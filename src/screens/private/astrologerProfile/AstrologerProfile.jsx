@@ -514,7 +514,7 @@ const AstrologerProfile = () => {
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 
-        navigate(`/chat-with-astrologers/${astrologerId}`, {
+        navigate(`/chat-to-astrologer/${astrologerId}`, {
           state: {
             userId: userId,
             astrologerId,
@@ -1045,6 +1045,9 @@ const AstrologerProfile = () => {
                             ₹{astrologer?.price?.chatRate?.amount || 0}
                           </span>
                           /min
+                          {astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice && (
+                            <span className={styles.originalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}/min</span>
+                          )}
                         </p>
                       </div>
                     )}
@@ -1063,6 +1066,9 @@ const AstrologerProfile = () => {
                             ₹{astrologer?.price?.audioRate?.amount || 0}
                           </span>
                           /min
+                          {astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice && (
+                            <span className={styles.originalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}/min</span>
+                          )}
                         </p>
                       </div>
                     )}
@@ -1586,6 +1592,9 @@ const AstrologerProfile = () => {
                     <span className={styles.optionLabel}>Chat</span>
                     <span className={styles.optionPrice}>
                       ₹{data?.price?.chatRate?.amount || 0}/ min
+                      {data?.price?.chatRate?.isDiscountActive && data?.price?.chatRate?.beforeDiscountPrice && (
+                        <span className={styles.originalPrice}>₹{data?.price?.chatRate?.beforeDiscountPrice}/ min</span>
+                      )}
                     </span>
                   </div>
                 </div>
@@ -1606,6 +1615,9 @@ const AstrologerProfile = () => {
                     <span className={styles.optionLabel}>Audio Call</span>
                     <span className={styles.optionPrice}>
                       ₹{data?.price?.audioRate?.amount || 0}/ min
+                      {data?.price?.audioRate?.isDiscountActive && data?.price?.audioRate?.beforeDiscountPrice && (
+                        <span className={styles.originalPrice}>₹{data?.price?.audioRate?.beforeDiscountPrice}/ min</span>
+                      )}
                     </span>
                   </div>
                 </div>
@@ -1626,6 +1638,9 @@ const AstrologerProfile = () => {
                     <span className={styles.optionLabel}>Video Call</span>
                     <span className={styles.optionPrice}>
                       ₹{data?.price?.videoCallRate?.amount || 0}/ min
+                      {data?.price?.videoCallRate?.isDiscountActive && data?.price?.videoCallRate?.beforeDiscountPrice && (
+                        <span className={styles.originalPrice}>₹{data?.price?.videoCallRate?.beforeDiscountPrice}/ min</span>
+                      )}
                     </span>
                   </div>
                 </div>
@@ -1704,6 +1719,9 @@ const AstrologerProfile = () => {
                 <span className={styles.btnLabel}>Chat</span>
                 <span className={styles.btnPrice}>
                   ₹{data?.price?.chatRate?.amount || 0}/min
+                  {data?.price?.chatRate?.isDiscountActive && data?.price?.chatRate?.beforeDiscountPrice && (
+                    <span className={styles.originalPrice}>₹{data?.price?.chatRate?.beforeDiscountPrice}/min</span>
+                  )}
                 </span>
               </div>
             </button>
@@ -1717,6 +1735,9 @@ const AstrologerProfile = () => {
                 <span className={styles.btnLabel}>Call</span>
                 <span className={styles.btnPrice}>
                   ₹{data?.price?.audioRate?.amount || 0}/min
+                  {data?.price?.audioRate?.isDiscountActive && data?.price?.audioRate?.beforeDiscountPrice && (
+                    <span className={styles.originalPrice}>₹{data?.price?.audioRate?.beforeDiscountPrice}/min</span>
+                  )}
                 </span>
               </div>
             </button>

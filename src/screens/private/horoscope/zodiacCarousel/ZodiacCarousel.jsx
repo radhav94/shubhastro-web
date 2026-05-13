@@ -77,7 +77,7 @@ const ZodiacCarousel = () => {
           {signs.map((sign) => (
             <div key={sign.id} className={styles.card}>
               <Link
-                to={`/horoscopes/daily-horoscope/${sign.name.toLowerCase()}`}
+                to={`/daily-horoscope/${sign.name.toLowerCase()}`}
                 className={styles.imgCircle}
               >
                 <img src={zodiacSignImages[sign.name.toLowerCase()] || sign.img || DefaultImages?.AriesDefault} alt={sign.name} />

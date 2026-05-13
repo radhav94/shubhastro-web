@@ -70,7 +70,7 @@ const SignatureLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/aiwow/signature/instructions')}
+          onClick={() => navigate('/signature-analysis/instructions')}
         >
           Proceed Ahead
         </button>

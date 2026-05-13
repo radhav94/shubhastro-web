@@ -23,7 +23,7 @@ const StickyChatFooter = () => {
   const { hasAnyPending } = useWaitingQueue();
   const navigate = useNavigate();
 
-  const onTalkDetailPage = useMatch("/chat-with-astrologers/:id");
+  const onTalkDetailPage = useMatch("/chat-to-astrologer/:id");
 
   useEffect(() => {
     if (!chatApproval) return;
@@ -74,7 +74,7 @@ const StickyChatFooter = () => {
             </div>
             <button
               onClick={() =>
-                navigate(`/chat-with-astrologers/${activeChat.astrologerId}`, {
+                navigate(`/chat-to-astrologer/${activeChat.astrologerId}`, {
                   state: {
                     userId: activeChat.userId,
                     astrologerId: activeChat.astrologerId,

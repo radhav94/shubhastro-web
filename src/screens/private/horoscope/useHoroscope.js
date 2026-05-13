@@ -20,7 +20,7 @@ export const useHoroscope = () => {
         img: "https://images.astroyogi.com/strapicmsprod/assets/ARIES_04bdeca59e.svg",
         bannerImg:
           "https://images.astroyogi.com/strapicmsprod/assets/Traits_ee14f625a9.webp",
-        link: "/horoscopes/daily/aries-free-horoscope.aspx",
+        link: "/horoscope/daily/aries-free-horoscope.aspx",
         description:
           "Aries are energetic, courageous, and ambitious leaders who love new challenges.",
       },
@@ -31,7 +31,7 @@ export const useHoroscope = () => {
         img: "https://images.astroyogi.com/strapicmsprod/assets/TAURUS_198b4c97e9.svg",
         bannerImg:
           "https://images.astroyogi.com/strapicmsprod/assets/Seasons_b0619d2142.webp",
-        link: "/horoscopes/daily/taurus-free-horoscope.aspx",
+        link: "/horoscope/daily/taurus-free-horoscope.aspx",
         description:
           "Taurus is patient, reliable, and loves beauty and comfort, valuing stability above all.",
       },
@@ -41,7 +41,7 @@ export const useHoroscope = () => {
         date: "21/5-20/6",
         img: "https://images.astroyogi.com/strapicmsprod/assets/GEMINI_9d35540bb9.svg",
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/gemini-free-horoscope.aspx",
+        link: "/horoscope/daily/gemini-free-horoscope.aspx",
         description:
           "Gemini are adaptable, curious, and expressive communicators who thrive on variety.",
       },
@@ -51,7 +51,7 @@ export const useHoroscope = () => {
         date: "21/6-22/7",
         img: "https://images.astroyogi.com/strapicmsprod/assets/CANCER_364708b894.svg",
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/cancer-free-horoscope.aspx",
+        link: "/horoscope/daily/cancer-free-horoscope.aspx",
         description:
           "Cancer is nurturing, intuitive, and deeply emotional, valuing home and family.",
       },
@@ -61,7 +61,7 @@ export const useHoroscope = () => {
         date: "23/7-22/8",
         img: "https://images.astroyogi.com/strapicmsprod/assets/LEO_593adbf0e7.svg",
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/leo-free-horoscope.aspx",
+        link: "/horoscope/daily/leo-free-horoscope.aspx",
         description:
           "Leo is confident, charismatic, and loves to be in the spotlight, leading with pride.",
       },
@@ -71,7 +71,7 @@ export const useHoroscope = () => {
         date: "23/8-22/9",
         img: "https://images.astroyogi.com/strapicmsprod/assets/VIRGO_fb766f0d08.svg",
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/virgo-free-horoscope.aspx",
+        link: "/horoscope/daily/virgo-free-horoscope.aspx",
         description:
           "Virgo is analytical, practical, and detail-oriented, with a deep love for service.",
       },
@@ -81,7 +81,7 @@ export const useHoroscope = () => {
         date: "23/9-22/10",
         img: "https://images.astroyogi.com/strapicmsprod/assets/LIBRA_c60a49cefb.svg",
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/libra-free-horoscope.aspx",
+        link: "/horoscope/daily/libra-free-horoscope.aspx",
         description:
           "Libra is charming, balanced, and values harmony and fairness in all relationships.",
       },
@@ -91,7 +91,7 @@ export const useHoroscope = () => {
         date: "23/10-21/11",
         img: "https://images.astroyogi.com/strapicmsprod/assets/SCORPIO_e6bde48051.svg",
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/scorpio-free-horoscope.aspx",
+        link: "/horoscope/daily/scorpio-free-horoscope.aspx",
         description:
           "Scorpio is passionate, intense, and deeply intuitive, often driven by transformation.",
       },
@@ -101,7 +101,7 @@ export const useHoroscope = () => {
         date: "22/11-21/12",
         img: "https://images.astroyogi.com/strapicmsprod/assets/SAGITTARIUS_e0ed1cd1fd.svg",
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/sagittarius-free-horoscope.aspx",
+        link: "/horoscope/daily/sagittarius-free-horoscope.aspx",
         description:
           "Sagittarius is adventurous, optimistic, and loves freedom, always seeking knowledge.",
       },
@@ -111,7 +111,7 @@ export const useHoroscope = () => {
         date: "22/12-19/1",
         img: "https://images.astroyogi.com/strapicmsprod/assets/CAPRICORN_ab2706bf23.svg",
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/capricorn-free-horoscope.aspx",
+        link: "/horoscope/daily/capricorn-free-horoscope.aspx",
         description:
           "Capricorn is disciplined, ambitious, and practical, with a strong sense of responsibility.",
       },
@@ -121,7 +121,7 @@ export const useHoroscope = () => {
         date: "20/1-18/2",
         img: "https://images.astroyogi.com/strapicmsprod/assets/AQUARIUS_4ad6eab3c3.svg",
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/aquarius-free-horoscope.aspx",
+        link: "/horoscope/daily/aquarius-free-horoscope.aspx",
         description:
           "Aquarius is innovative, independent, and humanitarian, always thinking of the future.",
       },
@@ -131,7 +131,7 @@ export const useHoroscope = () => {
         date: "19/2-20/3",
         img: "https://images.astroyogi.com/strapicmsprod/assets/PISCES_4991a00d62.svg",
         bannerImg: defaultImg,
-        link: "/horoscopes/daily/pisces-free-horoscope.aspx",
+        link: "/horoscope/daily/pisces-free-horoscope.aspx",
         description:
           "Pisces is empathetic, dreamy, and intuitive, guided strongly by emotions and imagination.",
       },
@@ -143,7 +143,7 @@ export const useHoroscope = () => {
     "A horoscope is an astrological chart created based on the positions of the Sun, Moon, and other celestial bodies at the time of a person's birth. It provides insights into an individual's personality, likes, dislikes, thoughts, love life, career, health, and more. Horoscopes offer a glimpse into future events and can be used to make informed decisions.Horoscopic traditions are primarily associated with the Western Zodiac. Vedic Astrology, on the other hand, uses a different system with the Kundali (birth chart). While some debate the scientific validity of horoscopes, their accuracy in reflecting individual traits continues to intrigue many.";
 
   const onClickSign = (data) => {
-    navigate(`/horoscopes/daily/${data.name}-free-horoscope`, {
+    navigate(`/horoscope/daily/${data.name}-free-horoscope`, {
       state: { data },
     });
   };

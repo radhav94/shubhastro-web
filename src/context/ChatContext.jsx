@@ -441,7 +441,7 @@ export const ChatProvider = ({ children }) => {
       // Skip Pandit AI messages — handled inline by PanditAIBubble
       if (isPanditAIEvent(data)) return;
 
-      const isOnChatPage = window.location.pathname.includes("/chat-with-astrologers");
+      const isOnChatPage = window.location.pathname.includes("/chat-to-astrologer");
       const isOnLivePage = window.location.pathname.startsWith("/live");
 
       // Don't show if user is already on the chat page
@@ -466,7 +466,7 @@ export const ChatProvider = ({ children }) => {
             }
             const astroId = data.astrologerId || activeChatRef.current?.astrologerId;
             if (astroId) {
-              window.location.href = `/chat-with-astrologers/${astroId}`;
+              window.location.href = `/chat-to-astrologer/${astroId}`;
             }
           }}
         />

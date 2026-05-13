@@ -65,7 +65,7 @@ const LalKitab = () => {
       const tevaData = result?.data || result;
       const lalKitabId = tevaData?._id;
       if (lalKitabId) {
-        navigate(`/lal-kitab/${lalKitabId}`, { state: { tevaData } });
+        navigate(`/laal-kitab/${lalKitabId}`, { state: { tevaData } });
       } else {
         Toast.error("Failed to generate Lal Kitab");
       }

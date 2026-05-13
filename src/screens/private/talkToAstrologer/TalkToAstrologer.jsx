@@ -74,7 +74,7 @@ const TalkToAstrologer = () => {
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
 
   const location = useLocation(); //  get current URL
-  // const isChatMode = location.pathname === "/chat-with-astrologers";
+  // const isChatMode = location.pathname === "/chat-to-astrologer";
   const currentPath = location.pathname.split("/").pop();
 
   const showCTA = useRecommendTrigger(120, resetTrigger);
@@ -881,7 +881,7 @@ const TalkToAstrologer = () => {
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 
-        navigate(`/chat-with-astrologers/${astrologerId}`, {
+        navigate(`/chat-to-astrologer/${astrologerId}`, {
           state: {
             userId: userId,
             astrologerId,

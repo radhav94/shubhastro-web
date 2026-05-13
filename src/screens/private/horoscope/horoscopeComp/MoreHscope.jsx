@@ -7,31 +7,31 @@ const MoreHscope = () => {
   const horoscopes = [
     {
       title: "Career Horoscope",
-      href: "/horoscopes/career",
+      href: "/horoscope/career",
       imgSrc:
         "https://images.astroyogi.com/strapicmsprod/assets/Career_Horoscope_75a4a5bd9d.svg",
     },
     {
       title: "Love Horoscope",
-      href: "/horoscopes/love",
+      href: "/horoscope/love",
       imgSrc:
         "https://images.astroyogi.com/strapicmsprod/assets/Love_Horoscope_bacfa32d03.svg",
     },
     {
       title: "Finance Horoscope",
-      href: "/horoscopes/finance",
+      href: "/horoscope/finance",
       imgSrc:
         "https://images.astroyogi.com/strapicmsprod/assets/Finance_Horoscope_bcc6c0bb67.svg",
     },
     {
       title: "Health Horoscope",
-      href: "/horoscopes/health",
+      href: "/horoscope/health",
       imgSrc:
         "https://images.astroyogi.com/strapicmsprod/assets/Health_Horoscope_7707e9f6d3.svg",
     },
     {
       title: "Horoscope",
-      href: "/horoscopes",
+      href: "/horoscope",
       imgSrc:
         "https://images.astroyogi.com/strapicmsprod/assets/Daily_Horoscope_3c3af383a0.svg",
     },
@@ -77,25 +77,25 @@ export const HoroTimmingList = () => {
   const data = [
     {
       title: "Yesterday",
-      href: "/horoscopes/yesterday",
+      href: "/horoscope/yesterday",
       imgSrc:
         "https://images.astroyogi.com/strapicmsprod/assets/Yesterday_38809916c3.svg",
     },
     {
       title: "Tomorrow",
-      href: "/horoscopes/tomorrow",
+      href: "/horoscope/tomorrow",
       imgSrc:
         "https://images.astroyogi.com/strapicmsprod/assets/Tomorrow_5179efbcfe.svg",
     },
     {
       title: "Weekly",
-      href: "/horoscopes/weekly",
+      href: "/horoscope/weekly",
       imgSrc:
         "https://images.astroyogi.com/strapicmsprod/assets/Weekly_d6934c5c5f.svg",
     },
     {
       title: "Monthly",
-      href: "/horoscopes/monthly",
+      href: "/horoscope/monthly",
       imgSrc:
         "https://images.astroyogi.com/strapicmsprod/assets/Monthly_00cc39523b.svg",
     },

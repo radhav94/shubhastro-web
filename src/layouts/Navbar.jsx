@@ -10,7 +10,7 @@ const Navbar = () => {
     {
       title: "Horoscope",
       children: [
-        { title: "Daily Horoscope", path: "/horoscopes/daily-horoscope" },
+        { title: "Daily Horoscope", path: "/daily-horoscope" },
         {
           title: "Monthly Horoscope",
           path: PATH.privateRoutes.HOROSCOPE.MONTHLY.path,

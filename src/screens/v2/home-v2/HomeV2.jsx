@@ -49,11 +49,38 @@ import avatar5 from "../../../assets/images/community-avatar-5.png";
 import liveCommunityBg from "../../../assets/images/live-community-bg.png";
 import sectionBg from "../../../assets/images/section-bg.png";
 
+// Muhurat icons
+import abhijitIcon from "../../../assets/images/Abhijit-Muhurat 1.png";
+import rahuKaalIcon from "../../../assets/images/Crucial Muhurats.png";
+import gulikaIcon from "../../../assets/images/Gulika-icon 1.png";
+import yamakantaIcon from "../../../assets/images/Crucial Muhurats (1).png";
+
 const HomeV2 = () => {
   const requireAuth = useRequireAuth();
   const navigate = useNavigate();
   const user = getUserFromStorage();
-  const name = user?.firstName || "Guest";
+  const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
+  const name = selectedKundli?.name?.split(" ")[0] || user?.firstName || "Guest";
+
+  // Random online count: random 100-500, increments by 30-50 each refresh, resets when exceeds 500
+  const [onlineCount] = useState(() => {
+    const stored = sessionStorage.getItem("liveCommunityCount");
+    if (stored) {
+      const increment = Math.floor(Math.random() * 21) + 30; // +30 to +50
+      const newCount = Number(stored) + increment;
+      if (newCount > 500) {
+        // Reset to a new random number between 100-500
+        const reset = Math.floor(Math.random() * 401) + 100;
+        sessionStorage.setItem("liveCommunityCount", reset);
+        return reset;
+      }
+      sessionStorage.setItem("liveCommunityCount", newCount);
+      return newCount;
+    }
+    const initial = Math.floor(Math.random() * 401) + 100;
+    sessionStorage.setItem("liveCommunityCount", initial);
+    return initial;
+  });
 
   // Add body class for footer text override on this page only
   useEffect(() => {
@@ -100,7 +127,16 @@ const HomeV2 = () => {
     if (item.slug === "ar-vastu-scanner") {
       setShowMobileAppModal(true);
     } else {
-      navigate(`/aiwow/${item.slug}`);
+      const rootLevelSlugs = [
+        "ai-palmistry-scanner",
+        "astro-face-reading",
+        "signature-analysis",
+        "clothes-colour-analysis",
+        "gemstone-authenticity",
+        "aura-photography",
+      ];
+      const path = rootLevelSlugs.includes(item.slug) ? `/${item.slug}` : `/aiwow/${item.slug}`;
+      navigate(path);
     }
   };
 
@@ -148,7 +184,12 @@ const HomeV2 = () => {
       { name: "Gulika Kaal", start: "—", end: "—" },
       { name: "Yamakanta Kaal", start: "—", end: "—" },
     ];
-    const fmt = (t) => t?.trim() || "—";
+    const fmt = (t) => {
+      const val = t?.trim();
+      if (!val) return "—";
+      // Remove seconds as we are getting from API (e.g. "12:14:20 PM" → "12:14 PM")
+      return val.replace(/(\d{1,2}:\d{2}):\d{2}/, "$1");
+    };
     return [
       { name: "Abhijit Muhurat", start: fmt(panchangResponse?.advanced_details?.abhijit_muhurta?.start), end: fmt(panchangResponse?.advanced_details?.abhijit_muhurta?.end) },
       { name: "Rahu Kaal", start: fmt(panchangResponse?.rahukaal?.split("to")[0]), end: fmt(panchangResponse?.rahukaal?.split("to")[1]) },
@@ -266,7 +307,7 @@ const HomeV2 = () => {
           {complementaryServices.map((card, i) => {
             const slugPaths = {
               "free-kundli": "/kundli",
-              "talk-to-astrologer": "/chat-with-astrologers",
+              "talk-to-astrologer": "/chat-to-astrologer",
               "daily-horoscope": "/daily-horoscope",
             };
             const path = slugPaths[card.slug] || "/";
@@ -286,8 +327,8 @@ const HomeV2 = () => {
 
           {/* Laal Kitaab — special card at bottom of left col (desktop only) */}
           <div
-            className={`${styles.qCardLaal} ${styles.desktopOnly}`}
-            onClick={() => navigate('/lal-kitab')}
+            className={`${styles.qCardLaal}`}
+            onClick={() => navigate('/laal-kitab')}
           >
             <span className={styles.featureTag}>New</span>
             <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title || "Laal Kitaab"}</h3>
@@ -422,18 +463,12 @@ const HomeV2 = () => {
             <div className={styles.muhuratGrid}>
               {muhurats.map((m, i) => {
                 const iconBgs = ["#FEF0E4", "#F4ECFB", "#E9F2EF", "#EBF2FB"];
-                const iconColors = ["#F75801", "#9333ea", "#16a34a", "#2563eb"];
-                const icons = [
-                  <svg key="sun" width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill={iconColors[0]}/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke={iconColors[0]} strokeWidth="2" strokeLinecap="round"/></svg>,
-                  <svg key="moon" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill={iconColors[1]}/></svg>,
-                  <svg key="clock" width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke={iconColors[2]} strokeWidth="2"/><path d="M12 7v5l3 3" stroke={iconColors[2]} strokeWidth="2" strokeLinecap="round"/></svg>,
-                  <svg key="star" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill={iconColors[3]}/></svg>,
-                ];
+                const muhuratIcons = [abhijitIcon, rahuKaalIcon, gulikaIcon, yamakantaIcon];
                 return (
                   <div key={i} className={styles.muhuratItem}>
                     <div className={styles.muhuratTop}>
                       <div className={styles.muhuratIcon} style={{ background: iconBgs[i % 4] }}>
-                        {icons[i % 4]}
+                        <img src={muhuratIcons[i % 4]} alt={m.name} width="22" height="22" />
                       </div>
                       <h5>{m.name}</h5>
                     </div>
@@ -463,7 +498,7 @@ const HomeV2 = () => {
                 <img src={avatar4} alt="" className={`${styles.clusterAvatar} ${styles.ca4}`} />
                 <img src={avatar5} alt="" className={`${styles.clusterAvatar} ${styles.ca5}`} />
                 <div className={`${styles.clusterAvatar} ${styles.ca6} ${styles.clusterCount}`}>
-                  <span>+128</span>
+                  <span>+{onlineCount}</span>
                   <span>Online</span>
                 </div>
               </div>
@@ -530,7 +565,7 @@ const HomeV2 = () => {
               {[avatar1, avatar2, avatar3, avatar4].map((av, i) => (
                 <img key={i} src={av} alt="" className={styles.liveCommunityAvatarImg} />
               ))}
-              <span className={styles.liveCommunityCount}>+128<br/>Online</span>
+              <span className={styles.liveCommunityCount}>+{onlineCount}<br/>Online</span>
             </div>
           </div>
         </div>
@@ -560,21 +595,21 @@ const HomeV2 = () => {
               ...a,
               _navFn: () => {
                 const slug = (a.slug || a.title?.toLowerCase().replace(/\s+/g, '-') || '');
-                if (slug.includes('horoscope'))                                    return navigate('/horoscopes/daily-horoscope');
+                if (slug.includes('horoscope'))                                    return navigate('/daily-horoscope');
                 if (slug.includes('dasha'))                                        return navigate('/kundli?tab=dasha');
                 if (slug.includes('birth') || slug.includes('kundli'))             return navigate('/kundli');
                 if (slug.includes('session') || slug.includes('order'))            return navigate('/profile', { state: { activeTab: 'Order History' } });
-                if (slug.includes('talk') || slug.includes('consult') || slug.includes('astrologer') || slug.includes('top-rated')) return navigate('/chat-with-astrologers');
+                if (slug.includes('talk') || slug.includes('consult') || slug.includes('astrologer') || slug.includes('top-rated')) return navigate('/chat-to-astrologer');
                 if (a.redirect_url)                                                return navigate(a.redirect_url);
               }
             })) : [
-              { title: "Horoscope\nSection",    _navFn: () => navigate('/horoscopes/daily-horoscope'),                              icon: AppIcons.Astrology },
-              { title: "Consult\nAstrologer",   _navFn: () => navigate('/chat-with-astrologers'),                                   icon: AppIcons.Chat },
-              { title: "Future\nPredictions",   _navFn: () => navigate('/chat-with-astrologers'),                                   icon: AppIcons.Star },
+              { title: "Horoscope\nSection",    _navFn: () => navigate('/daily-horoscope'),                              icon: AppIcons.Astrology },
+              { title: "Consult\nAstrologer",   _navFn: () => navigate('/chat-to-astrologer'),                                   icon: AppIcons.Chat },
+              { title: "Future\nPredictions",   _navFn: () => navigate('/chat-to-astrologer'),                                   icon: AppIcons.Star },
               { title: "Dasha\nTimeline",       _navFn: () => navigate('/kundli?tab=dasha'),                                        icon: AppIcons.Kundali },
               { title: "Birth\nDetails",        _navFn: () => navigate('/kundli'),                                                  icon: AppIcons.Education },
-              { title: "Talk to\nAstrologer",   _navFn: () => navigate('/chat-with-astrologers'),                                   icon: AppIcons.Call },
-              { title: "Top Rated\nAstrologer", _navFn: () => navigate('/chat-with-astrologers'),                                   icon: AppIcons.Trophy },
+              { title: "Talk to\nAstrologer",   _navFn: () => navigate('/chat-to-astrologer'),                                   icon: AppIcons.Call },
+              { title: "Top Rated\nAstrologer", _navFn: () => navigate('/chat-to-astrologer'),                                   icon: AppIcons.Trophy },
               { title: "My\nSessions",          _navFn: () => navigate('/profile', { state: { activeTab: 'Order History' } }),      icon: AppIcons.Message },
             ]).map((a, i) => {
               const iconBgs = [
@@ -625,7 +660,7 @@ const HomeV2 = () => {
           <div className={styles.sectionTitleBlock}>
             <h2 className={styles.sectionTitle}>{astrologerSection?.display_title || "TOP RATED ASTROLOGERS FOR YOU"}</h2>
           </div>
-          <button className={styles.viewAllBtn} style={{marginRight:"16px"}} onClick={() => navigate('/chat-with-astrologers')}>View all →</button>
+          <button className={styles.viewAllBtn} style={{marginRight:"16px"}} onClick={() => navigate('/chat-to-astrologer')}>View all →</button>
         </div>
         <AstrologersSection
           title=""
@@ -659,7 +694,7 @@ const HomeV2 = () => {
             ]).map((c, i) => {
               const catColors = ["#FFF"];
               return (
-                <div key={i} className={styles.catItem} onClick={() => navigate('/chat-with-astrologers', { state: { selectedType: c.slug } })} style={{ cursor: 'pointer' }}>
+                <div key={i} className={styles.catItem} onClick={() => navigate('/chat-to-astrologer', { state: { selectedType: c.slug } })} style={{ cursor: 'pointer' }}>
                   <div
                     className={styles.catIconBox}
                     style={{
@@ -695,7 +730,7 @@ const HomeV2 = () => {
               { title: "Vedic Kundli",    slug: "vedic-kundli",   redirect_url: "/kundli" },
               { title: "Numerology",      slug: "numerology",     redirect_url: "/numerology" },
               { title: "Tarot",           slug: "tarot",          redirect_url: "/tarot" },
-              { title: "Match-making",    slug: "matchmaking",    redirect_url: "/matchmaking" },
+              { title: "Match-making",    slug: "matchmaking",    redirect_url: "/match-making" },
             ]).map((item, i) => {
               const discoverBgs = ["#FFE4E4","#FFF3E4","#E4EEFF","#F0E4FF"];
               // Slug-based route map for API items
@@ -705,9 +740,9 @@ const HomeV2 = () => {
                 "numerology": "/numerology",
                 "tarot": "/tarot",
                 "tarot-reading": "/tarot",
-                "matchmaking": "/matchmaking",
-                "match-making": "/matchmaking",
-                "kundli-matching": "/matchmaking",
+                "matchmaking": "/match-making",
+                "match-making": "/match-making",
+                "kundli-matching": "/match-making",
                 "panchang": "/panchang",
               };
               const route = item.redirect_url || slugRoutes[item.slug] || (item.slug ? `/${item.slug}` : null);
@@ -818,7 +853,7 @@ const HomeV2 = () => {
 
           {/* Right */}
           <div className={styles.ctaRight}>
-            <button className={styles.ctaBtnPrimary} onClick={() => navigate('/chat-with-astrologers')}>
+            <button className={styles.ctaBtnPrimary} onClick={() => navigate('/chat-to-astrologer')}>
               <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
                 <path d="M10.625 23.75H10C5 23.75 2.5 22.5 2.5 16.25V10C2.5 5 5 2.5 10 2.5H20C25 2.5 27.5 5 27.5 10V16.25C27.5 21.25 25 23.75 20 23.75H19.375C18.9875 23.75 18.6125 23.9375 18.375 24.25L16.5 26.75C15.675 27.85 14.325 27.85 13.5 26.75L11.625 24.25C11.425 23.975 10.9625 23.75 10.625 23.75Z" stroke="#FEFEFE" stroke-width="1.8" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M8.75 10H21.25" stroke="#FEFEFE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -826,7 +861,7 @@ const HomeV2 = () => {
               </svg>
               {connectSection?.action_btn?.[0] || "Start Chat Consultation"}
             </button>
-            <button className={styles.ctaBtnSecondary} onClick={() => navigate('/chat-with-astrologers')}>
+            <button className={styles.ctaBtnSecondary} onClick={() => navigate('/chat-to-astrologer')}>
               <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
                 <path d="M27.4625 22.9125C27.4625 23.3625 27.3625 23.825 27.15 24.275C26.9375 24.725 26.6625 25.15 26.3 25.55C25.6875 26.225 25.0125 26.7125 24.25 27.025C23.5 27.3375 22.6875 27.5 21.8125 27.5C20.5375 27.5 19.175 27.2 17.7375 26.5875C16.3 25.975 14.8625 25.15 13.4375 24.1125C12 23.0625 10.6375 21.9 9.3375 20.6125C8.05 19.3125 6.8875 17.95 5.85 16.525C4.825 15.1 4 13.675 3.4 12.2625C2.8 10.8375 2.5 9.475 2.5 8.175C2.5 7.325 2.65 6.5125 2.95 5.7625C3.25 5 3.725 4.3 4.3875 3.675C5.1875 2.8875 6.0625 2.5 6.9875 2.5C7.3375 2.5 7.6875 2.575 8 2.725C8.325 2.875 8.6125 3.1 8.8375 3.425L11.7375 7.5125C11.9625 7.825 12.125 8.1125 12.2375 8.3875C12.35 8.65 12.4125 8.9125 12.4125 9.15C12.4125 9.45 12.325 9.75 12.15 10.0375C11.9875 10.325 11.75 10.625 11.45 10.925L10.5 11.9125C10.3625 12.05 10.3 12.2125 10.3 12.4125C10.3 12.5125 10.3125 12.6 10.3375 12.7C10.375 12.8 10.4125 12.875 10.4375 12.95C10.6625 13.3625 11.05 13.9 11.6 14.55C12.1625 15.2 12.7625 15.8625 13.4125 16.525C14.0875 17.1875 14.7375 17.8 15.4 18.3625C16.05 18.9125 16.5875 19.2875 17.0125 19.5125C17.075 19.5375 17.15 19.575 17.2375 19.6125C17.3375 19.65 17.4375 19.6625 17.55 19.6625C17.7625 19.6625 17.925 19.5875 18.0625 19.45L19.0125 18.5125C19.325 18.2 19.625 17.9625 19.9125 17.8125C20.2 17.6375 20.4875 17.55 20.8 17.55C21.0375 17.55 21.2875 17.6 21.5625 17.7125C21.8375 17.825 22.125 17.9875 22.4375 18.2L26.575 21.1375C26.9 21.3625 27.125 21.625 27.2625 21.9375C27.3875 22.25 27.4625 22.5625 27.4625 22.9125Z" stroke="url(#paint0_linear_12974_46590)" stroke-width="1.8" stroke-miterlimit="10"/>
                 <path d="M19.375 7.5H25.625" stroke="url(#paint1_linear_12974_46590)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>

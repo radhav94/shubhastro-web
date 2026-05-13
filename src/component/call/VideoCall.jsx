@@ -1061,7 +1061,7 @@ const VideoCalling = ({ callData }) => {
     }
 
     setIsMinimized(true);
-    navigate(`/chat-with-astrologers/${activeCall.astrologerId}`, {
+    navigate(`/chat-to-astrologer/${activeCall.astrologerId}`, {
       state: {
         userId: activeCall.userId,
         astrologerId: activeCall.astrologerId,
@@ -1190,7 +1190,7 @@ const VideoCalling = ({ callData }) => {
                   setHasNewRemedy(false);
                 } else {
                   setIsMinimized(true);
-                  navigate(`/chat-with-astrologers/${chatNotification.astrologerId}`, {
+                  navigate(`/chat-to-astrologer/${chatNotification.astrologerId}`, {
                     state: {
                       userId: activeCall?.userId,
                       astrologerId: activeCall?.astrologerId,
