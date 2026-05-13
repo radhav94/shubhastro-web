@@ -320,6 +320,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  position: relative;
   z-index: 1;
 }
 
@@ -374,6 +375,11 @@
 .heroContent {
   flex: 1;
   z-index: 2;
+  max-width: 55%;
+
+  @media (max-width: 767px) {
+    max-width: 60%;
+  }
 }
 
 .greeting {
@@ -382,7 +388,7 @@
 }
 
 .heroBanner h1 {
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 600;
   color: #1f2937;
   margin: 0 0 8px;
@@ -1735,7 +1741,7 @@
   height: 32px;
   border-radius: 17.78px;
   border: 1px solid #FFFFFF;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.6) 100%);
+  background: rgba(255, 255, 255, 0.9);
   color: #f75801;
   font-size: 18px;
   font-weight: 600;
@@ -1747,9 +1753,12 @@
   padding: 7.11px;
   gap: 8.89px;
   transition: all 0.15s;
+  z-index: 2;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 1);
   }
 
   &:disabled {
@@ -1769,6 +1778,8 @@
   flex: 1;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+  mask-image: linear-gradient(to right, transparent 0px, black 12px, black calc(100% - 12px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0px, black 12px, black calc(100% - 12px), transparent 100%);
 
   &::-webkit-scrollbar {
     display: none;
@@ -1824,11 +1835,15 @@
 }
 
 .quickDots {
-  display: flex;
+  display: none;
   justify-content: center;
   gap: 6px;
   margin-top: 14px;
   align-items: center;
+
+  @media (width <= 768px) {
+    display: flex;
+  }
 }
 
 .quickDotFilled {
@@ -3366,7 +3381,7 @@
   }
 
   .heroBanner h1 {
-    font-size: 18px;
+    font-size: 15px;
     width: 70%;
   }
 
@@ -3437,7 +3452,7 @@
 
 @media (max-width: 480px) {
   .heroBanner h1 {
-    font-size: 18px;
+    font-size: 15px;
   }
 
   // .wowCard { min-height: 140px; }
@@ -3456,6 +3471,16 @@
   .heroBanner h1 {
     font-size: 26px;
     // font-weight: 600;
+  }
+
+  .heroContent {
+    max-width: 60%;
+  }
+
+  .heroBgImg {
+    width: 180px;
+    right: -20px;
+    top: 0;
   }
 
   .centerCard {
@@ -3483,12 +3508,14 @@
 
 @media (max-width: 480px) {
   .heroBanner h1 {
-    font-size: 22px;
+    font-size: 15px;
   }
 
   // .heroDesc { font-size: 13px; }
   .heroBgImg {
     width: 208px;
+    right: -30px;
+    top: 0;
   }
 
   // .wowCard { flex: 0 0 44vw; }

@@ -217,7 +217,23 @@ const HomeV2 = () => {
     return homeList?.find(s => s.slug === "quick-link-section")?.content || [];
   }, [homeList]);
 
-  // Extract complementary services (left cards)
+  // Quick link carousel dot tracking
+  const [quickDotIndex, setQuickDotIndex] = useState(0);
+  useEffect(() => {
+    const el = document.getElementById('quickGridRow');
+    if (!el) return;
+    const handleScroll = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = el;
+      const maxScroll = scrollWidth - clientWidth;
+      if (maxScroll <= 0) { setQuickDotIndex(0); return; }
+      const ratio = scrollLeft / maxScroll;
+      const dotCount = 5;
+      const idx = Math.min(Math.round(ratio * (dotCount - 1)), dotCount - 1);
+      setQuickDotIndex(idx);
+    };
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [quickLinkItems]);  // Extract complementary services (left cards)
   const complementaryServices = useMemo(() => {
     const apiData = homeList?.find(s => s.slug === "complementary-services")?.content;
     if (apiData?.length > 0) return apiData;
@@ -626,7 +642,19 @@ const HomeV2 = () => {
         {/* Dots */}
         <div className={styles.quickDots}>
           {[0,1,2,3,4].map((_, i) => (
-            <span key={i} className={i === 0 ? styles.quickDotFilled : styles.quickDotEmpty} />
+            <span
+              key={i}
+              className={i === quickDotIndex ? styles.quickDotFilled : styles.quickDotEmpty}
+              onClick={() => {
+                const el = document.getElementById('quickGridRow');
+                if (!el) return;
+                const maxScroll = el.scrollWidth - el.clientWidth;
+                const targetScroll = (i / 4) * maxScroll;
+                el.scrollTo({ left: targetScroll, behavior: 'smooth' });
+                setQuickDotIndex(i);
+              }}
+              style={{ cursor: 'pointer' }}
+            />
           ))}
         </div>
       </section>

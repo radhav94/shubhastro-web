@@ -37,6 +37,7 @@ const DestinyReport = () => {
       <div className={styles.actions}>
         <button
           className={styles.shareBtn}
+          style={{ display: 'none' }}
           onClick={() => navigator.share?.({ title: "Destiny Number Report", text: destiny.meaning })}
         >
           Share Report

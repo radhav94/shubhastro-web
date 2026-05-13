@@ -13,6 +13,13 @@ const LoveMatchForm = ({
 
   return (
     <form className={styles.loveForm} onSubmit={onSubmit}>
+      {onReset && (
+        <div className={styles.resetRow}>
+          <button type="button" className={styles.resetTopBtn} onClick={onReset}>
+            Reset
+          </button>
+        </div>
+      )}
       {title && <h3 className={styles.formTitle}>{title}</h3>}
 
       <div className={styles.grid}>
@@ -87,11 +94,6 @@ const LoveMatchForm = ({
       </div>
 
       <div className={styles.btnRow}>
-        {onReset && (
-          <button type="button" className={styles.resetBtn} onClick={onReset}>
-            Cancel
-          </button>
-        )}
         <button type="submit" className={styles.submitBtn}>
           {submitText}
         </button>
