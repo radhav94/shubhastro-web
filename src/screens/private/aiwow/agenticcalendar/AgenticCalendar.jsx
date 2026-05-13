@@ -50,6 +50,7 @@ const AgenticCalendar = () => {
 
   const [navStateConsumed, setNavStateConsumed] = useState(false);
   const [autoSubmitPending, setAutoSubmitPending] = useState(false);
+  const pendingOccasionsRef = useRef(null);
 
   // Initialize from navigation state (once only)
   useEffect(() => {
@@ -58,6 +59,7 @@ const AgenticCalendar = () => {
       const customs = navState.occasions.filter((o) => !defaultSet.has(o));
       if (customs.length) setCustomOccasions(customs);
       setSelectedOccasions(navState.occasions);
+      pendingOccasionsRef.current = navState.occasions;
       setAutoSubmitPending(true);
     }
     if (navState.period) setSelectedPeriod(navState.period);
@@ -76,7 +78,8 @@ const AgenticCalendar = () => {
       // Clear nav state so a page refresh won't re-trigger auto-submit
       navigate(location.pathname, { replace: true, state: {} });
       setNavStateConsumed(true);
-      handleGetTimings();
+      handleGetTimings(pendingOccasionsRef.current);
+      pendingOccasionsRef.current = null;
     }
   }, [autoSubmitPending, profileLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -118,8 +121,9 @@ const AgenticCalendar = () => {
     }
   };
 
-  const handleGetTimings = async () => {
-    if (selectedOccasions.length === 0) {
+  const handleGetTimings = async (occasionsOverride) => {
+    const occasions = occasionsOverride || selectedOccasions;
+    if (occasions.length === 0) {
       Toast.error('Please select at least one occasion');
       return;
     }
@@ -168,14 +172,14 @@ const AgenticCalendar = () => {
         toDate = fromDate;
       }
 
-      const result = await analyzeCalendarEvents(selectedOccasions, {
+      const result = await analyzeCalendarEvents(occasions, {
         fromDate,
         toDate,
         kundliId: profile?._id,
       });
       if (result.success) {
         setAnalysis(result.data);
-        setExpandedOccasion(selectedOccasions[0]);
+        setExpandedOccasion(occasions[0]);
         setTimeout(() => {
           resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);

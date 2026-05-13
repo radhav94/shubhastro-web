@@ -7,6 +7,20 @@ import zodiacWheel from "../../../assets/images/404-zodiac-wheel.png";
 const NotFound = () => {
   const navigate = useNavigate();
 
+  const handleGoHome = () => {
+    // Use hard navigation to bypass corrupted router state (e.g. after Google Translate)
+    window.location.href = '/';
+  };
+
+  const handleGoBack = () => {
+    // If there's browser history, go back; otherwise hard-navigate to home
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      window.location.href = '/';
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.card}>

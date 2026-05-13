@@ -1,3 +1,34 @@
+/**
+ * Patch DOM methods to prevent Google Translate from crashing React.
+ * Google Translate wraps text nodes in <font> elements, which causes
+ * React's reconciliation to fail with "NotFoundError: Failed to execute
+ * 'removeChild'/'insertBefore'" when unmounting/updating components.
+ * This patch makes those operations gracefully handle missing nodes.
+ */
+if (typeof Node !== 'undefined') {
+  const originalRemoveChild = Node.prototype.removeChild;
+  Node.prototype.removeChild = function (child) {
+    if (child.parentNode !== this) {
+      if (console && console.warn) {
+        console.warn('Cannot remove child: node is not a child of this node (likely Google Translate interference)');
+      }
+      return child;
+    }
+    return originalRemoveChild.apply(this, arguments);
+  };
+
+  const originalInsertBefore = Node.prototype.insertBefore;
+  Node.prototype.insertBefore = function (newNode, referenceNode) {
+    if (referenceNode && referenceNode.parentNode !== this) {
+      if (console && console.warn) {
+        console.warn('Cannot insert before: reference node is not a child of this node (likely Google Translate interference)');
+      }
+      return newNode;
+    }
+    return originalInsertBefore.apply(this, arguments);
+  };
+}
+
 // import { StrictMode } from "react";
 // import { createRoot } from "react-dom/client";
 
