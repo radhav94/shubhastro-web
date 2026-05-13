@@ -369,7 +369,6 @@ export const useAstrologerConnect = () => {
         };
         console.log("[NormalFlow] 📤 Emitting call:initiate");
         console.log("[NormalFlow]   → payload:", JSON.stringify(payload));
-        debugger
         voiceSocket.emit("call:initiate", payload);
 
         // Add to waiting queue (roomId will be assigned when call:room arrives)
