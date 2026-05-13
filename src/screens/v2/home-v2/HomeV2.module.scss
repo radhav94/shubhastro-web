@@ -1038,6 +1038,12 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  background: transparent !important;
+
+  img {
+    width: 40px;
+    height: 40px;
+  }
 }
 
 .muhuratTime {
@@ -1798,9 +1804,18 @@
   width: 64px;
   height: 64px;
   border-radius: 16px;
-  // border: 1px solid #FFFFFF;
   flex-shrink: 0;
-  background: linear-gradient(116.1deg, #FBF3F1 0%, #F7E0DA 100%);
+  background: transparent;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 
   @media (width <=767px) {
     width: 52px;

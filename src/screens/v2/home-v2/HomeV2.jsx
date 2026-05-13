@@ -467,8 +467,8 @@ const HomeV2 = () => {
                 return (
                   <div key={i} className={styles.muhuratItem}>
                     <div className={styles.muhuratTop}>
-                      <div className={styles.muhuratIcon} style={{ background: iconBgs[i % 4] }}>
-                        <img src={muhuratIcons[i % 4]} alt={m.name} width="22" height="22" />
+                      <div className={styles.muhuratIcon}>
+                        <img src={muhuratIcons[i % 4]} alt={m.name} width="40" height="40" />
                       </div>
                       <h5>{m.name}</h5>
                     </div>
@@ -591,9 +591,8 @@ const HomeV2 = () => {
           }}>‹</button>
 
           <div className={styles.gridRow} id="quickGridRow">
-            {(quickLinkItems.length > 0 ? quickLinkItems.map((a, i) => ({
-              ...a,
-              _navFn: () => {
+            {quickLinkItems.map((a, i) => {
+              const navFn = () => {
                 const slug = (a.slug || a.title?.toLowerCase().replace(/\s+/g, '-') || '');
                 if (slug.includes('horoscope'))                                    return navigate('/daily-horoscope');
                 if (slug.includes('dasha'))                                        return navigate('/kundli?tab=dasha');
@@ -604,37 +603,14 @@ const HomeV2 = () => {
                 if (slug.includes('session') || slug.includes('order'))            return navigate('/profile', { state: { activeTab: 'Order History' } });
                 if (slug.includes('talk') || slug.includes('consult') || slug.includes('astrologer') || slug.includes('top-rated')) return navigate('/chat-to-astrologer');
                 if (a.redirect_url)                                                return navigate(a.redirect_url);
-              }
-            })) : [
-              { title: "Horoscope\nSection",    _navFn: () => navigate('/daily-horoscope'),                              icon: AppIcons.Astrology },
-              { title: "Consult\nAstrologer",   _navFn: () => navigate('/chat-to-astrologer'),                                   icon: AppIcons.Chat },
-              { title: "Future\nPredictions",   _navFn: () => navigate('/chat-to-astrologer'),                                   icon: AppIcons.Star },
-              { title: "Dasha\nTimeline",       _navFn: () => navigate('/kundli?tab=dasha'),                                        icon: AppIcons.Kundali },
-              { title: "Birth\nDetails",        _navFn: () => navigate('/kundli'),                                                  icon: AppIcons.Education },
-              { title: "Talk to\nAstrologer",   _navFn: () => navigate('/chat-to-astrologer'),                                   icon: AppIcons.Call },
-              { title: "Top Rated\nAstrologer", _navFn: () => navigate('/chat-to-astrologer'),                                   icon: AppIcons.Trophy },
-              { title: "My\nSessions",          _navFn: () => navigate('/profile', { state: { activeTab: 'Order History' } }),      icon: AppIcons.Message },
-            ]).map((a, i) => {
-              const iconBgs = [
-                "linear-gradient(116.1deg, #FBF3F1 0%, #F7E0DA 100%)",
-                "linear-gradient(116.1deg, #F3F1FD 0%, #EBE5FC 100%)",
-                "linear-gradient(116.1deg, #FAECFF 0%, #F9E7FF 100%)",
-                "linear-gradient(116.1deg, #FFFFFF 0%, #CBE9FC 100%)",
-                "linear-gradient(116.1deg, #F3F1FD 0%, #EBE5FC 100%)",
-                "linear-gradient(116.1deg, #FBF3F1 0%, #F7E0DA 100%)",
-                "linear-gradient(116.1deg, #FAECFF 0%, #F9E7FF 100%)",
-                "linear-gradient(116.1deg, #FFFFFF 0%, #CBE9FC 100%)",
-              ];
+              };
               return (
-                <div key={i} className={styles.gridItem} onClick={() => a._navFn ? a._navFn() : (a.redirect_url && navigate(a.redirect_url))} style={{ cursor: 'pointer' }}>
-                  <div
-                    className={styles.gridIconBox}
-                    style={{
-                      ...(a.image_url_web || a.image_url || a.icon ? {
-                        background: `url(${a.image_url_web || a.image_url || a.icon}) center/60% no-repeat`,
-                      } : {})
-                    }}
-                  />
+                <div key={i} className={styles.gridItem} onClick={navFn} style={{ cursor: 'pointer' }}>
+                  <div className={styles.gridIconBox}>
+                    {(a.image_url_web || a.image_url || a.icon) && (
+                      <img src={a.image_url_web || a.image_url || a.icon} alt={a.title} />
+                    )}
+                  </div>
                   <span>{a.title}</span>
                 </div>
               );
