@@ -72,12 +72,16 @@ const Kundali = () => {
         'download': 8, // Support lowercase as well
       };
       setActiveTabIndex(tabMap[tab] || 0);
+      // Scroll to top so tab bar is visible
+      window.scrollTo(0, 0);
     }
   }, [searchParams]);
 
-  // Require auth for remedies subtab — moved after token definition
+  // Require auth for protected tabs/subtabs
+  const tab = searchParams.get('tab');
   const subtab = searchParams.get('subtab');
-  const requiresAuth = subtab && subtab.startsWith('remed');
+  const protectedTabs = ['basic', 'dasha'];
+  const requiresAuth = (subtab && subtab.startsWith('remed')) || protectedTabs.includes(tab);
 
   // Get initial tab index from query params
   const getInitialTabIndex = () => {
@@ -489,9 +493,12 @@ const Kundali = () => {
   ];
 
   useEffect(() => {
-    if (planetLoading || isAstro) {
+    // Don't auto-scroll if page was loaded with a tab param (user navigated via URL)
+    const hasTabParam = searchParams.get('tab');
+    if ((planetLoading || isAstro) && !hasTabParam) {
       contentRef.current?.scrollIntoView({
         behavior: "smooth",
+        block: "start",
       });
     }
   }, [planetLoading, isAstro]);
