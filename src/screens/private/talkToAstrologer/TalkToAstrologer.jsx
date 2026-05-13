@@ -957,6 +957,12 @@ const TalkToAstrologer = () => {
         return;
       }
 
+      // ACTIVE CALL CONFLICT — user tried to initiate but already has an active call
+      if (err?.statusCode === 400 || err?.message === "You already have an active call") {
+        Toast.error(err?.message || "You already have an active call. Please end it before starting a new one.");
+        return;
+      }
+
       // USER_BUSY error — user tried to accept but has active session
       if (err?.code === "USER_BUSY") {
         Toast.error(err?.message || "You are already on a call. End it first.");
