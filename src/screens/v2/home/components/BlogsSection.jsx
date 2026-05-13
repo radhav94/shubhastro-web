@@ -1,4 +1,3 @@
-import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { PATH } from "../../../../utils/routes/Paths";
@@ -74,7 +73,7 @@ const BlogsSection = ({ blogData = [], title, showMore }) => {
             className={styles.viewAllBtn}
             onClick={() => navigate(PATH.privateRoutes.BLOG.path)}
           >
-            <ChevronRight size={24} />
+            View all ›
           </button>
         )}
       </div>

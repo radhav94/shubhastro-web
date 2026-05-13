@@ -3887,6 +3887,15 @@
 
 .blogsHeader .viewAllBtn {
   flex-shrink: 0;
+  width: auto;
+  height: auto;
+  background: none;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #f75801;
+  white-space: nowrap;
 }
 
 .blogsGrid {
