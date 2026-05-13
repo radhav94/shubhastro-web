@@ -67,7 +67,7 @@ const LalKitab = () => {
       const result = await generateTeva(String(selectedProfile._id)).unwrap();
       const lalKitabId = (result?.data || result)?._id;
       if (lalKitabId) {
-        navigate(`/lal-kitab/${lalKitabId}`, { state: { tevaData: result?.data || result } });
+        navigate(`/laal-kitab/${lalKitabId}`, { state: { tevaData: result?.data || result } });
       } else {
         Toast.error("Failed to generate Lal Kitab");
       }

@@ -12,13 +12,13 @@ import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect"
 import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
+import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
 
 // Lazy-load below-the-fold components
 const ProfileModals = lazy(() => import("../../private/kundli/components/ProfileModals"));
 const EmergencySessionModal = lazy(() => import("../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal"));
 const AstrologersSection = lazy(() => import("../home/components/AstrologersSection"));
 const BlogsSection = lazy(() => import("../home/components/BlogsSection"));
-const PanditAIBubble = lazy(() => import("../../../component/panditAI/PanditAIBubble"));
 const MobileAppModal = lazy(() => import("../../private/aiwow/components/MobileAppModal"));
 const MySessionsSection = lazy(() => import("./MySessionsSection"));
 const AgenticCalendarV2 = lazy(() => import("./AgenticCalendarV2"));
@@ -29,7 +29,7 @@ import astrologerImg from "../../../assets/images/home-hero-astrologer.png";
 import horoscopeImg from "../../../assets/images/home-hero-horoscope.png";
 
 // Hero BG
-import heroBg from "../../../assets/images/home-hero-bg.png";
+const heroBg = "https://shubhastroassets.s3.ap-south-1.amazonaws.com/images/1778659743-240854750.png";
 
 // WOW icons
 import vastuIcon from "../../../assets/aiwow/wow-vastu.svg";
@@ -335,7 +335,7 @@ const HomeV2 = () => {
                 </div>
                 <div className={styles.qImgWrap}>
                   <div className={styles.qImgGlow} />
-                  <img src={card.image_url || card.icon} alt={card.title} />
+                  <img src={card.image_url || card.icon} alt={card.title} loading="eager" fetchPriority="high" />
                 </div>
               </div>
             );
@@ -354,6 +354,7 @@ const HomeV2 = () => {
               src={aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon || laalKitaabImg}
               alt="Laal Kitaab"
               className={styles.laalKitaabImgLeft}
+              loading="lazy"
             />
           </div>
         </div>
@@ -382,7 +383,7 @@ const HomeV2 = () => {
               </div>
               <div className={styles.heroBgImg}>
                 <div className={styles.heroBgGlow}></div>
-                <img src={heroBg} alt="" />
+                <img src={heroBg} alt="" loading="eager" fetchPriority="high" width="350" height="350" decoding="async" />
               </div>
             </div>
 
@@ -412,7 +413,7 @@ const HomeV2 = () => {
                       style={{ cursor: item.slug ? 'pointer' : 'default' }}
                     >
                       <div className={styles.wowIconBox}>
-                        <img src={item.icon || item.iconUrl || item.icon_url} alt={item.title} />
+                        <img src={item.icon || item.iconUrl || item.icon_url} alt={item.title} loading="lazy" />
                       </div>
                       <span>{item.title}</span>
                     </div>
@@ -434,7 +435,7 @@ const HomeV2 = () => {
               </div>
               <button className={styles.fcCtaLight} onClick={() => navigate('/occult')}>Explore Occult &gt;</button>
               {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon || occultWorldImg) && (
-                <img src={aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon || occultWorldImg} alt="Occult World" className={styles.fcCardImg} />
+                <img src={aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon || occultWorldImg} alt="Occult World" className={styles.fcCardImg} loading="lazy" />
               )}
             </div>
 
@@ -453,6 +454,7 @@ const HomeV2 = () => {
                   src={aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon || aiPanditMic}
                   alt="AI Pandit"
                   className={styles.fcCardImg}
+                  loading="lazy"
                 />
               ) : (
                 <div className={styles.panditMicWrap}>
@@ -484,7 +486,7 @@ const HomeV2 = () => {
                   <div key={i} className={styles.muhuratItem}>
                     <div className={styles.muhuratTop}>
                       <div className={styles.muhuratIcon}>
-                        <img src={muhuratIcons[i % 4]} alt={m.name} width="40" height="40" />
+                        <img src={muhuratIcons[i % 4]} alt={m.name} width="40" height="40" loading="lazy" />
                       </div>
                       <h5>{m.name}</h5>
                     </div>
@@ -508,11 +510,11 @@ const HomeV2 = () => {
             {/* Circular avatar cluster */}
             <div className={styles.avatarCluster}>
               <div className={styles.avatarClusterInner}>
-                <img src={avatar1} alt="" className={`${styles.clusterAvatar} ${styles.ca1}`} />
-                <img src={avatar2} alt="" className={`${styles.clusterAvatar} ${styles.ca2}`} />
-                <img src={avatar3} alt="" className={`${styles.clusterAvatar} ${styles.ca3}`} />
-                <img src={avatar4} alt="" className={`${styles.clusterAvatar} ${styles.ca4}`} />
-                <img src={avatar5} alt="" className={`${styles.clusterAvatar} ${styles.ca5}`} />
+                <img src={avatar1} alt="" className={`${styles.clusterAvatar} ${styles.ca1}`} loading="lazy" />
+                <img src={avatar2} alt="" className={`${styles.clusterAvatar} ${styles.ca2}`} loading="lazy" />
+                <img src={avatar3} alt="" className={`${styles.clusterAvatar} ${styles.ca3}`} loading="lazy" />
+                <img src={avatar4} alt="" className={`${styles.clusterAvatar} ${styles.ca4}`} loading="lazy" />
+                <img src={avatar5} alt="" className={`${styles.clusterAvatar} ${styles.ca5}`} loading="lazy" />
                 <div className={`${styles.clusterAvatar} ${styles.ca6} ${styles.clusterCount}`}>
                   <span>+{onlineCount}</span>
                   <span>Online</span>
@@ -535,11 +537,11 @@ const HomeV2 = () => {
         </div>
         <div className={styles.mobileAiGridRow}>
           {/* Laal Kitaab */}
-          <div className={`${styles.mobileAiCard} ${styles.laalKitaab}`} onClick={() => navigate('/lal-kitab')}>
+          <div className={`${styles.mobileAiCard} ${styles.laalKitaab}`} onClick={() => navigate('/laal-kitab')}>
             <span className={styles.featureTag}>New</span>
             <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title || "Laal Kitaab"}</h3>
             <button className={styles.featureCta}>Explore Laal Kitaab &gt;</button>
-            <img src={aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon || laalKitaabImg} alt="Laal Kitaab" className={styles.mobileAiCardImg} />
+            <img src={aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon || laalKitaabImg} alt="Laal Kitaab" className={styles.mobileAiCardImg} loading="lazy" />
           </div>
           {/* Occult World */}
           <div className={`${styles.mobileAiCard} ${styles.occultWorld}`} onClick={() => navigate('/occult')}>
@@ -548,7 +550,7 @@ const HomeV2 = () => {
             <h3>{aiServicesItems[1]?.display_title || aiServicesItems[1]?.title || "Occult World"}</h3>
             <button className={styles.fcCtaLight}>Explore Occult &gt;</button>
             {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon || occultWorldImg) && (
-              <img src={aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon || occultWorldImg} alt="Occult World" className={styles.mobileAiCardImg} />
+              <img src={aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon || occultWorldImg} alt="Occult World" className={styles.mobileAiCardImg} loading="lazy" />
             )}
           </div>
           {/* AI Pandit */}
@@ -557,7 +559,7 @@ const HomeV2 = () => {
             <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title || "AI Pandit (Voice)"}</h3>
             <button className={styles.panditTalkBtn}>Talk Now &rsaquo;</button>
             {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon || aiPanditMic) ? (
-              <img src={aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon || aiPanditMic} alt="AI Pandit" className={styles.mobileAiCardImg} />
+              <img src={aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon || aiPanditMic} alt="AI Pandit" className={styles.mobileAiCardImg} loading="lazy" />
             ) : (
               <div className={styles.panditMicWrap}>
                 <div className={styles.panditWave} />
@@ -579,7 +581,7 @@ const HomeV2 = () => {
             <button className={styles.liveCommunityBtn}>Join Live Now &rsaquo;</button>
             <div className={styles.liveCommunityAvatars}>
               {[avatar1, avatar2, avatar3, avatar4].map((av, i) => (
-                <img key={i} src={av} alt="" className={styles.liveCommunityAvatarImg} />
+                <img key={i} src={av} alt="" className={styles.liveCommunityAvatarImg} loading="lazy" />
               ))}
               <span className={styles.liveCommunityCount}>+{onlineCount}<br/>Online</span>
             </div>
@@ -853,7 +855,7 @@ const HomeV2 = () => {
             <div className={styles.ctaAvatarRow}>
               <div className={styles.ctaAvatars}>
                 {[avatar1, avatar2, avatar3, avatar4].map((av, i) => (
-                  <img key={i} src={av} alt="" className={styles.ctaAvatar} />
+                  <img key={i} src={av} alt="" className={styles.ctaAvatar} loading="lazy" />
                 ))}
                 <span className={styles.ctaAvatarCount}>50+</span>
               </div>
@@ -987,9 +989,9 @@ const HomeV2 = () => {
           onChatNow={(a) => handleConnectClick(a, "chat", true)}
           onCallNow={(a) => handleConnectClick(a, "audio", true)}
         />
-        <PanditAIBubble />
         <MobileAppModal isOpen={showMobileAppModal} onClose={() => setShowMobileAppModal(false)} />
       </Suspense>
+      <PanditAIBubble />
     </>
   );
 };

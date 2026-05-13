@@ -332,7 +332,7 @@ $font-primary:     "Poppins", sans-serif;
   display: inline-block;
   margin-bottom: 4px;
   transition: color 0.2s;
-  &:hover { color: darken(#F75801, 10%); }
+  &:hover { color: #d94a01; }
 }
 
 .v2_phoneLink {
@@ -351,7 +351,7 @@ $font-primary:     "Poppins", sans-serif;
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
-  &:hover { color: darken(#F75801, 10%); }
+  &:hover { color: #d94a01; }
 }
 
 // ============================================================
