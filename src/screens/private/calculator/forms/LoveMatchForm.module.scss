@@ -90,6 +90,29 @@
   padding-top: 10px;
 }
 
+.resetRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.resetTopBtn {
+  padding: 6px 18px;
+  border-radius: 20px;
+  border: 1.5px solid #f75801;
+  background: transparent;
+  color: #f75801;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover {
+    background: linear-gradient(90deg, #f75801, #d43400);
+    color: #fff;
+  }
+}
+
 .btnRow {
   display: flex;
   gap: 24px;
@@ -115,24 +138,6 @@
   }
 }
 
-.resetBtn {
-  padding: 13px 40px;
-  border-radius: 28px;
-  border: 1.5px solid #f75801;
-  background: #fff;
-  color: #f75801;
-  font-weight: 600;
-  font-size: 15px;
-  cursor: pointer;
-  white-space: nowrap;
-  min-width: 180px;
-  transition: background 0.2s;
-
-  &:hover {
-    background: #fff8f5;
-  }
-}
-
 /* ---- Mobile ---- */
 @media (max-width: 768px) {
   .loveForm {
@@ -154,13 +159,6 @@
   }
 
   .submitBtn {
-    padding: 11px 20px;
-    font-size: 14px;
-    min-width: unset;
-    flex: 1;
-  }
-
-  .resetBtn {
     padding: 11px 20px;
     font-size: 14px;
     min-width: unset;
