@@ -16,7 +16,7 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
 .bubble {
   position: fixed;
   right: max(16px, calc(#{$profile-edge-offset} - 184px));
-  bottom: 25px;
+  bottom: 60px;
   z-index: 999;
   display: inline-flex;
   align-items: center;
@@ -135,7 +135,7 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
 .chatWindow {
   position: fixed;
   right: $profile-edge-offset;
-  bottom: 25px;
+  bottom: 60px;
   z-index: 9991;
   display: flex;
   flex-direction: column;
