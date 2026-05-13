@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { getUserFromStorage } from "../../../utils/authStorage";
 import { Toast } from "../../../component";
 import { useGetAiSuitesQuery, useGetNewHomeDetailsQuery } from "../../../services/appServices/homeServices";
+import { useGetBlogQuery } from "../../../services/appServices/blogService";
 import { useGetCurrentMahadashaFullQuery } from "../../../redux/api/kundli/dashaApi";
 import { useFetchAdvancePanchangQuery } from "../../../redux/api/panchang/panchangApi";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
@@ -201,6 +202,10 @@ const HomeV2 = () => {
     return homeList?.find(s => s.display_type === "blog");
   }, [homeList]);
 
+  // Fetch blogs from separate API
+  const { data: blogApiData } = useGetBlogQuery({ page: 1, limit: 6 });
+  const blogList = blogApiData?.data?.blogs || blogApiData?.data || [];
+
   // Extract ai-powered-astrology hero section
   const aiPoweredSection = useMemo(() => {
     return homeList?.find(s => s.display_type === "ai-powered-astrology");
@@ -246,13 +251,20 @@ const HomeV2 = () => {
   }, [homeList]);
 
   // Extract astrologers by category
-  const categoriesData = useMemo(() => {
-    return homeList?.find(s => s.display_type === "astrologers-by-category")?.content || [];
+  const categoriesSection = useMemo(() => {
+    return homeList?.find(s => s.display_type === "astrologers-by-category");
   }, [homeList]);
+  const categoriesData = categoriesSection?.content || [];
 
   // Extract discover more
-  const discoverMoreData = useMemo(() => {
-    return homeList?.find(s => s.display_type === "discover-more")?.content || [];
+  const discoverMoreSection = useMemo(() => {
+    return homeList?.find(s => s.display_type === "discover-more");
+  }, [homeList]);
+  const discoverMoreData = discoverMoreSection?.content || [];
+
+  // Extract muhurat section
+  const muhuratSection = useMemo(() => {
+    return homeList?.find(s => s.slug === "todays-muharat");
   }, [homeList]);
 
   // Extract live tracking stats
@@ -477,7 +489,7 @@ const HomeV2 = () => {
         <div className={styles.rightCol}>
           {/* Crucial Muhurats box */}
           <div className={styles.rightPanel}>
-            <h4>CRUCIAL MUHURATS</h4>
+            <h4>{ muhuratSection?.title || "CRUCIAL MUHURATS"}</h4>
             <div className={styles.muhuratGrid}>
               {muhurats.map((m, i) => {
                 const iconBgs = ["#FEF0E4", "#F4ECFB", "#E9F2EF", "#EBF2FB"];
@@ -526,9 +538,10 @@ const HomeV2 = () => {
       </section>
 
       {/* ═══ MOBILE ONLY — AI Services 2×2 Grid ═══ */}
+      {aiServicesItems.length > 0 && (
       <section className={styles.mobileAiGrid}>
         <div className={`${styles.titleWithBottomDevider}`}>
-          <h4 className={styles.wowTitle}>{aiServicesSection?.display_title || "LOREM IPSUM"}</h4>
+          <h4 className={styles.wowTitle}>{aiServicesSection?.title || "AI SERVICES"}</h4>
           <div className={styles.BottomDevider}>
             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
               <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
@@ -588,12 +601,14 @@ const HomeV2 = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* ═══ SECTION 2 — Quick Actions Grid ═══ */}
+      {quickLinkItems.length > 0 && (
       <section className={styles.quickGrid}>
         <div className={styles.quickGridHeader}>
           <div className={`${styles.titleWithBottomDevider}`}>
-            <h4 className={styles.wowTitle}>{homeList?.find(s => s.slug === "quick-link-section")?.display_title || "LOREM IPSUM AI"}</h4>
+            <h4 className={styles.wowTitle}>{homeList?.find(s => s.slug === "quick-link-section")?.title || "QUICK LINKS"}</h4>
             <div className={styles.BottomDevider}>
               <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
                 <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
@@ -611,16 +626,27 @@ const HomeV2 = () => {
           <div className={styles.gridRow} id="quickGridRow">
             {quickLinkItems.map((a, i) => {
               const navFn = () => {
-                const slug = (a.slug || a.title?.toLowerCase().replace(/\s+/g, '-') || '');
-                if (slug.includes('horoscope'))                                    return navigate('/daily-horoscope');
-                if (slug.includes('dasha'))                                        return navigate('/kundli?tab=dasha');
-                if (slug.includes('sade-sati') || slug.includes('sade sati'))      return navigate('/shani-sade-sati-calculator');
-                if (slug.includes('numerology'))                                   return navigate('/numerology-calculator');
-                if (slug.includes('remed'))                                        return navigate('/remedies');
-                if (slug.includes('birth') || slug.includes('kundli'))             return navigate('/kundli');
-                if (slug.includes('session') || slug.includes('order'))            return navigate('/profile', { state: { activeTab: 'Order History' } });
-                if (slug.includes('talk') || slug.includes('consult') || slug.includes('astrologer') || slug.includes('top-rated')) return navigate('/chat-to-astrologer');
-                if (a.redirect_url)                                                return navigate(a.redirect_url);
+                if (a.is_internal === true || a.is_internal === "true") {
+                  // Internal route — use redirect_url or slug as path
+                  const path = a.redirect_url || a.slug;
+                  if (path) navigate(path.startsWith('/') ? path : `/${path}`);
+                } else if (a.redirect_url) {
+                  // External URL
+                  window.open(a.redirect_url, '_blank', 'noopener,noreferrer');
+                } else {
+                  // Fallback: use slug as internal route
+                  const slug = a.slug || a.title?.toLowerCase().replace(/\s+/g, '-') || '';
+                  if (slug.includes('horoscope'))                                    return navigate('/daily-horoscope');
+                  if (slug.includes('dasha'))                                        return navigate('/kundli?tab=dasha');
+                  if (slug.includes('sade-sati') || slug.includes('sade sati'))      return navigate('/shani-sade-sati-calculator');
+                  if (slug.includes('numerology'))                                   return navigate('/numerology-calculator');
+                  if (slug.includes('remed'))                                        return navigate('/kundli?tab=free-report&subtab=remedies');
+                  if (slug.includes('birth') || slug.includes('kundli'))             return navigate('/kundli');
+                  if (slug.includes('match'))                                        return navigate('/match-making');
+                  if (slug.includes('session') || slug.includes('order'))            return navigate('/profile', { state: { activeTab: 'Order History' } });
+                  if (slug.includes('talk') || slug.includes('consult') || slug.includes('astrologer')) return navigate('/chat-to-astrologer');
+                  if (slug) navigate(`/${slug}`);
+                }
               };
               return (
                 <div key={i} className={styles.gridItem} onClick={navFn} style={{ cursor: 'pointer' }}>
@@ -660,12 +686,14 @@ const HomeV2 = () => {
           ))}
         </div>
       </section>
+      )}
 
       {/* ═══ SECTION 4 — Top Rated Astrologers ═══ */}
+      {astrologers.length > 0 && (
       <section className={styles.astrologerSection} style={{ backgroundColor: `#FFE9E5`,paddingBottom:'1px',paddingTop:'16px',paddingRight:'0px'}}>
         <div className={styles.sectionHeader} style={{marginBottom:"0px"}}>
           <div className={styles.sectionTitleBlock}>
-            <h2 className={styles.sectionTitle}>{astrologerSection?.display_title || "TOP RATED ASTROLOGERS FOR YOU"}</h2>
+            <h2 className={styles.sectionTitle}>{astrologerSection?.title || "TOP RATED ASTROLOGERS FOR YOU"}</h2>
           </div>
           <button className={styles.viewAllBtn} style={{marginRight:"16px"}} onClick={() => navigate('/chat-to-astrologer')}>View all →</button>
         </div>
@@ -678,14 +706,16 @@ const HomeV2 = () => {
           />
         </Suspense>
       </section>
+      )}
 
       {/* ═══ SECTION 5 — Explore by Category + Agentic Calendar + Discover More ═══ */}
+      {(categoriesData.length > 0 || discoverMoreData.length > 0) && (
       <section className={styles.threeColSection}>
 
         {/* LEFT — Explore by Category */}
         <div className={styles.categoryBox}>
           <div className={`${styles.titleWithBottomDevider}`}>
-            <h4 className={styles.wowTitle}>EXPLORE BY CATEGORY</h4>
+            <h4 className={styles.wowTitle}>{categoriesSection?.title || "EXPLORE BY CATEGORY"}</h4>
             <div className={styles.BottomDevider}>
               <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
                 <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
@@ -729,7 +759,7 @@ const HomeV2 = () => {
         {/* RIGHT — Discover More */}
         <div className={styles.discoverBox}>
           <div className={`${styles.titleWithBottomDevider} ${styles.tWBmarginBottomZero}`}>
-            <h4 className={styles.wowTitle}>DISCOVER MORE</h4>
+            <h4 className={styles.wowTitle}>{discoverMoreSection?.title || "DISCOVER MORE"}</h4>
             <div className={styles.BottomDevider}>
               <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
                 <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
@@ -780,17 +810,20 @@ const HomeV2 = () => {
         </div>
 
       </section>
+      )}
 
       {/* ═══ SECTION 5b — News / Blog ═══ */}
-      <section className={styles.blogSection} style={{ paddingRight:'0px'}}>
-        <Suspense fallback={null}>
-          <BlogsSection
-            blogData={blogSection?.content || []}
-            title={blogSection?.display_title || "NEWS / BLOGS"}
-            showMore={true}
-          />
-        </Suspense>
-      </section>
+      {(blogList.length > 0 || blogSection?.content?.length > 0) && (
+        <section className={styles.blogSection} style={{ paddingRight:'0px'}}>
+          <Suspense fallback={null}>
+            <BlogsSection
+              blogData={blogList.length > 0 ? blogList : blogSection?.content || []}
+              title={blogSection?.title || "NEWS / BLOGS"}
+              showMore={true}
+            />
+          </Suspense>
+        </section>
+      )}
 
       {/* ═══ SECTION 6 — My Sessions ═══ */}
       <Suspense fallback={null}>
@@ -808,12 +841,12 @@ const HomeV2 = () => {
         {/* Live Tracking badge */}
         <div className={styles.liveBadge}>
           <span className={styles.liveDot} />
-          LIVE TRACKING
+          {liveTrackingSection?.quick_message || "LIVE TRACKING"}
         </div>
 
         {/* Heading */}
         <h2 className={styles.liveHeading}>
-          {liveTrackingSection?.display_title || "Real People. Real Consultations. Right Now."}
+          {liveTrackingSection?.title || "Real People. Real Consultations. Right Now."}
         </h2>
         <p className={styles.liveSubtitle}>{liveTrackingSection?.description || "Live updates from ShubhAstro community"}</p>
 

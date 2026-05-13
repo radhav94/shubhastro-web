@@ -75,6 +75,10 @@ const Kundali = () => {
     }
   }, [searchParams]);
 
+  // Require auth for remedies subtab — moved after token definition
+  const subtab = searchParams.get('subtab');
+  const requiresAuth = subtab && subtab.startsWith('remed');
+
   // Get initial tab index from query params
   const getInitialTabIndex = () => {
     const tab = searchParams.get('tab');
@@ -129,6 +133,20 @@ const Kundali = () => {
       : localStorage.getItem("shubhtalk_customer_token");
   
   const isLoggedIn = !!token;
+
+  // Require auth for remedies subtab
+  useEffect(() => {
+    if (requiresAuth && !token) {
+      const fullPath = `/kundli?${searchParams.toString()}`;
+      localStorage.setItem("shubhtalk_redirect_after_login", fullPath);
+      window.location.href = "/login?skip=welcome";
+    }
+  }, [requiresAuth, token, searchParams]);
+
+  // Block render while redirecting to login
+  if (requiresAuth && !token) {
+    return null;
+  }
 
   // Temporary profiles for non-logged-in users (persisted in sessionStorage)
   const [tempProfiles, setTempProfiles] = useState(() => {
