@@ -597,6 +597,9 @@ const HomeV2 = () => {
                 const slug = (a.slug || a.title?.toLowerCase().replace(/\s+/g, '-') || '');
                 if (slug.includes('horoscope'))                                    return navigate('/daily-horoscope');
                 if (slug.includes('dasha'))                                        return navigate('/kundli?tab=dasha');
+                if (slug.includes('sade-sati') || slug.includes('sade sati'))      return navigate('/shani-sade-sati-calculator');
+                if (slug.includes('numerology'))                                   return navigate('/numerology-calculator');
+                if (slug.includes('remed'))                                        return navigate('/remedies');
                 if (slug.includes('birth') || slug.includes('kundli'))             return navigate('/kundli');
                 if (slug.includes('session') || slug.includes('order'))            return navigate('/profile', { state: { activeTab: 'Order History' } });
                 if (slug.includes('talk') || slug.includes('consult') || slug.includes('astrologer') || slug.includes('top-rated')) return navigate('/chat-to-astrologer');

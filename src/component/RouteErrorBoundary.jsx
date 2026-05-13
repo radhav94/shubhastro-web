@@ -1,4 +1,4 @@
-import { useRouteError, useNavigate } from 'react-router-dom';
+import { useRouteError } from 'react-router-dom';
 import { useEffect } from 'react';
 import styles from './ErrorBoundary.module.scss';
 
@@ -8,34 +8,53 @@ import styles from './ErrorBoundary.module.scss';
  */
 const RouteErrorBoundary = () => {
   const error = useRouteError();
-  const navigate = useNavigate();
 
   console.error('🔴 Route Error:', error);
 
+  // Check for chunk loading errors
+  const isChunkError = 
+    error?.message?.includes('Failed to fetch dynamically imported module') ||
+    error?.message?.includes('Importing a module script failed') ||
+    error?.message?.includes('error loading dynamically imported module') ||
+    error?.name === 'ChunkLoadError';
+
+  // Check if Google Translate is active
+  const hasGoogleTranslate = document.cookie.includes('googtrans=') ||
+    !!document.querySelector('.goog-te-combo') ||
+    !!document.querySelector('.goog-te-banner-frame');
+
+  // If Google Translate is active and it's NOT a chunk error, this is almost certainly
+  // a DOM conflict from Google Translate modifying React's tree. Redirect immediately.
+  if (hasGoogleTranslate && !isChunkError) {
+    const hasRecovered = sessionStorage.getItem('gtranslate-error-recovery');
+    if (!hasRecovered) {
+      sessionStorage.setItem('gtranslate-error-recovery', 'true');
+      window.location.href = '/';
+      // Return null to avoid rendering the error UI during redirect
+      return null;
+    }
+    // Already tried once, clear flag and show error page
+    sessionStorage.removeItem('gtranslate-error-recovery');
+  }
+
   // Handle chunk loading errors with auto-reload
   useEffect(() => {
-    const isChunkError = 
-      error?.message?.includes('Failed to fetch dynamically imported module') ||
-      error?.message?.includes('Importing a module script failed') ||
-      error?.message?.includes('error loading dynamically imported module') ||
-      error?.name === 'ChunkLoadError';
-
     if (isChunkError) {
       console.error('Chunk loading error detected in route, attempting reload...');
-      
       const hasReloaded = sessionStorage.getItem('route-chunk-error-reload');
       if (!hasReloaded) {
         sessionStorage.setItem('route-chunk-error-reload', 'true');
-        // Auto-reload after a short delay
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
+        window.location.reload();
       } else {
-        // Already tried reloading, clear flag and show error
         sessionStorage.removeItem('route-chunk-error-reload');
       }
     }
-  }, [error]);
+  }, [error, isChunkError]);
+
+  // Clear Google Translate recovery flag on successful render (user sees this page = recovery done)
+  useEffect(() => {
+    sessionStorage.removeItem('gtranslate-error-recovery');
+  }, []);
 
   const handleReload = () => {
     sessionStorage.removeItem('route-chunk-error-reload');
@@ -44,20 +63,14 @@ const RouteErrorBoundary = () => {
 
   const handleGoHome = () => {
     sessionStorage.removeItem('route-chunk-error-reload');
-    navigate('/', { replace: true });
+    // Use hard navigation to avoid corrupted router state (e.g. after Google Translate interference)
+    window.location.href = '/';
   };
 
   // Determine error type and message
   let errorTitle = 'Something went wrong';
   let errorMessage = 'An unexpected error occurred while loading this page.';
   let showDetails = false;
-
-  // Check for chunk loading errors
-  const isChunkError = 
-    error?.message?.includes('Failed to fetch dynamically imported module') ||
-    error?.message?.includes('Importing a module script failed') ||
-    error?.message?.includes('error loading dynamically imported module') ||
-    error?.name === 'ChunkLoadError';
 
   if (isChunkError) {
     errorTitle = 'Loading Issue';

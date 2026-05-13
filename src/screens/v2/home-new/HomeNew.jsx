@@ -439,7 +439,13 @@ const HomeNew = () => {
           ]).map((a, i) => {
             const bgs = ["#fef3c7","#fef2f2","#f5f3ff","#fff7ed","#fff7ed","#ede9fe","#fefce8","#eef2ff"];
             return (
-              <div key={i} className={styles.gridItem} onClick={() => a.redirect_url && navigate(a.redirect_url)} style={{ cursor: a.redirect_url ? 'pointer' : 'default' }}>
+              <div key={i} className={styles.gridItem} onClick={() => {
+                if (a.redirect_url) return navigate(a.redirect_url);
+                const slug = (a.slug || a.title?.toLowerCase().replace(/\s+/g, '-') || '');
+                if (slug.includes('sade-sati') || slug.includes('sade sati')) return navigate('/shani-sade-sati-calculator');
+                if (slug.includes('numerology')) return navigate('/numerology-calculator');
+                if (slug.includes('remed')) return navigate('/remedies');
+              }} style={{ cursor: 'pointer' }}>
                 <div
                   className={styles.gridIconBox}
                   style={{
