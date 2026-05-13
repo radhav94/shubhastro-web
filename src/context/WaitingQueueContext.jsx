@@ -47,8 +47,12 @@ export const WaitingQueueProvider = ({ children }) => {
     } catch { /* ignore */ }
   }, []);
 
+  const MAX_QUEUE_SIZE = 5;
+
   const addPendingConnection = useCallback((connection) => {
     setPendingConnections((prev) => {
+      // Don't exceed max queue size
+      if (prev.length >= MAX_QUEUE_SIZE) return prev;
       // Don't add duplicate by astrologer+type
       const exists = prev.some(
         (c) => c.astrologer?._id === connection.astrologer?._id && c.type === connection.type
@@ -59,6 +63,11 @@ export const WaitingQueueProvider = ({ children }) => {
       return next;
     });
   }, [persist]);
+
+  // Check if queue is full
+  const isQueueFull = useCallback(() => {
+    return pendingConnectionsRef.current.length >= MAX_QUEUE_SIZE;
+  }, []);
 
   // Update a pending connection (e.g., when roomId arrives from server)
   const updatePendingConnection = useCallback((astrologerId, type, updates) => {
@@ -416,6 +425,7 @@ export const WaitingQueueProvider = ({ children }) => {
         cancelAllExcept,
         cancelAll,
         isInQueue,
+        isQueueFull,
         hasAnyPending,
         updateStatusByRoomId,
         getConnectionByRoomId,

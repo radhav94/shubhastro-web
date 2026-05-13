@@ -20,7 +20,7 @@ export const useAstrologerConnect = () => {
   const token = getToken();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
-  const { addPendingConnection, isInQueue } = useWaitingQueue();
+  const { addPendingConnection, isInQueue, isQueueFull } = useWaitingQueue();
 
   const [openModal, setOpenModal] = useState({
     recharge: false,
@@ -48,6 +48,7 @@ export const useAstrologerConnect = () => {
   } = useCall();
 
   const {
+    activeChat,
     setActiveChat,
     setWaitingList,
     resetChatFlow,
@@ -58,6 +59,12 @@ export const useAstrologerConnect = () => {
 
   const activeCallAstroRef = useRef(null);
   const kundliRef = useRef(null);
+  const activeCallRef = useRef(activeCall);
+  const activeChatRef = useRef(activeChat);
+
+  // Keep refs in sync
+  activeCallRef.current = activeCall;
+  activeChatRef.current = activeChat;
 
   const [getBalance] = useGetBalanceMutation();
   const [createChatRoom] = useCreateChatRoomMutation();
@@ -333,9 +340,16 @@ export const useAstrologerConnect = () => {
       // If connection type exists, initiate call, otherwise chat
       if (connectionType) {
         // Initiate call
-        if (activeCall) {
-          console.log("[NormalFlow] ❌ Already on a call — aborting");
-          return Toast.error("You are already on a call");
+        if (activeCallRef.current || activeChatRef.current) {
+          console.log("[NormalFlow] ❌ Already on an active call/chat — aborting");
+          Toast.error("You already have an active call/chat");
+          return
+        }
+
+        // Check queue limit
+        if (isQueueFull()) {
+          console.log("[NormalFlow] ❌ Queue full — aborting");
+          return Toast.error("Maximum 5 simultaneous queues allowed. Please cancel an existing request first.");
         }
 
         // Check if same astrologer already has any pending request (call or chat)
@@ -355,6 +369,7 @@ export const useAstrologerConnect = () => {
         };
         console.log("[NormalFlow] 📤 Emitting call:initiate");
         console.log("[NormalFlow]   → payload:", JSON.stringify(payload));
+        debugger
         voiceSocket.emit("call:initiate", payload);
 
         // Add to waiting queue (roomId will be assigned when call:room arrives)
@@ -370,6 +385,18 @@ export const useAstrologerConnect = () => {
         console.log("[NormalFlow] ✅ call:initiate emitted — waiting for call:room / call:accepted / error");
       } else {
         // Initiate chat
+        if (activeCallRef.current || activeChatRef.current) {
+          console.log("[NormalFlow] ❌ Already on an active call/chat — aborting");
+          Toast.error("You already have an active call/chat");
+          return
+        }
+
+        // Check queue limit
+        if (isQueueFull()) {
+          console.log("[NormalFlow] ❌ Queue full — aborting");
+          return Toast.error("Maximum 5 simultaneous queues allowed. Please cancel an existing request first.");
+        }
+
         // Check if same astrologer already has any pending request (call or chat)
         if (isInQueue(astro._id, "chat") || isInQueue(astro._id, "audio") || isInQueue(astro._id, "video")) {
           console.log("[NormalFlow] ⏭️ Already in queue for this astrologer");
@@ -403,7 +430,7 @@ export const useAstrologerConnect = () => {
     } catch (error) {
       console.error("[NormalFlow] ❌ Error in handleAfterKundliSelect:", error);
     }
-  }, [token, userIdLocal, activeCall, navigate, location, setLastSelectedKundli, setLastCallType, setCallWaitingList, profiles, addPendingConnection, isInQueue]);
+  }, [token, userIdLocal, navigate, location, setLastSelectedKundli, setLastCallType, setCallWaitingList, profiles, addPendingConnection, isInQueue, isQueueFull]);
 
   const handleRechargeNow = useCallback(() => {
     setOpenModal((prev) => ({ ...prev, recharge: false }));

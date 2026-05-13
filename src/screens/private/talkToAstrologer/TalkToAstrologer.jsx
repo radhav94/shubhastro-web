@@ -958,8 +958,14 @@ const TalkToAstrologer = () => {
       }
 
       // ACTIVE CALL CONFLICT — user tried to initiate but already has an active call
-      if (err?.statusCode === 400 || err?.message === "You already have an active call") {
+      if (err?.message === "You already have an active call") {
         Toast.error(err?.message || "You already have an active call. Please end it before starting a new one.");
+        return;
+      }
+
+      // MAX QUEUE — user exceeded 5 simultaneous waiting requests
+      if (err?.message?.includes("Maximum") && err?.message?.includes("simultaneous queues")) {
+        Toast.error(err?.message || "Maximum 5 simultaneous queues allowed. Please cancel an existing request first.");
         return;
       }
 
