@@ -137,7 +137,7 @@
 .leftCards {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 
   @media (max-width: 900px) {
     flex-direction: column;
@@ -225,8 +225,8 @@
   }
 
   p {
-    font-size: 14px;
-    color: #6b7280;
+    font-size: 12px;
+    color: #030303;
     margin: 0;
     line-height: 1.5;
 
@@ -316,7 +316,7 @@
 
 .heroBanner {
   // padding: 24px 24px 16px;
-  margin-bottom: 24px;
+  margin-bottom: 10px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -388,7 +388,7 @@
 }
 
 .heroBanner h1 {
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 600;
   color: #1f2937;
   margin: 0 0 8px;
@@ -721,7 +721,7 @@
 
   p {
     font-size: 12px;
-    color: #6b7280;
+    color: #030303;
     margin: 0;
     line-height: 1.5;
     max-width: 55%;
@@ -741,9 +741,13 @@
     margin-top: auto;
     position: relative;
     z-index: 2;
-    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-    color: #fff;
+    // background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+    // background: transparent;
+    background: rgba(255, 255, 255, 0.90);
+    color: #F75801;
     width: 100%;
+    border: 1px solid #F75801;
+    backdrop-filter: none;
   }
 
   @media (max-width: 900px) {
@@ -824,7 +828,7 @@
 
   p {
     font-size: 12px;
-    color: #6b7280;
+    color: #030303;
     margin: 0;
     line-height: 1.5;
     max-width: 55%;
@@ -898,7 +902,7 @@
 
 .liveCommunityDesc {
   font-size: 13px;
-  color: #6b7280;
+  color: #030303;
   margin: 0;
   line-height: 1.5;
   font-family: 'Poppins', sans-serif;
@@ -1351,7 +1355,7 @@
   min-height: 180px;
 
   h3 { color: #1a1a1a !important; }
-  p  { color: #6b7280 !important; max-width: 60% !important; }
+  p  { max-width: 60% !important; }
 }
 
 .panditEllipse { display: none; }
@@ -2004,7 +2008,7 @@
 .calBody {
   flex: 1;
   // background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%);
-  padding: 16px 0px;
+  padding: 16px 0px 0px 0px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -2014,6 +2018,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.30);
 }
 
 .calLabel {
@@ -2108,15 +2114,16 @@
 
 .calHint {
   font-size: 13px;
-  color: #9ca3af;
+  color: #424242;
   margin: 0;
   font-family: 'Poppins', sans-serif;
 }
 
 .calDivider {
   height: 1px;
-  background: #f0f0f0;
+  background: rgba(0, 0, 0, 0.30);
   margin: 0 -20px;
+  display: none;
 }
 
 /* Date filter row */
@@ -2194,7 +2201,7 @@
 }
 
 .catGrid {
-  margin-bottom: 14px;
+  // margin-bottom: 14px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
@@ -2211,6 +2218,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
     cursor: pointer;
     width: 100%;
@@ -2242,7 +2250,7 @@
   background: linear-gradient(135deg, #FCF8F7 0%, #FCDBD9 100%);
   border-radius: 16px;
   // border: 1px solid white;
-  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
+  // border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
   flex-shrink: 0;
 }
 
@@ -2311,10 +2319,10 @@
 .discoverIconBox {
   width: 61px;
   height: 61px;
-  background: linear-gradient(135deg, #FCF8F7 0%, #FCDBD9 100%);
+  // background: linear-gradient(135deg, #FCF8F7 0%, #FCDBD9 100%);
   border-radius: 16px;
   // border: 1px solid white;
-  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
+  // border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
   flex-shrink: 0;
 }
 
@@ -3978,13 +3986,13 @@
 :global(body.home-v2-page) {
   background-image: url("../../../assets/images/main-body-bg-new.png") !important;
   background-attachment: fixed;
-  background-color: #ebecf2 !important;
+  // background-color: #ebecf2 !important;
   position: relative !important;
   background-repeat: repeat-y;
   background-size: 100% 100%;
-  // @media (width <= 767px) {
-  //   background-image: url("../../../assets/images/main-body-bg-mobile.png") !important;
-  // }
+  @media (width <= 767px) {
+    background-image: url("../../../assets/images/main-body-bg-new-mobile.png") !important;
+  }
 }
 
 :global(body.home-v2-page::before) {
@@ -4001,10 +4009,10 @@
   /* Astrologer cards glass effect */
   .astrologerSection :global(.astrologerCard),
   [class*="astrologerCard"] {
-    background: rgba(255, 255, 255, 0.6) !important;
+    background: rgba(255, 255, 255, 0.4) !important;
     // backdrop-filter: blur(20px) saturate(180%) !important;
     // -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+    border: 1.5px solid rgba(255, 255, 255, 1) !important;
     // box-shadow:
     //   0 0 0 1.5px rgba(255, 255, 255, 0.9),
     //   inset 0 1px 0 rgba(255, 255, 255, 0.9),

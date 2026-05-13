@@ -361,7 +361,7 @@
 
 .prodDesc {
   font-size: 11px;
-  color: #999;
+  color: #030303;
   margin: 0 0 4px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -902,21 +902,23 @@
 /* ── Filtered Products Grid ── */
 .filteredGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 16px;
   margin-bottom: 24px;
-
+  @media (max-width: 1180px) { grid-template-columns: repeat(4, 1fr); }
   @media (max-width: 900px) { grid-template-columns: repeat(3, 1fr); }
   @media (max-width: 629px) { grid-template-columns: repeat(2, 1fr); }
 }
 
 .filteredCard {
   position: relative;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12);
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  // box-shadow: 0 1px 6px rgba(0,0,0,0.06);
   transition: all 0.25s;
   &:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
 }

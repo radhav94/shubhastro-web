@@ -150,7 +150,9 @@
   width: 100%;
   max-width: 520px;
   max-height: 85vh;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 1);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 16px;
   display: flex;
   flex-direction: column;
