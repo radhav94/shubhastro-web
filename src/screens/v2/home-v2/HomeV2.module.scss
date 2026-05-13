@@ -3984,14 +3984,15 @@
 
 /* ═══ HomeV2 body background ═══ */
 :global(body.home-v2-page) {
-  background-image: url("https://shubhastroassets.s3.ap-south-1.amazonaws.com/images/1778659648-1576013064.png") !important;
+  // background-image: url("https://shubhastroassets.s3.ap-south-1.amazonaws.com/images/1778659648-1576013064.png") !important;
+  background-image: url("../../../assets/images/main-body-bg-new.png");
   background-attachment: fixed;
   // background-color: #ebecf2 !important;
   position: relative !important;
   background-repeat: repeat-y;
   background-size: 100% 100%;
   @media (width <= 767px) {
-    background-image: url("../../../assets/images/main-body-bg-new-mobile.png") !important;
+    background-image: url("../../../assets/images/main-body-bg-new-mobile.png");
   }
 }
 
