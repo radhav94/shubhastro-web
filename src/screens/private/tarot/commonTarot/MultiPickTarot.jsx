@@ -106,6 +106,15 @@ const MultiPickTarot = ({
         </div>
       )}
 
+      {revealed && isLoading && (
+        <div className={styles.resultContainer} ref={resultRef}>
+          <div className={styles.loadingSection}>
+            <div className={styles.loadingSpinner} />
+            <p>Reading the cards for you...</p>
+          </div>
+        </div>
+      )}
+
       {revealed && data && (
         <div className={styles.resultContainer}  ref={resultRef}>
           <ResultComponent

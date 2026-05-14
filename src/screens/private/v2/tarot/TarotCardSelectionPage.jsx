@@ -208,19 +208,19 @@ const TarotCardSelectionPage = () => {
             if (isMobile) {
               angle = offset * 5; spread = offset * 32
               curveHeight = Math.pow(normalizedOffset, 2) * 35
-              selectedLift = isSelected ? -25 : 0
+              selectedLift = isSelected ? -15 : 0
             } else if (isTablet) {
               angle = offset * 6.5; spread = offset * 50
               curveHeight = Math.pow(normalizedOffset, 2) * 55
-              selectedLift = isSelected ? -35 : 0
+              selectedLift = isSelected ? -20 : 0
             } else if (isLaptop) {
               angle = offset * 7.5; spread = offset * 65
               curveHeight = Math.pow(normalizedOffset, 2) * 70
-              selectedLift = isSelected ? -40 : 0
+              selectedLift = isSelected ? -25 : 0
             } else {
               angle = offset * 8; spread = offset * 75
               curveHeight = Math.pow(normalizedOffset, 2) * 80
-              selectedLift = isSelected ? -40 : 0
+              selectedLift = isSelected ? -30 : 0
             }
 
             const transform = isShuffling

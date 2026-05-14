@@ -33,7 +33,7 @@ const LoveMatchForm = ({
               value={name1}
               name="name1"
               placeholder="E.g. John Doe"
-              onChange={(e) => onChange("name1", e.target.value)}
+              onChange={(e) => onChange("name1", e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
             />
             {errors?.name1 && <p className={styles.error}>{errors.name1}</p>}
           </div>
@@ -69,7 +69,7 @@ const LoveMatchForm = ({
               name="name2"
               value={name2}
               placeholder="E.g. Jane Doe"
-              onChange={(e) => onChange("name2", e.target.value)}
+              onChange={(e) => onChange("name2", e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
             />
             {errors?.name2 && <p className={styles.error}>{errors.name2}</p>}
           </div>
