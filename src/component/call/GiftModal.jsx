@@ -67,8 +67,8 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
   
   const user = getUserFromStorage();
 
-  // Use API data if available, otherwise use dummy data
-  const gifts = data?.data && data.data.length > 0 ? data.data : DUMMY_GIFTS;
+  // Use API data if available, otherwise use dummy data — filter out inactive gifts
+  const gifts = data?.data && data.data.length > 0 ? data.data.filter(g => g.status === true) : DUMMY_GIFTS;
 
   // Categorize gifts
   const popularGifts = gifts.filter(g => g.category === "popular" || g.isPopular);
