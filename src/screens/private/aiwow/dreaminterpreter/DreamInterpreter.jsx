@@ -12,7 +12,16 @@ import TTSButton from '../../../../component/UI/TTSButton';
 const DreamInterpreter = () => {
   const navigate = useNavigate();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
-  
+
+  useEffect(() => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/aiwow/dream-interpreter");
+      window.location.href = "/login?skip=welcome";
+    }
+  }, []);
+
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;  
   const [dreamDescription, setDreamDescription] = useState('');
   const [tags, setTags] = useState('');
   const [lifePhase, setLifePhase] = useState('');

@@ -9,6 +9,16 @@ import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 const TalkToKundliChat = () => {
   const navigate = useNavigate();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+
+  useEffect(() => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/aiwow/talk-to-your-kundli");
+      window.location.href = "/login?skip=welcome";
+    }
+  }, []);
+
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
   
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');

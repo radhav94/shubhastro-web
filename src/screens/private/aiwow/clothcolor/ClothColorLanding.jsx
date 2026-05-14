@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ClothColorLanding.module.scss';
 import AuraSpectrumIcon from '../../../../assets/icons/auraspectrum.png';
@@ -10,7 +11,15 @@ import TTSButton from '../../../../component/UI/TTSButton';
 const ClothColorLanding = () => {
   const navigate = useNavigate();
 
-  const features = [
+  useEffect(() => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/clothes-colour-analysis");
+      window.location.href = "/login?skip=welcome";
+    }
+  }, []);
+
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;  const features = [
     {
       icon: AuraSpectrumIcon,
       title: 'Aura Spectrum',

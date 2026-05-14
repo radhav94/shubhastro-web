@@ -128,7 +128,7 @@ const HomeV2 = () => {
     if (item.slug === "ar-vastu-scanner") {
       setShowMobileAppModal(true);
     } else {
-      const rootLevelSlugs = [
+      const authRequiredSlugs = [
         "ai-palmistry-scanner",
         "astro-face-reading",
         "signature-analysis",
@@ -136,7 +136,18 @@ const HomeV2 = () => {
         "gemstone-authenticity",
         "aura-photography",
       ];
-      const path = rootLevelSlugs.includes(item.slug) ? `/${item.slug}` : `/aiwow/${item.slug}`;
+      const path = authRequiredSlugs.includes(item.slug) ? `/${item.slug}` : `/aiwow/${item.slug}`;
+      
+      // Require login for camera-based AI features
+      if (authRequiredSlugs.includes(item.slug)) {
+        const token = localStorage.getItem("shubhtalk_customer_token");
+        if (!token) {
+          localStorage.setItem("shubhtalk_redirect_after_login", path);
+          window.location.href = "/login?skip=welcome";
+          return;
+        }
+      }
+      
       navigate(path);
     }
   };
@@ -784,11 +795,11 @@ const HomeV2 = () => {
       )}
 
       {/* ═══ SECTION 5b — News / Blog ═══ */}
-      {(blogList.length > 0 || blogSection?.content?.length > 0) && (
+      {(blogSection?.content?.length > 0 || blogList.length > 0) && (
         <section className={styles.blogSection} style={{ paddingRight:'0px'}}>
           <Suspense fallback={null}>
             <BlogsSection
-              blogData={blogList.length > 0 ? blogList : blogSection?.content || []}
+              blogData={blogSection?.content?.length > 0 ? blogSection.content : blogList}
               title={blogSection?.title || "NEWS / BLOGS"}
               showMore={true}
             />
@@ -835,7 +846,11 @@ const HomeV2 = () => {
             const colors = ["#FEF0E4", "#F4ECFB", "#E9F2EF", "#EBF2FB"];
             return (
               <div key={i} className={styles.statCard}>
-                <div className={styles.statCircle} />
+                {s.icon ? (
+                  <img src={s.icon} alt="" className={styles.statIcon} loading="lazy" />
+                ) : (
+                  <div className={styles.statCircle} />
+                )}
                 <div className={styles.statText}>
                   <span className={styles.statNum}>{(s.count ?? 0).toLocaleString()}</span>
                   <span className={styles.statLabel}>{s.description}</span>

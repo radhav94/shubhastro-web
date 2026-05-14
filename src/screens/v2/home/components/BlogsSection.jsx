@@ -95,7 +95,7 @@ const BlogsSection = ({ blogData = [], title, showMore }) => {
           >
             <div className={styles.blogImageWrapper}>
               <img
-                src={blog.imageUrl || DefaultImages.BlogsDefault}
+                src={blog.imageUrl || blog.img || DefaultImages.BlogsDefault}
                 alt={blog.title}
                 className={styles.blogImage}
                 onError={(e) => {

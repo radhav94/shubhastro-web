@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './GemstoneLanding.module.scss';
 import ClarityIcon from '../../../../assets/icons/clarity.png';
@@ -11,6 +11,15 @@ import Footer from '../../../../layouts/Footer';
 const GemstoneLanding = () => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/gemstone-authenticity");
+      window.location.href = "/login?skip=welcome";
+    }
+  }, []);
+
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
   const features = [
     {
       icon: ClarityIcon,

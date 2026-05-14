@@ -2779,6 +2779,14 @@
   background: linear-gradient(135deg, #FCF8F7 0%, #FCDBD9 100%);
 }
 
+.statIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
 .statText {
   display: flex;
   flex-direction: column;
