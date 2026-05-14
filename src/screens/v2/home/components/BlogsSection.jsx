@@ -87,7 +87,7 @@ const BlogsSection = ({ blogData = [], title, showMore }) => {
               navigate(
                 PATH.privateRoutes.SINGLEBLOG.path.replace(
                   ":slug",
-                  blog.blogId,
+                  blog.blogId || blog._id || blog.slug,
                 ),
               )
             }

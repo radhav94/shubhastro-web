@@ -41,7 +41,7 @@ const LoveTriangleResultPage = () => {
   ];
 
   if (isLoading) {
-    return <PrimaryLoader />;
+    return <PrimaryLoader isLoading={true} />;
   }
 
   if (error) {
