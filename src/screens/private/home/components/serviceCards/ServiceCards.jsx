@@ -43,6 +43,8 @@ const ServiceCards = () => {
     "kundli-matching": PATH.privateRoutes.MATCHMAKING.path,
     numerology: PATH.privateRoutes.NUMEROLOGY.path,
     "talk-to-astrologer": PATH.privateRoutes.Chat_With_ASTROLOGER.path,
+    "daily-horoscope": "/daily-horoscope",
+    "explore-daily-horoscope": "/daily-horoscope",
     // tarot: PATH.privateRoutes.TAROT.path,
   };
 
