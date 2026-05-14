@@ -10,7 +10,7 @@ const FriendshipReport = () => {
 
   const stored = JSON.parse(localStorage.getItem("friendship_calculator"));
 
-  const [friendshipCalculator, { data, isLoading, isError }] =
+  const [friendshipCalculator, { data, isLoading }] =
     useFriendshipCalculatorMutation();
 
   useEffect(() => {
@@ -19,12 +19,13 @@ const FriendshipReport = () => {
     friendshipCalculator(stored)
       .unwrap()
       .catch((err) => {
-        console.error("Friendship calculator error:", err);
+        const message =
+          err?.data?.message || "Something went wrong. Please try again.";
+        navigate("/friendship-calculator", { replace: true });
       });
   }, []); // run once
 
-  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
-  if (isError) return <div className={styles.center}>No data found</div>;
+  if (isLoading || !data) return <PrimaryLoader isLoading={true} />;
 
   const report = data?.data;
   if (!report) return null;
