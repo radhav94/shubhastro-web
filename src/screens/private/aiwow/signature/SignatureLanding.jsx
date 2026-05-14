@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './SignatureLanding.module.scss';
 import StrokeIcon from '../../../../assets/icons/Stroke.png';
@@ -11,6 +11,15 @@ import TTSButton from '../../../../component/UI/TTSButton';
 const SignatureLanding = () => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/signature-analysis");
+      window.location.href = "/login?skip=welcome";
+    }
+  }, []);
+
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
   const features = [
     {
       icon: StrokeIcon,
