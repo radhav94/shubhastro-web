@@ -3,7 +3,7 @@
 .container {
   position: relative;
   min-height: 100vh;
-  background: #f5f5f5;
+  // background: #f5f5f5;
   padding-top: 95px;
   @media screen and (width <= 1180px) {
     padding-top: 53px;
@@ -11,15 +11,15 @@
 }
 
 .headerWrap{
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid #ffffff;
 }
 .header {
   display: flex;
   // justify-content: space-between;
   align-items: center;
   padding:6px 16px;
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
   gap: 16px;
 }
@@ -58,7 +58,7 @@
 }
 
 .content {
-  max-width: 1200px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 1rem;
 }
@@ -87,6 +87,11 @@
   // margin-bottom: 1.5rem;
   display: flex;
   justify-content: center;
+  img{
+    width: 140px;
+    flex-shrink: 0;
+    height: auto;
+  }
 }
 
 .faceImage {
@@ -111,17 +116,18 @@
 
 .resultSubtitle {
   font-size: 0.9375rem;
-  color: #6b7280;
+  color: #030303;
   margin: 0;
 }
 
 // Summary Card
 .summaryCard {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  border: 1px solid #e5e7eb;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -142,7 +148,7 @@
   font-size: 0.9375rem;
   line-height: 1.6;
   margin: 0;
-  color: #4b5563;
+  color: #030303;
 }
 
 // Tabs - Matching the image style
@@ -151,7 +157,7 @@
   gap: 0;
   overflow-x: auto;
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #fff;
   -webkit-overflow-scrolling: touch;
 
   &::-webkit-scrollbar {
@@ -235,7 +241,9 @@
 }
 
 .planetCard {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 1rem;
   padding: 1rem;
   // box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -258,7 +266,7 @@
 
 .planetAspect {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: #030303;
   margin: 0;
   line-height: 1.4;
 }
@@ -274,7 +282,9 @@
 // Cards - Matching the gray background from image
 .card,
 .dominantCard {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 1rem;
   padding: 0;
   position: relative;
@@ -285,8 +295,10 @@
 
 .cardHeaderButton {
   width: 100%;
-  background: #fff;
-  border: none;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
+  // border: none;
   padding: 1rem 1rem;
   display: flex;
   justify-content: space-between;
@@ -308,7 +320,7 @@
 
 .dropdownArrow {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #030303;
   transition: transform 0.3s ease;
   flex-shrink: 0;
   margin-left: 1rem;
@@ -382,13 +394,15 @@
 
 .dominantMeaning {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #030303;
   line-height: 1.6;
   margin: 0;
 }
 
 .energyCard {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 1rem;
   padding: 1.25rem;
   position: relative;
@@ -423,7 +437,7 @@
 
 .energyDescription {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #030303;
   line-height: 1.6;
   margin: 0;
 }
@@ -437,7 +451,7 @@
 
 .cardText {
   font-size: 0.9375rem;
-  color: #4b5563;
+  color: #030303;
   line-height: 1.6;
   margin: 0;
 }
@@ -453,7 +467,7 @@
 
 .listItem {
   font-size: 0.9375rem;
-  color: #4b5563;
+  color: #030303;
   line-height: 1.5;
   padding-left: 1.5rem;
   position: relative;
@@ -475,18 +489,22 @@
 }
 
 .chip {
-  background: #FFF8EC;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   color: #374151;
   padding: 0.375rem 0.75rem;
   border-radius: 3rem;
   font-size: 0.8125rem;
   font-weight: 500;
-  border: 1px solid rgba(247, 88, 1, 0.3);
+  // border: 1px solid rgba(247, 88, 1, 0.3);
 }
 
 // Analysis Card - Matching the image style
 .analysisCard {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 1rem;
   padding: 1.25rem;
 }
@@ -501,7 +519,7 @@
 
 .category {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: #030303;
   margin: 0 0 0.25rem 0;
   text-transform: capitalize;
 }
@@ -527,14 +545,16 @@
 
 .description {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #030303;
   line-height: 1.6;
   margin: 0;
 }
 
 // Aura Card
 .auraCard {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 1rem;
   padding: 1.25rem;
 }
@@ -551,7 +571,7 @@
   height: 48px;
   border-radius: 50%;
   flex-shrink: 0;
-  border: 2px solid #e5e7eb;
+  border: 1.5px solid #fff;
 }
 
 .auraInfo {
@@ -567,7 +587,7 @@
 
 .auraType {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: #030303;
   margin: 0;
   text-transform: capitalize;
 }
@@ -589,7 +609,9 @@
 
 // Feature Card
 .featureCard {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 1rem;
   padding: 1.25rem;
 }
@@ -604,7 +626,7 @@
 
 .featureShape {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #030303;
   margin: 0 0 0.5rem 0;
 
   strong {
@@ -614,14 +636,16 @@
 
 .featureInterpretation {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #030303;
   line-height: 1.6;
   margin: 0;
 }
 
 // Cosmic Card
 .cosmicCard {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 1rem;
   padding: 1.25rem;
 }
@@ -660,7 +684,7 @@
 
 .compatibility {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #030303;
   margin: 0.75rem 0 0 0;
 
   strong {
@@ -670,11 +694,13 @@
 
 // Insight Card
 .insightCard {
-  background: #f9fafb;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 1rem;
-  border: 1px solid #e5e7eb;
+  border: 1.5px solid #ffffff;
 }
 
 .insightTitle {
