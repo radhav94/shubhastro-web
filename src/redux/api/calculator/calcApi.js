@@ -132,7 +132,7 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "prediction/numerology",
         params: {
-          name: payload?.name,
+          name: payload?.name?.trim().replace(/\s+/g, ""),
           lang: "en",
           date: formatDate(payload?.dob),
         },
