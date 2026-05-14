@@ -92,7 +92,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
             </svg>
           </div>
         </div>
-        <button className={styles.viewAllBtn} onClick={() => navigate('/profile')}>View All &rsaquo;</button>
+        <button className={styles.viewAllBtn} onClick={() => navigate('/profile', { state: { activeTab: 'Order History' } })}>View All &rsaquo;</button>
       </div>
 
       <div className={styles.sessionScroll}>

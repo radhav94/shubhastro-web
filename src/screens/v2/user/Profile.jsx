@@ -82,6 +82,18 @@ const Profile = () => {
   );
   const [orderHistoryTab, setOrderHistoryTab] = useState("call"); // Sub-tab for order history
 
+  // Scroll to tabs section when navigated with activeTab state
+  useEffect(() => {
+    if (navigationState.activeTab && orderListRef.current) {
+      setTimeout(() => {
+        const el = orderListRef.current;
+        const headerOffset = 100;
+        const elementPosition = el.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({ top: elementPosition - headerOffset, behavior: "smooth" });
+      }, 300);
+    }
+  }, []);
+
   // Filter modal state
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [filterActiveTab, setFilterActiveTab] = useState("Sort");
@@ -1379,7 +1391,7 @@ const Profile = () => {
       </div>
 
       {/* Tabs */}
-      <div className={styles.tabsContainer}>
+      <div className={styles.tabsContainer} ref={orderListRef}>
         {tabs.map((tab) => (
           <button
             key={tab}
