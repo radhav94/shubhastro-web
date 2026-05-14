@@ -1,33 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import styles from "./NotFound.module.scss";
-import bgWaves from "../../../assets/images/404-bg-waves.svg";
-import bgRight from "../../../assets/images/404-bg-right.svg";
 import zodiacWheel from "../../../assets/images/404-zodiac-wheel.png";
 
 const NotFound = () => {
   const navigate = useNavigate();
 
-  const handleGoHome = () => {
-    // Use hard navigation to bypass corrupted router state (e.g. after Google Translate)
-    window.location.href = '/';
-  };
-
-  const handleGoBack = () => {
-    // If there's browser history, go back; otherwise hard-navigate to home
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      window.location.href = '/';
-    }
-  };
-
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-
-        {/* Background decorations */}
-        <img src={bgWaves} alt="" className={styles.bgWaves} aria-hidden="true" />
-        <img src={bgRight} alt="" className={styles.bgRight} aria-hidden="true" />
 
         {/* Left — Zodiac wheel image from Figma */}
         <div className={styles.wheelWrap}>

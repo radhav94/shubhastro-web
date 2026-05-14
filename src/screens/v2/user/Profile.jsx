@@ -1625,7 +1625,7 @@ const Profile = () => {
                                       <span className={styles.orderDate}>
                                         📅{" "}
                                         {dayjs(order.date).format(
-                                          "MMM DD, YYYY",
+                                          "DD MMM, YYYY",
                                         )}
                                       </span>
                                       <span className={styles.orderTime}>
