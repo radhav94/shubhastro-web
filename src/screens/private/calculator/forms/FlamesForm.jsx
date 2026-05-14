@@ -33,7 +33,7 @@ const FlamesForm = ({
         <input
           placeholder="Enter your name"
           value={name1}
-          onChange={(e) => onChange("name1", e.target.value)}
+          onChange={(e) => onChange("name1", e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
         />
         {errors?.name1 && <p className={styles.error}>{errors.name1}</p>}
       </div>
@@ -46,7 +46,7 @@ const FlamesForm = ({
         <input
           placeholder="Enter your partner's name"
           value={name2}
-          onChange={(e) => onChange("name2", e.target.value)}
+          onChange={(e) => onChange("name2", e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
         />
         {errors?.name2 && <p className={styles.error}>{errors.name2}</p>}
       </div>

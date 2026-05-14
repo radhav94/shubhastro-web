@@ -33,7 +33,8 @@ const AstroBirthForm = ({
         <input
           name="name"
           value={name}
-          onChange={(e) => onChange("name", e.target.value)}
+          placeholder="Enter your name"
+          onChange={(e) => onChange("name", e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
         />
         {errors?.name && <p className={styles.error}>{errors.name}</p>}
       </div>

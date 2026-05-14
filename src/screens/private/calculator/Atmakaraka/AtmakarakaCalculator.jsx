@@ -151,7 +151,7 @@ const AtmakarakaCalculator = () => {
               name="name"
               value={formData.name}
               placeholder="E.g. John Doe"
-              onChange={(e) => handleChange("name", e.target.value)}
+              onChange={(e) => handleChange("name", e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
             />
             {errors?.name && <p className={styles.error}>{errors.name}</p>}
           </div>
