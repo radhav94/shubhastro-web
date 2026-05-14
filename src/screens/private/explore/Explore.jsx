@@ -109,20 +109,20 @@ const Explore = () => {
   };
 
   // Helper function to get destiny card colors (same as home page category colors)
-  const getDestinyCardColor = (index) => {
-    const colors = [
-      "linear-gradient(135deg, #FFE4BA 0%, #FFD89B 100%)",
-      "linear-gradient(135deg, #FFE4E1 0%, #FFC0CB 100%)",
-      "linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 100%)",
-      "linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%)",
-      "linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%)",
-      "linear-gradient(135deg, #FFCCBC 0%, #FFAB91 100%)",
-      "linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%)",
-      "linear-gradient(135deg, #BBDEFB 0%, #90CAF9 100%)",
-      "linear-gradient(135deg, #F8BBD0 0%, #F48FB1 100%)",
-    ];
-    return colors[index % colors.length];
-  };
+  // const getDestinyCardColor = (index) => {
+  //   const colors = [
+  //     "linear-gradient(135deg, #FFE4BA 0%, #FFD89B 100%)",
+  //     "linear-gradient(135deg, #FFE4E1 0%, #FFC0CB 100%)",
+  //     "linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 100%)",
+  //     "linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%)",
+  //     "linear-gradient(135deg, #FFF9C4 0%, #FFF59D 100%)",
+  //     "linear-gradient(135deg, #FFCCBC 0%, #FFAB91 100%)",
+  //     "linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%)",
+  //     "linear-gradient(135deg, #BBDEFB 0%, #90CAF9 100%)",
+  //     "linear-gradient(135deg, #F8BBD0 0%, #F48FB1 100%)",
+  //   ];
+  //   return colors[index % colors.length];
+  // };
 
   // Render section based on display_type and slug
   const renderSection = (section, index) => {
@@ -151,7 +151,6 @@ const Explore = () => {
               <div
                 key={idx}
                 className={styles.topCard}
-                style={{ backgroundColor: card.bg_color || "#E56329" }}
                 onClick={() => handleCardClick(card, "all-about-you")}
               >
                 <h3 className={styles.cardTitle}>{card.title}</h3>
@@ -224,7 +223,6 @@ const Explore = () => {
               <div
                 key={idx}
                 className={styles.destinyCard}
-                style={{ background: getDestinyCardColor(idx) }}
                 onClick={() => handleCardClick(card)}
               >
                 <div className={styles.destinyCardContent}>
@@ -368,7 +366,6 @@ const Explore = () => {
             <div
               key={idx}
               className={styles.destinyCard}
-              style={{ background: getDestinyCardColor(idx) }}
               onClick={() => handleCardClick(card)}
             >
               <div className={styles.destinyCardContent}>
