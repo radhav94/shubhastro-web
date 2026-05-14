@@ -78,7 +78,7 @@ const GiftPopup = ({ show, onClose, giftList, astrologerId, astrologerName, sock
         <div className="gift-header">
           <div className="gift-title">Send a Gift</div>
           <div className="gift-wallet">
-            <span className="gift-wallet-amount">₹{balance}</span>
+            <span className="gift-wallet-amount">₹{balance ?? 0}</span>
             <div className="gift-wallet-label">
               <img src={walletIcon} alt="wallet" width="16" height="16" />
               <span>Wallet</span>

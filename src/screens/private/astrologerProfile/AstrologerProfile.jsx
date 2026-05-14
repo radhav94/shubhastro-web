@@ -366,6 +366,10 @@ const AstrologerProfile = () => {
 
 
   const handleOpenReviewModal = () => {
+    if (!getToken()) {
+      navigate("/login");
+      return;
+    }
     console.log(data,"123")
     setReviewData({
       astrologerID: data?.astrologer_ID,
