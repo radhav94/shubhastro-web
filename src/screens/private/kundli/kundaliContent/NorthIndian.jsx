@@ -73,10 +73,10 @@ export const planetaryHeaders = [
   { label: "Lord Status", key: "lord_status" },
 ];
 
-const NorthIndian = () => {
+const NorthIndian = ({ style = "north" }) => {
   const payload = useSelector((state) => state?.form?.kundliPayload);
 
-  const params = payload ? buildVedicParam(payload) : null;
+  const params = payload ? buildVedicParam(payload, { style }) : null;
 
   /** 🌟 Load Planet Data */
   const {

@@ -13,16 +13,63 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   font-family: $font-primary;
 }
 
+// --- Tab Switcher (North/South) ---
+.tabGroup {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  border-bottom: 1px solid $color-white;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.tabButton {
+  width: 50%;
+  background: none;
+  border: none;
+  color: $color-black;
+  font-weight: 500;
+  font-size: 15px;
+  padding: 10px 16px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+
+  @media (max-width: 1024px) {
+    font-size: 14px;
+  }
+
+  &:hover {
+    color: $color-black;
+  }
+}
+
+.activeTab {
+  font-weight: 600;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+    border-radius: 2px;
+  }
+}
+
 .grid {
-  display: grid;
-  grid-template-columns: 1fr; // Mobile-first
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   gap: 24px;
   margin-bottom: 24px;
-
-  @media (min-width: 768px) {
-    grid-template-columns: 1fr 1fr;
-    align-items: start; // 👈 ensures items don't stretch equally
-  }
+  flex-wrap: wrap;
 }
 
 .contentCard {
