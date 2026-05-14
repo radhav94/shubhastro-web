@@ -37,6 +37,7 @@ import { capitalizeWords } from "../../utils/capitalize";
 import VideocamIcon from "../../assets/chat/Videocam.svg";
 import CallIcon from "../../assets/chat/Call.svg";
 import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
+import SwitchWaitingPopup from "../UI/switchWaiting/SwitchWaitingPopup";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
@@ -95,6 +96,7 @@ const VideoCalling = ({ callData }) => {
   const [remoteVideoEnabled, setRemoteVideoEnabled] = useState(true);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
 
   // Auto-minimize when call originated from live and user is not on live page
   useEffect(() => {
@@ -819,6 +821,7 @@ const VideoCalling = ({ callData }) => {
         
         // Reset the downgrade flag since we're staying in video mode
         isDowngradingToAudio.current = false;
+        setIsSwitching(false);
         setWaitingList(null);
         
         Toast.info(data?.message || "Audio call request rejected. Continuing with video call.");
@@ -827,6 +830,7 @@ const VideoCalling = ({ callData }) => {
       
       // Regular call rejection
       console.log("📞 Regular call rejection - ending call");
+      setIsSwitching(false);
       safeEndCall();
     };
 
@@ -875,6 +879,7 @@ const VideoCalling = ({ callData }) => {
     if (activeCall && activeCall.callType === "audio" && activeCall.roomId === roomId) {
       console.log("🔄 Detected activeCall changed to audio, setting downgrade flag...");
       isDowngradingToAudio.current = true;
+      setIsSwitching(false);
       setWaitingList(null);
     }
   }, [activeCall, roomId]);
@@ -882,7 +887,7 @@ const VideoCalling = ({ callData }) => {
   /* ================= SWITCH TO AUDIO ================= */
   const switchToAudio = () => {
     Toast.success("Switching to audio call...");
-    setWaitingList(5);
+    setIsSwitching(true);
 
     voiceSocket.emit("call:initiate", {
       userId: activeCall.userId,
@@ -1108,8 +1113,22 @@ const VideoCalling = ({ callData }) => {
   // Ref to store sendMessage function from VideoCallChat
   const sendChatMessageRef = useRef(null);
 
+  const handleCancelSwitch = () => {
+    setIsSwitching(false);
+    isDowngradingToAudio.current = false;
+    voiceSocket.emit("call:cancel", { roomId: roomId, canceledBy: "CUSTOMER", isSwitch: true });
+    setWaitingList(null);
+  };
+
   return (
     <>
+      {/* Switch Waiting Popup */}
+      <SwitchWaitingPopup
+        isVisible={isSwitching}
+        switchType="audio"
+        onCancel={handleCancelSwitch}
+      />
+
       {/* MINI VIEW */}
       <div
         className={styles.floatingMini}

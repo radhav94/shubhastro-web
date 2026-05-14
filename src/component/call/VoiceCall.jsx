@@ -31,6 +31,7 @@ import { getAstrologerDefaultImage } from "../../utils/appImages";
 import { capitalizeWords } from "../../utils/capitalize";
 import walletIcon from "../../assets/images/wallet-icon.svg";
 import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
+import SwitchWaitingPopup from "../UI/switchWaiting/SwitchWaitingPopup";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
@@ -98,6 +99,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     }
   }, [activeCall?.origin, isOnLivePage, isMinimized, setIsMinimized]);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [showRechargeButton, setShowRechargeButton] = useState(false);
@@ -593,6 +595,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     if (activeCall && activeCall.callType === "video" && activeCall.roomId === roomId) {
       console.log("🔄 Detected activeCall changed to video, setting upgrade flag...");
       isUpgradingToVideo.current = true;
+      setIsSwitching(false);
       setWaitingList(null);
     }
   }, [activeCall, roomId]);
@@ -667,6 +670,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         
         // Reset the upgrade flag since we're staying in audio mode
         isUpgradingToVideo.current = false;
+        setIsSwitching(false);
         setWaitingList(null);
         
         // Show toast notification
@@ -678,6 +682,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       
       // If it's a regular call rejection (not a switch), end the call
       console.log("📞 Regular call rejection - ending call");
+      setIsSwitching(false);
       endCall();
     };
 
@@ -781,7 +786,7 @@ const AgoraVoiceCalling = ({ callData }) => {
 
       // Balance is sufficient, proceed with video call
       Toast.success("Switching to video call...");
-      setWaitingList(5);
+      setIsSwitching(true);
 
       voiceSocket.emit("call:initiate", {
         userId: activeCall.userId,
@@ -834,8 +839,22 @@ const AgoraVoiceCalling = ({ callData }) => {
   };
 
   /* ================= UI ================= */
+  const handleCancelSwitch = () => {
+    setIsSwitching(false);
+    isUpgradingToVideo.current = false;
+    voiceSocket.emit("call:cancel", { roomId: socketRoomId, canceledBy: "CUSTOMER", isSwitch: true });
+    setWaitingList(null);
+  };
+
   return (
     <>
+      {/* Switch Waiting Popup */}
+      <SwitchWaitingPopup
+        isVisible={isSwitching}
+        switchType="video"
+        onCancel={handleCancelSwitch}
+      />
+
       {/* MINI VIEW */}
       {isMinimized && !isOnLivePage && (
         <div

@@ -30,6 +30,7 @@ const useChatSocket = ({
   } = useChat();
 
   const [waitingPopup, setWaitingPopup] = useState(false);
+  const [switchType, setSwitchType] = useState(null);
   const [callRoomId, setCallRoomId] = useState(null);
   const [getBalance] = useGetBalanceMutation();
 
@@ -76,6 +77,8 @@ const useChatSocket = ({
     }
 
     console.log("🎵 Emitting call:initiate for audio with isSwitch and roomId");
+    setSwitchType("audio");
+    setWaitingPopup(true);
     voiceSocket.emit("call:initiate", {
       userId,
       astrologerId,
@@ -115,6 +118,8 @@ const useChatSocket = ({
     }
 
     console.log("📹 Emitting call:initiate for video with isSwitch and roomId");
+    setSwitchType("video");
+    setWaitingPopup(true);
     voiceSocket.emit("call:initiate", {
       userId,
       astrologerId,
@@ -281,6 +286,7 @@ const useChatSocket = ({
 
   return {
     waitingPopup,
+    switchType,
     handleAudioCall,
     handleVideoCall,
     handleCancelCall,
