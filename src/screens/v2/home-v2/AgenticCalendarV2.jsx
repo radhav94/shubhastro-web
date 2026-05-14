@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { FiChevronRight, FiCalendar, FiChevronLeft } from "react-icons/fi";
@@ -153,7 +154,7 @@ const AgenticCalendarV2 = ({ styles }) => {
       </div>
 
       {/* Date Picker Modal */}
-      {showDatePicker && (
+      {showDatePicker && createPortal(
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999 }}
           onClick={() => setShowDatePicker(false)}>
           <div style={{ background:'#fff', borderRadius:16, padding:24, width:340, maxWidth:'90vw' }}
@@ -222,11 +223,12 @@ const AgenticCalendarV2 = ({ styles }) => {
               })()}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Add Custom Modal */}
-      {showCustomModal && (
+      {showCustomModal && createPortal(
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999 }}
           onClick={() => setShowCustomModal(false)}>
           <div style={{ background:'#fff', borderRadius:16, padding:24, width:320, maxWidth:'90vw' }}
@@ -256,7 +258,8 @@ const AgenticCalendarV2 = ({ styles }) => {
               style={{ width:'100%', height:44, background:'#f75801', border:'none', borderRadius:999, color:'#fff', fontSize:15, fontWeight:700, cursor:'pointer', opacity: customInput.trim() ? 1 : 0.5 }}
             >Add</button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
