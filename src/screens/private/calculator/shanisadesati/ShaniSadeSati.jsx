@@ -116,7 +116,7 @@ const ShaniSadeSati = () => {
         <div className={styles.row}>
           <div className={styles.field}>
             <label>Full Name <span>*</span></label>
-            <input placeholder="Enter your name" value={formData.name} onChange={(e) => handleChange("name", e.target.value)} />
+            <input placeholder="Enter your name" value={formData.name} onChange={(e) => handleChange("name", e.target.value.replace(/[^a-zA-Z\s]/g, ""))} />
             {errors.name && <p className={styles.err}>{errors.name}</p>}
           </div>
           <div className={styles.field}>
