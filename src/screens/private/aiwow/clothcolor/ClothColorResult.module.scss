@@ -14,6 +14,15 @@
   border-bottom: 1.5px solid #ffffff;
   backdrop-filter: blur(12px);
 }
+.tabsWrap{
+  width: 100%;
+  position: sticky;
+  top: 95px;
+  z-index: 999;
+  @media (width <= 1180px) {
+    top: 53px;
+  }
+}
 .header {
   display: flex;
   // justify-content: space-between;

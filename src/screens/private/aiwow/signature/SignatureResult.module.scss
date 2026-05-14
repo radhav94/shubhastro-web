@@ -74,6 +74,12 @@
   background: rgba(255, 255, 255, 0.4);
   border-bottom: 1.5px solid #ffffff;
   backdrop-filter: blur(12px);
+  position: sticky;
+  top: 95px;
+  z-index: 999;
+  @media (width <= 1180px) {
+    top: 53px;
+  }
 }
 .tabs {
   display: flex;
@@ -143,12 +149,15 @@
 
 .signatureImageWrapper {
   position: relative;
-  width: 400px;
+  width: 250px;
+  flex-shrink: 0;
   margin: 0 auto 16px;
   background: rgba(255, 255, 255, 0.4);
   border: 1.5px solid #ffffff;
   backdrop-filter: blur(12px);
   margin: 0;
+  border-radius: 7px;
+  overflow: hidden;
   
   @media (max-width: 767px) {
     width: 70%;
@@ -230,9 +239,9 @@
 .traitsCard{
   // padding: 0;
   margin-bottom: 16px;
-  background: rgba(255, 255, 255, 0.4);
-  border: 1.5px solid #ffffff;
-  backdrop-filter: blur(12px);
+  // background: rgba(255, 255, 255, 0.4);
+  // border: 1.5px solid #ffffff;
+  // backdrop-filter: blur(12px);
 }
 .insightsCard,.leadershipCard,.communicationCard,.emotionalCard,.socialCard{
   background: rgba(255, 255, 255, 0.4);

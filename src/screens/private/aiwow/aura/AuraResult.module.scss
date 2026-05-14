@@ -159,6 +159,14 @@
   margin-bottom: 1.5rem;
   border-bottom: 1px solid #fff;
   -webkit-overflow-scrolling: touch;
+  position: sticky;
+  top: 95px;
+  z-index: 99;
+  // background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  @media (width <= 1180px) {
+    top: 53px;
+  }
 
   &::-webkit-scrollbar {
     display: none;
