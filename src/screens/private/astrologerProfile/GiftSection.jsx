@@ -15,7 +15,7 @@ const GiftSection = ({ astrologer }) => {
   const [selected, setSelected] = useState(null);
   const [disableSend, setDisableSend] = useState(false);
   const [isRechargeOpen, setIsRechargeOpen] = useState(false);
-  const gifts = data?.data || [];
+  const gifts = (data?.data || []).filter(g => g.status === true);
   const { balance, refreshWallet } = useWalletBalance();
 
   const handleSend = async () => {

@@ -10,7 +10,7 @@ const FlamesReport = () => {
 
   const stored = JSON.parse(localStorage.getItem("flames_calculator"));
 
-  const [flamesCalculator, { data, isLoading, isError }] =
+  const [flamesCalculator, { data, isLoading }] =
     useFlamesCalculatorMutation();
 
   useEffect(() => {
@@ -18,13 +18,17 @@ const FlamesReport = () => {
 
     flamesCalculator(stored)
       .unwrap()
-      .catch((err) => {
-        console.error("Flames calculator error:", err);
+      .then((res) => {
+        if (!res?.success) {
+          navigate("/flames-calculator", { replace: true });
+        }
+      })
+      .catch(() => {
+        navigate("/flames-calculator", { replace: true });
       });
   }, []); // run once
 
-  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
-  if (isError) return <div className={styles.center}>No data found</div>;
+  if (isLoading || !data) return <PrimaryLoader isLoading={true} />;
 
   const report = data?.data;
   if (!report) return null;
