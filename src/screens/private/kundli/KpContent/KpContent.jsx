@@ -1,5 +1,4 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
 import styles from "./KpContent.module.scss";
 import DynamicTable from "../../../../component/UI/table/kundli/DynamicTable";
 import DynamicChart from "../../../../component/UI/charts/kundli/DynamicChart";
@@ -12,15 +11,6 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
-
-const sectionVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
-  },
-};
 
 function decimalToDMS(decimal) {
   if (decimal === null || decimal === undefined || isNaN(decimal)) {
@@ -56,29 +46,23 @@ const rulingHeaders = [
 
 const planetaryHeaders = [
   { label: "Planet", key: "full_name" },
-
   { label: "Cusp", key: "house" },
-
   { label: "Sign", key: "zodiac" },
-
   {
     label: "Sign Lord",
     key: "pseudo_rasi_lord",
     render: (row) => row.pseudo_rasi_lord || "--",
   },
-
   {
     label: "Star Lord",
     key: "pseudo_nakshatra_lord",
     render: (row) => row.pseudo_nakshatra_lord || "--",
   },
-
   {
     label: "Sub Lord",
     key: "sub_lord",
     render: (row) => row.sub_lord || "--",
   },
-
   {
     label: "Sub-Sub Lord",
     key: "sub_sub_lord",
@@ -89,11 +73,11 @@ const planetaryHeaders = [
     key: "local_degree",
     render: (row) => decimalToDMS(row.local_degree),
   },
-
   {
     label: "Retro",
     key: "retro",
-    render: (row) => row.retro === true ? "Retro" : row.retro === false ? "Direct" : "-",
+    render: (row) =>
+      row.retro === true ? "Retro" : row.retro === false ? "Direct" : "-",
   },
 ];
 
@@ -127,9 +111,11 @@ const cuspHeaders = [
 ];
 
 const KpContent = () => {
+  const [activeTab, setActiveTab] = useState("north");
   const payload = useSelector((state) => state?.form?.kundliPayload);
-  const params = payload ? buildVedicParam(payload) : null;
-  const { data, isSuccess, isLoading } = useGetKpDetailsQuery(
+  const params = payload ? buildVedicParam(payload, { style: activeTab }) : null;
+
+  const { data, isLoading: kpLoading } = useGetKpDetailsQuery(
     params ? params : skipToken
   );
   const { data: chalitChart, isLoading: chalitLoading } = useGetChartQuery(
@@ -142,22 +128,28 @@ const KpContent = () => {
 
   const svgChalitUrl = sanitizeSvg(chalitChart) || null;
 
-
   return (
     <div className={styles.mainContainer}>
+      {/* North/South Tab Switcher */}
+      <div className={styles.tabGroup}>
+        <button
+          className={`${styles.tabButton} ${activeTab === "north" ? styles.activeTab : ""}`}
+          onClick={() => setActiveTab("north")}
+        >
+          North Indian
+        </button>
+        <button
+          className={`${styles.tabButton} ${activeTab === "south" ? styles.activeTab : ""}`}
+          onClick={() => setActiveTab("south")}
+        >
+          South Indian
+        </button>
+      </div>
+
       <PrimaryLoader isLoading={chalitLoading} />
       <div className={styles.grid}>
-        {/* Left: Chalit Chart */}
+        {/* Chalit Chart */}
         <DynamicChart title="Bhav Chalit Chart" src={svgChalitUrl} />
-
-        {/* Right: Ruling Table */}
-        {/* {kpPlanets?.length > 0 && (
-          <DynamicTable
-            title="Ruling Table"
-            headers={rulingHeaders}
-            data={kpPlanets.length > 5 ? kpPlanets.slice(0, 5) : kpPlanets}
-          />
-        )} */}
       </div>
 
       {/* Planetary Table */}
@@ -168,11 +160,6 @@ const KpContent = () => {
           data={kpPlanets}
         />
       )}
-
-      {/* Cusp Table */}
-      {/* {kpPlanets?.length > 0 && (
-        <DynamicTable title="Cusps" headers={cuspHeaders} data={kpPlanets} />
-      )} */}
     </div>
   );
 };
