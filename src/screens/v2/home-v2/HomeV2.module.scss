@@ -378,9 +378,11 @@
   flex: 1;
   z-index: 2;
   max-width: 55%;
-
-  @media (max-width: 767px) {
+  @media (max-width: 768px) {
     max-width: 60%;
+  }
+  @media (max-width: 767px) {
+    max-width: 82%;
   }
 }
 
@@ -3510,10 +3512,6 @@
   .heroBanner h1 {
     font-size: 26px;
     // font-weight: 600;
-  }
-
-  .heroContent {
-    max-width: 60%;
   }
 
   .heroBgImg {
