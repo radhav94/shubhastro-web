@@ -17,6 +17,17 @@ const AllCategories = () => {
   const allCategories = data?.data || [];
   const rootCategories = allCategories.filter((c) => c.parent_id === null);
 
+  // Use categories from homepage tray if passed (preserves tray ordering)
+  // Store in sessionStorage so it persists on back navigation
+  const trayCategories = (() => {
+    if (location.state?.categories) {
+      sessionStorage.setItem("shubhmall_tray_categories", JSON.stringify(location.state.categories));
+      return location.state.categories;
+    }
+    const stored = sessionStorage.getItem("shubhmall_tray_categories");
+    return stored ? JSON.parse(stored) : null;
+  })();
+
   // parent_id is numeric (e.g. 24), so match against numeric ID field
   const getChildren = (numericId) =>
     allCategories.filter((c) => c.parent_id === numericId);
@@ -62,13 +73,13 @@ const AllCategories = () => {
     if (parentStack.length > 0) {
       setParentStack((prev) => prev.slice(0, -1));
     } else {
-      navigate(-1);
+      navigate("/shubh-mall");
     }
   };
 
   const displayCategories = activeParent
     ? getChildren(activeParent.ID)
-    : rootCategories;
+    : (trayCategories || rootCategories);
 
   return (
     <div className={styles.page}>
