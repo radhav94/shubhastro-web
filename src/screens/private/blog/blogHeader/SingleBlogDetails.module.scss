@@ -59,7 +59,7 @@
 }
 
 .singleBlogWrapper {
-  max-width: 1440px;
+  max-width: 1240px;
   padding: 0 16px;
   margin: 70px auto 0 auto;
   // padding-top: 40px; // TopHeader (88px) + Blog Header (60px)
@@ -81,50 +81,50 @@
 
 .title {
   text-align: left;
-  font-size: 20px;
-  font-weight: 500;
+  font-size: 28px;
+  font-weight: 700;
   margin-bottom: 16px;
+  line-height: 1.35;
+  color: #1a1a1a;
 
   @media (max-width: 768px) {
-    font-size: 16px;
-    margin-bottom: 6px;
+    font-size: 20px;
+    margin-bottom: 12px;
   }
 }
 
 .metaInfo {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #bebbbb;
   flex-wrap: wrap;
 
   @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
   }
 }
 
 .date {
   font-size: 14px;
-  color: #666;
+  color: #555;
   margin: 0;
   text-align: left;
 }
 
 .author {
   font-size: 14px;
-  color: #666;
+  color: #555;
   margin: 0;
   text-align: left;
   
   &::before {
-    content: "•";
-    margin-right: 16px;
-    
-    @media (max-width: 768px) {
-      display: none;
-    }
+    content: "|";
+    margin-right: 8px;
+    color: #999;
   }
 }
 
@@ -132,35 +132,28 @@
   font-size: 16px;
   color: #222;
   text-align: left;
-  // background: #fff;
   border-radius: 16px;
-  border-radius: 16px;
-  border: 1px solid rgba(189, 189, 189, 0.20);
-  padding: 0px 16px 16px 16px;
-  background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border: 2px solid white;
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid white;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 
   @media (max-width: 768px) {
     font-size: 14px;
+    padding: 20px 16px;
   }
 
   p {
     margin-bottom: 18px;
-    // font-size: 16px;
   }
 
   strong {
-    // font-size: 18px;
     margin-top: 24px;
     display: block;
     color: #000;
     font-weight: 500;
-
-    // @media (min-width: 768px) {
-    //   font-size: 20px;
-    // }
   }
 
   ul,
@@ -168,4 +161,15 @@
     margin-left: 20px;
     margin-bottom: 16px;
   }
+}
+
+.trendingBadge {
+  display: inline-flex;
+  padding: 4px 14px;
+  border-radius: 100px;
+  background: #FFF5EC;
+  color: #E56329;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
 }

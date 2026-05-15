@@ -1,12 +1,18 @@
 .moreBlogsSection {
-  max-width: 1440px;
+  max-width: 1240px;
   padding: 0 16px;
   margin: 40px auto 48px;
+  background: rgba(255, 255, 255,0.4);
 
   @media (max-width: 768px) {
     margin: 40px auto 0px;
     padding: 0 16px;
   }
+}
+.moreBlogsMainSection{
+  margin: auto;
+  padding: 40px;
+  max-width: 1220px;
 }
 
 .header {
