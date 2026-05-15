@@ -123,17 +123,42 @@ const getBrand = (item) => typeof item?.brand === "object" ? item?.brand?.name :
 const EPooja = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState("all");
-  const [search, setSearch] = useState("");
-  const [showSearch, setShowSearch] = useState(false);
-  const [sort, setSort] = useState("");
+
+  // Initialize state from URL params for back-navigation persistence
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "all");
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [showSearch, setShowSearch] = useState(!!searchParams.get("search"));
+  const [sort, setSort] = useState(searchParams.get("sort") || "");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [traySlug, setTraySlug] = useState(searchParams.get("slug") || "");
   const [page, setPage] = useState(1);
   const [accumulated, setAccumulated] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
   const prevFilterKey = useRef("");
+  const observerRef = useRef(null);
+  const loadMoreRef = useRef(null);
   const LIMIT = 10;
 
+  // Homepage pagination state
+  const [homePage, setHomePage] = useState(1);
+  const [accumulatedTrays, setAccumulatedTrays] = useState([]);
+  const [homeHasMore, setHomeHasMore] = useState(true);
+  const homeObserverRef = useRef(null);
+  const homeLoadMoreRef = useRef(null);
+  const homeProcessedRef = useRef(null);
+  const HOME_LIMIT = 10;
+
   const debouncedSearch = useDebounce(search, 500);
+
+  // Sync filter state to URL params for back-navigation
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (activeTab !== "all") params.set("tab", activeTab);
+    if (sort) params.set("sort", sort);
+    if (search) params.set("search", search);
+    if (traySlug) params.set("slug", traySlug);
+    setSearchParams(params, { replace: true });
+  }, [activeTab, sort, search, traySlug]);
 
   // Determine if filters are active (search or non-"all" tab or sort)
   const isFiltering = debouncedSearch || activeTab !== "all" || sort;
@@ -142,7 +167,7 @@ const EPooja = () => {
   const filterKey = `${debouncedSearch}|${activeTab}|${sort}`;
 
   // ── API Calls ──
-  const { data: apiData, isLoading: homepageLoading } = useGetAstromallPageDataQuery({ page: 1, limit: 20 });
+  const { data: apiData, isLoading: homepageLoading, isFetching: homepageFetching } = useGetAstromallPageDataQuery({ page: homePage, limit: HOME_LIMIT });
   const { data: categoriesData } = useGetProductCategoriesQuery();
   const [addToCart] = useAddToCartMutation();
 
@@ -158,20 +183,6 @@ const EPooja = () => {
     return [ALL_TAB, ...mapped];
   })();
 
-  // ── Sync ?tab= query param to activeTab ──
-  useEffect(() => {
-    const tabParam = searchParams.get("tab");
-    if (!tabParam) return;
-    const match = categoryTabs.find(
-      (t) => t.slug.toLowerCase() === tabParam.toLowerCase() || t.label.toLowerCase() === tabParam.toLowerCase()
-    );
-    if (match && match.slug !== activeTab) {
-      setActiveTab(match.slug);
-      searchParams.delete("tab");
-      setSearchParams(searchParams, { replace: true });
-    }
-  }, [categoriesData, searchParams]);
-
   // ── Build filter params ──
   const activeCategoryId = categoryTabs.find((t) => t.slug === activeTab)?.id;
   const filterParams = {
@@ -179,7 +190,8 @@ const EPooja = () => {
     limit: LIMIT,
     ...(debouncedSearch && { search: debouncedSearch }),
     ...(activeTab !== "all" && activeCategoryId && { category: activeCategoryId }),
-    ...(sort && { sort }),
+    ...(traySlug && !activeCategoryId && { category: traySlug }),
+    sort: sort || "relevant",
   };
 
   const { data: productsData, isLoading: productsLoading, isFetching: productsFetching } = useGetProductsQuery(
@@ -187,7 +199,75 @@ const EPooja = () => {
     { skip: !isFiltering, refetchOnMountOrArgChange: true }
   );
 
-  const trays = apiData?.data?.list || apiData?.data || [];
+  const trays = accumulatedTrays;
+
+  // ── Accumulate homepage trays for scroll pagination ──
+  useEffect(() => {
+    if (!apiData?.data) return;
+    if (homeProcessedRef.current === apiData.data) return;
+    homeProcessedRef.current = apiData.data;
+
+    const raw = apiData.data;
+    const items = Array.isArray(raw.list) ? raw.list
+      : Array.isArray(raw) ? raw
+      : [];
+
+    if (!items.length) {
+      setHomeHasMore(false);
+      return;
+    }
+
+    if (homePage === 1) {
+      setAccumulatedTrays(items);
+    } else {
+      // Deduplicate by ID to avoid showing same trays again
+      setAccumulatedTrays((prev) => {
+        const existingIds = new Set(prev.map((t) => t.ID || t._id || t.slug || t.display_title));
+        const newItems = items.filter((t) => {
+          const id = t.ID || t._id || t.slug || t.display_title;
+          return !existingIds.has(id);
+        });
+        // If no new unique items, stop pagination
+        if (!newItems.length) {
+          setHomeHasMore(false);
+          return prev;
+        }
+        return [...prev, ...newItems];
+      });
+    }
+
+    // Check if more pages available
+    const totalPages = raw?.pages || raw?.totalPages || 0;
+    if (totalPages > 0) {
+      setHomeHasMore(homePage < totalPages);
+    } else {
+      setHomeHasMore(items.length >= HOME_LIMIT);
+    }
+  }, [apiData, homePage]);
+
+  // ── Homepage Infinite Scroll Observer ──
+  useEffect(() => {
+    if (homeObserverRef.current) homeObserverRef.current.disconnect();
+
+    if (!homeHasMore || homepageFetching || isFiltering) return;
+
+    homeObserverRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && homeHasMore && !homepageFetching) {
+          setHomePage((p) => p + 1);
+        }
+      },
+      { threshold: 0.1, rootMargin: "100px" }
+    );
+
+    if (homeLoadMoreRef.current) {
+      homeObserverRef.current.observe(homeLoadMoreRef.current);
+    }
+
+    return () => {
+      if (homeObserverRef.current) homeObserverRef.current.disconnect();
+    };
+  }, [homeHasMore, homepageFetching, isFiltering, accumulatedTrays]);
 
   // ── Accumulate products for load-more pagination ──
   const processedRef = useRef(null);
@@ -197,6 +277,7 @@ const EPooja = () => {
     if (prevFilterKey.current !== filterKey) {
       setPage(1);
       setAccumulated([]);
+      setHasMore(true);
       processedRef.current = null;
       prevFilterKey.current = filterKey;
     }
@@ -214,16 +295,56 @@ const EPooja = () => {
       : Array.isArray(raw.list) ? raw.list
       : Array.isArray(raw) ? raw
       : [];
+
+    // If API returns empty or null results, stop pagination
+    if (!items.length) {
+      setHasMore(false);
+      return;
+    }
+
     if (page === 1) {
       setAccumulated(items);
     } else {
       setAccumulated((prev) => [...prev, ...items]);
     }
+
+    // Check if there are more pages
+    const totalProducts = raw?.total || raw?.totalCount || 0;
+    const totalPages = raw?.pages || 0;
+    if (totalPages > 0) {
+      setHasMore(page < totalPages);
+    } else if (totalProducts > 0) {
+      setHasMore((page === 1 ? items.length : accumulated.length + items.length) < totalProducts);
+    } else {
+      // If no total info, check if we got fewer items than limit
+      setHasMore(items.length >= LIMIT);
+    }
   }, [productsData, page]);
 
-  const totalProducts = productsData?.data?.total || productsData?.data?.totalCount || 0;
-  const totalPages = productsData?.data?.pages || 0;
-  const hasMore = totalPages > 1 ? page < totalPages : accumulated.length < totalProducts;
+  // ── Infinite Scroll Observer ──
+  useEffect(() => {
+    if (observerRef.current) observerRef.current.disconnect();
+
+    // Only observe when we have data loaded, more pages available, and not currently fetching
+    if (!hasMore || productsFetching || !isFiltering) return;
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !productsFetching) {
+          setPage((p) => p + 1);
+        }
+      },
+      { threshold: 0.1, rootMargin: "100px" }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) observerRef.current.disconnect();
+    };
+  }, [hasMore, productsFetching, isFiltering, accumulated]);
 
   const isLoggedIn = () => {
     const role = localStorage.getItem("shubhtalk_role");
@@ -256,6 +377,7 @@ const EPooja = () => {
 
   const handleTabChange = (slug) => {
     setActiveTab(slug);
+    setTraySlug("");
   };
 
   const handleSortChange = (val) => {
@@ -267,6 +389,7 @@ const EPooja = () => {
     setSearch("");
     setActiveTab("all");
     setSort("");
+    setTraySlug("");
     setShowSearch(false);
   };
 
@@ -274,9 +397,11 @@ const EPooja = () => {
     const slug = tray?.slug || tray?.display_title || tray?.title || "";
     if (slug) {
       setActiveTab(slug);
+      setTraySlug(slug);
       setShowSearch(false);
       setSearch("");
       setSort("");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -292,11 +417,11 @@ const EPooja = () => {
     // ── astromall-banner ──
     if (displayType === "astromall-banner") {
       return (
-        <section key={tray.ID || index} className={styles.section}>
+        <section key={index} className={styles.section}>
           <SectionHeader title={title || "TOP DEALS FOR YOU"} onViewAll={showMore ? () => handleViewAll(tray) : undefined} />
           <HScrollRow>
             {items.map((d, i) => (
-              <div key={d.ID || i} className={styles.dealCard} onClick={() => navigate(`/product-details/${d.slug || d.ID}`, { state: d })}>
+              <div key={`${index}-${d.ID || i}`} className={styles.dealCard} onClick={() => navigate(`/product-details/${d.slug || d.ID}`, { state: d })}>
                 <ProductImage src={getImg(d)} alt={getTitle(d)} />
                 <div className={styles.dealBadges}>
                   {d.is_featured && <span className={styles.dealPopular}>Popular</span>}
@@ -315,19 +440,33 @@ const EPooja = () => {
 
     // ── browse-by-category ──
     if (displayType === "browse-by-category") {
+      const showArrows = items.length > 7;
       return (
-        <section key={tray.ID || index} className={styles.section}>
-          <SectionHeader title={title || "BROWSE BY CATEGORY"} onViewAll={showMore ? () => navigate("/categories") : undefined} />
-          <HScrollRow>
-            {items.map((c, i) => (
-              <div key={c.ID || i} className={styles.catSlideCard} onClick={() => navigate(`/category/${c.slug || c.ID}`, { state: { categoryId: c.ID, name: c.name, imgUrl: c.imgUrl } })} style={{ cursor: "pointer" }}>
-                <ProductImage src={c.imgUrl || getImg(c)} alt={c.name || "Category"} />
-                <div className={styles.catOverlay}>
-                  <h4>{c.name || "Category"}</h4>
+        <section key={index} className={styles.section}>
+          <SectionHeader title={title || "BROWSE BY CATEGORY"} onViewAll={showMore ? () => navigate("/categories", { state: { categories: items } }) : undefined} />
+          {showArrows ? (
+            <HScrollRow>
+              {items.map((c, i) => (
+                <div key={`${index}-${c.ID || i}`} className={styles.catSlideCard} onClick={() => navigate(`/category/${c.slug || c.ID}`, { state: { categoryId: c.ID, name: c.name, imgUrl: c.imgUrl } })} style={{ cursor: "pointer" }}>
+                  <ProductImage src={c.imgUrl || getImg(c)} alt={c.name || "Category"} />
+                  <div className={styles.catOverlay}>
+                    <h4>{c.name || "Category"}</h4>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </HScrollRow>
+              ))}
+            </HScrollRow>
+          ) : (
+            <div className={styles.hScrollRow}>
+              {items.map((c, i) => (
+                <div key={`${index}-${c.ID || i}`} className={styles.catSlideCard} onClick={() => navigate(`/category/${c.slug || c.ID}`, { state: { categoryId: c.ID, name: c.name, imgUrl: c.imgUrl } })} style={{ cursor: "pointer" }}>
+                  <ProductImage src={c.imgUrl || getImg(c)} alt={c.name || "Category"} />
+                  <div className={styles.catOverlay}>
+                    <h4>{c.name || "Category"}</h4>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       );
     }
@@ -336,12 +475,12 @@ const EPooja = () => {
     if (displayType === "shop-by-purpose") {
       const showArrows = items.length >= 7;
       return (
-        <section key={tray.ID || index} className={styles.section}>
+        <section key={index} className={styles.section}>
           <SectionHeader title={title || "SHOP BY PURPOSE"} onViewAll={showMore ? () => handleViewAll(tray) : undefined} />
           {showArrows ? (
             <HScrollRow>
               {items.map((item, i) => (
-                <div key={item.ID || i} className={styles.purposeCard} onClick={() => navigate(`/purpose/${item.slug || item.title?.toLowerCase() || ""}`)}>
+                <div key={`${index}-${item.ID || i}`} className={styles.purposeCard} onClick={() => navigate(`/purpose/${item.slug || item.title?.toLowerCase() || ""}`)}>
                   <ProductImage src={item.image_url || getImg(item)} alt={item.title || "Purpose"} />
                   <div className={styles.purposeOverlay}>
                     <h4>{item.title || ""}</h4>
@@ -352,7 +491,7 @@ const EPooja = () => {
           ) : (
             <div className={styles.hScrollRow}>
               {items.map((item, i) => (
-                <div key={item.ID || i} className={styles.purposeCard} onClick={() => navigate(`/purpose/${item.slug || item.title?.toLowerCase() || ""}`)}>
+                <div key={`${index}-${item.ID || i}`} className={styles.purposeCard} onClick={() => navigate(`/purpose/${item.slug || item.title?.toLowerCase() || ""}`)}>
                   <ProductImage src={item.image_url || getImg(item)} alt={item.title || "Purpose"} />
                   <div className={styles.purposeOverlay}>
                     <h4>{item.title || ""}</h4>
@@ -368,7 +507,7 @@ const EPooja = () => {
     // ── consult-to-expert-astrologer (static expert cards) ──
     if (displayType === "consult-to-expert-astrologer") {
       return (
-        <section key={tray.ID || index} className={styles.section}>
+        <section key={index} className={styles.section}>
           <SectionHeader title={title || "CONSULT NOW"} />
           <div className={styles.expertGrid}>
             {EXPERT_CARDS.map((e, i) => (
@@ -385,11 +524,11 @@ const EPooja = () => {
 
     // ── product-slider (suggested, special combo, new arrivals, etc.) ──
     return (
-      <section key={tray.ID || index} className={styles.section}>
+      <section key={index} className={styles.section}>
         <SectionHeader title={title} onViewAll={showMore ? () => handleViewAll(tray) : undefined} />
         <HScrollRow>
           {items.map((s, i) => (
-            <div key={s.ID || i} className={styles.prodCard} onClick={() => navigate(`/product-details/${s.slug || s.ID}`, { state: s })} style={{ cursor: "pointer" }}>
+            <div key={`${index}-${s.ID || i}`} className={styles.prodCard} onClick={() => navigate(`/product-details/${s.slug || s.ID}`, { state: s })} style={{ cursor: "pointer" }}>
               {s.is_featured && <span className={styles.sugBadge}>Featured</span>}
               {!s.is_featured && <span className={styles.sugBadge}>Suggested</span>}
               <div className={styles.prodImg}><ProductImage src={getImg(s)} alt={getTitle(s)} /></div>
@@ -407,7 +546,7 @@ const EPooja = () => {
     );
   };
 
-  const isLoading = isFiltering ? productsLoading : homepageLoading;
+  const isLoading = isFiltering ? (productsLoading && page === 1) : (homepageLoading && homePage === 1);
 
   return (
     <div className={styles.page}>
@@ -453,11 +592,10 @@ const EPooja = () => {
         ))}
       </div>
 
-      {/* ── Sort & Filter Bar (visible when filtering) ── */}
+      {/* ── Sort & Filter Bar ── */}
       {isFiltering && (
         <div className={styles.filterBar}>
           <div className={styles.filterInfo}>
-            {totalProducts > 0 && <span className={styles.resultCount}>{totalProducts} product{totalProducts !== 1 ? "s" : ""} found</span>}
             <button className={styles.clearFilterBtn} onClick={clearFilters}>Clear filters</button>
           </div>
           <div className={styles.sortWrap}>
@@ -482,13 +620,13 @@ const EPooja = () => {
         <div style={{ textAlign: "center", padding: "40px 0", color: "#999" }}>Loading...</div>
       )}
 
-      {/* ── Filtered Products Grid ── */}
+      {/* ── Products Grid ── */}
       {isFiltering && !productsLoading && (
         <>
           {accumulated.length > 0 ? (
             <div className={styles.filteredGrid}>
               {accumulated.map((item, i) => (
-                <div key={item._id || item.ID || i} className={styles.filteredCard} onClick={() => navigate(`/product-details/${item.slug || item.ID}`, { state: item })}>
+                <div key={`${item._id || item.ID}-${i}`} className={styles.filteredCard} onClick={() => navigate(`/product-details/${item.slug || item.ID}`, { state: item })}>
                   {item.is_featured && <span className={styles.sugBadge}>Featured</span>}
                   <div className={styles.filteredImg}>
                     <ProductImage src={getImg(item)} alt={getTitle(item)} />
@@ -504,25 +642,36 @@ const EPooja = () => {
               ))}
             </div>
           ) : (
-            <div className={styles.emptyState}>
-              <p>No products found for your search.</p>
-              <button className={styles.clearFilterBtn} onClick={clearFilters}>Clear filters</button>
-            </div>
+            !productsFetching && page === 1 && (
+              <div className={styles.emptyState}>
+                <p>No products found.</p>
+                {isFiltering && <button className={styles.clearFilterBtn} onClick={clearFilters}>Clear filters</button>}
+              </div>
+            )
           )}
 
-          {/* ── Load More ── */}
+          {/* ── Infinite Scroll Sentinel ── */}
           {hasMore && (
-            <div className={styles.loadMoreWrap}>
-              <button className={styles.loadMoreBtn} onClick={() => setPage((p) => p + 1)} disabled={productsFetching}>
-                {productsFetching ? "Loading..." : "Load More"}
-              </button>
+            <div ref={loadMoreRef} className={styles.loadMoreWrap}>
+              {productsFetching && <p style={{ textAlign: "center", color: "#999" }}>Loading more...</p>}
             </div>
           )}
         </>
       )}
 
-      {/* ── Homepage Trays (default view) ── */}
-      {!isFiltering && !homepageLoading && Array.isArray(trays) && trays.length > 0 && trays.map((tray, i) => renderTray(tray, i))}
+      {/* ── Homepage Trays (default view — no filters active) ── */}
+      {!isFiltering && !homepageLoading && Array.isArray(trays) && trays.length > 0 && (
+        <>
+          {trays.map((tray, i) => renderTray(tray, `${tray.ID || tray._id || ''}_${i}`))}
+
+          {/* Homepage Infinite Scroll Sentinel */}
+          {homeHasMore && (
+            <div ref={homeLoadMoreRef} className={styles.loadMoreWrap}>
+              {homepageFetching && <p style={{ textAlign: "center", color: "#999" }}>Loading more...</p>}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
