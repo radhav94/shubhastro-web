@@ -1522,10 +1522,56 @@
     margin-bottom: 12px;
   }
 }
+.titleWithBottomDevider {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  margin-bottom: 1rem;
 
+  &.tWBmarginLeft {
+    margin-left: 16px;
+  }
+
+  &.tWBmarginBottomZero {
+    margin-bottom: 0px;
+  }
+
+  .wowTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #030303;
+    text-transform: uppercase;
+  }
+
+  .BottomDevider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    &::after,
+    &::before {
+      content: "";
+      height: 1px;
+      width: 100%;
+    }
+
+    &::before {
+      background: linear-gradient(270deg, rgba(0, 0, 0, 1) 35%, rgba(0, 0, 0, 0) 100%);
+    }
+
+    &::after {
+      background: linear-gradient(90deg, rgba(0, 0, 0, 1) 35%, rgba(0, 0, 0, 0) 100%);
+    }
+
+    svg {
+      flex-shrink: 0;
+    }
+  }
+}
 .sectionTitle {
   font-family: "Poppins", sans-serif;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.5px;
   color: #160115;
@@ -1541,6 +1587,7 @@
   gap: 8px;
   width: 100%;
   margin: 6px auto 0 auto!important;
+  display: none!important;
   svg path{
     fill-opacity: 1;
   }
@@ -3245,9 +3292,9 @@
     margin-bottom: 32px;
   }
 
-  .sectionTitle {
-    font-size: 18px;
-  }
+  // .sectionTitle {
+  //   font-size: 18px;
+  // }
 
   // .astrologersGrid {
   //   gap: 20px;
@@ -3438,9 +3485,9 @@
   }
 
   /* Astrologers Section - Desktop */
-  .sectionTitle ,.sessionsTitle{
-    font-size: 19px;
-  }
+  // .sectionTitle ,.sessionsTitle{
+  //   font-size: 19px;
+  // }
 
   // .astrologerCard {
   //   flex: 0 0 340px;
@@ -3858,11 +3905,13 @@
 // }
 
 .blogsTitle {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.5px;
   color: #160115;
   text-transform: uppercase;
+  border-left: 4px solid #f75801;
+  padding-left: 5px;
 }
 
 .blogsHeader .titleDivider {
@@ -3976,9 +4025,9 @@
 
 /* Mobile responsive for Blogs */
 @media (max-width: 480px) {
-  .blogsTitle {
-    font-size: 16px;
-  }
+  // .blogsTitle {
+  //   font-size: 16px;
+  // }
 
   .blogsHeader .titleDivider {
     width: 100%;
@@ -4003,9 +4052,9 @@
     margin-bottom: 32px;
   }
 
-  .blogsTitle {
-    font-size: 19px;
-  }
+  // .blogsTitle {
+  //   font-size: 19px;
+  // }
 
   .blogsHeader .titleDivider {
     width: 100%;
@@ -4022,9 +4071,9 @@
 
 /* Desktop responsive for Blogs */
 @media (min-width: 1024px) {
-  .blogsTitle {
-    font-size: 19px;
-  }
+  // .blogsTitle {
+  //   font-size: 19px;
+  // }
 
   .blogsHeader .titleDivider {
     width: 100%;
