@@ -846,15 +846,17 @@ const HomeV2 = () => {
             const colors = ["#FEF0E4", "#F4ECFB", "#E9F2EF", "#EBF2FB"];
             return (
               <div key={i} className={styles.statCard}>
-                {s.icon ? (
-                  <img src={s.icon} alt="" className={styles.statIcon} loading="lazy" />
-                ) : (
-                  <div className={styles.statCircle} />
-                )}
-                <div className={styles.statText}>
+                <div className={styles.circleAndCount}>
+                  {s.icon ? (
+                    <img src={s.icon} alt="" className={styles.statIcon} loading="lazy" />
+                  ) : (
+                    <div className={styles.statCircle} />
+                  )}
                   <span className={styles.statNum}>{(s.count ?? 0).toLocaleString()}</span>
-                  <span className={styles.statLabel}>{s.description}</span>
                 </div>
+                {/* <div className={styles.statText}> */}
+                  <span className={styles.statLabel}>{s.description}</span>
+                {/* </div> */}
               </div>
             );
           })}

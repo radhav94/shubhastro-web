@@ -1,4 +1,5 @@
 import React from "react";
+import styles from "./RenderCard.module.scss";
 
 const DynamicTable = ({data}) => {
   // Convert nested objects (like varna, vasya, etc.) into an array
@@ -13,10 +14,10 @@ const DynamicTable = ({data}) => {
         {rows.map((item, index) => (
           <div
           key={index}
-          className="bg-white rounded-xl shadow p-4 md:p-8 text-center "
+          className={styles.dyCard}
         >
           {/* HEADER SECTION */}
-          <div className="border-b border-gray-300 pb-2 mb-2">
+          <div className={styles.dyCardInner}>
             <div className="text-m md:text-xl text-black-900 mb-1">
               {item.name}
             </div>
