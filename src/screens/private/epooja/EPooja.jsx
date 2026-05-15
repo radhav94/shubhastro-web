@@ -131,6 +131,7 @@ const EPooja = () => {
   const [sort, setSort] = useState(searchParams.get("sort") || "");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [traySlug, setTraySlug] = useState(searchParams.get("slug") || "");
+  const [showProductGrid, setShowProductGrid] = useState(!!searchParams.get("tab") || !!searchParams.get("slug") || !!searchParams.get("grid"));
   const [page, setPage] = useState(1);
   const [accumulated, setAccumulated] = useState([]);
   const [hasMore, setHasMore] = useState(true);
@@ -157,11 +158,12 @@ const EPooja = () => {
     if (sort) params.set("sort", sort);
     if (search) params.set("search", search);
     if (traySlug) params.set("slug", traySlug);
+    if (showProductGrid) params.set("grid", "1");
     setSearchParams(params, { replace: true });
-  }, [activeTab, sort, search, traySlug]);
+  }, [activeTab, sort, search, traySlug, showProductGrid]);
 
-  // Determine if filters are active (search or non-"all" tab or sort)
-  const isFiltering = debouncedSearch || activeTab !== "all" || sort;
+  // Determine if filters are active (search or non-"all" tab or sort or explicitly in product grid mode)
+  const isFiltering = debouncedSearch || activeTab !== "all" || sort || showProductGrid;
 
   // A key that changes whenever the filter criteria (not page) change
   const filterKey = `${debouncedSearch}|${activeTab}|${sort}`;
@@ -377,6 +379,7 @@ const EPooja = () => {
   const handleTabChange = (slug) => {
     setActiveTab(slug);
     setTraySlug("");
+    if (slug !== "all") setShowProductGrid(true);
   };
 
   const handleSortChange = (val) => {
@@ -386,10 +389,10 @@ const EPooja = () => {
 
   const clearFilters = () => {
     setSearch("");
-    setActiveTab("all");
     setSort("");
     setTraySlug("");
     setShowSearch(false);
+    // Keep the current category tab active — only reset to "all" if no tab was explicitly selected
   };
 
   const handleViewAll = (tray) => {
@@ -400,6 +403,7 @@ const EPooja = () => {
       setShowSearch(false);
       setSearch("");
       setSort("");
+      setShowProductGrid(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
@@ -552,7 +556,7 @@ const EPooja = () => {
       {/* ── Header ── */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <button className={styles.headerIconBtn} onClick={() => { if (isFiltering) { clearFilters(); } else { navigate("/"); } }} aria-label="Go back">
+          <button className={styles.headerIconBtn} onClick={() => { if (showProductGrid) { setShowProductGrid(false); setActiveTab("all"); setTraySlug(""); setSearch(""); setSort(""); setShowSearch(false); } else { navigate("/"); } }} aria-label="Go back">
             <FiChevronLeft />
           </button>
           <span className={styles.headerTitle}>ShubhMall</span>
@@ -595,7 +599,9 @@ const EPooja = () => {
       {isFiltering && (
         <div className={styles.filterBar}>
           <div className={styles.filterInfo}>
-            <button className={styles.clearFilterBtn} onClick={clearFilters}>Clear filters</button>
+            {(debouncedSearch || sort) && (
+              <button className={styles.clearFilterBtn} onClick={clearFilters}>Clear filters</button>
+            )}
           </div>
           <div className={styles.sortWrap}>
             <button className={styles.sortBtn} onClick={() => setShowSortDropdown((v) => !v)}>
