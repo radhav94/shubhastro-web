@@ -189,8 +189,7 @@ const EPooja = () => {
     page,
     limit: LIMIT,
     ...(debouncedSearch && { search: debouncedSearch }),
-    ...(activeTab !== "all" && activeCategoryId && { category: activeCategoryId }),
-    ...(traySlug && !activeCategoryId && { category: traySlug }),
+    ...(activeTab !== "all" && { category: activeCategoryId || traySlug || activeTab }),
     sort: sort || "relevant",
   };
 
