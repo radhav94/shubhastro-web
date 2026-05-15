@@ -1233,7 +1233,7 @@ const Profile = () => {
     <div className={styles.profilePage}>
       {/* Header */}
       <div className={styles.profileHeader}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
+        <button className={styles.backButton} onClick={() => navigate('/')}>
           <ChevronLeft size={24} />
         </button>
 

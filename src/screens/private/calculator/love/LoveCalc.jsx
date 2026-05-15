@@ -21,7 +21,7 @@ const LoveCalc = () => {
   );
 
   const [errors, setErrors] = useState({});
-  const [infoOpen, setInfoOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(true);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
