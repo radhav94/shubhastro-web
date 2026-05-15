@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import styles from "./Onboarding.module.scss";
+import LanguageSelector from "../../../component/LanguageSelector";
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -49,6 +49,9 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData, c
                 ></span>
               ))}
             </div>
+
+            {/* Language Translator */}
+            <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
           </div>
 
           <div className={styles.content}>

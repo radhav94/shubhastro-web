@@ -138,8 +138,11 @@ const HomeV2 = () => {
       ];
       const path = authRequiredSlugs.includes(item.slug) ? `/${item.slug}` : `/aiwow/${item.slug}`;
       
-      // Require login for camera-based AI features
-      if (authRequiredSlugs.includes(item.slug)) {
+      // Free features that don't require login
+      const freeAccessSlugs = ["agentic-calendar"];
+      
+      // Require login for all protected features (camera-based and AI Wow)
+      if (!freeAccessSlugs.includes(item.slug)) {
         const token = localStorage.getItem("shubhtalk_customer_token");
         if (!token) {
           localStorage.setItem("shubhtalk_redirect_after_login", path);

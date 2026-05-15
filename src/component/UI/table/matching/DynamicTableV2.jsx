@@ -21,7 +21,7 @@ const DynamicTable = ({data}) => {
               {item.name}
             </div>
         
-            <div className="text-xl md:text-4xl font-bold text-[#FF6A3D]">
+            <div className="text-xl md:text-4xl font-bold text-[#FF6A3D] notranslate" translate="no">
               {(item?.varna ?? "-")}/{(item?.full_score ?? "-")}
             </div>
           </div>

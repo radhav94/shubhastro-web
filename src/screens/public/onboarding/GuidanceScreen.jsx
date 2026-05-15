@@ -3,6 +3,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
+import LanguageSelector from "../../../component/LanguageSelector";
 import { Heart, Rocket, DollarSign, Plus, User, HelpCircle, Eye } from "lucide-react";
 import { registerUser } from "../../../services/appServices/authService";
 import { useCreateKundliMutation } from "../../../services/appServices/kundliServicesNew";
@@ -241,6 +242,9 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
                   ></span>
                 ))}
               </div>
+
+              {/* Language Translator */}
+              <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
             </div>
 
             <div className={styles.content}>

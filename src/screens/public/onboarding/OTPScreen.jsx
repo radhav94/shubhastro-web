@@ -12,6 +12,7 @@ import { loginSuccess } from "../../../redux/auth/authSlice";
 import { requestFCMToken } from "../../../services/firebase";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import onboardingBg from "../../../assets/images/onboarding.png";
+import LanguageSelector from "../../../component/LanguageSelector";
 
 const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const navigate = useNavigate();
@@ -231,6 +232,9 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           />
         </svg>
       </button>
+
+      {/* Language Translator - top right corner */}
+      <LanguageSelector />
 
       <div className={styles.loginContent}>
         <h1 className={styles.title}>Aligning your stars...</h1>
