@@ -26,7 +26,7 @@ const SunSignCalc = () => {
   );
 
   const [errors, setErrors] = useState({});
-  const [infoOpen, setInfoOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(true);
 
   const handleChange = (key, value) => {
     setFormData((prev) => {
@@ -260,7 +260,7 @@ const SunSignCalc = () => {
 
         <div className={styles.btnRow}>
           <button type="submit" className={styles.submitBtn}>
-            Show Results
+            Calculate My SunSign
           </button>
         </div>
       </form>

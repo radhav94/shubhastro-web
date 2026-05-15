@@ -450,7 +450,8 @@ const Explore = () => {
       if (cardTitle.includes("Horoscope")) {
         // No changes - proceed directly
         if (redirectUrl) {
-          navigate(redirectUrl);
+          const normalizedUrl = redirectUrl.replace("horoscope/daily-horoscope", "daily-horoscope");
+          navigate(normalizedUrl);
         }
         return;
       }
