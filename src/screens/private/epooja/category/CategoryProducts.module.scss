@@ -106,6 +106,8 @@
   cursor: pointer;
   box-shadow: 0 1px 6px rgba(0,0,0,0.06);
   transition: all 0.25s;
+  display: flex;
+  flex-direction: column;
   &:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
 }
 
@@ -135,6 +137,9 @@
 
 .cardBody {
   padding: 10px 12px 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   h4 { font-size: 13px; font-weight: 600; margin: 0 0 4px; color: #333; }
 }
 
@@ -173,6 +178,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  margin-top: auto;
   &:hover { border-color: #f75801; color: #f75801; }
 }
 

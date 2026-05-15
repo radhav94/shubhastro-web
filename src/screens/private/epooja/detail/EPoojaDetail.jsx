@@ -140,6 +140,12 @@ const EPoojaDetail = () => {
   // Helper: get variant identifier — handles both old (_id/skuCode) and new (id/sku) formats
   const getVid = (v) => v?._id || v?.id || v?.skuCode || v?.sku || "";
 
+  // Helper: format slug to readable label (e.g., "Without-Silver-Capping" → "Without Silver Capping")
+  const formatAttrValue = (val) => {
+    if (!val) return "";
+    return val.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
   // Helper: safely get attributes as {name: value} entries from a variant
   // Old format: [{name, value}] array  |  New format: {type: "gemstone", size: "5-ratti"} object
   const getAttrsEntries = (v) => {
@@ -639,7 +645,7 @@ const EPoojaDetail = () => {
     <div className={styles.page}>
       {/* Top Nav */}
       <div className={styles.topNav}>
-        <button className={styles.backBtn} onClick={() => navigate("/shubh-mall")}>
+        <button className={styles.backBtn} onClick={() => navigate(-1)}>
           <span className={styles.backCircle}><FiChevronLeft /></span>
           <span className={styles.backLabel}>ShubhMall</span>
         </button>
@@ -739,7 +745,7 @@ const EPoojaDetail = () => {
                 const available = new Set(getAvailableValues(dim.name));
                 return (
                   <div key={dim.name} className={styles.attrGroup}>
-                    <span className={styles.attrLabel}>{dim.name}</span>
+                    <span className={styles.attrLabel}>{formatAttrValue(dim.name)}</span>
                     <div className={styles.attrOptions}>
                       {dim.values.map((val) => {
                         const isSelected = selectedAttrs[dim.name] === val;
@@ -751,7 +757,7 @@ const EPoojaDetail = () => {
                             onClick={() => isAvailable && handleAttrSelect(dim.name, val)}
                             disabled={!isAvailable}
                           >
-                            {val}
+                            {formatAttrValue(val)}
                           </button>
                         );
                       })}
