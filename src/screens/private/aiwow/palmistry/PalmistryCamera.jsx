@@ -293,7 +293,7 @@ const PalmistryCamera = () => {
     }
     
     // Navigate after stopping camera
-    navigate(-1);
+    navigate('/aiwow');
   };
 
   if (error) {
