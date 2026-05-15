@@ -20,7 +20,7 @@
 }
 
 .modal {
-  background: #fff;
+  background: linear-gradient(90deg, rgba(254, 254, 254, 1) 0%, rgba(255, 248, 236, 1));
   border-radius: 20px 20px 0 0;
   width: 100%;
   max-width: 480px;
@@ -143,6 +143,7 @@
   border-radius: 8px;
   font-size: 13px;
   color: #15803d;
+  border: 1px solid #15803c40;
 }
 
 .deductionMsg.insufficient {
@@ -247,7 +248,7 @@
   display: flex;
   gap: 12px;
   padding: 16px 20px;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid #e6e7eb;
 }
 
 .cancelBtn {
@@ -256,6 +257,7 @@
   border: none;
   border-radius: 12px;
   background: #fff7ed;
+  border: 1px solid #ea580c;
   color: #ea580c;
   font-size: 15px;
   font-weight: 600;
