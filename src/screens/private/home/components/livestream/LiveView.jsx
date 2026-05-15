@@ -605,6 +605,8 @@ const LiveView = (props) => {
       roomId: null,
       waitingTime: 5,
       isEmergency: false,
+      fromLive: true,
+      liveChannelId: props.channel,
     });
 
     setShowWaitingModal(true);
@@ -670,6 +672,8 @@ const LiveView = (props) => {
       roomId: null,
       waitingTime: 5,
       isEmergency: false,
+      fromLive: true,
+      liveChannelId: props.channel,
     });
 
     setShowCallPopup(false);
@@ -1554,6 +1558,8 @@ const LiveView = (props) => {
                       roomId: null,
                       waitingTime: type === "chat" ? 2 : 5,
                       isEmergency: false,
+                      fromLive: true,
+                      liveChannelId: props.channel,
                     });
                   }}
                   onCancel={(roomId, type) => {

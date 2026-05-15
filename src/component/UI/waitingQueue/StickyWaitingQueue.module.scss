@@ -143,6 +143,18 @@
   margin: 0;
 }
 
+.itemNameClickable {
+  color: #f75801;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 0.2s;
+
+  &:hover {
+    text-decoration-color: #f75801;
+  }
+}
+
 .itemMeta {
   font-size: 12px;
   color: #6b7280;

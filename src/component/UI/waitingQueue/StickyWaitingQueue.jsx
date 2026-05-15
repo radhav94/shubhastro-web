@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { X, ChevronUp, ChevronDown, RotateCcw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { useCall } from "../../../context/CallContext";
 import { useChat } from "../../../context/ChatContext";
@@ -32,6 +33,7 @@ function formatWaitDisplay(conn) {
 }
 
 const StickyWaitingQueue = () => {
+  const navigate = useNavigate();
   const { pendingConnections, cancelPendingConnection, cancelAll, removePendingConnection, addPendingConnection } = useWaitingQueue();
   const { callApproval, missedApproval: callMissed, activeCall, setWaitingList: setCallWaitingList, resetCallFlow } = useCall();
   const { chatApproval, missedApproval: chatMissed, activeChat, setWaitingList, resetChatFlow } = useChat();
@@ -144,7 +146,16 @@ const StickyWaitingQueue = () => {
                   </div>
 
                   <div className={styles.itemInfo}>
-                    <p className={styles.itemName}>{name}</p>
+                    <p
+                      className={`${styles.itemName} ${conn.fromLive ? styles.itemNameClickable : ""}`}
+                      onClick={() => {
+                        if (conn.fromLive && conn.liveChannelId) {
+                          navigate(`/live/${conn.liveChannelId}`);
+                        }
+                      }}
+                    >
+                      {name}
+                    </p>
                     <p className={styles.itemMeta}>
                       {isAccepted && <span className={styles.metaGreen}>Accepted</span>}
                       {isOnHold && <span className={styles.metaRed}>Missed Call</span>}
