@@ -83,7 +83,10 @@ const TalkToKundliChat = () => {
 
         // Update suggested questions if provided by API
         if (sessionData.popularQuestions && Array.isArray(sessionData.popularQuestions)) {
+          // Keep original format (string or object) - handled in render
           setSuggestedQuestions(sessionData.popularQuestions);
+        } else if (sessionData.suggestedQuestions && Array.isArray(sessionData.suggestedQuestions)) {
+          setSuggestedQuestions(sessionData.suggestedQuestions);
         }
       } else {
         // Error already handled by service and interceptor
@@ -172,8 +175,10 @@ const TalkToKundliChat = () => {
     }
   };
 
-  const handleSuggestedQuestion = (question) => {
-    setInputMessage(question);
+  const handleSuggestedQuestion = (question, e) => {
+    // Use the actual displayed text from the button (respects Google Translate)
+    const displayedText = e?.currentTarget?.innerText || question;
+    setInputMessage(displayedText);
     inputRef.current?.focus();
   };
 
@@ -253,15 +258,23 @@ const TalkToKundliChat = () => {
           <div className={styles.suggestedQuestions}>
             <p className={styles.suggestedTitle}>Try asking:</p>
             <div className={styles.suggestedList}>
-              {suggestedQuestions.map((question, index) => (
-                <button
-                  key={index}
-                  className={styles.suggestedButton}
-                  onClick={() => handleSuggestedQuestion(question)}
-                >
-                  {question}
-                </button>
-              ))}
+              {suggestedQuestions.map((question, index) => {
+                // Handle both string and object formats from API
+                // Always use the displayed text for input (same language user sees)
+                const displayText = typeof question === 'object' 
+                  ? (question.translatedText || question.text || question.label || question.question || question.value) 
+                  : question;
+                
+                return (
+                  <button
+                    key={index}
+                    className={styles.suggestedButton}
+                    onClick={(e) => handleSuggestedQuestion(displayText, e)}
+                  >
+                    {displayText}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}  

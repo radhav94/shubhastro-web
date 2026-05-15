@@ -8,6 +8,8 @@ const FlamesForm = ({
   onChange,
   onSubmit,
   onReset,
+  name2Label = "Your Partner's Name",
+  name2Placeholder = "Enter your partner's name",
 }) => {
   const { name1, name2 } = formData;
 
@@ -38,13 +40,13 @@ const FlamesForm = ({
         {errors?.name1 && <p className={styles.error}>{errors.name1}</p>}
       </div>
 
-      {/* Partner Name */}
+      {/* Partner/Friend Name */}
       <div className={styles.formGroup}>
         <label>
-          Your Partner's Name <span className={styles.required}>*</span>
+          {name2Label} <span className={styles.required}>*</span>
         </label>
         <input
-          placeholder="Enter your partner's name"
+          placeholder={name2Placeholder}
           value={name2}
           onChange={(e) => onChange("name2", e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
         />
