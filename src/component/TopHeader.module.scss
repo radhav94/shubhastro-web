@@ -416,25 +416,6 @@
   flex-shrink: 0;
 }
 
-.languageWrap {
-  position: relative;
-  display: inline-block;
-  flex-shrink: 0;
-}
-
-.onHoverChangeLang {
-  cursor: pointer;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background-color: #fff;
-  border-radius: 40px;
-  padding: 4px 10px;
-  border: 1px solid rgba(189, 189, 189, 0.50);
-  height: 40px;
-  max-width: 130px;
-}
 .profileWrapName{
   display: flex;
   color: #424242;
@@ -449,7 +430,7 @@
     @include line-clamp(1);
   }
 }
-.languageName,.profileName {
+.languageNamee {
   color: #424242;
   font-size: 12px;
   font-weight: 500;
@@ -459,74 +440,6 @@
   max-width: 80px;
   display: inline-block;
 }
-
-/* Dropdown hidden by default */
-.languageDropdown {
-  position: absolute;
-  top: calc(100% + 40px);   /* below Lang */
-  right: -50px;
-  // left: 0;
-  min-width: 120px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-  padding: 8px 0;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(10px) scale(0.95);
-  transition: all 0.25s ease;
-  z-index: 1000;
-  max-height: 300px;
-  overflow: auto;
-}
-
-/* Show on hover (desktop only) */
-@media (min-width: 769px) {
-  .languageWrap:hover .languageDropdown {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Show/hide via click (mobile) */
-.languageDropdown.open {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0) scale(1);
-}
-
-.languageDropdown.close {
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(10px) scale(0.95);
-}
-
-/* Items */
-.languageDropdown p {
-  margin: 0;
-  padding: 8px 14px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  white-space: nowrap;
-  font-size: 12px;
-  width: 100%;
-}
-
-.languageDropdown p:hover {
-  background: #f2f2f2;
-}
-
-.languageDropdown p.activeLang {
-  background: #fff3ed;
-  color: #F75801;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
 
 .liveButton {
   display: flex;
