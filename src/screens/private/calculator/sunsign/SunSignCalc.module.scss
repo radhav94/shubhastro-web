@@ -19,7 +19,7 @@
 
   p {
     font-size: 14px;
-    color: #888;
+    color: #030303;
     margin: 0;
     font-style: italic;
   }
@@ -44,8 +44,9 @@
 }
 
 .infoCard {
-  background: #fffaf5;
-  border: 1px solid #ffe8d6;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 12px;
   padding: 0;
   margin-bottom: 24px;
@@ -85,7 +86,7 @@
 
   p {
     font-size: 13px;
-    color: #777;
+    color: #030303;
     line-height: 1.6;
     margin: 0;
     padding: 0 18px 14px;
