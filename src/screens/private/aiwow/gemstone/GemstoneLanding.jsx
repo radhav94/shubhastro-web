@@ -4,7 +4,6 @@ import styles from './GemstoneLanding.module.scss';
 import ClarityIcon from '../../../../assets/icons/clarity.png';
 import ColorGradingIcon from '../../../../assets/icons/colorgrading.png';
 import CutPrecisionIcon from '../../../../assets/icons/curprecision.png';
-import TTSButton from '../../../../component/UI/TTSButton';
 import CaratIcon from '../../../../assets/icons/carat.png';
 import Footer from '../../../../layouts/Footer';
 
@@ -65,13 +64,8 @@ const GemstoneLanding = () => {
         <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
             <div key={index} className={styles.featureCard}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <div className={styles.iconWrapper}>
-                    <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
-                  </div>
-                  <span style={{ marginLeft: 'auto', display: 'flex' }}>
-                    <TTSButton text={`${[feature?.title,feature?.description].filter(Boolean).join('. ')}`} />
-                  </span>
+                <div className={styles.iconWrapper}>
+                  <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
                 </div>
               <h3 className={styles.featureTitle}>{feature.title}</h3>
               <p className={styles.featureDescription}>{feature.description}</p>

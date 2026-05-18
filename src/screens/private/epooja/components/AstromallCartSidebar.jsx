@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import styles from "./AstromallCartSidebar.module.scss";
 import { FiShoppingCart, FiX, FiTrash2, FiPlus, FiMinus } from "react-icons/fi";
@@ -42,6 +43,16 @@ const getItemRouteId = (item) => {
   return p?.slug || p?.ID || p?.id || p?._id || "";
 };
 
+// Convert slug-style values (e.g. "Without-Silver-Capping") to readable text
+const formatAttrValue = (value) => {
+  if (!value || typeof value !== "string") return value;
+  // If value contains hyphens and no spaces, treat as slug
+  if (value.includes("-") && !value.includes(" ")) {
+    return value.replace(/-/g, " ");
+  }
+  return value;
+};
+
 // Extract variant attributes from all possible sources on the cart item
 const getVariantAttrs = (item) => {
   const seen = new Set();
@@ -50,7 +61,7 @@ const getVariantAttrs = (item) => {
     const key = name?.toString().toLowerCase();
     if (key && value && !seen.has(key)) {
       seen.add(key);
-      attrs.push({ name, value });
+      attrs.push({ name, value: formatAttrValue(value) });
     }
   };
 
@@ -144,7 +155,7 @@ const AstromallCartSidebar = () => {
       const attrs = [];
       const add = (name, value) => {
         const key = name?.toString().toLowerCase();
-        if (key && value && !seen.has(key)) { seen.add(key); attrs.push({ name, value }); }
+        if (key && value && !seen.has(key)) { seen.add(key); attrs.push({ name, value: formatAttrValue(value) }); }
       };
       const a = enriched.attributes;
       if (Array.isArray(a)) a.forEach((x) => add(x.name, x.value));
@@ -197,7 +208,7 @@ const AstromallCartSidebar = () => {
         {items.length > 0 && <span className={styles.cartBadge}>{items.length}</span>}
       </button>
 
-      {showCart && (
+      {showCart && createPortal(
         <div className={styles.cartOverlay} onClick={() => setShowCart(false)}>
           <div className={styles.cartSidebar} onClick={(e) => e.stopPropagation()}>
             <div className={styles.cartHeader}>
@@ -269,7 +280,8 @@ const AstromallCartSidebar = () => {
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

@@ -558,12 +558,12 @@ const AstromallCart = () => {
                 </div>
               </div>
               <button className={styles.removeBtn} onClick={() => handleRemove(item)} aria-label="Remove"><FiTrash2 size={18} /></button>
-              <div className={styles.priceCol}><span className={styles.price}>₹{(price * qty).toLocaleString()}</span><span className={styles.taxLabel}>Incl. of all taxes</span></div>
+              <div className={styles.priceCol}><span className={styles.price}>₹{(price * qty).toLocaleString()}</span></div>
             </div>);
         })}
         {items.length > 0 && (
           <div className={styles.bottomBar}>
-            <div className={styles.totalCol}><span className={styles.totalPrice}>₹{total.toLocaleString()}</span><span className={styles.taxLabel}>Incl. of all taxes</span></div>
+            <div className={styles.totalCol}><span className={styles.totalPrice}>₹{total.toLocaleString()}</span></div>
             <button className={styles.checkoutBtn} disabled={isValidating} onClick={async () => {
               const valid = await validateCartProducts();
               if (!valid) return;
