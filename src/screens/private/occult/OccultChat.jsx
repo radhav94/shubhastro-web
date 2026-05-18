@@ -139,7 +139,7 @@ const OccultChat = () => {
             <span className={styles.changeBtn}>Change</span>
           </div>
         ) : (
-          <button className={styles.selectBtn} onClick={() => setShowProfileManager(true)}>
+          <button className={styles.selectBtn} onClick={() => { if (!token) { requireAuth(); return; } setShowProfileManager(true); }}>
             + Select Kundli Profile
           </button>
         )}

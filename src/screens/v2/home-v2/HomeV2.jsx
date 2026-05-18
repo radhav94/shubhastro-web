@@ -380,7 +380,7 @@ const HomeV2 = () => {
             {/* Hero part */}
             <div className={styles.heroBanner}>
               <div className={styles.heroContent}>
-                <p className={styles.greeting}>Hello, {name}! 👋</p>
+                <p className={styles.greeting} key={`greeting-${name}`}>Hello, {name}! 👋</p>
                 <h1>
                   {aiPoweredSection?.title
                     ? <>{aiPoweredSection.title.replace(" AI", "")} <span className={styles.ai}>AI</span></>
