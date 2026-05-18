@@ -520,12 +520,12 @@ const LiveView = (props) => {
         if (props.skipCleanupRef) props.skipCleanupRef.current = true;
         if (props.skipChatCleanupRef) props.skipChatCleanupRef.current = true;
         // Don't call handleLeave — keep socket alive so backend doesn't cancel the call
-        navigate(PATH.privateRoutes.HOME.path);
+        navigate(-1);
         return;
       }
       clearViewerSession();
       await handleLeave?.();
-      navigate(PATH.privateRoutes.HOME.path);
+      navigate(-1);
     }
   };
 

@@ -188,10 +188,14 @@ const AIWow = () => {
   };
 
   const handleClick = (slug) => {
-    if (!requireAuth()) return;
-    if (!selectedProfile) {
-      toast.error("Please select one Kundli to proceed.");
-      return;
+    // Free features that don't require login
+    const freeAccessSlugs = ["agentic-calendar"];
+    if (!freeAccessSlugs.includes(slug)) {
+      if (!requireAuth()) return;
+      if (!selectedProfile) {
+        toast.error("Please select one Kundli to proceed.");
+        return;
+      }
     }
     if (slug === "ar-vastu-scanner") {
       setShowMobileAppModal(true);

@@ -5,7 +5,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     // GET Astromall Page Data (tray listing)
     getAstromallPageData: builder.query({
       query: ({ page = 1, limit = 20 } = {}) => ({
-        url: `mall/homepage/?slug=astromallpage&page=${page}&limit=${limit}`,
+        url: `mall/homepage?slug=astromallpage&page=${page}&limit=${limit}`,
         method: "GET",
         headers: { accept: "application/json" },
       }),

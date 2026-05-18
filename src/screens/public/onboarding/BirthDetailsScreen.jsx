@@ -4,6 +4,7 @@ import styles from "./Onboarding.module.scss";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
+import LanguageSelector from "../../../component/LanguageSelector";
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -82,6 +83,9 @@ const BirthDetailsScreen = ({
                 ></span>
               ))}
             </div>
+
+            {/* Language Translator */}
+            <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
           </div>
 
           <div className={styles.content}>

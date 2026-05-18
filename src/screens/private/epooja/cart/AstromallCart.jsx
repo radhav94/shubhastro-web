@@ -120,6 +120,12 @@ const getCartVariantAttrs = (item, enrichedVariants = {}) => {
   return attrs;
 };
 
+// Format slug to readable label (e.g., "Without-Silver-Capping" → "Without Silver Capping")
+const formatAttrValue = (val) => {
+  if (!val) return "";
+  return val.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
 // Fetch fresh product detail from API
 const fetchProductDetail = async (productIdOrSlug) => {
   try {
@@ -541,7 +547,7 @@ const AstromallCart = () => {
                 {variantInfo.length > 0 && (
                   <div className={styles.variantAttrs}>
                     {variantInfo.map((a, i) => (
-                      <span key={i} className={styles.variantAttr}><strong>{a.name}:</strong> {a.value}{i < variantInfo.length - 1 ? "," : ""}</span>
+                      <span key={i} className={styles.variantAttr}><strong>{formatAttrValue(a.name)}:</strong> {formatAttrValue(a.value)}{i < variantInfo.length - 1 ? "," : ""}</span>
                     ))}
                   </div>
                 )}
