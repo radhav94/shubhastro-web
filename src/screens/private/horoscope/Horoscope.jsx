@@ -32,7 +32,8 @@ import physiqueImg from "../../../assets/images/physique.png";
 const HoroscopeNew = () => {
   const navigate = useNavigate();
   const { sign } = useParams();
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
   
   // Category image mapping
   const categoryImages = {
@@ -499,7 +500,13 @@ const HoroscopeNew = () => {
       
       <div className="horoscope-header-Wrap">
         <div className="horoscope-header">
-          <button className="back-button" onClick={() => navigate('/')}>
+          <button className="back-button" onClick={() => {
+            if (location.key !== 'default') {
+              navigate(-1);
+            } else {
+              navigate('/');
+            }
+          }}>
             <ChevronLeft size={24} />
           </button>
           <button className="profile-selector" onClick={handleOpenModal}>
