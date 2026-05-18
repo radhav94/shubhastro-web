@@ -143,7 +143,7 @@ const Kundali = () => {
     if (requiresAuth && !token) {
       const fullPath = `/kundli?${searchParams.toString()}`;
       localStorage.setItem("shubhtalk_redirect_after_login", fullPath);
-      window.location.href = "/login?skip=welcome";
+      window.location.replace("/login?skip=welcome");
     }
   }, [requiresAuth, token, searchParams]);
 

@@ -1,4 +1,5 @@
 import React from "react";
+import TTSButton from "../../../UI/TTSButton";
 import styles from "./RenderCard.module.scss";
 
 const DynamicTable = ({data}) => {
@@ -8,14 +9,18 @@ const DynamicTable = ({data}) => {
     .map((key) => data[key]);
   return (
     <>
-      {/* {title && (
-        <h2 className="text-xl font-semibold text-start  p-3 ">{title}</h2>
-      )} */}
-        {rows.map((item, index) => (
+        {rows.map((item, index) => {
+          const cardText = `${item.name}. Score: ${item?.varna ?? 0} out of ${item?.full_score ?? 0}. Male: ${item?.boy_varna || ''}. Female: ${item?.girl_varna || ''}. ${item?.description || ''}`;
+          return (
           <div
           key={index}
           className={styles.dyCard}
         >
+          {/* TTS Button */}
+          <div className="absolute top-3 right-3">
+            <TTSButton text={cardText} />
+          </div>
+
           {/* HEADER SECTION */}
           <div className={styles.dyCardInner}>
             <div className="text-m md:text-xl text-black-900 mb-1">
@@ -40,7 +45,8 @@ const DynamicTable = ({data}) => {
             </div>
           </div>
         </div>
-        ))}
+          );
+        })}
     </>
   );
 };

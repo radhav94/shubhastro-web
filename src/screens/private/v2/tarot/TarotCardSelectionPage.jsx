@@ -189,6 +189,19 @@ const TarotCardSelectionPage = () => {
           </div>
         )}
 
+        {(isRomanticBreakup || isBusinessBreakup) && (
+          <div className={styles.drawSequence}>
+            {['You', 'Partner'].map((label, i) => (
+              <span
+                key={label}
+                className={`${styles.sequenceItem} ${selectedCards.length === i ? styles.sequenceActive : ''} ${selectedCards.length > i ? styles.sequenceDone : ''}`}
+              >
+                {i + 1}. {label}
+              </span>
+            ))}
+          </div>
+        )}
+
         <p className={styles.tapText}>Tap to pick</p>
 
         <div className={styles.cardsContainer} ref={containerRef}>
