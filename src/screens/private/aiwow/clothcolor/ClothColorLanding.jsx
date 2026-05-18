@@ -6,7 +6,6 @@ import VibrancyIcon from '../../../../assets/icons/vibrancy.png';
 import PatternIcon from '../../../../assets/icons/pattern.png';
 import StyleCaratIcon from '../../../../assets/icons/stylecarat.png';
 import Footer from '../../../../layouts/Footer';
-import TTSButton from '../../../../component/UI/TTSButton';
 
 const ClothColorLanding = () => {
   const navigate = useNavigate();
@@ -63,10 +62,7 @@ const ClothColorLanding = () => {
 
         <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
-            <div key={index} className={styles.featureCard} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
-                <TTSButton text={`${[feature?.title, feature.description].filter(Boolean).join('. ')}`} />
-              </span>
+            <div key={index} className={styles.featureCard}>
               <div className={styles.iconWrapper}>
                 <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
               </div>

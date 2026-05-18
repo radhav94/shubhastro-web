@@ -6,7 +6,6 @@ import PressureIcon from '../../../../assets/icons/pressure.png';
 import LetterIcon from '../../../../assets/icons/letter.png';
 import SignatureSizeIcon from '../../../../assets/icons/signauresize.png';
 import Footer from '../../../../layouts/Footer';
-import TTSButton from '../../../../component/UI/TTSButton';
 
 const SignatureLanding = () => {
   const navigate = useNavigate();
@@ -64,10 +63,7 @@ const SignatureLanding = () => {
 
         <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
-            <div key={index} className={styles.featureCard} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
-                <TTSButton text={`${[feature?.title, feature.description].filter(Boolean).join('. ')}`} />
-              </span>
+            <div key={index} className={styles.featureCard}>
               <div className={styles.iconWrapper}>
                 <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
               </div>
