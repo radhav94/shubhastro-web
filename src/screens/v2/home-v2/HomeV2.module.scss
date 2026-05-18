@@ -2653,6 +2653,36 @@
   max-width: 4px;
 }
 
+/* Chat History button */
+.sessionHistoryBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 20px;
+  background: #fff;
+  border: 1.5px solid #f75801;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f75801;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  white-space: nowrap;
+  flex: 1;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: background 0.15s;
+  @media (width <= 390px) {
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  &:hover {
+    background: #fff5f0;
+  }
+}
+
 /* Call Again button */
 .sessionCallBtn {
   height: 40px;

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import styles from "./ServiceCards.module.scss";
 import { IoArrowBackOutline, IoArrowForwardOutline } from "react-icons/io5";
 import { PrimaryText, Title } from "../../../../../component";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { PATH } from "../../../../../utils/routes/Paths";
 import { AppIcons ,DefaultImages} from "../../../../../utils/appImages";
 import { useGetHomeDetailsQuery } from "../../../../../services/appServices/homeServices";
@@ -26,13 +26,18 @@ const ServiceCards = () => {
 
   const scrollRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const bannerSection = data?.data?.list?.find(
     (item) => item.display_type === "complementary-services",
   );
   const preferredOrder = ["free-kundli", "generate-my-kundli", "talk-to-astrologer", "explore-daily-horoscope", "daily-horoscope"];
   const rawServices = bannerSection?.content || [];
-  const services = [...rawServices].sort((a, b) => {
+  const isKundliPage = location.pathname.startsWith("/kundli");
+  const filteredServices = isKundliPage
+    ? rawServices.filter((s) => s.slug !== "free-kundli" && s.slug !== "generate-my-kundli")
+    : rawServices;
+  const services = [...filteredServices].sort((a, b) => {
     const idxA = preferredOrder.indexOf(a.slug);
     const idxB = preferredOrder.indexOf(b.slug);
     return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
@@ -95,13 +100,13 @@ const ServiceCards = () => {
       <Title title="Complementary Astrology Services" showDivider />
 
       <div className={styles.carouselWrapper}>
-        <button
+        {/* <button
           className={`${styles.arrowBtn} ${disableLeft ? styles.disabled : ""}`}
           disabled={disableLeft}
           onClick={() => scrollByOneCard("left")}
         >
           <IoArrowBackOutline size={22} />
-        </button>
+        </button> */}
 
         <div className={styles.horizontalScroll} ref={scrollRef}>
           {services.map((service) => (
@@ -117,7 +122,7 @@ const ServiceCards = () => {
                 />
 
                 <PrimaryText className={styles.title}>
-                  {service.title}
+                  {service.title}ssss
                 </PrimaryText>
 
                 <PrimaryText className={styles.description}>
@@ -130,7 +135,7 @@ const ServiceCards = () => {
           ))}
         </div>
 
-        <button
+        {/* <button
           className={`${styles.arrowBtn} ${
             disableRight ? styles.disabled : ""
           }`}
@@ -138,7 +143,7 @@ const ServiceCards = () => {
           onClick={() => scrollByOneCard("right")}
         >
           <IoArrowForwardOutline size={22} />
-        </button>
+        </button> */}
       </div>
     </div>
   );

@@ -267,7 +267,7 @@ const HomeNew = () => {
             {/* Hero part */}
             <div className={styles.heroBanner}>
               <div className={styles.heroContent}>
-                <p className={styles.greeting}>Hello, {name}! 👋</p>
+                <p className={styles.greeting} key={`greeting-${name}`}>Hello, {name}! 👋</p>
                 <h1>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></h1>
                 <p className={styles.heroDesc}>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
                 {currentMahadasha && (

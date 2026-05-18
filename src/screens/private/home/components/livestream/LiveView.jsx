@@ -12,7 +12,7 @@ import LiveListModal from "./LiveListModal";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 import { useReelScroll } from "./useReelScroll";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { useGetAllGiftsQuery } from "../../../../../redux/api/gift/giftApi";
 import { useLiveList } from "../../../../../context/LiveListContext";
@@ -81,6 +81,7 @@ const LiveView = (props) => {
   const [showGifts, _setShowGifts] = useState(false);
   const [showLiveList, setShowLiveList] = useState(false);
   const [liveListData, setLiveListData] = useState([]);
+  const [isClosing, setIsClosing] = useState(false);
 
   // Auto-refresh live list when socket events fire while modal is open
   useEffect(() => {
@@ -419,6 +420,7 @@ const LiveView = (props) => {
 
   const reelRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useReelScroll({
     enabled: !!liveListCtx && ROLE !== "host" && !activeCall && !showWaitingModal,
@@ -519,13 +521,12 @@ const LiveView = (props) => {
         // Tell useLiveStreaming to skip Agora/socket cleanup on unmount
         if (props.skipCleanupRef) props.skipCleanupRef.current = true;
         if (props.skipChatCleanupRef) props.skipChatCleanupRef.current = true;
-        // Don't call handleLeave — keep socket alive so backend doesn't cancel the call
-        navigate(-1);
-        return;
+      } else {
+        clearViewerSession();
       }
-      clearViewerSession();
-      await handleLeave?.();
-      navigate(-1);
+      // Navigate back to referrer or home
+      const backPath = location.state?.from || "/";
+      navigate(backPath, { replace: true });
     }
   };
 
@@ -980,6 +981,8 @@ const LiveView = (props) => {
   });
 
   const shouldShowWaitingIndicator = !isHost && (showWaitingModal || !!resolvePendingLiveCall());
+
+  if (isClosing) return null;
 
   return (
     <FixedLayer>
