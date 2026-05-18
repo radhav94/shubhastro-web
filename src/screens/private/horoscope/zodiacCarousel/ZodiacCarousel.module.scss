@@ -24,15 +24,18 @@
 }
 .horoscopeTitle{
   font-family: "Poppins", sans-serif;
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    color: #160115;
-    text-align: center;
-    // margin-top: 16px;
-    @media (width <= 767px) {
-      font-size: 16px;
-    }
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #160115;
+  text-align: center;
+  width: fit-content;
+  margin: 0 auto;
+  border-bottom: 2px solid #000;
+  // margin-top: 16px;
+  @media (width <= 767px) {
+    font-size: 16px;
+  }
 }
 .arrowBtn {
   background: #fff;
@@ -57,7 +60,7 @@
   }
 }
 .titleDivider{
-  display: flex;
+  display: none;
   gap: 10px;
   align-items: center;
   justify-content: center;

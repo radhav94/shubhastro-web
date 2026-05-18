@@ -26,6 +26,9 @@
   font-weight: 500;
   line-height: 20px;
   text-transform: uppercase;
+  padding-left: 5px;
+  border-left: 4px solid #f75801;
+  width: fit-content;
 
   @media (max-width: 768px) {
     font-size: 16px;
@@ -35,7 +38,7 @@
 }
 
 .titleDivider {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
