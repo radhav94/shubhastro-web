@@ -49,10 +49,10 @@ const WaitlistModal = ({
   onCancelAll,
   onScrollToAstrologer,
 }) => {
-  // Auto-show when any request gets accepted or promoted to ringing
+  // Auto-show when any request gets accepted
   useEffect(() => {
     const hasAccepted = pendingRequests.some(
-      (r) => r.status === "astrologer_accepted" || r.status === "ringing"
+      (r) => r.status === "astrologer_accepted"
     );
     if (hasAccepted && onShow) onShow();
   }, [pendingRequests, onShow]);
