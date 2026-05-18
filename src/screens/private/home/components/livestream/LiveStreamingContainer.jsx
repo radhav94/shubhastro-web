@@ -362,9 +362,9 @@ const LiveStreamingContainer = ({ client }) => {
         <div onClick={(e) => e.stopPropagation()} style={{ background: "#fff", borderRadius: 16, padding: "32px 28px", maxWidth: 340, width: "85vw", textAlign: "center", position: "relative", boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
           <button onClick={dismissEnded} style={{ position: "absolute", top: 12, right: 14, background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#999", lineHeight: 1 }}>✕</button>
           {endedInfo.profileImage ? (
-            <img src={endedInfo.profileImage || getAstrologerDefaultImage(endedInfo.gender)} alt="" style={{ width: 60, height: 60, borderRadius: "50%", objectFit: "cover", border: "2px solid #f75801", margin: "0 auto 14px", display: "block" }} />
+            <img src={endedInfo.profileImage} alt="" style={{ width: 60, height: 60, borderRadius: "50%", objectFit: "cover", border: "2px solid #f75801", margin: "0 auto 14px", display: "block" }} />
           ) : (
-            <div style={{ fontSize: 36, marginBottom: 14 }}>🔮</div>
+            <img src={getAstrologerDefaultImage(endedInfo.gender)} alt="" style={{ width: 60, height: 60, borderRadius: "50%", objectFit: "cover", border: "2px solid #f75801", margin: "0 auto 14px", display: "block" }} />
           )}
           <h3 style={{ fontSize: 17, fontWeight: 600, color: "#1a1a1a", margin: "0 0 6px" }}>{endedInfo.hostName || "Astrologer"} has left</h3>
           <p style={{ fontSize: 14, color: "#888", margin: "0 0 18px" }}>The live session has ended</p>
