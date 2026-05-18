@@ -143,7 +143,7 @@ const MatchDetailsV2 = () => {
   })() : '';
 
   return (
-    <div className="bg-[#F7F7F7] min-h-screen flex flex-col items-center font-sans">
+    <div className="min-h-screen flex flex-col items-center font-sans">
       {/* Header with Back Button and Title */}
       <div className={styles.headerWrap}>
         <div className={styles.header}>
@@ -161,7 +161,7 @@ const MatchDetailsV2 = () => {
       </div>
 
       <div className={styles.containerCom}>{/* Total Score Card */}
-      <div className="bg-white mx-auto rounded-xl shadow-md p-6 mb-4 text-center">
+      <div className={styles.totalScoreCard}>
         {/* Score Box */}
         <KundliSummary score={matchingDetails?.score} total={36} />
         {/* Description */}

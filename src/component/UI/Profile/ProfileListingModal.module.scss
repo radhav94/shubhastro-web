@@ -21,7 +21,7 @@
 
 /* BOTTOM SHEET */
 .bottomSheet {
-  background: #f5f5f5;
+  background: linear-gradient(90deg, rgba(254, 254, 254, 1) 0%, rgba(255, 248, 236, 1));
   border-radius: 24px 24px 0 0;
   width: 100%;
   max-width: 500px;
@@ -124,7 +124,7 @@
   cursor: pointer;
   transition: 0.2s ease;
   flex-shrink: 0;
-  border: 2px solid transparent;
+  border: 2px solid rgba(247, 88, 1, 0.2);
 
   &:hover {
     // background: #ebebeb;

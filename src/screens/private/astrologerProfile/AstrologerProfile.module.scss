@@ -69,13 +69,16 @@
   }
   
   .sidebarTitle {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 600;
     color: #030303;
     margin: 0 0 0 0;
     letter-spacing: 0.5px;
     text-align: center;
     line-height: 1.4;
+    border-bottom: 2px solid #000;
+    width: fit-content;
+    margin: 0 auto;
   }
   
   .astrologersGrid {
@@ -583,12 +586,14 @@
   }
   
   .connectTitle {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 600;
     color: #030303;
-    margin: 0 0 10px 0;
+    margin: 0 auto 10px auto;
     letter-spacing: 0.3px;
     text-align: center;
+    width: fit-content;
+    border-bottom: 2px solid #000;
   }
   
   .connectOptions {
@@ -2433,6 +2438,7 @@
   justify-content: center;
   margin-block: 10px;
   gap: 10px;
+  display: none;
 }
 
 .dividerLine {

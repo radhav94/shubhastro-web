@@ -7,7 +7,9 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   font-size: 14px;
 
   th, td {
@@ -18,9 +20,9 @@
   }
 
   th {
-    background: #faf6f3;
+    background: #ffffff;
     font-weight: 600;
-    color: #4a5568;
+    color: #030303;
     font-size: 13px;
     position: sticky;
     top: 0;
@@ -36,7 +38,7 @@
 }
 
 .hasPlanets {
-  background: #fffdf5;
+  background: rgba(255, 255, 255, 0.4);
 }
 
 .khana {

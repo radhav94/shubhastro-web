@@ -1,5 +1,5 @@
 .moreBlogsSection {
-  max-width: 1240px;
+  max-width: 100%;
   padding: 0 16px;
   margin: 40px auto 48px;
   background: rgba(255, 255, 255,0.4);
@@ -11,7 +11,7 @@
 }
 .moreBlogsMainSection{
   margin: auto;
-  padding: 40px;
+  padding: 40px 0px;
   max-width: 1220px;
 }
 
@@ -31,19 +31,28 @@
   font-weight: 500;
   line-height: 20px;
   text-transform: uppercase;
+  padding-left: 5px;
+  border-left: 4px solid #f75801;
+  width: fit-content;
 
   @media (max-width: 768px) {
     font-size: 16px;
     margin-bottom: 12px;
+    // text-align: center;
   }
 }
 
 .titleDivider {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
   margin-top: 12px;
+
+  @media (max-width: 768px) {
+    gap: 8px;
+    // justify-content: center;
+  }
 }
 
 .dividerLine {

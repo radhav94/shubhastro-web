@@ -1,5 +1,6 @@
 import React from "react";
 import TTSButton from "../../../UI/TTSButton";
+import styles from "./RenderCard.module.scss";
 
 const DynamicTable = ({data}) => {
   // Convert nested objects (like varna, vasya, etc.) into an array
@@ -13,7 +14,7 @@ const DynamicTable = ({data}) => {
           return (
           <div
           key={index}
-          className="bg-white rounded-xl shadow p-4 md:p-8 text-center relative"
+          className={styles.dyCard}
         >
           {/* TTS Button */}
           <div className="absolute top-3 right-3">
@@ -21,7 +22,7 @@ const DynamicTable = ({data}) => {
           </div>
 
           {/* HEADER SECTION */}
-          <div className="border-b border-gray-300 pb-2 mb-2">
+          <div className={styles.dyCardInner}>
             <div className="text-m md:text-xl text-black-900 mb-1">
               {item.name}
             </div>
