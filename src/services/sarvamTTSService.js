@@ -4,6 +4,7 @@ const TTS_API_URL = "/api/sarvam/text-to-speech";
 export const SARVAM_SPEAKERS = {
   SHUBH: "shubh",
   ANUSHKA: "anushka",
+  ISHITA: "ishita"
 };
 
 export const SARVAM_LANGUAGES = {
@@ -30,7 +31,7 @@ export const SARVAM_LANGUAGES = {
 export const textToSpeech = async (text, options = {}) => {
   const {
     language = SARVAM_LANGUAGES.HINDI,
-    speaker = SARVAM_SPEAKERS.SHUBH,
+    speaker = SARVAM_SPEAKERS.ISHITA,
     pace = 1.0,
     model = "bulbul:v3",
     signal,
