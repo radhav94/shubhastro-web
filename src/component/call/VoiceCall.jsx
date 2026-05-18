@@ -104,7 +104,7 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [showRechargeButton, setShowRechargeButton] = useState(false);
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
-  const [suggestedRemedyData, setSuggestedRemedyData] = useState({ suggestedProducts: [], messages: [] });
+  const [suggestedRemedyData, setSuggestedRemedyData] = useState({ entries: [], suggestedProducts: [], messages: [] });
   const [hasNewRemedy, setHasNewRemedy] = useState(false);
   const [showEndCallConfirm, setShowEndCallConfirm] = useState(false);
 
@@ -149,6 +149,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     const handleProductMessage = (data) => {
       if (data?.type === "products" && data?.suggestedProducts?.length > 0) {
         setSuggestedRemedyData((prev) => ({
+          entries: [...prev.entries, { message: data.message || null, products: data.suggestedProducts }],
           suggestedProducts: [...prev.suggestedProducts, ...data.suggestedProducts],
           messages: data.message ? [...prev.messages, data.message] : prev.messages,
         }));
