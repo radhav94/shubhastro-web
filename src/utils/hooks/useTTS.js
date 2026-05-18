@@ -115,7 +115,7 @@ const useTTS = () => {
 
           audioBase64 = await textToSpeech(speakText, {
             language: sarvamLang,
-            speaker: "shubh",
+            speaker: "ishita",
             pace: 1.0,
             signal: controller.signal,
           });
