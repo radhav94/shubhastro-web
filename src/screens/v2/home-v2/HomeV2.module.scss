@@ -343,10 +343,12 @@
     font-weight: 600;
     color: #030303;
     text-transform: uppercase;
+    border-left: 4px solid #f75801;
+    padding-left: 5px;
   }
 
   .BottomDevider {
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     gap: 6px;
@@ -376,9 +378,11 @@
   flex: 1;
   z-index: 2;
   max-width: 55%;
-
-  @media (max-width: 767px) {
+  @media (max-width: 768px) {
     max-width: 60%;
+  }
+  @media (max-width: 767px) {
+    max-width: 82%;
   }
 }
 
@@ -762,11 +766,19 @@
     min-height: 120px;
     flex: unset;
     padding: 12px;
+    display: none;
 
     h3 { font-size: 15px; }
   }
 }
-
+.circleAndCount{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  @media (max-width: 767px) {
+    gap: 10px;
+  }
+}
 .laalKitaabImgLeft {
   position: absolute;
   bottom: -42px;
@@ -1471,6 +1483,8 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  border-left: 4px solid #f75801;
+  padding-left: 5px;
 }
 
 .titleUnderline {
@@ -2765,7 +2779,9 @@
   border-radius: 16px;
   padding: 16px;
   display: flex;
-  align-items: center;
+  // align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 16px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -2798,7 +2814,7 @@
 }
 
 .statNum {
-  font-size: 28px;
+  font-size: 38px;
   font-weight: 600;
   color: #1a1a1a;
   font-family: 'Poppins', sans-serif;
@@ -2810,6 +2826,12 @@
   color: #000;
   font-family: 'Poppins', sans-serif;
   line-height: 1.4;
+  padding-left: 70px;
+  margin-top: -16px;
+  @media (width <= 1180px) {
+    padding-left: 0px;
+    margin-top: -8px;
+  }
 }
 
 /* CTA Banner */
@@ -3490,10 +3512,6 @@
   .heroBanner h1 {
     font-size: 26px;
     // font-weight: 600;
-  }
-
-  .heroContent {
-    max-width: 60%;
   }
 
   .heroBgImg {

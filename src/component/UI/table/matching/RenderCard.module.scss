@@ -70,3 +70,15 @@
     }
   }
 }
+.dyCard{
+  background: rgba(255, 255, 255, 0.4);
+  padding: 1rem;
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  border: 1.5px solid #fff;
+  .dyCardInner{
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #fff;
+  }
+}
