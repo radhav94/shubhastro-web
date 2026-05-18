@@ -1,12 +1,19 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { textToSpeech, SARVAM_LANGUAGES } from "../../services/sarvamTTSService";
 import { translateText } from "../../component/panditAI/translateText";
 
-const LANG_TO_LOCALE = {
-  en: "en-IN", hi: "hi-IN", bn: "bn-IN", ta: "ta-IN", te: "te-IN",
-  mr: "mr-IN", gu: "gu-IN", kn: "kn-IN", ml: "ml-IN", pa: "pa-IN",
-  ar: "ar-SA", fr: "fr-FR", de: "de-DE", es: "es-ES", it: "it-IT",
-  pl: "pl-PL", sv: "sv-SE", da: "da-DK", cs: "cs-CZ", id: "id-ID",
-  ms: "ms-MY", my: "my-MM", th: "th-TH", tr: "tr-TR",
+const LANG_TO_SARVAM = {
+  en: SARVAM_LANGUAGES.ENGLISH,
+  hi: SARVAM_LANGUAGES.HINDI,
+  bn: SARVAM_LANGUAGES.BENGALI,
+  ta: SARVAM_LANGUAGES.TAMIL,
+  te: SARVAM_LANGUAGES.TELUGU,
+  mr: SARVAM_LANGUAGES.MARATHI,
+  gu: SARVAM_LANGUAGES.GUJARATI,
+  kn: SARVAM_LANGUAGES.KANNADA,
+  ml: SARVAM_LANGUAGES.MALAYALAM,
+  pa: SARVAM_LANGUAGES.PUNJABI,
+  or: SARVAM_LANGUAGES.ODIA,
 };
 
 const getGoogleTranslateLang = () => {
@@ -21,119 +28,133 @@ const getGoogleTranslateLang = () => {
   return "en";
 };
 
-const findVoice = (locale, voices) => {
-  if (!voices.length) return null;
-  const lang = locale.split("-")[0];
-  return (
-    voices.find((v) => v.lang === locale) ||
-    voices.find((v) => v.lang.startsWith(lang + "-")) ||
-    voices.find((v) => v.lang.startsWith(lang)) ||
-    null
-  );
-};
-
 // Global reference to the currently active TTS instance's stop function.
-// When a new button starts speaking, it calls this to stop the previous one.
 let activeStopFn = null;
+
+// Cache for TTS audio to avoid redundant API calls
+const audioCache = new Map();
+const MAX_CACHE_SIZE = 20;
 
 const useTTS = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const utteranceRef = useRef(null);
-  const watchdogRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const audioRef = useRef(null);
   const speakingRef = useRef(false);
-  const busyRef = useRef(false);
+  const abortRef = useRef(false);
+  const abortControllerRef = useRef(null);
 
   const setSpeaking = useCallback((val) => {
     speakingRef.current = val;
     setIsSpeaking(val);
   }, []);
 
-  const startWatchdog = useCallback(() => {
-    clearInterval(watchdogRef.current);
-    watchdogRef.current = setInterval(() => {
-      if (!window.speechSynthesis.speaking && !busyRef.current) {
-        setSpeaking(false);
-        clearInterval(watchdogRef.current);
-        watchdogRef.current = null;
-      }
-    }, 500);
-  }, [setSpeaking]);
-
-  const stopWatchdog = useCallback(() => {
-    clearInterval(watchdogRef.current);
-    watchdogRef.current = null;
-  }, []);
-
-  // Stable ref so the global tracker always invokes the latest stop
   const stopRef = useRef(null);
 
   const stop = useCallback(() => {
-    busyRef.current = false;
-    window.speechSynthesis.cancel();
+    abortRef.current = true;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
     setSpeaking(false);
-    stopWatchdog();
-    // Clear global active reference if this instance was the active one
+    setIsLoading(false);
     if (activeStopFn === stopRef.current) {
       activeStopFn = null;
     }
-  }, [setSpeaking, stopWatchdog]);
+  }, [setSpeaking]);
 
   stopRef.current = stop;
 
   const speak = useCallback(
-    (text) => {
-      if (!text || !window.speechSynthesis) return;
+    async (text) => {
+      if (!text) return;
 
-      if (speakingRef.current || busyRef.current) {
+      if (speakingRef.current) {
         stop();
         return;
       }
 
-      // Stop any other active TTS instance before starting this one
+      // Stop any other active TTS instance
       if (activeStopFn && activeStopFn !== stopRef.current) {
         activeStopFn();
       }
       activeStopFn = stopRef.current;
 
       const currentLang = getGoogleTranslateLang();
-      const locale = LANG_TO_LOCALE[currentLang] || `${currentLang}-${currentLang.toUpperCase()}`;
-
-      const doSpeak = (speakText) => {
-        if (!speakingRef.current) {
-          busyRef.current = false;
-          return;
-        }
-
-        const utterance = new SpeechSynthesisUtterance(speakText);
-        utterance.lang = locale;
-        utterance.rate = 0.95;
-        utterance.pitch = 1;
-
-        const voices = window.speechSynthesis.getVoices();
-        const voice = findVoice(locale, voices);
-        if (voice) utterance.voice = voice;
-
-        utterance.onend = () => setSpeaking(false);
-        utterance.onerror = () => setSpeaking(false);
-        utteranceRef.current = utterance;
-
-        busyRef.current = false;
-        window.speechSynthesis.speak(utterance);
-        startWatchdog();
-      };
+      const sarvamLang = LANG_TO_SARVAM[currentLang] || SARVAM_LANGUAGES.HINDI;
 
       setSpeaking(true);
+      setIsLoading(true);
+      abortRef.current = false;
 
-      if (currentLang === "en") {
-        doSpeak(text);
-      } else {
-        busyRef.current = true;
-        translateText({ text, targetLanguage: currentLang })
-          .then((translated) => doSpeak(translated || text))
-          .catch(() => doSpeak(text));
+      try {
+        const cacheKey = `${sarvamLang}:${text}`;
+        let audioBase64 = audioCache.get(cacheKey);
+
+        if (!audioBase64) {
+          const controller = new AbortController();
+          abortControllerRef.current = controller;
+
+          // Translate text if language is not English
+          let speakText = text;
+          if (currentLang !== "en") {
+            try {
+              const translated = await translateText({ text, targetLanguage: currentLang });
+              if (translated) speakText = translated;
+            } catch {
+              // Fall back to original text if translation fails
+            }
+          }
+
+          if (abortRef.current) return;
+
+          audioBase64 = await textToSpeech(speakText, {
+            language: sarvamLang,
+            speaker: "shubh",
+            pace: 1.0,
+            signal: controller.signal,
+          });
+
+          abortControllerRef.current = null;
+
+          // Store in cache, evict oldest if full
+          if (audioCache.size >= MAX_CACHE_SIZE) {
+            const firstKey = audioCache.keys().next().value;
+            audioCache.delete(firstKey);
+          }
+          audioCache.set(cacheKey, audioBase64);
+        }
+
+        if (abortRef.current) return;
+
+        setIsLoading(false);
+        const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
+        audioRef.current = audio;
+
+        audio.onended = () => {
+          audioRef.current = null;
+          setSpeaking(false);
+        };
+
+        audio.onerror = () => {
+          audioRef.current = null;
+          setSpeaking(false);
+        };
+
+        audio.play();
+      } catch (error) {
+        if (error.name === "AbortError") return;
+        console.error("Sarvam TTS failed:", error);
+        setSpeaking(false);
+        setIsLoading(false);
       }
     },
-    [stop, setSpeaking, startWatchdog]
+    [stop, setSpeaking]
   );
 
   useEffect(() => {
@@ -143,18 +164,14 @@ const useTTS = () => {
   }, [stop]);
 
   useEffect(() => {
-    const cancelSpeech = () => {
-      window.speechSynthesis.cancel();
-      stopWatchdog();
-    };
-    window.addEventListener("beforeunload", cancelSpeech);
     return () => {
-      cancelSpeech();
-      window.removeEventListener("beforeunload", cancelSpeech);
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
     };
-  }, [stopWatchdog]);
+  }, []);
 
-  return { speak, stop, isSpeaking };
+  return { speak, stop, isSpeaking, isLoading };
 };
 
 export default useTTS;
