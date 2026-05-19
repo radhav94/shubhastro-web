@@ -18,7 +18,7 @@ const AuraAnalysis = () => {
   const { profile, isLoading: profileLoading, error: profileError } = useSelectedKundliProfile({
     required: true,
     showToast: true,
-    redirectPath: PATH.privateRoutes.AIWOW?.path || '/aiwow',
+    redirectPath: PATH.privateRoutes.AIWOW?.path || '/ai-wow',
   });
   
   const [progress, setProgress] = useState(0);
@@ -65,7 +65,7 @@ const AuraAnalysis = () => {
     // Double-check profile is available before API call
     if (!profile) {
       Toast.error('Profile not available. Please select a profile.');
-      navigate(PATH.privateRoutes.AIWOW?.path || '/aiwow');
+      navigate(PATH.privateRoutes.AIWOW?.path || '/ai-wow');
       return;
     }
 

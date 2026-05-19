@@ -78,13 +78,13 @@ const TalkToKundliChat = () => {
       } else {
         // Error already handled by service and interceptor
         setTimeout(() => {
-          navigate('/aiwow', { replace: true });
+          navigate('/ai-wow', { replace: true });
         }, 1500);
       }
     } catch (error) {
       console.error('Failed to start session:', error);
       setTimeout(() => {
-        navigate('/aiwow', { replace: true });
+        navigate('/ai-wow', { replace: true });
       }, 1500);
     } finally {
       setIsLoading(false);

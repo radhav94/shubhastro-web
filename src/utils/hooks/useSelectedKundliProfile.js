@@ -23,7 +23,7 @@ const useSelectedKundliProfile = (options = {}) => {
   const {
     required = true,
     showToast = true,
-    redirectPath = PATH.privateRoutes.AI_WOW?.path || '/aiwow',
+    redirectPath = PATH.privateRoutes.AI_WOW?.path || '/ai-wow',
     validateOnMount = true,
   } = options;
 

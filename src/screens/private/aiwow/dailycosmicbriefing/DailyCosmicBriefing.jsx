@@ -49,13 +49,13 @@ const DailyCosmicBriefing = () => {
         setBriefing(result.data);
       } else {
         setTimeout(() => {
-          navigate('/aiwow', { replace: true });
+          navigate('/ai-wow', { replace: true });
         }, 1500);
       }
     } catch (error) {
       console.error('Failed to fetch briefing:', error);
       setTimeout(() => {
-        navigate('/aiwow', { replace: true });
+        navigate('/ai-wow', { replace: true });
       }, 1500);
     } finally {
       setIsLoading(false);
