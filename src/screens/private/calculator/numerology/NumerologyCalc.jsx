@@ -72,7 +72,7 @@ const NumerologyCalc = () => {
       </div>
 
       <NumerologyForm
-        submitText="Calculate Name Numerology"
+        submitText="Show Results"
         formData={formData}
         errors={errors}
         onChange={handleChange}

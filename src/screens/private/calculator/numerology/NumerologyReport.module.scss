@@ -50,7 +50,10 @@
 
 /* CARD */
 .card {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid white;
   border-radius: 12px;
   padding: 18px 20px;
   display: flex;
@@ -119,7 +122,10 @@
 }
 
 .accordionItem {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid white;
   border-radius: 12px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
   overflow: hidden;

@@ -78,24 +78,6 @@ const DestinyCalc = () => {
       </div>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.resetRow}>
-          <button type="button" className={styles.resetBtn} onClick={onReset}>Reset</button>
-        </div>
-        {/* <h3 className={styles.formTitle}>Enter Your Details</h3>
-
-        {profiles.length > 0 && (
-          <div className={styles.profileSelector}>
-            <label>Quick Fill from Profile</label>
-            <div className={styles.profileChips}>
-              {profiles.map((p) => (
-                <button key={p._id} type="button" className={`${styles.profileChip} ${formData.name === p.name ? styles.activeChip : ""}`} onClick={() => handleProfileSelect(p._id)}>
-                  {p.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )} */}
-
         <div className={styles.field}>
           <label>Full Name <span>*</span></label>
           <input placeholder="Enter your full name" value={formData.name} onChange={(e) => handleChange("name", e.target.value)} />
@@ -127,7 +109,10 @@ const DestinyCalc = () => {
           {errors.dob && <p className={styles.err}>{errors.dob}</p>}
         </div>
 
-        <button type="submit" className={styles.submitBtn}>Calculate Destiny Number</button>
+        <div className={styles.btnRow}>
+          <button type="button" className={styles.resetBtn} onClick={onReset}>Reset</button>
+          <button type="submit" className={styles.submitBtn}>Show Results</button>
+        </div>
       </form>
 
       <ProfileManager

@@ -162,19 +162,6 @@ const SunSignCalc = () => {
 
       {/* Form Card */}
       <form className={styles.formCard} onSubmit={handleSubmit}>
-        <div className={styles.resetRow}>
-          <button
-            type="button"
-            className={styles.resetBtn}
-            onClick={() => {
-              setFormData(initialFormState);
-              setErrors({});
-              localStorage.removeItem(STORAGE_KEY);
-            }}
-          >
-            Reset
-          </button>
-        </div>
         <h3 className={styles.formTitle}>Fill the form to calculate</h3>
 
         <div className={styles.formGrid}>
@@ -303,8 +290,19 @@ const SunSignCalc = () => {
         </div>
 
         <div className={styles.btnRow}>
+          <button
+            type="button"
+            className={styles.resetBtn}
+            onClick={() => {
+              setFormData(initialFormState);
+              setErrors({});
+              localStorage.removeItem(STORAGE_KEY);
+            }}
+          >
+            Reset
+          </button>
           <button type="submit" className={styles.submitBtn}>
-            Calculate My SunSign
+            Show Results
           </button>
         </div>
       </form>

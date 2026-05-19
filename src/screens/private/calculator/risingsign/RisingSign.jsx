@@ -90,7 +90,7 @@ const RisingSign = () => {
 
       <AstroBirthForm
         title="Calculate your Rising/Ascendant Sign here"
-        submitText="Calculate my Rising Sign"
+        submitText="Show Results"
         formData={formData}
         errors={errors}
         onChange={handleChange}

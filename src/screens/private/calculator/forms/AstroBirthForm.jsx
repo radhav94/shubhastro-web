@@ -55,13 +55,6 @@ const AstroBirthForm = ({
   return (
     <>
       <form className={styles.astroForm} onSubmit={onSubmit}>
-        {onReset && (
-          <div className={styles.resetRow}>
-            <button type="button" className={styles.resetBtn} onClick={onReset}>
-              Reset
-            </button>
-          </div>
-        )}
         <h3 className={styles.formTitle}>{title}</h3>
 
         <div className={styles.formGrid}>
@@ -158,7 +151,7 @@ const AstroBirthForm = ({
         </div>
 
         {/* TOB */}
-        <div className={styles.formGroup}>
+        <div className={`${styles.formGroup} ${styles.halfWidth}`}>
           <label>
             Birth Time <span className={styles.required}>*</span>
           </label>
@@ -190,9 +183,16 @@ const AstroBirthForm = ({
           <span>Don&apos;t know the exact time of birth</span>
         </div>
 
-        <button type="submit" className={styles.submitBtn}>
-          {submitText}
-        </button>
+        <div className={styles.btnRow}>
+          {onReset && (
+            <button type="button" className={styles.resetBtn} onClick={onReset}>
+              Reset
+            </button>
+          )}
+          <button type="submit" className={styles.submitBtn}>
+            {submitText}
+          </button>
+        </div>
       </form>
 
       <ProfileManager

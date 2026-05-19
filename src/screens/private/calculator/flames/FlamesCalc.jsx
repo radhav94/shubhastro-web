@@ -79,9 +79,6 @@ const FlamesCalc = () => {
       </div>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.resetRow}>
-          <button type="button" className={styles.resetBtn} onClick={onReset}>Reset</button>
-        </div>
         <h3 className={styles.formTitle}>Enter Your Names</h3>
 
         <div className={styles.field}>
@@ -102,7 +99,10 @@ const FlamesCalc = () => {
           </button>
         </div>
 
-        <button type="submit" className={styles.submitBtn}>Check FLAMES</button>
+        <div className={styles.btnRow}>
+          <button type="button" className={styles.resetBtn} onClick={onReset}>Reset</button>
+          <button type="submit" className={styles.submitBtn}>Show Results</button>
+        </div>
       </form>
 
       <ProfileManager

@@ -48,13 +48,6 @@ const FlamesForm = ({
   return (
     <>
       <form className={styles.flamesForm} onSubmit={onSubmit}>
-        {onReset && (
-          <div className={styles.resetRow}>
-            <button type="button" className={styles.resetBtn} onClick={onReset}>
-              Reset
-            </button>
-          </div>
-        )}
         <h3 className={styles.formTitle}>
           <span className={styles.dot}>●</span> {title}{" "}
           <span className={styles.moon}>☾</span>
@@ -100,9 +93,16 @@ const FlamesForm = ({
           </button>
         </div>
 
-        <button type="submit" className={styles.submitBtn}>
-          ✦ {submitText} ✦
-        </button>
+        <div className={styles.btnRow}>
+          {onReset && (
+            <button type="button" className={styles.resetBtn} onClick={onReset}>
+              Reset
+            </button>
+          )}
+          <button type="submit" className={styles.submitBtn}>
+            {submitText}
+          </button>
+        </div>
       </form>
 
       <ProfileManager
