@@ -1,12 +1,15 @@
 .wrapper {
   max-width: 800px;
-  margin: 0 auto;
-  padding: 0 16px 48px;
+  margin: 70px auto 40px auto;
+  padding: 16px;
+  border: 1.5px solid #fff;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.4);
 }
 
 .header {
   text-align: center;
-  padding: 32px 20px 24px;
+  padding: 0px 16px 16px 16px;
 
   h2 {
     font-size: 24px;
@@ -29,8 +32,9 @@
 }
 
 .statusCard {
-  background: #fff;
-  border: 1px solid #f0ebe4;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 14px;
   padding: 24px;
   margin-bottom: 28px;
@@ -85,7 +89,7 @@
 .description {
   font-size: 14px;
   line-height: 1.7;
-  color: #555;
+  color: #030303;
   background: #fffaf5;
   border: 1px solid #ffe8d6;
   border-radius: 12px;
@@ -99,17 +103,18 @@
 }
 
 .infoCard {
-  background: #fff;
-  padding: 18px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  padding: 16px;
   border-radius: 12px;
-  border: 1px solid #f0ebe4;
+  border: 1.5px solid #fff;
   transition: border-color 0.2s;
 
   &:hover { border-color: #f75801; }
 
   span {
     font-size: 11px;
-    color: #999;
+    color: #030303;
     text-transform: uppercase;
     letter-spacing: 0.6px;
     display: block;
@@ -143,15 +148,16 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   padding: 14px 16px;
   border-radius: 12px;
-  border: 1px solid #f0ebe4;
   transition: border-color 0.2s;
 
   &:hover { border-color: #f75801; }
 
-  p { font-size: 14px; line-height: 1.55; color: #444; margin: 0; }
+  p { font-size: 14px; line-height: 1.55; color: #030303; margin: 0; }
 }
 
 .remedyIcon {

@@ -1,6 +1,6 @@
 .wrapper {
   max-width: 900px;
-  margin: 40px auto;
+  margin: 70px auto;
   padding: 0 16px;
 }
 
@@ -53,7 +53,9 @@
 
 .compatibilityCard {
   margin-top: 24px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
@@ -88,9 +90,10 @@
   margin-top: 16px;
   padding: 14px;
   border-left: 4px solid #f75801;
-  background: #fff8f5;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
   border-radius: 8px;
-  color: #444;
+  color: #030303;
   font-size: 14px;
   line-height: 1.6;
 }
