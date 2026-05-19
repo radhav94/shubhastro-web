@@ -7,6 +7,7 @@ import formReducer from "../redux/kundliform/formSlice";
 import kundliReducer from "../redux/kundli/kundliSlice";
 import aiwowReducer from "../redux/aiwow/aiwowSlice";
 import remedyReducer from "../redux/remedy/remedySlice";
+import calculatorReducer from "../redux/calculator/calculatorSlice";
 import { baseApi } from "../redux/api/baseApi/baseApi";
 import { pythonApi } from "../redux/api/baseApi/pythonApi";
 import { horoscopeApi } from "../redux/api/baseApi/horoscopeBaseApi";
@@ -25,7 +26,7 @@ import "../redux/api/lalKitab/lalKitabApi"; // inject lal kitab endpoints
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth", "kundli"], // persist auth and kundli in localStorage
+  whitelist: ["auth", "kundli", "calculator"], // persist auth, kundli, and calculator slices
 };
 
 // Persist aiwow results in sessionStorage (clears when tab closes)
@@ -41,6 +42,7 @@ const rootReducer = combineReducers({
   kundli: kundliReducer,
   aiwow: persistReducer(aiwowPersistConfig, aiwowReducer),
   remedy: remedyReducer,
+  calculator: calculatorReducer,
   [baseApi.reducerPath]: baseApi.reducer,
   [privateRequestNew.reducerPath]: privateRequestNew.reducer,
   [localReuqqestApi.reducerPath]: localReuqqestApi.reducer,

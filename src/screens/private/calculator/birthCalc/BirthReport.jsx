@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import styles from "./BirthReport.module.scss";
 import { appColors } from "../../../../utils/theme";
@@ -8,6 +9,8 @@ import {
   useGetChartQuery,
   useGetPlanetsQuery,
 } from "../../../../redux/api/kundli/kundliApi";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
@@ -94,7 +97,7 @@ export const buildAstroPayload = (data) => {
 };
 
 const BirthReport = () => {
-  const payload = JSON.parse(localStorage.getItem("birth_natal_calc"));
+  const payload = useSelector(selectCalculatorData("birth_natal_calc"));
 
   const params = payload ? buildAstroPayload(payload) : null;
 
@@ -184,6 +187,8 @@ const BirthReport = () => {
           </div>
         </div>
       )}
+
+      <ConnectCard />
     </div>
   );
 };

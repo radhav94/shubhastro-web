@@ -1,14 +1,17 @@
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useFriendshipCalculatorMutation } from "../../../../redux/api/calculator/calcApi";
 import { useEffect } from "react";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./FriendshipReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 
 const FriendshipReport = () => {
   const navigate = useNavigate();
 
-  const stored = JSON.parse(localStorage.getItem("friendship_calculator"));
+  const stored = useSelector(selectCalculatorData("friendship_calculator"));
 
   const [friendshipCalculator, { data, isLoading }] =
     useFriendshipCalculatorMutation();
@@ -88,6 +91,8 @@ const FriendshipReport = () => {
           Calculate Again
         </button>
       </div>
+
+      <ConnectCard />
     </div>
   );
 };

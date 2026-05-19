@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useGetSadeSatiReportQuery } from "../../../../redux/api/calculator/calcApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./ShaniReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import { BsCheckCircleFill } from "react-icons/bs";
 import TTSButton from "../../../../component/UI/TTSButton";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 
 const ShaniReport = () => {
   const navigate = useNavigate();
   const [aboutOpen, setAboutOpen] = useState(true);
 
-  const stored = JSON.parse(localStorage.getItem("shani_sade_sati"));
+  const stored = useSelector(selectCalculatorData("shani_sade_sati"));
   const { data, isLoading } = useGetSadeSatiReportQuery(stored);
 
   if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
@@ -155,6 +158,8 @@ const ShaniReport = () => {
           Calculate Again
         </button>
       </div>
+
+      <ConnectCard />
     </div>
   );
 };

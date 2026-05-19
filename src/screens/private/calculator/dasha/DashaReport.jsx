@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   useGetDashaRepQuery,
   useGetDashaPeriodsQuery,
@@ -8,12 +9,14 @@ import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./DashaReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import TTSButton from "../../../../component/UI/TTSButton";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 
 const DashaReport = () => {
   const navigate = useNavigate();
   const [openIndex, setOpenIndex] = useState(0);
 
-  const stored = JSON.parse(localStorage.getItem("dasha_calc"));
+  const stored = useSelector(selectCalculatorData("dasha_calc"));
   const { data, isLoading } = useGetDashaRepQuery(stored);
   const { data: periodsData, isLoading: periodsLoading } =
     useGetDashaPeriodsQuery(stored);
@@ -131,6 +134,8 @@ const DashaReport = () => {
           Calculate Again
         </button>
       </div>
+
+      <ConnectCard />
     </div>
   );
 };

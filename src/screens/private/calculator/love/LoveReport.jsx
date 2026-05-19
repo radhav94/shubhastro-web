@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useLoveCalculatorMutation } from "../../../../redux/api/calculator/calcApi";
 import { useEffect, useState } from "react";
 import styles from "./LoveReport.module.scss";
@@ -9,10 +10,11 @@ import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import CalcBackButton from "../CalcBackButton";
 import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 import { Share2, ChevronDown } from "lucide-react";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const LoveReport = () => {
   const navigate = useNavigate();
-  const stored = JSON.parse(localStorage.getItem("love_calculator"));
+  const stored = useSelector(selectCalculatorData("love_calculator"));
 
   const [loveCalculator, { data, isLoading, isError, error }] =
     useLoveCalculatorMutation();

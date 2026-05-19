@@ -437,13 +437,21 @@
   border-top: 1px solid #e2e8f0;
 }
 
-/* Back Button */
+/* Action Row */
+.actionRow {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+  }
+}
+
 .backBtn {
-  display: block;
-  margin: 0 auto;
   padding: 14px 32px;
   border: none;
-  border-radius: 10px;
+  border-radius: 24px;
   background: linear-gradient(90deg, #F75801, #D43400);
   color: #fff;
   font-size: 15px;
@@ -453,6 +461,28 @@
 
   &:hover {
     opacity: 0.9;
+  }
+
+  @media (max-width: 600px) {
+    width: 100%;
+    padding: 14px;
+  }
+}
+
+.consultBtn {
+  padding: 14px 32px;
+  border: 2px solid #F75801;
+  border-radius: 24px;
+  background: #fff;
+  color: #F75801;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover {
+    background: #F75801;
+    color: #fff;
   }
 
   @media (max-width: 600px) {

@@ -1,14 +1,17 @@
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useAgeCalculatorMutation } from "../../../../redux/api/calculator/calcApi";
 import { useEffect } from "react";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./AgeReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 
 const AgeReport = () => {
   const navigate = useNavigate();
 
-  const stored = JSON.parse(localStorage.getItem("age_calculator"));
+  const stored = useSelector(selectCalculatorData("age_calculator"));
 
   const [ageCalculator, { data, isLoading, isError }] =
     useAgeCalculatorMutation();
@@ -61,6 +64,8 @@ const AgeReport = () => {
       >
         Calculate Again
       </button>
+
+      <ConnectCard />
     </div>
   );
 };

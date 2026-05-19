@@ -1,13 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { setCalculatorData, selectCalculatorData } from "../../../redux/calculator/calculatorSlice";
 
 /**
- * Reusable hook for calculator form state.
- * Always starts fresh — no persistence across refresh or navigation.
- * @param {string} storageKey - kept for API compatibility (used on submit)
- * @param {object} initialState
+ * Reusable hook for calculator form state backed by Redux.
+ * @param {string} storageKey - the key used in the calculator Redux slice
+ * @param {object} initialState - default form values
  */
 const useFormFromLocalStorage = (storageKey, initialState) => {
-  const [formData, setFormData] = useState(initialState);
+  const dispatch = useDispatch();
+  const storedData = useSelector(selectCalculatorData(storageKey));
+  const [formData, setFormData] = useState(storedData || initialState);
+
+  // Sync local state if Redux state changes externally
+  useEffect(() => {
+    if (storedData) {
+      setFormData(storedData);
+    }
+  }, [storedData]);
 
   return [formData, setFormData];
 };
